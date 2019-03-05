@@ -1,0 +1,9 @@
+test_module	1
+
+description
+	Test module
+end
+
+requires
+	module	1
+end

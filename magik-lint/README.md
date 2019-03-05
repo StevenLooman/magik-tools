@@ -1,0 +1,68 @@
+Magik-Lint
+==========
+
+A command line linter to use in your workflow. Mostly built after [Pylint](https://www.pylint.org/).
+
+
+Features
+--------
+
+Magik-lint currently features:
+
+- Checks to help you improve your code quality
+- Checks to help you prevent introduce bugs
+- Style checking
+
+
+Usage
+-----
+
+Magik-lint takes the following command line options:
+
+- --rcfile: Path to configuration file
+- --msg-template: Template for output, defaults to: `${path}:${line}:${column}: ${msg} (${symbol})`
+- --show-checks: Show a list of all checks and whether it is disabled
+- A file or directory to check.
+  - If a file is given, only this file is checked.
+  - If a directory is given, all files in this directory and any sub-directories, are checked.
+
+
+Configuration
+-------------
+
+Magik-lint can use a configuration file.
+
+The configuration file is located as follows, in order:
+
+1. if '--rcfile' command line argument is given, use it;
+2. if `magik-lint.properties` exists in the current working directory, use it;
+3. if `.magik-lint.properties` exists in the current working directory, use it;
+4. if `magik-lint.properties` exists in the current Smallworld product, or any parent product, use it;
+5. if environment variable `MAGIKLINTRC` is given and the file exists, use it;
+6. if `.magik-lint.properties` exists in your home directory, use it;
+7. if `/etc/magik-lint.properties` exists, use it.
+
+If no configuration file is found, defaults are assumed.
+
+The following options are avaiable in the configuration file:
+
+- disabled = <comma separated list of check-names>
+- <check_name>.<check_attribute> = <value>
+
+I.e., you can disable checks `method-complexity` and `line-length` by setting:
+
+```
+disabled = method-complexity, line-length
+```
+
+You can configure the `line-length` check to allow up to 120 characters per line by settings:
+
+```
+line-length.line-length=120
+```
+
+
+Template rules
+--------------
+
+XXX TODO

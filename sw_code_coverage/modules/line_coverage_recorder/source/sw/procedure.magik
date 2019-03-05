@@ -1,0 +1,19 @@
+#% text_encoding = iso8859_1
+
+_package sw
+
+procedure.define_shared_constant(
+	:int!line_coverage_data,
+	weak_hash_table.new(),
+	_true)
+$
+
+_method procedure.line_coverage_data
+	_return _self.int!line_coverage_data[_self]
+_endmethod
+$
+
+_method procedure.line_coverage_data << p_data
+	_return _self.int!line_coverage_data[_self] << p_data
+_endmethod
+$

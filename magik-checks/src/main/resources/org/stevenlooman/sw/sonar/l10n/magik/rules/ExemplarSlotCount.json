@@ -1,0 +1,15 @@
+{
+  "title": "Exemplars should not have too many slots",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "60min"
+  },
+  "tags": [
+    "unused"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "ExemplarSlotCount",
+  "sqKey": "exemplar-slot-count"
+}

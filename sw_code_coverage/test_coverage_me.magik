@@ -1,0 +1,116 @@
+#% text_encoding = iso8859_1
+
+!global_auto_declare?! << _true
+$
+
+_block
+	_if lcct _isnt _unset
+	_then
+		lcct.deactivate()
+	_endif
+	
+	lcct << line_coverage_compiler_tracker.new()
+	lcct.activate()
+_endblock
+$
+
+
+
+
+remex(:test_coverage_me)
+$
+
+def_slotted_exemplar(
+	:test_coverage_me,
+	{},
+	{})
+$
+
+_pragma(classify_level=restricted, topic={line_coverage})
+_method test_coverage_me.new()
+	_return _clone.init()
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic={line_coverage})
+_private _method test_coverage_me.init()
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic={line_coverage})
+_method test_coverage_me.run()
+	_local x << 0
+	x +<< _self.a()
+	x +<< _self.a()
+	x +<< _self.b()
+	_self[1,2]
+	write(x)
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic={line_coverage})
+_method test_coverage_me.a()
+	_local x << 1
+	_local y << 1
+	_return x + y
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic={line_coverage})
+_method test_coverage_me.b()
+	_local x << 1
+	_local y << 2
+	_return x + y
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic={line_coverage})
+_method test_coverage_me.c()
+	_local x << 1
+	_local y << 2
+	_local z << 3
+	_return x + y + z
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic={line_coverage})
+_method test_coverage_me[a,b]
+	_return a + b
+_endmethod
+$
+
+
+
+
+
+_block
+	_if lcct _isnt _unset
+	_then
+		lcct.deactivate()
+	_endif
+	_if lct _isnt _unset
+	_then
+		lct.deactivate()
+	_endif
+	
+	lct << line_coverage_tracker.new()
+	lct.enable_breakpoints_exemplar(test_coverage_me)
+	lct.activate()
+	
+	write("")
+	test_coverage_me.new().run()
+	test_coverage_me.new().run()
+	write("")
+	
+	lct.deactivate()
+	lct.disable_breakpoints_exemplar(test_coverage_me)
+	
+	print(lct.coverage)
+	
+	#lcce << line_coverage_cobertura_exporter.new(lct.coverage)
+	#lcce.run_stream(!output!)
+_endblock
+$
+
+!global_auto_declare?! << _maybe

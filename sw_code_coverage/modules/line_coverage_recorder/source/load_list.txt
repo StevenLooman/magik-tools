@@ -1,0 +1,6 @@
+sw/
+
+line_breakpoint_combiner
+
+line_coverage_tracker
+line_coverage_compiler_tracker

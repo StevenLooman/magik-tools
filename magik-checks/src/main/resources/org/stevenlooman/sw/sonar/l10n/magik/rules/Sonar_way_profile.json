@@ -1,0 +1,7 @@
+{
+  "name": "Sonar way recommended",
+  "ruleKeys": [
+    "LhsRhsComparatorEqual",
+    "UnusedVariable"
+  ]
+}

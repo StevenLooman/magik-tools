@@ -1,0 +1,15 @@
+{
+  "title": "Left hand side and right hand side of comparison are the same",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "unused"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "LhsRhsComparatorEqual",
+  "sqKey": "lhs-rhs-comparator-equal"
+}

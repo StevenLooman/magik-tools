@@ -1,0 +1,9 @@
+sonar_test_runner	1	1
+
+description
+	Sonar test runner for Smallworld/Magik SonarQube plugin
+end
+
+requires
+	munit_base
+end

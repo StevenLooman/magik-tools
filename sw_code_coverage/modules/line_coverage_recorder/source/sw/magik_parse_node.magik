@@ -1,0 +1,10 @@
+#% text_encoding = iso8859_1
+
+_pragma(classify_level=restricted, topic={line_coverage})
+_method magik_parse_node.accept(p_visitor)
+	_local l_method_name << :|visit_| + _self.class_name + :|()|
+	_return p_visitor.perform(l_method_name, _self)
+_endmethod
+$
+
+

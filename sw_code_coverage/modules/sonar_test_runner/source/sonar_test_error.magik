@@ -1,0 +1,32 @@
+#% text_encoding = iso8859_1
+
+def_slotted_exemplar(
+	:sonar_test_error,
+	{
+		{:message, _unset, :readable, :public},
+		{:type, _unset, :readable, :public},
+		{:text, _unset, :readable, :public}
+	},
+	{})
+$
+
+_method sonar_test_error.new(p_message, p_type, p_text)
+	_return _clone.init(p_message, p_type, p_text)
+_endmethod
+$
+
+_private _method sonar_test_error.init(p_message, p_type, p_text)
+	.message << p_message
+	.type << p_type
+	.text << p_text
+	_return _self
+_endmethod
+$
+
+_method sonar_test_error.write_to_stream(p_xml_stream)
+	_local l_message << _self.message.default("error")
+	p_xml_stream.start_element("error", :message, l_message)
+	p_xml_stream.write_cdata(_self.text)
+	p_xml_stream.end_element("error")
+_endmethod
+$

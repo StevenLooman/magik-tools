@@ -1,0 +1,15 @@
+# comment 1
+_block
+    a << "test"
+    b << :symbol
+    # comment 2
+_endblock
+$
+
+# comment 3
+_method a.b
+    ## comment 4
+    .slot << 100
+    # comment 5
+_endmethod
+$

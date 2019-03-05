@@ -1,0 +1,19 @@
+#% text_encoding = iso8859_1
+
+_block
+	sw:magik_code_sequence.optimise? << _false
+	sw:magik_code_fragment.generate_debug_info? << _true
+	
+	_if magik_rep.method(:process_org|()|) _is _unset
+	_then
+		magik_rep.define_method_synonym(:process_org|()|, :process|()|)
+	_endif
+_endblock
+$
+
+_pragma(classify_level=restricted, topic={line_coverage})
+_method magik_rep.process(x, _optional witter?)
+	_self.changed(:pre_process, _scatter x)
+	_return _self.process_org(x, witter?)
+_endmethod
+$

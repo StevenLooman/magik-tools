@@ -1,0 +1,114 @@
+#% text_encoding = iso8859_1
+
+def_slotted_exemplar(
+	:sonar_coverage_exporter,
+	{
+		{:coverage_data, _unset}
+	},
+	{})
+$
+
+_method sonar_coverage_exporter.new(p_coverage_data)
+	_return _clone.init(p_coverage_data)
+_endmethod
+$
+
+_private _method sonar_coverage_exporter.init(p_coverage_data)
+	.coverage_data << p_coverage_data
+	_return _self
+_endmethod
+$
+
+_method sonar_coverage_exporter.run(p_filename)
+	_local l_out_stream << external_text_output_stream.new(p_filename)
+	_protect
+		_self.run_stream(l_out_stream)
+	_protection
+		l_out_stream.close()
+	_endprotect
+_endmethod
+$
+
+_method sonar_coverage_exporter.run_stream(p_stream)
+	_local l_coverages << _self.gather_coverage_files()
+	
+	_local l_xml_stream << xml_output_stream.new(p_stream)
+	_self.report_coverage(l_coverages, l_xml_stream)
+	l_xml_stream.flush()
+_endmethod
+$
+
+_private _method sonar_coverage_exporter.gather_coverage_files()
+	_local l_coverage << equality_hash_table.new()
+	
+	_for i_proc, i_cov_data _over .coverage_data.fast_keys_and_elements()
+	_loop
+		_local l_lc_data << i_proc.line_coverage_data
+		_if l_lc_data _is _unset
+		_then
+			_continue
+		_endif
+		
+		_local l_filename << l_lc_data[:source_file]
+		_if _not l_coverage.includes_key?(l_filename)
+		_then
+			l_coverage[l_filename] << hash_table.new()
+		_endif
+		_local l_file_data << l_coverage[l_filename]
+		
+		_local l_breakpoints << l_lc_data[:breakpoints]
+		_for i_pc, i_hits _over i_cov_data.fast_keys_and_elements()
+		_loop
+			_local l_line_no << l_breakpoints.key_of(i_pc)
+			_local l_line <<
+				property_list.new_with(:line_number, l_line_no,
+						       :hits,        i_cov_data[i_pc],
+						       :branch,      _false)
+			l_file_data[l_line_no] << l_line
+		_endloop
+	_endloop
+	
+	_return l_coverage
+_endmethod
+$
+
+_private _method sonar_coverage_exporter.report_coverage(p_coverages, p_xml_stream)
+	p_xml_stream.start_element("coverage", :version, "1")
+	_for i_filename, i_line_data _over p_coverages.fast_keys_and_elements()
+	_loop
+		_self.report_file(i_filename, i_line_data, p_xml_stream)
+	_endloop
+	p_xml_stream.end_element("coverage")
+_endmethod
+$
+
+_private _method sonar_coverage_exporter.report_file(p_filename, p_line_data, p_xml_stream)
+	# ensure we don't report negative line numbers
+	_if _self.has_negative_line_numbers?(p_line_data)
+	_then
+		condition.raise(:warning, :string, "Ignoring file '", p_filename, "', as it contains negative line numbers")
+	_endif
+	
+	p_xml_stream.start_element("file", "path", system.canonicalise(p_filename))
+	_for i_line_no, i_line_data _over p_line_data.fast_keys_and_elements()
+	_loop
+		_local l_attrs << equality_property_list.new_with(
+			"lineNumber", i_line_no,
+			"covered", i_line_data[:hits] <> 0)
+		p_xml_stream.write_element("lineToCover", _unset _scatter l_attrs)
+	_endloop
+	p_xml_stream.end_element("file")
+_endmethod
+$
+
+_private _method sonar_coverage_exporter.has_negative_line_numbers?(p_line_data)
+	_for i_line_no, i_line_data _over p_line_data.fast_keys_and_elements()
+	_loop
+		_if i_line_no < 0
+		_then
+			_return _true
+		_endif
+	_endloop
+	_return _false
+_endmethod
+$

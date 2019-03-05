@@ -1,0 +1,10 @@
+sonar_test_error
+sonar_test_failure
+sonar_test_info
+sonar_test_slow_skipped
+
+sonar_test_base
+sonar_test_case
+sonar_test_suite
+
+sonar_test_runner

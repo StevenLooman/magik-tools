@@ -1,0 +1,152 @@
+#% text_encoding = iso8859_1
+
+def_slotted_exemplar(
+	:sonar_test_runner,
+	{
+		{:test_suite, _unset},
+		{:test_case, _unset},
+		{:anchor, _unset},
+		{:xml_stream, _unset}
+	},
+	{@sw:base_test_runner})
+$
+
+_private _method sonar_test_runner.init(p_stream, _gather p_keys_and_elements)
+	_super.init(p_stream, _scatter p_keys_and_elements)
+	.test_case << _unset
+	.test_suite << _unset
+	.anchor << _unset
+	.xml_stream << xml_output_stream.new(.stream)
+	_self.write_preamble_to_stream()
+	
+	_return _self
+_endmethod
+$
+
+
+_method sonar_test_runner.stop()
+	_self.write_postamble_to_stream()
+	_super.stop()
+_endmethod
+$
+
+_private _method sonar_test_runner.write_preamble_to_stream()
+	.xml_stream.start_element("testExecutions", :version, "1")
+	.xml_stream.flush()
+_endmethod
+$
+
+_private _method sonar_test_runner.write_postamble_to_stream()
+	.xml_stream.end_element("testExecutions")
+	.xml_stream.flush()
+_endmethod
+$
+
+_method sonar_test_runner.start_test(p_test)
+	.test_case << sonar_test_case.new(p_test,
+					  p_test.get_name(),
+					  .test_suite)
+	.test_case.start()
+_endmethod
+$
+
+_method sonar_test_runner.end_test(p_test)
+	.test_case.end()
+	_super.end_test(p_test)
+_endmethod
+$
+
+_method sonar_test_runner.add_error(p_test_failure)
+	_local p_test << p_test_failure.failed_test()
+	_local l_error << sonar_test_error.new(p_test_failure.raised_condition()[:message],
+					       p_test_failure.raised_condition().write_string,
+					       p_test_failure.full_traceback_text())
+	.test_case.add_exception(l_error)
+_endmethod
+$
+
+_method sonar_test_runner.add_failure(p_test_failure)
+	_local p_test << p_test_failure.failed_test()
+	_local l_failure << sonar_test_failure.new(p_test_failure.raised_condition()[:message],
+						   p_test_failure.raised_condition().name, 
+						   p_test_failure.full_traceback_text())
+	.test_case.add_exception(l_failure)
+_endmethod
+$
+
+_method sonar_test_runner.add_info(p_info)
+	_local l_info_string << _if p_info.is_class_of?(simple_vector)
+				_then
+					>> p_info.an_element()
+				_else
+					>> p_info
+				_endif
+	_local l_info << sonar_test_info.new(l_info_string)
+	.test_case.add_exception(l_info)
+_endmethod
+$
+
+_method sonar_test_runner.start_suite(p_test_suite)
+	_local l_name << p_test_suite.get_name().default(p_test_suite.class_name)
+	_local l_parent_suite << .test_suite
+	.test_suite << sonar_test_suite.new(l_name, l_parent_suite)
+	.test_suite.start()
+_endmethod
+$
+
+_method sonar_test_runner.end_suite(p_test_suite)
+	.test_suite.end()
+	.anchor << .test_suite ^<< .test_suite.parent
+_endmethod
+$
+
+_method sonar_test_runner.report_assert(_gather p_args)
+	## Report the result of an assert, regardless whether is it
+	## hard failed or not
+	# empty
+_endmethod
+$
+
+_method sonar_test_runner.not_run_slow_test(p_test)
+	## Report a skipped test
+	## Since start_test()/end_test() is never called, we do it here
+	_self.start_test(p_test)
+	
+	_local l_skipped << sonar_slow_test_skipped.new("Slow test skipped")
+	.test_case.add_exception(l_skipped)
+	
+	_self.end_test(p_test)
+_endmethod
+$
+
+_method sonar_test_runner.write_to_stream()
+	#<testExecutions version="1">
+	#  <file path="testx/ClassOneTest.xoo">
+	#    <testCase name="test1" duration="5"/>
+	#    <testCase name="test2" duration="500">
+	#      <skipped message="short message">other</skipped>
+	#    </testCase>
+	#    <testCase name="test3" duration="100">
+	#      <failure message="short">stacktrace</failure>
+	#    </testCase>
+	#    <testCase name="test4" duration="500">
+	#      <error message="short">stacktrace</error>
+	#    </testCase>
+	#  </file>
+	#</testExecutions>
+	
+	_local l_xml_stream << xml_output_stream.new(.stream)
+	.anchor.write_to_stream(l_xml_stream)
+	l_xml_stream.flush()
+_endmethod
+$
+
+_method sonar_test_runner.output_run_time(p_run_time)
+	_self.write_to_stream()
+_endmethod
+$
+
+_method sonar_test_runner.run(p_test)
+	_self.int!run(p_test)
+_endmethod
+$

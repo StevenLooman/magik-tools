@@ -1,0 +1,16 @@
+#% text_encoding = iso8859_1
+
+_package user
+
+def_slotted_exemplar(
+	:lcct_test,
+	{})
+$
+
+_method lcct_test.method_if()
+	_if _true
+	_then
+		write("test")
+	_endif
+_endmethod
+$
