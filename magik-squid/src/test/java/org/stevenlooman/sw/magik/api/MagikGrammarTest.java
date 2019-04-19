@@ -129,6 +129,7 @@ public class MagikGrammarTest {
         .matches("_loop _endloop")
         .matches("_loop expr() _endloop")
         .matches("_loop _finally _endloop")
+        .matches("_loop _finally _with total _endloop")
         ;
   }
 
