@@ -2,6 +2,7 @@
   "name": "Sonar way recommended",
   "ruleKeys": [
     "LhsRhsComparatorEqual",
+    "SizeZeroEmpty",
     "UnusedVariable"
   ]
 }

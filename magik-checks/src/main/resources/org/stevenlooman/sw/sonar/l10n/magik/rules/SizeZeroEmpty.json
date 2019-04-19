@@ -1,0 +1,15 @@
+{
+  "title": "Methods should not be too complex",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "optimization"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "SizeZeroEmpty",
+  "sqKey": "size-zero-empty"
+}

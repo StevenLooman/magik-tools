@@ -1,0 +1,9 @@
+<p>Use the method empty, instead of checking for size equals to 0. The method empty is faster.</p>
+<h2>Noncompliant Code Example</h2>
+<pre>
+a.size = 0
+</pre>
+<h2>Compliant Solution</h2>
+<pre>
+a.empty?
+</pre>
