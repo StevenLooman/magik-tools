@@ -20,6 +20,15 @@ public class SizeZeroEmptyCheckTest extends MagikCheckTest {
   }
 
   @Test
+  public void testSizeIsZeroTraversed() {
+    MagikCheck check = new SizeZeroEmptyCheck();
+    String code =
+        "a.b.size _is 0";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isNotEmpty();
+  }
+
+  @Test
   public void testSizeIsZeroReversed() {
     MagikCheck check = new SizeZeroEmptyCheck();
     String code =

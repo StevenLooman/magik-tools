@@ -6,7 +6,10 @@ import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
+import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 @Rule(key = SizeZeroEmptyCheck.CHECK_KEY)
@@ -40,7 +43,7 @@ public class SizeZeroEmptyCheck extends MagikCheck {
   }
 
   private boolean isMethodInvocationSize(AstNode node) {
-    AstNode methodInvocationNode = node.getFirstDescendant(MagikGrammar.METHOD_INVOCATION);
+    AstNode methodInvocationNode = getLastDescendant(node, MagikGrammar.METHOD_INVOCATION);
     if (methodInvocationNode == null) {
       return false;
     }
@@ -56,4 +59,26 @@ public class SizeZeroEmptyCheck extends MagikCheck {
            && numberNode.getTokenValue().equals("0");
   }
 
+  @Nullable
+  private AstNode getLastDescendant(AstNode node, AstNodeType nodeType) {
+    List<AstNode> children = node.getChildren();
+    Collections.reverse(children);
+    Iterator childrenIter = children.iterator();
+
+    AstNode childNode;
+    do {
+      if (!childrenIter.hasNext()) {
+        return null;
+      }
+
+      AstNode child = (AstNode)childrenIter.next();
+      if (child.is(nodeType)) {
+        return child;
+      }
+
+      childNode = getLastDescendant(child, nodeType);
+    } while(childNode == null);
+
+    return null;
+  }
 }
