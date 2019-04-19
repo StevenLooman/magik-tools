@@ -24,7 +24,10 @@
             <artifactId>sonar-plugin-api</artifactId>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.sonarsource.analyzer-commons</groupId>
+            <artifactId>sonar-analyzer-commons</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.sonarsource.sslr</groupId>
             <artifactId>sslr-xpath</artifactId>
@@ -33,6 +36,7 @@
         <dependency>
             <groupId>org.sonarsource.analyzer-commons</groupId>
             <artifactId>sonar-analyzer-test-commons</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -50,10 +54,6 @@
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
             <version>1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.sonarsource.analyzer-commons</groupId>
-            <artifactId>sonar-analyzer-commons</artifactId>
         </dependency>
     </dependencies>
 </project>
