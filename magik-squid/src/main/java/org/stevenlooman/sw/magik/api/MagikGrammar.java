@@ -58,7 +58,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   CATCH_BLOCK,
   LOCK_BLOCK,
   IF, ELIF, ELSE,
-  FOR, OVER, LOOP,
+  FOR, WHILE, OVER, LOOP,
   LEAVE_STATEMENT,
   CONTINUE_STATEMENT,
   LOOPBODY,
@@ -364,6 +364,7 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(ELIF).is(MagikKeyword.ELIF, EXPRESSION, MagikKeyword.THEN, BODY);
     b.rule(ELSE).is(MagikKeyword.ELSE, BODY);
     b.rule(FOR).is(MagikKeyword.FOR, IDENTIFIERS_WITH_GATHER, OVER);
+    b.rule(WHILE).is(MagikKeyword.WHILE, EXPRESSION, LOOP);
     b.rule(OVER).is(MagikKeyword.OVER, EXPRESSION, LOOP);
     b.rule(LOOP).is(
         MagikKeyword.LOOP, b.optional(LABEL),

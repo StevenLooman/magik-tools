@@ -117,6 +117,13 @@ public class MagikGrammarTest {
   }
 
   @Test
+  public void testWhile() {
+    Assertions.assertThat(g.rule(MagikGrammar.WHILE))
+        .matches("_while a _loop _endloop")
+        .matches("_while a _andif b _loop _endloop");
+  }
+
+  @Test
   public void testLoop() {
     Assertions.assertThat(g.rule(MagikGrammar.LOOP))
         .matches("_loop _endloop")
