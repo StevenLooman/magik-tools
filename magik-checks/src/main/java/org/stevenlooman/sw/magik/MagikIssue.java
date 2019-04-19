@@ -31,7 +31,9 @@ public class MagikIssue {
   }
 
   @CheckForNull
-  public Integer column() { return column; }
+  public Integer column() {
+    return column;
+  }
 
   public String message() {
     return message;

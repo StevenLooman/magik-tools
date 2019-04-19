@@ -10,8 +10,6 @@ import java.util.List;
 public abstract class MagikCheck extends MagikVisitor {
   private List<MagikIssue> issues = new ArrayList<>();
 
-  public final static String CHECK_KEY = "";
-
   /**
    * Scan the file from the context for issues.
    * @param context Context to use.

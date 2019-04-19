@@ -13,7 +13,8 @@ import java.util.List;
 @Rule(key = LhsRhsComparatorEqualCheck.CHECK_KEY)
 public class LhsRhsComparatorEqualCheck extends MagikCheck {
 
-  private static final String MESSAGE = "Left hand side and right hand side of comparator are equal.";
+  private static final String MESSAGE =
+      "Left hand side and right hand side of comparator are equal.";
   public static final String CHECK_KEY = "LhsRhsComparatorEqual";
 
   @Override
