@@ -65,7 +65,7 @@ public class UnusedVariableCheck extends MagikCheck {
   private boolean isGlobalOrDynamic(AstNode identifierNode) {
     String identifier = identifierNode.getTokenValue();
 
-    Scope scope = scopeBuilder.scopeForNode(identifierNode);
+    Scope scope = scopeBuilder.getScopeForNode(identifierNode);
     ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
 
     return scopeEntry.getType() == ScopeEntry.Type.GLOBAL ||
@@ -143,7 +143,7 @@ public class UnusedVariableCheck extends MagikCheck {
 
     // Remove all defined variables when they are used
     for (AstNode identifierNode: usedIdentifiers) {
-      Scope scope = scopeBuilder.scopeForNode(identifierNode);
+      Scope scope = scopeBuilder.getScopeForNode(identifierNode);
       String identifierName = identifierNode.getTokenValue();
       ScopeEntry scopeEntry = scope.getScopeEntry(identifierName);
       if (scopeEntry != null) {

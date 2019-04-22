@@ -32,6 +32,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   // constructs
   PARAMETERS,
   PARAMETER,
+  ASSIGNMENT_PARAMETER,
   BODY,
   OPERATOR,
   EXPRESSIONS,
@@ -383,9 +384,9 @@ public enum MagikGrammar implements GrammarRuleKey {
         b.firstOf(
             b.sequence(MagikPunctuator.DOT, IDENTIFIER,
                 b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikPunctuator.PAREN_L, PARAMETERS, MagikPunctuator.PAREN_R),
-                b.optional(SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.CHEVRON, MagikPunctuator.BOOT_CHEVRON), PARAMETER)),
+                b.optional(SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.CHEVRON, MagikPunctuator.BOOT_CHEVRON), ASSIGNMENT_PARAMETER)),
             b.sequence(MagikPunctuator.SQUARE_L, PARAMETERS, MagikPunctuator.SQUARE_R,
-                b.optional(SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.CHEVRON, MagikPunctuator.BOOT_CHEVRON), PARAMETER))),
+                b.optional(SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.CHEVRON, MagikPunctuator.BOOT_CHEVRON), ASSIGNMENT_PARAMETER))),
         BODY,
         MagikKeyword.ENDMETHOD, EOS);
 
@@ -393,6 +394,9 @@ public enum MagikGrammar implements GrammarRuleKey {
         b.optional(PARAMETER, b.zeroOrMore(b.optional(MagikPunctuator.COMMA), PARAMETER)));
     b.rule(PARAMETER).is(
         b.optional(b.firstOf(MagikKeyword.GATHER, MagikKeyword.OPTIONAL)), IDENTIFIER);
+    b.rule(ASSIGNMENT_PARAMETER).is(
+        PARAMETER
+    );
 
     b.rule(ARGUMENTS).is(b.optional(ARGUMENT, b.zeroOrMore(b.optional(MagikPunctuator.COMMA), ARGUMENT)));
     b.rule(ARGUMENT).is(EXPRESSION);

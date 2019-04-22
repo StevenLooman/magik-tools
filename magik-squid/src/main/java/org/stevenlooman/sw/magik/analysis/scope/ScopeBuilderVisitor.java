@@ -5,7 +5,6 @@ import com.sonar.sslr.api.AstNodeType;
 import org.stevenlooman.sw.magik.MagikVisitor;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -42,9 +41,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
   public void visitNode(AstNode node) {
     // dispatch
     AstNodeType nodeType = node.getType();
-    if (nodeType == MagikGrammar.METHOD_DEFINITION || nodeType == MagikGrammar.PROC_DEFINITION) {
-      visitNodeProcDefinition(node);
-    } else if (nodeType == MagikGrammar.BODY) {
+    if (nodeType == MagikGrammar.BODY) {
       visitNodeBody(node);
     } else if (nodeType == MagikGrammar.ASSIGNMENT_EXPRESSION
         || nodeType == MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION) {
@@ -56,31 +53,44 @@ public class ScopeBuilderVisitor extends MagikVisitor {
     }
   }
 
-  private void visitNodeProcDefinition(AstNode node) {
-    tempStorage = new ArrayList<>();
-
-    AstNode parametersNode = node.getFirstChild(MagikGrammar.PARAMETERS);
-    if (parametersNode == null) {
-      return;
-    }
-
-    List<AstNode> parameterNodes = parametersNode.getChildren(MagikGrammar.PARAMETER);
-    for (AstNode parameterNode: parameterNodes) {
-      AstNode identifierNode = parameterNode.getFirstChild(MagikGrammar.IDENTIFIER);
-      tempStorage.add(identifierNode);
-    }
-  }
-
   private void visitNodeBody(AstNode node) {
     // push new scope
-    if (node.getParent().getType() == MagikGrammar.METHOD_DEFINITION
-        || node.getParent().getType() == MagikGrammar.PROC_DEFINITION) {
+    AstNode parentNode = node.getParent();
+    if (parentNode.getType() == MagikGrammar.METHOD_DEFINITION
+        || parentNode.getType() == MagikGrammar.PROC_DEFINITION) {
       scope = new ProcedureScope(scope, node);
 
-      for (AstNode tempNode: tempStorage) {
-        String identifier = tempNode.getTokenValue();
-        scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, tempNode, null);
+      // add parameters to scope
+      AstNode parametersNode = parentNode.getFirstChild(MagikGrammar.PARAMETERS);
+      if (parametersNode != null) {
+        List<AstNode> parameterNodes = parametersNode.getChildren(MagikGrammar.PARAMETER);
+        for (AstNode parameterNode : parameterNodes) {
+          String identifier = parameterNode.getTokenValue();
+          scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, parameterNode, null);
+        }
       }
+
+      // add assignment parameter to scope
+      AstNode assignmentParameterNode = parentNode.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
+      if (assignmentParameterNode != null) {
+        AstNode parameterNode = assignmentParameterNode.getFirstChild(MagikGrammar.PARAMETER);
+        String identifier = parameterNode.getTokenValue();
+        scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, parameterNode, null);
+      }
+
+      scopeIndex.put(parentNode, scope);  // handy
+    } else if (parentNode.getType() == MagikGrammar.TRY_BLOCK) {
+      // XXX TODO: _try _with cond ???
+      scope = new BodyScope(scope, node);
+
+      AstNode identifiersNode = parentNode.getFirstChild(MagikGrammar.IDENTIFIERS);
+      List<AstNode> identifierNodes = identifiersNode.getChildren(MagikGrammar.IDENTIFIER);
+      for (AstNode identifierNode: identifierNodes) {
+        String identifier = identifierNode.getTokenValue();
+        scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, identifierNode, null);
+      }
+
+      scopeIndex.put(parentNode, scope);
     } else {
       scope = new BodyScope(scope, node);
     }
@@ -159,7 +169,12 @@ public class ScopeBuilderVisitor extends MagikVisitor {
     scope = scope.getParentScope();
   }
 
-  public Scope scopeForNode(AstNode node) {
+  /**
+   * Get the Scope for a AstNode
+   * @param node Node to look for
+   * @return Scope for node, or global scope if node is not found.
+   */
+  public Scope getScopeForNode(AstNode node) {
     // find scope for this node
     AstNode currentNode = node;
     while (currentNode != null) {
