@@ -1,0 +1,15 @@
+{
+  "title": "Possibly meant _import instead of _local",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "possible_bug"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "LocalImportProcedure",
+  "sqKey": "local-import-procedure"
+}
