@@ -7,7 +7,7 @@
     "constantCost": "60min"
   },
   "tags": [
-    "unused"
+    "complexity"
   ],
   "defaultSeverity": "Major",
   "ruleSpecification": "ExemplarSlotCount",
