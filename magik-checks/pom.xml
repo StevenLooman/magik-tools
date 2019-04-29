@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>magik-checks</artifactId>
-    <name>StevenLooman :: SW :: Magik :: Magik Checks</name>
+    <name>StevenLooman :: SW :: Magik :: Checks</name>
 
     <dependencies>
         <dependency>
