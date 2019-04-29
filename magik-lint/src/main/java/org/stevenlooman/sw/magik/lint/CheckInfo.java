@@ -8,9 +8,8 @@ import org.stevenlooman.sw.magik.CheckList;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.TemplatedCheck;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -85,16 +84,11 @@ public class CheckInfo {
     Class class_ = check.getClass();
     String simpleName = class_.getSimpleName();
     String name = simpleName.substring(0, simpleName.length() - 5);  // strip Check
-    String filename = CheckList.PROFILE_DIR + "/" + name + ".json";
-
-    // get resource file
-    ClassLoader classLoader = class_.getClassLoader();
-    String f = classLoader.getResource(filename).getFile();
-    File file = new File(f);
+    String filename = "/" + CheckList.PROFILE_DIR + "/" + name + ".json";
 
     // parse json
-    FileReader reader = new FileReader(file);
-    JSONTokener tokener = new JSONTokener(reader);
+    InputStream inputStream = getClass().getResourceAsStream(filename);
+    JSONTokener tokener = new JSONTokener(inputStream);
     JSONObject object = new JSONObject(tokener);
     return object;
   }

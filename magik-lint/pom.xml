@@ -61,6 +61,40 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>jarjar-maven-plugin</artifactId>
+                <version>1.9</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jarjar</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>${project.groupId}:magik-checks</include>
+                                <include>${project.groupId}:magik-squid</include>
+                                <include>org.sonarsource.sslr:sslr-core</include>
+                                <include>org.sonarsource.sslr:sslr-xpath</include>
+                                <include>jaxen:jaxen</include>
+                                <include>org.sonarsource.sonarqube:sonar-plugin-api</include>
+                                <include>commons-lang:commons-lang</include>
+                                <include>commons-cli:commons-cli</include>
+                                <include>org.apache.commons:commons-text</include>
+                                <include>org.apache.commons:commons-lang3</include>
+                                <include>org.json:json</include>
+                                <include>com.google.guava:guava</include>
+                            </includes>
+                            <rules>
+                                <keep>
+                                    <pattern>*.**</pattern>
+                                </keep>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

@@ -199,11 +199,12 @@ public class MagikLint {
       returnCode = 32;
     } catch (IOException ex) {
       System.out.println("Caught exception: " + ex.getMessage());
+      ex.printStackTrace();
       returnCode = 32;
-    } catch (IllegalAccessException e) {
-      e.printStackTrace();
-    } catch (InstantiationException e) {
-      e.printStackTrace();
+    } catch (IllegalAccessException ex) {
+      ex.printStackTrace();
+    } catch (InstantiationException ex) {
+      ex.printStackTrace();
     }
 
     System.exit(returnCode);
