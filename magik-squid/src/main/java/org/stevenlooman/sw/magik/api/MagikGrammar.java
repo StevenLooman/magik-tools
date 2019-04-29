@@ -370,7 +370,7 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(LOOP).is(
         MagikKeyword.LOOP, b.optional(LABEL),
         BODY,
-        b.optional(MagikKeyword.FINALLY, b.optional(MagikKeyword.WITH, IDENTIFIERS), BODY),
+        b.optional(MagikKeyword.FINALLY, b.optional(MagikKeyword.WITH, IDENTIFIERS_WITH_GATHER), BODY),
         MagikKeyword.ENDLOOP);
     b.rule(LEAVE_STATEMENT).is(MagikKeyword.LEAVE, b.optional(LABEL), b.optional(MagikKeyword.WITH, EXPRESSIONS));
     b.rule(CONTINUE_STATEMENT).is(MagikKeyword.CONTINUE, b.optional(LABEL), b.optional(MagikKeyword.WITH, EXPRESSIONS));
