@@ -7,6 +7,7 @@ import org.stevenlooman.sw.magik.checks.LhsRhsComparatorEqualCheck;
 import org.stevenlooman.sw.magik.checks.LineLengthCheck;
 import org.stevenlooman.sw.magik.checks.MethodComplexityCheck;
 import org.stevenlooman.sw.magik.checks.SizeZeroEmptyCheck;
+import org.stevenlooman.sw.magik.checks.TrailingWhitespaceCheck;
 import org.stevenlooman.sw.magik.checks.UnusedVariableCheck;
 import org.stevenlooman.sw.magik.checks.XPathCheck;
 
@@ -33,6 +34,7 @@ public final class CheckList {
         LineLengthCheck.class,
         MethodComplexityCheck.class,
         SizeZeroEmptyCheck.class,
+        TrailingWhitespaceCheck.class,
         UnusedVariableCheck.class,
         XPathCheck.class
     );
