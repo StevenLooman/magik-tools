@@ -1,6 +1,5 @@
 package org.stevenlooman.sw.magik.lint;
 
-import javax.annotation.CheckForNull;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import javax.annotation.CheckForNull;
 
 public class Configuration {
 
@@ -41,6 +41,11 @@ public class Configuration {
     return properties.getProperty(key);
   }
 
+  /**
+   * Get property as strings, split by a comma (',').
+   * @param key Key of property
+   * @return Value of property split by a comma
+   */
   @CheckForNull
   public List<String> getPropertySplit(String key) {
     String line = getProperty(key);
@@ -52,6 +57,11 @@ public class Configuration {
     return Arrays.stream(items).map(String::trim).collect(Collectors.toList());
   }
 
+  /**
+   * Get property as int.
+   * @param key Key of property
+   * @return Value of property as integer
+   */
   @CheckForNull
   public Integer getPropertyInt(String key) {
     String value = getProperty(key);
@@ -62,6 +72,11 @@ public class Configuration {
     return Integer.valueOf(value);
   }
 
+  /**
+   * Test if property with key exists.
+   * @param key Key of property
+   * @return True if it exists, false if not
+   */
   public boolean hasProperty(String key) {
     return properties.contains(key);
   }

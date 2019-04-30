@@ -2,15 +2,17 @@ package org.stevenlooman.sw.magik.lint;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
+
 import com.sonar.sslr.api.AstNode;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.stevenlooman.sw.magik.MagikIssue;
 import org.stevenlooman.sw.magik.MagikCheck;
+import org.stevenlooman.sw.magik.MagikIssue;
 import org.stevenlooman.sw.magik.MagikVisitorContext;
 import org.stevenlooman.sw.magik.lint.output.MessageFormatReporter;
 import org.stevenlooman.sw.magik.lint.output.Reporter;
@@ -35,7 +37,8 @@ public class MagikLint {
   CommandLine commandLine;
   Configuration config;
 
-  final static Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING = Maps.newHashMap();
+  static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING = Maps.newHashMap();
+
   static {
     SEVERITY_EXIT_CODE_MAPPING.put("Major", 2);
     SEVERITY_EXIT_CODE_MAPPING.put("Minor", 4);
@@ -126,7 +129,8 @@ public class MagikLint {
   }
 
 
-  private Iterable<CheckInfo> getAllChecks() throws IllegalAccessException, InstantiationException, FileNotFoundException {
+  private Iterable<CheckInfo> getAllChecks() throws
+      IllegalAccessException, InstantiationException, FileNotFoundException {
     return CheckInfo.getAllChecks(config);
   }
 
@@ -141,7 +145,8 @@ public class MagikLint {
     return SEVERITY_EXIT_CODE_MAPPING.getOrDefault(checkSeverity, 0);
   }
 
-  private void showChecks(Iterable<CheckInfo> checkInfos) throws IllegalAccessException, FileNotFoundException {
+  private void showChecks(Iterable<CheckInfo> checkInfos) throws
+      IllegalAccessException, FileNotFoundException {
     for (CheckInfo checkInfo: checkInfos) {
       String name = checkInfo.getName();
       if (checkInfo.isEnabled()) {
@@ -151,7 +156,8 @@ public class MagikLint {
       }
 
       checkInfo.getParameters().forEach(parameterInfo -> {
-        System.out.println("\t" + parameterInfo.getName() + ":\t" + parameterInfo.getValue() + " (" + parameterInfo.getDescription() + ")");
+        System.out.println("\t" + parameterInfo.getName() + ":\t" + parameterInfo.getValue() + " "
+            + "(" + parameterInfo.getDescription() + ")");
       });
     }
   }
@@ -177,6 +183,13 @@ public class MagikLint {
     return returnCode;
   }
 
+  /**
+   * Run the linter.
+   * @return Exit code to return from process.
+   * @throws IOException -
+   * @throws IllegalAccessException -
+   * @throws InstantiationException -
+   */
   public int run() throws IOException, IllegalAccessException, InstantiationException {
     Iterable<CheckInfo> checkInfos = getAllChecks();
 
@@ -189,6 +202,10 @@ public class MagikLint {
     return checkFiles(checkInfos);
   }
 
+  /**
+   * Main entry point.
+   * @param args Command line arguments.
+   */
   public static void main(String[] args) {
     int returnCode = 0;
     try {
@@ -210,6 +227,12 @@ public class MagikLint {
     System.exit(returnCode);
   }
 
+  /**
+   * Get reporter.
+   * If the option `msg-template` is given, use a MessageFormatReporter with the given template.
+   * Otherwise use MessageFormatReporter.
+   * @return Reporter
+   */
   public Reporter getReporter() {
     if (commandLine.hasOption("msg-template")) {
       String template = commandLine.getOptionValue("msg-template");

@@ -1,6 +1,7 @@
 package org.stevenlooman.sw.sonar;
 
 import com.google.common.collect.Sets;
+
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonarsource.analyzer.commons.RuleMetadataLoader;
 import org.stevenlooman.sw.magik.CheckList;

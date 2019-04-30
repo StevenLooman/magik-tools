@@ -6,11 +6,11 @@ import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import javax.annotation.Nullable;
 
 @Rule(key = SizeZeroEmptyCheck.CHECK_KEY)
 public class SizeZeroEmptyCheck extends MagikCheck {
@@ -31,7 +31,7 @@ public class SizeZeroEmptyCheck extends MagikCheck {
     if (hasEqOperator(node)
         && (isMethodInvocationSize(leftHandSide) && isNumberZero(rightHandSide)
         || isMethodInvocationSize(rightHandSide) && isNumberZero(leftHandSide))) {
-     addIssue(MESSAGE, node);
+      addIssue(MESSAGE, node);
     }
   }
 
@@ -77,7 +77,7 @@ public class SizeZeroEmptyCheck extends MagikCheck {
       }
 
       childNode = getLastDescendant(child, nodeType);
-    } while(childNode == null);
+    } while (childNode == null);
 
     return null;
   }

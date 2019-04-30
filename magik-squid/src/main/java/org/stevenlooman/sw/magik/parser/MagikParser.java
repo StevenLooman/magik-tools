@@ -61,6 +61,11 @@ public class MagikParser {
     return node;
   }
 
+  /**
+   * Parse a file and return the AstNode.
+   * @param path Path to file
+   * @return Tree
+   */
   public AstNode parse(Path path) {
     AstNode node = null;
     try (FileReader sr = new FileReader(path.toFile())) {

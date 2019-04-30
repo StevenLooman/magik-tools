@@ -2,15 +2,15 @@ package org.stevenlooman.sw.magik.analysis.scope;
 
 import com.sonar.sslr.api.AstNode;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
-abstract public class Scope {
+public abstract class Scope {
 
   protected Map<String, ScopeEntry> scopeEntries = new HashMap<>();
   private List<Scope> childScopes = new ArrayList<>();
@@ -100,7 +100,7 @@ abstract public class Scope {
    * @param identifier Identifier of declaration.
    * @param node AstNode for declaration.
    * @param parentEntry Parent entry for declaration (used for import declarations.)
-   * @return
+   * @return Added ScopeEntry
    */
   public ScopeEntry addDeclaration(ScopeEntry.Type type,
                                    String identifier,

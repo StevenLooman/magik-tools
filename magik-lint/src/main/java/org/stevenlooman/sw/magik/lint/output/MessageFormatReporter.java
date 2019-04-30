@@ -1,8 +1,8 @@
 package org.stevenlooman.sw.magik.lint.output;
 
 import com.google.common.collect.Maps;
+
 import org.apache.commons.text.StringSubstitutor;
-import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.MagikIssue;
 import org.stevenlooman.sw.magik.lint.CheckInfo;
 
@@ -14,8 +14,7 @@ public class MessageFormatReporter extends Reporter {
 
   private String format;
 
-//  public final static String DEFAULT_FORMAT = "${path}:${line}:${column}: ${msg_id}: ${msg} (${symbol})";
-  public final static String DEFAULT_FORMAT = "${path}:${line}:${column}: ${msg} (${symbol})";
+  public static final String DEFAULT_FORMAT = "${path}:${line}:${column}: ${msg} (${symbol})";
 
   public MessageFormatReporter() {
     this(DEFAULT_FORMAT);
@@ -25,7 +24,8 @@ public class MessageFormatReporter extends Reporter {
     this.format = format;
   }
 
-  private Map<String, String> createMap(Path path, CheckInfo checkInfo, MagikIssue issue) throws FileNotFoundException {
+  private Map<String, String> createMap(Path path, CheckInfo checkInfo, MagikIssue issue) throws
+      FileNotFoundException {
     Map<String, String> map = Maps.newHashMap();
     map.put("path", path.toString());
     map.put("abspath", path.toAbsolutePath().toString());
@@ -48,7 +48,8 @@ public class MessageFormatReporter extends Reporter {
   }
 
   @Override
-  public void reportIssue(Path path, CheckInfo checkInfo, MagikIssue issue) throws FileNotFoundException {
+  public void reportIssue(Path path, CheckInfo checkInfo, MagikIssue issue) throws
+      FileNotFoundException {
     Map<String, String> map = createMap(path, checkInfo, issue);
     StringSubstitutor sub = new StringSubstitutor(map);
     String resolvedString = sub.replace(format);

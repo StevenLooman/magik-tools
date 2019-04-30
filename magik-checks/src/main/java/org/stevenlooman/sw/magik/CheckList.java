@@ -1,6 +1,7 @@
 package org.stevenlooman.sw.magik;
 
 import com.google.common.collect.ImmutableList;
+
 import org.stevenlooman.sw.magik.checks.CommentRegularExpressionCheck;
 import org.stevenlooman.sw.magik.checks.ExemplarSlotCountCheck;
 import org.stevenlooman.sw.magik.checks.LhsRhsComparatorEqualCheck;

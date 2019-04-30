@@ -25,6 +25,13 @@ public class ScopeEntry {
   ScopeEntry parentEntry;
 
 
+  /**
+   * Constructor.
+   * @param type Type of entry
+   * @param identifier Identifier of entry
+   * @param node Node of entry
+   * @param parentEntry Parent of entry, in case of an _import
+   */
   public ScopeEntry(Type type, String identifier, AstNode node, ScopeEntry parentEntry) {
     this.type = type;
     this.identifier = identifier;

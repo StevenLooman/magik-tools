@@ -68,8 +68,8 @@ public class UnusedVariableCheck extends MagikCheck {
     Scope scope = scopeBuilder.getScopeForNode(identifierNode);
     ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
 
-    return scopeEntry.getType() == ScopeEntry.Type.GLOBAL ||
-        scopeEntry.getType() == ScopeEntry.Type.DYNAMIC;
+    return scopeEntry.getType() == ScopeEntry.Type.GLOBAL
+           || scopeEntry.getType() == ScopeEntry.Type.DYNAMIC;
   }
 
   private boolean isLhsOfAssignment(AstNode identifierNode) {
@@ -80,8 +80,8 @@ public class UnusedVariableCheck extends MagikCheck {
 
     AstNode parent = atomNode.getParent();
     return (parent.getType() == MagikGrammar.ASSIGNMENT_EXPRESSION
-            || parent.getType() == MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION) &&
-           parent.getFirstChild() == atomNode;
+            || parent.getType() == MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION)
+           && parent.getFirstChild() == atomNode;
   }
 
   private boolean isAssignedToDirectly(AstNode identifierNode) {
@@ -114,9 +114,9 @@ public class UnusedVariableCheck extends MagikCheck {
         AstNode scopeEntryNode = scopeEntry.getNode();
 
         // But not globals/dynamics which is assigned to directly
-        if ((scopeEntry.getType() == ScopeEntry.Type.GLOBAL ||
-            scopeEntry.getType() == ScopeEntry.Type.DYNAMIC) &&
-            isAssignedToDirectly(scopeEntryNode)) {
+        if ((scopeEntry.getType() == ScopeEntry.Type.GLOBAL
+             || scopeEntry.getType() == ScopeEntry.Type.DYNAMIC)
+            && isAssignedToDirectly(scopeEntryNode)) {
           continue;
         }
 

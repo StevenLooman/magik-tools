@@ -1,6 +1,7 @@
 package org.stevenlooman.sw.magik.lint;
 
 import com.google.common.collect.Lists;
+
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.sonar.check.RuleProperty;
@@ -60,6 +61,11 @@ public class CheckInfo {
     enabled = false;
   }
 
+  /**
+   * Get all parameters.
+   * @return List of ParameterInfo
+   * @throws IllegalAccessException -
+   */
   public Iterable<ParameterInfo> getParameters() throws IllegalAccessException {
     List<ParameterInfo> parameters = Lists.newArrayList();
 
@@ -81,8 +87,8 @@ public class CheckInfo {
 
   private JSONObject readMetadata() throws FileNotFoundException {
     // determine path
-    Class class_ = check.getClass();
-    String simpleName = class_.getSimpleName();
+    Class klass = check.getClass();
+    String simpleName = klass.getSimpleName();
     String name = simpleName.substring(0, simpleName.length() - 5);  // strip Check
     String filename = "/" + CheckList.PROFILE_DIR + "/" + name + ".json";
 
@@ -108,6 +114,12 @@ public class CheckInfo {
     return metadata.getString("title");
   }
 
+  /**
+   * Set a parameter.
+   * @param name Key of parameter to set
+   * @param value Value of parameter to set
+   * @throws IllegalAccessException -
+   */
   public void setParameter(String name, Object value) throws IllegalAccessException {
     boolean found = false;
     for (Field field: check.getClass().getFields()) {
@@ -127,7 +139,16 @@ public class CheckInfo {
     }
   }
 
-  public static List<CheckInfo> getAllChecks(Configuration config) throws IllegalAccessException, InstantiationException, FileNotFoundException {
+  /**
+   * Get all checks, enabled in the given configuration.
+   * @param config Configuration to use
+   * @return Collection of checks
+   * @throws IllegalAccessException -
+   * @throws InstantiationException -
+   * @throws FileNotFoundException -
+   */
+  public static List<CheckInfo> getAllChecks(Configuration config) throws
+      IllegalAccessException, InstantiationException, FileNotFoundException {
     List<CheckInfo> checkInfos = Lists.newArrayList();
 
     List<String> disabled = config.getPropertySplit("disabled");

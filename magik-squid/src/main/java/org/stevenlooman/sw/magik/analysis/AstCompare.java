@@ -10,15 +10,22 @@ public class AstCompare {
 
   }
 
-  public static boolean AstNodesEquals(AstNode left, AstNode right) {
+  /**
+   * Test if two nodes are equal to each other.
+   * Compares structure and token values.
+   * @param left Node to compare
+   * @param right Node to compare
+   * @return True if nodes are equal, false otherwise.
+   */
+  public static boolean astNodesEquals(AstNode left, AstNode right) {
     if (left.getType() != right.getType()) {
       return false;
     }
 
     String rightTokenValue = right.getTokenValue();
     String leftTokenValue = left.getTokenValue();
-    if (leftTokenValue == null || rightTokenValue == null &&
-        leftTokenValue != rightTokenValue) {
+    if (leftTokenValue == null || rightTokenValue == null
+        && leftTokenValue != rightTokenValue) {
       return false;
     }
 
@@ -35,7 +42,7 @@ public class AstCompare {
     for (int i = 0; i < leftChildren.size(); ++i) {
       AstNode leftChild = leftChildren.get(i);
       AstNode rightChild = rightChildren.get(i);
-      if (!AstNodesEquals(leftChild, rightChild)) {
+      if (!astNodesEquals(leftChild, rightChild)) {
         return false;
       }
     }
