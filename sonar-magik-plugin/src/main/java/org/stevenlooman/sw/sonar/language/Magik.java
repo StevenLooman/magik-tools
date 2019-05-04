@@ -1,7 +1,7 @@
 package org.stevenlooman.sw.sonar.language;
 
 import org.apache.commons.lang.StringUtils;
-import org.sonar.api.config.Settings;
+import org.sonar.api.config.Configuration;
 import org.sonar.api.resources.AbstractLanguage;
 import org.stevenlooman.sw.sonar.MagikPlugin;
 
@@ -17,20 +17,20 @@ public class Magik extends AbstractLanguage {
 
   private static final String[] DEFAULT_FILE_SUFFIXES = {"magik"}; // NOSONAR: S1192
 
-  private Settings settings;
+  private Configuration configuration;
 
   /**
    * Constructor.
-   * @param settings Settings.
+   * @param configuration Configuration.
    */
-  public Magik(Settings settings) {
+  public Magik(Configuration configuration) {
     super(KEY, "Magik");
-    this.settings = settings;
+    this.configuration = configuration;
   }
 
   @Override
   public String[] getFileSuffixes() {
-    String[] stringArray = settings.getStringArray(MagikPlugin.FILE_SUFFIXES_KEY);
+    String[] stringArray = configuration.getStringArray(MagikPlugin.FILE_SUFFIXES_KEY);
     String[] suffixes = filterEmptyStrings(stringArray);
     return suffixes.length == 0 ? Magik.DEFAULT_FILE_SUFFIXES : suffixes;
   }

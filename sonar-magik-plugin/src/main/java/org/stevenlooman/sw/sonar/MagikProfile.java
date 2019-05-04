@@ -1,26 +1,28 @@
 package org.stevenlooman.sw.sonar;
 
-import org.sonar.api.profiles.ProfileDefinition;
-import org.sonar.api.profiles.RulesProfile;
-import org.sonar.api.rules.RuleFinder;
-import org.sonar.api.utils.ValidationMessages;
-import org.sonarsource.analyzer.commons.ProfileDefinitionReader;
+import static org.stevenlooman.sw.sonar.MagikRuleRepository.RESOURCE_FOLDER;
+
+import org.sonar.api.SonarRuntime;
+import org.sonar.api.server.profile.BuiltInQualityProfilesDefinition;
+import org.sonarsource.analyzer.commons.BuiltInQualityProfileJsonLoader;
 import org.stevenlooman.sw.magik.CheckList;
 import org.stevenlooman.sw.sonar.language.Magik;
 
-public final class MagikProfile extends ProfileDefinition {
+public final class MagikProfile implements BuiltInQualityProfilesDefinition {
 
-  private final RuleFinder ruleFinder;
+  static final String PROFILE_NAME = "Sonar way";
+  static final String PROFILE_LOCATION = RESOURCE_FOLDER + "/Sonar_way_profile.json";
+  private final SonarRuntime sonarRuntime;
 
-  public MagikProfile(RuleFinder ruleFinder) {
-    this.ruleFinder = ruleFinder;
+  public MagikProfile(SonarRuntime sonarRuntime) {
+    this.sonarRuntime = sonarRuntime;
   }
 
   @Override
-  public RulesProfile createProfile(ValidationMessages messages) {
-    RulesProfile profile = RulesProfile.create(CheckList.SONAR_WAY_PROFILE, Magik.KEY);
-    ProfileDefinitionReader definitionReader = new ProfileDefinitionReader(ruleFinder);
-    definitionReader.activateRules(profile, CheckList.REPOSITORY_KEY, CheckList.PROFILE_LOCATION);
-    return profile;
+  public void define(Context context) {
+    NewBuiltInQualityProfile profile = context.createBuiltInQualityProfile(PROFILE_NAME, Magik.KEY);
+    BuiltInQualityProfileJsonLoader.load(
+        profile, CheckList.REPOSITORY_KEY, PROFILE_LOCATION, RESOURCE_FOLDER, sonarRuntime);
+    profile.done();
   }
 }

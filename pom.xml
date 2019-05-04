@@ -18,17 +18,46 @@
         <module>sslr-magik-toolkit</module>
     </modules>
 
+    <licenses>
+        <license>
+            <name>GNU LGPL 3</name>
+            <url>http://www.gnu.org/licenses/lgpl.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>StevenLooman</id>
+            <name>Steven Looman</name>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:StevenLooman/sonar-magik.git</connection>
+        <developerConnection>scm:git:git@github.com:StevenLooman/sonar-magik.git</developerConnection>
+        <url>https://github.com/StevenLooman/sonar-magik</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <properties>
+        <license.title>SonarQube Magik Plugin</license.title>
+        <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+        <sonar.pluginClass>org.stevenlooman.sw.sonar.MagikPlugin</sonar.pluginClass>
+        <sonar.pluginName>Magik</sonar.pluginName>
+        <sonarQubeMinVersion>6.7</sonarQubeMinVersion>
+
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <sonar.version>6.7</sonar.version>
+        <sonar.version>7.5</sonar.version>
         <sslr.version>1.23</sslr.version>
+        <sslr.xpath.version>1.22</sslr.xpath.version>
         <sslr-squid-bridge.version>2.7.0.377</sslr-squid-bridge.version>
-        <analyzerCommons.version>1.6.0.219</analyzerCommons.version>
+        <analyzerCommons.version>1.10.2.456</analyzerCommons.version>
         <checkapi.version>4.5.1</checkapi.version>
         <junit.version>4.11</junit.version>
         <slf4j.version>1.7.21</slf4j.version>
@@ -57,7 +86,7 @@
             <dependency>
                 <groupId>org.sonarsource.sslr</groupId>
                 <artifactId>sslr-xpath</artifactId>
-                <version>${sslr.version}</version>
+                <version>${sslr.xpath.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.sonarsource.sslr</groupId>
@@ -126,13 +155,30 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <testSource>1.8</testSource>
+                    <testTarget>1.8</testTarget>
+                    <compilerArgument>-Xlint:unchecked</compilerArgument>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
                 <artifactId>sonar-packaging-maven-plugin</artifactId>
                 <version>1.17</version>
                 <extensions>true</extensions>
 
                 <configuration>
+                    <pluginName>SonarMagik</pluginName>
                     <pluginClass>org.stevenlooman.sw.sonar.MagikPlugin</pluginClass>
+                    <skipDependenciesPackaging>true</skipDependenciesPackaging>
+                    <sonarLintSupported>false</sonarLintSupported>
+                    <sonarQubeMinVersion>${sonarQubeMinVersion}</sonarQubeMinVersion>
                 </configuration>
             </plugin>
 

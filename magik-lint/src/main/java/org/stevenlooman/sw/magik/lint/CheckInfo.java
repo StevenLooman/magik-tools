@@ -156,9 +156,10 @@ public class CheckInfo {
       disabled = Lists.newArrayList();
     }
 
-    List<Class> checkClasses = CheckList.getChecks();
-    for (Class checkClass: checkClasses) {
-      if (checkClass.getAnnotation(TemplatedCheck.class) != null) {
+    List<Class<?>> checkClasses = CheckList.getChecks();
+    for (Class<?> checkClass: checkClasses) {
+      TemplatedCheck annotation = checkClass.getAnnotation(TemplatedCheck.class);
+      if (annotation != null) {
         // skip templated checks for now
         continue;
       }

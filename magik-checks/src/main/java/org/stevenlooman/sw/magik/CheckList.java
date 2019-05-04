@@ -16,7 +16,6 @@ import java.util.List;
 
 public final class CheckList {
   public static final String REPOSITORY_KEY = "magik";
-  public static final String SONAR_WAY_PROFILE = "Sonar way";
   public static final String PROFILE_DIR = "org/stevenlooman/sw/sonar/l10n/magik/rules";
   public static final String PROFILE_LOCATION = PROFILE_DIR + "/Sonar_way_profile.json";
 
@@ -27,8 +26,8 @@ public final class CheckList {
    * Get the list of Checks.
    * @return List of with Checks
    */
-  public static List<Class> getChecks() {
-    return ImmutableList.<Class>of(
+  public static List<Class<?>> getChecks() {
+    return ImmutableList.<Class<?>>of(
         CommentRegularExpressionCheck.class,
         ExemplarSlotCountCheck.class,
         LhsRhsComparatorEqualCheck.class,

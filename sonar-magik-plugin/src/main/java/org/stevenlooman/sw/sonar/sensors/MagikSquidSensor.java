@@ -38,7 +38,6 @@ import org.stevenlooman.sw.sonar.language.Magik;
 import org.stevenlooman.sw.sonar.visitors.MagikHighlighterVisitor;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -169,8 +168,6 @@ public class MagikSquidSensor implements Sensor {
     FileLinesContext fileLinesContext = fileLinesContextFactory.createFor(inputFile);
     metrics.linesOfCode().forEach(
         line -> fileLinesContext.setIntValue(CoreMetrics.NCLOC_DATA_KEY, line, 1));
-    metrics.commentLines().forEach(
-        line -> fileLinesContext.setIntValue(CoreMetrics.COMMENT_LINES_DATA_KEY, line, 1));
     metrics.executableLines().forEach(
         line -> fileLinesContext.setIntValue(CoreMetrics.EXECUTABLE_LINES_DATA_KEY, line, 1));
     fileLinesContext.save();
@@ -179,13 +176,13 @@ public class MagikSquidSensor implements Sensor {
     noSonarFilter.noSonarInFile(inputFile, metrics.nosonarLines());
   }
 
-  private <T extends Serializable> void saveMetric(SensorContext context,
-                                                   InputFile inputFile,
-                                                   Metric metric,
-                                                   T value) {
+  private void saveMetric(SensorContext context,
+                          InputFile inputFile,
+                          Metric<Integer> metric,
+                          Integer value) {
     LOGGER.debug("Saving metric, file: {}, metric: {} value: {}", inputFile, metric, value);
 
-    context.<T>newMeasure()
+    context.<Integer>newMeasure()
         .withValue(value)
         .forMetric(metric)
         .on(inputFile)
