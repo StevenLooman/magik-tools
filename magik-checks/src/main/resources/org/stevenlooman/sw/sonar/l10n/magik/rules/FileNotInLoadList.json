@@ -1,0 +1,15 @@
+{
+  "title": "File nog in load_list",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "convention"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "FileNotInLoadList",
+  "sqKey": "file-not-in-load-list"
+}

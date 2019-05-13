@@ -125,7 +125,7 @@ public class MagikLint {
 
     byte[] encoded = Files.readAllBytes(path);
     String fileContents = new String(encoded, charset);
-    return new MagikVisitorContext(fileContents, root);
+    return new MagikVisitorContext(path, fileContents, root);
   }
 
 

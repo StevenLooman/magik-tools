@@ -122,12 +122,13 @@ public class MagikSquidSensor implements Sensor {
     LOGGER.debug("Parse and save measures");
     MagikParser parser = new MagikParser(charset);
     MagikVisitorContext visitorContext;
+    Path path = Paths.get(inputFile.toString());
     try {
       AstNode tree = parser.parse(fileContent);
-      visitorContext = new MagikVisitorContext(fileContent, tree);
+      visitorContext = new MagikVisitorContext(path, fileContent, tree);
       saveMetrics(context, inputFile, visitorContext);
     } catch (RecognitionException ex) {
-      visitorContext = new MagikVisitorContext(fileContent, ex);
+      visitorContext = new MagikVisitorContext(path, fileContent, ex);
       LOGGER.error("Unable to parse file: {}", inputFile);
       LOGGER.error("Exception", ex);
     }

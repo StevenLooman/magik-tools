@@ -4,25 +4,37 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.RecognitionException;
 import com.sonar.sslr.api.Token;
 
+import java.nio.file.Path;
 import java.util.List;
 import javax.annotation.CheckForNull;
 
 public class MagikVisitorContext {
+  private final Path path;
   private final String fileContent;
   private final AstNode rootTree;
   private final RecognitionException parsingException;
 
+  public MagikVisitorContext(Path path, String fileContent, AstNode tree) {
+    this(path, fileContent, tree, null);
+  }
+
+  public MagikVisitorContext(Path path, String fileContent, RecognitionException parsingException) {
+    this(path, fileContent, null, parsingException);
+  }
+
+  public MagikVisitorContext(Path path, AstNode tree) {
+    this(path, null, tree, null);
+  }
+
   public MagikVisitorContext(String fileContent, AstNode tree) {
-    this(fileContent, tree, null);
+    this(null, fileContent, tree, null);
   }
 
-  public MagikVisitorContext(String fileContent, RecognitionException parsingException) {
-    this(fileContent, null, parsingException);
-  }
-
-  private MagikVisitorContext(String fileContent,
+  private MagikVisitorContext(Path path,
+                              String fileContent,
                               AstNode rootTree,
                               RecognitionException parsingException) {
+    this.path = path;
     this.fileContent = fileContent;
     this.rootTree = rootTree;
     this.parsingException = parsingException;
@@ -44,5 +56,10 @@ public class MagikVisitorContext {
 
   public String fileContent() {
     return fileContent;
+  }
+
+  @CheckForNull
+  public Path path() {
+    return path;
   }
 }

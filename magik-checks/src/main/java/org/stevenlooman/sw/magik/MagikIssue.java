@@ -18,7 +18,7 @@ public class MagikIssue {
   }
 
   public static MagikIssue fileIssue(String message, MagikCheck check) {
-    return new MagikIssue(null, null, message, null, check);
+    return new MagikIssue(1, 0, message, null, check);
   }
 
   public static MagikIssue lineColumnIssue(int line, int column, String message, MagikCheck check) {

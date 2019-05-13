@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 
 import org.stevenlooman.sw.magik.checks.CommentRegularExpressionCheck;
 import org.stevenlooman.sw.magik.checks.ExemplarSlotCountCheck;
+import org.stevenlooman.sw.magik.checks.FileNotInLoadListCheck;
 import org.stevenlooman.sw.magik.checks.LhsRhsComparatorEqualCheck;
 import org.stevenlooman.sw.magik.checks.LineLengthCheck;
 import org.stevenlooman.sw.magik.checks.MethodComplexityCheck;
@@ -30,6 +31,7 @@ public final class CheckList {
     return ImmutableList.<Class<?>>of(
         CommentRegularExpressionCheck.class,
         ExemplarSlotCountCheck.class,
+        FileNotInLoadListCheck.class,
         LhsRhsComparatorEqualCheck.class,
         LineLengthCheck.class,
         MethodComplexityCheck.class,
