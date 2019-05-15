@@ -3,6 +3,7 @@
   "ruleKeys": [
     "LhsRhsComparatorEqual",
     "SizeZeroEmpty",
-    "UnusedVariable"
+    "UnusedVariable",
+    "VariableNamingCheck"
   ]
 }

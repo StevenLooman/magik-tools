@@ -1,0 +1,15 @@
+{
+  "title": "Give variables a proper descriptive name",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "1min"
+  },
+  "tags": [
+    "convention"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "VariableNaming",
+  "sqKey": "variable-naming"
+}

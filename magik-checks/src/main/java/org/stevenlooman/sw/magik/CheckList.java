@@ -11,6 +11,7 @@ import org.stevenlooman.sw.magik.checks.MethodComplexityCheck;
 import org.stevenlooman.sw.magik.checks.SizeZeroEmptyCheck;
 import org.stevenlooman.sw.magik.checks.TrailingWhitespaceCheck;
 import org.stevenlooman.sw.magik.checks.UnusedVariableCheck;
+import org.stevenlooman.sw.magik.checks.VariableNamingCheck;
 import org.stevenlooman.sw.magik.checks.XPathCheck;
 
 import java.util.List;
@@ -38,6 +39,7 @@ public final class CheckList {
         SizeZeroEmptyCheck.class,
         TrailingWhitespaceCheck.class,
         UnusedVariableCheck.class,
+        VariableNamingCheck.class,
         XPathCheck.class
     );
   }
