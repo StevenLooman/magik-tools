@@ -92,7 +92,7 @@ public class MagikLint {
       File file = path.toFile();
       if (file.isDirectory()) {
         addAllFilesInDirectory(path, files);
-      } else {
+      } else if (file.exists()) {
         files.add(path);
       }
     }
