@@ -67,6 +67,8 @@ public class MagikGrammarTest {
     Assertions.assertThat(g.rule(MagikGrammar.THROW_STATEMENT))
         .matches("_throw :test")
         .matches("_throw @error _with _false");
+    Assertions.assertThat(g.rule(MagikGrammar.THROW_STATEMENT))
+        .notMatches("_throw a\n _with _false");
   }
 
   @Test
@@ -288,6 +290,9 @@ public class MagikGrammarTest {
         .matches("_leave _with e()")
         .matches("_leave @label _with e()")
         ;
+    Assertions.assertThat(g.rule(MagikGrammar.BODY))
+        .notMatches("_continue\n _with 10")
+        .notMatches("_leave\n _with 10");
   }
 
   @Test
