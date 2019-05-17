@@ -1,14 +1,12 @@
 package org.stevenlooman.sw.magik.lint.output;
 
-import org.stevenlooman.sw.magik.MagikIssue;
-import org.stevenlooman.sw.magik.lint.CheckInfo;
+import org.stevenlooman.sw.magik.lint.CheckInfraction;
 
 import java.io.FileNotFoundException;
-import java.nio.file.Path;
 
 public abstract class Reporter {
 
-  public abstract void reportIssue(Path path, CheckInfo checkInfo, MagikIssue issue) throws
+  public abstract void reportIssue(CheckInfraction checkInfraction) throws
       FileNotFoundException;
 
 }

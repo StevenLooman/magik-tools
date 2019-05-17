@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import org.apache.commons.text.StringSubstitutor;
 import org.stevenlooman.sw.magik.MagikIssue;
 import org.stevenlooman.sw.magik.lint.CheckInfo;
+import org.stevenlooman.sw.magik.lint.CheckInfraction;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
@@ -48,11 +49,14 @@ public class MessageFormatReporter extends Reporter {
   }
 
   @Override
-  public void reportIssue(Path path, CheckInfo checkInfo, MagikIssue issue) throws
+  public void reportIssue(CheckInfraction checkInfraction) throws
       FileNotFoundException {
-    Map<String, String> map = createMap(path, checkInfo, issue);
-    StringSubstitutor sub = new StringSubstitutor(map);
-    String resolvedString = sub.replace(format);
+    Path path = checkInfraction.getPath();
+    CheckInfo checkInfo = checkInfraction.getCheckInfo();
+    MagikIssue magikIssue = checkInfraction.getMagikIssue();
+    Map<String, String> map = createMap(path, checkInfo, magikIssue);
+    StringSubstitutor stringSubstitutor = new StringSubstitutor(map);
+    String resolvedString = stringSubstitutor.replace(format);
     System.out.println(resolvedString);
   }
 

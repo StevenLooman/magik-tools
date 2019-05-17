@@ -29,8 +29,10 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MagikLint {
 
@@ -140,7 +142,14 @@ public class MagikLint {
     return checkIssues;
   }
 
-  public static int getReturnCode(CheckInfo checkInfo) throws FileNotFoundException {
+  /**
+   * Get the return code according to this infraction.
+   * @param checkInfraction Infraction to get return code for.
+   * @return Return code for the infraction.
+   * @throws FileNotFoundException Thrown in case CheckInfo cannot find data.
+   */
+  public static int getReturnCode(CheckInfraction checkInfraction) throws FileNotFoundException {
+    CheckInfo checkInfo = checkInfraction.getCheckInfo();
     String checkSeverity = checkInfo.getSeverity();
     return SEVERITY_EXIT_CODE_MAPPING.getOrDefault(checkSeverity, 0);
   }
@@ -165,19 +174,37 @@ public class MagikLint {
   private int checkFiles(Iterable<CheckInfo> checkInfos) throws IOException {
     int returnCode = 0;
 
+    Comparator<CheckInfraction> byPath = Comparator.comparing(ci -> ci.getPath().toString());
+    Comparator<CheckInfraction> byLine = Comparator.comparing(ci -> ci.getMagikIssue().line());
+    Comparator<CheckInfraction> byColumn = Comparator.comparing(ci -> ci.getMagikIssue().column());
+
     Reporter output = getReporter();
     for (Path path: getFiles()) {
       MagikVisitorContext context = buildContext(path);
+      List<CheckInfraction> fileInfactions = new ArrayList<>();
 
       // run checks, report issues
       for (CheckInfo checkInfo: checkInfos) {
-        for (MagikIssue issue: runCheck(context, checkInfo)) {
-          output.reportIssue(path, checkInfo, issue);
+        List<MagikIssue> magikIssues = runCheck(context, checkInfo);
+        List<CheckInfraction> checkInfractions = magikIssues.stream()
+            .map(magikIssue -> new CheckInfraction(path, checkInfo, magikIssue))
+            .collect(Collectors.toList());
 
-          int checkReturnCode = getReturnCode(checkInfo);
-          returnCode = returnCode | checkReturnCode;
-        }
+        fileInfactions.addAll(checkInfractions);
       }
+
+      fileInfactions.sort(
+          byPath
+          .thenComparing(byLine)
+          .thenComparing(byColumn)
+      );
+      for (CheckInfraction checkInfraction: fileInfactions) {
+        output.reportIssue(checkInfraction);
+
+        int checkReturnCode = getReturnCode(checkInfraction);
+        returnCode = returnCode | checkReturnCode;
+      }
+
     }
 
     return returnCode;
