@@ -157,7 +157,7 @@ public class MagikLint {
   private void showChecks(Iterable<CheckInfo> checkInfos) throws
       IllegalAccessException, FileNotFoundException {
     for (CheckInfo checkInfo: checkInfos) {
-      String name = checkInfo.getName();
+      String name = checkInfo.getSqKey();
       if (checkInfo.isEnabled()) {
         System.out.println("Check: " + name + " (" + checkInfo.getTitle() + ")");
       } else {
@@ -181,7 +181,7 @@ public class MagikLint {
     Reporter output = getReporter();
     for (Path path: getFiles()) {
       MagikVisitorContext context = buildContext(path);
-      List<CheckInfraction> fileInfactions = new ArrayList<>();
+      List<CheckInfraction> fileInfractions = new ArrayList<>();
 
       // run checks, report issues
       for (CheckInfo checkInfo: checkInfos) {
@@ -190,15 +190,15 @@ public class MagikLint {
             .map(magikIssue -> new CheckInfraction(path, checkInfo, magikIssue))
             .collect(Collectors.toList());
 
-        fileInfactions.addAll(checkInfractions);
+        fileInfractions.addAll(checkInfractions);
       }
 
-      fileInfactions.sort(
+      fileInfractions.sort(
           byPath
           .thenComparing(byLine)
           .thenComparing(byColumn)
       );
-      for (CheckInfraction checkInfraction: fileInfactions) {
+      for (CheckInfraction checkInfraction: fileInfractions) {
         output.reportIssue(checkInfraction);
 
         int checkReturnCode = getReturnCode(checkInfraction);

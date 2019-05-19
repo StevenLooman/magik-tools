@@ -31,8 +31,8 @@ public class MessageFormatReporter extends Reporter {
     map.put("path", path.toString());
     map.put("abspath", path.toAbsolutePath().toString());
     map.put("msg", issue.message());
-    map.put("msg_id", checkInfo.getName());
-    map.put("symbol", checkInfo.getName());
+    map.put("msg_id", checkInfo.getSqKey());
+    map.put("symbol", checkInfo.getSqKey());
     map.put("category", checkInfo.getSeverity());
 
     Integer line = issue.line();

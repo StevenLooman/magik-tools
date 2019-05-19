@@ -1,6 +1,7 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.google.common.collect.Lists;
+
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.RecognitionException;
 import com.sonar.sslr.api.Token;

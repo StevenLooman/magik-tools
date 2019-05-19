@@ -99,7 +99,7 @@ public class CheckInfo {
     return object;
   }
 
-  public String getName() throws FileNotFoundException {
+  public String getSqKey() throws FileNotFoundException {
     JSONObject metadata = readMetadata();
     return metadata.getString("sqKey");
   }
@@ -166,7 +166,7 @@ public class CheckInfo {
 
       MagikCheck check = (MagikCheck) checkClass.newInstance();
       CheckInfo checkInfo = new CheckInfo(check);
-      String name = checkInfo.getName();
+      String name = check.getCheckKeyKebabCase();
       boolean enabled = !disabled.contains(name);
       if (!enabled) {
         checkInfo.setDisabled();
