@@ -38,8 +38,8 @@ public class TrailingWhitespaceCheck extends MagikCheck {
 
       if (line.endsWith(" ")
           || line.endsWith("\t")) {
-        String message = String.format(MESSAGE, lineNo);
-        addIssue(message, lineNo, line.length());
+        String message = String.format(MESSAGE, lineNo + 1);
+        addIssue(message, lineNo + 1, line.length());
       }
     }
   }
