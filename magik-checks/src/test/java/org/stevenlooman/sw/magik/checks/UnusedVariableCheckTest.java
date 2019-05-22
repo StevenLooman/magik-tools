@@ -45,6 +45,18 @@ public class UnusedVariableCheckTest extends MagikCheckTest {
   }
 
   @Test
+  public void testVariableFirstNotUsedMultiAssignment() {
+    MagikCheck check = new UnusedVariableCheck();
+    String code =
+        "_method a.b\n" +
+            "\t_local (a, b) << (_scatter {1,2})\n" +
+            "\twrite(b)\n" +
+            "_endmethod\n";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
   public void testDynamicAssigned() {
     MagikCheck check = new UnusedVariableCheck();
     String code =

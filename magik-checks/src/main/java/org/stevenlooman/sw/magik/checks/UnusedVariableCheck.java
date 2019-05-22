@@ -1,5 +1,6 @@
 package org.stevenlooman.sw.magik.checks;
 
+import com.google.common.collect.Sets;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
@@ -100,6 +101,45 @@ public class UnusedVariableCheck extends MagikCheck {
     return !chrevronChildren.isEmpty();
   }
 
+  private boolean isPartOfMultiVariableDeclaration(AstNode identifierNode) {
+    AstNode identifiersNode = identifierNode.getParent();
+    if (identifiersNode == null
+        || identifiersNode.getType() != MagikGrammar.IDENTIFIERS_WITH_GATHER) {
+      return false;
+    }
+    AstNode multiVarDeclNode = identifiersNode.getParent();
+    if (multiVarDeclNode == null
+        || multiVarDeclNode.getType() != MagikGrammar.MULTI_VARIABLE_DECLARATION) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private boolean anyNextSiblingUsed(AstNode identifierNode) {
+    AstNode sibling = identifierNode.getNextSibling();
+    while (sibling != null) {
+      if (sibling.getType() != MagikGrammar.IDENTIFIER) {
+        sibling = sibling.getNextSibling();
+        continue;
+      }
+
+      for (AstNode usedIdentifier: usedIdentifiers) {
+        Scope scope = scopeBuilder.getScopeForNode(usedIdentifier);
+        String identifierName = usedIdentifier.getTokenValue();
+        ScopeEntry scopeEntry = scope.getScopeEntry(identifierName);
+        if (scopeEntry != null) {
+          return true;
+        }
+
+      }
+
+      sibling = sibling.getNextSibling();
+    }
+
+    return false;
+  }
+
   @Override
   public void leaveNode(AstNode node) {
     if (node.getType() == MagikGrammar.ATOM) {
@@ -149,6 +189,17 @@ public class UnusedVariableCheck extends MagikCheck {
       if (scopeEntry != null) {
         AstNode scopeEntryNode = scopeEntry.getNode();
         declaredIdentifiers.remove(scopeEntryNode);
+      }
+    }
+
+    // Remove all defined variables which are:
+    // - part of a MULTI_VARIABLE_DECLARATION
+    // - the later identifiers of it are used
+    // - but this one isn't
+    for (AstNode declaredIdentifier: Sets.newHashSet(declaredIdentifiers)) {
+      if (isPartOfMultiVariableDeclaration(declaredIdentifier)
+          && anyNextSiblingUsed(declaredIdentifier)) {
+        declaredIdentifiers.remove(declaredIdentifier);
       }
     }
 
