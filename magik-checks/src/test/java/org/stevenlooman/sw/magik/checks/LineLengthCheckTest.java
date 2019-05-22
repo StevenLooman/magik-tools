@@ -55,4 +55,5 @@ public class LineLengthCheckTest extends MagikCheckTest {
     List<MagikIssue> issues = runCheck(code, check);
     assertThat(issues).isNotEmpty();
   }
+
 }
