@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -92,9 +93,12 @@ public class MagikLint {
     for (String arg: commandLine.getArgList()) {
       Path path = Paths.get(arg);
       File file = path.toFile();
+      FileSystem filesystem = path.getFileSystem();
+      PathMatcher matcher = filesystem.getPathMatcher("glob:**.magik");
       if (file.isDirectory()) {
         addAllFilesInDirectory(path, files);
-      } else if (file.exists()) {
+      } else if (file.exists()
+                 && matcher.matches(path)) {
         files.add(path);
       }
     }
@@ -103,7 +107,8 @@ public class MagikLint {
   }
 
   private void addAllFilesInDirectory(Path directory, List<Path> files) throws IOException {
-    PathMatcher matcher = directory.getFileSystem().getPathMatcher("glob:**.magik");
+    FileSystem filesystem = directory.getFileSystem();
+    PathMatcher matcher = filesystem.getPathMatcher("glob:**.magik");
 
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory)) {
       for (Path entry : stream) {
