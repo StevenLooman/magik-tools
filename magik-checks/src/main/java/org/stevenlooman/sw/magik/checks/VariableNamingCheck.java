@@ -50,14 +50,14 @@ public class VariableNamingCheck extends MagikCheck {
 
     for (AstNode identifierNode : identifierNodes) {
       String identifier = identifierNode.getTokenValue();
-      identifier = stripPrefix(identifier);
+      String strippedIdentifier = stripPrefix(identifier);
 
       List<String> whitelist = whitelist();
-      if (whitelist.contains(identifier)) {
+      if (whitelist.contains(strippedIdentifier)) {
         continue;
       }
 
-      if (identifier.length() >= MIN_LENGTH) {
+      if (strippedIdentifier.length() >= MIN_LENGTH) {
         continue;
       }
 
