@@ -15,7 +15,8 @@ import javax.annotation.Nullable;
 public class LineLengthCheck extends MagikCheck {
   public static final String CHECK_KEY = "LineLength";
   private static final int DEFAULT_MAX_LINE_LENGTH = 120;
-  private static final String MESSAGE = "Line is too long";
+  private static final String MESSAGE = "Line is too long (%s/%s)";
+  private static final int TAB_WIDTH = 8;
 
   @RuleProperty(
       key = "line length",
@@ -32,14 +33,18 @@ public class LineLengthCheck extends MagikCheck {
   public void visitFile(@Nullable AstNode node) {
     MagikVisitorContext context = getContext();
     String fileContents = context.fileContent();
+    String tab = String.join("", Collections.nCopies(TAB_WIDTH, " "));
 
     int lineNo = 0;
     for (String line: fileContents.split("\n")) {
-      line = line.trim();
-      line = line.replaceAll("\t", "        ");  // tab width of 8
+      if (line.endsWith("\r")) {
+        line.replaceAll("\r", "");
+      }
+      line = line.replaceAll("\t", tab);  // tab width of 8
       ++lineNo;
       if (line.length() > maxLineLength + 1) {
-        addIssue(MESSAGE, lineNo, maxLineLength);
+        String message = String.format(MESSAGE, line.length(), maxLineLength);
+        addIssue(message, lineNo, line.length());
       }
     }
   }
