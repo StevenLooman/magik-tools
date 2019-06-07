@@ -190,6 +190,10 @@ public class MagikLint {
 
       // run checks, report issues
       for (CheckInfo checkInfo: checkInfos) {
+        if (!checkInfo.isEnabled()) {
+          continue;
+        }
+
         List<MagikIssue> magikIssues = runCheck(context, checkInfo);
         List<CheckInfraction> checkInfractions = magikIssues.stream()
             .map(magikIssue -> new CheckInfraction(path, checkInfo, magikIssue))

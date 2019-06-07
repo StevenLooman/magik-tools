@@ -8,7 +8,7 @@ import org.stevenlooman.sw.magik.MagikIssue;
 
 import java.util.List;
 
-public class VariableNamingCheckTest extends MagikCheckTest {
+public class VariableNamingCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testValidName() {

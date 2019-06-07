@@ -7,7 +7,7 @@ import org.stevenlooman.sw.magik.MagikIssue;
 
 import java.util.List;
 
-public class CommentRegularExpressionCheckTest extends MagikCheckTest {
+public class CommentRegularExpressionCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testMatch() {

@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
+import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.analysis.scope.Scope;
 import org.stevenlooman.sw.magik.analysis.scope.ScopeBuilderVisitor;

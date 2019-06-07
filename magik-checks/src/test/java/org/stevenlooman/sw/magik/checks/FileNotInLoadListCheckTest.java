@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class FileNotInLoadListCheckTest extends MagikCheckTest {
+public class FileNotInLoadListCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testNotInLoadList() {

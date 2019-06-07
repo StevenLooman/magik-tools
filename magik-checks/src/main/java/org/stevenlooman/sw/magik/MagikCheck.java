@@ -111,8 +111,8 @@ public abstract class MagikCheck extends MagikVisitor {
    * @return The check key, kebab-cased.
    */
   public String getCheckKeyKebabCase() {
-    CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, getCheckKey());
-    return getCheckKey();
+    String checkKey = getCheckKey();
+    return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, checkKey);
   }
 
 }
