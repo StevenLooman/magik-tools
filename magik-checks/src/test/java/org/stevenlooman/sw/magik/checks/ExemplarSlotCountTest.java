@@ -7,7 +7,7 @@ import org.stevenlooman.sw.magik.MagikIssue;
 
 import java.util.List;
 
-public class ExemplarSlotCountTest extends MagikCheckTest {
+public class ExemplarSlotCountTest extends MagikCheckTestBase {
 
   @Test
   public void testMaxSlotCountExceeded() {

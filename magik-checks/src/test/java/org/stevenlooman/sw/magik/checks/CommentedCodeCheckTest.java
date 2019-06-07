@@ -8,7 +8,7 @@ import org.stevenlooman.sw.magik.MagikIssue;
 
 import java.util.List;
 
-public class CommentedCodeCheckTest extends MagikCheckTest {
+public class CommentedCodeCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testNoCommentedCode() {

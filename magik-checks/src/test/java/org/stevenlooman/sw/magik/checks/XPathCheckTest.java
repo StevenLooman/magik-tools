@@ -7,7 +7,7 @@ import org.stevenlooman.sw.magik.MagikIssue;
 
 import java.util.List;
 
-public class XPathCheckTest extends MagikCheckTest {
+public class XPathCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testMatch() {

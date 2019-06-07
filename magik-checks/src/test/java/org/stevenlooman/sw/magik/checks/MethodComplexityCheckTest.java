@@ -8,7 +8,7 @@ import org.stevenlooman.sw.magik.MagikCheck;
 
 import java.util.List;
 
-public class MethodComplexityCheckTest extends MagikCheckTest {
+public class MethodComplexityCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testTooComplex() {

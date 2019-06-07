@@ -8,7 +8,7 @@ import org.stevenlooman.sw.magik.MagikIssue;
 
 import java.util.List;
 
-public class LocalImportProcedureCheckTest extends MagikCheckTest {
+public class LocalImportProcedureCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testImportOk() {

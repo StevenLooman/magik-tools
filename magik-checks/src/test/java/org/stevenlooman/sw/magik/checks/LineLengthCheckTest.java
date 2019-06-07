@@ -8,7 +8,7 @@ import org.stevenlooman.sw.magik.MagikCheck;
 
 import java.util.List;
 
-public class LineLengthCheckTest extends MagikCheckTest {
+public class LineLengthCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testLineNotTooLong_1() {

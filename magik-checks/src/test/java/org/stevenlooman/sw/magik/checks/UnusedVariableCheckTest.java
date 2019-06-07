@@ -8,7 +8,7 @@ import org.stevenlooman.sw.magik.MagikCheck;
 
 import java.util.List;
 
-public class UnusedVariableCheckTest extends MagikCheckTest {
+public class UnusedVariableCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testVariableUsed() {

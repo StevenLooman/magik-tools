@@ -8,7 +8,7 @@ import org.stevenlooman.sw.magik.MagikCheck;
 
 import java.util.List;
 
-public class LhsRhsComparatorCheckTest extends MagikCheckTest {
+public class LhsRhsComparatorCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testOrLhsRhsUnequal() {

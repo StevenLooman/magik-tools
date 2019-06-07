@@ -8,7 +8,7 @@ import org.stevenlooman.sw.magik.MagikIssue;
 
 import java.util.List;
 
-public class TrailingWhitespaceCheckTest extends MagikCheckTest {
+public class TrailingWhitespaceCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testNoTrailingWhitespace() {

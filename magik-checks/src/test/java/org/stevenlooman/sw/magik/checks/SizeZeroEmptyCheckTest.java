@@ -8,7 +8,7 @@ import org.stevenlooman.sw.magik.MagikCheck;
 
 import java.util.List;
 
-public class SizeZeroEmptyCheckTest extends MagikCheckTest {
+public class SizeZeroEmptyCheckTest extends MagikCheckTestBase {
 
   @Test
   public void testSizeIsZero() {
