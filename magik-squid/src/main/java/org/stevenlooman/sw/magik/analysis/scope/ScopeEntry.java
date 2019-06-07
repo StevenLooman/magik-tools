@@ -9,15 +9,15 @@ import javax.annotation.Nullable;
 public class ScopeEntry {
 
   /**
-   * Type of ScopeEntry
-   *
+   * Type of ScopeEntry.
+   * Types:
    * LOCAL: _local
    * GLOBAL: _global
    * DYNAMIC: _dynamic
    * IMPORT: _import
    * RECURSIVE: _recursive
    * CONSTANT: _constant
-   * PARAMTER: procedure parameter
+   * PARAMETER: procedure parameter
    * DEFINITION: direct assignment
    */
   public enum Type {
