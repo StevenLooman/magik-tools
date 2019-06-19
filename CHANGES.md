@@ -1,6 +1,6 @@
 Changes
 =======
 
-0.1.0 (unreleased)
+0.1.0 (2019-06-19)
 
-- Initial public commit
+- Initial release
