@@ -158,10 +158,10 @@ public class MagikSquidSensor implements Sensor {
 
     // metrics on file
     saveMetric(context, inputFile, CoreMetrics.NCLOC, metrics.linesOfCode().size());
-    saveMetric(context, inputFile, CoreMetrics.COMMENT_LINES, metrics.commentLines().size());
+    saveMetric(context, inputFile, CoreMetrics.COMMENT_LINES, metrics.commentLineCount());
     saveMetric(context, inputFile, CoreMetrics.CLASSES, metrics.numberOfExemplars());
-    saveMetric(context, inputFile, CoreMetrics.FUNCTIONS, metrics.numberOfMethods()
-        + metrics.numberOfProcedures());
+    saveMetric(context, inputFile, CoreMetrics.FUNCTIONS,
+        metrics.numberOfMethods() + metrics.numberOfProcedures());
     saveMetric(context, inputFile, CoreMetrics.STATEMENTS, metrics.numberOfStatements());
     saveMetric(context, inputFile, CoreMetrics.COMPLEXITY, metrics.fileComplexity());
 

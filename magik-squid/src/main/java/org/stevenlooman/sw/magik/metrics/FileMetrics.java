@@ -111,6 +111,9 @@ public class FileMetrics {
   public Set<Integer> commentLines() {
     return commentLines;
   }
+  public int commentLineCount() {
+    return commentLines.size();
+  }
 
   public Set<Integer> nosonarLines() {
     return nosonarLines;
