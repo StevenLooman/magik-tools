@@ -11,6 +11,7 @@ deploy:
   file:
     - sonar-magik-plugin/target/sonar-magik-plugin-*.jar
     - magik-lint/target/magik-lint-*.jar
+    - sslr-magik-toolkit/target/sslr-magik-toolkit-*.jar
   on:
     repo: StevenLooman/sonar-magik
     tags: true
