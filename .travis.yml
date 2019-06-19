@@ -1,3 +1,15 @@
 language: java
 jdk:
-  - openjdk8
+- openjdk8
+
+deploy:
+  provider: releases
+  api_key:
+    secure: Zwxu+5FjJYfZWw0G4+2TVaTSRrTjAeLEh3d9p9CxquDvfmPomn5YNsXCQqGqKHYlLbGohVBaLAxrnHK+TU5m0Odb5CEXIKR+1zzWlJVo6rZ5krq6Em3qMf4nEg0tIR5njqVJkpUN8clSNBkBC3psVQy4iTYA9gbsK4sWE6X39kG7zNT/qF5W7yhz9U3pqhmcdaO7D4+Y0wwGSCqKec2CRPyhnJFaA+8BG+lt6FdPdseNaR/pWvRoAPKlkm5c0Xnx97hXUE/kfqEjy5A+EFzvlY6edEG+O9iBMQAgWu9n37dV18cTqZ5QCHMZxCRHOLpNEfw1n8Z+mzR417AXiKglRpgvrdy1+6jkALBeaX9KBocZe/ZqlHhO3sbQXbKmM3jiHYDmWKeRzOMjyVwLR7lBs7eeH4cULBbQYFgHuBj15EE60JXcigtCBibZBNFWA8CsouQSDekwFmiJW6FTalfajhQPB+k4UmIdqhLnZHDBSDwTqVL/6jlnueA3SPBtKDLg7QcjK0hj6c5Gw4QJwODw+VaWT2ON5QbFwNck9BWdyXhJs8h464q0n9UhVDGnKxy8hZhLlrURVghbm/lfASBFs+j/5ceOY33vPG+bw1wQRxvqDTF7fn+gUcUTf8yR6ChUHw8LVdL6dVDhKUUPceCHLBGgo9OaVL8M7cIxphS2+BM=
+  file_glob: true
+  file:
+    - sonar-magik-plugin/target/sonar-magik-plugin-*.jar
+    - magik-lint/target/magik-lint-*.jar
+  on:
+    repo: StevenLooman/sonar-magik
+    tags: true
