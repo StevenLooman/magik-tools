@@ -2,6 +2,7 @@ language: java
 jdk:
 - openjdk8
 
+before_deploy: "mvn clean package"
 deploy:
   provider: releases
   api_key:
