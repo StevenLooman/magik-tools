@@ -81,6 +81,12 @@ public class MagikLint {
         .longOpt("show-checks")
         .desc("Show checks and quit")
         .build());
+    options.addOption(Option.builder()
+        .longOpt("untabify")
+        .desc("Expand tabs to N spaces")
+        .hasArg()
+        .type(Number.class)
+        .build());
 
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd = parser.parse(options, args);
@@ -125,13 +131,19 @@ public class MagikLint {
   }
 
 
-  private MagikVisitorContext buildContext(Path path) throws IOException {
+  private MagikVisitorContext buildContext(Path path) throws IOException, ParseException {
     Charset charset = FileCharsetDeterminer.determineCharset(path, Charsets.ISO_8859_1);
-    MagikParser parser = new MagikParser(charset);
-    AstNode root = parser.parse(path);
-
     byte[] encoded = Files.readAllBytes(path);
     String fileContents = new String(encoded, charset);
+    if (commandLine.getOptionValue("untabify") != null) {
+      Long untabify = (Long)commandLine.getParsedOptionValue("untabify");
+      String spaces = String.format("%" + untabify + "s", "");
+      fileContents = fileContents.replaceAll("\t", spaces);
+    }
+
+    MagikParser parser = new MagikParser(charset);
+    AstNode root = parser.parse(fileContents);
+
     return new MagikVisitorContext(path, fileContents, root);
   }
 
@@ -176,7 +188,14 @@ public class MagikLint {
     }
   }
 
-  private int checkFiles(Iterable<CheckInfo> checkInfos) throws IOException {
+  /**
+   * Check all files.
+   * @param checkInfos Checks to run.
+   * @return Exit code for process.
+   * @throws IOException Unable to read file
+   * @throws ParseException Unable to parse command line
+   */
+  private int checkFiles(Iterable<CheckInfo> checkInfos) throws IOException, ParseException {
     int returnCode = 0;
 
     Comparator<CheckInfraction> byPath = Comparator.comparing(ci -> ci.getPath().toString());
@@ -226,7 +245,8 @@ public class MagikLint {
    * @throws IllegalAccessException -
    * @throws InstantiationException -
    */
-  public int run() throws IOException, IllegalAccessException, InstantiationException {
+  public int run()
+      throws IOException, IllegalAccessException, InstantiationException, ParseException {
     Iterable<CheckInfo> checkInfos = getAllChecks();
 
     if (commandLine.hasOption("show-checks")) {
