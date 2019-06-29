@@ -357,6 +357,13 @@ public class MagikGrammarTest {
   }
 
   @Test
+  public void testClass() {
+    Assertions.assertThat(g.rule(MagikGrammar.CLASS))
+        .matches("_class |java.lang.Integer|")
+    ;
+  }
+
+  @Test
   public void testMagik() {
     Assertions.assertThat(g.rule(MagikGrammar.MAGIK))
         .matches("_block _return _endblock")

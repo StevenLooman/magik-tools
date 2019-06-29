@@ -43,6 +43,7 @@ public enum MagikKeyword implements GrammarRuleKey {
   SUPER,
   PRIMITIVE,
   THISTHREAD,
+  CLASS,
   ;
 
   /**
