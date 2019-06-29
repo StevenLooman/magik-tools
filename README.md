@@ -3,7 +3,7 @@ Sonar Magik plugin
 
 `Sonar-Magik` is a code analyzer for Smallworld projects, which uses the Magik programming language.
 
-By no means is the fully tested and production-ready. Use at your own risk, your mileage may vary.
+By no means is this product fully tested and production-ready. Use at your own risk, your mileage may vary.
 
 
 Installation
@@ -59,6 +59,12 @@ An XPath-template-rule is available to quickly build custom rules. Follow these 
 - Create a Custom Rule by clicking on the Create-button.
 
 
+Magik linter
+------------
+
+A linter for magik is available in the `magik-lint` directory. See `magik-link/README.md` for more information.
+
+
 Contributing
 ------------
 
@@ -68,12 +74,12 @@ See `CONTRIBUTING.md` for instruction on how to contribute.
 License
 -------
 
-This project is licensed under GPLv3, see `LICENSE.md`.
+This project is licensed under LGPLv3, see `LICENSE.md`.
 
 
 Commercial use
 --------------
 
-By no means is the fully tested and production-ready. Use at your own risk, your mileage may vary.
+By no means is this product fully tested and production-ready. Use at your own risk, your mileage may vary.
 
 If you do use this, please do inform me.
