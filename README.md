@@ -21,7 +21,7 @@ Copy the plugin (`sonar-magik-plugin-<version>.jar`) to your `sonarqube/extensio
 Analyzing projects
 ------------------
 
-Use `sonar-scanner` to analyze your projects. An example configuration, stored in `sonar-project.properties`, would be:
+Use [sonar-scanner](https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner) to analyze your projects. An example configuration, stored in `sonar-project.properties`, would be:
 
 ```
 sonar.projectKey=test:test_project
