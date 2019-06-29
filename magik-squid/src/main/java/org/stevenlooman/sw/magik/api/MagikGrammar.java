@@ -94,6 +94,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   GLOBAL_REF,
   SIMPLE_VECTOR,
   GATHER,
+  CLASS,
   ;
 
   // CHECKSTYLE.OFF: LineLength
@@ -218,6 +219,8 @@ public enum MagikGrammar implements GrammarRuleKey {
         MagikPunctuator.BRACE_L,
         b.optional(EXPRESSION, b.zeroOrMore(MagikPunctuator.COMMA, EXPRESSION)),
         MagikPunctuator.BRACE_R);
+    b.rule(CLASS).is(
+        MagikKeyword.CLASS, IDENTIFIER);
     b.rule(GATHER).is(MagikKeyword.GATHER, EXPRESSIONS);
 
     b.rule(EXPRESSION).is(ASSIGNMENT_EXPRESSION);
@@ -254,6 +257,7 @@ public enum MagikGrammar implements GrammarRuleKey {
             GLOBAL_REF,
             SLOT,
             SIMPLE_VECTOR,
+            CLASS,
             GATHER,
             LOOPBODY,
             PROC_DEFINITION,
