@@ -6,6 +6,12 @@ Sonar Magik plugin
 By no means is this product fully tested and production-ready. Use at your own risk, your mileage may vary.
 
 
+Status
+------
+
+[![Build Status](https://travis-ci.org/StevenLooman/sonar-magik.svg?branch=develop)](https://travis-ci.org/StevenLooman/sonar-magik)
+
+
 Installation
 ------------
 
