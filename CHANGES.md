@@ -1,6 +1,9 @@
 Changes
 =======
 
+0.1.2 (unreleased)
+
+
 0.1.1 (2019-06-30)
 
 - Add --untabify <n> option to magik-lint
