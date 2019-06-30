@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.1.1 (unreleased)
+0.1.1 (2019-06-30)
 
 - Add --untabify <n> option to magik-lint
 - Add support for \_class keyword
