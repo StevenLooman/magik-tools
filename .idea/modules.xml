@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/magik-checks/magik-checks.iml" filepath="$PROJECT_DIR$/magik-checks/magik-checks.iml" />
+      <module fileurl="file://$PROJECT_DIR$/magik-lint/magik-lint.iml" filepath="$PROJECT_DIR$/magik-lint/magik-lint.iml" />
+      <module fileurl="file://$PROJECT_DIR$/magik-squid/magik-squid.iml" filepath="$PROJECT_DIR$/magik-squid/magik-squid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/sonar-magik.iml" filepath="$PROJECT_DIR$/.idea/sonar-magik.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sonar-magik-plugin/sonar-magik-plugin.iml" filepath="$PROJECT_DIR$/sonar-magik-plugin/sonar-magik-plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sslr-magik-toolkit/sslr-magik-toolkit.iml" filepath="$PROJECT_DIR$/sslr-magik-toolkit/sslr-magik-toolkit.iml" />
+    </modules>
+  </component>
+</project>
