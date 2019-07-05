@@ -3,6 +3,8 @@ Changes
 
 0.1.2 (unreleased)
 
+- Report parser errors through checks
+
 
 0.1.1 (2019-06-30)
 

@@ -15,7 +15,7 @@ public class DisableCheck extends MagikCheckTestBase {
     MagikCheck check = new SizeZeroEmptyCheck();
 
     String code =
-        "a.size = 0  # mlint: disable=SizeZeroEmpty";
+        "a.size = 0  # mlint: disable=size-zero-empty";
     List<MagikIssue> issues = runCheck(code, check);
     assertThat(issues).isEmpty();
   }

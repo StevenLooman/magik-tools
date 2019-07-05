@@ -2,10 +2,11 @@ package org.stevenlooman.sw.magik.parser;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
+import com.sonar.sslr.api.RecognitionException;
 import com.sonar.sslr.api.Token;
+import com.sonar.sslr.api.TokenType;
 import com.sonar.sslr.api.Trivia;
 import com.sonar.sslr.impl.Parser;
-
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -15,25 +16,47 @@ import org.stevenlooman.sw.magik.api.MagikGrammar;
 import org.stevenlooman.sw.magik.api.MessagePatchGrammar;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MagikParser {
+
+  public enum UtilityTokenType implements TokenType {
+    DUMMY,
+    PARSER_ERROR;
+
+    @Override
+    public String getName() {
+      return name();
+    }
+
+    @Override
+    public String getValue() {
+      return name();
+    }
+
+    @Override
+    public boolean hasToBeSkippedFromAst(AstNode node) {
+      return false;
+    }
+  }
 
   private static final String TRANSMIT = "$";
   private static final String END_OF_MESSAGE_PATCH = "$";
   private static final Logger LOGGER = Loggers.get(MagikParser.class);
 
-  Parser<LexerlessGrammar> magikParser;
-  ParserAdapter<LexerlessGrammar> messagePatchParser;
+  public Parser<LexerlessGrammar> magikParser;
+  public ParserAdapter<LexerlessGrammar> messagePatchParser;
 
   /**
    * Constructor.
@@ -76,6 +99,12 @@ public class MagikParser {
     return node;
   }
 
+  /**
+   * Parse sources from reader.
+   * @param reader Reader to read from.
+   * @return Parsed node.
+   * @throws IOException Exception raised.
+   */
   private AstNode parse(Reader reader) throws IOException {
     AstNode resultNode = new AstNode(MagikGrammar.MAGIK, "MAGIK", null);
 
@@ -100,38 +129,83 @@ public class MagikParser {
         String part = sb.toString();
 
         // parse part
-        AstNode node;
+        AstNode node = null;
         if (readMessagePatch) {
           node = parsePartMessagePatch(part);
         } else {
-          node = parsePartMagik(part);
+          if (!isEmpty(part)) {
+            try {
+              node = parsePartMagik(part);
+            } catch (RecognitionException exception) {
+              // Don't throw, magik parser also can continue if it encounters invalid code.
+              // Instead, build a special node so this is recognizable.
+              node = buildParserErrorNode(exception);
+            }
+          }
         }
 
-        if (isNotParsed(part, node)) {
-          LOGGER.error("Could not parse: '" + part + "'");
+        if (node != null) {
+          // fix tokens/lines
+          updateTokenLines(node.getTokens(), startLineOffset);
+
+          // fix identifier casing
+          updateIdentifiersSymbolsCasing(node);
+
+          // rebuild AST as if a single file/parsePartMagik
+          addChildNodesToParent(resultNode, node.getChildren());
+
+          // read message patch next up?
+          readMessagePatch = hasReadMessagePatch(node);
         }
-
-        // fix tokens/lines
-        updateTokenLines(node.getTokens(), startLineOffset);
-
-        // fix identifier casing
-        updateIdentifiersSymbolsCasing(node);
 
         // reset buffer
         sb.setLength(0);
         startLineOffset = lineNumber;
-
-        // rebuild AST as if a single file/parsePartMagik
-        addChildNodesToParent(resultNode, node.getChildren());
-
-        // read message patch next up?
-        readMessagePatch = hasReadMessagePatch(node);
       }
     } while (line != null);
 
     return resultNode;
   }
 
+  private AstNode buildParserErrorNode(RecognitionException recognitionException) {
+    int line = recognitionException.getLine();
+
+    // parse message, as the exception doesn't provide the raw value
+    String message = recognitionException.getMessage();
+    Matcher m = Pattern.compile("Parse error at line (\\d+) column (\\d+):.*").matcher(message);
+    if (!m.find()) {
+      throw new IllegalStateException("Unrecognized RecognitionException message");
+    }
+    String columnStr = m.group(2);
+    int column = Integer.parseInt(columnStr);
+
+    URI uri = buildUri();
+    Token.Builder builder = Token.builder();
+    Token dummyToken = builder.setValueAndOriginalValue("dummy")
+        .setURI(uri)
+        .setLine(line)
+        .setColumn(column)
+        .setType(UtilityTokenType.DUMMY)
+        .build();
+    Token parserErrorToken = builder.setValueAndOriginalValue("error")
+        .setURI(uri)
+        .setLine(line)
+        .setColumn(column)
+        .setType(UtilityTokenType.PARSER_ERROR)
+        .build();
+
+    AstNode dummyNode =
+        new AstNode(MagikGrammar.PARSER_ERROR, "PARSER_ERROR", dummyToken);
+    AstNode errorNode =
+        new AstNode(MagikGrammar.PARSER_ERROR, "PARSER_ERROR", parserErrorToken);
+    dummyNode.addChild(errorNode);
+    return dummyNode;
+  }
+
+  /**
+   * Update token value.
+   * @param node Node to update.
+   */
   private void updateIdentifiersSymbolsCasing(AstNode node) {
     Field field = FieldUtils.getField(Token.class, "value", true);
 
@@ -151,20 +225,46 @@ public class MagikParser {
     }
   }
 
+  /**
+   * Test if source is parsed by SSLR.
+   * @param source Source code that should have been parsed.
+   * @param node Resulting AstNode.
+   * @return True if source was parsed, false if not.
+   */
   private boolean isNotParsed(String source, AstNode node) {
     source = source.replaceAll("#.*", ""); // remove any comment lines
     return node.getChildren().isEmpty() && !source.trim().isEmpty();
   }
 
+  private boolean isEmpty(String source) {
+    source = source.replaceAll("#.*", ""); // remove any comment lines
+    return source.trim().isEmpty();
+  }
+
+  /**
+   * Parse a part as a message patch.
+   * @param source Part to parse.
+   * @return Resulting AstNode.
+   */
   private AstNode parsePartMessagePatch(String source) {
     source = source.substring(0, source.length() - 1); // remove trailing \n
     return messagePatchParser.parse(source);
   }
 
-  private AstNode parsePartMagik(String source) {
+  /**
+   * Parse a part as Magik code.
+   * @param source Part to parse.
+   * @return Resulting AstNode.
+   */
+  public AstNode parsePartMagik(String source) {
     return magikParser.parse(source);
   }
 
+  /**
+   * Test if 'read_message_patch' was parsed, indicating the start of a message patch.
+   * @param node AstNode to test.
+   * @return True if the next part is a message patch, false if not.
+   */
   private boolean hasReadMessagePatch(AstNode node) {
     if ("read_message_patch".equalsIgnoreCase(node.getTokenValue())) {
       return true;
@@ -179,18 +279,11 @@ public class MagikParser {
     return false;
   }
 
-  private void updateUri(List<Token> tokens, File file) {
-    Field field = FieldUtils.getField(Token.class, "uri", true);
-    URI uri = file.toURI();
-    for (Token token : tokens) {
-      try {
-        field.set(token, uri);
-      } catch (IllegalAccessException ex) {
-        LOGGER.error("Caught exception during update URI", ex);
-      }
-    }
-  }
-
+  /**
+   * Update the token lines to match the lines in the source file, instead of the parsed part.
+   * @param tokens Tokens to update.
+   * @param lineOffset Offset to add to lines.
+   */
   private void updateTokenLines(List<Token> tokens, int lineOffset) {
     Field field = FieldUtils.getField(Token.class, "line", true);
     for (Token token : tokens) {
@@ -216,12 +309,22 @@ public class MagikParser {
     }
   }
 
-  private void addChildNodesToParent(AstNode resultNode, List<AstNode> children) {
+  /**
+   * Add child nodes to parent node.
+   * @param parentNode Parent node to add to.
+   * @param children Child nodes to add.
+   */
+  private void addChildNodesToParent(AstNode parentNode, List<AstNode> children) {
     for (AstNode child : children) {
-      resultNode.addChild(child);
+      parentNode.addChild(child);
     }
   }
 
+  /**
+   * Parse an identifier.
+   * @param value Identifier to parse.
+   * @return Parsed identifier.
+   */
   static String parseIdentifier(String value) {
     // if |, read until next |
     // if \\., read .
@@ -254,6 +357,16 @@ public class MagikParser {
     }
 
     return sb.toString();
+  }
+
+  private static URI buildUri() {
+    URI uri;
+    try {
+      return new URI("tests://unittest");
+    } catch (URISyntaxException exception) {
+      // pass
+    }
+    return null;
   }
 
 }
