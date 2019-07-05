@@ -343,6 +343,7 @@ public class MagikGrammarTest {
         .matches("a1:abc")
         .matches("\\|a")
         .matches("xyz\\|abcdef")
+        .notMatches("_loop")
         ;
   }
 

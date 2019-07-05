@@ -15,9 +15,6 @@ public class MagikCheckTestBase {
   protected static MagikVisitorContext createContext(String code) throws IllegalArgumentException {
     MagikParser parser = new MagikParser(Charsets.UTF_8);
     AstNode root = parser.parse(code);
-    if (root.getChildren().isEmpty()) {
-      throw new IllegalArgumentException("Unable to parse code");
-    }
     return new MagikVisitorContext(code, root);
   }
 

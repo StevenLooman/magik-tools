@@ -14,7 +14,8 @@ public enum MagikGrammar implements GrammarRuleKey {
   EOS,
   EOS_NO_LB,
 
-  // keywordsit stat
+  PARSER_ERROR,
+
   KEYWORDS,
 
   // root
@@ -156,7 +157,8 @@ public enum MagikGrammar implements GrammarRuleKey {
         b.sequence(SPACING_NO_LB, b.endOfInput()))).skip();
 
     b.rule(MAGIK).is(
-        b.zeroOrMore(
+//        b.zeroOrMore(
+        b.oneOrMore(
             b.firstOf(
                 PACKAGE_SPECIFICATION,
                 PRAGMA,
