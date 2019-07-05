@@ -186,7 +186,7 @@ public enum MagikGrammar implements GrammarRuleKey {
 
   private static void keywords(LexerlessGrammarBuilder b) {
     for (MagikKeyword k : MagikKeyword.values()) {
-      b.rule(k).is(SPACING, b.regexp("(?i)" + k.getValue()));
+      b.rule(k).is(SPACING, b.regexp("(?i)" + k.getValue() + "(?!\\w)"));
     }
 
     List<MagikKeyword> keywords = MagikKeyword.keywords();

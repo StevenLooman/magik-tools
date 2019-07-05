@@ -401,6 +401,8 @@ public class MagikGrammarTest {
         .matches("_proc() _handling _default _endproc")
         .matches("_package sw")
         .matches("_package sw\n_package user")
+        .notMatches("_block _endblo")
+        .notMatches("_blocki _endblock")
     ;
   }
 
