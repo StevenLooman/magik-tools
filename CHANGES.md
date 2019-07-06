@@ -6,6 +6,7 @@ Changes
 - Report parser errors through checks
 - Enforce strict keyword matching in parser
 - Fix ScopeBuilder not properly handling optional parameters
+- Reduce size of magik-lint jar by removing dependencies
 
 
 0.1.1 (2019-06-30)

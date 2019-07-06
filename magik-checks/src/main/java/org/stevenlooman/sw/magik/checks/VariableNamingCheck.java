@@ -1,10 +1,7 @@
 package org.stevenlooman.sw.magik.checks;
 
-import com.google.common.collect.Lists;
-
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
-
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
@@ -77,7 +74,7 @@ public class VariableNamingCheck extends MagikCheck {
   }
 
   private List<String> whitelist() {
-    return Lists.newArrayList(whitelist.split(","));
+    return Arrays.asList(whitelist.split(","));
   }
 
 }

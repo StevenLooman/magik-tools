@@ -1,7 +1,5 @@
 package org.stevenlooman.sw.magik;
 
-import com.google.common.collect.ImmutableList;
-
 import org.stevenlooman.sw.magik.checks.CommentRegularExpressionCheck;
 import org.stevenlooman.sw.magik.checks.ExemplarSlotCountCheck;
 import org.stevenlooman.sw.magik.checks.FileNotInLoadListCheck;
@@ -15,6 +13,7 @@ import org.stevenlooman.sw.magik.checks.UnusedVariableCheck;
 import org.stevenlooman.sw.magik.checks.VariableNamingCheck;
 import org.stevenlooman.sw.magik.checks.XPathCheck;
 
+import java.util.Arrays;
 import java.util.List;
 
 public final class CheckList {
@@ -30,19 +29,19 @@ public final class CheckList {
    * @return List of with Checks
    */
   public static List<Class<?>> getChecks() {
-    return ImmutableList.<Class<?>>of(
-        CommentRegularExpressionCheck.class,
-        ExemplarSlotCountCheck.class,
-        FileNotInLoadListCheck.class,
-        LhsRhsComparatorEqualCheck.class,
-        LineLengthCheck.class,
-        MethodComplexityCheck.class,
-        ParserErrorCheck.class,
-        SizeZeroEmptyCheck.class,
-        TrailingWhitespaceCheck.class,
-        UnusedVariableCheck.class,
-        VariableNamingCheck.class,
-        XPathCheck.class
+    return Arrays.asList(
+      CommentRegularExpressionCheck.class,
+      ExemplarSlotCountCheck.class,
+      FileNotInLoadListCheck.class,
+      LhsRhsComparatorEqualCheck.class,
+      LineLengthCheck.class,
+      MethodComplexityCheck.class,
+      ParserErrorCheck.class,
+      SizeZeroEmptyCheck.class,
+      TrailingWhitespaceCheck.class,
+      UnusedVariableCheck.class,
+      VariableNamingCheck.class,
+      XPathCheck.class
     );
   }
 }

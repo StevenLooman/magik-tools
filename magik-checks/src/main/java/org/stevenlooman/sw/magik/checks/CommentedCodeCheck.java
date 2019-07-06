@@ -1,7 +1,5 @@
 package org.stevenlooman.sw.magik.checks;
 
-import com.google.common.collect.Lists;
-
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.RecognitionException;
 import com.sonar.sslr.api.Token;
@@ -13,6 +11,7 @@ import org.stevenlooman.sw.magik.api.MagikGrammar;
 import org.stevenlooman.sw.magik.parser.MagikParser;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,7 @@ public class CommentedCodeCheck extends MagikCheck {
 
   @Override
   public List<AstNodeType> subscribedTo() {
-    return Lists.newArrayList(MagikGrammar.values());
+    return Arrays.asList(MagikGrammar.values());
   }
 
   private void visitComment(Token token, String comment) {

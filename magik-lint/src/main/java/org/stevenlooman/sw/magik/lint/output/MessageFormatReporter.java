@@ -1,14 +1,12 @@
 package org.stevenlooman.sw.magik.lint.output;
 
-import com.google.common.collect.Maps;
-
-import org.apache.commons.text.StringSubstitutor;
 import org.stevenlooman.sw.magik.MagikIssue;
 import org.stevenlooman.sw.magik.lint.CheckInfo;
 import org.stevenlooman.sw.magik.lint.CheckInfraction;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 
 public class MessageFormatReporter extends Reporter {
@@ -27,7 +25,7 @@ public class MessageFormatReporter extends Reporter {
 
   private Map<String, String> createMap(Path path, CheckInfo checkInfo, MagikIssue issue) throws
       FileNotFoundException {
-    Map<String, String> map = Maps.newHashMap();
+    Map<String, String> map = new HashMap<>();
     map.put("path", path.toString());
     map.put("abspath", path.toAbsolutePath().toString());
     map.put("msg", issue.message());
@@ -55,9 +53,17 @@ public class MessageFormatReporter extends Reporter {
     CheckInfo checkInfo = checkInfraction.getCheckInfo();
     MagikIssue magikIssue = checkInfraction.getMagikIssue();
     Map<String, String> map = createMap(path, checkInfo, magikIssue);
-    StringSubstitutor stringSubstitutor = new StringSubstitutor(map);
-    String resolvedString = stringSubstitutor.replace(format);
-    System.out.println(resolvedString);
+
+    String line = format.toString();
+    for (Map.Entry<String, String> entry: map.entrySet()) {
+      String key = "${" + entry.getKey() + "}";
+      if (line.contains(key)) {
+        String matchKey = "\\$\\{" + entry.getKey() + "}";
+        String value = entry.getValue();
+        line = line.replaceAll(matchKey, value);
+      }
+    }
+    System.out.println(line);
   }
 
 }

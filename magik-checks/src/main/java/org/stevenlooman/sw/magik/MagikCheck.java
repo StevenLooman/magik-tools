@@ -1,11 +1,8 @@
 package org.stevenlooman.sw.magik;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.Sets;
-
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
-
 import org.sonar.check.Rule;
 
 import java.util.ArrayList;
@@ -111,8 +108,14 @@ public abstract class MagikCheck extends MagikVisitor {
    * @return The check key, kebab-cased.
    */
   public String getCheckKeyKebabCase() {
+    Pattern pattern = Pattern.compile("(?=[A-Z][a-z])");
     String checkKey = getCheckKey();
-    return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, checkKey);
+    Matcher matcher = pattern.matcher(checkKey);
+    String checkKeyKebab = matcher.replaceAll("-").toLowerCase();
+    if (checkKeyKebab.startsWith("-")) {
+      checkKeyKebab = checkKeyKebab.substring(1);
+    }
+    return checkKeyKebab;
   }
 
 }

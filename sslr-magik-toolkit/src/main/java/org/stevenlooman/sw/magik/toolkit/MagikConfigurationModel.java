@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 
 import com.sonar.sslr.impl.Parser;
 
-import org.apache.commons.io.Charsets;
 import org.sonar.colorizer.KeywordsTokenizer;
 import org.sonar.colorizer.StringTokenizer;
 import org.sonar.colorizer.Tokenizer;
@@ -29,7 +28,7 @@ final class MagikConfigurationModel implements ConfigurationModel {
   }
 
   public Charset getCharset() {
-    return Charsets.UTF_8;
+    return Charset.forName("UTF-8");
   }
 
   public Parser getParser() {

@@ -1,11 +1,10 @@
 package org.stevenlooman.sw.magik;
 
-import com.google.common.collect.ImmutableSet;
-
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.Token;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
@@ -18,7 +17,8 @@ public abstract class MagikVisitor {
 
   private Set<AstNodeType> subscribedKinds() {
     if (subscribedKinds == null) {
-      subscribedKinds = ImmutableSet.copyOf(subscribedTo());
+      subscribedKinds = new HashSet<>();
+      subscribedKinds.addAll(subscribedTo());
     }
     return subscribedKinds;
   }

@@ -1,10 +1,9 @@
 package org.stevenlooman.sw.magik.lint;
 
-import com.google.common.collect.Lists;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -72,7 +71,7 @@ public class ConfigurationLocator {
   }
 
   private static Collection<Path> locateProductDirs() {
-    List<Path> dirs = Lists.newArrayList();
+    List<Path> dirs = new ArrayList<>();
     Path path = Paths.get(".").toAbsolutePath();
     while (path != null && Files.exists(path)) {
       // check if product.def exists
