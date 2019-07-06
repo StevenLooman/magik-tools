@@ -1,7 +1,5 @@
 package org.stevenlooman.sw.magik.checks;
 
-import com.google.common.collect.Sets;
-
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
@@ -197,7 +195,7 @@ public class UnusedVariableCheck extends MagikCheck {
     // - part of a MULTI_VARIABLE_DECLARATION
     // - the later identifiers of it are used
     // - but this one isn't
-    for (AstNode declaredIdentifier: Sets.newHashSet(declaredIdentifiers)) {
+    for (AstNode declaredIdentifier: new HashSet<>(declaredIdentifiers)) {
       if (isPartOfMultiVariableDeclaration(declaredIdentifier)
           && anyNextSiblingUsed(declaredIdentifier)) {
         declaredIdentifiers.remove(declaredIdentifier);

@@ -12,6 +12,7 @@ import org.stevenlooman.sw.magik.TemplatedCheck;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CheckInfo {
@@ -149,11 +150,11 @@ public class CheckInfo {
    */
   public static List<CheckInfo> getAllChecks(Configuration config) throws
       IllegalAccessException, InstantiationException, FileNotFoundException {
-    List<CheckInfo> checkInfos = Lists.newArrayList();
+    List<CheckInfo> checkInfos = new ArrayList<>();
 
     List<String> disabled = config.getPropertySplit("disabled");
     if (disabled == null) {
-      disabled = Lists.newArrayList();
+      disabled = new ArrayList<>();
     }
 
     List<Class<?>> checkClasses = CheckList.getChecks();

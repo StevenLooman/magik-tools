@@ -80,9 +80,7 @@
                                 <include>jaxen:jaxen</include>
                                 <include>org.sonarsource.sonarqube:sonar-plugin-api</include>
                                 <include>commons-cli:commons-cli</include>
-                                <include>org.apache.commons:commons-text</include>
                                 <include>org.json:json</include>
-                                <!--<include>com.google.guava:guava</include>-->
                             </includes>
                             <rules>
                                 <zap>

@@ -1,6 +1,5 @@
 package org.stevenlooman.sw.sonar.language;
 
-import org.apache.commons.lang.StringUtils;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.resources.AbstractLanguage;
 import org.stevenlooman.sw.sonar.MagikPlugin;
@@ -38,7 +37,7 @@ public class Magik extends AbstractLanguage {
   private static String[] filterEmptyStrings(String[] stringArray) {
     List<String> nonEmptyStrings = new ArrayList<>();
     for (String string : stringArray) {
-      if (StringUtils.isNotBlank(string.trim())) {
+      if (!string.trim().isEmpty()) {
         nonEmptyStrings.add(string.trim());
       }
     }

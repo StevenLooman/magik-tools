@@ -8,7 +8,6 @@ import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.TemplatedCheck;
 
-import java.lang.invoke.MethodHandles;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;

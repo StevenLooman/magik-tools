@@ -7,9 +7,6 @@ import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.TokenType;
 import com.sonar.sslr.api.Trivia;
 import com.sonar.sslr.impl.Parser;
-import org.apache.commons.lang.reflect.FieldUtils;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 import org.sonar.sslr.parser.LexerlessGrammar;
 import org.sonar.sslr.parser.ParserAdapter;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
@@ -53,7 +50,6 @@ public class MagikParser {
 
   private static final String TRANSMIT = "$";
   private static final String END_OF_MESSAGE_PATCH = "$";
-  private static final Logger LOGGER = Loggers.get(MagikParser.class);
 
   public Parser<LexerlessGrammar> magikParser;
   public ParserAdapter<LexerlessGrammar> messagePatchParser;
@@ -79,7 +75,8 @@ public class MagikParser {
     try (StringReader sr = new StringReader(source)) {
       node = parse(sr);
     } catch (IOException ex) {
-      LOGGER.error("Caught exception during parsing", ex);
+      System.out.println("Caught exception during parsing: " + ex);
+      ex.printStackTrace();
     }
     return node;
   }
@@ -94,7 +91,8 @@ public class MagikParser {
     try (FileReader sr = new FileReader(path.toFile())) {
       node = parse(sr);
     } catch (IOException ex) {
-      LOGGER.error("Caught exception during parsing", ex);
+      System.out.println("Caught exception during parsing: " + ex);
+      ex.printStackTrace();
     }
     return node;
   }
@@ -172,7 +170,8 @@ public class MagikParser {
 
     // parse message, as the exception doesn't provide the raw value
     String message = recognitionException.getMessage();
-    Matcher matcher = Pattern.compile("Parse error at line (\\d+) column (\\d+):.*").matcher(message);
+    Pattern pattern = Pattern.compile("Parse error at line (\\d+) column (\\d+):.*");
+    Matcher matcher = pattern.matcher(message);
     if (!matcher.find()) {
       throw new IllegalStateException("Unrecognized RecognitionException message");
     }
@@ -207,7 +206,14 @@ public class MagikParser {
    * @param node Node to update.
    */
   private void updateIdentifiersSymbolsCasing(AstNode node) {
-    Field field = FieldUtils.getField(Token.class, "value", true);
+    Field field = null;
+    try {
+      field = Token.class.getDeclaredField("value");
+      field.setAccessible(true);
+    } catch (NoSuchFieldException ex) {
+      System.out.println("Caught exception during parsing: " + ex);
+      ex.printStackTrace();
+    }
 
     AstNodeType nodeType = node.getType();
     if (nodeType == MagikGrammar.IDENTIFIER || nodeType == MagikGrammar.SYMBOL) {
@@ -216,7 +222,8 @@ public class MagikParser {
       try {
         field.set(token, value);
       } catch (IllegalAccessException ex) {
-        LOGGER.error("Caught exception during update token lines", ex);
+        System.out.println("Caught exception during parsing: " + ex);
+        ex.printStackTrace();
       }
     }
 
@@ -285,14 +292,23 @@ public class MagikParser {
    * @param lineOffset Offset to add to lines.
    */
   private void updateTokenLines(List<Token> tokens, int lineOffset) {
-    Field field = FieldUtils.getField(Token.class, "line", true);
+    Field field = null;
+    try {
+      field = Token.class.getDeclaredField("line");
+      field.setAccessible(true);
+    } catch (NoSuchFieldException ex) {
+      System.out.println("Caught exception during parsing: " + ex);
+      ex.printStackTrace();
+    }
+
     for (Token token : tokens) {
       // update token lines
       int newLine = lineOffset + token.getLine();
       try {
         field.set(token, newLine);
       } catch (IllegalAccessException ex) {
-        LOGGER.error("Caught exception during update token lines", ex);
+        System.out.println("Caught exception during parsing: " + ex);
+        ex.printStackTrace();
       }
 
       // update trivia-token lines
@@ -302,7 +318,8 @@ public class MagikParser {
           try {
             field.set(triviaToken, newLine);
           } catch (IllegalAccessException ex) {
-            LOGGER.error("Caught exception during update trivia lines", ex);
+            System.out.println("Caught exception during parsing: " + ex);
+            ex.printStackTrace();
           }
         }
       }

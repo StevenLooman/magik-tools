@@ -1,10 +1,6 @@
 package org.stevenlooman.sw.magik.lint;
 
-import com.google.common.base.Charsets;
-import com.google.common.collect.Maps;
-
 import com.sonar.sslr.api.AstNode;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -31,6 +27,7 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,7 +37,7 @@ public class MagikLint {
   CommandLine commandLine;
   Configuration config;
 
-  static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING = Maps.newHashMap();
+  static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING = new HashMap<>();
 
   static {
     SEVERITY_EXIT_CODE_MAPPING.put("Major", 2);
@@ -132,7 +129,8 @@ public class MagikLint {
 
 
   private MagikVisitorContext buildContext(Path path) throws IOException, ParseException {
-    Charset charset = FileCharsetDeterminer.determineCharset(path, Charsets.ISO_8859_1);
+    Charset defaultCharset = Charset.forName("ISO_8859_1");
+    Charset charset = FileCharsetDeterminer.determineCharset(path, defaultCharset);
     byte[] encoded = Files.readAllBytes(path);
     String fileContents = new String(encoded, charset);
     if (commandLine.getOptionValue("untabify") != null) {
