@@ -44,6 +44,18 @@ $ mvn clean package
 An artifact/jar will be created at `sonar-magik-plugin/target/sonar-magik-plugin-<version>.jar`.
 
 
+Unit tests
+----------
+
+You can run the unit tests using maven, like so:
+
+```
+$ mvn clean test
+```
+
+Results will be shown on the console.
+
+
 Coverage
 --------
 
