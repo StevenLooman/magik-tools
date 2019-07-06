@@ -1,6 +1,8 @@
 Sonar Magik plugin
 ==================
 
+Magik analyzed!
+
 `Sonar-Magik` is a code analyzer for Smallworld projects, which uses the Magik programming language.
 
 By no means is this product fully tested and production-ready. Use at your own risk, your mileage may vary.
