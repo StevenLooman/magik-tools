@@ -172,11 +172,11 @@ public class MagikParser {
 
     // parse message, as the exception doesn't provide the raw value
     String message = recognitionException.getMessage();
-    Matcher m = Pattern.compile("Parse error at line (\\d+) column (\\d+):.*").matcher(message);
-    if (!m.find()) {
+    Matcher matcher = Pattern.compile("Parse error at line (\\d+) column (\\d+):.*").matcher(message);
+    if (!matcher.find()) {
       throw new IllegalStateException("Unrecognized RecognitionException message");
     }
-    String columnStr = m.group(2);
+    String columnStr = matcher.group(2);
     int column = Integer.parseInt(columnStr);
 
     URI uri = buildUri();
