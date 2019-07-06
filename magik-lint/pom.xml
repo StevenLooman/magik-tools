@@ -5,7 +5,7 @@
 
     <parent>
         <groupId>org.stevenlooman.sw.sonar</groupId>
-        <artifactId>sonar-swmagik</artifactId>
+        <artifactId>sonar-magik</artifactId>
         <version>0.1.2-SNAPSHOT</version>
     </parent>
 
@@ -79,17 +79,18 @@
                                 <include>org.sonarsource.sslr:sslr-xpath</include>
                                 <include>jaxen:jaxen</include>
                                 <include>org.sonarsource.sonarqube:sonar-plugin-api</include>
-                                <include>commons-lang:commons-lang</include>
                                 <include>commons-cli:commons-cli</include>
                                 <include>org.apache.commons:commons-text</include>
-                                <include>org.apache.commons:commons-lang3</include>
                                 <include>org.json:json</include>
-                                <include>com.google.guava:guava</include>
+                                <!--<include>com.google.guava:guava</include>-->
                             </includes>
                             <rules>
-                                <keep>
-                                    <pattern>*.**</pattern>
-                                </keep>
+                                <zap>
+                                    <pattern>org.sonar.api.*.**</pattern>
+                                </zap>
+                                <zap>
+                                    <pattern>org.sonarsource.*.**</pattern>
+                                </zap>
                             </rules>
                         </configuration>
                     </execution>
