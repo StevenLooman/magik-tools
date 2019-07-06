@@ -5,6 +5,7 @@ Changes
 
 - Report parser errors through checks
 - Enforce strict keyword matching in parser
+- Fix ScopeBuilder not properly handling optional parameters
 
 
 0.1.1 (2019-06-30)

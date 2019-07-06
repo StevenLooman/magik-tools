@@ -135,6 +135,30 @@ public class UnusedVariableCheckTest extends MagikCheckTestBase {
   }
 
   @Test
+  public void testParameterOptional() {
+    MagikCheck check = new UnusedVariableCheck(true);
+    String code =
+        "_method a.b(p_param1, _optional p_param2)\n" +
+        "\twrite(p_param1)\n" +
+        "\twrite(p_param2)\n" +
+        "_endmethod\n";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
+  public void testParameterGather() {
+    MagikCheck check = new UnusedVariableCheck(true);
+    String code =
+        "_method a.b(p_param1, _gather p_param2)\n" +
+            "\twrite(p_param1)\n" +
+            "\twrite(p_param2)\n" +
+            "_endmethod\n";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
   public void testMethodProcedureImport() {
     MagikCheck check = new UnusedVariableCheck();
     String code =
