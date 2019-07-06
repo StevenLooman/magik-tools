@@ -63,9 +63,10 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       // add parameters to scope
       AstNode parametersNode = parentNode.getFirstChild(MagikGrammar.PARAMETERS);
       if (parametersNode != null) {
-        List<AstNode> parameterNodes = parametersNode.getChildren(MagikGrammar.PARAMETER);
-        for (AstNode parameterNode : parameterNodes) {
-          String identifier = parameterNode.getTokenValue();
+        List<AstNode> identifierNodes = parametersNode.getDescendants(MagikGrammar.IDENTIFIER);
+        for (AstNode identifierNode : identifierNodes) {
+          AstNode parameterNode = identifierNode.getParent();
+          String identifier = identifierNode.getTokenValue();
           scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, parameterNode, null);
         }
       }
