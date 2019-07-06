@@ -157,7 +157,6 @@ public enum MagikGrammar implements GrammarRuleKey {
         b.sequence(SPACING_NO_LB, b.endOfInput()))).skip();
 
     b.rule(MAGIK).is(
-//        b.zeroOrMore(
         b.oneOrMore(
             b.firstOf(
                 PACKAGE_SPECIFICATION,
