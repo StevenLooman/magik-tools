@@ -86,7 +86,7 @@ public class CheckInfo {
     return parameters;
   }
 
-  private JSONObject readMetadata() throws FileNotFoundException {
+  private JSONObject readMetadata() {
     // determine path
     Class klass = check.getClass();
     String simpleName = klass.getSimpleName();
