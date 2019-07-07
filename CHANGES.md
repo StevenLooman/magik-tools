@@ -1,6 +1,11 @@
 Changes
 =======
 
+0.1.3 (2019-07-07)
+
+- Fix output of Windows paths in magik-lint
+
+
 0.1.2 (2019-07-06)
 
 - Report parser errors through checks
