@@ -290,7 +290,7 @@ public class MagikLint {
   public Reporter getReporter() {
     if (commandLine.hasOption("msg-template")) {
       String template = commandLine.getOptionValue("msg-template");
-      return new MessageFormatReporter(template);
+      return new MessageFormatReporter(System.out, template);
     }
 
     return new MessageFormatReporter();

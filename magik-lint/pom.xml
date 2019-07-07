@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.stevenlooman.sw.sonar</groupId>
         <artifactId>sonar-magik</artifactId>
-        <version>0.1.2</version>
+        <version>0.1.3</version>
     </parent>
 
     <artifactId>magik-lint</artifactId>

@@ -5,21 +5,26 @@ import org.stevenlooman.sw.magik.lint.CheckInfo;
 import org.stevenlooman.sw.magik.lint.CheckInfraction;
 
 import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MessageFormatReporter extends Reporter {
 
+  private PrintStream outStream;
   private String format;
 
   public static final String DEFAULT_FORMAT = "${path}:${line}:${column}: ${msg} (${symbol})";
 
   public MessageFormatReporter() {
-    this(DEFAULT_FORMAT);
+    this(System.out, DEFAULT_FORMAT);
   }
 
-  public MessageFormatReporter(String format) {
+  public MessageFormatReporter(PrintStream outStream, String format) {
+    this.outStream = outStream;
     this.format = format;
   }
 
@@ -40,7 +45,6 @@ public class MessageFormatReporter extends Reporter {
     Integer column = issue.column();
     if (column != null) {
       map.put("column", column.toString());
-
     }
 
     return map;
@@ -58,12 +62,13 @@ public class MessageFormatReporter extends Reporter {
     for (Map.Entry<String, String> entry: map.entrySet()) {
       String key = "${" + entry.getKey() + "}";
       if (line.contains(key)) {
-        String matchKey = "\\$\\{" + entry.getKey() + "}";
+        String matchKey = Pattern.quote(key);
         String value = entry.getValue();
-        line = line.replaceAll(matchKey, value);
+        String matchValue = Matcher.quoteReplacement(value);
+        line = line.replaceAll(matchKey, matchValue);
       }
     }
-    System.out.println(line);
+    outStream.println(line);
   }
 
 }
