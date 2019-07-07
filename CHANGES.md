@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.1.3 (unreleased)
+0.1.3 (2019-07-07)
 
 - Fix output of Windows paths in magik-lint
 
