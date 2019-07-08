@@ -14,7 +14,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   EOS,
   EOS_NO_LB,
 
-  PARSER_ERROR,
+  SYNTAX_ERROR,
 
   KEYWORDS,
 
