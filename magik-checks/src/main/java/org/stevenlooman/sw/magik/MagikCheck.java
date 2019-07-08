@@ -1,13 +1,12 @@
 package org.stevenlooman.sw.magik;
 
-import com.google.common.collect.Sets;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
 import org.sonar.check.Rule;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,8 +83,8 @@ public abstract class MagikCheck extends MagikVisitor {
     }
 
     String match = matcher.group(1);
-    HashSet<String> disableds = Sets.newHashSet(match.split("\n"));
 
+    List<String> disableds = Arrays.asList(match.split("\n"));
     String checkKey = this.getCheckKeyKebabCase();
     if (disableds.contains(checkKey)) {
       return true;
