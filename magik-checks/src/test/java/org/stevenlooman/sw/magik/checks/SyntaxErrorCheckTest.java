@@ -8,11 +8,11 @@ import org.stevenlooman.sw.magik.MagikIssue;
 
 import java.util.List;
 
-public class ParserErrorCheckTest extends MagikCheckTestBase {
+public class SyntaxErrorCheckTest extends MagikCheckTestBase {
 
   @Test
-  public void testParserError() {
-    MagikCheck check = new ParserErrorCheck();
+  public void testSyntaxError() {
+    MagikCheck check = new SyntaxErrorCheck();
     String code =
         "_block\n" +
         "_endbloc";
