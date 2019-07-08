@@ -10,6 +10,7 @@ deploy:
     - sonar-magik-plugin/target/sonar-magik-plugin-*.jar
     - magik-lint/target/magik-lint-*.jar
     - sslr-magik-toolkit/target/sslr-magik-toolkit-*.jar
+  file_glob: true
   skip_cleanup: true
   on:
     repo: StevenLooman/sonar-magik
