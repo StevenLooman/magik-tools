@@ -5,6 +5,7 @@ Changes
 
 - Fixes after reducing size of magik-lint jar
 - Rename ParserErrorCheck to SyntaxErrorCheck
+- Make LineLengthCheck a minor infraction and signal from nth column
 
 
 0.1.3 (2019-07-07)
