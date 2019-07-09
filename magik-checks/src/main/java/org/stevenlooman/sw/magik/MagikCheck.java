@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public abstract class MagikCheck extends MagikVisitor {
   private List<MagikIssue> issues = new ArrayList<>();
@@ -83,8 +84,9 @@ public abstract class MagikCheck extends MagikVisitor {
     }
 
     String match = matcher.group(1);
-
-    List<String> disableds = Arrays.asList(match.split("\n"));
+    List<String> disableds = Arrays.stream(match.split(","))
+        .map(x -> x.trim())
+        .collect(Collectors.toList());
     String checkKey = this.getCheckKeyKebabCase();
     if (disableds.contains(checkKey)) {
       return true;
