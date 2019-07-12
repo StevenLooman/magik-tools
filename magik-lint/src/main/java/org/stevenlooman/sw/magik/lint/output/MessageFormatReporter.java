@@ -42,7 +42,7 @@ public class MessageFormatReporter extends Reporter {
     if (line != null) {
       map.put("line", line.toString());
     }
-    Integer column = issue.column();
+    Integer column = issue.column0();
     if (column != null) {
       map.put("column", column.toString());
     }

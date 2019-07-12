@@ -35,6 +35,15 @@ public class MagikIssue {
     return column;
   }
 
+  @CheckForNull
+  public Integer column0() {
+    if (column == null) {
+      return null;
+    }
+
+    return Math.max(0, column - 1);
+  }
+
   public String message() {
     return message;
   }
