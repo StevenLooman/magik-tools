@@ -8,6 +8,7 @@ Changes
 - Make LineLengthCheck a minor infraction and signal from nth column
 - Better handle multiple disabled checks
 - Add FormattingCheck
+- Add ForbiddenCallCheck
 
 
 0.1.3 (2019-07-07)
