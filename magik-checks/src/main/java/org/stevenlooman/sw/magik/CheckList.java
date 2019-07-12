@@ -3,6 +3,7 @@ package org.stevenlooman.sw.magik;
 import org.stevenlooman.sw.magik.checks.CommentRegularExpressionCheck;
 import org.stevenlooman.sw.magik.checks.ExemplarSlotCountCheck;
 import org.stevenlooman.sw.magik.checks.FileNotInLoadListCheck;
+import org.stevenlooman.sw.magik.checks.ForbiddenCallCheck;
 import org.stevenlooman.sw.magik.checks.FormattingCheck;
 import org.stevenlooman.sw.magik.checks.LhsRhsComparatorEqualCheck;
 import org.stevenlooman.sw.magik.checks.LineLengthCheck;
@@ -34,6 +35,7 @@ public final class CheckList {
       CommentRegularExpressionCheck.class,
       ExemplarSlotCountCheck.class,
       FileNotInLoadListCheck.class,
+      ForbiddenCallCheck.class,
       FormattingCheck.class,
       LhsRhsComparatorEqualCheck.class,
       LineLengthCheck.class,
