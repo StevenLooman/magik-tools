@@ -1,0 +1,15 @@
+{
+  "title": "Forbidden call",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "bug"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "ForbiddenCall",
+  "sqKey": "forbidden-call"
+}
