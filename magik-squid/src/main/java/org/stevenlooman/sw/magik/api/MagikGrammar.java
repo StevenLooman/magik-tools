@@ -421,9 +421,12 @@ public enum MagikGrammar implements GrammarRuleKey {
             MagikKeyword.ORIF, MagikKeyword.OR,
             MagikKeyword.XOR,
             MagikKeyword.DIV, MagikKeyword.MOD,
+            MagikKeyword.CF,
+            MagikKeyword.IS, MagikKeyword.ISNT,
             MagikPunctuator.PLUS, MagikPunctuator.MINUS,
             MagikPunctuator.STAR, MagikPunctuator.DIV,
-            MagikPunctuator.EXP
+            MagikPunctuator.EXP,
+            MagikPunctuator.EQ, MagikPunctuator.NEQ
             )).skip();
 
     b.rule(PRAGMA).is(MagikKeyword.PRAGMA, SPACING, MagikPunctuator.PAREN_L, PRAGMA_PARAMS, MagikPunctuator.PAREN_R);
