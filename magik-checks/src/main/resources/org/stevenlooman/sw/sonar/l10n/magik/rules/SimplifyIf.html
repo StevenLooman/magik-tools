@@ -1,0 +1,23 @@
+<p>This if-statement can be simplified.</p>
+<h2>Noncompliant Code Example</h2>
+<pre>
+_if a
+_then
+    ...
+_else
+    _if b
+    _then
+        ...
+    _endif
+_endif
+</pre>
+<h2>Compliant Solution</h2>
+<pre>
+_if a
+_then
+    ...
+_elif b
+_then
+    ...
+_endif
+</pre>
