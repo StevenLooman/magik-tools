@@ -5,11 +5,11 @@ before_deploy: mvn package
 deploy:
   provider: releases
   api_key:
-    secure: ddMddB226YPsNAJZ14zC7Bdp3yNwgF+EcCl8k9xna2N3Ys6FSzJz5gI1KSFtVMahAieLWaEtB5XSCxW+LBjOl7j5TbAJ13TkHAw3T8N7tEatcfS4sSsvM7U8CThRzfZqJgOjhcO1PvvjOWfEXZjY5HUkBFQd87F52Bn3Dc4KM8Cp8qbGrsj2cMbjEp4OJZgsFtWiBZxxHM2jg6HT+MK29caiHj9hqepqflxr1vmatc4ZAAMNe09UStTS95pve7mw9pXESs9WnkZrpPyd9meNAV0bEMyvWGzBA37vtN8s+fW/mO8ivXiCzpOP0z9GLH44gbx3P9KE7t7PUHYBjhMn6tHZFafew8+rKxAAN5C4eN/BldFk0JT0JDNWW/AeV9KIH6ynKzhhZXKEAnm7qTn8KOgVXlvxqlJBF74Bfn1MrOEltlP8cC9LWZFRaIlSqhpGPGBlHUt2ZZdIW/SwBvXbNlmakzKqc1TFe0VbzWMEoUw2UvVRp5+azhMcVFHKud98ihNit8NPCNcjOgT49rGq738AHZAAAkB6QnkUMf3EmMZiiW+xkY/kegk0ZXNGK0yUFFYMIg1b6Rb9l/i4DCYCqwgSMCIvirHm6UMK7Mg7266tXvOoNWVkxCrGqZj2U0VsyYEGGWA5SXz4et58BSY+TzefpZOA/KjvslfK4b1u7Eg=
+    secure: ti1fBFjb6+JkLk7C+GOb8cdyA3lDAYgywyWjlSnQQxxyNzlTueO+zE7MCHYQTUHPd/oVnjyjLlBop1fJ10vv7Mk553vzckwkvPnc1VmjSdQZQa0ytRtWPtLAZLLmiH/dYaySWb1LN/r6Pi1o/ebRpt13T8eJrkDjOliYLm3f0yiXzqRgW6bqRiRv8bpAuketRs8u2KDpaQePLgCM5tR3tpNKHfuad1s/ovKhNEhaeLVR46pY9jeoO0vQejwcSCwOCMfn4rg6VVRW5xPnDqJbKgdOePEO6IoWXXpJGMMTyGyLCgKLsq0y9BE9Mzuecj13VgGhgu2GKgqbxk/iPpAGOONSbKN4q0ryDoIdum/Qbv502jUklDyq8swaiuOIa8iT/fGyTtz6wZX9Mo3+TBkimTWcIDJPG5/9GEtsjayU/zFWcR0+1WBudeRZlZIHP6NxulWku3lrsRdh5AWeEybWtcVb6JaEOYSU5Mk6FZzF40+xRj0stNKizGhaN2oaExpPSACR5T36/MGGp1CM5k9vS89y3drnAOLsrD+uyBipFYmVM5ymYOeJ9UVq4vM2rF3iaqzKhEvrlc/RD/wbJ5ZV++p6xuReHJnVk1Oet4UecDxbAlXz2b+DiqnD9FXXEhfgQKiwXfY7GITekm6zOXzDIycE/bTJvepH8BNJrSYMjNo=
   file:
-    - sonar-magik-plugin/target/sonar-magik-plugin-*.jar
-    - magik-lint/target/magik-lint-*.jar
-    - sslr-magik-toolkit/target/sslr-magik-toolkit-*.jar
+  - sonar-magik-plugin/target/sonar-magik-plugin-*.jar
+  - magik-lint/target/magik-lint-*.jar
+  - sslr-magik-toolkit/target/sslr-magik-toolkit-*.jar
   file_glob: true
   skip_cleanup: true
   on:
