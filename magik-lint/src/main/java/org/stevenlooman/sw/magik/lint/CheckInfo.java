@@ -147,7 +147,7 @@ public class CheckInfo {
    * @throws FileNotFoundException -
    */
   public static List<CheckInfo> getAllChecks(Configuration config) throws
-      IllegalAccessException, InstantiationException, FileNotFoundException {
+      IllegalAccessException, InstantiationException {
     List<CheckInfo> checkInfos = new ArrayList<>();
 
     List<String> disabled = config.getPropertySplit("disabled");

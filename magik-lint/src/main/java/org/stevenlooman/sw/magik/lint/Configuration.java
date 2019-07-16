@@ -78,7 +78,7 @@ public class Configuration {
    * @return True if it exists, false if not
    */
   public boolean hasProperty(String key) {
-    return properties.contains(key);
+    return properties.getProperty(key) != null;
   }
 
 }
