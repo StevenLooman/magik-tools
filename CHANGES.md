@@ -12,6 +12,7 @@ Changes
 - Make magik-lint output 0-base column numbers (removed)
 - Add SimplifyIfCheck
 - Add column-offset option to magik-lint
+- Fix bug where rc-file options weren't properly read
 
 
 0.1.3 (2019-07-07)
