@@ -44,7 +44,7 @@ public class MessageFormatReporterTest {
     MagikIssue issue = MagikIssue.fileIssue("message", null);
     CheckInfraction infraction = new CheckInfraction(path, checkInfo, issue);
 
-    MessageFormatReporter reporter = new MessageFormatReporter(stream, "${path}");
+    MessageFormatReporter reporter = new MessageFormatReporter(stream, "${path}", null);
     reporter.reportIssue(infraction);
 
     String result = os.toString().trim();
