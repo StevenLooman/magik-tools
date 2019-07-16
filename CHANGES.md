@@ -9,8 +9,9 @@ Changes
 - Better handle multiple disabled checks
 - Add FormattingCheck
 - Add ForbiddenCallCheck
-- Make magik-lint output 0-base column numbers
+- Make magik-lint output 0-base column numbers (removed)
 - Add SimplifyIfCheck
+- Add column-offset option to magik-lint
 
 
 0.1.3 (2019-07-07)

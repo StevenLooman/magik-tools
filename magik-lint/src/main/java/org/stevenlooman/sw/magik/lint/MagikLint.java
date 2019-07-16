@@ -7,6 +7,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PatternOptionBuilder;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.MagikIssue;
 import org.stevenlooman.sw.magik.MagikVisitorContext;
@@ -49,8 +50,8 @@ public class MagikLint {
 
     // read configuration
     if (commandLine.hasOption("rcfile")) {
-      String rcfile = commandLine.getOptionValue("rcfile");
-      Path path = Paths.get(rcfile);
+      File rcfile = (File)commandLine.getParsedOptionValue("rcfile");
+      Path path = rcfile.toPath();
       config = new Configuration(path);
     } else {
       Path path = ConfigurationLocator.locateConfiguration();
@@ -68,11 +69,13 @@ public class MagikLint {
         .longOpt("msg-template")
         .desc("Output pattern")
         .hasArg()
+        .type(PatternOptionBuilder.STRING_VALUE)
         .build());
     options.addOption(Option.builder()
         .longOpt("rcfile")
         .desc("Configuration file")
         .hasArg()
+        .type(PatternOptionBuilder.EXISTING_FILE_VALUE)
         .build());
     options.addOption(Option.builder()
         .longOpt("show-checks")
@@ -82,7 +85,13 @@ public class MagikLint {
         .longOpt("untabify")
         .desc("Expand tabs to N spaces")
         .hasArg()
-        .type(Number.class)
+        .type(PatternOptionBuilder.NUMBER_VALUE)
+        .build());
+    options.addOption(Option.builder()
+        .longOpt("column-offset")
+        .desc("Set column offset, positive or negative")
+        .hasArg()
+        .type(PatternOptionBuilder.NUMBER_VALUE)
         .build());
 
     CommandLineParser parser = new DefaultParser();
@@ -287,13 +296,14 @@ public class MagikLint {
    * Otherwise use MessageFormatReporter.
    * @return Reporter
    */
-  public Reporter getReporter() {
-    if (commandLine.hasOption("msg-template")) {
-      String template = commandLine.getOptionValue("msg-template");
-      return new MessageFormatReporter(System.out, template);
-    }
+  public Reporter getReporter() throws ParseException {
+    Long columnOffset = (Long)commandLine.getParsedOptionValue("column-offset");
 
-    return new MessageFormatReporter();
+    String template = MessageFormatReporter.DEFAULT_FORMAT;
+    if (commandLine.hasOption("msg-template")) {
+      template = commandLine.getOptionValue("msg-template");
+    }
+    return new MessageFormatReporter(System.out, template, columnOffset);
   }
 
 }

@@ -11,21 +11,32 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.annotation.Nullable;
 
 public class MessageFormatReporter extends Reporter {
 
   private PrintStream outStream;
   private String format;
+  private Long columnOffset;
 
   public static final String DEFAULT_FORMAT = "${path}:${line}:${column}: ${msg} (${symbol})";
 
-  public MessageFormatReporter() {
-    this(System.out, DEFAULT_FORMAT);
-  }
-
-  public MessageFormatReporter(PrintStream outStream, String format) {
+  /**
+   * Constructor.
+   * @param outStream Output stream to write to.
+   * @param format Format to use.
+   * @param columnOffset Column offset for reported columns.
+   */
+  public MessageFormatReporter(PrintStream outStream,
+                               String format,
+                               @Nullable Long columnOffset) {
     this.outStream = outStream;
     this.format = format;
+    if (columnOffset != null) {
+      this.columnOffset = columnOffset;
+    } else {
+      this.columnOffset = 0l;
+    }
   }
 
   private Map<String, String> createMap(Path path, CheckInfo checkInfo, MagikIssue issue) throws
@@ -42,8 +53,9 @@ public class MessageFormatReporter extends Reporter {
     if (line != null) {
       map.put("line", line.toString());
     }
-    Integer column = issue.column0();
+    Integer column = issue.column();
     if (column != null) {
+      column += columnOffset.intValue();
       map.put("column", column.toString());
     }
 
