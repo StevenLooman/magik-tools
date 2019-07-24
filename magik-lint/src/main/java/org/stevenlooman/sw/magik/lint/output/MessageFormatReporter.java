@@ -35,7 +35,7 @@ public class MessageFormatReporter extends Reporter {
     if (columnOffset != null) {
       this.columnOffset = columnOffset;
     } else {
-      this.columnOffset = 0l;
+      this.columnOffset = 0L;
     }
   }
 

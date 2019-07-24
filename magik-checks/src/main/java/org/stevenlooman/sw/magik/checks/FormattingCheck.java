@@ -217,7 +217,7 @@ public class FormattingCheck extends MagikCheck {
   }
 
   /**
-   * Require a whitespace-character after
+   * Require a whitespace-character after.
    * @param token Token to test
    */
   private void requireWhitespaceAfter(Token token) {

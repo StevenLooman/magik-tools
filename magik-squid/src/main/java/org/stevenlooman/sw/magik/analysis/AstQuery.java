@@ -21,7 +21,7 @@ public class AstQuery {
    * This does perform backtracking if needed.
    * @Param node {{AstNode}} to query
    * @param nodeTypes Chain of {{AstNodeType}}s
-   * @return
+   * @return {{AstNode}}s which match
    */
   public static List<AstNode> getFromChain(AstNode node, AstNodeType... nodeTypes) {
     List<AstNode> nodes = Arrays.asList(node);
