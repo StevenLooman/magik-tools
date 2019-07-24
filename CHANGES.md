@@ -13,6 +13,7 @@ Changes
 - Add SimplifyIfCheck
 - Add column-offset option to magik-lint
 - Fix bug where rc-file options weren't properly read
+- Fix bug in UnusedVariableCheck where assignment to import is improperly flagged
 
 
 0.1.3 (2019-07-07)
