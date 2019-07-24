@@ -42,7 +42,11 @@ public class SimplifyIfCheck extends MagikCheck {
 
     // statement is an if statement
     List<AstNode> bodyIfNodes = AstQuery.getFromChain(bodyNode,
-        MagikGrammar.STATEMENT, MagikGrammar.EXPRESSION_STATEMENT, MagikGrammar.EXPRESSION, MagikGrammar.ATOM, MagikGrammar.IF);
+        MagikGrammar.STATEMENT,
+        MagikGrammar.EXPRESSION_STATEMENT,
+        MagikGrammar.EXPRESSION,
+        MagikGrammar.ATOM,
+        MagikGrammar.IF);
     if (bodyIfNodes.size() != 1) {
       return;
     }
@@ -74,7 +78,11 @@ public class SimplifyIfCheck extends MagikCheck {
 
     // statement is an if statement
     List<AstNode> elseIfNodes = AstQuery.getFromChain(bodyNode,
-        MagikGrammar.STATEMENT, MagikGrammar.EXPRESSION_STATEMENT, MagikGrammar.EXPRESSION, MagikGrammar.ATOM, MagikGrammar.IF);
+        MagikGrammar.STATEMENT,
+        MagikGrammar.EXPRESSION_STATEMENT,
+        MagikGrammar.EXPRESSION,
+        MagikGrammar.ATOM,
+        MagikGrammar.IF);
     if (elseIfNodes.size() != 1) {
       return;
     }
