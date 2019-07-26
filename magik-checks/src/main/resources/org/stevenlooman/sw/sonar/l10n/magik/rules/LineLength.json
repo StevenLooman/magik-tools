@@ -9,7 +9,7 @@
   "tags": [
     "convention"
   ],
-  "defaultSeverity": "Major",
+  "defaultSeverity": "Minor",
   "ruleSpecification": "LineLength",
   "sqKey": "line-length"
 }

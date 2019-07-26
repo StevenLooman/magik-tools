@@ -54,7 +54,10 @@ public class UnusedVariableCheck extends MagikCheck {
         return;
       }
 
-      if (isLhsOfAssignment(identifierNode) && !isGlobalOrDynamic(identifierNode)) {
+      if (isLhsOfAssignment(identifierNode)
+          && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.GLOBAL)
+          && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.DYNAMIC)
+          && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.IMPORT)) {
         return;
       }
 
@@ -62,14 +65,13 @@ public class UnusedVariableCheck extends MagikCheck {
     }
   }
 
-  private boolean isGlobalOrDynamic(AstNode identifierNode) {
+  private boolean isOfScopeEntryType(AstNode identifierNode, ScopeEntry.Type type) {
     String identifier = identifierNode.getTokenValue();
 
     Scope scope = scopeBuilder.getScopeForNode(identifierNode);
     ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
 
-    return scopeEntry.getType() == ScopeEntry.Type.GLOBAL
-           || scopeEntry.getType() == ScopeEntry.Type.DYNAMIC;
+    return scopeEntry.getType() == type;
   }
 
   private boolean isLhsOfAssignment(AstNode identifierNode) {

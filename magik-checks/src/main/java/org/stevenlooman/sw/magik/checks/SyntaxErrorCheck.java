@@ -10,18 +10,18 @@ import java.util.Arrays;
 import java.util.List;
 
 @Rule(
-    key = ParserErrorCheck.CHECK_KEY,
-    name = "ParserError",
+    key = SyntaxErrorCheck.CHECK_KEY,
+    name = "SyntaxError",
     description = "Handle parser errors")
-public class ParserErrorCheck extends MagikCheck {
+public class SyntaxErrorCheck extends MagikCheck {
 
-  public static final String CHECK_KEY = "ParserError";
+  public static final String CHECK_KEY = "SyntaxError";
   private static final String MESSAGE = "Invalid code.";
 
   @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
-        MagikGrammar.PARSER_ERROR);
+        MagikGrammar.SYNTAX_ERROR);
   }
 
   @Override

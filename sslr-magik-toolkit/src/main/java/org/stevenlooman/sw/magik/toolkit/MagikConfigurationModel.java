@@ -1,9 +1,6 @@
 package org.stevenlooman.sw.magik.toolkit;
 
-import com.google.common.collect.ImmutableList;
-
 import com.sonar.sslr.impl.Parser;
-
 import org.sonar.colorizer.KeywordsTokenizer;
 import org.sonar.colorizer.StringTokenizer;
 import org.sonar.colorizer.Tokenizer;
@@ -15,6 +12,7 @@ import org.stevenlooman.sw.magik.api.MagikGrammar;
 import org.stevenlooman.sw.magik.api.MagikKeyword;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,11 +37,12 @@ final class MagikConfigurationModel implements ConfigurationModel {
 
   @SuppressWarnings("squid:S1192")
   public List<Tokenizer> getTokenizers() {
-    return ImmutableList.of(
+    return Arrays.asList(
         new StringTokenizer("<span class=\"s\">", "</span>"),
         new MagikDocTokenizer("<span class=\"cppd\">", "</span>"),
         new MagikCommentTokenizer("<span class=\"cd\">", "</span>"),
-        new KeywordsTokenizer("<span class=\"k\">", "</span>", MagikKeyword.keywordValues()));
+        new KeywordsTokenizer("<span class=\"k\">", "</span>",
+            MagikKeyword.keywordValues()));
   }
 }
 

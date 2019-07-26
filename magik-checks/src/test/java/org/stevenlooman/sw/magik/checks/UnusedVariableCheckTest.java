@@ -174,6 +174,21 @@ public class UnusedVariableCheckTest extends MagikCheckTestBase {
   }
 
   @Test
+  public void testMethodProcedureImportAssignment() {
+    MagikCheck check = new UnusedVariableCheck();
+    String code =
+        "_method a.b\n" +
+            "\t_local l_me << _self\n" +
+            "\t_proc()\n" +
+            "\t\t_import l_me\n" +
+            "\t\tl_me << 10\n" +
+            "\t_endproc()\n" +
+            "_endmethod\n";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
   public void testCase() {
     MagikCheck check = new UnusedVariableCheck();
     String code =

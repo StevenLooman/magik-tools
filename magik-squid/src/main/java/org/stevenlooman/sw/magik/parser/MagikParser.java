@@ -30,7 +30,7 @@ public class MagikParser {
 
   public enum UtilityTokenType implements TokenType {
     DUMMY,
-    PARSER_ERROR;
+    SYNTAX_ERROR;
 
     @Override
     public String getName() {
@@ -137,7 +137,7 @@ public class MagikParser {
             } catch (RecognitionException exception) {
               // Don't throw, magik parser also can continue if it encounters invalid code.
               // Instead, build a special node so this is recognizable.
-              node = buildParserErrorNode(exception);
+              node = buildSyntaxErrorNode(exception);
             }
           }
         }
@@ -165,7 +165,7 @@ public class MagikParser {
     return resultNode;
   }
 
-  private AstNode buildParserErrorNode(RecognitionException recognitionException) {
+  private AstNode buildSyntaxErrorNode(RecognitionException recognitionException) {
     int line = recognitionException.getLine();
 
     // parse message, as the exception doesn't provide the raw value
@@ -186,17 +186,17 @@ public class MagikParser {
         .setColumn(column)
         .setType(UtilityTokenType.DUMMY)
         .build();
-    Token parserErrorToken = builder.setValueAndOriginalValue("error")
+    Token syntaxErrorToken = builder.setValueAndOriginalValue("error")
         .setURI(uri)
         .setLine(line)
         .setColumn(column)
-        .setType(UtilityTokenType.PARSER_ERROR)
+        .setType(UtilityTokenType.SYNTAX_ERROR)
         .build();
 
     AstNode dummyNode =
-        new AstNode(MagikGrammar.PARSER_ERROR, "PARSER_ERROR", dummyToken);
+        new AstNode(MagikGrammar.SYNTAX_ERROR, "SYNTAX_ERROR", dummyToken);
     AstNode errorNode =
-        new AstNode(MagikGrammar.PARSER_ERROR, "PARSER_ERROR", parserErrorToken);
+        new AstNode(MagikGrammar.SYNTAX_ERROR, "SYNTAX_ERROR", syntaxErrorToken);
     dummyNode.addChild(errorNode);
     return dummyNode;
   }
