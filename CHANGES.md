@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.1.4 (unreleased)
+0.1.4 (2019-07-26)
 
 - Fixes after reducing size of magik-lint jar
 - Rename ParserErrorCheck to SyntaxErrorCheck
