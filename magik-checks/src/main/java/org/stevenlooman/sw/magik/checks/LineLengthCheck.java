@@ -44,7 +44,7 @@ public class LineLengthCheck extends MagikCheck {
       ++lineNo;
       if (line.length() > maxLineLength + 1) {
         String message = String.format(MESSAGE, line.length(), maxLineLength);
-        addIssue(message, lineNo, line.length());
+        addIssue(message, lineNo, maxLineLength);
       }
     }
   }

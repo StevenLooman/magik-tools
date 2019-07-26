@@ -1,16 +1,12 @@
 package org.stevenlooman.sw.magik.checks;
 
-import com.google.common.base.Strings;
-
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.xpath.api.AstNodeXPathQuery;
-
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
-
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.TemplatedCheck;
 
@@ -55,7 +51,7 @@ public class XPathCheck extends MagikCheck {
    */
   @CheckForNull
   public AstNodeXPathQuery<Object> query() {
-    if (query == null && !Strings.isNullOrEmpty(xpathQuery)) {
+    if (query == null && xpathQuery != null && !xpathQuery.isEmpty()) {
       try {
         query = AstNodeXPathQuery.create(xpathQuery);
       } catch (RuntimeException ex) {

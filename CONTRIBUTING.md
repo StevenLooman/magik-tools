@@ -22,3 +22,5 @@ Creating additional checks can be done as follows. To make this more concrete, t
 
 
 Please make sure to follow the naming conventions already present.
+
+In case you want to visualize the generated AST, use the `sslr-magik-toolkit`.

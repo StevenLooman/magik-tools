@@ -2,16 +2,17 @@ package org.stevenlooman.sw.magik.analysis.scope;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import com.google.common.base.Charsets;
 import com.sonar.sslr.api.AstNode;
 import org.junit.Test;
 import org.stevenlooman.sw.magik.MagikVisitorContext;
 import org.stevenlooman.sw.magik.parser.MagikParser;
 
+import java.nio.charset.Charset;
+
 public class ScopeBuilderVisitorTest {
 
   protected static MagikVisitorContext createContext(String code) throws IllegalArgumentException {
-    MagikParser parser = new MagikParser(Charsets.UTF_8);
+    MagikParser parser = new MagikParser(Charset.forName("UTF-8"));
     AstNode root = parser.parse(code);
     if (root.getChildren().isEmpty()) {
       throw new IllegalArgumentException("Unable to parse code");

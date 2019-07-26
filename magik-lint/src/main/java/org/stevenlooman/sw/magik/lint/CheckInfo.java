@@ -1,7 +1,5 @@
 package org.stevenlooman.sw.magik.lint;
 
-import com.google.common.collect.Lists;
-
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.sonar.check.RuleProperty;
@@ -68,7 +66,7 @@ public class CheckInfo {
    * @throws IllegalAccessException -
    */
   public Iterable<ParameterInfo> getParameters() throws IllegalAccessException {
-    List<ParameterInfo> parameters = Lists.newArrayList();
+    List<ParameterInfo> parameters = new ArrayList<>();
 
     for (Field field: check.getClass().getFields()) {
       RuleProperty ruleProperty = field.getAnnotation(RuleProperty.class);
@@ -149,7 +147,7 @@ public class CheckInfo {
    * @throws FileNotFoundException -
    */
   public static List<CheckInfo> getAllChecks(Configuration config) throws
-      IllegalAccessException, InstantiationException, FileNotFoundException {
+      IllegalAccessException, InstantiationException {
     List<CheckInfo> checkInfos = new ArrayList<>();
 
     List<String> disabled = config.getPropertySplit("disabled");

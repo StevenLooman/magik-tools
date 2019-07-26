@@ -1,0 +1,15 @@
+{
+  "title": "Improper formatting",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "formatting"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "Formatting",
+  "sqKey": "formatting"
+}
