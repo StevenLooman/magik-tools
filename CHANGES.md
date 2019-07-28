@@ -4,6 +4,7 @@ Changes
 0.1.5 (unreleased)
 
 - Add --watch option to magik-lint
+- Add --help option to magik-lint
 
 
 0.1.4 (2019-07-26)
