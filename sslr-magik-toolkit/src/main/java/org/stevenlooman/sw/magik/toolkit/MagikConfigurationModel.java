@@ -29,13 +29,12 @@ final class MagikConfigurationModel implements ConfigurationModel {
     return Charset.forName("UTF-8");
   }
 
-  public Parser getParser() {
+  public Parser<LexerlessGrammar> getParser() {
     Charset charset = getCharset();
     Parser<LexerlessGrammar> magikParser = new ParserAdapter<>(charset, MagikGrammar.create());
     return magikParser;
   }
 
-  @SuppressWarnings("squid:S1192")
   public List<Tokenizer> getTokenizers() {
     return Arrays.asList(
         new StringTokenizer("<span class=\"s\">", "</span>"),

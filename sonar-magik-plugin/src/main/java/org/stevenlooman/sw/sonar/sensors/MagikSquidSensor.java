@@ -62,7 +62,7 @@ public class MagikSquidSensor implements Sensor {
                           NoSonarFilter noSonarFilter) {
     this.checks = checkFactory
         .<MagikCheck>create(CheckList.REPOSITORY_KEY)
-        .addAnnotatedChecks((Iterable) CheckList.getChecks());
+        .addAnnotatedChecks((Iterable<Class<?>>) CheckList.getChecks());
     this.fileLinesContextFactory = fileLinesContextFactory;
     this.noSonarFilter = noSonarFilter;
   }

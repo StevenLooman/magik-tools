@@ -14,7 +14,6 @@ public class ScopeBuilderVisitor extends MagikVisitor {
 
   private Scope scope;
   private Map<AstNode, Scope> scopeIndex = new HashMap<>();
-  private List<AstNode> tempStorage;
 
   public ScopeBuilderVisitor() {
     scope = new GlobalScope();
