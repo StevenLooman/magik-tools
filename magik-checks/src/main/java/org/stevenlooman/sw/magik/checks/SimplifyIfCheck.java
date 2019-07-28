@@ -17,6 +17,11 @@ public class SimplifyIfCheck extends MagikCheck {
       "You can simplify this if by using _elif or combining guards..";
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.IF

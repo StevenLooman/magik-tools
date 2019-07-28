@@ -3,24 +3,19 @@ package org.stevenlooman.sw.magik.checks;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.xpath.api.AstNodeXPathQuery;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
-import org.stevenlooman.sw.magik.TemplatedCheck;
 
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-@TemplatedCheck
 @Rule(key = XPathCheck.CHECK_KEY)
 public class XPathCheck extends MagikCheck {
 
   public static final String CHECK_KEY = "XPath";
-  private static final Logger LOGGER = Loggers.get(XPathCheck.class);
 
   private static final String DEFAULT_XPATH_QUERY = "";
   private static final String DEFAULT_MESSAGE = "The XPath expression matches this piece of code";
@@ -39,6 +34,11 @@ public class XPathCheck extends MagikCheck {
   public String message = DEFAULT_MESSAGE;
 
   private AstNodeXPathQuery<Object> query = null;
+
+  @Override
+  public boolean isTemplatedCheck() {
+    return true;
+  }
 
   @Override
   public List<AstNodeType> subscribedTo() {
@@ -66,8 +66,6 @@ public class XPathCheck extends MagikCheck {
 
   @Override
   public void visitFile(@Nullable AstNode fileNode) {
-    LOGGER.debug("Visiting file: {}", fileNode);
-
     AstNodeXPathQuery<Object> xpath = query();
     if (xpath != null && fileNode != null) {
       for (Object object : xpath.selectNodes(fileNode)) {

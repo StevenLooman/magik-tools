@@ -29,6 +29,11 @@ public class MethodComplexityCheck extends MagikCheck {
   public int maximumComplexity = DEFAULT_MAXIMUM_COMPLEXITY;
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.METHOD_DEFINITION,

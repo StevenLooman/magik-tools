@@ -6,13 +6,11 @@ import com.sonar.sslr.api.Trivia;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
-import org.stevenlooman.sw.magik.TemplatedCheck;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
-@TemplatedCheck
 @Rule(key = CommentRegularExpressionCheck.CHECK_KEY)
 public class CommentRegularExpressionCheck extends MagikCheck {
   public static final String CHECK_KEY = "CommentRegularExpression";
@@ -32,6 +30,11 @@ public class CommentRegularExpressionCheck extends MagikCheck {
       defaultValue = "" + DEFAULT_MESSAGE,
       description = "Message to show when the rule matches")
   public String message = DEFAULT_MESSAGE;
+
+  @Override
+  public boolean isTemplatedCheck() {
+    return true;
+  }
 
   @Override
   public List<AstNodeType> subscribedTo() {

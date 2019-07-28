@@ -5,7 +5,6 @@ import org.json.JSONTokener;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.CheckList;
 import org.stevenlooman.sw.magik.MagikCheck;
-import org.stevenlooman.sw.magik.TemplatedCheck;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -157,13 +156,12 @@ public class CheckInfo {
 
     List<Class<?>> checkClasses = CheckList.getChecks();
     for (Class<?> checkClass: checkClasses) {
-      TemplatedCheck annotation = checkClass.getAnnotation(TemplatedCheck.class);
-      if (annotation != null) {
+      MagikCheck check = (MagikCheck) checkClass.newInstance();
+      if (check.isTemplatedCheck()) {
         // skip templated checks for now
         continue;
       }
 
-      MagikCheck check = (MagikCheck) checkClass.newInstance();
       CheckInfo checkInfo = new CheckInfo(check);
       String name = check.getCheckKeyKebabCase();
       boolean enabled = !disabled.contains(name);

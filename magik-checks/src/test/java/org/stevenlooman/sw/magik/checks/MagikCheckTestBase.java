@@ -10,7 +10,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
 
-@SuppressWarnings("squid:S2187")
 public class MagikCheckTestBase {
   protected static MagikVisitorContext createContext(String code) throws IllegalArgumentException {
     MagikParser parser = new MagikParser(Charset.forName("UTF-8"));

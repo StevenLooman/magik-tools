@@ -20,6 +20,11 @@ public class LocalImportProcedureCheck extends MagikCheck {
   public static final String CHECK_KEY = "LocalImportProcedure";
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.METHOD_DEFINITION);
