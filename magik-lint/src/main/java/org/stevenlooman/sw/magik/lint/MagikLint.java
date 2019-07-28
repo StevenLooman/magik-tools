@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -34,34 +35,15 @@ public class MagikLint {
 
   CommandLine commandLine;
   Configuration config;
+  static final Options options;
 
-  static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING = new HashMap<>();
-
-  static {
-    SEVERITY_EXIT_CODE_MAPPING.put("Major", 2);
-    SEVERITY_EXIT_CODE_MAPPING.put("Minor", 4);
-  }
-
-  MagikLint(String[] args) throws ParseException {
-    commandLine = parseCommandline(args);
-
-    // read configuration
-    if (commandLine.hasOption("rcfile")) {
-      File rcfile = (File) commandLine.getParsedOptionValue("rcfile");
-      Path path = rcfile.toPath();
-      config = new Configuration(path);
-    } else {
-      Path path = ConfigurationLocator.locateConfiguration();
-      if (path != null) {
-        config = new Configuration(path);
-      } else {
-        config = new Configuration();
-      }
-    }
-  }
-
-  private CommandLine parseCommandline(String[] args) throws ParseException {
-    Options options = new Options();
+  static
+  {
+    options = new Options();
+    options.addOption(Option.builder()
+        .longOpt("help")
+        .desc("Show this help")
+        .build());
     options.addOption(Option.builder()
         .longOpt("msg-template")
         .desc("Output pattern")
@@ -94,9 +76,36 @@ public class MagikLint {
         .longOpt("watch")
         .desc("Watch the given directory/file for changes")
         .build());
+  }
 
+  static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING = new HashMap<>();
+
+  static {
+    SEVERITY_EXIT_CODE_MAPPING.put("Major", 2);
+    SEVERITY_EXIT_CODE_MAPPING.put("Minor", 4);
+  }
+
+  MagikLint(String[] args) throws ParseException {
+    commandLine = parseCommandline(args);
+
+    // read configuration
+    if (commandLine.hasOption("rcfile")) {
+      File rcfile = (File) commandLine.getParsedOptionValue("rcfile");
+      Path path = rcfile.toPath();
+      config = new Configuration(path);
+    } else {
+      Path path = ConfigurationLocator.locateConfiguration();
+      if (path != null) {
+        config = new Configuration(path);
+      } else {
+        config = new Configuration();
+      }
+    }
+  }
+
+  private CommandLine parseCommandline(String[] args) throws ParseException {
     CommandLineParser parser = new DefaultParser();
-    CommandLine cmd = parser.parse(options, args);
+    CommandLine cmd = parser.parse(MagikLint.options, args);
     return cmd;
   }
 
@@ -279,8 +288,10 @@ public class MagikLint {
     Iterable<CheckInfo> checkInfos = getAllChecks();
 
     int exitCode = 0;
-    if (commandLine.hasOption("help")) {
-      // XXX TODO: showhelp
+    if (commandLine.hasOption("help")
+        || commandLine.getArgs().length == 0) {
+      HelpFormatter formatter = new HelpFormatter();
+      formatter.printHelp("magik-lint", MagikLint.options);
     } else if (commandLine.hasOption("show-checks")) {
       showChecks(checkInfos);
     } else if (commandLine.hasOption("watch")) {
