@@ -233,16 +233,10 @@ public class MagikParser {
   }
 
   /**
-   * Test if source is parsed by SSLR.
-   * @param source Source code that should have been parsed.
-   * @param node Resulting AstNode.
-   * @return True if source was parsed, false if not.
+   * Test if source contains any magik source.
+   * @param source Potential magik code
+   * @return True if it contains no magik code, false otherwise.
    */
-  private boolean isNotParsed(String source, AstNode node) {
-    source = source.replaceAll("#.*", ""); // remove any comment lines
-    return node.getChildren().isEmpty() && !source.trim().isEmpty();
-  }
-
   private boolean isEmpty(String source) {
     source = source.replaceAll("#.*", ""); // remove any comment lines
     return source.trim().isEmpty();
@@ -377,7 +371,6 @@ public class MagikParser {
   }
 
   private static URI buildUri() {
-    URI uri;
     try {
       return new URI("tests://unittest");
     } catch (URISyntaxException exception) {
