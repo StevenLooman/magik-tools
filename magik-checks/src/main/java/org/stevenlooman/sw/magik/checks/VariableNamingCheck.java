@@ -26,6 +26,11 @@ public class VariableNamingCheck extends MagikCheck {
   public String whitelist = DEFAULT_WHITELIST;
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.VARIABLE_DECLARATION,

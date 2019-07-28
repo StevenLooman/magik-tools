@@ -19,6 +19,11 @@ public class SizeZeroEmptyCheck extends MagikCheck {
   public static final String CHECK_KEY = "SizeZeroEmpty";
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.EQUALITY_EXPRESSION);
@@ -63,7 +68,7 @@ public class SizeZeroEmptyCheck extends MagikCheck {
   private AstNode getLastDescendant(AstNode node, AstNodeType nodeType) {
     List<AstNode> children = node.getChildren();
     Collections.reverse(children);
-    Iterator childrenIter = children.iterator();
+    Iterator<AstNode> childrenIter = children.iterator();
 
     AstNode childNode;
     do {

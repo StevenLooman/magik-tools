@@ -21,6 +21,11 @@ public class FileNotInLoadListCheck extends MagikCheck {
   public static final String CHECK_KEY = "FileNotInLoadList";
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Collections.emptyList();
   }

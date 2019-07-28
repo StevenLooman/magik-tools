@@ -28,6 +28,11 @@ public class CommentedCodeCheck extends MagikCheck {
   public int minLines = DEFAULT_MIN_LINES;
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(MagikGrammar.values());
   }
@@ -58,12 +63,6 @@ public class CommentedCodeCheck extends MagikCheck {
         .map(triviaComment -> triviaComment.substring(1))
         .collect(Collectors.joining("\n"));
     visitComment(token, comment);
-  }
-
-
-
-  private boolean containsCode(String comment) {
-    return false;
   }
 
 }

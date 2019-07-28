@@ -31,6 +31,11 @@ public class ForbiddenCallCheck extends MagikCheck {
   }
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.METHOD_INVOCATION,

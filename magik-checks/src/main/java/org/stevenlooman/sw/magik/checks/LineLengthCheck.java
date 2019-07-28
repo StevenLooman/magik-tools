@@ -25,6 +25,11 @@ public class LineLengthCheck extends MagikCheck {
   public int maxLineLength = DEFAULT_MAX_LINE_LENGTH;
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Collections.emptyList();
   }
