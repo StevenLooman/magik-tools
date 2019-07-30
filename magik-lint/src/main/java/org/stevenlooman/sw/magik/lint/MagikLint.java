@@ -37,8 +37,7 @@ public class MagikLint {
   Configuration config;
   static final Options options;
 
-  static
-  {
+  static {
     options = new Options();
     options.addOption(Option.builder()
         .longOpt("help")

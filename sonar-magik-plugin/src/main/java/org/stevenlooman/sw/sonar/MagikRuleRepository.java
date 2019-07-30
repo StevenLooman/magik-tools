@@ -49,7 +49,7 @@ public class MagikRuleRepository implements RulesDefinition {
           .filter(rule -> templatedRules.contains(rule.key()))
           .forEach(rule -> rule.setTemplate(true));
     } catch (IllegalAccessException | InstantiationException ex) {
-
+      // pass
     }
 
     repository.done();
