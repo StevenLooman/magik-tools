@@ -131,6 +131,10 @@ public class MagikSquidSensor implements Sensor {
       visitorContext = new MagikVisitorContext(path, fileContent, ex);
       LOGGER.error("Unable to parse file: {}", inputFile);
       LOGGER.error("Exception", ex);
+    } catch (IOException ex) {
+      LOGGER.error("Unable to parse file: {}, aborting analysis of this file", inputFile);
+      LOGGER.error("Exception", ex);
+      return;
     }
 
     // save issues

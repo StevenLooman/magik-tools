@@ -16,7 +16,7 @@ public class MagikCheckTestBase {
 
   /**
    * VSCode runs from module directory, mvn runs from project directory.
-   * 
+   *
    * @return Proper {{Path}} to file.
    */
   protected Path getPath(Path relativePath) {
@@ -30,14 +30,14 @@ public class MagikCheckTestBase {
   protected static MagikVisitorContext createContext(String code)
       throws IllegalArgumentException {
     MagikParser parser = new MagikParser(Charset.forName("UTF-8"));
-    AstNode root = parser.parse(code);
+    AstNode root = parser.parseSafe(code);
     return new MagikVisitorContext(code, root);
   }
 
   protected static MagikVisitorContext createFileContext(Path path)
       throws IllegalArgumentException {
     MagikParser parser = new MagikParser(Charset.forName("UTF-8"));
-    AstNode root = parser.parse(path);
+    AstNode root = parser.parseSafe(path);
     if (root.getChildren().isEmpty()) {
       throw new IllegalArgumentException("Unable to parse code");
     }
