@@ -30,7 +30,7 @@ public class MagikParserTest {
     String code =
         "_block\n" +
         "_endbloc";
-    AstNode node = parser.parse(code);
+    AstNode node = parser.parseSafe(code);
     assertThat(node.getChildren()).hasSize(1);
     AstNode syntaxErrorNode = node.getChildren().get(0);
     assertThat(syntaxErrorNode.getType()).isEqualTo(MagikGrammar.SYNTAX_ERROR);
@@ -46,7 +46,7 @@ public class MagikParserTest {
         "\t_block\n" +
         "\t_endbloc\n" +
         "_endmethod";
-    AstNode node = parser.parse(code);
+    AstNode node = parser.parseSafe(code);
     assertThat(node.getChildren()).hasSize(1);
     AstNode syntaxErrorNode = node.getChildren().get(0);
     assertThat(syntaxErrorNode.getType()).isEqualTo(MagikGrammar.SYNTAX_ERROR);
@@ -61,7 +61,7 @@ public class MagikParserTest {
         "_method object.m2\n" +
         "\t_local a << {1 2}\n" +
         "_endmethod";
-    AstNode node = parser.parse(code);
+    AstNode node = parser.parseSafe(code);
     assertThat(node.getChildren()).hasSize(1);
     AstNode syntaxErrorNode = node.getChildren().get(0);
     assertThat(syntaxErrorNode.getType()).isEqualTo(MagikGrammar.SYNTAX_ERROR);
@@ -76,7 +76,7 @@ public class MagikParserTest {
         "_method object.m3\n" +
         "\t_local a << prc(:)\n" +
         "_endmethod";
-    AstNode node = parser.parse(code);
+    AstNode node = parser.parseSafe(code);
     assertThat(node.getChildren()).hasSize(1);
     AstNode syntaxErrorNode = node.getChildren().get(0);
     assertThat(syntaxErrorNode.getType()).isEqualTo(MagikGrammar.SYNTAX_ERROR);

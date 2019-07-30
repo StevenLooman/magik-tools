@@ -67,38 +67,64 @@ public class MagikParser {
 
   /**
    * Parse a string and return the AstNode.
+   *
+   * @param source Source to parse
+   * @return Tree
+   * @throws IOException -
+   */
+  public AstNode parse(String source) throws IOException {
+    StringReader sr = new StringReader(source);
+    return parse(sr);
+  }
+
+  /**
+   * Parse a string and return the AstNode.
+   * IOExceptions are caught, not handled.
+   *
    * @param source Source to parse
    * @return Tree
    */
-  public AstNode parse(String source) {
-    AstNode node = null;
-    try (StringReader sr = new StringReader(source)) {
-      node = parse(sr);
+  public AstNode parseSafe(String source) {
+    try {
+      return parse(source);
     } catch (IOException ex) {
-      System.out.println("Caught exception during parsing: " + ex);
-      ex.printStackTrace();
+      System.out.println("Caught exception: " + ex);
     }
-    return node;
+    return null;
   }
 
   /**
    * Parse a file and return the AstNode.
+   *
    * @param path Path to file
    * @return Tree
+   * @throws IOException
    */
-  public AstNode parse(Path path) {
-    AstNode node = null;
-    try (FileReader sr = new FileReader(path.toFile())) {
-      node = parse(sr);
+  public AstNode parse(Path path) throws IOException {
+    FileReader sr = new FileReader(path.toFile());
+    return parse(sr);
+  }
+
+  /**
+   * Parse a file and return the AstNode.
+   * IOExceptions are caught, not handled.
+   *
+   * @param path Path to file
+   * @return Tree
+   * @throws IOException
+   */
+  public AstNode parseSafe(Path path) {
+    try {
+      return parse(path);
     } catch (IOException ex) {
-      System.out.println("Caught exception during parsing: " + ex);
-      ex.printStackTrace();
+      System.out.println("Caught exception: " + ex);
     }
-    return node;
+    return null;
   }
 
   /**
    * Parse sources from reader.
+   *
    * @param reader Reader to read from.
    * @return Parsed node.
    * @throws IOException Exception raised.
@@ -203,6 +229,7 @@ public class MagikParser {
 
   /**
    * Update token value.
+   *
    * @param node Node to update.
    */
   private void updateIdentifiersSymbolsCasing(AstNode node) {
@@ -234,6 +261,7 @@ public class MagikParser {
 
   /**
    * Test if source contains any magik source.
+   *
    * @param source Potential magik code
    * @return True if it contains no magik code, false otherwise.
    */
@@ -244,6 +272,7 @@ public class MagikParser {
 
   /**
    * Parse a part as a message patch.
+   *
    * @param source Part to parse.
    * @return Resulting AstNode.
    */
@@ -254,6 +283,7 @@ public class MagikParser {
 
   /**
    * Parse a part as Magik code.
+   *
    * @param source Part to parse.
    * @return Resulting AstNode.
    */
@@ -263,6 +293,7 @@ public class MagikParser {
 
   /**
    * Test if 'read_message_patch' was parsed, indicating the start of a message patch.
+   *
    * @param node AstNode to test.
    * @return True if the next part is a message patch, false if not.
    */
@@ -282,6 +313,7 @@ public class MagikParser {
 
   /**
    * Update the token lines to match the lines in the source file, instead of the parsed part.
+   *
    * @param tokens Tokens to update.
    * @param lineOffset Offset to add to lines.
    */
@@ -322,6 +354,7 @@ public class MagikParser {
 
   /**
    * Add child nodes to parent node.
+   *
    * @param parentNode Parent node to add to.
    * @param children Child nodes to add.
    */
@@ -333,6 +366,7 @@ public class MagikParser {
 
   /**
    * Parse an identifier.
+   *
    * @param value Identifier to parse.
    * @return Parsed identifier.
    */

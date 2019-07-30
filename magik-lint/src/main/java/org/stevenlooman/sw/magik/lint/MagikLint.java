@@ -137,7 +137,7 @@ public class MagikLint {
     }
 
     MagikParser parser = new MagikParser(charset);
-    AstNode root = parser.parse(fileContents);
+    AstNode root = parser.parseSafe(fileContents);
 
     return new MagikVisitorContext(path, fileContents, root);
   }

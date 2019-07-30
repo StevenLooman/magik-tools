@@ -41,7 +41,7 @@ public class CommentedCodeCheck extends MagikCheck {
     Charset charset = Charset.forName("iso8859_1");
     MagikParser parser = new MagikParser(charset);
     try {
-      parser.parse(comment);
+      parser.parseSafe(comment);
     } catch (RecognitionException exception) {
       return;
     }

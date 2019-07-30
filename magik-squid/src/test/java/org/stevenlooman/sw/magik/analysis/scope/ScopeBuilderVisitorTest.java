@@ -13,7 +13,7 @@ public class ScopeBuilderVisitorTest {
 
   protected static MagikVisitorContext createContext(String code) throws IllegalArgumentException {
     MagikParser parser = new MagikParser(Charset.forName("UTF-8"));
-    AstNode root = parser.parse(code);
+    AstNode root = parser.parseSafe(code);
     if (root.getChildren().isEmpty()) {
       throw new IllegalArgumentException("Unable to parse code");
     }

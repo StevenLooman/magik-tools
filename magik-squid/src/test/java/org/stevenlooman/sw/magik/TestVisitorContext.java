@@ -9,7 +9,7 @@ public class TestVisitorContext {
 
   public static MagikVisitorContext create(String code) {
     MagikParser parser = new MagikParser(Charset.forName("UTF-8"));
-    AstNode root = parser.parse(code);
+    AstNode root = parser.parseSafe(code);
     return new MagikVisitorContext(code, root);
   }
 

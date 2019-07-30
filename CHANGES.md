@@ -5,6 +5,7 @@ Changes
 
 - Add --watch option to magik-lint
 - Add --help option to magik-lint
+- Provide safe and unsafe versions of MagikParser.parse()
 
 
 0.1.4 (2019-07-26)
