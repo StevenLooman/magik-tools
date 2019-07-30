@@ -1,7 +1,7 @@
 language: java
 jdk:
 - openjdk8
-before_deploy: mvn package
+before_deploy: mvn -B -DskipTests=true package
 deploy:
   provider: releases
   api_key:
