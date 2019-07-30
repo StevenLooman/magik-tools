@@ -17,7 +17,7 @@ public class MagikFileScannerTest {
   /**
    * VSCode runs from module directory, mvn runs from project directory.
    * 
-   * @return Base {{Path}} which we run from.
+   * @return Proper {{Path}} to use.
    */
   private Path getPath(String relativePath) {
     Path path = Paths.get(".").toAbsolutePath().getParent();

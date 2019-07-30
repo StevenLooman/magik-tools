@@ -15,16 +15,16 @@ public class FileNotInLoadListCheckTest extends MagikCheckTestBase {
   @Test
   public void testNotInLoadList() {
     MagikCheck check = new FileNotInLoadListCheck();
-    Path path = Paths.get("src/test/resources/test_product/test_module/source/not_in_load_list.magik");
-    List<MagikIssue> issues = runFileCheck(path, check);
+    Path path = Paths.get("magik-checks/src/test/resources/test_product/test_module/source/not_in_load_list.magik");
+    List<MagikIssue> issues = runCheck(path, check);
     assertThat(issues).isNotEmpty();
   }
 
   @Test
   public void testInLoadList() {
     MagikCheck check = new FileNotInLoadListCheck();
-    Path path = Paths.get("src/test/resources/test_product/test_module/source/in_load_list.magik");
-    List<MagikIssue> issues = runFileCheck(path, check);
+    Path path = Paths.get("magik-checks/src/test/resources/test_product/test_module/source/in_load_list.magik");
+    List<MagikIssue> issues = runCheck(path, check);
     assertThat(issues).isEmpty();
   }
 
