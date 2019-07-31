@@ -19,6 +19,8 @@ Installation
 
 Copy the plugin (`sonar-magik-plugin-<version>.jar`) to your `sonarqube/extensions/plugins` directory. (Re)start Sonar to activate the plugin.
 
+Pre-built artifacts/jars can be found at [`sonar-magik/releases`](https://github.com/StevenLooman/sonar-magik/releases).
+
 
 Analyzing projects
 ------------------
@@ -43,7 +45,7 @@ You can build the plugin using maven, like so:
 $ mvn clean package
 ```
 
-An artifact/jar will be created at `sonar-magik-plugin/target/sonar-magik-plugin-<version>.jar`.
+The artifact/jar will be created at `sonar-magik-plugin/target/sonar-magik-plugin-<version>.jar`.
 
 
 Unit tests
@@ -82,19 +84,19 @@ An XPath-template-rule is available to quickly build custom rules. Follow these 
 Magik linter
 ------------
 
-A linter for magik is available in the `magik-lint` directory. See `magik-link/README.md` for more information.
+A linter for magik is available in the [`magik-lint`](magik-lint) directory. See [`magik-lint/README.md`](magik-lint/README.md) for more information.
 
 
 Contributing
 ------------
 
-See `CONTRIBUTING.md` for instruction on how to contribute.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for instruction on how to contribute.
 
 
 License
 -------
 
-This project is licensed under LGPLv3, see `LICENSE.md`.
+This project is licensed under LGPLv3, see [`LICENSE.md`](LICENSE.md).
 
 
 Commercial use
