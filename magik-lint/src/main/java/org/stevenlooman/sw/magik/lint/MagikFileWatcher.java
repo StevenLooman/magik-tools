@@ -53,6 +53,7 @@ class MagikFileWatcher {
           continue;
         }
 
+        @SuppressWarnings("unchecked")
         WatchEvent<Path> ev = (WatchEvent<Path>)event;
         Path pathBase = watchKeys.get(key);
         Path pathRelative = ev.context();

@@ -29,24 +29,24 @@ public class FileLinesVisitor extends MagikVisitor {
   private Set<Integer> executableLines = new HashSet<>();
   private Set<Integer> nosonarLines = new HashSet<>();
 
-  private static final Set<AstNodeType> NON_EXECUTABLE_TOKENS = new HashSet<AstNodeType>() {{
-      add(MagikKeyword.HANDLING);
-      add(MagikKeyword.BLOCK);
-      add(MagikKeyword.TRY);
-      add(MagikKeyword.WHEN);
-      add(MagikKeyword.ENDTRY);
-      add(MagikKeyword.PROTECT);
-      add(MagikKeyword.PROTECTION);
-      add(MagikKeyword.ENDPROTECT);
-      add(MagikKeyword.LOCK);
-      add(MagikKeyword.ENDLOCK);
-      add(MagikKeyword.CATCH);
-      add(MagikKeyword.ENDCATCH);
-      add(MagikKeyword.PROC);
-      add(MagikKeyword.ENDPROC);
-      add(MagikPunctuator.DOLLAR);
-    }
-  };
+  private static final Set<AstNodeType> NON_EXECUTABLE_TOKENS = new HashSet<AstNodeType>(
+      Arrays.asList(
+        MagikKeyword.HANDLING,
+        MagikKeyword.BLOCK,
+        MagikKeyword.TRY,
+        MagikKeyword.WHEN,
+        MagikKeyword.ENDTRY,
+        MagikKeyword.PROTECT,
+        MagikKeyword.PROTECTION,
+        MagikKeyword.ENDPROTECT,
+        MagikKeyword.LOCK,
+        MagikKeyword.ENDLOCK,
+        MagikKeyword.CATCH,
+        MagikKeyword.ENDCATCH,
+        MagikKeyword.PROC,
+        MagikKeyword.ENDPROC,
+        MagikPunctuator.DOLLAR
+  ));
 
   public FileLinesVisitor(boolean ignoreHeaderComments) {
     this.ignoreHeaderComments = ignoreHeaderComments;

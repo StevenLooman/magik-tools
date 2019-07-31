@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.stevenlooman.sw.magik.MagikVisitorContext;
 import org.stevenlooman.sw.magik.TestVisitorContext;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,7 +51,7 @@ public class FileMetricsTest {
   @Test
   public void testExecutableLines1() {
     String code = "print(1)";
-    Set<Integer> expected = new HashSet<Integer>(){{add(1);}};
+    Set<Integer> expected = new HashSet<Integer>(Arrays.asList(1));
     assertThat(metrics(code).executableLines()).isEqualTo(expected);
   }
 
@@ -64,7 +65,7 @@ public class FileMetricsTest {
         "\tprint(1)\n" +
         "\t_return _self\n" +
         "_endmethod\n";
-    Set<Integer> expected = new HashSet<Integer>(){{add(5); add(6);}};
+    Set<Integer> expected = new HashSet<Integer>(Arrays.asList(5, 6));
     assertThat(metrics(code).executableLines()).isEqualTo(expected);
   }
 
@@ -77,7 +78,7 @@ public class FileMetricsTest {
         "\t## method header\n" +
         "\t_return _self.call(:symbol, c)\n" +
         "_endmethod\n";
-    Set<Integer> expected = new HashSet<Integer>(){{add(5);}};
+    Set<Integer> expected = new HashSet<Integer>(Arrays.asList(5));
     assertThat(metrics(code).executableLines()).isEqualTo(expected);
   }
 
@@ -93,7 +94,7 @@ public class FileMetricsTest {
         "_else\n" +
         "\tprint(3)\n" +
         "_endif\n";
-    Set<Integer> expected = new HashSet<Integer>(){{add(1); add(3); add(4); add(6); add(8);}};
+    Set<Integer> expected = new HashSet<Integer>(Arrays.asList(1, 3, 4, 6, 8));
     assertThat(metrics(code).executableLines()).isEqualTo(expected);
   }
 
@@ -105,7 +106,7 @@ public class FileMetricsTest {
         "\t\tprint(1)\n" +
         "\t_endproc\n" +
         "_endmethod\n";
-    Set<Integer> expected = new HashSet<Integer>(){{add(2); add(3);}};
+    Set<Integer> expected = new HashSet<Integer>(Arrays.asList(2, 3));
     assertThat(metrics(code).executableLines()).isEqualTo(expected);
   }
 
@@ -126,9 +127,7 @@ public class FileMetricsTest {
         "\t_self.method_4(p_props[:key_4])\n" +
         "_endmethod\n" +
         "$";
-    Set<Integer> expected = new HashSet<Integer>(){{
-      add(3); add(4); add(5); add(6); add(7); add(8); add(9); add(10); add(11); add(12);
-    }};
+    Set<Integer> expected = new HashSet<Integer>(Arrays.asList(3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
     assertThat(metrics(code).executableLines()).isEqualTo(expected);
   }
 
@@ -144,7 +143,7 @@ public class FileMetricsTest {
         "\t_endloop\n" +
         "_endmethod\n" +
         "$";
-    Set<Integer> expected = new HashSet<Integer>(){{add(4); add(6);}};
+    Set<Integer> expected = new HashSet<Integer>(Arrays.asList(4, 6));
     assertThat(metrics(code).executableLines()).isEqualTo(expected);
   }
 

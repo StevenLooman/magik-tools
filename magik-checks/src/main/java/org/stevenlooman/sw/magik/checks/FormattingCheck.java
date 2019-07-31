@@ -21,28 +21,27 @@ public class FormattingCheck extends MagikCheck {
   private String[] lines;
   private Token lastToken;
 
-  private static final Set<String> AUGMENTED_ASSIGNMENT_TOKENS = new HashSet<String>() {
-    {
-      add("_is");
-      add("_isnt");
-      add("_andif");
-      add("_and");
-      add("_orif");
-      add("_or");
-      add("_xor");
-      add("_div");
-      add("_mod");
-      add("_cf");
+  private static final Set<String> AUGMENTED_ASSIGNMENT_TOKENS = new HashSet<String>(
+      Arrays.asList(
+        "_is",
+        "_isnt",
+        "_andif",
+        "_and",
+        "_orif",
+        "_or",
+        "_xor",
+        "_div",
+        "_mod",
+        "_cf",
 
-      add("+");
-      add("-");
-      add("*");
-      add("/");
-      add("**");
-      add("=");
-      add("~=");
-    }
-  };
+        "+",
+        "-",
+        "*",
+        "/",
+        "**",
+        "=",
+        "~="
+  ));
 
   @Override
   public boolean isTemplatedCheck() {

@@ -67,18 +67,6 @@ public class MagikParser {
 
   /**
    * Parse a string and return the AstNode.
-   *
-   * @param source Source to parse
-   * @return Tree
-   * @throws IOException -
-   */
-  public AstNode parse(String source) throws IOException {
-    StringReader sr = new StringReader(source);
-    return parse(sr);
-  }
-
-  /**
-   * Parse a string and return the AstNode.
    * IOExceptions are caught, not handled.
    *
    * @param source Source to parse
@@ -95,23 +83,11 @@ public class MagikParser {
 
   /**
    * Parse a file and return the AstNode.
-   *
-   * @param path Path to file
-   * @return Tree
-   * @throws IOException
-   */
-  public AstNode parse(Path path) throws IOException {
-    FileReader sr = new FileReader(path.toFile());
-    return parse(sr);
-  }
-
-  /**
-   * Parse a file and return the AstNode.
    * IOExceptions are caught, not handled.
    *
    * @param path Path to file
    * @return Tree
-   * @throws IOException
+   * @throws IOException -
    */
   public AstNode parseSafe(Path path) {
     try {
@@ -120,6 +96,30 @@ public class MagikParser {
       System.out.println("Caught exception: " + ex);
     }
     return null;
+  }
+
+  /**
+   * Parse a string and return the AstNode.
+   *
+   * @param source Source to parse
+   * @return Tree
+   * @throws IOException -
+   */
+  public AstNode parse(String source) throws IOException {
+    StringReader sr = new StringReader(source);
+    return parse(sr);
+  }
+
+  /**
+   * Parse a file and return the AstNode.
+   *
+   * @param path Path to file
+   * @return Tree
+   * @throws IOException -
+   */
+  public AstNode parse(Path path) throws IOException {
+    FileReader sr = new FileReader(path.toFile());
+    return parse(sr);
   }
 
   /**

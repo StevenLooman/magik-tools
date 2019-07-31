@@ -6,7 +6,6 @@ import org.stevenlooman.sw.magik.MagikIssue;
 import org.stevenlooman.sw.magik.MagikVisitorContext;
 import org.stevenlooman.sw.magik.parser.MagikParser;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
