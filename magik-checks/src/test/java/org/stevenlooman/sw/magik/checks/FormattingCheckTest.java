@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.MagikIssue;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -173,7 +174,7 @@ public class FormattingCheckTest extends MagikCheckTestBase {
   }
 
   @Test
-  public void testFile() {
+  public void testFile() throws IllegalArgumentException, IOException {
     MagikCheck check = new FormattingCheck();
     Path path = Paths.get("magik-checks/src/test/resources/test_product/test_module/source/in_load_list.magik");
     List<MagikIssue> issues = runCheck(path, check);
