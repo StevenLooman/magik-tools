@@ -6,6 +6,9 @@ import org.stevenlooman.sw.magik.MagikIssue;
 import org.stevenlooman.sw.magik.MagikVisitorContext;
 import org.stevenlooman.sw.magik.parser.MagikParser;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,6 +29,16 @@ public class MagikCheckTestBase {
     return Paths.get(".").resolve(relativePath);
   }
 
+  protected static String readFileContents(Path path, Charset charset) throws IOException {
+    File file = path.toFile();
+    FileInputStream fis = new FileInputStream(file);
+    byte[] data = new byte[(int) file.length()];
+    fis.read(data);
+    fis.close();
+
+    return new String(data, charset);
+  }
+
   protected static MagikVisitorContext createContext(String code)
       throws IllegalArgumentException {
     MagikParser parser = new MagikParser(Charset.forName("UTF-8"));
@@ -34,13 +47,12 @@ public class MagikCheckTestBase {
   }
 
   protected static MagikVisitorContext createFileContext(Path path)
-      throws IllegalArgumentException {
-    MagikParser parser = new MagikParser(Charset.forName("UTF-8"));
+      throws IllegalArgumentException, IOException {
+    Charset charset = Charset.forName("UTF-8");
+    MagikParser parser = new MagikParser(charset);
     AstNode root = parser.parseSafe(path);
-    if (root.getChildren().isEmpty()) {
-      throw new IllegalArgumentException("Unable to parse code");
-    }
-    return new MagikVisitorContext(path, root);
+    String fileContent = readFileContents(path, charset);
+    return new MagikVisitorContext(path, fileContent, root);
   }
 
   protected List<MagikIssue> runCheck(String code, MagikCheck check)
@@ -51,7 +63,7 @@ public class MagikCheckTestBase {
   }
 
   protected List<MagikIssue> runCheck(Path path, MagikCheck check)
-      throws IllegalArgumentException {
+      throws IllegalArgumentException, IOException {
     Path fixedPath = getPath(path);
     MagikVisitorContext context = createFileContext(fixedPath);
     List<MagikIssue> issues = check.scanFileForIssues(context);
