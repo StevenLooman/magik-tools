@@ -7,6 +7,7 @@ Changes
 - Add --help option to magik-lint
 - Provide safe and unsafe versions of MagikParser.parse()
 - Update README (@sebastiaanspeck)
+- Fix error in FormattingCheck when trying to check SYNTAX_ERROR tokens
 
 
 0.1.4 (2019-07-26)

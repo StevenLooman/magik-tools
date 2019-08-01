@@ -174,6 +174,14 @@ public class FormattingCheckTest extends MagikCheckTestBase {
   }
 
   @Test
+  public void testSyntaxError() {
+    MagikCheck check = new FormattingCheck();
+    String code = "_method";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
   public void testFile() throws IllegalArgumentException, IOException {
     MagikCheck check = new FormattingCheck();
     Path path = Paths.get("magik-checks/src/test/resources/test_product/test_module/source/in_load_list.magik");

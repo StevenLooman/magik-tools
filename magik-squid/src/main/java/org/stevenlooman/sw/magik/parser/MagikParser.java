@@ -163,7 +163,7 @@ public class MagikParser {
             } catch (RecognitionException exception) {
               // Don't throw, magik parser also can continue if it encounters invalid code.
               // Instead, build a special node so this is recognizable.
-              node = buildSyntaxErrorNode(exception);
+              node = buildSyntaxErrorNode(part, exception);
             }
           }
         }
@@ -191,8 +191,12 @@ public class MagikParser {
     return resultNode;
   }
 
-  private AstNode buildSyntaxErrorNode(RecognitionException recognitionException) {
+  private AstNode buildSyntaxErrorNode(String part, RecognitionException recognitionException) {
     int line = recognitionException.getLine();
+    String[] lines = part.split("\n");
+    if (lines.length <= line) {
+      line = lines.length;
+    }
 
     // parse message, as the exception doesn't provide the raw value
     String message = recognitionException.getMessage();

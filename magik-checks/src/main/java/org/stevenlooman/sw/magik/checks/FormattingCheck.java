@@ -6,6 +6,7 @@ import com.sonar.sslr.api.Token;
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.MagikVisitorContext;
+import org.stevenlooman.sw.magik.parser.MagikParser;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -64,7 +65,7 @@ public class FormattingCheck extends MagikCheck {
 
   @Override
   public void visitToken(Token token) {
-    if (lines == null) {
+    if (token.getType() == MagikParser.UtilityTokenType.SYNTAX_ERROR) {
       return;
     }
 
