@@ -6,7 +6,6 @@ import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.analysis.scope.GlobalScope;
 import org.stevenlooman.sw.magik.analysis.scope.Scope;
-import org.stevenlooman.sw.magik.analysis.scope.ScopeBuilderVisitor;
 import org.stevenlooman.sw.magik.analysis.scope.ScopeEntry;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 import org.stevenlooman.sw.magik.api.MagikPunctuator;
