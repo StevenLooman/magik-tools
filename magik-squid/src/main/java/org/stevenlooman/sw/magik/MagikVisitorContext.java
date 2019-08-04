@@ -4,6 +4,9 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.RecognitionException;
 import com.sonar.sslr.api.Token;
 
+import org.stevenlooman.sw.magik.analysis.scope.GlobalScope;
+import org.stevenlooman.sw.magik.analysis.scope.ScopeBuilderVisitor;
+
 import java.nio.file.Path;
 import java.util.List;
 import javax.annotation.CheckForNull;
@@ -13,6 +16,7 @@ public class MagikVisitorContext {
   private final String fileContent;
   private final AstNode rootTree;
   private final RecognitionException parsingException;
+  private ScopeBuilderVisitor scopeBuilder;
 
   public MagikVisitorContext(Path path, String fileContent, AstNode tree) {
     this(path, fileContent, tree, null);
@@ -62,4 +66,20 @@ public class MagikVisitorContext {
   public Path path() {
     return path;
   }
+
+  /**
+   * Get the Global scope from this context.
+   */
+  public GlobalScope getGlobalScope() {
+    if (scopeBuilder == null
+        && rootTree != null) {
+      scopeBuilder = new ScopeBuilderVisitor();
+      scopeBuilder.scanNode(rootTree);
+    }
+    if (scopeBuilder == null) {
+      return null;
+    }
+    return scopeBuilder.getGlobalScope();
+  }
+
 }

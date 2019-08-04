@@ -12,15 +12,17 @@ import java.util.Map;
 
 public class ScopeBuilderVisitor extends MagikVisitor {
 
+  private GlobalScope globalScope;
   private Scope scope;
   private Map<AstNode, Scope> scopeIndex = new HashMap<>();
 
   public ScopeBuilderVisitor() {
-    scope = new GlobalScope();
+    globalScope = new GlobalScope(scopeIndex);
+    scope = globalScope;
   }
 
-  public Scope getScope() {
-    return scope;
+  public GlobalScope getGlobalScope() {
+    return globalScope;
   }
 
   @Override
@@ -167,25 +169,6 @@ public class ScopeBuilderVisitor extends MagikVisitor {
   private void leaveNodeBody(AstNode node) {
     // pop current scope
     scope = scope.getParentScope();
-  }
-
-  /**
-   * Get the Scope for a AstNode
-   * @param node Node to look for
-   * @return Scope for node, or global scope if node is not found.
-   */
-  public Scope getScopeForNode(AstNode node) {
-    // find scope for this node
-    AstNode currentNode = node;
-    while (currentNode != null) {
-      if (scopeIndex.containsKey(currentNode)) {
-        return scopeIndex.get(currentNode);
-      }
-
-      currentNode = currentNode.getParent();
-    }
-
-    return scope; // get global scope
   }
 
 }
