@@ -32,7 +32,7 @@ public class GlobalScope extends Scope {
     return scopeEntry;
   }
 
-   /**
+  /**
    * Get the Scope for a AstNode
    * @param node Node to look for
    * @return Scope for node, or global scope if node is not found.

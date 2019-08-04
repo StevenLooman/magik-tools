@@ -9,6 +9,7 @@ Changes
 - Update README (@sebastiaanspeck)
 - Fix error in FormattingCheck when trying to check SYNTAX_ERROR tokens
 - Let MagikVisitorContext handle Scope building
+- Add ${tag} to MessageFormatReporter
 
 
 0.1.4 (2019-07-26)
