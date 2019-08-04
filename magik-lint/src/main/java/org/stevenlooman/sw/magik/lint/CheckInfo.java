@@ -85,7 +85,7 @@ public class CheckInfo {
 
   private JSONObject readMetadata() {
     // determine path
-    Class klass = check.getClass();
+    Class<?> klass = check.getClass();
     String simpleName = klass.getSimpleName();
     String name = simpleName.substring(0, simpleName.length() - 5);  // strip Check
     String filename = "/" + CheckList.PROFILE_DIR + "/" + name + ".json";
