@@ -31,7 +31,7 @@ public class ScopeBuilderVisitorTest {
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
     visitor.scanFile(context);
 
-    Scope globalScope = visitor.getScope();
+    Scope globalScope = visitor.getGlobalScope();
     Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     ScopeEntry entryA = methodScope.getScopeEntry("a");

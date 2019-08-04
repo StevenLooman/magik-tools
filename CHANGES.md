@@ -8,6 +8,7 @@ Changes
 - Provide safe and unsafe versions of MagikParser.parse()
 - Update README (@sebastiaanspeck)
 - Fix error in FormattingCheck when trying to check SYNTAX_ERROR tokens
+- Let MagikVisitorContext handle Scope building
 
 
 0.1.4 (2019-07-26)

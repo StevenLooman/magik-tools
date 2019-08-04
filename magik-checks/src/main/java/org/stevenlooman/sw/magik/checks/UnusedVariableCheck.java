@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
+import org.stevenlooman.sw.magik.analysis.scope.GlobalScope;
 import org.stevenlooman.sw.magik.analysis.scope.Scope;
 import org.stevenlooman.sw.magik.analysis.scope.ScopeBuilderVisitor;
 import org.stevenlooman.sw.magik.analysis.scope.ScopeEntry;
@@ -22,7 +23,6 @@ public class UnusedVariableCheck extends MagikCheck {
   public static final String CHECK_KEY = "UnusedVariable";
   private boolean checkParameters;
 
-  ScopeBuilderVisitor scopeBuilder;
   Set<AstNode> usedIdentifiers = new HashSet<>();
 
   public UnusedVariableCheck() {
@@ -48,11 +48,7 @@ public class UnusedVariableCheck extends MagikCheck {
   @Override
   public void visitNode(AstNode node) {
     // ensure part of global scope
-    if (node.getType() == MagikGrammar.MAGIK) {
-      // construct scope
-      scopeBuilder = new ScopeBuilderVisitor();
-      scopeBuilder.scanNode(node);
-    } else if (node.getType() == MagikGrammar.ATOM) {
+    if (node.getType() == MagikGrammar.ATOM) {
       // save used identifiers
       AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
       if (identifierNode == null) {
@@ -73,7 +69,8 @@ public class UnusedVariableCheck extends MagikCheck {
   private boolean isOfScopeEntryType(AstNode identifierNode, ScopeEntry.Type type) {
     String identifier = identifierNode.getTokenValue();
 
-    Scope scope = scopeBuilder.getScopeForNode(identifierNode);
+    GlobalScope globalScope = getContext().getGlobalScope();
+    Scope scope = globalScope.getScopeForNode(identifierNode);
     ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
 
     return scopeEntry.getType() == type;
@@ -123,6 +120,7 @@ public class UnusedVariableCheck extends MagikCheck {
   }
 
   private boolean anyNextSiblingUsed(AstNode identifierNode) {
+    GlobalScope globalScope = getContext().getGlobalScope();
     AstNode sibling = identifierNode.getNextSibling();
     while (sibling != null) {
       if (sibling.getType() != MagikGrammar.IDENTIFIER) {
@@ -131,13 +129,12 @@ public class UnusedVariableCheck extends MagikCheck {
       }
 
       for (AstNode usedIdentifier: usedIdentifiers) {
-        Scope scope = scopeBuilder.getScopeForNode(usedIdentifier);
+        Scope scope = globalScope.getScopeForNode(usedIdentifier);
         String identifierName = usedIdentifier.getTokenValue();
         ScopeEntry scopeEntry = scope.getScopeEntry(identifierName);
         if (scopeEntry != null) {
           return true;
         }
-
       }
 
       sibling = sibling.getNextSibling();
@@ -148,13 +145,13 @@ public class UnusedVariableCheck extends MagikCheck {
 
   @Override
   public void leaveNode(AstNode node) {
-    if (node.getType() == MagikGrammar.ATOM) {
+    if (node.getType() != MagikGrammar.MAGIK) {
       return;
     }
 
     // Gather all defined variables
     Set<AstNode> declaredIdentifiers = new HashSet<>();
-    Scope globalScope = scopeBuilder.getScope();
+    GlobalScope globalScope = getContext().getGlobalScope();
     for (Scope scope: globalScope.getSelfAndDescendantScopes()) {
       for (ScopeEntry scopeEntry: scope.getScopeEntries()) {
         AstNode scopeEntryNode = scopeEntry.getNode();
@@ -189,7 +186,7 @@ public class UnusedVariableCheck extends MagikCheck {
 
     // Remove all defined variables when they are used
     for (AstNode identifierNode: usedIdentifiers) {
-      Scope scope = scopeBuilder.getScopeForNode(identifierNode);
+      Scope scope = globalScope.getScopeForNode(identifierNode);
       String identifierName = identifierNode.getTokenValue();
       ScopeEntry scopeEntry = scope.getScopeEntry(identifierName);
       if (scopeEntry != null) {
@@ -215,8 +212,6 @@ public class UnusedVariableCheck extends MagikCheck {
       String message = String.format(MESSAGE, name);
       addIssue(message, identifierNode);
     }
-
-    scopeBuilder = null;
   }
 
 }
