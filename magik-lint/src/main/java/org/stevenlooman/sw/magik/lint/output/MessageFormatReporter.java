@@ -19,7 +19,7 @@ public class MessageFormatReporter extends Reporter {
   private String format;
   private Long columnOffset;
 
-  public static final String DEFAULT_FORMAT = "${path}:${line}:${column}: ${msg} (${symbol})";
+  public static final String DEFAULT_FORMAT = "${path}:${line}:${column}:${msg} (${symbol})";
 
   /**
    * Constructor.
@@ -48,6 +48,7 @@ public class MessageFormatReporter extends Reporter {
     map.put("msg_id", checkInfo.getSqKey());
     map.put("symbol", checkInfo.getSqKey());
     map.put("category", checkInfo.getSeverity());
+    map.put("tag", checkInfo.getTag());
 
     Integer line = issue.line();
     if (line != null) {
