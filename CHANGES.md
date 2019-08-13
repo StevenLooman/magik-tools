@@ -12,6 +12,7 @@ Changes
 - Add ${tag} to MessageFormatReporter
 - Changes to MagikGrammar
 - Give FormattingCheck proper key
+- Fix magik-lint --show-checks
 
 
 0.1.4 (2019-07-26)

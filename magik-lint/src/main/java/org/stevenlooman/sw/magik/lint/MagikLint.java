@@ -287,12 +287,12 @@ public class MagikLint {
     Iterable<CheckInfo> checkInfos = getAllChecks();
 
     int exitCode = 0;
-    if (commandLine.hasOption("help")
-        || commandLine.getArgs().length == 0) {
+    if (commandLine.hasOption("show-checks")) {
+      showChecks(checkInfos);
+    } else if (commandLine.hasOption("help")
+               || commandLine.getArgs().length == 0) {
       HelpFormatter formatter = new HelpFormatter();
       formatter.printHelp("magik-lint", MagikLint.options);
-    } else if (commandLine.hasOption("show-checks")) {
-      showChecks(checkInfos);
     } else if (commandLine.hasOption("watch")) {
       String[] args = commandLine.getArgs();
       Path dir = MagikFileScanner.getSingleDirectoryFromArguments(args);
