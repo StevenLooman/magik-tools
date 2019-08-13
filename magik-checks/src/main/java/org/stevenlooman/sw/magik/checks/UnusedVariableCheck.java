@@ -227,6 +227,8 @@ public class UnusedVariableCheck extends MagikCheck {
       String message = String.format(MESSAGE, name);
       addIssue(message, identifierNode);
     }
+
+    usedIdentifiers.clear();
   }
 
 }

@@ -202,7 +202,7 @@ public class MagikLint {
     Comparator<CheckInfraction> byLine = Comparator.comparing(ci -> ci.getMagikIssue().line());
     Comparator<CheckInfraction> byColumn = Comparator.comparing(ci -> ci.getMagikIssue().column());
 
-    Reporter output = getReporter();
+    Reporter reporter = getReporter();
     for (Path path : paths) {
       MagikVisitorContext context = buildContext(path);
       List<CheckInfraction> fileInfractions = new ArrayList<>();
@@ -226,12 +226,11 @@ public class MagikLint {
           .thenComparing(byLine)
           .thenComparing(byColumn));
       for (CheckInfraction checkInfraction : fileInfractions) {
-        output.reportIssue(checkInfraction);
+        reporter.reportIssue(checkInfraction);
 
         int checkReturnCode = getReturnCode(checkInfraction);
         returnCode = returnCode | checkReturnCode;
       }
-
     }
 
     return returnCode;
