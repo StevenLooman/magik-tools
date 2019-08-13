@@ -28,13 +28,11 @@ public class ScopeBuilderVisitor extends MagikVisitor {
   @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
-        MagikGrammar.METHOD_DEFINITION,
-        MagikGrammar.PROC_DEFINITION,
         MagikGrammar.BODY,
         MagikGrammar.ASSIGNMENT_EXPRESSION,
         MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION,
-        MagikGrammar.VARIABLE_DECLARATION,
-        MagikGrammar.MULTI_VARIABLE_DECLARATION
+        MagikGrammar.VARIABLE_DEFINITION_STATEMENT,
+        MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT
     );
   }
 
@@ -45,12 +43,12 @@ public class ScopeBuilderVisitor extends MagikVisitor {
     if (nodeType == MagikGrammar.BODY) {
       visitNodeBody(node);
     } else if (nodeType == MagikGrammar.ASSIGNMENT_EXPRESSION
-        || nodeType == MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION) {
+               || nodeType == MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION) {
       visitNodeAssignmentExpression(node);
-    } else if (nodeType == MagikGrammar.VARIABLE_DECLARATION) {
-      visitNodeVariableDeclaration(node);
-    } else if (nodeType == MagikGrammar.MULTI_VARIABLE_DECLARATION) {
-      visitNodeMultiVariableDeclaration(node);
+    } else if (nodeType == MagikGrammar.VARIABLE_DEFINITION_STATEMENT) {
+      visitNodeVariableDefinitionStatement(node);
+    } else if (nodeType == MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT) {
+      visitNodeMultipleAssignmentStatement(node);
     }
   }
 
@@ -100,31 +98,35 @@ public class ScopeBuilderVisitor extends MagikVisitor {
     scopeIndex.put(node, scope);
   }
 
-  private void visitNodeVariableDeclaration(AstNode node) {
-    AstNode variableDeclarationStatement = node.getParent();
-    String type = variableDeclarationStatement.getTokenValue().toUpperCase().substring(1);
+  private void visitNodeVariableDefinitionStatement(AstNode node) {
+    String type = node.getTokenValue().toUpperCase().substring(1);
     ScopeEntry.Type scopeEntryType = ScopeEntry.Type.valueOf(type);
 
-    String identifier = node.getTokenValue();
-    if (scope.getScopeEntry(identifier) != null) {
-      // don't overwrite entries
-      return;
+    AstNode identifiersWithGatherNode = node.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
+    List<AstNode> identifierNodes;
+    if (identifiersWithGatherNode != null) {
+      identifierNodes = identifiersWithGatherNode.getChildren(MagikGrammar.IDENTIFIER);
+    } else {
+      identifierNodes = node.getChildren(MagikGrammar.IDENTIFIER);
     }
 
-    ScopeEntry parentEntry = null;
-    if (scopeEntryType == ScopeEntry.Type.IMPORT) {
-      parentEntry = scope.getParentScope().getScopeEntry(identifier);
-    }
+    for (AstNode identifierNode : identifierNodes) {
+      String identifier = identifierNode.getTokenValue();
+      if (scope.getScopeEntry(identifier) != null) {
+        // don't overwrite entries
+        continue;
+      }
 
-    AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-    scope.addDeclaration(scopeEntryType, identifier, identifierNode, parentEntry);
+      ScopeEntry parentEntry = null;
+      if (scopeEntryType == ScopeEntry.Type.IMPORT) {
+        parentEntry = scope.getParentScope().getScopeEntry(identifier);
+      }
+
+      scope.addDeclaration(scopeEntryType, identifier, identifierNode, parentEntry);
+    }
   }
 
-  private void visitNodeMultiVariableDeclaration(AstNode node) {
-    AstNode variableDeclarationStatement = node.getParent();
-    String type = variableDeclarationStatement.getTokenValue().toUpperCase().substring(1);
-    ScopeEntry.Type scopeEntryType = ScopeEntry.Type.valueOf(type);
-
+  private void visitNodeMultipleAssignmentStatement(AstNode node) {
     AstNode identifiersNode = node.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
     List<AstNode> identifierNodes = identifiersNode.getChildren(MagikGrammar.IDENTIFIER);
     for (AstNode identifierNode: identifierNodes) {
@@ -134,7 +136,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
         continue;
       }
 
-      scope.addDeclaration(scopeEntryType, identifier, identifierNode, null);
+      scope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
     }
   }
 

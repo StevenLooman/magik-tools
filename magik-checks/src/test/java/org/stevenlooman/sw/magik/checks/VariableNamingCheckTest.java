@@ -20,10 +20,28 @@ public class VariableNamingCheckTest extends MagikCheckTestBase {
   }
 
   @Test
+  public void testValidNameAssignment() {
+    MagikCheck check = new VariableNamingCheck();
+    String code =
+        "coord << 10";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
   public void testInvalidName() {
     MagikCheck check = new VariableNamingCheck();
     String code =
         "_local c";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isNotEmpty();
+  }
+
+  @Test
+  public void testInvalidNameAssignment() {
+    MagikCheck check = new VariableNamingCheck();
+    String code =
+        "c << 10";
     List<MagikIssue> issues = runCheck(code, check);
     assertThat(issues).isNotEmpty();
   }

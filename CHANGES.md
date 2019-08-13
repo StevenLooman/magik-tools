@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.1.5 (unreleased)
+0.2.0 (unreleased)
 
 - Add --watch option to magik-lint
 - Add --help option to magik-lint
@@ -10,6 +10,7 @@ Changes
 - Fix error in FormattingCheck when trying to check SYNTAX_ERROR tokens
 - Let MagikVisitorContext handle Scope building
 - Add ${tag} to MessageFormatReporter
+- Changes to MagikGrammar
 
 
 0.1.4 (2019-07-26)
