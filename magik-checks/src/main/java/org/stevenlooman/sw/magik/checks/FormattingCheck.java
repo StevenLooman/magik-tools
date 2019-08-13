@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 
 @Rule(key = FormattingCheck.CHECK_KEY)
 public class FormattingCheck extends MagikCheck {
-  public static final String CHECK_KEY = "FormattingCheck";
+  public static final String CHECK_KEY = "Formatting";
   private static final String MESSAGE = "Improper formatting: %s.";
 
   private String[] lines;
