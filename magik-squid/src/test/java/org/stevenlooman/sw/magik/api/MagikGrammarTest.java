@@ -252,8 +252,8 @@ public class MagikGrammarTest {
   }
 
   @Test
-  public void testVariableDeclaration() {
-    Assertions.assertThat(g.rule(MagikGrammar.VARIABLE_DECLARATION_STATEMENT))
+  public void testVariableDefinition() {
+    Assertions.assertThat(g.rule(MagikGrammar.VARIABLE_DEFINITION_STATEMENT))
         .matches("_local a")
         .matches("_local a, b")
         .matches("_local a << 1")
@@ -274,6 +274,16 @@ public class MagikGrammarTest {
         .matches("_import a")
         .matches("_import a, b")
         .matches("_dynamic _import y");
+  }
+
+  @Test
+  public void testMultipleAssignment() {
+    Assertions.assertThat(g.rule(MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT))
+        .matches("(a, b) << (1, 2)")
+        .matches("(a, b) << 1")
+        .matches("(a, _gather b) << (1, 2)")
+        .matches("(a, _gather b) << (1, 2, 3)")
+        .matches("(a, _gather b) << (1, _scatter {1, 2})");
   }
 
   @Test

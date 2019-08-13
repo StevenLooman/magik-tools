@@ -39,8 +39,6 @@ public enum MagikGrammar implements GrammarRuleKey {
   EXPRESSIONS,
   IDENTIFIERS,
   IDENTIFIERS_WITH_GATHER,
-  MULTI_VARIABLE_DECLARATION,
-  VARIABLE_DECLARATION,
   METHOD_INVOCATION,
   PROCEDURE_INVOCATION,
   INDEXED_INVOCATION,
@@ -48,7 +46,8 @@ public enum MagikGrammar implements GrammarRuleKey {
   // statements
   STATEMENT,
   STATEMENT_SEPARATOR,
-  VARIABLE_DECLARATION_STATEMENT,
+  VARIABLE_DEFINITION_STATEMENT,
+  MULTIPLE_ASSIGNMENT_STATEMENT,
   RETURN_STATEMENT,
   EMIT_STATEMENT,
   EXPRESSION_STATEMENT,
@@ -295,21 +294,22 @@ public enum MagikGrammar implements GrammarRuleKey {
   private static void statements(LexerlessGrammarBuilder b) {
     b.rule(STATEMENT).is(
         b.firstOf(
+            MULTIPLE_ASSIGNMENT_STATEMENT,
             EXPRESSION_STATEMENT,
             RETURN_STATEMENT,
             EMIT_STATEMENT,
             CONTINUE_STATEMENT,
             LEAVE_STATEMENT,
             THROW_STATEMENT,
-            VARIABLE_DECLARATION_STATEMENT,
+            VARIABLE_DEFINITION_STATEMENT,
             STATEMENT_SEPARATOR));
 
     b.rule(BODY).is(
         b.zeroOrMore(HANDLING),
         b.zeroOrMore(STATEMENT));
 
-    b.rule(VARIABLE_DECLARATION_STATEMENT).is(
-        b.zeroOrMore(
+    b.rule(VARIABLE_DEFINITION_STATEMENT).is(
+        b.oneOrMore(
             b.firstOf(
                 MagikKeyword.LOCAL,
                 MagikKeyword.CONSTANT,
@@ -318,15 +318,31 @@ public enum MagikGrammar implements GrammarRuleKey {
                 MagikKeyword.DYNAMIC,
                 MagikKeyword.IMPORT)),
         b.firstOf(
-            MULTI_VARIABLE_DECLARATION,
-            b.sequence(VARIABLE_DECLARATION, b.zeroOrMore(MagikPunctuator.COMMA, VARIABLE_DECLARATION))),
+            b.sequence(
+                MagikPunctuator.PAREN_L,
+                IDENTIFIERS_WITH_GATHER,
+                MagikPunctuator.PAREN_R,
+                MagikPunctuator.CHEVRON,
+                EXPRESSIONS),
+            b.sequence(
+                IDENTIFIER,
+                b.optional(
+                    MagikPunctuator.CHEVRON,
+                    EXPRESSION),
+                b.zeroOrMore(
+                    MagikPunctuator.COMMA,
+                    IDENTIFIER,
+                    b.optional(
+                        MagikPunctuator.CHEVRON,
+                        EXPRESSION)))),
         EOS);
-    b.rule(MULTI_VARIABLE_DECLARATION).is(
-        b.sequence(MagikPunctuator.PAREN_L, IDENTIFIERS_WITH_GATHER, MagikPunctuator.PAREN_R,
-            MagikPunctuator.CHEVRON,
-            b.optional(MagikPunctuator.PAREN_L), EXPRESSIONS, b.optional(MagikPunctuator.PAREN_R)));
-    b.rule(VARIABLE_DECLARATION).is(
-        b.sequence(IDENTIFIER, b.optional(MagikPunctuator.CHEVRON, EXPRESSION)));
+
+    b.rule(MULTIPLE_ASSIGNMENT_STATEMENT).is(
+        MagikPunctuator.PAREN_L,
+        IDENTIFIERS_WITH_GATHER,
+        MagikPunctuator.PAREN_R,
+        MagikPunctuator.CHEVRON,
+        EXPRESSIONS);
 
     b.rule(BLOCK).is(MagikKeyword.BLOCK, BODY, MagikKeyword.ENDBLOCK);
 

@@ -89,11 +89,11 @@ public class UnusedVariableCheck extends MagikCheck {
 
   private boolean isAssignedToDirectly(AstNode identifierNode) {
     AstNode variableDeclarationNode = identifierNode.getParent();
-    if (variableDeclarationNode.getType() != MagikGrammar.VARIABLE_DECLARATION) {
+    if (variableDeclarationNode.getType() != MagikGrammar.VARIABLE_DEFINITION_STATEMENT) {
       return false;
     }
 
-    if (variableDeclarationNode.getFirstChild() != identifierNode) {
+    if (variableDeclarationNode.getFirstChild(MagikGrammar.IDENTIFIER) != identifierNode) {
       return false;
     }
 
@@ -103,7 +103,22 @@ public class UnusedVariableCheck extends MagikCheck {
     return !chrevronChildren.isEmpty();
   }
 
-  private boolean isPartOfMultiVariableDeclaration(AstNode identifierNode) {
+  private boolean isPartOfMultiVariableDefinition(AstNode identifierNode) {
+    AstNode identifiersWithGatherNode = identifierNode.getParent();
+    if (identifiersWithGatherNode == null
+        || identifiersWithGatherNode.getType() != MagikGrammar.IDENTIFIERS_WITH_GATHER) {
+      return false;
+    }
+    AstNode multiVarDeclNode = identifiersWithGatherNode.getParent();
+    if (multiVarDeclNode == null
+        || multiVarDeclNode.getType() != MagikGrammar.VARIABLE_DEFINITION_STATEMENT) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private boolean isPartOfMultiAssignment(AstNode identifierNode) {
     AstNode identifiersNode = identifierNode.getParent();
     if (identifiersNode == null
         || identifiersNode.getType() != MagikGrammar.IDENTIFIERS_WITH_GATHER) {
@@ -111,7 +126,7 @@ public class UnusedVariableCheck extends MagikCheck {
     }
     AstNode multiVarDeclNode = identifiersNode.getParent();
     if (multiVarDeclNode == null
-        || multiVarDeclNode.getType() != MagikGrammar.MULTI_VARIABLE_DECLARATION) {
+        || multiVarDeclNode.getType() != MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT) {
       return false;
     }
 
@@ -199,7 +214,8 @@ public class UnusedVariableCheck extends MagikCheck {
     // - the later identifiers of it are used
     // - but this one isn't
     for (AstNode declaredIdentifier: new HashSet<>(declaredIdentifiers)) {
-      if (isPartOfMultiVariableDeclaration(declaredIdentifier)
+      if ((isPartOfMultiVariableDefinition(declaredIdentifier)
+           || isPartOfMultiAssignment(declaredIdentifier))
           && anyNextSiblingUsed(declaredIdentifier)) {
         declaredIdentifiers.remove(declaredIdentifier);
       }
