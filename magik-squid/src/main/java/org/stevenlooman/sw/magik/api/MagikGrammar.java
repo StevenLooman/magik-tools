@@ -142,10 +142,13 @@ public enum MagikGrammar implements GrammarRuleKey {
         b.zeroOrMore(
             b.commentTrivia(b.regexp(COMMENT_REGEXP)),
             b.skippedTrivia(WHITESPACE))).skip();
-    b.rule(SPACING_NO_LB).is(b.zeroOrMore(b.firstOf(
-        b.skippedTrivia(b.regexp("[\\s&&[^\n\r]]++")),
-        b.commentTrivia(b.regexp(COMMENT_REGEXP))))).skip();
-    b.rule(NEXT_NOT_LB).is(b.nextNot(b.regexp("(?:" + "[\n\r]" + ")"))).skip();
+    b.rule(SPACING_NO_LB).is(
+        b.zeroOrMore(
+            b.firstOf(
+                b.skippedTrivia(b.regexp("[\\s&&[^\n\r]]++")),
+                b.commentTrivia(b.regexp(COMMENT_REGEXP))))).skip();
+    b.rule(NEXT_NOT_LB).is(
+        b.nextNot(b.regexp("(?:" + "[\n\r]" + ")"))).skip();
 
     b.rule(EOS).is(b.firstOf(
         SPACING,
