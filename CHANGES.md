@@ -14,6 +14,7 @@ Changes
 - Give FormattingCheck proper key
 - Fix magik-lint --show-checks
 - Fix memleak in UnusedVariableCheck
+- Add MethodDocCheck
 
 
 0.1.4 (2019-07-26)
