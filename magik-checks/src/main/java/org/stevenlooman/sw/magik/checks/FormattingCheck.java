@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 public class FormattingCheck extends MagikCheck {
   public static final String CHECK_KEY = "Formatting";
   private static final String MESSAGE = "Improper formatting: %s.";
+  private static final Integer TAB_WIDTH = 8;
 
   private String[] lines;
   private Token lastToken;
@@ -60,6 +61,16 @@ public class FormattingCheck extends MagikCheck {
     String fileContents = context.fileContent();
     if (fileContents != null) {
       lines = fileContents.split("\n");
+    }
+
+    int lineNo = 1;
+    for (String line : lines) {
+      if (line.matches("^[ ]{" + TAB_WIDTH + "}.*")
+          || line.matches("^[ ]+[\t]+.*")) {
+        String message = String.format(MESSAGE, "Line must start with tabs");
+        addIssue(message, lineNo, 1);
+      }
+      lineNo += 1;
     }
   }
 

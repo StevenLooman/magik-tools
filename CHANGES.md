@@ -15,6 +15,7 @@ Changes
 - Fix magik-lint --show-checks
 - Fix memleak in UnusedVariableCheck
 - Add MethodDocCheck
+- Extend FormattingCheck to test if line starts with tabs
 
 
 0.1.4 (2019-07-26)
