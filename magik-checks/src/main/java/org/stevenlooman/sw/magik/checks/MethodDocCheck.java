@@ -90,8 +90,6 @@ public class MethodDocCheck extends MagikCheck {
       parameters.add(name);
     }
 
-    // indexer parameters
-
     return parameters;
   }
 

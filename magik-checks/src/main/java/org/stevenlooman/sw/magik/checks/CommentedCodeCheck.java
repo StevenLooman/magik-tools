@@ -1,5 +1,6 @@
 package org.stevenlooman.sw.magik.checks;
 
+import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.RecognitionException;
 import com.sonar.sslr.api.Token;
@@ -12,7 +13,9 @@ import org.stevenlooman.sw.magik.parser.MagikParser;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Rule(key = CommentedCodeCheck.CHECK_KEY)
@@ -34,35 +37,68 @@ public class CommentedCodeCheck extends MagikCheck {
 
   @Override
   public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(MagikGrammar.values());
-  }
-
-  private void visitComment(Token token, String comment) {
-    Charset charset = Charset.forName("iso8859_1");
-    MagikParser parser = new MagikParser(charset);
-    try {
-      parser.parseSafe(comment);
-    } catch (RecognitionException exception) {
-      return;
-    }
-
-    addIssue(MESSAGE, token);
+    return Arrays.asList(MagikGrammar.BODY);
   }
 
   @Override
-  public void visitToken(Token token) {
-    List<Trivia> triviaComments = token.getTrivia().stream()
-        .filter(trivia -> trivia.isComment())
-        .collect(Collectors.toList());
-    if (triviaComments.size() < minLines) {
-      return;
+  public void visitNode(AstNode node) {
+    Map<Token, String> commentBlocks = extractCommentBlocks(node);
+    for (Map.Entry<Token, String> entry : commentBlocks.entrySet()) {
+      String comment = entry.getValue();
+      if (comment.split("\n").length >= minLines
+          && isCommentedCode(comment)) {
+        Token token = entry.getKey();
+        addIssue(MESSAGE, token);
+      }
     }
+  }
 
-    String comment = triviaComments.stream()
-        .map(trivia -> trivia.getToken().getValue())
-        .map(triviaComment -> triviaComment.substring(1))
-        .collect(Collectors.joining("\n"));
-    visitComment(token, comment);
+  private Map<Token, String> extractCommentBlocks(AstNode bodyNode) {
+    List<Token> commentTokens = bodyNode.getTokens().stream()
+        .flatMap(token -> token.getTrivia().stream())
+        .filter(trivia -> trivia.isComment())
+        .flatMap(trivia -> trivia.getTokens().stream())
+        .collect(Collectors.toList());
+
+    // iterate over all comment tokens and match blocks together
+    Map<Token, String> commentBlocks = new Hashtable<>();
+    Token startToken = null;
+    Token lastToken = null;
+    StringBuilder commentBuilder = new StringBuilder();
+    for (Token token : commentTokens) {
+      if (startToken == null) {
+        startToken = token;
+      } else if (lastToken.getLine() != token.getLine() - 1
+                 || lastToken.getColumn() != token.getColumn()) {
+        // save current comment
+        commentBlocks.put(startToken, commentBuilder.toString());
+
+        // starting new comment
+        startToken = token;
+        commentBuilder.setLength(0);
+      }
+
+      commentBuilder.append(token.getValue());
+      commentBuilder.append("\n");
+      lastToken = token;
+    }
+    // save the last part
+    if (startToken != null) {
+      commentBlocks.put(startToken, commentBuilder.toString());
+    }
+    return commentBlocks;
+  }
+
+  private boolean isCommentedCode(String comment) {
+    String bareComment = comment.replaceAll("^#", "").replaceAll("\n#", "\n");
+    Charset charset = Charset.forName("iso8859_1");
+    MagikParser parser = new MagikParser(charset);
+    try {
+      AstNode node = parser.parseSafe(bareComment);
+      return node.hasChildren();
+    } catch (RecognitionException exception) {
+      return false;
+    }
   }
 
 }

@@ -66,15 +66,16 @@ public class MagikGrammarTest {
   public void testThrow() {
     Assertions.assertThat(g.rule(MagikGrammar.THROW_STATEMENT))
         .matches("_throw :test")
-        .matches("_throw @error _with _false");
-    Assertions.assertThat(g.rule(MagikGrammar.THROW_STATEMENT))
-        .notMatches("_throw a\n _with _false");
+        .matches("_throw @error _with _false")
+        .notMatches("_throw a\n _with _false")
+        ;
   }
 
   @Test
   public void testLockBlock() {
     Assertions.assertThat(g.rule(MagikGrammar.LOCK_BLOCK))
-        .matches("_lock a _endlock");
+        .matches("_lock a _endlock")
+        ;
   }
 
   @Test
@@ -85,7 +86,8 @@ public class MagikGrammarTest {
         .matches("_proc(a) _endproc")
         .matches("_proc(a, b) _endproc")
         .matches("_proc @test() _endproc")
-        .matches("_proc @|test 123|() _endproc");
+        .matches("_proc @|test 123|() _endproc")
+        ;
   }
 
   @Test
@@ -95,7 +97,8 @@ public class MagikGrammarTest {
         .matches("@ label")
         .matches("@LABEL")
         .matches("@label")
-        .matches("@|label 123|");
+        .matches("@|label 123|")
+        ;
   }
 
   @Test
@@ -108,21 +111,24 @@ public class MagikGrammarTest {
         .matches("@package:ref")
         .matches("@pkg_a:ref_a")
         .matches("@ pkg_a:ref_a")
-        .matches("@|test 123|");
+        .matches("@|test 123|")
+        ;
   }
 
   @Test
   public void testFor() {
     Assertions.assertThat(g.rule(MagikGrammar.FOR))
         .matches("_for a _over a _loop _endloop")
-        .matches("_for a, b _over a _loop _endloop");
+        .matches("_for a, b _over a _loop _endloop")
+        ;
   }
 
   @Test
   public void testWhile() {
     Assertions.assertThat(g.rule(MagikGrammar.WHILE))
         .matches("_while a _loop _endloop")
-        .matches("_while a _andif b _loop _endloop");
+        .matches("_while a _andif b _loop _endloop")
+        ;
   }
 
   @Test
@@ -143,7 +149,7 @@ public class MagikGrammarTest {
         .matches("_if expr _then _else _endif")
         .matches("_if expr _then _elif expr _then _else _endif")
         .matches("_if expr _then >> 1 _endif")
-    ;
+        ;
   }
 
   @Test
@@ -152,7 +158,7 @@ public class MagikGrammarTest {
         .matches(">> a")
         .matches(">> (1, 2)")
         .matches(">> (a) _mod b")
-    ;
+        ;
   }
 
   @Test
@@ -168,7 +174,7 @@ public class MagikGrammarTest {
         .matches("identifier.method(1, 2) << a")
         .matches("10.method")
         .matches("1.0.method")
-    ;
+        ;
   }
 
   @Test
@@ -178,7 +184,7 @@ public class MagikGrammarTest {
         .matches("identifier[1,2]")
         .matches("identifier[1] << a")
         .matches("identifier[1,2] << a")
-    ;
+        ;
   }
 
   @Test
@@ -188,7 +194,8 @@ public class MagikGrammarTest {
         .matches("expr.method(1)[1]")
         .matches("expr.method(1, 2)[1]")
         .matches("expr.method(1)[1,2]")
-        .matches("expr.method(1, 2)[1,2]");
+        .matches("expr.method(1, 2)[1,2]")
+        ;
   }
 
   @Test
@@ -198,7 +205,7 @@ public class MagikGrammarTest {
         .matches("_return a")
         .matches("_return (a, b)")
         .matches("_return (\na, b)")
-    ;
+        ;
   }
 
   @Test
@@ -248,7 +255,7 @@ public class MagikGrammarTest {
         .matches("_iter _method a.b _endmethod")
         .matches("_private _method a.b _endmethod")
         .matches("_abstract _method a.b _endmethod")
-    ;
+        ;
   }
 
   @Test
@@ -273,7 +280,8 @@ public class MagikGrammarTest {
         .matches("_dynamic _dynamic y")
         .matches("_import a")
         .matches("_import a, b")
-        .matches("_dynamic _import y");
+        .matches("_dynamic _import y")
+        ;
   }
 
   @Test
@@ -283,7 +291,8 @@ public class MagikGrammarTest {
         .matches("(a, b) << 1")
         .matches("(a, _gather b) << (1, 2)")
         .matches("(a, _gather b) << (1, 2, 3)")
-        .matches("(a, _gather b) << (1, _scatter {1, 2})");
+        .matches("(a, _gather b) << (1, _scatter {1, 2})")
+        ;
   }
 
   @Test
@@ -299,10 +308,25 @@ public class MagikGrammarTest {
         .matches("_leave @label")
         .matches("_leave _with e()")
         .matches("_leave @label _with e()")
-        ;
-    Assertions.assertThat(g.rule(MagikGrammar.BODY))
         .notMatches("_continue\n _with 10")
-        .notMatches("_leave\n _with 10");
+        .notMatches("_leave\n _with 10")
+        .matches(";")
+        .matches("\n;")
+        .matches("a()")
+        .matches("a();b()")
+        .matches("a();;b()")
+        .matches("a();;;b()")
+        .matches("a()\nb()")
+        .matches("a()\n\nb()")
+        .matches("a()\n\n\nb()")
+        .matches("a.b() ; c.d()")
+        .matches("_block _endblock")
+        .matches("_block ; _endblock")
+        .matches("_block a();b() _endblock")
+        .matches("_block a()\nb() _endblock")
+        .notMatches("a()b()")
+        .notMatches("_block a() b() _endblock")
+        ;
   }
 
   @Test
@@ -371,7 +395,7 @@ public class MagikGrammarTest {
   public void testClass() {
     Assertions.assertThat(g.rule(MagikGrammar.CLASS))
         .matches("_class |java.lang.Integer|")
-    ;
+        ;
   }
 
   @Test
@@ -405,15 +429,17 @@ public class MagikGrammarTest {
         .matches("_for x, _gather y _over a _loop _endloop")
         .matches(">> (a - b).m() < c")
         .matches("_method a.a a.b(x _scatter y) _endmethod")
-        .matches("a.b() ; c.d()")
         .matches(";")
         .matches("x +^<< 1")
         .matches("_proc() _handling _default _endproc")
         .matches("_package sw")
         .matches("_package sw\n_package user")
+        .matches("_block write(1);write(2) _endblock")
         .notMatches("_block _endblo")
         .notMatches("_blocki _endblock")
-    ;
+        .notMatches("_block write(1) write(2) _endblock")
+        .notMatches("_block write(1)write(2) _endblock")
+        ;
   }
 
 }

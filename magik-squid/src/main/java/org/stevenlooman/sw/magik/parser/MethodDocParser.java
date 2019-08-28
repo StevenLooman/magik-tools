@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -38,7 +39,7 @@ public class MethodDocParser {
     this.parameters = new Hashtable<>();
     this.parameterLines = new Hashtable<>();
 
-    extractDocFromNode(methodNode); // sets doc and start line
+    extractDoc(methodNode); // sets doc and start line
 
     if (doc != null) {
       parseSections(doc, startLine, sections, sectionLines);
@@ -51,36 +52,21 @@ public class MethodDocParser {
     }
   }
 
-  private void extractDocFromNode(AstNode node) {
-    // try first child of body
+  private void extractDoc(AstNode node) {
     AstNode bodyNode = node.getFirstChild(MagikGrammar.BODY);
-    Token bodyNodeToken = bodyNode.getToken();
-    if (bodyNodeToken != null) {
-      List<Trivia> trivia = bodyNodeToken.getTrivia();
-      if (!trivia.isEmpty()) {
-        Optional<String> methodDoc = trivia.stream()
-            .filter(t -> t.isComment())
-            .map(t -> t.getToken().getValue())
+    List<Token> bodyNodeTokens = bodyNode.getTokens();
+    if (!bodyNodeTokens.isEmpty()) {
+      List<Token> commentTokens = bodyNodeTokens.stream()
+          .flatMap(token -> token.getTrivia().stream())
+          .filter(trivia -> trivia.isComment())
+          .map(trivia -> trivia.getToken())
+          .collect(Collectors.toList());
+      if (!commentTokens.isEmpty()) {
+        Optional<String> methodDoc = commentTokens.stream()
+            .map(token -> token.getValue())
             .reduce((acc, arg) -> acc + "\n" + arg);
         this.doc = methodDoc.get();
-        this.startLine = trivia.get(0).getToken().getLine();
-        return;
-      }
-    }
-
-    // try _ENDMETHOD node
-    AstNode endMethodNode = node.getFirstChild(MagikKeyword.ENDMETHOD);
-    Token endMethodNodeToken = endMethodNode.getToken();
-    if (endMethodNodeToken != null) {
-      List<Trivia> trivia = endMethodNodeToken.getTrivia();
-      if (!trivia.isEmpty()) {
-        Optional<String> methodDoc = trivia.stream()
-            .filter(t -> t.isComment())
-            .map(t -> t.getToken().getValue())
-            .reduce((acc, arg) -> acc + "\n" + arg);
-        this.doc = methodDoc.get();
-        this.startLine = trivia.get(0).getToken().getLine();
-        return;
+        this.startLine = commentTokens.get(0).getLine();
       }
     }
   }
