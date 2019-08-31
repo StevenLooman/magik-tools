@@ -4,8 +4,8 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
+import org.stevenlooman.sw.magik.analysis.scope.GlobalScope;
 import org.stevenlooman.sw.magik.analysis.scope.Scope;
-import org.stevenlooman.sw.magik.analysis.scope.ScopeBuilderVisitor;
 import org.stevenlooman.sw.magik.analysis.scope.ScopeEntry;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
@@ -20,6 +20,11 @@ public class LocalImportProcedureCheck extends MagikCheck {
   public static final String CHECK_KEY = "LocalImportProcedure";
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.METHOD_DEFINITION);
@@ -32,13 +37,12 @@ public class LocalImportProcedureCheck extends MagikCheck {
       return;
     }
 
-    // Build scope.
-    ScopeBuilderVisitor scopeBuilder = new ScopeBuilderVisitor();
-    scopeBuilder.scanNode(node);
+    // Get scope.
+    GlobalScope globalScope = getContext().getGlobalScope();
 
     // get all proc scopes
     for (AstNode procDefNode: procDefNodes) {
-      Scope procScope = scopeBuilder.getScopeForNode(procDefNode);
+      Scope procScope = globalScope.getScopeForNode(procDefNode);
 
       // get all parent scopes from procedure
       List<Scope> parentScopes = procScope.getAncestorScopes();

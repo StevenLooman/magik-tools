@@ -7,7 +7,9 @@ import org.stevenlooman.sw.magik.checks.ForbiddenCallCheck;
 import org.stevenlooman.sw.magik.checks.FormattingCheck;
 import org.stevenlooman.sw.magik.checks.LhsRhsComparatorEqualCheck;
 import org.stevenlooman.sw.magik.checks.LineLengthCheck;
+import org.stevenlooman.sw.magik.checks.LocalImportProcedureCheck;
 import org.stevenlooman.sw.magik.checks.MethodComplexityCheck;
+import org.stevenlooman.sw.magik.checks.MethodDocCheck;
 import org.stevenlooman.sw.magik.checks.SimplifyIfCheck;
 import org.stevenlooman.sw.magik.checks.SizeZeroEmptyCheck;
 import org.stevenlooman.sw.magik.checks.SyntaxErrorCheck;
@@ -40,7 +42,9 @@ public final class CheckList {
       FormattingCheck.class,
       LhsRhsComparatorEqualCheck.class,
       LineLengthCheck.class,
+      LocalImportProcedureCheck.class,
       MethodComplexityCheck.class,
+      MethodDocCheck.class,
       SyntaxErrorCheck.class,
       SimplifyIfCheck.class,
       SizeZeroEmptyCheck.class,

@@ -26,10 +26,16 @@ public class VariableNamingCheck extends MagikCheck {
   public String whitelist = DEFAULT_WHITELIST;
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
-        MagikGrammar.VARIABLE_DECLARATION,
-        MagikGrammar.MULTI_VARIABLE_DECLARATION,
+        MagikGrammar.VARIABLE_DEFINITION_STATEMENT,
+        MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT,
+        MagikGrammar.ASSIGNMENT_EXPRESSION,
         MagikGrammar.PARAMETER
     );
   }
@@ -37,10 +43,12 @@ public class VariableNamingCheck extends MagikCheck {
   @Override
   public void visitNode(AstNode node) {
     List<AstNode> identifierNodes;
-    if (node.getType() == MagikGrammar.MULTI_VARIABLE_DECLARATION) {
-      identifierNodes = node
-          .getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER)
-          .getChildren(MagikGrammar.IDENTIFIER);
+    AstNode identifierWithGather = node.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
+    AstNode firstChildNode = node.getFirstChild();
+    if (identifierWithGather != null) {
+      identifierNodes = identifierWithGather.getChildren(MagikGrammar.IDENTIFIER);
+    } else if (firstChildNode.getType() == MagikGrammar.ATOM) {
+      identifierNodes = firstChildNode.getChildren(MagikGrammar.IDENTIFIER);
     } else {
       identifierNodes = node.getChildren(MagikGrammar.IDENTIFIER);
     }

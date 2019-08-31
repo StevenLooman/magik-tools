@@ -13,6 +13,10 @@ public class FileCharsetDeterminerTest {
   @Test
   public void testDetermineCharsetOk() {
     Path path = Paths.get("src/test/resources/tests/parser/determine_encoding_1.magik");
+    if (!path.toFile().exists()) {
+      // For vscode
+      path = Paths.get("magik-squid/src/test/resources/tests/parser/determine_encoding_1.magik");
+    }
     Charset defaultCharset = Charset.forName("UTF-8");
     Charset result = FileCharsetDeterminer.determineCharset(path, defaultCharset);
 

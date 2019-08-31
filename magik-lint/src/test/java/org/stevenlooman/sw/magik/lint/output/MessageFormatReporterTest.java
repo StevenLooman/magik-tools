@@ -32,6 +32,11 @@ public class MessageFormatReporterTest {
       return "major";
     }
 
+    @Override
+    public String getTag() {
+      return "tag";
+    }
+
   }
 
   @Test

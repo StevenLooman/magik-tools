@@ -1,11 +1,11 @@
 package org.stevenlooman.sw.magik.lint;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.CheckList;
 import org.stevenlooman.sw.magik.MagikCheck;
-import org.stevenlooman.sw.magik.TemplatedCheck;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -86,7 +86,7 @@ public class CheckInfo {
 
   private JSONObject readMetadata() {
     // determine path
-    Class klass = check.getClass();
+    Class<?> klass = check.getClass();
     String simpleName = klass.getSimpleName();
     String name = simpleName.substring(0, simpleName.length() - 5);  // strip Check
     String filename = "/" + CheckList.PROFILE_DIR + "/" + name + ".json";
@@ -106,6 +106,35 @@ public class CheckInfo {
   public String getSeverity() throws FileNotFoundException {
     JSONObject metadata = readMetadata();
     return metadata.getString("defaultSeverity");
+  }
+
+  /**
+   * Get tags for this check.
+   * @return List of tags.
+   * @throws FileNotFoundException -
+   */
+  public List<String> getTags() throws FileNotFoundException {
+    JSONObject metadata = readMetadata();
+    JSONArray tags = metadata.getJSONArray("tags");
+    List<String> tagsList = new ArrayList<>();
+    for (int i = 0; i < tags.length(); ++i) {
+      String tag = tags.getString(i);
+      tagsList.add(tag);
+    }
+    return tagsList;
+  }
+
+  /**
+   * Get the first tag for this check.
+   * @return First tag.
+   * @throws FileNotFoundException -
+   */
+  public String getTag() throws FileNotFoundException {
+    List<String> tags = getTags();
+    if (tags.isEmpty()) {
+      return null;
+    }
+    return tags.get(0);
   }
 
   public String getTitle() throws FileNotFoundException {
@@ -157,13 +186,12 @@ public class CheckInfo {
 
     List<Class<?>> checkClasses = CheckList.getChecks();
     for (Class<?> checkClass: checkClasses) {
-      TemplatedCheck annotation = checkClass.getAnnotation(TemplatedCheck.class);
-      if (annotation != null) {
+      MagikCheck check = (MagikCheck) checkClass.newInstance();
+      if (check.isTemplatedCheck()) {
         // skip templated checks for now
         continue;
       }
 
-      MagikCheck check = (MagikCheck) checkClass.newInstance();
       CheckInfo checkInfo = new CheckInfo(check);
       String name = check.getCheckKeyKebabCase();
       boolean enabled = !disabled.contains(name);

@@ -38,6 +38,14 @@ public abstract class Scope {
   }
 
   /**
+   * Get {{AstNode}} where scope begins.
+   * @return {{AstNode}} where scope begins
+   */
+  public AstNode getNode() {
+    return node;
+  }
+
+  /**
    * Get self and all descendant scopes.
    * @return List with self and descendant scopes.
    */

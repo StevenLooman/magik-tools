@@ -20,4 +20,13 @@ public class SyntaxErrorCheckTest extends MagikCheckTestBase {
     assertThat(issues).isNotEmpty();
   }
 
+  @Test
+  public void testSytnaxError2() {
+    MagikCheck check = new SyntaxErrorCheck();
+    String code =
+        "_method";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isNotEmpty();
+  }
+
 }

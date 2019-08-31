@@ -1,6 +1,25 @@
 Changes
 =======
 
+0.2.0 (2019-08-31)
+
+- Add --watch option to magik-lint
+- Add --help option to magik-lint
+- Provide safe and unsafe versions of MagikParser.parse()
+- Update README (@sebastiaanspeck)
+- Fix error in FormattingCheck when trying to check SYNTAX_ERROR tokens
+- Let MagikVisitorContext handle Scope building
+- Add ${tag} to MessageFormatReporter
+- Changes to MagikGrammar
+- Give FormattingCheck proper key
+- Fix magik-lint --show-checks
+- Fix memleak in UnusedVariableCheck
+- Add MethodDocCheck
+- Extend FormattingCheck to test if line starts with tabs
+- Narrow Magik grammar to be more like SW43
+- Fixes for Sonar
+
+
 0.1.4 (2019-07-26)
 
 - Fixes after reducing size of magik-lint jar
