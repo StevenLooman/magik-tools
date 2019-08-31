@@ -4,8 +4,6 @@ import org.sonar.sslr.grammar.GrammarRuleKey;
 import org.sonar.sslr.grammar.LexerlessGrammarBuilder;
 import org.sonar.sslr.parser.LexerlessGrammar;
 
-import java.util.List;
-
 public enum MagikGrammar implements GrammarRuleKey {
   WHITESPACE,
   SPACING,
@@ -14,8 +12,6 @@ public enum MagikGrammar implements GrammarRuleKey {
   EOS,
 
   SYNTAX_ERROR,
-
-  KEYWORDS,
 
   // root
   MAGIK,
@@ -188,13 +184,6 @@ public enum MagikGrammar implements GrammarRuleKey {
     for (MagikKeyword k : MagikKeyword.values()) {
       b.rule(k).is(SPACING, b.regexp("(?i)" + k.getValue() + "(?!\\w)"));
     }
-
-    List<MagikKeyword> keywords = MagikKeyword.keywords();
-    Object[] rest = new Object[keywords.size() - 2];
-    for (int i = 2; i < keywords.size(); i++) {
-      rest[i - 2] = keywords.get(i);
-    }
-    b.rule(KEYWORDS).is(b.firstOf(keywords.get(0), keywords.get(1), rest));
   }
 
   private static void literals(LexerlessGrammarBuilder b) {

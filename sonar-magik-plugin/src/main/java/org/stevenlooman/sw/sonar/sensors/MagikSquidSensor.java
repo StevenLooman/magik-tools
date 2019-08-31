@@ -42,6 +42,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -224,15 +225,21 @@ public class MagikSquidSensor implements Sensor {
     LOGGER.debug("Saving CPD tokens, file: {}", inputFile);
 
     NewCpdTokens newCpdTokens = context.newCpdTokens().onFile(inputFile);
-
     List<Token> tokens = visitorContext.tokens();
-    for (Token token : tokens) {
-      TokenLocation location = new TokenLocation(token);
-      newCpdTokens.addToken(
-          location.line(), location.column(),
-          location.endLine(), location.endColumn(),
-          token.getValue());
-    }
+
+    // For some reason, tokens sometimes get swapped.
+    // We work around this by sorting the tokens.
+    Comparator<TokenLocation> byLine = Comparator.comparing(token -> token.line());
+    Comparator<TokenLocation> byColumn = Comparator.comparing(token -> token.column());
+
+    tokens.stream()
+        .filter(token -> !token.getValue().trim().equals(""))
+        .map(token -> new TokenLocation(token))
+        .sorted(byLine.thenComparing(byColumn))
+        .forEach(tokenLocation -> newCpdTokens.addToken(
+          tokenLocation.line(), tokenLocation.column(),
+          tokenLocation.endLine(), tokenLocation.endColumn(),
+          tokenLocation.getValue()));
     newCpdTokens.save();
   }
 }
