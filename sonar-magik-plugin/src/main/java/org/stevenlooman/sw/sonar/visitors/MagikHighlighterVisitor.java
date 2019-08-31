@@ -54,7 +54,7 @@ public class MagikHighlighterVisitor extends MagikVisitor {
   public void visitToken(Token token) {
     String tokenValue = token.getValue();
     String lowerTokenValue = tokenValue.toLowerCase();
-    if (this.KEYWORDS.contains(lowerTokenValue)) {
+    if (MagikHighlighterVisitor.KEYWORDS.contains(lowerTokenValue)) {
       highlight(token, TypeOfText.KEYWORD);
     }
 

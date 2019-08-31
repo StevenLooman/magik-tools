@@ -18,6 +18,11 @@ public class LhsRhsComparatorEqualCheck extends MagikCheck {
   public static final String CHECK_KEY = "LhsRhsComparatorEqual";
 
   @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
+
+  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.OR_EXPRESSION,

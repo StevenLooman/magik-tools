@@ -14,7 +14,12 @@ import java.util.List;
 public class SimplifyIfCheck extends MagikCheck {
   public static final String CHECK_KEY = "SimplifyIf";
   private static final String MESSAGE =
-      "You can simplify this if by using _elif or combining guards..";
+      "You can simplify this if by using _elif or combining guards.";
+
+  @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
 
   @Override
   public List<AstNodeType> subscribedTo() {
@@ -36,7 +41,7 @@ public class SimplifyIfCheck extends MagikCheck {
       return;
     }
     AstNode bodyNode = bodyNodes.get(0);
-    if (bodyNode.getChildren().size() != 1) {
+    if (bodyNode.getChildren(MagikGrammar.STATEMENT).size() != 1) {
       return;
     }
 
@@ -72,7 +77,7 @@ public class SimplifyIfCheck extends MagikCheck {
       return;
     }
     AstNode bodyNode = bodyNodes.get(0);
-    if (bodyNode.getChildren().size() != 1) {
+    if (bodyNode.getChildren(MagikGrammar.STATEMENT).size() != 1) {
       return;
     }
 

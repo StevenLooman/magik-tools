@@ -6,6 +6,7 @@ import com.sonar.sslr.api.Token;
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.MagikVisitorContext;
+import org.stevenlooman.sw.magik.parser.MagikParser;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,34 +16,39 @@ import javax.annotation.Nullable;
 
 @Rule(key = FormattingCheck.CHECK_KEY)
 public class FormattingCheck extends MagikCheck {
-  public static final String CHECK_KEY = "FormattingCheck";
+  public static final String CHECK_KEY = "Formatting";
   private static final String MESSAGE = "Improper formatting: %s.";
+  private static final Integer TAB_WIDTH = 8;
 
   private String[] lines;
   private Token lastToken;
 
-  private static final Set<String> AUGMENTED_ASSIGNMENT_TOKENS = new HashSet<String>() {
-    {
-      add("_is");
-      add("_isnt");
-      add("_andif");
-      add("_and");
-      add("_orif");
-      add("_or");
-      add("_xor");
-      add("_div");
-      add("_mod");
-      add("_cf");
+  private static final Set<String> AUGMENTED_ASSIGNMENT_TOKENS = new HashSet<String>(
+      Arrays.asList(
+        "_is",
+        "_isnt",
+        "_andif",
+        "_and",
+        "_orif",
+        "_or",
+        "_xor",
+        "_div",
+        "_mod",
+        "_cf",
 
-      add("+");
-      add("-");
-      add("*");
-      add("/");
-      add("**");
-      add("=");
-      add("~=");
-    }
-  };
+        "+",
+        "-",
+        "*",
+        "/",
+        "**",
+        "=",
+        "~="
+  ));
+
+  @Override
+  public boolean isTemplatedCheck() {
+    return false;
+  }
 
   @Override
   public List<AstNodeType> subscribedTo() {
@@ -56,11 +62,21 @@ public class FormattingCheck extends MagikCheck {
     if (fileContents != null) {
       lines = fileContents.split("\n");
     }
+
+    int lineNo = 1;
+    for (String line : lines) {
+      if (line.matches("^[ ]{" + TAB_WIDTH + "}.*")
+          || line.matches("^[ ]+[\t]+.*")) {
+        String message = String.format(MESSAGE, "Line must start with tabs");
+        addIssue(message, lineNo, 1);
+      }
+      lineNo += 1;
+    }
   }
 
   @Override
   public void visitToken(Token token) {
-    if (lines == null) {
+    if (token.getType() == MagikParser.UtilityTokenType.SYNTAX_ERROR) {
       return;
     }
 

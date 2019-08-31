@@ -1,7 +1,7 @@
 language: java
 jdk:
 - openjdk8
-before_deploy: mvn package
+before_deploy: mvn -B -DskipTests=true package
 deploy:
   provider: releases
   api_key:
@@ -12,6 +12,7 @@ deploy:
   - sslr-magik-toolkit/target/sslr-magik-toolkit-*.jar
   file_glob: true
   skip_cleanup: true
+  overwrite: true
   on:
     repo: StevenLooman/sonar-magik
     tags: true

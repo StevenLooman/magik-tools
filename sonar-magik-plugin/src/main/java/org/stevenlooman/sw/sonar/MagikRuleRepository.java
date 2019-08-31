@@ -3,9 +3,10 @@ package org.stevenlooman.sw.sonar;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonarsource.analyzer.commons.RuleMetadataLoader;
 import org.stevenlooman.sw.magik.CheckList;
-import org.stevenlooman.sw.magik.TemplatedCheck;
+import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.sonar.language.Magik;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -15,12 +16,22 @@ public class MagikRuleRepository implements RulesDefinition {
   static final String REPOSITORY_NAME = "SonarAnalyzer";
   static final String RESOURCE_FOLDER = "org/stevenlooman/sw/sonar/l10n/magik/rules";
 
-  private List<String> templatedRules() {
-    return getCheckClasses().stream()
-        .filter(klass -> klass.getAnnotation(TemplatedCheck.class) != null)
-        .map(klass -> klass.getAnnotation(org.sonar.check.Rule.class))
-        .map(rule -> ((org.sonar.check.Rule)rule).key())
-        .collect(Collectors.toList());
+  private List<String> templatedRules() throws IllegalAccessException, InstantiationException {
+    List<String> templatedRules = new ArrayList<>();
+    for (Class<?> klass: getCheckClasses()) {
+      MagikCheck instance = (MagikCheck) klass.newInstance();
+      if (!instance.isTemplatedCheck()) {
+        continue;
+      }
+
+      org.sonar.check.Rule rule = klass.getAnnotation(org.sonar.check.Rule.class);
+      if (rule == null) {
+        continue;
+      }
+
+      templatedRules.add(rule.key());
+    }
+    return templatedRules;
   }
 
   @Override
@@ -32,10 +43,14 @@ public class MagikRuleRepository implements RulesDefinition {
     RuleMetadataLoader loader = new RuleMetadataLoader(RESOURCE_FOLDER, CheckList.PROFILE_LOCATION);
     loader.addRulesByAnnotatedClass(repository, getCheckClasses());
 
-    List<String> templatedRules = templatedRules();
-    repository.rules().stream()
-        .filter(rule -> templatedRules.contains(rule.key()))
-        .forEach(rule -> rule.setTemplate(true));
+    try {
+      List<String> templatedRules = templatedRules();
+      repository.rules().stream()
+          .filter(rule -> templatedRules.contains(rule.key()))
+          .forEach(rule -> rule.setTemplate(true));
+    } catch (IllegalAccessException | InstantiationException ex) {
+      // pass
+    }
 
     repository.done();
   }

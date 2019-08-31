@@ -1,5 +1,5 @@
 {
-  "title": "Methods should not be too complex",
+  "title": "Use .empty instead of .size = 0",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
@@ -7,7 +7,7 @@
     "constantCost": "5min"
   },
   "tags": [
-    "optimization"
+    "complexity"
   ],
   "defaultSeverity": "Minor",
   "ruleSpecification": "SizeZeroEmpty",

@@ -16,6 +16,11 @@ public abstract class MagikCheck extends MagikVisitor {
   private List<MagikIssue> issues = new ArrayList<>();
 
   /**
+   * Is this a templated check.
+   */
+  public abstract boolean isTemplatedCheck();
+
+  /**
    * Scan the file from the context for issues.
    * @param context Context to use.
    * @return List issues.
