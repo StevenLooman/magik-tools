@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.2.0 (unreleased)
+0.2.0 (2019-08-31)
 
 - Add --watch option to magik-lint
 - Add --help option to magik-lint
