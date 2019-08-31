@@ -53,4 +53,20 @@ public class TokenLocation {
     return endLineOffset;
   }
 
+  /**
+   * Get value of token.
+   * @return Value of token.
+   */
+  public String getValue() {
+    return token.getValue();
+  }
+
+  /**
+   * Get token.
+   * @return Token.
+   */
+  public Token token() {
+    return token;
+  }
+
 }

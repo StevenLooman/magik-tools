@@ -35,7 +35,7 @@ public class SizeZeroEmptyCheck extends MagikCheck {
     AstNode rightHandSide = node.getLastChild();
     if (hasEqOperator(node)
         && (isMethodInvocationSize(leftHandSide) && isNumberZero(rightHandSide)
-        || isMethodInvocationSize(rightHandSide) && isNumberZero(leftHandSide))) {
+            || isMethodInvocationSize(rightHandSide) && isNumberZero(leftHandSide))) {
       addIssue(MESSAGE, node);
     }
   }

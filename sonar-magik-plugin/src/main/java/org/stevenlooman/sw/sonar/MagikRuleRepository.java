@@ -20,10 +20,10 @@ public class MagikRuleRepository implements RulesDefinition {
     List<String> templatedRules = new ArrayList<>();
     for (Class<?> klass: getCheckClasses()) {
       MagikCheck instance = (MagikCheck) klass.newInstance();
-      if (instance.isTemplatedCheck()) {
+      if (!instance.isTemplatedCheck()) {
         continue;
       }
-      
+
       org.sonar.check.Rule rule = klass.getAnnotation(org.sonar.check.Rule.class);
       if (rule == null) {
         continue;

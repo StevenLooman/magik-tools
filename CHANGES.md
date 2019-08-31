@@ -17,6 +17,7 @@ Changes
 - Add MethodDocCheck
 - Extend FormattingCheck to test if line starts with tabs
 - Narrow Magik grammar to be more like SW43
+- Fixes for Sonar
 
 
 0.1.4 (2019-07-26)
