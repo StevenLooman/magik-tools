@@ -131,4 +131,26 @@ public class ScopeBuilderVisitorTest {
     assertThat(entryB.getType() == ScopeEntry.Type.DEFINITION);
   }
 
+  @Test
+  public void testTryWith() {
+    String code =
+        "_try _with a\n" +
+        "_when error\n" +
+        "_endtry\n";
+    MagikVisitorContext context = createContext(code);
+
+    ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
+    visitor.scanFile(context);
+
+    Scope globalScope = visitor.getGlobalScope();
+    Scope tryScope = globalScope.getSelfAndDescendantScopes().get(1);
+    ScopeEntry entryTryA = tryScope.getScopeEntry("a");
+    assertThat(entryTryA).isNull();
+
+    Scope whenScope = globalScope.getSelfAndDescendantScopes().get(2);
+    ScopeEntry entryWhenA = whenScope.getScopeEntry("a");
+    assertThat(entryWhenA).isNotNull();
+    assertThat(entryWhenA.getType() == ScopeEntry.Type.DEFINITION);
+  }
+
 }

@@ -79,8 +79,8 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       }
 
       scopeIndex.put(parentNode, scope);  // handy
-    } else if (parentNode.getType() == MagikGrammar.TRY_BLOCK) {
-      // XXX TODO: _try _with cond ???
+    } else if (parentNode.getType() == MagikGrammar.TRY_BLOCK
+               && parentNode.getChildren(MagikGrammar.BODY).get(0) != node) {
       scope = new BodyScope(scope, node);
 
       AstNode identifiersNode = parentNode.getFirstChild(MagikGrammar.IDENTIFIERS);
