@@ -1,0 +1,15 @@
+{
+  "title": "Warned call",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "error"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "WarnedCall",
+  "sqKey": "warned-call"
+}

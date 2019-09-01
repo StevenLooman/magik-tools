@@ -12,20 +12,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Rule(key = ForbiddenCallCheck.CHECK_KEY)
-public class ForbiddenCallCheck extends MagikCheck {
-  public static final String CHECK_KEY = "ForbiddenCall";
-  private static final String MESSAGE = "Call is forbidden.";
-  private static final String DEFAULT_FORBIDDEN_CALLS = "show(), print(), debug_print()";
+@Rule(key = WarnedCallCheck.CHECK_KEY)
+public class WarnedCallCheck extends MagikCheck {
+  public static final String CHECK_KEY = "WarnedCall";
+  private static final String MESSAGE = "Call is warned.";
+  private static final String DEFAULT_WARNED_CALLS = "write()";
 
   @RuleProperty(
-      key = "forbidden calls",
-      defaultValue = "" + DEFAULT_FORBIDDEN_CALLS,
-      description = "List of forbidden calls, separated by ','")
-  public String forbiddenCalls = DEFAULT_FORBIDDEN_CALLS;
+      key = "Warned calls",
+      defaultValue = "" + DEFAULT_WARNED_CALLS,
+      description = "List of Warned calls, separated by ','")
+  public String warnedCalls = DEFAULT_WARNED_CALLS;
 
-  private Set<String> getForbiddenCalls() {
-    return Arrays.stream(forbiddenCalls.split(","))
+  private Set<String> getWarnedCalls() {
+    return Arrays.stream(warnedCalls.split(","))
         .map(s -> s.trim())
         .collect(Collectors.toSet());
   }
@@ -58,7 +58,7 @@ public class ForbiddenCallCheck extends MagikCheck {
     }
 
     String identifier = "." + identifierNode.getTokenValue();
-    if (!getForbiddenCalls().contains(identifier)) {
+    if (!getWarnedCalls().contains(identifier)) {
       return;
     }
 
@@ -72,7 +72,7 @@ public class ForbiddenCallCheck extends MagikCheck {
     }
 
     String identifier = parentNode.getTokenValue() + "()";
-    if (!getForbiddenCalls().contains(identifier)) {
+    if (!getWarnedCalls().contains(identifier)) {
       return;
     }
 
