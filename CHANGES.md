@@ -3,6 +3,8 @@ Changes
 
 0.2.1 (unreleased)
 
+- Add WarnedCallCheck
+
 
 0.2.0 (2019-08-31)
 
