@@ -2,9 +2,7 @@ package org.stevenlooman.sw.magik.parser;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
-import com.sonar.sslr.api.Trivia;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
-import org.stevenlooman.sw.magik.api.MagikKeyword;
 
 import java.util.Hashtable;
 import java.util.List;

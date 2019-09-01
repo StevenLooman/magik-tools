@@ -4,6 +4,7 @@ Changes
 0.2.1 (unreleased)
 
 - Add WarnedCallCheck
+- Fix ScopeBuilderVisitor for \_try \_with identifier scoping
 
 
 0.2.0 (2019-08-31)
