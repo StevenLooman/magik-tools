@@ -439,6 +439,7 @@ public class MagikGrammarTest {
         .notMatches("_blocki _endblock")
         .notMatches("_block write(1) write(2) _endblock")
         .notMatches("_block write(1)write(2) _endblock")
+        .notMatches("_pragma(classify_level=restricted)\n_method a.b _block _endmethod")
         ;
   }
 
