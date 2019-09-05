@@ -148,8 +148,8 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(EOS).is(
         b.firstOf(
             SPACING,
-            b.sequence(SPACING_NO_LB, b.regexp(NEWLINE_REGEXP)),
-            b.sequence(SPACING, b.endOfInput()))).skip();
+            b.sequence(SPACING_NO_LB, b.regexp(NEWLINE_REGEXP))
+        )).skip();
 
     b.rule(MAGIK).is(
         b.oneOrMore(
@@ -160,7 +160,9 @@ public enum MagikGrammar implements GrammarRuleKey {
                 STATEMENT,
                 STATEMENT_SEPARATOR,
                 TRANSMIT),
-            EOS));
+            EOS),
+        b.endOfInput());
+
     b.rule(TRANSMIT).is(MagikPunctuator.DOLLAR);
 
     punctuators(b);

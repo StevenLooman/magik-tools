@@ -25,7 +25,22 @@ public class MagikParserTest {
   }
 
   @Test
-  public void testInvalidMagik() {
+  public void testValidMagik1() {
+    MagikParser parser = new MagikParser(Charset.forName("UTF-8"));
+    String code =
+        "_block\n" +
+        "\twrite(1)\n" +
+        "_endblock";
+    AstNode node = parser.parseSafe(code);
+    assertThat(node.getChildren()).hasSize(1);
+    AstNode blockNode = node.getChildren().get(0);
+    assertThat(blockNode.getType()).isEqualTo(MagikGrammar.STATEMENT);
+    assertThat(blockNode.getToken().getLine()).isEqualTo(1);
+    assertThat(blockNode.getToken().getColumn()).isEqualTo(0);
+  }
+
+  @Test
+  public void testInvalidMagik1() {
     MagikParser parser = new MagikParser(Charset.forName("UTF-8"));
     String code =
         "_block\n" +
@@ -82,6 +97,21 @@ public class MagikParserTest {
     assertThat(syntaxErrorNode.getType()).isEqualTo(MagikGrammar.SYNTAX_ERROR);
     assertThat(syntaxErrorNode.getToken().getLine()).isEqualTo(2);
     assertThat(syntaxErrorNode.getToken().getColumn()).isEqualTo(18);
+  }
+
+  @Test
+  public void testInvalidMagik5() {
+    MagikParser parser = new MagikParser(Charset.forName("UTF-8"));
+    String code =
+      "_pragma(classify_level=restricted)\n" +
+      "_method a.b _block _endmethod" +
+      "";
+    AstNode node = parser.parseSafe(code);
+    assertThat(node.getChildren()).hasSize(1);
+    AstNode syntaxErrorNode = node.getChildren().get(0);
+    assertThat(syntaxErrorNode.getType()).isEqualTo(MagikGrammar.SYNTAX_ERROR);
+    assertThat(syntaxErrorNode.getToken().getLine()).isEqualTo(2);
+    assertThat(syntaxErrorNode.getToken().getColumn()).isEqualTo(20);
   }
 
 }
