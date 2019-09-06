@@ -75,6 +75,12 @@ public class MagikLint {
         .longOpt("watch")
         .desc("Watch the given directory/file for changes")
         .build());
+    options.addOption(Option.builder()
+        .longOpt("max-infractions")
+        .desc("Set max number of reporter infractions")
+        .hasArg()
+        .type(PatternOptionBuilder.NUMBER_VALUE)
+        .build());
   }
 
   static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING = new HashMap<>();
@@ -197,6 +203,7 @@ public class MagikLint {
   private int checkFiles(Iterable<CheckInfo> checkInfos, Iterable<Path> paths)
       throws IOException, ParseException {
     int returnCode = 0;
+    int infractionCount = 0;
 
     Comparator<CheckInfraction> byPath = Comparator.comparing(ci -> ci.getPath().toString());
     Comparator<CheckInfraction> byLine = Comparator.comparing(ci -> ci.getMagikIssue().line());
@@ -230,6 +237,12 @@ public class MagikLint {
 
         int checkReturnCode = getReturnCode(checkInfraction);
         returnCode = returnCode | checkReturnCode;
+
+        infractionCount++;
+        if (commandLine.hasOption("max-infractions")
+            && infractionCount == (Long)commandLine.getParsedOptionValue("max-infractions")) {
+          return returnCode;
+        }
       }
     }
 
