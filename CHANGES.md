@@ -7,6 +7,7 @@ Changes
 - Fix ScopeBuilderVisitor for \_try \_with identifier scoping
 - Actually fail and give SYNTAX_ERROR when input cannot be entirely parsed
 - Add --max-infractions option to magik-lint
+- FileNotInLoadListCheck trims lines from load_list
 
 
 0.2.0 (2019-08-31)

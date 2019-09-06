@@ -54,7 +54,7 @@ public class FileNotInLoadListCheck extends MagikCheck {
     String filename = path.getFileName().toString();
     filename = filename.replaceFirst("[.][^.]+$", "");  // strip .extension
     for (String line: lines) {
-      if (line.equals(filename)) {
+      if (line.trim().equals(filename)) {
         return;
       }
     }
