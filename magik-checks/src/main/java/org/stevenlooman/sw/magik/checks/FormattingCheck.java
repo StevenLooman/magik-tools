@@ -3,6 +3,7 @@ package org.stevenlooman.sw.magik.checks;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.Token;
+
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.MagikVisitorContext;
@@ -21,7 +22,9 @@ public class FormattingCheck extends MagikCheck {
   private static final Integer TAB_WIDTH = 8;
 
   private String[] lines;
-  private Token lastToken;
+  private Token previousToken;
+  private Token currentToken;
+  private Token nextToken;
 
   private static final Set<String> AUGMENTED_ASSIGNMENT_TOKENS = new HashSet<String>(
       Arrays.asList(
@@ -61,6 +64,8 @@ public class FormattingCheck extends MagikCheck {
     String fileContents = context.fileContent();
     if (fileContents != null) {
       lines = fileContents.split("\n");
+    } else {
+      lines = new String[]{};
     }
 
     int lineNo = 1;
@@ -75,36 +80,58 @@ public class FormattingCheck extends MagikCheck {
   }
 
   @Override
+  public void leaveFile(@Nullable AstNode node) {
+    // process last token
+    previousToken = currentToken;
+    currentToken = nextToken;
+    nextToken = null;
+
+    if (currentToken != null) {
+      handleToken();
+    }
+  }
+
+  @Override
   public void visitToken(Token token) {
     if (token.getType() == MagikParser.UtilityTokenType.SYNTAX_ERROR) {
       return;
     }
 
+    previousToken = currentToken;
+    currentToken = nextToken;
+    nextToken = token;
+
+    if (currentToken != null) {
+      handleToken();
+    }
+  }
+
+  private void handleToken() {
     // don't care about pragma
-    if (isPragmaLine(token)) {
+    if (isPragmaLine(currentToken)) {
       return;
     }
 
-    String value = token.getValue();
+    String value = currentToken.getValue();
     switch (value) {
       case ",":
-        visitTokenComma(token);
+        visitTokenComma(currentToken);
         break;
 
       case ".":
-        visitTokenDot(token);
+        visitTokenDot(currentToken);
         break;
 
       case "{":
       case "[":
       case "(":
-        visitTokenBracketOpen(token);
+        visitTokenBracketOpen(currentToken);
         break;
 
       case "}":
       case "]":
       case ")":
-        visitTokenBracketClose(token);
+        visitTokenBracketClose(currentToken);
         break;
 
       //case "+":  // can be unary expression
@@ -127,23 +154,30 @@ public class FormattingCheck extends MagikCheck {
       case "_andif":
       case "_xor":
       case "_cf":
-        visitTokenBinaryOperator(token);
+        if (nextToken != null
+            && (nextToken.getValue().equals("<<")
+                || nextToken.getValue().equals("^<<"))) {
+          // part 1 of augmented assignment
+          visitTokenAugmentedAssignmentExpression1(currentToken);
+        } else {
+          visitTokenBinaryOperator(currentToken);
+        }
         break;
 
       case "<<":
       case "^<<":
-        if (isAugmentedAssignmentExpression(token)) {
-          visitTokenAugmentedAssignmentExpression(token);
+        if (previousToken != null
+            && AUGMENTED_ASSIGNMENT_TOKENS.contains(previousToken.getValue())) {
+          // part 2 of augmented assignment
+          visitTokenAugmentedAssignmentExpression2(currentToken);
         } else {
-          visitTokenBinaryOperator(token);
+          visitTokenBinaryOperator(currentToken);
         }
         break;
 
       default:
         break;
     }
-
-    lastToken = token;
   }
 
   private boolean isPragmaLine(Token token) {
@@ -157,15 +191,15 @@ public class FormattingCheck extends MagikCheck {
   }
 
   private Character charBefore(Token token) {
-    if (lastToken != null
-        && lastToken.getLine() != token.getLine()) {
+    if (previousToken != null
+        && previousToken.getLine() != token.getLine()) {
       return null;
     }
 
     String line = getLineFor(token);
     int prevColumn = token.getColumn() - 1;
     // special case: '% ', cheat by getting the %
-    if (lastToken.getValue().equals("% ")) {
+    if (previousToken.getValue().equals("% ")) {
       prevColumn -= 1;
     }
     if (prevColumn < 0) {
@@ -188,7 +222,7 @@ public class FormattingCheck extends MagikCheck {
   }
 
   private boolean isAugmentedAssignmentExpression(Token token) {
-    String previousTokenValue = lastToken.getValue();
+    String previousTokenValue = previousToken.getValue();
     return AUGMENTED_ASSIGNMENT_TOKENS.contains(previousTokenValue);
   }
 
@@ -245,8 +279,12 @@ public class FormattingCheck extends MagikCheck {
     }
   }
 
-  private void visitTokenAugmentedAssignmentExpression(Token token) {
-    requireNonWhitespaceBefore(token);
+  private void visitTokenAugmentedAssignmentExpression1(Token token) {
+    requireWhitespaceBefore(token);
+    requireNonWhitespaceAfter(token);
+  }
+
+  private void visitTokenAugmentedAssignmentExpression2(Token token) {
     requireWhitespaceAfter(token);
   }
 
