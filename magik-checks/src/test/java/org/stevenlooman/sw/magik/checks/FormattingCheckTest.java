@@ -104,6 +104,22 @@ public class FormattingCheckTest extends MagikCheckTestBase {
   }
 
   @Test
+  public void testAugmentedAssignment1() {
+    MagikCheck check = new FormattingCheck();
+    String code = "a *<< b";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
+  public void testAugmentedAssignment2() {
+    MagikCheck check = new FormattingCheck();
+    String code = "a _orif<< b";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
   public void testBracketProper1() {
     MagikCheck check = new FormattingCheck();
     String code = "show(a, b)";
