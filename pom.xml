@@ -180,7 +180,7 @@
 
                 <executions>
                     <execution>
-                        <id>validate</id>
+                        <id>checkstyle</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
@@ -189,9 +189,8 @@
                 </executions>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <consoleOutput>true</consoleOutput>
-                    <failsOnError>true</failsOnError>
-                    <linkXRef>false</linkXRef>
+                    <violationSeverity>warning</violationSeverity>
+                    <failOnViolation>true</failOnViolation>
                     <configLocation>checkstyle.xml</configLocation>
                 </configuration>
             </plugin>
