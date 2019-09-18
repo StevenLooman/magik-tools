@@ -11,6 +11,7 @@ Changes
 - Fix bug where FormattingCheck does not handle augmented assignments properly
 - Make AST more an AST, not including terminals
 - Fix lines not matching due to \r\r\n
+- Don't crash on usage of vec() in def_slotted_exemplar()
 
 
 0.2.0 (2019-08-31)
