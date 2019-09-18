@@ -80,7 +80,7 @@ public abstract class MagikCheck extends MagikVisitor {
       return false;
     }
 
-    String[] lines = fileContents.split("\n");
+    String[] lines = fileContents.split("\r\n|\n|\r");  // match BufferedReader.readLine()
     String line = lines[lineNo - 1];
     Pattern pattern = Pattern.compile(".*# ?mlint: ?disable=(.*)");
     Matcher matcher = pattern.matcher(line);

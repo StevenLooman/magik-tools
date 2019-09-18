@@ -10,6 +10,7 @@ Changes
 - FileNotInLoadListCheck trims lines from load_list
 - Fix bug where FormattingCheck does not handle augmented assignments properly
 - Make AST more an AST, not including terminals
+- Fix lines not matching due to \r\r\n
 
 
 0.2.0 (2019-08-31)
