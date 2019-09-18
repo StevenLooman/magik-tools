@@ -35,8 +35,14 @@ public enum MagikGrammar implements GrammarRuleKey {
   IDENTIFIERS,
   IDENTIFIERS_WITH_GATHER,
   METHOD_INVOCATION,
+  INDEX_INVOCATION,
+  METHOD_INVOCATION_ASSIGNMENT,
   PROCEDURE_INVOCATION,
-  INDEXED_INVOCATION,
+  METHOD_MODIFIER,
+  PARAMETER_MODIFIER,
+  VARIABLE_DEFINITION_MODIFIER,
+  VARIABLE_DEFINITION_MULTI,
+  VARIABLE_DEFINITION,
 
   // statements
   STATEMENT,
@@ -178,13 +184,13 @@ public enum MagikGrammar implements GrammarRuleKey {
 
   private static void punctuators(LexerlessGrammarBuilder b) {
     for (MagikPunctuator p : MagikPunctuator.values()) {
-      b.rule(p).is(SPACING, p.getValue());
+      b.rule(p).is(SPACING, p.getValue()).skip();
     }
   }
 
   private static void keywords(LexerlessGrammarBuilder b) {
     for (MagikKeyword k : MagikKeyword.values()) {
-      b.rule(k).is(SPACING, b.regexp("(?i)" + k.getValue() + "(?!\\w)"));
+      b.rule(k).is(SPACING, b.regexp("(?i)" + k.getValue() + "(?!\\w)")).skip();
     }
   }
 
@@ -236,7 +242,7 @@ public enum MagikGrammar implements GrammarRuleKey {
             SPACING_NO_LB, NEXT_NOT_LB,
             b.firstOf(
                 METHOD_INVOCATION,
-                INDEXED_INVOCATION,
+                INDEX_INVOCATION,
                 PROCEDURE_INVOCATION))).skipIfOneChild();
 
     b.rule(ATOM).is(
@@ -277,10 +283,12 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(METHOD_INVOCATION).is(
         MagikPunctuator.DOT, IDENTIFIER,
         b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikPunctuator.PAREN_L, ARGUMENTS, MagikPunctuator.PAREN_R),
-        b.optional(SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.CHEVRON, MagikPunctuator.BOOT_CHEVRON), EXPRESSION));
-    b.rule(INDEXED_INVOCATION).is(
+        b.optional(METHOD_INVOCATION_ASSIGNMENT));
+    b.rule(INDEX_INVOCATION).is(
         MagikPunctuator.SQUARE_L, ARGUMENTS, MagikPunctuator.SQUARE_R,
-        b.optional(SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.CHEVRON, MagikPunctuator.BOOT_CHEVRON), EXPRESSION));
+        b.optional(METHOD_INVOCATION_ASSIGNMENT));
+    b.rule(METHOD_INVOCATION_ASSIGNMENT).is(
+        SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.CHEVRON, MagikPunctuator.BOOT_CHEVRON), EXPRESSION);
     b.rule(PROCEDURE_INVOCATION).is(MagikPunctuator.PAREN_L, ARGUMENTS, MagikPunctuator.PAREN_R);
   }
 
@@ -311,31 +319,34 @@ public enum MagikGrammar implements GrammarRuleKey {
 
     b.rule(VARIABLE_DEFINITION_STATEMENT).is(
         b.oneOrMore(
-            b.firstOf(
-                MagikKeyword.LOCAL,
-                MagikKeyword.CONSTANT,
-                MagikKeyword.RECURSIVE,
-                MagikKeyword.GLOBAL,
-                MagikKeyword.DYNAMIC,
-                MagikKeyword.IMPORT)),
+            VARIABLE_DEFINITION_MODIFIER),
         b.firstOf(
+            VARIABLE_DEFINITION_MULTI,
             b.sequence(
-                MagikPunctuator.PAREN_L,
-                IDENTIFIERS_WITH_GATHER,
-                MagikPunctuator.PAREN_R,
-                MagikPunctuator.CHEVRON,
-                EXPRESSIONS),
-            b.sequence(
-                IDENTIFIER,
-                b.optional(
-                    MagikPunctuator.CHEVRON,
-                    EXPRESSION),
+                VARIABLE_DEFINITION,
                 b.zeroOrMore(
                     MagikPunctuator.COMMA,
-                    IDENTIFIER,
-                    b.optional(
-                        MagikPunctuator.CHEVRON,
-                        EXPRESSION)))));
+                    VARIABLE_DEFINITION))));
+    b.rule(VARIABLE_DEFINITION_MODIFIER).is(
+        b.firstOf(
+            MagikKeyword.LOCAL,
+            MagikKeyword.CONSTANT,
+            MagikKeyword.RECURSIVE,
+            MagikKeyword.GLOBAL,
+            MagikKeyword.DYNAMIC,
+            MagikKeyword.IMPORT));
+    b.rule(VARIABLE_DEFINITION).is(
+        IDENTIFIER,
+        b.optional(
+            MagikPunctuator.CHEVRON,
+            EXPRESSION));
+    b.rule(VARIABLE_DEFINITION_MULTI).is(
+        MagikPunctuator.PAREN_L,
+        IDENTIFIERS_WITH_GATHER,
+        MagikPunctuator.PAREN_R,
+        MagikPunctuator.CHEVRON,
+        EXPRESSIONS
+    );
 
     b.rule(MULTIPLE_ASSIGNMENT_STATEMENT).is(
         MagikPunctuator.PAREN_L,
@@ -404,8 +415,9 @@ public enum MagikGrammar implements GrammarRuleKey {
 
   private static void constructs(LexerlessGrammarBuilder b) {
     b.rule(METHOD_DEFINITION).is(
-        b.zeroOrMore(b.firstOf(MagikKeyword.ITER, MagikKeyword.PRIVATE, MagikKeyword.ABSTRACT)),
-        MagikKeyword.METHOD, IDENTIFIER,
+        b.zeroOrMore(METHOD_MODIFIER),
+        MagikKeyword.METHOD,
+        IDENTIFIER,
         b.firstOf(
             b.sequence(MagikPunctuator.DOT, IDENTIFIER,
                 b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikPunctuator.PAREN_L, PARAMETERS, MagikPunctuator.PAREN_R),
@@ -415,15 +427,29 @@ public enum MagikGrammar implements GrammarRuleKey {
         BODY,
         MagikKeyword.ENDMETHOD);
 
-    b.rule(PARAMETERS).is(
-        b.optional(PARAMETER, b.zeroOrMore(b.optional(MagikPunctuator.COMMA), PARAMETER)));
-    b.rule(PARAMETER).is(
-        b.optional(b.firstOf(MagikKeyword.GATHER, MagikKeyword.OPTIONAL)), IDENTIFIER);
-    b.rule(ASSIGNMENT_PARAMETER).is(
-        PARAMETER
-    );
+    b.rule(METHOD_MODIFIER).is(
+        b.firstOf(
+            MagikKeyword.ITER,
+            MagikKeyword.PRIVATE,
+            MagikKeyword.ABSTRACT));
 
-    b.rule(ARGUMENTS).is(b.optional(ARGUMENT, b.zeroOrMore(b.optional(MagikPunctuator.COMMA), ARGUMENT)));
+    b.rule(PARAMETERS).is(
+        b.optional(
+            PARAMETER,
+            b.zeroOrMore(b.optional(MagikPunctuator.COMMA), PARAMETER)));
+    b.rule(PARAMETER).is(
+        b.optional(PARAMETER_MODIFIER),
+        IDENTIFIER);
+    b.rule(PARAMETER_MODIFIER).is(
+        b.firstOf(
+            MagikKeyword.GATHER,
+            MagikKeyword.OPTIONAL));
+    b.rule(ASSIGNMENT_PARAMETER).is(IDENTIFIER);
+
+    b.rule(ARGUMENTS).is(
+        b.optional(
+            ARGUMENT,
+            b.zeroOrMore(b.optional(MagikPunctuator.COMMA), ARGUMENT)));
     b.rule(ARGUMENT).is(EXPRESSION);
 
     b.rule(EXPRESSIONS).is(

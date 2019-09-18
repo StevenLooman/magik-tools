@@ -30,7 +30,7 @@ public class UnusedVariableCheckTest extends MagikCheckTestBase {
         "\t_local a\n" +
         "_endmethod\n";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
@@ -41,7 +41,7 @@ public class UnusedVariableCheckTest extends MagikCheckTestBase {
         "\t_local (a, b) << (_scatter {1,2})\n" +
         "_endmethod\n";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(2);
   }
 
   @Test
@@ -99,7 +99,7 @@ public class UnusedVariableCheckTest extends MagikCheckTestBase {
         "\t_dynamic !notify_database_data_changes?!\n" +
         "_endmethod\n";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
@@ -122,7 +122,7 @@ public class UnusedVariableCheckTest extends MagikCheckTestBase {
         "\ta << 10\n" +
         "_endmethod\n";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
@@ -143,7 +143,7 @@ public class UnusedVariableCheckTest extends MagikCheckTestBase {
         "_method a.b(p_param1)\n" +
         "_endmethod\n";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
@@ -207,6 +207,20 @@ public class UnusedVariableCheckTest extends MagikCheckTestBase {
         "_method a.b()\n" +
         "\tl_Set << 10\n" +
         "\tprint(l_set)\n" +
+        "_endmethod\n";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
+  public void testUndeclaredGlobal() {
+    MagikCheck check = new UnusedVariableCheck();
+    String code =
+        "_method a.b()\n" +
+        "\t_if !current_grs! _isnt _unset\n" +
+        "\t_then\n" +
+        "\t\twrite(1)\n" +
+        "\t_endif\n" +
         "_endmethod\n";
     List<MagikIssue> issues = runCheck(code, check);
     assertThat(issues).isEmpty();
