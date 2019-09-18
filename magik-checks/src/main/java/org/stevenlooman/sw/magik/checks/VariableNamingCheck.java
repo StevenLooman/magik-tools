@@ -5,6 +5,10 @@ import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
+import org.stevenlooman.sw.magik.MagikVisitorContext;
+import org.stevenlooman.sw.magik.analysis.scope.GlobalScope;
+import org.stevenlooman.sw.magik.analysis.scope.Scope;
+import org.stevenlooman.sw.magik.analysis.scope.ScopeEntry;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
 import java.util.Arrays;
@@ -33,42 +37,7 @@ public class VariableNamingCheck extends MagikCheck {
   @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
-        MagikGrammar.VARIABLE_DEFINITION_STATEMENT,
-        MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT,
-        MagikGrammar.ASSIGNMENT_EXPRESSION,
-        MagikGrammar.PARAMETER
-    );
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
-    List<AstNode> identifierNodes;
-    AstNode identifierWithGather = node.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
-    AstNode firstChildNode = node.getFirstChild();
-    if (identifierWithGather != null) {
-      identifierNodes = identifierWithGather.getChildren(MagikGrammar.IDENTIFIER);
-    } else if (firstChildNode.getType() == MagikGrammar.ATOM) {
-      identifierNodes = firstChildNode.getChildren(MagikGrammar.IDENTIFIER);
-    } else {
-      identifierNodes = node.getChildren(MagikGrammar.IDENTIFIER);
-    }
-
-    for (AstNode identifierNode : identifierNodes) {
-      String identifier = identifierNode.getTokenValue();
-      String strippedIdentifier = stripPrefix(identifier);
-
-      List<String> whitelist = whitelist();
-      if (whitelist.contains(strippedIdentifier)) {
-        continue;
-      }
-
-      if (strippedIdentifier.length() >= MIN_LENGTH) {
-        continue;
-      }
-
-      String message = String.format(MESSAGE, identifier);
-      addIssue(message, identifierNode);
-    }
+        MagikGrammar.MAGIK);
   }
 
   private String stripPrefix(String identifier) {
@@ -83,6 +52,34 @@ public class VariableNamingCheck extends MagikCheck {
 
   private List<String> whitelist() {
     return Arrays.asList(whitelist.split(","));
+  }
+
+  @Override
+  public void leaveNode(AstNode node) {
+    MagikVisitorContext context = getContext();
+    GlobalScope globalScope = context.getGlobalScope();
+    for (Scope scope : globalScope.getSelfAndDescendantScopes()) {
+      for (ScopeEntry scopeEntry : scope.getScopeEntries()) {
+        if (scopeEntry.getType() == ScopeEntry.Type.LOCAL
+            || scopeEntry.getType() == ScopeEntry.Type.DEFINITION
+            || scopeEntry.getType() == ScopeEntry.Type.PARAMETER) {
+          String identifier = scopeEntry.getIdentifier();
+
+          if (!isValidName(identifier)) {
+            String message = String.format(MESSAGE, identifier);
+            AstNode identifierNode = scopeEntry.getNode();
+            addIssue(message, identifierNode);
+          }
+        }
+      }
+    }
+  }
+
+  private boolean isValidName(String identifier) {
+    String strippedIdentifier = stripPrefix(identifier);
+    List<String> whitelist = whitelist();
+    return whitelist.contains(strippedIdentifier)
+           || strippedIdentifier.length() >= MIN_LENGTH;
   }
 
 }

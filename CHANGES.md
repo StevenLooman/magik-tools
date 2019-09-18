@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.2.1 (unreleased)
+0.3.0 (unreleased)
 
 - Add WarnedCallCheck
 - Fix ScopeBuilderVisitor for \_try \_with identifier scoping
@@ -9,6 +9,7 @@ Changes
 - Add --max-infractions option to magik-lint
 - FileNotInLoadListCheck trims lines from load_list
 - Fix bug where FormattingCheck does not handle augmented assignments properly
+- Make AST more an AST, not including terminals
 
 
 0.2.0 (2019-08-31)

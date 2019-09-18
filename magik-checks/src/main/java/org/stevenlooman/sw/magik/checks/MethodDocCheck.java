@@ -84,8 +84,7 @@ public class MethodDocCheck extends MagikCheck {
     // assignment value
     AstNode assignmentParameterNode = node.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
     if (assignmentParameterNode != null) {
-      AstNode parameterNode = assignmentParameterNode.getFirstChild(MagikGrammar.PARAMETER);
-      AstNode identifierNode = parameterNode.getFirstChild(MagikGrammar.IDENTIFIER);
+      AstNode identifierNode = assignmentParameterNode.getFirstChild(MagikGrammar.IDENTIFIER);
       String name = identifierNode.getTokenValue();
       parameters.add(name);
     }
