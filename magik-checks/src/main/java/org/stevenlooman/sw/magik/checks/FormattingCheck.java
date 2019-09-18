@@ -221,11 +221,6 @@ public class FormattingCheck extends MagikCheck {
     return charAfter;
   }
 
-  private boolean isAugmentedAssignmentExpression(Token token) {
-    String previousTokenValue = previousToken.getValue();
-    return AUGMENTED_ASSIGNMENT_TOKENS.contains(previousTokenValue);
-  }
-
   /**
    * Require a non-whitespace-character before.
    * If only whites-space is encountered before, this is accepted as well.
