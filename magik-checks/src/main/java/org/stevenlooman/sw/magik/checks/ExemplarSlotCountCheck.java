@@ -82,6 +82,10 @@ public class ExemplarSlotCountCheck extends MagikCheck {
 
     AstNode slotsArgumentNode = argumentNodes.get(1);
     AstNode slotsDefinitionNode = slotsArgumentNode.getFirstDescendant(MagikGrammar.SIMPLE_VECTOR);
+    if (slotsDefinitionNode == null) {
+      // vec() can also be used, but don't support that for now...
+      return Collections.emptyList();
+    }
 
     return slotsDefinitionNode.getChildren(MagikGrammar.EXPRESSION);
   }
