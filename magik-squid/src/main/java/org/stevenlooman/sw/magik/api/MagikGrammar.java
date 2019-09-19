@@ -52,6 +52,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   RETURN_STATEMENT,
   EMIT_STATEMENT,
   EXPRESSION_STATEMENT,
+  PRIMITIVE_STATEMENT,
   HANDLING,
   THROW_STATEMENT,
   BLOCK,
@@ -276,7 +277,6 @@ public enum MagikGrammar implements GrammarRuleKey {
             MagikKeyword.TRUE,
             MagikKeyword.FALSE,
             MagikKeyword.MAYBE,
-            MagikKeyword.PRIMITIVE,
             MagikKeyword.THISTHREAD
             ));
 
@@ -302,7 +302,8 @@ public enum MagikGrammar implements GrammarRuleKey {
             CONTINUE_STATEMENT,
             LEAVE_STATEMENT,
             THROW_STATEMENT,
-            VARIABLE_DEFINITION_STATEMENT));
+            VARIABLE_DEFINITION_STATEMENT,
+            PRIMITIVE_STATEMENT));
 
     b.rule(STATEMENT_SEPARATOR).is(
         b.firstOf(
@@ -375,6 +376,8 @@ public enum MagikGrammar implements GrammarRuleKey {
             b.sequence(b.optional(MagikPunctuator.PAREN_L), EXPRESSIONS, b.optional(MagikPunctuator.PAREN_R))
         ));
     b.rule(EXPRESSION_STATEMENT).is(EXPRESSION);
+    b.rule(PRIMITIVE_STATEMENT).is(MagikKeyword.PRIMITIVE, NUMBER);
+
     b.rule(HANDLING).is(
         MagikKeyword.HANDLING, b.firstOf(
             b.sequence(

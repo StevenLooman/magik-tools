@@ -5,13 +5,14 @@ Changes
 
 - Add WarnedCallCheck
 - Fix ScopeBuilderVisitor for \_try \_with identifier scoping
-- Actually fail and give SYNTAX_ERROR when input cannot be entirely parsed
+- Actually fail and give SYNTAX\_ERROR when input cannot be entirely parsed
 - Add --max-infractions option to magik-lint
-- FileNotInLoadListCheck trims lines from load_list
+- FileNotInLoadListCheck trims lines from load\_list
 - Fix bug where FormattingCheck does not handle augmented assignments properly
 - Make AST more an AST, not including terminals
 - Fix lines not matching due to \r\r\n
-- Don't crash on usage of vec() in def_slotted_exemplar()
+- Don't crash on usage of vec() in def\_slotted\_exemplar()
+- Properly support \_primitive
 
 
 0.2.0 (2019-08-31)
@@ -20,7 +21,7 @@ Changes
 - Add --help option to magik-lint
 - Provide safe and unsafe versions of MagikParser.parse()
 - Update README (@sebastiaanspeck)
-- Fix error in FormattingCheck when trying to check SYNTAX_ERROR tokens
+- Fix error in FormattingCheck when trying to check SYNTAX\_ERROR tokens
 - Let MagikVisitorContext handle Scope building
 - Add ${tag} to MessageFormatReporter
 - Changes to MagikGrammar
