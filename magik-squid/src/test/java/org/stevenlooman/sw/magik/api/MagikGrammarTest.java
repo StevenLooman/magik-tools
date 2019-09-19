@@ -209,6 +209,15 @@ public class MagikGrammarTest {
   }
 
   @Test
+  public void testPrimitiveStatement() {
+    Assertions.assertThat(g.rule(MagikGrammar.PRIMITIVE_STATEMENT))
+    .matches("_primitive 1")
+    .matches("_primitive 512")
+    .notMatches("_primitive")
+        ;
+  }
+
+  @Test
   public void testExpression() {
     Assertions.assertThat(g.rule(MagikGrammar.EXPRESSION))
         .matches("a()")
