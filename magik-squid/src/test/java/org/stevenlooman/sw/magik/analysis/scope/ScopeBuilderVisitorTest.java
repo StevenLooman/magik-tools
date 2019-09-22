@@ -8,7 +8,6 @@ import org.stevenlooman.sw.magik.MagikVisitorContext;
 import org.stevenlooman.sw.magik.parser.MagikParser;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 public class ScopeBuilderVisitorTest {
 

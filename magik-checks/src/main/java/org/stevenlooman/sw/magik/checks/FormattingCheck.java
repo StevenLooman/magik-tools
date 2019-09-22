@@ -61,10 +61,8 @@ public class FormattingCheck extends MagikCheck {
   @Override
   public void visitFile(@Nullable AstNode node) {
     MagikVisitorContext context = getContext();
-    String fileContents = context.fileContent();
-    if (fileContents != null) {
-      lines = fileContents.split("\n");
-    } else {
+    lines = context.fileContentLines();
+    if (lines == null) {
       lines = new String[]{};
     }
 

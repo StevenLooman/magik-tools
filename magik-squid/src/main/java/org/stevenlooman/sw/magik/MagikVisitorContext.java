@@ -59,8 +59,25 @@ public class MagikVisitorContext {
     return parsingException;
   }
 
+  /**
+   * Get contents.
+   * @return Contents.
+   */
+  @CheckForNull
   public String fileContent() {
     return fileContent;
+  }
+
+  /**
+   * Get contents, pre-split.
+   * @return Split contents.
+   */
+  @CheckForNull
+  public String[] fileContentLines() {
+    if (fileContent == null) {
+      return null;
+    }
+    return fileContent.split("\r\n|\n|\r");  // match BufferedReader.readLine()
   }
 
   @CheckForNull
