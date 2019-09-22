@@ -1,9 +1,9 @@
 Changes
 =======
 
-0.3.1 (unreleased)
+0.3.1 (2019-09-22)
 
-- Prevent CPD errors when SYNTAX_ERROR token is too long
+- Prevent CPD errors when SYNTAX\_ERROR token is too long
 - Fix several Magik Grammar bugs
 
 
