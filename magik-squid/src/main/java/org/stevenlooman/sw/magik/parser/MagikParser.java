@@ -216,7 +216,7 @@ public class MagikParser {
         .setColumn(column)
         .setType(UtilityTokenType.DUMMY)
         .build();
-    Token syntaxErrorToken = builder.setValueAndOriginalValue("error")
+    Token syntaxErrorToken = builder.setValueAndOriginalValue("X")
         .setURI(uri)
         .setLine(line)
         .setColumn(column)

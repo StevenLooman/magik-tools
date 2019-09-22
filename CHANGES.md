@@ -1,6 +1,12 @@
 Changes
 =======
 
+0.3.1 (2019-09-22)
+
+- Prevent CPD errors when SYNTAX\_ERROR token is too long
+- Fix several Magik Grammar bugs
+
+
 0.3.0 (2019-09-22)
 
 - Add WarnedCallCheck
