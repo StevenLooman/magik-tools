@@ -9,7 +9,8 @@ public class GlobalScope extends Scope {
 
   private Map<AstNode, Scope> scopeIndex;
 
-  GlobalScope(Map<AstNode, Scope> scopeIndex) {
+  GlobalScope(Map<AstNode, Scope> scopeIndex, AstNode node) {
+    super(node);
     this.scopeIndex = scopeIndex;
   }
 
@@ -49,6 +50,26 @@ public class GlobalScope extends Scope {
     }
 
     return this; // get global scope
+  }
+
+  @Override
+  public int getStartLine() {
+    return 0;
+  }
+
+  @Override
+  public int getStartColumn() {
+    return 0;
+  }
+
+  @Override
+  public int getEndLine() {
+    return Integer.MAX_VALUE;
+  }
+
+  @Override
+  public int getEndColumn() {
+    return Integer.MAX_VALUE;
   }
 
 }

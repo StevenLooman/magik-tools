@@ -24,11 +24,13 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 public class MagikLint {
@@ -191,6 +193,22 @@ public class MagikLint {
     }
   }
 
+  private boolean isMagikIssueDisabled(
+      MagikIssue magikIssue, InstructionsHandler instructionsHandler) {
+    int line = magikIssue.line();
+    int column = magikIssue.column();
+    String checkKey = magikIssue.check().getCheckKeyKebabCase();
+
+    Map<String, String> scopeInstructions =
+        instructionsHandler.getInstructionsInScope(line, column);
+    Map<String, String> lineInstructions =
+        instructionsHandler.getInstructionsAtLine(line);
+    String[] scopeDisableds = scopeInstructions.getOrDefault("disable", "").split(",");
+    String[] lineDisableds = lineInstructions.getOrDefault("disable", "").split(",");
+    return Arrays.asList(scopeDisableds).contains(checkKey)
+           || Arrays.asList(lineDisableds).contains(checkKey);
+  }
+
   /**
    * Check all files.
    *
@@ -205,13 +223,14 @@ public class MagikLint {
     int returnCode = 0;
     int infractionCount = 0;
 
-    Comparator<CheckInfraction> byPath = Comparator.comparing(ci -> ci.getPath().toString());
     Comparator<CheckInfraction> byLine = Comparator.comparing(ci -> ci.getMagikIssue().line());
     Comparator<CheckInfraction> byColumn = Comparator.comparing(ci -> ci.getMagikIssue().column());
 
     Reporter reporter = getReporter();
     for (Path path : paths) {
+      System.out.println("Checking: " + path);
       MagikVisitorContext context = buildContext(path);
+      InstructionsHandler instructionsHandler = new InstructionsHandler(context);
       List<CheckInfraction> fileInfractions = new ArrayList<>();
 
       // run checks, report issues
@@ -222,6 +241,7 @@ public class MagikLint {
 
         List<MagikIssue> magikIssues = runCheck(context, checkInfo);
         List<CheckInfraction> checkInfractions = magikIssues.stream()
+            .filter(magikIssue -> !isMagikIssueDisabled(magikIssue, instructionsHandler))
             .map(magikIssue -> new CheckInfraction(path, checkInfo, magikIssue))
             .collect(Collectors.toList());
 
@@ -229,8 +249,7 @@ public class MagikLint {
       }
 
       fileInfractions.sort(
-          byPath
-          .thenComparing(byLine)
+          byLine
           .thenComparing(byColumn));
       for (CheckInfraction checkInfraction : fileInfractions) {
         reporter.reportIssue(checkInfraction);
