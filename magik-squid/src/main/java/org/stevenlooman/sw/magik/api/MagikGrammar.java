@@ -208,8 +208,7 @@ public enum MagikGrammar implements GrammarRuleKey {
         b.optional(MagikKeyword.ITER), MagikKeyword.PROC, b.optional(LABEL),
         MagikPunctuator.PAREN_L, b.optional(PARAMETERS), MagikPunctuator.PAREN_R,
         BODY,
-        MagikKeyword.ENDPROC
-    );
+        MagikKeyword.ENDPROC);
 
   }
 
@@ -346,8 +345,7 @@ public enum MagikGrammar implements GrammarRuleKey {
         IDENTIFIERS_WITH_GATHER,
         MagikPunctuator.PAREN_R,
         MagikPunctuator.CHEVRON,
-        EXPRESSIONS
-    );
+        EXPRESSIONS);
 
     b.rule(MULTIPLE_ASSIGNMENT_STATEMENT).is(
         MagikPunctuator.PAREN_L,
@@ -365,16 +363,13 @@ public enum MagikGrammar implements GrammarRuleKey {
         MagikKeyword.RETURN,
         b.optional(
             SPACING_NO_LB, NEXT_NOT_LB,
-            b.optional(MagikPunctuator.PAREN_L),
-            EXPRESSIONS,
-            b.optional(MagikPunctuator.PAREN_R)));
+            EXPRESSIONS));
 
     b.rule(EMIT_STATEMENT).is(
         MagikPunctuator.EMIT,
         b.firstOf(
             EXPRESSIONS,
-            b.sequence(b.optional(MagikPunctuator.PAREN_L), EXPRESSIONS, b.optional(MagikPunctuator.PAREN_R))
-        ));
+            b.sequence(b.optional(MagikPunctuator.PAREN_L), EXPRESSIONS, b.optional(MagikPunctuator.PAREN_R))));
     b.rule(EXPRESSION_STATEMENT).is(EXPRESSION);
     b.rule(PRIMITIVE_STATEMENT).is(MagikKeyword.PRIMITIVE, NUMBER);
 
