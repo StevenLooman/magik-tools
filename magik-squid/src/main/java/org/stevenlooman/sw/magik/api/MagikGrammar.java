@@ -383,7 +383,7 @@ public enum MagikGrammar implements GrammarRuleKey {
 
     b.rule(THROW_STATEMENT).is(
         MagikKeyword.THROW, EXPRESSION,
-        b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikKeyword.WITH, EXPRESSION));
+        b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikKeyword.WITH, EXPRESSIONS));
     b.rule(PROTECT_BLOCK).is(MagikKeyword.PROTECT, BODY, MagikKeyword.PROTECTION, BODY, MagikKeyword.ENDPROTECT);
     b.rule(TRY_BLOCK).is(
         MagikKeyword.TRY, b.optional(MagikKeyword.WITH, IDENTIFIERS),
@@ -408,7 +408,7 @@ public enum MagikGrammar implements GrammarRuleKey {
         MagikKeyword.ENDLOOP);
     b.rule(LEAVE_STATEMENT).is(MagikKeyword.LEAVE, b.optional(LABEL), b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikKeyword.WITH, EXPRESSIONS));
     b.rule(CONTINUE_STATEMENT).is(MagikKeyword.CONTINUE, b.optional(LABEL), b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikKeyword.WITH, EXPRESSIONS));
-    b.rule(LOOPBODY).is(MagikKeyword.LOOPBODY, MagikPunctuator.PAREN_L, EXPRESSIONS, MagikPunctuator.PAREN_R);
+    b.rule(LOOPBODY).is(MagikKeyword.LOOPBODY, MagikPunctuator.PAREN_L, b.optional(EXPRESSIONS), MagikPunctuator.PAREN_R);
   }
 
   private static void constructs(LexerlessGrammarBuilder b) {
