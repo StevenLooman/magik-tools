@@ -55,6 +55,7 @@ public class MagikRuleRepository implements RulesDefinition {
     repository.done();
   }
 
+  @SuppressWarnings("rawtypes")
   private static List<Class> getCheckClasses() {
     return StreamSupport.stream(CheckList.getChecks().spliterator(), false)
         .collect(Collectors.toList());

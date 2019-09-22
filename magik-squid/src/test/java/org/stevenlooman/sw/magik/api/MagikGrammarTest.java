@@ -209,6 +209,15 @@ public class MagikGrammarTest {
   }
 
   @Test
+  public void testPrimitiveStatement() {
+    Assertions.assertThat(g.rule(MagikGrammar.PRIMITIVE_STATEMENT))
+    .matches("_primitive 1")
+    .matches("_primitive 512")
+    .notMatches("_primitive")
+        ;
+  }
+
+  @Test
   public void testExpression() {
     Assertions.assertThat(g.rule(MagikGrammar.EXPRESSION))
         .matches("a()")
@@ -439,6 +448,7 @@ public class MagikGrammarTest {
         .notMatches("_blocki _endblock")
         .notMatches("_block write(1) write(2) _endblock")
         .notMatches("_block write(1)write(2) _endblock")
+        .notMatches("_pragma(classify_level=restricted)\n_method a.b _block _endmethod")
         ;
   }
 

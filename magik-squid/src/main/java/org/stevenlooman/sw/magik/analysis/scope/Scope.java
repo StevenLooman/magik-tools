@@ -1,6 +1,7 @@
 package org.stevenlooman.sw.magik.analysis.scope;
 
 import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.Token;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +23,10 @@ public abstract class Scope {
     this.node = node;
 
     parentScope.addChildScope(this);
+  }
+
+  protected Scope(AstNode node) {
+    this.node = node;
   }
 
   Scope() {
@@ -69,6 +74,18 @@ public abstract class Scope {
       scopes.add(parentScope);
       parentScope = parentScope.getParentScope();
     }
+    return scopes;
+  }
+
+  /**
+   * Get self and all parent/acestor scopes.
+   * @return List with self and parent/ancestor scopes.
+   */
+  public List<Scope> getSelfAndAncestorScopes() {
+    List<Scope> scopes = new ArrayList<>();
+    scopes.add(this);
+    List<Scope> ancestorScopes = getAncestorScopes();
+    scopes.addAll(ancestorScopes);
     return scopes;
   }
 
@@ -163,6 +180,78 @@ public abstract class Scope {
    */
   public Collection<ScopeEntry> getScopeEntries() {
     return scopeEntries.values();
+  }
+
+  /**
+   * Get the start line of this scope.
+   * @return Start line.
+   */
+  public int getStartLine() {
+    AstNode parentNode = node.getParent();
+    List<Token> tokens = parentNode.getTokens();
+    Token firstToken = tokens.get(0);
+    return firstToken.getLine();
+  }
+
+  /**
+   * Get the start column of this scope.
+   * @return Start column.
+   */
+  public int getStartColumn() {
+    AstNode parentNode = node.getParent();
+    List<Token> tokens = parentNode.getTokens();
+    Token firstToken = tokens.get(0);
+    return firstToken.getColumn() + firstToken.getOriginalValue().length();
+  }
+
+  /**
+   * Get the end line of this scope.
+   * @return End line.
+   */
+  public int getEndLine() {
+    AstNode parentNode = node.getParent();
+    List<Token> tokens = parentNode.getTokens();
+    Token lastToken = tokens.get(tokens.size() - 1);
+    return lastToken.getLine();
+  }
+
+  /**
+   * Get the end column of this scope.
+   * @return End column.
+   */
+  public int getEndColumn() {
+    AstNode parentNode = node.getParent();
+    List<Token> tokens = parentNode.getTokens();
+    Token lastToken = tokens.get(tokens.size() - 1);
+    return lastToken.getColumn();
+  }
+
+  /**
+   * Get the most specific {{Scope}} at {{line}}/{{column}}.
+   * @param line Line to target.
+   * @param column Column to target.
+   * @return Scope, if any, at {{line}}/{{column}}.
+   */
+  @Nullable
+  public Scope getScopeForLineColumn(int line, int column) {
+    if (line < getStartLine()
+        || line > getEndLine()
+        || line == getStartLine() && column < getStartColumn()
+        || line == getEndLine() && column > getEndColumn()) {
+      // outside of our scope
+      return null;
+    }
+
+    // try child Scopes
+    for (Scope childScope: childScopes) {
+      Scope foundScope = childScope.getScopeForLineColumn(line, column);
+      if (foundScope != null) {
+        return foundScope;
+      }
+    }
+
+    // no child Scope matches, must be ourselves
+    return this;
   }
 
 }

@@ -34,7 +34,7 @@ public class VariableNamingCheckTest extends MagikCheckTestBase {
     String code =
         "_local c";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
@@ -43,7 +43,7 @@ public class VariableNamingCheckTest extends MagikCheckTestBase {
     String code =
         "c << 10";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
@@ -70,7 +70,7 @@ public class VariableNamingCheckTest extends MagikCheckTestBase {
     String code =
         "_method a.b(c) _endmethod";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
@@ -88,7 +88,7 @@ public class VariableNamingCheckTest extends MagikCheckTestBase {
     String code =
         "_local l_c";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
@@ -115,7 +115,25 @@ public class VariableNamingCheckTest extends MagikCheckTestBase {
     String code =
         "_local (l_i, l_r) << (1, 2)";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(2);
+  }
+
+  @Test
+  public void testAugmentedAssignment() {
+    MagikCheck check = new VariableNamingCheck();
+    String code =
+        "result +<< 10";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
+  public void testAugmentedAssignmentMulti() {
+    MagikCheck check = new VariableNamingCheck();
+    String code =
+        "result +<< str << _self.a";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
   }
 
 }

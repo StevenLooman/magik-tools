@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.stevenlooman.sw.sonar</groupId>
     <artifactId>sonar-magik</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <packaging>pom</packaging>
 
     <name>Magik</name>
@@ -55,7 +55,7 @@
 
         <sonar.version>7.5</sonar.version>
         <sslr.version>1.23</sslr.version>
-        <sslr.xpath.version>1.22</sslr.xpath.version>
+        <sslr.xpath.version>1.23</sslr.xpath.version>
         <sslr-squid-bridge.version>2.7.0.377</sslr-squid-bridge.version>
         <analyzerCommons.version>1.10.2.456</analyzerCommons.version>
         <checkapi.version>4.5.1</checkapi.version>
@@ -180,7 +180,7 @@
 
                 <executions>
                     <execution>
-                        <id>validate</id>
+                        <id>checkstyle</id>
                         <phase>validate</phase>
                         <goals>
                             <goal>check</goal>
@@ -189,9 +189,8 @@
                 </executions>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <consoleOutput>true</consoleOutput>
-                    <failsOnError>true</failsOnError>
-                    <linkXRef>false</linkXRef>
+                    <violationSeverity>warning</violationSeverity>
+                    <failOnViolation>true</failOnViolation>
                     <configLocation>checkstyle.xml</configLocation>
                 </configuration>
             </plugin>

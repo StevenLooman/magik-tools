@@ -2,9 +2,11 @@ package org.stevenlooman.sw.magik.analysis.scope;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
+
 import org.stevenlooman.sw.magik.MagikVisitor;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -12,15 +14,31 @@ import java.util.Map;
 
 public class ScopeBuilderVisitor extends MagikVisitor {
 
+  /**
+   * Global scope.
+   */
   private GlobalScope globalScope;
+
+  /**
+   * Current scope.
+   */
   private Scope scope;
+
+  /**
+   * Scope index for quick searching.
+   */
   private Map<AstNode, Scope> scopeIndex = new HashMap<>();
 
+  /**
+   * Constructor.
+   */
   public ScopeBuilderVisitor() {
-    globalScope = new GlobalScope(scopeIndex);
-    scope = globalScope;
   }
 
+  /**
+   * Get the {{GlobalScope}}.
+   * @return Global scope
+   */
   public GlobalScope getGlobalScope() {
     return globalScope;
   }
@@ -28,11 +46,13 @@ public class ScopeBuilderVisitor extends MagikVisitor {
   @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
+        MagikGrammar.MAGIK,
         MagikGrammar.BODY,
         MagikGrammar.ASSIGNMENT_EXPRESSION,
         MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION,
         MagikGrammar.VARIABLE_DEFINITION_STATEMENT,
-        MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT
+        MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT,
+        MagikGrammar.ATOM
     );
   }
 
@@ -40,7 +60,9 @@ public class ScopeBuilderVisitor extends MagikVisitor {
   public void visitNode(AstNode node) {
     // dispatch
     AstNodeType nodeType = node.getType();
-    if (nodeType == MagikGrammar.BODY) {
+    if (nodeType == MagikGrammar.MAGIK) {
+      scope = globalScope = new GlobalScope(scopeIndex, node);
+    } else if (nodeType == MagikGrammar.BODY) {
       visitNodeBody(node);
     } else if (nodeType == MagikGrammar.ASSIGNMENT_EXPRESSION
                || nodeType == MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION) {
@@ -49,6 +71,8 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       visitNodeVariableDefinitionStatement(node);
     } else if (nodeType == MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT) {
       visitNodeMultipleAssignmentStatement(node);
+    } else if (nodeType == MagikGrammar.ATOM) {
+      visitNodeAtom(node);
     }
   }
 
@@ -73,16 +97,17 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       // add assignment parameter to scope
       AstNode assignmentParameterNode = parentNode.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
       if (assignmentParameterNode != null) {
-        AstNode parameterNode = assignmentParameterNode.getFirstChild(MagikGrammar.PARAMETER);
-        String identifier = parameterNode.getTokenValue();
-        scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, parameterNode, null);
+        AstNode identifierNode = assignmentParameterNode.getFirstChild(MagikGrammar.IDENTIFIER);
+        String identifier = identifierNode.getTokenValue();
+        scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, identifierNode, null);
       }
 
-      scopeIndex.put(parentNode, scope);  // handy
-    } else if (parentNode.getType() == MagikGrammar.TRY_BLOCK) {
-      // XXX TODO: _try _with cond ???
+      scopeIndex.put(parentNode, scope);
+    } else if (parentNode.getType() == MagikGrammar.TRY_BLOCK
+               && parentNode.getChildren(MagikGrammar.BODY).get(0) != node) {
       scope = new BodyScope(scope, node);
 
+      // add with-item to scope
       AstNode identifiersNode = parentNode.getFirstChild(MagikGrammar.IDENTIFIERS);
       List<AstNode> identifierNodes = identifiersNode.getChildren(MagikGrammar.IDENTIFIER);
       for (AstNode identifierNode: identifierNodes) {
@@ -91,23 +116,47 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       }
 
       scopeIndex.put(parentNode, scope);
+    } else if (parentNode.getType() == MagikGrammar.LOOP) {
+      scope = new BodyScope(scope, node);
+
+      // add for-items to scope
+      AstNode loopNode = node.getParent();
+      AstNode overNode = loopNode.getParent();
+      if (overNode.getType() == MagikGrammar.OVER) {
+        AstNode forNode = overNode.getParent();
+        if (forNode.getType() == MagikGrammar.FOR) {
+          AstNode identifiersNode = forNode.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
+          List<AstNode> identifierNodes = identifiersNode.getChildren(MagikGrammar.IDENTIFIER);
+          for (AstNode identifierNode: identifierNodes) {
+            String identifier = identifierNode.getTokenValue();
+            scope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
+          }
+        }
+      }
     } else {
+      // regular scope
       scope = new BodyScope(scope, node);
     }
-
     scopeIndex.put(node, scope);
   }
 
   private void visitNodeVariableDefinitionStatement(AstNode node) {
-    String type = node.getTokenValue().toUpperCase().substring(1);
+    String type = node.getFirstChild(MagikGrammar.VARIABLE_DEFINITION_MODIFIER)
+        .getTokenValue().toUpperCase().substring(1);
     ScopeEntry.Type scopeEntryType = ScopeEntry.Type.valueOf(type);
 
-    AstNode identifiersWithGatherNode = node.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
+    AstNode varDefMultiNode = node.getFirstChild(MagikGrammar.VARIABLE_DEFINITION_MULTI);
     List<AstNode> identifierNodes;
-    if (identifiersWithGatherNode != null) {
+    if (varDefMultiNode != null) {
+      AstNode identifiersWithGatherNode =
+          varDefMultiNode.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
       identifierNodes = identifiersWithGatherNode.getChildren(MagikGrammar.IDENTIFIER);
     } else {
-      identifierNodes = node.getChildren(MagikGrammar.IDENTIFIER);
+      identifierNodes = new ArrayList<>();
+      for (AstNode varDefNode: node.getChildren(MagikGrammar.VARIABLE_DEFINITION)) {
+        AstNode identifierNode = varDefNode.getFirstChild(MagikGrammar.IDENTIFIER);
+        identifierNodes.add(identifierNode);
+      }
     }
 
     for (AstNode identifierNode : identifierNodes) {
@@ -157,7 +206,24 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       return;
     }
 
+    // add as definition
     scope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
+  }
+
+  private void visitNodeAtom(AstNode node) {
+    AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
+    if (identifierNode == null) {
+      return;
+    }
+
+    String identifier = identifierNode.getTokenValue();
+    if (scope.getScopeEntry(identifier) != null) {
+      // don't overwrite entries
+      return;
+    }
+
+    // add as global
+    scope.addDeclaration(ScopeEntry.Type.GLOBAL, identifier, node, null);
   }
 
   @Override

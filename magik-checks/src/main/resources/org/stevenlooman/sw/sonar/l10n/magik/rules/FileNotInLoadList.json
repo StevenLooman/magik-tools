@@ -1,5 +1,5 @@
 {
-  "title": "File nog in load_list",
+  "title": "File is not included in load_list",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {

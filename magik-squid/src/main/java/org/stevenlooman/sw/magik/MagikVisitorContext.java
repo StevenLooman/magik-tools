@@ -10,6 +10,7 @@ import org.stevenlooman.sw.magik.analysis.scope.ScopeBuilderVisitor;
 import java.nio.file.Path;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 public class MagikVisitorContext {
   private final Path path;
@@ -58,8 +59,25 @@ public class MagikVisitorContext {
     return parsingException;
   }
 
+  /**
+   * Get contents.
+   * @return Contents.
+   */
+  @CheckForNull
   public String fileContent() {
     return fileContent;
+  }
+
+  /**
+   * Get contents, pre-split.
+   * @return Split contents.
+   */
+  @CheckForNull
+  public String[] fileContentLines() {
+    if (fileContent == null) {
+      return null;
+    }
+    return fileContent.split("\r\n|\n|\r");  // match BufferedReader.readLine()
   }
 
   @CheckForNull
@@ -70,6 +88,7 @@ public class MagikVisitorContext {
   /**
    * Get the Global scope from this context.
    */
+  @Nullable
   public GlobalScope getGlobalScope() {
     if (scopeBuilder == null
         && rootTree != null) {

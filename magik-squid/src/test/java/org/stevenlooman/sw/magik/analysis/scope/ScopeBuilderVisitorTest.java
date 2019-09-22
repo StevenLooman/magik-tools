@@ -27,7 +27,6 @@ public class ScopeBuilderVisitorTest {
         "\t_local a\n" +
         "_endmethod\n";
     MagikVisitorContext context = createContext(code);
-
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
     visitor.scanFile(context);
 
@@ -46,7 +45,6 @@ public class ScopeBuilderVisitorTest {
         "\t_local a, b\n" +
         "_endmethod\n";
     MagikVisitorContext context = createContext(code);
-
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
     visitor.scanFile(context);
 
@@ -69,7 +67,6 @@ public class ScopeBuilderVisitorTest {
         "\t_local (a, b) << (1, 2)\n" +
         "_endmethod\n";
     MagikVisitorContext context = createContext(code);
-
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
     visitor.scanFile(context);
 
@@ -92,7 +89,6 @@ public class ScopeBuilderVisitorTest {
         "\t_local a << b << _unset\n" +
         "_endmethod\n";
     MagikVisitorContext context = createContext(code);
-
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
     visitor.scanFile(context);
 
@@ -115,7 +111,6 @@ public class ScopeBuilderVisitorTest {
         "\t(a, b) << (1, 2)\n" +
         "_endmethod\n";
     MagikVisitorContext context = createContext(code);
-
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
     visitor.scanFile(context);
 
@@ -129,6 +124,103 @@ public class ScopeBuilderVisitorTest {
     ScopeEntry entryB = methodScope.getScopeEntry("b");
     assertThat(entryB).isNotNull();
     assertThat(entryB.getType() == ScopeEntry.Type.DEFINITION);
+  }
+
+  @Test
+  public void testTryWith() {
+    String code =
+        "_try _with a\n" +
+        "_when error\n" +
+        "_endtry";
+    MagikVisitorContext context = createContext(code);
+    ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
+    visitor.scanFile(context);
+
+    Scope globalScope = visitor.getGlobalScope();
+    Scope tryScope = globalScope.getSelfAndDescendantScopes().get(1);
+    ScopeEntry entryTryA = tryScope.getScopeEntry("a");
+    assertThat(entryTryA).isNull();
+
+    Scope whenScope = globalScope.getSelfAndDescendantScopes().get(2);
+    ScopeEntry entryWhenA = whenScope.getScopeEntry("a");
+    assertThat(entryWhenA).isNotNull();
+    assertThat(entryWhenA.getType() == ScopeEntry.Type.DEFINITION);
+  }
+
+  @Test
+  public void testForLoop() {
+    String code =
+        "_for i, j _over a.fast_keys_and_elements()\n" +
+        "_loop\n" +
+        "_endloop";
+    MagikVisitorContext context = createContext(code);
+    ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
+    visitor.scanFile(context);
+
+    Scope globalScope = visitor.getGlobalScope();
+    Scope loopScope = globalScope.getSelfAndDescendantScopes().get(1);
+    ScopeEntry entryI = loopScope.getScopeEntry("i");
+    assertThat(entryI).isNotNull();
+    assertThat(entryI.getType() == ScopeEntry.Type.DEFINITION);
+
+    ScopeEntry entryJ = loopScope.getScopeEntry("j");
+    assertThat(entryJ).isNotNull();
+    assertThat(entryJ.getType() == ScopeEntry.Type.DEFINITION);
+  }
+
+  @Test
+  public void testParameter() {
+    String code =
+        "_method object.m(a, _optional b)\n" +
+        "_endmethod";
+    MagikVisitorContext context = createContext(code);
+    ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
+    visitor.scanFile(context);
+
+    Scope globalScope = visitor.getGlobalScope();
+    Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    ScopeEntry entryA = methodScope.getScopeEntry("a");
+    assertThat(entryA).isNotNull();
+    assertThat(entryA.getType() == ScopeEntry.Type.PARAMETER);
+
+    ScopeEntry entryB = methodScope.getScopeEntry("b");
+    assertThat(entryB).isNotNull();
+    assertThat(entryB.getType() == ScopeEntry.Type.PARAMETER);
+  }
+
+  @Test
+  public void testParameterAssignment() {
+    String code =
+        "_method object.m << a\n" +
+        "_endmethod";
+    MagikVisitorContext context = createContext(code);
+    ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
+    visitor.scanFile(context);
+
+    Scope globalScope = visitor.getGlobalScope();
+    Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    ScopeEntry entryA = methodScope.getScopeEntry("a");
+    assertThat(entryA).isNotNull();
+    assertThat(entryA.getType() == ScopeEntry.Type.PARAMETER);
+  }
+
+  @Test
+  public void testUndeclaredGlobal() {
+    String code =
+        "_method a.b\n" +
+        "\t_return !current_grs! _is _unset\n" +
+        "_endmethod";
+    MagikVisitorContext context = createContext(code);
+    ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
+    visitor.scanFile(context);
+
+    Scope globalScope = visitor.getGlobalScope();
+    Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+    ScopeEntry entryCurrentGrs = methodScope.getScopeEntry("!current_grs!");
+    assertThat(entryCurrentGrs).isNotNull();
+    assertThat(entryCurrentGrs.getType() == ScopeEntry.Type.GLOBAL);
   }
 
 }

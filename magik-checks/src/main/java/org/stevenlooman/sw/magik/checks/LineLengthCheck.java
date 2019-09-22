@@ -37,14 +37,14 @@ public class LineLengthCheck extends MagikCheck {
   @Override
   public void visitFile(@Nullable AstNode node) {
     MagikVisitorContext context = getContext();
-    String fileContents = context.fileContent();
-    String tab = String.join("", Collections.nCopies(TAB_WIDTH, " "));
+    String[] lines = context.fileContentLines();
+    if (lines == null) {
+      lines = new String[]{};
+    }
 
+    String tab = String.join("", Collections.nCopies(TAB_WIDTH, " "));
     int lineNo = 0;
-    for (String line: fileContents.split("\n")) {
-      if (line.endsWith("\r")) {
-        line.replaceAll("\r", "");
-      }
+    for (String line: lines) {
       line = line.replaceAll("\t", tab);  // tab width of 8
       ++lineNo;
       if (line.length() > maxLineLength + 1) {
