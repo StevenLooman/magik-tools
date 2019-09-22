@@ -8,7 +8,6 @@ import org.stevenlooman.sw.magik.analysis.scope.GlobalScope;
 import org.stevenlooman.sw.magik.analysis.scope.Scope;
 import org.stevenlooman.sw.magik.analysis.scope.ScopeEntry;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
-import org.stevenlooman.sw.magik.api.MagikPunctuator;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -47,22 +46,24 @@ public class UnusedVariableCheck extends MagikCheck {
   @Override
   public void visitNode(AstNode node) {
     // ensure part of global scope
-    if (node.getType() == MagikGrammar.ATOM) {
-      // save used identifiers
-      AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-      if (identifierNode == null) {
-        return;
-      }
-
-      if (isLhsOfAssignment(identifierNode)
-          && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.GLOBAL)
-          && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.DYNAMIC)
-          && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.IMPORT)) {
-        return;
-      }
-
-      usedIdentifiers.add(identifierNode);
+    if (node.getType() != MagikGrammar.ATOM) {
+      return;
     }
+
+    // save used identifiers
+    AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
+    if (identifierNode == null) {
+      return;
+    }
+
+    if (isLhsOfAssignment(identifierNode)
+        && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.GLOBAL)
+        && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.DYNAMIC)
+        && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.IMPORT)) {
+      return;
+    }
+
+    usedIdentifiers.add(identifierNode);
   }
 
   private boolean isOfScopeEntryType(AstNode identifierNode, ScopeEntry.Type type) {
@@ -88,19 +89,17 @@ public class UnusedVariableCheck extends MagikCheck {
   }
 
   private boolean isAssignedToDirectly(AstNode identifierNode) {
-    AstNode variableDeclarationNode = identifierNode.getParent();
-    if (variableDeclarationNode.getType() != MagikGrammar.VARIABLE_DEFINITION_STATEMENT) {
+    AstNode variableDefinitionNode = identifierNode.getParent();
+    if (variableDefinitionNode.getType() != MagikGrammar.VARIABLE_DEFINITION) {
       return false;
     }
 
-    if (variableDeclarationNode.getFirstChild(MagikGrammar.IDENTIFIER) != identifierNode) {
+    if (variableDefinitionNode.getFirstChild(MagikGrammar.IDENTIFIER) != identifierNode) {
       return false;
     }
 
-    List<AstNode> chrevronChildren = variableDeclarationNode.getChildren(
-        MagikPunctuator.CHEVRON,
-        MagikPunctuator.BOOT_CHEVRON);
-    return !chrevronChildren.isEmpty();
+    return variableDefinitionNode.getTokens().stream()
+      .anyMatch(token -> token.getValue().equals("<<") || token.getValue().equals("^<<"));
   }
 
   private boolean isPartOfMultiVariableDefinition(AstNode identifierNode) {
@@ -111,7 +110,7 @@ public class UnusedVariableCheck extends MagikCheck {
     }
     AstNode multiVarDeclNode = identifiersWithGatherNode.getParent();
     if (multiVarDeclNode == null
-        || multiVarDeclNode.getType() != MagikGrammar.VARIABLE_DEFINITION_STATEMENT) {
+        || multiVarDeclNode.getType() != MagikGrammar.VARIABLE_DEFINITION_MULTI) {
       return false;
     }
 

@@ -52,7 +52,7 @@ public class MagikParser {
   private static final String END_OF_MESSAGE_PATCH = "$";
 
   public Parser<LexerlessGrammar> magikParser;
-  public ParserAdapter<LexerlessGrammar> messagePatchParser;
+  public Parser<LexerlessGrammar> messagePatchParser;
 
   /**
    * Constructor.

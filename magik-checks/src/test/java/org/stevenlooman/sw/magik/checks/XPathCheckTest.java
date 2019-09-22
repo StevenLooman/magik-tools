@@ -12,7 +12,7 @@ public class XPathCheckTest extends MagikCheckTestBase {
   @Test
   public void testMatch() {
     XPathCheck check = new XPathCheck();
-    check.xpathQuery = "//RETURN";
+    check.xpathQuery = "//RETURN_STATEMENT";
 
     String code =
         "_method a.b\n" +
