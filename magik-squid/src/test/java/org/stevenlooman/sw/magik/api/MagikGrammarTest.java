@@ -63,10 +63,20 @@ public class MagikGrammarTest {
   }
 
   @Test
+  public void testLoopBody() {
+    Assertions.assertThat(g.rule(MagikGrammar.LOOPBODY))
+        .matches("_loopbody()")
+        .matches("_loopbody(1)")
+        .matches("_loopbody(1, 2)")
+        ;
+  }
+
+  @Test
   public void testThrow() {
     Assertions.assertThat(g.rule(MagikGrammar.THROW_STATEMENT))
         .matches("_throw :test")
         .matches("_throw @error _with _false")
+        .matches("_throw :a _with 1, 2, 3")
         .notMatches("_throw a\n _with _false")
         ;
   }
@@ -444,6 +454,8 @@ public class MagikGrammarTest {
         .matches("_package sw")
         .matches("_package sw\n_package user")
         .matches("_block write(1);write(2) _endblock")
+        .matches("_return (a) _or b")
+        .matches("_method a.b _return (a).not _endmethod")
         .notMatches("_block _endblo")
         .notMatches("_blocki _endblock")
         .notMatches("_block write(1) write(2) _endblock")
