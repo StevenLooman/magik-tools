@@ -13,6 +13,7 @@ Changes
 - Fix lines not matching due to \r\r\n
 - Don't crash on usage of vec() in def\_slotted\_exemplar()
 - Properly support \_primitive
+- Move MLint-specific instruction handling to magik-lint + support mlint instructions per scope
 
 
 0.2.0 (2019-08-31)

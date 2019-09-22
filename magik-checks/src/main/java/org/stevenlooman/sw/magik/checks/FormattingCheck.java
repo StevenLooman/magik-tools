@@ -257,7 +257,7 @@ public class FormattingCheck extends MagikCheck {
     if (next != null
         && Character.isWhitespace(next)) {
       String msg = String.format(MESSAGE, "no whitespace after allowed");
-      addIssue(msg, token.getLine(), token.getColumn() + token.getOriginalValue().length());
+      addIssue(msg, token);
     }
   }
 
@@ -270,7 +270,7 @@ public class FormattingCheck extends MagikCheck {
     if (next != null
         && !Character.isWhitespace(next)) {
       String msg = String.format(MESSAGE, "whitespace after required");
-      addIssue(msg, token.getLine(), token.getColumn() + token.getOriginalValue().length());
+      addIssue(msg, token);
     }
   }
 

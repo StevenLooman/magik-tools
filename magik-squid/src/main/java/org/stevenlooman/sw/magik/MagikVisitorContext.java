@@ -10,6 +10,7 @@ import org.stevenlooman.sw.magik.analysis.scope.ScopeBuilderVisitor;
 import java.nio.file.Path;
 import java.util.List;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 public class MagikVisitorContext {
   private final Path path;
@@ -70,6 +71,7 @@ public class MagikVisitorContext {
   /**
    * Get the Global scope from this context.
    */
+  @Nullable
   public GlobalScope getGlobalScope() {
     if (scopeBuilder == null
         && rootTree != null) {

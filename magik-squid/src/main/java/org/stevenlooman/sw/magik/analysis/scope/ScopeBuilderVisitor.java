@@ -2,6 +2,7 @@ package org.stevenlooman.sw.magik.analysis.scope;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
+
 import org.stevenlooman.sw.magik.MagikVisitor;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
@@ -32,8 +33,6 @@ public class ScopeBuilderVisitor extends MagikVisitor {
    * Constructor.
    */
   public ScopeBuilderVisitor() {
-    globalScope = new GlobalScope(scopeIndex);
-    scope = globalScope;
   }
 
   /**
@@ -47,6 +46,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
   @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
+        MagikGrammar.MAGIK,
         MagikGrammar.BODY,
         MagikGrammar.ASSIGNMENT_EXPRESSION,
         MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION,
@@ -60,7 +60,9 @@ public class ScopeBuilderVisitor extends MagikVisitor {
   public void visitNode(AstNode node) {
     // dispatch
     AstNodeType nodeType = node.getType();
-    if (nodeType == MagikGrammar.BODY) {
+    if (nodeType == MagikGrammar.MAGIK) {
+      scope = globalScope = new GlobalScope(scopeIndex, node);
+    } else if (nodeType == MagikGrammar.BODY) {
       visitNodeBody(node);
     } else if (nodeType == MagikGrammar.ASSIGNMENT_EXPRESSION
                || nodeType == MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION) {
@@ -100,11 +102,12 @@ public class ScopeBuilderVisitor extends MagikVisitor {
         scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, identifierNode, null);
       }
 
-      scopeIndex.put(parentNode, scope);  // handy
+      scopeIndex.put(parentNode, scope);
     } else if (parentNode.getType() == MagikGrammar.TRY_BLOCK
                && parentNode.getChildren(MagikGrammar.BODY).get(0) != node) {
       scope = new BodyScope(scope, node);
 
+      // add with-item to scope
       AstNode identifiersNode = parentNode.getFirstChild(MagikGrammar.IDENTIFIERS);
       List<AstNode> identifierNodes = identifiersNode.getChildren(MagikGrammar.IDENTIFIER);
       for (AstNode identifierNode: identifierNodes) {
@@ -113,10 +116,27 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       }
 
       scopeIndex.put(parentNode, scope);
+    } else if (parentNode.getType() == MagikGrammar.LOOP) {
+      scope = new BodyScope(scope, node);
+
+      // add for-items to scope
+      AstNode loopNode = node.getParent();
+      AstNode overNode = loopNode.getParent();
+      if (overNode.getType() == MagikGrammar.OVER) {
+        AstNode forNode = overNode.getParent();
+        if (forNode.getType() == MagikGrammar.FOR) {
+          AstNode identifiersNode = forNode.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
+          List<AstNode> identifierNodes = identifiersNode.getChildren(MagikGrammar.IDENTIFIER);
+          for (AstNode identifierNode: identifierNodes) {
+            String identifier = identifierNode.getTokenValue();
+            scope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
+          }
+        }
+      }
     } else {
+      // regular scope
       scope = new BodyScope(scope, node);
     }
-
     scopeIndex.put(node, scope);
   }
 
@@ -186,6 +206,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       return;
     }
 
+    // add as definition
     scope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
   }
 
@@ -197,9 +218,11 @@ public class ScopeBuilderVisitor extends MagikVisitor {
 
     String identifier = identifierNode.getTokenValue();
     if (scope.getScopeEntry(identifier) != null) {
+      // don't overwrite entries
       return;
     }
 
+    // add as global
     scope.addDeclaration(ScopeEntry.Type.GLOBAL, identifier, node, null);
   }
 
