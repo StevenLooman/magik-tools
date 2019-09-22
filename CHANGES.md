@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.3.0 (unreleased)
+0.3.0 (2019-09-22)
 
 - Add WarnedCallCheck
 - Fix ScopeBuilderVisitor for \_try \_with identifier scoping
