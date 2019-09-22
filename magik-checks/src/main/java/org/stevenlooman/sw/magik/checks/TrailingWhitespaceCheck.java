@@ -31,8 +31,10 @@ public class TrailingWhitespaceCheck extends MagikCheck {
    * @param node Root node.
    */
   public void visitFile(@Nullable AstNode node) {
-    String contents = getContext().fileContent();
-    String[] lines = contents.split("\n");
+    String[] lines = getContext().fileContentLines();
+    if (lines == null) {
+      lines = new String[]{};
+    }
     for (int lineNo = 0; lineNo < lines.length; ++lineNo) {
       String line = lines[lineNo];
 

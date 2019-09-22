@@ -122,14 +122,12 @@ public class InstructionsHandler {
   }
 
   private void parseInstructionsInScopes() {
-    String fileContents = context.fileContent();
-    if (fileContents == null
-        || fileContents.isEmpty()) {
+    String[] lines = context.fileContentLines();
+    if (lines == null) {
       return;
     }
 
     GlobalScope globalScope = context.getGlobalScope();
-    String[] lines = fileContents.split("\r\n|\n|\r");  // match BufferedReader.readLine()
     for (int lineNo = 0; lineNo < lines.length; ++lineNo) {
       String line = lines[lineNo];
       String str = extractInstructionsInStr(line, true);
@@ -171,13 +169,11 @@ public class InstructionsHandler {
    * Read all instructions from all lines.
    */
   private void parseInstructionsFromLines() {
-    String fileContents = context.fileContent();
-    if (fileContents == null
-        || fileContents.isEmpty()) {
+    String[] lines = context.fileContentLines();
+    if (lines == null) {
       return;
     }
 
-    String[] lines = fileContents.split("\r\n|\n|\r");  // match BufferedReader.readLine()
     for (int lineNo = 0; lineNo < lines.length; ++lineNo) {
       String line = lines[lineNo];
       String str = extractInstructionsInStr(line, false);
