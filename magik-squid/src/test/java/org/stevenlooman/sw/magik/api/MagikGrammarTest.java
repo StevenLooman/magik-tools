@@ -444,6 +444,8 @@ public class MagikGrammarTest {
         .matches("_package sw")
         .matches("_package sw\n_package user")
         .matches("_block write(1);write(2) _endblock")
+        .matches("_return (a) _or b")
+        .matches("_method a.b _return (a).not _endmethod")
         .notMatches("_block _endblo")
         .notMatches("_blocki _endblock")
         .notMatches("_block write(1) write(2) _endblock")
