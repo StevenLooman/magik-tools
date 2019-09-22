@@ -1,6 +1,9 @@
 Changes
 =======
 
+0.3.2 (unreleased)
+
+
 0.3.1 (2019-09-22)
 
 - Prevent CPD errors when SYNTAX\_ERROR token is too long
