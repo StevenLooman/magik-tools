@@ -4,6 +4,7 @@ Changes
 0.3.2 (unreleased)
 
 - Add check ScopeCount
+- Add check UndefinedVariable
 
 
 0.3.1 (2019-09-22)
