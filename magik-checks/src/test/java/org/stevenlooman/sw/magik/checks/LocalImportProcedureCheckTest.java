@@ -37,7 +37,19 @@ public class LocalImportProcedureCheckTest extends MagikCheckTestBase {
         "  _endproc\n" +
         "_endmethod";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
+  }
+
+  @Test
+  public void testMethodProcedureParameter() {
+    MagikCheck check = new LocalImportProcedureCheck();
+    String code =
+        "_method a.a(p_a)\n" +
+        "  _proc(p_a)\n" +
+        "  _endproc\n" +
+        "_endmethod";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
   }
 
   @Test

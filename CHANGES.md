@@ -5,6 +5,7 @@ Changes
 
 - Add check ScopeCount
 - Add check UndefinedVariable
+- Fix LocalImportProcedureCheck not properly handling non-locals/definitions
 
 
 0.3.1 (2019-09-22)
