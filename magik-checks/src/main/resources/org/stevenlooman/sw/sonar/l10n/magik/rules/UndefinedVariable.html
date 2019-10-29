@@ -1,0 +1,14 @@
+<p>The prefixed variable indicates it should have been declared in the local scope, but was used as a global.</p>
+<h2>Noncompliant Code Example</h2>
+<pre>
+_method object.do_something()
+  write(l_a)
+_endmethod
+</pre>
+<h2>Compliant Solution</h2>
+<pre>
+_method object.do_something()
+  _local l_a &lt;&lt; 10
+  write(l_a)
+_endmethod
+</pre>
