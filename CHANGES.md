@@ -1,6 +1,13 @@
 Changes
 =======
 
+0.3.2 (2019-10-29)
+
+- Add check ScopeCount
+- Add check UndefinedVariable
+- Fix LocalImportProcedureCheck not properly handling non-locals/definitions
+
+
 0.3.1 (2019-09-22)
 
 - Prevent CPD errors when SYNTAX\_ERROR token is too long

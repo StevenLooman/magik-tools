@@ -1,0 +1,15 @@
+{
+  "title": "Too many variables in scope",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "complexity"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "ScopeCount",
+  "sqKey": "scope-count"
+}

@@ -54,7 +54,8 @@ public class LocalImportProcedureCheck extends MagikCheck {
       for (Scope scope: childScopes) {
         for (ScopeEntry scopeEntry: scope.getScopeEntries()) {
           boolean found = false;
-          if (scopeEntry.getType() == ScopeEntry.Type.IMPORT) {
+          if (scopeEntry.getType() != ScopeEntry.Type.LOCAL
+              && scopeEntry.getType() != ScopeEntry.Type.DEFINITION) {
             continue;
           }
 

@@ -1,0 +1,15 @@
+{
+  "title": "Prefixed variable used as a global",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "error"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "UndefinedVariable",
+  "sqKey": "undefined-variable"
+}

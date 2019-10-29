@@ -44,7 +44,8 @@ public class VariableNamingCheck extends MagikCheck {
     String lowered = identifier.toLowerCase();
     if (lowered.startsWith("p_")
         || lowered.startsWith("l_")
-        || lowered.startsWith("i_")) {
+        || lowered.startsWith("i_")
+        || lowered.startsWith("c_")) {
       return identifier.substring(2);
     }
     return identifier;
