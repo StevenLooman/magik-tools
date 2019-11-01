@@ -27,6 +27,40 @@ Magik-lint takes the following command line options:
   - If a directory is given, all files in this directory and any sub-directories, are checked.
 
 
+Integration
+-----------
+
+The [emacs magik-mode](https://github.com/roadrunner1776/magik) readily supports integration of sonar-magik through [flycheck](https://www.flycheck.org/).
+
+VSCode integration is achieved by adding a task with a `problemMatcher`, for example:
+```
+        {
+            "label": "magik-lint",
+            "type": "shell",
+            "command": "java -jar /path/to/magik-lint-LATEST.jar --msg-template \"\\${path}:\\${line}:\\${column}:\\${severity}:\\${symbol}:\\${msg}\" --watch .",
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "magik",
+                "fileLocation": "relative",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):(.*):(.*):(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "code": 5,
+                    "message": 6
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "File change detected\\. Scanning files\\.\\.\\.",
+                    "endsPattern": "Scanning complete\\. Watching for file changes\\."
+                }
+            }
+        }
+```
+
+
 Configuration
 -------------
 
