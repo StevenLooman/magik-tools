@@ -101,21 +101,17 @@ public class ScopeBuilderVisitor extends MagikVisitor {
         String identifier = identifierNode.getTokenValue();
         scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, identifierNode, null);
       }
-
-      scopeIndex.put(parentNode, scope);
-    } else if (parentNode.getType() == MagikGrammar.TRY_BLOCK
-               && parentNode.getChildren(MagikGrammar.BODY).get(0) != node) {
+    } else if (parentNode.getType() == MagikGrammar.WHEN) {
       scope = new BodyScope(scope, node);
 
-      // add with-item to scope
-      AstNode identifiersNode = parentNode.getFirstChild(MagikGrammar.IDENTIFIERS);
+      // add _with items to scope
+      AstNode tryNode = parentNode.getParent();
+      AstNode identifiersNode = tryNode.getFirstChild(MagikGrammar.IDENTIFIERS);
       List<AstNode> identifierNodes = identifiersNode.getChildren(MagikGrammar.IDENTIFIER);
       for (AstNode identifierNode: identifierNodes) {
         String identifier = identifierNode.getTokenValue();
         scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, identifierNode, null);
       }
-
-      scopeIndex.put(parentNode, scope);
     } else if (parentNode.getType() == MagikGrammar.LOOP) {
       scope = new BodyScope(scope, node);
 
@@ -137,6 +133,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       // regular scope
       scope = new BodyScope(scope, node);
     }
+
     scopeIndex.put(node, scope);
   }
 
