@@ -1,6 +1,7 @@
 package org.stevenlooman.sw.magik;
 
 import org.stevenlooman.sw.magik.checks.CommentRegularExpressionCheck;
+import org.stevenlooman.sw.magik.checks.EmptyBlockCheck;
 import org.stevenlooman.sw.magik.checks.ExemplarSlotCountCheck;
 import org.stevenlooman.sw.magik.checks.FileNotInLoadListCheck;
 import org.stevenlooman.sw.magik.checks.ForbiddenCallCheck;
@@ -39,6 +40,7 @@ public final class CheckList {
   public static List<Class<?>> getChecks() {
     return Arrays.asList(
       CommentRegularExpressionCheck.class,
+      EmptyBlockCheck.class,
       ExemplarSlotCountCheck.class,
       FileNotInLoadListCheck.class,
       ForbiddenCallCheck.class,

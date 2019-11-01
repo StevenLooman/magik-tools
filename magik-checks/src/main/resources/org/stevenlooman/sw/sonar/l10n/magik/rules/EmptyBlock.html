@@ -1,0 +1,17 @@
+<p>Block is empty and can be removed.</p>
+<h2>Noncompliant Code Example</h2>
+<pre>
+_if a
+_then
+  write(a)
+_else
+  # block without any contents
+_endif
+</pre>
+<h2>Compliant Solution</h2>
+<pre>
+_if a
+_then
+  write(a)
+_endif
+</pre>
