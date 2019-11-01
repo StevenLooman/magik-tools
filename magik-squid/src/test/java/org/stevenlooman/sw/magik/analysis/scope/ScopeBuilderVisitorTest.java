@@ -130,6 +130,7 @@ public class ScopeBuilderVisitorTest {
   public void testTryWith() {
     String code =
         "_try _with a\n" +
+        "  _local b\n" +
         "_when error\n" +
         "_endtry";
     MagikVisitorContext context = createContext(code);
@@ -140,11 +141,16 @@ public class ScopeBuilderVisitorTest {
     Scope tryScope = globalScope.getSelfAndDescendantScopes().get(1);
     ScopeEntry entryTryA = tryScope.getScopeEntry("a");
     assertThat(entryTryA).isNull();
+    ScopeEntry entryTryB = tryScope.getScopeEntry("b");
+    assertThat(entryTryB).isNotNull();
+    assertThat(entryTryB.getType() == ScopeEntry.Type.LOCAL);
 
     Scope whenScope = globalScope.getSelfAndDescendantScopes().get(2);
     ScopeEntry entryWhenA = whenScope.getScopeEntry("a");
     assertThat(entryWhenA).isNotNull();
     assertThat(entryWhenA.getType() == ScopeEntry.Type.DEFINITION);
+    ScopeEntry entryWhenB = whenScope.getScopeEntry("b");
+    assertThat(entryWhenB).isNull();
   }
 
   @Test

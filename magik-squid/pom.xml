@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.stevenlooman.sw.sonar</groupId>
         <artifactId>sonar-magik</artifactId>
-        <version>0.3.3-SNAPSHOT</version>
+        <version>0.4.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>magik-squid</artifactId>

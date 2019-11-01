@@ -45,8 +45,8 @@ public class MagikGrammarTest {
   }
 
   @Test
-  public void testTryBlock() {
-    Assertions.assertThat(g.rule(MagikGrammar.TRY_BLOCK))
+  public void testTry() {
+    Assertions.assertThat(g.rule(MagikGrammar.TRY))
         .matches("_try _when error _endtry")
         .matches("_try expr() _when error _endtry")
         .matches("_try _with e _when error _endtry")
@@ -55,15 +55,15 @@ public class MagikGrammarTest {
   }
 
   @Test
-  public void testCatchBlock() {
-    Assertions.assertThat(g.rule(MagikGrammar.CATCH_BLOCK))
+  public void testCatch() {
+    Assertions.assertThat(g.rule(MagikGrammar.CATCH))
         .matches("_catch _endcatch")
         .matches("_catch :a\n_endcatch")
         ;
   }
 
   @Test
-  public void testLoopBody() {
+  public void testLoopBodyStatement() {
     Assertions.assertThat(g.rule(MagikGrammar.LOOPBODY))
         .matches("_loopbody()")
         .matches("_loopbody(1)")
@@ -83,7 +83,7 @@ public class MagikGrammarTest {
 
   @Test
   public void testLockBlock() {
-    Assertions.assertThat(g.rule(MagikGrammar.LOCK_BLOCK))
+    Assertions.assertThat(g.rule(MagikGrammar.LOCK))
         .matches("_lock a _endlock")
         ;
   }
@@ -166,8 +166,10 @@ public class MagikGrammarTest {
   public void testResult() {
     Assertions.assertThat(g.rule(MagikGrammar.EMIT_STATEMENT))
         .matches(">> a")
-        .matches(">> (1, 2)")
+        .matches(">> (a, b)")
+        .matches(">> (\na, b)")
         .matches(">> (a) _mod b")
+        .matches(">>\na")
         ;
   }
 
@@ -215,6 +217,7 @@ public class MagikGrammarTest {
         .matches("_return a")
         .matches("_return (a, b)")
         .matches("_return (\na, b)")
+        .matches("_return (a) _mod b")
         ;
   }
 
@@ -343,6 +346,7 @@ public class MagikGrammarTest {
         .matches("_block ; _endblock")
         .matches("_block a();b() _endblock")
         .matches("_block a()\nb() _endblock")
+        .matches("_block @label _endblock")
         .notMatches("a()b()")
         .notMatches("_block a() b() _endblock")
         ;

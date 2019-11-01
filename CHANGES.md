@@ -1,7 +1,9 @@
 Changes
 =======
 
-0.3.3 (unreleased)
+0.4.0 (unreleased)
+
+- Make MagikGrammar more consistent
 
 
 0.3.2 (2019-10-29)
