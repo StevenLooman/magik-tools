@@ -20,6 +20,7 @@ import org.stevenlooman.sw.magik.parser.MagikParser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,9 +31,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class MagikLint {
+
+  static Logger logger = Logger.getLogger(MagikLint.class.getName());
 
   CommandLine commandLine;
   Configuration config;
@@ -82,6 +88,10 @@ public class MagikLint {
         .hasArg()
         .type(PatternOptionBuilder.NUMBER_VALUE)
         .build());
+    options.addOption(Option.builder()
+        .longOpt("debug")
+        .desc("Enable showing of debug information")
+        .build());
   }
 
   static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING = new HashMap<>();
@@ -91,8 +101,22 @@ public class MagikLint {
     SEVERITY_EXIT_CODE_MAPPING.put("Minor", 4);
   }
 
+  private void initLogger() {
+    InputStream stream = MagikLint.class.getClassLoader().getResourceAsStream("logging.properties");
+    try {
+      LogManager.getLogManager().readConfiguration(stream);
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
+  }
+
   MagikLint(String[] args) throws ParseException {
     commandLine = parseCommandline(args);
+
+    if (commandLine.hasOption("debug")) {
+      initLogger();
+      logger.log(Level.FINE, "enabled debugging information");
+    }
 
     // read configuration
     if (commandLine.hasOption("rcfile")) {
@@ -227,7 +251,7 @@ public class MagikLint {
 
     Reporter reporter = getReporter();
     for (Path path : paths) {
-      System.out.println("Checking: " + path);
+      logger.finest("Checking file: " + path);
       MagikVisitorContext context = buildContext(path);
       InstructionsHandler instructionsHandler = new InstructionsHandler(context);
       List<CheckInfraction> fileInfractions = new ArrayList<>();

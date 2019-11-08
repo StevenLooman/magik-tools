@@ -12,8 +12,11 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class CheckInfo {
+
+  static Logger logger = Logger.getLogger(CheckInfo.class.getName());
 
   class ParameterInfo {
 
