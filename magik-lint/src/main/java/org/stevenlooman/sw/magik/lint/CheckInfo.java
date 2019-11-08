@@ -187,10 +187,6 @@ public class CheckInfo {
     List<Class<?>> checkClasses = CheckList.getChecks();
     for (Class<?> checkClass: checkClasses) {
       MagikCheck check = (MagikCheck) checkClass.newInstance();
-      if (check.isTemplatedCheck()) {
-        // skip templated checks for now
-        continue;
-      }
 
       CheckInfo checkInfo = new CheckInfo(check);
       String name = check.getCheckKeyKebabCase();

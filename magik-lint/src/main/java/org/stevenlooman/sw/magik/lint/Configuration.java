@@ -1,11 +1,15 @@
 package org.stevenlooman.sw.magik.lint;
 
+import org.stevenlooman.sw.magik.CheckList;
+import org.stevenlooman.sw.magik.MagikCheck;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -16,15 +20,29 @@ public class Configuration {
   private Properties properties = new Properties();
 
   Configuration() {
-    properties.put("disabled", "comment-regular-expression,xpath");
+    setTemplatedChecksDisabled();
   }
 
   Configuration(Path path) {
-    this();
+    setTemplatedChecksDisabled();
     readFileProperties(path);
   }
 
-  void readFileProperties(Path path) {
+  private void setTemplatedChecksDisabled() {
+    String templatedCheckNames = getTemplatedCheckNames();
+    properties.put("disabled", templatedCheckNames);
+  }
+
+  private String getTemplatedCheckNames() {
+    return CheckList.getTemplatedChecks().stream()
+        .map(checkClass -> checkClass.getAnnotation(org.sonar.check.Rule.class))
+        .filter(rule -> rule != null)
+        .map(rule -> rule.key())
+        .map(MagikCheck::toKebabCase)
+        .collect(Collectors.joining(","));
+  }
+
+  private void readFileProperties(Path path) {
     try {
       InputStream inputStream = new FileInputStream(path.toFile());
       properties.load(inputStream);
@@ -43,6 +61,7 @@ public class Configuration {
 
   /**
    * Get property as strings, split by a comma (',').
+   * 
    * @param key Key of property
    * @return Value of property split by a comma
    */
@@ -59,6 +78,7 @@ public class Configuration {
 
   /**
    * Get property as int.
+   * 
    * @param key Key of property
    * @return Value of property as integer
    */
@@ -74,6 +94,7 @@ public class Configuration {
 
   /**
    * Test if property with key exists.
+   * 
    * @param key Key of property
    * @return True if it exists, false if not
    */
