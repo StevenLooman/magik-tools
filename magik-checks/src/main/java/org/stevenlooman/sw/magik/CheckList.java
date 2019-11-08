@@ -24,6 +24,7 @@ import org.stevenlooman.sw.magik.checks.XPathCheck;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class CheckList {
   public static final String REPOSITORY_KEY = "magik";
@@ -34,8 +35,8 @@ public final class CheckList {
   }
 
   /**
-   * Get the list of Checks.
-   * @return List of with Checks
+   * Get the list of {{MagikCheck}}s.
+   * @return List of with {{MagikCheck}}s
    */
   public static List<Class<?>> getChecks() {
     return Arrays.asList(
@@ -62,4 +63,24 @@ public final class CheckList {
       XPathCheck.class
     );
   }
+
+  /**
+   * Get the list of {{MagikCheck}}s which are templated.
+   * @return List of with {{MagikCheck}}s which are templated.
+   */
+  public static List<Class<?>> getTemplatedChecks() {
+    return getChecks().stream()
+        .filter(checkClass -> {
+          MagikCheck instance;
+          try {
+            instance = (MagikCheck) checkClass.newInstance();
+            return instance.isTemplatedCheck();
+          } catch (InstantiationException | IllegalAccessException ex) {
+            ex.printStackTrace();
+          }
+          return false;
+        })
+        .collect(Collectors.toList());
+  }
+
 }
