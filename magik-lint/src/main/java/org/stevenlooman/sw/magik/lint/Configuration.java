@@ -12,20 +12,27 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 
 public class Configuration {
 
+  static Logger logger = Logger.getLogger(Configuration.class.getName());
+
   private Properties properties = new Properties();
 
   Configuration() {
+    logger.fine("Using default configuration");
     setTemplatedChecksDisabled();
+    logConfiguration();
   }
 
   Configuration(Path path) {
+    logger.fine("Reading configuration from: " + path);
     setTemplatedChecksDisabled();
     readFileProperties(path);
+    logConfiguration();
   }
 
   private void setTemplatedChecksDisabled() {
@@ -100,6 +107,16 @@ public class Configuration {
    */
   public boolean hasProperty(String key) {
     return properties.getProperty(key) != null;
+  }
+
+  private void logConfiguration() {
+    logger.fine("Configuration:");
+    List<?> propertyNames = Collections.list(properties.propertyNames());
+    for (Object propertyName : propertyNames) {
+      String name = (String)propertyName;
+      Object propertyValue = properties.get(name);
+      logger.fine(" " + name + ": " + propertyValue);
+    }
   }
 
 }

@@ -7,6 +7,7 @@ Changes
 - Add check EmptyBlock
 - Dont check ##-comments in CommentedCodeCheck + handle SYNTAX\_ERRORS
 - Refactor getting templated checks to CheckList.getTemplatedChecks()
+- Add --debug option to magik-lint
 
 
 0.3.2 (2019-10-29)
