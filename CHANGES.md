@@ -5,6 +5,7 @@ Changes
 
 - Make MagikGrammar more consistent
 - Add check EmptyBlock
+- Dont check ##-comments in CommentedCodeCheck + handle SYNTAX\_ERRORS
 
 
 0.3.2 (2019-10-29)
