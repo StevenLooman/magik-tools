@@ -1,0 +1,15 @@
+{
+  "title": "Method is defined multiple times in this file",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "10min"
+  },
+  "tags": [
+    "error"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "DuplicateMethodInFile",
+  "sqKey": "duplicate-method-in-file"
+}

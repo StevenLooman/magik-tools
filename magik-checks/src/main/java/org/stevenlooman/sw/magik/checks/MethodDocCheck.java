@@ -33,12 +33,14 @@ public class MethodDocCheck extends MagikCheck {
   public void visitNode(AstNode node) {
     MethodDocParser docParser = new MethodDocParser(node);
 
+    // ensure there is method doc at all
     if (docParser.getDoc() == null) {
       String message = String.format(MESSAGE, "all");
       addIssue(message, node);
       return;
     }
 
+    // ensure sections have text
     List<String> mandatorySections = Arrays.asList("function", "returns", "parameters");
     for (String section : mandatorySections) {
       String str = docParser.getSection(section);
@@ -74,6 +76,19 @@ public class MethodDocCheck extends MagikCheck {
     if (parametersNode != null) {
       List<AstNode> parameterNodes = parametersNode.getChildren(MagikGrammar.PARAMETER);
       List<String> names = parameterNodes.stream()
+          .map(parameterNode -> parameterNode.getFirstChild(MagikGrammar.IDENTIFIER))
+          .map(identifierNode -> identifierNode.getTokenValue())
+          .map(identifier -> identifier.toLowerCase())
+          .collect(Collectors.toList());
+      parameters.addAll(names);
+    }
+
+    // indexer parameters
+    AstNode indexerParametersNode = node.getFirstChild(MagikGrammar.INDEXER_PARAMETERS);
+    if (indexerParametersNode != null) {
+      List<AstNode> indexerParameterNodes =
+            indexerParametersNode.getChildren(MagikGrammar.PARAMETER);
+      List<String> names = indexerParameterNodes.stream()
           .map(parameterNode -> parameterNode.getFirstChild(MagikGrammar.IDENTIFIER))
           .map(identifierNode -> identifierNode.getTokenValue())
           .map(identifier -> identifier.toLowerCase())
