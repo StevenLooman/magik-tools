@@ -8,6 +8,7 @@ Changes
 - Dont check ##-comments in CommentedCodeCheck + handle SYNTAX\_ERRORS
 - Refactor getting templated checks to CheckList.getTemplatedChecks()
 - Add --debug option to magik-lint
+- Fix ScopeBuilderVisitor for \_try without an identifier
 
 
 0.3.2 (2019-10-29)

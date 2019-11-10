@@ -107,10 +107,12 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       // add _with items to scope
       AstNode tryNode = parentNode.getParent();
       AstNode identifiersNode = tryNode.getFirstChild(MagikGrammar.IDENTIFIERS);
-      List<AstNode> identifierNodes = identifiersNode.getChildren(MagikGrammar.IDENTIFIER);
-      for (AstNode identifierNode: identifierNodes) {
-        String identifier = identifierNode.getTokenValue();
-        scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, identifierNode, null);
+      if (identifiersNode != null) {
+        List<AstNode> identifierNodes = identifiersNode.getChildren(MagikGrammar.IDENTIFIER);
+        for (AstNode identifierNode: identifierNodes) {
+          String identifier = identifierNode.getTokenValue();
+          scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, identifierNode, null);
+        }
       }
     } else if (parentNode.getType() == MagikGrammar.LOOP) {
       scope = new BodyScope(scope, node);
