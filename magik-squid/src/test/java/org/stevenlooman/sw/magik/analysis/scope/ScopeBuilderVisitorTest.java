@@ -127,6 +127,28 @@ public class ScopeBuilderVisitorTest {
   }
 
   @Test
+  public void testTry() {
+    String code =
+        "_try\n" +
+        "  _local b\n" +
+        "_when error\n" +
+        "_endtry";
+    MagikVisitorContext context = createContext(code);
+    ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
+    visitor.scanFile(context);
+
+    Scope globalScope = visitor.getGlobalScope();
+    Scope tryScope = globalScope.getSelfAndDescendantScopes().get(1);
+    ScopeEntry entryTryB = tryScope.getScopeEntry("b");
+    assertThat(entryTryB).isNotNull();
+    assertThat(entryTryB.getType() == ScopeEntry.Type.LOCAL);
+
+    Scope whenScope = globalScope.getSelfAndDescendantScopes().get(2);
+    ScopeEntry entryWhenB = whenScope.getScopeEntry("b");
+    assertThat(entryWhenB).isNull();
+  }
+
+  @Test
   public void testTryWith() {
     String code =
         "_try _with a\n" +
