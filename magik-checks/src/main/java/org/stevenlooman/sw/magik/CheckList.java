@@ -1,6 +1,7 @@
 package org.stevenlooman.sw.magik;
 
 import org.stevenlooman.sw.magik.checks.CommentRegularExpressionCheck;
+import org.stevenlooman.sw.magik.checks.DuplicateMethodInFileCheck;
 import org.stevenlooman.sw.magik.checks.EmptyBlockCheck;
 import org.stevenlooman.sw.magik.checks.ExemplarSlotCountCheck;
 import org.stevenlooman.sw.magik.checks.FileNotInLoadListCheck;
@@ -41,6 +42,7 @@ public final class CheckList {
   public static List<Class<?>> getChecks() {
     return Arrays.asList(
       CommentRegularExpressionCheck.class,
+      DuplicateMethodInFileCheck.class,
       EmptyBlockCheck.class,
       ExemplarSlotCountCheck.class,
       FileNotInLoadListCheck.class,

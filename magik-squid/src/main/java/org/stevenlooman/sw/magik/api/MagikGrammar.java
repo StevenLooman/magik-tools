@@ -27,6 +27,7 @@ public enum MagikGrammar implements GrammarRuleKey {
 
   // constructs
   PARAMETERS,
+  INDEXER_PARAMETERS,
   PARAMETER,
   ASSIGNMENT_PARAMETER,
   BODY,
@@ -439,7 +440,7 @@ public enum MagikGrammar implements GrammarRuleKey {
             b.sequence(MagikPunctuator.DOT, IDENTIFIER,
                 b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikPunctuator.PAREN_L, PARAMETERS, MagikPunctuator.PAREN_R),
                 b.optional(SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.CHEVRON, MagikPunctuator.BOOT_CHEVRON), ASSIGNMENT_PARAMETER)),
-            b.sequence(MagikPunctuator.SQUARE_L, PARAMETERS, MagikPunctuator.SQUARE_R,
+            b.sequence(MagikPunctuator.SQUARE_L, INDEXER_PARAMETERS, MagikPunctuator.SQUARE_R,
                 b.optional(SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.CHEVRON, MagikPunctuator.BOOT_CHEVRON), ASSIGNMENT_PARAMETER))),
         BODY,
         MagikKeyword.ENDMETHOD);
@@ -451,6 +452,10 @@ public enum MagikGrammar implements GrammarRuleKey {
             MagikKeyword.ABSTRACT));
 
     b.rule(PARAMETERS).is(
+        b.optional(
+            PARAMETER,
+            b.zeroOrMore(b.optional(MagikPunctuator.COMMA), PARAMETER)));
+    b.rule(INDEXER_PARAMETERS).is(
         b.optional(
             PARAMETER,
             b.zeroOrMore(b.optional(MagikPunctuator.COMMA), PARAMETER)));
