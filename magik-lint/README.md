@@ -71,7 +71,7 @@ The configuration file is located as follows, in order:
 1. if '--rcfile' command line argument is given, use it;
 2. if `magik-lint.properties` exists in the current working directory, use it;
 3. if `.magik-lint.properties` exists in the current working directory, use it;
-4. if `magik-lint.properties` exists in the current Smallworld product, or any parent product, use it;
+4. if `magik-lint.properties` exists in the current Smallworld product seen from the current working directory, or any parent product, use it;
 5. if environment variable `MAGIKLINTRC` is given and the file exists, use it;
 6. if `.magik-lint.properties` exists in your home directory, use it;
 7. if `/etc/magik-lint.properties` exists, use it.
