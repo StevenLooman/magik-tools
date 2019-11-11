@@ -42,7 +42,8 @@ public class UndefinedVariableCheck extends MagikCheck {
       return;
     }
 
-    Scope procedureScope = globalScope.getScopeForNode(node);
+    AstNode bodyNode = node.getFirstChild(MagikGrammar.BODY);
+    Scope procedureScope = globalScope.getScopeForNode(bodyNode);
     procedureScope.getSelfAndDescendantScopes().stream()
         .map(scope -> scope.getScopeEntries())
         .flatMap(scopeEntries -> scopeEntries.stream())
