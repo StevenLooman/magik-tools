@@ -45,5 +45,4 @@ public class ScopeCountCheckTest extends MagikCheckTestBase {
     assertThat(issues).hasSize(1);
   }
 
-
 }

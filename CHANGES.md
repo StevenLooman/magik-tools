@@ -11,6 +11,7 @@ Changes
 - Fix ScopeBuilderVisitor for \_try without an identifier
 - Refactorings in MagikLint
 - Add check DuplicateMethodInFile
+- Fix ScopeCountCheck, UndefinedVariableCheck always using global scope
 
 
 0.3.2 (2019-10-29)
