@@ -8,7 +8,6 @@ import org.stevenlooman.sw.magik.api.MagikGrammar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
