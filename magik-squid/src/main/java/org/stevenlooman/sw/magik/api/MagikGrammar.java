@@ -183,7 +183,7 @@ public enum MagikGrammar implements GrammarRuleKey {
 
     punctuators(b);
     keywords(b);
-    literals(b);
+    atoms(b);
     expressions(b);
     statements(b);
     constructs(b);
@@ -204,7 +204,7 @@ public enum MagikGrammar implements GrammarRuleKey {
     }
   }
 
-  private static void literals(LexerlessGrammarBuilder b) {
+  private static void atoms(LexerlessGrammarBuilder b) {
     b.rule(STRING).is(SPACING, b.regexp(STRING_REGEXP));
     b.rule(NUMBER).is(SPACING, b.regexp(NUMBER_REGEXP));
     b.rule(CHARACTER).is(SPACING, b.regexp(CHARACTER_REGEXP));
@@ -218,7 +218,6 @@ public enum MagikGrammar implements GrammarRuleKey {
         MagikPunctuator.PAREN_L, b.optional(PARAMETERS), MagikPunctuator.PAREN_R,
         BODY,
         MagikKeyword.ENDPROC);
-
   }
 
   private static void expressions(LexerlessGrammarBuilder b) {

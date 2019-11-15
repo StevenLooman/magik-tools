@@ -19,6 +19,7 @@ import org.stevenlooman.sw.magik.checks.SyntaxErrorCheck;
 import org.stevenlooman.sw.magik.checks.TrailingWhitespaceCheck;
 import org.stevenlooman.sw.magik.checks.UndefinedVariableCheck;
 import org.stevenlooman.sw.magik.checks.UnusedVariableCheck;
+import org.stevenlooman.sw.magik.checks.UseValueCompareCheck;
 import org.stevenlooman.sw.magik.checks.VariableNamingCheck;
 import org.stevenlooman.sw.magik.checks.WarnedCallCheck;
 import org.stevenlooman.sw.magik.checks.XPathCheck;
@@ -60,6 +61,7 @@ public final class CheckList {
       TrailingWhitespaceCheck.class,
       UndefinedVariableCheck.class,
       UnusedVariableCheck.class,
+      UseValueCompareCheck.class,
       VariableNamingCheck.class,
       WarnedCallCheck.class,
       XPathCheck.class
