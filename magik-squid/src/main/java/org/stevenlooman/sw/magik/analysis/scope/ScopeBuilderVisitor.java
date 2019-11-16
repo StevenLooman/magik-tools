@@ -94,6 +94,17 @@ public class ScopeBuilderVisitor extends MagikVisitor {
         }
       }
 
+      // add indexer parameters
+      AstNode indexerParametersNode = parentNode.getFirstChild(MagikGrammar.INDEXER_PARAMETERS);
+      if (indexerParametersNode != null) {
+        List<AstNode> identifierNodes = indexerParametersNode.getDescendants(MagikGrammar.IDENTIFIER);
+        for (AstNode identifierNode : identifierNodes) {
+          AstNode parameterNode = identifierNode.getParent();
+          String identifier = identifierNode.getTokenValue();
+          scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, parameterNode, null);
+        }
+      }
+
       // add assignment parameter to scope
       AstNode assignmentParameterNode = parentNode.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
       if (assignmentParameterNode != null) {
@@ -171,6 +182,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       }
 
       scope.addDeclaration(scopeEntryType, identifier, identifierNode, parentEntry);
+      // parentEntry gets a usage via the constructor of the added declaration
     }
   }
 
@@ -216,13 +228,19 @@ public class ScopeBuilderVisitor extends MagikVisitor {
     }
 
     String identifier = identifierNode.getTokenValue();
-    if (scope.getScopeEntry(identifier) != null) {
+    ScopeEntry existingScopeEntry = scope.getScopeEntry(identifier);
+    if (existingScopeEntry != null) {
+      if (existingScopeEntry.getNode() != identifierNode) {
+        existingScopeEntry.addUsage(node);
+      }
+
       // don't overwrite entries
       return;
     }
 
-    // add as global
-    scope.addDeclaration(ScopeEntry.Type.GLOBAL, identifier, node, null);
+    // add as global, and use directly
+    ScopeEntry entry = scope.addDeclaration(ScopeEntry.Type.GLOBAL, identifier, node, null);
+    entry.addUsage(node);
   }
 
   @Override

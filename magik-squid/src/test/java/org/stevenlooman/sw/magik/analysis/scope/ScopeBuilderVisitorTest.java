@@ -24,7 +24,7 @@ public class ScopeBuilderVisitorTest {
   public void testDefinition() {
     String code =
         "_method object.m\n" +
-        "\t_local a\n" +
+        "  _local a\n" +
         "_endmethod\n";
     MagikVisitorContext context = createContext(code);
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
@@ -42,7 +42,7 @@ public class ScopeBuilderVisitorTest {
   public void testDefinitionSerial() {
     String code =
         "_method object.m\n" +
-        "\t_local a, b\n" +
+        "  _local a, b\n" +
         "_endmethod\n";
     MagikVisitorContext context = createContext(code);
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
@@ -64,7 +64,7 @@ public class ScopeBuilderVisitorTest {
   public void testDefinitionMultiple() {
     String code =
         "_method object.m\n" +
-        "\t_local (a, b) << (1, 2)\n" +
+        "  _local (a, b) << (1, 2)\n" +
         "_endmethod\n";
     MagikVisitorContext context = createContext(code);
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
@@ -86,7 +86,7 @@ public class ScopeBuilderVisitorTest {
   public void testDefinitionAssignment() {
     String code =
         "_method object.m\n" +
-        "\t_local a << b << _unset\n" +
+        "  _local a << b << _unset\n" +
         "_endmethod\n";
     MagikVisitorContext context = createContext(code);
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
@@ -108,7 +108,7 @@ public class ScopeBuilderVisitorTest {
   public void testMultipleAssignment() {
     String code =
         "_method object.m\n" +
-        "\t(a, b) << (1, 2)\n" +
+        "  (a, b) << (1, 2)\n" +
         "_endmethod\n";
     MagikVisitorContext context = createContext(code);
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
@@ -218,6 +218,27 @@ public class ScopeBuilderVisitorTest {
   }
 
   @Test
+  public void testParameterIndexer() {
+    String code =
+        "_method object[a, b]\n" +
+        "_endmethod";
+    MagikVisitorContext context = createContext(code);
+    ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
+    visitor.scanFile(context);
+
+    Scope globalScope = visitor.getGlobalScope();
+    Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    ScopeEntry entryA = methodScope.getScopeEntry("a");
+    assertThat(entryA).isNotNull();
+    assertThat(entryA.getType() == ScopeEntry.Type.PARAMETER);
+
+    ScopeEntry entryB = methodScope.getScopeEntry("b");
+    assertThat(entryB).isNotNull();
+    assertThat(entryB.getType() == ScopeEntry.Type.PARAMETER);
+  }
+
+  @Test
   public void testParameterAssignment() {
     String code =
         "_method object.m << a\n" +
@@ -238,7 +259,7 @@ public class ScopeBuilderVisitorTest {
   public void testUndeclaredGlobal() {
     String code =
         "_method a.b\n" +
-        "\t_return !current_grs! _is _unset\n" +
+        "  _return !current_grs! _is _unset\n" +
         "_endmethod";
     MagikVisitorContext context = createContext(code);
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
@@ -249,6 +270,52 @@ public class ScopeBuilderVisitorTest {
     ScopeEntry entryCurrentGrs = methodScope.getScopeEntry("!current_grs!");
     assertThat(entryCurrentGrs).isNotNull();
     assertThat(entryCurrentGrs.getType() == ScopeEntry.Type.GLOBAL);
+  }
+
+  @Test
+  public void testUsage() {
+    String code =
+        "_method a.b\n" +
+        "  _local a << 10\n" +
+        "  show(a)\n" +
+        "_endmethod";
+    MagikVisitorContext context = createContext(code);
+    ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
+    visitor.scanFile(context);
+
+    Scope globalScope = visitor.getGlobalScope();
+    Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+    ScopeEntry entryA = methodScope.getScopeEntry("a");
+    assertThat(entryA).isNotNull();
+    assertThat(entryA.getType() == ScopeEntry.Type.LOCAL);
+    assertThat(entryA.getNode().getTokenLine()).isEqualTo(2);
+    assertThat(entryA.getUsages()).hasSize(1);
+    assertThat(entryA.getUsages().get(0).getTokenLine()).isEqualTo(3);
+  }
+
+  @Test
+  public void testUsageMethodAssignment() {
+    String code =
+        "_block\n" +
+        "  _local a\n" +
+        "  a.b << 10\n" +
+        "_endblock";
+    MagikVisitorContext context = createContext(code);
+    ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
+    visitor.scanFile(context);
+
+    Scope globalScope = visitor.getGlobalScope();
+    Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    ScopeEntry entryA = methodScope.getScopeEntry("a");
+    assertThat(entryA).isNotNull();
+    assertThat(entryA.getType() == ScopeEntry.Type.LOCAL);
+    assertThat(entryA.getNode().getTokenLine()).isEqualTo(2);
+    assertThat(entryA.getUsages()).hasSize(1);
+    assertThat(entryA.getUsages().get(0).getTokenLine()).isEqualTo(3);
+
+    ScopeEntry entryB = methodScope.getScopeEntry("b");
+    assertThat(entryB).isNull();
   }
 
 }
