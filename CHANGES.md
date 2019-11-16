@@ -13,6 +13,7 @@ Changes
 - Add check DuplicateMethodInFile
 - Fix ScopeCountCheck, UndefinedVariableCheck always using global scope
 - Add check UseValueCompare
+- ScopeBuilderVisitor now also tracks usage
 
 
 0.3.2 (2019-10-29)
