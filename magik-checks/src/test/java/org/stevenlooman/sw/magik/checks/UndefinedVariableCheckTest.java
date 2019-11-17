@@ -78,4 +78,16 @@ public class UndefinedVariableCheckTest extends MagikCheckTestBase {
     assertThat(issues).isEmpty();
   }
 
+  @Test
+  public void testSerialAssigment() {
+    MagikCheck check = new UndefinedVariableCheck();
+    String code =
+        "_method a.b()\n" +
+        "  l_a << l_b << 10\n" +
+        "  show(l_a, l_b)\n" +
+        "_endmethod";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+ }
+
 }

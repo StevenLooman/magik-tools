@@ -14,6 +14,7 @@ Changes
 - Fix ScopeCountCheck, UndefinedVariableCheck always using global scope
 - Add check UseValueCompare
 - ScopeBuilderVisitor now also tracks usage
+- Fix ScopeBuilderVisitor uncorrectly marking ScopeEntry as GLOBAL
 
 
 0.3.2 (2019-10-29)
