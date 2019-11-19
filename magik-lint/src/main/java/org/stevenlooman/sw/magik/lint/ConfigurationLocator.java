@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -87,19 +86,23 @@ public class ConfigurationLocator {
 
   private static Collection<Path> locateProductDirs() {
     List<Path> dirs = new ArrayList<>();
-    Path path = Paths.get("");
+
+    Path path = Paths.get("").toAbsolutePath();
+    logger.finest("Locating product.def in path (3): " + path);
+
     while (path != null && Files.exists(path)) {
       // check if product.def exists
       Path productDefPath = path.resolve("product.def");
-      logger.finest("Trying to get product at (3): " + productDefPath);
+      logger.finest("Product.def path (3): " + productDefPath);
       if (Files.exists(productDefPath)) {
+        logger.finest("Found product.def, adding path: " + path);
         dirs.add(path);
       }
 
       path = path.getParent();
     }
 
-    return Collections.emptyList();
+    return dirs;
   }
 
 }
