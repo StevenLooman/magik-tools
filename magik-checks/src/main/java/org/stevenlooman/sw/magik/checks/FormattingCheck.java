@@ -173,6 +173,10 @@ public class FormattingCheck extends MagikCheck {
         }
         break;
 
+      case "$":
+        visitTokenTransmit(currentToken);
+        break;
+
       default:
         break;
     }
@@ -272,6 +276,19 @@ public class FormattingCheck extends MagikCheck {
     }
   }
 
+  /**
+   * Require an empty line after.
+   * @param token Token to test
+   */
+  private void requireEmptyLineAfter(Token token) {
+    if (nextToken != null
+        && getLineFor(token).equals("$")
+        && token.getLine() + 1 == nextToken.getLine()) {
+      String msg = String.format(MESSAGE, "empty line after required");
+      addIssue(msg, token);
+    }
+  }
+
   private void visitTokenAugmentedAssignmentExpression1(Token token) {
     requireWhitespaceBefore(token);
     requireNonWhitespaceAfter(token);
@@ -301,6 +318,10 @@ public class FormattingCheck extends MagikCheck {
   private void visitTokenBinaryOperator(Token token) {
     requireWhitespaceBefore(token);
     requireWhitespaceAfter(token);
+  }
+
+  private void visitTokenTransmit(Token token) {
+    requireEmptyLineAfter(token);
   }
 
 }

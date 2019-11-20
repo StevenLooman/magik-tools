@@ -174,7 +174,7 @@ public class FormattingCheckTest extends MagikCheckTestBase {
   }
 
   @Test
-  public void testMagik() {
+  public void testSpaces() {
     MagikCheck check = new FormattingCheck();
     String code = ".uri     << items[2]";
     List<MagikIssue> issues = runCheck(code, check);
@@ -225,6 +225,14 @@ public class FormattingCheckTest extends MagikCheckTestBase {
   public void testLineStartWithTabsSpaces() {
     MagikCheck check = new FormattingCheck();
     String code = " \tprint(a)";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isNotEmpty();
+  }
+
+  @Test
+  public void testEmptyLineAfterTransmit() {
+    MagikCheck check = new FormattingCheck();
+    String code = "$\n$";
     List<MagikIssue> issues = runCheck(code, check);
     assertThat(issues).isNotEmpty();
   }
