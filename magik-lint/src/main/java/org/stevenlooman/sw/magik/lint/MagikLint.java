@@ -207,8 +207,10 @@ public class MagikLint {
    */
   private List<MagikIssue> runCheck(MagikVisitorContext context, CheckInfo checkInfo) {
     MagikCheck check = checkInfo.getCheck();
-    List<MagikIssue> checkIssues = check.scanFileForIssues(context);
-    return checkIssues;
+    synchronized (check) {
+      List<MagikIssue> checkIssues = check.scanFileForIssues(context);
+      return checkIssues;
+    }
   }
 
   /**
@@ -282,7 +284,7 @@ public class MagikLint {
    */
   private List<CheckInfraction> runChecksOnFile(
       Path path, Long untabify, Iterable<CheckInfo> checkInfos) {
-    logger.finest("Checking file: " + path);
+    logger.finest("Thread: " + Thread.currentThread().getName() + ", checking file: " + path);
 
     MagikVisitorContext context = buildContext(path, untabify);
     InstructionsHandler instructionsHandler = new InstructionsHandler(context);
@@ -370,9 +372,11 @@ public class MagikLint {
     Comparator<CheckInfraction> byColumn =
         Comparator.comparing(ci -> ci.getMagikIssue().column());
     int exitCode = paths.stream()
-        .sequential()
+        .parallel()
         .map(path -> runChecksOnFile(path, untabify, checkInfos))
         .flatMap(infractions -> infractions.stream())
+        .collect(Collectors.toList())
+        .stream()
         .sorted(byPath.thenComparing(byLine).thenComparing(byColumn))
         .limit(maxInfractions)
         .map(infraction -> {

@@ -45,16 +45,30 @@ public class CheckInfo {
 
   private MagikCheck check;
   private boolean enabled;
+  private JSONObject metadata;
 
+  /**
+   * Constructor.
+   * @param check Check to wrap.
+   */
   public CheckInfo(MagikCheck check) {
     this.check = check;
     this.enabled = true;
+    this.metadata = null;
   }
 
+  /**
+   * Get the wrapped check.
+   * @return Check
+   */
   public MagikCheck getCheck() {
     return check;
   }
 
+  /**
+   * Test if check is enabled.
+   * @return True if enabled, false if not.
+   */
   public boolean isEnabled() {
     return enabled;
   }
@@ -88,24 +102,39 @@ public class CheckInfo {
   }
 
   private JSONObject readMetadata() {
-    // determine path
-    Class<?> klass = check.getClass();
-    String simpleName = klass.getSimpleName();
-    String name = simpleName.substring(0, simpleName.length() - 5);  // strip Check
-    String filename = "/" + CheckList.PROFILE_DIR + "/" + name + ".json";
+    if (metadata == null) {
+      synchronized (this) {
+        // determine path
+        Class<?> klass = check.getClass();
+        String simpleName = klass.getSimpleName();
+        String name = simpleName.substring(0, simpleName.length() - 5);  // strip Check
+        String filename = "/" + CheckList.PROFILE_DIR + "/" + name + ".json";
 
-    // parse json
-    InputStream inputStream = getClass().getResourceAsStream(filename);
-    JSONTokener tokener = new JSONTokener(inputStream);
-    JSONObject object = new JSONObject(tokener);
-    return object;
+        // parse json
+        InputStream inputStream = getClass().getResourceAsStream(filename);
+        JSONTokener tokener = new JSONTokener(inputStream);
+        metadata = new JSONObject(tokener);
+      }
+    }
+
+    return metadata;
   }
 
+  /**
+   * Get SQ-key.
+   * @return SQ-key.
+   * @throws FileNotFoundException -
+   */
   public String getSqKey() throws FileNotFoundException {
     JSONObject metadata = readMetadata();
     return metadata.getString("sqKey");
   }
 
+  /**
+   * Get severity.
+   * @return Severity.
+   * @throws FileNotFoundException -
+   */
   public String getSeverity() throws FileNotFoundException {
     JSONObject metadata = readMetadata();
     return metadata.getString("defaultSeverity");
@@ -140,6 +169,11 @@ public class CheckInfo {
     return tags.get(0);
   }
 
+  /**
+   * Get the title of the check.
+   * @return Title.
+   * @throws FileNotFoundException -
+   */
   public String getTitle() throws FileNotFoundException {
     JSONObject metadata = readMetadata();
     return metadata.getString("title");
