@@ -144,7 +144,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
           List<AstNode> identifierNodes = identifiersNode.getChildren(MagikGrammar.IDENTIFIER);
           for (AstNode identifierNode: identifierNodes) {
             String identifier = identifierNode.getTokenValue();
-            scope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
+            scope.addDeclaration(ScopeEntry.Type.LOCAL, identifier, identifierNode, null);
           }
         }
       }

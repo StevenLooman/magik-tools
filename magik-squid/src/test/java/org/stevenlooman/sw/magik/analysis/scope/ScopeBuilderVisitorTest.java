@@ -223,22 +223,35 @@ public class ScopeBuilderVisitorTest {
   @Test
   public void testForLoop() {
     String code =
-        "_for i, j _over a.fast_keys_and_elements()\n" +
-        "_loop\n" +
-        "_endloop";
+        "_method a.b\n" +
+        "  _for i, j _over a.fast_keys_and_elements()\n" +
+        "  _loop\n" +
+        "  _endloop\n" +
+        "_endmethod";
     MagikVisitorContext context = createContext(code);
     ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
     visitor.scanFile(context);
 
     Scope globalScope = visitor.getGlobalScope();
-    Scope loopScope = globalScope.getSelfAndDescendantScopes().get(1);
+    ScopeEntry entryGlobalI = globalScope.getScopeEntry("i");
+    assertThat(entryGlobalI).isNull();
+    ScopeEntry entryGlobalJ = globalScope.getScopeEntry("j");
+    assertThat(entryGlobalJ).isNull();
+
+    Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+    ScopeEntry entryMethodI = methodScope.getScopeEntry("i");
+    assertThat(entryMethodI).isNull();
+    ScopeEntry entryMethodJ = methodScope.getScopeEntry("j");
+    assertThat(entryMethodJ).isNull();
+
+    Scope loopScope = globalScope.getSelfAndDescendantScopes().get(2);
     ScopeEntry entryI = loopScope.getScopeEntry("i");
     assertThat(entryI).isNotNull();
-    assertThat(entryI.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    assertThat(entryI.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
 
     ScopeEntry entryJ = loopScope.getScopeEntry("j");
     assertThat(entryJ).isNotNull();
-    assertThat(entryJ.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    assertThat(entryJ.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
   }
 
   @Test
