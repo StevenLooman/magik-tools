@@ -18,6 +18,7 @@ Changes
 - Fix locating magik-lint.properties in products
 - Make parsing/checking files parallel in magik-lint
 - Check Formatting now requires empty line after TRANSMIT
+- Fix scoping for variables defined at \_for loops
 
 
 0.3.2 (2019-10-29)
