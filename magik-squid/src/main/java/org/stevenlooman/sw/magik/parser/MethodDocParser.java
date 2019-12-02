@@ -24,6 +24,8 @@ public class MethodDocParser {
   private Map<String, Integer> sectionLines;
   private Map<String, String> parameters;
   private Map<String, Integer> parameterLines;
+  private Map<String, String> loopParameters;
+  private Map<String, Integer> loopParameterLines;
 
   /**
    * Constructor/initiator.
@@ -36,6 +38,8 @@ public class MethodDocParser {
     this.sectionLines = new Hashtable<>();
     this.parameters = new Hashtable<>();
     this.parameterLines = new Hashtable<>();
+    this.loopParameters = new Hashtable<>();
+    this.loopParameterLines = new Hashtable<>();
 
     extractDoc(methodNode); // sets doc and start line
 
@@ -43,9 +47,15 @@ public class MethodDocParser {
       parseSections(doc, startLine, sections, sectionLines);
 
       String parametersDoc = sections.get("parameters");
-      Integer parametersLine = sectionLines.get("parameters");
       if (parametersDoc != null) {
+        Integer parametersLine = sectionLines.get("parameters");
         parseSections(parametersDoc, parametersLine, parameters, parameterLines);
+      }
+
+      String loopParametersDoc = sections.get("loopbody");
+      if (loopParametersDoc != null) {
+        Integer loopParametersLine = sectionLines.get("loopbody");
+        parseSections(loopParametersDoc, loopParametersLine, loopParameters, loopParameterLines);
       }
     }
   }
@@ -124,6 +134,10 @@ public class MethodDocParser {
 
   public Integer getLineForParameter(String name) {
     return parameterLines.get(name);
+  }
+
+  public Map<String, String> getLoopParameters() {
+    return loopParameters;
   }
 
 }
