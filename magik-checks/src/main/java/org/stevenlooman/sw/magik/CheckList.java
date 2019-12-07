@@ -15,6 +15,7 @@ import org.stevenlooman.sw.magik.checks.MethodDocCheck;
 import org.stevenlooman.sw.magik.checks.ScopeCountCheck;
 import org.stevenlooman.sw.magik.checks.SimplifyIfCheck;
 import org.stevenlooman.sw.magik.checks.SizeZeroEmptyCheck;
+import org.stevenlooman.sw.magik.checks.SwMethodDocCheck;
 import org.stevenlooman.sw.magik.checks.SyntaxErrorCheck;
 import org.stevenlooman.sw.magik.checks.TrailingWhitespaceCheck;
 import org.stevenlooman.sw.magik.checks.UndefinedVariableCheck;
@@ -58,6 +59,7 @@ public final class CheckList {
       SyntaxErrorCheck.class,
       SimplifyIfCheck.class,
       SizeZeroEmptyCheck.class,
+      SwMethodDocCheck.class,
       TrailingWhitespaceCheck.class,
       UndefinedVariableCheck.class,
       UnusedVariableCheck.class,

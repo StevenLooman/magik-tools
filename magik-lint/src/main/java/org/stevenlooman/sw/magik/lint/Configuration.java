@@ -38,6 +38,11 @@ public class Configuration {
   private void setTemplatedChecksDisabled() {
     String templatedCheckNames = getTemplatedCheckNames();
     properties.put("disabled", templatedCheckNames);
+
+    // manually: for now, disable sw-method-doc check
+    String disabled = (String) properties.get("disabled");
+    disabled += ",sw-method-doc";
+    properties.put("disabled", disabled);
   }
 
   private String getTemplatedCheckNames() {
