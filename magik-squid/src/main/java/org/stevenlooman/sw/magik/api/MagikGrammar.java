@@ -32,7 +32,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   ASSIGNMENT_PARAMETER,
   BODY,
   OPERATOR,
-  EXPRESSIONS,
+  MULTI_VALUE_EXPRESSION,
   IDENTIFIERS,
   IDENTIFIERS_WITH_GATHER,
   METHOD_INVOCATION,
@@ -106,6 +106,14 @@ public enum MagikGrammar implements GrammarRuleKey {
   CLASS,
   LOOPBODY,
   PROC_DEFINITION,
+  SELF,
+  CLONE,
+  UNSET,
+  TRUE,
+  FALSE,
+  MAYBE,
+  THISTHREAD,
+  SUPER,
   ;
 
   // CHECKSTYLE.OFF: LineLength
@@ -226,9 +234,8 @@ public enum MagikGrammar implements GrammarRuleKey {
         MagikPunctuator.BRACE_L,
         b.optional(EXPRESSION, b.zeroOrMore(MagikPunctuator.COMMA, EXPRESSION)),
         MagikPunctuator.BRACE_R);
-    b.rule(CLASS).is(
-        MagikKeyword.CLASS, IDENTIFIER);
-    b.rule(GATHER).is(MagikKeyword.GATHER, EXPRESSIONS);
+    b.rule(CLASS).is(MagikKeyword.CLASS, IDENTIFIER);
+    b.rule(GATHER).is(MagikKeyword.GATHER, MULTI_VALUE_EXPRESSION);
 
     b.rule(EXPRESSION).is(ASSIGNMENT_EXPRESSION);
     b.rule(ASSIGNMENT_EXPRESSION).is(AUGMENTED_ASSIGNMENT_EXPRESSION, b.zeroOrMore(SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.CHEVRON, MagikPunctuator.BOOT_CHEVRON), AUGMENTED_ASSIGNMENT_EXPRESSION)).skipIfOneChild();
@@ -255,7 +262,7 @@ public enum MagikGrammar implements GrammarRuleKey {
 
     b.rule(ATOM).is(
         b.firstOf(
-            b.sequence(MagikPunctuator.PAREN_L, EXPRESSIONS, MagikPunctuator.PAREN_R),
+            b.sequence(MagikPunctuator.PAREN_L, EXPRESSION, MagikPunctuator.PAREN_R),
             NUMBER,
             STRING,
             SYMBOL,
@@ -277,15 +284,25 @@ public enum MagikGrammar implements GrammarRuleKey {
             TRY,
             CATCH,
             LOCK,
-            MagikKeyword.SELF,
-            MagikKeyword.CLONE,
-            MagikKeyword.SUPER,
-            MagikKeyword.UNSET,
-            MagikKeyword.TRUE,
-            MagikKeyword.FALSE,
-            MagikKeyword.MAYBE,
-            MagikKeyword.THISTHREAD
-            ));
+
+            SELF,
+            CLONE,
+            UNSET,
+            TRUE,
+            FALSE,
+            MAYBE,
+            THISTHREAD,
+            SUPER));
+    b.rule(SELF).is(MagikKeyword.SELF);
+    b.rule(CLONE).is(MagikKeyword.CLONE);
+    b.rule(UNSET).is(MagikKeyword.UNSET);
+    b.rule(TRUE).is(MagikKeyword.TRUE);
+    b.rule(FALSE).is(MagikKeyword.FALSE);
+    b.rule(MAYBE).is(MagikKeyword.MAYBE);
+    b.rule(THISTHREAD).is(MagikKeyword.THISTHREAD);
+    b.rule(SUPER).is(
+        MagikKeyword.SUPER,
+        b.optional(MagikPunctuator.PAREN_L, IDENTIFIER, MagikPunctuator.PAREN_R));
 
     b.rule(METHOD_INVOCATION).is(
         MagikPunctuator.DOT, IDENTIFIER,
@@ -348,22 +365,23 @@ public enum MagikGrammar implements GrammarRuleKey {
         IDENTIFIERS_WITH_GATHER,
         MagikPunctuator.PAREN_R,
         MagikPunctuator.CHEVRON,
-        EXPRESSIONS);
+        MULTI_VALUE_EXPRESSION);
 
     b.rule(MULTIPLE_ASSIGNMENT_STATEMENT).is(
         MagikPunctuator.PAREN_L,
         IDENTIFIERS_WITH_GATHER,
         MagikPunctuator.PAREN_R,
         MagikPunctuator.CHEVRON,
-        EXPRESSIONS);
-    b.rule(RETURN_STATEMENT).is(MagikKeyword.RETURN, b.optional(SPACING_NO_LB, NEXT_NOT_LB, EXPRESSIONS));
-    b.rule(EMIT_STATEMENT).is(MagikPunctuator.EMIT, EXPRESSIONS);
+        MULTI_VALUE_EXPRESSION);
+    b.rule(RETURN_STATEMENT).is(
+        MagikKeyword.RETURN, b.optional(SPACING_NO_LB, NEXT_NOT_LB, MULTI_VALUE_EXPRESSION));
+    b.rule(EMIT_STATEMENT).is(MagikPunctuator.EMIT, MULTI_VALUE_EXPRESSION);
     b.rule(EXPRESSION_STATEMENT).is(EXPRESSION);
     b.rule(PRIMITIVE_STATEMENT).is(MagikKeyword.PRIMITIVE, NUMBER);
-    b.rule(LEAVE_STATEMENT).is(MagikKeyword.LEAVE, b.optional(LABEL), b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikKeyword.WITH, EXPRESSIONS));
-    b.rule(CONTINUE_STATEMENT).is(MagikKeyword.CONTINUE, b.optional(LABEL), b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikKeyword.WITH, EXPRESSIONS));
-    b.rule(LOOPBODY).is(MagikKeyword.LOOPBODY, MagikPunctuator.PAREN_L, b.optional(EXPRESSIONS), MagikPunctuator.PAREN_R);
-    b.rule(THROW_STATEMENT).is(MagikKeyword.THROW, EXPRESSION, b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikKeyword.WITH, EXPRESSIONS));
+    b.rule(LEAVE_STATEMENT).is(MagikKeyword.LEAVE, b.optional(LABEL), b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikKeyword.WITH, MULTI_VALUE_EXPRESSION));
+    b.rule(CONTINUE_STATEMENT).is(MagikKeyword.CONTINUE, b.optional(LABEL), b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikKeyword.WITH, MULTI_VALUE_EXPRESSION));
+    b.rule(LOOPBODY).is(MagikKeyword.LOOPBODY, MagikPunctuator.PAREN_L, b.optional(MULTI_VALUE_EXPRESSION), MagikPunctuator.PAREN_R);
+    b.rule(THROW_STATEMENT).is(MagikKeyword.THROW, EXPRESSION, b.optional(SPACING_NO_LB, NEXT_NOT_LB, MagikKeyword.WITH, MULTI_VALUE_EXPRESSION));
 
     b.rule(HANDLING).is(
         MagikKeyword.HANDLING, b.firstOf(
@@ -378,7 +396,8 @@ public enum MagikGrammar implements GrammarRuleKey {
         BODY,
         MagikKeyword.ENDBLOCK);
     b.rule(PROTECT).is(
-        MagikKeyword.PROTECT, BODY,
+        MagikKeyword.PROTECT, b.optional(MagikKeyword.LOCKING, EXPRESSION),
+        BODY,
         PROTECTION,
         MagikKeyword.ENDPROTECT);
     b.rule(PROTECTION).is(
@@ -473,9 +492,17 @@ public enum MagikGrammar implements GrammarRuleKey {
             b.zeroOrMore(b.optional(MagikPunctuator.COMMA), ARGUMENT)));
     b.rule(ARGUMENT).is(EXPRESSION);
 
-    b.rule(EXPRESSIONS).is(
-        EXPRESSION,
-        b.zeroOrMore(SPACING_NO_LB, NEXT_NOT_LB, MagikPunctuator.COMMA, EXPRESSION));
+    b.rule(MULTI_VALUE_EXPRESSION).is(
+        b.firstOf(
+            b.sequence(
+                EXPRESSION,
+                b.zeroOrMore(SPACING_NO_LB, NEXT_NOT_LB, MagikPunctuator.COMMA, EXPRESSION)),
+            b.sequence(
+                MagikPunctuator.PAREN_L,
+                EXPRESSION,
+                b.zeroOrMore(MagikPunctuator.COMMA, EXPRESSION),
+                MagikPunctuator.PAREN_R)
+            ));
 
     b.rule(IDENTIFIERS).is(
         IDENTIFIER, b.zeroOrMore(SPACING_NO_LB, NEXT_NOT_LB, MagikPunctuator.COMMA, IDENTIFIER));

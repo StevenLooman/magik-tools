@@ -21,6 +21,7 @@ Changes
 - Fix scoping for variables defined at \_for loops
 - MethodDocCheck now needs Loopbody-section for \_iter methods
 - Add check SwMethodDoc (disabled by default in linter)
+- Fixes and improvements to MagikGrammar
 
 
 0.3.2 (2019-10-29)

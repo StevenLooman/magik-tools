@@ -138,7 +138,7 @@ public class MethodDocCheck extends MagikCheck {
         continue;
       }
 
-      AstNode expressionsNode = loopbodyNode.getFirstChild(MagikGrammar.EXPRESSIONS);
+      AstNode expressionsNode = loopbodyNode.getFirstChild(MagikGrammar.MULTI_VALUE_EXPRESSION);
       if (expressionsNode == null) {
         continue;
       }
