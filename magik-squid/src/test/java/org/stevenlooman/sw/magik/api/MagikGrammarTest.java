@@ -72,6 +72,28 @@ public class MagikGrammarTest {
   }
 
   @Test
+  public void testLeaveStatement() {
+    Assertions.assertThat(g.rule(MagikGrammar.LEAVE_STATEMENT))
+        .matches("_leave")
+        .matches("_leave @label")
+        .matches("_leave _with a")
+        .matches("_leave _with (a, b)")
+        .matches("_leave @label _with a")
+        ;
+  }
+
+  @Test
+  public void testContinueStatement() {
+    Assertions.assertThat(g.rule(MagikGrammar.CONTINUE_STATEMENT))
+        .matches("_continue")
+        .matches("_continue @label")
+        .matches("_continue _with a")
+        .matches("_continue _with (a, b)")
+        .matches("_continue @label _with a")
+        ;
+  }
+
+  @Test
   public void testThrow() {
     Assertions.assertThat(g.rule(MagikGrammar.THROW_STATEMENT))
         .matches("_throw :test")
@@ -215,6 +237,7 @@ public class MagikGrammarTest {
     Assertions.assertThat(g.rule(MagikGrammar.RETURN_STATEMENT))
         .matches("_return")
         .matches("_return a")
+        .matches("_return (a)")
         .matches("_return (a, b)")
         .matches("_return (\na, b)")
         .matches("_return (a) _mod b")
@@ -245,6 +268,8 @@ public class MagikGrammarTest {
         .matches("a -<< b")
         .matches("a +<< b")
         .matches("a << b + 1")
+        .matches("a _or b")
+        .matches("(a) _or b")
         ;
   }
 
@@ -329,6 +354,8 @@ public class MagikGrammarTest {
         .matches("_leave")
         .matches("_leave @label")
         .matches("_leave _with e()")
+        .matches("_leave _with (a)")
+        .matches("_leave _with (a, b)")
         .matches("_leave @label _with e()")
         .notMatches("_continue\n _with 10")
         .notMatches("_leave\n _with 10")
@@ -349,6 +376,15 @@ public class MagikGrammarTest {
         .matches("_block @label _endblock")
         .notMatches("a()b()")
         .notMatches("_block a() b() _endblock")
+        ;
+  }
+
+  @Test
+  public void testProtect() {
+    Assertions.assertThat(g.rule(MagikGrammar.PROTECT))
+        .matches("_protect _protection _endprotect")
+        .matches("_protect a() _protection b() _endprotect")
+        .matches("_protect _locking _self a() _protection _endprotect")
         ;
   }
 
@@ -411,6 +447,14 @@ public class MagikGrammarTest {
         .matches("%:")
         .matches("%newline")
         .matches("%.")
+        ;
+  }
+
+  @Test
+  public void testSuper() {
+    Assertions.assertThat(g.rule(MagikGrammar.SUPER))
+        .matches("_super")
+        .matches("_super(sw_component)")
         ;
   }
 
