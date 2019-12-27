@@ -36,7 +36,7 @@ public class LhsRhsComparatorEqualCheck extends MagikCheck {
   public void visitNode(AstNode node) {
     AstNode leftHandSide = node.getFirstChild();
     AstNode rightHandSide = node.getLastChild();
-    if (AstCompare.astNodesEquals(leftHandSide, rightHandSide)) {
+    if (AstCompare.astNodeEqualsRecursive(leftHandSide, rightHandSide)) {
       addIssue(MESSAGE, node);
     }
   }
