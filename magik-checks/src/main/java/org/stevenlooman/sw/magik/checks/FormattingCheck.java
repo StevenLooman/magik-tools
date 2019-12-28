@@ -5,6 +5,7 @@ import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.Token;
 
 import org.sonar.check.Rule;
+import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.MagikVisitorContext;
 import org.stevenlooman.sw.magik.parser.MagikParser;
@@ -18,8 +19,24 @@ import javax.annotation.Nullable;
 @Rule(key = FormattingCheck.CHECK_KEY)
 public class FormattingCheck extends MagikCheck {
   public static final String CHECK_KEY = "Formatting";
+
+  private static final String DEFAULT_INDENT_CHARACTER = "tab";
+  @RuleProperty(
+      key = "indent character",
+      description = "The character used for indentation (tab/space)",
+      defaultValue = "" + DEFAULT_INDENT_CHARACTER,
+      type = "TEXT")
+  public String indentCharacter = DEFAULT_INDENT_CHARACTER;
+
   private static final String MESSAGE = "Improper formatting: %s.";
-  private static final Integer TAB_WIDTH = 8;
+
+  private static final int DEFAULT_TAB_WIDTH = 8;
+  @RuleProperty(
+      key = "tab width",
+      description = "The width of a tab character",
+      defaultValue = "" + DEFAULT_TAB_WIDTH,
+      type = "INT")
+  public int tabWidth = DEFAULT_TAB_WIDTH;
 
   private String[] lines;
   private Token previousToken;
@@ -68,10 +85,19 @@ public class FormattingCheck extends MagikCheck {
 
     int lineNo = 1;
     for (String line : lines) {
-      if (line.matches("^[ ]{" + TAB_WIDTH + "}.*")
-          || line.matches("^[ ]+[\t]+.*")) {
-        String message = String.format(MESSAGE, "Line must start with tabs");
-        addIssue(message, lineNo, 1);
+      if (getIndentChar() == '\t') {
+        // Tab character for indenting.
+        if (line.matches("^[ ]{" + tabWidth + "}.*")
+            || line.matches("^[ ]+[\t]+.*")) {
+          String message = String.format(MESSAGE, "Line must start with tabs");
+          addIssue(message, lineNo, 1);
+        }
+      } else {
+        // Space characters for indenting.
+        if (line.matches("^\t.*")) {
+          String message = String.format(MESSAGE, "Line must start with spaces");
+          addIssue(message, lineNo, 1);
+        }
       }
       lineNo += 1;
     }
@@ -322,6 +348,14 @@ public class FormattingCheck extends MagikCheck {
 
   private void visitTokenTransmit(Token token) {
     requireEmptyLineAfter(token);
+  }
+
+  private char getIndentChar() {
+    if (indentCharacter.equals("tab")) {
+      return '\t';
+    }
+
+    return ' ';
   }
 
 }
