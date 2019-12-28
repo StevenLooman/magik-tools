@@ -206,27 +206,49 @@ public class FormattingCheckTest extends MagikCheckTestBase {
   }
 
   @Test
-  public void testLineStartWithTabs() {
-    MagikCheck check = new FormattingCheck();
+  public void testTabIndentLineStartWithTabs() {
+    FormattingCheck check = new FormattingCheck();
+    check.indentCharacter = "tab";
     String code = "\tprint(a)";
     List<MagikIssue> issues = runCheck(code, check);
     assertThat(issues).isEmpty();
   }
 
   @Test
-  public void testLineStartWithSpaces() {
-    MagikCheck check = new FormattingCheck();
+  public void testTabIndentLineStartWithSpaces() {
+    FormattingCheck check = new FormattingCheck();
+    check.indentCharacter = "tab";
     String code = "        print(a)";
     List<MagikIssue> issues = runCheck(code, check);
     assertThat(issues).isNotEmpty();
   }
 
   @Test
-  public void testLineStartWithTabsSpaces() {
-    MagikCheck check = new FormattingCheck();
+  public void testTabIndentLineStartWithTabsSpaces() {
+    FormattingCheck check = new FormattingCheck();
+    check.indentCharacter = "tab";
     String code = " \tprint(a)";
     List<MagikIssue> issues = runCheck(code, check);
     assertThat(issues).isNotEmpty();
+  }
+
+  @Test
+  public void tetSpaceIndentLineStartWithTabs() {
+    FormattingCheck check = new FormattingCheck();
+    check.indentCharacter = "space";
+    String code = "\tprint(a)";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isNotEmpty();
+
+  }
+
+  @Test
+  public void testSpaceIndentLineStrtWithSpaces() {
+    FormattingCheck check = new FormattingCheck();
+    check.indentCharacter = "space";
+    String code = "        print(a)";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
   }
 
   @Test

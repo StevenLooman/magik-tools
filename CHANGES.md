@@ -23,6 +23,7 @@ Changes
 - Add check SwMethodDoc (disabled by default in linter)
 - Fixes and improvements to MagikGrammar
 - Improvements to AstCompare
+- Add setting FormattingCheck.indent\_character (tab/space)
 
 
 0.3.2 (2019-10-29)
