@@ -6,12 +6,14 @@ import com.sonar.sslr.xpath.api.AstNodeXPathQuery;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
+import org.stevenlooman.sw.magik.TemplatedMagikCheck;
 
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
+@TemplatedMagikCheck
 @Rule(key = XPathCheck.CHECK_KEY)
 public class XPathCheck extends MagikCheck {
 
@@ -34,11 +36,6 @@ public class XPathCheck extends MagikCheck {
   public String message = DEFAULT_MESSAGE;
 
   private AstNodeXPathQuery<Object> query = null;
-
-  @Override
-  public boolean isTemplatedCheck() {
-    return true;
-  }
 
   @Override
   public List<AstNodeType> subscribedTo() {

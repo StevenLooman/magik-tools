@@ -66,11 +66,6 @@ public class FormattingCheck extends MagikCheck {
   ));
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList();
   }

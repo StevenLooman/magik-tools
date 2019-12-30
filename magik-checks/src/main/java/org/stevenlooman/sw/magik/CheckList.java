@@ -66,8 +66,7 @@ public final class CheckList {
       UseValueCompareCheck.class,
       VariableNamingCheck.class,
       WarnedCallCheck.class,
-      XPathCheck.class
-    );
+      XPathCheck.class);
   }
 
   /**
@@ -76,16 +75,7 @@ public final class CheckList {
    */
   public static List<Class<?>> getTemplatedChecks() {
     return getChecks().stream()
-        .filter(checkClass -> {
-          MagikCheck instance;
-          try {
-            instance = (MagikCheck) checkClass.newInstance();
-            return instance.isTemplatedCheck();
-          } catch (InstantiationException | IllegalAccessException ex) {
-            ex.printStackTrace();
-          }
-          return false;
-        })
+        .filter(checkClass -> checkClass.getAnnotation(TemplatedMagikCheck.class) != null)
         .collect(Collectors.toList());
   }
 

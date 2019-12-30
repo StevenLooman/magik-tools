@@ -28,11 +28,6 @@ public class SwMethodDocCheck extends MagikCheck {
   private static final String PARAMETER_REGEXP = "[ \t]?([A-Z0-9_?]+)[ \t\n\r]+";
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(MagikGrammar.METHOD_DEFINITION);
   }

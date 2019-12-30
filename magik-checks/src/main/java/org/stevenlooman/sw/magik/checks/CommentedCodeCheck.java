@@ -30,11 +30,6 @@ public class CommentedCodeCheck extends MagikCheck {
   public int minLines = DEFAULT_MIN_LINES;
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(MagikGrammar.BODY);
   }

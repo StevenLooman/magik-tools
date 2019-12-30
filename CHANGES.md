@@ -24,6 +24,7 @@ Changes
 - Fixes and improvements to MagikGrammar
 - Improvements to AstCompare
 - Add setting FormattingCheck.indent\_character (tab/space)
+- Use annotation to mark MagikCheck as templated check
 
 
 0.3.2 (2019-10-29)

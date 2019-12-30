@@ -20,11 +20,6 @@ public class DuplicateMethodInFileCheck extends MagikCheck {
   public static final String CHECK_KEY = "DuplicateMethodInFile";
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(MagikGrammar.MAGIK);
   }

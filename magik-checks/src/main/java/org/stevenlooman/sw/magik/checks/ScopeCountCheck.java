@@ -28,11 +28,6 @@ public class ScopeCountCheck extends MagikCheck {
   public int maxScopeCount = DEFAULT_MAX_SCOPE_COUNT;
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
       MagikGrammar.METHOD_DEFINITION,
