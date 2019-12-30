@@ -16,11 +16,6 @@ public class EmptyBlockCheck extends MagikCheck {
   public static final String CHECK_KEY = "EmptyBlock";
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.BLOCK,

@@ -17,11 +17,6 @@ public class TrailingWhitespaceCheck extends MagikCheck {
   public static final String CHECK_KEY = "TrailingWhitespace";
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Collections.emptyList();
   }

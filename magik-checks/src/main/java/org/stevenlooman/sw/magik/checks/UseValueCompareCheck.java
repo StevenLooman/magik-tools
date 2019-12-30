@@ -15,11 +15,6 @@ public class UseValueCompareCheck extends MagikCheck {
   public static final String CHECK_KEY = "UseValueCompare";
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(MagikGrammar.EQUALITY_EXPRESSION);
   }
