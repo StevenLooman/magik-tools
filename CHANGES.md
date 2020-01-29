@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.4.0 (unreleased)
+0.4.0 (2020-01-29)
 
 - Make MagikGrammar more consistent
 - Add check EmptyBlock
