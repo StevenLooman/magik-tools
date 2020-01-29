@@ -17,12 +17,7 @@ public class UndefinedVariableCheck extends MagikCheck {
 
   public static final String CHECK_KEY = "UndefinedVariable";
   private static final String MESSAGE =
-      "Variable %s is expected to be declared, but used as a global.";
-
-  @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
+      "Variable '%s' is expected to be declared, but used as a global.";
 
   @Override
   public List<AstNodeType> subscribedTo() {
@@ -42,24 +37,27 @@ public class UndefinedVariableCheck extends MagikCheck {
       return;
     }
 
-    Scope procedureScope = globalScope.getScopeForNode(node);
+    AstNode bodyNode = node.getFirstChild(MagikGrammar.BODY);
+    Scope procedureScope = globalScope.getScopeForNode(bodyNode);
     procedureScope.getSelfAndDescendantScopes().stream()
         .map(scope -> scope.getScopeEntries())
         .flatMap(scopeEntries -> scopeEntries.stream())
         .filter(scopeEntry -> scopeEntry.getType() == ScopeEntry.Type.GLOBAL)
-        .filter(scopeEntry -> {
-          String identifier = scopeEntry.getIdentifier().toLowerCase();
-          return identifier.startsWith("l_")
-                 || identifier.startsWith("i_")
-                 || identifier.startsWith("p_")
-                 || identifier.startsWith("c_");
-        })
+        .filter(scopeEntry -> isPrefixed(scopeEntry.getIdentifier()))
         .forEach(scopeEntry -> {
           AstNode scopeEntryNode = scopeEntry.getNode();
           String identifier = scopeEntry.getIdentifier();
           String message = String.format(MESSAGE, identifier);
           addIssue(message, scopeEntryNode);
         });
+  }
+
+  private boolean isPrefixed(String identifier) {
+    String lowerCased = identifier.toLowerCase();
+    return lowerCased.startsWith("l_")
+           || lowerCased.startsWith("i_")
+           || lowerCased.startsWith("p_")
+           || lowerCased.startsWith("c_");
   }
 
 }

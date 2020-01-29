@@ -1,6 +1,8 @@
 package org.stevenlooman.sw.magik;
 
 import org.stevenlooman.sw.magik.checks.CommentRegularExpressionCheck;
+import org.stevenlooman.sw.magik.checks.DuplicateMethodInFileCheck;
+import org.stevenlooman.sw.magik.checks.EmptyBlockCheck;
 import org.stevenlooman.sw.magik.checks.ExemplarSlotCountCheck;
 import org.stevenlooman.sw.magik.checks.FileNotInLoadListCheck;
 import org.stevenlooman.sw.magik.checks.ForbiddenCallCheck;
@@ -13,16 +15,19 @@ import org.stevenlooman.sw.magik.checks.MethodDocCheck;
 import org.stevenlooman.sw.magik.checks.ScopeCountCheck;
 import org.stevenlooman.sw.magik.checks.SimplifyIfCheck;
 import org.stevenlooman.sw.magik.checks.SizeZeroEmptyCheck;
+import org.stevenlooman.sw.magik.checks.SwMethodDocCheck;
 import org.stevenlooman.sw.magik.checks.SyntaxErrorCheck;
 import org.stevenlooman.sw.magik.checks.TrailingWhitespaceCheck;
 import org.stevenlooman.sw.magik.checks.UndefinedVariableCheck;
 import org.stevenlooman.sw.magik.checks.UnusedVariableCheck;
+import org.stevenlooman.sw.magik.checks.UseValueCompareCheck;
 import org.stevenlooman.sw.magik.checks.VariableNamingCheck;
 import org.stevenlooman.sw.magik.checks.WarnedCallCheck;
 import org.stevenlooman.sw.magik.checks.XPathCheck;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class CheckList {
   public static final String REPOSITORY_KEY = "magik";
@@ -33,12 +38,14 @@ public final class CheckList {
   }
 
   /**
-   * Get the list of Checks.
-   * @return List of with Checks
+   * Get the list of {{MagikCheck}}s.
+   * @return List of with {{MagikCheck}}s
    */
   public static List<Class<?>> getChecks() {
     return Arrays.asList(
       CommentRegularExpressionCheck.class,
+      DuplicateMethodInFileCheck.class,
+      EmptyBlockCheck.class,
       ExemplarSlotCountCheck.class,
       FileNotInLoadListCheck.class,
       ForbiddenCallCheck.class,
@@ -52,12 +59,24 @@ public final class CheckList {
       SyntaxErrorCheck.class,
       SimplifyIfCheck.class,
       SizeZeroEmptyCheck.class,
+      SwMethodDocCheck.class,
       TrailingWhitespaceCheck.class,
       UndefinedVariableCheck.class,
       UnusedVariableCheck.class,
+      UseValueCompareCheck.class,
       VariableNamingCheck.class,
       WarnedCallCheck.class,
-      XPathCheck.class
-    );
+      XPathCheck.class);
   }
+
+  /**
+   * Get the list of {{MagikCheck}}s which are templated.
+   * @return List of with {{MagikCheck}}s which are templated.
+   */
+  public static List<Class<?>> getTemplatedChecks() {
+    return getChecks().stream()
+        .filter(checkClass -> checkClass.getAnnotation(TemplatedMagikCheck.class) != null)
+        .collect(Collectors.toList());
+  }
+
 }

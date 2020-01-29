@@ -20,11 +20,6 @@ public class LocalImportProcedureCheck extends MagikCheck {
   public static final String CHECK_KEY = "LocalImportProcedure";
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.METHOD_DEFINITION);
@@ -42,7 +37,7 @@ public class LocalImportProcedureCheck extends MagikCheck {
 
     // get all proc scopes
     for (AstNode procDefNode: procDefNodes) {
-      Scope procScope = globalScope.getScopeForNode(procDefNode);
+      Scope procScope = globalScope.getScopeForNode(procDefNode.getFirstChild(MagikGrammar.BODY));
 
       // get all parent scopes from procedure
       List<Scope> parentScopes = procScope.getAncestorScopes();

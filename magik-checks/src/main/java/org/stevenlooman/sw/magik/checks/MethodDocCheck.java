@@ -20,11 +20,6 @@ public class MethodDocCheck extends MagikCheck {
   public static final String CHECK_KEY = "MethodDoc";
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(MagikGrammar.METHOD_DEFINITION);
   }
@@ -33,12 +28,14 @@ public class MethodDocCheck extends MagikCheck {
   public void visitNode(AstNode node) {
     MethodDocParser docParser = new MethodDocParser(node);
 
+    // ensure there is method doc at all
     if (docParser.getDoc() == null) {
       String message = String.format(MESSAGE, "all");
       addIssue(message, node);
       return;
     }
 
+    // ensure sections have text
     List<String> mandatorySections = Arrays.asList("function", "returns", "parameters");
     for (String section : mandatorySections) {
       String str = docParser.getSection(section);
@@ -64,6 +61,27 @@ public class MethodDocCheck extends MagikCheck {
         addIssue(message, node);
       }
     }
+
+    if (node.getTokenValue().equals("_iter")) {
+      // Require loopbody if it is an iterator method.
+      if (docParser.getSection("loopbody") == null) {
+        String message = String.format(MESSAGE, "loopbody");
+        addIssue(message, node);
+      } else {
+        // Match loopbody arguments with sub-section of loopbody.
+        int loopParameterCount = getLoopbodyParameterCount(node);
+        if (loopParameterCount != docParser.getLoopParameters().size()) {
+          String message = String.format(MESSAGE, "Loopbody parameter " + loopParameterCount);
+          addIssue(message, node);
+        }
+      }
+    } else {
+      // Disallow loopbody if it is an iterator method.
+      if (docParser.getSection("loopbody") != null) {
+        String message = String.format(MESSAGE, "loopbody");
+        addIssue(message, node);
+      }
+    }
   }
 
   private List<String> getMethodParameters(AstNode node) {
@@ -81,15 +99,47 @@ public class MethodDocCheck extends MagikCheck {
       parameters.addAll(names);
     }
 
+    // indexer parameters
+    AstNode indexerParametersNode = node.getFirstChild(MagikGrammar.INDEXER_PARAMETERS);
+    if (indexerParametersNode != null) {
+      List<AstNode> indexerParameterNodes =
+            indexerParametersNode.getChildren(MagikGrammar.PARAMETER);
+      List<String> names = indexerParameterNodes.stream()
+          .map(parameterNode -> parameterNode.getFirstChild(MagikGrammar.IDENTIFIER))
+          .map(identifierNode -> identifierNode.getTokenValue())
+          .map(identifier -> identifier.toLowerCase())
+          .collect(Collectors.toList());
+      parameters.addAll(names);
+    }
+
     // assignment value
     AstNode assignmentParameterNode = node.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
     if (assignmentParameterNode != null) {
       AstNode identifierNode = assignmentParameterNode.getFirstChild(MagikGrammar.IDENTIFIER);
-      String name = identifierNode.getTokenValue();
+      String name = identifierNode.getTokenValue().toLowerCase();
       parameters.add(name);
     }
 
     return parameters;
+  }
+
+  private int getLoopbodyParameterCount(AstNode node) {
+    List<AstNode> loopbodyNodes = node.getDescendants(MagikGrammar.LOOPBODY);
+
+    int max = 0;
+    for (AstNode loopbodyNode : loopbodyNodes) {
+      // Ensure part part of iter proc.
+      if (loopbodyNode.getFirstAncestor(MagikGrammar.PROC_DEFINITION) != null) {
+        continue;
+      }
+
+      AstNode expressionsNode = loopbodyNode.getFirstChild(MagikGrammar.MULTI_VALUE_EXPRESSION);
+      if (expressionsNode == null) {
+        continue;
+      }
+      max = Math.max(expressionsNode.getChildren(MagikGrammar.EXPRESSION).size(), max);
+    }
+    return max;
   }
 
 }

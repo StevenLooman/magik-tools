@@ -30,11 +30,6 @@ public class CommentedCodeCheck extends MagikCheck {
   public int minLines = DEFAULT_MIN_LINES;
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(MagikGrammar.BODY);
   }
@@ -57,6 +52,7 @@ public class CommentedCodeCheck extends MagikCheck {
         .flatMap(token -> token.getTrivia().stream())
         .filter(trivia -> trivia.isComment())
         .flatMap(trivia -> trivia.getTokens().stream())
+        .filter(token -> !token.getValue().startsWith("##"))
         .collect(Collectors.toList());
 
     // iterate over all comment tokens and match blocks together
@@ -93,8 +89,11 @@ public class CommentedCodeCheck extends MagikCheck {
     Charset charset = Charset.forName("iso8859_1");
     MagikParser parser = new MagikParser(charset);
     try {
-      AstNode node = parser.parseSafe(bareComment);
-      return node.hasChildren();
+      AstNode magikNode = parser.parseSafe(bareComment);
+      List<AstNode> nodes = magikNode.getChildren().stream()
+            .filter(node -> !node.getName().equals("SYNTAX_ERROR"))
+            .collect(Collectors.toList());
+      return !nodes.isEmpty();
     } catch (RecognitionException exception) {
       return false;
     }

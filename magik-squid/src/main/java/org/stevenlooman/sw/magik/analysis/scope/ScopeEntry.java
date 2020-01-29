@@ -2,6 +2,8 @@ package org.stevenlooman.sw.magik.analysis.scope;
 
 import com.sonar.sslr.api.AstNode;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -37,6 +39,7 @@ public class ScopeEntry {
   String identifier;
   AstNode node;
   ScopeEntry parentEntry;
+  List<AstNode> usages;
 
 
   /**
@@ -51,6 +54,12 @@ public class ScopeEntry {
     this.identifier = identifier;
     this.node = node;
     this.parentEntry = parentEntry;
+    this.usages = new ArrayList<>();
+
+    // Parent entry/import is usage
+    if (parentEntry != null) {
+      parentEntry.addUsage(node);
+    }
   }
 
   public Type getType() {
@@ -87,4 +96,13 @@ public class ScopeEntry {
   public int hashCode() {
     return Objects.hash(identifier);
   }
+
+  public void addUsage(AstNode node) {
+    usages.add(node);
+  }
+
+  public List<AstNode> getUsages() {
+    return usages;
+  }
+
 }

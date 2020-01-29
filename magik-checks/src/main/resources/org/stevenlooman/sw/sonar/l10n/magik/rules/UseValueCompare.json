@@ -1,0 +1,15 @@
+{
+  "title": "Unused local variables should be removed",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "error"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "UnusedVariable",
+  "sqKey": "unused-variable"
+}

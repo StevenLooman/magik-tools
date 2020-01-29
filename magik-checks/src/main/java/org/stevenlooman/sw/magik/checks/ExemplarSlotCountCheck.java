@@ -24,11 +24,6 @@ public class ExemplarSlotCountCheck extends MagikCheck {
   public int maxSlotCount = DEFAULT_MAX_SLOT_COUNT;
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(MagikGrammar.PROCEDURE_INVOCATION);
   }

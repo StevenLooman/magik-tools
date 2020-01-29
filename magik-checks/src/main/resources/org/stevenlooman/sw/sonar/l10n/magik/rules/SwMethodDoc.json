@@ -1,0 +1,15 @@
+{
+  "title": "Method is missing documentation in Smallworld style",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "10min"
+  },
+  "tags": [
+    "documentation"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "SwMethodDoc",
+  "sqKey": "sw-method-doc"
+}
