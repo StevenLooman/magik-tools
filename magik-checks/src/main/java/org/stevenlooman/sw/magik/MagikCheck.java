@@ -14,11 +14,6 @@ public abstract class MagikCheck extends MagikVisitor {
   private List<MagikIssue> issues = new ArrayList<>();
 
   /**
-   * Is this a templated check.
-   */
-  public abstract boolean isTemplatedCheck();
-
-  /**
    * Scan the file from the context for issues.
    * @param context Context to use.
    * @return List issues.
@@ -80,14 +75,23 @@ public abstract class MagikCheck extends MagikVisitor {
    * @return The check key, kebab-cased.
    */
   public String getCheckKeyKebabCase() {
-    Pattern pattern = Pattern.compile("(?=[A-Z][a-z])");
     String checkKey = getCheckKey();
-    Matcher matcher = pattern.matcher(checkKey);
-    String checkKeyKebab = matcher.replaceAll("-").toLowerCase();
-    if (checkKeyKebab.startsWith("-")) {
-      checkKeyKebab = checkKeyKebab.substring(1);
+    return MagikCheck.toKebabCase(checkKey);
+  }
+
+  /**
+   * Utility method to convert camel case  to kebab case.
+   * @param string String in camel case.
+   * @return String in kebab case.
+   */
+  public static String toKebabCase(String string) {
+    Pattern pattern = Pattern.compile("(?=[A-Z][a-z])");
+    Matcher matcher = pattern.matcher(string);
+    String stringKebab = matcher.replaceAll("-").toLowerCase();
+    if (stringKebab.startsWith("-")) {
+      stringKebab = stringKebab.substring(1);
     }
-    return checkKeyKebab;
+    return stringKebab;
   }
 
 }

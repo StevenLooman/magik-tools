@@ -19,11 +19,6 @@ public class SyntaxErrorCheck extends MagikCheck {
   private static final String MESSAGE = "Invalid code.";
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.SYNTAX_ERROR);

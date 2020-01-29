@@ -39,16 +39,19 @@ public class MessageFormatReporter extends Reporter {
     }
   }
 
-  private Map<String, String> createMap(Path path, CheckInfo checkInfo, MagikIssue issue) throws
-      FileNotFoundException {
+  private Map<String, String> createMap(Path path, CheckInfo checkInfo, MagikIssue issue) {
     Map<String, String> map = new HashMap<>();
     map.put("path", path.toString());
     map.put("abspath", path.toAbsolutePath().toString());
     map.put("msg", issue.message());
-    map.put("msg_id", checkInfo.getSqKey());
-    map.put("symbol", checkInfo.getSqKey());
-    map.put("category", checkInfo.getSeverity());
-    map.put("tag", checkInfo.getTag());
+    try {
+      map.put("msg_id", checkInfo.getSqKey());
+      map.put("symbol", checkInfo.getSqKey());
+      map.put("category", checkInfo.getSeverity());
+      map.put("tag", checkInfo.getTag());
+    } catch (FileNotFoundException ex) {
+      ex.printStackTrace();
+    }
 
     Integer line = issue.line();
     if (line != null) {
@@ -64,8 +67,7 @@ public class MessageFormatReporter extends Reporter {
   }
 
   @Override
-  public void reportIssue(CheckInfraction checkInfraction) throws
-      FileNotFoundException {
+  public void reportIssue(CheckInfraction checkInfraction) {
     Path path = checkInfraction.getPath();
     CheckInfo checkInfo = checkInfraction.getCheckInfo();
     MagikIssue magikIssue = checkInfraction.getMagikIssue();

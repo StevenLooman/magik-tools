@@ -1,6 +1,32 @@
 Changes
 =======
 
+0.4.0 (2020-01-29)
+
+- Make MagikGrammar more consistent
+- Add check EmptyBlock
+- Dont check ##-comments in CommentedCodeCheck + handle SYNTAX\_ERRORS
+- Refactor getting templated checks to CheckList.getTemplatedChecks()
+- Add --debug option to magik-lint
+- Fix ScopeBuilderVisitor for \_try without an identifier
+- Refactorings in MagikLint
+- Add check DuplicateMethodInFile
+- Fix ScopeCountCheck, UndefinedVariableCheck always using global scope
+- Add check UseValueCompare
+- ScopeBuilderVisitor now also tracks usage
+- Fix ScopeBuilderVisitor uncorrectly marking ScopeEntry as GLOBAL
+- Fix locating magik-lint.properties in products
+- Make parsing/checking files parallel in magik-lint
+- Check Formatting now requires empty line after TRANSMIT
+- Fix scoping for variables defined at \_for loops
+- MethodDocCheck now needs Loopbody-section for \_iter methods
+- Add check SwMethodDoc (disabled by default in linter)
+- Fixes and improvements to MagikGrammar
+- Improvements to AstCompare
+- Add setting FormattingCheck.indent\_character (tab/space)
+- Use annotation to mark MagikCheck as templated check
+
+
 0.3.2 (2019-10-29)
 
 - Add check ScopeCount

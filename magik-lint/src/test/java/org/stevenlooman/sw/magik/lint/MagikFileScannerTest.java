@@ -41,21 +41,6 @@ public class MagikFileScannerTest {
     assertEquals(expectedPaths, actualPaths);
   }
 
-  @Test
-  public void testScanDirectories() throws IOException {
-    Path testProductPath = getPath("magik-lint/src/test/resources/test_product");
-    Collection<Path> actualPathsCollection = MagikFileScanner.scanDirectories(testProductPath);
-    Set<Path> actualPaths = new HashSet<>(actualPathsCollection);
-
-    Set<Path> expectedPaths = new HashSet<>(Arrays.asList(
-      getPath("magik-lint/src/test/resources/test_product"),
-      getPath("magik-lint/src/test/resources/test_product/test_module"),
-      getPath("magik-lint/src/test/resources/test_product/test_module/source"),
-      getPath("magik-lint/src/test/resources/test_product/test_module/source/sw")
-    ));
-    assertEquals(expectedPaths, actualPaths);
- }
-
  @Test
  public void testgetFilesFromArgsSingleFile() throws IOException {
    Path path = getPath("magik-lint/src/test/resources/test_product/test_module/source/a.magik");

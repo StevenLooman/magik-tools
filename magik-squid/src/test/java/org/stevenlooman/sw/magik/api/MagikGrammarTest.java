@@ -45,8 +45,8 @@ public class MagikGrammarTest {
   }
 
   @Test
-  public void testTryBlock() {
-    Assertions.assertThat(g.rule(MagikGrammar.TRY_BLOCK))
+  public void testTry() {
+    Assertions.assertThat(g.rule(MagikGrammar.TRY))
         .matches("_try _when error _endtry")
         .matches("_try expr() _when error _endtry")
         .matches("_try _with e _when error _endtry")
@@ -55,19 +55,41 @@ public class MagikGrammarTest {
   }
 
   @Test
-  public void testCatchBlock() {
-    Assertions.assertThat(g.rule(MagikGrammar.CATCH_BLOCK))
+  public void testCatch() {
+    Assertions.assertThat(g.rule(MagikGrammar.CATCH))
         .matches("_catch _endcatch")
         .matches("_catch :a\n_endcatch")
         ;
   }
 
   @Test
-  public void testLoopBody() {
+  public void testLoopBodyStatement() {
     Assertions.assertThat(g.rule(MagikGrammar.LOOPBODY))
         .matches("_loopbody()")
         .matches("_loopbody(1)")
         .matches("_loopbody(1, 2)")
+        ;
+  }
+
+  @Test
+  public void testLeaveStatement() {
+    Assertions.assertThat(g.rule(MagikGrammar.LEAVE_STATEMENT))
+        .matches("_leave")
+        .matches("_leave @label")
+        .matches("_leave _with a")
+        .matches("_leave _with (a, b)")
+        .matches("_leave @label _with a")
+        ;
+  }
+
+  @Test
+  public void testContinueStatement() {
+    Assertions.assertThat(g.rule(MagikGrammar.CONTINUE_STATEMENT))
+        .matches("_continue")
+        .matches("_continue @label")
+        .matches("_continue _with a")
+        .matches("_continue _with (a, b)")
+        .matches("_continue @label _with a")
         ;
   }
 
@@ -83,7 +105,7 @@ public class MagikGrammarTest {
 
   @Test
   public void testLockBlock() {
-    Assertions.assertThat(g.rule(MagikGrammar.LOCK_BLOCK))
+    Assertions.assertThat(g.rule(MagikGrammar.LOCK))
         .matches("_lock a _endlock")
         ;
   }
@@ -166,8 +188,10 @@ public class MagikGrammarTest {
   public void testResult() {
     Assertions.assertThat(g.rule(MagikGrammar.EMIT_STATEMENT))
         .matches(">> a")
-        .matches(">> (1, 2)")
+        .matches(">> (a, b)")
+        .matches(">> (\na, b)")
         .matches(">> (a) _mod b")
+        .matches(">>\na")
         ;
   }
 
@@ -213,8 +237,10 @@ public class MagikGrammarTest {
     Assertions.assertThat(g.rule(MagikGrammar.RETURN_STATEMENT))
         .matches("_return")
         .matches("_return a")
+        .matches("_return (a)")
         .matches("_return (a, b)")
         .matches("_return (\na, b)")
+        .matches("_return (a) _mod b")
         ;
   }
 
@@ -242,6 +268,8 @@ public class MagikGrammarTest {
         .matches("a -<< b")
         .matches("a +<< b")
         .matches("a << b + 1")
+        .matches("a _or b")
+        .matches("(a) _or b")
         ;
   }
 
@@ -326,6 +354,8 @@ public class MagikGrammarTest {
         .matches("_leave")
         .matches("_leave @label")
         .matches("_leave _with e()")
+        .matches("_leave _with (a)")
+        .matches("_leave _with (a, b)")
         .matches("_leave @label _with e()")
         .notMatches("_continue\n _with 10")
         .notMatches("_leave\n _with 10")
@@ -343,8 +373,18 @@ public class MagikGrammarTest {
         .matches("_block ; _endblock")
         .matches("_block a();b() _endblock")
         .matches("_block a()\nb() _endblock")
+        .matches("_block @label _endblock")
         .notMatches("a()b()")
         .notMatches("_block a() b() _endblock")
+        ;
+  }
+
+  @Test
+  public void testProtect() {
+    Assertions.assertThat(g.rule(MagikGrammar.PROTECT))
+        .matches("_protect _protection _endprotect")
+        .matches("_protect a() _protection b() _endprotect")
+        .matches("_protect _locking _self a() _protection _endprotect")
         ;
   }
 
@@ -407,6 +447,14 @@ public class MagikGrammarTest {
         .matches("%:")
         .matches("%newline")
         .matches("%.")
+        ;
+  }
+
+  @Test
+  public void testSuper() {
+    Assertions.assertThat(g.rule(MagikGrammar.SUPER))
+        .matches("_super")
+        .matches("_super(sw_component)")
         ;
   }
 

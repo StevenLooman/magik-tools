@@ -20,6 +20,7 @@ import org.stevenlooman.sw.magik.parser.MagikParser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,9 +31,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class MagikLint {
+
+  static Logger logger = Logger.getLogger(MagikLint.class.getName());
 
   CommandLine commandLine;
   Configuration config;
@@ -82,6 +88,10 @@ public class MagikLint {
         .hasArg()
         .type(PatternOptionBuilder.NUMBER_VALUE)
         .build());
+    options.addOption(Option.builder()
+        .longOpt("debug")
+        .desc("Enable showing of debug information")
+        .build());
   }
 
   static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING = new HashMap<>();
@@ -91,8 +101,30 @@ public class MagikLint {
     SEVERITY_EXIT_CODE_MAPPING.put("Minor", 4);
   }
 
+  /**
+   * Initialize logger from logging.properties.
+   */
+  private void initLogger() {
+    InputStream stream = MagikLint.class.getClassLoader().getResourceAsStream("logging.properties");
+    try {
+      LogManager.getLogManager().readConfiguration(stream);
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  /**
+   * Constructor, parses command line and reads configuration.
+   * @param args Command line arguments.
+   * @throws ParseException -
+   */
   MagikLint(String[] args) throws ParseException {
     commandLine = parseCommandline(args);
+
+    if (commandLine.hasOption("debug")) {
+      initLogger();
+      logger.log(Level.FINE, "enabled debugging information");
+    }
 
     // read configuration
     if (commandLine.hasOption("rcfile")) {
@@ -109,6 +141,12 @@ public class MagikLint {
     }
   }
 
+  /**
+   * Parse the command line.
+   * @param args Command line arguments.
+   * @return Parsed command line.
+   * @throws ParseException -
+   */
   private CommandLine parseCommandline(String[] args) throws ParseException {
     CommandLineParser parser = new DefaultParser();
     CommandLine cmd = parser.parse(MagikLint.options, args);
@@ -132,13 +170,25 @@ public class MagikLint {
     return new MessageFormatReporter(System.out, template, columnOffset);
   }
 
-  private MagikVisitorContext buildContext(Path path) throws IOException, ParseException {
+  /**
+   * Build context for a file, untabifying if needed.
+   * @param path Path to file
+   * @param untabify Untabify to N-spaces, if given
+   * @return Visitor context for file.
+   */
+  private MagikVisitorContext buildContext(Path path, Long untabify) {
     Charset defaultCharset = Charset.forName("ISO_8859_1");
     Charset charset = FileCharsetDeterminer.determineCharset(path, defaultCharset);
-    byte[] encoded = Files.readAllBytes(path);
+
+    byte[] encoded = null;
+    try {
+      encoded = Files.readAllBytes(path);
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
+
     String fileContents = new String(encoded, charset);
-    if (commandLine.getOptionValue("untabify") != null) {
-      Long untabify = (Long) commandLine.getParsedOptionValue("untabify");
+    if (untabify != null) {
       String spaces = String.format("%" + untabify + "s", "");
       fileContents = fileContents.replaceAll("\t", spaces);
     }
@@ -149,15 +199,18 @@ public class MagikLint {
     return new MagikVisitorContext(path, fileContents, root);
   }
 
-  private Iterable<CheckInfo> getAllChecks()
-      throws IllegalAccessException, InstantiationException, FileNotFoundException {
-    return CheckInfo.getAllChecks(config);
-  }
-
+  /**
+   * Run a single check on context.
+   * @param context Context to run check on.
+   * @param checkInfo CheckInfo (Check) to run.
+   * @return Issues/infractions found.
+   */
   private List<MagikIssue> runCheck(MagikVisitorContext context, CheckInfo checkInfo) {
     MagikCheck check = checkInfo.getCheck();
-    List<MagikIssue> checkIssues = check.scanFileForIssues(context);
-    return checkIssues;
+    synchronized (check) {
+      List<MagikIssue> checkIssues = check.scanFileForIssues(context);
+      return checkIssues;
+    }
   }
 
   /**
@@ -167,12 +220,21 @@ public class MagikLint {
    * @return Return code for the infraction.
    * @throws FileNotFoundException Thrown in case CheckInfo cannot find data.
    */
-  public static int getReturnCode(CheckInfraction checkInfraction) throws FileNotFoundException {
+  public static int getReturnCode(CheckInfraction checkInfraction) {
     CheckInfo checkInfo = checkInfraction.getCheckInfo();
-    String checkSeverity = checkInfo.getSeverity();
+    String checkSeverity = null;
+    try {
+      checkSeverity = checkInfo.getSeverity();
+    } catch (FileNotFoundException ex) {
+      ex.printStackTrace();
+    }
     return SEVERITY_EXIT_CODE_MAPPING.getOrDefault(checkSeverity, 0);
   }
 
+  /**
+   * Show checks active and inactive checks.
+   * @param checkInfos CheckInfos to show.
+   */
   private void showChecks(Iterable<CheckInfo> checkInfos)
       throws IllegalAccessException, FileNotFoundException {
     for (CheckInfo checkInfo : checkInfos) {
@@ -192,6 +254,12 @@ public class MagikLint {
     }
   }
 
+  /**
+   * Check if a found issue/infraction is disabled via line or scope.
+   * @param magikIssue Issue to check.
+   * @param instructionsHandler Instruction handler to use.
+   * @return true if issue is disabled at line.
+   */
   private boolean isMagikIssueDisabled(
       MagikIssue magikIssue, InstructionsHandler instructionsHandler) {
     int line = magikIssue.line();
@@ -209,95 +277,114 @@ public class MagikLint {
   }
 
   /**
-   * Check all files.
-   *
-   * @param checkInfos Checks to run.
-   * @param paths      Paths to check.
-   * @return Exit code for process.
-   * @throws IOException    Unable to read file
-   * @throws ParseException Unable to parse command line
+   * Run {{CheckInfo}}s on {{Path}}.
+   * @param path File to run on.
+   * @param checkInfos {{CheckInfo}}s to run.
+   * @return List of {{CheckInfraction}}s for the given file.
    */
-  private int checkFiles(Iterable<CheckInfo> checkInfos, Iterable<Path> paths)
-      throws IOException, ParseException {
-    int returnCode = 0;
-    int infractionCount = 0;
+  private List<CheckInfraction> runChecksOnFile(
+      Path path, Long untabify, Iterable<CheckInfo> checkInfos) {
+    logger.finest("Thread: " + Thread.currentThread().getName() + ", checking file: " + path);
 
-    Comparator<CheckInfraction> byLine = Comparator.comparing(ci -> ci.getMagikIssue().line());
-    Comparator<CheckInfraction> byColumn = Comparator.comparing(ci -> ci.getMagikIssue().column());
+    MagikVisitorContext context = buildContext(path, untabify);
+    InstructionsHandler instructionsHandler = new InstructionsHandler(context);
+    List<CheckInfraction> infractions = new ArrayList<>();
 
-    Reporter reporter = getReporter();
-    for (Path path : paths) {
-      System.out.println("Checking: " + path);
-      MagikVisitorContext context = buildContext(path);
-      InstructionsHandler instructionsHandler = new InstructionsHandler(context);
-      List<CheckInfraction> fileInfractions = new ArrayList<>();
-
-      // run checks, report issues
-      for (CheckInfo checkInfo : checkInfos) {
-        if (!checkInfo.isEnabled()) {
-          continue;
-        }
-
-        List<MagikIssue> magikIssues = runCheck(context, checkInfo);
-        List<CheckInfraction> checkInfractions = magikIssues.stream()
-            .filter(magikIssue -> !isMagikIssueDisabled(magikIssue, instructionsHandler))
-            .map(magikIssue -> new CheckInfraction(path, checkInfo, magikIssue))
-            .collect(Collectors.toList());
-
-        fileInfractions.addAll(checkInfractions);
+    // run checks on files
+    for (CheckInfo checkInfo : checkInfos) {
+      if (!checkInfo.isEnabled()) {
+        continue;
       }
 
-      fileInfractions.sort(
-          byLine
-          .thenComparing(byColumn));
-      for (CheckInfraction checkInfraction : fileInfractions) {
-        reporter.reportIssue(checkInfraction);
+      List<MagikIssue> magikIssues = runCheck(context, checkInfo);
+      List<CheckInfraction> checkInfractions = magikIssues.stream()
+          .filter(magikIssue -> !isMagikIssueDisabled(magikIssue, instructionsHandler))
+          .map(magikIssue -> new CheckInfraction(path, checkInfo, magikIssue))
+          .collect(Collectors.toList());
 
-        int checkReturnCode = getReturnCode(checkInfraction);
-        returnCode = returnCode | checkReturnCode;
-
-        infractionCount++;
-        if (commandLine.hasOption("max-infractions")
-            && infractionCount == (Long)commandLine.getParsedOptionValue("max-infractions")) {
-          return returnCode;
-        }
-      }
+      infractions.addAll(checkInfractions);
     }
-
-    return returnCode;
+    return infractions;
   }
 
   /**
    * Watch the given directory/file for changes.
    * 
+   * @param dir Path (directory) to watch.
    * @param checkInfos Checks to run.
-   * @param path       Path (directory) to watch.
-   * @throws MagikLintException   -
+   * @param untabify Replace tabs with N-spaces, if not null.
+   * @param maxInfractions Maximum number of infractions to report.
+   * @param reporter Reporter to use to report infractions.
    * @throws InterruptedException -
-   * @throws ParseException       -
+   * @throws IOException -
    */
-  private void watch(Iterable<CheckInfo> checkInfos, Path dir)
-      throws IOException, MagikLintException, ParseException, InterruptedException {
+  private void watch(
+      Path dir,
+      Iterable<CheckInfo> checkInfos,
+      Long untabify,
+      long maxInfractions,
+      Reporter reporter)
+      throws InterruptedException, IOException {
     MagikFileWatcher.ChangesListener listener = new MagikFileWatcher.ChangesListener() {
       @Override
       void onChanged(Collection<Path> paths) {
         try {
           System.out.println("File change detected. Scanning files...");
-          checkFiles(checkInfos, paths);
+          runChecks(paths, checkInfos, untabify, Long.MAX_VALUE, reporter);
           System.out.println("Scanning complete. Watching for file changes.");
-        } catch (IOException | ParseException ex) {
+        } catch (IOException ex) {
           System.out.println("Caught exception: " + ex.getMessage());
         }
       }
     };
 
     // Initial file scan.
+    logger.finest("Doing initial scan of: " + dir);
     Collection<Path> paths = MagikFileScanner.scanMagikFiles(dir);
     listener.onChanged(paths);
 
     // Continuous scanning for changes.
+    logger.finest("Starting to watch: " + dir);
     MagikFileWatcher watcher = new MagikFileWatcher(dir, listener);
     watcher.run();
+  }
+
+  /**
+   * Run checks on files.
+   * @param paths {{Path}}s to check.
+   * @param checkInfos {{CheckInfo}}s to check on each path.
+   * @param untabify Replace tabs with N-spaces, if not null.
+   * @param maxInfractions Maximum number of infractions to report.
+   * @param reporter Reporter to use for reporting.
+   * @return Exit code for process.
+   */
+  private int runChecks(
+      Collection<Path> paths,
+      Iterable<CheckInfo> checkInfos,
+      Long untabify,
+      long maxInfractions,
+      Reporter reporter)
+      throws IOException {
+    Comparator<CheckInfraction> byPath =
+        Comparator.comparing(ci -> ci.getPath());
+    Comparator<CheckInfraction> byLine =
+        Comparator.comparing(ci -> ci.getMagikIssue().line());
+    Comparator<CheckInfraction> byColumn =
+        Comparator.comparing(ci -> ci.getMagikIssue().column());
+    int exitCode = paths.stream()
+        .parallel()
+        .map(path -> runChecksOnFile(path, untabify, checkInfos))
+        .flatMap(infractions -> infractions.stream())
+        .collect(Collectors.toList())
+        .stream()
+        .sorted(byPath.thenComparing(byLine).thenComparing(byColumn))
+        .limit(maxInfractions)
+        .map(infraction -> {
+          reporter.reportIssue(infraction);
+          return getReturnCode(infraction);
+        })
+        .reduce(0, (code, infractionCode) -> code |= infractionCode);
+    return exitCode;
   }
 
   /**
@@ -314,10 +401,10 @@ public class MagikLint {
   public int run()
       throws IOException, IllegalAccessException, InstantiationException,
       ParseException, MagikLintException, InterruptedException {
-    Iterable<CheckInfo> checkInfos = getAllChecks();
 
     int exitCode = 0;
     if (commandLine.hasOption("show-checks")) {
+      Iterable<CheckInfo> checkInfos = CheckInfo.getAllChecks(config);
       showChecks(checkInfos);
     } else if (commandLine.hasOption("help")
                || commandLine.getArgs().length == 0) {
@@ -326,12 +413,39 @@ public class MagikLint {
     } else if (commandLine.hasOption("watch")) {
       String[] args = commandLine.getArgs();
       Path dir = MagikFileScanner.getSingleDirectoryFromArguments(args);
-      watch(checkInfos, dir);
+
+      Iterable<CheckInfo> checkInfos = CheckInfo.getAllChecks(config);
+
+      Long untabify = null;
+      if (commandLine.hasOption("untabify")) {
+        untabify = (Long) commandLine.getParsedOptionValue("untabify");
+      }
+
+      long maxInfractions = Long.MAX_VALUE;
+      if (commandLine.hasOption("max-infractions")) {
+        maxInfractions = (Long)commandLine.getParsedOptionValue("max-infractions");
+      }
+
+      Reporter reporter = getReporter();
+      watch(dir, checkInfos, untabify, maxInfractions, reporter);
     } else {
-      // loop over files
       String[] args = commandLine.getArgs();
-      Iterable<Path> paths = MagikFileScanner.getFilesFromArgs(args);
-      exitCode = checkFiles(checkInfos, paths);
+      Collection<Path> paths = MagikFileScanner.getFilesFromArgs(args);
+
+      Iterable<CheckInfo> checkInfos = CheckInfo.getAllChecks(config);
+
+      Long untabify = null;
+      if (commandLine.hasOption("untabify")) {
+        untabify = (Long) commandLine.getParsedOptionValue("untabify");
+      }
+
+      long maxInfractions = Long.MAX_VALUE;
+      if (commandLine.hasOption("max-infractions")) {
+        maxInfractions = (Long)commandLine.getParsedOptionValue("max-infractions");
+      }
+
+      Reporter reporter = getReporter();
+      exitCode = runChecks(paths, checkInfos, untabify, maxInfractions, reporter);
     }
 
     return exitCode;

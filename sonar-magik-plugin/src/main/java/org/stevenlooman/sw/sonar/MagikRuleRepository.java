@@ -3,10 +3,8 @@ package org.stevenlooman.sw.sonar;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonarsource.analyzer.commons.RuleMetadataLoader;
 import org.stevenlooman.sw.magik.CheckList;
-import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.sonar.language.Magik;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -17,21 +15,11 @@ public class MagikRuleRepository implements RulesDefinition {
   static final String RESOURCE_FOLDER = "org/stevenlooman/sw/sonar/l10n/magik/rules";
 
   private List<String> templatedRules() throws IllegalAccessException, InstantiationException {
-    List<String> templatedRules = new ArrayList<>();
-    for (Class<?> klass: getCheckClasses()) {
-      MagikCheck instance = (MagikCheck) klass.newInstance();
-      if (!instance.isTemplatedCheck()) {
-        continue;
-      }
-
-      org.sonar.check.Rule rule = klass.getAnnotation(org.sonar.check.Rule.class);
-      if (rule == null) {
-        continue;
-      }
-
-      templatedRules.add(rule.key());
-    }
-    return templatedRules;
+    return CheckList.getTemplatedChecks().stream()
+          .map(checkClass -> checkClass.getAnnotation(org.sonar.check.Rule.class))
+          .filter(rule -> rule != null)
+          .map(rule -> rule.key())
+          .collect(Collectors.toList());
   }
 
   @Override

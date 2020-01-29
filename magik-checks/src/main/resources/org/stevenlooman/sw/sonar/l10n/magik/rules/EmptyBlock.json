@@ -1,0 +1,15 @@
+{
+  "title": "Block is empty and can be removed",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "warning"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "EmptyBlock",
+  "sqKey": "empty-block"
+}

@@ -19,17 +19,13 @@ public class ScopeCountCheck extends MagikCheck {
 
   public static final String CHECK_KEY = "ScopeCount";
   private static final String MESSAGE = "Too many variables in scope.";
-  private static final int DEFAULT_MAX_SCOPE_COUNT = 20;
+  private static final int DEFAULT_MAX_SCOPE_COUNT = 25;
+
   @RuleProperty(
       key = "max scope count",
       defaultValue = "" + DEFAULT_MAX_SCOPE_COUNT,
       description = "Maximum number of entries in scope")
   public int maxScopeCount = DEFAULT_MAX_SCOPE_COUNT;
-
-  @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
 
   @Override
   public List<AstNodeType> subscribedTo() {
@@ -49,7 +45,8 @@ public class ScopeCountCheck extends MagikCheck {
       return;
     }
 
-    Scope procedureScope = globalScope.getScopeForNode(node);
+    AstNode bodyNode = node.getFirstChild(MagikGrammar.BODY);
+    Scope procedureScope = globalScope.getScopeForNode(bodyNode);
     List<ScopeEntry> procedureScopeEntries = procedureScope.getSelfAndDescendantScopes().stream()
         .map(scope -> scope.getScopeEntries())
         .flatMap(scopeEntries -> scopeEntries.stream())

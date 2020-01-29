@@ -67,23 +67,4 @@ class MagikFileScanner {
     return files;
   }
 
-  static Collection<Path> scanDirectories(Path start) throws IOException {
-    List<Path> dirs = new ArrayList<>();
-
-    Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
-      @Override
-      public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attr) {
-        if (!path.endsWith(".")
-            && path.toFile().isHidden()) {
-          return FileVisitResult.SKIP_SUBTREE;
-        }
-
-        dirs.add(path);
-        return FileVisitResult.CONTINUE;
-      }
-    });
-
-    return dirs;
-  }
-
 }

@@ -35,7 +35,7 @@ public class CommentedCodeCheckTest extends MagikCheckTestBase {
         "\t#_return x\n" +
         "_endmethod";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
@@ -43,19 +43,18 @@ public class CommentedCodeCheckTest extends MagikCheckTestBase {
     MagikCheck check = new CommentedCodeCheck();
     String code =
         "_method a.b\n" +
-            "\t#_local x << _self.call()\n" +
-            "\t#x +<< 10\n" +
-            "\t#write(x)\n" +
-            "\t#_return x\n" +
-            "\t_return 10\n" +
-            "\t#_local x << _self.call()\n" +
-            "\t#x +<< 10\n" +
-            "\t#write(x)\n" +
-            "\t#_return x\n" +
-            "_endmethod";
+        "\t#_local x << _self.call()\n" +
+        "\t#x +<< 10\n" +
+        "\t#write(x)\n" +
+        "\t#_return x\n" +
+        "\t_return 10\n" +
+        "\t#_local x << _self.call()\n" +
+        "\t#x +<< 10\n" +
+        "\t#write(x)\n" +
+        "\t#_return x\n" +
+        "_endmethod";
     List<MagikIssue> issues = runCheck(code, check);
     assertThat(issues).hasSize(2);
   }
-
 
 }

@@ -194,4 +194,49 @@ public class MethodDocCheckTest extends MagikCheckTestBase {
     assertThat(issues).isNotEmpty();
   }
 
+  @Test
+  public void testMethodDocIterHasLoopbody() {
+    MagikCheck check = new MethodDocCheck();
+    String code =
+      "_iter _method a.b\n" +
+      "  ## Function  : example\n" +
+      "  ## Parameters: -\n" +
+      "  ## Loopbody  : FIRST_ARG: one\n" +
+      "  ##             SECOND_ARG: two\n" +
+      "  ## Returns   : -\n" +
+      "  _loopbody(1, 2)\n" +
+      "_endmethod";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
+  public void testMethodDocIterLoopbodyMissing() {
+    MagikCheck check = new MethodDocCheck();
+    String code =
+      "_iter _method a.b\n" +
+      "  ## Function  : example\n" +
+      "  ## Parameters: -\n" +
+      "  ## Returns   : -\n" +
+      "  _loopbody(1)\n" +
+      "_endmethod";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
+
+  @Test
+  public void testMethodDocIterLoopbodyInvalid() {
+    MagikCheck check = new MethodDocCheck();
+    String code =
+      "_iter _method a.b\n" +
+      "  ## Function  : example\n" +
+      "  ## Parameters: -\n" +
+      "  ## Loopbody  : one\n" +
+      "  ## Returns   : -\n" +
+      "  _loopbody(1)\n" +
+      "_endmethod";
+    List<MagikIssue> issues = runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
+
 }

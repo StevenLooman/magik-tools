@@ -18,11 +18,6 @@ public class LhsRhsComparatorEqualCheck extends MagikCheck {
   public static final String CHECK_KEY = "LhsRhsComparatorEqual";
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
     return Arrays.asList(
         MagikGrammar.OR_EXPRESSION,
@@ -36,7 +31,7 @@ public class LhsRhsComparatorEqualCheck extends MagikCheck {
   public void visitNode(AstNode node) {
     AstNode leftHandSide = node.getFirstChild();
     AstNode rightHandSide = node.getLastChild();
-    if (AstCompare.astNodesEquals(leftHandSide, rightHandSide)) {
+    if (AstCompare.astNodeEqualsRecursive(leftHandSide, rightHandSide)) {
       addIssue(MESSAGE, node);
     }
   }

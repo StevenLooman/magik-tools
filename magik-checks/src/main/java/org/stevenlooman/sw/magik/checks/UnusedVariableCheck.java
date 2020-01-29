@@ -9,10 +9,9 @@ import org.stevenlooman.sw.magik.analysis.scope.Scope;
 import org.stevenlooman.sw.magik.analysis.scope.ScopeEntry;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Rule(key = UnusedVariableCheck.CHECK_KEY)
 public class UnusedVariableCheck extends MagikCheck {
@@ -20,8 +19,6 @@ public class UnusedVariableCheck extends MagikCheck {
   private static final String MESSAGE = "Remove the unused local variable \"%s\".";
   public static final String CHECK_KEY = "UnusedVariable";
   private boolean checkParameters;
-
-  Set<AstNode> usedIdentifiers = new HashSet<>();
 
   public UnusedVariableCheck() {
     this.checkParameters = false;
@@ -32,60 +29,8 @@ public class UnusedVariableCheck extends MagikCheck {
   }
 
   @Override
-  public boolean isTemplatedCheck() {
-    return false;
-  }
-
-  @Override
   public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(
-        MagikGrammar.MAGIK,
-        MagikGrammar.ATOM);
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
-    // ensure part of global scope
-    if (node.getType() != MagikGrammar.ATOM) {
-      return;
-    }
-
-    // save used identifiers
-    AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-    if (identifierNode == null) {
-      return;
-    }
-
-    if (isLhsOfAssignment(identifierNode)
-        && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.GLOBAL)
-        && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.DYNAMIC)
-        && !isOfScopeEntryType(identifierNode, ScopeEntry.Type.IMPORT)) {
-      return;
-    }
-
-    usedIdentifiers.add(identifierNode);
-  }
-
-  private boolean isOfScopeEntryType(AstNode identifierNode, ScopeEntry.Type type) {
-    String identifier = identifierNode.getTokenValue();
-
-    GlobalScope globalScope = getContext().getGlobalScope();
-    Scope scope = globalScope.getScopeForNode(identifierNode);
-    ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
-
-    return scopeEntry.getType() == type;
-  }
-
-  private boolean isLhsOfAssignment(AstNode identifierNode) {
-    AstNode atomNode = identifierNode.getParent();
-    if (atomNode.getType() != MagikGrammar.ATOM) {
-      return false;
-    }
-
-    AstNode parent = atomNode.getParent();
-    return (parent.getType() == MagikGrammar.ASSIGNMENT_EXPRESSION
-            || parent.getType() == MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION)
-           && parent.getFirstChild() == atomNode;
+    return Arrays.asList(MagikGrammar.MAGIK);
   }
 
   private boolean isAssignedToDirectly(AstNode identifierNode) {
@@ -134,6 +79,7 @@ public class UnusedVariableCheck extends MagikCheck {
 
   private boolean anyNextSiblingUsed(AstNode identifierNode) {
     GlobalScope globalScope = getContext().getGlobalScope();
+    Scope scope = globalScope.getScopeForNode(identifierNode);
     AstNode sibling = identifierNode.getNextSibling();
     while (sibling != null) {
       if (sibling.getType() != MagikGrammar.IDENTIFIER) {
@@ -141,13 +87,11 @@ public class UnusedVariableCheck extends MagikCheck {
         continue;
       }
 
-      for (AstNode usedIdentifier: usedIdentifiers) {
-        Scope scope = globalScope.getScopeForNode(usedIdentifier);
-        String identifierName = usedIdentifier.getTokenValue();
-        ScopeEntry scopeEntry = scope.getScopeEntry(identifierName);
-        if (scopeEntry != null) {
-          return true;
-        }
+      String siblingIdentifier = sibling.getTokenValue();
+      ScopeEntry siblingEntry = scope.getScopeEntry(siblingIdentifier);
+      if (siblingEntry != null
+          && !siblingEntry.getUsages().isEmpty()) {
+        return true;
       }
 
       sibling = sibling.getNextSibling();
@@ -162,72 +106,53 @@ public class UnusedVariableCheck extends MagikCheck {
       return;
     }
 
-    // Gather all defined variables
-    Set<AstNode> declaredIdentifiers = new HashSet<>();
+    // Gather all scope entries to be checked
+    List<ScopeEntry> scopeEntries = new ArrayList<>();
     GlobalScope globalScope = getContext().getGlobalScope();
     for (Scope scope: globalScope.getSelfAndDescendantScopes()) {
       for (ScopeEntry scopeEntry: scope.getScopeEntries()) {
         AstNode scopeEntryNode = scopeEntry.getNode();
 
-        // But not globals/dynamics which is assigned to directly
+        // But not globals/dynamics which are assigned to directly
         if ((scopeEntry.getType() == ScopeEntry.Type.GLOBAL
              || scopeEntry.getType() == ScopeEntry.Type.DYNAMIC)
             && isAssignedToDirectly(scopeEntryNode)) {
           continue;
         }
 
+        // No parameters, unless forced to
         if (!checkParameters && scopeEntry.getType() == ScopeEntry.Type.PARAMETER) {
           continue;
         }
 
-        declaredIdentifiers.add(scopeEntryNode);
+        scopeEntries.add(scopeEntry);
       }
     }
 
-    // Import is also a use
-    for (Scope scope: globalScope.getSelfAndDescendantScopes()) {
-      for (ScopeEntry scopeEntry : scope.getScopeEntries()) {
-        if (scopeEntry.getType() == ScopeEntry.Type.IMPORT) {
-          ScopeEntry parentEntry = scopeEntry.getParentEntry();
-          if (parentEntry != null) {
-            AstNode parentEntryNode = parentEntry.getNode();
-            declaredIdentifiers.remove(parentEntryNode);
-          }
-        }
-      }
-    }
-
-    // Remove all defined variables when they are used
-    for (AstNode identifierNode: usedIdentifiers) {
-      Scope scope = globalScope.getScopeForNode(identifierNode);
-      String identifierName = identifierNode.getTokenValue();
-      ScopeEntry scopeEntry = scope.getScopeEntry(identifierName);
-      if (scopeEntry != null) {
-        AstNode scopeEntryNode = scopeEntry.getNode();
-        declaredIdentifiers.remove(scopeEntryNode);
-      }
-    }
-
-    // Remove all defined variables which are:
+    // Remove all defined scope entries which are:
     // - part of a MULTI_VARIABLE_DECLARATION
-    // - the later identifiers of it are used
-    // - but this one isn't
-    for (AstNode declaredIdentifier: new HashSet<>(declaredIdentifiers)) {
-      if ((isPartOfMultiVariableDefinition(declaredIdentifier)
-           || isPartOfMultiAssignment(declaredIdentifier))
-          && anyNextSiblingUsed(declaredIdentifier)) {
-        declaredIdentifiers.remove(declaredIdentifier);
+    // - any later identifier(s) of it is used
+    // - but this one is not
+    for (ScopeEntry entry : new ArrayList<>(scopeEntries)) {
+      AstNode entryNode = entry.getNode();
+      if ((isPartOfMultiVariableDefinition(entryNode) || isPartOfMultiAssignment(entryNode))
+          && anyNextSiblingUsed(entryNode)) {
+        scopeEntries.remove(entry);
       }
     }
 
-    // Report all unused declarations
-    for (AstNode identifierNode: declaredIdentifiers) {
-      String name = identifierNode.getTokenValue();
-      String message = String.format(MESSAGE, name);
-      addIssue(message, identifierNode);
-    }
+    // Report all unused scope entries
+    for (ScopeEntry entry : scopeEntries) {
+      if (!entry.getUsages().isEmpty()) {
+        continue;
+      }
 
-    usedIdentifiers.clear();
+      AstNode entryNode = entry.getNode();
+      String name = entryNode.getTokenValue();
+      String message = String.format(MESSAGE, name);
+      addIssue(message, entryNode);
+    }
   }
+
 
 }
