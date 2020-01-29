@@ -1,73 +1,82 @@
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
-# User-specific stuff
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/dictionaries
-.idea/**/shelf
+# Created by https://www.gitignore.io/api/eclipse
+# Edit at https://www.gitignore.io/?templates=eclipse
 
-# Generated files
-.idea/**/contentModel.xml
+### Eclipse ###
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
 
-# Sensitive or high-churn files
-.idea/**/dataSources/
-.idea/**/dataSources.ids
-.idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xml
-.idea/**/dynamic.xml
-.idea/**/uiDesigner.xml
-.idea/**/dbnavigator.xml
+# External tool builders
+.externalToolBuilders/
 
-# Gradle
-.idea/**/gradle.xml
-.idea/**/libraries
+# Locally stored "Eclipse launch configurations"
+*.launch
 
-# Gradle and Maven with auto-import
-# When using Gradle or Maven with auto-import, you should exclude module files,
-# since they will be recreated, and may cause churn.  Uncomment if using
-# auto-import.
-# .idea/modules.xml
-# .idea/*.iml
-# .idea/modules
+# PyDev specific (Python IDE for Eclipse)
+*.pydevproject
 
-# CMake
-cmake-build-*/
+# CDT-specific (C/C++ Development Tooling)
+.cproject
 
-# Mongo Explorer plugin
-.idea/**/mongoSettings.xml
+# CDT- autotools
+.autotools
 
-# File-based project format
-*.iws
+# Java annotation processor (APT)
+.factorypath
 
-# IntelliJ
-out/
+# PDT-specific (PHP Development Tools)
+.buildpath
 
-# mpeltonen/sbt-idea plugin
-.idea_modules/
+# sbteclipse plugin
+.target
 
-# JIRA plugin
-atlassian-ide-plugin.xml
+# Tern plugin
+.tern-project
 
-# Cursive Clojure plugin
-.idea/replstate.xml
+# TeXlipse plugin
+.texlipse
 
-# Crashlytics plugin (for Android Studio and IntelliJ)
-com_crashlytics_export_strings.xml
-crashlytics.properties
-crashlytics-build.properties
-fabric.properties
+# STS (Spring Tool Suite)
+.springBeans
 
-# Editor-based Rest Client
-.idea/httpRequests
+# Code Recommenders
+.recommenders/
 
-# Android studio 3.1+ serialized cache file
-.idea/caches/build_file_checksums.ser
+# Annotation Processing
+.apt_generated/
 
+# Scala IDE specific (Scala & Java development for Eclipse)
+.cache-main
+.scala_dependencies
+.worksheet
 
+### Eclipse Patch ###
+# Eclipse Core
+.project
 
-# Maven
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# Annotation Processing
+.apt_generated
+
+.sts4-cache/
+
+# End of https://www.gitignore.io/api/eclipse
+
+# Created by https://www.gitignore.io/api/maven
+# Edit at https://www.gitignore.io/?templates=maven
+
+### Maven ###
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -78,3 +87,6 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
+.flattened-pom.xml
+
+# End of https://www.gitignore.io/api/maven
