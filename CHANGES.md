@@ -4,6 +4,7 @@ Changes
 0.4.1 (unreleased)
 
 - MessagePatchGrammar no longer needs a $ at the end of the message patch
+- Strip org.sonarsource.sonarqube:sonar-plugin-api from magik-lint, shaving size
 
 
 0.4.0 (2020-01-29)
