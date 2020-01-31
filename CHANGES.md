@@ -3,6 +3,8 @@ Changes
 
 0.4.1 (unreleased)
 
+- MessagePatchGrammar no longer needs a $ at the end of the message patch
+
 
 0.4.0 (2020-01-29)
 

@@ -22,7 +22,18 @@ public enum MessagePatchGrammar implements GrammarRuleKey {
 
   SPACING,
   WHITESPACE_NEWLINE,
-  WHITESPACE,;
+  WHITESPACE,
+  EOS,
+  ;
+
+  private static final String SYMBOL_REGEXP = "(?is):(([a-z0-9_\\?\\!])|(\\|[^\\|]*\\|))+";
+  private static final String WHITESPACE_REGEXP = "[ \t]+";
+  private static final String WHITESPACE_NEWLINE_REGEXP = "[ \n\r\t\f]+";
+  private static final String REST_OF_LINE_REGEXP = "(?!:)[^\r\n]*";
+
+  public static final String END_OF_MESSAGE_PATCH = "$";
+
+  // CHECKSTYLE.OFF: LocalVariableName
 
   /**
    * Create MessagePatchGrammar.
@@ -30,28 +41,43 @@ public enum MessagePatchGrammar implements GrammarRuleKey {
    * @return The grammar.
    */
   public static LexerlessGrammar create(String endOfPatchString) {
-    LexerlessGrammarBuilder builder = LexerlessGrammarBuilder.create();
+    String terminator = endOfPatchString;
+    if (endOfPatchString == null
+        || endOfPatchString.trim().equals("")) {
+      terminator = END_OF_MESSAGE_PATCH;
+    }
+    LexerlessGrammarBuilder b = LexerlessGrammarBuilder.create();
 
     //CHECKSTYLE.OFF: LineLength
-    builder.rule(READ_MESSAGE_PATCH).is(builder.zeroOrMore(builder.firstOf(WHITESPACE_NEWLINE, MESSAGE_PATCH)), END_MESSAGE_PATCH);
-    builder.rule(END_MESSAGE_PATCH).is(endOfPatchString);
+    b.rule(READ_MESSAGE_PATCH).is(
+        b.zeroOrMore(b.firstOf(WHITESPACE_NEWLINE, MESSAGE_PATCH)),
+        b.optional(END_MESSAGE_PATCH));
+    b.rule(END_MESSAGE_PATCH).is(terminator);
 
-    builder.rule(MESSAGE_PATCH).is(MESSAGE_IDENTIFIER, builder.optional(WHITESPACE, LANGUAGE_IDENTIFIER, WHITESPACE), builder.firstOf(REMOVE, MESSAGE));
-    builder.rule(MESSAGE_IDENTIFIER).is(SYMBOL);
-    builder.rule(LANGUAGE_IDENTIFIER).is(SYMBOL);
+    b.rule(MESSAGE_PATCH).is(
+        MESSAGE_IDENTIFIER,
+        b.optional(WHITESPACE, LANGUAGE_IDENTIFIER, WHITESPACE),
+        b.firstOf(REMOVE, MESSAGE));
+    b.rule(MESSAGE_IDENTIFIER).is(SYMBOL);
+    b.rule(LANGUAGE_IDENTIFIER).is(SYMBOL);
 
-    builder.rule(REMOVE).is(":REMOVE", SPACING);
-    builder.rule(SYMBOL).is(builder.regexp("(?is):(([a-z0-9_\\?\\!])|(\\|[^\\|]*\\|))+")).skip();
-    builder.rule(MESSAGE).is(builder.oneOrMore(REST_OF_LINE, SPACING));
+    b.rule(REMOVE).is(":REMOVE", SPACING);
+    b.rule(SYMBOL).is(b.regexp(SYMBOL_REGEXP)).skip();
+    b.rule(MESSAGE).is(b.oneOrMore(REST_OF_LINE, SPACING));
 
-    builder.rule(SPACING).is(builder.oneOrMore(WHITESPACE_NEWLINE)).skip();
-    builder.rule(WHITESPACE_NEWLINE).is(builder.skippedTrivia(builder.regexp("[ \n\r\t\f]+"))).skip();
-    builder.rule(WHITESPACE).is(builder.skippedTrivia(builder.regexp("[ \t]+"))).skip();
-    builder.rule(REST_OF_LINE).is(builder.regexp("(?!:)[^\r\n]*"));
+    b.rule(SPACING).is(b.oneOrMore(WHITESPACE_NEWLINE)).skip();
+    b.rule(WHITESPACE_NEWLINE).is(b.skippedTrivia(b.regexp(WHITESPACE_NEWLINE_REGEXP))).skip();
+    b.rule(WHITESPACE).is(b.skippedTrivia(b.regexp(WHITESPACE_REGEXP))).skip();
+    b.rule(REST_OF_LINE).is(b.regexp(REST_OF_LINE_REGEXP));
+    b.rule(EOS).is(
+        b.firstOf(SPACING, WHITESPACE_NEWLINE_REGEXP)).skip();
 
-    builder.setRootRule(READ_MESSAGE_PATCH);
+    b.setRootRule(READ_MESSAGE_PATCH);
     //CHECKSTYLE.ON: LineLength
 
-    return builder.build();
+    return b.build();
   }
+
+  // CHECKSTYLE.ON: LocalVariableName
+
 }
