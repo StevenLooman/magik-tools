@@ -5,6 +5,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import com.sonar.sslr.api.AstNode;
 import org.junit.Test;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
+import org.stevenlooman.sw.magik.api.MessagePatchGrammar;
 
 import java.nio.charset.Charset;
 
@@ -112,6 +113,24 @@ public class MagikParserTest {
     assertThat(syntaxErrorNode.getType()).isEqualTo(MagikGrammar.SYNTAX_ERROR);
     assertThat(syntaxErrorNode.getToken().getLine()).isEqualTo(2);
     assertThat(syntaxErrorNode.getToken().getColumn()).isEqualTo(20);
+  }
+
+  @Test
+  public void testReadMessagePatch() {
+    MagikParser parser = new MagikParser(Charset.forName("UTF-8"));
+    String code =
+      "read_message_patch(:name)\n" +
+      "$\n" +
+      "\n" +
+      ":a  :en_gb  A A\n" +
+      "";  // No TRANSMIT afterwards.
+    AstNode node = parser.parseSafe(code);
+    assertThat(node.getChildren()).hasSize(3);
+    AstNode patchNode1 = node.getChildren().get(2);
+    assertThat(patchNode1.getType()).isEqualTo(MessagePatchGrammar.MESSAGE_PATCH);
+    assertThat(patchNode1.getChildren().get(0).getTokenValue()).isEqualTo(":a");
+    assertThat(patchNode1.getChildren().get(1).getTokenValue()).isEqualTo(":en_gb");
+    assertThat(patchNode1.getChildren().get(2).getTokenValue()).isEqualTo("A A");
   }
 
 }

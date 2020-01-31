@@ -49,7 +49,6 @@ public class MagikParser {
   }
 
   private static final String TRANSMIT = "$";
-  private static final String END_OF_MESSAGE_PATCH = "$";
 
   public Parser<LexerlessGrammar> magikParser;
   public Parser<LexerlessGrammar> messagePatchParser;
@@ -62,7 +61,7 @@ public class MagikParser {
     magikParser = new ParserAdapter<>(charset, MagikGrammar.create());
     messagePatchParser = new ParserAdapter<>(
         charset,
-        MessagePatchGrammar.create(END_OF_MESSAGE_PATCH));
+        MessagePatchGrammar.create(TRANSMIT));
   }
 
   /**
@@ -155,6 +154,7 @@ public class MagikParser {
         // parse part
         AstNode node = null;
         if (readMessagePatch) {
+          part += "\n";  // Add newline at the end of patch, to help MessagePatchGrammar.
           node = parsePartMessagePatch(part);
         } else {
           if (!isEmpty(part)) {

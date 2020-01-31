@@ -7,7 +7,7 @@ import org.stevenlooman.sw.magik.api.MessagePatchGrammar;
 import static org.sonar.sslr.tests.Assertions.assertThat;
 
 public class MessagePatchGrammarTest {
-  private Grammar g = MessagePatchGrammar.create("$");
+  private Grammar g = MessagePatchGrammar.create(MessagePatchGrammar.END_OF_MESSAGE_PATCH);
 
   @Test
   public void testEndMessagePatch() {
@@ -62,6 +62,7 @@ public class MessagePatchGrammarTest {
   @Test
   public void testReadMessagePatch() {
     assertThat(g.rule(MessagePatchGrammar.READ_MESSAGE_PATCH))
+        .matches(":test this is a patch\n")
         .matches(":test this is a patch\n$")
         .matches(":test this is a patch\netc\n$")
         .matches(":test this is a patch\n:test2 this is another patch\n$")
