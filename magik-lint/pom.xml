@@ -78,17 +78,10 @@
                                 <include>org.sonarsource.sslr:sslr-core</include>
                                 <include>org.sonarsource.sslr:sslr-xpath</include>
                                 <include>jaxen:jaxen</include>
-                                <include>org.sonarsource.sonarqube:sonar-plugin-api</include>
                                 <include>commons-cli:commons-cli</include>
                                 <include>org.json:json</include>
                             </includes>
                             <rules>
-                                <zap>
-                                    <pattern>org.sonar.api.*.**</pattern>
-                                </zap>
-                                <zap>
-                                    <pattern>org.sonarsource.*.**</pattern>
-                                </zap>
                             </rules>
                         </configuration>
                     </execution>
