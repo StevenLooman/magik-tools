@@ -31,7 +31,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -42,53 +41,55 @@ public class MagikLint {
 
   CommandLine commandLine;
   Configuration config;
-  static final Options options;
+  static final Options OPTIONS;
 
   static {
-    options = new Options();
-    options.addOption(Option.builder()
+    OPTIONS = new Options();
+    OPTIONS.addOption(Option.builder()
         .longOpt("help")
         .desc("Show this help")
         .build());
-    options.addOption(Option.builder()
+    OPTIONS.addOption(Option.builder()
         .longOpt("msg-template")
         .desc("Output pattern")
         .hasArg()
         .type(PatternOptionBuilder.STRING_VALUE)
         .build());
-    options.addOption(Option.builder()
+    OPTIONS.addOption(Option.builder()
         .longOpt("rcfile")
         .desc("Configuration file")
         .hasArg()
         .type(PatternOptionBuilder.EXISTING_FILE_VALUE)
         .build());
-    options.addOption(Option.builder()
+    OPTIONS.addOption(Option.builder()
         .longOpt("show-checks")
         .desc("Show checks and quit")
         .build());
-    options.addOption(Option.builder()
+    OPTIONS.addOption(Option.builder()
         .longOpt("untabify")
         .desc("Expand tabs to N spaces")
         .hasArg()
         .type(PatternOptionBuilder.NUMBER_VALUE)
         .build());
-    options.addOption(Option.builder()
+    OPTIONS.addOption(Option.builder()
         .longOpt("column-offset")
         .desc("Set column offset, positive or negative")
         .hasArg()
         .type(PatternOptionBuilder.NUMBER_VALUE)
         .build());
-    options.addOption(Option.builder()
+    OPTIONS.addOption(Option.builder()
         .longOpt("watch")
         .desc("Watch the given directory/file for changes")
+        .hasArg()
+        .type(PatternOptionBuilder.EXISTING_FILE_VALUE)
         .build());
-    options.addOption(Option.builder()
+    OPTIONS.addOption(Option.builder()
         .longOpt("max-infractions")
         .desc("Set max number of reporter infractions")
         .hasArg()
         .type(PatternOptionBuilder.NUMBER_VALUE)
         .build());
-    options.addOption(Option.builder()
+    OPTIONS.addOption(Option.builder()
         .longOpt("debug")
         .desc("Enable showing of debug information")
         .build());
@@ -123,7 +124,7 @@ public class MagikLint {
 
     if (commandLine.hasOption("debug")) {
       initLogger();
-      logger.log(Level.FINE, "enabled debugging information");
+      logger.fine("enabled debugging information");
     }
 
     // read configuration
@@ -149,7 +150,7 @@ public class MagikLint {
    */
   private CommandLine parseCommandline(String[] args) throws ParseException {
     CommandLineParser parser = new DefaultParser();
-    CommandLine cmd = parser.parse(MagikLint.options, args);
+    CommandLine cmd = parser.parse(MagikLint.OPTIONS, args);
     return cmd;
   }
 
@@ -409,7 +410,7 @@ public class MagikLint {
     } else if (commandLine.hasOption("help")
                || commandLine.getArgs().length == 0) {
       HelpFormatter formatter = new HelpFormatter();
-      formatter.printHelp("magik-lint", MagikLint.options);
+      formatter.printHelp("magik-lint", MagikLint.OPTIONS);
     } else if (commandLine.hasOption("watch")) {
       String[] args = commandLine.getArgs();
       Path dir = MagikFileScanner.getSingleDirectoryFromArguments(args);
