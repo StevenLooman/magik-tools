@@ -1,7 +1,6 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.Token;
 
 import org.sonar.check.Rule;
@@ -12,7 +11,6 @@ import org.stevenlooman.sw.magik.parser.MagikParser;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 
@@ -66,11 +64,6 @@ public class FormattingCheck extends MagikCheck {
   ));
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList();
-  }
-
-  @Override
   public void visitFile(@Nullable AstNode node) {
     MagikVisitorContext context = getContext();
     lines = context.fileContentLines();
@@ -111,7 +104,7 @@ public class FormattingCheck extends MagikCheck {
   }
 
   @Override
-  public void visitToken(Token token) {
+  public void walkToken(Token token) {
     if (token.getType() == MagikParser.UtilityTokenType.SYNTAX_ERROR) {
       return;
     }

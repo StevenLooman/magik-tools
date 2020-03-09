@@ -93,7 +93,7 @@ public class MagikVisitorContext {
     if (scopeBuilder == null
         && rootTree != null) {
       scopeBuilder = new ScopeBuilderVisitor();
-      scopeBuilder.scanNode(rootTree);
+      scopeBuilder.walkAst(rootTree);
     }
     if (scopeBuilder == null) {
       return null;

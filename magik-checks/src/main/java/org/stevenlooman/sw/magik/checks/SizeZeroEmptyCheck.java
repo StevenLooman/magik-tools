@@ -6,7 +6,6 @@ import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -19,13 +18,7 @@ public class SizeZeroEmptyCheck extends MagikCheck {
   public static final String CHECK_KEY = "SizeZeroEmpty";
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(
-        MagikGrammar.EQUALITY_EXPRESSION);
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
+  protected void walkPreEqualityExpression(AstNode node) {
     AstNode leftHandSide = node.getFirstChild();
     AstNode rightHandSide = node.getLastChild();
     if (hasEqOperator(node)

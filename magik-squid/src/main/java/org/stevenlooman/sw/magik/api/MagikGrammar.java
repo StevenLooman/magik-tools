@@ -5,12 +5,14 @@ import org.sonar.sslr.grammar.LexerlessGrammarBuilder;
 import org.sonar.sslr.parser.LexerlessGrammar;
 
 public enum MagikGrammar implements GrammarRuleKey {
+  // spacing
   WHITESPACE,
   SPACING,
   SPACING_NO_LB,
   NEXT_NOT_LB,
   EOS,
 
+  // specials
   SYNTAX_ERROR,
 
   // root
@@ -92,7 +94,13 @@ public enum MagikGrammar implements GrammarRuleKey {
   ARGUMENTS,
   ARGUMENT,
 
+  FOR_IDENTIFIERS,
+  CONDITIONAL_EXPRESSION,
+  ITERABLE_EXPRESSION,
+
   // atoms
+  ALLRESULTS,
+  SCATTER_EXPRESSION,
   STRING,
   NUMBER,
   CHARACTER,
@@ -249,7 +257,7 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(MULTIPLICATIVE_EXPRESSION).is(EXPONENTIAL_EXPRESSION, b.zeroOrMore(SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.STAR, MagikPunctuator.DIV, MagikKeyword.DIV, MagikKeyword.MOD), EXPONENTIAL_EXPRESSION)).skipIfOneChild();
     b.rule(EXPONENTIAL_EXPRESSION).is(UNARY_EXPRESSION, b.zeroOrMore(SPACING_NO_LB, NEXT_NOT_LB, MagikPunctuator.EXP, UNARY_EXPRESSION)).skipIfOneChild();
     b.rule(UNARY_EXPRESSION).is(b.firstOf(
-        b.sequence(b.firstOf(MagikPunctuator.NOT, MagikKeyword.NOT, MagikPunctuator.PLUS, MagikPunctuator.MINUS, MagikKeyword.ALLRESULTS, MagikKeyword.SCATTER), UNARY_EXPRESSION),
+        b.sequence(b.firstOf(MagikPunctuator.NOT, MagikKeyword.NOT, MagikPunctuator.PLUS, MagikPunctuator.MINUS), UNARY_EXPRESSION),
         POSTFIX_EXPRESSION)).skipIfOneChild();
     b.rule(POSTFIX_EXPRESSION).is(
         ATOM,
@@ -263,6 +271,8 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(ATOM).is(
         b.firstOf(
             b.sequence(MagikPunctuator.PAREN_L, EXPRESSION, MagikPunctuator.PAREN_R),
+            ALLRESULTS,
+            SCATTER_EXPRESSION,
             NUMBER,
             STRING,
             SYMBOL,
@@ -293,6 +303,8 @@ public enum MagikGrammar implements GrammarRuleKey {
             MAYBE,
             THISTHREAD,
             SUPER));
+    b.rule(ALLRESULTS).is(MagikKeyword.ALLRESULTS, EXPRESSION);
+    b.rule(SCATTER_EXPRESSION).is(MagikKeyword.SCATTER, EXPRESSION);
     b.rule(SELF).is(MagikKeyword.SELF);
     b.rule(CLONE).is(MagikKeyword.CLONE);
     b.rule(UNSET).is(MagikKeyword.UNSET);
@@ -314,6 +326,9 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(METHOD_INVOCATION_ASSIGNMENT).is(
         SPACING_NO_LB, NEXT_NOT_LB, b.firstOf(MagikPunctuator.CHEVRON, MagikPunctuator.BOOT_CHEVRON), EXPRESSION);
     b.rule(PROCEDURE_INVOCATION).is(MagikPunctuator.PAREN_L, ARGUMENTS, MagikPunctuator.PAREN_R);
+
+    b.rule(CONDITIONAL_EXPRESSION).is(EXPRESSION);
+    b.rule(ITERABLE_EXPRESSION).is(EXPRESSION);
   }
 
   private static void statements(LexerlessGrammarBuilder b) {
@@ -418,26 +433,28 @@ public enum MagikGrammar implements GrammarRuleKey {
         BODY,
         MagikKeyword.ENDLOCK);
     b.rule(IF).is(
-        MagikKeyword.IF, EXPRESSION, MagikKeyword.THEN,
+        MagikKeyword.IF, CONDITIONAL_EXPRESSION, MagikKeyword.THEN,
         BODY,
         b.zeroOrMore(ELIF),
         b.optional(ELSE),
         MagikKeyword.ENDIF);
     b.rule(ELIF).is(
-        MagikKeyword.ELIF, EXPRESSION,
+        MagikKeyword.ELIF, CONDITIONAL_EXPRESSION,
         MagikKeyword.THEN,
         BODY);
     b.rule(ELSE).is(
         MagikKeyword.ELSE,
         BODY);
     b.rule(FOR).is(
-        MagikKeyword.FOR, IDENTIFIERS_WITH_GATHER,
+        MagikKeyword.FOR, FOR_IDENTIFIERS,
         OVER);
+    b.rule(FOR_IDENTIFIERS).is(
+        IDENTIFIERS_WITH_GATHER);
     b.rule(WHILE).is(
-        MagikKeyword.WHILE, EXPRESSION,
+        MagikKeyword.WHILE, CONDITIONAL_EXPRESSION,
         LOOP);
     b.rule(OVER).is(
-        MagikKeyword.OVER, EXPRESSION,
+        MagikKeyword.OVER, ITERABLE_EXPRESSION,
         LOOP);
     b.rule(LOOP).is(
         MagikKeyword.LOOP, b.optional(LABEL),

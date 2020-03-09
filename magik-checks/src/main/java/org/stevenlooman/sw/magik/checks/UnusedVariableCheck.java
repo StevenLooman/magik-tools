@@ -1,7 +1,6 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.analysis.scope.GlobalScope;
@@ -10,7 +9,6 @@ import org.stevenlooman.sw.magik.analysis.scope.ScopeEntry;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Rule(key = UnusedVariableCheck.CHECK_KEY)
@@ -26,11 +24,6 @@ public class UnusedVariableCheck extends MagikCheck {
 
   public UnusedVariableCheck(boolean checkParameters) {
     this.checkParameters = checkParameters;
-  }
-
-  @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(MagikGrammar.MAGIK);
   }
 
   private boolean isAssignedToDirectly(AstNode identifierNode) {
@@ -101,11 +94,7 @@ public class UnusedVariableCheck extends MagikCheck {
   }
 
   @Override
-  public void leaveNode(AstNode node) {
-    if (node.getType() != MagikGrammar.MAGIK) {
-      return;
-    }
-
+  protected void walkPostMagik(AstNode node) {
     // Gather all scope entries to be checked
     List<ScopeEntry> scopeEntries = new ArrayList<>();
     GlobalScope globalScope = getContext().getGlobalScope();

@@ -1,12 +1,9 @@
 package org.stevenlooman.sw.magik.metrics;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.stevenlooman.sw.magik.MagikVisitor;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
-import java.util.Arrays;
-import java.util.List;
 import javax.annotation.Nullable;
 
 public class ExemplarDefinitionVisitor extends MagikVisitor {
@@ -23,12 +20,7 @@ public class ExemplarDefinitionVisitor extends MagikVisitor {
   }
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(MagikGrammar.PROCEDURE_INVOCATION);
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
+  public void walkPreProcedureInvocation(AstNode node) {
     AstNode previousSibling = node.getPreviousSibling();
     if (previousSibling == null) {
       return;

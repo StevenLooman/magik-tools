@@ -7,14 +7,12 @@ import com.sonar.sslr.api.TokenType;
 import com.sonar.sslr.api.Trivia;
 import org.stevenlooman.sw.magik.MagikCommentAnalyser;
 import org.stevenlooman.sw.magik.MagikVisitor;
-import org.stevenlooman.sw.magik.api.MagikGrammar;
 import org.stevenlooman.sw.magik.api.MagikKeyword;
 import org.stevenlooman.sw.magik.api.MagikPunctuator;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -52,12 +50,6 @@ public class FileLinesVisitor extends MagikVisitor {
     this.ignoreHeaderComments = ignoreHeaderComments;
   }
 
-  @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(MagikGrammar.STATEMENT,
-                         MagikGrammar.EXPRESSION);
-  }
-
   public Set<Integer> getLinesOfCode() {
     return Collections.unmodifiableSet(linesOfCode);
   }
@@ -84,7 +76,7 @@ public class FileLinesVisitor extends MagikVisitor {
   }
 
   @Override
-  public void visitToken(Token token) {
+  public void walkToken(Token token) {
     // process lines of code
     String[] tokenLines = token.getValue().split("\n", -1);
     for (int line = token.getLine(); line < token.getLine() + tokenLines.length; line++) {
@@ -106,7 +98,16 @@ public class FileLinesVisitor extends MagikVisitor {
   }
 
   @Override
-  public void visitNode(AstNode node) {
+  protected void walkPreStatement(AstNode node) {
+    addIfExecutableLine(node);
+  }
+
+  @Override
+  protected void walkPreExpression(AstNode node) {
+    addIfExecutableLine(node);
+  }
+
+  private void addIfExecutableLine(AstNode node) {
     // process any executable nodes/tokens
     TokenType tokenType = node.getToken().getType();
     if (!NON_EXECUTABLE_TOKENS.contains(tokenType)) {
@@ -123,7 +124,8 @@ public class FileLinesVisitor extends MagikVisitor {
       if (commentLine.contains("NOSONAR")) {
         linesOfComments.remove(line);
         nosonarLines.add(line);
-      } else if (!MagikCommentAnalyser.isBlank(commentLine) && !nosonarLines.contains(line)) {
+      } else if (!MagikCommentAnalyser.isBlank(commentLine)
+                 && !nosonarLines.contains(line)) {
         linesOfComments.add(line);
       }
 

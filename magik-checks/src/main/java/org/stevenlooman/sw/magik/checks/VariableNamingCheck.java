@@ -1,7 +1,6 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
@@ -9,7 +8,6 @@ import org.stevenlooman.sw.magik.MagikVisitorContext;
 import org.stevenlooman.sw.magik.analysis.scope.GlobalScope;
 import org.stevenlooman.sw.magik.analysis.scope.Scope;
 import org.stevenlooman.sw.magik.analysis.scope.ScopeEntry;
-import org.stevenlooman.sw.magik.api.MagikGrammar;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,12 +27,6 @@ public class VariableNamingCheck extends MagikCheck {
       description = "Whitelist (comma separated) of variable names to allow/ignore.")
   public String whitelist = DEFAULT_WHITELIST;
 
-  @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(
-        MagikGrammar.MAGIK);
-  }
-
   private String stripPrefix(String identifier) {
     String lowered = identifier.toLowerCase();
     if (lowered.startsWith("p_")
@@ -51,7 +43,7 @@ public class VariableNamingCheck extends MagikCheck {
   }
 
   @Override
-  public void leaveNode(AstNode node) {
+  protected void walkPostMagik(AstNode node) {
     MagikVisitorContext context = getContext();
     GlobalScope globalScope = context.getGlobalScope();
     for (Scope scope : globalScope.getSelfAndDescendantScopes()) {

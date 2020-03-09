@@ -1,13 +1,10 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 
-import java.util.Collections;
-import java.util.List;
 import javax.annotation.Nullable;
 
 @Rule(key = TrailingWhitespaceCheck.CHECK_KEY)
@@ -15,11 +12,6 @@ public class TrailingWhitespaceCheck extends MagikCheck {
 
   private static final String MESSAGE = "Remove the trailing whitespace at line %s.";
   public static final String CHECK_KEY = "TrailingWhitespace";
-
-  @Override
-  public List<AstNodeType> subscribedTo() {
-    return Collections.emptyList();
-  }
 
   /**
    * Visit the file

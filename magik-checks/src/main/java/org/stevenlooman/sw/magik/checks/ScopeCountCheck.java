@@ -1,7 +1,6 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
@@ -10,7 +9,6 @@ import org.stevenlooman.sw.magik.analysis.scope.Scope;
 import org.stevenlooman.sw.magik.analysis.scope.ScopeEntry;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,18 +26,20 @@ public class ScopeCountCheck extends MagikCheck {
   public int maxScopeCount = DEFAULT_MAX_SCOPE_COUNT;
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(
-      MagikGrammar.METHOD_DEFINITION,
-      MagikGrammar.PROC_DEFINITION);
+  protected void walkPostMethodDefinition(AstNode node) {
+    checkScopeCount(node);
+  }
+
+  @Override
+  protected void walkPostProcDefinition(AstNode node) {
+    checkScopeCount(node);
   }
 
   /**
    * Test if there are too many entries in the method/procedure scope.
    * @param node Node to check.
    */
-  @Override
-  public void leaveNode(AstNode node) {
+  private void checkScopeCount(AstNode node) {
     GlobalScope globalScope = getContext().getGlobalScope();
     if (globalScope == null) {
       return;

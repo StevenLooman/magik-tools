@@ -2,7 +2,6 @@ package org.stevenlooman.sw.magik.api;
 
 import com.sonar.sslr.api.Grammar;
 import org.junit.Test;
-import org.stevenlooman.sw.magik.api.ProductDefinitionGrammar;
 
 import static org.sonar.sslr.tests.Assertions.assertThat;
 

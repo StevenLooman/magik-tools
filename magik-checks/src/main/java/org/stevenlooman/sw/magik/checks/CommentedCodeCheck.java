@@ -1,17 +1,14 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.RecognitionException;
 import com.sonar.sslr.api.Token;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
-import org.stevenlooman.sw.magik.api.MagikGrammar;
 import org.stevenlooman.sw.magik.parser.MagikParser;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +27,7 @@ public class CommentedCodeCheck extends MagikCheck {
   public int minLines = DEFAULT_MIN_LINES;
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(MagikGrammar.BODY);
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
+  protected void walkPreBody(AstNode node) {
     Map<Token, String> commentBlocks = extractCommentBlocks(node);
     for (Map.Entry<Token, String> entry : commentBlocks.entrySet()) {
       String comment = entry.getValue();
