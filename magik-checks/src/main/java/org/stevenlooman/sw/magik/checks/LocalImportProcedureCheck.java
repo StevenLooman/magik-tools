@@ -1,7 +1,6 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.analysis.scope.GlobalScope;
@@ -9,7 +8,6 @@ import org.stevenlooman.sw.magik.analysis.scope.Scope;
 import org.stevenlooman.sw.magik.analysis.scope.ScopeEntry;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Rule(key = LocalImportProcedureCheck.CHECK_KEY)
@@ -20,13 +18,7 @@ public class LocalImportProcedureCheck extends MagikCheck {
   public static final String CHECK_KEY = "LocalImportProcedure";
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(
-        MagikGrammar.METHOD_DEFINITION);
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
+  public void walkPreMethodDefinition(AstNode node) {
     List<AstNode> procDefNodes = node.getDescendants(MagikGrammar.PROC_DEFINITION);
     if (procDefNodes.isEmpty()) {
       return;

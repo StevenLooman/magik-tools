@@ -1,12 +1,10 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Rule(key = UseValueCompareCheck.CHECK_KEY)
@@ -15,12 +13,7 @@ public class UseValueCompareCheck extends MagikCheck {
   public static final String CHECK_KEY = "UseValueCompare";
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(MagikGrammar.EQUALITY_EXPRESSION);
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
+  protected void walkPreEqualityExpression(AstNode node) {
     if (isInstanceCompare(node)
         && (hasStringLiteral(node) || hasBigNumLiteral(node))) {
       String message = String.format(MESSAGE, "string");

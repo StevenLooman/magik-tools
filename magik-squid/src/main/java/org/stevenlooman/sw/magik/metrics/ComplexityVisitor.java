@@ -1,13 +1,8 @@
 package org.stevenlooman.sw.magik.metrics;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 
 import org.stevenlooman.sw.magik.MagikVisitor;
-import org.stevenlooman.sw.magik.api.MagikGrammar;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Complexity visitor for Magik.
@@ -16,18 +11,32 @@ public class ComplexityVisitor extends MagikVisitor {
   private int complexity = 1;
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(
-        MagikGrammar.PROC_DEFINITION,
-        MagikGrammar.LOOP,
-        MagikGrammar.IF,
-        MagikGrammar.ELIF,
-        MagikGrammar.AND_EXPRESSION,
-        MagikGrammar.OR_EXPRESSION);
+  protected void walkPreProcDefinition(AstNode node) {
+    complexity++;
   }
 
   @Override
-  public void visitNode(AstNode ast) {
+  protected void walkPreLoop(AstNode node) {
+    complexity++;
+  }
+
+  @Override
+  protected void walkPreIf(AstNode node) {
+    complexity++;
+  }
+
+  @Override
+  protected void walkPreElif(AstNode node) {
+    complexity++;
+  }
+
+  @Override
+  protected void walkPreAndExpression(AstNode node) {
+    complexity++;
+  }
+
+  @Override
+  protected void walkPreOrExpression(AstNode node) {
     complexity++;
   }
 

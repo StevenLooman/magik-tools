@@ -53,7 +53,7 @@ public class FileMetrics {
     // method definitions/complexity
     for (AstNode methodDef : rootTree.getDescendants(MagikGrammar.METHOD_DEFINITION)) {
       ComplexityVisitor methodComplexityVisitor = new ComplexityVisitor();
-      methodComplexityVisitor.visitNode(methodDef);
+      methodComplexityVisitor.walkAst(methodDef);
       int complexity = methodComplexityVisitor.getComplexity();
       methodComplexities.add(complexity);
     }
@@ -65,7 +65,7 @@ public class FileMetrics {
       }
 
       ComplexityVisitor procComplexityVisitor = new ComplexityVisitor();
-      procComplexityVisitor.visitNode(procDef);
+      procComplexityVisitor.walkAst(procDef);
       int complexity = procComplexityVisitor.getComplexity();
       procedureComplexities.add(complexity);
     }

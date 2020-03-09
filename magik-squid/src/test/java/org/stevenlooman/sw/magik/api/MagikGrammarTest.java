@@ -270,6 +270,7 @@ public class MagikGrammarTest {
         .matches("a << b + 1")
         .matches("a _or b")
         .matches("(a) _or b")
+        .matches("_allresults a()")
         ;
   }
 
@@ -504,6 +505,8 @@ public class MagikGrammarTest {
         .matches("_block write(1);write(2) _endblock")
         .matches("_return (a) _or b")
         .matches("_method a.b _return (a).not _endmethod")
+        .matches("_leave _with 1, _scatter _allresults a.m()")
+        .matches("(a, b) << (_scatter {1, 2})")
         .notMatches("_block _endblo")
         .notMatches("_blocki _endblock")
         .notMatches("_block write(1) write(2) _endblock")

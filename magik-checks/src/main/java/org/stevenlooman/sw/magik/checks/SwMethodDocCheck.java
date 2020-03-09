@@ -1,14 +1,12 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.Token;
 
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -28,12 +26,7 @@ public class SwMethodDocCheck extends MagikCheck {
   private static final String PARAMETER_REGEXP = "[ \t]?([A-Z0-9_?]+)[ \t\n\r]+";
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(MagikGrammar.METHOD_DEFINITION);
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
+  protected void walkPreMethodDefinition(AstNode node) {
     String methodDoc = extractDoc(node);
     if (methodDoc == null) {
       String message = String.format(MESSAGE, "all");

@@ -1,13 +1,11 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -20,12 +18,7 @@ public class DuplicateMethodInFileCheck extends MagikCheck {
   public static final String CHECK_KEY = "DuplicateMethodInFile";
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(MagikGrammar.MAGIK);
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
+  protected void walkPreMagik(AstNode node) {
     Map<String, List<AstNode>> methods = new HashMap<>();
 
     // convert all method definitions to strings

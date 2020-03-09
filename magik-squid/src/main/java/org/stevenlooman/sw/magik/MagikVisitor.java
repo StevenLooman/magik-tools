@@ -1,41 +1,18 @@
 package org.stevenlooman.sw.magik;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
-import com.sonar.sslr.api.Token;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.stevenlooman.sw.magik.analysis.AstWalker;
+
 import javax.annotation.Nullable;
 
-public abstract class MagikVisitor {
+public abstract class MagikVisitor extends AstWalker {
   private MagikVisitorContext context;
-  private Set<AstNodeType> subscribedKinds = null;
-
-  public abstract List<AstNodeType> subscribedTo();
-
-  private Set<AstNodeType> subscribedKinds() {
-    if (subscribedKinds == null) {
-      subscribedKinds = new HashSet<>();
-      subscribedKinds.addAll(subscribedTo());
-    }
-    return subscribedKinds;
-  }
 
   public void visitFile(@Nullable AstNode node) {
   }
 
   public void leaveFile(@Nullable AstNode node) {
-  }
-
-  public void visitNode(AstNode node) {
-  }
-
-  public void leaveNode(AstNode node) {
-  }
-
-  public void visitToken(Token token) {
   }
 
   public MagikVisitorContext getContext() {
@@ -48,34 +25,14 @@ public abstract class MagikVisitor {
    */
   public void scanFile(MagikVisitorContext context) {
     this.context = context;
+
     AstNode tree = context.rootTree();
     visitFile(tree);
     if (tree != null) {
-      scanNode(tree);
+      // scanNode(tree);
+      walkAst(tree);
     }
     leaveFile(tree);
   }
 
-  /**
-   * Scan the node/tree.
-   * @param node Node to scan.
-   */
-  public void scanNode(AstNode node) {
-    boolean isSubscribedType = subscribedKinds().contains(node.getType());
-
-    if (isSubscribedType) {
-      visitNode(node);
-    }
-
-    List<AstNode> children = node.getChildren();
-    if (children.isEmpty()) {
-      node.getTokens().forEach(this::visitToken);
-    } else {
-      children.forEach(this::scanNode);
-    }
-
-    if (isSubscribedType) {
-      leaveNode(node);
-    }
-  }
 }

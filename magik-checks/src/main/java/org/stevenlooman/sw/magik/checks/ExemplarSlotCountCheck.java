@@ -1,13 +1,11 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,12 +22,7 @@ public class ExemplarSlotCountCheck extends MagikCheck {
   public int maxSlotCount = DEFAULT_MAX_SLOT_COUNT;
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(MagikGrammar.PROCEDURE_INVOCATION);
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
+  protected void walkPreProcedureInvocation(AstNode node) {
     if (!isDefSlottedExemplar(node)) {
       return;
     }

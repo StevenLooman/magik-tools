@@ -1,16 +1,12 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.analysis.scope.GlobalScope;
 import org.stevenlooman.sw.magik.analysis.scope.Scope;
 import org.stevenlooman.sw.magik.analysis.scope.ScopeEntry;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Rule(key = UndefinedVariableCheck.CHECK_KEY)
 public class UndefinedVariableCheck extends MagikCheck {
@@ -20,18 +16,20 @@ public class UndefinedVariableCheck extends MagikCheck {
       "Variable '%s' is expected to be declared, but used as a global.";
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(
-      MagikGrammar.METHOD_DEFINITION,
-      MagikGrammar.PROC_DEFINITION);
+  protected void walkPostMethodDefinition(AstNode node) {
+    checkForPrefixedGlobals(node);
+  }
+
+  @Override
+  protected void walkPostProcDefinition(AstNode node) {
+    checkForPrefixedGlobals(node);
   }
 
   /**
    * Test if any global variable in the method/procedure scope has a prefix.
    * @param node Node to check.
    */
-  @Override
-  public void leaveNode(AstNode node) {
+  private void checkForPrefixedGlobals(AstNode node) {
     GlobalScope globalScope = getContext().getGlobalScope();
     if (globalScope == null) {
       return;

@@ -1,7 +1,6 @@
 package org.stevenlooman.sw.sonar.visitors;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
 
@@ -11,7 +10,6 @@ import org.sonar.api.batch.sensor.highlighting.NewHighlighting;
 import org.sonar.api.batch.sensor.highlighting.TypeOfText;
 
 import org.stevenlooman.sw.magik.MagikVisitor;
-import org.stevenlooman.sw.magik.api.MagikGrammar;
 import org.stevenlooman.sw.magik.api.MagikKeyword;
 import org.stevenlooman.sw.sonar.TokenLocation;
 
@@ -30,28 +28,24 @@ public class MagikHighlighterVisitor extends MagikVisitor {
   }
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(MagikGrammar.STRING, MagikGrammar.SYMBOL);
-  }
-
-  @Override
   public void leaveFile(@Nullable AstNode astNode) {
     newHighlighting.save();
   }
 
   @Override
-  public void visitNode(AstNode node) {
+  protected void walkPreString(AstNode node) {
     Token token = node.getToken();
-    if (node.getType() == MagikGrammar.STRING) {
-      highlight(token, TypeOfText.STRING);
-    }
-    if (node.getType() == MagikGrammar.SYMBOL) {
-      highlight(token, TypeOfText.CONSTANT);
-    }
+    highlight(token, TypeOfText.STRING);
   }
 
   @Override
-  public void visitToken(Token token) {
+  protected void walkPreSymbol(AstNode node) {
+    Token token = node.getToken();
+    highlight(token, TypeOfText.CONSTANT);
+  }
+
+  @Override
+  public void walkToken(Token token) {
     String tokenValue = token.getValue();
     String lowerTokenValue = tokenValue.toLowerCase();
     if (MagikHighlighterVisitor.KEYWORDS.contains(lowerTokenValue)) {

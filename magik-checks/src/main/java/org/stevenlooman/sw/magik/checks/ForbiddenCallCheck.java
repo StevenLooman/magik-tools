@@ -1,14 +1,12 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,22 +29,7 @@ public class ForbiddenCallCheck extends MagikCheck {
   }
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(
-        MagikGrammar.METHOD_INVOCATION,
-        MagikGrammar.PROCEDURE_INVOCATION);
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
-    if (node.getType() == MagikGrammar.METHOD_INVOCATION) {
-      visitNodeMethodInvocation(node);
-    } else if (node.getType() == MagikGrammar.PROCEDURE_INVOCATION) {
-      visitNodeProcedureInvocation(node);
-    }
-  }
-
-  private void visitNodeMethodInvocation(AstNode node) {
+  protected void walkPreMethodInvocation(AstNode node) {
     AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
     if (identifierNode == null) {
       return;
@@ -60,7 +43,8 @@ public class ForbiddenCallCheck extends MagikCheck {
     addIssue(MESSAGE, node);
   }
 
-  private void visitNodeProcedureInvocation(AstNode node) {
+  @Override
+  protected void walkPreProcedureInvocation(AstNode node) {
     AstNode parentNode = node.getParent();
     if (parentNode.getType() != MagikGrammar.POSTFIX_EXPRESSION) {
       return;

@@ -34,7 +34,7 @@ public class MethodComplexityCheckTest extends MagikCheckTestBase {
         "\t_endif\n" +
         "_endmethod\n";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
   @Test
   public void testNotTooComplex() {

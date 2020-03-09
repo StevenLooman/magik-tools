@@ -1,15 +1,10 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 import org.stevenlooman.sw.magik.MagikCheck;
-import org.stevenlooman.sw.magik.api.MagikGrammar;
 import org.stevenlooman.sw.magik.metrics.ComplexityVisitor;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Rule(
     key = MethodComplexityCheck.CHECK_KEY,
@@ -29,16 +24,19 @@ public class MethodComplexityCheck extends MagikCheck {
   public int maximumComplexity = DEFAULT_MAXIMUM_COMPLEXITY;
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(
-        MagikGrammar.METHOD_DEFINITION,
-        MagikGrammar.PROC_DEFINITION);
+  protected void walkPreMethodDefinition(AstNode node) {
+    checkDefinition(node);
   }
 
   @Override
-  public void visitNode(AstNode node) {
+  protected void walkPreProcDefinition(AstNode node) {
+    checkDefinition(node);
+  }
+
+  private void checkDefinition(AstNode node) {
     ComplexityVisitor visitor = new ComplexityVisitor();
-    visitor.scanNode(node);
+    // visitor.scanNode(node);
+    visitor.walkAst(node);
 
     int complexity = visitor.getComplexity();
     if (complexity > maximumComplexity) {

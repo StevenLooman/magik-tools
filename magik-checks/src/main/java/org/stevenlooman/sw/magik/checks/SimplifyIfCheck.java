@@ -1,13 +1,11 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.analysis.AstQuery;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Rule(key = SimplifyIfCheck.CHECK_KEY)
@@ -17,14 +15,7 @@ public class SimplifyIfCheck extends MagikCheck {
       "You can simplify this if by using _elif or combining guards.";
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(
-        MagikGrammar.IF
-    );
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
+  protected void walkPreIf(AstNode node) {
     testIfIf(node);
     testIfElseIf(node);
   }

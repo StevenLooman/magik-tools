@@ -1,7 +1,6 @@
 package org.stevenlooman.sw.magik.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.AstNodeType;
 import org.sonar.check.Rule;
 import org.stevenlooman.sw.magik.MagikCheck;
 import org.stevenlooman.sw.magik.api.MagikGrammar;
@@ -20,12 +19,7 @@ public class MethodDocCheck extends MagikCheck {
   public static final String CHECK_KEY = "MethodDoc";
 
   @Override
-  public List<AstNodeType> subscribedTo() {
-    return Arrays.asList(MagikGrammar.METHOD_DEFINITION);
-  }
-
-  @Override
-  public void visitNode(AstNode node) {
+  protected void walkPreMethodDefinition(AstNode node) {
     MethodDocParser docParser = new MethodDocParser(node);
 
     // ensure there is method doc at all
