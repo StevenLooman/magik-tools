@@ -1,0 +1,15 @@
+{
+  "title": "No statement after body exit",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "10min"
+  },
+  "tags": [
+    "error"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "NoStatementAfterBodyExit",
+  "sqKey": "no-statement-after-body-exit"
+}

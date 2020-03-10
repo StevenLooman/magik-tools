@@ -6,6 +6,7 @@ Changes
 - MessagePatchGrammar no longer needs a $ at the end of the message patch
 - Strip org.sonarsource.sonarqube:sonar-plugin-api from magik-lint, shaving size
 - Update MagikGrammar for easier processing + introduce AstWalker
+- Add check NoStatementAfterBodyExit
 
 
 0.4.0 (2020-01-29)
