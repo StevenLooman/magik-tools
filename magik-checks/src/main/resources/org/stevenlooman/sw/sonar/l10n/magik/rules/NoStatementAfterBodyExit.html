@@ -1,0 +1,8 @@
+<p>Statements after a body-exit statement (_return, >>, _leave, _continue) are never executed.</p>
+<h2>Noncompliant Code Example</h2>
+<pre>
+_method a.b
+  _return 10
+  write(10)  # never executed
+_endmethod
+</pre>
