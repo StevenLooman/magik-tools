@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class ScopeCountCheck extends MagikCheck {
 
   public static final String CHECK_KEY = "ScopeCount";
-  private static final String MESSAGE = "Too many variables in scope.";
+  private static final String MESSAGE = "Too many variables in scope (%s/%s).";
   private static final int DEFAULT_MAX_SCOPE_COUNT = 25;
 
   @RuleProperty(
@@ -52,8 +52,10 @@ public class ScopeCountCheck extends MagikCheck {
         .flatMap(scopeEntries -> scopeEntries.stream())
         .filter(scopeEntry -> scopeEntry.getType() != ScopeEntry.Type.IMPORT)
         .collect(Collectors.toList());
-    if (procedureScopeEntries.size() > maxScopeCount) {
-      addIssue(MESSAGE, node);
+    int scopeCount = procedureScopeEntries.size();
+    if (scopeCount > maxScopeCount) {
+      String message = String.format(MESSAGE, scopeCount, maxScopeCount);
+      addIssue(message, node);
     }
   }
 
