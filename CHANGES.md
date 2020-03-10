@@ -7,6 +7,7 @@ Changes
 - Strip org.sonarsource.sonarqube:sonar-plugin-api from magik-lint, shaving size
 - Update MagikGrammar for easier processing + introduce AstWalker
 - Add check NoStatementAfterBodyExit
+- Show scope count/max scope count in ScopeCountCheck
 
 
 0.4.0 (2020-01-29)

@@ -11,7 +11,7 @@ import java.util.List;
 
 @Rule(key = ExemplarSlotCountCheck.CHECK_KEY)
 public class ExemplarSlotCountCheck extends MagikCheck {
-  private static final String MESSAGE = "Exemplar has %s slots, more than allowed %s slots.";
+  private static final String MESSAGE = "Exemplar has too many slots (%s/%s).";
   public static final String CHECK_KEY = "ExemplarSlotCount";
   private static final int DEFAULT_MAX_SLOT_COUNT = 10;
 
