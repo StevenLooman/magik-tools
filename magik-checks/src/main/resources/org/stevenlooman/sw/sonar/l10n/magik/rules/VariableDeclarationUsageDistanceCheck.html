@@ -1,0 +1,11 @@
+<p>Distance between a variable declaration and its first usage.</p>
+<h2>Noncompliant Code Example, max distance is 5</h2>
+<pre>
+_local a << 10
+do_something_unrelated()  # distance to a is 1
+do_something_unrelated()  # distance to a is 2
+do_something_unrelated()  # distance to a is 3
+do_something_unrelated()  # distance to a is 4
+do_something_unrelated()  # distance to a is 5
+show(a)                   # distance to a is 6
+</pre>
