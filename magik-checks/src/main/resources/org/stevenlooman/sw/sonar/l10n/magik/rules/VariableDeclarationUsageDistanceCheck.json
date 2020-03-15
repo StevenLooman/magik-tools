@@ -1,5 +1,5 @@
 {
-  "title": "Distance of declared variable to first usage is too long",
+  "title": "d",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
@@ -7,9 +7,9 @@
     "constantCost": "5min"
   },
   "tags": [
-    "complexity"
+    "convention"
   ],
   "defaultSeverity": "Minor",
-  "ruleSpecification": "UnusedVariable",
-  "sqKey": "unused-variable"
+  "ruleSpecification": "VariableDeclarationUsageDistance",
+  "sqKey": "variable-declaration-usage-distance"
 }

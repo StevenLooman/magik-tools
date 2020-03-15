@@ -8,6 +8,7 @@ Changes
 - Update MagikGrammar for easier processing + introduce AstWalker
 - Add check NoStatementAfterBodyExit
 - Show scope count/max scope count in ScopeCountCheck
+- Add check VariableDeclarationUsageDistance
 
 
 0.4.0 (2020-01-29)

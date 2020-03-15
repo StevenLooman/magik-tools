@@ -21,6 +21,7 @@ import org.stevenlooman.sw.magik.checks.TrailingWhitespaceCheck;
 import org.stevenlooman.sw.magik.checks.UndefinedVariableCheck;
 import org.stevenlooman.sw.magik.checks.UnusedVariableCheck;
 import org.stevenlooman.sw.magik.checks.UseValueCompareCheck;
+import org.stevenlooman.sw.magik.checks.VariableDeclarationUsageDistanceCheck;
 import org.stevenlooman.sw.magik.checks.VariableNamingCheck;
 import org.stevenlooman.sw.magik.checks.WarnedCallCheck;
 import org.stevenlooman.sw.magik.checks.XPathCheck;
@@ -56,14 +57,15 @@ public final class CheckList {
       MethodComplexityCheck.class,
       MethodDocCheck.class,
       ScopeCountCheck.class,
-      SyntaxErrorCheck.class,
       SimplifyIfCheck.class,
       SizeZeroEmptyCheck.class,
       SwMethodDocCheck.class,
+      SyntaxErrorCheck.class,
       TrailingWhitespaceCheck.class,
       UndefinedVariableCheck.class,
       UnusedVariableCheck.class,
       UseValueCompareCheck.class,
+      VariableDeclarationUsageDistanceCheck.class,
       VariableNamingCheck.class,
       WarnedCallCheck.class,
       XPathCheck.class);

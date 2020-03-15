@@ -23,7 +23,7 @@ public class ForbiddenCallCheckTest extends MagikCheckTestBase {
     MagikCheck check = new ForbiddenCallCheck();
     String code = "show(1)";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
@@ -32,7 +32,7 @@ public class ForbiddenCallCheckTest extends MagikCheckTestBase {
     check.forbiddenCalls = ".p";
     String code = "1.p";
     List<MagikIssue> issues = runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 
 }
