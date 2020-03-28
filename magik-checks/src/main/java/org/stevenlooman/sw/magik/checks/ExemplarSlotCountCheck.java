@@ -27,8 +27,8 @@ public class ExemplarSlotCountCheck extends MagikCheck {
       return;
     }
 
-    List<AstNode> slotDefinitions = getSlotDefinitions(node);
-    int slotCount = slotDefinitions.size();
+    List<AstNode> slotDefinitionNodes = getSlotDefinitionNodes(node);
+    int slotCount = slotDefinitionNodes.size();
     if (slotCount > maxSlotCount) {
       String message = String.format(MESSAGE, slotCount, maxSlotCount);
       addIssue(message, node);
@@ -61,7 +61,7 @@ public class ExemplarSlotCountCheck extends MagikCheck {
     return true;
   }
 
-  private List<AstNode> getSlotDefinitions(AstNode node) {
+  private List<AstNode> getSlotDefinitionNodes(AstNode node) {
     AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
     List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT);
     if (argumentNodes.size() < 2) {
