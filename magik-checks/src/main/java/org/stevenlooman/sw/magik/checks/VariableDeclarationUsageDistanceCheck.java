@@ -40,13 +40,14 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
 
   @Override
   protected void walkPostMethodDefinition(AstNode node) {
+    this.statementNodes.clear();
     this.seenNodes.clear();
   }
 
   @Override
   protected void walkPreStatement(AstNode node) {
     // Record all statements in a list, flattening.
-    statementNodes.add(node);
+    this.statementNodes.add(node);
   }
 
   @Override
@@ -103,6 +104,7 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
   @Override
   public void leaveFile(AstNode node) {
     this.seenNodes.clear();
+    this.statementNodes.clear();
   }
 
   private int distanceBetweenStatements(AstNode declarationNode, AstNode usageNode) {

@@ -31,13 +31,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class MagikLint {
 
-  static Logger logger = Logger.getLogger(MagikLint.class.getName());
+  static Logger LOGGER = Logger.getLogger(MagikLint.class.getName());
 
   CommandLine commandLine;
   Configuration config;
@@ -105,8 +106,9 @@ public class MagikLint {
   /**
    * Initialize logger from logging.properties.
    */
-  private void initLogger() {
-    InputStream stream = MagikLint.class.getClassLoader().getResourceAsStream("logging.properties");
+  private void initDebugLogger() {
+    InputStream stream =
+        MagikLint.class.getClassLoader().getResourceAsStream("debug-logging.properties");
     try {
       LogManager.getLogManager().readConfiguration(stream);
     } catch (IOException ex) {
@@ -123,8 +125,8 @@ public class MagikLint {
     commandLine = parseCommandline(args);
 
     if (commandLine.hasOption("debug")) {
-      initLogger();
-      logger.fine("enabled debugging information");
+      initDebugLogger();
+      LOGGER.fine("enabled debugging information");
     }
 
     // read configuration
@@ -185,7 +187,7 @@ public class MagikLint {
     try {
       encoded = Files.readAllBytes(path);
     } catch (IOException ex) {
-      ex.printStackTrace();
+      LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
     }
 
     String fileContents = new String(encoded, charset);
@@ -226,8 +228,8 @@ public class MagikLint {
     String checkSeverity = null;
     try {
       checkSeverity = checkInfo.getSeverity();
-    } catch (FileNotFoundException ex) {
-      ex.printStackTrace();
+    } catch (FileNotFoundException exception) {
+      LOGGER.log(Level.SEVERE, exception.getMessage(), exception);
     }
     return SEVERITY_EXIT_CODE_MAPPING.getOrDefault(checkSeverity, 0);
   }
@@ -285,7 +287,7 @@ public class MagikLint {
    */
   private List<CheckInfraction> runChecksOnFile(
       Path path, Long untabify, Iterable<CheckInfo> checkInfos) {
-    logger.finest("Thread: " + Thread.currentThread().getName() + ", checking file: " + path);
+    LOGGER.finest("Thread: " + Thread.currentThread().getName() + ", checking file: " + path);
 
     MagikVisitorContext context = buildContext(path, untabify);
     InstructionsHandler instructionsHandler = new InstructionsHandler(context);
@@ -340,12 +342,12 @@ public class MagikLint {
     };
 
     // Initial file scan.
-    logger.finest("Doing initial scan of: " + dir);
+    LOGGER.finest("Doing initial scan of: " + dir);
     Collection<Path> paths = MagikFileScanner.scanMagikFiles(dir);
     listener.onChanged(paths);
 
     // Continuous scanning for changes.
-    logger.finest("Starting to watch: " + dir);
+    LOGGER.finest("Starting to watch: " + dir);
     MagikFileWatcher watcher = new MagikFileWatcher(dir, listener);
     watcher.run();
   }
