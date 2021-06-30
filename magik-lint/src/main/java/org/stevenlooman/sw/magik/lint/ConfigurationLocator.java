@@ -65,7 +65,7 @@ public class ConfigurationLocator {
     }
 
     // 5. In your home directory
-    String homeEnvVar = System.getenv("HOME");
+    String homeEnvVar = System.getProperty("user.home");
     if (homeEnvVar != null) {
       path = Paths.get(homeEnvVar).resolve(HIDDEN_MAGIK_LINT_RC_FILENAME);
       logger.finest("Trying to get config at (5): " + path.toAbsolutePath());
