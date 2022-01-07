@@ -1,3 +1,0 @@
-magik_rep
-procedure
-magik_parse_node

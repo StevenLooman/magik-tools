@@ -30,7 +30,7 @@ Magik-lint takes the following command line options:
 Integration
 -----------
 
-The [emacs magik-mode](https://github.com/roadrunner1776/magik) readily supports integration of sonar-magik through [flycheck](https://www.flycheck.org/).
+The [emacs magik-mode](https://github.com/roadrunner1776/magik) readily supports integration of magik-tools through [flycheck](https://www.flycheck.org/).
 
 VSCode integration is achieved by adding a task with a `problemMatcher`, for example:
 ```
@@ -38,7 +38,6 @@ VSCode integration is achieved by adding a task with a `problemMatcher`, for exa
             "label": "magik-lint",
             "type": "shell",
             "command": "java -jar /path/to/magik-lint-LATEST.jar --msg-template \"\\${path}:\\${line}:\\${column}:\\${severity}:\\${symbol}:\\${msg}\" --watch .",
-            "isBackground": true,
             "problemMatcher": {
                 "owner": "magik",
                 "fileLocation": "relative",
@@ -50,11 +49,6 @@ VSCode integration is achieved by adding a task with a `problemMatcher`, for exa
                     "severity": 4,
                     "code": 5,
                     "message": 6
-                },
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "File change detected\\. Scanning files\\.\\.\\.",
-                    "endsPattern": "Scanning complete\\. Watching for file changes\\."
                 }
             }
         }

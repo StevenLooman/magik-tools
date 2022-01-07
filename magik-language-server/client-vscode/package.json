@@ -1,0 +1,241 @@
+{
+	"name": "magik-language-server",
+	"description": "Magik Language Server",
+	"author": "Steven Looman",
+	"license": "GPL-3.0-only",
+	"version": "0.5.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/StevenLooman/magik-tools"
+	},
+	"publisher": "StevenLooman",
+	"categories": [
+		"Programming Languages",
+		"Debuggers",
+		"Linters",
+		"Formatters",
+		"Snippets"
+	],
+	"keywords": [
+		"magik"
+	],
+	"engines": {
+		"vscode": "^1.59.0"
+	},
+	"activationEvents": [
+		"onLanguage:magik",
+		"onCommand:magik.startSession",
+		"onDebug",
+		"onDebugInitialConfigurations",
+		"onDebugResolve:magik",
+		"workspaceContains:**/product.def"
+	],
+	"main": "./client/out/extension",
+	"contributes": {
+		"languages": [
+			{
+				"id": "magik",
+				"aliases": [
+					"Magik"
+				],
+				"extensions": [
+					".magik"
+				],
+				"configuration": "./magik-language-configuration.json"
+			},
+			{
+				"id": "product.def",
+				"aliases": [
+					"Smallworld Product definition"
+				],
+				"filenames": [
+					"product.def"
+				],
+				"configuration": "./definition-language-configuration.json"
+			},
+			{
+				"id": "module.def",
+				"aliases": [
+					"Smallworld Module definition"
+				],
+				"filenames": [
+					"module.def"
+				],
+				"configuration": "./definition-language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "magik",
+				"scopeName": "source.magik",
+				"path": "./syntaxes/magik.tmGrammar.json"
+			}
+		],
+		"snippets": [
+			{
+				"language": "magik",
+				"path": "./snippets/snippets.json"
+			}
+		],
+		"breakpoints": [
+			{
+				"language": "magik"
+			}
+		],
+		"debuggers": [
+			{
+				"type": "magik",
+				"label": "Magik",
+				"languages": [
+					"magik"
+				],
+				"variables": {},
+				"configurationSnippets": [],
+				"configurationAttributes": {
+					"attach": {
+						"properties": {
+							"connect": {
+								"label": "Attach by connecting to the MDA interface",
+								"type": "object",
+								"description": "The connection properties used to connect to the MDA interface over a TCP socket.",
+								"properties": {
+									"port": {
+										"label": "Port",
+										"type": "number",
+										"description": "Port to connect to.",
+										"default": 32000
+									},
+									"host": {
+										"label": "Host",
+										"type": "string",
+										"description": "Hostname or IP address to connect to.",
+										"default": "127.0.0.1"
+									}
+								}
+							}
+						},
+						"required": [
+							"connect"
+						]
+					}
+				},
+				"initialConfigurations": [
+					{
+						"type": "magik",
+						"name": "Attach magik debugger",
+						"request": "attach"
+					}
+				]
+			}
+		],
+		"commands": [
+			{
+				"command": "magik.transmitFile",
+				"title": "Transmit a file to the active Smallworld Sessions",
+				"category": "Magik"
+			},
+			{
+				"command": "magik.transmitCurrentRegion",
+				"title": "Transmit current region to the active Smallworld Session",
+				"category": "Magik"
+			},
+			{
+				"command": "magik.custom.writeTypesCsv",
+				"title": "Write types to CSV file",
+				"category": "Magik"
+			},
+			{
+				"command": "magik.custom.reIndex",
+				"title": "Reindex files",
+				"category": "Magik"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "magik.transmitFile",
+				"key": "f4 b",
+				"when": "editorTextFocus && editorLangId == magik"
+			},
+			{
+				"command": "magik.transmitCurrentRegion",
+				"key": "f4 enter",
+				"when": "editorTextFocus && editorLangId == magik"
+			}
+		],
+		"taskDefinitions": [
+			{
+				"type": "run_alias",
+				"required": [
+					"entry"
+				],
+				"properties": {
+					"entry": {
+						"type": "string",
+						"description": "Name of entry in aliases file"
+					},
+					"args": {
+						"type": "array",
+						"description": "Additional runalias arguments"
+					}
+				}
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "Smallworld/Magik",
+			"properties": {
+				"magik.javaHome": {
+					"description": "Path to Java Runtime, Java 11 minimum.",
+					"type": "string"
+				},
+				"magik.smallworldGis": {
+					"description": "Path to Smallworld Core.",
+					"type": "string"
+				},
+				"magik.aliases": {
+					"description": "Path to gis_aliases file.",
+					"type": "string"
+				},
+				"magik.environment": {
+					"description": "Path to environment file.",
+					"type": "string"
+				},
+				"magik.typing.typeDatabasePaths": {
+					"description": "Path to CSV with type info for core product.",
+					"type": "array"
+				},
+				"magik.typing.enableChecks": {
+					"description": "Enable typing checks.",
+					"type": "boolean",
+					"default": false
+				},
+				"magik.trace.server": {
+					"type": "string",
+					"enum": [
+						"off",
+						"messages",
+						"verbose"
+					],
+					"default": "off",
+					"description": "Traces the communication between VS Code and the Magik language server.",
+					"scope": "window"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -b",
+		"watch": "tsc -b -w",
+		"postinstall": "cd client && npm install && cd ..",
+		"package": "vsce package"
+	},
+	"devDependencies": {
+		"@types/mocha": "^8.0.3",
+		"@types/node": "^12.19.12",
+		"@typescript-eslint/parser": "^2.3.0",
+		"eslint": "^6.4.0",
+		"typescript": "^4.0.2",
+		"vsce": "^1.103.1"
+	}
+}

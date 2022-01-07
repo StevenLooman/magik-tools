@@ -1,0 +1,24 @@
+{
+	"comments": {
+		"lineComment": "#"
+	},
+	"surroundingPairs": [
+		["(", ")"],
+		["[", "]"],
+		["{", "}"]
+	],
+	"autoClosingPairs": [
+		["(", ")"],
+		["[", "]"],
+		["{", "}"],
+		["_method", "_endmethod"],
+		["_proc", "_endproc"],
+		["_block", "_endblock"],
+		["_protect", "_endprotect"],
+		["_try", "_endtry"],
+		["_catch", "_endcatch"],
+		["_lock", "_endlock"],
+		["_then", "_endif"],
+		["_loop", "_endloop"]
+	]
+}
