@@ -1,0 +1,30 @@
+_package user
+
+def_slotted_exemplar(
+    :test_exemplar,
+    {
+        {:slot_a, _unset}
+    },
+    {@sw:sw_regexp})
+$
+
+_method test_exemplar.new()
+    _return _clone.init()
+_endmethod
+$
+
+_private _method test_exemplar.init()
+    .slot_a << 10
+    _return _self
+_endmethod
+$
+
+_global !test_global! << 10.0
+$
+
+define_binary_operator_case(:|=|, integer, integer,
+    _proc(lhs, rhs)
+        ## @return {sw:false|sw:maybe}
+        _return lhs _cf rhs
+    _endproc)
+$

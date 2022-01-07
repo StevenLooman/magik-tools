@@ -1,0 +1,124 @@
+package nl.ramsolutions.sw.magik.lint.output;
+
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.annotation.Nullable;
+import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
+import nl.ramsolutions.sw.magik.checks.MagikIssue;
+
+/**
+ * Message format reporter.
+ */
+public class MessageFormatReporter implements Reporter {
+
+    /**
+     * Default format.
+     */
+    public static final String DEFAULT_FORMAT = "${path}:${line}:${column}:${msg} (${symbol})";
+
+    private final PrintStream outStream;
+    private final String format;
+    private final Long columnOffset;
+    private final Set<String> reportedSeverities;
+
+    /**
+     * Constructor.
+     *
+     * @param outStream Output stream to write to.
+     * @param format Format to use.
+     * @param columnOffset Column offset for reported columns.
+     */
+    public MessageFormatReporter(final PrintStream outStream, final String format, final @Nullable Long columnOffset) {
+        this.outStream = outStream;
+        this.format = format;
+        if (columnOffset != null) {
+            this.columnOffset = columnOffset;
+        } else {
+            this.columnOffset = 0L;
+        }
+        this.reportedSeverities = new HashSet<>();
+    }
+
+    private Map<String, String> createMapForMagikIssue(final Path path, final MagikIssue issue) {
+        final MagikCheckHolder holder = issue.check().getHolder();
+        if (holder == null) {
+            throw new IllegalStateException();
+        }
+
+        final Map<String, String> map = new HashMap<>();
+        map.put("path", path.toString());
+        map.put("abspath", path.toAbsolutePath().toString());
+        map.put("msg", issue.message());
+        try {
+            map.put("msg_id", holder.getSqKey());
+            map.put("symbol", holder.getSqKey());
+            map.put("severity", holder.getSeverity());
+            map.put("category", holder.getSeverity());
+            map.put("tag", holder.getTag());
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        }
+
+        final Integer startLine = issue.startLine();
+        if (startLine != null) {
+            map.put("line", startLine.toString());
+            map.put("start_line", startLine.toString());
+        }
+        Integer startColumn = issue.startColumn();
+        if (startColumn != null) {
+            startColumn += this.columnOffset.intValue();
+            map.put("column", startColumn.toString());
+            map.put("start_column", startColumn.toString());
+        }
+
+        final Integer endLine = issue.endLine();
+        if (endLine != null) {
+            map.put("end_line", endLine.toString());
+        }
+        Integer endColumn = issue.endColumn();
+        if (endColumn != null) {
+            endColumn += this.columnOffset.intValue();
+            map.put("end_column", endColumn.toString());
+        }
+
+        return map;
+    }
+
+    @Override
+    public void reportIssue(final MagikIssue magikIssue) {
+        // Create map for find/replace.
+        final Path path = magikIssue.location().getPath();
+        final Map<String, String> map = createMapForMagikIssue(path, magikIssue);
+
+        // Save severity.
+        final String severity = map.get("severity");
+        this.reportedSeverities.add(severity);
+
+        // Do find/replace.
+        String line = this.format;
+        for (final Map.Entry<String, String> entry : map.entrySet()) {
+            final String key = "${" + entry.getKey() + "}";
+            if (line.contains(key)) {
+                final String matchKey = Pattern.quote(key);
+                final String value = entry.getValue();
+                final String matchValue = Matcher.quoteReplacement(value);
+                line = line.replaceAll(matchKey, matchValue);
+            }
+        }
+        this.outStream.println(line);
+    }
+
+    @Override
+    public Set<String> reportedSeverities() {
+        return Collections.unmodifiableSet(this.reportedSeverities);
+    }
+
+}

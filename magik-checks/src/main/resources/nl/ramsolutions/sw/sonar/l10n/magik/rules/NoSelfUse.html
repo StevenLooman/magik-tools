@@ -1,0 +1,15 @@
+<p>No self usage.</p>
+<p>When _self is not used, should this actually be a method? This <b>might</b> incidate a design issue, although this not always have to be the case.</p>
+<h2>Noncompliant Code Example</h2>
+<pre>
+    _method exemplar.write_info()
+      write("This is info about me")
+    _endmethod
+</pre>
+
+<h2>Compliant Code Example</h2>
+<pre>
+    _method exemplar.write_info()
+      write("This is: ", _self)
+    _endmethod
+</pre>

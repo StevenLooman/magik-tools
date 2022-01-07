@@ -1,0 +1,15 @@
+{
+  "title": "Variable is unused",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "complexity"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "UnusedVariable",
+  "sqKey": "unused-variable"
+}

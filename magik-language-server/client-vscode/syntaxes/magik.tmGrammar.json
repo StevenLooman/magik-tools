@@ -1,0 +1,224 @@
+{
+	"scopeName": "source.magik",
+	"patterns": [
+		{ "include": "#keyword" },
+		{ "include": "#operator" },
+		{ "include": "#comment" },
+		{ "include": "#string" },
+		{ "include": "#symbol" },
+		{ "include": "#slot" },
+		{ "include": "#method_definition" },
+		{ "include": "#method_invocation" },
+		{ "include": "#proc_invocation" },
+		{ "include": "#object" }
+	],
+	"repository": {
+	    "keyword": {
+		    "patterns": [
+				{
+					"name": "keyword.other.magik",
+					"match": "(?i)\\b(_package)\\b"
+				},
+				{
+					"name": "keyword.other.magik",
+					"match": "(?i)\\b(_pragma)\\b"
+				},
+				{
+					"name": "variable.language.magik",
+					"match": "(?i)\\b(_self|_clone|_super|_thisthread)\\b"
+				},
+				{
+					"name": "constant.language.magik",
+					"match": "(?i)\\b(_true|_false|_maybe|_unset)\\b"
+				},
+				{
+					"name": "keyword.other.magik",
+					"match": "(?i)\\b(_if|_then|_elif|_else|_endif)\\b"
+				},
+				{
+					"name": "keyword.operator.magik",
+					"match": "(?i)\\b(_not|_is|_isnt|_and|_andif|_or|_orif|_xor|_cf|_div|_mod|_divmod)\\b"
+				},
+				{
+					"name": "storage.modifier.magik",
+					"match": "(?i)\\b(_iter|_private|_abstract)\\b"
+				},
+				{
+					"name": "keyword.control.magik",
+					"match": "(?i)\\b(_while|_for|_over|_loop|_loopbody|_finally|_endloop)\\b"
+				},
+				{
+					"name": "keyword.control.magik",
+					"match": "(?i)\\b(_try|_with|_when|_endtry)\\b"
+				},
+				{
+					"name": "keyword.control.magik",
+					"match": "(?i)\\b(_throw|_catch|_endcatch)\\b"
+				},
+				{
+					"name": "keyword.control.magik",
+					"match": "(?i)\\b(_protect|_protection|_endprotect)\\b"
+				},
+				{
+					"name": "keyword.control.magik",
+					"match": "(?i)\\b(_lock|_locking|_endlock)\\b"
+				},
+				{
+					"name": "keyword.control.magik",
+					"match": "(?i)\\b(_block|_endblock|_handling|_default)\\b"
+				},
+				{
+					"name": "keyword.control.magik",
+					"match": "(?i)\\b(_return|_leave|_continue|>>)\\b"
+				},
+				{
+					"name": "storage.type.magik",
+					"match": "(?i)\\b(_local|_global|_constant|_import|_dynamic)\\b"
+				},
+				{
+					"name": "keyword.operator.magik",
+					"match": "(?i)\\b(_scatter|_gather|_allresults)\\b"
+				}
+			]
+	  	},
+		"operator": {
+			"patterns": [
+				{
+					"name": "keyword.operator.assignment.magik",
+					"match": "(<<)"
+				},
+				{
+					"name": "keyword.operator.magik",
+					"match": "(=|<>|<|>|<=|>=|<>)"
+				},
+				{
+					"name": "keyword.operator.arithmetic.magik",
+					"match": "(\\-|\\+|\\*|\\/|\\*\\*)"
+				}
+			]
+		},
+		"comments": {
+			"patterns": [
+				{
+					"begin": "##",
+					"beginCaptures": {
+							"0": {"name": "comment.block.documentation.magik"}
+					},
+					"end": "\\n",
+					"name": "comment.block.documentation.magik"
+				},
+				{
+					"begin": "#",
+					"beginCaptures": {
+							"0": {"name": "comment.line.magik"}
+					},
+					"end": "\\n",
+					"name": "comment.line.magik"
+				}
+			]
+		},
+		"strings": {
+			"patterns": [
+				{
+					"begin": "(?:^|[^%])(\")",
+					"beginCaptures": {
+						"1": {"name": "string.quoted.double.magik"}
+					},
+					"end": "\"",
+					"endCaptures": {
+						"0": {"name": "string.quoted.double.magik"}
+					},
+					"contentName": "string.quoted.double.magik"
+				},
+				{
+					"begin": "(?:^|[^%])(')",
+					"beginCaptures": {
+						"1": {"name": "string.quoted.single.magik"}
+					},
+					"end": "'",
+					"endCaptures": {
+						"0": {"name": "string.quoted.single.magik"}
+					},
+					"contentName": "string.quoted.single.magik"
+				}
+			]
+		},
+		"symbol": {
+			"patterns": [
+				{
+					"match": "(?:\\s*[^#\"\\w!?])((?:\\:[\\w!?]*\\|.+\\|)|(?:\\:[\\w!?]+))(?=\\s*[^\\w!?])",
+					"captures": {
+						"1": {"name": "string.other.magik"}
+					}
+				}
+			]
+		},
+		"method_definition": {
+			"patterns": [
+				{
+					"match": "(_method)\\s+([\\w!?]+)\\s*(?:\\.)\\s*([\\w!?]+)\\s*",
+					"captures": {
+						"1": {"name": "storage.type.function.magik"},
+						"2": {"name": "entity.name.type.class.magik"},
+						"3": {"name": "entity.name.function.magik"}
+					}
+				},
+				{
+					"match": "(_method)\\s+([\\w!?]+)\\s*(?:\\.)",
+					"captures": {
+						"1": {"name": "storage.type.function.magik"},
+						"2": {"name": "entity.name.type.class.magik"}
+					}
+				},
+				{
+					"name": "storage.type.function.magik",
+					"match": "\\b(_endmethod)\\b"
+				}
+			]
+		},
+		"proc_definition": {
+			"patterns": [
+				{
+					"match": "(_proc)\\s*",
+					"captures": {
+						"1": {"name": "storage.type.function.magik"}
+					}
+				},
+				{
+					"match": "(_endproc)",
+					"name": "storage.type.function.magik"
+				}
+			]
+		},
+		"slot": {
+			"patterns": [
+				{
+					"match": "(?:\\s*[^#\"\\w!?)\\]])(\\.[\\w!?]+)(?=\\s*[^\\w!?])",
+					"captures": {
+						"1": {"name": "variable.other.object.property.magik"}
+					}
+				}
+			]
+		},
+		"method_invocation": {
+			"patterns": [
+				{
+					"match": "(?:[^\"]\\.)([\\w!?]+)",
+					"captures": {
+						"1": {"name": "entity.name.function.magik"}
+					}
+				}
+			]
+		},
+		"proc_invocation": {
+			"patterns": [
+				{
+					"match": "(?:\\s*[^#\"\\w!?])([A-Za-z0-9!?]+[\\w!?]*)\\s*(?=\\()",
+					"captures": {
+						"1": {"name": "entity.name.function.magik"}
+					}
+				}
+			]
+		}
+	}
+}

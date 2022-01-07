@@ -1,0 +1,220 @@
+{
+	"Define slotted exemplar": {
+		"prefix": "def_slotted_exemplar",
+		"body": [
+			"##",
+			"def_slotted_exemplar(",
+			"\t$1,",
+			"\t{",
+			"\t\t$2",
+			"\t},",
+			"\t{$3})",
+			"$"
+		],
+		"description": "Define slotted exemplar"
+	},
+	"Define shared constant": {
+		"prefix": "shared_constant",
+		"body": [
+			"##",
+			"$1.define_shared_constant(",
+			"\t$2,",
+			"\t$3,",
+			"\t$4)",
+			"$"
+		],
+		"description": "Define shared constant"
+	},
+	"Define shared variable": {
+		"prefix": "shared_variable",
+		"body": [
+			"##",
+			"$1.define_shared_variable(",
+			"\t$2,",
+			"\t$3,",
+			"\t$4)",
+			"$"
+		],
+		"description": "Define shared variable"
+	},
+	"Define method": {
+		"prefix": "method",
+		"body": [
+			"_method $1.$2($3)",
+			"\t## $4",
+			"_endmethod",
+			"$"
+		],
+		"description": "Define method"
+	},
+	"Define abstract method": {
+		"prefix": "abstract method",
+		"body": [
+			"_abstract _method $1.$2($3)",
+			"\t## $4",
+			"_endmethod",
+			"$"
+		],
+		"description": "Define method"
+	},
+	"Define private method": {
+		"prefix": "private method",
+		"body": [
+			"_private _method $1.$2($3)",
+			"\t## $4",
+			"_endmethod",
+			"$"
+		],
+		"description": "Define private method"
+	},
+	"Define iter method": {
+		"prefix": "iter method",
+		"body": [
+			"_iter _method $1.$2($3)",
+			"\t## $4",
+			"_endmethod",
+			"$"
+		],
+		"description": "Define iter method"
+	},
+	"Define procedure": {
+		"prefix": "proc",
+		"body": [
+			"_proc@$1($2)",
+			"\t$3",
+			"_endproc"
+		],
+		"description": "Define procedure"
+	},
+	"Define iter procedure": {
+		"prefix": "proc",
+		"body": [
+			"_iter _proc@$1($2)",
+			"\t$3",
+			"_endproc"
+		],
+		"description": "Define iter procedure"
+	},
+	"Pragma": {
+		"prefix": "pragma",
+		"body": [
+			"_pragma(classify_level=$1, topic=$2, usage=$3)"
+		],
+		"description": "Define pragma"
+	},
+	"If": {
+		"prefix": "if",
+		"body": [
+			"_if $1",
+			"_then",
+			"\t$2",
+			"_endif"
+		],
+		"description": "If statement"
+	},
+	"Elif": {
+		"prefix": "elif",
+		"body": [
+			"_elif $1",
+			"_then",
+			"\t$2"
+		],
+		"description": "Elif part of if statement"
+	},
+	"Protect": {
+		"prefix": "protect",
+		"body": [
+			"_protect",
+			"\t$1",
+			"_protection",
+			"\t$2",
+			"_endprotect"
+		],
+		"description": "Protect statement"
+	},
+	"Protect locking": {
+		"prefix": "protect locking",
+		"body": [
+			"_protect _locking $1",
+			"\t$2",
+			"_protection",
+			"\t$3",
+			"_endprotect"
+		],
+		"description": "Protect locking statement"
+	},
+	"Try": {
+		"prefix": "try",
+		"body": [
+			"_try",
+			"\t$1",
+			"_when $2",
+			"\t$3",
+			"_endtry"
+		],
+		"description": "Try statement"
+	},
+	"Loop": {
+		"prefix": "loop",
+		"body": [
+			"_loop",
+			"\t$1",
+			"_endloop"
+		],
+		"description": "Loop statement"
+	},
+	"Over": {
+		"prefix": "over",
+		"body": [
+			"_over $1",
+			"_loop",
+			"\t$2",
+			"_endloop"
+		],
+		"description": "Over statement"
+	},
+	"For": {
+		"prefix": "for",
+		"body": [
+			"_for $1 _over $2",
+			"_loop",
+			"\t$3",
+			"_endloop"
+		],
+		"description": "For statement"
+	},
+	"While": {
+		"prefix": "while",
+		"body": [
+			"_while $1",
+			"_loop",
+			"\t$2",
+			"_endloop"
+		],
+		"description": "While statement"
+	},
+	"Catch": {
+		"prefix": "catch",
+		"body": [
+			"_catch $1",
+			"\t$2",
+			"_endcatch"
+		],
+		"description": "Catch statement"
+	},
+	"Lock": {
+		"prefix": "lock",
+		"body": [
+			"_lock $1",
+			"\t$2",
+			"_endlock"
+		],
+		"description": "Lock statement"
+	},
+	"Handling": {
+		"prefix": "handling",
+		"body": [
+			"_handling $1 _with $2"
+		]
+	}
+}

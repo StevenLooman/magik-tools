@@ -1,9 +1,0 @@
-sonar_coverage_reporter	1	1
-
-description
-	Sonar Coverage exporter for Smallworld/Magik SonarQube plugin
-end
-
-requires
-	line_coverage_recorder	1
-end

@@ -1,0 +1,50 @@
+_package user
+
+def_slotted_exemplar(
+    :bpt,
+    {
+        {:slot1, _unset, :writable, :public},
+        {:slot2, _unset, :writable, :public},
+        {:slot3, _unset, :writable, :public}
+    })
+$
+
+_method bpt.invoke(_optional arg)
+    _self.t(arg)
+_endmethod
+$
+
+_method bpt.t(_optional arg)
+    _local var_end << arg
+    _local var << 0
+    var << 10
+    show(:test1, var)
+    var << _self.t2(120)
+    show(:test1, var)
+    var << 30
+    show(:test1, var)
+    var << 40
+    show(:test1, var)
+    var << 50
+    show(:test1, var)
+    _return var_end
+_endmethod
+$
+
+_method bpt.t2(_optional arg)
+    show(:test2, 1)
+    show(:test2, 2)
+    show(:test2, 3)
+    _return arg
+_endmethod
+$
+
+_method bpt.ce()
+    condition.raise(:error, :string, "test")
+_endmethod
+$
+
+_method bpt.ci()
+    condition.raise(:information, :string, "test")
+_endmethod
+$

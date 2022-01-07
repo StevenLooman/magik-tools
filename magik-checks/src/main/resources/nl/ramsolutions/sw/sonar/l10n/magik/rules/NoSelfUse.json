@@ -1,0 +1,15 @@
+{
+  "title": "No usage of _self",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "design"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "NoSelfUse",
+  "sqKey": "no-self-use"
+}

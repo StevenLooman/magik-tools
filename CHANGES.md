@@ -1,14 +1,30 @@
 Changes
 =======
 
-0.5.0 (unreleased)
+0.5.0 (2022-01-07)
 
 - MessagePatchGrammar no longer needs a $ at the end of the message patch
 - Strip org.sonarsource.sonarqube:sonar-plugin-api from magik-lint, shaving size
-- Update MagikGrammar for easier processing + introduce AstWalker
+- Update MagikGrammar for easier processing
+- Introduce AstWalker
 - Add check NoStatementAfterBodyExit
 - Show scope count/max scope count in ScopeCountCheck
 - Add check VariableDeclarationUsageDistance
+- Add magik-language-server, with
+  - source indexing
+  - type inferencing
+  - hover provider
+  - implementation provider
+  - foldeing range provider
+  - references provider
+  - formatting provider
+  - signature help provider
+  - completion provider
+- Add magik-debug-adapter
+- Add check ImportMissingDefinition
+- Add check NoSelfUse
+- Remove --watch option from magik-lint
+- Add check HidesVariable
 
 
 0.4.0 (2020-01-29)

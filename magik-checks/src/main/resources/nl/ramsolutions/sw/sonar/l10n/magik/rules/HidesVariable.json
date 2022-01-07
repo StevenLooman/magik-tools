@@ -1,0 +1,15 @@
+{
+  "title": "Variable definition hides another variable with the same name.",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "10min"
+  },
+  "tags": [
+    "warning"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "HidesVariable",
+  "sqKey": "hides-variable"
+}

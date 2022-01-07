@@ -1,29 +1,34 @@
-Sonar Magik plugin
-==================
+# Sonar Magik plugin
 
 Magik analyzed!
 
-`Sonar-Magik` is a code analyzer for Smallworld projects, which uses the Magik programming language.
+`Magik-tools` is a collection of tools for the Magik programming language used by the Smallworld 5 platform. It provides the following tools:
+
+* SonarQube plugin
+* Linter
+* Language server
+* Debug adapter
 
 By no means is this product fully tested and production-ready. Use at your own risk, your mileage may vary.
 
 
-Status
-------
+## Status
 
-[![Build Status](https://travis-ci.com/StevenLooman/sonar-magik.svg?branch=develop)](https://travis-ci.com/StevenLooman/sonar-magik)
+No build status for now.
 
 
-Installation
-------------
+## SonarQube plugin
+
+### Installation
+
+After building, the artifact/jar will be created at `sonar-magik-plugin/target/sonar-magik-plugin-<version>.jar`.
 
 Copy the plugin (`sonar-magik-plugin-<version>.jar`) to your `sonarqube/extensions/plugins` directory. (Re)start Sonar to activate the plugin.
 
-Pre-built artifacts/jars can be found at [`sonar-magik/releases`](https://github.com/StevenLooman/sonar-magik/releases).
+Pre-built artifacts/jars can be found at [`magik-tools/releases`](https://github.com/StevenLooman/magik-tools/releases).
 
 
-Analyzing projects
-------------------
+### Analyzing projects
 
 Use [sonar-scanner](https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner) to analyze your projects. An example configuration, stored in `sonar-project.properties`, would be:
 
@@ -36,8 +41,22 @@ sonar.coverageReportPaths=coverage.xml
 ```
 
 
-Building
---------
+## Magik Linter
+
+A linter for magik is available in the [`magik-lint`](magik-lint) directory. See [`magik-lint/README.md`](magik-lint/README.md) for more information.
+
+
+## Language server
+
+TODO
+
+
+## Debug adapter
+
+TODO
+
+
+## Building
 
 You can build the plugin using maven, like so:
 
@@ -45,11 +64,8 @@ You can build the plugin using maven, like so:
 $ mvn clean package
 ```
 
-The artifact/jar will be created at `sonar-magik-plugin/target/sonar-magik-plugin-<version>.jar`.
 
-
-Unit tests
-----------
+## Unit tests
 
 You can run the unit tests using maven, like so:
 
@@ -60,47 +76,19 @@ $ mvn clean test
 Results will be shown on the console.
 
 
-Coverage
---------
-
-A module has been built to report coverage from within Smallworld 4.3. See `sw_code_coverage`. It includes a way to export line coverage to an XML file which `Sonar` supports. See `sw_code_coverage/README.md` on how to use this.
-
-To use the coverage report, set property `sonar.coverageReportPaths` in your `sonar-project.properties`-file.
-
-
-XPath rule
-----------
-
-An XPath-template-rule is available to quickly build custom rules. Follow these steps to create and use a custom rule:
-
-- Log in at you Sonar-installation;
-- Go to `Quality Profiles`;
-- Create a copy of the standard Magik Sonar Way profile;
-- Go the copied profile;
-- Find the `Track breaches of an XPath rule` Rule Template;
-- Create a Custom Rule by clicking on the Create-button.
-
-
-Magik linter
-------------
-
-A linter for magik is available in the [`magik-lint`](magik-lint) directory. See [`magik-lint/README.md`](magik-lint/README.md) for more information.
-
-
-Contributing
-------------
+## Contributing
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for instruction on how to contribute.
 
 
-License
--------
+## License
 
-This project is licensed under LGPLv3, see [`LICENSE.md`](LICENSE.md).
+This project is licensed under GPLv3, see [`LICENSE.md`](LICENSE.md).
+
+Note that this has been changed from LGPLv3!
 
 
-Commercial use
---------------
+## Commercial use
 
 By no means is this product fully tested and production-ready. Use at your own risk, your mileage may vary.
 
