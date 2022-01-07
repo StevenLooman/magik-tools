@@ -1,6 +1,9 @@
 Changes
 =======
 
+0.5.1 (unreleased)
+
+
 0.5.0 (2022-01-07)
 
 - MessagePatchGrammar no longer needs a $ at the end of the message patch
