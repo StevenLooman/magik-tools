@@ -140,11 +140,6 @@
 				"category": "Magik"
 			},
 			{
-				"command": "magik.custom.writeTypesCsv",
-				"title": "Write types to CSV file",
-				"category": "Magik"
-			},
-			{
 				"command": "magik.custom.reIndex",
 				"title": "Reindex files",
 				"category": "Magik"
@@ -201,7 +196,7 @@
 					"type": "string"
 				},
 				"magik.typing.typeDatabasePaths": {
-					"description": "Path to CSV with type info for core product.",
+					"description": "Paths to type databases.",
 					"type": "array"
 				},
 				"magik.typing.enableChecks": {

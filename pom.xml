@@ -370,7 +370,6 @@
                   </limits>
                   <excludes>
                     <exclude>nl.ramsolutions.sw.magik.analysis.AstWalker.*</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.analysis.typing.CsvTypeKeeperReader.parseLine(java.lang.String[])</exclude>
                     <exclude>nl.ramsolutions.sw.magik.checks.checks.FormattingCheck.handleToken()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.stackTrace(long)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>

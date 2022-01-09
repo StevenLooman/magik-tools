@@ -56,7 +56,7 @@ public final class JsonTypeKeeperReader {
     }
 
     private void run() throws IOException {
-        LOGGER.debug("Reading types from path: {}", this.path);
+        LOGGER.debug("Reading type database from path: {}", this.path);
 
         final File file = this.path.toFile();
         try (FileReader fileReader = new FileReader(file, StandardCharsets.ISO_8859_1);
