@@ -1,8 +1,10 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.annotation.CheckForNull;
 
@@ -30,7 +32,16 @@ public class MagikSettings {
     @CheckForNull
     public String getSmallworldGis() {
         final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
-        return magik.get("smallworldGis").getAsString();
+        if (magik == null) {
+            return null;
+        }
+
+        final JsonElement smallworldGis = magik.get("smallworldGis");
+        if (smallworldGis == null) {
+            return null;
+        }
+
+        return smallworldGis.getAsString();
     }
 
     /**
@@ -39,8 +50,19 @@ public class MagikSettings {
      */
     public List<String> getTypingTypeDatabasePaths() {
         final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+        if (magik == null) {
+            return Collections.emptyList();
+        }
+
         final JsonObject typing = magik.getAsJsonObject("typing");
+        if (typing == null) {
+            return Collections.emptyList();
+        }
+
         final JsonArray typesDatabasePaths = typing.getAsJsonArray("typeDatabasePaths");
+        if (typesDatabasePaths == null) {
+            return Collections.emptyList();
+        }
 
         final List<String> paths = new ArrayList<>();
         typesDatabasePaths.forEach(jsonElement -> {
@@ -51,14 +73,27 @@ public class MagikSettings {
     }
 
     /**
-     * Get magik.typing.enableChecks.
+     * Get magik.typing.enableChecks, defaults to false if no config is provided.
      * @return magik.typing.enableChecks.
      */
     @CheckForNull
     public Boolean getTypingEnableChecks() {
         final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+        if (magik == null) {
+            return false;
+        }
+
         final JsonObject typing = magik.getAsJsonObject("typing");
-        return typing.get("enableChecks").getAsBoolean();
+        if (typing == null) {
+            return false;
+        }
+
+        final JsonElement enableChecks = typing.get("enableChecks");
+        if (enableChecks == null) {
+            return false;
+        }
+
+        return enableChecks.getAsBoolean();
     }
 
 }

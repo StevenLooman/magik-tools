@@ -3,6 +3,8 @@ Changes
 
 0.5.1 (unreleased)
 
+- More robustness for other LSP clients other than VScode
+
 
 0.5.0 (2022-01-07)
 
