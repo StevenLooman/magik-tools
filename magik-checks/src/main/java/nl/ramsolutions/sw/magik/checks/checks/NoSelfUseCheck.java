@@ -3,12 +3,14 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import com.sonar.sslr.api.AstNode;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
 
 /**
  * Check for _self/_super/_clone/slot use in method.
  */
+@DisabledByDefault
 @Rule(key = NoSelfUseCheck.CHECK_KEY)
 public class NoSelfUseCheck extends MagikCheck {
 
