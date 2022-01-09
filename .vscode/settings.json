@@ -1,0 +1,23 @@
+{
+    "files.exclude": {
+        "**/.classpath": true,
+        "**/.project": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    },
+    "editor.renderWhitespace": "selection",
+    "editor.rulers": [120],
+    "editor.tabSize": 4,
+    "java.autobuild.enabled": false,
+    "java.configuration.maven.notCoveredPluginExecutionSeverity": "ignore",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.completion.importOrder": [
+        "com",
+        "java",
+        "javax",
+        "org"
+    ],
+    "editor.detectIndentation": false,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+}
