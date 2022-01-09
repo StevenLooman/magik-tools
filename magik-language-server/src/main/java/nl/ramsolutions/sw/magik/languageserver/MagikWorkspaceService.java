@@ -117,6 +117,7 @@ public class MagikWorkspaceService implements WorkspaceService {
         LOGGER.trace("Running MagikPreIndexer");
         for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
             try {
+                LOGGER.debug("Running MagikPreIndexer from: {}", workspaceFolder.getUri());
                 final MagikPreIndexer preIndexer = new MagikPreIndexer(this.typeKeeper);
                 final Stream<Path> indexableFiles = this.getIndexableFiles(workspaceFolder);
                 preIndexer.indexPaths(indexableFiles);
@@ -130,6 +131,7 @@ public class MagikWorkspaceService implements WorkspaceService {
         LOGGER.trace("Running MagikIndexer");
         for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
             try {
+                LOGGER.debug("Running MagikIndexer from: {}", workspaceFolder.getUri());
                 final MagikIndexer indexer = new MagikIndexer(this.typeKeeper);
                 final Stream<Path> indexableFiles = this.getIndexableFiles(workspaceFolder);
                 indexer.indexPaths(indexableFiles);
@@ -289,7 +291,9 @@ public class MagikWorkspaceService implements WorkspaceService {
 
         // Read method docs.
         final String smallworldGisDir = magikSettings.getSmallworldGis();
-        this.readLibsDocs(smallworldGisDir);
+        if (smallworldGisDir != null) {
+            this.readLibsDocs(smallworldGisDir);
+        }
 
         // Index .magik-tools-ignore files.
         this.runIgnoreFilesIndexer();
