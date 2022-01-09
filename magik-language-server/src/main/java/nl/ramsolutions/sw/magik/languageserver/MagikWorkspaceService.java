@@ -162,16 +162,16 @@ public class MagikWorkspaceService implements WorkspaceService {
     }
 
     /**
-     * Read the types CSV from the given path.
-     * @param typesCsvPaths Paths to types csvs.
+     * Read the type databases from the given path.
+     * @param typeDbPaths Paths to type databases.
      */
-    public void readTypesCsvs(final List<String> typesCsvPaths) {
-        LOGGER.trace("Reading types from: {}", typesCsvPaths);
+    public void readTypesDbs(final List<String> typeDbPaths) {
+        LOGGER.trace("Reading type databases from: {}", typeDbPaths);
 
-        typesCsvPaths.forEach(pathStr -> {
+        typeDbPaths.forEach(pathStr -> {
             final Path path = Path.of(pathStr);
             if (!Files.exists(path)) {
-                LOGGER.warn("Path to types CSV does not exist: {}", pathStr);
+                LOGGER.warn("Path to types database does not exist: {}", pathStr);
                 return;
             }
 
@@ -282,10 +282,10 @@ public class MagikWorkspaceService implements WorkspaceService {
     private void runIndexers() {
         LOGGER.trace("Run indexers");
 
-        // Read types CSV.
+        // Read types db.
         final MagikSettings magikSettings = this.languageServer.getMagikSettings();
-        final List<String> typesCsvPaths = magikSettings.getTypingTypeDatabasePaths();
-        this.readTypesCsvs(typesCsvPaths);
+        final List<String> typesDbPaths = magikSettings.getTypingTypeDatabasePaths();
+        this.readTypesDbs(typesDbPaths);
 
         // Read method docs.
         final String smallworldGisDir = magikSettings.getSmallworldGis();

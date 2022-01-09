@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { MagikLanguageClient } from './language-client';
 import { MagikAliasTaskProvider } from './alias-task-provider';
 import { MagikDebugProvider } from './debug-provider';
-import {  MagikSessionProvider } from './magik-session';
+import { MagikSessionProvider } from './magik-session';
 import { MagikTestProvider } from './test-provider';
 
 

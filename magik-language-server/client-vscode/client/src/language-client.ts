@@ -80,12 +80,6 @@ export class MagikLanguageClient implements vscode.Disposable {
 	}
 
 	private registerCommands() {
-		const rereadTypesCsv = vscode.commands.registerCommand('magik.custom.rereadTypesCsv', () => this.command_custom_reread_types_csv());
-		this._context.subscriptions.push(rereadTypesCsv);
-
-		const writeTypesCsv = vscode.commands.registerCommand('magik.custom.writeTypesCsv', () => this.command_custom_write_types_csv());
-		this._context.subscriptions.push(writeTypesCsv);
-
 		const reIndex = vscode.commands.registerCommand('magik.custom.reIndex', () => this.command_custom_re_index());
 		this._context.subscriptions.push(reIndex);
 	}
@@ -103,14 +97,6 @@ export class MagikLanguageClient implements vscode.Disposable {
 	}
 
 	//#region: Commands
-	private command_custom_reread_types_csv() {
-		this._client.sendRequest('custom/rereadTypesCsv');
-	}
-
-	private command_custom_write_types_csv() {
-		this._client.sendRequest('custom/writeTypesCsv');
-	}
-
 	private command_custom_re_index() {
 		this._client.sendRequest('custom/reIndex');
 	}
