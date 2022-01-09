@@ -50,14 +50,22 @@ public class BinaryOperator {
          * @return Operator.
          */
         public static Operator valueFor(final String value) {
-            final String valueLower = value.toLowerCase();
             for (final Operator operator : Operator.values()) {
-                if (operator.getValue().equals(valueLower)) {
+                if (operator.getValue().equalsIgnoreCase(value)) {
                     return operator;
                 }
             }
 
-            throw new IllegalStateException("Unknown operator: " + valueLower);
+            for (final Operator operator : Operator.values()) {
+                if (operator.name().endsWith("_KEYWORD")) {
+                    final String prefixedOperatorValue = "_" + operator.getValue();
+                    if (prefixedOperatorValue.equalsIgnoreCase(value)) {
+                        return operator;
+                    }
+                }
+            }
+
+            throw new IllegalStateException("Unknown operator: " + value);
         }
 
     }
