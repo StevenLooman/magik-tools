@@ -133,7 +133,7 @@ public class LocalTypeReasoner extends AstWalker {
     public ExpressionResult getNodeType(final AstNode node) {
         final ExpressionResult result = this.nodeTypes.get(node);
         if (result == null) {
-            LOGGER.warn("Node without type: {}", node);
+            LOGGER.debug("Node without type: {}", node);
             return ExpressionResult.UNDEFINED;
         }
         return result;
@@ -207,7 +207,7 @@ public class LocalTypeReasoner extends AstWalker {
     private ExpressionResult getLoopbodyNodeType(final AstNode node) {
         final ExpressionResult result = this.loopbodyNodeTypes.get(node);
         if (result == null) {
-            LOGGER.warn("Node without type: {}", node);
+            LOGGER.debug("Node without type: {}", node);
             return ExpressionResult.UNDEFINED;
         }
         return result;
@@ -228,7 +228,7 @@ public class LocalTypeReasoner extends AstWalker {
         final String name = identifierNode.getTokenValue();
 
         if (!this.typeKeeper.hasPackage(name)) {
-            LOGGER.warn("Package not found: {}", name);
+            LOGGER.debug("Package not found: {}", name);
         }
 
         // Package is created on demand.
@@ -857,10 +857,10 @@ public class LocalTypeReasoner extends AstWalker {
                 final AbstractType type = invokedResult.get(0, null);
                 if (type == null
                     || methodName == null) {
-                    LOGGER.warn(
-                        "Could not get type of last child of, "
+                    LOGGER.debug(""
+                        + "Could not get type of last child of, "
                         + "assigned node: {}, last chid node: {}, methodName: {}",
-                        assignedNode, methodName);
+                        assignedNode, lastChildNode, methodName);
                     return;
                 }
                 result = this.getMethodInvocationResult(type, methodName);

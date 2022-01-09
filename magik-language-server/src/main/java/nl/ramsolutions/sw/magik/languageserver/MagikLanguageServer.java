@@ -48,7 +48,24 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
         LOGGER.trace("initialize");
 
         final List<WorkspaceFolder> folders = params.getWorkspaceFolders();
-        this.workspaceFolders.addAll(folders);
+        if (folders != null) {
+            this.workspaceFolders.addAll(folders);
+        }
+
+        // For older clients.
+        final String rootUri = params.getRootUri();
+        if (rootUri != null
+            && this.workspaceFolders.isEmpty()) {
+            final WorkspaceFolder rootFolder = new WorkspaceFolder(rootUri);
+            this.workspaceFolders.add(rootFolder);
+        }
+
+        // Report workspace folders.
+        if (this.workspaceFolders.isEmpty()) {
+            LOGGER.debug("No workspace folders!");
+        } else {
+            this.workspaceFolders.forEach(workspaceFolder -> LOGGER.debug("Workspace folder: {}", workspaceFolder));
+        }
 
         return CompletableFuture.supplyAsync(() -> {
             // Set capabilities.

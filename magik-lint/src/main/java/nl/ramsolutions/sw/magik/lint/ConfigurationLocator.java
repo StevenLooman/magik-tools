@@ -109,6 +109,7 @@ public final class ConfigurationLocator {
             return etcPath;
         }
 
+        LOGGER.trace("No configuration found");
         return null;
     }
 
