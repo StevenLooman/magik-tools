@@ -6,6 +6,7 @@ Changes
 - More robustness for other LSP clients other than VScode
 - Fix binary operator handling not recognizing magik keywords
 - Disable check no-self-use by default
+- Disable check method-doc by default, in favor of new-doc check
 
 
 0.5.0 (2022-01-07)
