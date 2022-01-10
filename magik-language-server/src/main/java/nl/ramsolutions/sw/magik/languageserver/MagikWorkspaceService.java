@@ -90,7 +90,7 @@ public class MagikWorkspaceService implements WorkspaceService {
     }
 
     private void runIgnoreFilesIndexer() {
-        LOGGER.trace("Running IgnoreHandler indexing");
+        LOGGER.trace("Running IgnoreHandler indexer");
         for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
             final String uriStr = workspaceFolder.getUri();
             final URI uri = URI.create(uriStr);

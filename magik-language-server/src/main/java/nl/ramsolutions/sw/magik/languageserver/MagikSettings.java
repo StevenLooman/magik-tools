@@ -13,6 +13,11 @@ import javax.annotation.CheckForNull;
  */
 public class MagikSettings {
 
+    /**
+     * Default MagikSettings, to prevent NPEs.
+     */
+    public static final MagikSettings DEFAULT = new MagikSettings(new JsonObject());
+
     private static final String TOP_LEVEL = "magik";
 
     private final JsonObject settings;
