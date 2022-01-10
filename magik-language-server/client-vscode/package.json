@@ -226,11 +226,11 @@
 		"package": "vsce package"
 	},
 	"devDependencies": {
-		"@types/mocha": "^8.0.3",
-		"@types/node": "^12.19.12",
+		"@types/mocha": "^8.2.3",
+		"@types/node": "^12.20.41",
 		"@typescript-eslint/parser": "^2.3.0",
 		"eslint": "^6.4.0",
-		"typescript": "^4.0.2",
+		"typescript": "^4.5.4",
 		"vsce": "^1.103.1"
 	}
 }
