@@ -27,18 +27,17 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikLanguageServer.class);
 
-    private final ITypeKeeper typeKeeper;
+    private final ITypeKeeper typeKeeper = new TypeKeeper();
+    private final List<WorkspaceFolder> workspaceFolders = new ArrayList<>();
     private final MagikTextDocumentService magikTextDocumentService;
     private final MagikWorkspaceService magikWorkspaceService;
     private LanguageClient languageClient;
-    private final List<WorkspaceFolder> workspaceFolders = new ArrayList<>();
-    private MagikSettings settings;
+    private MagikSettings settings = MagikSettings.DEFAULT;
 
     /**
      * Constructor.
      */
     public MagikLanguageServer() {
-        this.typeKeeper = new TypeKeeper();
         this.magikTextDocumentService = new MagikTextDocumentService(this, this.typeKeeper);
         this.magikWorkspaceService = new MagikWorkspaceService(this, this.typeKeeper);
     }
