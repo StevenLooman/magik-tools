@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.parser.MethodDocParser;
 import org.sonar.check.Rule;
@@ -14,6 +15,7 @@ import org.sonar.check.Rule;
 /**
  * Check method doc.
  */
+@DisabledByDefault
 @Rule(key = MethodDocCheck.CHECK_KEY)
 public class MethodDocCheck extends MagikCheck {
 
