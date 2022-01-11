@@ -18,11 +18,11 @@ public final class GlobalReference {
     public GlobalReference(final String reference) {
         final String[] parts = reference.split(":");
         if (parts.length != 2) {
-            throw new IllegalStateException("Malformed reference");
+            throw new IllegalStateException("Malformed reference: " + reference);
         }
         if (parts[0].indexOf(':') != -1
             || parts[1].indexOf(':') != -1) {
-            throw new IllegalStateException("Package or identifier with package");
+            throw new IllegalStateException("Package or identifier with package in reference: " + reference);
         }
 
         this.pakkage = parts[0];
@@ -37,7 +37,8 @@ public final class GlobalReference {
     public GlobalReference(final String pakkage, final String identifier) {
         if (pakkage.indexOf(':') != -1
             || identifier.indexOf(':') != -1) {
-            throw new IllegalStateException("Malformed package or identifier");
+            throw new IllegalStateException(
+                "Malformed package or identifier, pakkage: " + pakkage + ", identifier: " + identifier);
         }
 
         this.pakkage = pakkage;
