@@ -107,32 +107,47 @@ public class MagikIndexer {
      * Index a single magik file when it is created (or first read).
      * @param path Path to magik file.
      */
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void indexPathCreated(final Path path) {
         LOGGER.debug("Scanning created file: {}", path);
 
-        this.scrubDefinitions(path);
-        this.readDefinitions(path);
+        try {
+            this.scrubDefinitions(path);
+            this.readDefinitions(path);
+        } catch (Exception exception) {
+            LOGGER.error("Error indexing created file: " + path, exception);
+        }
     }
 
     /**
      * Index a single magik file when it is changed.
      * @param path Path to magik file.
      */
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void indexPathChanged(final Path path) {
         LOGGER.debug("Scanning changed file: {}", path);
 
-        this.scrubDefinitions(path);
-        this.readDefinitions(path);
+        try {
+            this.scrubDefinitions(path);
+            this.readDefinitions(path);
+        } catch (Exception exception) {
+            LOGGER.error("Error indexing changed file: " + path, exception);
+        }
     }
 
     /**
      * Un-index a single magik file when it is deleted.
      * @param path Path to magik file.
      */
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void indexPathDeleted(final Path path) {
         LOGGER.debug("Scanning deleted file: {}", path);
 
-        this.scrubDefinitions(path);
+        try {
+            this.scrubDefinitions(path);
+        } catch (Exception exception) {
+            LOGGER.error("Error indexing deleted file: " + path, exception);
+        }
     }
 
     private void handleDefinition(final Path path, final MagikFile magikFile, final Definition definition) {

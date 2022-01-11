@@ -63,6 +63,7 @@ public class MagikPreIndexer {
      * Index a single magik file.
      * @param path Path to magik file.
      */
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public void indexPath(Path path) {
         LOGGER.debug("Scanning file: {}", path);
         try {
@@ -78,6 +79,8 @@ public class MagikPreIndexer {
                 .forEach(this::handleDefinition);
         } catch (IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
+        } catch (Exception exception) {
+            LOGGER.error("Error pre-indexing file: " + path, exception);
         }
     }
 
