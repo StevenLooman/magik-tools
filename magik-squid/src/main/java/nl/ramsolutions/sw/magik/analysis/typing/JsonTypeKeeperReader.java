@@ -73,7 +73,7 @@ public final class JsonTypeKeeperReader {
     }
 
     private void processLine(final String line) {
-        if (line.startsWith("#")) {
+        if (line.startsWith("//")) {
             // Ignore comments.
             return;
         }
