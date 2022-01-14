@@ -7,6 +7,8 @@ Changes
 - Fix binary operator handling not recognizing magik keywords
 - Disable check no-self-use by default
 - Disable check method-doc by default, in favor of new-doc check
+- Fix bug in JSON type database reader: lines with // are now regarded as comment-lines
+- Fix bug causing magik-lint.jar --show-checks to not work
 
 
 0.5.0 (2022-01-07)

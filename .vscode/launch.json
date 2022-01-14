@@ -16,7 +16,10 @@
             "request": "launch",
             "mainClass": "nl.ramsolutions.sw.magik.lint.Main",
             "projectName": "magik-lint",
-            "args": "magik-lint/lint-demo.magik"
+            "args": [
+                "--debug",
+                "magik-lint/lint-demo.magik"
+            ]
         },
         {
             "type": "java",
