@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.logging.LogManager;
 import nl.ramsolutions.sw.magik.lint.output.MessageFormatReporter;
+import nl.ramsolutions.sw.magik.lint.output.NullReporter;
 import nl.ramsolutions.sw.magik.lint.output.Reporter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -19,6 +20,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 /**
  * Main entry point for magik linter.
@@ -32,11 +34,13 @@ public final class Main {
     private static final String OPTION_COLUMN_OFFSET = "column-offset";
     private static final String OPTION_MAX_INFRACTIONS = "max-infractions";
     private static final String OPTION_UNTABIFY = "untabify";
+    private static final String OPTION_DEBUG = "debug";
+    private static final String OPTION_HELP = "help";
 
     static {
         OPTIONS = new Options();
         OPTIONS.addOption(Option.builder()
-            .longOpt("help")
+            .longOpt(OPTION_HELP)
             .desc("Show this help")
             .build());
         OPTIONS.addOption(Option.builder()
@@ -74,7 +78,7 @@ public final class Main {
             .type(PatternOptionBuilder.NUMBER_VALUE)
             .build());
         OPTIONS.addOption(Option.builder()
-            .longOpt("debug")
+            .longOpt(OPTION_DEBUG)
             .desc("Enable showing of debug information")
             .build());
     }
@@ -140,13 +144,51 @@ public final class Main {
      * @throws ReflectiveOperationException -
      */
     public static void main(final String[] args) throws ParseException, IOException, ReflectiveOperationException {
-        final CommandLine commandLine = parseCommandline(args);
+        final CommandLine commandLine;
+        try {
+            commandLine = Main.parseCommandline(args);
+        } catch (UnrecognizedOptionException exception) {
+            System.out.println("Unrecognized option: " + exception.getMessage());
 
-        if (commandLine.hasOption("debug")) {
-            initDebugLogger();
+            System.exit(1);
+            return;  // Keep inferer happy.
         }
 
-        if (commandLine.hasOption("help")
+        if (commandLine.hasOption(OPTION_DEBUG)) {
+            Main.initDebugLogger();
+        }
+
+        // Read configuration.
+        final Configuration config;
+        if (commandLine.hasOption(OPTION_RCFILE)) {
+            final File rcfile = (File) commandLine.getParsedOptionValue(OPTION_RCFILE);
+            final Path path = rcfile.toPath();
+            config = new Configuration(path);
+        } else {
+            final Path path = ConfigurationLocator.locateConfiguration();
+            config = path != null
+                ? new Configuration(path)
+                : new Configuration();
+        }
+
+        // Fill configuration from command line.
+        Main.copyOptionToConfig(commandLine, config, OPTION_UNTABIFY);
+        Main.copyOptionToConfig(commandLine, config, OPTION_MAX_INFRACTIONS);
+        Main.copyOptionToConfig(commandLine, config, OPTION_COLUMN_OFFSET);
+        Main.copyOptionToConfig(commandLine, config, OPTION_MSG_TEMPLATE);
+
+        // Show checks.
+        if (commandLine.hasOption(OPTION_SHOW_CHECKS)) {
+            final Reporter reporter = new NullReporter();
+            final MagikLint lint = new MagikLint(config, reporter);
+            final Writer writer = new PrintWriter(System.out);
+            lint.showChecks(writer);
+            writer.flush();
+            System.exit(0);
+        }
+
+        // Help.
+        if (commandLine.hasOption(OPTION_HELP)
             || commandLine.getArgs().length == 0) {
             final HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("magik-lint", Main.OPTIONS);
@@ -154,45 +196,17 @@ public final class Main {
             System.exit(0);
         }
 
-        // Read configuration.
-        Configuration config;
-        if (commandLine.hasOption(OPTION_RCFILE)) {
-            final File rcfile = (File) commandLine.getParsedOptionValue(OPTION_RCFILE);
-            final Path path = rcfile.toPath();
-            config = new Configuration(path);
-        } else {
-            final Path path = ConfigurationLocator.locateConfiguration();
-            if (path != null) {
-                config = new Configuration(path);
-            } else {
-                config = new Configuration();
-            }
-        }
-
-        // Fill configuration from command line.
-        copyOptionToConfig(commandLine, config, OPTION_UNTABIFY);
-        copyOptionToConfig(commandLine, config, OPTION_MAX_INFRACTIONS);
-        copyOptionToConfig(commandLine, config, OPTION_COLUMN_OFFSET);
-        copyOptionToConfig(commandLine, config, OPTION_MSG_TEMPLATE);
-
-        // Build reporter.
-        final Reporter reporter = createReporter(config);
-
-        // Run the actual thing.
+        // Actual linting.
+        final Reporter reporter = Main.createReporter(config);
         final MagikLint lint = new MagikLint(config, reporter);
-        if (commandLine.hasOption(OPTION_SHOW_CHECKS)) {
-            final Writer writer = new PrintWriter(System.out);
-            lint.showChecks(writer);
-        } else {
-            final String[] leftOverArgs = commandLine.getArgs();
-            final Collection<Path> paths = MagikFileScanner.getFilesFromArgs(leftOverArgs);
-            lint.run(paths);
+        final String[] leftOverArgs = commandLine.getArgs();
+        final Collection<Path> paths = MagikFileScanner.getFilesFromArgs(leftOverArgs);
+        lint.run(paths);
 
-            final int exitCode = reporter.reportedSeverities().stream()
-                .map(severity -> SEVERITY_EXIT_CODE_MAPPING.get(severity))
-                .reduce(0, (partial, sum) -> sum | partial);
-            System.exit(exitCode);
-        }
+        final int exitCode = reporter.reportedSeverities().stream()
+            .map(severity -> SEVERITY_EXIT_CODE_MAPPING.get(severity))
+            .reduce(0, (partial, sum) -> sum | partial);
+        System.exit(exitCode);
     }
 
     private static void copyOptionToConfig(
