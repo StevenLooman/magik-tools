@@ -1,7 +1,10 @@
 Changes
 =======
 
-0.5.1 (unreleased)
+0.5.2 (unreleased)
+
+
+0.5.1 (2022-01-17)
 
 - More robustness for other LSP clients other than VScode
 - Fix binary operator handling not recognizing magik keywords
