@@ -28,13 +28,18 @@ Changes
 - Add magik-language-server, with
   - source indexing
   - type inferencing
+  - completion provider
+  - document symbol provider
+  - folding range provider
+  - formatting provider
+  - formatting provider
   - hover provider
   - implementation provider
-  - foldeing range provider
   - references provider
-  - formatting provider
+  - rename provider
   - signature help provider
-  - completion provider
+  - somenatic token provider
+  - symbol provider
 - Add magik-debug-adapter
 - Add check ImportMissingDefinition
 - Add check NoSelfUse
