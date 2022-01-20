@@ -390,4 +390,21 @@ class ScopeBuilderVisitorTest {
         assertThat(entryA.getUsages()).isEmpty();
     }
 
+    @Test
+    void testTopLevelProcImport() {
+        final String code = ""
+            + "_proc()\n"
+            + "  _import !traceback_show_args?!\n"
+            + "_endproc";
+        final ScopeBuilderVisitor visitor = this.buildCode(code);
+        final Scope globalScope = visitor.getGlobalScope();
+        final Scope procScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+        final ScopeEntry entryTracebackShowArgs = procScope.getScopeEntry("!traceback_show_args?!");
+        assertThat(entryTracebackShowArgs.getType()).isEqualTo(ScopeEntry.Type.IMPORT);
+        assertThat(entryTracebackShowArgs.getImportedEntry()).isNull();
+        assertThat(entryTracebackShowArgs.getNode().getTokenLine()).isEqualTo(2);
+        assertThat(entryTracebackShowArgs.getUsages()).isEmpty();
+    }
+
 }
