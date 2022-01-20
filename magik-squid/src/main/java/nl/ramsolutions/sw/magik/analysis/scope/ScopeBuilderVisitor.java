@@ -155,8 +155,10 @@ public class ScopeBuilderVisitor extends MagikVisitor {
                         MagikGrammar.METHOD_DEFINITION,
                         MagikGrammar.PROCEDURE_DEFINITION);
                     if (procScopeNode != null) {
-                        AstNode parentScopeNode = procScopeNode.getFirstAncestor(MagikGrammar.BODY);
-                        Scope parentScope = this.scopeIndex.get(parentScopeNode);
+                        final AstNode parentScopeNode = procScopeNode.getFirstAncestor(MagikGrammar.BODY);
+                        final Scope parentScope = parentScopeNode != null
+                            ? this.scopeIndex.get(parentScopeNode)
+                            : this.globalScope;
                         parentEntry = parentScope.getScopeEntry(identifier);
                     }
                 }

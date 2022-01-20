@@ -3,6 +3,8 @@ Changes
 
 0.5.2 (unreleased)
 
+- Fix bug in ScopeBuilderVisitor where import in top level procedure caused a NPE
+
 
 0.5.1 (2022-01-17)
 
