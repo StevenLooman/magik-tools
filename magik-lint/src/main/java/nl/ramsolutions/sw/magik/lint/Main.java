@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
@@ -53,7 +54,7 @@ public final class Main {
             .longOpt(OPTION_RCFILE)
             .desc("Configuration file")
             .hasArg()
-            .type(PatternOptionBuilder.EXISTING_FILE_VALUE)
+            .type(PatternOptionBuilder.FILE_VALUE)
             .build());
         OPTIONS.addOption(Option.builder()
             .longOpt(OPTION_SHOW_CHECKS)
@@ -163,6 +164,11 @@ public final class Main {
         if (commandLine.hasOption(OPTION_RCFILE)) {
             final File rcfile = (File) commandLine.getParsedOptionValue(OPTION_RCFILE);
             final Path path = rcfile.toPath();
+            if (!Files.exists(path)) {
+                System.out.println("RC File does not exist: " + path);
+
+                System.exit(1);
+            }
             config = new Configuration(path);
         } else {
             final Path path = ConfigurationLocator.locateConfiguration();
