@@ -38,7 +38,7 @@ public class PackageNodeHelper {
         AstNode siblingNode = topNode.getPreviousSibling();
         while (siblingNode != null) {
             if (siblingNode.is(MagikGrammar.PACKAGE_SPECIFICATION)) {
-                AstNode identifierNode = siblingNode.getFirstChild(MagikGrammar.IDENTIFIER);
+                final AstNode identifierNode = siblingNode.getFirstChild(MagikGrammar.PACKAGE_IDENTIFIER);
                 return identifierNode.getTokenValue();
             }
 

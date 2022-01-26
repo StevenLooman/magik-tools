@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstWalker;
+import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -357,8 +358,8 @@ public class SemanticTokenWalker extends AstWalker {
 
     @Override
     protected void walkPostPackageSpecification(final AstNode node) {
-        final AstNode identifierNode = node.getFirstDescendant(MagikGrammar.IDENTIFIER);
-        this.currentPakkage = identifierNode.getTokenValue();
+        final PackageNodeHelper helper = new PackageNodeHelper(node);
+        this.currentPakkage = helper.getCurrentPackage();
     }
 
     private boolean isKnownType(final GlobalReference globalReference) {

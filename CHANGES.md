@@ -5,6 +5,7 @@ Changes
 
 - Fix bug in ScopeBuilderVisitor where import in top level procedure caused a NPE
 - Fix bug in magik-lint --rcfile, where java.io.File is expected but was java.io.FileInputStream
+- Fix bug where grammar accepted invalid _package identifiers, causing problems later on
 
 
 0.5.1 (2022-01-17)

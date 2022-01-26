@@ -24,7 +24,8 @@ class MagikGrammarTest {
     void testPackage() {
         Assertions.assertThat(g.rule(MagikGrammar.PACKAGE_SPECIFICATION))
             .matches("_package sw")
-            .matches("_package user");
+            .matches("_package user")
+            .notMatches("_package p1:a");
     }
 
     @Test

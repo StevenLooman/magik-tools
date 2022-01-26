@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.Objects;
+import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -23,8 +24,8 @@ public class GlobalKnownTypedCheck extends MagikTypedCheck {
 
     @Override
     protected void walkPostPackageSpecification(final AstNode node) {
-        final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-        this.currentPakkage = identifierNode.getTokenValue();
+        final PackageNodeHelper helper = new PackageNodeHelper(node);
+        this.currentPakkage = helper.getCurrentPackage();
     }
 
     @Override

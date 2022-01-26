@@ -25,6 +25,7 @@ public enum MagikGrammar implements GrammarRuleKey {
     // root
     MAGIK,
     PACKAGE_SPECIFICATION,
+    PACKAGE_IDENTIFIER,
     METHOD_DEFINITION,
     METHOD_DEFINITION_SYNTAX_ERROR,
     TRANSMIT,
@@ -815,7 +816,8 @@ public enum MagikGrammar implements GrammarRuleKey {
                 b.zeroOrMore(MagikPunctuator.COMMA, IDENTIFIER),
                 MagikPunctuator.BRACE_R)));
 
-        b.rule(PACKAGE_SPECIFICATION).is(MagikKeyword.PACKAGE, IDENTIFIER);
+        b.rule(PACKAGE_IDENTIFIER).is(SPACING, b.regexp(BARE_IDENTIFIER_REGEXP));
+        b.rule(PACKAGE_SPECIFICATION).is(MagikKeyword.PACKAGE, PACKAGE_IDENTIFIER);
 
         b.rule(LABEL).is(MagikPunctuator.AT, SPACING, b.regexp(LABEL_REGEXP));
     }
