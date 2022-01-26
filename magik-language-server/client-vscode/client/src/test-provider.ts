@@ -223,15 +223,14 @@ export class MagikTestProvider implements vscode.Disposable {
 
 		// Build test runner script.
 		let script = `
-_package user
 _protect
 	# Require products to be added.
 	_block
 		_for product _over {${productsStr}}.fast_elements()
 		_loop
-			_if smallworld_product.product(product) _is _unset
+			_if sw:smallworld_product.product(product) _is _unset
 			_then
-				condition.raise(:error, :string, write_string('Product could not be found: ', product))
+				sw:condition.raise(:error, :string, sw:write_string('Product could not be found: ', product))
 			_endif
 		_endloop
 	_endblock
@@ -240,21 +239,21 @@ _protect
 	_block
 		_for module _over {${modulesStr}}.fast_elements()
 		_loop
-			_if _not sw_module_manager.module(module).loaded?
+			_if _not sw:sw_module_manager.module(module).loaded?
 			_then
-				sw_module_manager.load_module(module)
+				sw:sw_module_manager.load_module(module)
 			_endif
 		_endloop
 	_endblock
 
 	# Load munit_xml_base for xml_test_runner.
-	sw_module_manager.load_module(:munit_xml)
+	sw:sw_module_manager.load_module(:munit_xml)
 
-	_dynamic !global_auto_declare?! << _false
+	_dynamic sw:!global_auto_declare?! << _false
 
 	# Create test_suite and run it.
 	_block
-		_local top_suite << get_global_value(:|sw:test_suite|).new(_unset, :vscode_munit_test_runner)
+		_local top_suite << sw:get_global_value(:|sw:test_suite|).new(_unset, :vscode_munit_test_runner)
 
 		# Add all test_cases.`;
 
@@ -264,29 +263,28 @@ _protect
 
 		script += `
 		# Run tests.
-		_local tmp_file << system.temp_file_name('vscode_test_run.xml')
-		_local output << external_text_output_stream.new(tmp_file, :utf8)
+		_local tmp_file << sw:system.temp_file_name('vscode_test_run.xml')
+		_local output << sw:external_text_output_stream.new(tmp_file, :utf8)
 		_protect
-			_dynamic !
-			_local runner << get_global_value(:|sw:xml_test_runner|).new(output)
+			_local runner << sw:get_global_value(:|sw:xml_test_runner|).new(output)
 			runner.run_in_foreground(top_suite)
 		_protection
 			output.close()
 		_endprotect
 
 		_local output_path << "${outputPath}"
-		system.rename(tmp_file, output_path)
+		sw:system.rename(tmp_file, output_path)
 	_endblock
 _protection
 	_local output_path << "${outputPath}"
-	_if _not system.file_exists?(output_path)
+	_if _not sw:system.file_exists?(output_path)
 	_then
 		# Place a dummy file.
-		_local tmp_file << system.temp_file_name('vscode_test_run.xml')
-		_local os << external_text_output_stream.new(tmp_file)
+		_local tmp_file << sw:system.temp_file_name('vscode_test_run.xml')
+		_local os << sw:external_text_output_stream.new(tmp_file)
 		os.write('<testsuite name="vscode_munit_test_runner" />')
 		os.close()
-		system.rename(tmp_file, output_path)
+		sw:system.rename(tmp_file, output_path)
 	_endif
 _endprotect
 $
@@ -420,17 +418,17 @@ $
 			});
 			return `
 ${indentStr}_block
-${indentStr}	_local ${suiteName} << get_global_value(:|sw:test_suite|).new(_unset, "${testItem.id}")
+${indentStr}	_local ${suiteName} << sw:get_global_value(:|sw:test_suite|).new(_unset, "${testItem.id}")
 ${indentStr}	${parentId}.add_test(${suiteName})
 ${indentStr}	${childItems}
 ${indentStr}_endblock`;
 		}
 
 		// Actual test case.
-		const exemplarName = testItem.parent.id.substr('test_case:'.length);
-		const testMethodName = testItem.id.substr('method:'.length);
+		const exemplarName = testItem.parent.id.substring('test_case:'.length);
+		const testMethodName = testItem.id.substring('method:'.length);
 		return `
-${indentStr}	${parentId}.add_test(get_global_value(:|${exemplarName}|).new(:|${testMethodName}|))`;
+${indentStr}	${parentId}.add_test(sw:get_global_value(:|${exemplarName}|).new(:|${testMethodName}|))`;
 	}
 
 }

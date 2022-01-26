@@ -113,9 +113,9 @@ class MagikSession implements vscode.Disposable {
 		const sourcePathParam = sourcePath ? `"${sourcePath}"` : "_unset";
 		const magik = ""
 			+ "_protect "
-			+ `load_file("${tempPath}", _unset, ${sourcePathParam}) `
+			+ `sw:load_file("${tempPath}", _unset, ${sourcePathParam}) `
 			+ "_protection "
-			+ `system.unlink("${tempPath}", _true, _true) `
+			+ `sw:system.unlink("${tempPath}", _true, _true) `
 			+ "_endprotect\n"
 			+ `$`;
 		this._terminal.sendText(magik);
