@@ -224,8 +224,8 @@ public class LocalTypeReasoner extends AstWalker {
 
     @Override
     protected void walkPostPackageSpecification(final AstNode node) {
-        final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-        final String name = identifierNode.getTokenValue();
+        final PackageNodeHelper helper = new PackageNodeHelper(node);
+        final String name = helper.getCurrentPackage();
 
         if (!this.typeKeeper.hasPackage(name)) {
             LOGGER.debug("Package not found: {}", name);
