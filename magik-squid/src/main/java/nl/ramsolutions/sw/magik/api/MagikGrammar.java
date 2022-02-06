@@ -817,7 +817,15 @@ public enum MagikGrammar implements GrammarRuleKey {
                 MagikPunctuator.BRACE_R)));
 
         b.rule(PACKAGE_IDENTIFIER).is(SPACING, b.regexp(BARE_IDENTIFIER_REGEXP));
-        b.rule(PACKAGE_SPECIFICATION).is(MagikKeyword.PACKAGE, PACKAGE_IDENTIFIER);
+        b.rule(PACKAGE_SPECIFICATION).is(
+            MagikKeyword.PACKAGE, PACKAGE_IDENTIFIER,
+            b.next(
+                b.firstOf(
+                    b.sequence(
+                        SPACING_NO_LB,
+                        b.optional(COMMENT),
+                        NEWLINE),
+                    b.endOfInput())));
 
         b.rule(LABEL).is(MagikPunctuator.AT, SPACING, b.regexp(LABEL_REGEXP));
     }
