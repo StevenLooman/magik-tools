@@ -18,6 +18,7 @@ import nl.ramsolutions.sw.magik.api.MagikOperator;
 public class DefSlottedExemplarParser extends TypeDefParser {
 
     private static final String DEF_SLOTTED_EXEMPLAR = "def_slotted_exemplar";
+    private static final String SW_DEF_SLOTTED_EXEMPLAR = "sw:def_slotted_exemplar";
 
     /**
      * Constructor.
@@ -38,7 +39,8 @@ public class DefSlottedExemplarParser extends TypeDefParser {
         }
 
         final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
-        if (!helper.isProcedureInvocationOf(DEF_SLOTTED_EXEMPLAR)) {
+        if (!helper.isProcedureInvocationOf(DEF_SLOTTED_EXEMPLAR)
+            && !helper.isProcedureInvocationOf(SW_DEF_SLOTTED_EXEMPLAR)) {
             return false;
         }
 
