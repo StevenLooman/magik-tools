@@ -545,8 +545,11 @@ class MagikGrammarTest {
             .matches("_blocki _endblock");
 
         MagikRuleForbiddenAssert.assertThat(g.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
-            .matches("_block\n _local x << 10  # type: integer\n write(x)\n _endblock\n");
+            .matches("_block\n _local x << 10  # type: integer\n write(x)\n _endblock\n")
+            .matches("_package a\n:a");
 
+        MagikRuleRequiredAssert.assertThat(g.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
+            .matches("_package a:a");
     }
 
 }
