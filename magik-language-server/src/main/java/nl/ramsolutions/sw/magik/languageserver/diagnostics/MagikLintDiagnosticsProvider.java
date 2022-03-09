@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
@@ -39,11 +40,15 @@ public class MagikLintDiagnosticsProvider {
     /**
      * Constructor. Locates configuration to be used.
      */
-    public MagikLintDiagnosticsProvider() {
-        final Path path = ConfigurationLocator.locateConfiguration();
+    public MagikLintDiagnosticsProvider(final @Nullable Path overrideConfigurationPath) {
+        final Path path = overrideConfigurationPath != null
+            ? overrideConfigurationPath
+            : ConfigurationLocator.locateConfiguration();
+
         if (path != null) {
             this.configuration = new Configuration(path);
         } else {
+            // Default configuration.
             this.configuration = new Configuration();
         }
 
