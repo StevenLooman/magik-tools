@@ -153,7 +153,9 @@ class MagikSession implements vscode.Disposable {
 	 */
 	 public transmitEditor(editor: vscode.TextEditor) {
 		// Save file in editor.
-		editor.document.save();
+		if (editor.document.uri.scheme != 'untitled') {
+			editor.document.save();
+		}
 
 		// Get active file.
 		const doc = editor.document;
