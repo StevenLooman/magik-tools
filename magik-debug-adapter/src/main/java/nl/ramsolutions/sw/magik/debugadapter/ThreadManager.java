@@ -40,7 +40,6 @@ class ThreadManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadManager.class);
 
     private static final String LANGUAGE_MAGIK = "Magik";
-    private static final String UNKNOWN_EXEMPLAR_UNKNOWN_METHOD = "<unknown exemplar><unknown method>";
     private static final String LOOPBODY = "<loopbody>";
     private static final String UNNAMED_PROC = "<unnamed proc>()";
     private static final String EVAL_EXEMPLAR_PACKAGE =
@@ -113,16 +112,15 @@ class ThreadManager {
         // instead of Lsp4jConversion.
         final List<StackFrame> stackFrames = new ArrayList<>();
         for (final ThreadStackResponse.StackElement stackElement : threadStack.getStackFrames()) {
-            if (!stackElement.getLanguage().equals(LANGUAGE_MAGIK)
-                || stackElement.getName().equals(UNKNOWN_EXEMPLAR_UNKNOWN_METHOD)
-                || stackElement.getName().equals(LOOPBODY)) {
+            if (!stackElement.getLanguage().equals(LANGUAGE_MAGIK)) {
                 continue;
             }
 
             Path path = null;
             try {
                 String method = stackElement.getName();
-                if (!method.equals(UNNAMED_PROC)) {
+                if (!method.equals(UNNAMED_PROC)
+                    && !method.equals(LOOPBODY)) {
                     final int indexDot = method.indexOf(".");
                     final int indexBracket = method.indexOf("[");
                     final int index = indexDot != -1
@@ -153,7 +151,7 @@ class ThreadManager {
 
                     path = Path.of(filename);
                 }
-            } catch (ExecutionException exception) {
+            } catch (final ExecutionException exception) {
                 final Throwable cause = exception.getCause();
                 if (cause instanceof SlapErrorException
                     && ((SlapErrorException) cause).getError().getErrorMessage() != ErrorMessage.METHOD_NOT_FOUND) {
@@ -333,8 +331,7 @@ class ThreadManager {
             // - Magik
             // - A real method
             // If not, otherwise continue stepping anyway.
-            if (!topElement.getLanguage().equals(LANGUAGE_MAGIK)
-                || currentMethod.equals(UNKNOWN_EXEMPLAR_UNKNOWN_METHOD)) {
+            if (!topElement.getLanguage().equals(LANGUAGE_MAGIK)) {
                 continue;
             }
 
