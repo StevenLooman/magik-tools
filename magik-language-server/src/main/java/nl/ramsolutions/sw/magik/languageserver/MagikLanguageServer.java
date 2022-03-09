@@ -42,6 +42,7 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
         this.magikWorkspaceService = new MagikWorkspaceService(this, this.typeKeeper);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public CompletableFuture<InitializeResult> initialize(final InitializeParams params) {
         LOGGER.trace("initialize");
