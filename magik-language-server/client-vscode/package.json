@@ -195,6 +195,10 @@
 					"description": "Path to environment file.",
 					"type": "string"
 				},
+				"magik.lint.overrideConfigFile": {
+					"description": "Override path to magiklintrc.properties.",
+					"type": "string"
+				},
 				"magik.typing.typeDatabasePaths": {
 					"description": "Paths to type databases.",
 					"type": "array"

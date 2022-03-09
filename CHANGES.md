@@ -8,6 +8,7 @@ Changes
 - Fix bug where grammar accepted invalid _package identifiers, causing problems later on
 - Fix bug in DefSlottedExemplarParser: also see `sw:def_slotted_exemplar`
 - Minor clean up in `ThreadManager`
+- Add setting `magik.lint.overrideConfigFile` to override properties file for linter from Language Server
 
 
 0.5.1 (2022-01-17)

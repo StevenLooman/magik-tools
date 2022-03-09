@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.languageserver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -99,6 +100,35 @@ public class MagikSettings {
         }
 
         return enableChecks.getAsBoolean();
+    }
+
+    /**
+     * Get magik.lint.overrideConfigFile.
+     * @return magik.lint.overrideConfigFile
+     */
+    @CheckForNull
+    public Path getChecksOverrideSettingsPath() {
+        final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+        if (magik == null) {
+            return null;
+        }
+
+        final JsonObject lint = magik.getAsJsonObject("lint");
+        if (lint == null) {
+            return null;
+        }
+
+        final JsonElement overrideConfigFile = lint.get("overrideConfigFile");
+        if (overrideConfigFile == null) {
+            return null;
+        }
+
+        final String overrideConfigFileStr = overrideConfigFile.getAsString();
+        if (overrideConfigFileStr == null) {
+            return null;
+        }
+
+        return Path.of(overrideConfigFileStr);
     }
 
 }

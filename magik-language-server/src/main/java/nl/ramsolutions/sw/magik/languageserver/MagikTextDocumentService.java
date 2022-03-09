@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -211,7 +212,10 @@ public class MagikTextDocumentService implements TextDocumentService {
     }
 
     private List<Diagnostic> getDiagnosticsLinter(final MagikTypedFile magikFile) {
-        final MagikLintDiagnosticsProvider lintProvider = new MagikLintDiagnosticsProvider();
+        final MagikSettings magikSettings = this.languageServer.getMagikSettings();
+        final Path overrideSettingsPath = magikSettings.getChecksOverrideSettingsPath();
+
+        final MagikLintDiagnosticsProvider lintProvider = new MagikLintDiagnosticsProvider(overrideSettingsPath);
         try {
             return lintProvider.getDiagnostics(magikFile);
         } catch (final IOException exception) {
