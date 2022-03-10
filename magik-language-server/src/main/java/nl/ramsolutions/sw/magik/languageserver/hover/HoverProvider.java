@@ -76,6 +76,8 @@ public class HoverProvider {
         } else if (hoveredNode.getParent().is(MagikGrammar.PARAMETER)) {
             final AstNode parameterNode = hoveredNode.getParent();
             this.provideHoverAtom(magikFile, parameterNode, builder);
+        } else if (hoveredNode.getParent().is(MagikGrammar.VARIABLE_DEFINITION)) {
+            this.provideHoverAtom(magikFile, hoveredNode, builder);
         }
 
         final MarkupContent contents = new MarkupContent(MarkupKind.MARKDOWN, builder.toString());
