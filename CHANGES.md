@@ -9,6 +9,7 @@ Changes
 - Fix bug in DefSlottedExemplarParser: also see `sw:def_slotted_exemplar`
 - Minor clean up in `ThreadManager`
 - Add setting `magik.lint.overrideConfigFile` to override properties file for linter from Language Server
+- Fix bug in HoverProvider where no hover was provided for assigned variable
 
 
 0.5.1 (2022-01-17)

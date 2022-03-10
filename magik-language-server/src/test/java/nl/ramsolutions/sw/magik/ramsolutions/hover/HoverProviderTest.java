@@ -171,4 +171,26 @@ class HoverProviderTest {
         assertThat(content.getValue()).contains("_undefined");
     }
 
+    @Test
+    void testProvideHoverAssignedVariable() {
+        // Set up a method.
+        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final MagikType symbolType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:symbol"));
+        symbolType.setDoc("type_doc");
+
+        final String code = ""
+            + "_method a.b\n"
+            + "    _local var << :symbol\n"
+            + "    var.hover_me()\n"
+            + "_endmethod";
+        final Position position = new Position(1, 11);  // On `var`.
+
+        // Hover and test.
+        final Hover hover = this.provideHover(code, position, typeKeeper);
+        final MarkupContent content = hover.getContents().getRight();
+        assertThat(content.getKind()).isEqualTo(MarkupKind.MARKDOWN);
+        assertThat(content.getValue()).contains("symbol");
+        assertThat(content.getValue()).contains("type_doc");
+    }
+
 }
