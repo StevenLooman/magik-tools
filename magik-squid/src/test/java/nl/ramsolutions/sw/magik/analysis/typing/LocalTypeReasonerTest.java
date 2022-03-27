@@ -560,14 +560,14 @@ class LocalTypeReasonerTest {
 
         final Collection<Method> procMethods = resultType.getMethods("invoke()");
         assertThat(procMethods).isNotEmpty();
-        for (final Method procMethod : procMethods) {
+        procMethods.forEach(procMethod -> {
             final ExpressionResult procResult = procMethod.getCallResult();
             assertThat(procResult.size()).isEqualTo(1);
 
             final MagikType procResultType = (MagikType) procResult.get(0, null);
             assertThat(procResultType).isNotNull();
             assertThat(procResultType.getFullName()).isEqualTo("sw:integer");
-        }
+        });
     }
 
     @Test
