@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.5.2 (unreleased)
+0.5.2 (2022-05-26)
 
 - Fix bug in ScopeBuilderVisitor where import in top level procedure caused a NPE
 - Fix bug in magik-lint --rcfile, where java.io.File is expected but was java.io.FileInputStream

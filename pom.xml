@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>nl.ramsolutions</groupId>
   <artifactId>magik-tools</artifactId>
-  <version>0.5.2-SNAPSHOT</version>
+  <version>0.5.2</version>
   <packaging>pom</packaging>
 
   <name>Magik Tools</name>
