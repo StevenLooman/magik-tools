@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.5.3 (unreleased)
+0.5.3 (2022-11-04)
 - Fix bug in sonar plugin where all issues were applied to every file
 
 
