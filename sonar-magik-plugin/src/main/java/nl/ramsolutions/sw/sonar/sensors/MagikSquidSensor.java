@@ -47,7 +47,8 @@ public class MagikSquidSensor implements Sensor {
     private static final Logger LOGGER = Loggers.get(MagikSquidSensor.class);
     private static final long SLEEP_PERIOD = 100;
 
-    private final Checks<MagikCheck> checks;
+    private final CheckFactory checkFactory;
+    // private final Checks<MagikCheck> checks;
     private final FileLinesContextFactory fileLinesContextFactory;
     private final NoSonarFilter noSonarFilter;
 
@@ -60,9 +61,7 @@ public class MagikSquidSensor implements Sensor {
             final CheckFactory checkFactory,
             final FileLinesContextFactory fileLinesContextFactory,
             final NoSonarFilter noSonarFilter) {
-        this.checks = checkFactory
-            .<MagikCheck>create(CheckList.REPOSITORY_KEY)
-            .addAnnotatedChecks((Iterable<Class<?>>) CheckList.getChecks());
+        this.checkFactory = checkFactory;
         this.fileLinesContextFactory = fileLinesContextFactory;
         this.noSonarFilter = noSonarFilter;
     }
@@ -121,10 +120,18 @@ public class MagikSquidSensor implements Sensor {
 
         // Save issues.
         LOGGER.debug("Running checks");
-        for (final MagikCheck check : this.checks.all()) {
+        final Checks<MagikCheck> checks = checkFactory
+            .<MagikCheck>create(CheckList.REPOSITORY_KEY)
+            .addAnnotatedChecks((Iterable<Class<?>>) CheckList.getChecks());
+        for (final MagikCheck check : checks.all()) {
             LOGGER.debug("Running check: {}", check);
             final List<MagikIssue> issues = check.scanFileForIssues(magikFile);
-            this.saveIssues(context, check, issues, inputFile);
+            final RuleKey ruleKey = checks.ruleKey(check);
+            if (ruleKey == null) {
+                continue;
+            }
+
+            this.saveIssues(context, ruleKey, check, issues, inputFile);
         }
 
         // Save highlighted tokens.
@@ -178,16 +185,13 @@ public class MagikSquidSensor implements Sensor {
 
     private void saveIssues(
             final SensorContext context,
-            final MagikCheck check,
-            final List<MagikIssue> issues,
+            final RuleKey ruleKey,
+            final MagikCheck magikCheck,
+            final List<MagikIssue> magikIssues,
             final InputFile inputFile) {
-        for (final MagikIssue magikIssue : issues) {
+        for (final MagikIssue magikIssue : magikIssues) {
             LOGGER.debug("Saving issue, file: {}, issue: {}", inputFile, magikIssue);
 
-            final RuleKey ruleKey = this.checks.ruleKey(check);
-            if (ruleKey == null) {
-                continue;
-            }
             final NewIssue issue = context.newIssue();
             final NewIssueLocation location = issue.newLocation()
                 .on(inputFile)

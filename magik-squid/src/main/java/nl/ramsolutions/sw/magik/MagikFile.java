@@ -89,6 +89,9 @@ public class MagikFile {
             final MagikParser parser = new MagikParser();
             final String magikSource = this.getSource();
             this.astNode = parser.parseSafe(magikSource);
+
+            // Update URI.
+            MagikParser.updateUri(this.astNode, this.uri);
         }
 
         return this.astNode;
