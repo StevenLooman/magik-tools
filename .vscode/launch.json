@@ -43,6 +43,14 @@
             "hostName": "localhost",
             "port": 5006,
             "projectName": "magik-debug-adapter"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Attach)-sonar-magik-plugin",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5007,
+            "projectName": "sonar-magik-plugin"
         }
     ]
 }

@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -218,6 +219,26 @@ public class MagikParser {
         }
 
         node.getChildren().forEach(this::applyWhitespaceConversion);
+    }
+
+    /**
+     * Recusrively update URI for AstNode/Tokens.
+     * @param node Node to start at.
+     * @param newUri New URI to set.
+     */
+    public static void updateUri(final AstNode node, final URI newUri) {
+        final Token token = node.getToken();
+        if (token != null) {
+            try {
+                final Field fieldUri = token.getClass().getDeclaredField("uri");
+                fieldUri.setAccessible(true);
+                fieldUri.set(token, newUri);
+            } catch (final ReflectiveOperationException exception) {
+                LOGGER.error(exception.getMessage(), exception);
+            }
+        }
+
+        node.getChildren().forEach(childNode -> MagikParser.updateUri(childNode, newUri));
     }
 
     /**
