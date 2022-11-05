@@ -6,7 +6,6 @@
     "ForbiddenCall",
     "LhsRhsComparatorEqual",
     "LocalImportProcedure",
-    "MethodDoc",
     "SimplifyIf",
     "SizeZeroEmpty",
     "SyntaxError",

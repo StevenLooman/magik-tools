@@ -16,7 +16,6 @@ import nl.ramsolutions.sw.magik.checks.checks.LhsRhsComparatorEqualCheck;
 import nl.ramsolutions.sw.magik.checks.checks.LineLengthCheck;
 import nl.ramsolutions.sw.magik.checks.checks.LocalImportProcedureCheck;
 import nl.ramsolutions.sw.magik.checks.checks.MethodComplexityCheck;
-import nl.ramsolutions.sw.magik.checks.checks.MethodDocCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NewDocCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoSelfUseCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoStatementAfterBodyExitCheck;
@@ -71,7 +70,6 @@ public final class CheckList {
             LineLengthCheck.class,
             LocalImportProcedureCheck.class,
             MethodComplexityCheck.class,
-            MethodDocCheck.class,
             NewDocCheck.class,
             NoSelfUseCheck.class,
             NoStatementAfterBodyExitCheck.class,

@@ -1,6 +1,11 @@
 Changes
 =======
 
+0.5.4 (unreleased)
+
+- Remove MethodDoc check
+
+
 0.5.3 (2022-11-04)
 - Fix bug in sonar plugin where all issues were applied to every file
 
