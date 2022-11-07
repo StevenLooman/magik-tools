@@ -5,6 +5,7 @@ Changes
 
 - Remove MethodDoc check
 - Add ParameterCount check
+- Update Sonar way profile
 
 
 0.5.3 (2022-11-04)
