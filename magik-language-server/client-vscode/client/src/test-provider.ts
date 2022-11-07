@@ -33,6 +33,10 @@ class TestItemCollection implements vscode.TestItemCollection {
 		items.forEach(this.add, this);
 	}
 
+	[Symbol.iterator](): Iterator<[id: string, testItem: vscode.TestItem], any, undefined> {
+		return this._items.entries();
+	}
+
 	public get size() : number {
 		return this._items.size;
 	}
