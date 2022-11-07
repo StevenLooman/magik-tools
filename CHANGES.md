@@ -4,6 +4,7 @@ Changes
 0.5.4 (unreleased)
 
 - Remove MethodDoc check
+- Add ParameterCount check
 
 
 0.5.3 (2022-11-04)

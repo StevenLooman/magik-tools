@@ -1,0 +1,13 @@
+{
+  "title": "Methods/procedures should not have too many parameters",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "60min"
+  },
+  "tags": ["complexity"],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "ParameterCount",
+  "sqKey": "parameter-count"
+}

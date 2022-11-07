@@ -19,6 +19,7 @@ import nl.ramsolutions.sw.magik.checks.checks.MethodComplexityCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NewDocCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoSelfUseCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoStatementAfterBodyExitCheck;
+import nl.ramsolutions.sw.magik.checks.checks.ParameterCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ScopeCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.SimplifyIfCheck;
 import nl.ramsolutions.sw.magik.checks.checks.SizeZeroEmptyCheck;
@@ -73,6 +74,7 @@ public final class CheckList {
             NewDocCheck.class,
             NoSelfUseCheck.class,
             NoStatementAfterBodyExitCheck.class,
+            ParameterCountCheck.class,
             ScopeCountCheck.class,
             SimplifyIfCheck.class,
             SizeZeroEmptyCheck.class,
