@@ -1,7 +1,10 @@
 Changes
 =======
 
-0.5.4 (unreleased)
+0.5.5 (unreleased)
+
+
+0.5.4 (2022-11-07)
 
 - Remove MethodDoc check
 - Add ParameterCount check
