@@ -1,16 +1,24 @@
 {
   "name": "Sonar way recommended",
   "ruleKeys": [
+    "CommentedCode",
+    "DuplicateMethodInFile",
+    "EmptyBlock",
     "ExemplarSlotCount",
     "FileNotInLoadList",
     "ForbiddenCall",
+    "HidesVariable",
+    "ImportMissingDefinition",
     "LhsRhsComparatorEqual",
     "LocalImportProcedure",
+    "MethodComplexity",
+    "NoStatementAfterBodyExit",
     "ParameterCount",
-    "SimplifyIf",
+    "ScopeCount",
     "SizeZeroEmpty",
     "SyntaxError",
     "UnusedVariable",
+    "UseValueCompare",
     "VariableNaming"
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "title": "d",
+  "title": "Distance between variable definition and usage",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
