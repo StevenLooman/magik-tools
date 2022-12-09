@@ -57,10 +57,10 @@ public class MagikLintDiagnosticsProvider {
     }
 
     /**
-     * Get {{Diagnostic}}s using {{MagikLint}}.
+     * Get {@link Diagnostic}s using {@link MagikLint}.
      *
      * @param magikFile Magik file.
-     * @return List with {{Diagnostic}}s.
+     * @return List with {@link Diagnostic}s.
      * @throws IOException -
      */
     public List<Diagnostic> getDiagnostics(final MagikFile magikFile) throws IOException {

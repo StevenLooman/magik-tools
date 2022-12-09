@@ -35,7 +35,8 @@ class NewDocGrammarTest {
         Assertions.assertThat(g.rule(NewDocGrammar.RETURN))
             .matches("## @return Aaaaa aaa.")
             .matches("## @return {sw:rope}")
-            .matches("## @return {user:thing} Aaaaa aaa.");
+            .matches("## @return {user:thing} Aaaaa aaa.")
+            .matches("## @return {_parameter(p1)}");
     }
 
     @Test

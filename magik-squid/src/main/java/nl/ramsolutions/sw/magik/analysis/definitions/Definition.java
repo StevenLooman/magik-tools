@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
  * Base class for definitions.
@@ -8,18 +9,19 @@ import com.sonar.sslr.api.AstNode;
 public abstract class Definition {
 
     private final AstNode node;
-    private final String pakkage;
-    private final String name;
+    private final TypeString name;
 
     /**
      * Constructor.
      * @param node Node.
-     * @param pakkage Package of definition.
-     * @param name Name of definition.
+     * @param name Name of definition, if applicable.
      */
-    protected Definition(final AstNode node, final String pakkage, final String name) {
+    protected Definition(final AstNode node, final TypeString name) {
+        if (!name.isSingle()) {
+            throw new IllegalStateException();
+        }
+
         this.node = node;
-        this.pakkage = pakkage;
         this.name = name;
     }
 
@@ -36,7 +38,7 @@ public abstract class Definition {
      * @return Name of definition.
      */
     public String getName() {
-        return this.name;
+        return this.name.getIdentifier();
     }
 
     /**
@@ -44,7 +46,7 @@ public abstract class Definition {
      * @return Package name.
      */
     public String getPackage() {
-        return this.pakkage;
+        return this.name.getPakkage();
     }
 
     @Override

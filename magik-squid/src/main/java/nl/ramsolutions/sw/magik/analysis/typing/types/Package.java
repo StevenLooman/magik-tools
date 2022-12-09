@@ -1,14 +1,15 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.Location;
+import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 
 /**
  * Smallworld Package.
@@ -16,18 +17,22 @@ import nl.ramsolutions.sw.magik.analysis.Location;
 public class Package {
 
     private final String name;
-    private final Set<Package> uses = new HashSet<>();
-    private final Map<String, AbstractType> types = new HashMap<>();
+    private final Set<String> uses = ConcurrentHashMap.newKeySet();
+    private final Map<String, AbstractType> types = new ConcurrentHashMap<>();
     private Location location;
+    private String doc;
+    private ITypeKeeper typeKeeper;
 
     /**
      * Constructor.
      * @param name Name of package.
      */
-    public Package(final String name) {
+    public Package(final ITypeKeeper typeKeeper, final String name) {
+        this.typeKeeper = typeKeeper;
         this.name = name;
 
         this.setLocation(null);
+        this.typeKeeper.addPackage(this);
     }
 
     /**
@@ -57,50 +62,61 @@ public class Package {
 
     /**
      * Add a use of another package.
-     * @param usePackage Other package.
+     * @param pakkageName Other package.
      */
-    public void addUse(final Package usePackage) {
-        this.uses.add(usePackage);
+    public void addUse(final String pakkageName) {
+        this.uses.add(pakkageName);
+    }
+
+    /**
+     * Clear uses.
+     */
+    public void clearUses() {
+        this.uses.clear();
     }
 
     /**
      * Get all used packages.
      * @return All used packages.
      */
-    public Set<Package> uses() {
-        return Collections.unmodifiableSet(this.uses);
+    public Set<Package> getUses() {
+        return this.uses.stream()
+            .map(this.typeKeeper::getPackage)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     /**
-     * See if {{key}} is defined in this package.
+     * See if {@code key} is defined in this package.
      * This also includes used packages.
      * @param key Key to check.
      * @return true if defined in this package, false otherwise.
      */
     public boolean containsKey(final String key) {
-        if (!this.types.containsKey(key)) {
-            for (final Package usedPackage : this.uses) {
-                if (usedPackage.containsKey(key)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        return true;
+        return this.get(key) != null;
     }
 
     /**
-     * Get a {{AbstractType}} defined in this package.
+     * Test if type is contained by this package.
+     * @param type Type to check.
+     * @return True if contained, false otherwise.
+     */
+    public boolean containsTypeLocal(final AbstractType type) {
+        final String identifier = type.getTypeString().getIdentifier();
+        return this.types.containsKey(identifier)
+            && this.types.get(identifier).equals(type);
+    }
+
+    /**
+     * Get a {@link AbstractType} defined in this package.
      * This also includes used packages.
      * @param key Key to get.
-     * @return {{AbstractType}} if found, otherwise null.
+     * @return {@link AbstractType} if found, otherwise null.
      */
     @CheckForNull
     public AbstractType get(final String key) {
         if (!this.types.containsKey(key)) {
-            for (final Package usedPackage : this.uses) {
+            for (final Package usedPackage : this.getUses()) {
                 final AbstractType type = usedPackage.get(key);
                 if (type != null) {
                     return type;
@@ -121,6 +137,14 @@ public class Package {
     }
 
     /**
+     * Put all types.
+     * @param newTypes Types to add.
+     */
+    public void putAll(final Map<String, AbstractType> newTypes) {
+        this.types.putAll(newTypes);
+    }
+
+    /**
      * Get all types in this package.
      * @return All types in this pacakge.
      */
@@ -129,36 +153,34 @@ public class Package {
     }
 
     /**
-     * Test if type is contained by this package.
-     * @param type Type to check.
-     * @return True if contained, false otherwise.
-     */
-    public boolean containsTypeLocal(final AbstractType type) {
-        final String typeName = type.getName();
-        return this.types.containsKey(typeName)
-            && this.types.get(typeName).equals(type);
-    }
-
-    /**
-     * Remove an identifier from this package.
-     * @param identifier Identifier to remove.
-     */
-    public void remove(final String identifier) {
-        this.types.remove(identifier);
-    }
-
-    /**
      * Remove a type from this package.
      * @param type Type to remove.
      */
     public void remove(final AbstractType type) {
-        final String identifier = type.getName();
-        this.remove(identifier);
+        final String identifier = type.getTypeString().getIdentifier();
+        this.types.remove(identifier);
+    }
+
+    /**
+     * Set method documentation.
+     * @param comment Method doc.
+     */
+    public void setDoc(final String comment) {
+        this.doc = comment;
+    }
+
+    /**
+     * Get method documentation.
+     * @return Method doc.
+     */
+    @CheckForNull
+    public String getDoc() {
+        return this.doc;
     }
 
     @Override
     public String toString() {
-        final String usesParts = this.uses().stream()
+        final String usesParts = this.getUses().stream()
                 .map(Package::getName)
                 .collect(Collectors.joining(","));
         return String.format(

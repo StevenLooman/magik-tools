@@ -1,24 +1,19 @@
 package nl.ramsolutions.sw.magik.parser;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.GenericTokenType;
-import com.sonar.sslr.api.RecognitionException;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
 import com.sonar.sslr.impl.Parser;
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
-import nl.ramsolutions.sw.magik.api.ExtendedTokenType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.NewDocGrammar;
 import org.slf4j.Logger;
@@ -63,13 +58,14 @@ public class NewDocParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NewDocParser.class);
 
-    private final Parser<LexerlessGrammar> parser = new ParserAdapter<>(StandardCharsets.UTF_8, NewDocGrammar.create());
+    private final Parser<LexerlessGrammar> parser =
+        new ParserAdapter<>(StandardCharsets.ISO_8859_1, NewDocGrammar.create());
     private final List<Token> tokens;
     private AstNode newDocNode;
 
     /**
      * Constructor.
-     * @param node {{AstNode}} to analyze.
+     * @param node {@link AstNode} to analyze.
      */
     public NewDocParser(final AstNode node) {
         this(NewDocParser.getCommentTokens(node));
@@ -82,8 +78,9 @@ public class NewDocParser {
 
     private static List<Token> getCommentTokens(final AstNode node) {
         final Predicate<AstNode> predicate =
-            predNode -> node == predNode
-                        || predNode.isNot(MagikGrammar.PROCEDURE_DEFINITION);
+            predNode ->
+                node == predNode
+                || predNode.isNot(MagikGrammar.PROCEDURE_DEFINITION);
         return AstQuery.dfs(node, predicate)
                 .map(AstNode::getToken)
                 .filter(Objects::nonNull)
@@ -95,17 +92,12 @@ public class NewDocParser {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    private AstNode parseNewDocSafely() {
-        try {
-            return this.parseNewDoc();
-        } catch (RecognitionException exception) {
-            LOGGER.debug(exception.getMessage(), exception);
-            return this.buildSyntaxErrorNode(exception);
-        }
-    }
-
     @SuppressWarnings("java:S3011")
     private AstNode parseNewDoc() {
+        // TODO: Can't we convert to string first, and replace all before with spaces/tabs?
+        //       Perhaps use MagikFile for this?
+        //       Atleast then we don't have to update token lines/columns.
+
         // Build comment.
         final String comments = this.tokens.stream()
             .map(Token::getValue)
@@ -142,107 +134,46 @@ public class NewDocParser {
         return node;
     }
 
-    private AstNode buildSyntaxErrorNode(RecognitionException recognitionException) {
-        // Build comment.
-        final String comments = this.tokens.stream()
-            .map(Token::getOriginalValue)
-            .collect(Collectors.joining("\n"));
-
-        int line = recognitionException.getLine();
-        final String[] lines = comments.split("\n");
-        if (lines.length <= line) {
-            line = lines.length;
-        }
-
-        // parse message, as the exception doesn't provide the raw value
-        final String message = recognitionException.getMessage();
-        final Pattern pattern = Pattern.compile("Parse error at line (\\d+) column (\\d+):.*");
-        final Matcher matcher = pattern.matcher(message);
-        if (!matcher.find()) {
-            throw new IllegalStateException("Unrecognized RecognitionException message");
-        }
-        final String columnStr = matcher.group(2);
-        int column = Integer.parseInt(columnStr) - 1;
-        final String offendingLineStr = lines[line - 1];
-        if (column >= offendingLineStr.length()) {
-            // Don't break things!
-            column = offendingLineStr.length() - 1;
-        }
-
-        final URI uri = URI.create("magik://syntax_error");    // This is later updated.
-        final Token syntaxErrorToken = Token.builder()
-                .setValueAndOriginalValue(comments)
-                .setURI(uri)
-                .setLine(line)
-                .setColumn(column)
-                .setType(ExtendedTokenType.SYNTAX_ERROR)
-                .build();
-
-        final AstNode dummyNode = new AstNode(MagikGrammar.MAGIK, "NEW_DOC", null);
-
-        final AstNode errorNode = new AstNode(MagikGrammar.SYNTAX_ERROR, "SYNTAX_ERROR", syntaxErrorToken);
-        dummyNode.addChild(errorNode);
-
-        int eofLine = lines.length;
-        int eofColumn = 0;
-        if (comments.endsWith("\n")) {
-            eofLine += 1;
-        } else {
-            eofColumn = lines[lines.length - 1].length();
-        }
-        final Token eofToken = Token.builder()
-                .setValueAndOriginalValue("")
-                .setURI(uri)
-                .setLine(eofLine)
-                .setColumn(eofColumn)
-                .setType(ExtendedTokenType.SYNTAX_ERROR)
-                .build();
-        final AstNode eofNode = new AstNode(GenericTokenType.EOF, "EOF", eofToken);
-        dummyNode.addChild(eofNode);
-
-        return dummyNode;
-    }
-
     /**
      * Get NewDoc AstNode.
      * @return Parsed AstNode.
      */
     public AstNode getNewDocNode() {
         if (this.newDocNode == null) {
-            this.newDocNode = this.parseNewDocSafely();
+            this.newDocNode = this.parseNewDoc();
         }
 
         return this.newDocNode;
     }
 
     /**
-     * Get @param types.
-     * @return Map with @param types, keyed on @param name, values on @param type.
+     * Get param types.
+     * @return Map with @param types, keyed on name, valued on type.
      */
-    public Map<String, String> getParameterTypes() {
+    public Map<String, TypeString> getParameterTypes() {
         final AstNode node = this.getNewDocNode();
         return node.getChildren(NewDocGrammar.PARAM).stream()
             .filter(this::noEmptyName)
             .collect(Collectors.toMap(
                 this::getName,
-                this::getTypeName));
+                this::getTypeString));
     }
 
     /**
-     * Get @param nodes + @param type names.
+     * Get @param nodes + type strings.
      * @return
      */
-    public Map<AstNode, String> getParameterTypeNodes() {
+    public Map<AstNode, TypeString> getParameterTypeNodes() {
         final AstNode node = this.getNewDocNode();
         return node.getChildren(NewDocGrammar.PARAM).stream()
             .filter(this::hasTypeNode)
             .collect(Collectors.toMap(
                 this::getTypeNode,
-                this::getTypeName));
+                this::getTypeString));
     }
 
     /**
-     * Get parameter name node + names.
+     * Get @param name node + names.
      * @return
      */
     public Map<AstNode, String> getParameterNameNodes() {
@@ -258,34 +189,34 @@ public class NewDocParser {
      * Get @return types.
      * @return List with @return types.
      */
-    public List<String> getReturnTypes() {
+    public List<TypeString> getReturnTypes() {
         final AstNode node = this.getNewDocNode();
         return node.getChildren(NewDocGrammar.RETURN).stream()
-            .map(this::getTypeName)
+            .map(this::getTypeString)
             .collect(Collectors.toList());
     }
 
     /**
-     * Get @return type nodes + names.
+     * Get return type nodes + names.
      * @return Map with @return type nodes + type names.
      */
-    public Map<AstNode, String> getReturnTypeNodes() {
+    public Map<AstNode, TypeString> getReturnTypeNodes() {
         final AstNode node = this.getNewDocNode();
         return node.getChildren(NewDocGrammar.RETURN).stream()
             .filter(this::hasTypeNode)
             .collect(Collectors.toMap(
                 this::getTypeNode,
-                this::getTypeName));
+                this::getTypeString));
     }
 
     /**
      * Get @loop types.
      * @return List with @loop types.
      */
-    public List<String> getLoopTypes() {
+    public List<TypeString> getLoopTypes() {
         final AstNode node = this.getNewDocNode();
         return node.getChildren(NewDocGrammar.LOOP).stream()
-            .map(this::getTypeName)
+            .map(this::getTypeString)
             .collect(Collectors.toList());
     }
 
@@ -293,43 +224,43 @@ public class NewDocParser {
      * Get @loop type nodes + names.
      * @return List with @loop type nodes + type names.
      */
-    public Map<AstNode, String> getLoopTypeNodes() {
+    public Map<AstNode, TypeString> getLoopTypeNodes() {
         final AstNode node = this.getNewDocNode();
         return node.getChildren(NewDocGrammar.LOOP).stream()
             .filter(this::hasTypeNode)
             .collect(Collectors.toMap(
                 this::getTypeNode,
-                this::getTypeName));
+                this::getTypeString));
     }
 
     /**
-     * Get slot types.
-     * @return Map with slot types, keyed on slot name, values on slot type.
+     * Get @slot types.
+     * @return Map with @slot types, keyed on name, valued on type.
      */
-    public Map<String, String> getSlotTypes() {
+    public Map<String, TypeString> getSlotTypes() {
         final AstNode node = this.getNewDocNode();
         return node.getChildren(NewDocGrammar.SLOT).stream()
             .filter(this::noEmptyName)
             .collect(Collectors.toMap(
                 this::getName,
-                this::getTypeName));
+                this::getTypeString));
     }
 
     /**
-     * Get slot type nodes + name.
+     * Get @slot type nodes + types.
      * @return
      */
-    public Map<AstNode, String> getSlotTypeNodes() {
+    public Map<AstNode, TypeString> getSlotTypeNodes() {
         final AstNode node = this.getNewDocNode();
         return node.getChildren(NewDocGrammar.SLOT).stream()
             .filter(this::hasTypeNode)
             .collect(Collectors.toMap(
                 this::getTypeNode,
-                this::getTypeName));
+                this::getTypeString));
     }
 
     /**
-     * Get slot name nodes + name.
+     * Get @slot name nodes + name.
      * @return
      */
     public Map<String, AstNode> getSlotNameNodes() {
@@ -359,17 +290,18 @@ public class NewDocParser {
         return node.getFirstChild(NewDocGrammar.TYPE) != null;
     }
 
-    private String getTypeName(final AstNode node) {
+    private TypeString getTypeString(final AstNode node) {
         final AstNode typeNode = node.getFirstChild(NewDocGrammar.TYPE);
         if (typeNode == null) {
-            return "";
+            return TypeString.UNDEFINED;
         }
 
-        return typeNode.getTokens().stream()
+        final String value = typeNode.getTokens().stream()
             .filter(token -> !token.getValue().equals("{"))
             .filter(token -> !token.getValue().equals("}"))
             .map(Token::getValue)
             .collect(Collectors.joining());
+        return TypeString.of(value);
     }
 
     private AstNode getTypeNode(final AstNode node) {

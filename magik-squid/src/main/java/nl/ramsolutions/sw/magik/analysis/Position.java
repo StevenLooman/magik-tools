@@ -12,7 +12,7 @@ public class Position implements Comparable<Position> {
     private static final String NEWLINE_REGEXP = "(?:\\n|\\r\\n|\\r)";
 
     /**
-     * Comparator for {{Position}}s.
+     * Comparator for {@link Position}s.
      */
     public class PositionComparator implements Comparator<Position> {
 

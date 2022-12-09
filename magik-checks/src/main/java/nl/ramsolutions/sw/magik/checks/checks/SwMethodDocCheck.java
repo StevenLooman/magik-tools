@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
@@ -18,7 +17,7 @@ import org.sonar.check.Rule;
 /**
  * Check if method docs are valid, according to SW style.
  */
-@DisabledByDefault // This conflicts with {{MethodDocCheck}}!
+@DisabledByDefault
 @Rule(key = SwMethodDocCheck.CHECK_KEY)
 public class SwMethodDocCheck extends MagikCheck {
 
@@ -31,7 +30,7 @@ public class SwMethodDocCheck extends MagikCheck {
     @Override
     protected void walkPreMethodDefinition(final AstNode node) {
         final String methodDoc = this.extractDoc(node);
-        if (methodDoc == null) {
+        if (methodDoc.isBlank()) {
             final String message = String.format(MESSAGE, "all");
             this.addIssue(node, message);
             return;
@@ -73,7 +72,6 @@ public class SwMethodDocCheck extends MagikCheck {
         return parameters;
     }
 
-    @CheckForNull
     private String extractDoc(final AstNode node) {
         return MagikCommentExtractor.extractDocComments(node)
             .map(Token::getValue)

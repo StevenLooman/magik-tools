@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.Location;
 
 /**
@@ -16,10 +15,16 @@ public abstract class AbstractType {
     private String doc;
 
     /**
+     * Get the global reference to this type.
+     * @return Global reference to this type.
+     */
+    public abstract TypeString getTypeString();
+
+    /**
      * Get the full name of this type, including package.
      * @return Name of this type, including package.
      */
-    public abstract String getFullName();
+    public abstract String getFullName();  // TODO: Remove this, get via TypeString.
 
     /**
      * Get the name of this type.
@@ -40,7 +45,7 @@ public abstract class AbstractType {
     public abstract Collection<Method> getMethods();
 
     /**
-     * Get all {{Method}}s for this type responds to by name.
+     * Get all {@link Method}s for this type responds to by name.
      * @param methodName Name of method(s).
      * @return Collection of methods for this type/these types with this name.
      */
@@ -90,13 +95,13 @@ public abstract class AbstractType {
     }
 
     /**
-     * Test if this type is kind of {{otherType}}.
+     * Test if this type is kind of {@code otherType}.
      *
      * <p>
-     * Note that this does not work when testing against a {{@code CombinedType}}.
+     * Note that this does not work when testing against a {@link CombinedType}.
      * </p>
      * @param otherType Type to test against.
-     * @return True if kind of {{otherType}}, false otherwise.
+     * @return True if kind of {@code otherType}, false otherwise.
      */
     public boolean isKindOf(final AbstractType otherType) {
         return this.equals(otherType) || this.getAncestors().contains(otherType);
@@ -136,8 +141,8 @@ public abstract class AbstractType {
     }
 
     /**
-     * Get {{Location}} for exemplar.
-     * @return {{Location}} where exemplar is defined.
+     * Get {@link Location} for exemplar.
+     * @return {@link Location} where exemplar is defined.
      */
     @CheckForNull
     public Location getLocation() {
@@ -145,10 +150,10 @@ public abstract class AbstractType {
     }
 
     /**
-     * Set {{Location}} for exemplar.
-     * @param location Set {{Location}} where exemplar is defined.
+     * Set {@link Location} for exemplar.
+     * @param location Set {@link Location} where exemplar is defined.
      */
-    public void setLocation(final @Nullable Location location) {
+    public void setLocation(final Location location) {
         this.location = location;
     }
 
@@ -156,7 +161,7 @@ public abstract class AbstractType {
      * Set method documentation.
      * @param comment Method doc.
      */
-    public void setDoc(final @Nullable String comment) {
+    public void setDoc(final String comment) {
         this.doc = comment;
     }
 
@@ -167,6 +172,20 @@ public abstract class AbstractType {
     @CheckForNull
     public String getDoc() {
         return this.doc;
+    }
+
+    /**
+     * Substitute {@code from} type for {@code to} type, if {@code this} is equal to {@code from}.
+     * @param from From type.
+     * @param to To type.
+     * @return To type or self.
+     */
+    public AbstractType substituteType(final AbstractType from, final AbstractType to) {
+        if (from.equals(this)) {
+            return to;
+        }
+
+        return this;
     }
 
 }

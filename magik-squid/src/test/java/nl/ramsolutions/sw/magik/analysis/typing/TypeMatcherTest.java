@@ -2,9 +2,9 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
-import nl.ramsolutions.sw.magik.analysis.typing.types.IntrinsicType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,116 +16,148 @@ class TypeMatcherTest {
 
     @Test
     void testTypeEquals() {
-        final AbstractType type = new IntrinsicType(GlobalReference.of("sw:type"));
-        final AbstractType criterium = new IntrinsicType(GlobalReference.of("sw:type"));
-        final boolean matches = TypeMatcher.typeMatches(type, criterium);
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString typeRef = TypeString.of("sw:type");
+        final AbstractType type = new MagikType(typeKeeper, Sort.INTRINSIC, typeRef);
+
+        final boolean matches = TypeMatcher.typeMatches(type, type);
         assertThat(matches).isTrue();
     }
 
     @Test
     void testTypeNotEquals() {
-        final AbstractType type = new IntrinsicType(GlobalReference.of("sw:type1"));
-        final AbstractType criterium = new IntrinsicType(GlobalReference.of("sw:type2"));
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString type1Ref = TypeString.of("sw:type1");
+        final TypeString type2Ref = TypeString.of("sw:type2");
+        final AbstractType type = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
+        final AbstractType criterium = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
+
         final boolean matches = TypeMatcher.typeMatches(type, criterium);
         assertThat(matches).isFalse();
     }
 
     @Test
     void testTypeIsKindOf() {
-        final AbstractType baseType = new IntrinsicType(GlobalReference.of("sw:base"));
-        final MagikType childType = new IntrinsicType(GlobalReference.of("sw:child"));
-        childType.addParent(baseType);
+        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString baseRef = TypeString.of("sw:base");
+        final MagikType baseType = new MagikType(typeKeeper, Sort.INTRINSIC, baseRef);
+        final TypeString childRef = TypeString.of("sw:child");
+        final MagikType childType = new MagikType(typeKeeper, Sort.INTRINSIC, childRef);
+        childType.addParent(baseRef);
 
-        final AbstractType criterium = new IntrinsicType(GlobalReference.of("sw:base"));
-        final boolean matches = TypeMatcher.typeMatches(childType, criterium);
+        final boolean matches = TypeMatcher.typeMatches(childType, baseType);
         assertThat(matches).isTrue();
     }
 
     @Test
     void testTypeMatchesCombinedType() {
-        final AbstractType type = new IntrinsicType(GlobalReference.of("sw:type1"));
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString type1Ref = TypeString.of("sw:type1");
+        final MagikType type1 = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
+        final TypeString type2Ref = TypeString.of("sw:type2");
+        final MagikType type2 = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
+        final AbstractType criterium = new CombinedType(type1, type2);
 
-        final AbstractType criterium = new CombinedType(
-            new IntrinsicType(GlobalReference.of("sw:type1")),
-            new IntrinsicType(GlobalReference.of("sw:type2")));
-        final boolean matches = TypeMatcher.typeMatches(type, criterium);
+        final boolean matches = TypeMatcher.typeMatches(type1, criterium);
         assertThat(matches).isTrue();
     }
 
     @Test
     void testTypeNotMatchesCombinedType() {
-        final AbstractType type = new IntrinsicType(GlobalReference.of("sw:type3"));
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString type3Ref = TypeString.of("sw:type3");
+        final AbstractType type3 = new MagikType(typeKeeper, Sort.INTRINSIC, type3Ref);
+        final TypeString type1Ref = TypeString.of("sw:type1");
+        final MagikType type1 = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
+        final TypeString type2Ref = TypeString.of("sw:type2");
+        final MagikType type2 = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
+        final AbstractType criterium = new CombinedType(type1, type2);
 
-        final AbstractType criterium = new CombinedType(
-            new IntrinsicType(GlobalReference.of("sw:type1")),
-            new IntrinsicType(GlobalReference.of("sw:type2")));
-        final boolean matches = TypeMatcher.typeMatches(type, criterium);
+        final boolean matches = TypeMatcher.typeMatches(type3, criterium);
         assertThat(matches).isFalse();
     }
 
     @Test
     void testCombinedTypeMatchesCombinedType() {
-        final AbstractType type = new CombinedType(
-            new IntrinsicType(GlobalReference.of("sw:type1")),
-            new IntrinsicType(GlobalReference.of("sw:type2")));
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString type1Ref = TypeString.of("sw:type1");
+        final MagikType type1 = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
+        final TypeString type2Ref = TypeString.of("sw:type2");
+        final MagikType type2 = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
+        final AbstractType type = new CombinedType(type1, type2);
+        final TypeString type3Ref = TypeString.of("sw:type3");
+        final MagikType type3 = new MagikType(typeKeeper, Sort.INTRINSIC, type3Ref);
+        final AbstractType criterium = new CombinedType(type1, type2, type3);
 
-        final AbstractType criterium = new CombinedType(
-            new IntrinsicType(GlobalReference.of("sw:type1")),
-            new IntrinsicType(GlobalReference.of("sw:type2")),
-            new IntrinsicType(GlobalReference.of("sw:type3")));
         final boolean matches = TypeMatcher.typeMatches(type, criterium);
         assertThat(matches).isTrue();
     }
 
     @Test
     void testCombinedTypeNotMatchesCombinedType() {
-        final AbstractType type = new CombinedType(
-            new IntrinsicType(GlobalReference.of("sw:type1")),
-            new IntrinsicType(GlobalReference.of("sw:type2")));
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString type1Ref = TypeString.of("sw:type1");
+        final MagikType type1 = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
+        final TypeString type2Ref = TypeString.of("sw:type2");
+        final MagikType type2 = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
+        final AbstractType type = new CombinedType(type1, type2);
+        final TypeString type3Ref = TypeString.of("sw:type3");
+        final MagikType type3 = new MagikType(typeKeeper, Sort.INTRINSIC, type3Ref);
+        final AbstractType criterium = new CombinedType(type2, type3);
 
-        final AbstractType criterium = new CombinedType(
-            new IntrinsicType(GlobalReference.of("sw:type2")),
-            new IntrinsicType(GlobalReference.of("sw:type3")));
         final boolean matches = TypeMatcher.typeMatches(type, criterium);
         assertThat(matches).isFalse();
     }
 
     @Test
     void testIsKindOfEquals() {
-        final AbstractType type = new IntrinsicType(GlobalReference.of("sw:type"));
-        final AbstractType criterium = new IntrinsicType(GlobalReference.of("sw:type"));
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString typeRef = TypeString.of("sw:type");
+        final AbstractType type = new MagikType(typeKeeper, Sort.INTRINSIC, typeRef);
+        final AbstractType criterium = type;
+
         final boolean isKindOf = TypeMatcher.isKindOf(type, criterium);
         assertThat(isKindOf).isTrue();
     }
 
     @Test
     void testIsKindOfNotEquals() {
-        final AbstractType type = new IntrinsicType(GlobalReference.of("sw:type1"));
-        final AbstractType criterium = new IntrinsicType(GlobalReference.of("sw:type2"));
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString type1Ref = TypeString.of("sw:type1");
+        final AbstractType type = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
+        final TypeString type2Ref = TypeString.of("sw:type2");
+        final AbstractType criterium = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
+
         final boolean isKindOf = TypeMatcher.isKindOf(type, criterium);
         assertThat(isKindOf).isFalse();
     }
 
     @Test
     void testIsKindOfDirectParent() {
-        final AbstractType baseType = new IntrinsicType(GlobalReference.of("sw:base"));
-        final MagikType childType = new IntrinsicType(GlobalReference.of("sw:child"));
-        childType.addParent(baseType);
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString baseRef = TypeString.of("sw:base");
+        final TypeString childRef = TypeString.of("sw:child");
+        final MagikType childType = new MagikType(typeKeeper, Sort.INTRINSIC, childRef);
+        childType.addParent(baseRef);
+        final AbstractType criterium = new MagikType(typeKeeper, Sort.INTRINSIC, baseRef);
 
-        final AbstractType criterium = new IntrinsicType(GlobalReference.of("sw:base"));
         final boolean isKindOf = TypeMatcher.isKindOf(childType, criterium);
         assertThat(isKindOf).isTrue();
     }
 
     @Test
     void testIsKindOfIndirectParent() {
-        final AbstractType baseType = new IntrinsicType(GlobalReference.of("sw:base"));
-        final MagikType child1Type = new IntrinsicType(GlobalReference.of("sw:child1"));
-        child1Type.addParent(baseType);
-        final MagikType child2Type = new IntrinsicType(GlobalReference.of("sw:child2"));
-        child2Type.addParent(child1Type);
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString baseRef = TypeString.of("sw:base");
+        final AbstractType baseType = new MagikType(typeKeeper, Sort.INTRINSIC, baseRef);
+        final TypeString child1Ref = TypeString.of("sw:child1");
+        final MagikType child1Type = new MagikType(typeKeeper, Sort.INTRINSIC, child1Ref);
+        child1Type.addParent(baseRef);
+        final TypeString child2Ref = TypeString.of("sw:child2");
+        final MagikType child2Type = new MagikType(typeKeeper, Sort.INTRINSIC, child2Ref);
+        child2Type.addParent(child1Ref);
+        final AbstractType criterium = baseType;
 
-        final AbstractType criterium = new IntrinsicType(GlobalReference.of("sw:base"));
         final boolean isKindOf = TypeMatcher.isKindOf(child2Type, criterium);
         assertThat(isKindOf).isTrue();
     }

@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 
 /**
- * Container to hold resulting {{MagikType}}s for an EXPRESSION node.
- * Acts like an unmodifiable {{List}}.
+ * Container to hold resulting {@link AbstractType}s for an EXPRESSION node.
  */
+@Immutable
 public class ExpressionResult {
 
     /**
@@ -19,23 +21,21 @@ public class ExpressionResult {
      */
     public static final Collector<AbstractType, ?, ExpressionResult> COLLECTOR = Collector.of(
         ArrayList<AbstractType>::new,
-        // () -> new ArrayList<AbstractType>(),
-        // ArrayList<AbstractType>::addAll,
         (list, value) -> list.add(value),
-        (left, right) -> {
-            left.addAll(right);
-            return left;
+        (list, values) -> {
+            list.addAll(values);
+            return list;
         },
         ExpressionResult::new);
 
     /**
-     * Instance of {{ExpressionResult}} to be used in all cases of undefined expression results.
+     * Instance of {@link ExpressionResult} to be used in all cases of undefined expression results.
      */
     public static final ExpressionResult UNDEFINED = new ExpressionResult(
         Collections.nCopies(1024, UndefinedType.INSTANCE));    // 1024 is max for _scatter
 
     /**
-     * Serialized name of {{ExpressionResult.UNDEFINED}}.
+     * Serialized name of {@code ExpressionResult.UNDEFINED}.
      */
     public static final String UNDEFINED_SERIALIZED_NAME = "__UNDEFINED_RESULT__";
 
@@ -59,23 +59,16 @@ public class ExpressionResult {
 
     /**
      * List constructor.
-     * @param types Types this {{ExpressionResult}} represents.
+     * @param types Types this {@link ExpressionResult} represents.
      */
     public ExpressionResult(final List<AbstractType> types) {
         this.types = Collections.unmodifiableList(types);
     }
 
     /**
-     * Copy constructor.
-     */
-    public ExpressionResult(final ExpressionResult existing) {
-        this(existing.getTypes());
-    }
-
-    /**
      * Combine constructor.
-     * @param result1 First {{ExpressionResult}}.
-     * @param result2 Second {{ExpressionResult}}.
+     * @param result1 First {@link ExpressionResult}.
+     * @param result2 Second {@link ExpressionResult}.
      * @param unsetType Unset type, used for filler.
      */
     public ExpressionResult(
@@ -94,6 +87,18 @@ public class ExpressionResult {
         this.types = Collections.unmodifiableList(combinedTypes);
     }
 
+    /**
+     * Test if is empty.
+     * @return True if empty, false otherwise.
+     */
+    public boolean isEmpty() {
+        return this.types.isEmpty();
+    }
+
+    /**
+     * Get types.
+     * @return
+     */
     public List<AbstractType> getTypes() {
         return Collections.unmodifiableList(this.types);
     }
@@ -117,54 +122,16 @@ public class ExpressionResult {
     }
 
     /**
-     * Substitue {{from}} by {{to}} in a copy of self.
-     * Used to replace the {{SelfType}}.
+     * Substitue {@code from} by {@code to} in a copy of self.
+     * Used to replace the {@link SelfType}.
      * @param from To substitute.
      * @param to To substitute with.
-     * @return New {{ExpressionResult}}.
+     * @return New {@link ExpressionResult}.
      */
     public ExpressionResult substituteType(final AbstractType from, final AbstractType to) {
         return this.types.stream()
-            .map(type -> {
-                if (from.equals(type)) {
-                    return to;
-                }
-
-                return type;
-            })
+            .map(type -> type.substituteType(from, to))
             .collect(ExpressionResult.COLLECTOR);
-    }
-
-    @Override
-    @SuppressWarnings("checkstyle:NestedIfDepth")
-    public String toString() {
-        return String.format(
-            "%s@%s(%s)",
-            this.getClass().getName(), Integer.toHexString(this.hashCode()),
-            this.getTypeNames(","));
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.types.toArray());
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj == null) {
-            return false;
-        }
-
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-
-        final ExpressionResult other = (ExpressionResult) obj;
-        return Objects.equals(this.types, other.types);
     }
 
     /**
@@ -209,6 +176,46 @@ public class ExpressionResult {
                 .append("...");
         }
         return builder.toString();
+    }
+
+    /**
+     * Get stream of types contained by this {@link ExpressionResult}.
+     * @return Stream of types.
+     */
+    public Stream<AbstractType> stream() {
+        return this.types.stream();
+    }
+
+    @Override
+    @SuppressWarnings("checkstyle:NestedIfDepth")
+    public String toString() {
+        return String.format(
+            "%s@%s(%s)",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()),
+            this.getTypeNames(","));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.types.toArray());
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final ExpressionResult other = (ExpressionResult) obj;
+        return Objects.equals(this.types, other.types);
     }
 
 }

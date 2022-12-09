@@ -6,9 +6,9 @@ import com.sonar.sslr.api.Token;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import nl.ramsolutions.sw.magik.api.ExtendedTokenType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
+import nl.ramsolutions.sw.magik.api.MagikPunctuator;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.TextEdit;
 
@@ -24,9 +24,9 @@ class StandardFormattingStrategy extends FormattingStrategy {
     // Tokens surround the AstNodes, e.g.: '(', pre PARAMETERS, post PARAMETERS, ')', or
     // '_method', '...', pre BODY, ..., post BODY, '# comment', '_endmethod'.
     private static final Set<String> INDENT_INCREASE = Collections.unmodifiableSet(Set.of(
-        // MagikPunctuator.BRACE_L.getValue(),
         // MagikPunctuator.PAREN_L.getValue(),
-        // MagikPunctuator.SQUARE_L.getValue(),
+        MagikPunctuator.BRACE_L.getValue(),
+        MagikPunctuator.SQUARE_L.getValue(),
         MagikKeyword.PROC.getValue(),
         MagikKeyword.METHOD.getValue(),
         MagikKeyword.BLOCK.getValue(),
@@ -43,9 +43,9 @@ class StandardFormattingStrategy extends FormattingStrategy {
     ));
 
     private static final Set<String> INDENT_DECREASE = Collections.unmodifiableSet(Set.of(
-        // MagikPunctuator.BRACE_R.getValue(),
         // MagikPunctuator.PAREN_R.getValue(),
-        // MagikPunctuator.SQUARE_R.getValue(),
+        MagikPunctuator.BRACE_R.getValue(),
+        MagikPunctuator.SQUARE_R.getValue(),
         MagikKeyword.ENDPROC.getValue(),
         MagikKeyword.ENDMETHOD.getValue(),
         MagikKeyword.ENDBLOCK.getValue(),
@@ -56,6 +56,7 @@ class StandardFormattingStrategy extends FormattingStrategy {
         MagikKeyword.ENDCATCH.getValue(),
         MagikKeyword.ENDLOCK.getValue(),
         MagikKeyword.ELSE.getValue(),
+        MagikKeyword.ELIF.getValue(),
         MagikKeyword.ENDIF.getValue(),
         MagikKeyword.ENDLOOP.getValue(),
         MagikKeyword.FINALLY.getValue()
@@ -83,7 +84,7 @@ class StandardFormattingStrategy extends FormattingStrategy {
         TextEdit textEdit = null;
         if (this.options.isTrimTrailingWhitespace()
             && this.lastToken != null
-            && this.lastToken.getType() == ExtendedTokenType.WHITESPACE) {
+            && this.lastToken.getType() == GenericTokenType.WHITESPACE) {
             textEdit = this.editToken(this.lastToken, "");
         }
         return textEdit;
@@ -129,25 +130,34 @@ class StandardFormattingStrategy extends FormattingStrategy {
         return this.lastTextToken != null    // Don't string keywords: _if _not, _method obj, obj _andif..
             && this.lastTextToken.getLine() == token.getLine()
             && (KEYWORDS.contains(this.lastTextToken.getOriginalValue().toLowerCase())
-                || KEYWORDS.contains(tokenValue))
+                || KEYWORDS.contains(tokenValue)
+                || "<<".equals(tokenValue)  // Not really part of stringing keywords.
+                || "^<<".equals(tokenValue))
             && !".".equals(tokenValue)
             && !",".equals(tokenValue)
             && !")".equals(tokenValue)
             && !"}".equals(tokenValue)
-            && !"]".equals(tokenValue);
+            && !"]".equals(tokenValue)
+            && !"(".equals(this.lastToken.getValue())
+            && !"{".equals(this.lastToken.getValue())
+            && !"[".equals(this.lastToken.getValue());
     }
 
     private boolean requireNoWhitespaceBefore(final Token token) {
         final String tokenValue = token.getOriginalValue();
         return token.getType() != GenericTokenType.COMMENT
-            && (")".equals(tokenValue)
-            || this.nodeIsSlot()
-            || this.lastTokenIs("@", "(", "{", "[")
-            || this.currentNode.is(MagikGrammar.ARGUMENTS)
-            || this.currentNode.is(MagikGrammar.PARAMETERS)
-            || this.nodeIsMethodDefinition()
-            || this.nodeIsInvocation()
-            || this.nodeIsUnaryExpression());
+            && (
+                ")".equals(tokenValue)
+                || "}".equals(tokenValue)
+                || "]".equals(tokenValue)
+                || ",".equals(tokenValue)
+                || this.nodeIsSlot()
+                || this.lastTokenIs("@", "(", "{", "[")
+                || this.currentNode.is(MagikGrammar.ARGUMENTS)
+                || this.currentNode.is(MagikGrammar.PARAMETERS)
+                || this.nodeIsMethodDefinition()
+                || this.nodeIsInvocation()
+                || this.nodeIsUnaryExpression());
     }
 
     private boolean lastTokenIs(final String... values) {
@@ -172,7 +182,10 @@ class StandardFormattingStrategy extends FormattingStrategy {
 
     private boolean nodeIsMethodDefinition() {
         return this.currentNode.is(MagikGrammar.METHOD_DEFINITION)
-            || this.currentNode.getParent().is(MagikGrammar.METHOD_DEFINITION);
+            || this.currentNode.getParent().is(
+                MagikGrammar.METHOD_DEFINITION,
+                MagikGrammar.EXEMPLAR_NAME,
+                MagikGrammar.METHOD_NAME);
     }
 
     private boolean nodeIsInvocation() {
@@ -189,9 +202,10 @@ class StandardFormattingStrategy extends FormattingStrategy {
             // Reset indenting.
             this.indent = 0;
         } else if (node.is(
-                MagikGrammar.PROCEDURE_INVOCATION,
-                MagikGrammar.METHOD_INVOCATION,
-                MagikGrammar.SIMPLE_VECTOR)) {
+            MagikGrammar.VARIABLE_DEFINITION,
+            MagikGrammar.VARIABLE_DEFINITION_MULTI,
+            MagikGrammar.PROCEDURE_INVOCATION,
+            MagikGrammar.METHOD_INVOCATION)) {
             this.indent += 1;
         }
     }
@@ -200,9 +214,10 @@ class StandardFormattingStrategy extends FormattingStrategy {
     public void walkPostNode(final AstNode node) {
         if (this.isBinaryExpression(node)
             || node.is(
+                MagikGrammar.VARIABLE_DEFINITION,
+                MagikGrammar.VARIABLE_DEFINITION_MULTI,
                 MagikGrammar.PROCEDURE_INVOCATION,
-                MagikGrammar.METHOD_INVOCATION,
-                MagikGrammar.SIMPLE_VECTOR)) {
+                MagikGrammar.METHOD_INVOCATION)) {
             // Count token nodes.
             // long count = node.getChildren().stream()
             //         .filter(childNode -> childNode.isNot(MagikGrammar.values()))
@@ -231,12 +246,12 @@ class StandardFormattingStrategy extends FormattingStrategy {
     private TextEdit ensureIndenting(final Token token) {
         // Indenting.
         if (this.indent == 0
-            && this.lastToken.getType() != ExtendedTokenType.WHITESPACE) {
+            && this.lastToken.getType() != GenericTokenType.WHITESPACE) {
             return null;
         }
 
         final String indentText = this.indentText();
-        if (this.lastToken.getType() != ExtendedTokenType.WHITESPACE) {
+        if (this.lastToken.getType() != GenericTokenType.WHITESPACE) {
             return this.insertBeforeToken(token, indentText);
         } else if (!this.lastToken.getOriginalValue().equals(indentText)) {
             return this.editToken(this.lastToken, indentText);

@@ -55,8 +55,8 @@ public abstract class Scope {
     }
 
     /**
-     * Get {{AstNode}} where scope begins.
-     * @return {{AstNode}} where scope begins
+     * Get {@link AstNode} where scope begins.
+     * @return {@link AstNode} where scope begins
      */
     public AstNode getNode() {
         return this.node;
@@ -170,6 +170,16 @@ public abstract class Scope {
      * @return Scope entry by identifier.
      */
     @CheckForNull
+    public ScopeEntry getLocalScopeEntry(final String identifier) {
+        return this.scopeEntries.get(identifier);
+    }
+
+    /**
+     * Get a ScopeEntry by its identifier.
+     * @param identifier Identifier of the ScopeEntry.
+     * @return Scope entry by identifier.
+     */
+    @CheckForNull
     public ScopeEntry getScopeEntry(final String identifier) {
         if (this.scopeEntries.containsKey(identifier)) {
             return this.scopeEntries.get(identifier);
@@ -243,10 +253,10 @@ public abstract class Scope {
     }
 
     /**
-     * Get the most specific {{Scope}} at {{line}}/{{column}}.
+     * Get the most specific {@link Scope} at {@code line}/{@code column}.
      * @param line Line to target.
      * @param column Column to target.
-     * @return Scope, if any, at {{line}}/{{column}}.
+     * @return Scope, if any, at {@code line}/{@code column}.
      */
     @Nullable
     public Scope getScopeForLineColumn(final int line, final int column) {

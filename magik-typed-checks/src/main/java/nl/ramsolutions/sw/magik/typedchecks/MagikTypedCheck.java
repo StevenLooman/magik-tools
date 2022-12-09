@@ -9,8 +9,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
@@ -82,9 +82,9 @@ public class MagikTypedCheck extends MagikCheck {
         }
 
         final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(node);
-        final GlobalReference globalRef = methodDefHelper.getTypeGlobalReference();
+        final TypeString typeString = methodDefHelper.getTypeString();
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
-        return typeKeeper.getType(globalRef);
+        return typeKeeper.getType(typeString);
     }
 
 }

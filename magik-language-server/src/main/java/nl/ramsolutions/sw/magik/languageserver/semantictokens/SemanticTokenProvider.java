@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.languageserver.semantictokens;
 
 import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import java.io.IOException;
 import java.net.URI;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.api.ExtendedTokenType;
 import org.eclipse.lsp4j.DocumentFilter;
 import org.eclipse.lsp4j.SemanticTokens;
 import org.eclipse.lsp4j.SemanticTokensLegend;
@@ -84,7 +84,7 @@ public class SemanticTokenProvider {
                 .setLine(1)
                 .setColumn(0)
                 .setValueAndOriginalValue("")
-                .setType(ExtendedTokenType.OTHER)
+                .setType(GenericTokenType.UNKNOWN_CHAR)
                 .setURI(URI.create("magik://dummy"))
                 .build();
         return new SemanticToken(startToken, SemanticToken.Type.CLASS, Collections.emptySet());

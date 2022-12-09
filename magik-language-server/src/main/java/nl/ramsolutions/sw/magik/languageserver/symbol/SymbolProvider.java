@@ -11,11 +11,13 @@ import java.util.regex.PatternSyntaxException;
 import nl.ramsolutions.sw.magik.analysis.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.SymbolKind;
+import org.eclipse.lsp4j.WorkspaceSymbol;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +44,11 @@ public class SymbolProvider {
     }
 
     /**
-     * Get symbols matching {{query}}.
+     * Get symbols matching {@code query}.
      * @param query Query to match against.
-     * @return {{SymbolInformation}}s with query results.
+     * @return {@link SymbolInformation}s with query results.
      */
-    public List<SymbolInformation> getSymbols(final String query) {
+    public List<WorkspaceSymbol> getSymbols(final String query) {
         LOGGER.debug("Searching for: '{}'", query);
 
         if (query.trim().isEmpty()) {
@@ -54,10 +56,12 @@ public class SymbolProvider {
         }
 
         final Predicate<AbstractType> typePredicate;
+        final Predicate<Condition> conditionPredicate;
         final Predicate<Method> methodPredicate;
         final BiPredicate<AbstractType, Method> typeMethodPredicate;
         try {
             typePredicate = this.buildTypePredicate(query);
+            conditionPredicate = this.buildConditionPredicate(query);
             methodPredicate = this.buildMethodPredicate(query);
             typeMethodPredicate = this.buildTypeMethodPredicate(query);
         } catch (PatternSyntaxException ex) {
@@ -65,17 +69,17 @@ public class SymbolProvider {
             return Collections.emptyList();
         }
 
-        final List<SymbolInformation> symbolInformations = new ArrayList<>();
+        final List<WorkspaceSymbol> symbolInformations = new ArrayList<>();
         for (final AbstractType type : this.typeKeeper.getTypes()) {
             if (typePredicate.test(type)) {
                 final Location location = type.getLocation() != null
                     ? type.getLocation()
                     : DUMMY_LOCATION;
-                final SymbolInformation information = new SymbolInformation(
+                final WorkspaceSymbol symbol = new WorkspaceSymbol(
                     "Exemplar: " + type.getFullName(),
                     SymbolKind.Class,
-                    Lsp4jConversion.locationToLsp4j(location));
-                symbolInformations.add(information);
+                    Either.forLeft(Lsp4jConversion.locationToLsp4j(location)));
+                symbolInformations.add(symbol);
             }
 
             for (final Method method : type.getLocalMethods()) {
@@ -83,23 +87,36 @@ public class SymbolProvider {
                     final Location location = method.getLocation() != null
                         ? method.getLocation()
                         : DUMMY_LOCATION;
-                    final SymbolInformation information = new SymbolInformation(
+                    final WorkspaceSymbol symbol = new WorkspaceSymbol(
                         "Method: " + method.getSignature(),
                         SymbolKind.Method,
-                        Lsp4jConversion.locationToLsp4j(location));
-                    symbolInformations.add(information);
+                        Either.forLeft(Lsp4jConversion.locationToLsp4j(location)));
+                    symbolInformations.add(symbol);
                 }
 
                 if (typeMethodPredicate.test(type, method)) {
                     final Location location = method.getLocation() != null
                         ? method.getLocation()
                         : DUMMY_LOCATION;
-                    final SymbolInformation information = new SymbolInformation(
+                    final WorkspaceSymbol symbol = new WorkspaceSymbol(
                         "Method: " + method.getSignature(),
                         SymbolKind.Method,
-                        Lsp4jConversion.locationToLsp4j(location));
-                    symbolInformations.add(information);
+                        Either.forLeft(Lsp4jConversion.locationToLsp4j(location)));
+                    symbolInformations.add(symbol);
                 }
+            }
+        }
+
+        for (final Condition condition : this.typeKeeper.getConditions()) {
+            if (conditionPredicate.test(condition)) {
+                final Location location = condition.getLocation() != null
+                    ? condition.getLocation()
+                    : DUMMY_LOCATION;
+                final WorkspaceSymbol symbol = new WorkspaceSymbol(
+                    "Condition: " + condition.getName(),
+                    SymbolKind.Class,
+                    Either.forLeft(Lsp4jConversion.locationToLsp4j(location)));
+                symbolInformations.add(symbol);
             }
         }
 
@@ -108,11 +125,11 @@ public class SymbolProvider {
     }
 
     /**
-     * Build {{Predicate}} which matches {{AbstractType}}. This only gives a matchable
+     * Build {@link Predicate} which matches {@link AbstractType}. This only gives a matchable
      * predicate if no '.' appears in the query.
      *
      * @param query Query string
-     * @return Predicate to match {{AbstractType}}
+     * @return Predicate to match {@link AbstractType}.
      */
     private Predicate<AbstractType> buildTypePredicate(final String query) {
         final int dotIndex = query.indexOf('.');
@@ -125,10 +142,27 @@ public class SymbolProvider {
     }
 
     /**
-     * Build {{Predicate}} which matches {{Method}}.
+     * Build {@link Predicate} which matches {@link Condition}. This only gives a matchable
+     * predicate if no '.' appears in the query.
+     *
+     * @param query Query string
+     * @return {@link Predicate} to match {@link Condition}
+     */
+    private Predicate<Condition> buildConditionPredicate(final String query) {
+        final int dotIndex = query.indexOf('.');
+        if (dotIndex != -1) {
+            return type -> false;
+        }
+
+        final String regexp = ".*" + query + ".*";
+        return condition -> condition.getName().matches(regexp);
+    }
+
+    /**
+     * Build {@link Predicate} which matches {@link Method}.
      * This only gives a matchable predicate if no '.' appears in the query.
      * @param query Query string
-     * @return Predicate to match {{Method}}
+     * @return Predicate to match {@link Method}
      */
     private Predicate<Method> buildMethodPredicate(final String query) {
         final int dotIndex = query.indexOf('.');
@@ -141,10 +175,10 @@ public class SymbolProvider {
     }
 
     /**
-     * Build {{BiPredicate}} which matches {{AbstractType}} and {{Method}}.
+     * Build {@link BiPredicate} which matches {@link AbstractType} and {@link Method}.
      * This only gives a matchable predicate if '.' appears in the query.
      * @param query Query string
-     * @return BiPredicate to match {{AbstractType}} and {{Method}}
+     * @return {@link BiPredicate} to match {@link AbstractType} and {@link Method}
      */
     private BiPredicate<AbstractType, Method> buildTypeMethodPredicate(final String query) {
         final int dotIndex = query.indexOf('.');

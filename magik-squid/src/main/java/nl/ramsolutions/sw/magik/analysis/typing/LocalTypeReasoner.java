@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -19,24 +23,28 @@ import nl.ramsolutions.sw.magik.analysis.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.LeaveStatementNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ParameterReferenceType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ProcedureInstance;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Slot;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
+import nl.ramsolutions.sw.magik.api.MagikOperator;
+import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
 import nl.ramsolutions.sw.magik.parser.NewDocParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,47 +61,60 @@ import org.slf4j.LoggerFactory;
  * </p>
  *
  * <p>
- * If a type cannot be determined, the {{UndefinedType}} is used instead.
+ * If a type cannot be determined, the {@code UndefinedType} is used instead.
  * </p>
  *
  * <p>
- * If {{_self}} or {{_clone}} is returned in a method, the {{SelfType}} is used.
- * It is up to the user to determine the real type. I.e., in case of {{sw:date_time_mixin}},
+ * If {@code _self} or {@code _clone} is returned in a method, the {@code SelfType} is used.
+ * It is up to the user to determine the real type. I.e., in case of {@code sw:date_time_mixin},
  * none of the methods are called on that class directly, but always through an inherited class.
- * On declaration the inheriting classes are unknown, thus if {{_self}} is returned from a mixin,
+ * On declaration the inheriting classes are unknown, thus if {@code _self} is returned from a mixin,
  * we need to proxy the type.
  * </p>
  */
 public class LocalTypeReasoner extends AstWalker {
 
-    private static final GlobalReference SW_UNSET = GlobalReference.of("sw:unset");
-    private static final GlobalReference SW_SIMPLE_VECTOR = GlobalReference.of("sw:simple_vector");
-    private static final GlobalReference SW_FALSE = GlobalReference.of("sw:false");
-    private static final GlobalReference SW_MAYBE = GlobalReference.of("sw:maybe");
-    private static final GlobalReference SW_HEAVY_THREAD = GlobalReference.of("sw:heavy_thread");
-    private static final GlobalReference SW_LIGHT_THREAD = GlobalReference.of("sw:light_thread");
-    private static final GlobalReference SW_GLOBAL_VARIABLE = GlobalReference.of("sw:global_variable");
-    private static final GlobalReference SW_BIGNUM = GlobalReference.of("sw:bignum");
-    private static final GlobalReference SW_INTEGER = GlobalReference.of("sw:integer");
-    private static final GlobalReference SW_FLOAT = GlobalReference.of("sw:float");
-    private static final GlobalReference SW_CHARACTER = GlobalReference.of("sw:character");
-    private static final GlobalReference SW_SW_REGEXP = GlobalReference.of("sw:sw_regexp");
-    private static final GlobalReference SW_CHAR16_VECTOR = GlobalReference.of("sw:char16_vector");
-    private static final GlobalReference SW_SYMBOL = GlobalReference.of("sw:symbol");
-    private static final GlobalReference SW_CONDITION = GlobalReference.of("sw:condition");
-    private static final GlobalReference SW_PROCEDURE = GlobalReference.of("sw:procedure");
+    private static final TypeString SW_UNSET = TypeString.of("sw:unset");
+    private static final TypeString SW_SIMPLE_VECTOR = TypeString.of("sw:simple_vector");
+    private static final TypeString SW_FALSE = TypeString.of("sw:false");
+    private static final TypeString SW_MAYBE = TypeString.of("sw:maybe");
+    private static final TypeString SW_HEAVY_THREAD = TypeString.of("sw:heavy_thread");
+    private static final TypeString SW_LIGHT_THREAD = TypeString.of("sw:light_thread");
+    private static final TypeString SW_GLOBAL_VARIABLE = TypeString.of("sw:global_variable");
+    private static final TypeString SW_BIGNUM = TypeString.of("sw:bignum");
+    private static final TypeString SW_INTEGER = TypeString.of("sw:integer");
+    private static final TypeString SW_FLOAT = TypeString.of("sw:float");
+    private static final TypeString SW_CHARACTER = TypeString.of("sw:character");
+    private static final TypeString SW_SW_REGEXP = TypeString.of("sw:sw_regexp");
+    private static final TypeString SW_CHAR16_VECTOR = TypeString.of("sw:char16_vector");
+    private static final TypeString SW_SYMBOL = TypeString.of("sw:symbol");
+    private static final TypeString SW_CONDITION = TypeString.of("sw:condition");
+    private static final TypeString SW_PROCEDURE = TypeString.of("sw:procedure");
+
+    private static final Map<String, String> UNARY_OPERATOR_METHODS = Map.of(
+        MagikOperator.NOT.getValue(), "not",
+        MagikKeyword.NOT.getValue(), "not",
+        MagikOperator.MINUS.getValue(), "negated",
+        MagikOperator.PLUS.getValue(), "unary_plus");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalTypeReasoner.class);
     @SuppressWarnings("checkstyle:MagicNumber")
     private static final long BIGNUM_START = 1 << 29;
+    private static final String DEFAULT_PACKAGE = "user";
+    private static final CommentInstructionReader.InstructionType TYPE_INSTRUCTION =
+        CommentInstructionReader.InstructionType.createInstructionType("type");
+    private static final CommentInstructionReader.InstructionType ITER_TYPE_INSTRUCTION =
+        CommentInstructionReader.InstructionType.createInstructionType("iter-type");
 
+    private final AstNode topNode;
     private final ITypeKeeper typeKeeper;
     private final TypeParser typeParser;
     private final GlobalScope globalScope;
+    private final CommentInstructionReader instructionReader;
     private final Map<AstNode, ExpressionResult> nodeTypes = new HashMap<>();
     private final Map<AstNode, ExpressionResult> loopbodyNodeTypes = new HashMap<>();
     private final Map<ScopeEntry, AstNode> currentScopeEntryNodes = new HashMap<>();
-    private Package currentPackage;
+    private String currentPackage;
     private ExpressionResult iteratorType;
 
     /**
@@ -101,32 +122,26 @@ public class LocalTypeReasoner extends AstWalker {
      * @param magikFile Magik file to reason on.
      */
     public LocalTypeReasoner(final MagikTypedFile magikFile) {
-        this(magikFile.getTypeKeeper(), magikFile.getGlobalScope());
-    }
-
-    /**
-     * Constructor.
-     * @param typeKeeper TypeKeeper to use.
-     * @param globalScope Scope to use for analysis.
-     */
-    public LocalTypeReasoner(final ITypeKeeper typeKeeper, final GlobalScope globalScope) {
-        this.typeKeeper = typeKeeper;
+        this.topNode = magikFile.getTopNode();
+        this.typeKeeper = magikFile.getTypeKeeper();
         this.typeParser = new TypeParser(this.typeKeeper);
-        this.globalScope = globalScope;
-        this.currentPackage = this.typeKeeper.getPackage("sw");
+        this.globalScope = magikFile.getGlobalScope();
+        this.instructionReader = new CommentInstructionReader(
+            magikFile, Set.of(TYPE_INSTRUCTION, ITER_TYPE_INSTRUCTION));
+        this.currentPackage = DEFAULT_PACKAGE;
     }
 
     /**
-     * Evaluate the given top {{AstNode}}.
+     * Evaluate the given top {@link AstNode}.
      */
-    public void run(final AstNode node) {
+    public void run() {
         // Start walking.
         LOGGER.debug("Start walking");
-        this.walkAst(node);
+        this.walkAst(this.topNode);
     }
 
     /**
-     * Get the type for a {{AstNode}}.
+     * Get the type for a {@link AstNode}.
      * @param node AstNode.
      * @return Resulting type.
      */
@@ -140,7 +155,7 @@ public class LocalTypeReasoner extends AstWalker {
     }
 
     /**
-     * Get the type for a {{AstNode}}.
+     * Get the type for a {@link AstNode}.
      * @param node AstNode.
      * @return Resulting type.
      */
@@ -150,7 +165,7 @@ public class LocalTypeReasoner extends AstWalker {
     }
 
     /**
-     * Test if the type for a {{AstNode}} is known.
+     * Test if the type for a {@link AstNode} is known.
      * @param node AstNode.
      * @return True if known, false otherwise.
      */
@@ -159,7 +174,7 @@ public class LocalTypeReasoner extends AstWalker {
     }
 
     /**
-     * Set a type for a {{AstNode}}.
+     * Set a type for a {@link AstNode}.
      * @param node AstNode.
      * @param result ExpressionResult.
      */
@@ -178,12 +193,12 @@ public class LocalTypeReasoner extends AstWalker {
 
     @CheckForNull
     private ExpressionResult getIteratorType() {
-        // XXX TODO: Return undefined instead of null.
+        // TODO: Return undefined instead of null.
         return this.iteratorType;
     }
 
     /**
-     * Add a type for a {{AstNode}}. Combines type if a type is already known.
+     * Add a type for a {@link AstNode}. Combines type if a type is already known.
      * @param node AstNode.
      * @param result ExpressionResult.
      */
@@ -200,11 +215,11 @@ public class LocalTypeReasoner extends AstWalker {
     }
 
     /**
-     * Get the loopbody type for a {{AstNode}}.
+     * Get the loopbody type for a {@link AstNode}.
      * @param node AstNode.
      * @return Resulting type.
      */
-    private ExpressionResult getLoopbodyNodeType(final AstNode node) {
+    public ExpressionResult getLoopbodyNodeType(final AstNode node) {
         final ExpressionResult result = this.loopbodyNodeTypes.get(node);
         if (result == null) {
             LOGGER.debug("Node without type: {}", node);
@@ -214,7 +229,17 @@ public class LocalTypeReasoner extends AstWalker {
     }
 
     /**
-     * Set a loopbody type for a {{AstNode}}.
+     * Get the loopbody type for a {@link AstNode}.
+     * @param node AstNode.
+     * @return Resulting type.
+     */
+    public ExpressionResult getLoopbodyNodeTypeSilent(final AstNode node) {
+        final ExpressionResult result = this.loopbodyNodeTypes.get(node);
+        return result;
+    }
+
+    /**
+     * Set a loopbody type for a {@link AstNode}.
      * @param node AstNode.
      * @param result Type.
      */
@@ -224,15 +249,13 @@ public class LocalTypeReasoner extends AstWalker {
 
     @Override
     protected void walkPostPackageSpecification(final AstNode node) {
-        final PackageNodeHelper helper = new PackageNodeHelper(node);
-        final String name = helper.getCurrentPackage();
+        final String packageName = node.getFirstChild(MagikGrammar.PACKAGE_IDENTIFIER).getTokenValue();
 
-        if (!this.typeKeeper.hasPackage(name)) {
-            LOGGER.debug("Package not found: {}", name);
+        if (!this.typeKeeper.hasPackage(packageName)) {
+            LOGGER.debug("Package not found: {}", packageName);
         }
 
-        // Package is created on demand.
-        this.currentPackage = this.typeKeeper.getPackage(name);
+        this.currentPackage = packageName;
     }
 
     @Override
@@ -277,7 +300,17 @@ public class LocalTypeReasoner extends AstWalker {
         final AstNode forNode = overNode.getParent();
         if (forNode.is(MagikGrammar.FOR)) {
             final AstNode loopNode = overNode.getFirstChild(MagikGrammar.LOOP);
+            if (loopNode == null) {
+                LOGGER.debug("Unexpected: LOOP node is null");
+                return;
+            }
+
             final AstNode bodyNode = loopNode.getFirstChild(MagikGrammar.BODY);
+            if (bodyNode == null) {
+                LOGGER.debug("Unexpected: BODY node is null");
+                return;
+            }
+
             final List<AstNode> identifierNodes = AstQuery.getChildrenFromChain(
                 forNode,
                 MagikGrammar.FOR_VARIABLES,
@@ -312,19 +345,16 @@ public class LocalTypeReasoner extends AstWalker {
         final AstNode definitionNode =
             node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
         final NewDocParser docParser = new NewDocParser(definitionNode);
-        final Map<String, String> parameterTypes = docParser.getParameterTypes();
-        final String parameterTypeStr = parameterTypes.get(identifier);
+        final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
+        final TypeString parameterTypeString = parameterTypes.get(identifier);
 
         final ExpressionResult result;
         final ParameterNodeHelper helper = new ParameterNodeHelper(node);
         if (helper.isGatherParameter()) {
             final AbstractType simpleVectorType = this.typeKeeper.getType(SW_SIMPLE_VECTOR);
             result = new ExpressionResult(simpleVectorType);
-        } else if (parameterTypeStr != null && !parameterTypeStr.isBlank()) {
-            final PackageNodeHelper packageHelper = new PackageNodeHelper(node);
-            final String pakkage = packageHelper.getCurrentPackage();
-            final AbstractType type = this.typeParser.parseTypeString(parameterTypeStr, pakkage);
-
+        } else if (parameterTypeString != null && !parameterTypeString.isUndefined()) {
+            final AbstractType type = this.typeParser.parseTypeString(parameterTypeString);
             if (helper.isOptionalParameter()) {
                 final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
                 final AbstractType optionalType = new CombinedType(type, unsetType);
@@ -336,7 +366,7 @@ public class LocalTypeReasoner extends AstWalker {
             result = ExpressionResult.UNDEFINED;
         }
 
-        this.setNodeType(node, result);
+        this.setNodeType(identifierNode, result);
 
         final Scope scope = this.globalScope.getScopeForNode(node);
         Objects.requireNonNull(scope);
@@ -381,16 +411,13 @@ public class LocalTypeReasoner extends AstWalker {
 
         final Scope scope = this.globalScope.getScopeForNode(node);
         Objects.requireNonNull(scope);
-        String identifier = node.getTokenValue();
+        final String identifier = node.getTokenValue();
         final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
         Objects.requireNonNull(scopeEntry);
         if (scopeEntry.isType(ScopeEntry.Type.GLOBAL)
             || scopeEntry.isType(ScopeEntry.Type.DYNAMIC)) {
-            final String packageName = this.currentPackage.getName();
-            final GlobalReference globalRef = identifier.contains(":")
-                ? GlobalReference.of(identifier)
-                : GlobalReference.of(packageName, identifier);
-            this.assignAtom(node, globalRef);
+            final TypeString typeString = TypeString.of(identifier, this.currentPackage);
+            this.assignAtom(node, typeString);
         } else if (scopeEntry.isType(ScopeEntry.Type.IMPORT)) {
             final ScopeEntry parentScopeEntry = scopeEntry.getImportedEntry();
             final AstNode lastNodeType = this.currentScopeEntryNodes.get(parentScopeEntry);
@@ -546,8 +573,8 @@ public class LocalTypeReasoner extends AstWalker {
         this.assignAtom(node, threadType);
     }
 
-    private void assignAtom(final AstNode node, final GlobalReference globalRef) {
-        final AbstractType type = this.typeKeeper.getType(globalRef);
+    private void assignAtom(final AstNode node, final TypeString typeString) {
+        final AbstractType type = this.typeKeeper.getType(typeString);
         this.assignAtom(node, type);
     }
 
@@ -567,16 +594,15 @@ public class LocalTypeReasoner extends AstWalker {
     protected void walkPostReturnStatement(final AstNode node) {
         // Get results.
         final AstNode tupleNode = node.getFirstChild(MagikGrammar.TUPLE);
-        if (tupleNode == null) {
-            return;
-        }
+        final ExpressionResult result = tupleNode != null
+            ? this.getNodeType(tupleNode)
+            : new ExpressionResult();
 
-        // Find related node.
+        // Find related node to store on.
         final AstNode definitionNode =
             node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
 
         // Save results at returned node.
-        final ExpressionResult result = this.getNodeType(tupleNode);
         this.addNodeType(definitionNode, result);
     }
 
@@ -700,26 +726,28 @@ public class LocalTypeReasoner extends AstWalker {
     @Override
     protected void walkPostProcedureDefinition(final AstNode node) {
         // Get name of procedure.
-        String procName = ProcedureInstance.ANONYMOUS_PROCEDURE;
-        final AstNode labelNode = node.getFirstChild(MagikGrammar.LABEL);
-        if (labelNode != null) {
-            final List<AstNode> labelNodeChildren = labelNode.getChildren();
-            procName = labelNodeChildren.get(1).getTokenValue();
-        }
+        final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
+        final String procedureName = helper.getProcedureName();
 
         // Parameters.
         final AstNode parametersNode = node.getFirstChild(MagikGrammar.PARAMETERS);
+        if (parametersNode == null) {
+            // Robustness, in case of a syntax error in the procedure definition.
+            return;
+        }
+
+        // TODO: Can we move this somewhere else?
         final List<Parameter> parameters = new ArrayList<>();
         final List<AstNode> parameterNodes = parametersNode.getChildren(MagikGrammar.PARAMETER);
         for (final AstNode parameterNode : parameterNodes) {
             final AstNode identifierNode = parameterNode.getFirstChild(MagikGrammar.IDENTIFIER);
             final String identifier = identifierNode.getTokenValue();
 
-            final ParameterNodeHelper helper = new ParameterNodeHelper(parameterNode);
+            final ParameterNodeHelper parameterHelper = new ParameterNodeHelper(parameterNode);
             final Parameter.Modifier modifier;
-            if (helper.isOptionalParameter()) {
+            if (parameterHelper.isOptionalParameter()) {
                 modifier = Parameter.Modifier.OPTIONAL;
-            } else if (helper.isGatherParameter()) {
+            } else if (parameterHelper.isGatherParameter()) {
                 modifier = Parameter.Modifier.GATHER;
             } else {
                 modifier = Parameter.Modifier.NONE;
@@ -732,17 +760,26 @@ public class LocalTypeReasoner extends AstWalker {
 
         // Result.
         final ExpressionResult procResult = this.getNodeType(node);
+        final ExpressionResultString procResultStr = TypeParser.unparseExpressionResult(procResult);
 
         // Loopbody result.
         final ExpressionResult loopbodyResult = this.getLoopbodyNodeType(node);
+        final ExpressionResultString loopbodyResultStr = TypeParser.unparseExpressionResult(loopbodyResult);
 
         // Create procedure instance.
         final EnumSet<Method.Modifier> modifiers = EnumSet.noneOf(Method.Modifier.class);
         final URI uri = node.getToken().getURI();
         final Location location = new Location(uri, node);
-        final GlobalReference globalRef = GlobalReference.of(ProcedureInstance.ANONYMOUS_PROCEDURE);
-        final ProcedureInstance procType = new ProcedureInstance(globalRef, procName);
-        procType.addMethod(modifiers, location, "invoke()", parameters, null, procResult, loopbodyResult);
+        final MagikType procedureType = (MagikType) this.typeKeeper.getType(TypeString.of("sw:procedure"));
+        final ProcedureInstance procType = new ProcedureInstance(
+            procedureType,
+            location,
+            procedureName,
+            modifiers,
+            parameters,
+            null,
+            procResultStr,
+            loopbodyResultStr);
 
         // Store result.
         final ExpressionResult result = new ExpressionResult(procType);
@@ -806,10 +843,10 @@ public class LocalTypeReasoner extends AstWalker {
     @Override
     protected void walkPostExpression(final AstNode node) {
         // Check for type annotations, those overrule normal operations.
-        final String typeAnnotation = TypeAnnotationHandler.typeAnnotationForExpression(node);
+        final String typeAnnotation = this.instructionReader.getInstructionForNode(node, TYPE_INSTRUCTION);
         if (typeAnnotation != null) {
-            final String pakkageName = this.currentPackage.getName();
-            final ExpressionResult result = this.typeParser.parseExpressionResultString(typeAnnotation, pakkageName);
+            final ExpressionResultString resultStr = ExpressionResultString.of(typeAnnotation, this.currentPackage);
+            final ExpressionResult result = this.typeParser.parseExpressionResultString(resultStr);
             this.setNodeType(node, result);
         } else {
             // Normal operations apply.
@@ -822,11 +859,11 @@ public class LocalTypeReasoner extends AstWalker {
         }
 
         // Check for iter type annotations.
-        final String iterTypeAnnotation = TypeAnnotationHandler.iterTypeAnnotationForExpression(node);
+        final String iterTypeAnnotation = this.instructionReader.getInstructionForNode(node, ITER_TYPE_INSTRUCTION);
         if (iterTypeAnnotation != null) {
-            final String pakkageName = this.currentPackage.getName();
-            final ExpressionResult iterResult =
-                this.typeParser.parseExpressionResultString(iterTypeAnnotation, pakkageName);
+            final ExpressionResultString iterResultStr =
+                ExpressionResultString.of(iterTypeAnnotation, this.currentPackage);
+            final ExpressionResult iterResult = this.typeParser.parseExpressionResultString(iterResultStr);
             this.setIteratorType(iterResult);
             LOGGER.trace("{} is of iter-type: {}", node, iterResult);
         }
@@ -874,8 +911,12 @@ public class LocalTypeReasoner extends AstWalker {
                 this.currentScopeEntryNodes.put(scopeEntry, assignedNode);
 
                 this.setNodeType(assignedNode, result);
-            } else if (assignedNode.is(MagikGrammar.SLOT)) {
-                throw new UnsupportedOperationException();
+            } else if (assignedNode.is(MagikGrammar.ATOM)
+                       && assignedNode.getFirstChild(MagikGrammar.SLOT) != null) {
+                // Store slot.
+                this.setNodeType(assignedNode, result);
+            } else {
+                LOGGER.debug("Unsupported construct!");  // TODO
             }
         }
 
@@ -918,9 +959,10 @@ public class LocalTypeReasoner extends AstWalker {
             default:
                 final BinaryOperator.Operator operator = BinaryOperator.Operator.valueFor(operatorStr);
                 final BinaryOperator binaryOperator = this.typeKeeper.getBinaryOperator(operator, leftType, rightType);
-                final AbstractType resultingType = binaryOperator != null
+                final TypeString resultingTypeRef = binaryOperator != null
                     ? binaryOperator.getResultType()
-                    : UndefinedType.INSTANCE;
+                    : TypeString.UNDEFINED;
+                final AbstractType resultingType = this.typeKeeper.getType(resultingTypeRef);
                 result = new ExpressionResult(resultingType);
                 break;
         }
@@ -1040,9 +1082,10 @@ public class LocalTypeReasoner extends AstWalker {
                     final BinaryOperator.Operator operator = BinaryOperator.Operator.valueFor(operatorStr);
                     final BinaryOperator binaryOperator =
                         this.typeKeeper.getBinaryOperator(operator, leftType, rightType);
-                    final AbstractType resultingType = binaryOperator != null
+                    final TypeString resultingTypeRef = binaryOperator != null
                         ? binaryOperator.getResultType()
-                        : UndefinedType.INSTANCE;
+                        : TypeString.UNDEFINED;
+                    final AbstractType resultingType = this.typeKeeper.getType(resultingTypeRef);
                     result = new ExpressionResult(resultingType);
                     break;
             }
@@ -1077,15 +1120,13 @@ public class LocalTypeReasoner extends AstWalker {
         final AbstractType type = operatedResult.get(0, unsetType);
 
         // Get operator.
-        final String operatorStr = node.getTokenValue();
-        final UnaryOperator.Operator operator = UnaryOperator.Operator.valueFor(operatorStr);
-        final UnaryOperator unaryOperator = this.typeKeeper.getUnaryOperator(operator, type);
+        final String operatorStr = node.getTokenValue().toLowerCase();
+        final String operatorMethod = UNARY_OPERATOR_METHODS.get(operatorStr);
 
         // Apply opertor to operand and store result.
-        final AbstractType resultingType = unaryOperator != null
-            ? unaryOperator.getResultType()
-            : UndefinedType.INSTANCE;
-        final ExpressionResult result = new ExpressionResult(resultingType);
+        final ExpressionResult result = this.getMethodInvocationResult(type, operatorMethod)
+            .substituteType(SelfType.INSTANCE, type);
+
         this.setNodeType(node, result);
     }
 
@@ -1122,32 +1163,55 @@ public class LocalTypeReasoner extends AstWalker {
             callResult = ExpressionResult.UNDEFINED;
             this.setIteratorType(ExpressionResult.UNDEFINED);
         } else {
+            final List<AstNode> argumentExpressionNodes = helper.getArgumentExpressionNodes();
+            final List<AbstractType> argumentTypes = argumentExpressionNodes.stream()
+                .map(exprNode -> this.getNodeType(exprNode).get(0, unsetType))
+                .collect(Collectors.toList());
             for (final Method method : methods) {
                 // Call.
-                if (callResult == null) {
-                    callResult = method.getCallResult();
-                } else {
-                    final ExpressionResult methodResult = method.getCallResult();
-                    callResult = new ExpressionResult(callResult, methodResult, unsetType);
+                final ExpressionResultString methodCallResultStr = method.getCallResult();
+                final ExpressionResult methodCallResultBare =
+                    this.typeParser.parseExpressionResultString(methodCallResultStr);
+                ExpressionResult methodCallResult = originalCalledType != SelfType.INSTANCE
+                    ? methodCallResultBare.substituteType(SelfType.INSTANCE, calledType)
+                    : methodCallResultBare;
+
+                final Map<ParameterReferenceType, AbstractType> paramRefTypeMap = IntStream
+                    .range(0, method.getParameters().size())
+                    .mapToObj(i -> {
+                        final Parameter param = method.getParameters().get(i);
+                        final String paramName = param.getName();
+                        final ParameterReferenceType paramRefType = new ParameterReferenceType(paramName);
+                        final AbstractType argType = i < argumentTypes.size()
+                            ? argumentTypes.get(i)
+                            : unsetType;  // TODO: What about gather parameters?
+                        return new AbstractMap.SimpleEntry<>(paramRefType, argType);
+                    })
+                    .collect(Collectors.toMap(
+                        entry -> entry.getKey(),
+                        entry -> entry.getValue()));
+                for (final Map.Entry<ParameterReferenceType, AbstractType> entry : paramRefTypeMap.entrySet()) {
+                    final ParameterReferenceType paramRefType = entry.getKey();
+                    final AbstractType argType = entry.getValue();
+                    methodCallResult = methodCallResult.substituteType(paramRefType, argType);
                 }
-                if (originalCalledType != SelfType.INSTANCE) {
-                    callResult = callResult.substituteType(SelfType.INSTANCE, calledType);
-                }
+                callResult = callResult == null
+                    ? methodCallResult
+                    : new ExpressionResult(callResult, methodCallResult, unsetType);
 
                 // Iterator.
-                final ExpressionResult loopbodyResult = method.getLoopbodyResult();
+                final ExpressionResultString loopbodyResultStr = method.getLoopbodyResult();
+                final ExpressionResult loopbodyResultBare =
+                    this.typeParser.parseExpressionResultString(loopbodyResultStr);
+                final ExpressionResult loopbodyResult = originalCalledType != SelfType.INSTANCE
+                    ? loopbodyResultBare.substituteType(SelfType.INSTANCE, calledType)
+                    : loopbodyResultBare;
                 if (this.getIteratorType() == null) {
                     this.setIteratorType(loopbodyResult);
                 } else {
                     final ExpressionResult iterResult =
                         new ExpressionResult(this.iteratorType, loopbodyResult, unsetType);
                     this.setIteratorType(iterResult);
-                }
-
-                if (originalCalledType != SelfType.INSTANCE) {
-                    final ExpressionResult subbedResult =
-                        this.getIteratorType().substituteType(SelfType.INSTANCE, calledType);
-                    this.setIteratorType(subbedResult);
                 }
             }
         }
@@ -1160,6 +1224,8 @@ public class LocalTypeReasoner extends AstWalker {
     @Override
     protected void walkPostProcedureInvocation(final AstNode node) {
         final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+
+        // TODO: Handle sw:obj/sw:prototype.
 
         // Get called type for invocation.
         final AstNode calledNode = node.getPreviousSibling();
@@ -1182,9 +1248,11 @@ public class LocalTypeReasoner extends AstWalker {
             final Collection<Method> methods = procedureType.getMethods("invoke()");
             final Method method = methods.stream().findAny().orElse(null);
             Objects.requireNonNull(method);
-            callResult = method.getCallResult();
+            final ExpressionResultString callResultStr = method.getCallResult();
+            callResult = this.typeParser.parseExpressionResultString(callResultStr);
 
-            final ExpressionResult loopbodyResult = method.getLoopbodyResult();
+            final ExpressionResultString loopbodyResultStr = method.getLoopbodyResult();
+            final ExpressionResult loopbodyResult = this.typeParser.parseExpressionResultString(loopbodyResultStr);
             this.setIteratorType(loopbodyResult);
 
             if (originalCalledType == SelfType.INSTANCE) {
@@ -1212,12 +1280,12 @@ public class LocalTypeReasoner extends AstWalker {
         }
 
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefNode);
-        final GlobalReference globalRef = helper.getTypeGlobalReference();
-        return this.typeKeeper.getType(globalRef);
+        final TypeString typeString = helper.getTypeString();
+        return this.typeKeeper.getType(typeString);
     }
 
     /**
-     * Get the resulting {{ExpressionResult}} from a method invocation.
+     * Get the resulting {@link ExpressionResult} from a method invocation.
      * @param calledType Type method is invoked on.
      * @param methodName Name of method to invoke.
      * @return Result of invocation.
@@ -1226,6 +1294,7 @@ public class LocalTypeReasoner extends AstWalker {
         final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
         return calledType.getMethods(methodName).stream()
             .map(method -> method.getCallResult())
+            .map(expressionResultString -> this.typeParser.parseExpressionResultString(expressionResultString))
             .reduce((result, element) -> new ExpressionResult(result, element, unsetType))
             .orElse(ExpressionResult.UNDEFINED);
     }

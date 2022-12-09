@@ -10,10 +10,10 @@ import nl.ramsolutions.sw.magik.analysis.Position;
 import nl.ramsolutions.sw.magik.analysis.Range;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import nl.ramsolutions.sw.magik.languageserver.implementation.ImplementationProvider;
 import org.junit.jupiter.api.Test;
@@ -33,14 +33,17 @@ class ImplementationProviderTest {
     @Test
     void testProvideImplementation() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             EMPTY_LOCATION,
+            EnumSet.noneOf(Method.Modifier.class),
             "implementation()",
             Collections.emptyList(),
             null,
-            ExpressionResult.UNDEFINED);
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
 
         final URI uri = URI.create("tests://unittest");
         final String code = ""

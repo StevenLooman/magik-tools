@@ -34,8 +34,8 @@ public class PackageNodeHelper {
             topNode = topNode.getParent();
         }
 
-        // Try to find via siblings.
-        AstNode siblingNode = topNode.getPreviousSibling();
+        // Try to find PACKAGE_SPECIFICATION node via previous siblings.
+        AstNode siblingNode = topNode;
         while (siblingNode != null) {
             if (siblingNode.is(MagikGrammar.PACKAGE_SPECIFICATION)) {
                 final AstNode identifierNode = siblingNode.getFirstChild(MagikGrammar.PACKAGE_IDENTIFIER);

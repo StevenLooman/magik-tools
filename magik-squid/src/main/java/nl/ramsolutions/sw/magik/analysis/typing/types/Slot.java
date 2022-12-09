@@ -20,7 +20,7 @@ public class Slot {
      * @param owner Owner of the slot.
      * @param name Name of this slot.
      */
-    public Slot(@Nullable Location location, MagikType owner, String name) {
+    public Slot(final @Nullable Location location, final MagikType owner, final String name) {
         this.location = location;
         this.owner = owner;
         this.name = name;

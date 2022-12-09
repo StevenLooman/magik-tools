@@ -29,59 +29,59 @@ import org.apache.commons.cli.UnrecognizedOptionException;
 public final class Main {
 
     private static final Options OPTIONS;
-    private static final String OPTION_MSG_TEMPLATE = "msg-template";
-    private static final String OPTION_RCFILE = "rcfile";
-    private static final String OPTION_SHOW_CHECKS = "show-checks";
-    private static final String OPTION_COLUMN_OFFSET = "column-offset";
-    private static final String OPTION_MAX_INFRACTIONS = "max-infractions";
-    private static final String OPTION_UNTABIFY = "untabify";
-    private static final String OPTION_DEBUG = "debug";
-    private static final String OPTION_HELP = "help";
+    private static final Option OPTION_MSG_TEMPLATE = Option.builder()
+        .longOpt("msg-template")
+        .desc("Output pattern")
+        .hasArg()
+        .type(PatternOptionBuilder.STRING_VALUE)
+        .build();
+    private static final Option OPTION_RCFILE = Option.builder()
+        .longOpt("rcfile")
+        .desc("Configuration file")
+        .hasArg()
+        .type(PatternOptionBuilder.FILE_VALUE)
+        .build();
+    private static final Option OPTION_SHOW_CHECKS = Option.builder()
+        .longOpt("show-checks")
+        .desc("Show checks and quit")
+        .build();
+    private static final Option OPTION_COLUMN_OFFSET = Option.builder()
+        .longOpt("column-offset")
+        .desc("Set column offset, positive or negative")
+        .hasArg()
+        .type(PatternOptionBuilder.NUMBER_VALUE)
+        .build();
+    private static final Option OPTION_MAX_INFRACTIONS = Option.builder()
+        .longOpt("max-infractions")
+        .desc("Set max number of reporter infractions")
+        .hasArg()
+        .type(PatternOptionBuilder.NUMBER_VALUE)
+        .build();
+    private static final Option OPTION_UNTABIFY = Option.builder()
+        .longOpt("untabify")
+        .desc("Expand tabs to N spaces")
+        .hasArg()
+        .type(PatternOptionBuilder.NUMBER_VALUE)
+        .build();
+    private static final Option OPTION_DEBUG = Option.builder()
+        .longOpt("debug")
+        .desc("Enable showing of debug information")
+        .build();
+    private static final Option OPTION_HELP = Option.builder()
+        .longOpt("help")
+        .desc("Show this help")
+        .build();
 
     static {
         OPTIONS = new Options();
-        OPTIONS.addOption(Option.builder()
-            .longOpt(OPTION_HELP)
-            .desc("Show this help")
-            .build());
-        OPTIONS.addOption(Option.builder()
-            .longOpt(OPTION_MSG_TEMPLATE)
-            .desc("Output pattern")
-            .hasArg()
-            .type(PatternOptionBuilder.STRING_VALUE)
-            .build());
-        OPTIONS.addOption(Option.builder()
-            .longOpt(OPTION_RCFILE)
-            .desc("Configuration file")
-            .hasArg()
-            .type(PatternOptionBuilder.FILE_VALUE)
-            .build());
-        OPTIONS.addOption(Option.builder()
-            .longOpt(OPTION_SHOW_CHECKS)
-            .desc("Show checks and quit")
-            .build());
-        OPTIONS.addOption(Option.builder()
-            .longOpt(OPTION_UNTABIFY)
-            .desc("Expand tabs to N spaces")
-            .hasArg()
-            .type(PatternOptionBuilder.NUMBER_VALUE)
-            .build());
-        OPTIONS.addOption(Option.builder()
-            .longOpt(OPTION_COLUMN_OFFSET)
-            .desc("Set column offset, positive or negative")
-            .hasArg()
-            .type(PatternOptionBuilder.NUMBER_VALUE)
-            .build());
-        OPTIONS.addOption(Option.builder()
-            .longOpt(OPTION_MAX_INFRACTIONS)
-            .desc("Set max number of reporter infractions")
-            .hasArg()
-            .type(PatternOptionBuilder.NUMBER_VALUE)
-            .build());
-        OPTIONS.addOption(Option.builder()
-            .longOpt(OPTION_DEBUG)
-            .desc("Enable showing of debug information")
-            .build());
+        OPTIONS.addOption(OPTION_HELP);
+        OPTIONS.addOption(OPTION_MSG_TEMPLATE);
+        OPTIONS.addOption(OPTION_RCFILE);
+        OPTIONS.addOption(OPTION_SHOW_CHECKS);
+        OPTIONS.addOption(OPTION_UNTABIFY);
+        OPTIONS.addOption(OPTION_COLUMN_OFFSET);
+        OPTIONS.addOption(OPTION_MAX_INFRACTIONS);
+        OPTIONS.addOption(OPTION_DEBUG);
     }
 
     private static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING = Map.of(
@@ -124,12 +124,14 @@ public final class Main {
      * @return Reporter.
      */
     private static Reporter createReporter(final Configuration configuration) {
-        final String template = configuration.hasProperty(OPTION_MSG_TEMPLATE)
-            ? configuration.getPropertyString(OPTION_MSG_TEMPLATE)
+        final String msgTemplateOptName = OPTION_MSG_TEMPLATE.getLongOpt();
+        final String template = configuration.hasProperty(msgTemplateOptName)
+            ? configuration.getPropertyString(msgTemplateOptName)
             : MessageFormatReporter.DEFAULT_FORMAT;
 
-        final String columnOffsetStr = configuration.getPropertyString(OPTION_COLUMN_OFFSET);
-        final Long columnOffset = configuration.hasProperty(OPTION_COLUMN_OFFSET)
+        final String columnOffsetOptName = OPTION_COLUMN_OFFSET.getLongOpt();
+        final String columnOffsetStr = configuration.getPropertyString(columnOffsetOptName);
+        final Long columnOffset = configuration.hasProperty(columnOffsetOptName)
             ? Long.parseLong(columnOffsetStr)
             : null;
 
@@ -149,7 +151,7 @@ public final class Main {
         try {
             commandLine = Main.parseCommandline(args);
         } catch (UnrecognizedOptionException exception) {
-            System.out.println("Unrecognized option: " + exception.getMessage());
+            System.err.println("Unrecognized option: " + exception.getMessage());
 
             System.exit(1);
             return;  // Keep inferer happy.
@@ -165,7 +167,7 @@ public final class Main {
             final File rcfile = (File) commandLine.getParsedOptionValue(OPTION_RCFILE);
             final Path path = rcfile.toPath();
             if (!Files.exists(path)) {
-                System.out.println("RC File does not exist: " + path);
+                System.err.println("RC File does not exist: " + path);
 
                 System.exit(1);
             }
@@ -218,7 +220,8 @@ public final class Main {
     private static void copyOptionToConfig(
             final CommandLine commandLine,
             final Configuration config,
-            final String key) {
+            final Option option) {
+        final String key = option.getLongOpt();
         if (commandLine.hasOption(key)) {
             final String value = commandLine.getOptionValue(key);
             config.setProperty(key, value);

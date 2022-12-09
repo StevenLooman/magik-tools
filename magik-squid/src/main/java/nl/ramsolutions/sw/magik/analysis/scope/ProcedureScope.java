@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.scope;
 
 import com.sonar.sslr.api.AstNode;
+import javax.annotation.Nullable;
 
 /**
  * Procedure-/method-definition scope.
@@ -29,7 +30,7 @@ public class ProcedureScope extends Scope {
             final ScopeEntry.Type type,
             final String identifier,
             final AstNode node,
-            final ScopeEntry parentEntry) {
+            final @Nullable ScopeEntry parentEntry) {
         final ScopeEntry scopeEntry = new ScopeEntry(type, identifier, node, parentEntry);
         this.scopeEntries.put(identifier, scopeEntry);
         return scopeEntry;

@@ -27,7 +27,7 @@ class BreakpointManagerTest {
     /**
      * VSCode runs from module directory, mvn runs from project directory.
      *
-     * @return Proper {{Path}} to use.
+     * @return Proper {@link Path} to use.
      */
     private Path getPath(final String relativePath) {
         final Path path = Path.of(".").toAbsolutePath().getParent();

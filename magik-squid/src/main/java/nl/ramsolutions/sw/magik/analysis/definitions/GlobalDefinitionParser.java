@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 
@@ -49,9 +50,9 @@ public class GlobalDefinitionParser {
         // Figure name.
         final AstNode variableDefinitionNode = this.node.getFirstChild(MagikGrammar.VARIABLE_DEFINITION);
         final AstNode identifierNode = variableDefinitionNode.getFirstChild(MagikGrammar.IDENTIFIER);
-        final String name = identifierNode.getTokenValue();
-
-        final GlobalDefinition globalDefinition = new GlobalDefinition(node, pakkage, name);
+        final String identifier = identifierNode.getTokenValue();
+        final TypeString name = TypeString.of(identifier, pakkage);
+        final GlobalDefinition globalDefinition = new GlobalDefinition(node, name);
         return List.of(globalDefinition);
     }
 

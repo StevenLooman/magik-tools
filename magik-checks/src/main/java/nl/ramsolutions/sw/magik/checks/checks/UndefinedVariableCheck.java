@@ -19,7 +19,8 @@ public class UndefinedVariableCheck extends MagikCheck {
     @Override
     protected void walkPostMagik(final AstNode node) {
         final GlobalScope globalScope = this.getMagikFile().getGlobalScope();
-        globalScope.getScopeEntriesInScope().stream()
+        globalScope.getSelfAndDescendantScopes().stream()
+            .flatMap(scope -> scope.getScopeEntriesInScope().stream())
             .filter(scopeEntry -> scopeEntry.isType(ScopeEntry.Type.GLOBAL))
             .filter(scopeEntry -> this.isPrefixed(scopeEntry.getIdentifier()))
             .forEach(scopeEntry -> {

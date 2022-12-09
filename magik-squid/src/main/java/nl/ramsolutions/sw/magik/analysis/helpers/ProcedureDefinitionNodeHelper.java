@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ProcedureInstance;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
@@ -40,6 +41,19 @@ public class ProcedureDefinitionNodeHelper {
                 .collect(Collectors.toMap(
                     parameterNode -> parameterNode.getFirstChild(MagikGrammar.IDENTIFIER).getTokenValue(),
                     parameterNode -> parameterNode));
+    }
+
+    /**
+     * Get procedure name.
+     * @return Name of the procedure.
+     */
+    public String getProcedureName() {
+        final AstNode nameNode = node.getFirstChild(MagikGrammar.PROCEDURE_NAME);
+        if (nameNode == null) {
+            return ProcedureInstance.ANONYMOUS_PROCEDURE;
+        }
+        final AstNode labelNode = nameNode.getFirstChild(MagikGrammar.LABEL);
+        return labelNode.getLastChild().getTokenOriginalValue();
     }
 
 }

@@ -105,7 +105,7 @@ export class MagikTestProvider implements vscode.Disposable {
 
 	dispose() {
 		if (this.workdir !== null) {
-			fs.rmdirSync(this.workdir, {recursive: true});
+			fs.rmSync(this.workdir, {recursive: true});
 			this.workdir = null;
 		}
 	}

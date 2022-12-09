@@ -30,7 +30,7 @@ public enum ErrorMessage {
     }
 
     /**
-     * Get the {{ErrorMessage}} from an interger value.
+     * Get the {@link ErrorMessage} from an interger value.
      * @param value Integer value.
      * @return ErrorMessage
      */

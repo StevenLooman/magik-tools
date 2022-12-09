@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.debugadapter.slap.responses;
 
 import java.nio.ByteBuffer;
-import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferUtils;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
 
@@ -45,7 +45,7 @@ public class EvalResponse implements ISlapResponse {
      * @return Decoded message.
      */
     public static EvalResponse decode(final ByteBuffer buffer) {
-        final String result = ByteBufferUtils.readString(buffer, OFFSET_RESULT_LENGTH);
+        final String result = ByteBufferHelper.readString(buffer, OFFSET_RESULT_LENGTH);
         return new EvalResponse(result);
     }
 

@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
@@ -12,6 +13,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 public class DefMixinParser extends TypeDefParser {
 
     private static final String DEF_MIXIN = "def_mixin";
+    private static final String SW_DEF_MIXIN = "sw:def_mixin";
 
     /**
      * Constructor.
@@ -32,7 +34,8 @@ public class DefMixinParser extends TypeDefParser {
         }
 
         final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
-        if (!helper.isProcedureInvocationOf(DEF_MIXIN)) {
+        if (!helper.isProcedureInvocationOf(DEF_MIXIN)
+            && !helper.isProcedureInvocationOf(SW_DEF_MIXIN)) {
             return false;
         }
 
@@ -66,13 +69,14 @@ public class DefMixinParser extends TypeDefParser {
         final String pakkage = this.getCurrentPakkage();
 
         // Figure name.
-        final String name = argument0Node.getTokenValue().substring(1);
+        final String identifier = argument0Node.getTokenValue().substring(1);
+        final TypeString name = TypeString.of(identifier, pakkage);
 
         // Parents.
         final AstNode argument1Node = argumentsHelper.getArgument(1);
-        final List<String> parents = this.extractParents(argument1Node);
+        final List<TypeString> parents = this.extractParents(argument1Node);
 
-        final MixinDefinition mixinDefinition = new MixinDefinition(statementNode, pakkage, name, parents);
+        final MixinDefinition mixinDefinition = new MixinDefinition(statementNode, name, parents);
         return List.of(mixinDefinition);
     }
 

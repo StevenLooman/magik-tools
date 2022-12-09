@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
 import java.util.Objects;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
  * Binary operator.
@@ -71,25 +71,25 @@ public class BinaryOperator {
     }
 
     private final Operator operator;
-    private final AbstractType leftType;
-    private final AbstractType rightType;
-    private final AbstractType resultType;
+    private final TypeString leftRef;
+    private final TypeString rightRef;
+    private final TypeString resultRef;
 
     /**
      * Constructor.
      * @param operator Operator name.
-     * @param leftType Left {{MagikType}}.
-     * @param rightType Right {{MagikType}}.
+     * @param leftRef Left {@link MagikType}.
+     * @param rightRef Right {@link MagikType}.
      */
     public BinaryOperator(
             final Operator operator,
-            final AbstractType leftType,
-            final AbstractType rightType,
-            final AbstractType resultType) {
+            final TypeString leftRef,
+            final TypeString rightRef,
+            final TypeString resultRef) {
         this.operator = operator;
-        this.leftType = leftType;
-        this.rightType = rightType;
-        this.resultType = resultType;
+        this.leftRef = leftRef;
+        this.rightRef = rightRef;
+        this.resultRef = resultRef;
     }
 
     /**
@@ -104,24 +104,24 @@ public class BinaryOperator {
      * Get left type.
      * @return Left type.
      */
-    public AbstractType getLeftType() {
-        return this.leftType;
+    public TypeString getLeftType() {
+        return this.leftRef;
     }
 
     /**
      * Get right type.
      * @return Right type.
      */
-    public AbstractType getRightType() {
-        return this.rightType;
+    public TypeString getRightType() {
+        return this.rightRef;
     }
 
     /**
      * Get result type.
      * @return Result type.
      */
-    public AbstractType getResultType() {
-        return resultType;
+    public TypeString getResultType() {
+        return resultRef;
     }
 
     @Override
@@ -140,14 +140,14 @@ public class BinaryOperator {
 
         final BinaryOperator other = (BinaryOperator) obj;
         return Objects.equals(this.operator, other.operator)
-            && Objects.equals(this.leftType, other.leftType)
-            && Objects.equals(this.rightType, other.rightType)
-            && Objects.equals(this.resultType, other.resultType);
+            && Objects.equals(this.leftRef, other.leftRef)
+            && Objects.equals(this.rightRef, other.rightRef)
+            && Objects.equals(this.resultRef, other.resultRef);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.operator, this.leftType, this.rightType, this.resultType);
+        return Objects.hash(this.operator, this.leftRef, this.rightRef, this.resultRef);
     }
 
     @Override
@@ -155,7 +155,7 @@ public class BinaryOperator {
         return String.format(
             "%s@%s(%s, %s, %s, %s)",
             this.getClass().getName(), System.identityHashCode(this),
-            this.operator, this.leftType, this.rightType, this.resultType);
+            this.operator, this.leftRef, this.rightRef, this.resultRef);
     }
 
 }

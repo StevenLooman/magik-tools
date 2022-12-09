@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.ExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
@@ -53,32 +54,25 @@ abstract class TypeDefParser {
      * @param definitionNode Definition node.
      * @return List of parents.
      */
-    protected List<String> extractParents(@Nullable AstNode definitionNode) {
+    protected List<TypeString> extractParents(final @Nullable AstNode definitionNode) {
         if (definitionNode == null) {
             return Collections.emptyList();
         }
 
-        final List<String> parents = new ArrayList<>();
+        final List<TypeString> parents = new ArrayList<>();
         final ExpressionNodeHelper expressionHelper = new ExpressionNodeHelper(definitionNode);
         final String singleParent = expressionHelper.getConstant();
         final AstNode multiParentNode =
             AstQuery.getOnlyFromChain(definitionNode, MagikGrammar.ATOM, MagikGrammar.SIMPLE_VECTOR);
         if (singleParent != null) {
-            final String parent = singleParent.startsWith(":") || singleParent.startsWith("@")
-                ? singleParent.substring(1)
-                : singleParent;
-
+            final TypeString parent = this.getFullParent(singleParent);
             parents.add(parent);
         } else if (multiParentNode != null) {
             for (final AstNode parentNode : multiParentNode.getChildren(MagikGrammar.EXPRESSION)) {
                 final ExpressionNodeHelper parentExpressionHelper = new ExpressionNodeHelper(parentNode);
                 final String parentStr = parentExpressionHelper.getConstant();
                 Objects.requireNonNull(parentStr);
-
-                final String parent = parentStr.startsWith(":") || parentStr.startsWith("@")
-                    ? parentStr.substring(1)
-                    : parentStr;
-
+                final TypeString parent = this.getFullParent(parentStr);
                 parents.add(parent);
             }
         }
@@ -88,6 +82,15 @@ abstract class TypeDefParser {
     protected String getCurrentPakkage() {
         final PackageNodeHelper helper = new PackageNodeHelper(this.node);
         return helper.getCurrentPackage();
+    }
+
+    private TypeString getFullParent(final String parentStr) {
+        final String parent = parentStr.startsWith(":") || parentStr.startsWith("@")
+            ? parentStr.substring(1)
+            : parentStr;
+        return parent.contains(":")
+            ? TypeString.of(parent)
+            : TypeString.of(this.getCurrentPakkage() + ":" + parent);
     }
 
 }

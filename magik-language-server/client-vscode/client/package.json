@@ -3,14 +3,14 @@
 	"description": "Magik Language Server and Debug Adapter client for VSCode",
 	"author": "Steven Looman",
 	"license": "GPL-3.0-only",
-	"version": "0.5.5-SNAPSHOT",
+	"version": "0.6.0",
 	"publisher": "StevenLooman",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/StevenLooman/magik-tools"
 	},
 	"engines": {
-		"vscode": "^1.59.0"
+		"vscode": "^1.70.0"
 	},
 	"dependencies": {
 		"vscode-languageclient": "^7.0.0",
@@ -18,7 +18,7 @@
 		"xml2js": "^0.4.23"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.59.0",
+		"@types/vscode": "^1.70.0",
 		"@types/xml2js": "^0.4.9"
 	}
 }

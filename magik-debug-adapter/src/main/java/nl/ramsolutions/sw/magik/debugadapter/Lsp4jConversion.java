@@ -24,10 +24,10 @@ public final class Lsp4jConversion {
     }
 
     /**
-     * Convert a slap {{ThreadInfoResponse}} to a lsp4j {{Thread}}.
+     * Convert a slap {@link ThreadInfoResponse} to a lsp4j {@link Thread}.
      * @param threadId ID of the thread.
      * @param threadInfo Slap thread info.
-     * @return lsp4j {{Thread}}.
+     * @return lsp4j {@link Thread}.
      */
     public static Thread toLsp4j(final long threadId, final ThreadInfoResponse threadInfo) {
         final Thread thread = new Thread();
@@ -37,9 +37,9 @@ public final class Lsp4jConversion {
     }
 
     /**
-     * Convert a slap {{BreakpointSetResponse}} to a lsp4j {{Breakpoint}}.
+     * Convert a slap {@link BreakpointSetResponse} to a lsp4j {@link Breakpoint}.
      * @param breakpointSet Slap breakpoint set.
-     * @return lsp4j {{Breakpoint}}.
+     * @return lsp4j {@link Breakpoint}.
      */
     public static Breakpoint toLsp4j(final BreakpointSetResponse breakpointSet, final Source source) {
         final Breakpoint breakpoint = new Breakpoint();
@@ -50,11 +50,11 @@ public final class Lsp4jConversion {
     }
 
     /**
-     * Convert a slap {{ThreadStackResponse.StackElement}} to lsp4j {{StackFrame}}.
+     * Convert a slap {@link ThreadStackResponse.StackElement} to lsp4j {@link StackFrame}.
      * @param threadId Thread ID.
      * @param stackElement Stack element.
      * @param path Path.
-     * @return lsp4j {{StackFrame}}.
+     * @return lsp4j {@link StackFrame}.
      */
     public static StackFrame toLsp4j(
             final long threadId, final ThreadStackResponse.StackElement stackElement, final @Nullable Path path) {
@@ -73,10 +73,10 @@ public final class Lsp4jConversion {
     }
 
     /**
-     * Convert {{MagikBreakpoint}}s to LSP4j {{Breakpoint}}s.
+     * Convert {@link MagikBreakpoint}s to LSP4j {@link Breakpoint}s.
      * @param source Source of file.
      * @param magikBreakpoints MagikBreakpoints.
-     * @return Array of converted LSP4j {{Breakpoint}}s.
+     * @return Array of converted LSP4j {@link Breakpoint}s.
      */
     public static Breakpoint[] toLsp4j(final Source source, final List<MagikBreakpoint> magikBreakpoints) {
         return magikBreakpoints.stream()
@@ -92,9 +92,9 @@ public final class Lsp4jConversion {
     }
 
     /**
-     * Convert {{MagikVariable}}s to LSP4j {{Variable}}s.
+     * Convert {@link MagikVariable}s to LSP4j {@link Variable}s.
      * @param magikVariables MagikVariables.
-     * @return List of converted LSP4j {{Variable}}s.
+     * @return List of converted LSP4j {@link Variable}s.
      */
     public static Variable[] toLsp4j(final List<MagikVariable> magikVariables) {
         return magikVariables.stream()

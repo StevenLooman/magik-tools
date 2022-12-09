@@ -21,7 +21,7 @@ public enum ResponseType {
     }
 
     /**
-     * Get the {{ResponseType}} from an interger value.
+     * Get the {@link ResponseType} from an interger value.
      * @param value Integer value.
      * @return ResponseType
      */

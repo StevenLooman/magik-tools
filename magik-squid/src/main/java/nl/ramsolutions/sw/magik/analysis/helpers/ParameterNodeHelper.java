@@ -34,6 +34,9 @@ public class ParameterNodeHelper {
         if (this.hasModifier(MagikKeyword.GATHER)) {
             return false;
         }
+        if (this.node.getParent().is(MagikGrammar.ASSIGNMENT_PARAMETER)) {
+            return false;
+        }
 
         final AstNode parametersNode = this.node.getParent();
         if (parametersNode.isNot(MagikGrammar.PARAMETERS)) {

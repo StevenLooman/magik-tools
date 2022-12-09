@@ -125,7 +125,7 @@ public final class SwProductScanner {
 
     /**
      * Read product.def file.
-     * @param path Path to {{@code product.def}} file.
+     * @param path Path to {@code product.def} file.
      * @return Parsed product definition.
      * @throws IOException -
      */

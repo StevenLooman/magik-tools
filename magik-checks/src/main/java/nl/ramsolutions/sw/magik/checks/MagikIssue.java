@@ -25,8 +25,8 @@ public class MagikIssue {
     }
 
     /**
-     * Get the {{Location}} of the issue.
-     * @return {{Location}}.
+     * Get the {@link Location} of the issue.
+     * @return {@link Location}.
      */
     public Location location() {
         return this.location;
@@ -77,8 +77,8 @@ public class MagikIssue {
     }
 
     /**
-     * Get the {{MagikCheck}} giving the issue.
-     * @return {{MagikCheck}} giving the issue.
+     * Get the {@link MagikCheck} giving the issue.
+     * @return {@link MagikCheck} giving the issue.
      */
     public MagikCheck check() {
         return this.check;

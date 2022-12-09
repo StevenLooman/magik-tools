@@ -1,7 +1,23 @@
 Changes
 =======
 
-0.5.5 (unreleased)
+0.6.0 (2022-09-12)
+
+- Drop UnaryOperator, replaced by the proper method calls
+- Minor refactoring of CLI options
+- Improve MagikIndexer to determine whether a method really returns something and setting the resulting type of the method accordingly (undefined result when no new-method-doc is available, or an empty result)
+- Don't overwrite already known methods in JsonTypeKeeperReader
+- Add JsonTypeKeeperWriter
+- Support methods returning a parameter with the `_parameter(..)` type/ParameterReferenceType
+- Fix MagikGrammer better support EOLs in certain cases
+- Fix showing procedure doc on hover
+- Extend hover provider, now supports packages, conditions
+- Support conditions
+- Changes to MagikGrammar
+- Rewrite parts of references to types in TypeKeeper/types. Fixes mem leaks, references to invalid/old types. MagikPreIndexer can now also be removed and methods without a type definition can be indexed
+- Methods support recording used globals, called methods, used slots, used conditions. This allows for finding references and possibly method renaming in the future
+- Various bug fixes
+- Various new features
 
 
 0.5.4 (2022-11-07)

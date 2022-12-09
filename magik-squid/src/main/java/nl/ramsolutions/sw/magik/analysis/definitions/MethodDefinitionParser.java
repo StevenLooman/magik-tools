@@ -9,8 +9,8 @@ import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
@@ -43,12 +43,9 @@ public class MethodDefinitionParser {
             return List.of();
         }
 
-        // Figure pakkage.
-        final String pakkage = this.getCurrentPakkage();
-
         // Figure exemplar name & method name.
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(this.node);
-        final String exemplarName = helper.getExemplarName();
+        final TypeString exemplarName = helper.getTypeString();
         final String methodName = helper.getMethodName();
 
         // Figure modifers.
@@ -72,13 +69,8 @@ public class MethodDefinitionParser {
             this.createAssignmentParameterDefinition(assignmentParameterNode);
 
         final MethodDefinition methodDefinition = new MethodDefinition(
-            this.node, pakkage, exemplarName, methodName, modifiers, parameters, assignmentParamter);
+            this.node, exemplarName, methodName, modifiers, parameters, assignmentParamter);
         return List.of(methodDefinition);
-    }
-
-    private String getCurrentPakkage() {
-        final PackageNodeHelper helper = new PackageNodeHelper(this.node);
-        return helper.getCurrentPackage();
     }
 
     private List<ParameterDefinition> createParameterDefinitions(final @Nullable AstNode parametersNode) {

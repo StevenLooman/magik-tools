@@ -49,4 +49,5 @@ public class MethodComplexityCheck extends MagikCheck {
             this.addIssue(node, message);
         }
     }
+
 }

@@ -5,7 +5,6 @@ import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
 import java.util.List;
-import nl.ramsolutions.sw.magik.api.ExtendedTokenType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("checkstyle:MagicNumber")
 class MagikParserTest {
 
-    private AstNode parseMagik(String code) {
+    private AstNode parseMagik(final String code) {
         final MagikParser parser = new MagikParser();
         return parser.parseSafe(code);
     }
@@ -304,7 +303,7 @@ class MagikParserTest {
         assertThat(trivia0.getToken().getOriginalValue()).isEqualTo("\n");
 
         final Trivia trivia1 = trivia.get(1);
-        assertThat(trivia1.getToken().getType()).isEqualTo(ExtendedTokenType.WHITESPACE);
+        assertThat(trivia1.getToken().getType()).isEqualTo(GenericTokenType.WHITESPACE);
         assertThat(trivia1.getToken().getOriginalValue()).isEqualTo("  ");
 
         final Trivia trivia2 = trivia.get(2);
@@ -316,7 +315,7 @@ class MagikParserTest {
         assertThat(trivia3.getToken().getOriginalValue()).isEqualTo("\n");
 
         final Trivia trivia4 = trivia.get(4);
-        assertThat(trivia4.getToken().getType()).isEqualTo(ExtendedTokenType.WHITESPACE);
+        assertThat(trivia4.getToken().getType()).isEqualTo(GenericTokenType.WHITESPACE);
         assertThat(trivia4.getToken().getOriginalValue()).isEqualTo("  ");
 
         final Trivia trivia5 = trivia.get(5);

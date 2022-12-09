@@ -43,6 +43,7 @@ import org.eclipse.lsp4j.ImplementationParams;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.PrepareRenameDefaultBehavior;
 import org.eclipse.lsp4j.PrepareRenameParams;
 import org.eclipse.lsp4j.PrepareRenameResult;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
@@ -54,7 +55,6 @@ import org.eclipse.lsp4j.SemanticTokensParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SignatureHelpParams;
-import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
@@ -63,6 +63,7 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.lsp4j.jsonrpc.messages.Either3;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.slf4j.Logger;
@@ -357,7 +358,8 @@ public class MagikTextDocumentService implements TextDocumentService {
     }
 
     @Override
-    public CompletableFuture<Either<Range, PrepareRenameResult>> prepareRename(final PrepareRenameParams params) {
+    public CompletableFuture<Either3<Range, PrepareRenameResult, PrepareRenameDefaultBehavior>> prepareRename(
+            PrepareRenameParams params) {
         final TextDocumentIdentifier textDocument = params.getTextDocument();
         LOGGER.trace(
             "prepareRename, uri: {}, position: {},{}",
@@ -381,8 +383,9 @@ public class MagikTextDocumentService implements TextDocumentService {
         return CompletableFuture.supplyAsync(() -> this.renameProvider.provideRename(magikFile, position, newName));
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> documentSymbol(
+    public CompletableFuture<List<Either<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>>> documentSymbol(
             final DocumentSymbolParams params) {
         final TextDocumentIdentifier textDocument = params.getTextDocument();
         LOGGER.trace("documentSymbol, uri: {}", textDocument.getUri());

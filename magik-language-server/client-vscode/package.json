@@ -3,7 +3,7 @@
 	"description": "Magik Language Server",
 	"author": "Steven Looman",
 	"license": "GPL-3.0-only",
-	"version": "0.5.5-SNAPSHOT",
+	"version": "0.6.0",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/StevenLooman/magik-tools"
@@ -110,6 +110,26 @@
 										"type": "string",
 										"description": "Hostname or IP address to connect to.",
 										"default": "127.0.0.1"
+									},
+									"path_mapping": {
+										"default": [],
+										"label": "Path mapping",
+										"description": "Path mapping",
+										"type": "array",
+										"items": {
+											"label": "Path substitution",
+											"type": "object",
+											"properties": {
+												"from": {
+													"label": "From path",
+													"type": "string"
+												},
+												"to": {
+													"label": "To path",
+													"type": "string"
+												}
+											}
+										}
 									}
 								}
 							}
@@ -207,17 +227,6 @@
 					"description": "Enable typing checks.",
 					"type": "boolean",
 					"default": false
-				},
-				"magik.trace.server": {
-					"type": "string",
-					"enum": [
-						"off",
-						"messages",
-						"verbose"
-					],
-					"default": "off",
-					"description": "Traces the communication between VS Code and the Magik language server.",
-					"scope": "window"
 				}
 			}
 		}

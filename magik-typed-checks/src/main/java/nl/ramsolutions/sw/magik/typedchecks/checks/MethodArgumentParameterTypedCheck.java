@@ -8,9 +8,11 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeMatcher;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
@@ -21,6 +23,7 @@ import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
 
     private static final String MESSAGE = "Argument type (%s) does not match parameter type (%s)";
+    private static final String SW_UNSET = "sw:unset";
 
     @Override
     protected void walkPostMethodInvocation(final AstNode node) {
@@ -49,6 +52,7 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
         // Get methods.
         final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
         final String methodName = helper.getMethodName();
+        final AbstractType unsetType = this.getTypeKeeper().getType(TypeString.of(SW_UNSET));
         for (final Method method : calledType.getMethods(methodName)) {
             final List<Parameter> parameters = method.getParameters();
             if (parameters.isEmpty()) {
@@ -58,7 +62,13 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
             final List<AbstractType> parameterTypes = method.getParameters().stream()
                 .filter(parameter -> parameter.is(Parameter.Modifier.NONE)
                                      || parameter.is(Parameter.Modifier.OPTIONAL))  // Don't check gather.
-                .map(Parameter::getType)
+                .map(parameter -> {
+                    final AbstractType type = parameter.getType();
+                    if (parameter.is(Parameter.Modifier.OPTIONAL)) {
+                        return CombinedType.combine(type, unsetType);
+                    }
+                    return type;
+                })
                 .collect(Collectors.toList());
 
             // Test parameter type against argument type.

@@ -9,17 +9,22 @@ import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * {@code define_slot_access()}}parser.
+ * {@code define_slot_access()} parser.
  */
 public class DefineSlotAccessParser {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefineSlotAccessParser.class);
+
     private static final String DEFINE_SLOT_ACCESS = "define_slot_access()";
-    // TODO: define_slot_externally_readable()
-    // TODO: define_slot_externally_writable()
+    private static final String DEFINE_SLOT_EXTERNALLY_READABLE = "define_slot_externally_readable()";
+    private static final String DEFINE_SLOT_EXTERNALLY_WRITABLE = "define_slot_externally_writable()";
     private static final String FLAG_READ = ":read";
     private static final String FLAG_READABLE = ":readable";
     private static final String FLAG_WRITE = ":write";
@@ -52,7 +57,7 @@ public class DefineSlotAccessParser {
         }
 
         final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
-        if (!helper.isMethodInvocationOf(DEFINE_SLOT_ACCESS)) {
+        if (!helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_ACCESS)) {
             return false;
         }
 
@@ -66,6 +71,7 @@ public class DefineSlotAccessParser {
             return false;
         }
 
+        // Arguments: name, flag, optional flavour, owner_name
         final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
         final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
         final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
@@ -75,30 +81,105 @@ public class DefineSlotAccessParser {
     }
 
     /**
+     * Test if node is a {@code define_slot_externally_readable()}.
+     * @param node Node to test
+     * @return True if node is a {@code define_slot_externally_readable()}, false otherwise.
+     */
+    public static boolean isDefineSlotExternallyReadable(final AstNode node) {
+        if (node.isNot(MagikGrammar.METHOD_INVOCATION)) {
+            return false;
+        }
+
+        final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
+        if (!helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_EXTERNALLY_READABLE)) {
+            return false;
+        }
+
+        final AstNode parentNode = node.getParent();
+        final AstNode atomNode = parentNode.getFirstChild();
+        if (atomNode.isNot(MagikGrammar.ATOM)) {
+            return false;
+        }
+        final String exemplarName = atomNode.getTokenValue();
+        if (exemplarName == null) {
+            return false;
+        }
+
+        // Arguments: name, optional private?, owner_name
+        // `private?` is actually `flavour`.
+        final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+        final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+        final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+        return argument0Node != null;
+    }
+
+    /**
+     * Test if node is a {@code define_slot_externally_writable()}.
+     * @param node Node to test
+     * @return True if node is a {@code define_slot_externally_writable()}, false otherwise.
+     */
+    public static boolean isDefineSlotExternallyWritable(final AstNode node) {
+        if (node.isNot(MagikGrammar.METHOD_INVOCATION)) {
+            return false;
+        }
+
+        final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
+        if (!helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_EXTERNALLY_WRITABLE)) {
+            return false;
+        }
+
+        final AstNode parentNode = node.getParent();
+        final AstNode atomNode = parentNode.getFirstChild();
+        if (atomNode.isNot(MagikGrammar.ATOM)) {
+            return false;
+        }
+        final String exemplarName = atomNode.getTokenValue();
+        if (exemplarName == null) {
+            return false;
+        }
+
+        // Arguments: name, optional flavour, owner_name
+        final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+        final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+        final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+        return argument0Node != null;
+    }
+
+    /**
      * Parse defitions.
      * @return List of parsed definitions.
      */
     public List<Definition> parseDefinitions() {
         final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
         final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+        final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
 
         // Some sanity.
         final AstNode parentNode = node.getParent();
         final AstNode atomNode = parentNode.getFirstChild();
         if (atomNode.isNot(MagikGrammar.ATOM)) {
-            throw new IllegalStateException();
+            LOGGER.warn(
+                "Unable to read slot access: {}, at line: {}", helper.getMethodName(), this.node.getTokenLine());
+            return Collections.emptyList();
         }
-        final String exemplarName = atomNode.getTokenValue();
-        if (exemplarName == null) {
-            throw new IllegalStateException();
+        final String identifier = atomNode.getTokenValue();
+        if (identifier == null) {
+            LOGGER.warn(
+                "Unable to read slot access: {}, at line: {}", helper.getMethodName(), this.node.getTokenLine());
+            return Collections.emptyList();
         }
 
         final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
         final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
         final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SYMBOL);
-        if (argument0Node == null
-            || argument1Node == null) {
-            throw new IllegalStateException();
+        if (argument0Node == null) {
+            return Collections.emptyList();
+        }
+        if (helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_ACCESS)
+            && argument1Node == null) {
+            LOGGER.warn(
+                "Unable to read slot access: {}, at line: {}", helper.getMethodName(), this.node.getTokenLine());
+            return Collections.emptyList();
         }
 
         // Figure statement node.
@@ -107,21 +188,31 @@ public class DefineSlotAccessParser {
         // Figure pakkage.
         final String pakkage = this.getCurrentPakkage();
 
+        // Build methods.
         final String slotNameSymbol = argument0Node.getTokenValue();
         final String slotName = slotNameSymbol.substring(1);
-        final String flag = argument1Node.getTokenValue();
         final String flavor = argument2Node != null
             ? argument2Node.getTokenValue()
             : FLAVOR_PUBLIC;  // Default is public.
+        final String flag;
+        if (helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_EXTERNALLY_READABLE)) {
+            flag = DefineSlotAccessParser.FLAG_READABLE;
+        } else if (helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_EXTERNALLY_WRITABLE)) {
+            flag = DefineSlotAccessParser.FLAG_WRITABLE;
+        } else if (helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_ACCESS)) {
+            flag = argument1Node.getTokenValue();
+        } else {
+            throw new IllegalStateException();
+        }
+        final TypeString exemplarName = TypeString.of(identifier, pakkage);
         final List<MethodDefinition> methodDefinitions =
-                this.generateSlotMethods(statementNode, pakkage, exemplarName, slotName, flag, flavor);
+            this.generateSlotMethods(statementNode, exemplarName, slotName, flag, flavor);
         return List.copyOf(methodDefinitions);
     }
 
     private List<MethodDefinition> generateSlotMethods(
             final AstNode definitionNode,
-            final String pakkage,
-            final String exemplarName,
+            final TypeString exemplarName,
             final String slotName,
             final String flag,
             final String flavor) {
@@ -136,7 +227,7 @@ public class DefineSlotAccessParser {
             }
             final List<ParameterDefinition> getParameters = Collections.emptyList();
             final MethodDefinition getMethod = new MethodDefinition(
-                definitionNode, pakkage, exemplarName, getName, getModifiers, getParameters, null);
+                definitionNode, exemplarName, getName, getModifiers, getParameters, null);
             methodDefinitions.add(getMethod);
         } else if (flag.equals(FLAG_WRITE)
                    || flag.equals(FLAG_WRITABLE)) {
@@ -147,7 +238,7 @@ public class DefineSlotAccessParser {
             }
             final List<ParameterDefinition> getParameters = Collections.emptyList();
             final MethodDefinition getMethod = new MethodDefinition(
-                definitionNode, pakkage, exemplarName, slotName, getModifiers, getParameters, null);
+                definitionNode, exemplarName, slotName, getModifiers, getParameters, null);
             methodDefinitions.add(getMethod);
 
             // set
@@ -160,13 +251,13 @@ public class DefineSlotAccessParser {
             final ParameterDefinition assignmentParam =
                 new ParameterDefinition(definitionNode, "val", ParameterDefinition.Modifier.NONE);
             final MethodDefinition setMethod = new MethodDefinition(
-                definitionNode, pakkage, exemplarName, setName, setModifiers, setParameters, assignmentParam);
+                definitionNode, exemplarName, setName, setModifiers, setParameters, assignmentParam);
             methodDefinitions.add(setMethod);
 
             // boot
             final String bootName = slotName + MagikOperator.BOOT_CHEVRON.getValue();
             final MethodDefinition bootMethod = new MethodDefinition(
-                definitionNode, pakkage, exemplarName, bootName, setModifiers, setParameters, assignmentParam);
+                definitionNode, exemplarName, bootName, setModifiers, setParameters, assignmentParam);
             methodDefinitions.add(bootMethod);
         }
         return methodDefinitions;

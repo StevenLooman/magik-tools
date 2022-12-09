@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferUtils;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
 
@@ -94,16 +94,16 @@ public class ThreadStackResponse implements ISlapResponse {
          * @return Decoded message.
          */
         public static StackElement decode(final ByteBuffer buffer) {
-            final int level = (int) ByteBufferUtils.readUInt32(buffer, OFFSET_LEVEL);
-            final int offset = (int) ByteBufferUtils.readUInt32(buffer, OFFSET_OFFSET);
+            final int level = (int) ByteBufferHelper.readUInt32(buffer, OFFSET_LEVEL);
+            final int offset = (int) ByteBufferHelper.readUInt32(buffer, OFFSET_OFFSET);
 
-            final int nameLength = (int) ByteBufferUtils.readUInt32(buffer, OFFSET_NAME_LENGTH);
+            final int nameLength = (int) ByteBufferHelper.readUInt32(buffer, OFFSET_NAME_LENGTH);
             final byte[] nameArr = new byte[nameLength];
             buffer.position(OFFSET_NAME_LANGUAGE);
             buffer.get(nameArr);
             final String name = new String(nameArr, StandardCharsets.UTF_8);
 
-            final int languageLength = (int) ByteBufferUtils.readUInt32(buffer, OFFSET_LANGUAGE_LENGTH);
+            final int languageLength = (int) ByteBufferHelper.readUInt32(buffer, OFFSET_LANGUAGE_LENGTH);
             final byte[] langArr = new byte[languageLength];
             buffer.position(OFFSET_NAME_LANGUAGE + nameLength);
             buffer.get(langArr);

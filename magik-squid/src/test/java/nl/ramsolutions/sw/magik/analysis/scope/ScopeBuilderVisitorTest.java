@@ -407,4 +407,64 @@ class ScopeBuilderVisitorTest {
         assertThat(entryTracebackShowArgs.getUsages()).isEmpty();
     }
 
+    @Test
+    void testHidingScopeEntryLocal() {
+        final String code = ""
+            + "_method a.b\n"
+            + "  _local x << 10\n"
+            + "  _block\n"
+            + "    _local x << 10\n"
+            + "    show(x)\n"
+            + "  _endblock\n"
+            + "_endmethod";
+        final ScopeBuilderVisitor visitor = this.buildCode(code);
+        final Scope globalScope = visitor.getGlobalScope();
+        final Scope bodyScope = globalScope.getSelfAndDescendantScopes().get(1);
+        final Scope loopScope = globalScope.getSelfAndDescendantScopes().get(2);
+
+        final ScopeEntry bodyXEntry = bodyScope.getScopeEntry("x");
+        final ScopeEntry loopXEntry = loopScope.getScopeEntry("x");
+        assertThat(bodyXEntry).isNotSameAs(loopXEntry);
+    }
+
+    @Test
+    void testNotHidingScopeEntryDefinition() {
+        final String code = ""
+            + "_method a.b\n"
+            + "  x << 10\n"
+            + "  _block\n"
+            + "    x << 10\n"
+            + "    show(x)\n"
+            + "  _endblock\n"
+            + "_endmethod";
+        final ScopeBuilderVisitor visitor = this.buildCode(code);
+        final Scope globalScope = visitor.getGlobalScope();
+        final Scope bodyScope = globalScope.getSelfAndDescendantScopes().get(1);
+        final Scope loopScope = globalScope.getSelfAndDescendantScopes().get(2);
+
+        final ScopeEntry bodyXEntry = bodyScope.getScopeEntry("x");
+        final ScopeEntry loopXEntry = loopScope.getScopeEntry("x");
+        assertThat(bodyXEntry).isEqualTo(loopXEntry);
+    }
+
+    @Test
+    void testNotHidingScopeEntryDefinitionMulti() {
+        final String code = ""
+            + "_method a.b\n"
+            + "  (x, y) << (10, 20)\n"
+            + "  _block\n"
+            + "    x << 10\n"
+            + "    show(x)\n"
+            + "  _endblock\n"
+            + "_endmethod";
+        final ScopeBuilderVisitor visitor = this.buildCode(code);
+        final Scope globalScope = visitor.getGlobalScope();
+        final Scope bodyScope = globalScope.getSelfAndDescendantScopes().get(1);
+        final Scope loopScope = globalScope.getSelfAndDescendantScopes().get(2);
+
+        final ScopeEntry bodyXEntry = bodyScope.getScopeEntry("x");
+        final ScopeEntry loopXEntry = loopScope.getScopeEntry("x");
+        assertThat(bodyXEntry).isEqualTo(loopXEntry);
+    }
+
 }

@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
 import org.junit.jupiter.api.Test;
@@ -55,7 +56,7 @@ class DefinitionReaderTest {
 
     @Test
     void testEnumeratorDefintion() {
-        final String code = "def_enumeration(:test_enum, _false, :a)";
+        final String code = "sw:def_enumeration(:test_enum, _false, :a)";
         final AstNode node = this.parseCode(code);
         final DefinitionReader reader = new DefinitionReader();
         reader.walkAst(node);
@@ -144,7 +145,7 @@ class DefinitionReaderTest {
         final SlottedExemplarDefinition slottedExemplarDef = (SlottedExemplarDefinition) definitions.get(0);
         assertThat(slottedExemplarDef.getName()).isEqualTo("test_exemplar");
         assertThat(slottedExemplarDef.getNode()).isEqualTo(node.getFirstDescendant(MagikGrammar.STATEMENT));
-        assertThat(slottedExemplarDef.getParents()).containsExactly("sw:rope");
+        assertThat(slottedExemplarDef.getParents()).containsExactly(TypeString.of("sw:rope"));
     }
 
     @Test
@@ -161,12 +162,14 @@ class DefinitionReaderTest {
         final SlottedExemplarDefinition slottedExemplarDef = (SlottedExemplarDefinition) definitions.get(0);
         assertThat(slottedExemplarDef.getName()).isEqualTo("test_exemplar");
         assertThat(slottedExemplarDef.getNode()).isEqualTo(node.getFirstDescendant(MagikGrammar.STATEMENT));
-        assertThat(slottedExemplarDef.getParents()).containsExactly("mixin1", "rope");
+        assertThat(slottedExemplarDef.getParents()).containsExactly(
+            TypeString.of("user:mixin1"),
+            TypeString.of("user:rope"));
     }
 
     @Test
     void testDefIndexeExemplar() {
-        final String code = "def_indexed_exemplar(:test_exemplar, {}, {:mixin1, :integer})";
+        final String code = "def_indexed_exemplar(:test_exemplar, _unset, {:mixin1, :integer})";
         final AstNode node = this.parseCode(code);
         final DefinitionReader reader = new DefinitionReader();
         reader.walkAst(node);
@@ -176,8 +179,10 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(IndexedExemplarDefinition.class);
         final IndexedExemplarDefinition indexedExemplarDef = (IndexedExemplarDefinition) definitions.get(0);
-        assertThat(indexedExemplarDef.getName()).isEqualTo("test_exemplar");
-        assertThat(indexedExemplarDef.getParents()).containsExactly("mixin1", "integer");
+        assertThat(indexedExemplarDef.getTypeString()).isEqualTo(TypeString.of("user:test_exemplar"));
+        assertThat(indexedExemplarDef.getParents()).containsExactly(
+            TypeString.of("user:mixin1"),
+            TypeString.of("user:integer"));
     }
 
     @Test
@@ -192,8 +197,8 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MixinDefinition.class);
         final MixinDefinition mixinDef = (MixinDefinition) definitions.get(0);
-        assertThat(mixinDef.getName()).isEqualTo("test_mixin");
-        assertThat(mixinDef.getParents()).containsExactly("mixin1");
+        assertThat(mixinDef.getTypeString()).isEqualTo(TypeString.of("user:test_mixin"));
+        assertThat(mixinDef.getParents()).containsExactly(TypeString.of("user:mixin1"));
     }
 
     @Test
@@ -208,10 +213,10 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(BinaryOperatorDefinition.class);
         final BinaryOperatorDefinition operatorDefinition = (BinaryOperatorDefinition) definitions.get(0);
-        assertThat(operatorDefinition.getName()).isEqualTo("integer > float");
+        assertThat(operatorDefinition.getName()).isEqualTo("user:integer > user:float");
         assertThat(operatorDefinition.getOperator()).isEqualTo(">");
-        assertThat(operatorDefinition.getLhs()).isEqualTo("integer");
-        assertThat(operatorDefinition.getRhs()).isEqualTo("float");
+        assertThat(operatorDefinition.getLhs()).isEqualTo(TypeString.of("user:integer"));
+        assertThat(operatorDefinition.getRhs()).isEqualTo(TypeString.of("user:float"));
     }
 
     @Test
@@ -320,6 +325,69 @@ class DefinitionReaderTest {
     }
 
     @Test
+    void testDefineSlotExternallyReadable() {
+        final String code = "test_exemplar.define_slot_externally_readable(:slot1)";
+        final AstNode node = this.parseCode(code);
+        final DefinitionReader reader = new DefinitionReader();
+        reader.walkAst(node);
+
+        final List<Definition> definitions = reader.getDefinitions();
+        assertThat(definitions).hasSize(1);
+
+        assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
+        final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
+        assertThat(methodDef.getName()).isEqualTo("test_exemplar.slot1");
+        assertThat(methodDef.getModifiers()).isEmpty();
+        assertThat(methodDef.getParameters()).isEmpty();
+    }
+
+    @Test
+    void testDefineSlotExternallyReadablePublic() {
+        final String code = "test_exemplar.define_slot_externally_readable(:slot1, :public)";
+        final AstNode node = this.parseCode(code);
+        final DefinitionReader reader = new DefinitionReader();
+        reader.walkAst(node);
+
+        final List<Definition> definitions = reader.getDefinitions();
+        assertThat(definitions).hasSize(1);
+
+        assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
+        final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
+        assertThat(methodDef.getName()).isEqualTo("test_exemplar.slot1");
+        assertThat(methodDef.getModifiers()).isEmpty();
+        assertThat(methodDef.getParameters()).isEmpty();
+    }
+
+    @Test
+    void testDefineSlotExternallyWritable() {
+        final String code = "test_exemplar.define_slot_externally_writable(:slot1, :public)";
+        final AstNode node = this.parseCode(code);
+        final DefinitionReader reader = new DefinitionReader();
+        reader.walkAst(node);
+
+        final List<Definition> definitions = reader.getDefinitions();
+        assertThat(definitions).hasSize(3);
+
+        assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
+        final MethodDefinition getMethodDef = (MethodDefinition) definitions.get(0);
+        assertThat(getMethodDef.getName()).isEqualTo("test_exemplar.slot1");
+        assertThat(getMethodDef.getModifiers()).isEmpty();
+        assertThat(getMethodDef.getParameters()).isEmpty();
+
+        assertThat(definitions.get(1)).isInstanceOf(MethodDefinition.class);
+        final MethodDefinition setMethodDef = (MethodDefinition) definitions.get(1);
+        assertThat(setMethodDef.getName()).isEqualTo("test_exemplar.slot1<<");
+        assertThat(setMethodDef.getModifiers()).isEmpty();
+        assertThat(setMethodDef.getParameters()).isEmpty();
+
+        assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
+        final MethodDefinition bootMethodDef = (MethodDefinition) definitions.get(2);
+        assertThat(bootMethodDef.getName()).isEqualTo("test_exemplar.slot1^<<");
+        assertThat(bootMethodDef.getModifiers()).isEmpty();
+        assertThat(bootMethodDef.getParameters()).isEmpty();
+    }
+
+    @Test
     void testDefineSharedVariable() {
         final String code = "test_exemplar.define_shared_variable(:var1, 1, :readonly)";
         final AstNode node = this.parseCode(code);
@@ -385,6 +453,45 @@ class DefinitionReaderTest {
         assertThat(definitions.get(0)).isInstanceOf(GlobalDefinition.class);
         final GlobalDefinition globalDef = (GlobalDefinition) definitions.get(0);
         assertThat(globalDef.getName()).isEqualTo("g");
+    }
+
+    @Test
+    void testParseCondition() {
+        final String code = "condition.define_condition(:cond1, :information, {:data1, :data2})";
+        final AstNode node = this.parseCode(code);
+        final DefinitionReader reader = new DefinitionReader();
+        reader.walkAst(node);
+
+        final List<Definition> definitions = reader.getDefinitions();
+        assertThat(definitions).hasSize(1);
+
+        assertThat(definitions.get(0)).isInstanceOf(ConditionDefinition.class);
+        final ConditionDefinition conditionDef = (ConditionDefinition) definitions.get(0);
+        assertThat(conditionDef.getName()).isEqualTo("cond1");
+        assertThat(conditionDef.getParent()).isEqualTo("information");
+        assertThat(conditionDef.getDataNames()).containsOnly(
+            "data1", "data2");
+    }
+
+    @Test
+    void testParseConditionInBlock() {
+        final String code = ""
+            + "_block\n"
+            + "  condition.define_condition(:cond1, :information, {:data1, :data2})\n"
+            + "_endblock";
+        final AstNode node = this.parseCode(code);
+        final DefinitionReader reader = new DefinitionReader();
+        reader.walkAst(node);
+
+        final List<Definition> definitions = reader.getDefinitions();
+        assertThat(definitions).hasSize(1);
+
+        assertThat(definitions.get(0)).isInstanceOf(ConditionDefinition.class);
+        final ConditionDefinition conditionDef = (ConditionDefinition) definitions.get(0);
+        assertThat(conditionDef.getName()).isEqualTo("cond1");
+        assertThat(conditionDef.getParent()).isEqualTo("information");
+        assertThat(conditionDef.getDataNames()).containsOnly(
+            "data1", "data2");
     }
 
 }

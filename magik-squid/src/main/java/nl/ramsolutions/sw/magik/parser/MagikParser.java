@@ -2,9 +2,7 @@ package nl.ramsolutions.sw.magik.parser;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
-import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
-import com.sonar.sslr.api.Trivia;
 import com.sonar.sslr.impl.Parser;
 import java.io.File;
 import java.io.FileReader;
@@ -15,12 +13,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
-import nl.ramsolutions.sw.magik.api.ExtendedTokenType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
-import nl.ramsolutions.sw.magik.api.MagikPunctuator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.sslr.parser.LexerlessGrammar;
@@ -123,9 +118,6 @@ public class MagikParser {
         // Apply RULE_MAPPING.
         this.applyRuleMapping(magikNode);
 
-        // Apply whitespace conversion.
-        this.applyWhitespaceConversion(magikNode);
-
         return magikNode;
     }
 
@@ -147,9 +139,6 @@ public class MagikParser {
 
             // Apply RULE_MAPPING.
             this.applyRuleMapping(magikNode);
-
-            // Apply whitespace conversion.
-            this.applyWhitespaceConversion(magikNode);
 
             return magikNode;
         }
@@ -177,48 +166,6 @@ public class MagikParser {
         }
 
         node.getChildren().forEach(this::applyRuleMapping);
-    }
-
-    /**
-     * Convert whitespace trivia disguised as comment trivia.
-     * @param node Node to do conversion on.
-     */
-    private void applyWhitespaceConversion(final AstNode node) {
-        final Token token = node.getToken();
-        if (token != null) {
-            final List<Trivia> tokenTrivia = token.getTrivia();
-
-            tokenTrivia.replaceAll(trivia -> {
-                final List<Token> triviaTokens = trivia.getTokens();
-                final Token triviaToken = triviaTokens.get(0);
-                final String triviaTokenValue = triviaToken.getOriginalValue();
-                if (triviaTokenValue.startsWith("#")) {
-                    // Comment, do nothing
-                    return trivia;
-                } else if (triviaTokenValue.matches("\r|\n|\r\n")) {
-                    // Newline.
-                    final Token newToken = Token.builder(triviaToken)
-                        .setType(GenericTokenType.EOL)
-                        .build();
-                    return Trivia.createSkippedText(newToken);
-                } else if (triviaTokenValue.matches("[\\t\\v\\f\\u0020\\u00A0\\uFEFF]+")) { // Whitespace.
-                    final Token newToken = Token.builder(triviaToken)
-                        .setType(ExtendedTokenType.WHITESPACE)
-                        .build();
-                    return Trivia.createSkippedText(newToken);
-                } else if (triviaTokenValue.equals(MagikPunctuator.SEMICOLON.getValue())) {
-                    final Token newToken = Token.builder(triviaToken)
-                        .setType(ExtendedTokenType.STATEMENT_SEPARATOR)
-                        .build();
-                    return Trivia.createSkippedText(newToken);
-                }
-
-                LOGGER.warn("Unknown triva token: " + triviaToken);
-                return null;
-            });
-        }
-
-        node.getChildren().forEach(this::applyWhitespaceConversion);
     }
 
     /**

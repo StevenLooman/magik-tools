@@ -1,6 +1,5 @@
 package nl.ramsolutions.sw.magik;
 
-import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
@@ -48,22 +47,20 @@ public class MagikTypedFile extends MagikFile {
     }
 
     /**
-     * Get the {{ITypeKeeper}} used for the {{LocalTypeReasoner}}.
+     * Get the {@link ITypeKeeper} used for the {@link LocalTypeReasoner}.
      */
     public ITypeKeeper getTypeKeeper() {
         return this.typeKeeper;
     }
 
     /**
-     * Run the (cached) {{LocalTypeReasoner}} and return it.
-     * @return The used LocalTypeReasoner.
+     * Run the (cached) {@link LocalTypeReasoner} and return it.
+     * @return The used {@link LocalTypeReasoner}.
      */
     public synchronized LocalTypeReasoner getTypeReasoner() {
         if (this.typeReasoner == null) {
-            final AstNode node = this.getTopNode();
-
             this.typeReasoner = new LocalTypeReasoner(this);
-            this.typeReasoner.run(node);
+            this.typeReasoner.run();
         }
 
         return this.typeReasoner;

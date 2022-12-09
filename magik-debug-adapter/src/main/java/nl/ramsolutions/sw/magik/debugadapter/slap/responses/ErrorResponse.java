@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.debugadapter.slap.responses;
 
 import java.nio.ByteBuffer;
-import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferUtils;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ErrorMessage;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
@@ -50,9 +50,9 @@ public class ErrorResponse implements ISlapResponse {
      * @return Decoded message.
      */
     public static ErrorResponse decode(final ByteBuffer buffer) {
-        final int requestTypeVal = (int) ByteBufferUtils.readUInt32(buffer, OFFSET_REQUEST_TYPE);
+        final int requestTypeVal = (int) ByteBufferHelper.readUInt32(buffer, OFFSET_REQUEST_TYPE);
         final RequestType requestType = RequestType.valueOf(requestTypeVal);
-        final int errorMessageVal = (int) ByteBufferUtils.readUInt32(buffer, OFFSET_ERROR_TYPE);
+        final int errorMessageVal = (int) ByteBufferHelper.readUInt32(buffer, OFFSET_ERROR_TYPE);
         final ErrorMessage errorMessage = ErrorMessage.valueOf(errorMessageVal);
 
         return new ErrorResponse(requestType, errorMessage);

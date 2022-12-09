@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
  * Binary operator definition.
@@ -8,8 +9,8 @@ import com.sonar.sslr.api.AstNode;
 public class BinaryOperatorDefinition extends Definition {
 
     private final String operator;
-    private final String lhs;
-    private final String rhs;
+    private final TypeString lhs;
+    private final TypeString rhs;
 
     /**
      * Constructor.
@@ -23,9 +24,18 @@ public class BinaryOperatorDefinition extends Definition {
             final AstNode node,
             final String pakkage,
             final String operator,
-            final String lhs,
-            final String rhs) {
-        super(node, pakkage, lhs + " " + operator + " " + rhs);
+            final TypeString lhs,
+            final TypeString rhs) {
+        super(node, TypeString.UNDEFINED);
+
+        if (!lhs.isSingle()) {
+            throw new IllegalStateException();
+        }
+
+        if (!rhs.isSingle()) {
+            throw new IllegalStateException();
+        }
+
         this.operator = operator;
         this.lhs = lhs;
         this.rhs = rhs;
@@ -35,12 +45,17 @@ public class BinaryOperatorDefinition extends Definition {
         return this.operator;
     }
 
-    public String getLhs() {
+    public TypeString getLhs() {
         return this.lhs;
     }
 
-    public String getRhs() {
+    public TypeString getRhs() {
         return this.rhs;
+    }
+
+    @Override
+    public String getName() {
+        return this.lhs.getFullString() + " " + this.operator + " " + this.rhs.getFullString();
     }
 
 }

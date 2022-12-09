@@ -5,6 +5,7 @@ import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
@@ -13,6 +14,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 public class DefineBinaryOperatorCaseParser {
 
     private static final String DEFINE_BINARY_OPERATOR_CASE = "define_binary_operator_case";
+    private static final String SW_DEFINE_BINARY_OPERATOR_CASE = "sw:define_binary_operator_case";
 
     private final AstNode node;
 
@@ -39,7 +41,8 @@ public class DefineBinaryOperatorCaseParser {
         }
 
         final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
-        if (!helper.isProcedureInvocationOf(DEFINE_BINARY_OPERATOR_CASE)) {
+        if (!helper.isProcedureInvocationOf(DEFINE_BINARY_OPERATOR_CASE)
+            && !helper.isProcedureInvocationOf(SW_DEFINE_BINARY_OPERATOR_CASE)) {
             return false;
         }
 
@@ -100,14 +103,16 @@ public class DefineBinaryOperatorCaseParser {
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
 
         // Figure pakkage.
-        final String pakkage = this.getCurrentPakkage();
+        final String currentPakkage = this.getCurrentPakkage();
 
         // Figure operator & lhs & rhs.
         final String operator = operatorSymbol.substring(1);
-        final String lhs = argument1Node.getTokenValue();
-        final String rhs = argument2Node.getTokenValue();
+        final String lhsName = argument1Node.getTokenValue();
+        final TypeString lhs = TypeString.of(lhsName, currentPakkage);
+        final String rhsName = argument2Node.getTokenValue();
+        final TypeString rhs = TypeString.of(rhsName, currentPakkage);
         final BinaryOperatorDefinition operatorDefinition =
-                new BinaryOperatorDefinition(statementNode, pakkage, operator, lhs, rhs);
+            new BinaryOperatorDefinition(statementNode, currentPakkage, operator, lhs, rhs);
         return List.of(operatorDefinition);
     }
 

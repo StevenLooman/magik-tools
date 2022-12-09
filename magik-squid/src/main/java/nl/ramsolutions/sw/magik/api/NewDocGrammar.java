@@ -39,6 +39,7 @@ public enum NewDocGrammar implements GrammarRuleKey {
 
     TYPE_SELF,
     TYPE_CLONE,
+    TYPE_PARAMETER_REFERENCE,
 
     // root
     NEW_DOC;
@@ -87,7 +88,10 @@ public enum NewDocGrammar implements GrammarRuleKey {
         TYPE_SEPARATOR(","),
         TYPE_COMBINATOR("|"),
         TYPE_OPEN("{"),
-        TYPE_CLOSE("}");
+        TYPE_CLOSE("}"),
+        TYPE_ARG_OPEN("("),
+        TYPE_ARG_CLOSE(")"),
+        TYPE_PARAM_REF("_parameter");
 
         private final String value;
 
@@ -200,12 +204,18 @@ public enum NewDocGrammar implements GrammarRuleKey {
             b.firstOf(
                 TYPE_SELF,
                 TYPE_CLONE,
+                TYPE_PARAMETER_REFERENCE,
                 b.regexp(TYPE_IDENTIFIER_REGEXP)));
 
         b.rule(TYPE_SELF).is(
             b.regexp(SELF_REGEXP));
         b.rule(TYPE_CLONE).is(
             b.regexp(CLONE_REGEXP));
+        b.rule(TYPE_PARAMETER_REFERENCE).is(
+            Punctuator.TYPE_PARAM_REF,
+            Punctuator.TYPE_ARG_OPEN,
+            b.regexp(SIMPLE_IDENTIFIER_REGEXP),
+            Punctuator.TYPE_ARG_CLOSE);
 
         b.setRootRule(NEW_DOC);
 

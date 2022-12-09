@@ -9,6 +9,7 @@ import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 
@@ -71,13 +72,13 @@ public class DefineSharedVariableParser {
      */
     public List<Definition> parseDefinitions() {
         // Some sanity.
-        final AstNode parentNode = node.getParent();
+        final AstNode parentNode = this.node.getParent();
         final AstNode atomNode = parentNode.getFirstChild();
         if (atomNode.isNot(MagikGrammar.ATOM)) {
             throw new IllegalStateException();
         }
-        final String exemplarName = atomNode.getTokenValue();    // Assume this is an exemplar.
-        if (exemplarName == null) {
+        final String identifier = atomNode.getTokenValue();    // Assume this is an exemplar.
+        if (identifier == null) {
             throw new IllegalStateException();
         }
 
@@ -99,15 +100,15 @@ public class DefineSharedVariableParser {
         final String variableNameSymbol = argument0Node.getTokenValue();
         final String variableName = variableNameSymbol.substring(1);
         final String flavor = argument2Node.getTokenValue();
+        final TypeString exemplarName = TypeString.of(identifier, pakkage);
         final List<MethodDefinition> methodDefinitions =
-            this.generateVariableMethods(statementNode, pakkage, exemplarName, variableName, flavor);
+            this.generateVariableMethods(statementNode, exemplarName, variableName, flavor);
         return List.copyOf(methodDefinitions);
     }
 
     private List<MethodDefinition> generateVariableMethods(
             final AstNode definitionNode,
-            final String pakkage,
-            final String exemplarName,
+            final TypeString exemplarName,
             final String variableName,
             final String flavor) {
         final List<MethodDefinition> methodDefinitions = new ArrayList<>();
@@ -119,7 +120,7 @@ public class DefineSharedVariableParser {
         }
         final List<ParameterDefinition> getParameters = Collections.emptyList();
         final MethodDefinition getMethod = new MethodDefinition(
-            definitionNode, pakkage, exemplarName, variableName, getModifiers, getParameters, null);
+            definitionNode, exemplarName, variableName, getModifiers, getParameters, null);
         methodDefinitions.add(getMethod);
 
         // set
@@ -132,13 +133,13 @@ public class DefineSharedVariableParser {
         final ParameterDefinition assignmentParam =
             new ParameterDefinition(definitionNode, "val", ParameterDefinition.Modifier.NONE);
         final MethodDefinition setMethod = new MethodDefinition(
-            definitionNode, pakkage, exemplarName, setName, setModifiers, setParameters, assignmentParam);
+            definitionNode, exemplarName, setName, setModifiers, setParameters, assignmentParam);
         methodDefinitions.add(setMethod);
 
         // boot
         final String bootName = variableName + MagikOperator.BOOT_CHEVRON.getValue();
         final MethodDefinition bootMethod = new MethodDefinition(
-            definitionNode, pakkage, exemplarName, bootName, setModifiers, setParameters, assignmentParam);
+            definitionNode, exemplarName, bootName, setModifiers, setParameters, assignmentParam);
         methodDefinitions.add(bootMethod);
 
         return methodDefinitions;

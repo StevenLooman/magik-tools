@@ -34,9 +34,9 @@ class FormattingProviderTest {
         return provider.provideFormatting(magikFile, options);
     }
 
-    // region: Whitespaces
+    // region: Whitespace
     @Test
-    void testMethodDefintion1() {
+    void testWhitespaceMethodDefintion1() {
         final String code = ""
             + "_method a. b(x, y, z)\n"
             + "_endmethod\n";
@@ -46,7 +46,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testMethodDefintion2() {
+    void testWhitespaceMethodDefintion2() {
         final String code = ""
             + "_method a.b (x, y, z)\n"
             + "_endmethod\n";
@@ -56,7 +56,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testParameters1() {
+    void testWhitespaceParameters1() {
         final String code = ""
             + "_method a.b(x,y, z)\n"
             + "_endmethod\n";
@@ -74,7 +74,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testParameters2() {
+    void testWhitespaceParameters2() {
         final String code = ""
             + "_method a.b(x, y,z)\n"
             + "_endmethod\n";
@@ -92,7 +92,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testParameters3() {
+    void testWhitespaceParameters3() {
         final String code = ""
             + "_method a.b(x, y , z)\n"
             + "_endmethod\n";
@@ -110,7 +110,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testParameters4() {
+    void testWhitespaceParameters4() {
         final String code = "print(a,b, c)\n";
         final List<TextEdit> edits = this.getEdits(code);
 
@@ -126,7 +126,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testParameters5() {
+    void testWhitespaceParameters5() {
         final String code = "print(a, b,c)\n";
         final List<TextEdit> edits = this.getEdits(code);
 
@@ -142,7 +142,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testMethodInvocation1() {
+    void testWhitespaceMethodInvocation1() {
         final String code = "class .method(a, b, c)\n";
         final List<TextEdit> edits = this.getEdits(code);
 
@@ -158,7 +158,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testMethodInvocation2() {
+    void testWhitespaceMethodInvocation2() {
         final String code = "class. method(a, b, c)\n";
         final List<TextEdit> edits = this.getEdits(code);
 
@@ -174,7 +174,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testMethodInvocation3() {
+    void testWhitespaceMethodInvocation3() {
         final String code = "class.method (a, b, c)\n";
         final List<TextEdit> edits = this.getEdits(code);
 
@@ -190,7 +190,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testArguments1() {
+    void testWhitespaceArguments1() {
         final String code = "prc( a, b, c)\n";
         final List<TextEdit> edits = this.getEdits(code);
 
@@ -206,7 +206,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testArguments2() {
+    void testWhitespaceArguments2() {
         final String code = "prc(a,b, c)\n";
         final List<TextEdit> edits = this.getEdits(code);
 
@@ -222,7 +222,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testArguments3() {
+    void testWhitespaceArguments3() {
         final String code = "prc(a, b,c)\n";
         final List<TextEdit> edits = this.getEdits(code);
 
@@ -238,7 +238,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testArguments4() {
+    void testWhitespaceArguments4() {
         final String code = "prc(a, b , c)\n";
         final List<TextEdit> edits = this.getEdits(code);
 
@@ -254,7 +254,15 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testMethodInvocationMultiLine() {
+    void testWhitespaceArgumentsSelf() {
+        final String code = "prc(_self)\n";
+        final List<TextEdit> edits = this.getEdits(code);
+
+        assertThat(edits).isEmpty();
+    }
+
+    @Test
+    void testWhitespaceMethodInvocationMultiLine() {
         final String code = ""
             + "obj.\n"
             + "m()\n";
@@ -270,11 +278,29 @@ class FormattingProviderTest {
             "\t");
         assertThat(edit0).isEqualTo(expected0);
     }
+
+    @Test
+    void testWhitespaceSimpleVector() {
+        final String code = ""
+            + "{:slot1, _unset, :readable, :public}";
+
+        final List<TextEdit> edits = this.getEdits(code);
+        assertThat(edits).isEmpty();
+    }
+
+    @Test
+    void testWhitespaceAssignmentMethod() {
+        final String code = ""
+            + "_self.x() << 10";
+
+        final List<TextEdit> edits = this.getEdits(code);
+        assertThat(edits).isEmpty();
+    }
     // endregion
 
     // region: Indenting.
     @Test
-    void testIndentingStatement() {
+    void testIndentBlockStatement() {
         final String code = ""
             + "_block\n"
             + "print(1)\n"
@@ -293,7 +319,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testIndentingComments() {
+    void testIndentComments() {
         final String code = ""
             + "_block\n"
             + "# comment\n"
@@ -312,7 +338,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testCommentsAfterStatement() {
+    void testIndentCommentsAfterStatement() {
         final String code = ""
             + "_method a.b(a, b, c)\n"
             + "\tprint(1) # test method\n"
@@ -323,7 +349,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testNewlineExpression() {
+    void testIndentNewlineExpression() {
         final String code = ""
             + "_if a() _andif\n"
             + "b()\n"
@@ -361,7 +387,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testAssignmentExpression() {
+    void testIndentAssignmentExpression2() {
         final String code = ""
             + "a << _if x?\n"
             + "_then\n"
@@ -412,6 +438,43 @@ class FormattingProviderTest {
                 new Position(5, 0)),
             "\t");
         assertThat(edit4).isEqualTo(expected4);
+    }
+
+    @Test
+    void testIndentArguments() {
+        final String code = ""
+            + "def_slotted_exemplar(\n"
+            + "\t:test_ex,\n"
+            + "\t{\n"
+            + "\t\t{:slot1, _unset}\n"
+            + "\t})\n";
+        final List<TextEdit> edits = this.getEdits(code);
+        assertThat(edits).isEmpty();
+    }
+
+    @Test
+    void testIndentIfElif() {
+        final String code = ""
+            + "_if a\n"
+            + "_then\n"
+            + "\tshow(:a)\n"
+            + "_elif b\n"
+            + "_then\n"
+            + "\tshow(:b)\n"
+            + "_else\n"
+            + "\tshow(:c)\n"
+            + "_endif\n";
+        final List<TextEdit> edits = this.getEdits(code);
+        assertThat(edits).isEmpty();
+    }
+
+    @Test
+    void testIndentVariableDefinitionAssignment() {
+        final String code = ""
+            + "_local a <<\n"
+            + "\t10";
+        final List<TextEdit> edits = this.getEdits(code);
+        assertThat(edits).isEmpty();
     }
     // endregion
 

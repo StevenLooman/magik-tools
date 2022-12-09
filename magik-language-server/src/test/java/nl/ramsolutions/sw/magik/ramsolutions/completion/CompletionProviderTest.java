@@ -11,11 +11,11 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.SlottedType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
 import org.eclipse.lsp4j.CompletionItem;
@@ -69,14 +69,17 @@ class CompletionProviderTest {
             + "    1.\n"
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "find_me()",
             Collections.emptyList(),
             null,
-            ExpressionResult.UNDEFINED);
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
         final Position position = new Position(1, 6);    // On '.'.
         final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
 
@@ -96,15 +99,17 @@ class CompletionProviderTest {
             + "    _self.\n"
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType aType = new SlottedType(GlobalReference.of("user:a"));
-        typeKeeper.addType(aType);
+        final TypeString aRef = TypeString.of("user:a");
+        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, aRef);
         aType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "find_me()",
             Collections.emptyList(),
             null,
-            ExpressionResult.UNDEFINED);
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
         final Position position = new Position(1, 10);    // On '.'.
         final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
 
@@ -124,14 +129,17 @@ class CompletionProviderTest {
             + "    1.fi\n"
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "find_me()",
             Collections.emptyList(),
             null,
-            ExpressionResult.UNDEFINED);
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
         final Position position = new Position(1, 8);    // On 'i'.
         final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
 
@@ -198,9 +206,9 @@ class CompletionProviderTest {
             + "    \n"
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType aType = new SlottedType(GlobalReference.of("user", "a"));
+        final TypeString aRef = TypeString.of("user:a");
+        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, aRef);
         aType.addSlot(null, "slot1");
-        typeKeeper.addType(aType);
         final Position position = new Position(1, 2);    // On ''.
         final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
 

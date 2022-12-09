@@ -24,7 +24,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
     /**
      * Current scope.
      */
-    private Scope scope;
+    private Scope currentScope;
 
     /**
      * Scope index for quick searching.
@@ -32,7 +32,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
     private final Map<AstNode, Scope> scopeIndex = new HashMap<>();
 
     /**
-     * Get the {{GlobalScope}}.
+     * Get the {@link GlobalScope}.
      * @return Global scope
      */
     public GlobalScope getGlobalScope() {
@@ -42,7 +42,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
     @Override
     protected void walkPreMagik(final AstNode node) {
         this.globalScope = new GlobalScope(this.scopeIndex, node);
-        this.scope = this.globalScope;
+        this.currentScope = this.globalScope;
 
         this.scopeIndex.put(node, this.globalScope);
     }
@@ -62,16 +62,16 @@ public class ScopeBuilderVisitor extends MagikVisitor {
             this.walkPreBodyRegular(node);
         }
 
-        this.scopeIndex.put(node, this.scope);
+        this.scopeIndex.put(node, this.currentScope);
     }
 
     private void walkPreBodyRegular(final AstNode node) {
         // regular scope
-        this.scope = new BodyScope(this.scope, node);
+        this.currentScope = new BodyScope(this.currentScope, node);
     }
 
     private void walkPreBodyLoop(final AstNode node) {
-        this.scope = new BodyScope(scope, node);
+        this.currentScope = new BodyScope(this.currentScope, node);
 
         // add for-items to scope
         final AstNode forNode = AstQuery.getParentFromChain(
@@ -85,15 +85,15 @@ public class ScopeBuilderVisitor extends MagikVisitor {
                 MagikGrammar.FOR_VARIABLES,
                 MagikGrammar.IDENTIFIERS_WITH_GATHER,
                 MagikGrammar.IDENTIFIER);
-            for (final AstNode identifierNode: identifierNodes) {
+            for (final AstNode identifierNode : identifierNodes) {
                 final String identifier = identifierNode.getTokenValue();
-                this.scope.addDeclaration(ScopeEntry.Type.LOCAL, identifier, identifierNode, null);
+                this.currentScope.addDeclaration(ScopeEntry.Type.LOCAL, identifier, identifierNode, null);
             }
         }
     }
 
     private void walkPreBodyWhen(final AstNode node, final AstNode parentNode) {
-        this.scope = new BodyScope(scope, node);
+        this.currentScope = new BodyScope(currentScope, node);
 
         // add _with items to scope
         final AstNode tryNode = parentNode.getParent();
@@ -101,7 +101,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
         if (tryVariableNode != null) {
             final AstNode identifierNode = tryVariableNode.getFirstChild(MagikGrammar.IDENTIFIER);
             final String identifier = identifierNode.getTokenValue();
-            this.scope.addDeclaration(ScopeEntry.Type.LOCAL, identifier, identifierNode, null);
+            this.currentScope.addDeclaration(ScopeEntry.Type.LOCAL, identifier, identifierNode, null);
 
             // Don't add identifierNode to scope index,
             // as this identifier can have multiple scopes (multiple _when).
@@ -109,7 +109,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
     }
 
     private void walkPreBodyMethodProcDefinition(final AstNode node, final AstNode parentNode) {
-        this.scope = new ProcedureScope(this.scope, node);
+        this.currentScope = new ProcedureScope(this.currentScope, node);
 
         // Add all parameters to scope.
         parentNode.getChildren(MagikGrammar.PARAMETERS, MagikGrammar.ASSIGNMENT_PARAMETER).stream()
@@ -117,9 +117,9 @@ public class ScopeBuilderVisitor extends MagikVisitor {
             .forEach(parameterNode -> {
                 final AstNode identifierNode = parameterNode.getFirstChild(MagikGrammar.IDENTIFIER);
                 final String identifier = identifierNode.getTokenValue();
-                this.scope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, parameterNode, null);
+                this.currentScope.addDeclaration(ScopeEntry.Type.PARAMETER, identifier, identifierNode, null);
 
-                this.scopeIndex.put(parameterNode, this.scope);
+                this.scopeIndex.put(identifierNode, this.currentScope);
             });
     }
 
@@ -143,7 +143,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
             .filter(identifierNode -> {
                 // Don't overwrite entries.
                 final String identifier = identifierNode.getTokenValue();
-                return this.scope.getScopeEntry(identifier) == null;
+                return this.currentScope.getLocalScopeEntry(identifier) == null;
             })
             .forEach(identifierNode -> {
                 final String identifier = identifierNode.getTokenValue();
@@ -171,10 +171,10 @@ public class ScopeBuilderVisitor extends MagikVisitor {
                     parentEntry = null;
                 }
 
-                this.scope.addDeclaration(scopeEntryType, identifier, identifierNode, parentEntry);
+                this.currentScope.addDeclaration(scopeEntryType, identifier, identifierNode, parentEntry);
                 // ParentEntry gets a usage via the constructor of the added declaration.
 
-                this.scopeIndex.put(identifierNode, this.scope);
+                this.scopeIndex.put(identifierNode, this.currentScope);
             });
     }
 
@@ -189,12 +189,12 @@ public class ScopeBuilderVisitor extends MagikVisitor {
             .filter(Objects::nonNull)
             .forEach(identifierNode -> {
                 final String identifier = identifierNode.getTokenValue();
-                if (this.scope.getScopeEntry(identifier) != null) {
+                if (this.currentScope.getScopeEntry(identifier) != null) {
                     // Don't overwrite entries.
                     return;
                 }
 
-                this.scope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
+                this.currentScope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
             });
     }
 
@@ -220,13 +220,13 @@ public class ScopeBuilderVisitor extends MagikVisitor {
             }
 
             final String identifier = identifierNode.getTokenValue();
-            if (this.scope.getScopeEntry(identifier) != null) {
+            if (this.currentScope.getScopeEntry(identifier) != null) {
                 // Don't overwrite entries.
                 return;
             }
 
             // add as definition
-            this.scope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
+            this.currentScope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
         }
     }
 
@@ -238,7 +238,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
         }
 
         final String identifier = identifierNode.getTokenValue();
-        final ScopeEntry existingScopeEntry = this.scope.getScopeEntry(identifier);
+        final ScopeEntry existingScopeEntry = this.currentScope.getScopeEntry(identifier);
         if (existingScopeEntry != null) {
             if (existingScopeEntry.getNode() != identifierNode) {
                 // Prevent using ourselves.
@@ -250,14 +250,15 @@ public class ScopeBuilderVisitor extends MagikVisitor {
         }
 
         // Add as global, and use directly.
-        final ScopeEntry entry = this.globalScope.addDeclaration(ScopeEntry.Type.GLOBAL, identifier, node, null);
+        final ScopeEntry entry =
+            this.currentScope.addDeclaration(ScopeEntry.Type.GLOBAL, identifier, identifierNode, null);
         entry.addUsage(node);
     }
 
     @Override
     protected void walkPostBody(final AstNode node) {
         // pop current scope
-        this.scope = this.scope.getParentScope();
+        this.currentScope = this.currentScope.getParentScope();
     }
 
 }

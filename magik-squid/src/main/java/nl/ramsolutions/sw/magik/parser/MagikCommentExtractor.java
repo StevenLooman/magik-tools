@@ -19,7 +19,7 @@ public final class MagikCommentExtractor {
     }
 
     /**
-     * Extract comments from {{node}}.
+     * Extract comments from {@link node}.
      * @param node Node containing {@link Trivia} with comments.
      * @return Stream of comment {@link Token}s.
      */
@@ -31,7 +31,7 @@ public final class MagikCommentExtractor {
     }
 
     /**
-     * Extract line comments from {{node}}.
+     * Extract line comments from {@link node}.
      * @param node Node containing {@link Trivia} with comments.
      * @return Stream of comment {@link Token}s.
      */
@@ -48,9 +48,9 @@ public final class MagikCommentExtractor {
                     final Token previousTriviaLastToken = previousTriviaTokens.get(previousTriviaTokens.size() - 1);
                     if (trivia.isComment()
                         && (previousTrivia.isSkippedText()  // Whitespace from start of line.
-                        && previousTriviaLastToken.getColumn() == 0
-                        || previousTrivia.isSkippedText()  // EOL.
-                        && previousTriviaLastToken.getType() == GenericTokenType.EOL)) {
+                            && previousTriviaLastToken.getColumn() == 0
+                            || previousTrivia.isSkippedText()  // EOL.
+                            && previousTriviaLastToken.getType() == GenericTokenType.EOL)) {
                         final Token lineCommentToken = trivia.getToken();
                         lineCommentTokens.add(lineCommentToken);
                     }
@@ -62,7 +62,7 @@ public final class MagikCommentExtractor {
     }
 
     /**
-     * Extract Doc comments for {{node}}.
+     * Extract Doc comments for {@link node}.
      * @param node Node containing {@link Trivia} with comments.
      * @return Stream of Doc comment {@link Token}s.
      */

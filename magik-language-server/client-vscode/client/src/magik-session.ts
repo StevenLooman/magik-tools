@@ -91,7 +91,7 @@ class MagikSession implements vscode.Disposable {
 
 	public dispose() {
 		if (this._workdir !== null) {
-			fs.rmdirSync(this._workdir, {recursive: true});
+			fs.rmSync(this._workdir, {recursive: true});
 			this._workdir = null;
 		}
 	}

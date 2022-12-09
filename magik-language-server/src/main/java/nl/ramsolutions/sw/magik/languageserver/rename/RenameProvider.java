@@ -15,12 +15,13 @@ import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.PrepareRenameDefaultBehavior;
 import org.eclipse.lsp4j.PrepareRenameResult;
 import org.eclipse.lsp4j.RenameOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.lsp4j.jsonrpc.messages.Either3;
 
 /**
  * Rename provider.
@@ -43,7 +44,7 @@ public class RenameProvider {
      * @param position Position in magik source.
      * @return Prepare rename or null if no rename possible.
      */
-    public Either<org.eclipse.lsp4j.Range, PrepareRenameResult> providePrepareRename(
+    public Either3<org.eclipse.lsp4j.Range, PrepareRenameResult, PrepareRenameDefaultBehavior> providePrepareRename(
             final MagikTypedFile magikFile, final Position position) {
         // Parse magik.
         final AstNode topNode = magikFile.getTopNode();
@@ -70,7 +71,7 @@ public class RenameProvider {
         final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
         final String identifier = node.getTokenOriginalValue();
         final PrepareRenameResult result = new PrepareRenameResult(rangeLsp4j, identifier);
-        return Either.forRight(result);
+        return Either3.forSecond(result);
     }
 
     /**
@@ -125,7 +126,7 @@ public class RenameProvider {
             return null;
         }
 
-        final String identifier = node.getTokenOriginalValue();
+        final String identifier = node.getTokenValue();
         return scope.getScopeEntry(identifier);
     }
 

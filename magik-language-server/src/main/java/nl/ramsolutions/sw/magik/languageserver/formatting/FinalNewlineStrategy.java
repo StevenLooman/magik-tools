@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.languageserver.formatting;
 
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
-import nl.ramsolutions.sw.magik.api.ExtendedTokenType;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
@@ -13,7 +12,7 @@ import org.eclipse.lsp4j.TextEdit;
  */
 public class FinalNewlineStrategy extends FormattingStrategy {
 
-    private static final String EOL_TOKEN_VALUE = "\n";    // TODO: Extract this from AST.
+    private static final String EOL_TOKEN_VALUE = "\n";
 
     FinalNewlineStrategy(final FormattingOptions options) {
         super(options);
@@ -40,7 +39,7 @@ public class FinalNewlineStrategy extends FormattingStrategy {
     TextEdit walkCommentToken(final Token token) {
         TextEdit textEdit = null;
         if (this.lastToken != null
-            && this.lastToken.getType() == ExtendedTokenType.WHITESPACE) {
+            && this.lastToken.getType() == GenericTokenType.WHITESPACE) {
             textEdit = this.editToken(this.lastToken, "");
         }
         return textEdit;
