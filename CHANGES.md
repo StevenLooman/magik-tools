@@ -1,6 +1,9 @@
 Changes
 =======
 
+0.6.1 (unreleased)
+
+
 0.6.0 (2022-09-12)
 
 - Drop UnaryOperator, replaced by the proper method calls
