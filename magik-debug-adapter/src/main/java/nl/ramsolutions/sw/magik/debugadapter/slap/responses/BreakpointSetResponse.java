@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.debugadapter.slap.responses;
 
 import java.nio.ByteBuffer;
-import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferUtils;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
 
@@ -47,7 +47,7 @@ public class BreakpointSetResponse implements ISlapResponse {
      * @return Decoded message.
      */
     public static BreakpointSetResponse decode(final ByteBuffer buffer) {
-        final long breakpointId = ByteBufferUtils.readUInt32(buffer, OFFSET_BREAKPOINT_ID);
+        final long breakpointId = ByteBufferHelper.readUInt32(buffer, OFFSET_BREAKPOINT_ID);
 
         return new BreakpointSetResponse(breakpointId);
     }

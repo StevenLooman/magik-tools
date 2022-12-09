@@ -18,8 +18,8 @@ import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
@@ -163,14 +163,14 @@ public class SemanticTokenWalker extends AstWalker {
                         NewDocGrammar.TYPE_NAME, NewDocGrammar.TYPE_CLONE, NewDocGrammar.TYPE_SELF);
                     typeNodes.forEach(typeTypeNode -> {
                         final String identifier = typeTypeNode.getTokenValue();
-                        final GlobalReference globalRef = identifier.indexOf(':') != -1
-                            ? GlobalReference.of(identifier)
-                            : GlobalReference.of(this.currentPakkage, identifier);
+                        final TypeString typeString = identifier.indexOf(':') != -1
+                            ? TypeString.of(identifier)
+                            : TypeString.of(identifier, this.currentPakkage);
                         if (typeTypeNode.is(NewDocGrammar.TYPE_CLONE, NewDocGrammar.TYPE_SELF)) {
                             final Set<SemanticToken.Modifier> constModifier =
                                 Set.of(SemanticToken.Modifier.DOCUMENTATION, SemanticToken.Modifier.READONLY);
                             this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, constModifier);
-                        } else if (this.isKnownType(globalRef)) {
+                        } else if (this.isKnownType(typeString)) {
                             this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, docModifier);
                         }
                     });
@@ -242,8 +242,12 @@ public class SemanticTokenWalker extends AstWalker {
             return;
         }
 
-        if (parentNode.is(MagikGrammar.METHOD_DEFINITION)) {
-            this.walkPostIdentifierMethodDefintion(node);
+        if (parentNode.is(MagikGrammar.EXEMPLAR_NAME)) {
+            this.addSemanticToken(node, SemanticToken.Type.CLASS);
+        } else if (parentNode.is(MagikGrammar.METHOD_NAME)) {
+            this.addSemanticToken(node, SemanticToken.Type.METHOD);
+        } else if (parentNode.is(MagikGrammar.CONDITION_NAME)) {
+            this.addSemanticToken(node, SemanticToken.Type.CLASS);
         } else if (parentNode.is(MagikGrammar.ATOM)
                    && !this.isPartOfProcedureInvocation(node)) {
             this.walkPostIdentifierAtom(node);
@@ -283,19 +287,6 @@ public class SemanticTokenWalker extends AstWalker {
         this.addSemanticToken(node, SemanticToken.Type.VARIABLE);
     }
 
-    private void walkPostIdentifierMethodDefintion(final AstNode node) {
-        final AstNode methodDefinitionNode = node.getParent();
-        final List<AstNode> identifierNodes = methodDefinitionNode.getChildren(MagikGrammar.IDENTIFIER);
-        final int index = identifierNodes.indexOf(node);
-        if (index == 0) {
-            final AstNode typeIdentifierNode = identifierNodes.get(0);
-            this.addSemanticToken(typeIdentifierNode, SemanticToken.Type.CLASS);
-        } else if (index == 1) {
-            final AstNode methodIdentifierNode = identifierNodes.get(1);
-            this.addSemanticToken(methodIdentifierNode, SemanticToken.Type.METHOD);
-        }
-    }
-
     private void walkPostIdentifierAtom(final AstNode node) {
         final GlobalScope globalScope = this.magikFile.getGlobalScope();
         final Scope scope = globalScope.getScopeForNode(node);
@@ -321,10 +312,8 @@ public class SemanticTokenWalker extends AstWalker {
 
             case GLOBAL:
             case DYNAMIC:
-                final GlobalReference globalRef = identifier.indexOf(':') != -1
-                    ? GlobalReference.of(identifier)
-                    : GlobalReference.of(this.currentPakkage, identifier);
-                if (this.isKnownType(globalRef)) {
+                final TypeString typeString = TypeString.of(identifier, this.currentPakkage);
+                if (this.isKnownType(typeString)) {
                     this.addSemanticToken(
                         node, SemanticToken.Type.CLASS, Set.of(SemanticToken.Modifier.VARIABLE_GLOBAL));
                 } else {
@@ -362,9 +351,9 @@ public class SemanticTokenWalker extends AstWalker {
         this.currentPakkage = helper.getCurrentPackage();
     }
 
-    private boolean isKnownType(final GlobalReference globalReference) {
+    private boolean isKnownType(final TypeString typeString) {
         final ITypeKeeper typeKeeper = this.magikFile.getTypeKeeper();
-        return typeKeeper.getType(globalReference) instanceof MagikType;
+        return typeKeeper.getType(typeString) instanceof MagikType;
     }
 
 }

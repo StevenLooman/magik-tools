@@ -22,8 +22,8 @@ public final class CheckList {
     }
 
     /**
-     * Get the list of {{MagikCheck}}s.
-     * @return List of with {{MagikCheck}}s
+     * Get the list of {@link MagikCheck}s.
+     * @return List of with {@link MagikCheck}s
      */
     public static List<Class<?>> getChecks() {
         return List.of(
@@ -38,8 +38,8 @@ public final class CheckList {
     }
 
     /**
-     * Get {{MagikCheck}}s which are disabled by default.
-     * @return List of {{MagikCheck}}s.
+     * Get {@link MagikCheck}s which are disabled by default.
+     * @return List of {@link MagikCheck}s.
      */
     public static List<Class<?>> getDisabledByDefaultChecks() {
         return getChecks().stream()
@@ -48,8 +48,8 @@ public final class CheckList {
     }
 
     /**
-     * Get {{MagikCheck}}s which are templated.
-     * @return List of {{MagikCheck}}s.
+     * Get {@link MagikCheck}s which are templated.
+     * @return List of {@link MagikCheck}s.
      */
     public static List<Class<?>> getTemplatedChecks() {
         return getChecks().stream()

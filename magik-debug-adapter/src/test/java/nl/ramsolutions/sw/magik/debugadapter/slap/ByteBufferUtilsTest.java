@@ -19,7 +19,7 @@ class ByteBufferUtilsTest {
         ByteBuffer buffer = ByteBuffer.wrap(data);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        long actual = ByteBufferUtils.readUInt32(buffer);
+        long actual = ByteBufferHelper.readUInt32(buffer);
         long expected = 132;
         assertThat(actual).isEqualTo(expected);
     }
@@ -31,7 +31,7 @@ class ByteBufferUtilsTest {
         ByteBuffer buffer = ByteBuffer.wrap(data);
         buffer.order(ByteOrder.BIG_ENDIAN);
 
-        long actual = ByteBufferUtils.readUInt32(buffer);
+        long actual = ByteBufferHelper.readUInt32(buffer);
         long expected = 132;
         assertThat(actual).isEqualTo(expected);
     }
@@ -41,12 +41,12 @@ class ByteBufferUtilsTest {
         ByteBuffer buffer = ByteBuffer.allocate(4);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         long writeValue = 0x0A0B0C0D;
-        ByteBufferUtils.writeUInt32(buffer, writeValue);
+        ByteBufferHelper.writeUInt32(buffer, writeValue);
 
         assertThat(buffer.array()).isEqualTo(new byte[] {0x0D, 0x0C, 0x0B, 0x0A});
 
         buffer.flip();
-        long readValue = ByteBufferUtils.readUInt32(buffer, 0);
+        long readValue = ByteBufferHelper.readUInt32(buffer, 0);
         assertThat(readValue).isEqualTo(0x0A0B0C0D);
     }
 
@@ -55,12 +55,12 @@ class ByteBufferUtilsTest {
         ByteBuffer buffer = ByteBuffer.allocate(4);
         buffer.order(ByteOrder.BIG_ENDIAN);
         long writeValue = 0x0A0B0C0D;
-        ByteBufferUtils.writeUInt32(buffer, writeValue);
+        ByteBufferHelper.writeUInt32(buffer, writeValue);
 
         assertThat(buffer.array()).isEqualTo(new byte[] {0x0A, 0x0B, 0x0C, 0x0D});
 
         buffer.flip();
-        long readValue = ByteBufferUtils.readUInt32(buffer, 0);
+        long readValue = ByteBufferHelper.readUInt32(buffer, 0);
         assertThat(readValue).isEqualTo(0x0A0B0C0D);
     }
 
@@ -69,12 +69,12 @@ class ByteBufferUtilsTest {
         ByteBuffer buffer = ByteBuffer.allocate(4);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         long writeValue = 1;
-        ByteBufferUtils.writeUInt32(buffer, writeValue);
+        ByteBufferHelper.writeUInt32(buffer, writeValue);
 
         assertThat(buffer.array()).isEqualTo(new byte[] {0x01, 0x00, 0x00, 0x00});
 
         buffer.flip();
-        long readValue = ByteBufferUtils.readUInt32(buffer, 0);
+        long readValue = ByteBufferHelper.readUInt32(buffer, 0);
         assertThat(readValue).isEqualTo(1);
     }
 
@@ -83,12 +83,12 @@ class ByteBufferUtilsTest {
         ByteBuffer buffer = ByteBuffer.allocate(4);
         buffer.order(ByteOrder.BIG_ENDIAN);
         long value = 1;
-        ByteBufferUtils.writeUInt32(buffer, value);
+        ByteBufferHelper.writeUInt32(buffer, value);
 
         assertThat(buffer.array()).isEqualTo(new byte[] {0x00, 0x00, 0x00, 0x01});
 
         buffer.flip();
-        long readValue = ByteBufferUtils.readUInt32(buffer, 0);
+        long readValue = ByteBufferHelper.readUInt32(buffer, 0);
         assertThat(readValue).isEqualTo(1);
     }
 
@@ -97,12 +97,12 @@ class ByteBufferUtilsTest {
         ByteBuffer buffer = ByteBuffer.allocate(4);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         long writeValue = 1L << 32;
-        ByteBufferUtils.writeUInt32(buffer, writeValue);
+        ByteBufferHelper.writeUInt32(buffer, writeValue);
 
         assertThat(buffer.array()).isEqualTo(new byte[] {0x00, 0x00, 0x00, 0x00});
 
         buffer.flip();
-        long readValue = ByteBufferUtils.readUInt32(buffer, 0);
+        long readValue = ByteBufferHelper.readUInt32(buffer, 0);
         assertThat(readValue).isZero();
     }
 
@@ -111,12 +111,12 @@ class ByteBufferUtilsTest {
         ByteBuffer buffer = ByteBuffer.allocate(4);
         buffer.order(ByteOrder.BIG_ENDIAN);
         long value = 1L << 32;
-        ByteBufferUtils.writeUInt32(buffer, value);
+        ByteBufferHelper.writeUInt32(buffer, value);
 
         assertThat(buffer.array()).isEqualTo(new byte[] {0x00, 0x00, 0x00, 0x00});
 
         buffer.flip();
-        long readValue = ByteBufferUtils.readUInt32(buffer, 0);
+        long readValue = ByteBufferHelper.readUInt32(buffer, 0);
         assertThat(readValue).isZero();
     }
 

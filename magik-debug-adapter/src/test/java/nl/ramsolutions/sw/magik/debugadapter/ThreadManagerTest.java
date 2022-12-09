@@ -1,8 +1,11 @@
 package nl.ramsolutions.sw.magik.debugadapter;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
@@ -47,7 +50,8 @@ class ThreadManagerTest {
             }
         };
 
-        final ThreadManager manager = new ThreadManager(slapProtocol, null);
+        final PathMapper pathMapper = new PathMapper(Collections.emptyMap());
+        final ThreadManager manager = new ThreadManager(slapProtocol, null, pathMapper);
         final List<Thread> threads = manager.threads();
         assertThat(threads).hasSize(2);
 
@@ -82,28 +86,31 @@ class ThreadManagerTest {
             public CompletableFuture<ISlapResponse> getSourceFile(final String method) throws IOException {
                 String result = null;
                 if ("sw:object.m1()".equals(method)) {
-                    result = "file1.magik";
+                    result = "/src/module/sources/file1.magik";
                 } else if ("sw:object.m2()".equals(method)) {
-                    result = "file2.magik";
+                    result = "/src/module/sources/file2.magik";
                 }
                 final SourceFileResponse response = new SourceFileResponse(result);
                 return CompletableFuture.completedFuture(response);
             }
         };
 
-        final ThreadManager manager = new ThreadManager(slapProtocol, null);
+        final Map<Path, Path> pathMapping = Map.of(
+            Path.of("/src"), Path.of("/home/user/src"));
+        final PathMapper pathMapper = new PathMapper(pathMapping);
+        final ThreadManager manager = new ThreadManager(slapProtocol, null, pathMapper);
         final List<StackFrame> stackFrames = manager.stackTrace(1);
         assertThat(stackFrames).hasSize(2);
 
         final StackFrame frame0 = stackFrames.get(0);
         assertThat(frame0.getId()).isEqualTo(Lsp4jConversion.threadIdLevelToFrameId(1, 0));
         assertThat(frame0.getName()).isEqualTo("sw:object.m1()");
-        assertThat(frame0.getSource().getPath()).isEqualTo("file1.magik");
+        assertThat(frame0.getSource().getPath()).isEqualTo("/home/user/src/module/sources/file1.magik");
 
         final StackFrame frame1 = stackFrames.get(1);
         assertThat(frame1.getId()).isEqualTo(Lsp4jConversion.threadIdLevelToFrameId(1, 2));
         assertThat(frame1.getName()).isEqualTo("sw:object.m2()");
-        assertThat(frame1.getSource().getPath()).isEqualTo("file2.magik");
+        assertThat(frame1.getSource().getPath()).isEqualTo("/home/user/src/module/sources/file2.magik");
     }
 
 }

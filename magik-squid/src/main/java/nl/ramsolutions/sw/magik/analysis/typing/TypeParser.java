@@ -1,25 +1,20 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ParameterReferenceType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
-import nl.ramsolutions.sw.magik.api.MagikKeyword;
-import nl.ramsolutions.sw.magik.api.NewDocGrammar;
 
 /**
  * Type parser.
  */
 public final class TypeParser {
 
-    private static final String TYPE_COMBINATOR_RE = Pattern.quote(NewDocGrammar.Punctuator.TYPE_COMBINATOR.getValue());
-    private static final String TYPE_SEPARATOR_RE = Pattern.quote(NewDocGrammar.Punctuator.TYPE_SEPARATOR.getValue());
-    private static final String TYPE_SEPARATOR = NewDocGrammar.Punctuator.TYPE_SEPARATOR.getValue();
     private final ITypeKeeper typeKeeper;
 
     /**
@@ -34,74 +29,57 @@ public final class TypeParser {
      * Parse a type string and return the type. The result can be a {@Link CombinedType} type when types are combined
      * with a {@code |}-sign.
      * @param typeString String to parse.
-     * @param currentPakkage Package in context.
      * @return Parsed type.
      */
-    public AbstractType parseTypeString(final @Nullable String typeString, final String currentPakkage) {
+    public AbstractType parseTypeString(final @Nullable TypeString typeString) {
         if (typeString == null
-            || typeString.isBlank()) {
+            || typeString.isUndefined()) {
             return UndefinedType.INSTANCE;
         }
 
-        return Stream.of(typeString.split(TYPE_COMBINATOR_RE))
+        return typeString.parts().stream()
             .map(typeStr -> {
-                if (typeStr.equalsIgnoreCase(SelfType.SERIALIZED_NAME)
-                    || typeStr.equalsIgnoreCase(MagikKeyword.SELF.getValue())
-                    || typeStr.equalsIgnoreCase(MagikKeyword.CLONE.getValue())) {
+                if (typeStr.isSelf()) {
                     return SelfType.INSTANCE;
-                } else if (typeStr.equalsIgnoreCase(UndefinedType.SERIALIZED_NAME)) {
+                } else if (typeStr.isUndefined()) {
                     return UndefinedType.INSTANCE;
+                } else if (typeStr.isParameterReference()) {
+                    final String paramName = typeStr.referencedParameter();
+                    return new ParameterReferenceType(paramName);
                 }
 
-                final GlobalReference globalRef = this.getGlobalRefeference(typeStr, currentPakkage);
-                return this.typeKeeper.getType(globalRef);
+                return this.typeKeeper.getType(typeStr);
             })
             .reduce(CombinedType::combine)
             .orElse(UndefinedType.INSTANCE);
     }
 
     /**
-     * Parse `identifier`.
-     * @param typeString Identifier, may be prefixed with `<package>:`.
-     * @param currentPakkage Current package.
-     * @return Global reference.
-     */
-    public GlobalReference getGlobalRefeference(final String typeString, final String currentPakkage) {
-        final int index = typeString.indexOf(':');
-        final String pakkage = index != -1
-            ? typeString.substring(0, index).trim()
-            : currentPakkage;
-        final String identifier = index != -1
-            ? typeString.substring(index + 1).trim()
-            : typeString;
-        return GlobalReference.of(pakkage, identifier);
-    }
-
-    /**
-     * Parse {@link ExpressionResult} from string.
-     * @param expressionResultString String to parse.
-     * @param currentPackage Package in context.
+     * Parse {@link ExpressionResult} from {@link ExpressionResultString}.
+     * @param expressionResultString {@link ExpressionResultString} to parse.
      * @return Parsed result.
      */
     public ExpressionResult parseExpressionResultString(
-            final @Nullable String expressionResultString, final String currentPackage) {
-        if (expressionResultString == null
-            || expressionResultString.isBlank()
-            || expressionResultString.equalsIgnoreCase(ExpressionResult.UNDEFINED_SERIALIZED_NAME)) {
+            final @Nullable ExpressionResultString expressionResultString) {
+        if (expressionResultString == null) {
             return ExpressionResult.UNDEFINED;
         }
 
-        return Stream.of(expressionResultString.split(TYPE_SEPARATOR_RE))
-            .map(typeString -> this.parseTypeString(typeString, currentPackage))
+        return expressionResultString.stream()
+            .map(typeString -> this.parseTypeString(typeString))
             .collect(ExpressionResult.COLLECTOR);
     }
 
-    public static String stringifyType(final AbstractType type) {
-        return type.getFullName();
-    }
-
-    public static String stringifyExpressionResult(final ExpressionResult result) {
-        return result.getTypeNames(TypeParser.TYPE_SEPARATOR);
+    /**
+     * Unparse an {@link ExpressionResult} to an {@link ExpressionResultString}.
+     * @param expressionResult
+     * @return Expression result string.
+     */
+    public static ExpressionResultString unparseExpressionResult(final ExpressionResult expressionResult) {
+        return expressionResult.stream()
+            .map(AbstractType::getFullName)
+            .map(TypeString::new)
+            .collect(ExpressionResultString.COLLECTOR);
     }
 
 }

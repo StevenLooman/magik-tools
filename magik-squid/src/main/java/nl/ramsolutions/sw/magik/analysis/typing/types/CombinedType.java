@@ -2,11 +2,10 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.analysis.Location;
 
 /**
@@ -18,10 +17,18 @@ public class CombinedType extends AbstractType {
 
     private final Set<AbstractType> types;
 
+    /**
+     * Constructor.
+     * @param types Combined types.
+     */
     public CombinedType(final AbstractType... types) {
         this(Set.of(types));
     }
 
+    /**
+     * Constructor.
+     * @param types Combined types.
+     */
     public CombinedType(final Collection<AbstractType> types) {
         this.types = Collections.unmodifiableSet(Set.copyOf(types));
     }
@@ -32,7 +39,7 @@ public class CombinedType extends AbstractType {
 
     @Override
     public String getFullName() {
-        return this.types.stream()
+        return this.getTypes().stream()
             .map(AbstractType::getFullName)
             .sorted()
             .collect(Collectors.joining(VALUE_COMBINATOR));
@@ -40,116 +47,79 @@ public class CombinedType extends AbstractType {
 
     @Override
     public String getName() {
-        return this.types.stream()
+        return this.getTypes().stream()
             .map(AbstractType::getName)
             .sorted()
             .collect(Collectors.joining(VALUE_COMBINATOR));
     }
 
     /**
-     * Combine two {{MagikType}}s.
-     * @param type1 First {{MagikType}} to combine.
-     * @param type2 Second {{MagikType}} to combine.
-     * @return {{CombinedMagikType}} representing both types.
+     * Combine {@link AbstractType}s.
+     * @param types Types {@link AbstractType} to combine.
+     * @return {@link CombinedType} representing both types, or {@link AbstractType} if singular.
      */
-    public static AbstractType combine(final AbstractType type1, final @Nullable AbstractType type2) {
-        if (type2 == null) {
-            return type1;
+    public static AbstractType combine(final AbstractType... types) {
+        if (types.length == 0) {
+            return null;
         }
 
-        // Cases: a. 1 = SingleMagikType,   2 = SingleMagikType
-        //        b. 1 = SingleMagikType,   2 = CombinedMagikType
-        //        c. 1 = CombinedMagikType, 2 = SingleMagikType
-        //        d. 1 = CombinedMagikType, 2 = CombinedMagikType
-        final Set<AbstractType> types = new HashSet<>();
+        final Set<AbstractType> combinedTypes = Stream.of(types)
+            .flatMap(type -> {
+                if (type instanceof CombinedType) {
+                    final CombinedType combinedType = (CombinedType) type;
+                    return combinedType.getTypes().stream();
+                }
 
-        // 1.
-        if (type1 instanceof CombinedType) {
-            final CombinedType combinedType = (CombinedType) type1;
-            types.addAll(combinedType.getTypes());
-        } else {
-            types.add(type1);
-        }
-
-        // 2.
-        if (type2 instanceof CombinedType) {
-            final CombinedType combinedType = (CombinedType) type2;
-            types.addAll(combinedType.getTypes());
-        } else {
-            types.add(type2);
-        }
-
-        if (types.size() == 1) {
-            return types.stream()
-                .findAny()
+                return Stream.of(type);
+            })
+            .collect(Collectors.toUnmodifiableSet());
+        if (combinedTypes.size() == 1) {
+            return combinedTypes.stream()
+                .findFirst()
                 .orElseThrow();
         }
 
-        return new CombinedType(types);
+        return new CombinedType(combinedTypes);
     }
 
     @Override
     public Collection<Slot> getSlots() {
-        return this.types.stream()
+        return this.getTypes().stream()
             .flatMap(type -> type.getSlots().stream())
             .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
     public Collection<Method> getMethods() {
-        return this.types.stream()
+        return this.getTypes().stream()
             .flatMap(type -> type.getMethods().stream())
             .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
     public Collection<Method> getLocalMethods() {
-        return this.types.stream()
+        return this.getTypes().stream()
             .flatMap(type -> type.getLocalMethods().stream())
             .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj == null) {
-            return false;
-        }
-
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-
-        final CombinedType other = (CombinedType) obj;
-        return Objects.equals(this.types.size(), other.types.size())
-            && Objects.equals(this.getFullName(), other.getFullName());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.types.toArray());
-    }
-
-    @Override
     public Collection<AbstractType> getParents() {
-        return this.types.stream()
+        return this.getTypes().stream()
             .flatMap(type -> type.getParents().stream())
             .collect(Collectors.toSet());
     }
 
     @Override
     public Collection<Method> getSuperMethods(final String methodName) {
-        return this.types.stream()
+        return this.getTypes().stream()
             .flatMap(type -> type.getSuperMethods(methodName).stream())
             .collect(Collectors.toSet());
     }
 
     @Override
     public Collection<Method> getSuperMethods(final String methodName, final String superName) {
-        return this.types.stream()
+        return this.getTypes().stream()
             .filter(type -> type.getFullName().equals(superName))
             .flatMap(type -> type.getMethods(methodName).stream())
             .collect(Collectors.toSet());
@@ -173,6 +143,56 @@ public class CombinedType extends AbstractType {
     @Override
     public void setDoc(final String comment) {
         throw new IllegalStateException();
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "%s@%s(%s)",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()),
+            this.getFullName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.types.toArray());
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final CombinedType other = (CombinedType) obj;
+        return Objects.equals(this.getFullName(), other.getFullName());
+    }
+
+    @Override
+    public TypeString getTypeString() {
+        return this.types.stream()
+            .map(AbstractType::getTypeString)
+            .collect(TypeString.COLLECTOR);
+    }
+
+    @Override
+    public AbstractType substituteType(final AbstractType from, final AbstractType to) {
+        final Set<AbstractType> substitutedTypes = this.types.stream()
+            .map(type -> type.substituteType(from, to))
+            .collect(Collectors.toUnmodifiableSet());
+        if (substitutedTypes.equals(this.types)) {
+            return this;
+        }
+
+        return new CombinedType(substitutedTypes);
     }
 
 }

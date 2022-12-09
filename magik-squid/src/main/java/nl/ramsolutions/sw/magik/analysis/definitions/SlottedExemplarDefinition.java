@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import com.sonar.sslr.api.AstNode;
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
  * Slotted exemplar definition.
@@ -34,23 +34,21 @@ public class SlottedExemplarDefinition extends Definition {
     }
 
     private final List<Slot> slots;
-    private final List<String> parents;
+    private final List<TypeString> parents;
 
     /**
      * Constructor.
      * @param node Node for definition.
-     * @param pakkage Package defined in.
      * @param name Name of slotted exemplar.
      * @param slots Slots of slotted exemplar.
      * @param parents Parents of slotted exemplar.
      */
     public SlottedExemplarDefinition(
             final AstNode node,
-            final String pakkage,
-            final String name,
+            final TypeString name,
             final List<Slot> slots,
-            final List<String> parents) {
-        super(node, pakkage, name);
+            final List<TypeString> parents) {
+        super(node, name);
         this.slots = List.copyOf(slots);
         this.parents = List.copyOf(parents);
     }
@@ -59,12 +57,12 @@ public class SlottedExemplarDefinition extends Definition {
         return Collections.unmodifiableList(this.slots);
     }
 
-    public List<String> getParents() {
+    public List<TypeString> getParents() {
         return Collections.unmodifiableList(this.parents);
     }
 
-    public GlobalReference getGlobalReference() {
-        return GlobalReference.of(this.getPackage(), this.getName());
+    public TypeString getTypeString() {
+        return TypeString.of(this.getPackage() + ":" + this.getName());
     }
 
 }

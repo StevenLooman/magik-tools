@@ -27,13 +27,22 @@ public class SimpleVectorNodeHelper {
     /**
      * Helper method to get helper from EXPRESSION node.
      */
-    public static SimpleVectorNodeHelper fromExpression(final AstNode expressionNode) {
+    @CheckForNull
+    public static SimpleVectorNodeHelper fromExpressionSafe(final AstNode expressionNode) {
         if (!expressionNode.is(MagikGrammar.EXPRESSION)) {
-            throw new IllegalArgumentException();
+            return null;
         }
 
         final AstNode atomNode = expressionNode.getFirstChild(MagikGrammar.ATOM);
+        if (atomNode == null) {
+            return null;
+        }
+
         final AstNode simpleVectorNode = atomNode.getFirstChild(MagikGrammar.SIMPLE_VECTOR);
+        if (simpleVectorNode == null) {
+            return null;
+        }
+
         return new SimpleVectorNodeHelper(simpleVectorNode);
     }
 

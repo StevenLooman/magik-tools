@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.magik.debugadapter.slap.responses;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Set;
-import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferUtils;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
 
@@ -58,7 +58,7 @@ public class ThreadInfoResponse implements ISlapResponse {
         }
 
         /**
-         * Get the {{ThreadState}} from an interger value.
+         * Get the {@link ThreadState} from an interger value.
          * @param value Integer value.
          * @return ThreadState
          */
@@ -95,7 +95,7 @@ public class ThreadInfoResponse implements ISlapResponse {
         }
 
         /**
-         * Get the {{ThreadFlag}} from an interger value.
+         * Get the {@link ThreadFlag} from an interger value.
          * @param value Integer value.
          * @return ThreadFlag
          */
@@ -110,7 +110,7 @@ public class ThreadInfoResponse implements ISlapResponse {
         }
 
         /**
-         * Get the {{ThreadFlag}}s from an interger value.
+         * Get the {@link ThreadFlag}s from an interger value.
          * @param flags Integer value.
          * @return ThreadFlags
          */
@@ -192,10 +192,10 @@ public class ThreadInfoResponse implements ISlapResponse {
      * @return Decoded message.
      */
     public static ThreadInfoResponse decode(final ByteBuffer buffer) {
-        final int priority = (int) ByteBufferUtils.readUInt32(buffer, OFFSET_PRIORITY);
-        final boolean daemon = ByteBufferUtils.readUInt32(buffer, OFFSET_DAEMON) != 0;
-        final int flags = (int) ByteBufferUtils.readUInt32(buffer, OFFSET_FLAGS);
-        final String name = ByteBufferUtils.readString(buffer, OFFSET_NAME_LENGTH);
+        final int priority = (int) ByteBufferHelper.readUInt32(buffer, OFFSET_PRIORITY);
+        final boolean daemon = ByteBufferHelper.readUInt32(buffer, OFFSET_DAEMON) != 0;
+        final int flags = (int) ByteBufferHelper.readUInt32(buffer, OFFSET_FLAGS);
+        final String name = ByteBufferHelper.readString(buffer, OFFSET_NAME_LENGTH);
 
         final ThreadState threadState = ThreadState.valueOf(flags & BYTE_1_MASK);
         final Set<ThreadFlag> threadFlags = ThreadFlag.flagsOf((flags >> BYTE_2_SHIFT) & BYTE_1_MASK);

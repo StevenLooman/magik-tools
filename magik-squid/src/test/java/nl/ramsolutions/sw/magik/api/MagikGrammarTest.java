@@ -86,6 +86,7 @@ class MagikGrammarTest {
     void testTry() {
         MagikRuleForbiddenAssert.assertThat(g.rule(MagikGrammar.TRY), MagikGrammar.TRY_SYNTAX_ERROR)
             .matches("_try _when error _endtry")
+            .matches("_try _when information, warning _endtry")
             .matches("_try expr() _when error _endtry")
             .matches("_try _with e _when error _endtry")
             .matches("_try _with e expr() _when error _endtry");
@@ -213,6 +214,7 @@ class MagikGrammarTest {
     void testWhile() {
         Assertions.assertThat(g.rule(MagikGrammar.WHILE))
             .matches("_while a _loop _endloop")
+            .matches("_while a < 10 _loop _endloop")
             .matches("_while a _andif b _loop _endloop")
             .matches("_while a _isnt _unset _loop _endloop");
     }
@@ -310,7 +312,8 @@ class MagikGrammarTest {
 
     @Test
     void testExpression() {
-        Assertions.assertThat(g.rule(MagikGrammar.EXPRESSION))
+        final Rule rule = g.rule(MagikGrammar.EXPRESSION);
+        Assertions.assertThat(rule)
             .matches("a()")
             .matches("expr()")
             .matches("a _is b")

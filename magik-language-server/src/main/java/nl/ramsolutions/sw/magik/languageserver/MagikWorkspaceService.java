@@ -12,12 +12,12 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoTypeKeeperReader;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.JsonTypeKeeperReader;
 import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
-import nl.ramsolutions.sw.magik.languageserver.indexer.MagikIndexer;
-import nl.ramsolutions.sw.magik.languageserver.indexer.MagikPreIndexer;
+import nl.ramsolutions.sw.magik.analysis.typing.indexer.MagikIndexer;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItem;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItemProvider;
 import nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider;
@@ -27,11 +27,11 @@ import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.FileEvent;
 import org.eclipse.lsp4j.ProgressParams;
 import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.WorkDoneProgressBegin;
 import org.eclipse.lsp4j.WorkDoneProgressCreateParams;
 import org.eclipse.lsp4j.WorkDoneProgressEnd;
 import org.eclipse.lsp4j.WorkspaceFolder;
+import org.eclipse.lsp4j.WorkspaceSymbol;
 import org.eclipse.lsp4j.WorkspaceSymbolParams;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
@@ -57,7 +57,7 @@ public class MagikWorkspaceService implements WorkspaceService {
     /**
      * Constructor.
      * @param languageServer Owner language server.
-     * @param typeKeeper {{TypeKeeper}} used for type storage.
+     * @param typeKeeper {@link TypeKeeper} used for type storage.
      */
     public MagikWorkspaceService(final MagikLanguageServer languageServer, final ITypeKeeper typeKeeper) {
         this.languageServer = languageServer;
@@ -113,28 +113,13 @@ public class MagikWorkspaceService implements WorkspaceService {
         }
     }
 
-    private void runPreIndexer() {
-        LOGGER.trace("Running MagikPreIndexer");
-        for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
-            try {
-                LOGGER.debug("Running MagikPreIndexer from: {}", workspaceFolder.getUri());
-                final MagikPreIndexer preIndexer = new MagikPreIndexer(this.typeKeeper);
-                final Stream<Path> indexableFiles = this.getIndexableFiles(workspaceFolder);
-                preIndexer.indexPaths(indexableFiles);
-            } catch (final IOException exception) {
-                LOGGER.error(exception.getMessage(), exception);
-            }
-        }
-    }
-
     private void runIndexer() {
         LOGGER.trace("Running MagikIndexer");
         for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
             try {
                 LOGGER.debug("Running MagikIndexer from: {}", workspaceFolder.getUri());
-                final MagikIndexer indexer = new MagikIndexer(this.typeKeeper);
                 final Stream<Path> indexableFiles = this.getIndexableFiles(workspaceFolder);
-                indexer.indexPaths(indexableFiles);
+                this.magikIndexer.indexPaths(indexableFiles);
             } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
@@ -234,15 +219,18 @@ public class MagikWorkspaceService implements WorkspaceService {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public CompletableFuture<List<? extends SymbolInformation>> symbol(final WorkspaceSymbolParams params) {
+    public CompletableFuture<
+            Either<List<? extends org.eclipse.lsp4j.SymbolInformation>, List<? extends WorkspaceSymbol>>
+            > symbol(WorkspaceSymbolParams params) {
         final String query = params.getQuery();
         LOGGER.trace("symbol, query: {}", query);
 
         return CompletableFuture.supplyAsync(() -> {
-            final List<SymbolInformation> queryResults = this.symbolProvider.getSymbols(query);
+            final List<WorkspaceSymbol> queryResults = this.symbolProvider.getSymbols(query);
             LOGGER.debug("Symbols found for: '{}', count: {}", query, queryResults.size());
-            return queryResults;
+            return Either.forRight(queryResults);
         });
     }
 
@@ -266,6 +254,17 @@ public class MagikWorkspaceService implements WorkspaceService {
      */
     @JsonRequest(value = "custom/munit/getTestItems")
     public CompletableFuture<Collection<MUnitTestItem>> getTestItems() {
+        // TODO: Rewrite this to generic queries on types. Such as:
+        //       - Get type by name
+        //         - doc
+        //         - location
+        //         - parents
+        //         - children
+        //         - ...
+        //         - methods?
+        //       - Get methods from type name
+        //       - Get method by name
+        //       In fact, maybe we can use LSP typeHierarchy support?
         LOGGER.trace("munit/getTestItems");
 
         return CompletableFuture.supplyAsync(this.testItemProvider::getTestItems);
@@ -297,9 +296,6 @@ public class MagikWorkspaceService implements WorkspaceService {
 
         // Index .magik-tools-ignore files.
         this.runIgnoreFilesIndexer();
-
-        // Run pre-indexer.
-        this.runPreIndexer();
 
         // Run indexer.
         this.runIndexer();
@@ -337,6 +333,11 @@ public class MagikWorkspaceService implements WorkspaceService {
             languageClient.notifyProgress(progressParams);
             LOGGER.trace("Done indexing in background");
         });
+    }
+
+    public void shutdown() {
+        // TODO: Dump type database, and read it again when starting?
+        //       Requires timestamping of definitions/files!
     }
 
 }

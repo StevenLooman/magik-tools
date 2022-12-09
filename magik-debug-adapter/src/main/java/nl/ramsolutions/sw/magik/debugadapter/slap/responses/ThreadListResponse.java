@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferUtils;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
 
@@ -53,9 +53,9 @@ public class ThreadListResponse implements ISlapResponse {
      */
     public static ThreadListResponse decode(final ByteBuffer buffer) {
         final List<Long> threadIds = new ArrayList<>();
-        final int numThreads = (int) ByteBufferUtils.readUInt32(buffer, OFFSET_NUM_THREADS);
+        final int numThreads = (int) ByteBufferHelper.readUInt32(buffer, OFFSET_NUM_THREADS);
         for (int i = 0; i < numThreads; ++i) {
-            final long threadId = ByteBufferUtils.readUInt32(buffer, OFFSET_THREAD_IDS + i * INT_SIZE_BYTES);
+            final long threadId = ByteBufferHelper.readUInt32(buffer, OFFSET_THREAD_IDS + i * INT_SIZE_BYTES);
             threadIds.add(threadId);
         }
 

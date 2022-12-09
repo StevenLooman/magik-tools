@@ -4,8 +4,9 @@ import java.util.Collection;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
  * Type keeper to hold types.
@@ -14,6 +15,9 @@ public interface ITypeKeeper {
 
     /**
      * Add a new package.
+     * If the package already exists, then:
+     * - the types are copied.
+     * - the location is updated.
      * @param pakkage New package.
      */
     void addPackage(Package pakkage);
@@ -31,6 +35,7 @@ public interface ITypeKeeper {
      * @param pakkageName Name of package.
      * @return Package with name.
      */
+    @CheckForNull
     Package getPackage(String pakkageName);
 
     /**
@@ -45,11 +50,11 @@ public interface ITypeKeeper {
     Set<Package> getPackages();
 
     /**
-     * Test if we have a type with name.
-     * @param globalReference Reference.
+     * Test if the type reference can be resolved.
+     * @param typeString Reference.
      * @return True if reference points to something.
      */
-    boolean hasType(GlobalReference globalReference);
+    boolean hasType(TypeString typeString);
 
     /**
      * Add a global type, such as an exemplar.
@@ -59,10 +64,10 @@ public interface ITypeKeeper {
 
     /**
      * Get a global type, such as an exemplar.
-     * @param globalReference Reference.
+     * @param typeString Reference.
      * @return Type, or UndefinedType if not found.
      */
-    AbstractType getType(GlobalReference globalReference);
+    AbstractType getType(TypeString typeString);
 
     /**
      * Remove a type. Searches all packages.
@@ -71,43 +76,46 @@ public interface ITypeKeeper {
     void removeType(AbstractType type);
 
     /**
-     * Get all {{AbstractType}}s that we know of.
-     * @return All {{AbstractTypes}}
+     * Get all {@link AbstractType}s that we know of.
+     * @return All {@link AbstractType}s.
      */
     Collection<AbstractType> getTypes();
 
-    // region: Operators.
-    // region: Unary operators.
     /**
-     * Add a unary operator.
-     * @param unaryOperator Unary operator.
+     * Add a condition.
+     * @param condition Condition to add.
      */
-    void addUnaryOperator(UnaryOperator unaryOperator);
+    void addCondition(Condition condition);
 
     /**
-     * Get the resulting {{MagikTYpe}} for a unary operator.
-     * @param operator Operator name.
-     * @param type Type operator is applied to.
+     * Get condition by name.
+     * @param name Name of condition.
+     * @return Condition, if found.
      */
     @CheckForNull
-    UnaryOperator getUnaryOperator(UnaryOperator.Operator operator, AbstractType type);
+    Condition getCondition(String name);
 
     /**
-     * Remove a unary operator.
-     * @param unaryOperator Unary operator.
+     * Get all {@link Condition}s that we know of.
+     * @return All {@link Condition}s.
      */
-    void removeUnaryOperator(UnaryOperator unaryOperator);
-    // endregion
+    Collection<Condition> getConditions();
+
+    /**
+     * Remove a condition.
+     * @param condition Condition to remove.
+     */
+    void removeCondition(Condition condition);
 
     // region: Binary operators.
     /**
      * Add a binary operator.
-     * @param binaryOpeartor Operator.
+     * @param binaryOperator Operator.
      */
-    void addBinaryOperator(BinaryOperator binaryOpeartor);
+    void addBinaryOperator(BinaryOperator binaryOperator);
 
     /**
-     * Get the resulting {{MagikType}} for a binary operator.
+     * Get the resulting {@link MagikType} for a binary operator.
      * @param operator Operator name.
      * @param leftType Left type.
      * @param rightType Right type.
@@ -121,7 +129,6 @@ public interface ITypeKeeper {
      * @param binaryOperator Operator.
      */
     void removeBinaryOperator(BinaryOperator binaryOperator);
-    // endregion
     // endregion
 
     /**

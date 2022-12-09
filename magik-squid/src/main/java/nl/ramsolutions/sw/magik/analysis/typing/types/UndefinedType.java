@@ -5,17 +5,17 @@ import java.util.Collections;
 import nl.ramsolutions.sw.magik.analysis.Location;
 
 /**
- * Special type used when the {{TypeReasoner}} cannot determine type.
+ * Special type used when the {@link TypeReasoner} cannot determine type.
  */
 public final class UndefinedType extends AbstractType {
 
     /**
-     * Instance of {{UndefinedType}} to be used in all cases.
+     * Instance of {@code UndefinedType} to be used in all cases.
      */
     public static final UndefinedType INSTANCE = new UndefinedType();
 
     /**
-     * Serialized name of {{UndefinedType}}.
+     * Serialized name of {@code UndefinedType}.
      */
     public static final String SERIALIZED_NAME = "_undefined";
 
@@ -26,13 +26,18 @@ public final class UndefinedType extends AbstractType {
     }
 
     @Override
+    public TypeString getTypeString() {
+        return TypeString.of(UndefinedType.SERIALIZED_NAME);
+    }
+
+    @Override
     public String getFullName() {
-        return SERIALIZED_NAME;
+        return UndefinedType.SERIALIZED_NAME;
     }
 
     @Override
     public String getName() {
-        return SERIALIZED_NAME;
+        return UndefinedType.SERIALIZED_NAME;
     }
 
     @Override
@@ -41,12 +46,12 @@ public final class UndefinedType extends AbstractType {
     }
 
     @Override
-    public Slot getSlot(String name) {
+    public Slot getSlot(final String name) {
         return null;
     }
 
     @Override
-    public Collection<Method> getMethods(String methodName) {
+    public Collection<Method> getMethods(final String methodName) {
         return Collections.emptySet();
     }
 
@@ -56,7 +61,7 @@ public final class UndefinedType extends AbstractType {
     }
 
     @Override
-    public boolean hasLocalMethod(String methodName) {
+    public boolean hasLocalMethod(final String methodName) {
         return false;
     }
 
@@ -68,8 +73,8 @@ public final class UndefinedType extends AbstractType {
     @Override
     public String toString() {
         return String.format(
-                "%s@%s",
-                this.getClass().getName(), Integer.toHexString(this.hashCode()));
+            "%s@%s",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()));
     }
 
     @Override
@@ -78,12 +83,12 @@ public final class UndefinedType extends AbstractType {
     }
 
     @Override
-    public Collection<Method> getSuperMethods(String methodName) {
+    public Collection<Method> getSuperMethods(final String methodName) {
         return Collections.emptySet();
     }
 
     @Override
-    public Collection<Method> getSuperMethods(String methodName, String superName) {
+    public Collection<Method> getSuperMethods(final String methodName, final String superName) {
         return Collections.emptySet();
     }
 
@@ -93,7 +98,7 @@ public final class UndefinedType extends AbstractType {
     }
 
     @Override
-    public void setLocation(Location location) {
+    public void setLocation(final Location location) {
         throw new IllegalStateException();
     }
 
@@ -103,7 +108,7 @@ public final class UndefinedType extends AbstractType {
     }
 
     @Override
-    public void setDoc(String comment) {
+    public void setDoc(final String comment) {
         throw new IllegalStateException();
     }
 

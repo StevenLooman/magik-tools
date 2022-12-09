@@ -7,6 +7,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeParser;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.NewDocParser;
@@ -43,11 +44,11 @@ public class NewDocTypeExistsTypeCheck extends MagikTypedCheck {
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
         final TypeParser typeParser = new TypeParser(typeKeeper);
         newDocParser.getParameterTypeNodes().entrySet().stream()
-            .filter(entry -> typeParser.parseTypeString(entry.getValue(), pakkage) == UndefinedType.INSTANCE)
+            .filter(entry -> typeParser.parseTypeString(entry.getValue()) == UndefinedType.INSTANCE)
             .forEach(entry -> {
                 final AstNode typeNode = entry.getKey();
-                final String typeName = entry.getValue();
-                final String message = String.format(MESSAGE, typeName);
+                final TypeString typeString = entry.getValue();
+                final String message = String.format(MESSAGE, typeString);
                 this.addIssue(typeNode, message);
             });
     }
@@ -57,11 +58,11 @@ public class NewDocTypeExistsTypeCheck extends MagikTypedCheck {
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
         final TypeParser typeParser = new TypeParser(typeKeeper);
         newDocParser.getLoopTypeNodes().entrySet().stream()
-            .filter(entry -> typeParser.parseTypeString(entry.getValue(), pakkage) == UndefinedType.INSTANCE)
+            .filter(entry -> typeParser.parseTypeString(entry.getValue()) == UndefinedType.INSTANCE)
             .forEach(entry -> {
                 final AstNode typeNode = entry.getKey();
-                final String typeName = entry.getValue();
-                final String message = String.format(MESSAGE, typeName);
+                final TypeString typeString = entry.getValue();
+                final String message = String.format(MESSAGE, typeString);
                 this.addIssue(typeNode, message);
             });
     }
@@ -71,11 +72,11 @@ public class NewDocTypeExistsTypeCheck extends MagikTypedCheck {
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
         final TypeParser typeParser = new TypeParser(typeKeeper);
         newDocParser.getReturnTypeNodes().entrySet().stream()
-            .filter(entry -> typeParser.parseTypeString(entry.getValue(), pakkage) == UndefinedType.INSTANCE)
+            .filter(entry -> typeParser.parseTypeString(entry.getValue()) == UndefinedType.INSTANCE)
             .forEach(entry -> {
                 final AstNode typeNode = entry.getKey();
-                final String typeName = entry.getValue();
-                final String message = String.format(MESSAGE, typeName);
+                final TypeString typeString = entry.getValue();
+                final String message = String.format(MESSAGE, typeString);
                 this.addIssue(typeNode, message);
             });
     }
@@ -92,21 +93,18 @@ public class NewDocTypeExistsTypeCheck extends MagikTypedCheck {
         // Get slot defintions.
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
         final NewDocParser newDocParser = new NewDocParser(statementNode);
-        final Map<AstNode, String> slotTypeNodes = newDocParser.getSlotTypeNodes();
-
-        final PackageNodeHelper helper = new PackageNodeHelper(node);
-        final String currentPakkage = helper.getCurrentPackage();
+        final Map<AstNode, TypeString> slotTypeNodes = newDocParser.getSlotTypeNodes();
 
         // Test slot types.
         slotTypeNodes.entrySet().stream()
             .filter(entry -> {
-                final AbstractType type = typeParser.parseTypeString(entry.getValue(), currentPakkage);
+                final AbstractType type = typeParser.parseTypeString(entry.getValue());
                 return type == UndefinedType.INSTANCE;
             })
             .forEach(entry -> {
                 final AstNode typeNode = entry.getKey();
-                final String typeName = entry.getValue();
-                final String message = String.format(MESSAGE, typeName);
+                final TypeString typeString = entry.getValue();
+                final String message = String.format(MESSAGE, typeString);
                 this.addIssue(typeNode, message);
             });
     }

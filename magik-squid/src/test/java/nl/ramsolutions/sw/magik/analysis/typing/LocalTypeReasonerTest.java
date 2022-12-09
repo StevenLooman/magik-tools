@@ -6,17 +6,19 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
-import nl.ramsolutions.sw.magik.analysis.typing.types.IndexedType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
+import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ProcedureInstance;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.SlottedType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.junit.jupiter.api.Test;
@@ -35,7 +37,29 @@ class LocalTypeReasonerTest {
     }
 
     @Test
-    void testReasonMethodReturn() {
+    void testReasonMethodReturnNone() {
+        final String code = ""
+            + "_package sw\n"
+            + "_method object.test\n"
+            + "    _return\n"
+            + "_endmethod\n";
+
+        // Set up TypeKeeper/TypeReasoner.
+        final TypeKeeper typeKeeper = new TypeKeeper();
+
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
+        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+
+        // Assert user:object.test type determined.
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        assertThat(result.isEmpty()).isTrue();
+    }
+
+    @Test
+    void testReasonMethodReturnRope() {
         final String code = ""
             + "_package sw\n"
             + "_method object.test\n"
@@ -44,15 +68,17 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType ropeType = new SlottedType(GlobalReference.of("sw:rope"));
+        final TypeString ropeRef = TypeString.of("sw:rope");
+        final MagikType ropeType = new MagikType(typeKeeper, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "new()",
             Collections.emptyList(),
             null,
-            new ExpressionResult(ropeType));
-        typeKeeper.addType(ropeType);
+            null,
+            new ExpressionResultString(TypeString.SELF),
+            new ExpressionResultString());
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -64,9 +90,10 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:rope");
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(ropeType);
     }
 
     @Test
@@ -91,9 +118,11 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
+        final AbstractType integerType = typeKeeper.getType(TypeString.of("sw:integer"));
         final AbstractType resultType = (AbstractType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:integer");
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(integerType);
     }
 
     @Test
@@ -120,9 +149,13 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
+        final AbstractType combinedType = new CombinedType(
+            typeKeeper.getType(TypeString.of("sw:integer")),
+            typeKeeper.getType(TypeString.of("sw:symbol")));
         final AbstractType resultType = (AbstractType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:integer|sw:symbol");
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(combinedType);
     }
 
     @Test
@@ -146,8 +179,9 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final SelfType resultType = (SelfType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo(SelfType.SERIALIZED_NAME);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(SelfType.INSTANCE);
     }
 
     @Test
@@ -161,22 +195,26 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType ropeType = new SlottedType(GlobalReference.of("sw:rope"));
+        final TypeString ropeRef = TypeString.of("sw:rope");
+        final MagikType ropeType = new MagikType(typeKeeper, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "new()",
             Collections.emptyList(),
             null,
-            new ExpressionResult(ropeType));
-        ropeType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            new ExpressionResultString(TypeString.SELF),
+            new ExpressionResultString());
+        ropeType.addMethod(
+            null,
+            EnumSet.noneOf(Method.Modifier.class),
             "add()",
             Collections.emptyList(),
             null,
-            new ExpressionResult());
-        typeKeeper.addType(ropeType);
+            null,
+            new ExpressionResultString(),
+            new ExpressionResultString());
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -188,9 +226,10 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:rope");
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(ropeType);
     }
 
     @Test
@@ -204,22 +243,26 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType ropeType = new SlottedType(GlobalReference.of("sw:rope"));
+        final TypeString ropeRef = TypeString.of("sw:rope");
+        final MagikType ropeType = new MagikType(typeKeeper, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "new()",
             Collections.emptyList(),
             null,
-            new ExpressionResult(ropeType));
-        ropeType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            new ExpressionResultString(TypeString.SELF),
+            new ExpressionResultString());
+        ropeType.addMethod(
+            null,
+            EnumSet.noneOf(Method.Modifier.class),
             "add()",
             Collections.emptyList(),
             null,
-            new ExpressionResult());
-        typeKeeper.addType(ropeType);
+            null,
+            new ExpressionResultString(),
+            new ExpressionResultString());
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -231,9 +274,10 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:rope");
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(ropeType);
     }
 
     @Test
@@ -245,9 +289,17 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final AbstractType falseType = typeKeeper.getType(GlobalReference.of("sw:false"));
-        final UnaryOperator unaryOp = new UnaryOperator(UnaryOperator.Operator.valueFor("_not"), falseType, falseType);
-        typeKeeper.addUnaryOperator(unaryOp);
+        final TypeString falseRef = TypeString.of("sw:false");
+        final MagikType falseType = (MagikType) typeKeeper.getType(falseRef);
+        falseType.addMethod(
+            null,
+            EnumSet.noneOf(Method.Modifier.class),
+            "not",
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SELF),
+            new ExpressionResultString());
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -259,9 +311,10 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:false");
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(falseType);
     }
 
     @Test
@@ -273,9 +326,9 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final AbstractType char16VectorType = typeKeeper.getType(GlobalReference.of("sw:char16_vector"));
+        final TypeString char16VectorRef = TypeString.of("sw:char16_vector");
         final BinaryOperator binOp = new BinaryOperator(
-            BinaryOperator.Operator.valueFor("+"), char16VectorType, char16VectorType, char16VectorType);
+            BinaryOperator.Operator.valueFor("+"), char16VectorRef, char16VectorRef, char16VectorRef);
         typeKeeper.addBinaryOperator(binOp);
 
         // Do analysis.
@@ -288,9 +341,11 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:char16_vector");
+        final AbstractType char16VectorType = typeKeeper.getType(char16VectorRef);
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(char16VectorType);
     }
 
     @Test
@@ -302,14 +357,14 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final AbstractType char16VectorType = typeKeeper.getType(GlobalReference.of("sw:char16_vector"));
-        final AbstractType symbolType = typeKeeper.getType(GlobalReference.of("sw:symbol"));
-        final AbstractType integerType = typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString char16VectorRef = TypeString.of("sw:char16_vector");
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString symbolRef = TypeString.of("sw:symbol");
         final BinaryOperator binOp1 =
-            new BinaryOperator(BinaryOperator.Operator.valueFor("+"), integerType, symbolType, symbolType);
+            new BinaryOperator(BinaryOperator.Operator.valueFor("+"), integerRef, symbolRef, symbolRef);
         typeKeeper.addBinaryOperator(binOp1);
         final BinaryOperator binOp2 =
-            new BinaryOperator(BinaryOperator.Operator.valueFor("+"), symbolType, char16VectorType, char16VectorType);
+            new BinaryOperator(BinaryOperator.Operator.valueFor("+"), symbolRef, char16VectorRef, char16VectorRef);
         typeKeeper.addBinaryOperator(binOp2);
 
         // Do analysis.
@@ -322,9 +377,11 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:char16_vector");
+        final AbstractType char16VectorType = typeKeeper.getType(char16VectorRef);
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(char16VectorType);
     }
 
     @Test
@@ -349,17 +406,22 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(3);
 
-        final MagikType resultType1 = (MagikType) result.get(0, null);
-        assertThat(resultType1).isNotNull();
-        assertThat(resultType1.getFullName()).isEqualTo("sw:integer");
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final AbstractType integerType = typeKeeper.getType(integerRef);
+        final AbstractType resultType1 = result.get(0, null);
+        assertThat(resultType1)
+            .isNotNull()
+            .isEqualTo(integerType);
 
-        final MagikType resultType2 = (MagikType) result.get(1, null);
-        assertThat(resultType2).isNotNull();
-        assertThat(resultType2.getFullName()).isEqualTo("sw:integer");
+        final AbstractType resultType2 = result.get(1, null);
+        assertThat(resultType2)
+            .isNotNull()
+            .isEqualTo(integerType);
 
-        final MagikType resultType3 = (MagikType) result.get(2, null);
-        assertThat(resultType3).isNotNull();
-        assertThat(resultType3.getFullName()).isEqualTo("sw:integer");
+        final AbstractType resultType3 = result.get(2, null);
+        assertThat(resultType3)
+            .isNotNull()
+            .isEqualTo(integerType);
     }
 
     @Test
@@ -388,9 +450,12 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:integer");
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final AbstractType integerType = typeKeeper.getType(integerRef);
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(integerType);
     }
 
     @Test
@@ -405,15 +470,17 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "upto()",
             Collections.emptyList(),
             null,
-            new ExpressionResult(),
-            new ExpressionResult(integerType));
+            null,
+            new ExpressionResultString(),
+            new ExpressionResultString(integerRef));
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -425,9 +492,10 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:integer");
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(integerType);
     }
 
     @Test
@@ -442,15 +510,17 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "upto()",
             Collections.emptyList(),
             null,
-            new ExpressionResult(),
-            new ExpressionResult(integerType));
+            null,
+            new ExpressionResultString(),
+            new ExpressionResultString(integerRef));
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -462,9 +532,10 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:integer");
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(integerType);
     }
 
     @Test
@@ -482,15 +553,17 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "upto()",
             Collections.emptyList(),
             null,
-            new ExpressionResult(),
-            new ExpressionResult(integerType));
+            null,
+            new ExpressionResultString(),
+            new ExpressionResultString(integerRef));
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -502,9 +575,13 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
+        final CombinedType expectedType = new CombinedType(
+            typeKeeper.getType(TypeString.of("sw:integer")),
+            typeKeeper.getType(TypeString.of("sw:unset")));
         final CombinedType resultType = (CombinedType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:integer|sw:unset");
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(expectedType);
     }
 
     @Test
@@ -528,8 +605,9 @@ class LocalTypeReasonerTest {
         assertThat(result).isEqualTo(ExpressionResult.UNDEFINED);
 
         final UndefinedType resultType = (UndefinedType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo(UndefinedType.SERIALIZED_NAME);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(UndefinedType.INSTANCE);
     }
 
     @Test
@@ -541,10 +619,8 @@ class LocalTypeReasonerTest {
             + "            _endproc\n"
             + "_endmethod\n";
 
-        // Set up TypeKeeper/TypeReasoner.
-        final TypeKeeper typeKeeper = new TypeKeeper();
-
         // Do analysis.
+        final TypeKeeper typeKeeper = new TypeKeeper();
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
         final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
 
@@ -558,15 +634,17 @@ class LocalTypeReasonerTest {
         assertThat(resultType).isNotNull();
         assertThat(resultType.getProcedureName()).isEqualTo("test");
 
-        final Collection<Method> procMethods = resultType.getMethods("invoke()");
-        assertThat(procMethods).isNotEmpty();
-        procMethods.forEach(procMethod -> {
-            final ExpressionResult procResult = procMethod.getCallResult();
+        final Collection<Method> invokeMethods = resultType.getMethods("invoke()");
+        assertThat(invokeMethods).isNotEmpty();
+        final TypeString integerRef = TypeString.of("sw:integer");
+        invokeMethods.forEach(procMethod -> {
+            final ExpressionResultString procResult = procMethod.getCallResult();
             assertThat(procResult.size()).isEqualTo(1);
 
-            final MagikType procResultType = (MagikType) procResult.get(0, null);
-            assertThat(procResultType).isNotNull();
-            assertThat(procResultType.getFullName()).isEqualTo("sw:integer");
+            final TypeString procResultTypeString = procResult.get(0, null);
+            assertThat(procResultTypeString)
+                .isNotNull()
+                .isEqualTo(integerRef);
         });
     }
 
@@ -574,7 +652,7 @@ class LocalTypeReasonerTest {
     void testMultipleAssignmentStatement() {
         final String code = ""
             + "_method object.test\n"
-            + "    (a, b) << (2, 3)\n"
+            + "    (a, b) << (:a, 3)\n"
             + "    _return b\n"
             + "_endmethod\n";
 
@@ -591,9 +669,11 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:integer");
+        final AbstractType resultType = result.get(0, null);
+        final AbstractType integerType = typeKeeper.getType(TypeString.of("sw:integer"));
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(integerType);
     }
 
     @Test
@@ -607,15 +687,17 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType propertyListType = new IndexedType(GlobalReference.of("sw:property_list"));
+        final MagikType propertyListType =
+            new MagikType(typeKeeper, Sort.INDEXED, TypeString.of("sw:property_list"));
         propertyListType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "new()",
             Collections.emptyList(),
             null,
-            new ExpressionResult(SelfType.INSTANCE));
-        typeKeeper.addType(propertyListType);
+            null,
+            new ExpressionResultString(TypeString.SELF),
+            new ExpressionResultString());
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -627,9 +709,10 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:property_list");
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(propertyListType);
     }
 
     // region: self
@@ -643,14 +726,17 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType objectType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:object"));
+        final TypeString objectRef = TypeString.of("sw:object");
+        final MagikType objectType = (MagikType) typeKeeper.getType(objectRef);
         objectType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "test1",
             Collections.emptyList(),
             null,
-            new ExpressionResult(SelfType.INSTANCE));
+            null,
+            new ExpressionResultString(TypeString.SELF),
+            new ExpressionResultString());
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -663,8 +749,9 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final SelfType resultType = (SelfType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo(SelfType.SERIALIZED_NAME);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(SelfType.INSTANCE);
     }
 
     @Test
@@ -676,15 +763,17 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType ropeType = new SlottedType(GlobalReference.of("sw:rope"));
-        typeKeeper.addType(ropeType);
+        final TypeString ropeRef = TypeString.of("sw:rope");
+        final MagikType ropeType = new MagikType(typeKeeper, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "new()",
             Collections.emptyList(),
             null,
-            new ExpressionResult(SelfType.INSTANCE));
+            null,
+            new ExpressionResultString(TypeString.SELF),
+            new ExpressionResultString());
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -696,9 +785,10 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:rope");
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(ropeType);
     }
     // endregion
 
@@ -722,9 +812,11 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:integer");
+        final AbstractType integerType = typeKeeper.getType(TypeString.of("sw:integer"));
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(integerType);
     }
 
     @Test
@@ -737,10 +829,8 @@ class LocalTypeReasonerTest {
             + "    _endloop\n"
             + "_endmethod\n";
 
-        // Set up TypeKeeper/TypeReasoner.
-        final TypeKeeper typeKeeper = new TypeKeeper();
-
         // Do analysis.
+        final TypeKeeper typeKeeper = new TypeKeeper();
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
         final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
 
@@ -752,17 +842,21 @@ class LocalTypeReasonerTest {
         final ExpressionResult aResult = reasoner.getNodeType(aNode);
         assertThat(aResult.size()).isEqualTo(1);
 
-        final MagikType aResultType = (MagikType) aResult.get(0, null);
-        assertThat(aResultType).isNotNull();
-        assertThat(aResultType.getFullName()).isEqualTo("sw:integer");
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final AbstractType integerType = typeKeeper.getType(integerRef);
+        final AbstractType aResultType = aResult.get(0, null);
+        assertThat(aResultType)
+            .isEqualTo(integerType);
 
         final AstNode bNode = forVariablesNode.getDescendants(MagikGrammar.IDENTIFIER).get(1);
         final ExpressionResult bResult = reasoner.getNodeType(bNode);
         assertThat(bResult.size()).isEqualTo(1);
 
-        final MagikType bResultType = (MagikType) bResult.get(0, null);
-        assertThat(bResultType).isNotNull();
-        assertThat(bResultType.getFullName()).isEqualTo("sw:float");
+        final TypeString floatRef = TypeString.of("sw:float");
+        final AbstractType floatType = typeKeeper.getType(floatRef);
+        final AbstractType bResultType = bResult.get(0, null);
+        assertThat(bResultType)
+            .isEqualTo(floatType);
     }
 
     @Test
@@ -786,9 +880,11 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:unset");
+        final AbstractType unsetType = typeKeeper.getType(TypeString.of("sw:unset"));
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(unsetType);
     }
 
     @Test
@@ -802,10 +898,11 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final AbstractType integerType = typeKeeper.getType(GlobalReference.of("sw:integer"));
-        final AbstractType floatType = typeKeeper.getType(GlobalReference.of("sw:float"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString floatRef = TypeString.of("sw:float");
+        final AbstractType floatType = typeKeeper.getType(floatRef);
         final BinaryOperator binaryOperator =
-            new BinaryOperator(BinaryOperator.Operator.valueFor("+"), integerType, floatType, floatType);
+            new BinaryOperator(BinaryOperator.Operator.valueFor("+"), integerRef, floatRef, floatRef);
         typeKeeper.addBinaryOperator(binaryOperator);
 
         // Do analysis.
@@ -818,9 +915,10 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:float");
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(floatType);
     }
 
     @Test
@@ -838,11 +936,17 @@ class LocalTypeReasonerTest {
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
-        final AstNode parameterNode = topNode.getFirstDescendant(MagikGrammar.PARAMETER);
+        final AstNode parameterNode = topNode
+            .getFirstDescendant(MagikGrammar.PARAMETER)
+            .getFirstChild(MagikGrammar.IDENTIFIER);
         final ExpressionResult result = reasoner.getNodeType(parameterNode);
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:simple_vector");
+
+        final TypeString simpleVectorRef = TypeString.of("sw:simple_vector");
+        final AbstractType simpleVectorType = typeKeeper.getType(simpleVectorRef);
+        final AbstractType actualResultType = result.get(0, null);
+        assertThat(actualResultType)
+            .isNotNull()
+            .isEqualTo(simpleVectorType);
     }
 
     @Test
@@ -867,9 +971,12 @@ class LocalTypeReasonerTest {
         final AstNode procNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
         final AstNode importNode = procNode.getFirstDescendant(MagikGrammar.VARIABLE_DEFINITION);
         final ExpressionResult result = reasoner.getNodeType(importNode);
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:integer");
+
+        final AbstractType integerType = typeKeeper.getType(TypeString.of("sw:integer"));
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(integerType);
     }
 
     @Test
@@ -893,13 +1000,16 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(2);
 
-        final MagikType resultType1 = (MagikType) result.get(0, null);
-        assertThat(resultType1).isNotNull();
-        assertThat(resultType1.getFullName()).isEqualTo("sw:integer");
+        final AbstractType integerType = typeKeeper.getType(TypeString.of("sw:integer"));
+        final AbstractType resultType1 = result.get(0, null);
+        assertThat(resultType1)
+            .isNotNull()
+            .isEqualTo(integerType);
 
-        final MagikType resultType2 = (MagikType) result.get(1, null);
-        assertThat(resultType2).isNotNull();
-        assertThat(resultType2.getFullName()).isEqualTo("sw:integer");
+        final AbstractType resultType2 = result.get(1, null);
+        assertThat(resultType2)
+            .isNotNull()
+            .isEqualTo(integerType);
     }
 
     @Test
@@ -924,9 +1034,11 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(tryVarNode);
         assertThat(result).isNotNull();
 
-        final MagikType resultType = (MagikType) result.get(0, null);
-        assertThat(resultType).isNotNull();
-        assertThat(resultType.getFullName()).isEqualTo("sw:condition");
+        final AbstractType conditionType = typeKeeper.getType(TypeString.of("sw:condition"));
+        final AbstractType resultType = result.get(0, null);
+        assertThat(resultType)
+            .isNotNull()
+            .isEqualTo(conditionType);
     }
 
     @Test
@@ -950,20 +1062,26 @@ class LocalTypeReasonerTest {
         assertThat(result).isNotNull();
 
         // First is integer + undefined.
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final AbstractType intAndUndefinedType = new CombinedType(
+            typeKeeper.getType(integerRef),
+            UndefinedType.INSTANCE);
         final AbstractType resultType0 = result.get(0, null);
         assertThat(resultType0)
                 .isNotNull()
-                .isInstanceOf(CombinedType.class);
-        assertThat(resultType0.getFullName()).isEqualTo("_undefined|sw:integer");
+                .isEqualTo(intAndUndefinedType);
 
         // The rest is unset + undefined, as merging the two yields unset for the rest.
+        final TypeString unsetRef = TypeString.of("sw:unset");
+        final AbstractType unsetAndUndefinedType = new CombinedType(
+            typeKeeper.getType(unsetRef),
+            UndefinedType.INSTANCE);
         result.getTypes().stream()
             .skip(1)
             .forEach(type -> {
                 assertThat(type)
                     .isNotNull()
-                    .isInstanceOf(CombinedType.class);
-                assertThat(type.getFullName()).isEqualTo("_undefined|sw:unset");
+                    .isEqualTo(unsetAndUndefinedType);
             });
     }
 
@@ -976,11 +1094,11 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType sType = new SlottedType(GlobalReference.of("sw:s"));
-        typeKeeper.addType(sType);
-        final MagikType tType = new SlottedType(GlobalReference.of("sw:t"));
-        tType.addParent(sType);
-        typeKeeper.addType(tType);
+        final TypeString sRef = TypeString.of("sw:s");
+        final MagikType sType = new MagikType(typeKeeper, Sort.SLOTTED, sRef);
+        final TypeString tRef = TypeString.of("sw:t");
+        final MagikType tType = new MagikType(typeKeeper, Sort.SLOTTED, tRef);
+        tType.addParent(sRef);
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -1006,14 +1124,14 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType rType = new SlottedType(GlobalReference.of("sw", "r"));
-        typeKeeper.addType(rType);
-        final MagikType sType = new SlottedType(GlobalReference.of("sw", "s"));
-        typeKeeper.addType(sType);
-        final MagikType tType = new SlottedType(GlobalReference.of("sw", "t"));
-        tType.addParent(rType);
-        tType.addParent(sType);
-        typeKeeper.addType(tType);
+        final TypeString rRef = TypeString.of("sw:r");
+        final MagikType rType = new MagikType(typeKeeper, Sort.SLOTTED, rRef);
+        final TypeString sRef = TypeString.of("sw:s");
+        new MagikType(typeKeeper, Sort.SLOTTED, sRef);
+        final TypeString tRef = TypeString.of("sw:t");
+        final MagikType tType = new MagikType(typeKeeper, Sort.SLOTTED, tRef);
+        tType.addParent(rRef);
+        tType.addParent(sRef);
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
@@ -1035,6 +1153,7 @@ class LocalTypeReasonerTest {
         final String code = ""
             + "_method a.b(p1)\n"
             + "  ## @param {sw:float} p1\n"
+            + "  show(p1)"
             + "_endmethod";
 
         // Set up TypeKeeper/TypeReasoner.
@@ -1044,15 +1163,26 @@ class LocalTypeReasonerTest {
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
         final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
 
+        final TypeString floatRef = TypeString.of("sw:float");
+        final AbstractType floatType = typeKeeper.getType(floatRef);
         final AstNode topNode = magikFile.getTopNode();
-        final AstNode parameterNode = topNode.getFirstDescendant(MagikGrammar.PARAMETER);
-        final ExpressionResult result = reasoner.getNodeType(parameterNode);
-        assertThat(result)
-            .isNotNull();
 
-        final AbstractType floatType = typeKeeper.getType(GlobalReference.of("sw:float"));
-        final AbstractType actualType = result.get(0, null);
-        assertThat(actualType)
+        // Test parameter definition.
+        final AstNode parameterNode = topNode
+            .getFirstDescendant(MagikGrammar.PARAMETER)
+            .getFirstChild(MagikGrammar.IDENTIFIER);
+        final ExpressionResult actualParameterResult = reasoner.getNodeType(parameterNode);
+        final AbstractType actualParameterType = actualParameterResult.get(0, null);
+        assertThat(actualParameterType)
+            .isNotNull()
+            .isEqualTo(floatType);
+
+        // Test parameter usage.
+        final AstNode procInvocationNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_INVOCATION);
+        final AstNode atomNode = procInvocationNode.getFirstDescendant(MagikGrammar.ATOM);
+        final ExpressionResult actualAtomResult = reasoner.getNodeType(atomNode);
+        final AbstractType actualAtomType = actualAtomResult.get(0, null);
+        assertThat(actualAtomType)
             .isNotNull()
             .isEqualTo(floatType);
     }
@@ -1072,14 +1202,133 @@ class LocalTypeReasonerTest {
         final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
 
         final AstNode topNode = magikFile.getTopNode();
-        final AstNode parameterNode = topNode.getFirstDescendant(MagikGrammar.PARAMETER);
+        final AstNode parameterNode = topNode
+            .getFirstDescendant(MagikGrammar.PARAMETER)
+            .getFirstChild(MagikGrammar.IDENTIFIER);
         final ExpressionResult result = reasoner.getNodeType(parameterNode);
-        assertThat(result)
-            .isNotNull();
-
-        final AbstractType floatType = typeKeeper.getType(GlobalReference.of("sw:float"));
-        final AbstractType integerType = typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString floatRef = TypeString.of("sw:float");
+        final AbstractType floatType = typeKeeper.getType(floatRef);
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType expectedType = CombinedType.combine(floatType, integerType);
+        final AbstractType actualType = result.get(0, null);
+        assertThat(actualType)
+            .isNotNull()
+            .isEqualTo(expectedType);
+    }
+
+    @Test
+    void testParameterReferenceUsage() {
+        final String code = ""
+            + "_method a.b\n"
+            + "  _return _self.returns_param(10)\n"
+            + "_endmethod";
+
+        // Set up TypeKeeper/TypeReasoner.
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, TypeString.of("user:a"));
+        final TypeString param1Ref = TypeString.of("_parameter(p1)");
+        aType.addMethod(
+            null,
+            EnumSet.noneOf(Method.Modifier.class),
+            "returns_param()",
+            List.of(
+                new Parameter("p1", Parameter.Modifier.NONE)),
+            null,
+            null,
+            new ExpressionResultString(param1Ref),
+            new ExpressionResultString());
+
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
+        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+        final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
+        final AbstractType expectedType = typeKeeper.getType(TypeString.of("sw:integer"));
+        final AbstractType actualType = result.get(0, null);
+        assertThat(actualType)
+            .isNotNull()
+            .isEqualTo(expectedType);
+    }
+
+    @Test
+    void testParameterReferenceNested() {
+        final String code = ""
+            + "_method a.b\n"
+            + "  _return _self.returns_param(_self.returns_param2(10))\n"
+            + "_endmethod";
+
+        // Set up TypeKeeper/TypeReasoner.
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, TypeString.of("user:a"));
+        final TypeString param1Ref = TypeString.of("_parameter(p1)");
+        aType.addMethod(
+            null,
+            EnumSet.noneOf(Method.Modifier.class),
+            "returns_param()",
+            List.of(
+                new Parameter("p1", Parameter.Modifier.NONE)),
+            null,
+            null,
+            new ExpressionResultString(param1Ref),
+            new ExpressionResultString());
+        aType.addMethod(
+            null,
+            EnumSet.noneOf(Method.Modifier.class),
+            "returns_param2()",
+            List.of(
+                new Parameter("p1", Parameter.Modifier.NONE)),
+            null,
+            null,
+            new ExpressionResultString(param1Ref),
+            new ExpressionResultString());
+
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
+        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+        final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
+        final AbstractType expectedType = typeKeeper.getType(TypeString.of("sw:integer"));
+        final AbstractType actualType = result.get(0, null);
+        assertThat(actualType)
+            .isNotNull()
+            .isEqualTo(expectedType);
+    }
+
+    @Test
+    void testParameterReferenceOptional() {
+        final String code = ""
+            + "_method a.b\n"
+            + "  _return _self.returns_param()\n"
+            + "_endmethod";
+
+        // Set up TypeKeeper/TypeReasoner.
+        final TypeKeeper typeKeeper = new TypeKeeper();
+        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, TypeString.of("user:a"));
+        final TypeString param1Ref = TypeString.of("_parameter(p1)");
+        aType.addMethod(
+            null,
+            EnumSet.noneOf(Method.Modifier.class),
+            "returns_param()",
+            List.of(
+                new Parameter("p1", Parameter.Modifier.OPTIONAL)),
+            null,
+            null,
+            new ExpressionResultString(param1Ref),
+            new ExpressionResultString());
+
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
+        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+        final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
+        final AbstractType expectedType = typeKeeper.getType(TypeString.of("sw:unset"));
         final AbstractType actualType = result.get(0, null);
         assertThat(actualType)
             .isNotNull()

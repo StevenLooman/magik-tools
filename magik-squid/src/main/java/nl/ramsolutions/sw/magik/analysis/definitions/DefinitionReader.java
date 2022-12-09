@@ -66,21 +66,32 @@ public class DefinitionReader extends AstWalker {
 
     @Override
     protected void walkPostMethodInvocation(final AstNode node) {
-        // Some more sanity: Directly under top level.
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
         if (statementNode != null
             && statementNode.getParent() != null
-            && statementNode.getParent().isNot(MagikGrammar.MAGIK)) {
-            return;
+            && statementNode.getParent().is(MagikGrammar.MAGIK)) {
+            // Some more sanity: Directly under top level.
+            if (DefineSlotAccessParser.isDefineSlotAccess(node)
+                || DefineSlotAccessParser.isDefineSlotExternallyReadable(node)
+                || DefineSlotAccessParser.isDefineSlotExternallyWritable(node)) {
+                this.handleDefineSlotAccess(node);
+            } else if (DefineSharedVariableParser.isDefineSharedVariable(node)) {
+                this.handleDefineSharedVariable(node);
+            } else if (DefineSharedConstantParser.isDefineSharedConstant(node)) {
+                this.handleDefineSharedConstant(node);
+            }
         }
 
-        if (DefineSlotAccessParser.isDefineSlotAccess(node)) {
-            this.handleDefineSlotAccess(node);
-        } else if (DefineSharedVariableParser.isDefineSharedVariable(node)) {
-            this.handleDefineSharedVariable(node);
-        } else if (DefineSharedConstantParser.isDefineSharedConstant(node)) {
-            this.handleDefineSharedConstant(node);
+        // Anything goes.
+        if (DefConditionParser.isDefineCondition(node)) {
+            this.handleDefineCondition(node);
         }
+    }
+
+    private void handleDefineCondition(final AstNode node) {
+        final DefConditionParser parser = new DefConditionParser(node);
+        final List<Definition> parsedDefinitions = parser.parseDefinitions();
+        this.definitions.addAll(parsedDefinitions);
     }
 
     private void handleDefPackage(final AstNode node) {

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
@@ -68,8 +69,9 @@ public class ScopeEntry {
         return this.type;
     }
 
-    public boolean isType(final Type isType) {
-        return this.type == isType;
+    public boolean isType(final Type... isType) {
+        return Stream.of(isType)
+            .anyMatch(wantedType -> wantedType == this.type);
     }
 
     public String getIdentifier() {
@@ -119,15 +121,10 @@ public class ScopeEntry {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder
-            .append(this.getClass().getSimpleName(), '@', System.identityHashCode(this))
-            .append('(')
-            .append(this.getIdentifier())
-            .append(',')
-            .append(this.getType())
-            .append(')');
-        return builder.toString();
+        return String.format(
+            "%s@%s(%s,%s)",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()),
+            this.getIdentifier(), this.getType());
     }
 
 }

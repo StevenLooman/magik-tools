@@ -4,7 +4,6 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import javax.annotation.CheckForNull;
-import nl.ramsolutions.sw.magik.api.ExtendedTokenType;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
@@ -64,7 +63,7 @@ abstract class FormattingStrategy {
      * @param token Token to set.
      */
     void setLastToken(final Token token) {
-        if (token.getType() != ExtendedTokenType.WHITESPACE
+        if (token.getType() != GenericTokenType.WHITESPACE
             && token.getType() != GenericTokenType.EOL
             && token.getType() != GenericTokenType.EOF) {
             this.lastTextToken = token;
@@ -82,7 +81,7 @@ abstract class FormattingStrategy {
         // Ensure " " before token.
         TextEdit textEdit = null;
         if (this.lastToken == null
-            || this.lastToken.getType() != ExtendedTokenType.WHITESPACE) {
+            || this.lastToken.getType() != GenericTokenType.WHITESPACE) {
             textEdit = this.insertBeforeToken(token, " ");
         }
         return textEdit;
@@ -97,7 +96,7 @@ abstract class FormattingStrategy {
         // Ensure no whitespace before token.
         TextEdit textEdit = null;
         if (this.lastToken != null
-            && this.lastToken.getType() == ExtendedTokenType.WHITESPACE) {
+            && this.lastToken.getType() == GenericTokenType.WHITESPACE) {
             textEdit = this.editToken(this.lastToken, "");
         }
         return textEdit;

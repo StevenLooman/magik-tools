@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.debugadapter.slap.events;
 
 import java.nio.ByteBuffer;
-import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferUtils;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.EventType;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapEvent;
 
@@ -47,7 +47,7 @@ public class ThreadEndedEvent implements ISlapEvent {
      * @return Decoded event.
      */
     public static ThreadEndedEvent decode(final ByteBuffer buffer) {
-        final long threadId = ByteBufferUtils.readUInt32(buffer, OFFSET_THREAD_ID);
+        final long threadId = ByteBufferHelper.readUInt32(buffer, OFFSET_THREAD_ID);
         return new ThreadEndedEvent(threadId);
     }
 

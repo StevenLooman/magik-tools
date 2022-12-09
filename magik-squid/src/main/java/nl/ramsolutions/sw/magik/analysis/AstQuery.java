@@ -20,10 +20,10 @@ public final class AstQuery {
     }
 
     /**
-     * Get the AstNodes which match a chain of {{AstNodeType}}s.
-     * @param node {{AstNode}} to query
-     * @param nodeTypes Chain of {{AstNodeType}}s
-     * @return {{AstNode}}s which match query
+     * Get the AstNodes which match a chain of {@link AstNodeType}s.
+     * @param node {@link AstNode} to query
+     * @param nodeTypes Chain of {@link AstNodeType}s
+     * @return {@link AstNode}s which match query
      */
     public static List<AstNode> getChildrenFromChain(final AstNode node, final AstNodeType... nodeTypes) {
         List<AstNode> nodes = List.of(node);
@@ -43,11 +43,11 @@ public final class AstQuery {
     }
 
     /**
-     * Get the first AstNode which matches a chain of {{AstNodeTypes}}s.
-     * Tries to get {{getChildNode()}} on each node, for each {{nodeTypes}}.
-     * @param node {{AstNode}} to query
-     * @param nodeTypes Chain of {{AstNodeType}}s
-     * @return {{AstNode}} which matches query, {{null}} if none is found.
+     * Get the first AstNode which matches a chain of {@link AstNodeTypes}s.
+     * Tries to get {@code getChildNode()} on each node, for each {@code nodeTypes}.
+     * @param node {@link AstNode} to query
+     * @param nodeTypes Chain of {@link AstNodeType}s
+     * @return {@link AstNode} which matches query, {@code null} if none is found.
      */
     @CheckForNull
     public static AstNode getFirstChildFromChain(final AstNode node, final AstNodeType... nodeTypes) {
@@ -62,10 +62,10 @@ public final class AstQuery {
     }
 
     /**
-     * Get a child {{AstNode}} from chain, but only if each node has one child and the type.
-     * @param node {{AstNode}} to query
-     * @param nodeTypes Chain of {{AstNodeType}}s
-     * @return {{AstNode}} which matches query, {{null}} if not is found.
+     * Get a child {@link AstNode} from chain, but only if each node has one child and the type.
+     * @param node {@link AstNode} to query
+     * @param nodeTypes Chain of {@link AstNodeType}s
+     * @return {@link AstNode} which matches query, {@code null} if not is found.
      */
     @CheckForNull
     public static AstNode getOnlyFromChain(final AstNode node, final AstNodeType... nodeTypes) {
@@ -84,10 +84,10 @@ public final class AstQuery {
     }
 
     /**
-     * Get a parent {{AstNode}} from chain, but only if each node matches the type.
-     * @param node {{AstNode}} to query.
-     * @param nodeTypes Chain of {{AstNodeType}}s.
-     * @return {{AstNode}} which matches query, {{null}} if not found.
+     * Get a parent {@link AstNode} from chain, but only if each node matches the type.
+     * @param node {@link AstNode} to query.
+     * @param nodeTypes Chain of {@link AstNodeType}s.
+     * @return {@link AstNode} which matches query, {@code null} if not found.
      */
     @CheckForNull
     public static AstNode getParentFromChain(final AstNode node, final AstNodeType... nodeTypes) {
@@ -103,7 +103,7 @@ public final class AstQuery {
     }
 
     /**
-     * Get the node in {{topNode}} before {{position}}.
+     * Get the node in {@code topNode} before {@code position}.
      * @param topNode Top node.
      * @param position Position for node.
      * @return Token-Node before position.
@@ -125,7 +125,7 @@ public final class AstQuery {
     }
 
     /**
-     * Get the node in {{topNode}} at {{position}}.
+     * Get the node in {@code topNode} at {@code position}.
      * @param topNode Top node.
      * @param position Position for node.
      * @return Token-Node at position.
@@ -148,7 +148,7 @@ public final class AstQuery {
     }
 
     /**
-     * Get the (token) node in {{node}} at {{position}} of a specific type.
+     * Get the (token) node in {@code node} at {@code position} of a specific type.
      * @param topNode Top node.
      * @param position Position for node.
      * @param nodeTypes Node type to look for.
@@ -168,7 +168,7 @@ public final class AstQuery {
     }
 
     /**
-     * Get the node in {{topNode}} after {{position}}.
+     * Get the node in {@code topNode} after {@code position}.
      * @param topNode Top node.
      * @param position Position for node.
      * @return Node after position.
@@ -190,7 +190,7 @@ public final class AstQuery {
     }
 
     /**
-     * Get the {{AstNode}} surrounding {{position}}.
+     * Get the {@link AstNode} surrounding {@code position}.
      * @param topNode Top node.
      * @param position Position to look at.
      * @return 'Finest' node containing position.
@@ -225,7 +225,7 @@ public final class AstQuery {
     }
 
     /**
-     * Get the {{AstNode}} surrounding {{position}} of a specific type.
+     * Get the {@link AstNode} surrounding {@code position} of a specific type.
      * @param topNode Top node.
      * @param position Position to look at.
      * @param nodeTypes Wanted node types.

@@ -15,7 +15,7 @@ public final class Lsp4jConversion {
     /**
      * Convert a Position from LSP4J.
      * @param position Position to convert.
-     * @return Position in {{magik.analysis}}.
+     * @return Position in {@code magik.analysis}.
      */
     public static Position positionFromLsp4j(final org.eclipse.lsp4j.Position position) {
         return new Position(position.getLine() + 1, position.getCharacter());

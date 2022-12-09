@@ -1,9 +1,11 @@
 package nl.ramsolutions.sw.magik.analysis.scope;
 
 import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.Token;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
@@ -30,7 +32,10 @@ public class GlobalScope extends Scope {
 
     @Override
     public ScopeEntry addDeclaration(
-            final ScopeEntry.Type type, final String identifier, final AstNode node, final ScopeEntry parentEntry) {
+            final ScopeEntry.Type type,
+            final String identifier,
+            final AstNode node,
+            final @Nullable ScopeEntry parentEntry) {
         final ScopeEntry scopeEntry = new ScopeEntry(type, identifier, node, parentEntry);
         this.scopeEntries.put(identifier, scopeEntry);
         return scopeEntry;
@@ -43,6 +48,12 @@ public class GlobalScope extends Scope {
      */
     @CheckForNull
     public Scope getScopeForNode(final AstNode node) {
+        // Try node directly, perhaps we're lucky.
+        final Scope scope = this.scopeIndex.get(node);
+        if (scope != null) {
+            return scope;
+        }
+
         AstNode searchNode = node;
         // Do some helping.
         if (node.is(MagikGrammar.PARAMETER)
@@ -81,12 +92,15 @@ public class GlobalScope extends Scope {
 
     @Override
     public int getEndLine() {
-        return Integer.MAX_VALUE;
+        final AstNode lastChild = this.getNode().getLastChild();
+        return lastChild.getTokenLine();
     }
 
     @Override
     public int getEndColumn() {
-        return Integer.MAX_VALUE;
+        final AstNode lastChild = this.getNode().getLastChild();
+        final Token token = lastChild.getToken();
+        return token.getColumn() + token.getOriginalValue().length();
     }
 
 }

@@ -15,20 +15,20 @@ import nl.ramsolutions.sw.definitions.SwProductScanner;
 import nl.ramsolutions.sw.magik.analysis.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * MUnit {{@code TestItem}} provider.
+ * MUnit {@code TestItem} provider.
  */
 public class MUnitTestItemProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MUnitTestItemProvider.class);
-    private static final GlobalReference MUNIT_TEST_CASE_EXEMPLAR_NAME = GlobalReference.of("sw:test_case");
+    private static final TypeString MUNIT_TEST_CASE_EXEMPLAR_NAME = TypeString.of("sw:test_case");
     private static final String MUNIT_TEST_METHOD_PREFIX = "test";
 
     private final ITypeKeeper typeKeeper;
@@ -46,7 +46,7 @@ public class MUnitTestItemProvider {
     }
 
     /**
-     * Get {{@Code TestItem}}s.
+     * Get {@Link TestItem}s.
      *
      * <p>
      * A hierarchy per product is provided:

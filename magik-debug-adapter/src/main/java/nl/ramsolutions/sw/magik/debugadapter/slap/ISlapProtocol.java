@@ -20,9 +20,16 @@ public interface ISlapProtocol {
     long getVersion();
 
     /**
+     * Connect to the running session.
+     * @throws IOException -
+     * @throws SlapErrorException -
+     */
+    void connect() throws IOException, SlapException;
+
+    /**
      * Close the connection to the debuggee.
      *
-     * @throws IOException                    -
+     * @throws IOException -
      */
     void close() throws IOException;
 
@@ -129,7 +136,7 @@ public interface ISlapProtocol {
     CompletableFuture<ISlapResponse> step(long threadId, StepType stepType, int count) throws IOException;
 
     /**
-     * Evaluate {{code}}.
+     * Evaluate {@code expression}.
      * @param threadId Thread to evaluate in.
      * @param level Stack level to evaluate in.
      * @param expression Code to evaluate.

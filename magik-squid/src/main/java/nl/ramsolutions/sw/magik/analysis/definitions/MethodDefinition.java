@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
  * Method definition.
@@ -24,7 +25,7 @@ public class MethodDefinition extends Definition {
     }
 
     private final Set<Modifier> modifiers;
-    private final String exemplarName;
+    private final TypeString exemplarName;
     private final String methodName;
     private final List<ParameterDefinition> parameters;
     private final ParameterDefinition assignmentParameter;
@@ -32,24 +33,22 @@ public class MethodDefinition extends Definition {
     /**
      * Constructor.
      * @param node Node for definition.
-     * @param pakkage Package defined in.
      * @param exemplarName Name of exemplar.
-     * @param name Name of method.
+     * @param methodName Name of method.
      * @param modifiers Modifiers for method.
      * @param parameters Parameters for method.
      * @param assignmentParameter Assignment parameter.
      */
     public MethodDefinition(
             final AstNode node,
-            final String pakkage,
-            final String exemplarName,
-            final String name,
+            final TypeString exemplarName,
+            final String methodName,
             final Set<Modifier> modifiers,
             final List<ParameterDefinition> parameters,
             final @Nullable ParameterDefinition assignmentParameter) {
-        super(node, pakkage, name.startsWith("[") ? exemplarName + name : exemplarName + "." + name);
+        super(node, exemplarName);
         this.exemplarName = exemplarName;
-        this.methodName = name;
+        this.methodName = methodName;
         this.modifiers = Set.copyOf(modifiers);
         this.parameters = List.copyOf(parameters);
         this.assignmentParameter = assignmentParameter;
@@ -59,7 +58,7 @@ public class MethodDefinition extends Definition {
      * Get exemplar name.
      * @return Name of exemplar.
      */
-    public String getExemplarName() {
+    public TypeString getExemplarName() {
         return this.exemplarName;
     }
 
@@ -68,7 +67,14 @@ public class MethodDefinition extends Definition {
      * @return Name of method.
      */
     public String getMethodName() {
-        return methodName;
+        return this.methodName;
+    }
+
+    @Override
+    public String getName() {
+        return this.methodName.startsWith("[")
+            ? exemplarName.getIdentifier() + methodName
+            : exemplarName.getIdentifier() + "." + methodName;
     }
 
     /**
@@ -88,16 +94,21 @@ public class MethodDefinition extends Definition {
     }
 
     /**
+     * Test if method definition is an actual {@code _method ... _endmethod}, or a
+     * shared constant/variable/slot accessor.
+     * @return True if actual method, false otherwise.
+     */
+    public boolean isActualMethodDefinition() {
+        return this.getNode().is(MagikGrammar.METHOD_DEFINITION);
+    }
+
+    /**
      * Get assignment parameter.
      * @return Assignment parameter.
      */
     @CheckForNull
     public ParameterDefinition getAssignmentParameter() {
         return this.assignmentParameter;
-    }
-
-    public GlobalReference getTypeGlobalReference() {
-        return GlobalReference.of(this.getPackage(), this.getExemplarName());
     }
 
 }

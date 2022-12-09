@@ -22,7 +22,7 @@ public enum EventType {
     }
 
     /**
-     * Get the {{EventType}} from an interger value.
+     * Get the {@link EventType} from an interger value.
      * @param value Integer value.
      * @return EventType
      */

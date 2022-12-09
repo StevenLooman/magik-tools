@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -78,21 +79,21 @@ public class SlapProtocol implements ISlapProtocol {
      */
     public interface SlapEventListener {
         /**
-         * Handle an incoming {{SlapEvent}}.
+         * Handle an incoming {@link SlapEvent}.
          * @param event Incoming event.
          */
         void handleEvent(ISlapEvent event);
     }
 
+    private final InetSocketAddress inetSocketAddress;
     private final SlapEventListener listener;
-    private final SocketChannel socketChannel;
-    private final ByteBuffer inputBuffer = ByteBuffer.allocate(10240);
+    private SocketChannel socketChannel;
+    private final ByteBuffer inputBuffer = ByteBuffer.allocate(65536);
     private ByteOrder byteOrder = ByteOrder.nativeOrder();
     private State state;
     private RequestType multiResponseRequestType;
     private long version;
-    private final List<RequestFuture> requestFutures =
-            Collections.synchronizedList(new ArrayList<>());
+    private final List<RequestFuture> requestFutures = Collections.synchronizedList(new ArrayList<>());
     private final List<ISlapResponse> subResponses = new ArrayList<>();
 
     /**
@@ -102,17 +103,22 @@ public class SlapProtocol implements ISlapProtocol {
      * @param port Port to connect to.
      * @throws SlapException -
      */
-    public SlapProtocol(final String host, final int port, final SlapEventListener listener)
-            throws IOException, SlapException {
+    public SlapProtocol(final String host, final int port, final SlapEventListener listener) {
+        this.inetSocketAddress = new InetSocketAddress(host, port);
         this.listener = listener;
 
         this.state = State.WAITING;
         this.version = -1;
+    }
 
-        // Connect socket.
+    /**
+     * Connect to the running session.
+     * @throws IOException -
+     * @throws SlapErrorException -
+     */
+    public void connect() throws IOException, SlapException {
         this.socketChannel = SocketChannel.open();
-        final InetSocketAddress inetSocketAddress = new InetSocketAddress(host, port);
-        this.socketChannel.connect(inetSocketAddress);
+        this.socketChannel.connect(this.inetSocketAddress);
 
         this.doHandshake();
         this.startReceiverThread();
@@ -129,6 +135,9 @@ public class SlapProtocol implements ISlapProtocol {
                     }
 
                     protocol.handleData();
+                } catch (IOException exception) {
+                    LOGGER.error(exception.getMessage(), exception);
+                    break;
                 } catch (Exception exception) {
                     LOGGER.error(exception.getMessage(), exception);
                 }
@@ -171,7 +180,7 @@ public class SlapProtocol implements ISlapProtocol {
         this.inputBuffer.order(this.byteOrder);
 
         // Is this correct?
-        this.version = ByteBufferUtils.readUInt32(handshakeResponse, 20);
+        this.version = ByteBufferHelper.readUInt32(handshakeResponse, 20);
 
         LOGGER.debug("Connected with MDA, version: {}", this.version);
     }
@@ -252,10 +261,10 @@ public class SlapProtocol implements ISlapProtocol {
 
         final int requestLength = buffer.limit();
         final int requestVal = requestType.getVal();
-        ByteBufferUtils.writeUInt32(buffer, requestLength);
-        ByteBufferUtils.writeUInt32(buffer, requestVal);
-        ByteBufferUtils.writeUInt32(buffer, param0);
-        ByteBufferUtils.writeUInt32(buffer, param1);
+        ByteBufferHelper.writeUInt32(buffer, requestLength);
+        ByteBufferHelper.writeUInt32(buffer, requestVal);
+        ByteBufferHelper.writeUInt32(buffer, param0);
+        ByteBufferHelper.writeUInt32(buffer, param1);
         buffer.put(data);
         buffer.flip();
 
@@ -265,6 +274,7 @@ public class SlapProtocol implements ISlapProtocol {
                 "Thread: {}, Sending, type: {}, param0: {}, param1: {}",
                 Thread.currentThread().getName(), requestType, param0, param1);
             final CompletableFuture<ISlapResponse> future = this.addFutureRequest(requestType);
+
             this.socketChannel.write(buffer);
             LOGGER.trace(
                 "Thread: {}, Sent, type: {}, param0: {}, param1: {}",
@@ -281,8 +291,9 @@ public class SlapProtocol implements ISlapProtocol {
      */
     private void handleData() throws IOException {
         // Read from socket.
-        final int read = this.socketChannel.read(this.inputBuffer);
-        if (read == -1) {
+        try {
+            this.socketChannel.read(this.inputBuffer);
+        } catch (final AsynchronousCloseException ex) {
             // Channel has reached end-of-stream.
             this.socketChannel.close();
             return;
@@ -291,33 +302,31 @@ public class SlapProtocol implements ISlapProtocol {
 
         final int limit = this.inputBuffer.limit();
         LOGGER.trace("Received data, byte count: {}", limit);
-        if (limit < 4) {
-            LOGGER.warn("Ignoring received data, byte count: {}", limit);
-            // Ignore this data.
-            this.inputBuffer.clear();
-            return;
-        }
 
         while (this.inputBuffer.hasRemaining()) {
             final int startPosition = this.inputBuffer.position();
-            final int messageLength = (int) ByteBufferUtils.readUInt32(this.inputBuffer); // byte: 0-4
-            if (this.inputBuffer.limit() < messageLength) {
+            final int bufferLength = this.inputBuffer.limit() - startPosition;
+            final int messageLength = (int) ByteBufferHelper.peekUInt32(this.inputBuffer); // byte: 0-4
+            LOGGER.trace(
+                "Message length: {}, buffer size: {}",
+                messageLength, bufferLength);
+            if (bufferLength < messageLength) {
                 // Did not receive enough data (yet), wait for more data.
                 break;
             }
 
-            // Rewind, copy data, decode message.
-            this.inputBuffer.position(startPosition);
-            final byte[] message = new byte[messageLength];
-            this.inputBuffer.get(message);
-            final ByteBuffer roBuffer = ByteBuffer.wrap(message).asReadOnlyBuffer();
-            roBuffer.order(this.inputBuffer.order());
-            this.handleMessage(roBuffer);
-        }
+            // Rewind, decode message from data.
+            final ByteOrder order = this.inputBuffer.order();
+            final ByteBuffer messageBuffer = this.inputBuffer
+                .position(startPosition)
+                .slice()
+                .limit(messageLength)
+                .asReadOnlyBuffer()
+                .order(order);
+            this.handleMessage(messageBuffer);
 
-        if (this.inputBuffer.position() != this.inputBuffer.limit()) {
-            // Sanity.
-            LOGGER.warn("Euh...");
+            // Skip past message.
+            this.inputBuffer.position(startPosition + messageLength);
         }
 
         this.inputBuffer.compact();
@@ -331,7 +340,7 @@ public class SlapProtocol implements ISlapProtocol {
         // Basic message layout:
         // 00-04: uint32, message length
         // 04-08: uint32, response type
-        final int val = (int) ByteBufferUtils.readUInt32(buffer, 4);
+        final int val = (int) ByteBufferHelper.readUInt32(buffer, 4);
         final ResponseType responseType = ResponseType.valueOf(val);
         switch (responseType) {
             case ERROR:
@@ -347,6 +356,7 @@ public class SlapProtocol implements ISlapProtocol {
                 break;
 
             default:
+                LOGGER.warn("Unknown response type, val: {}", val);
                 break;
         }
     }
@@ -364,7 +374,7 @@ public class SlapProtocol implements ISlapProtocol {
         RequestType requestType = RequestType.UNKOWN;
         boolean isEndPacket = false;
         if (this.state == State.WAITING) {
-            final int val = (int) ByteBufferUtils.readUInt32(buffer, 8);
+            final int val = (int) ByteBufferHelper.readUInt32(buffer, 8);
             requestType = RequestType.valueOf(val);
         } else if (this.state == State.WAITING_FOR_MULTIPLE_RESPONSES) {
             requestType = this.multiResponseRequestType;
@@ -456,7 +466,7 @@ public class SlapProtocol implements ISlapProtocol {
             default:
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("Unknown response, ByteBuffer: {}, contents:\n{}",
-                        buffer, ByteBufferUtils.toHexDump(buffer));
+                        buffer, ByteBufferHelper.toHexDump(buffer));
                 }
                 throw new IllegalStateException("Unknown response");
         }
@@ -480,7 +490,7 @@ public class SlapProtocol implements ISlapProtocol {
         // 00-04: uint32, message length
         // 04-08: uint32, response type
         // 08-12: uint32, event type
-        final int val = (int) ByteBufferUtils.readUInt32(buffer, 8);
+        final int val = (int) ByteBufferHelper.readUInt32(buffer, 8);
         final EventType eventType = EventType.valueOf(val);
         LOGGER.trace(
             "Thread: {}, Received event: event type: {}",
@@ -521,7 +531,7 @@ public class SlapProtocol implements ISlapProtocol {
         // 04-08: uint32, response type
         // 08-12: uint32, request type
         // 12-16: uint32, error message
-        final int val = (int) ByteBufferUtils.readUInt32(buffer, 8);
+        final int val = (int) ByteBufferHelper.readUInt32(buffer, 8);
         final RequestType requestType = RequestType.valueOf(val);
         LOGGER.trace(
             "Thread: {}, Received error: request type: {}",
@@ -549,7 +559,7 @@ public class SlapProtocol implements ISlapProtocol {
         final ByteBuffer buffer = ByteBuffer.wrap(data);
         buffer.order(this.byteOrder);
 
-        ByteBufferUtils.writeString(buffer, method);
+        ByteBufferHelper.writeString(buffer, method);
 
         return this.sendRequest(RequestType.BREAKPOINT_SET, 0, line, data);
     }
@@ -683,7 +693,7 @@ public class SlapProtocol implements ISlapProtocol {
         final ByteBuffer buffer = ByteBuffer.wrap(data);
         buffer.order(this.byteOrder);
 
-        ByteBufferUtils.writeString(buffer, method);
+        ByteBufferHelper.writeString(buffer, method);
 
         return this.sendRequest(RequestType.SOURCE_FILE, 0, 0, data);
     }
@@ -705,7 +715,7 @@ public class SlapProtocol implements ISlapProtocol {
     }
 
     /**
-     * Evaluate {{code}}.
+     * Evaluate {@code expresion}.
      * @param threadId Thread to evaluate in.
      * @param level Stack level to evaluate in.
      * @param expression Code to evaluate.
@@ -722,7 +732,7 @@ public class SlapProtocol implements ISlapProtocol {
         final ByteBuffer buffer = ByteBuffer.wrap(data);
         buffer.order(this.byteOrder);
 
-        ByteBufferUtils.writeString(buffer, expression);
+        ByteBufferHelper.writeString(buffer, expression);
 
         return this.sendRequest(RequestType.EVALUATE, threadId, level, data);
     }

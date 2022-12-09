@@ -81,8 +81,8 @@ public class MagikFile {
     }
 
     /**
-     * Parse the text for this file and return the top level {{AstNode}}.
-     * @return Top level {{AstNode}}.
+     * Parse the text for this file and return the top level {@link AstNode}.
+     * @return Top level {@link AstNode}.
      */
     public synchronized AstNode getTopNode() {
         if (this.astNode == null) {
@@ -98,8 +98,8 @@ public class MagikFile {
     }
 
     /**
-     * Get the {{GlobalScope}} for this file.
-     * @return {{GlobalScope}} for this file.
+     * Get the {@link GlobalScope} for this file.
+     * @return {@link GlobalScope} for this file.
      */
     public synchronized GlobalScope getGlobalScope() {
         if (this.globalScope == null) {
@@ -113,8 +113,8 @@ public class MagikFile {
     }
 
     /**
-     * Get {{Definition}}s in this file.
-     * @return {{Definition}}s in this file.
+     * Get {@link Definition}s in this file.
+     * @return {@link Definition}s in this file.
      */
     public synchronized List<Definition> getDefinitions() {
         if (this.definitions == null) {

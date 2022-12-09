@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -14,6 +15,245 @@ import nl.ramsolutions.sw.magik.api.MagikKeyword;
  * Magik method.
  */
 public class Method {
+
+    /**
+     * Global usage.
+     */
+    public static class GlobalUsage {
+
+        private final TypeString ref;
+        private final Location location;
+
+        /**
+         * Constructor.
+         * @param ref Global reference.
+         * @param location Location of use.
+         */
+        public GlobalUsage(final TypeString ref, final @Nullable Location location) {
+            this.ref = ref;
+            this.location = location;
+        }
+
+        public TypeString getGlobal() {
+            return this.ref;
+        }
+
+        @CheckForNull
+        public Location getLocation() {
+            return this.location;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.ref);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            if (obj == null) {
+                return false;
+            }
+
+            if (this.getClass() != obj.getClass()) {
+                return false;
+            }
+
+            final GlobalUsage otherTypeUsage = (GlobalUsage) obj;
+            return Objects.equals(otherTypeUsage.getGlobal(), this.getGlobal());
+        }
+
+    }
+
+    /**
+     * Method usage.
+     */
+    public static class MethodUsage {
+
+        private final TypeString typeRef;
+        private final String methodName;
+        private final Location location;
+
+        /**
+         * Constructor.
+         * @param typeRef Type reference.
+         * @param methodName Name of method.
+         * @param location Location of use.
+         */
+        public MethodUsage(final TypeString typeRef, final String methodName, final @Nullable Location location) {
+            this.typeRef = typeRef;
+            this.methodName = methodName;
+            this.location = location;
+        }
+
+        /**
+         * Constructor.
+         * @param typeRef Type reference.
+         * @param methodName Name of method.
+         */
+        public MethodUsage(final TypeString typeRef, final String methodName) {
+            this(typeRef, methodName, null);
+        }
+
+        public TypeString getType() {
+            return this.typeRef;
+        }
+
+        public String getMethodName() {
+            return this.methodName;
+        }
+
+        @CheckForNull
+        public Location getLocation() {
+            return this.location;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.typeRef, this.methodName);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            if (obj == null) {
+                return false;
+            }
+
+            if (this.getClass() != obj.getClass()) {
+                return false;
+            }
+
+            final MethodUsage otherMethodUsage = (MethodUsage) obj;
+            return Objects.equals(otherMethodUsage.getType(), this.getType())
+                && Objects.equals(otherMethodUsage.getMethodName(), this.getMethodName());
+        }
+
+    }
+
+    /**
+     * Slot usage.
+     */
+    public static class SlotUsage {
+
+        private final String slotName;
+        private final Location location;
+
+        /**
+         * Constructor.
+         * @param slotName Name of slot.
+         * @param location Location of use.
+         */
+        public SlotUsage(final String slotName, final @Nullable Location location) {
+            this.slotName = slotName;
+            this.location = location;
+        }
+
+        /**
+         * Constructor.
+         * @param slotName Name of slot.
+         */
+        public SlotUsage(final String slotName) {
+            this(slotName, null);
+        }
+
+        public String getSlotName() {
+            return this.slotName;
+        }
+
+        public Location getLocation() {
+            return this.location;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.slotName);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            if (obj == null) {
+                return false;
+            }
+
+            if (this.getClass() != obj.getClass()) {
+                return false;
+            }
+
+            final SlotUsage otherSlotUsage = (SlotUsage) obj;
+            return Objects.equals(otherSlotUsage.getSlotName(), this.getSlotName());
+        }
+
+    }
+
+    /**
+     * Condition usage.
+     */
+    public static class ConditionUsage {
+
+        private final String conditionName;
+        private final Location location;
+
+        /**
+         * Constructor.
+         * @param conditionName Name of condition.
+         * @param location Location of use.
+         */
+        public ConditionUsage(final String conditionName, final @Nullable Location location) {
+            this.conditionName = conditionName;
+            this.location = location;
+        }
+
+        /**
+         * Constructor.
+         * @param conditionName Name of condition.
+         */
+        public ConditionUsage(final String conditionName) {
+            this(conditionName, null);
+        }
+
+        public String getConditionName() {
+            return this.conditionName;
+        }
+
+        public Location getLocation() {
+            return this.location;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.conditionName);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            if (obj == null) {
+                return false;
+            }
+
+            if (this.getClass() != obj.getClass()) {
+                return false;
+            }
+
+            final ConditionUsage otherConditionUsage = (ConditionUsage) obj;
+            return Objects.equals(otherConditionUsage.getConditionName(), this.getConditionName());
+        }
+
+    }
 
     /**
      * Method modifier.
@@ -41,47 +281,56 @@ public class Method {
 
     }
 
-    private final EnumSet<Modifier> modifiers;
     private final Location location;
+    private final EnumSet<Modifier> modifiers;
     private final MagikType owner;
     private final List<Parameter> parameters;
     private final Parameter assignmentParameter;
-    private final ExpressionResult callResult;
-    private final ExpressionResult loopbodyResult;
+    private final ExpressionResultString callResult;
+    private final ExpressionResultString loopbodyResult;
     private final String name;
+    private final Set<GlobalUsage> usedTypes;
+    private final Set<MethodUsage> calledMethods;
+    private final Set<SlotUsage> usedSlots;
+    private final Set<ConditionUsage> usedConditions;
     private String doc;
-    private final Set<String> usedTypes;
-    private final Set<String> calledMethods;
-    private final Set<String> usedSlots;
 
     /**
      * Constructor.
+     * @param location Location of definition.
+     * @param modifiers Modifiers.
+     * @param owner Owner of method.
      * @param name Name of method.
      * @param parameters Parameters of method.
+     * @param assignmentParameter Assignment parameter.
+     * @param methodDoc Method doc.
      * @param callResult Result of call.
      * @param loopbodyResult Result of iterator call.
      */
     @SuppressWarnings({"java:S1319", "checkstyle:ParameterNumber"})
     public Method(
-            final EnumSet<Modifier> modifiers,
             final @Nullable Location location,
+            final EnumSet<Modifier> modifiers,
             final MagikType owner,
             final String name,
             final List<Parameter> parameters,
             final @Nullable Parameter assignmentParameter,
-            final ExpressionResult callResult,
-            final ExpressionResult loopbodyResult) {
-        this.modifiers = modifiers;
+            final @Nullable String methodDoc,
+            final ExpressionResultString callResult,
+            final ExpressionResultString loopbodyResult) {
         this.location = location;
+        this.modifiers = modifiers;
         this.owner = owner;
         this.name = name;
         this.parameters = parameters;
         this.assignmentParameter = assignmentParameter;
+        this.doc = methodDoc;
         this.callResult = callResult;
         this.loopbodyResult = loopbodyResult;
         this.usedTypes = new HashSet<>();
         this.calledMethods = new HashSet<>();
         this.usedSlots = new HashSet<>();
+        this.usedConditions = new HashSet<>();
     }
 
     /**
@@ -211,7 +460,7 @@ public class Method {
      * Get result of call.
      * @return Result of call.
      */
-    public ExpressionResult getCallResult() {
+    public ExpressionResultString getCallResult() {
         return this.callResult;
     }
 
@@ -219,7 +468,7 @@ public class Method {
      * Get result of iterator call.
      * @return Result of iterator call.
      */
-    public ExpressionResult getLoopbodyResult() {
+    public ExpressionResultString getLoopbodyResult() {
         return this.loopbodyResult;
     }
 
@@ -241,51 +490,63 @@ public class Method {
 
     /**
      * Add a used type.
-     * @param typeName Type name, including package.
+     * @param typeUsage Type usage.
      */
-    public void addUsedType(final String typeName) {
-        this.usedTypes.add(typeName);
-    }
-
-    /**
-     * Add a used type.
-     * @param type Used type.
-     */
-    public void addUsedType(final AbstractType type) {
-        final String typeName = type.getFullName();
-        this.addUsedType(typeName);
+    public void addUsedType(final GlobalUsage typeUsage) {
+        this.usedTypes.add(typeUsage);
     }
 
     /**
      * Get the used types.
      * @return All used types by this method.
      */
-    public Set<String> getUsedTypes() {
+    public Set<GlobalUsage> getTypeUsages() {
         return Collections.unmodifiableSet(this.usedTypes);
     }
 
     /**
      * Add a called method.
-     * @param methodName Name of called method.
+     * @param calledMethod Name of called method.
      */
-    public void addCalledMethod(final String methodName) {
-        this.calledMethods.add(methodName);
+    public void addCalledMethod(final MethodUsage calledMethod) {
+        this.calledMethods.add(calledMethod);
     }
 
     /**
-     * Get the method names by this method.
-     * @return Called method names.
+     * Get the method usages by this method.
+     * @return Method usages.
      */
-    public Set<String> getCalledMethods() {
+    public Set<Method.MethodUsage> getMethodUsages() {
         return Collections.unmodifiableSet(this.calledMethods);
     }
 
-    public void addUsedSlot(final String slotName) {
-        this.usedSlots.add(slotName);
+    /**
+     * Add used slot.
+     * @param slotUsage Name of used slot.
+     */
+    public void addUsedSlot(final SlotUsage slotUsage) {
+        this.usedSlots.add(slotUsage);
     }
 
-    public Set<String> getUsedSlots() {
+    /**
+     * Get the slot usages by this method.
+     * @return Slot usages.
+     * @return
+     */
+    public Set<SlotUsage> getUsedSlots() {
         return Collections.unmodifiableSet(this.usedSlots);
+    }
+
+    public void addUsedCondition(final ConditionUsage conditionUsage) {
+        this.usedConditions.add(conditionUsage);
+    }
+
+    /**
+     * Get the condition usages by this method.
+     * @return Condition usages.
+     */
+    public Set<Method.ConditionUsage> getConditionUsages() {
+        return Collections.unmodifiableSet(this.usedConditions);
     }
 
     @Override

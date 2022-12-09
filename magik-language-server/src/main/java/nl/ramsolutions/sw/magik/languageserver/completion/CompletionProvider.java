@@ -23,8 +23,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
@@ -188,8 +188,8 @@ public class CompletionProvider {
             final AstNode methodDefinitionNode = scopeNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
             if (methodDefinitionNode != null) {
                 final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefinitionNode);
-                final GlobalReference globalRef = helper.getTypeGlobalReference();
-                final AbstractType type = typeKeeper.getType(globalRef);
+                final TypeString typeString = helper.getTypeString();
+                final AbstractType type = typeKeeper.getType(typeString);
                 type.getSlots().stream()
                     .map(slot -> {
                         final String slotName = slot.getName();
@@ -212,7 +212,7 @@ public class CompletionProvider {
             .filter(type -> type.getFullName().indexOf(identifierPart) != -1)
             .map(type -> {
                 final CompletionItem item = new CompletionItem(type.getFullName());
-                item.setInsertText(type.getFullName());  // TODO: if visible from current package, don't prefix package.
+                item.setInsertText(type.getFullName());
                 item.setDetail(type.getFullName());
                 item.setDocumentation(type.getDoc());
                 item.setKind(CompletionItemKind.Class);
@@ -234,8 +234,7 @@ public class CompletionProvider {
             final MagikTypedFile magikFile, final AstNode tokenNode, final String tokenValue) {
         // Reason (on newly parsed source, thus not from magikFile) and get type.
         final LocalTypeReasoner reasoner = new LocalTypeReasoner(magikFile);
-        final AstNode topNode = tokenNode.getFirstAncestor(MagikGrammar.MAGIK);
-        reasoner.run(topNode);
+        reasoner.run();
 
         // Token -->
         // - parent: any --> parent: ATOM
@@ -262,9 +261,9 @@ public class CompletionProvider {
         if (type == SelfType.INSTANCE) {
             final AstNode methodDefNode = tokenNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
             final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefNode);
-            final GlobalReference globalRef = helper.getTypeGlobalReference();
+            final TypeString typeString = helper.getTypeString();
             final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-            type = typeKeeper.getType(globalRef);
+            type = typeKeeper.getType(typeString);
         }
 
         // Convert all known methods to CompletionItems.
@@ -334,9 +333,9 @@ public class CompletionProvider {
     }
 
     /**
-     * Provide keyword {{CompletionItem}}s.
+     * Provide keyword {@link CompletionItem}s.
      *
-     * @return {{CompletionItem}}s.
+     * @return {@link CompletionItem}s.
      */
     private List<CompletionItem> provideKeywordCompletions() {
         return Arrays.stream(MagikKeyword.values())
@@ -350,10 +349,10 @@ public class CompletionProvider {
     }
 
     /**
-     * Get the current character at {{position}} in {{text}}.
+     * Get the current character at {@code position} in {@code text}.
      * @param text Text to use.
      * @param position Position to get character from.
-     * @return Character at {{position}}.
+     * @return Character at {@code position}.
      */
     @CheckForNull
     private Character getCurrentChar(final String text, final Position position) {

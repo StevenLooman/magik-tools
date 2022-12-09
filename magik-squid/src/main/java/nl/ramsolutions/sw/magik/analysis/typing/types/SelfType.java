@@ -10,12 +10,12 @@ import nl.ramsolutions.sw.magik.analysis.Location;
 public final class SelfType extends AbstractType {
 
     /**
-     * Instance of {{_self}}/{{_clone}} to be used in all cases.
+     * Instance of {@code _self}/{@code _clone} to be used in all cases.
      */
     public static final SelfType INSTANCE = new SelfType();
 
     /**
-     * Serialized name of {{SelfType}}.
+     * Serialized name of {@code SelfType}.
      */
     public static final String SERIALIZED_NAME = "_self";
 
@@ -26,13 +26,18 @@ public final class SelfType extends AbstractType {
     }
 
     @Override
+    public TypeString getTypeString() {
+        return TypeString.of(SelfType.SERIALIZED_NAME);
+    }
+
+    @Override
     public String getFullName() {
-        return SERIALIZED_NAME;
+        return SelfType.SERIALIZED_NAME;
     }
 
     @Override
     public String getName() {
-        return SERIALIZED_NAME;
+        return SelfType.SERIALIZED_NAME;
     }
 
     @Override
@@ -63,8 +68,8 @@ public final class SelfType extends AbstractType {
     @Override
     public String toString() {
         return String.format(
-                "%s@%s",
-                this.getClass().getName(), Integer.toHexString(this.hashCode()));
+            "%s@%s",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()));
     }
 
     @Override

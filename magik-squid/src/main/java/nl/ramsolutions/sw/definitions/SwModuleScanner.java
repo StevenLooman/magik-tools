@@ -110,7 +110,7 @@ public final class SwModuleScanner {
 
     /**
      * Read module.def file.
-     * @param path Path to {{@code module.def}} file.
+     * @param path Path to {@code module.def} file.
      * @return Parsed module definition.
      * @throws IOException -
      */

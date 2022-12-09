@@ -21,7 +21,7 @@ public interface ISlapResponse {
     int INT_SIZE_BYTES = 4;
 
     /**
-     * Get the {{RequestType}} from this response.
+     * Get the {@link RequestType} from this response.
      * @return RequestType.
      */
     RequestType getRequestType();

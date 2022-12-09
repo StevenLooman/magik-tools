@@ -6,7 +6,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferUtils;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
 
@@ -62,7 +62,7 @@ public class StackFrameLocalsResponse implements ISlapResponse {
         }
 
         /**
-         * Get the {{LocalType}} from an interger value.
+         * Get the {@link LocalType} from an interger value.
          * @param value Integer value.
          * @return LocalType
          */
@@ -100,7 +100,7 @@ public class StackFrameLocalsResponse implements ISlapResponse {
         }
 
         /**
-         * Get the {{VariableType}}s from an interger value.
+         * Get the {@link VariableType}s from an interger value.
          * @param flags Integer value.
          * @return VariableTypes
          */
@@ -167,11 +167,11 @@ public class StackFrameLocalsResponse implements ISlapResponse {
          */
         @SuppressWarnings("checkstyle:AvoidNestedBlocks")
         public static Local decode(final ByteBuffer buffer) {
-            final int status = (int) ByteBufferUtils.readUInt32(buffer, OFFSET_STATUS);
+            final int status = (int) ByteBufferHelper.readUInt32(buffer, OFFSET_STATUS);
             final Set<VariableType> variableTypes = VariableType.flagsOf(status);
             final LocalType type = LocalType.valueOf((status & BYTE_2_MASK) >> BYTE_2_SHIFT);
-            final int nameLength = (int) ByteBufferUtils.readUInt32(buffer, OFFSET_NAME_LENGTH);
-            final String name = ByteBufferUtils.readString(buffer, OFFSET_NAME_LENGTH);
+            final int nameLength = (int) ByteBufferHelper.readUInt32(buffer, OFFSET_NAME_LENGTH);
+            final String name = ByteBufferHelper.readString(buffer, OFFSET_NAME_LENGTH);
 
             String valueStr = null;
             final int valueOffset = OFFSET_NAME + nameLength;
@@ -215,7 +215,7 @@ public class StackFrameLocalsResponse implements ISlapResponse {
                 }
 
                 case TYPE_OBJ: {
-                    valueStr = ByteBufferUtils.readString(buffer, valueOffset);
+                    valueStr = ByteBufferHelper.readString(buffer, valueOffset);
                     break;
                 }
 

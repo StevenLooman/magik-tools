@@ -22,7 +22,7 @@ public enum StepType {
     }
 
     /**
-     * Get the {{StepType}} from an interger value.
+     * Get the {@link StepType} from an interger value.
      * @param value Integer value.
      * @return StepType
      */

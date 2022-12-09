@@ -1,6 +1,5 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -8,32 +7,90 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.Location;
+import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 
 /**
  * Magik type: slotted exemplar, indexed exemplar, enumeration, or mixin.
  */
-public abstract class MagikType extends AbstractType {
+public class MagikType extends AbstractType {
 
-    private final GlobalReference globalReference;
-    private final Set<Method> methods;
-    private final List<AbstractType> parents;
-    private final Map<String, Slot> slots;
+    /**
+     * Sort of MagikType.
+     */
+    public enum Sort {
+
+        /**
+         * Type has not been seen yet, but, e.g., referred to by a method definition.
+         */
+        UNDEFINED,
+
+        /**
+         * {@code object} type.
+         */
+        OBJECT,
+
+        /**
+         * Slotted exemplar type.
+         */
+        SLOTTED,
+
+        /**
+         * Indexed exemplar type.
+         */
+        INDEXED,
+
+        /**
+         * Intrinsic type.
+         */
+        INTRINSIC;
+
+    }
+
+    private final TypeString typeString;
+    private final Set<Method> methods = ConcurrentHashMap.newKeySet();
+    private final Set<TypeString> parents = ConcurrentHashMap.newKeySet();
+    private final Map<String, Slot> slots = new ConcurrentHashMap<>();
+    private Sort sort;
+    private ITypeKeeper typeKeeper;
 
     /**
      * Constructor.
-     * @param globalReference Global reference.
+     * @param typeKeeper TypeKeeper.
+     * @param magikTypeType Sort.
+     * @param typeString Global reference.
      */
-    protected MagikType(final GlobalReference globalReference) {
-        this.globalReference = globalReference;
+    public MagikType(
+            final ITypeKeeper typeKeeper,
+            final Sort magikTypeType,
+            final TypeString typeString) {
+        this.typeKeeper = typeKeeper;
+        this.sort = magikTypeType;
+        this.typeString = typeString;
 
-        this.methods = new HashSet<>();
-        this.parents = new ArrayList<>();
-        this.slots = new HashMap<>();
+        // Add self to TypeKeeper.
+        this.typeKeeper.addType(this);
+    }
+
+    /**
+     * Get the magik type.
+     * @return
+     */
+    public Sort getSort() {
+        return this.sort;
+    }
+
+    /**
+     * Set the magik type.
+     */
+    public void setSort(final Sort sort) {
+        this.sort = sort;
     }
 
     /**
@@ -45,34 +102,33 @@ public abstract class MagikType extends AbstractType {
 
     /**
      * Add a parent type.
-     * @param parentType Type to inherit.
+     * @param parentTypeString Reference to parent type.
      */
     @SuppressWarnings("java:S2583")
-    public void addParent(final AbstractType parentType) {
-        if (parentType == SelfType.INSTANCE
-            || parentType == UndefinedType.INSTANCE) {
-            final String message = "Trying to inherit invalid type: " + parentType;
-            throw new IllegalArgumentException(message);
-        } else if (parentType == this) {
-            final String message = "Type: " + parentType + " cannot be inherited by ourselves";
-            throw new IllegalArgumentException(message);
-        }
-        this.parents.add(parentType);
+    public void addParent(final TypeString parentTypeString) {
+        this.parents.add(parentTypeString);
     }
 
     @Override
     public Collection<AbstractType> getParents() {
-        return Collections.unmodifiableList(this.parents);
+        return this.parents.stream()
+            .map(parentRef -> this.typeKeeper.getType(parentRef))
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public TypeString getTypeString() {
+        return this.typeString;
     }
 
     @Override
     public String getFullName() {
-        return this.globalReference.getFullName();
+        return this.typeString.getFullString();
     }
 
     @Override
     public String getName() {
-        return this.globalReference.getIdentifier();
+        return this.typeString.getString();
     }
 
     /**
@@ -124,6 +180,10 @@ public abstract class MagikType extends AbstractType {
         return allSlots;
     }
 
+    public Collection<Slot> getLocalSlots() {
+        return Collections.unmodifiableCollection(this.slots.values());
+    }
+
     /**
      * Clear current slots, for this type.
      */
@@ -132,46 +192,35 @@ public abstract class MagikType extends AbstractType {
     }
 
     /**
-     * Add the resulting types of a method.
-     * @param methodLocation Location of method.
-     * @param methodName Name of method.
-     * @param parameters Parameters of method.
-     * @param assignmentParameter Assignment parameter for method.
-     * @param callResult Results the method returns.
-     */
-    @SuppressWarnings("java:S1319")
-    public Method addMethod(
-            final EnumSet<Method.Modifier> modifiers,
-            final @Nullable Location methodLocation,
-            final String methodName,
-            final List<Parameter> parameters,
-            final @Nullable Parameter assignmentParameter,
-            final ExpressionResult callResult) {
-        final ExpressionResult loopbodyResult = new ExpressionResult();
-        return this.addMethod(
-            modifiers, methodLocation, methodName, parameters, assignmentParameter, callResult, loopbodyResult);
-    }
-
-    /**
      * Add the resulting types of a method and loopbody, overwrites existing methods.
-     * @param methodLocation Location of method.
+     * @param location Location of method.
      * @param methodName Name of method.
      * @param parameters Parameters for method.
      * @param assignmentParameter Assignment parameter for method.
-     * @param callResult {{MagikType}}s the method returns.
-     * @param loopbodyResult {{MagikType}}s the method iterates.
+     * @param methodDoc Method doc.
+     * @param callResult {@link MagikType}s the method returns.
+     * @param loopbodyResult {@link MagikType}s the method iterates.
      */
-    @SuppressWarnings("java:S1319")
+    @SuppressWarnings({"java:S1319", "checkstyle:ParameterNumber"})
     public Method addMethod(
+            final @Nullable Location location,
             final EnumSet<Method.Modifier> modifiers,
-            final @Nullable Location methodLocation,
             final String methodName,
             final List<Parameter> parameters,
             final @Nullable Parameter assignmentParameter,
-            final ExpressionResult callResult,
-            final ExpressionResult loopbodyResult) {
+            final @Nullable String methodDoc,
+            final ExpressionResultString callResult,
+            final ExpressionResultString loopbodyResult) {
         final Method method = new Method(
-            modifiers, methodLocation, this, methodName, parameters, assignmentParameter, callResult, loopbodyResult);
+            location,
+            modifiers,
+            this,
+            methodName,
+            parameters,
+            assignmentParameter,
+            methodDoc,
+            callResult,
+            loopbodyResult);
         this.methods.add(method);
         return method;
     }
@@ -192,7 +241,7 @@ public abstract class MagikType extends AbstractType {
         });
 
         // Add methods from parent types, if not overridden.
-        for (final AbstractType parent : this.parents) {
+        for (final AbstractType parent : this.getParents()) {
             parent.getMethods().forEach(method -> {
                 final String methodName = method.getName();
                 if (allMethods.containsKey(methodName)) {
@@ -225,7 +274,7 @@ public abstract class MagikType extends AbstractType {
     @Override
     public Collection<Method> getSuperMethods(final String methodName) {
         // Try to get the wanted method from all super types, first one wins.
-        return this.parents.stream()
+        return this.getParents().stream()
             .flatMap(parent -> parent.getMethods(methodName).stream())
             .collect(Collectors.toSet());
     }
@@ -238,7 +287,7 @@ public abstract class MagikType extends AbstractType {
     @Override
     public Collection<Method> getSuperMethods(final String methodName, final String superName) {
         // If super-type was specified, specifically search that one.
-        final Optional<AbstractType> superType = this.parents.stream()
+        final Optional<AbstractType> superType = this.getParents().stream()
             .filter(type -> type.getFullName().equals(superName))
             .findAny();
         if (!superType.isPresent()) {
@@ -262,6 +311,29 @@ public abstract class MagikType extends AbstractType {
             "%s@%s(%s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
             this.getFullName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getFullName());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final MagikType other = (MagikType) obj;
+        return Objects.equals(this.getTypeString(), other.getTypeString());
     }
 
 }

@@ -9,19 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.analysis.AstWalker;
-import nl.ramsolutions.sw.magik.api.ExtendedTokenType;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.TextEdit;
 
 /**
- * Formatting AST walker which produces {{TextEdit}}s.
+ * Formatting AST walker which produces {@link TextEdit}s.
  */
 public class FormattingWalker extends AstWalker {
 
     private final List<TextEdit> textEdits = new ArrayList<>();
-    private PragmaFormattingStrategy pragmaStrategy;
-    private StandardFormattingStrategy standardStrategy;
-    private FinalNewlineStrategy finalNewlineStrategy;
+    private final PragmaFormattingStrategy pragmaStrategy;
+    private final StandardFormattingStrategy standardStrategy;
+    private final FinalNewlineStrategy finalNewlineStrategy;
     private FormattingStrategy activeStrategy;
 
     /**
@@ -85,7 +84,7 @@ public class FormattingWalker extends AstWalker {
             } else if (trivia.isSkippedText()) {
                 if (token.getType() == GenericTokenType.EOL) {
                     this.walkEolToken(token);
-                } else if (token.getType() == ExtendedTokenType.WHITESPACE) {
+                } else if (token.getType() == GenericTokenType.WHITESPACE) {
                     this.walkWhitespaceToken(token);
                 }
             }
@@ -121,7 +120,7 @@ public class FormattingWalker extends AstWalker {
             final Token whitespaceToken = Token.builder(token)
                 .setValueAndOriginalValue(trimmed)
                 .setColumn(token.getColumn() + trimmedComment.length())
-                .setType(ExtendedTokenType.WHITESPACE)
+                .setType(GenericTokenType.WHITESPACE)
                 .build();
             this.walkWhitespaceToken(whitespaceToken);
 

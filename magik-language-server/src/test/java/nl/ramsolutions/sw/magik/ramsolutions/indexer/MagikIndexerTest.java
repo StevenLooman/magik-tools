@@ -4,11 +4,11 @@ import java.nio.file.Path;
 import java.util.Collection;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.indexer.MagikIndexer;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
-import nl.ramsolutions.sw.magik.languageserver.indexer.MagikIndexer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +21,7 @@ class MagikIndexerTest {
     /**
      * VSCode runs from module directory, mvn runs from project directory.
      *
-     * @return Proper {{Path}} to file.
+     * @return Proper {@link Path} to file.
      */
     protected Path getPath(final Path relativePath) {
         final Path path = Path.of(".").toAbsolutePath().getParent();
@@ -40,8 +40,8 @@ class MagikIndexerTest {
         magikIndexer.indexPathCreated(fixedPath);
 
         // Test type.
-        final GlobalReference globalRef = GlobalReference.of("user:test_exemplar");
-        final AbstractType type = typeKeeper.getType(globalRef);
+        final TypeString typeString = TypeString.of("user:test_exemplar");
+        final AbstractType type = typeKeeper.getType(typeString);
         assertThat(type).isNotEqualTo(UndefinedType.INSTANCE);
 
         // Test methods.
@@ -64,8 +64,8 @@ class MagikIndexerTest {
         magikIndexer.indexPathChanged(fixedPath);
 
         // Test type.
-        final GlobalReference globalRef = GlobalReference.of("user:test_exemplar");
-        final AbstractType type = typeKeeper.getType(globalRef);
+        final TypeString typeString = TypeString.of("user:test_exemplar");
+        final AbstractType type = typeKeeper.getType(typeString);
         assertThat(type).isNotEqualTo(UndefinedType.INSTANCE);
 
         // Test methods.
@@ -85,15 +85,15 @@ class MagikIndexerTest {
         magikIndexer.indexPathCreated(fixedPath);
 
         // Test type.
-        final GlobalReference globalRef = GlobalReference.of("user:test_exemplar");
-        final AbstractType type = typeKeeper.getType(globalRef);
+        final TypeString typeString = TypeString.of("user:test_exemplar");
+        final AbstractType type = typeKeeper.getType(typeString);
         assertThat(type).isNotEqualTo(UndefinedType.INSTANCE);
 
-        // Pretend update.
+        // Pretend delete.
         magikIndexer.indexPathDeleted(fixedPath);
 
         // Test type.
-        final AbstractType typeRemoved = typeKeeper.getType(globalRef);
+        final AbstractType typeRemoved = typeKeeper.getType(typeString);
         assertThat(typeRemoved).isEqualTo(UndefinedType.INSTANCE);
     }
 

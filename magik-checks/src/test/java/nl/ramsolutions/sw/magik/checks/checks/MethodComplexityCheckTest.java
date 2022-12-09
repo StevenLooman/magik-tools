@@ -45,8 +45,8 @@ class MethodComplexityCheckTest extends MagikCheckTestBase {
         final MagikCheck check = new MethodComplexityCheck();
         final String code = ""
             + "_method a.b\n"
-            + "    _if a"
-            + "    _then"
+            + "    _if a\n"
+            + "    _then\n"
             + "    _endif\n"
             + "_endmethod\n";
         final List<MagikIssue> issues = this.runCheck(code, check);

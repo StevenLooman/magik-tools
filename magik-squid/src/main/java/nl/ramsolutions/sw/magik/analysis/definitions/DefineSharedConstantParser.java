@@ -8,6 +8,7 @@ import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
@@ -78,8 +79,8 @@ public class DefineSharedConstantParser {
         if (atomNode.isNot(MagikGrammar.ATOM)) {
             throw new IllegalStateException();
         }
-        final String exemplarName = atomNode.getTokenValue();    // Assume this is an exemplar.
-        if (exemplarName == null) {
+        final String identifier = atomNode.getTokenValue();    // Assume this is an exemplar.
+        if (identifier == null) {
             throw new IllegalStateException();
         }
 
@@ -108,8 +109,9 @@ public class DefineSharedConstantParser {
             modifiers.add(MethodDefinition.Modifier.PRIVATE);
         }
         final List<ParameterDefinition> parameters = Collections.emptyList();
+        final TypeString exemplarName = TypeString.of(identifier, pakkage);
         final MethodDefinition methodDefinition =
-            new MethodDefinition(statementNode, pakkage, exemplarName, constantName, modifiers, parameters, null);
+            new MethodDefinition(statementNode, exemplarName, constantName, modifiers, parameters, null);
         return List.of(methodDefinition);
     }
 

@@ -43,10 +43,11 @@ class ThreadManager {
     private static final String LOOPBODY = "<loopbody>";
     private static final String UNNAMED_PROC = "<unnamed proc>()";
     private static final String EVAL_EXEMPLAR_PACKAGE =
-        "_self.method(%s).owner.meta_at(:exemplar_global).package.name.write_string";
+        "_self.define_method_target.meta_at(:exemplar_global).package.association_at(%s).package.name.write_string";
 
     private final ISlapProtocol slapProtocol;
     private final IDebugProtocolClient debugClient;
+    private final PathMapper pathMapper;
     private boolean stepCompletedEventReceived;
     private BreakpointEvent breakpointEvent;
 
@@ -54,15 +55,20 @@ class ThreadManager {
      * Constructor.
      * @param slapProtocol SLapProtocol.
      * @param debugClient LSP4j DebugClient.
+     * @param pathMapper Path mapping.
      */
-    ThreadManager(final ISlapProtocol slapProtocol, final IDebugProtocolClient debugClient) {
+    ThreadManager(
+            final ISlapProtocol slapProtocol,
+            final IDebugProtocolClient debugClient,
+            final PathMapper pathMapper) {
         this.slapProtocol = slapProtocol;
         this.debugClient = debugClient;
+        this.pathMapper = pathMapper;
     }
 
     /**
      * Get the Thread currently active.
-     * @return {{Thread}}s
+     * @return {@link Thread}s
      * @throws IOException -
      * @throws InterruptedException -
      * @throws ExecutionException -
@@ -112,6 +118,10 @@ class ThreadManager {
         // instead of Lsp4jConversion.
         final List<StackFrame> stackFrames = new ArrayList<>();
         for (final ThreadStackResponse.StackElement stackElement : threadStack.getStackFrames()) {
+            LOGGER.trace(
+                "Stack element, level: {}, language: {}, name: '{}', offset: {}",
+                stackElement.getLevel(), stackElement.getLanguage(), stackElement.getName(), stackElement.getOffset());
+
             if (!stackElement.getLanguage().equals(LANGUAGE_MAGIK)) {
                 continue;
             }
@@ -130,9 +140,9 @@ class ThreadManager {
                         // Do some extra work to determine package.
                         final int level = stackElement.getLevel();
 
-                        final String methodName = ":|" + method.substring(index) + "|";
-                        final String expr = String.format(EVAL_EXEMPLAR_PACKAGE, methodName);
-                        LOGGER.debug("Eval expression: {}", expr);
+                        final String exemplarName = ":|" + method.substring(0, index - 1) + "|";
+                        final String expr = String.format(EVAL_EXEMPLAR_PACKAGE, exemplarName);
+                        LOGGER.debug("Eval expression: '{}'", expr);
                         final EvalResponse eval =
                             (EvalResponse) this.slapProtocol.evaluate(threadId, level, expr).get();
                         method = eval.getResult() + ":" + method;
@@ -148,8 +158,8 @@ class ThreadManager {
                     final CompletableFuture<ISlapResponse> sourceFileFuture = this.slapProtocol.getSourceFile(method);
                     final SourceFileResponse sourceFile = (SourceFileResponse) sourceFileFuture.get();
                     final String filename = sourceFile.getFilename();
-
-                    path = Path.of(filename);
+                    final Path daPath = Path.of(filename);
+                    path = this.pathMapper.applyMapping(daPath);
                 }
             } catch (final ExecutionException exception) {
                 final Throwable cause = exception.getCause();
@@ -245,16 +255,19 @@ class ThreadManager {
      */
     String evaluate(final @Nullable Integer frameId, final String expression)
             throws IOException, InterruptedException, ExecutionException {
-        // TODO: Which threadId to choose here? Or do we abort?
-        final long threadId = frameId != null ? Lsp4jConversion.frameIdToThreadId(frameId) : 0;
-        final int level = frameId != null ? Lsp4jConversion.frameIdToLevel(frameId) : 0;
+        if (frameId == null) {
+            throw new IllegalArgumentException("Missing frame ID");
+        }
+
+        final long threadId = Lsp4jConversion.frameIdToThreadId(frameId);
+        final int level = Lsp4jConversion.frameIdToLevel(frameId);
         final CompletableFuture<ISlapResponse> evaluateFuture = this.slapProtocol.evaluate(threadId, level, expression);
         final EvalResponse response = (EvalResponse) evaluateFuture.get();
         return response.getResult();
     }
 
     /**
-     * Handle a {{ThreadStartedEvent}}.
+     * Handle a {@link ThreadStartedEvent}.
      * @param event Event.
      */
     void handleThreadStartedEvent(final ThreadStartedEvent event) {
@@ -265,7 +278,7 @@ class ThreadManager {
     }
 
     /**
-     * Handle a {{ThreadEndedEvent}}.
+     * Handle a {@link ThreadEndedEvent}.
      * @param event Event.
      */
     void handleThreadEndedEvent(final ThreadEndedEvent event) {
@@ -276,7 +289,7 @@ class ThreadManager {
     }
 
     /**
-     * Handle a {{StepCompletedEvent}}.
+     * Handle a {@link StepCompletedEvent}.
      * @param event Event.
      */
     void handleStepCompletedEvent(final StepCompletedEvent event) {

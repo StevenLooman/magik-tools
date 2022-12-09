@@ -8,7 +8,7 @@ import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry.Type;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 
@@ -51,10 +51,8 @@ public class GlobalKnownTypedCheck extends MagikTypedCheck {
         }
 
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
-        final GlobalReference globalRef = identifier.indexOf(':') != -1
-            ? GlobalReference.of(identifier)
-            : GlobalReference.of(this.currentPakkage, identifier);
-        if (typeKeeper.hasType(globalRef)) {
+        final TypeString typeString = TypeString.of(identifier, this.currentPakkage);
+        if (typeKeeper.hasType(typeString)) {
             return;
         }
 

@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
@@ -12,6 +13,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 public class DefIndexedExemplarParser extends TypeDefParser {
 
     private static final String DEF_INDEXED_EXEMPLAR = "def_indexed_exemplar";
+    private static final String SW_DEF_INDEXED_EXEMPLAR = "sw:def_indexed_exemplar";
 
     /**
      * Constructor.
@@ -32,7 +34,8 @@ public class DefIndexedExemplarParser extends TypeDefParser {
         }
 
         final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
-        if (!helper.isProcedureInvocationOf(DEF_INDEXED_EXEMPLAR)) {
+        if (!helper.isProcedureInvocationOf(DEF_INDEXED_EXEMPLAR)
+            && !helper.isProcedureInvocationOf(SW_DEF_INDEXED_EXEMPLAR)) {
             return false;
         }
 
@@ -43,8 +46,7 @@ public class DefIndexedExemplarParser extends TypeDefParser {
         if (argument0Node == null) {
             return false;
         }
-        final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SIMPLE_VECTOR);
-        return argument1Node != null;
+        return true;
     }
 
     /**
@@ -61,10 +63,6 @@ public class DefIndexedExemplarParser extends TypeDefParser {
         if (argument0Node == null) {
             throw new IllegalStateException();
         }
-        final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SIMPLE_VECTOR);
-        if (argument1Node == null) {
-            throw new IllegalStateException();
-        }
 
         // Figure statement node.
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
@@ -73,14 +71,15 @@ public class DefIndexedExemplarParser extends TypeDefParser {
         final String pakkage = this.getCurrentPakkage();
 
         // Figure name.
-        final String name = argument0Node.getTokenValue().substring(1);
+        final String identifier = argument0Node.getTokenValue().substring(1);
+        final TypeString name = TypeString.of(identifier, pakkage);
 
         // Parents.
         final AstNode argument2Node = argumentsHelper.getArgument(2);
-        final List<String> parents = this.extractParents(argument2Node);
+        final List<TypeString> parents = this.extractParents(argument2Node);
 
         final IndexedExemplarDefinition indexedExemplarDefinition =
-                new IndexedExemplarDefinition(statementNode, pakkage, name, parents);
+            new IndexedExemplarDefinition(statementNode, name, parents);
         return List.of(indexedExemplarDefinition);
     }
 

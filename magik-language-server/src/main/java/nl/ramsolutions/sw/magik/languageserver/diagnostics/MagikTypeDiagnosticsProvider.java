@@ -24,9 +24,9 @@ public class MagikTypeDiagnosticsProvider {
     static final Logger LOGGER = LoggerFactory.getLogger(MagikTypeDiagnosticsProvider.class);
 
     /**
-     * Get {{Diagnostic}}s for typing errors..
+     * Get {@link Diagnostic}s for typing errors..
      * @param magikFile Magik file.
-     * @return List with {{Diagnostic}}s.
+     * @return List with {@link Diagnostic}s.
      * @throws IOException -
      */
     public List<Diagnostic> getDiagnostics(final MagikTypedFile magikFile) throws IOException {

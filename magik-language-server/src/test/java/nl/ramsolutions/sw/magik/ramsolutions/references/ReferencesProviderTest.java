@@ -10,10 +10,11 @@ import nl.ramsolutions.sw.magik.analysis.Position;
 import nl.ramsolutions.sw.magik.analysis.Range;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider;
 import org.junit.jupiter.api.Test;
 
@@ -40,15 +41,21 @@ class ReferencesProviderTest {
     @Test
     void testProvideMethodReferenceFromMethodInvocation() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final Method referingMethod = integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             EMPTY_LOCATION,
+            EnumSet.noneOf(Method.Modifier.class),
             "refering",
             Collections.emptyList(),
             null,
-            ExpressionResult.UNDEFINED);
-        referingMethod.addCalledMethod("refering");
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
+        final TypeString undefinedTypeRef = TypeString.of(UndefinedType.SERIALIZED_NAME);
+        final Method.MethodUsage calledMethod =
+            new Method.MethodUsage(undefinedTypeRef, "refering", EMPTY_LOCATION);
+        referingMethod.addCalledMethod(calledMethod);
 
         final String code = ""
             + "_method integer.refering\n"
@@ -62,21 +69,27 @@ class ReferencesProviderTest {
     @Test
     void testProvideMethodReferenceFromMethodDefintion() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString interRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(interRef);
         final Method referingMethod = integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             EMPTY_LOCATION,
+            EnumSet.noneOf(Method.Modifier.class),
             "refering",
             Collections.emptyList(),
             null,
-            ExpressionResult.UNDEFINED);
-        referingMethod.addCalledMethod("refering");
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
+        final TypeString undefinedTypeRef = TypeString.of(UndefinedType.SERIALIZED_NAME);
+        final Method.MethodUsage calledMethod =
+            new Method.MethodUsage(undefinedTypeRef, "refering", EMPTY_LOCATION);
+        referingMethod.addCalledMethod(calledMethod);
 
         final String code = ""
             + "_method integer.refering\n"
             + "    _self.refering\n"
             + "_endmethod\n";
-        final org.eclipse.lsp4j.Position position = new org.eclipse.lsp4j.Position(0, 20);    // On refering
+        final org.eclipse.lsp4j.Position position = new org.eclipse.lsp4j.Position(0, 20);    // On `refering`.
         final List<org.eclipse.lsp4j.Location> references = this.getReferences(code, position, typeKeeper);
         assertThat(references).hasSize(1);
     }
@@ -84,21 +97,25 @@ class ReferencesProviderTest {
     @Test
     void testProvideTypeReferenceFromAtom() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final Method referingMethod = integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             EMPTY_LOCATION,
+            EnumSet.noneOf(Method.Modifier.class),
             "refering",
             Collections.emptyList(),
             null,
-            ExpressionResult.UNDEFINED);
-        referingMethod.addUsedType("sw:integer");
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
+        final Method.GlobalUsage typeUsage = new Method.GlobalUsage(integerRef, EMPTY_LOCATION);
+        referingMethod.addUsedType(typeUsage);
 
         final String code = ""
             + "_method integer.refering\n"
             + "    integer\n"
             + "_endmethod\n";
-        final org.eclipse.lsp4j.Position position = new org.eclipse.lsp4j.Position(1, 4);    // On integer.
+        final org.eclipse.lsp4j.Position position = new org.eclipse.lsp4j.Position(1, 4);    // On `integer`.
         final List<org.eclipse.lsp4j.Location> references = this.getReferences(code, position, typeKeeper);
         assertThat(references).hasSize(1);
     }
@@ -106,21 +123,25 @@ class ReferencesProviderTest {
     @Test
     void testProvideTypeReferenceFromMethodDefinition() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final Method referingMethod = integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             EMPTY_LOCATION,
+            EnumSet.noneOf(Method.Modifier.class),
             "refering",
             Collections.emptyList(),
             null,
-            ExpressionResult.UNDEFINED);
-        referingMethod.addUsedType("sw:integer");
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
+        final Method.GlobalUsage typeUsage = new Method.GlobalUsage(integerRef, EMPTY_LOCATION);
+        referingMethod.addUsedType(typeUsage);
 
         final String code = ""
             + "_method integer.refering\n"
             + "    print(integer)\n"
             + "_endmethod\n";
-        final org.eclipse.lsp4j.Position position = new org.eclipse.lsp4j.Position(0, 10);    // On integer.
+        final org.eclipse.lsp4j.Position position = new org.eclipse.lsp4j.Position(0, 10);    // On `integer`.
         final List<org.eclipse.lsp4j.Location> references = this.getReferences(code, position, typeKeeper);
         assertThat(references).hasSize(1);
     }

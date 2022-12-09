@@ -50,9 +50,9 @@ public class Location {
     }
 
     /**
-     * Constructor from {{AstNode}}.
+     * Constructor from {@link AstNode}.
      * @param uri Path to file.
-     * @param node {{AstNode}} to create {{Location}} from.
+     * @param node {@link AstNode} to create {@link Location} from.
      */
     public Location(final URI uri, final AstNode node) {
         this.uri = uri;
@@ -60,9 +60,9 @@ public class Location {
     }
 
     /**
-     * Constructor from {{AstNode}}.
+     * Constructor from {@link AstNode}.
      * @param uri Path to file.
-     * @param token {{Token}} to create {{Location}} from.
+     * @param token {@link Token} to create {@link Location} from.
      */
     public Location(final URI uri, final Token token) {
         this.uri = uri;

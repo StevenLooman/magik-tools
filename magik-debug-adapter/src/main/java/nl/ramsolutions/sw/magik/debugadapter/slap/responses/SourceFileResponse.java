@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.debugadapter.slap.responses;
 
 import java.nio.ByteBuffer;
-import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferUtils;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
 
@@ -43,7 +43,7 @@ public class SourceFileResponse implements ISlapResponse {
      * @return Decoded message.
      */
     public static SourceFileResponse decode(final ByteBuffer buffer) {
-        final String filename = ByteBufferUtils.readString(buffer, OFFSET_FILENAME_LENGTH);
+        final String filename = ByteBufferHelper.readString(buffer, OFFSET_FILENAME_LENGTH);
 
         return new SourceFileResponse(filename);
     }

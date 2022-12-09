@@ -2,18 +2,22 @@ package nl.ramsolutions.sw.magik.languageserver.implementation;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
@@ -38,7 +42,7 @@ public class ImplementationProvider {
     }
 
     /**
-     * Provide implementations for {{position}} in {{path}}.
+     * Provide implementations for {@code position} in {@code path}.
      * @param magikFile Magik file.
      * @param position Location in file.
      * @return List of Locations for implementation.
@@ -59,12 +63,73 @@ public class ImplementationProvider {
                 final List<org.eclipse.lsp4j.Location> methodLocations =
                     this.implementationsForMethodInvocation(typeKeeper, reasoner, currentNode);
                 locations.addAll(methodLocations);
+                break;
+            } else if (currentNode.is(MagikGrammar.ATOM)) {
+                final List<org.eclipse.lsp4j.Location> methodLocations =
+                    this.implentationsForAtom(typeKeeper, reasoner, currentNode);
+                locations.addAll(methodLocations);
+                break;
+            } else if (currentNode.is(MagikGrammar.CONDITION_NAME)) {
+                final List<org.eclipse.lsp4j.Location> methodLocations =
+                    this.implentationsForCondition(typeKeeper, reasoner, currentNode);
+                locations.addAll(methodLocations);
+                break;
             }
 
             currentNode = currentNode.getParent();
         }
 
         return locations;
+    }
+
+    private List<org.eclipse.lsp4j.Location> implentationsForCondition(
+            final ITypeKeeper typeKeeper, final LocalTypeReasoner reasoner, final AstNode currentNode) {
+        final String conditionName = currentNode.getTokenValue();
+        if (conditionName == null) {
+            return Collections.emptyList();
+        }
+
+        final Condition condition = typeKeeper.getCondition(conditionName);
+        if (condition == null) {
+            return Collections.emptyList();
+        }
+
+        final Location location = condition.getLocation();
+        if (location == null) {
+            return Collections.emptyList();
+        }
+
+        return List.of(Lsp4jConversion.locationToLsp4j(location));
+    }
+
+    private List<org.eclipse.lsp4j.Location> implentationsForAtom(
+            final ITypeKeeper typeKeeper, final LocalTypeReasoner reasoner, final AstNode currentNode) {
+        final ExpressionResult result = reasoner.getNodeType(currentNode);
+        final AbstractType reasonedType = result.get(0, null);
+        if (reasonedType == null) {
+            return Collections.emptyList();
+        }
+
+        final AbstractType type;
+        if (reasonedType == SelfType.INSTANCE) {
+            final AstNode methodDefNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
+            final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(methodDefNode);
+            final TypeString typeString = methodDefHelper.getTypeString();
+            type = typeKeeper.getType(typeString);
+        } else {
+            type = reasonedType;
+        }
+
+        if (type == UndefinedType.INSTANCE) {
+            return Collections.emptyList();
+        }
+
+        final Location location = type.getLocation();
+        if (location == null) {
+            return Collections.emptyList();
+        }
+
+        return List.of(Lsp4jConversion.locationToLsp4j(location));
     }
 
     private List<org.eclipse.lsp4j.Location> implementationsForMethodInvocation(
@@ -75,7 +140,7 @@ public class ImplementationProvider {
         final AstNode previousSiblingNode = currentNode.getPreviousSibling();
         final ExpressionResult result = reasoner.getNodeType(previousSiblingNode);
 
-        final AbstractType unsetType = typeKeeper.getType(GlobalReference.of("sw:unset"));
+        final AbstractType unsetType = typeKeeper.getType(TypeString.of("sw:unset"));
         AbstractType type = result.get(0, unsetType);
         final List<org.eclipse.lsp4j.Location> locations = new ArrayList<>();
         if (type == UndefinedType.INSTANCE) {
@@ -90,12 +155,13 @@ public class ImplementationProvider {
             if (type == SelfType.INSTANCE) {
                 final AstNode methodDefNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
                 final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(methodDefNode);
-                final GlobalReference globalRef = methodDefHelper.getTypeGlobalReference();
-                type = typeKeeper.getType(globalRef);
+                final TypeString typeString = methodDefHelper.getTypeString();
+                type = typeKeeper.getType(typeString);
             }
             LOGGER.debug("Finding implementations for type:, {}, method: {}", type.getFullName(), methodName);
             type.getMethods(methodName).stream()
                 .map(Method::getLocation)
+                .filter(Objects::nonNull)
                 .map(Lsp4jConversion::locationToLsp4j)
                 .forEach(locations::add);
         }

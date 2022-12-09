@@ -14,8 +14,7 @@ public final class AstCompare {
     /**
      * Flags to influence the compare functionality.
      * Values:
-     *     {{IDENTIFIER_IGNORE_NAME}}: Ignore the name of the IDENTIFIER node.
-     *     {{ONLY_AST}}: Only compare AST, ignoring tokens such as '(' and ')'.
+     *     {@code IDENTIFIER_IGNORE_NAME}: Ignore the name of the IDENTIFIER node.
      */
     enum Flags {
         IGNORE_IDENTIFIER_NAME,

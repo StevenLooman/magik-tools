@@ -3,10 +3,12 @@ package nl.ramsolutions.sw.magik.debugadapter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.BreakpointEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.StepCompletedEvent;
@@ -121,10 +123,10 @@ class VariableManager {
 
     // region: Scopes
     /**
-     * Get the {{Scope}}s for frame ID.
+     * Get the {@link Scope}s for frame ID.
      * Currently only returns locals scope.
      * @param frameId Frame ID.
-     * @return {{Scope}}s for frame ID.
+     * @return {@link Scope}s for frame ID.
      */
     Scope[] getScopes(final int frameId) {
         Scope localsScope = this.getScope(frameId);
@@ -183,7 +185,7 @@ class VariableManager {
     }
 
     /**
-     * Add a new variable from a {{StackFrameLocalsResponse.Local}}.
+     * Add a new variable from a {@link StackFrameLocalsResponse.Local}.
      * @param frameId Frame ID.
      * @param local Local to convert.
      * @return New variable.
@@ -195,7 +197,7 @@ class VariableManager {
     }
 
     /**
-     * Add a new variable from another {{MagikVariable}}.
+     * Add a new variable from another {@link MagikVariable}.
      * @param variable Parent variable.
      * @param name Name of variable.
      * @param value Value of variable.
@@ -287,7 +289,11 @@ class VariableManager {
             magikVariables.addAll(subVariables);
         }
 
-        return magikVariables;
+        // Sort variables.
+        final Comparator<MagikVariable> byName = Comparator.comparing(MagikVariable::getName);
+        return magikVariables.stream()
+            .sorted(byName)
+            .collect(Collectors.toList());
     }
     // endregion
 
@@ -367,7 +373,7 @@ class VariableManager {
     }
 
     /**
-     * Handle a {{BreakpointEvent}}.
+     * Handle a {@link BreakpointEvent}.
      *
      * @param event Event.
      */
@@ -376,7 +382,7 @@ class VariableManager {
     }
 
     /**
-     * Handle a {{StepCompletedEvent}}.
+     * Handle a {@link StepCompletedEvent}.
      * @param event Event.
      */
     void handleStepCompletedEvent(final StepCompletedEvent event) {

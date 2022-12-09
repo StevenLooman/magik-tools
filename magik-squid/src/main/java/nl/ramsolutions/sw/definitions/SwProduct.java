@@ -37,8 +37,8 @@ public class SwProduct {
     }
 
     /**
-     * Get path to {{@code product.def}} file.
-     * @return Path to {{@code product.def}} file.
+     * Get path to {@code product.def} file.
+     * @return Path to {@code product.def} file.
      */
     @CheckForNull
     public Path getPath() {
@@ -46,32 +46,32 @@ public class SwProduct {
     }
 
     /**
-     * Get child {{@code SwProduct}}s of this product.
-     * @return Child {{@code SwProduct}}s of this product.
+     * Get child {@link SwProduct}s of this product.
+     * @return Child {@link SwProduct}s of this product.
      */
     public Set<SwProduct> getChildren() {
         return Collections.unmodifiableSet(this.children);
     }
 
     /**
-     * Add a {{@code SwProduct}} to this product.
-     * @param swProduct {{@code SwProduct}} to add.
+     * Add a {@link SwProduct} to this product.
+     * @param swProduct {@link SwProduct} to add.
      */
     public void addChild(final SwProduct swProduct) {
         this.children.add(swProduct);
     }
 
     /**
-     * Get {{@code SwModule}}s in this product.
-     * @return Collection of {{@code SwModule}}s in this product.
+     * Get {@link SwModule}s in this product.
+     * @return Collection of {@link SwModule}s in this product.
      */
     public Set<SwModule> getModules() {
         return Collections.unmodifiableSet(modules);
     }
 
     /**
-     * Add a {{@code SwModule}} to this product.
-     * @param swModule {{@code SwModule}} to add.
+     * Add a {@link SwModule} to this product.
+     * @param swModule {@link SwModule} to add.
      */
     public void addModule(final SwModule swModule) {
         this.modules.add(swModule);

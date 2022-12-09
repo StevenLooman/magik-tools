@@ -215,7 +215,7 @@ class BreakpointManager {
         if (methodNode == null) {
             method = "<not_in_method>";
         } else {
-            method = helper.getPakkageExemplarMethodName();
+            method = helper.getFullExemplarMethodName();
             methodLine = methodNode.getTokenLine();
             if (methodLine == line) {
                 line = 0;
@@ -259,7 +259,7 @@ class BreakpointManager {
      * Add multiple function breakpoints.
      *
      * @param functionBreakpoints Breakpoints to be set.
-     * @return List of {{MagikBreakpoint}}s.
+     * @return List of {@link MagikBreakpoint}s.
      * @throws ExecutionException -
      * @throws InterruptedException -
      * @throws IOException -
@@ -277,8 +277,8 @@ class BreakpointManager {
     /**
      * Add a function breakpoint.
      *
-     * @param functionBreakpoint {{FunctionBreakpoint}} to add.
-     * @return Created {{MagikBreakpoint}}.
+     * @param functionBreakpoint {@link FunctionBreakpoint} to add.
+     * @return Created {@link MagikBreakpoint}.
      * @throws IOException -
      * @throws ExecutionException -
      * @throws InterruptedException -
@@ -366,7 +366,7 @@ class BreakpointManager {
 
     // region: Event handling
     /**
-     * Handle a {{BreakpointEvent}}.
+     * Handle a {@link BreakpointEvent}.
      * @param breakpointEvent event.
      */
     void handleBreakpointEvent(final BreakpointEvent breakpointEvent) {

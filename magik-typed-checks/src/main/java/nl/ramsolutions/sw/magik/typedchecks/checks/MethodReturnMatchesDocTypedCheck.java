@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeParser;
@@ -45,13 +44,11 @@ public class MethodReturnMatchesDocTypedCheck extends MagikTypedCheck {
     }
 
     private ExpressionResult extractMethodDocResult(final AstNode node) {
-        final PackageNodeHelper packageHelper = new PackageNodeHelper(node);
-        final String currentPakkage = packageHelper.getCurrentPackage();
         final NewDocParser docParser = new NewDocParser(node);
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
         final TypeParser typeParser = new TypeParser(typeKeeper);
         final List<AbstractType> docReturnTypes = docParser.getReturnTypes().stream()
-                .map(typeStr -> typeParser.parseTypeString(typeStr, currentPakkage))
+                .map(typeStr -> typeParser.parseTypeString(typeStr))
                 .collect(Collectors.toList());
         return new ExpressionResult(docReturnTypes);
     }

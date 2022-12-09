@@ -4,7 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -28,10 +28,10 @@ public class FormattingProvider {
      *
      * @param magikFile Magik file.
      * @param options Formatting options
-     * @return {{TextEdit}}s.
+     * @return {@link TextEdit}s.
      * @throws IOException -
      */
-    public List<TextEdit> provideFormatting(final MagikTypedFile magikFile, final FormattingOptions options) {
+    public List<TextEdit> provideFormatting(final MagikFile magikFile, final FormattingOptions options) {
         final AstNode node = magikFile.getTopNode();
 
         try {
@@ -54,7 +54,7 @@ public class FormattingProvider {
      * @param magikFile Magik file.
      * @return False if AST contains a SYNTAX_ERROR, true otherwise.
      */
-    public boolean canFormat(MagikTypedFile magikFile) {
+    public boolean canFormat(final MagikFile magikFile) {
         final AstNode node = magikFile.getTopNode();
         return node.getFirstDescendant(MagikGrammar.SYNTAX_ERROR) == null;
     }

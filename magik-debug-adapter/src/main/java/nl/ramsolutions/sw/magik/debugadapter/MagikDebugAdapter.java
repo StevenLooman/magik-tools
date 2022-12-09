@@ -1,12 +1,16 @@
 package nl.ramsolutions.sw.magik.debugadapter;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.debugadapter.BreakpointManager.MagikBreakpoint;
 import nl.ramsolutions.sw.magik.debugadapter.VariableManager.MagikVariable;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapEvent;
@@ -20,6 +24,7 @@ import nl.ramsolutions.sw.magik.debugadapter.slap.events.ThreadEndedEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.ThreadStartedEvent;
 import org.eclipse.lsp4j.debug.Breakpoint;
 import org.eclipse.lsp4j.debug.Capabilities;
+import org.eclipse.lsp4j.debug.ConfigurationDoneArguments;
 import org.eclipse.lsp4j.debug.ContinueArguments;
 import org.eclipse.lsp4j.debug.ContinueResponse;
 import org.eclipse.lsp4j.debug.DisconnectArguments;
@@ -37,10 +42,13 @@ import org.eclipse.lsp4j.debug.ScopesResponse;
 import org.eclipse.lsp4j.debug.SetBreakpointsArguments;
 import org.eclipse.lsp4j.debug.SetBreakpointsResponse;
 import org.eclipse.lsp4j.debug.SetExceptionBreakpointsArguments;
+import org.eclipse.lsp4j.debug.SetExceptionBreakpointsResponse;
 import org.eclipse.lsp4j.debug.SetFunctionBreakpointsArguments;
 import org.eclipse.lsp4j.debug.SetFunctionBreakpointsResponse;
 import org.eclipse.lsp4j.debug.Source;
+import org.eclipse.lsp4j.debug.SourceArguments;
 import org.eclipse.lsp4j.debug.SourceBreakpoint;
+import org.eclipse.lsp4j.debug.SourceResponse;
 import org.eclipse.lsp4j.debug.StackFrame;
 import org.eclipse.lsp4j.debug.StackTraceArguments;
 import org.eclipse.lsp4j.debug.StackTraceResponse;
@@ -71,6 +79,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     private ThreadManager threadManager;
     private VariableManager variableManager;
     private BreakpointManager breakpointManager;
+    private PathMapper pathMapper;
 
     /**
      * Connect to the debug client.
@@ -90,28 +99,36 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    public CompletableFuture<Void> configurationDone(final ConfigurationDoneArguments args) {
+        return new CompletableFuture<>();
+    }
+
+    @Override
     public CompletableFuture<Void> attach(final Map<String, Object> args) {
-        final Map<String, Object> connect = (Map<String, Object>) args.get("connect");
-        if (connect == null) {
+        final String host = this.getHost(args);
+        final Integer port = this.getPort(args);
+        if (host == null || port == null) {
+            // Inform user.
             final OutputEventArguments outputArgs = new OutputEventArguments();
             outputArgs.setCategory(OutputEventArgumentsCategory.STDERR);
-            outputArgs.setOutput("No \"connect\" object in configuration, aborting.");
+            outputArgs.setOutput("No \"host\" and/or \"port\" found in configuration, aborting.");
             this.debugClient.output(outputArgs);
 
-            final Throwable exception = new Exception("No \"connect\" object in configuration, aborting.");
+            // Crash.
+            final Throwable exception = new Exception("No \"host\" and/or \"port\" found in configuration, aborting.");
             final CompletableFuture<Void> future = new CompletableFuture<>();
             future.completeExceptionally(exception);
             return future;
         }
 
-        final String host = (String) connect.get("host");
-        final int port = (int) Math.floor((Double) connect.get("port"));
+        final Map<Path, Path> pathMapping = this.getPathMapping(args);
+        this.pathMapper = new PathMapper(pathMapping);
 
         return CompletableFuture.runAsync(() -> {
             try {
                 // Connect to session.
                 this.slapProtocol = new SlapProtocol(host, port, this);
+                this.slapProtocol.connect();
 
                 // Inform client we're initialized.
                 this.debugClient.initialized();
@@ -120,9 +137,61 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
             }
 
             this.breakpointManager = new BreakpointManager(this.slapProtocol, this.debugClient);
-            this.threadManager = new ThreadManager(this.slapProtocol, this.debugClient);
+            this.threadManager = new ThreadManager(this.slapProtocol, this.debugClient, this.pathMapper);
             this.variableManager = new VariableManager(this.slapProtocol);
         });
+    }
+
+    @SuppressWarnings("unchecked")
+    private String getHost(final Map<String, Object> args) {
+        try {
+            final Map<String, Object> connect = (Map<String, Object>) args.get("connect");
+            return (String) connect.get("host");
+        } catch (ClassCastException ex) {
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Integer getPort(final Map<String, Object> args) {
+        try {
+            final Map<String, Object> connect = (Map<String, Object>) args.get("connect");
+            final Object portObj = connect.get("port");
+            if (portObj == null) {
+                return null;
+            }
+
+            final Double portDouble = (Double) portObj;
+            return (int) Math.floor(portDouble);
+        } catch (ClassCastException ex) {
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<Path, Path> getPathMapping(final Map<String, Object> args) {
+        try {
+            final Map<String, Object> connect = (Map<String, Object>) args.get("connect");
+            if (!connect.containsKey("path_mapping")) {
+                return Collections.emptyMap();
+            }
+
+            final ArrayList<Map<String, String>> pathMappings =
+                (ArrayList<Map<String, String>>) connect.get("path_mapping");
+            return pathMappings.stream()
+                .map(mapping -> {
+                    final String fromStr = mapping.get("from");
+                    final String toStr = mapping.get("to");
+                    final Path from = Path.of(fromStr);
+                    final Path to = Path.of(toStr);
+                    return Map.entry(from, to);
+                })
+                .collect(Collectors.toUnmodifiableMap(
+                    entry -> entry.getKey(),
+                    entry -> entry.getValue()));
+        } catch (ClassCastException ex) {
+            return Collections.emptyMap();
+        }
     }
 
     @Override
@@ -374,13 +443,21 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     }
 
     @Override
-    public CompletableFuture<Void> setExceptionBreakpoints(final SetExceptionBreakpointsArguments args) {
+    public CompletableFuture<SetExceptionBreakpointsResponse>
+            setExceptionBreakpoints(final SetExceptionBreakpointsArguments args) {
         LOGGER.trace("setExceptionBreakpoints");
-        return CompletableFuture.runAsync(() -> {
+        return CompletableFuture.supplyAsync(() -> {
             final String[] filters = args.getFilters();
             try {
                 // Set (or update) condition breakpoint.
-                this.breakpointManager.setConditionBreakpoint(filters);
+                final MagikBreakpoint magikBreakpoint = this.breakpointManager.setConditionBreakpoint(filters);
+
+                final SetExceptionBreakpointsResponse response = new SetExceptionBreakpointsResponse();
+                if (magikBreakpoint != null) {
+                    final Breakpoint[] breakpoints = Lsp4jConversion.toLsp4j(null, List.of(magikBreakpoint));
+                    response.setBreakpoints(breakpoints);
+                }
+                return response;
             } catch (InterruptedException exception) {
                 java.lang.Thread.currentThread().interrupt();
                 throw new CompletionException(exception.getMessage(), exception);
@@ -412,6 +489,34 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
             } catch (IOException | ExecutionException exception) {
                 throw new CompletionException(exception.getMessage(), exception);
             }
+        });
+    }
+
+    @Override
+    public CompletableFuture<SourceResponse> source(final SourceArguments args) {
+        LOGGER.trace(
+            "source, source: {}",
+            args.getSource());
+        return CompletableFuture.supplyAsync(() -> {
+            final Source source = args.getSource();
+            final String pathStr = source.getPath();
+            final Path path = Path.of(pathStr);
+            final Path mappedPath = this.pathMapper.applyMapping(path);
+
+            final SourceResponse sourceResponse = new SourceResponse();
+            if (Files.exists(mappedPath)) {
+                try {
+                    final String content = Files.readString(mappedPath);
+                    sourceResponse.setContent(content);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+
+                    sourceResponse.setContent("Error reading file: " + pathStr);
+                }
+            } else {
+                sourceResponse.setContent("File not found: " + pathStr);
+            }
+            return sourceResponse;
         });
     }
 

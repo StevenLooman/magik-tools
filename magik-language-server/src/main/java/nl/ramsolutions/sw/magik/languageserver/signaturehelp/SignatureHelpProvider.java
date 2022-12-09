@@ -12,8 +12,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
@@ -43,10 +43,10 @@ public class SignatureHelpProvider {
     }
 
     /**
-     * Provide a {{SignatureHelp}} for {{position}} in {{path}}.
+     * Provide a {@link SignatureHelp} for {@code position} in {@code path}.
      * @param magikFile Magik file.
      * @param position Position in file.
-     * @return {{SignatureHelp}}.
+     * @return {@link SignatureHelp}.
      */
     public SignatureHelp provideSignatureHelp(final MagikTypedFile magikFile, final Position position) {
         // Get intended method and called type.
@@ -68,7 +68,7 @@ public class SignatureHelpProvider {
         final AstNode previousSiblingNode = currentNode.getPreviousSibling();
         final ExpressionResult result = reasoner.getNodeType(previousSiblingNode);
         final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-        final AbstractType unsetType = typeKeeper.getType(GlobalReference.of("sw:unset"));
+        final AbstractType unsetType = typeKeeper.getType(TypeString.of("sw:unset"));
         AbstractType type = result.get(0, unsetType);
 
         LOGGER.debug("Provide signature for type: {}, method: {}", type.getFullName(), methodName);
@@ -85,8 +85,8 @@ public class SignatureHelpProvider {
             if (type == SelfType.INSTANCE) {
                 final AstNode methodDefNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
                 final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(methodDefNode);
-                final GlobalReference globalRef = methodDefHelper.getTypeGlobalReference();
-                type = typeKeeper.getType(globalRef);
+                final TypeString typeString = methodDefHelper.getTypeString();
+                type = typeKeeper.getType(typeString);
             }
             // Provide methods for this type with the name.
             sigInfos = type.getMethods().stream()

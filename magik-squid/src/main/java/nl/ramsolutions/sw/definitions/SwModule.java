@@ -21,7 +21,7 @@ public class SwModule {
     /**
      * Constructor.
      * @param name Name of module.
-     * @param path Path to {{@code module.def}} file.
+     * @param path Path to {@code module.def} file.
      */
     public SwModule(final String name, final @Nullable Path path) {
         this.name = name;

@@ -16,7 +16,7 @@ public interface ISlapEvent {
     int OFFSET_EVENT_TYPE = 8;
 
     /**
-     * Get the {{EventType}} from this event.
+     * Get the {@link EventType} from this event.
      * @return EventType.
      */
     EventType getEventType();

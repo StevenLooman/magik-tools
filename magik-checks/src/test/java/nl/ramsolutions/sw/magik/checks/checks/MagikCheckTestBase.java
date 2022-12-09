@@ -20,7 +20,7 @@ class MagikCheckTestBase {
     /**
      * VSCode runs from module directory, mvn runs from project directory.
      *
-     * @return Proper {{Path}} to file.
+     * @return Proper {@link Path} to file.
      */
     protected Path getPath(final Path relativePath) {
         final Path path = Path.of(".").toAbsolutePath().getParent();

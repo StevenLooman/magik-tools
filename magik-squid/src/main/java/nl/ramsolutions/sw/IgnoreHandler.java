@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.languageserver;
+package nl.ramsolutions.sw;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -78,7 +78,7 @@ public final class IgnoreHandler {
     }
 
     /**
-     * Test if {{path}} is ignored.
+     * Test if {@code path} is ignored.
      *
      * <p>
      * A file is either ignored when:

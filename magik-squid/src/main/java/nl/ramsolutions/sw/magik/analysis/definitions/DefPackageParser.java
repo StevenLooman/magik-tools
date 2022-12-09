@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ExpressionNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
@@ -15,6 +14,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 public class DefPackageParser {
 
     private static final String DEF_PACKAGE = "def_package";
+    private static final String SW_DEF_PACKAGE = "sw:def_package";
 
     private final AstNode node;
 
@@ -41,7 +41,8 @@ public class DefPackageParser {
         }
 
         final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
-        if (!helper.isProcedureInvocationOf(DEF_PACKAGE)) {
+        if (!helper.isProcedureInvocationOf(DEF_PACKAGE)
+            && !helper.isProcedureInvocationOf(SW_DEF_PACKAGE)) {
             return false;
         }
 
@@ -69,9 +70,6 @@ public class DefPackageParser {
         // Figure statement node.
         final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
 
-        // Figure package.
-        final String pakkage = this.getCurrentPakkage();
-
         // Figure name.
         final String name = argument0Node.getTokenValue().substring(1);
 
@@ -95,13 +93,8 @@ public class DefPackageParser {
             uses.add("sw");
         }
 
-        final PackageDefinition packageDefinition = new PackageDefinition(statementNode, pakkage, name, uses);
+        final PackageDefinition packageDefinition = new PackageDefinition(statementNode, name, uses);
         return List.of(packageDefinition);
-    }
-
-    private String getCurrentPakkage() {
-        final PackageNodeHelper helper = new PackageNodeHelper(this.node);
-        return helper.getCurrentPackage();
     }
 
 }

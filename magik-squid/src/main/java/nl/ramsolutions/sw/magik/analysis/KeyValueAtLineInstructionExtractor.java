@@ -60,8 +60,8 @@ public class KeyValueAtLineInstructionExtractor {
     }
 
     /**
-     * Get the instructions at line of {{AstNode}}.
-     * @param searchNode Line of {{AstNode}} to get instructions from.
+     * Get the instructions at line of {@link AstNode}.
+     * @param searchNode Line of {@link AstNode} to get instructions from.
      * @return Map with key/value instructions at node.
      */
     public Map<String, String> getInstructions(final AstNode searchNode) {

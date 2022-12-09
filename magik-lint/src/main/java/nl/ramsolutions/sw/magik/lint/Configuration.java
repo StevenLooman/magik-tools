@@ -36,8 +36,8 @@ public class Configuration {
     }
 
     /**
-     * Constructor which reads properties from {{path}}.
-     * @param path {{Path}} to read properties from.
+     * Constructor which reads properties from {@code path}.
+     * @param path {@link Path} to read properties from.
      */
     public Configuration(final Path path) {
         LOGGER.debug("Reading configuration from: {}", path.toAbsolutePath());

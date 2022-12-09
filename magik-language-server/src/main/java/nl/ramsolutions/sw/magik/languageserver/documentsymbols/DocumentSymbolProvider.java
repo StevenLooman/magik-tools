@@ -17,7 +17,6 @@ import nl.ramsolutions.sw.magik.analysis.definitions.SlottedExemplarDefinition;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.SymbolKind;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
@@ -35,11 +34,13 @@ public class DocumentSymbolProvider {
     }
 
     /**
-     * Provide {{DocumentSymbol}}s.
+     * Provide {@link DocumentSymbol}s.
      * @param magikFile Magik file to provide symbols for.
-     * @return {{DocumentSymbol}}s.
+     * @return {@link DocumentSymbol}s.
      */
-    public List<Either<SymbolInformation, DocumentSymbol>> provideDocumentSymbol(final MagikTypedFile magikFile) {
+    @SuppressWarnings("deprecation")
+    public List<Either<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>> provideDocumentSymbol(
+            final MagikTypedFile magikFile) {
         final DefinitionReader definitionReader = new DefinitionReader();
         final AstNode topNode = magikFile.getTopNode();
         definitionReader.walkAst(topNode);
@@ -47,7 +48,7 @@ public class DocumentSymbolProvider {
         // Convert definitions to DocumentSymbols.
         return definitionReader.getDefinitions().stream()
             .map(this::convertDefinition)
-            .map(Either::<SymbolInformation, DocumentSymbol>forRight)
+            .map(Either::<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>forRight)
             .collect(Collectors.toList());
     }
 

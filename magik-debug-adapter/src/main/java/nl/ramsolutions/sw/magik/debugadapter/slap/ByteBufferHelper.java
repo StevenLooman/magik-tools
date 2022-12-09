@@ -8,11 +8,11 @@ import java.nio.charset.StandardCharsets;
  * Byte buffer utils.
  */
 @SuppressWarnings("checkstyle:MagicNumber")
-public final class ByteBufferUtils {
+public final class ByteBufferHelper {
 
     private static final int ELEMENTS_PER_LINE = 16;
 
-    private ByteBufferUtils() {
+    private ByteBufferHelper() {
     }
 
     /**
@@ -66,7 +66,19 @@ public final class ByteBufferUtils {
         final ByteBuffer roBuffer = buffer.asReadOnlyBuffer();
         roBuffer.order(buffer.order());
         roBuffer.position(position);
-        return ByteBufferUtils.readUInt32(roBuffer);
+        return ByteBufferHelper.readUInt32(roBuffer);
+    }
+
+    /**
+     * Peek a uint32 value from the buffers current position. Position is not updated.
+     * @param buffer ByteBuffer to read from.
+     * @return Uint32 value.
+     */
+    public static long peekUInt32(final ByteBuffer buffer) {
+        final int position = buffer.position();
+        final long val = ByteBufferHelper.readUInt32(buffer);
+        buffer.position(position);
+        return val;
     }
 
     /**
@@ -95,7 +107,7 @@ public final class ByteBufferUtils {
      * @return String value.
      */
     public static String readString(final ByteBuffer buffer) {
-        final int length = (int) ByteBufferUtils.readUInt32(buffer);
+        final int length = (int) ByteBufferHelper.readUInt32(buffer);
         final byte[] encoded = new byte[length];
         buffer.get(encoded);
         return new String(encoded, StandardCharsets.UTF_8);
@@ -111,7 +123,7 @@ public final class ByteBufferUtils {
         final ByteBuffer roBuffer = buffer.asReadOnlyBuffer();
         roBuffer.order(buffer.order());
         roBuffer.position(position);
-        return ByteBufferUtils.readString(roBuffer);
+        return ByteBufferHelper.readString(roBuffer);
     }
 
     /**
@@ -121,7 +133,7 @@ public final class ByteBufferUtils {
      */
     public static void writeString(final ByteBuffer buffer, final String value) {
         final byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-        ByteBufferUtils.writeUInt32(buffer, bytes.length);
+        ByteBufferHelper.writeUInt32(buffer, bytes.length);
         buffer.put(bytes);
     }
 

@@ -11,10 +11,12 @@ import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.SetTraceParams;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
+import org.eclipse.lsp4j.services.NotebookDocumentService;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 import org.slf4j.Logger;
@@ -31,6 +33,7 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     private final List<WorkspaceFolder> workspaceFolders = new ArrayList<>();
     private final MagikTextDocumentService magikTextDocumentService;
     private final MagikWorkspaceService magikWorkspaceService;
+    private final MagikNotebookDocumentService magikNotebookDocumentService;
     private LanguageClient languageClient;
     private MagikSettings settings = MagikSettings.DEFAULT;
 
@@ -40,6 +43,7 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     public MagikLanguageServer() {
         this.magikTextDocumentService = new MagikTextDocumentService(this, this.typeKeeper);
         this.magikWorkspaceService = new MagikWorkspaceService(this, this.typeKeeper);
+        this.magikNotebookDocumentService = new MagikNotebookDocumentService(this);
     }
 
     @SuppressWarnings("deprecation")
@@ -72,9 +76,18 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
             final ServerCapabilities capabilities = new ServerCapabilities();
             this.magikTextDocumentService.setCapabilities(capabilities);
             this.magikWorkspaceService.setCapabilities(capabilities);
+            this.magikNotebookDocumentService.setCapabilities(capabilities);
 
             return new InitializeResult(capabilities);
         });
+    }
+
+    @Override
+    public void setTrace(final SetTraceParams params) {
+        LOGGER.trace(
+            "trace, value: {}",
+            params.getValue());
+        // Do nothing.
     }
 
     @Override
@@ -85,7 +98,12 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     @Override
     public CompletableFuture<Object> shutdown() {
         LOGGER.trace("shutdown");
-        return CompletableFuture.supplyAsync(() -> null);
+
+        return CompletableFuture.supplyAsync(() -> {
+            this.magikWorkspaceService.shutdown();
+
+            return null;
+        });
     }
 
     @Override
@@ -104,12 +122,17 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     }
 
     @Override
+    public NotebookDocumentService getNotebookDocumentService() {
+        return this.magikNotebookDocumentService;
+    }
+
+    @Override
     public void connect(final LanguageClient newLanguageClient) {
         this.languageClient = newLanguageClient;
     }
 
     /**
-     * Get the {{LanguageClient}}.
+     * Get the {@link LanguageClient}.
      * @return Language client.
      */
     public LanguageClient getLanguageClient() {
@@ -117,8 +140,8 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     }
 
     /**
-     * Get the {{WorkspaceFolder}}s.
-     * @return {{WorkspaceFolder}}s.
+     * Get the {@link WorkspaceFolder}s.
+     * @return {@link WorkspaceFolder}s.
      */
     public List<WorkspaceFolder> getWorkspaceFolders() {
         return Collections.unmodifiableList(this.workspaceFolders);

@@ -19,14 +19,14 @@ import org.eclipse.lsp4j.jsonrpc.Launcher;
 public final class Main {
 
     private static final Options OPTIONS;
-    private static final String OPTION_DEBUG = "debug";
+    private static final Option OPTION_DEBUG = Option.builder()
+        .longOpt("debug")
+        .desc("Show debug messages")
+        .build();
 
     static {
         OPTIONS = new Options();
-        OPTIONS.addOption(Option.builder()
-            .longOpt(OPTION_DEBUG)
-            .desc("Show debug messages")
-            .build());
+        OPTIONS.addOption(OPTION_DEBUG);
     }
 
     private Main() {
@@ -71,7 +71,7 @@ public final class Main {
      * @throws ParseException -
      */
     public static void main(final String[] args) throws IOException, ParseException {
-        final CommandLine commandLine = parseCommandline(args);
+        final CommandLine commandLine = Main.parseCommandline(args);
         if (commandLine.hasOption(OPTION_DEBUG)) {
             Main.initDebugLogger();
         } else {

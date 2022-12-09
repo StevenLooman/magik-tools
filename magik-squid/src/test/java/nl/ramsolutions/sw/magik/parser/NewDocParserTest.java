@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class NewDocParserTest {
 
-    private AstNode parseMagik(String code) {
+    private AstNode parseMagik(final String code) {
         final MagikParser parser = new MagikParser();
         return parser.parseSafe(code);
     }
@@ -31,13 +32,12 @@ class NewDocParserTest {
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
         final NewDocParser docParser = new NewDocParser(methodNode);
-        final Map<String, String> parameterTypes = docParser.getParameterTypes();
-        assertThat(parameterTypes)
-            .containsOnly(
-                Map.entry("param1", "sw:symbol"),
-                Map.entry("param2", "integer"),
-                Map.entry("param3", "integer"),
-                Map.entry("param4", "integer|float"));
+        final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
+        assertThat(parameterTypes).containsOnly(
+            Map.entry("param1", TypeString.of("sw:symbol")),
+            Map.entry("param2", TypeString.of("integer")),
+            Map.entry("param3", TypeString.of("integer")),
+            Map.entry("param4", TypeString.of("integer|float")));
     }
 
     @Test
@@ -53,13 +53,12 @@ class NewDocParserTest {
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
         final NewDocParser docParser = new NewDocParser(methodNode);
-        final Map<String, String> parameterTypes = docParser.getParameterTypes();
-        assertThat(parameterTypes)
-            .containsOnly(
-                Map.entry("param1", ""),
-                Map.entry("param2", "integer"),
-                Map.entry("param3", "integer"),
-                Map.entry("param4", "integer|float"));
+        final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
+        assertThat(parameterTypes).containsOnly(
+            Map.entry("param1", TypeString.UNDEFINED),
+            Map.entry("param2", TypeString.of("integer")),
+            Map.entry("param3", TypeString.of("integer")),
+            Map.entry("param4", TypeString.of("integer|float")));
     }
 
     @Test
@@ -71,9 +70,9 @@ class NewDocParserTest {
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
         final NewDocParser docParser = new NewDocParser(methodNode);
-        final List<String> returnTypes = docParser.getReturnTypes();
+        final List<TypeString> returnTypes = docParser.getReturnTypes();
         assertThat(returnTypes)
-            .containsExactly("sw:integer");
+            .containsExactly(TypeString.of("sw:integer"));
     }
 
     @Test
@@ -88,9 +87,12 @@ class NewDocParserTest {
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
         final NewDocParser docParser = new NewDocParser(methodNode);
-        final List<String> returnTypes = docParser.getReturnTypes();
-        assertThat(returnTypes)
-            .containsExactly("", "sw:integer", "sw:integer", "sw:integer|sw:float");
+        final List<TypeString> returnTypes = docParser.getReturnTypes();
+        assertThat(returnTypes).containsExactly(
+            TypeString.UNDEFINED,
+            TypeString.of("sw:integer"),
+            TypeString.of("sw:integer"),
+            TypeString.of("sw:integer|sw:float"));
     }
 
     @Test
@@ -102,9 +104,9 @@ class NewDocParserTest {
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
         final NewDocParser docParser = new NewDocParser(methodNode);
-        final List<String> returnTypes = docParser.getReturnTypes();
+        final List<TypeString> returnTypes = docParser.getReturnTypes();
         assertThat(returnTypes)
-            .containsExactly("_self");
+            .containsExactly(TypeString.SELF);
     }
 
     @Test
@@ -120,15 +122,15 @@ class NewDocParserTest {
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
         final NewDocParser methodDocParser = new NewDocParser(methodNode);
-        final List<String> methodReturnTypes = methodDocParser.getReturnTypes();
+        final List<TypeString> methodReturnTypes = methodDocParser.getReturnTypes();
         assertThat(methodReturnTypes)
-            .containsExactly("sw:integer");
+            .containsExactly(TypeString.of("sw:integer"));
 
         final AstNode procNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
         final NewDocParser procDocParser = new NewDocParser(procNode);
-        final List<String> procReturnTypes = procDocParser.getReturnTypes();
+        final List<TypeString> procReturnTypes = procDocParser.getReturnTypes();
         assertThat(procReturnTypes)
-            .containsExactly("sw:float");
+            .containsExactly(TypeString.of("sw:float"));
     }
 
     @Test
@@ -143,11 +145,10 @@ class NewDocParserTest {
         final AstNode topNode = this.parseMagik(code);
         final AstNode definitionNode = topNode.getFirstChild(MagikGrammar.STATEMENT);
         final NewDocParser docParser = new NewDocParser(definitionNode);
-        final Map<String, String> slotTypes = docParser.getSlotTypes();
-        assertThat(slotTypes)
-            .containsOnly(
-                Map.entry("slot1", ""),
-                Map.entry("slot2", "integer"));
+        final Map<String, TypeString> slotTypes = docParser.getSlotTypes();
+        assertThat(slotTypes).containsOnly(
+            Map.entry("slot1", TypeString.UNDEFINED),
+            Map.entry("slot2", TypeString.of("integer")));
     }
 
     @Test
@@ -167,6 +168,20 @@ class NewDocParserTest {
         final AstNode parameterNode = (AstNode) parameterNodes.get(0);
         assertThat(parameterNode.getTokenLine())
             .isEqualTo(2);
+    }
+
+    @Test
+    void testReturnParameterReference() throws IOException {
+        final String code = ""
+            + "_method a.b(p1)\n"
+            + "    ## @return {_parameter(p1)} First parameter.\n"
+            + "_endmethod";
+        final AstNode topNode = this.parseMagik(code);
+        final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+        final NewDocParser docParser = new NewDocParser(methodNode);
+        final List<TypeString> returnTypes = docParser.getReturnTypes();
+        assertThat(returnTypes)
+            .containsExactly(TypeString.of("_parameter(p1)"));
     }
 
 }

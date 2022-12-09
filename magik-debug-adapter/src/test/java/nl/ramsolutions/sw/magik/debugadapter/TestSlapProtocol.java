@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
+import nl.ramsolutions.sw.magik.debugadapter.slap.SlapException;
 import nl.ramsolutions.sw.magik.debugadapter.slap.StepType;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.BreakpointModifyResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.BreakpointSetResponse;
@@ -19,6 +20,11 @@ public class TestSlapProtocol implements ISlapProtocol {
     private final List<Long> breakpoints = new ArrayList<>();
 
     public TestSlapProtocol() {
+    }
+
+    @Override
+    public void connect() throws IOException, SlapException {
+        // Does nothing.
     }
 
     @Override

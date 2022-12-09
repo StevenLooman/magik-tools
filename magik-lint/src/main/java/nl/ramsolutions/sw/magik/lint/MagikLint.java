@@ -12,7 +12,9 @@ import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,11 +24,14 @@ import javax.annotation.Nullable;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.Location;
+import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
+import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.lint.output.Reporter;
+import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.check.Rule;
@@ -38,6 +43,11 @@ import org.sonar.check.RuleProperty;
 public class MagikLint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikLint.class);
+
+    private static final CommentInstructionReader.InstructionType MLINT_INSTRUCTION =
+        CommentInstructionReader.InstructionType.createInstructionType("mlint");
+    private static final CommentInstructionReader.InstructionType MLINT_SCOPE_INSTRUCTION =
+        CommentInstructionReader.InstructionType.createScopeInstructionType("mlint");
 
     private final Configuration config;
     private final Reporter reporter;
@@ -128,21 +138,18 @@ public class MagikLint {
      * @return true if issue is disabled at line.
      */
     private boolean isMagikIssueDisabled(
-            final MagikIssue magikIssue, final LintInstructionsHandler instructionsHandler) {
+            final MagikFile magikFile,
+            final MagikIssue magikIssue,
+            final CommentInstructionReader instructionReader) {
         final MagikCheckHolder holder = magikIssue.check().getHolder();
-        if (holder == null) {
-            throw new IllegalStateException();
-        }
+        Objects.requireNonNull(holder);
 
         final Integer line = magikIssue.startLine();
-        final Integer column = magikIssue.startColumn();
-        if (line == null || column == null) {
-            return false;
-        }
         final String checkKey = holder.getCheckKeyKebabCase();
 
-        final Map<String, String> scopeInstructions = instructionsHandler.getInstructionsInScope(line, column);
-        final Map<String, String> lineInstructions = instructionsHandler.getInstructionsAtLine(line);
+        final Map<String, String> scopeInstructions =
+            MagikLint.getScopeInstructions(magikFile, instructionReader, line);
+        final Map<String, String> lineInstructions = MagikLint.getLineInstructions(instructionReader, line);
         final String[] scopeDisableds = scopeInstructions.getOrDefault("disable", "").split(",");
         final String[] lineDisableds = lineInstructions.getOrDefault("disable", "").split(",");
         return List.of(scopeDisableds).contains(checkKey)
@@ -150,15 +157,16 @@ public class MagikLint {
     }
 
     /**
-     * Run {{MagikCheckHolder}}s on {{MagikFile}}.
+     * Run {@link MagikCheckHolder}s on {@link MagikFile}.
      * @param magikFile File to run on.
-     * @param holders {{MagikCheckHolder}}s to run.
-     * @return List of {{MagikIssue}}s for the given file.
+     * @param holders {@link MagikCheckHolder}s to run.
+     * @return List of {@link MagikIssue}s for the given file.
      */
     private List<MagikIssue> runChecksOnFile(final MagikFile magikFile, final Iterable<MagikCheckHolder> holders) {
         LOGGER.trace("Thread: {}, checking file: {}", Thread.currentThread().getName(), magikFile);
 
-        final LintInstructionsHandler instructionsHandler = new LintInstructionsHandler(magikFile);
+        final CommentInstructionReader instructionReader = new CommentInstructionReader(
+            magikFile, Set.of(MLINT_INSTRUCTION, MLINT_SCOPE_INSTRUCTION));
         final List<MagikIssue> magikIssues = new ArrayList<>();
 
         // run checks on files
@@ -169,7 +177,7 @@ public class MagikLint {
 
             try {
                 final List<MagikIssue> issues = this.runCheckOnFile(magikFile, holder).stream()
-                    .filter(magikIssue -> !this.isMagikIssueDisabled(magikIssue, instructionsHandler))
+                    .filter(magikIssue -> !this.isMagikIssueDisabled(magikFile, magikIssue, instructionReader))
                     .collect(Collectors.toList());
                 magikIssues.addAll(issues);
             } catch (ReflectiveOperationException exception) {
@@ -181,7 +189,7 @@ public class MagikLint {
     }
 
     /**
-     * Run the linter on {{paths}}.
+     * Run the linter on {@code paths}.
      *
      * @throws IOException -
      * @throws ReflectiveOperationException -
@@ -239,7 +247,7 @@ public class MagikLint {
     }
 
     /**
-     * Run the linter on {{magikFile}}.
+     * Run the linter on {@code magikFile}.
      * @param magikFile File to run on.
      * @throws ReflectiveOperationException -
      */
@@ -256,7 +264,7 @@ public class MagikLint {
      * Get all checks, enabled in the given configuration.
      *
      * @param config Configuration to use
-     * @return Collection of {{MagikCheckHolder}}s.
+     * @return Collection of {@link MagikCheckHolder}s.
      */
     @SuppressWarnings("unchecked")
     public static List<MagikCheckHolder> getAllChecks(final Configuration config) {
@@ -309,6 +317,63 @@ public class MagikLint {
             holders.add(holder);
         }
         return holders;
+    }
+
+    /**
+     * Get scope instructions at line.
+     * @param magikFile Magik file.
+     * @param instructionReader Instruction reader to use.
+     * @param line Line of scope.
+     * @return Instructions in scope and ancestor scopes.
+     */
+    public static Map<String, String> getScopeInstructions(
+            final MagikFile magikFile,
+            final CommentInstructionReader instructionReader,
+            final int line) {
+        final Map<String, String> instructions = new HashMap<>();
+        final GlobalScope globalScope = magikFile.getGlobalScope();
+        if (globalScope == null) {
+            return instructions;
+        }
+
+        // Ensure we can find a Scope.
+        final String[] sourceLines = magikFile.getSourceLines();
+        final int column = sourceLines[line - 1].length() - 1;
+        final Scope fromScope = globalScope.getScopeForLineColumn(line, column);
+        if (fromScope == null) {
+            return instructions;
+        }
+
+        // Iterate over all ancestor scopes, see if the check is disabled in any scope.
+        final List<Scope> scopes = fromScope.getSelfAndAncestorScopes();
+        // Reverse such that if a narrower scope overrides a broader scope instruction.
+        Collections.reverse(scopes);
+        for (final Scope scope : scopes) {
+            final Set<String> scopeInstructions =
+                instructionReader.getScopeInstructions(scope, MLINT_SCOPE_INSTRUCTION);
+            final Map<String, String> parsedScopeInstructions = scopeInstructions.stream()
+                .map(str -> CommentInstructionReader.parseInstructions(str))
+                .reduce(
+                    instructions,
+                    (acc, elem) -> {
+                        acc.putAll(elem);
+                        return acc;
+                    });
+            instructions.putAll(parsedScopeInstructions);
+        }
+
+        return instructions;
+    }
+
+    private static Map<String, String> getLineInstructions(
+            final CommentInstructionReader instructionReader,
+            final int line) {
+        final String str = instructionReader.getInstructionsAtLine(line, MLINT_INSTRUCTION);
+        if (str == null) {
+            return Collections.emptyMap();
+        }
+
+        return CommentInstructionReader.parseInstructions(str);
     }
 
 }

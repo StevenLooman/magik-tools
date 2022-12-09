@@ -8,11 +8,12 @@ import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
 import nl.ramsolutions.sw.magik.languageserver.rename.RenameProvider;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.PrepareRenameDefaultBehavior;
 import org.eclipse.lsp4j.PrepareRenameResult;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.lsp4j.jsonrpc.messages.Either3;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("checkstyle:MagicNumber")
 class RenameProviderTest {
 
-    private Either<Range, PrepareRenameResult> getPrepareRename(String code, final Position position) {
+    private Either3<Range, PrepareRenameResult, PrepareRenameDefaultBehavior> getPrepareRename(
+            String code, final Position position) {
         final URI uri = URI.create("tests://unittest");
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final MagikTypedFile magikFile = new MagikTypedFile(uri, code, typeKeeper);
@@ -48,10 +50,11 @@ class RenameProviderTest {
             + "_endblock\n";
         final Position position = new Position(1, 12);  // On `var`.
 
-        final Either<Range, PrepareRenameResult> either = this.getPrepareRename(code, position);
+        final Either3<Range, PrepareRenameResult, PrepareRenameDefaultBehavior> either =
+            this.getPrepareRename(code, position);
         assertThat(either).isNotNull();
 
-        final PrepareRenameResult prepareRenameResult = either.getRight();
+        final PrepareRenameResult prepareRenameResult = either.getSecond();
         assertThat(prepareRenameResult.getRange()).isEqualTo(
                 new Range(
                         new Position(1, 11), new Position(1, 14)));
@@ -105,10 +108,11 @@ class RenameProviderTest {
             + "_endblock\n";
         final Position position = new Position(1, 10);  // on `iter_var`.
 
-        final Either<Range, PrepareRenameResult> either = this.getPrepareRename(code, position);
+        final Either3<Range, PrepareRenameResult, PrepareRenameDefaultBehavior> either =
+            this.getPrepareRename(code, position);
         assertThat(either).isNotNull();
 
-        final PrepareRenameResult prepareRenameResult = either.getRight();
+        final PrepareRenameResult prepareRenameResult = either.getSecond();
         assertThat(prepareRenameResult.getRange()).isEqualTo(
                 new Range(
                         new Position(1, 9), new Position(1, 17)));

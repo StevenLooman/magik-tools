@@ -4,8 +4,9 @@ import java.util.Collection;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
  * Readonly wrapper for TypeKeeper.
@@ -44,8 +45,8 @@ public class ReadOnlyTypeKeeperAdapter implements ITypeKeeper {
     }
 
     @Override
-    public boolean hasType(final GlobalReference globalReference) {
-        return this.typeKeeper.hasType(globalReference);
+    public boolean hasType(final TypeString typeString) {
+        return this.typeKeeper.hasType(typeString);
     }
 
     @Override
@@ -54,8 +55,8 @@ public class ReadOnlyTypeKeeperAdapter implements ITypeKeeper {
     }
 
     @Override
-    public AbstractType getType(final GlobalReference globalReference) {
-        return this.typeKeeper.getType(globalReference);
+    public AbstractType getType(final TypeString typeString) {
+        return this.typeKeeper.getType(typeString);
     }
 
     @Override
@@ -66,22 +67,6 @@ public class ReadOnlyTypeKeeperAdapter implements ITypeKeeper {
     @Override
     public Collection<AbstractType> getTypes() {
         return this.typeKeeper.getTypes();
-    }
-
-    @CheckForNull
-    @Override
-    public void addUnaryOperator(final UnaryOperator unaryOperator) {
-        // Do nothing.
-    }
-
-    @Override
-    public UnaryOperator getUnaryOperator(final UnaryOperator.Operator operator, final AbstractType type) {
-        return this.typeKeeper.getUnaryOperator(operator, type);
-    }
-
-    @Override
-    public void removeUnaryOperator(final UnaryOperator unaryOperator) {
-        // Do nothing.
     }
 
     @Override
@@ -105,6 +90,25 @@ public class ReadOnlyTypeKeeperAdapter implements ITypeKeeper {
 
     @Override
     public void clear() {
+        // Do nothing.
+    }
+
+    @Override
+    public void addCondition(final Condition condition) {
+        // Do nothing.
+    }
+
+    @Override
+    public Condition getCondition(final String name) {
+        return this.typeKeeper.getCondition(name);
+    }
+
+    public Collection<Condition> getConditions() {
+        return this.typeKeeper.getConditions();
+    }
+
+    @Override
+    public void removeCondition(final Condition condition) {
         // Do nothing.
     }
 

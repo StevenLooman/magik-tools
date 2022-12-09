@@ -1,9 +1,13 @@
 package nl.ramsolutions.sw.magik.languageserver.references;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
@@ -12,8 +16,8 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
@@ -59,73 +63,88 @@ public class ReferencesProvider {
 
         final AstNode wantedNode = currentNode.getFirstAncestor(
             MagikGrammar.METHOD_INVOCATION,
-            MagikGrammar.METHOD_DEFINITION);
+            MagikGrammar.METHOD_DEFINITION,
+            MagikGrammar.ATOM,
+            MagikGrammar.CONDITION_NAME);
         LOGGER.trace("Wanted node: {}", wantedNode);
+        final PackageNodeHelper packageHelper = new PackageNodeHelper(wantedNode);
         if (wantedNode == null) {
             return Collections.emptyList();
         } else if (wantedNode.is(MagikGrammar.METHOD_INVOCATION)) {
             final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(wantedNode);
             final String methodName = helper.getMethodName();
             LOGGER.debug("Getting references to method: {}", methodName);
-            return this.referencesToMethod(typeKeeper, methodName);
+            return this.referencesToMethod(typeKeeper, UndefinedType.SERIALIZED_NAME, methodName);
         } else if (wantedNode.is(MagikGrammar.METHOD_DEFINITION)) {
             final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(wantedNode);
-            final PackageNodeHelper packageHelper = new PackageNodeHelper(wantedNode);
             final String identifier = currentNode.getTokenValue();
 
             // Name of the method.
-            if (this.nodeIsMethodDefinitionMethodName(currentNode, wantedNode)) {
-                String methodName = helper.getMethodName();
+            if (currentNode.getFirstAncestor(MagikGrammar.METHOD_NAME) != null) {
+                final String methodName = helper.getMethodName();
                 LOGGER.debug("Getting references to method: {}", methodName);
-                return this.referencesToMethod(typeKeeper, methodName);
-            } else if (this.nodeIsMethodDefinitionExemplarName(currentNode, wantedNode)) {
+                return this.referencesToMethod(typeKeeper, UndefinedType.SERIALIZED_NAME, methodName);
+            } else if (currentNode.getFirstAncestor(MagikGrammar.EXEMPLAR_NAME) != null) {
                 // Must be the exemplar name.
                 final String pakkage = packageHelper.getCurrentPackage();
-                final GlobalReference globalRef = GlobalReference.of(pakkage, identifier);
-                final AbstractType type = magikFile.getTypeKeeper().getType(globalRef);
+                final TypeString typeString = TypeString.of(identifier, pakkage);
+                final AbstractType type = typeKeeper.getType(typeString);
                 if (type != UndefinedType.INSTANCE) {
                     final String typeName = type.getFullName();
                     LOGGER.debug("Getting references to type: {}", typeName);
                     return this.referencesToType(typeKeeper, typeName);
                 }
-            } else {
-                // A random identifier, regard it as a type.
-                final String pakkage = packageHelper.getCurrentPackage();
-                final GlobalReference globalRef = GlobalReference.of(pakkage, identifier);
-                final AbstractType type = magikFile.getTypeKeeper().getType(globalRef);
-                if (type != UndefinedType.INSTANCE) {
-                    final String typeName = type.getFullName();
-                    LOGGER.debug("Getting references to method: {}", typeName);
-                    return this.referencesToType(typeKeeper, typeName);
-                }
             }
+        } else if (wantedNode.is(MagikGrammar.ATOM)
+                   && wantedNode.getFirstChild().is(MagikGrammar.IDENTIFIER)) {
+            // A random identifier, regard it as a type.
+            final String pakkage = packageHelper.getCurrentPackage();
+            final String identifier = currentNode.getTokenValue();
+            final TypeString typeString = TypeString.of(identifier, pakkage);
+            final AbstractType type = typeKeeper.getType(typeString);
+            if (type != UndefinedType.INSTANCE) {
+                final String typeName = type.getFullName();
+                LOGGER.debug("Getting references to type: {}", typeName);
+                return this.referencesToType(typeKeeper, typeName);
+            }
+        } else if (wantedNode.is(MagikGrammar.CONDITION_NAME)) {
+            final String conditionName = currentNode.getTokenValue();
+            LOGGER.debug("Getting references to condition: {}", conditionName);
+            return this.referencesToCondition(typeKeeper, conditionName);
         }
 
         return Collections.emptyList();
     }
 
-    private boolean nodeIsMethodDefinitionMethodName(final AstNode currentNode, final AstNode methodDefinitionNode) {
-        // TODO: This does not support [] methods.
-        final List<AstNode> identifierNodes = methodDefinitionNode.getChildren(MagikGrammar.IDENTIFIER);
-        final AstNode methodNameNode = identifierNodes.get(1);
-        return methodNameNode.getToken() == currentNode.getToken();
-    }
-
-    private boolean nodeIsMethodDefinitionExemplarName(final AstNode currentNode, final AstNode methodDefinitionNode) {
-        final List<AstNode> identifierNodes = methodDefinitionNode.getChildren(MagikGrammar.IDENTIFIER);
-        final AstNode exemplarNameNode = identifierNodes.get(0);
-        return exemplarNameNode.getToken() == currentNode.getToken();
-    }
-
-    private List<Location> referencesToMethod(final ITypeKeeper typeKeeper, final String methodName) {
+    private List<Location> referencesToMethod(
+            final ITypeKeeper typeKeeper, final String typeName, final String methodName) {
         LOGGER.debug("Finding references to method: {}", methodName);
+
+        // Build set of types which may contain this method: type + ancestors.
+        final AbstractType type =
+            typeName.equals(UndefinedType.SERIALIZED_NAME)
+            ? UndefinedType.INSTANCE
+            : typeKeeper.getType(TypeString.of(typeName));
+        final Set<AbstractType> wantedTypes = new HashSet<>();
+        wantedTypes.add(UndefinedType.INSTANCE);  // For unreasoned/undetermined calls.
+        wantedTypes.add(type);
+        wantedTypes.addAll(type.getAncestors());
+
+        final Collection<Method.MethodUsage> wantedMethodUsages = wantedTypes.stream()
+            .map(wantedType -> {
+                final String wantedTypeName = wantedType.getFullName();
+                final TypeString wantedTypeRef = TypeString.of(wantedTypeName);
+                return new Method.MethodUsage(wantedTypeRef, methodName);
+            })
+            .collect(Collectors.toSet());
+        final Predicate<Method.MethodUsage> filterPredicate = methodUsage -> wantedMethodUsages.contains(methodUsage);
 
         // Find references.
         return typeKeeper.getTypes().stream()
-            .flatMap(type -> type.getMethods().stream())
-            .filter(method -> method.getCalledMethods().contains(methodName))
-            // TODO: can't we get the location to the usage?
-            .map(Method::getLocation)
+            .flatMap(type_ -> type_.getMethods().stream())
+            .flatMap(method -> method.getMethodUsages().stream())
+            .filter(filterPredicate::test)
+            .map(Method.MethodUsage::getLocation)
             .filter(Objects::nonNull)
             .map(Lsp4jConversion::locationToLsp4j)
             .collect(Collectors.toList());
@@ -134,13 +153,39 @@ public class ReferencesProvider {
     private List<Location> referencesToType(final ITypeKeeper typeKeeper, final String typeName) {
         LOGGER.debug("Finding references to type: {}", typeName);
 
+        final AbstractType type = typeKeeper.getType(TypeString.of(typeName));
+        final Set<AbstractType> wantedTypes = new HashSet<>();
+        wantedTypes.add(type);
+        // wantedTypes.addAll(type.getAncestors());  // TODO: Ancestors or descendants?
+
+        final Collection<Method.GlobalUsage> wantedTypeUsages = wantedTypes.stream()
+            .map(wantedType -> {
+                final String wantedTypeName = wantedType.getFullName();
+                final TypeString wantedTypeRef = TypeString.of(wantedTypeName);
+                return new Method.GlobalUsage(wantedTypeRef, null);
+            })
+            .collect(Collectors.toSet());
+        final Predicate<Method.GlobalUsage> filterPredicate = typeUsage -> wantedTypeUsages.contains(typeUsage);
+
         // Find references.
         return typeKeeper.getTypes().stream()
-            .flatMap(type -> type.getMethods().stream())
-            .filter(method -> method.getUsedTypes().contains(typeName))
-            // TODO: can't we get the location to the usage?
-            .map(Method::getLocation)
+            .flatMap(type_ -> type_.getMethods().stream())
+            .flatMap(method -> method.getTypeUsages().stream())
+            .filter(filterPredicate::test)
+            .map(Method.GlobalUsage::getLocation)
             .filter(Objects::nonNull)
+            .map(Lsp4jConversion::locationToLsp4j)
+            .collect(Collectors.toList());
+    }
+
+    private List<Location> referencesToCondition(final ITypeKeeper typeKeeper, final String conditionName) {
+        LOGGER.debug("Finding references to condition: {}", conditionName);
+
+        return typeKeeper.getTypes().stream()
+            .flatMap(type -> type.getLocalMethods().stream())
+            .flatMap(method -> method.getConditionUsages().stream())
+            .filter(conditionUsage -> conditionUsage.getConditionName().equals(conditionName))
+            .map(Method.ConditionUsage::getLocation)
             .map(Lsp4jConversion::locationToLsp4j)
             .collect(Collectors.toList());
     }

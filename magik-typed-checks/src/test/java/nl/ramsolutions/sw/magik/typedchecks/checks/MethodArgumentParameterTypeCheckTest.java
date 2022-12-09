@@ -5,11 +5,11 @@ import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
@@ -26,16 +26,20 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final String code = "integer.m1(:symbol)";
         final ITypeKeeper typeKeeper = new TypeKeeper();
 
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
-        final AbstractType symbolType = typeKeeper.getType(GlobalReference.of("sw:symbol"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
+        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final Parameter param1 = new Parameter("p1", Parameter.Modifier.NONE, symbolType);
         integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "m1()",
             List.of(param1),
             null,
-            ExpressionResult.UNDEFINED);
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
 
         final MagikTypedCheck check = new MethodArgumentParameterTypedCheck();
         final List<MagikIssue> checkResults = this.runCheck(code, typeKeeper, check);
@@ -47,16 +51,20 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final String code = "integer.m1(1)";
         final ITypeKeeper typeKeeper = new TypeKeeper();
 
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
-        final AbstractType symbolType = typeKeeper.getType(GlobalReference.of("sw:symbol"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
+        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final Parameter param1 = new Parameter("p1", Parameter.Modifier.NONE, symbolType);
         integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "m1()",
             List.of(param1),
             null,
-            ExpressionResult.UNDEFINED);
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
 
         final MagikTypedCheck check = new MethodArgumentParameterTypedCheck();
         final List<MagikIssue> checkResults = this.runCheck(code, typeKeeper, check);
@@ -68,16 +76,20 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final String code = "integer.m1()";
         final ITypeKeeper typeKeeper = new TypeKeeper();
 
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
-        final AbstractType symbolType = typeKeeper.getType(GlobalReference.of("sw:symbol"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
+        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final Parameter param1 = new Parameter("p1", Parameter.Modifier.NONE, symbolType);
         integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "m1()",
             List.of(param1),
             null,
-            ExpressionResult.UNDEFINED);
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
 
         final MagikTypedCheck check = new MethodArgumentParameterTypedCheck();
         final List<MagikIssue> checkResults = this.runCheck(code, typeKeeper, check);
@@ -89,16 +101,20 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final String code = "integer.m1(:symbol, :symbol)";
         final ITypeKeeper typeKeeper = new TypeKeeper();
 
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
-        final AbstractType symbolType = typeKeeper.getType(GlobalReference.of("sw:symbol"));
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
+        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final Parameter param1 = new Parameter("p1", Parameter.Modifier.NONE, symbolType);
         integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "m1()",
             List.of(param1),
             null,
-            ExpressionResult.UNDEFINED);
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
 
         final MagikTypedCheck check = new MethodArgumentParameterTypedCheck();
         final List<MagikIssue> checkResults = this.runCheck(code, typeKeeper, check);

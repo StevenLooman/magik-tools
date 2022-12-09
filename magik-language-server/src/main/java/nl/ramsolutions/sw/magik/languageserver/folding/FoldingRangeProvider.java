@@ -24,7 +24,7 @@ public class FoldingRangeProvider {
     /**
      * Provide folding ranges.
      * @param magikFile Magik file.
-     * @return {{FoldingRange}}s.
+     * @return {@link FoldingRange}s.
      */
     public List<FoldingRange> provideFoldingRanges(final MagikTypedFile magikFile) {
         // Parse and reason magik.

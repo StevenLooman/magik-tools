@@ -14,9 +14,9 @@ import java.util.Scanner;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,12 +84,12 @@ public final class ClassInfoTypeKeeperReader {
     }
 
     private void readMethod(final String line, final BufferedReader reader) throws IOException {
-        // - 1 : "method" <class name> <method name> <parameters> <-- possibly no assignment parameter
-        //     2 : n ["private"/"classconst"/"classvar"/"iter"]*
-        //             ["basic"/"restricted"/"internal"/pragma]* source_file
-        //     3+: <n lines of comments>
+        // 1 : "method" <class name> <method name> <parameters> <-- possibly no assignment parameter
+        // 2 : n ["private"/"classconst"/"classvar"/"iter"]*
+        //       ["basic"/"restricted"/"internal"/pragma]* source_file
+        // 3+: <n lines of comments>
         // Line 1
-        // ignore <global> and <condition> for now
+        // Ignore <global> and <condition> for now.
         final MagikType type;
         final String methodName;
         try (Scanner scanner = new Scanner(line)) {
@@ -98,15 +98,17 @@ public final class ClassInfoTypeKeeperReader {
             final String className = scanner.next();
             if (!"<global>".equals(className)
                 && !"<condition>".equals(className)) {
-                final GlobalReference globalRef = GlobalReference.of(className);
+                final TypeString typeString = TypeString.of(className);
                 methodName = scanner.next();
-                if (!this.typeKeeper.hasType(globalRef)) {
-                    // LOGGER.debug("Type not found: {}, for method: {}", pakkageName, methodName);
+                if (!this.typeKeeper.hasType(typeString)) {
+                    LOGGER.debug("Type not found: {}, for method: {}", className, methodName);
                     type = null;
                 } else {
-                    type = (MagikType) this.typeKeeper.getType(globalRef);
+                    type = (MagikType) this.typeKeeper.getType(typeString);
                 }
-                scanner.nextLine(); // <parameters>
+
+                // Skip parameters.
+                scanner.nextLine();
             } else {
                 scanner.nextLine(); // Skip line
                 type = null;
@@ -118,6 +120,8 @@ public final class ClassInfoTypeKeeperReader {
         int commentLineCount = 0;
         try (Scanner scanner = new Scanner(reader.readLine())) {
             commentLineCount = scanner.nextInt();
+
+            // Read pragmas.
             final List<String> pragmas = new ArrayList<>();
             final List<String> skipList = List.of("private", "classconst", "classvar", "iter");
             while (scanner.hasNext("[^/]+")) {
@@ -127,7 +131,9 @@ public final class ClassInfoTypeKeeperReader {
                 }
                 pragmas.add(pragma);
             }
-            scanner.nextLine(); // Skip path
+
+            // Skip path.
+            scanner.nextLine();
         }
 
         // Line 3+
@@ -148,22 +154,22 @@ public final class ClassInfoTypeKeeperReader {
     }
 
     private void readSlottedClass(final String line, final BufferedReader reader) throws IOException {
-        // - 1 : "slotted_class" <class name> <slots>    <-- also slots of inherited exemplars
-        //     2 : <base classes>
-        //     3 : n pragma source_file
-        //     4+: <n lines of comments>
+        // 1 : "slotted_class" <class name> <slots>    <-- also slots of inherited exemplars
+        // 2 : <base classes>
+        // 3 : n pragma source_file
+        // 4+: <n lines of comments>
         // Line 1
         final MagikType type;
         try (Scanner scanner = new Scanner(line)) {
             scanner.next(); // "slotted_class"
 
             final String identifier = scanner.next();
-            final GlobalReference globalRef = GlobalReference.of(identifier);
-            if (!this.typeKeeper.hasType(globalRef)) {
+            final TypeString typeString = TypeString.of(identifier);
+            if (!this.typeKeeper.hasType(typeString)) {
                 LOGGER.debug("Type not found: {}", identifier);
                 type = null;
             } else {
-                type = (MagikType) this.typeKeeper.getType(globalRef);
+                type = (MagikType) this.typeKeeper.getType(typeString);
             }
 
             scanner.nextLine(); // skip slots.
@@ -173,8 +179,8 @@ public final class ClassInfoTypeKeeperReader {
         final String parentClassesLine = reader.readLine();
         final String[] parentClasses = parentClassesLine.split(" ");
         for (final String parentClass : parentClasses) {
-            final GlobalReference parentGlobalRef = GlobalReference.of(parentClass);
-            if (!this.typeKeeper.hasType(parentGlobalRef)) {
+            final TypeString parentTypeString = TypeString.of(parentClass);
+            if (!this.typeKeeper.hasType(parentTypeString)) {
                 LOGGER.debug("Type not found: {}", parentClass);
             }
         }
@@ -183,12 +189,16 @@ public final class ClassInfoTypeKeeperReader {
         int commentLineCount = 0;
         try (Scanner scanner = new Scanner(reader.readLine())) {
             commentLineCount = scanner.nextInt();
+
+            // Pragmas.
             final List<String> pragmas = new ArrayList<>();
             while (scanner.hasNext("[^/]+")) {
                 final String pragma = scanner.next();
                 pragmas.add(pragma);
             }
-            scanner.nextLine(); // Skip path
+
+            // Skip path
+            scanner.nextLine();
         }
 
         // Line 4+
@@ -207,22 +217,22 @@ public final class ClassInfoTypeKeeperReader {
     }
 
     private void readMixin(final String line, final BufferedReader reader) throws IOException {
-        // - 1 : "mixin" <class name>
-        //     2 : "."
-        //     3 : n pragma source_file
-        //     4+: <n lines of comments>
+        // 1 : "mixin" <class name>
+        // 2 : "."
+        // 3 : n pragma source_file
+        // 4+: <n lines of comments>
         // Line 1
         final MagikType type;
         try (Scanner scanner = new Scanner(line)) {
             scanner.next(); // "mixin"
 
             final String identifier = scanner.next();
-            final GlobalReference globalRef = GlobalReference.of(identifier);
-            if (!this.typeKeeper.hasType(globalRef)) {
+            final TypeString typeString = TypeString.of(identifier);
+            if (!this.typeKeeper.hasType(typeString)) {
                 LOGGER.debug("Type not found: {}", identifier);
                 type = null;
             } else {
-                type = (MagikType) this.typeKeeper.getType(globalRef);
+                type = (MagikType) this.typeKeeper.getType(typeString);
             }
 
             scanner.nextLine();
@@ -235,12 +245,16 @@ public final class ClassInfoTypeKeeperReader {
         final int commentLineCount;
         try (Scanner scanner = new Scanner(reader.readLine())) {
             commentLineCount = scanner.nextInt();
+
+            // Read pragmas.
             final List<String> pragmas = new ArrayList<>();
             while (scanner.hasNext("[^/]+")) {
                 final String pragma = scanner.next();
                 pragmas.add(pragma);
             }
-            scanner.nextLine(); // Skip path
+
+            // Skip path
+            scanner.nextLine();
         }
 
         // Line 4+
@@ -262,7 +276,7 @@ public final class ClassInfoTypeKeeperReader {
      * Read types from a jar/class_info file.
      *
      * @param path             Path to jar file.
-     * @param typeKeeper {{TypeKeeper}} to fill.
+     * @param typeKeeper {@link TypeKeeper} to fill.
      * @throws IOException -
      */
     public static void readTypes(final Path path, final ITypeKeeper typeKeeper) throws IOException {
@@ -273,7 +287,7 @@ public final class ClassInfoTypeKeeperReader {
     /**
      * Read libs directory.
      * @param libsPath Path to libs directory.
-     * @param typeKeeper {{TypeKeeper}} to fill.
+     * @param typeKeeper {@link TypeKeeper} to fill.
      * @throws IOException -
      */
     public static void readLibsDirectory(final Path libsPath, final ITypeKeeper typeKeeper) throws IOException {

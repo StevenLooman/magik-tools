@@ -5,7 +5,6 @@ import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.api.ExtendedTokenType;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
@@ -112,10 +111,6 @@ public class FormattingCheck extends MagikCheck {
 
     @Override
     public void walkToken(final Token token) {
-        if (token.getType() == ExtendedTokenType.SYNTAX_ERROR) {
-            return;
-        }
-
         this.previousToken = this.currentToken;
         this.currentToken = this.nextToken;
         this.nextToken = token;

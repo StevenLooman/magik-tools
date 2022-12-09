@@ -4,13 +4,14 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.EnumSet;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.analysis.typing.BinaryOperator;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GlobalReference;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.SlottedType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
@@ -37,15 +38,17 @@ class HoverProviderTest {
     void testProvideHoverMethodDefinitionName() {
         // Set up a method in the TypeKeeper.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType objectType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:object"));
-        final Method method = objectType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
+        final TypeString objectRef = TypeString.of("sw:object");
+        final MagikType objectType = (MagikType) typeKeeper.getType(objectRef);
+        objectType.addMethod(
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "hover_me_method()",
             Collections.emptyList(),
             null,
-            ExpressionResult.UNDEFINED);
-        method.setDoc("method_doc");
+            "method_doc",
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
 
         final String code = ""
             + "_method object.hover_me_method()\n"
@@ -64,9 +67,9 @@ class HoverProviderTest {
     void testProvideHoverMethodDefinitionExemplar() {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType hoverMeType = new SlottedType(GlobalReference.of("user:hover_me_type"));
+        final TypeString hoverMeTypeRef = TypeString.of("user:hover_me_type");
+        final MagikType hoverMeType = new MagikType(typeKeeper, Sort.SLOTTED, hoverMeTypeRef);
         hoverMeType.setDoc("type_doc");
-        typeKeeper.addType(hoverMeType);
 
         final String code = ""
             + "_method hover_me_type.method()\n"
@@ -85,15 +88,17 @@ class HoverProviderTest {
     void testProvideHoverMethod() {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType integerType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:integer"));
-        final Method method = integerType.addMethod(
-            EnumSet.noneOf(Method.Modifier.class),
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
+        integerType.addMethod(
             null,
+            EnumSet.noneOf(Method.Modifier.class),
             "hover_me()",
             Collections.emptyList(),
             null,
-            ExpressionResult.UNDEFINED);
-        method.setDoc("method_doc");
+            "method_doc",
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
 
         final String code = ""
             + "_method a.b\n"
@@ -132,7 +137,8 @@ class HoverProviderTest {
     void testProvideHoverType() {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType symbolType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:symbol"));
+        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final MagikType symbolType = (MagikType) typeKeeper.getType(symbolRef);
         symbolType.setDoc("type_doc");
 
         final String code = ""
@@ -154,15 +160,13 @@ class HoverProviderTest {
     void testProvideHoverTypeUnknown() {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType symbolType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:symbol"));
-        symbolType.setDoc("type_doc");
 
         final String code = ""
             + "_method a.b\n"
             + "    _local var << some_object\n"
             + "    var.hover_me()\n"
             + "_endmethod";
-        final Position position = new Position(2, 4);
+        final Position position = new Position(2, 4);  // On `var`.
 
         // Hover and test.
         final Hover hover = this.provideHover(code, position, typeKeeper);
@@ -175,13 +179,13 @@ class HoverProviderTest {
     void testProvideHoverAssignedVariable() {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType symbolType = (MagikType) typeKeeper.getType(GlobalReference.of("sw:symbol"));
+        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final MagikType symbolType = (MagikType) typeKeeper.getType(symbolRef);
         symbolType.setDoc("type_doc");
 
         final String code = ""
             + "_method a.b\n"
             + "    _local var << :symbol\n"
-            + "    var.hover_me()\n"
             + "_endmethod";
         final Position position = new Position(1, 11);  // On `var`.
 
@@ -190,6 +194,32 @@ class HoverProviderTest {
         final MarkupContent content = hover.getContents().getRight();
         assertThat(content.getKind()).isEqualTo(MarkupKind.MARKDOWN);
         assertThat(content.getValue()).contains("symbol");
+        assertThat(content.getValue()).contains("type_doc");
+    }
+
+    @Test
+    void testBinaryOperatorTimes() {
+        // Set up a method.
+        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString integerRef = TypeString.of("sw:integer");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
+        integerType.setDoc("type_doc");
+
+        final BinaryOperator binaryOperator =
+            new BinaryOperator(BinaryOperator.Operator.STAR, integerRef, integerRef, integerRef);
+        typeKeeper.addBinaryOperator(binaryOperator);
+
+        final String code = ""
+            + "_method a.b\n"
+            + "    _local var << 4 * 4\n"
+            + "_endmethod";
+        final Position position = new Position(1, 20);  // On `*`.
+
+        // Hover and test.
+        final Hover hover = this.provideHover(code, position, typeKeeper);
+        final MarkupContent content = hover.getContents().getRight();
+        assertThat(content.getKind()).isEqualTo(MarkupKind.MARKDOWN);
+        assertThat(content.getValue()).contains("integer");
         assertThat(content.getValue()).contains("type_doc");
     }
 

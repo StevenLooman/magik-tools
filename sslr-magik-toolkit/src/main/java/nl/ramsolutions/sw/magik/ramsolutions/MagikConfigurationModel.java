@@ -50,7 +50,7 @@ final class MagikConfigurationModel implements ConfigurationModel {
     }
 
     /**
-     * Get {{Tokenizer}}s.
+     * Get {@link Tokenizer}s.
      */
     public List<Tokenizer> getTokenizers() {
         return List.of(
@@ -61,4 +61,3 @@ final class MagikConfigurationModel implements ConfigurationModel {
     }
 
 }
-
