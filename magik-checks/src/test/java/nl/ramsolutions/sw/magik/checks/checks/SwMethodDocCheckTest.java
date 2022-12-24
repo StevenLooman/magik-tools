@@ -25,7 +25,7 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
     }
 
     @Test
-    void testSwMethodDocMssing() {
+    void testSwMethodDocMissing() {
         final MagikCheck check = new SwMethodDocCheck();
         final String code = ""
             + "_method a.b(param1, param2)\n"
@@ -34,6 +34,40 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
             + "_endmethod";
         final List<MagikIssue> issues = runCheck(code, check);
         assertThat(issues).hasSize(2);
+    }
+
+    @Test
+    void testSwMethodDocMissingAll() {
+        final MagikCheck check = new SwMethodDocCheck();
+        final String code = ""
+            + "_method a.b\n"
+            + "_endmethod";
+        final List<MagikIssue> issues = runCheck(code, check);
+        assertThat(issues).hasSize(1);
+    }
+
+    @Test
+    void testSwMethodDocMissingEmptyComments() {
+        final MagikCheck check = new SwMethodDocCheck();
+        final String code = ""
+            + "_method a.b\n"
+            + "    ##\n"
+            + "    ##\n"
+            + "_endmethod";
+        final List<MagikIssue> issues = runCheck(code, check);
+        assertThat(issues).hasSize(1);
+    }
+
+    @Test
+    void testSwMethodDocNoParams() {
+        final MagikCheck check = new SwMethodDocCheck();
+        final String code = ""
+            + "_method a.b\n"
+            + "    ## This is an example method.\n"
+            + "    ## Some more doc.\n"
+            + "_endmethod";
+        final List<MagikIssue> issues = runCheck(code, check);
+        assertThat(issues).isEmpty();
     }
 
 }

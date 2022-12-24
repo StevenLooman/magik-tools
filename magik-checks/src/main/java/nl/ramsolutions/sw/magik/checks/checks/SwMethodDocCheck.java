@@ -75,6 +75,7 @@ public class SwMethodDocCheck extends MagikCheck {
     private String extractDoc(final AstNode node) {
         return MagikCommentExtractor.extractDocComments(node)
             .map(Token::getValue)
+            .map(comment -> comment.substring("##".length()))
             .collect(Collectors.joining("\n"));
     }
 
