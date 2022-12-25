@@ -18,6 +18,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.Slot;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -424,10 +425,6 @@ public class HoverProvider {
 
             this.buildInheritanceDoc(parentType, builder, indent + 1);
         });
-
-        if (indent == 0) {
-            builder.append(SECTION_END);
-        }
     }
 
     private void buildMethodUnknownDoc(final AbstractType type, final String methodName, final StringBuilder builder) {
@@ -480,12 +477,40 @@ public class HoverProvider {
                 .append(SECTION_END);
         }
 
+        // Type slots.
+        Collection<Slot> slots = type.getSlots();
+        if (!slots.isEmpty()) {
+            builder
+                .append("## Slots\n");
+            slots.stream()
+                .sorted(Comparator.comparing(Slot::getName))
+                .forEach(slot -> {
+                    final AbstractType slotType = slot.getType();
+                    builder
+                        .append("* ")
+                        .append(slot.getName())
+                        .append(": ")
+                        .append(slotType.getFullName())
+                        .append("\n");
+                });
+            builder
+                .append(SECTION_END);
+        }
+
         // Inheritance.
-        if (type instanceof CombinedType) {
-            final CombinedType combinedType = (CombinedType) type;
-            combinedType.getTypes().forEach(cType -> this.buildInheritanceDoc(cType, builder, 0));
-        } else {
-            this.buildInheritanceDoc(type, builder, 0);
+        if (!type.getParents().isEmpty()) {
+            builder
+                .append("## Inheritance\n");
+            if (type instanceof CombinedType) {
+                final CombinedType combinedType = (CombinedType) type;
+                combinedType.getTypes().stream()
+                    .sorted(Comparator.comparing(AbstractType::getName))
+                    .forEach(cType -> this.buildInheritanceDoc(cType, builder, 0));
+            } else {
+                this.buildInheritanceDoc(type, builder, 0);
+            }
+            builder
+                .append(SECTION_END);
         }
     }
 
