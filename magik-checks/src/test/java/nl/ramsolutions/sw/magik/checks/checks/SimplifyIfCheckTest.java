@@ -23,7 +23,7 @@ class SimplifyIfCheckTest extends MagikCheckTestBase {
             + "    _endif\n"
             + "_endif";
         final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isNotEmpty();
+        assertThat(issues).hasSize(1);
     }
 
     @Test
@@ -38,7 +38,7 @@ class SimplifyIfCheckTest extends MagikCheckTestBase {
             + "    _endif\n"
             + "_endif";
         final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isNotEmpty();
+        assertThat(issues).hasSize(1);
     }
 
     @Test
@@ -97,6 +97,22 @@ class SimplifyIfCheckTest extends MagikCheckTestBase {
             + "    _if b\n"
             + "    _then\n"
             + "    _endif\n"
+            + "    c()\n"
+            + "_endif";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
+    @Test
+    void testSimplifyIfIfElseIf() {
+        final MagikCheck check = new SimplifyIfCheck();
+        final String code = ""
+            + "_if a\n"
+            + "_then\n"
+            + "    _if b\n"
+            + "    _then\n"
+            + "    _endif\n"
+            + "_else\n"
             + "    c()\n"
             + "_endif";
         final List<MagikIssue> issues = this.runCheck(code, check);

@@ -24,17 +24,19 @@ public class SimplifyIfCheck extends MagikCheck {
     }
 
     private void testIfIf(final AstNode node) {
-        // only one statement in if body
-        final List<AstNode> bodyNodes = AstQuery.getChildrenFromChain(node, MagikGrammar.BODY);
-        if (bodyNodes.size() != 1) {
-            return;
-        }
-        final AstNode bodyNode = bodyNodes.get(0);
-        if (bodyNode.getChildren(MagikGrammar.STATEMENT).size() != 1) {
+        // Has no elif or else child nodes.
+        if (node.hasDirectChildren(MagikGrammar.ELIF, MagikGrammar.ELSE)) {
             return;
         }
 
-        // statement is an if statement
+        // Only one statement in if body.
+        final AstNode bodyNode = node.getFirstChild(MagikGrammar.BODY);
+        final List<AstNode> statementNodes = bodyNode.getChildren(MagikGrammar.STATEMENT);
+        if (statementNodes.size() != 1) {
+            return;
+        }
+
+        // Statement is an if statement.
         final List<AstNode> bodyIfNodes = AstQuery.getChildrenFromChain(bodyNode,
             MagikGrammar.STATEMENT,
             MagikGrammar.EXPRESSION_STATEMENT,
@@ -45,33 +47,35 @@ public class SimplifyIfCheck extends MagikCheck {
             return;
         }
 
-        // has no elif or else
-        final AstNode ifNode = bodyIfNodes.get(0);
-        final List<AstNode> elifNodes = ifNode.getChildren(MagikGrammar.ELIF);
-        if (!elifNodes.isEmpty()) {
-            return;
-        }
-        final AstNode elseNode = ifNode.getFirstChild(MagikGrammar.ELSE);
-        if (elseNode != null) {
+        // Has no elif or else.
+        final AstNode bodyIfNode = bodyIfNodes.get(0);
+        final List<AstNode> bodyIfElifNodes = bodyIfNode.getChildren(MagikGrammar.ELIF);
+        if (!bodyIfElifNodes.isEmpty()) {
             return;
         }
 
-        this.addIssue(ifNode, MESSAGE);
+        final AstNode bodyIfElseNode = bodyIfNode.getFirstChild(MagikGrammar.ELSE);
+        if (bodyIfElseNode != null) {
+            return;
+        }
+
+        this.addIssue(bodyIfNode, MESSAGE);
     }
 
     private void testIfElseIf(final AstNode node) {
-        // only one statement in else body
-        final List<AstNode> bodyNodes =
-            AstQuery.getChildrenFromChain(node, MagikGrammar.ELSE, MagikGrammar.BODY);
-        if (bodyNodes.size() != 1) {
-            return;
-        }
-        final AstNode bodyNode = bodyNodes.get(0);
-        if (bodyNode.getChildren(MagikGrammar.STATEMENT).size() != 1) {
+        final AstNode elseNode = node.getFirstChild(MagikGrammar.ELSE);
+        if (elseNode == null) {
             return;
         }
 
-        // statement is an if statement
+        // Only one statement in else body.
+        final AstNode bodyNode = elseNode.getFirstChild(MagikGrammar.BODY);
+        final List<AstNode> statementNodes = bodyNode.getChildren(MagikGrammar.STATEMENT);
+        if (statementNodes.size() != 1) {
+            return;
+        }
+
+        // Statement is an if statement.
         final List<AstNode> elseIfNodes = AstQuery.getChildrenFromChain(bodyNode,
             MagikGrammar.STATEMENT,
             MagikGrammar.EXPRESSION_STATEMENT,
