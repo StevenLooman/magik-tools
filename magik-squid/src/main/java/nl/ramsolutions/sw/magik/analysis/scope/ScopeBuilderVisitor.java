@@ -188,13 +188,22 @@ public class ScopeBuilderVisitor extends MagikVisitor {
                 MagikGrammar.IDENTIFIER))
             .filter(Objects::nonNull)
             .forEach(identifierNode -> {
-                final String identifier = identifierNode.getTokenValue();
+                final String tokenValue = identifierNode.getTokenValue();
+
+                final int index = tokenValue.indexOf(':');
+                final String identifier =  index != -1
+                    ? tokenValue.substring(index + 1)
+                    : tokenValue;
+
                 if (this.currentScope.getScopeEntry(identifier) != null) {
                     // Don't overwrite entries.
                     return;
                 }
 
-                this.currentScope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
+                final ScopeEntry.Type type = index != -1
+                    ? ScopeEntry.Type.GLOBAL
+                    : ScopeEntry.Type.DEFINITION;
+                this.currentScope.addDeclaration(type, identifier, identifierNode, null);
             });
     }
 
@@ -202,8 +211,9 @@ public class ScopeBuilderVisitor extends MagikVisitor {
     protected void walkPreAssignmentExpression(final AstNode node) {
         // get all atoms to the last <<
         final Integer lastAssignmentTokenIndex = node.getChildren().stream()
-            .filter(childNode -> childNode.getTokenValue().equals("<<")
-                                                        || childNode.getTokenValue().equals("^<<"))
+            .filter(childNode ->
+                childNode.getTokenValue().equals("<<")
+                || childNode.getTokenValue().equals("^<<"))
             .map(childNode -> node.getChildren().indexOf(childNode))
             .max(Comparator.naturalOrder())
             .orElse(null);
@@ -219,14 +229,21 @@ public class ScopeBuilderVisitor extends MagikVisitor {
                 return;
             }
 
-            final String identifier = identifierNode.getTokenValue();
-            if (this.currentScope.getScopeEntry(identifier) != null) {
+            final String tokenValue = identifierNode.getTokenValue();
+            if (this.currentScope.getScopeEntry(tokenValue) != null) {
                 // Don't overwrite entries.
                 return;
             }
 
-            // add as definition
-            this.currentScope.addDeclaration(ScopeEntry.Type.DEFINITION, identifier, identifierNode, null);
+            final int index = tokenValue.indexOf(':');
+            final ScopeEntry.Type type = index != -1
+                ? ScopeEntry.Type.GLOBAL
+                : ScopeEntry.Type.DEFINITION;
+            final String identifier =  index != -1
+                ? tokenValue.substring(index + 1)
+                : tokenValue;
+
+            this.currentScope.addDeclaration(type, identifier, identifierNode, null);
         }
     }
 

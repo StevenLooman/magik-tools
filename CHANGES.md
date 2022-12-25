@@ -6,6 +6,7 @@ Changes
 - Fix SwMethodDocCheck accepting `##` as a comment.
 - Fix SimplifyIfCheck to not report invalid reduction.
 - Also show slots on type hover.
+- Properly scope package-prefixed globals.
 
 
 0.6.0 (2022-09-12)

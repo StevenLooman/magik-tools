@@ -21,7 +21,7 @@ class ScopeBuilderVisitorTest {
     }
 
     @Test
-    void testDefinition() {
+    void testLocal() {
         final String code = ""
             + "_method object.m\n"
             + "    _local a\n"
@@ -37,7 +37,7 @@ class ScopeBuilderVisitorTest {
     }
 
     @Test
-    void testDefinitionSerial() {
+    void testLocalSerial() {
         final String code = ""
             + "_method object.m\n"
             + "    _local a, b\n"
@@ -138,6 +138,38 @@ class ScopeBuilderVisitorTest {
     }
 
     @Test
+    void testAssignment() {
+        final String code = ""
+            + "_method object.m\n"
+            + "    a << 1\n"
+            + "_endmethod";
+        final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+        final Scope globalScope = visitor.getGlobalScope();
+        final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+        final ScopeEntry entryA = methodScope.getScopeEntry("a");
+        assertThat(entryA).isNotNull();
+        assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    }
+
+    @Test
+    void testAssignmentPackage() {
+        final String code = ""
+            + "_method object.m\n"
+            + "    sw:a << 1\n"
+            + "_endmethod";
+        final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+        final Scope globalScope = visitor.getGlobalScope();
+        final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+        final ScopeEntry entryA = methodScope.getScopeEntry("a");
+        assertThat(entryA).isNotNull();
+        assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.GLOBAL);
+    }
+
+    @Test
     void testMultipleAssignment() {
         final String code = ""
             + "_method object.m\n"
@@ -151,6 +183,26 @@ class ScopeBuilderVisitorTest {
         final ScopeEntry entryA = methodScope.getScopeEntry("a");
         assertThat(entryA).isNotNull();
         assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+
+        final ScopeEntry entryB = methodScope.getScopeEntry("b");
+        assertThat(entryB).isNotNull();
+        assertThat(entryB.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    }
+
+    @Test
+    void testMultipleAssignmentPackage() {
+        final String code = ""
+            + "_method object.m\n"
+            + "    (sw:a, b) << (1, 2)\n"
+            + "_endmethod";
+        final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+        final Scope globalScope = visitor.getGlobalScope();
+        final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+        final ScopeEntry entryA = methodScope.getScopeEntry("a");
+        assertThat(entryA).isNotNull();
+        assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.GLOBAL);
 
         final ScopeEntry entryB = methodScope.getScopeEntry("b");
         assertThat(entryB).isNotNull();
