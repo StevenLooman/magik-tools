@@ -1,0 +1,13 @@
+{
+  "title": "Method/procedure is too long",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "20min"
+  },
+  "tags": ["convention"],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "MethodLineCount",
+  "sqKey": "method-line-count"
+}

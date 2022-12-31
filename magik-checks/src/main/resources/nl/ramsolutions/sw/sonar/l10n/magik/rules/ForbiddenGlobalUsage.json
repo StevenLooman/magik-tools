@@ -1,0 +1,13 @@
+{
+    "title": "Forbidden usage of global",
+    "type": "CODE_SMELL",
+    "status": "ready",
+    "remediation": {
+      "func": "Constant/Issue",
+      "constantCost": "20min"
+    },
+    "tags": ["error"],
+    "defaultSeverity": "Minor",
+    "ruleSpecification": "ForbiddenGlobalUsage",
+    "sqKey": "forbidden-global-usage"
+  }
