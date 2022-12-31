@@ -9,6 +9,7 @@ import nl.ramsolutions.sw.magik.checks.checks.EmptyBlockCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ExemplarSlotCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.FileNotInLoadListCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenCallCheck;
+import nl.ramsolutions.sw.magik.checks.checks.ForbiddenGlobalUsageCheck;
 import nl.ramsolutions.sw.magik.checks.checks.FormattingCheck;
 import nl.ramsolutions.sw.magik.checks.checks.HidesVariableCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ImportMissingDefinitionCheck;
@@ -16,6 +17,7 @@ import nl.ramsolutions.sw.magik.checks.checks.LhsRhsComparatorEqualCheck;
 import nl.ramsolutions.sw.magik.checks.checks.LineLengthCheck;
 import nl.ramsolutions.sw.magik.checks.checks.LocalImportProcedureCheck;
 import nl.ramsolutions.sw.magik.checks.checks.MethodComplexityCheck;
+import nl.ramsolutions.sw.magik.checks.checks.MethodLineCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NewDocCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoSelfUseCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoStatementAfterBodyExitCheck;
@@ -29,6 +31,7 @@ import nl.ramsolutions.sw.magik.checks.checks.TrailingWhitespaceCheck;
 import nl.ramsolutions.sw.magik.checks.checks.UndefinedVariableCheck;
 import nl.ramsolutions.sw.magik.checks.checks.UnusedVariableCheck;
 import nl.ramsolutions.sw.magik.checks.checks.UseValueCompareCheck;
+import nl.ramsolutions.sw.magik.checks.checks.VariableCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.VariableDeclarationUsageDistanceCheck;
 import nl.ramsolutions.sw.magik.checks.checks.VariableNamingCheck;
 import nl.ramsolutions.sw.magik.checks.checks.WarnedCallCheck;
@@ -64,6 +67,7 @@ public final class CheckList {
             ExemplarSlotCountCheck.class,
             FileNotInLoadListCheck.class,
             ForbiddenCallCheck.class,
+            ForbiddenGlobalUsageCheck.class,
             FormattingCheck.class,
             HidesVariableCheck.class,
             ImportMissingDefinitionCheck.class,
@@ -71,6 +75,7 @@ public final class CheckList {
             LineLengthCheck.class,
             LocalImportProcedureCheck.class,
             MethodComplexityCheck.class,
+            MethodLineCountCheck.class,
             NewDocCheck.class,
             NoSelfUseCheck.class,
             NoStatementAfterBodyExitCheck.class,
@@ -84,6 +89,7 @@ public final class CheckList {
             UndefinedVariableCheck.class,
             UnusedVariableCheck.class,
             UseValueCompareCheck.class,
+            VariableCountCheck.class,
             VariableDeclarationUsageDistanceCheck.class,
             VariableNamingCheck.class,
             WarnedCallCheck.class,

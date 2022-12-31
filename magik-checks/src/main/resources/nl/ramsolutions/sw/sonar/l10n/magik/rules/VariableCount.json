@@ -1,0 +1,13 @@
+{
+  "title": "Method/procedure contains too many variables",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "20min"
+  },
+  "tags": ["complexity"],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "VariableCount",
+  "sqKey": "variable-count"
+}

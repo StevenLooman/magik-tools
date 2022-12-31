@@ -7,6 +7,9 @@ Changes
 - Fix SimplifyIfCheck to not report invalid reduction.
 - Also show slots on type hover.
 - Properly scope package-prefixed globals.
+- Add check ForbiddenGlobalUsage
+- Add check MethodLineCount
+- Add check VariableCount
 
 
 0.6.0 (2022-09-12)
