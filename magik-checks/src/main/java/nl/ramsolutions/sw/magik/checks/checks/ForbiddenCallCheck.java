@@ -18,7 +18,7 @@ public class ForbiddenCallCheck extends MagikCheck {
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final String CHECK_KEY = "ForbiddenCall";
 
-    private static final String MESSAGE = "Call is forbidden.";
+    private static final String MESSAGE = "Call '%s' is forbidden.";
     private static final String DEFAULT_FORBIDDEN_CALLS = "show(), print(), debug_print()";
 
     /**
@@ -50,7 +50,8 @@ public class ForbiddenCallCheck extends MagikCheck {
             return;
         }
 
-        this.addIssue(node, MESSAGE);
+        final String message = String.format(MESSAGE, identifier);
+        this.addIssue(node, message);
     }
 
     @Override
@@ -65,7 +66,8 @@ public class ForbiddenCallCheck extends MagikCheck {
             return;
         }
 
-        this.addIssue(node, MESSAGE);
+        final String message = String.format(MESSAGE, identifier);
+        this.addIssue(node, message);
     }
 
 }
