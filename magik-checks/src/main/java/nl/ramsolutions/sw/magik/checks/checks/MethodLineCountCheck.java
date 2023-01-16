@@ -43,6 +43,11 @@ public class MethodLineCountCheck extends MagikCheck {
 
     private void checkDefinition(final AstNode node) {
         final AstNode bodyNode = node.getFirstChild(MagikGrammar.BODY);
+        if (bodyNode == null) {
+            // In case of a SYNTAX_ERROR.
+            return;
+        }
+
         final long lineCount = bodyNode.getTokens().stream()
             .map(Token::getLine)
             .distinct()

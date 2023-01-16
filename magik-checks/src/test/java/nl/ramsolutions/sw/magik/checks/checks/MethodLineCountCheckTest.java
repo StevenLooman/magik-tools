@@ -65,4 +65,15 @@ public class MethodLineCountCheckTest extends MagikCheckTestBase {
         assertThat(issues).isEmpty();
     }
 
+    @Test
+    void testSyntaxError() {
+        final MethodLineCountCheck check = new MethodLineCountCheck();
+        final String code = ""
+            + "_method a.b\n"
+            + "    >> _self.\n"
+            + "_endmethod";
+        final List<MagikIssue> issues = runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
 }
