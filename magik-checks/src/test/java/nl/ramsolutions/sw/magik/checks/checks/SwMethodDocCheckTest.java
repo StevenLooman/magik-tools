@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SwMethodDocCheckTest extends MagikCheckTestBase {
 
     @Test
-    void testSwMethodDoc() {
+    void testDoc() {
         final MagikCheck check = new SwMethodDocCheck();
         final String code = ""
             + "_method a.b(param1, param2?)\n"
@@ -25,7 +25,7 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
     }
 
     @Test
-    void testSwMethodDocMissing() {
+    void testDocMissing() {
         final MagikCheck check = new SwMethodDocCheck();
         final String code = ""
             + "_method a.b(param1, param2)\n"
@@ -37,7 +37,7 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
     }
 
     @Test
-    void testSwMethodDocMissingAll() {
+    void testDocMissingAll() {
         final MagikCheck check = new SwMethodDocCheck();
         final String code = ""
             + "_method a.b\n"
@@ -47,7 +47,7 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
     }
 
     @Test
-    void testSwMethodDocMissingEmptyComments() {
+    void testDocMissingEmptyComments() {
         final MagikCheck check = new SwMethodDocCheck();
         final String code = ""
             + "_method a.b\n"
@@ -59,7 +59,7 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
     }
 
     @Test
-    void testSwMethodDocNoParams() {
+    void testDocNoParams() {
         final MagikCheck check = new SwMethodDocCheck();
         final String code = ""
             + "_method a.b\n"
