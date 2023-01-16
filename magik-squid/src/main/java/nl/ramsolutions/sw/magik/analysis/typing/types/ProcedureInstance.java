@@ -128,7 +128,7 @@ public class ProcedureInstance extends AbstractType {
         }
 
         final ProcedureInstance other = (ProcedureInstance) obj;
-        return this == other;    // Test on identity.
+        return this == other;  // Test on identity.
     }
 
     @Override
