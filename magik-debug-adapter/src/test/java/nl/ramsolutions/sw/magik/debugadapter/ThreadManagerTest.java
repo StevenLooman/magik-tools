@@ -105,12 +105,18 @@ class ThreadManagerTest {
         final StackFrame frame0 = stackFrames.get(0);
         assertThat(frame0.getId()).isEqualTo(Lsp4jConversion.threadIdLevelToFrameId(1, 0));
         assertThat(frame0.getName()).isEqualTo("sw:object.m1()");
-        assertThat(frame0.getSource().getPath()).isEqualTo("/home/user/src/module/sources/file1.magik");
+        final String path0Str = frame0.getSource().getPath();
+        final Path path0 = Path.of(path0Str);
+        final Path path0Expected = Path.of("/home/user/src/module/sources/file1.magik");
+        assertThat(path0).isEqualTo(path0Expected);
 
         final StackFrame frame1 = stackFrames.get(1);
         assertThat(frame1.getId()).isEqualTo(Lsp4jConversion.threadIdLevelToFrameId(1, 2));
         assertThat(frame1.getName()).isEqualTo("sw:object.m2()");
-        assertThat(frame1.getSource().getPath()).isEqualTo("/home/user/src/module/sources/file2.magik");
+        final String path1Str = frame1.getSource().getPath();
+        final Path path1 = Path.of(path1Str);
+        final Path path1Expected = Path.of("/home/user/src/module/sources/file2.magik");
+        assertThat(path1).isEqualTo(path1Expected);
     }
 
 }
