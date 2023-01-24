@@ -1,0 +1,15 @@
+{
+    "title": "Files should not contain too many methods",
+    "type": "CODE_SMELL",
+    "status": "ready",
+    "remediation": {
+      "func": "Constant\/Issue",
+      "constantCost": "60min"
+    },
+    "tags": [
+      "complexity"
+    ],
+    "defaultSeverity": "Major",
+    "ruleSpecification": "FileMethodCount",
+    "sqKey": "file-method-count"
+  }

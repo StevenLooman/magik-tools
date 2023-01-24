@@ -11,6 +11,7 @@ Changes
 - Add check MethodLineCount
 - Add check VariableCount
 - Fix VariableCountCheck better handling syntax errors
+- Add check FileMethodCount
 
 
 0.6.0 (2022-09-12)
