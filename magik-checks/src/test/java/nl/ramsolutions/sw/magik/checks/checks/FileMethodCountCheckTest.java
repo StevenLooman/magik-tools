@@ -11,6 +11,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class FileMethodCountCheckTest extends MagikCheckTestBase {
 
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final int MAX_METHOD_COUNT = 10;
+
     @Test
     void testTooManyMethods() {
         final FileMethodCountCheck check = new FileMethodCountCheck();
@@ -26,7 +29,7 @@ public class FileMethodCountCheckTest extends MagikCheckTestBase {
     @Test
     void testOk() {
         final FileMethodCountCheck check = new FileMethodCountCheck();
-        check.maxMethodCount = 10;
+        check.maxMethodCount = MAX_METHOD_COUNT;
         final String code = ""
             + "_method a.m1 _endmethod\n"
             + "_method a.m1 _endmethod\n"
