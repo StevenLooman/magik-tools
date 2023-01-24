@@ -31,6 +31,10 @@ public class SimplifyIfCheck extends MagikCheck {
 
         // Only one statement in if body.
         final AstNode bodyNode = node.getFirstChild(MagikGrammar.BODY);
+        if (bodyNode == null) {
+            // Possibly a syntax error.
+            return;
+        }
         final List<AstNode> statementNodes = bodyNode.getChildren(MagikGrammar.STATEMENT);
         if (statementNodes.size() != 1) {
             return;
@@ -70,6 +74,10 @@ public class SimplifyIfCheck extends MagikCheck {
 
         // Only one statement in else body.
         final AstNode bodyNode = elseNode.getFirstChild(MagikGrammar.BODY);
+        if (bodyNode == null) {
+            // Possibly a syntax error.
+            return;
+        }
         final List<AstNode> statementNodes = bodyNode.getChildren(MagikGrammar.STATEMENT);
         if (statementNodes.size() != 1) {
             return;
