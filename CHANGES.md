@@ -10,6 +10,7 @@ Changes
 - Add check ForbiddenGlobalUsage
 - Add check MethodLineCount
 - Add check VariableCount
+- Fix VariableCountCheck better handling syntax errors
 
 
 0.6.0 (2022-09-12)

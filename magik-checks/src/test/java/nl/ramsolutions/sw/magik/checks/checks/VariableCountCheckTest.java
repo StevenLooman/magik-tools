@@ -67,4 +67,15 @@ public class VariableCountCheckTest extends MagikCheckTestBase {
         assertThat(issues).isEmpty();
     }
 
+    @Test
+    void testMethodSyntaxError() {
+        final VariableCountCheck check = new VariableCountCheck();
+        check.maximumVariableCount = 2;
+        final String code = ""
+            + "_method a.\n"
+            + "_endmethod\n";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
 }
