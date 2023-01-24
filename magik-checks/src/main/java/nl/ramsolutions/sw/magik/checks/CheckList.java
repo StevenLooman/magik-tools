@@ -7,6 +7,7 @@ import nl.ramsolutions.sw.magik.checks.checks.CommentedCodeCheck;
 import nl.ramsolutions.sw.magik.checks.checks.DuplicateMethodInFileCheck;
 import nl.ramsolutions.sw.magik.checks.checks.EmptyBlockCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ExemplarSlotCountCheck;
+import nl.ramsolutions.sw.magik.checks.checks.FileMethodCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.FileNotInLoadListCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenCallCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenGlobalUsageCheck;
@@ -65,6 +66,7 @@ public final class CheckList {
             DuplicateMethodInFileCheck.class,
             EmptyBlockCheck.class,
             ExemplarSlotCountCheck.class,
+            FileMethodCountCheck.class,
             FileNotInLoadListCheck.class,
             ForbiddenCallCheck.class,
             ForbiddenGlobalUsageCheck.class,
