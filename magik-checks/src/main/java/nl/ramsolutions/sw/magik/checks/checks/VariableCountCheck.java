@@ -46,6 +46,11 @@ public class VariableCountCheck extends MagikCheck {
 
     private void checkDefinition(final AstNode node) {
         final AstNode body = node.getFirstChild(MagikGrammar.BODY);
+        if (body == null) {
+            // Possibly a syntax error.
+            return;
+        }
+
         final MagikFile magikFile = this.getMagikFile();
         final GlobalScope globalScope = magikFile.getGlobalScope();
         final Scope scope = globalScope.getScopeForNode(body);
