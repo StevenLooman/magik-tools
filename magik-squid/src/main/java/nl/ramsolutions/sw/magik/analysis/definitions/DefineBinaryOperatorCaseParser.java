@@ -108,9 +108,9 @@ public class DefineBinaryOperatorCaseParser {
         // Figure operator & lhs & rhs.
         final String operator = operatorSymbol.substring(1);
         final String lhsName = argument1Node.getTokenValue();
-        final TypeString lhs = TypeString.of(lhsName, currentPakkage);
+        final TypeString lhs = TypeString.ofIdentifier(lhsName, currentPakkage);
         final String rhsName = argument2Node.getTokenValue();
-        final TypeString rhs = TypeString.of(rhsName, currentPakkage);
+        final TypeString rhs = TypeString.ofIdentifier(rhsName, currentPakkage);
         final BinaryOperatorDefinition operatorDefinition =
             new BinaryOperatorDefinition(statementNode, currentPakkage, operator, lhs, rhs);
         return List.of(operatorDefinition);

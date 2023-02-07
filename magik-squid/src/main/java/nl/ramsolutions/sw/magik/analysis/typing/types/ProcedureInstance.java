@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -62,6 +63,11 @@ public class ProcedureInstance extends AbstractType {
     @Override
     public Collection<Slot> getSlots() {
         return this.procedureType.getSlots();
+    }
+
+    @Override
+    public List<GenericDeclaration> getGenerics() {
+        return Collections.emptyList();
     }
 
     @Override

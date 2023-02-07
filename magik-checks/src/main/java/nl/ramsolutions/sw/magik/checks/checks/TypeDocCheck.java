@@ -12,17 +12,17 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.parser.NewDocParser;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import org.sonar.check.Rule;
 
 /**
- * Check NewDoc.
+ * Check TypeDoc.
  */
-@Rule(key = NewDocCheck.CHECK_KEY)
-public class NewDocCheck extends MagikCheck {
+@Rule(key = TypeDocCheck.CHECK_KEY)
+public class TypeDocCheck extends MagikCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "NewDoc";
+    public static final String CHECK_KEY = "TypeDoc";
 
     private static final String MESSAGE_PARAM_MISSING = "Missing parameter: %s.";
     private static final String MESSAGE_PARAM_UNKNOWN = "Unknown parameter: %s.";
@@ -41,8 +41,8 @@ public class NewDocCheck extends MagikCheck {
 
     private void checkDefinitionParameters(final AstNode node) {
         // Get parameter defintions.
-        final NewDocParser newDocParser = new NewDocParser(node);
-        final Map<AstNode, String> docParameterNameNodes = newDocParser.getParameterNameNodes();
+        final TypeDocParser typeDocParser = new TypeDocParser(node);
+        final Map<AstNode, String> docParameterNameNodes = typeDocParser.getParameterNameNodes();
         final Map<String, AstNode> parameterNodes = this.getParameterNodes(node);
 
         // Compare parameters.
@@ -83,8 +83,8 @@ public class NewDocCheck extends MagikCheck {
 
         // Get slot defintions.
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
-        final NewDocParser newDocParser = new NewDocParser(statementNode);
-        final Map<String, AstNode> docSlotNameNodes = newDocParser.getSlotNameNodes();
+        final TypeDocParser typeDocParser = new TypeDocParser(statementNode);
+        final Map<String, AstNode> docSlotNameNodes = typeDocParser.getSlotNameNodes();
 
         final DefSlottedExemplarParser parser = new DefSlottedExemplarParser(node);
         final List<Definition> definitions = parser.parseDefinitions();

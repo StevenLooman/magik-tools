@@ -23,7 +23,6 @@ import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
 
     private static final String MESSAGE = "Argument type (%s) does not match parameter type (%s)";
-    private static final String SW_UNSET = "sw:unset";
 
     @Override
     protected void walkPostMethodInvocation(final AstNode node) {
@@ -52,7 +51,7 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
         // Get methods.
         final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
         final String methodName = helper.getMethodName();
-        final AbstractType unsetType = this.getTypeKeeper().getType(TypeString.of(SW_UNSET));
+        final AbstractType unsetType = this.getTypeKeeper().getType(TypeString.ofIdentifier("unset", "sw"));
         for (final Method method : calledType.getMethods(methodName)) {
             final List<Parameter> parameters = method.getParameters();
             if (parameters.isEmpty()) {

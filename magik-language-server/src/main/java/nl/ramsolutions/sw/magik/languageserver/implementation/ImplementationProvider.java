@@ -140,7 +140,8 @@ public class ImplementationProvider {
         final AstNode previousSiblingNode = currentNode.getPreviousSibling();
         final ExpressionResult result = reasoner.getNodeType(previousSiblingNode);
 
-        final AbstractType unsetType = typeKeeper.getType(TypeString.of("sw:unset"));
+        final TypeString unsetTypeString = TypeString.ofIdentifier("unset", "sw");
+        final AbstractType unsetType = typeKeeper.getType(unsetTypeString);
         AbstractType type = result.get(0, unsetType);
         final List<org.eclipse.lsp4j.Location> locations = new ArrayList<>();
         if (type == UndefinedType.INSTANCE) {

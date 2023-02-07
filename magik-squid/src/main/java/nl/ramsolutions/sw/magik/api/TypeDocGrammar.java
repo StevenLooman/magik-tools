@@ -9,10 +9,10 @@ import org.sonar.sslr.grammar.LexerlessGrammarBuilder;
 import org.sonar.sslr.parser.LexerlessGrammar;
 
 /**
- * NewDoc grammar.
+ * TypeDoc grammar.
  */
 @SuppressWarnings({"checkstyle:JavadocVariable", "checkstyle:MethodLength"})
-public enum NewDocGrammar implements GrammarRuleKey {
+public enum TypeDocGrammar implements GrammarRuleKey {
 
     // spacing
     WHITESPACE,
@@ -31,28 +31,27 @@ public enum NewDocGrammar implements GrammarRuleKey {
     RETURN,
     LOOP,
     SLOT,
+    GENERIC,
 
+    // parts
     NAME,
     TYPE,
-    TYPE_NAME,
+    TYPE_VALUE,
     DESCRIPTION,
 
-    TYPE_SELF,
-    TYPE_CLONE,
-    TYPE_PARAMETER_REFERENCE,
-
     // root
-    NEW_DOC;
+    TYPE_DOC;
 
     /**
-     * NewDoc Doc elements.
+     * TypeDoc Doc elements.
      */
     public enum Element implements GrammarRuleKey {
 
         PARAM,
         RETURN,
         LOOP,
-        SLOT;
+        SLOT,
+        GENERIC;
 
         static final String START_CHAR = "@";
 
@@ -81,17 +80,12 @@ public enum NewDocGrammar implements GrammarRuleKey {
     }
 
     /**
-     * NewDoc Punctuators.
+     * TypeDoc Punctuators.
      */
     public enum Punctuator implements GrammarRuleKey {
 
-        TYPE_SEPARATOR(","),
-        TYPE_COMBINATOR("|"),
         TYPE_OPEN("{"),
-        TYPE_CLOSE("}"),
-        TYPE_ARG_OPEN("("),
-        TYPE_ARG_CLOSE(")"),
-        TYPE_PARAM_REF("_parameter");
+        TYPE_CLOSE("}");
 
         private final String value;
 
@@ -112,14 +106,10 @@ public enum NewDocGrammar implements GrammarRuleKey {
     private static final String DESCRIPTION_REGEXP = ".*";
 
     private static final String SIMPLE_IDENTIFIER_REGEXP = "([a-zA-Z!?]|\\\\.)([a-zA-Z0-9_!?]|\\\\.)*";
-    private static final String TYPE_IDENTIFIER_REGEXP =
-        "(" + SIMPLE_IDENTIFIER_REGEXP + ":)?" + SIMPLE_IDENTIFIER_REGEXP;
-    private static final String SELF_REGEXP = "(?i)" + MagikKeyword.SELF.getValue() + "(?!\\w)";
-    private static final String CLONE_REGEXP = "(?i)" + MagikKeyword.CLONE.getValue() + "(?!\\w)";
 
     /**
-     * Create a new LexerlessGrammar for the Magik language.
-     * @return Grammar for the Magik language
+     * Create a new LexerlessGrammar for TypeDoc.
+     * @return TypeDoc grammar.
      */
     public static LexerlessGrammar create() {
         final LexerlessGrammarBuilder b = LexerlessGrammarBuilder.create();
@@ -137,17 +127,18 @@ public enum NewDocGrammar implements GrammarRuleKey {
             SPACING,
             b.regexp(DOC_START_REGEXP));
 
-        NewDocGrammar.elements(b);
-        NewDocGrammar.punctuators(b);
+        TypeDocGrammar.elements(b);
+        TypeDocGrammar.punctuators(b);
 
-        b.rule(NEW_DOC).is(
+        b.rule(TYPE_DOC).is(
             b.optional(FUNCTION),
             b.zeroOrMore(
                 b.firstOf(
                     PARAM,
                     RETURN,
                     LOOP,
-                    SLOT)),
+                    SLOT,
+                    GENERIC)),
             SPACING,
             b.token(GenericTokenType.EOF, b.endOfInput()));
 
@@ -192,32 +183,20 @@ public enum NewDocGrammar implements GrammarRuleKey {
             b.optional(TYPE),
             NAME,
             DESCRIPTION);
+        b.rule(GENERIC).is(
+            DOC_START,
+            Element.GENERIC,
+            NAME,
+            DESCRIPTION);
 
+        b.rule(TYPE_VALUE).is(
+            b.regexp(TypeDocGrammar.anythingButPunctuator(Punctuator.TYPE_CLOSE)));
         b.rule(TYPE).is(
             Punctuator.TYPE_OPEN,
-            b.optional(TYPE_NAME),
-            b.zeroOrMore(
-                Punctuator.TYPE_COMBINATOR,
-                TYPE_NAME),
+            TYPE_VALUE,
             Punctuator.TYPE_CLOSE);
-        b.rule(TYPE_NAME).is(
-            b.firstOf(
-                TYPE_SELF,
-                TYPE_CLONE,
-                TYPE_PARAMETER_REFERENCE,
-                b.regexp(TYPE_IDENTIFIER_REGEXP)));
 
-        b.rule(TYPE_SELF).is(
-            b.regexp(SELF_REGEXP));
-        b.rule(TYPE_CLONE).is(
-            b.regexp(CLONE_REGEXP));
-        b.rule(TYPE_PARAMETER_REFERENCE).is(
-            Punctuator.TYPE_PARAM_REF,
-            Punctuator.TYPE_ARG_OPEN,
-            b.regexp(SIMPLE_IDENTIFIER_REGEXP),
-            Punctuator.TYPE_ARG_CLOSE);
-
-        b.setRootRule(NEW_DOC);
+        b.setRootRule(TYPE_DOC);
 
         return b.build();
     }
@@ -243,6 +222,10 @@ public enum NewDocGrammar implements GrammarRuleKey {
         for (final Punctuator p : Punctuator.values()) {
             b.rule(p).is(SPACING_NO_LB, p.getValue()).skip();
         }
+    }
+
+    private static String anythingButPunctuator(final Punctuator punctuator) {
+        return "(?s).+?(?=\\" + punctuator.getValue() + ")";
     }
 
 }

@@ -34,11 +34,6 @@ public class ExpressionResult {
     public static final ExpressionResult UNDEFINED = new ExpressionResult(
         Collections.nCopies(1024, UndefinedType.INSTANCE));    // 1024 is max for _scatter
 
-    /**
-     * Serialized name of {@code ExpressionResult.UNDEFINED}.
-     */
-    public static final String UNDEFINED_SERIALIZED_NAME = "__UNDEFINED_RESULT__";
-
     private static final int MAX_ITEMS = 1024;
 
     private final List<AbstractType> types;
@@ -123,7 +118,6 @@ public class ExpressionResult {
 
     /**
      * Substitue {@code from} by {@code to} in a copy of self.
-     * Used to replace the {@link SelfType}.
      * @param from To substitute.
      * @param to To substitute with.
      * @return New {@link ExpressionResult}.

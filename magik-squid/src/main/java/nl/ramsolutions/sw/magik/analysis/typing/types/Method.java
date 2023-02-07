@@ -66,6 +66,14 @@ public class Method {
             return Objects.equals(otherTypeUsage.getGlobal(), this.getGlobal());
         }
 
+        @Override
+        public String toString() {
+            return String.format(
+                "%s@%s(%s)",
+                this.getClass().getName(), Integer.toHexString(this.hashCode()),
+                this.getGlobal());
+        }
+
     }
 
     /**
@@ -289,7 +297,7 @@ public class Method {
     private final ExpressionResultString callResult;
     private final ExpressionResultString loopbodyResult;
     private final String name;
-    private final Set<GlobalUsage> usedTypes;
+    private final Set<GlobalUsage> usedGlobals;
     private final Set<MethodUsage> calledMethods;
     private final Set<SlotUsage> usedSlots;
     private final Set<ConditionUsage> usedConditions;
@@ -327,7 +335,7 @@ public class Method {
         this.doc = methodDoc;
         this.callResult = callResult;
         this.loopbodyResult = loopbodyResult;
-        this.usedTypes = new HashSet<>();
+        this.usedGlobals = new HashSet<>();
         this.calledMethods = new HashSet<>();
         this.usedSlots = new HashSet<>();
         this.usedConditions = new HashSet<>();
@@ -489,19 +497,19 @@ public class Method {
     }
 
     /**
-     * Add a used type.
-     * @param typeUsage Type usage.
+     * Add a used global.
+     * @param globalUsage Global usage.
      */
-    public void addUsedType(final GlobalUsage typeUsage) {
-        this.usedTypes.add(typeUsage);
+    public void addUsedGlobal(final GlobalUsage globalUsage) {
+        this.usedGlobals.add(globalUsage);
     }
 
     /**
      * Get the used types.
      * @return All used types by this method.
      */
-    public Set<GlobalUsage> getTypeUsages() {
-        return Collections.unmodifiableSet(this.usedTypes);
+    public Set<GlobalUsage> getGlobalUsages() {
+        return Collections.unmodifiableSet(this.usedGlobals);
     }
 
     /**

@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
@@ -141,6 +142,25 @@ public abstract class AbstractType {
     }
 
     /**
+     * Get the {@link GenericDefinition}s.
+     * @return List of {@link GenericDefinition}s.
+     */
+    public abstract List<GenericDeclaration> getGenerics();
+
+    /**
+     * Get the {@link GenericDefinition} by name.
+     * @param name Name of GenericDefinition.
+     * @return
+     */
+    @CheckForNull
+    public GenericDeclaration getGeneric(final String name) {
+        return this.getGenerics().stream()
+            .filter(genericDefinition -> genericDefinition.getName().equals(name))
+            .findAny()
+            .orElse(null);
+    }
+
+    /**
      * Get {@link Location} for exemplar.
      * @return {@link Location} where exemplar is defined.
      */
@@ -158,16 +178,16 @@ public abstract class AbstractType {
     }
 
     /**
-     * Set method documentation.
-     * @param comment Method doc.
+     * Set type documentation.
+     * @param doc Type doc.
      */
-    public void setDoc(final String comment) {
-        this.doc = comment;
+    public void setDoc(final String doc) {
+        this.doc = doc;
     }
 
     /**
-     * Get method documentation.
-     * @return Method doc.
+     * Get type documentation.
+     * @return Type doc.
      */
     @CheckForNull
     public String getDoc() {

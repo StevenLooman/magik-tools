@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
-import nl.ramsolutions.sw.magik.api.NewDocGrammar;
 
 /**
  * Container to hold resulting unresolved {@link AbstractType}s.
@@ -40,9 +38,6 @@ public class ExpressionResultString {
      * Serialized name of {@code ExpressionResult.UNDEFINED}.
      */
     public static final String UNDEFINED_SERIALIZED_NAME = "__UNDEFINED_RESULT__";
-
-    private static final String TYPE_SEPARATOR = NewDocGrammar.Punctuator.TYPE_SEPARATOR.getValue();
-    private static final String TYPE_SEPARATOR_RE = Pattern.quote(TYPE_SEPARATOR);
 
     private static final int MAX_ITEMS = 1024;
 
@@ -97,6 +92,18 @@ public class ExpressionResultString {
     }
 
     /**
+     * Substitue {@code from} by {@code to} in a copy of self.
+     * @param from From type.
+     * @param to To type.
+     * @return New {@link ExpressionResultString}.
+     */
+    public ExpressionResultString substituteType(final TypeString from, final TypeString to) {
+        return this.types.stream()
+            .map(typeString -> typeString.substituteType(from, to))
+            .collect(ExpressionResultString.COLLECTOR);
+    }
+
+    /**
      * Get type names of all items of the result.
      * @return Type names of items of the result.
      */
@@ -146,25 +153,6 @@ public class ExpressionResultString {
      */
     public Stream<TypeString> stream() {
         return this.types.stream();
-    }
-
-    /**
-     * Get {@link ExpressionResultString} from string and package.
-     * @param expressionResultString String to parse.
-     * @param currentPackage Current package.
-     * @return Parsed expression result string.
-     */
-    public static ExpressionResultString of(
-            final @Nullable String expressionResultString, final String currentPackage) {
-        if (expressionResultString == null
-            || expressionResultString.isBlank()
-            || expressionResultString.equalsIgnoreCase(ExpressionResult.UNDEFINED_SERIALIZED_NAME)) {
-            return ExpressionResultString.UNDEFINED;
-        }
-
-        return Stream.of(expressionResultString.split(TYPE_SEPARATOR_RE))
-            .map(str -> TypeString.of(str, currentPackage))
-            .collect(ExpressionResultString.COLLECTOR);
     }
 
     @Override

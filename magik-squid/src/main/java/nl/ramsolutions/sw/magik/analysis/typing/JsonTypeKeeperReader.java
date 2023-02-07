@@ -8,9 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.security.InvalidParameterException;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import nl.ramsolutions.sw.magik.analysis.Location;
@@ -18,15 +16,16 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.types.GenericDeclaration;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ProcedureInstance;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Slot;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
+import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,15 +43,14 @@ public final class JsonTypeKeeperReader {
     private static final String SW_PAKKAGE = "sw";
 
     private final ITypeKeeper typeKeeper;
-    private final TypeParser typeParser;
-    private final Map<MagikType, JSONArray> typeParents = new HashMap<>();
-    private final Map<Slot, TypeString> slotTypeNames = new HashMap<>();
+    private final TypeReader typeParser;
 
     private JsonTypeKeeperReader(final ITypeKeeper typeKeeper) {
         this.typeKeeper = typeKeeper;
-        this.typeParser = new TypeParser(this.typeKeeper);
+        this.typeParser = new TypeReader(this.typeKeeper);
     }
 
+    @SuppressWarnings("checkstyle:IllegalCatch")
     private void run(final Path path) throws IOException {
         LOGGER.debug("Reading type database from path: {}", path);
 
@@ -62,17 +60,21 @@ public final class JsonTypeKeeperReader {
              BufferedReader bufferedReader = new BufferedReader(fileReader)) {
             String line = bufferedReader.readLine();
             while (line != null) {
-                this.processLine(line);
+                try {
+                    this.processLine(line);
+                } catch (final RuntimeException exception) {
+                    LOGGER.error("Error parsing line {}, line data: {}", lineNo, line);
+                    LOGGER.error(exception.getMessage(), exception);
+                }
 
                 ++lineNo;
                 line = bufferedReader.readLine();
             }
         } catch (final JSONException exception) {
+            // This will never be hit, the catch block above handles it.
             LOGGER.error("JSON Error reading line no: {}", lineNo);
             throw new IllegalStateException(exception);
         }
-
-        this.postProcess();
     }
 
     private void processLine(final String line) {
@@ -132,7 +134,7 @@ public final class JsonTypeKeeperReader {
     private void handleType(final JSONObject instruction) {
         final String typeFormat = instruction.getString("type_format");
         final String name = instruction.getString("type_name");
-        final TypeString typeString = TypeString.of(name);
+        final TypeString typeString = TypeStringParser.parseTypeString(name);
         final MagikType type;
         if (this.typeKeeper.getType(typeString) != UndefinedType.INSTANCE) {
             type = (MagikType) this.typeKeeper.getType(typeString);
@@ -154,44 +156,35 @@ public final class JsonTypeKeeperReader {
         instruction.getJSONArray("slots").forEach(slotObj -> {
             final JSONObject slot = (JSONObject) slotObj;
             final String slotName = slot.getString("name");
-            final Slot typeSlot = type.addSlot(null, slotName);
             final String slotTypeName = slot.getString("type_name");
-            final TypeString slotTypeString = TypeString.of(slotTypeName);
-            this.slotTypeNames.put(typeSlot, slotTypeString);
+            final TypeString slotTypeString = TypeStringParser.parseTypeString(slotTypeName);
+            type.addSlot(null, slotName, slotTypeString);
         });
 
-        // Save inheritance for later...
-        final JSONArray parents = instruction.getJSONArray("parents");
-        this.typeParents.put(type, parents);
-    }
-
-    private void postProcess() {
-        // Parents.
-        this.typeParents.entrySet().forEach(entry -> {
-            final MagikType type = entry.getKey();
-            final JSONArray parentsArray = entry.getValue();
-            parentsArray.forEach(parentObj -> {
-                final String parentStr = (String) parentObj;
-                final TypeString parentRef = TypeString.of(parentStr, SW_PAKKAGE);
-                type.addParent(parentRef);
+        if (instruction.has("generics")) {
+            instruction.getJSONArray("generics").forEach(genericObj -> {
+                final JSONObject generic = (JSONObject) genericObj;
+                final String genericName = generic.getString("name");
+                final String genericDoc = generic.getString("doc");
+                final GenericDeclaration genericDeclaration = type.addGeneric(null, genericName);
+                genericDeclaration.setDoc(genericDoc);
             });
-        });
+        }
 
-        // Slot types.
-        this.slotTypeNames.entrySet().forEach(entry -> {
-            final Slot slot = entry.getKey();
-            final TypeString typeString = entry.getValue();
-            final AbstractType type = this.typeParser.parseTypeString(typeString);
-            slot.setType(type);
+        final JSONArray parents = instruction.getJSONArray("parents");
+        parents.forEach(parentObj -> {
+            final String parentStr = (String) parentObj;
+            final TypeString parentRef = TypeString.ofIdentifier(parentStr, SW_PAKKAGE);
+            type.addParent(parentRef);
         });
     }
 
     private void handleGlobal(final JSONObject instruction) {
         final String name = instruction.getString("name");
-        final TypeString typeString = TypeString.of(name);
+        final TypeString typeString = TypeString.ofIdentifier(name, TypeString.DEFAULT_PACKAGE);
 
         final String typeName = instruction.getString("type_name");
-        final TypeString aliasedRef = TypeString.of(typeName);
+        final TypeString aliasedRef = TypeStringParser.parseTypeString(typeName);
 
         final AliasType global = new AliasType(this.typeKeeper, typeString, aliasedRef);
         this.typeKeeper.addType(global);
@@ -199,7 +192,7 @@ public final class JsonTypeKeeperReader {
 
     private void handleMethod(final JSONObject instruction) {
         final String typeName = instruction.getString("type_name");
-        final TypeString typeRef = TypeString.of(typeName);
+        final TypeString typeRef = TypeString.ofIdentifier(typeName, TypeString.DEFAULT_PACKAGE);
         final AbstractType abstractType = this.typeKeeper.getType(typeRef);
         if (abstractType == UndefinedType.INSTANCE) {
             throw new IllegalStateException("Unknown type: " + typeName);
@@ -261,9 +254,12 @@ public final class JsonTypeKeeperReader {
     private void handleBinaryOperator(final JSONObject instruction) {
         final BinaryOperator.Operator operator =
             BinaryOperator.Operator.valueFor(instruction.getString("operator"));
-        final TypeString lhsTypeRef = TypeString.of(instruction.getString("lhs_type"));
-        final TypeString rhsTypeRef = TypeString.of(instruction.getString("rhs_type"));
-        final TypeString resultTypeRef = TypeString.of(instruction.getString("return_type"));
+        final String lhsTypeStr = instruction.getString("lhs_type");
+        final TypeString lhsTypeRef = TypeStringParser.parseTypeString(lhsTypeStr);
+        final String rhsTypeStr = instruction.getString("rhs_type");
+        final TypeString rhsTypeRef = TypeStringParser.parseTypeString(rhsTypeStr);
+        final String returnTypeStr = instruction.getString("return_type");
+        final TypeString resultTypeRef = TypeStringParser.parseTypeString(returnTypeStr);
         final BinaryOperator binaryOperator = new BinaryOperator(operator, lhsTypeRef, rhsTypeRef, resultTypeRef);
         this.typeKeeper.addBinaryOperator(binaryOperator);
     }
@@ -277,7 +273,7 @@ public final class JsonTypeKeeperReader {
                     ? Parameter.Modifier.valueOf(parameterObj.getString("modifier").toUpperCase())
                     : Parameter.Modifier.NONE;
                 final String typeName = parameterObj.getString("type_name");
-                final TypeString typeString = TypeString.of(typeName);
+                final TypeString typeString = TypeStringParser.parseTypeString(typeName);
                 final AbstractType type = this.typeParser.parseTypeString(typeString);
                 return new Parameter(name, modifier, type);
             })
@@ -291,15 +287,14 @@ public final class JsonTypeKeeperReader {
 
         if (obj instanceof String) {
             final String expressionResultString = (String) obj;
-            final TypeString typeString = TypeString.of(expressionResultString);
-            return new ExpressionResultString(typeString);
+            return TypeStringParser.parseExpressionResultString(expressionResultString, TypeString.DEFAULT_PACKAGE);
         }
 
         if (obj instanceof JSONArray) {
             final JSONArray array = (JSONArray) obj;
             return StreamSupport.stream(array.spliterator(), false)
                 .map(String.class::cast)
-                .map(TypeString::new)
+                .map(TypeStringParser::parseTypeString)
                 .collect(ExpressionResultString.COLLECTOR);
         }
 
@@ -321,7 +316,8 @@ public final class JsonTypeKeeperReader {
         final ExpressionResultString loopResultStr = this.parseExpressionResultString(instruction.get("loop_types"));
 
         final String procedureName = instruction.getString("procedure_name");
-        final MagikType procedureType = (MagikType) this.typeKeeper.getType(TypeString.of("sw:procedure"));
+        final TypeString procedureRef = TypeString.ofIdentifier("procedure", "sw");
+        final MagikType procedureType = (MagikType) this.typeKeeper.getType(procedureRef);
         final String methodDoc = instruction.get("doc") != JSONObject.NULL
             ? instruction.getString("doc")
             : null;
@@ -337,7 +333,7 @@ public final class JsonTypeKeeperReader {
 
         // Create alias to instance.
         final String name = instruction.getString("name");
-        final TypeString typeString = TypeString.of(name);
+        final TypeString typeString = TypeString.ofIdentifier(name, TypeString.DEFAULT_PACKAGE);
         new AliasType(this.typeKeeper, typeString, instance);
     }
 

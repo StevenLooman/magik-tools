@@ -100,7 +100,7 @@ public class DefineSharedVariableParser {
         final String variableNameSymbol = argument0Node.getTokenValue();
         final String variableName = variableNameSymbol.substring(1);
         final String flavor = argument2Node.getTokenValue();
-        final TypeString exemplarName = TypeString.of(identifier, pakkage);
+        final TypeString exemplarName = TypeString.ofIdentifier(identifier, pakkage);
         final List<MethodDefinition> methodDefinitions =
             this.generateVariableMethods(statementNode, exemplarName, variableName, flavor);
         return List.copyOf(methodDefinitions);

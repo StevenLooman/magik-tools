@@ -1,0 +1,28 @@
+_package user
+
+## Test exemplar.
+## @slot {sw:rope} slot_a
+## @slot {sw:property_list<sw:symbol, sw:integer>} slot_b
+def_slotted_exemplar(
+    :test_exemplar,
+    {
+        {:slot_a, _unset},
+        {:slot_b, _unset}
+    })
+$
+
+_method test_exemplar.new()
+    ## Constructor.
+    ## @return {_self}
+    _return _clone.init()
+_endmethod
+$
+
+_private _method test_exemplar.init()
+    ## Initializer.
+    ## @return {_self}
+    .slot_a << sw:rope.new()
+    .slot_b << sw:property_list.new()
+    _return _self
+_endmethod
+$

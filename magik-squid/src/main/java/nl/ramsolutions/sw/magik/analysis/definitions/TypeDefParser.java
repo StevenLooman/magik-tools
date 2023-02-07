@@ -88,9 +88,7 @@ abstract class TypeDefParser {
         final String parent = parentStr.startsWith(":") || parentStr.startsWith("@")
             ? parentStr.substring(1)
             : parentStr;
-        return parent.contains(":")
-            ? TypeString.of(parent)
-            : TypeString.of(this.getCurrentPakkage() + ":" + parent);
+        return TypeString.ofIdentifier(parent, this.getCurrentPakkage());
     }
 
 }

@@ -10,20 +10,18 @@ import nl.ramsolutions.sw.magik.analysis.Location;
 public class Slot {
 
     private final Location location;
-    private final MagikType owner;
     private final String name;
-    private AbstractType type = UndefinedType.INSTANCE;
+    private final TypeString type;
 
     /**
      * Constructor.
      * @param location Location where this slot is defined.
-     * @param owner Owner of the slot.
      * @param name Name of this slot.
      */
-    public Slot(final @Nullable Location location, final MagikType owner, final String name) {
+    public Slot(final @Nullable Location location, final String name, final TypeString type) {
         this.location = location;
-        this.owner = owner;
         this.name = name;
+        this.type = type;
     }
 
     /**
@@ -33,14 +31,6 @@ public class Slot {
     @CheckForNull
     public Location getLocation() {
         return this.location;
-    }
-
-    /**
-     * Get the owner of the slot.
-     * @return Owner of the slot.
-     */
-    public MagikType getOwner() {
-        return this.owner;
     }
 
     /**
@@ -54,24 +44,16 @@ public class Slot {
     /**
      * Get the type of the slot.
      */
-    public AbstractType getType() {
+    public TypeString getType() {
         return this.type;
-    }
-
-    /**
-     * Set the type of the slot.
-     * @param type New type of this slot.
-     */
-    public void setType(AbstractType type) {
-        this.type = type;
     }
 
     @Override
     public String toString() {
         return String.format(
-                "%s@%s(%s.%s)",
-                this.getClass().getName(), Integer.toHexString(this.hashCode()),
-                this.getOwner().getFullName(), this.getName());
+            "%s@%s(%s)",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()),
+            this.getName());
     }
 
 }

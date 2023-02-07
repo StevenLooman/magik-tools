@@ -15,6 +15,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.GenericDeclaration;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
@@ -478,19 +479,35 @@ public class HoverProvider {
         }
 
         // Type slots.
-        Collection<Slot> slots = type.getSlots();
+        final Collection<Slot> slots = type.getSlots();
         if (!slots.isEmpty()) {
             builder
                 .append("## Slots\n");
             slots.stream()
                 .sorted(Comparator.comparing(Slot::getName))
                 .forEach(slot -> {
-                    final AbstractType slotType = slot.getType();
+                    final TypeString slotType = slot.getType();
                     builder
                         .append("* ")
                         .append(slot.getName())
                         .append(": ")
-                        .append(slotType.getFullName())
+                        .append(slotType.getFullString())
+                        .append("\n");
+                });
+            builder
+                .append(SECTION_END);
+        }
+
+        // Type generics.
+        final Collection<GenericDeclaration> generics = type.getGenerics();
+        if (!generics.isEmpty()) {
+            builder
+                .append("## Generics\n");
+            generics.stream()
+                .forEach(generic -> {
+                    builder
+                        .append("* ")
+                        .append(generic.getName())
                         .append("\n");
                 });
             builder

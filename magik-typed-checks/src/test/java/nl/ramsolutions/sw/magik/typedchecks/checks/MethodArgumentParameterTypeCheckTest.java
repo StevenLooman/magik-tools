@@ -26,9 +26,9 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final String code = "integer.m1(:symbol)";
         final ITypeKeeper typeKeeper = new TypeKeeper();
 
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
-        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final Parameter param1 = new Parameter("p1", Parameter.Modifier.NONE, symbolType);
         integerType.addMethod(
@@ -51,9 +51,9 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final String code = "integer.m1(1)";
         final ITypeKeeper typeKeeper = new TypeKeeper();
 
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
-        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final Parameter param1 = new Parameter("p1", Parameter.Modifier.NONE, symbolType);
         integerType.addMethod(
@@ -76,9 +76,9 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final String code = "integer.m1()";
         final ITypeKeeper typeKeeper = new TypeKeeper();
 
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
-        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final Parameter param1 = new Parameter("p1", Parameter.Modifier.NONE, symbolType);
         integerType.addMethod(
@@ -101,9 +101,9 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final String code = "integer.m1(:symbol, :symbol)";
         final ITypeKeeper typeKeeper = new TypeKeeper();
 
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
-        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final Parameter param1 = new Parameter("p1", Parameter.Modifier.NONE, symbolType);
         integerType.addMethod(

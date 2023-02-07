@@ -23,8 +23,10 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
-import nl.ramsolutions.sw.magik.api.NewDocGrammar;
-import nl.ramsolutions.sw.magik.parser.NewDocParser;
+import nl.ramsolutions.sw.magik.api.TypeDocGrammar;
+import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
+import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 
 /**
  * Semantic token walker.
@@ -38,10 +40,10 @@ public class SemanticTokenWalker extends AstWalker {
         MagikKeyword.ABSTRACT.getValue(),
         MagikKeyword.ITER.getValue());
 
-    private static final Map<NewDocGrammar, SemanticToken.Type> NEW_DOC_ELEMENT_TYPE_MAPPING = Map.of(
-        NewDocGrammar.PARAM, SemanticToken.Type.PARAMETER,
-        NewDocGrammar.LOOP, SemanticToken.Type.VARIABLE,
-        NewDocGrammar.SLOT, SemanticToken.Type.PROPERTY);
+    private static final Map<TypeDocGrammar, SemanticToken.Type> TYPE_DOC_ELEMENT_TYPE_MAPPING = Map.of(
+        TypeDocGrammar.PARAM, SemanticToken.Type.PARAMETER,
+        TypeDocGrammar.LOOP, SemanticToken.Type.VARIABLE,
+        TypeDocGrammar.SLOT, SemanticToken.Type.PROPERTY);
 
     private static final Set<String> MAGIK_KEYWORD_VALUES = Arrays.stream(MagikKeyword.values())
         .filter(keyword ->
@@ -134,22 +136,24 @@ public class SemanticTokenWalker extends AstWalker {
         final String value = token.getOriginalValue();
         if (value.startsWith("##")) {
             final Set<SemanticToken.Modifier> docModifier = Set.of(SemanticToken.Modifier.DOCUMENTATION);
+            final Set<SemanticToken.Modifier> constModifier =
+                Set.of(SemanticToken.Modifier.DOCUMENTATION, SemanticToken.Modifier.READONLY);
 
             final List<Token> docTokens = List.of(token);
-            final NewDocParser newDocParser = new NewDocParser(docTokens);
-            final AstNode newDocNode = newDocParser.getNewDocNode();
+            final TypeDocParser typeDocParser = new TypeDocParser(docTokens);
+            final AstNode typeDocNode = typeDocParser.getTypeDocNode();
 
             // It is either a FUNCTION node or element nodes.
-            final AstNode functionNode = newDocNode.getFirstChild(NewDocGrammar.FUNCTION);
+            final AstNode functionNode = typeDocNode.getFirstChild(TypeDocGrammar.FUNCTION);
             if (functionNode != null) {
                 this.addSemanticToken(token, SemanticToken.Type.COMMENT, docModifier);
             }
 
-            final List<AstNode> elementNodes = newDocNode.getChildren(
-                NewDocGrammar.PARAM, NewDocGrammar.RETURN, NewDocGrammar.LOOP, NewDocGrammar.SLOT);
+            final List<AstNode> elementNodes = typeDocNode.getChildren(
+                TypeDocGrammar.PARAM, TypeDocGrammar.RETURN, TypeDocGrammar.LOOP, TypeDocGrammar.SLOT);
             elementNodes.forEach(elementNode -> {
                 // DOC_START
-                final AstNode docStartNode = elementNode.getFirstChild(NewDocGrammar.DOC_START);
+                final AstNode docStartNode = elementNode.getFirstChild(TypeDocGrammar.DOC_START);
                 this.addSemanticToken(docStartNode, SemanticToken.Type.COMMENT, docModifier);
 
                 // Element
@@ -157,35 +161,49 @@ public class SemanticTokenWalker extends AstWalker {
                 this.addSemanticToken(keywordNode, SemanticToken.Type.KEYWORD, docModifier);
 
                 // TYPE
-                final AstNode typeNode = elementNode.getFirstChild(NewDocGrammar.TYPE);
+                final AstNode typeNode = elementNode.getFirstChild(TypeDocGrammar.TYPE);
                 if (typeNode != null) {
-                    final List<AstNode> typeNodes = typeNode.getDescendants(
-                        NewDocGrammar.TYPE_NAME, NewDocGrammar.TYPE_CLONE, NewDocGrammar.TYPE_SELF);
-                    typeNodes.forEach(typeTypeNode -> {
-                        final String identifier = typeTypeNode.getTokenValue();
-                        final TypeString typeString = identifier.indexOf(':') != -1
-                            ? TypeString.of(identifier)
-                            : TypeString.of(identifier, this.currentPakkage);
-                        if (typeTypeNode.is(NewDocGrammar.TYPE_CLONE, NewDocGrammar.TYPE_SELF)) {
-                            final Set<SemanticToken.Modifier> constModifier =
-                                Set.of(SemanticToken.Modifier.DOCUMENTATION, SemanticToken.Modifier.READONLY);
-                            this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, constModifier);
-                        } else if (this.isKnownType(typeString)) {
-                            this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, docModifier);
-                        }
-                    });
+                    final List<AstNode> typeValueNodes = typeNode.getChildren(TypeDocGrammar.TYPE_VALUE);
+                    if (!typeValueNodes.isEmpty()) {
+                        final AstNode typeValueNode = typeValueNodes.get(0);
+                        final AstNode typeStringNode = TypeStringParser.getParsedNodeForTypeString(typeValueNode);
+                        final List<AstNode> typeNodes = typeStringNode.getDescendants(
+                            TypeStringGrammar.TYPE_IDENTIFIER,
+                            TypeStringGrammar.TYPE_CLONE,
+                            TypeStringGrammar.TYPE_SELF,
+                            TypeStringGrammar.TYPE_PARAMETER_REFERENCE,
+                            TypeStringGrammar.TYPE_GENERIC);
+                        typeNodes.forEach(typeTypeNode -> {
+                            final String identifier = typeTypeNode.getTokenValue();
+                            final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
+                            if (typeTypeNode.is(TypeStringGrammar.TYPE_CLONE, TypeStringGrammar.TYPE_SELF)) {
+                                this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, constModifier);
+                            } else if (typeTypeNode.is(TypeStringGrammar.TYPE_PARAMETER_REFERENCE)) {
+                                this.addSemanticToken(typeTypeNode, SemanticToken.Type.KEYWORD, docModifier);
+
+                                // Color the parameter name.
+                                final AstNode refNode = typeTypeNode.getChildren().get(2);
+                                this.addSemanticToken(refNode, SemanticToken.Type.PARAMETER, docModifier);
+                            } else if (typeTypeNode.is(TypeStringGrammar.TYPE_GENERIC)) {
+                                final AstNode nameNode = typeTypeNode.getChildren().get(1);
+                                this.addSemanticToken(nameNode, SemanticToken.Type.TYPE_PARAMETER, docModifier);
+                            } else if (this.isKnownType(typeString)) {
+                                this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, docModifier);
+                            }
+                        });
+                    }
                 }
 
                 // NAME
-                final AstNode nameNode = elementNode.getFirstChild(NewDocGrammar.NAME);
+                final AstNode nameNode = elementNode.getFirstChild(TypeDocGrammar.NAME);
                 if (nameNode != null
                     && nameNode.getToken() != null) {
-                    final SemanticToken.Type type = NEW_DOC_ELEMENT_TYPE_MAPPING.get(elementNode.getType());
+                    final SemanticToken.Type type = TYPE_DOC_ELEMENT_TYPE_MAPPING.get(elementNode.getType());
                     this.addSemanticToken(nameNode, type, docModifier);
                 }
 
                 // DESCRIPTION
-                final List<AstNode> descriptionNodes = elementNode.getChildren(NewDocGrammar.DESCRIPTION);
+                final List<AstNode> descriptionNodes = elementNode.getChildren(TypeDocGrammar.DESCRIPTION);
                 descriptionNodes.forEach(descriptionNode ->
                     this.addSemanticToken(descriptionNode, SemanticToken.Type.COMMENT, docModifier));
             });
@@ -312,7 +330,7 @@ public class SemanticTokenWalker extends AstWalker {
 
             case GLOBAL:
             case DYNAMIC:
-                final TypeString typeString = TypeString.of(identifier, this.currentPakkage);
+                final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
                 if (this.isKnownType(typeString)) {
                     this.addSemanticToken(
                         node, SemanticToken.Type.CLASS, Set.of(SemanticToken.Modifier.VARIABLE_GLOBAL));

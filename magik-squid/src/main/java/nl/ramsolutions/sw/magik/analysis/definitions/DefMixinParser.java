@@ -70,7 +70,7 @@ public class DefMixinParser extends TypeDefParser {
 
         // Figure name.
         final String identifier = argument0Node.getTokenValue().substring(1);
-        final TypeString name = TypeString.of(identifier, pakkage);
+        final TypeString name = TypeString.ofIdentifier(identifier, pakkage);
 
         // Parents.
         final AstNode argument1Node = argumentsHelper.getArgument(1);

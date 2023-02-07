@@ -98,7 +98,7 @@ public final class ClassInfoTypeKeeperReader {
             final String className = scanner.next();
             if (!"<global>".equals(className)
                 && !"<condition>".equals(className)) {
-                final TypeString typeString = TypeString.of(className);
+                final TypeString typeString = TypeString.ofIdentifier(className, TypeString.DEFAULT_PACKAGE);
                 methodName = scanner.next();
                 if (!this.typeKeeper.hasType(typeString)) {
                     LOGGER.debug("Type not found: {}, for method: {}", className, methodName);
@@ -164,7 +164,7 @@ public final class ClassInfoTypeKeeperReader {
             scanner.next(); // "slotted_class"
 
             final String identifier = scanner.next();
-            final TypeString typeString = TypeString.of(identifier);
+            final TypeString typeString = TypeString.ofIdentifier(identifier, TypeString.DEFAULT_PACKAGE);
             if (!this.typeKeeper.hasType(typeString)) {
                 LOGGER.debug("Type not found: {}", identifier);
                 type = null;
@@ -179,7 +179,7 @@ public final class ClassInfoTypeKeeperReader {
         final String parentClassesLine = reader.readLine();
         final String[] parentClasses = parentClassesLine.split(" ");
         for (final String parentClass : parentClasses) {
-            final TypeString parentTypeString = TypeString.of(parentClass);
+            final TypeString parentTypeString = TypeString.ofIdentifier(parentClass, TypeString.DEFAULT_PACKAGE);
             if (!this.typeKeeper.hasType(parentTypeString)) {
                 LOGGER.debug("Type not found: {}", parentClass);
             }
@@ -227,7 +227,7 @@ public final class ClassInfoTypeKeeperReader {
             scanner.next(); // "mixin"
 
             final String identifier = scanner.next();
-            final TypeString typeString = TypeString.of(identifier);
+            final TypeString typeString = TypeString.ofIdentifier(identifier, TypeString.DEFAULT_PACKAGE);
             if (!this.typeKeeper.hasType(typeString)) {
                 LOGGER.debug("Type not found: {}", identifier);
                 type = null;

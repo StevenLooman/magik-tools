@@ -33,7 +33,7 @@ class ImplementationProviderTest {
     @Test
     void testProvideImplementation() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
             EMPTY_LOCATION,

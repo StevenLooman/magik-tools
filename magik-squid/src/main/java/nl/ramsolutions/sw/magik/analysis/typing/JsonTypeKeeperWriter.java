@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
@@ -92,10 +92,25 @@ public final class JsonTypeKeeperWriter {
                     .map(slot -> {
                         final JSONObject slotObject = new JSONObject();
                         slotObject.put("name", slot.getName());
-                        slotObject.put("type_name", slot.getType().getFullName());
+                        slotObject.put("type_name", slot.getType().getFullString());
                         return slotObject;
                     })
                     .collect(Collectors.toList());
+
+                final List<JSONObject> generics;
+                if (type instanceof MagikType) {
+                    final MagikType magikType = (MagikType) type;
+                    generics = magikType.getGenerics().stream()
+                        .map(generic -> {
+                            final JSONObject genericObject = new JSONObject();
+                            genericObject.put("name", generic.getName());
+                            genericObject.put("doc", generic.getDoc());
+                            return genericObject;
+                        })
+                    .collect(Collectors.toList());
+                } else {
+                    generics = Collections.emptyList();
+                }
 
                 final JSONObject instruction = new JSONObject();
                 instruction.put("instruction", "type");
@@ -103,6 +118,7 @@ public final class JsonTypeKeeperWriter {
                 instruction.put("type_format", this.getTypeFormat(type));
                 instruction.put("parents", parents);
                 instruction.put("slots", slots);
+                instruction.put("generics", generics);
                 instruction.put("doc", type.getDoc());
                 this.writeInstruction(writer, instruction);
             });
@@ -177,7 +193,7 @@ public final class JsonTypeKeeperWriter {
                     final ExpressionResultString loopTypes = method.getLoopbodyResult();
                     instruction.put("loop_types", loopTypes);
                 } else {
-                    instruction.put("return_types", ExpressionResult.UNDEFINED_SERIALIZED_NAME);
+                    instruction.put("return_types", ExpressionResultString.UNDEFINED_SERIALIZED_NAME);
                 }
                 instruction.put("source_file", sourceFile);
                 instruction.put("doc", method.getDoc());

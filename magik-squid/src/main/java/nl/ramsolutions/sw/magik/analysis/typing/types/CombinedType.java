@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -80,6 +81,13 @@ public class CombinedType extends AbstractType {
         }
 
         return new CombinedType(combinedTypes);
+    }
+
+    @Override
+    public List<GenericDeclaration> getGenerics() {
+        return this.getTypes().stream()
+            .flatMap(type -> type.getGenerics().stream())
+            .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
@@ -178,9 +186,11 @@ public class CombinedType extends AbstractType {
 
     @Override
     public TypeString getTypeString() {
-        return this.types.stream()
+        final TypeString[] typeStringsArr = this.types.stream()
             .map(AbstractType::getTypeString)
-            .collect(TypeString.COLLECTOR);
+            .collect(Collectors.toList())
+            .toArray(TypeString[]::new);
+        return TypeString.ofCombination(TypeString.DEFAULT_PACKAGE, typeStringsArr);
     }
 
     @Override
