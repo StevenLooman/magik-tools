@@ -25,7 +25,7 @@ public class EnumerationDefinition extends Definition {
     }
 
     public TypeString getTypeString() {
-        return TypeString.of(this.getPackage() + ":" + this.getName());
+        return TypeString.ofIdentifier(this.getName(), this.getPackage());
     }
 
 }

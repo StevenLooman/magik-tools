@@ -204,7 +204,7 @@ public class DefineSlotAccessParser {
         } else {
             throw new IllegalStateException();
         }
-        final TypeString exemplarName = TypeString.of(identifier, pakkage);
+        final TypeString exemplarName = TypeString.ofIdentifier(identifier, pakkage);
         final List<MethodDefinition> methodDefinitions =
             this.generateSlotMethods(statementNode, exemplarName, slotName, flag, flavor);
         return List.copyOf(methodDefinitions);

@@ -14,7 +14,7 @@ class ExpressionResultTest {
     @Test
     void testToStringOne() {
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final ExpressionResult result = new ExpressionResult(symbolType);
         final String toString = result.toString();
@@ -24,7 +24,7 @@ class ExpressionResultTest {
     @Test
     void testToStringThree() {
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final ExpressionResult result = new ExpressionResult(integerType, integerType, integerType);
         final String toString = result.toString();
@@ -41,9 +41,9 @@ class ExpressionResultTest {
     @Test
     void testToStringRepeating() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString unsetRef = TypeString.of("sw:unset");
+        final TypeString unsetRef = TypeString.ofIdentifier("unset", "sw");
         final AbstractType unsetType = typeKeeper.getType(unsetRef);
-        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final ExpressionResult result1 = ExpressionResult.UNDEFINED;
         final ExpressionResult result2 = new ExpressionResult(symbolType);
@@ -55,9 +55,9 @@ class ExpressionResultTest {
     @Test
     void testSubstituteType1() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
 
         final ExpressionResult result = new ExpressionResult(symbolType);
@@ -69,9 +69,9 @@ class ExpressionResultTest {
     @Test
     void testSubstituteType2() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final CombinedType combinedType = new CombinedType(symbolType, integerType);
 
@@ -85,7 +85,7 @@ class ExpressionResultTest {
     @Test
     void testSubstituteType3() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final AbstractType parameterReferenceType = new ParameterReferenceType("p1");
         final CombinedType combinedType = new CombinedType(symbolType, parameterReferenceType);

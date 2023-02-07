@@ -145,7 +145,8 @@ class DefinitionReaderTest {
         final SlottedExemplarDefinition slottedExemplarDef = (SlottedExemplarDefinition) definitions.get(0);
         assertThat(slottedExemplarDef.getName()).isEqualTo("test_exemplar");
         assertThat(slottedExemplarDef.getNode()).isEqualTo(node.getFirstDescendant(MagikGrammar.STATEMENT));
-        assertThat(slottedExemplarDef.getParents()).containsExactly(TypeString.of("sw:rope"));
+        final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
+        assertThat(slottedExemplarDef.getParents()).containsExactly(ropeRef);
     }
 
     @Test
@@ -163,8 +164,8 @@ class DefinitionReaderTest {
         assertThat(slottedExemplarDef.getName()).isEqualTo("test_exemplar");
         assertThat(slottedExemplarDef.getNode()).isEqualTo(node.getFirstDescendant(MagikGrammar.STATEMENT));
         assertThat(slottedExemplarDef.getParents()).containsExactly(
-            TypeString.of("user:mixin1"),
-            TypeString.of("user:rope"));
+            TypeString.ofIdentifier("mixin1", "user"),
+            TypeString.ofIdentifier("rope", "user"));
     }
 
     @Test
@@ -179,10 +180,10 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(IndexedExemplarDefinition.class);
         final IndexedExemplarDefinition indexedExemplarDef = (IndexedExemplarDefinition) definitions.get(0);
-        assertThat(indexedExemplarDef.getTypeString()).isEqualTo(TypeString.of("user:test_exemplar"));
+        assertThat(indexedExemplarDef.getTypeString()).isEqualTo(TypeString.ofIdentifier("test_exemplar", "user"));
         assertThat(indexedExemplarDef.getParents()).containsExactly(
-            TypeString.of("user:mixin1"),
-            TypeString.of("user:integer"));
+            TypeString.ofIdentifier("mixin1", "user"),
+            TypeString.ofIdentifier("user:integer", "user"));
     }
 
     @Test
@@ -197,8 +198,8 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MixinDefinition.class);
         final MixinDefinition mixinDef = (MixinDefinition) definitions.get(0);
-        assertThat(mixinDef.getTypeString()).isEqualTo(TypeString.of("user:test_mixin"));
-        assertThat(mixinDef.getParents()).containsExactly(TypeString.of("user:mixin1"));
+        assertThat(mixinDef.getTypeString()).isEqualTo(TypeString.ofIdentifier("test_mixin", "user"));
+        assertThat(mixinDef.getParents()).containsExactly(TypeString.ofIdentifier("mixin1", "user"));
     }
 
     @Test
@@ -215,8 +216,8 @@ class DefinitionReaderTest {
         final BinaryOperatorDefinition operatorDefinition = (BinaryOperatorDefinition) definitions.get(0);
         assertThat(operatorDefinition.getName()).isEqualTo("user:integer > user:float");
         assertThat(operatorDefinition.getOperator()).isEqualTo(">");
-        assertThat(operatorDefinition.getLhs()).isEqualTo(TypeString.of("user:integer"));
-        assertThat(operatorDefinition.getRhs()).isEqualTo(TypeString.of("user:float"));
+        assertThat(operatorDefinition.getLhs()).isEqualTo(TypeString.ofIdentifier("integer", "user"));
+        assertThat(operatorDefinition.getRhs()).isEqualTo(TypeString.ofIdentifier("float", "user"));
     }
 
     @Test

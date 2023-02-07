@@ -2,20 +2,11 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * Reference to the type of a parameter.
- * TODO: Should this be an AbstractType? Probably otherwise it cannot be used with the reasoner etc.
- *       Maybe the hierarchy should change a bit, such as:
- *       - AbstractType
- *         - ConcreteType
- *           - MagikType
- *           - SelfType
- *           - ...
- *         - ParameterRefType
- *         - GenericedType
- *         - ...
  */
 public class ParameterReferenceType extends AbstractType {
 
@@ -31,7 +22,7 @@ public class ParameterReferenceType extends AbstractType {
 
     @Override
     public TypeString getTypeString() {
-        throw new IllegalStateException();
+        return TypeString.ofParameterRef(this.parameterName);
     }
 
     @Override
@@ -103,6 +94,11 @@ public class ParameterReferenceType extends AbstractType {
             "%s@%s(%s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
             this.getParameterName());
+    }
+
+    @Override
+    public List<GenericDeclaration> getGenerics() {
+        return Collections.emptyList();
     }
 
 }

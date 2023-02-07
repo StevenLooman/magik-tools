@@ -69,7 +69,7 @@ class CompletionProviderTest {
             + "    1.\n"
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
             null,
@@ -99,7 +99,7 @@ class CompletionProviderTest {
             + "    _self.\n"
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString aRef = TypeString.of("user:a");
+        final TypeString aRef = TypeString.ofIdentifier("a", "user");
         final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, aRef);
         aType.addMethod(
             null,
@@ -129,7 +129,7 @@ class CompletionProviderTest {
             + "    1.fi\n"
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
             null,
@@ -206,9 +206,9 @@ class CompletionProviderTest {
             + "    \n"
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString aRef = TypeString.of("user:a");
+        final TypeString aRef = TypeString.ofIdentifier("a", "user");
         final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, aRef);
-        aType.addSlot(null, "slot1");
+        aType.addSlot(null, "slot1", TypeString.UNDEFINED);
         final Position position = new Position(1, 2);    // On ''.
         final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
 

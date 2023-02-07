@@ -38,7 +38,7 @@ class HoverProviderTest {
     void testProvideHoverMethodDefinitionName() {
         // Set up a method in the TypeKeeper.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString objectRef = TypeString.of("sw:object");
+        final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
         final MagikType objectType = (MagikType) typeKeeper.getType(objectRef);
         objectType.addMethod(
             null,
@@ -67,7 +67,7 @@ class HoverProviderTest {
     void testProvideHoverMethodDefinitionExemplar() {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString hoverMeTypeRef = TypeString.of("user:hover_me_type");
+        final TypeString hoverMeTypeRef = TypeString.ofIdentifier("hover_me_type", "user");
         final MagikType hoverMeType = new MagikType(typeKeeper, Sort.SLOTTED, hoverMeTypeRef);
         hoverMeType.setDoc("type_doc");
 
@@ -88,7 +88,7 @@ class HoverProviderTest {
     void testProvideHoverMethod() {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
             null,
@@ -137,7 +137,7 @@ class HoverProviderTest {
     void testProvideHoverType() {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final MagikType symbolType = (MagikType) typeKeeper.getType(symbolRef);
         symbolType.setDoc("type_doc");
 
@@ -179,7 +179,7 @@ class HoverProviderTest {
     void testProvideHoverAssignedVariable() {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString symbolRef = TypeString.of("sw:symbol");
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final MagikType symbolType = (MagikType) typeKeeper.getType(symbolRef);
         symbolType.setDoc("type_doc");
 
@@ -201,7 +201,7 @@ class HoverProviderTest {
     void testBinaryOperatorTimes() {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.setDoc("type_doc");
 

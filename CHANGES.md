@@ -12,6 +12,8 @@ Changes
 - Add check VariableCount
 - Fix VariableCountCheck better handling syntax errors
 - Add check FileMethodCount
+- Rename check NewDoc to TypeDoc.
+- Add generics to the type system, which allows collections to be parameterized.
 
 
 0.6.0 (2022-09-12)

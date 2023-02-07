@@ -1,13 +1,11 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
-
-import org.sonar.check.Rule;
-import org.sonar.check.RuleProperty;
-
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
+import org.sonar.check.Rule;
+import org.sonar.check.RuleProperty;
 
 /**
  * Check if file contains too many methods.

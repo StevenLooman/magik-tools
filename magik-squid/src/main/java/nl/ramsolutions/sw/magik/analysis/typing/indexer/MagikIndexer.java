@@ -38,7 +38,7 @@ import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.BinaryOperator;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeParser;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
@@ -49,13 +49,13 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Slot;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
-import nl.ramsolutions.sw.magik.parser.NewDocParser;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
+import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +93,7 @@ public class MagikIndexer {
         CommentInstructionReader.InstructionType.createInstructionType("type");
 
     private final ITypeKeeper typeKeeper;
-    private final TypeParser typeParser;
+    private final TypeReader typeParser;
     private final Map<Path, Set<Package>> indexedPackages = new HashMap<>();
     private final Map<Path, Set<AbstractType>> indexedTypes = new HashMap<>();
     private final Map<Path, Set<Method>> indexedMethods = new HashMap<>();
@@ -103,7 +103,7 @@ public class MagikIndexer {
 
     public MagikIndexer(final ITypeKeeper typeKeeper) {
         this.typeKeeper = typeKeeper;
-        this.typeParser = new TypeParser(this.typeKeeper);
+        this.typeParser = new TypeReader(this.typeKeeper);
     }
 
     /**
@@ -225,11 +225,11 @@ public class MagikIndexer {
 
         final AstNode node = definition.getNode();
         final TypeString typeString = definition.getTypeString();
-        final MagikType magikType = this.findType(typeString, MagikType.Sort.INDEXED);
+        final MagikType magikType = this.findOrCreateType(typeString, MagikType.Sort.INDEXED);
 
         final Map<String, TypeString> slots = Collections.emptyMap();
         final List<TypeString> parents = definition.getParents();
-        final TypeString defaultParentRef = TypeString.of("sw:indexed_format_mixin");
+        final TypeString defaultParentRef = TypeString.ofIdentifier("indexed_format_mixin", "sw");
         this.fillType(magikType, magikFile, node, typeString.getPakkage(), slots, parents, defaultParentRef);
 
         final Path path = Paths.get(magikFile.getUri());
@@ -243,11 +243,11 @@ public class MagikIndexer {
 
         final AstNode node = definition.getNode();
         final TypeString typeString = definition.getTypeString();
-        final MagikType magikType = this.findType(typeString, MagikType.Sort.SLOTTED);
+        final MagikType magikType = this.findOrCreateType(typeString, MagikType.Sort.SLOTTED);
 
         final Map<String, TypeString> slots = Collections.emptyMap();
         final List<TypeString> parents = definition.getParents();
-        final TypeString defaultParentRef = TypeString.of("sw:enumeration_value");
+        final TypeString defaultParentRef = TypeString.ofIdentifier("enumeration_value", "sw");
         this.fillType(magikType, magikFile, node, typeString.getPakkage(), slots, parents, defaultParentRef);
 
         final Path path = Paths.get(magikFile.getUri());
@@ -261,9 +261,10 @@ public class MagikIndexer {
 
         final AstNode node = definition.getNode();
         final TypeString typeString = definition.getTypeString();
-        final MagikType magikType = this.findType(typeString, MagikType.Sort.SLOTTED);
+        final MagikType magikType = this.findOrCreateType(typeString, MagikType.Sort.SLOTTED);
 
-        final NewDocParser docParser = new NewDocParser(node);
+        // Slots.
+        final TypeDocParser docParser = new TypeDocParser(node);
         final Map<String, TypeString> slotTypes = docParser.getSlotTypes();
         // This needs a default value ("") due to https://bugs.openjdk.java.net/browse/JDK-8148463
         final Map<String, TypeString> slots = definition.getSlots().stream()
@@ -272,8 +273,20 @@ public class MagikIndexer {
                 slotName -> slotName,
                 slotName -> slotTypes.getOrDefault(slotName, TypeString.UNDEFINED)));
         final List<TypeString> parents = definition.getParents();
-        final TypeString defaultParentRef = TypeString.of("sw:slotted_format_mixin");
+        final TypeString defaultParentRef = TypeString.ofIdentifier("slotted_format_mixin", "sw");
         this.fillType(magikType, magikFile, node, typeString.getPakkage(), slots, parents, defaultParentRef);
+
+        // Generics.
+        docParser.getGenericTypeNodes().entrySet()
+            .forEach(entry -> {
+                final AstNode genericNode = entry.getKey();
+                final URI uri = magikFile.getUri();
+                final Location location = new Location(uri, genericNode);
+                final TypeString genericTypeStr = entry.getValue();
+                final String name = genericTypeStr.getIdentifier();
+                magikType.addGeneric(location, name);
+            });
+
 
         final Path path = Paths.get(magikFile.getUri());
         this.indexedTypes.get(path).add(magikType);
@@ -286,7 +299,7 @@ public class MagikIndexer {
 
         final AstNode node = definition.getNode();
         final TypeString typeString = definition.getTypeString();
-        final MagikType magikType = this.findType(typeString, MagikType.Sort.INTRINSIC);
+        final MagikType magikType = this.findOrCreateType(typeString, MagikType.Sort.INTRINSIC);
 
         final Map<String, TypeString> slots = Collections.emptyMap();
         final List<TypeString> parents = definition.getParents();
@@ -320,8 +333,8 @@ public class MagikIndexer {
         }
 
         // Combine parameter types with method docs.
-        final NewDocParser newDocParser = new NewDocParser(node);
-        final Map<String, TypeString> parameterTypes = newDocParser.getParameterTypes();
+        final TypeDocParser typeDocParser = new TypeDocParser(node);
+        final Map<String, TypeString> parameterTypes = typeDocParser.getParameterTypes();
         final List<Parameter> parameters = definition.getParameters().stream()
             .map(parameterDefinition -> {
                 final String name = parameterDefinition.getName();
@@ -346,7 +359,7 @@ public class MagikIndexer {
             : null;
 
         // Get return types from method docs.
-        final List<TypeString> callResultDocs = newDocParser.getReturnTypes();
+        final List<TypeString> callResultDocs = typeDocParser.getReturnTypes();
         // Ensure we can believe the docs, sort of.
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
         final boolean returnsAnything = helper.returnsAnything();
@@ -357,7 +370,7 @@ public class MagikIndexer {
             : ExpressionResultString.UNDEFINED;
 
         // Get iterator types from method docs.
-        final List<TypeString> loopResultDocs = newDocParser.getLoopTypes();
+        final List<TypeString> loopResultDocs = typeDocParser.getLoopTypes();
         // Ensure method docs match actual loopbody, sort of.
         final boolean hasLoopbody = helper.hasLoopbody();
         final ExpressionResultString loopResult =
@@ -395,7 +408,7 @@ public class MagikIndexer {
             .filter(scopeEntry -> scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC))
             .map(scopeEntry -> {
                 final String identifier = scopeEntry.getIdentifier();
-                final TypeString ref = TypeString.of(identifier, currentPakkage);
+                final TypeString ref = TypeString.ofIdentifier(identifier, currentPakkage);
                 AbstractType type = this.typeKeeper.getType(ref);
                 if (type == UndefinedType.INSTANCE) {
                     return null;
@@ -408,13 +421,13 @@ public class MagikIndexer {
                 return globalUsage;
             })
             .filter(Objects::nonNull)
-            .forEach(method::addUsedType);
+            .forEach(method::addUsedGlobal);
 
         // Save called method names (thus without type).
         node.getDescendants(MagikGrammar.METHOD_INVOCATION).stream()
             .map(invocationNode -> {
                 final MethodInvocationNodeHelper invocationHelper = new MethodInvocationNodeHelper(invocationNode);
-                final TypeString usedTypeRef = TypeString.of(UndefinedType.SERIALIZED_NAME);
+                final TypeString usedTypeRef = TypeString.UNDEFINED;
                 final String usedMethodName = invocationHelper.getMethodName();
                 final Location methodUseLocation = new Location(uri, invocationNode);
                 return new Method.MethodUsage(usedTypeRef, usedMethodName, methodUseLocation);
@@ -451,7 +464,7 @@ public class MagikIndexer {
 
         final String pakkage = globalDefinition.getPackage();
         final String identifier = globalDefinition.getName();
-        final TypeString typeStr = TypeString.of(identifier, pakkage);
+        final TypeString typeStr = TypeString.ofIdentifier(identifier, pakkage);
 
         if (this.typeKeeper.getType(typeStr) != null) {
             // Don't overwrite any existing types with a AliasType.
@@ -463,7 +476,7 @@ public class MagikIndexer {
             new CommentInstructionReader(magikFile, Set.of(TYPE_INSTRUCTION));
         final String typeAnnotation = instructionReader.getInstructionForNode(node, TYPE_INSTRUCTION);
         final TypeString aliasedRef = typeAnnotation != null
-            ? TypeString.of(typeAnnotation, globalDefinition.getPackage())
+            ? TypeStringParser.parseTypeString(typeAnnotation, globalDefinition.getPackage())
             : TypeString.UNDEFINED;
         final AbstractType globalType = new AliasType(this.typeKeeper, typeStr, aliasedRef);
         this.typeKeeper.addType(globalType);
@@ -522,9 +535,7 @@ public class MagikIndexer {
             .forEach(entry -> {
                 final String slotName = entry.getKey();
                 final TypeString slotTypeString = entry.getValue();
-                final AbstractType slotType = this.typeParser.parseTypeString(slotTypeString);
-                final Slot slot = magikType.addSlot(null, slotName);
-                slot.setType(slotType);
+                magikType.addSlot(null, slotName, slotTypeString);
             });
 
         // Parents.
@@ -564,14 +575,14 @@ public class MagikIndexer {
 
         // Get method return types from docs, if any.
         final AstNode node = definition.getNode();
-        final NewDocParser methodDocParser = new NewDocParser(node);
+        final TypeDocParser methodDocParser = new TypeDocParser(node);
         final List<TypeString> methodReturnTypes = methodDocParser.getReturnTypes();
 
         // Get slot type from docs, if any.
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
         final TypeString slotType;
         if (statementNode != null) {
-            final NewDocParser exemplarDocParser = new NewDocParser(statementNode);
+            final TypeDocParser exemplarDocParser = new TypeDocParser(statementNode);
             final String slotName = definition.getMethodName();
             final Map<String, TypeString> slotTypes = exemplarDocParser.getSlotTypes();
             slotType = slotTypes.getOrDefault(slotName, TypeString.UNDEFINED);
@@ -617,7 +628,7 @@ public class MagikIndexer {
         }
     }
 
-    private MagikType findType(final TypeString typeString, final MagikType.Sort sort) {
+    private MagikType findOrCreateType(final TypeString typeString, final MagikType.Sort sort) {
         final AbstractType type = this.typeKeeper.getType(typeString);
         if (type == UndefinedType.INSTANCE) {
             return new MagikType(this.typeKeeper, sort, typeString);

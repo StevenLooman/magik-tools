@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.Location;
 
 /**
@@ -27,7 +28,7 @@ public final class UndefinedType extends AbstractType {
 
     @Override
     public TypeString getTypeString() {
-        return TypeString.of(UndefinedType.SERIALIZED_NAME);
+        return TypeString.UNDEFINED;
     }
 
     @Override
@@ -110,6 +111,11 @@ public final class UndefinedType extends AbstractType {
     @Override
     public void setDoc(final String comment) {
         throw new IllegalStateException();
+    }
+
+    @Override
+    public List<GenericDeclaration> getGenerics() {
+        return Collections.emptyList();
     }
 
 }

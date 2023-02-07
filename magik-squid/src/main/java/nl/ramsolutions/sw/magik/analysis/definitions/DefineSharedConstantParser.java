@@ -109,7 +109,7 @@ public class DefineSharedConstantParser {
             modifiers.add(MethodDefinition.Modifier.PRIVATE);
         }
         final List<ParameterDefinition> parameters = Collections.emptyList();
-        final TypeString exemplarName = TypeString.of(identifier, pakkage);
+        final TypeString exemplarName = TypeString.ofIdentifier(identifier, pakkage);
         final MethodDefinition methodDefinition =
             new MethodDefinition(statementNode, exemplarName, constantName, modifiers, parameters, null);
         return List.of(methodDefinition);

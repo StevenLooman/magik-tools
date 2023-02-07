@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.languageserver.semantictokens;
 
 import com.sonar.sslr.api.Token;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -27,7 +28,8 @@ public class SemanticToken {
         STRING(9),
         NUMBER(10),
         REGEXP(11),
-        OPERATOR(12);
+        OPERATOR(12),
+        TYPE_PARAMETER(13);
 
         private final int value;
 
@@ -35,8 +37,16 @@ public class SemanticToken {
             this.value = value;
         }
 
+        /**
+         * Get the name of the semantic token. This name, and its number,  is communicated/matched to the client.
+         * @return Name of semantic token.
+         */
         public String getSemanticTokenName() {
-            return this.name().toLowerCase();
+            final String name = this.name().toLowerCase();
+            final String str = Pattern.compile("_([a-z])")
+                .matcher(name)
+                .replaceAll(match -> match.group(1).toUpperCase());
+            return str;
         }
 
         public Integer getTokenType() {
@@ -115,4 +125,3 @@ public class SemanticToken {
     }
 
 }
-

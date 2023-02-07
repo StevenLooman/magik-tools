@@ -19,7 +19,6 @@ import nl.ramsolutions.sw.magik.checks.checks.LineLengthCheck;
 import nl.ramsolutions.sw.magik.checks.checks.LocalImportProcedureCheck;
 import nl.ramsolutions.sw.magik.checks.checks.MethodComplexityCheck;
 import nl.ramsolutions.sw.magik.checks.checks.MethodLineCountCheck;
-import nl.ramsolutions.sw.magik.checks.checks.NewDocCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoSelfUseCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoStatementAfterBodyExitCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ParameterCountCheck;
@@ -29,6 +28,7 @@ import nl.ramsolutions.sw.magik.checks.checks.SizeZeroEmptyCheck;
 import nl.ramsolutions.sw.magik.checks.checks.SwMethodDocCheck;
 import nl.ramsolutions.sw.magik.checks.checks.SyntaxErrorCheck;
 import nl.ramsolutions.sw.magik.checks.checks.TrailingWhitespaceCheck;
+import nl.ramsolutions.sw.magik.checks.checks.TypeDocCheck;
 import nl.ramsolutions.sw.magik.checks.checks.UndefinedVariableCheck;
 import nl.ramsolutions.sw.magik.checks.checks.UnusedVariableCheck;
 import nl.ramsolutions.sw.magik.checks.checks.UseValueCompareCheck;
@@ -78,7 +78,6 @@ public final class CheckList {
             LocalImportProcedureCheck.class,
             MethodComplexityCheck.class,
             MethodLineCountCheck.class,
-            NewDocCheck.class,
             NoSelfUseCheck.class,
             NoStatementAfterBodyExitCheck.class,
             ParameterCountCheck.class,
@@ -88,6 +87,7 @@ public final class CheckList {
             SwMethodDocCheck.class,
             SyntaxErrorCheck.class,
             TrailingWhitespaceCheck.class,
+            TypeDocCheck.class,
             UndefinedVariableCheck.class,
             UnusedVariableCheck.class,
             UseValueCompareCheck.class,

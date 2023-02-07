@@ -93,7 +93,7 @@ public class MethodDefinitionNodeHelper {
         final String pakkage = packageHelper.getCurrentPackage();
         final AstNode exemplarNameNode = this.node.getFirstChild(MagikGrammar.EXEMPLAR_NAME);
         final String exemplarName = exemplarNameNode.getTokenValue();
-        return TypeString.of(exemplarName, pakkage);
+        return TypeString.ofIdentifier(exemplarName, pakkage);
     }
 
     /**

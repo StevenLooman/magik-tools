@@ -1,14 +1,11 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import nl.ramsolutions.sw.magik.api.MagikKeyword;
-import nl.ramsolutions.sw.magik.api.NewDocGrammar;
+import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
 
 /**
  * Type string, containing package name and identifier.
@@ -17,77 +14,101 @@ import nl.ramsolutions.sw.magik.api.NewDocGrammar;
  * - {@code "sw:char16_vector|sw:symbol|sw:unset"}
  * - {@code "_undefined"}
  * - {@code "_self|sw:unset"}
+ * - {@code "sw:rope<sw:integer>"}
  */
 public final class TypeString {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString UNDEFINED = new TypeString(UndefinedType.SERIALIZED_NAME);
-    @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SELF = new TypeString(SelfType.SERIALIZED_NAME);
+    public static final String DEFAULT_PACKAGE = "user";
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String TYPE_COMBINATOR = NewDocGrammar.Punctuator.TYPE_COMBINATOR.getValue();
-
-    /**
-     * Stream collector.
-     */
-    public static final Collector<TypeString, ?, TypeString> COLLECTOR = Collector.of(
-        ArrayList<TypeString>::new,
-        (list, value) -> list.add(value),
-        (list, values) -> {
-            list.addAll(values);
-            return list;
-        },
-        list -> {
-            final String str = list.stream()
-                .map(TypeString::getString)
-                .sorted()
-                .collect(Collectors.joining(TYPE_COMBINATOR));
-            return new TypeString(str);
-        });
-
-    private static final String TYPE_COMBINATOR_RE = Pattern.quote(TYPE_COMBINATOR);
-    private static final String DEFAULT_PACKAGE = "user";
+    public static final TypeString UNDEFINED = new TypeString(UndefinedType.SERIALIZED_NAME, DEFAULT_PACKAGE);
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SELF = new TypeString(SelfType.SERIALIZED_NAME, DEFAULT_PACKAGE);
 
     private final String string;
     private final String currentPackage;
-
-    /**
-     * Constructor.
-     * @param string Type string, e.g., {@code "sw:rope"}.
-     */
-    public TypeString(final String string) {
-        this.string = string.trim();
-        this.currentPackage = DEFAULT_PACKAGE;
-    }
+    private final List<TypeString> combinedTypes;
+    private final List<TypeString> generics;
 
     /**
      * Constructor.
      * @param identifier Identifier, e.g., {@code "sw:rope"}.
      * @param currentPackage The current package, e.g., {@code "user"}.
      */
-    public TypeString(final String identifier, final String currentPackage) {
+    private TypeString(final String identifier, final String currentPackage) {
         this.string = identifier.trim();
         this.currentPackage = currentPackage.trim();
+        this.combinedTypes = Collections.emptyList();
+        this.generics = Collections.emptyList();
     }
 
     /**
-     * Static constructor, for readability.
-     * @param string String, e.g., {@code "sw:rope"}, or {@code "sw:symbol|sw:unset"}.
-     * @return New type string.
+     * Constructor for generics.
+     * @param identifier Identifier, e.g., {@code "sw:rope"}.
+     * @param currentPackage The current package, e.g., {@code "user"}.
      */
-    public static TypeString of(final String string) {
-        return new TypeString(string);
+    private TypeString(final String identifier, final String currentPackage, final TypeString... generics) {
+        this.string = identifier.trim();
+        this.currentPackage = currentPackage.trim();
+        this.combinedTypes = Collections.emptyList();
+        this.generics = Arrays.asList(generics);
     }
 
     /**
-     * Static constructor, for readability.
-     * @param string Identifier, e.g., {@code "rope"}.
-     * @param currentPackage Package name, e.g., {@code "sw"}.
-     * @return Type strring..
+     * Constructor for combined types.
+     * @param currentPackage The current package, e.g., {@code "user"}.
+     * @param combinations Combined {@link TypeString}s.
      */
-    public static TypeString of(final String string, final String currentPackage) {
-        return new TypeString(string, currentPackage);
+    private TypeString(final String currentPackage, final TypeString... combinations) {
+        this.string = null;
+        this.currentPackage = currentPackage.trim();
+        this.combinedTypes = Arrays.asList(combinations);
+        this.generics = Collections.emptyList();
+    }
+
+    /**
+     * Create a {@link TypeString} of a generic.
+     * @param identifier Name of generic.
+     * @return {@link TypeString}.
+     */
+    public static TypeString ofGeneric(final String identifier) {
+        return new TypeString(identifier, "_generic");
+    }
+
+    /**
+     * Create a {@link TypeString} of a parameter reference.
+     * @param identifier Name of parameter.
+     * @return {@link TypeString}.
+     */
+    public static TypeString ofParameterRef(final String identifier) {
+        return new TypeString(identifier, "_parameter");
+    }
+
+    /**
+     * Create a {@link TypeString} of an identifier, possibly with generic definitions.
+     * @param identifier Identifier of type.
+     * @param currentPakkage Current package.
+     * @param generics Generics to embed.
+     * @return {@link TypeString}.
+     */
+    public static TypeString ofIdentifier(
+            final String identifier,
+            final String currentPakkage,
+            final TypeString... generics) {
+        return new TypeString(identifier, currentPakkage, generics);
+    }
+
+    /**
+     * Create a {@link TypeString} of a combination.
+     * @param currentPakkage Current package.
+     * @param combinations Types to combine.
+     * @return {@link TypeString}.
+     */
+    public static TypeString ofCombination(
+            final String currentPakkage,
+            final TypeString... combinations) {
+        return new TypeString(currentPakkage, combinations);
     }
 
     /**
@@ -137,6 +158,13 @@ public final class TypeString {
      * @return
      */
     public String getFullString() {
+        if (this.isCombined()) {
+            return this.combinedTypes.stream()
+                .map(typeStr -> typeStr.getFullString())
+                .sorted()
+                .collect(Collectors.joining(TypeStringGrammar.Punctuator.TYPE_COMBINATOR.getValue()));
+        }
+
         if (this.string.contains(":")) {
             return this.string;
         }
@@ -145,31 +173,56 @@ public final class TypeString {
     }
 
     public boolean isUndefined() {
-        return this.getString().equalsIgnoreCase(UndefinedType.SERIALIZED_NAME);
+        return !this.isCombined()
+            && this.getString().equalsIgnoreCase(UndefinedType.SERIALIZED_NAME);
     }
 
     public boolean isSelf() {
-        return this.getString().equals(SelfType.SERIALIZED_NAME)
-               || this.getString().equalsIgnoreCase(MagikKeyword.CLONE.getValue());
+        return !this.isCombined()
+            && this.getString().equalsIgnoreCase(SelfType.SERIALIZED_NAME);
     }
 
     public boolean isSingle() {
-        return !this.getString().contains(TYPE_COMBINATOR);
+        return this.combinedTypes.isEmpty();
+    }
+
+    public boolean isCombined() {
+        return !this.combinedTypes.isEmpty();
+    }
+
+    public boolean isGeneric() {
+        return TypeStringGrammar.Keyword.TYPE_STRING_GENERIC.getValue().equalsIgnoreCase(this.currentPackage);
+    }
+
+    public boolean isGenericParametered() {
+        return !this.generics.isEmpty();
+    }
+
+    /**
+     * Get type without generic.
+     * @return Bare type without any generics.
+     */
+    public TypeString getWithoutGenerics() {
+        return TypeString.ofIdentifier(this.getIdentifier(), this.getPakkage());
+    }
+
+    /**
+     * Get types, in order, used for generics.
+     * @return Types of generics.
+     */
+    public List<TypeString> getGenerics() {
+        return this.generics;
     }
 
     /**
      * Get parts of (combined) string.
      */
-    public List<TypeString> parts() {
-        final String[] parts = this.string.split(TYPE_COMBINATOR_RE);
-        return Stream.of(parts)
-            .map(String::trim)
-            .map(part -> TypeString.of(part, this.currentPackage))
-            .collect(Collectors.toList());
+    public List<TypeString> getCombinedTypes() {
+        return Collections.unmodifiableList(this.combinedTypes);
     }
 
     public boolean isParameterReference() {
-        return this.string.toLowerCase().startsWith("_parameter");
+        return TypeStringGrammar.Keyword.TYPE_STRING_PARAMETER.getValue().equalsIgnoreCase(this.currentPackage);
     }
 
     /**
@@ -177,24 +230,35 @@ public final class TypeString {
      * @return Referenced parameter.
      */
     public String referencedParameter() {
-        if (!this.isParameterReference()) {
-            throw new IllegalStateException();
+        return this.string;
+    }
+
+    /**
+     * Substitype a {@link TypeString}, or return self.
+     * @param from {@link TypeString} to substitute.
+     * @param to {@link TypeString} to replace with.
+     * @return Replaced {@link TypeString} if {@code from} matches, or this.
+     */
+    public TypeString substituteType(final TypeString from, final TypeString to) {
+        if (from.equals(this)) {
+            return to;
         }
 
-        final int indexOpen = this.string.indexOf("(");
-        final int indexClose = this.string.indexOf(")");
-        if (indexOpen == -1
-            || indexClose == -1) {
-            // Don't crash, just
-            return null;
-        }
-
-        return this.string.substring(indexOpen + 1, indexClose).trim();
+        return this;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.currentPackage, this.string);
+        if (this.isCombined()) {
+            return Objects.hash(this.combinedTypes);
+        }
+
+        // Hash the bare type, without a package.
+        final int index = this.string.indexOf(":");
+        final String str = index == -1
+            ? this.string
+            : this.string.substring(index + 1);
+        return Objects.hash(str);
     }
 
     @Override
@@ -218,7 +282,7 @@ public final class TypeString {
     @Override
     public String toString() {
         return String.format(
-            "%s@%s(%s:%s)",
+            "%s@%s(%s, %s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
             this.getPakkage(), this.getString());
     }

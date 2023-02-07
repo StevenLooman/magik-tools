@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test NewDocParser.
+ * Test TypeDocParser.
  */
-class NewDocParserTest {
+class TypeDocParserTest {
 
     private AstNode parseMagik(final String code) {
         final MagikParser parser = new MagikParser();
@@ -31,13 +31,16 @@ class NewDocParserTest {
             + "_endmethod";
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final NewDocParser docParser = new NewDocParser(methodNode);
+        final TypeDocParser docParser = new TypeDocParser(methodNode);
         final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
         assertThat(parameterTypes).containsOnly(
-            Map.entry("param1", TypeString.of("sw:symbol")),
-            Map.entry("param2", TypeString.of("integer")),
-            Map.entry("param3", TypeString.of("integer")),
-            Map.entry("param4", TypeString.of("integer|float")));
+            Map.entry("param1", TypeString.ofIdentifier("sw:symbol", TypeString.DEFAULT_PACKAGE)),
+            Map.entry("param2", TypeString.ofIdentifier("integer", TypeString.DEFAULT_PACKAGE)),
+            Map.entry("param3", TypeString.ofIdentifier("integer", TypeString.DEFAULT_PACKAGE)),
+            Map.entry("param4", TypeString.ofCombination(
+                TypeString.DEFAULT_PACKAGE,
+                TypeString.ofIdentifier("integer", TypeString.DEFAULT_PACKAGE),
+                TypeString.ofIdentifier("float", TypeString.DEFAULT_PACKAGE))));
     }
 
     @Test
@@ -52,13 +55,16 @@ class NewDocParserTest {
             + "_endmethod";
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final NewDocParser docParser = new NewDocParser(methodNode);
+        final TypeDocParser docParser = new TypeDocParser(methodNode);
         final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
         assertThat(parameterTypes).containsOnly(
             Map.entry("param1", TypeString.UNDEFINED),
-            Map.entry("param2", TypeString.of("integer")),
-            Map.entry("param3", TypeString.of("integer")),
-            Map.entry("param4", TypeString.of("integer|float")));
+            Map.entry("param2", TypeString.ofIdentifier("integer", TypeString.DEFAULT_PACKAGE)),
+            Map.entry("param3", TypeString.ofIdentifier("integer", TypeString.DEFAULT_PACKAGE)),
+            Map.entry("param4", TypeString.ofCombination(
+                TypeString.DEFAULT_PACKAGE,
+                TypeString.ofIdentifier("integer", TypeString.DEFAULT_PACKAGE),
+                TypeString.ofIdentifier("float", TypeString.DEFAULT_PACKAGE))));
     }
 
     @Test
@@ -69,10 +75,10 @@ class NewDocParserTest {
             + "_endmethod";
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final NewDocParser docParser = new NewDocParser(methodNode);
+        final TypeDocParser docParser = new TypeDocParser(methodNode);
         final List<TypeString> returnTypes = docParser.getReturnTypes();
         assertThat(returnTypes)
-            .containsExactly(TypeString.of("sw:integer"));
+            .containsExactly(TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE));
     }
 
     @Test
@@ -86,13 +92,16 @@ class NewDocParserTest {
             + "_endmethod";
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final NewDocParser docParser = new NewDocParser(methodNode);
+        final TypeDocParser docParser = new TypeDocParser(methodNode);
         final List<TypeString> returnTypes = docParser.getReturnTypes();
         assertThat(returnTypes).containsExactly(
             TypeString.UNDEFINED,
-            TypeString.of("sw:integer"),
-            TypeString.of("sw:integer"),
-            TypeString.of("sw:integer|sw:float"));
+            TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE),
+            TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE),
+            TypeString.ofCombination(
+                TypeString.DEFAULT_PACKAGE,
+                TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE),
+                TypeString.ofIdentifier("sw:float", TypeString.DEFAULT_PACKAGE)));
     }
 
     @Test
@@ -103,7 +112,7 @@ class NewDocParserTest {
             + "_endmethod";
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final NewDocParser docParser = new NewDocParser(methodNode);
+        final TypeDocParser docParser = new TypeDocParser(methodNode);
         final List<TypeString> returnTypes = docParser.getReturnTypes();
         assertThat(returnTypes)
             .containsExactly(TypeString.SELF);
@@ -121,16 +130,16 @@ class NewDocParserTest {
             + "_endmethod";
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final NewDocParser methodDocParser = new NewDocParser(methodNode);
+        final TypeDocParser methodDocParser = new TypeDocParser(methodNode);
         final List<TypeString> methodReturnTypes = methodDocParser.getReturnTypes();
         assertThat(methodReturnTypes)
-            .containsExactly(TypeString.of("sw:integer"));
+            .containsExactly(TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE));
 
         final AstNode procNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
-        final NewDocParser procDocParser = new NewDocParser(procNode);
+        final TypeDocParser procDocParser = new TypeDocParser(procNode);
         final List<TypeString> procReturnTypes = procDocParser.getReturnTypes();
         assertThat(procReturnTypes)
-            .containsExactly(TypeString.of("sw:float"));
+            .containsExactly(TypeString.ofIdentifier("sw:float", TypeString.DEFAULT_PACKAGE));
     }
 
     @Test
@@ -144,11 +153,11 @@ class NewDocParserTest {
             + "    })\n";
         final AstNode topNode = this.parseMagik(code);
         final AstNode definitionNode = topNode.getFirstChild(MagikGrammar.STATEMENT);
-        final NewDocParser docParser = new NewDocParser(definitionNode);
+        final TypeDocParser docParser = new TypeDocParser(definitionNode);
         final Map<String, TypeString> slotTypes = docParser.getSlotTypes();
         assertThat(slotTypes).containsOnly(
             Map.entry("slot1", TypeString.UNDEFINED),
-            Map.entry("slot2", TypeString.of("integer")));
+            Map.entry("slot2", TypeString.ofIdentifier("integer", TypeString.DEFAULT_PACKAGE)));
     }
 
     @Test
@@ -159,7 +168,7 @@ class NewDocParserTest {
             + "_endproc";
         final AstNode topNode = this.parseMagik(code);
         final AstNode definitionNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
-        final NewDocParser docParser = new NewDocParser(definitionNode);
+        final TypeDocParser docParser = new TypeDocParser(definitionNode);
         final Map<AstNode, String> parameterNameNodes = docParser.getParameterNameNodes();
         assertThat(parameterNameNodes)
             .hasSize(1);
@@ -178,10 +187,10 @@ class NewDocParserTest {
             + "_endmethod";
         final AstNode topNode = this.parseMagik(code);
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final NewDocParser docParser = new NewDocParser(methodNode);
+        final TypeDocParser docParser = new TypeDocParser(methodNode);
         final List<TypeString> returnTypes = docParser.getReturnTypes();
         assertThat(returnTypes)
-            .containsExactly(TypeString.of("_parameter(p1)"));
+            .containsExactly(TypeString.ofParameterRef("p1"));
     }
 
 }

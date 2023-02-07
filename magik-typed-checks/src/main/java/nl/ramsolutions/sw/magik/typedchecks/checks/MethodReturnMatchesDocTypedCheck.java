@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeParser;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.parser.NewDocParser;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 
 /**
@@ -44,9 +44,9 @@ public class MethodReturnMatchesDocTypedCheck extends MagikTypedCheck {
     }
 
     private ExpressionResult extractMethodDocResult(final AstNode node) {
-        final NewDocParser docParser = new NewDocParser(node);
+        final TypeDocParser docParser = new TypeDocParser(node);
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
-        final TypeParser typeParser = new TypeParser(typeKeeper);
+        final TypeReader typeParser = new TypeReader(typeKeeper);
         final List<AbstractType> docReturnTypes = docParser.getReturnTypes().stream()
                 .map(typeStr -> typeParser.parseTypeString(typeStr))
                 .collect(Collectors.toList());

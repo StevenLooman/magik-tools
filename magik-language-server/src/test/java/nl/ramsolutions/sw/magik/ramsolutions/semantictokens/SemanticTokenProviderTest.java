@@ -115,7 +115,7 @@ class SemanticTokenProviderTest {
         final SemanticTokens semanticTokens = this.getSemanticTokens(code);
         assertThat(semanticTokens.getData())
             .containsExactly(
-                0, 0, "a".length(), SemanticToken.Type.FUNCTION.getTokenType(), 0);  // TODO: Why no varGlobalModifier?
+                0, 0, "a".length(), SemanticToken.Type.FUNCTION.getTokenType(), 0);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
+import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 
 /**
@@ -96,6 +97,11 @@ public class AliasType extends AbstractType {
     @Override
     public Collection<Method> getSuperMethods(String methodName, String superName) {
         return this.getAliasedType().getSuperMethods(methodName, superName);
+    }
+
+    @Override
+    public List<GenericDeclaration> getGenerics() {
+        return this.getAliasedType().getGenerics();
     }
 
     @Override

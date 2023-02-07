@@ -81,7 +81,7 @@ public class DefSlottedExemplarParser extends TypeDefParser {
 
         // Figure name.
         final String identifier = argument0Node.getTokenValue().substring(1);
-        final TypeString name = TypeString.of(identifier, currentPakkage);
+        final TypeString name = TypeString.ofIdentifier(identifier, currentPakkage);
 
         // Figure slots.
         final List<SlottedExemplarDefinition.Slot> slots = new ArrayList<>();
@@ -109,7 +109,7 @@ public class DefSlottedExemplarParser extends TypeDefParser {
                 && flavorNode != null) {
                 final String flag = flagNode.getTokenValue();
                 final String flavor = flavorNode.getTokenValue();
-                final TypeString exemplarName = TypeString.of(identifier, currentPakkage);
+                final TypeString exemplarName = TypeString.ofIdentifier(identifier, currentPakkage);
                 final List<MethodDefinition> slotMethodDefinitions =
                     this.generateSlotMethods(slotDefNode, exemplarName, slotName, flag, flavor);
                 methodDefinitions.addAll(slotMethodDefinitions);

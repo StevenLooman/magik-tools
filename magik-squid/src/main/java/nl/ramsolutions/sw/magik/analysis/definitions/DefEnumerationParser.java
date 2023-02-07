@@ -72,7 +72,7 @@ public class DefEnumerationParser extends TypeDefParser {
 
         // Figure name.
         final String identifier = argument0Node.getTokenValue().substring(1);
-        final TypeString name = TypeString.of(identifier, pakkage);
+        final TypeString name = TypeString.ofIdentifier(identifier, pakkage);
 
         // Figure parents.
         final List<TypeString> parents = Collections.emptyList();

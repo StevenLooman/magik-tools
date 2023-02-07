@@ -51,7 +51,7 @@ public class GlobalDefinitionParser {
         final AstNode variableDefinitionNode = this.node.getFirstChild(MagikGrammar.VARIABLE_DEFINITION);
         final AstNode identifierNode = variableDefinitionNode.getFirstChild(MagikGrammar.IDENTIFIER);
         final String identifier = identifierNode.getTokenValue();
-        final TypeString name = TypeString.of(identifier, pakkage);
+        final TypeString name = TypeString.ofIdentifier(identifier, pakkage);
         final GlobalDefinition globalDefinition = new GlobalDefinition(node, name);
         return List.of(globalDefinition);
     }

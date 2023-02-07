@@ -8,16 +8,16 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for NewDocCheck.
+ * Tests for TypeDocCheck.
  */
-class NewDocCheckTest extends MagikCheckTestBase {
+class TypeDocCheckTest extends MagikCheckTestBase {
 
     @Test
     void testParameterMissing() {
         final String code = ""
             + "_method a.m1(p1)\n"
             + "_endmethod";
-        final MagikCheck check = new NewDocCheck();
+        final MagikCheck check = new TypeDocCheck();
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).hasSize(1);
     }
@@ -28,7 +28,7 @@ class NewDocCheckTest extends MagikCheckTestBase {
             + "_method a.m1()\n"
             + "  ## @param {sw:float} p1 Paramter 1.\n"
             + "_endmethod";
-        final MagikCheck check = new NewDocCheck();
+        final MagikCheck check = new TypeDocCheck();
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).hasSize(1);
     }
@@ -39,7 +39,7 @@ class NewDocCheckTest extends MagikCheckTestBase {
             + "_method a.m1(p1)\n"
             + "  ## @param {sw:float} p1 Paramter 1.\n"
             + "_endmethod";
-        final MagikCheck check = new NewDocCheck();
+        final MagikCheck check = new TypeDocCheck();
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isEmpty();
     }
@@ -50,7 +50,7 @@ class NewDocCheckTest extends MagikCheckTestBase {
             + "def_slotted_exemplar(\n"
             + "  :test_exemplar,\n"
             + "  {{:slot1, _unset}})";
-        final MagikCheck check = new NewDocCheck();
+        final MagikCheck check = new TypeDocCheck();
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).hasSize(1);
     }
@@ -62,7 +62,7 @@ class NewDocCheckTest extends MagikCheckTestBase {
             + "def_slotted_exemplar(\n"
             + "  :test_exemplar,\n"
             + "  {})";
-        final MagikCheck check = new NewDocCheck();
+        final MagikCheck check = new TypeDocCheck();
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).hasSize(1);
     }
@@ -74,7 +74,7 @@ class NewDocCheckTest extends MagikCheckTestBase {
             + "def_slotted_exemplar(\n"
             + "  :test_exemplar,\n"
             + "  {{:slot1, _unset}})";
-        final MagikCheck check = new NewDocCheck();
+        final MagikCheck check = new TypeDocCheck();
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isEmpty();
     }

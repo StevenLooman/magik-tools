@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.Location;
@@ -57,6 +59,7 @@ public class MagikType extends AbstractType {
     private final Set<Method> methods = ConcurrentHashMap.newKeySet();
     private final Set<TypeString> parents = ConcurrentHashMap.newKeySet();
     private final Map<String, Slot> slots = new ConcurrentHashMap<>();
+    private final Queue<GenericDeclaration> generics = new ConcurrentLinkedQueue<>();
     private Sort sort;
     private ITypeKeeper typeKeeper;
 
@@ -132,30 +135,51 @@ public class MagikType extends AbstractType {
     }
 
     /**
+     * Add a {@link GenericDefinition}.
+     * @param location Location GenericDefinition.
+     * @param name Name of GenericDefinition.
+     * @return
+     */
+    public GenericDeclaration addGeneric(final @Nullable Location location, final String name) {
+        // TODO: Parameter `name` should be a TypeString?
+        // TODO: Don't do this on the fly, but only at definition...
+        final GenericDeclaration declaration = new GenericDeclaration(location, name);
+        this.generics.add(declaration);
+        return declaration;
+    }
+
+    @Override
+    public List<GenericDeclaration> getGenerics() {
+        return List.copyOf(this.generics);
+    }
+
+    /**
      * Add a slot with a given name and type.
-     * @param slotLocation Location of slot.
-     * @param slotName Name of slot.
+     * @param location Location of slot.
+     * @param name Name of slot.
+     * @param slotTypeString Type of slot.
      * @return Added slot.
      */
-    public Slot addSlot(final @Nullable Location slotLocation, final String slotName) {
-        final Slot slot = new Slot(slotLocation, this, slotName);
-        this.slots.put(slot.getName(), slot);
+    public Slot addSlot(final @Nullable Location location, final String name, final TypeString slotTypeString) {
+        // TODO: Don't do this on the fly, but only at definition...
+        final Slot slot = new Slot(location, name, slotTypeString);
+        this.slots.put(name, slot);
         return slot;
     }
 
     /**
      * Get a slot by name.
-     * @param slotName Name of slot
+     * @param name Name of slot
      * @return Type of slot.
      */
     @Override
-    public Slot getSlot(final String slotName) {
-        if (this.slots.containsKey(slotName)) {
-            return this.slots.get(slotName);
+    public Slot getSlot(final String name) {
+        if (this.slots.containsKey(name)) {
+            return this.slots.get(name);
         }
 
         for (final AbstractType parent : this.getParents()) {
-            final Slot slot = parent.getSlot(slotName);
+            final Slot slot = parent.getSlot(name);
             if (slot != null) {
                 return slot;
             }

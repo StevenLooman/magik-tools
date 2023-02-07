@@ -51,7 +51,7 @@ public class GlobalKnownTypedCheck extends MagikTypedCheck {
         }
 
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
-        final TypeString typeString = TypeString.of(identifier, this.currentPakkage);
+        final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
         if (typeKeeper.hasType(typeString)) {
             return;
         }

@@ -15,9 +15,11 @@
         "com",
         "java",
         "javax",
+        "nl",
         "org"
     ],
     "editor.detectIndentation": false,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
+    "java.compile.nullAnalysis.mode": "automatic",
 }

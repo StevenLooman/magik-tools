@@ -87,7 +87,7 @@ public class ReferencesProvider {
             } else if (currentNode.getFirstAncestor(MagikGrammar.EXEMPLAR_NAME) != null) {
                 // Must be the exemplar name.
                 final String pakkage = packageHelper.getCurrentPackage();
-                final TypeString typeString = TypeString.of(identifier, pakkage);
+                final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
                 final AbstractType type = typeKeeper.getType(typeString);
                 if (type != UndefinedType.INSTANCE) {
                     final String typeName = type.getFullName();
@@ -100,7 +100,7 @@ public class ReferencesProvider {
             // A random identifier, regard it as a type.
             final String pakkage = packageHelper.getCurrentPackage();
             final String identifier = currentNode.getTokenValue();
-            final TypeString typeString = TypeString.of(identifier, pakkage);
+            final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
             final AbstractType type = typeKeeper.getType(typeString);
             if (type != UndefinedType.INSTANCE) {
                 final String typeName = type.getFullName();
@@ -121,10 +121,9 @@ public class ReferencesProvider {
         LOGGER.debug("Finding references to method: {}", methodName);
 
         // Build set of types which may contain this method: type + ancestors.
-        final AbstractType type =
-            typeName.equals(UndefinedType.SERIALIZED_NAME)
+        final AbstractType type = typeName.equals(UndefinedType.SERIALIZED_NAME)
             ? UndefinedType.INSTANCE
-            : typeKeeper.getType(TypeString.of(typeName));
+            : typeKeeper.getType(TypeString.ofIdentifier(typeName, TypeString.DEFAULT_PACKAGE));
         final Set<AbstractType> wantedTypes = new HashSet<>();
         wantedTypes.add(UndefinedType.INSTANCE);  // For unreasoned/undetermined calls.
         wantedTypes.add(type);
@@ -133,7 +132,7 @@ public class ReferencesProvider {
         final Collection<Method.MethodUsage> wantedMethodUsages = wantedTypes.stream()
             .map(wantedType -> {
                 final String wantedTypeName = wantedType.getFullName();
-                final TypeString wantedTypeRef = TypeString.of(wantedTypeName);
+                final TypeString wantedTypeRef = TypeString.ofIdentifier(wantedTypeName, TypeString.DEFAULT_PACKAGE);
                 return new Method.MethodUsage(wantedTypeRef, methodName);
             })
             .collect(Collectors.toSet());
@@ -153,24 +152,25 @@ public class ReferencesProvider {
     private List<Location> referencesToType(final ITypeKeeper typeKeeper, final String typeName) {
         LOGGER.debug("Finding references to type: {}", typeName);
 
-        final AbstractType type = typeKeeper.getType(TypeString.of(typeName));
+        final TypeString typeStr = TypeString.ofIdentifier(typeName, TypeString.DEFAULT_PACKAGE);
+        final AbstractType type = typeKeeper.getType(typeStr);
         final Set<AbstractType> wantedTypes = new HashSet<>();
         wantedTypes.add(type);
         // wantedTypes.addAll(type.getAncestors());  // TODO: Ancestors or descendants?
 
-        final Collection<Method.GlobalUsage> wantedTypeUsages = wantedTypes.stream()
+        final Collection<Method.GlobalUsage> wantedGlobalUsages = wantedTypes.stream()
             .map(wantedType -> {
                 final String wantedTypeName = wantedType.getFullName();
-                final TypeString wantedTypeRef = TypeString.of(wantedTypeName);
+                final TypeString wantedTypeRef = TypeString.ofIdentifier(wantedTypeName, TypeString.DEFAULT_PACKAGE);
                 return new Method.GlobalUsage(wantedTypeRef, null);
             })
             .collect(Collectors.toSet());
-        final Predicate<Method.GlobalUsage> filterPredicate = typeUsage -> wantedTypeUsages.contains(typeUsage);
+        final Predicate<Method.GlobalUsage> filterPredicate = globalUsage -> wantedGlobalUsages.contains(globalUsage);
 
         // Find references.
         return typeKeeper.getTypes().stream()
             .flatMap(type_ -> type_.getMethods().stream())
-            .flatMap(method -> method.getTypeUsages().stream())
+            .flatMap(method -> method.getGlobalUsages().stream())
             .filter(filterPredicate::test)
             .map(Method.GlobalUsage::getLocation)
             .filter(Objects::nonNull)

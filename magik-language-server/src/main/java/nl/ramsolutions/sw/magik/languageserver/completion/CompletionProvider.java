@@ -193,7 +193,7 @@ public class CompletionProvider {
                 type.getSlots().stream()
                     .map(slot -> {
                         final String slotName = slot.getName();
-                        final String fullSlotName = slot.getOwner().getFullName() + "." + slot.getName();
+                        final String fullSlotName = type.getFullName() + "." + slot.getName();
                         final CompletionItem item = new CompletionItem(slotName);
                         item.setInsertText(slotName);
                         item.setDetail(fullSlotName);

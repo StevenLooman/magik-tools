@@ -23,6 +23,7 @@ public class FileMethodCountCheckTest extends MagikCheckTestBase {
         assertThat(issues).hasSize(1);
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Test
     void testOk() {
         final FileMethodCountCheck check = new FileMethodCountCheck();

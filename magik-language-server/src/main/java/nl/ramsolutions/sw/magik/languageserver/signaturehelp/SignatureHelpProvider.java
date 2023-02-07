@@ -68,7 +68,8 @@ public class SignatureHelpProvider {
         final AstNode previousSiblingNode = currentNode.getPreviousSibling();
         final ExpressionResult result = reasoner.getNodeType(previousSiblingNode);
         final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-        final AbstractType unsetType = typeKeeper.getType(TypeString.of("sw:unset"));
+        final TypeString unsetTypeString = TypeString.ofIdentifier("unset", "sw");
+        final AbstractType unsetType = typeKeeper.getType(unsetTypeString);
         AbstractType type = result.get(0, unsetType);
 
         LOGGER.debug("Provide signature for type: {}, method: {}", type.getFullName(), methodName);

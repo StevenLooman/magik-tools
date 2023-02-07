@@ -14,7 +14,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +40,7 @@ class ReferencesProviderTest {
     @Test
     void testProvideMethodReferenceFromMethodInvocation() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final Method referingMethod = integerType.addMethod(
             EMPTY_LOCATION,
@@ -52,7 +51,7 @@ class ReferencesProviderTest {
             null,
             ExpressionResultString.UNDEFINED,
             new ExpressionResultString());
-        final TypeString undefinedTypeRef = TypeString.of(UndefinedType.SERIALIZED_NAME);
+        final TypeString undefinedTypeRef = TypeString.UNDEFINED;
         final Method.MethodUsage calledMethod =
             new Method.MethodUsage(undefinedTypeRef, "refering", EMPTY_LOCATION);
         referingMethod.addCalledMethod(calledMethod);
@@ -69,8 +68,8 @@ class ReferencesProviderTest {
     @Test
     void testProvideMethodReferenceFromMethodDefintion() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString interRef = TypeString.of("sw:integer");
-        final MagikType integerType = (MagikType) typeKeeper.getType(interRef);
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
+        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final Method referingMethod = integerType.addMethod(
             EMPTY_LOCATION,
             EnumSet.noneOf(Method.Modifier.class),
@@ -80,7 +79,7 @@ class ReferencesProviderTest {
             null,
             ExpressionResultString.UNDEFINED,
             new ExpressionResultString());
-        final TypeString undefinedTypeRef = TypeString.of(UndefinedType.SERIALIZED_NAME);
+        final TypeString undefinedTypeRef = TypeString.UNDEFINED;
         final Method.MethodUsage calledMethod =
             new Method.MethodUsage(undefinedTypeRef, "refering", EMPTY_LOCATION);
         referingMethod.addCalledMethod(calledMethod);
@@ -97,7 +96,7 @@ class ReferencesProviderTest {
     @Test
     void testProvideTypeReferenceFromAtom() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final Method referingMethod = integerType.addMethod(
             EMPTY_LOCATION,
@@ -109,7 +108,7 @@ class ReferencesProviderTest {
             ExpressionResultString.UNDEFINED,
             new ExpressionResultString());
         final Method.GlobalUsage typeUsage = new Method.GlobalUsage(integerRef, EMPTY_LOCATION);
-        referingMethod.addUsedType(typeUsage);
+        referingMethod.addUsedGlobal(typeUsage);
 
         final String code = ""
             + "_method integer.refering\n"
@@ -123,7 +122,7 @@ class ReferencesProviderTest {
     @Test
     void testProvideTypeReferenceFromMethodDefinition() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        final TypeString integerRef = TypeString.of("sw:integer");
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final Method referingMethod = integerType.addMethod(
             EMPTY_LOCATION,
@@ -135,7 +134,7 @@ class ReferencesProviderTest {
             ExpressionResultString.UNDEFINED,
             new ExpressionResultString());
         final Method.GlobalUsage typeUsage = new Method.GlobalUsage(integerRef, EMPTY_LOCATION);
-        referingMethod.addUsedType(typeUsage);
+        referingMethod.addUsedGlobal(typeUsage);
 
         final String code = ""
             + "_method integer.refering\n"

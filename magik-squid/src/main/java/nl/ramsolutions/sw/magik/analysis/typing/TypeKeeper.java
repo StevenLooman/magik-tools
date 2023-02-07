@@ -2,11 +2,10 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
@@ -26,9 +25,9 @@ public class TypeKeeper implements ITypeKeeper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeKeeper.class);
 
-    private final Map<String, Package> packages = new HashMap<>();
-    private final Set<BinaryOperator> binaryOperators = new HashSet<>();
-    private final Map<String, Condition> conditions = new HashMap<>();
+    private final Map<String, Package> packages = new ConcurrentHashMap<>();
+    private final Set<BinaryOperator> binaryOperators = ConcurrentHashMap.newKeySet();
+    private final Map<String, Condition> conditions = new ConcurrentHashMap<>();
 
     /**
      * Constructor.
@@ -59,37 +58,63 @@ public class TypeKeeper implements ITypeKeeper {
     private void registerRequiredTypes() {
         final Package swPakkage = this.getPackage("sw");
 
-        swPakkage.put("object", new MagikType(this, Sort.OBJECT, TypeString.of("sw:object")));
-        swPakkage.put("unset", new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:unset")));
-        swPakkage.put("false", new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:false")));
-        swPakkage.put("maybe", new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:maybe")));
-        swPakkage.put("integer", new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:integer")));
-        swPakkage.put("bignum", new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:bignum")));
-        swPakkage.put("float", new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:float")));
-        swPakkage.put("symbol", new MagikType(this, Sort.INDEXED, TypeString.of("sw:symbol")));
-        swPakkage.put("character", new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:character")));
-        swPakkage.put("sw_regexp", new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:sw_regexp")));
-        swPakkage.put("procedure", new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:procedure")));
         swPakkage.put(
-            "char16_vector", new MagikType(this, Sort.INDEXED, TypeString.of("sw:char16_vector")));
+            "object",
+            new MagikType(this, Sort.OBJECT, TypeString.ofIdentifier("object", "sw")));
         swPakkage.put(
-            "simple_vector", new MagikType(this, Sort.INDEXED, TypeString.of("sw:simple_vector")));
+            "unset",
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("unset", "sw")));
+        swPakkage.put(
+            "false",
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("false", "sw")));
+        swPakkage.put(
+            "maybe",
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("maybe", "sw")));
+        swPakkage.put(
+            "integer",
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("integer", "sw")));
+        swPakkage.put(
+            "bignum",
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("bignum", "sw")));
+        swPakkage.put(
+            "float",
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("float", "sw")));
+        swPakkage.put(
+            "symbol",
+            new MagikType(this, Sort.INDEXED, TypeString.ofIdentifier("symbol", "sw")));
+        swPakkage.put(
+            "character",
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("character", "sw")));
+        swPakkage.put(
+            "sw_regexp",
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("sw_regexp", "sw")));
+        swPakkage.put(
+            "procedure",
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("procedure", "sw")));
+        swPakkage.put(
+            "char16_vector",
+            new MagikType(this, Sort.INDEXED, TypeString.ofIdentifier("char16_vector", "sw")));
+        swPakkage.put(
+            "simple_vector",
+            new MagikType(this, Sort.INDEXED, TypeString.ofIdentifier("simple_vector", "sw")));
         swPakkage.put(
             "heavy_thread",
-            new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:heavy_thread")));
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("heavy_thread", "sw")));
         swPakkage.put(
             "light_thread",
-            new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:light_thread")));
-        swPakkage.put("condition", new MagikType(this, Sort.SLOTTED, TypeString.of("sw:condition")));
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("light_thread", "sw")));
+        swPakkage.put(
+            "condition",
+            new MagikType(this, Sort.SLOTTED, TypeString.ofIdentifier("condition", "sw")));
         swPakkage.put(
             "enumeration_value",
-            new MagikType(this, Sort.SLOTTED, TypeString.of("sw:enumeration_value")));
+            new MagikType(this, Sort.SLOTTED, TypeString.ofIdentifier("enumeration_value", "sw")));
         swPakkage.put(
             "indexed_format_mixin",
-            new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:indexed_format_mixin")));
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("indexed_format_mixin", "sw")));
         swPakkage.put(
             "slotted_format_mixin",
-            new MagikType(this, Sort.INTRINSIC, TypeString.of("sw:slotted_format_mixin")));
+            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("slotted_format_mixin", "sw")));
     }
 
     @Override

@@ -45,7 +45,8 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
-import nl.ramsolutions.sw.magik.parser.NewDocParser;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
+import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,22 +75,22 @@ import org.slf4j.LoggerFactory;
  */
 public class LocalTypeReasoner extends AstWalker {
 
-    private static final TypeString SW_UNSET = TypeString.of("sw:unset");
-    private static final TypeString SW_SIMPLE_VECTOR = TypeString.of("sw:simple_vector");
-    private static final TypeString SW_FALSE = TypeString.of("sw:false");
-    private static final TypeString SW_MAYBE = TypeString.of("sw:maybe");
-    private static final TypeString SW_HEAVY_THREAD = TypeString.of("sw:heavy_thread");
-    private static final TypeString SW_LIGHT_THREAD = TypeString.of("sw:light_thread");
-    private static final TypeString SW_GLOBAL_VARIABLE = TypeString.of("sw:global_variable");
-    private static final TypeString SW_BIGNUM = TypeString.of("sw:bignum");
-    private static final TypeString SW_INTEGER = TypeString.of("sw:integer");
-    private static final TypeString SW_FLOAT = TypeString.of("sw:float");
-    private static final TypeString SW_CHARACTER = TypeString.of("sw:character");
-    private static final TypeString SW_SW_REGEXP = TypeString.of("sw:sw_regexp");
-    private static final TypeString SW_CHAR16_VECTOR = TypeString.of("sw:char16_vector");
-    private static final TypeString SW_SYMBOL = TypeString.of("sw:symbol");
-    private static final TypeString SW_CONDITION = TypeString.of("sw:condition");
-    private static final TypeString SW_PROCEDURE = TypeString.of("sw:procedure");
+    private static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", "sw");
+    private static final TypeString SW_SIMPLE_VECTOR = TypeString.ofIdentifier("simple_vector", "sw");
+    private static final TypeString SW_FALSE = TypeString.ofIdentifier("false", "sw");
+    private static final TypeString SW_MAYBE = TypeString.ofIdentifier("maybe", "sw");
+    private static final TypeString SW_HEAVY_THREAD = TypeString.ofIdentifier("heavy_thread", "sw");
+    private static final TypeString SW_LIGHT_THREAD = TypeString.ofIdentifier("light_thread", "sw");
+    private static final TypeString SW_GLOBAL_VARIABLE = TypeString.ofIdentifier("global_variable", "sw");
+    private static final TypeString SW_BIGNUM = TypeString.ofIdentifier("bignum", "sw");
+    private static final TypeString SW_INTEGER = TypeString.ofIdentifier("integer", "sw");
+    private static final TypeString SW_FLOAT = TypeString.ofIdentifier("float", "sw");
+    private static final TypeString SW_CHARACTER = TypeString.ofIdentifier("character", "sw");
+    private static final TypeString SW_SW_REGEXP = TypeString.ofIdentifier("sw_regexp", "sw");
+    private static final TypeString SW_CHAR16_VECTOR = TypeString.ofIdentifier("char16_vector", "sw");
+    private static final TypeString SW_SYMBOL = TypeString.ofIdentifier("symbol", "sw");
+    private static final TypeString SW_CONDITION = TypeString.ofIdentifier("condition", "sw");
+    private static final TypeString SW_PROCEDURE = TypeString.ofIdentifier("procedure", "sw");
 
     private static final Map<String, String> UNARY_OPERATOR_METHODS = Map.of(
         MagikOperator.NOT.getValue(), "not",
@@ -108,7 +109,7 @@ public class LocalTypeReasoner extends AstWalker {
 
     private final AstNode topNode;
     private final ITypeKeeper typeKeeper;
-    private final TypeParser typeParser;
+    private final TypeReader typeReader;
     private final GlobalScope globalScope;
     private final CommentInstructionReader instructionReader;
     private final Map<AstNode, ExpressionResult> nodeTypes = new HashMap<>();
@@ -124,7 +125,7 @@ public class LocalTypeReasoner extends AstWalker {
     public LocalTypeReasoner(final MagikTypedFile magikFile) {
         this.topNode = magikFile.getTopNode();
         this.typeKeeper = magikFile.getTypeKeeper();
-        this.typeParser = new TypeParser(this.typeKeeper);
+        this.typeReader = new TypeReader(this.typeKeeper);
         this.globalScope = magikFile.getGlobalScope();
         this.instructionReader = new CommentInstructionReader(
             magikFile, Set.of(TYPE_INSTRUCTION, ITER_TYPE_INSTRUCTION));
@@ -344,7 +345,7 @@ public class LocalTypeReasoner extends AstWalker {
         // Parse method/proc docs and extract parameter type.
         final AstNode definitionNode =
             node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
-        final NewDocParser docParser = new NewDocParser(definitionNode);
+        final TypeDocParser docParser = new TypeDocParser(definitionNode);
         final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
         final TypeString parameterTypeString = parameterTypes.get(identifier);
 
@@ -354,7 +355,7 @@ public class LocalTypeReasoner extends AstWalker {
             final AbstractType simpleVectorType = this.typeKeeper.getType(SW_SIMPLE_VECTOR);
             result = new ExpressionResult(simpleVectorType);
         } else if (parameterTypeString != null && !parameterTypeString.isUndefined()) {
-            final AbstractType type = this.typeParser.parseTypeString(parameterTypeString);
+            final AbstractType type = this.typeReader.parseTypeString(parameterTypeString);
             if (helper.isOptionalParameter()) {
                 final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
                 final AbstractType optionalType = new CombinedType(type, unsetType);
@@ -394,9 +395,10 @@ public class LocalTypeReasoner extends AstWalker {
         final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
         final String slotName = identifierNode.getTokenValue();
         final Slot slot = type.getSlot(slotName);
-        final AbstractType slotType = slot != null
+        final TypeString slotTypeStr = slot != null
             ? slot.getType()
-            : UndefinedType.INSTANCE;
+            : TypeString.UNDEFINED;
+        final AbstractType slotType = this.typeReader.parseTypeString(slotTypeStr);
         Objects.requireNonNull(slotType);
 
         this.assignAtom(node, slotType);
@@ -416,7 +418,7 @@ public class LocalTypeReasoner extends AstWalker {
         Objects.requireNonNull(scopeEntry);
         if (scopeEntry.isType(ScopeEntry.Type.GLOBAL)
             || scopeEntry.isType(ScopeEntry.Type.DYNAMIC)) {
-            final TypeString typeString = TypeString.of(identifier, this.currentPackage);
+            final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPackage);
             this.assignAtom(node, typeString);
         } else if (scopeEntry.isType(ScopeEntry.Type.IMPORT)) {
             final ScopeEntry parentScopeEntry = scopeEntry.getImportedEntry();
@@ -574,7 +576,7 @@ public class LocalTypeReasoner extends AstWalker {
     }
 
     private void assignAtom(final AstNode node, final TypeString typeString) {
-        final AbstractType type = this.typeKeeper.getType(typeString);
+        final AbstractType type = this.typeReader.parseTypeString(typeString);
         this.assignAtom(node, type);
     }
 
@@ -628,7 +630,7 @@ public class LocalTypeReasoner extends AstWalker {
             final AstNode scopeEntryNode = scopeEntry.getNode();
             this.setNodeType(scopeEntryNode, result);
 
-            // TODO: test if it isn't a slot node
+            // TODO: Test if it isn't a slot node
             this.currentScopeEntryNodes.put(scopeEntry, identifierNode);
         } else if (scopeEntry.isType(ScopeEntry.Type.IMPORT)) {
             // TODO: globals/dynamics/...?
@@ -760,17 +762,17 @@ public class LocalTypeReasoner extends AstWalker {
 
         // Result.
         final ExpressionResult procResult = this.getNodeType(node);
-        final ExpressionResultString procResultStr = TypeParser.unparseExpressionResult(procResult);
+        final ExpressionResultString procResultStr = TypeReader.unparseExpressionResult(procResult);
 
         // Loopbody result.
         final ExpressionResult loopbodyResult = this.getLoopbodyNodeType(node);
-        final ExpressionResultString loopbodyResultStr = TypeParser.unparseExpressionResult(loopbodyResult);
+        final ExpressionResultString loopbodyResultStr = TypeReader.unparseExpressionResult(loopbodyResult);
 
         // Create procedure instance.
         final EnumSet<Method.Modifier> modifiers = EnumSet.noneOf(Method.Modifier.class);
         final URI uri = node.getToken().getURI();
         final Location location = new Location(uri, node);
-        final MagikType procedureType = (MagikType) this.typeKeeper.getType(TypeString.of("sw:procedure"));
+        final MagikType procedureType = (MagikType) this.typeKeeper.getType(SW_PROCEDURE);
         final ProcedureInstance procType = new ProcedureInstance(
             procedureType,
             location,
@@ -845,8 +847,12 @@ public class LocalTypeReasoner extends AstWalker {
         // Check for type annotations, those overrule normal operations.
         final String typeAnnotation = this.instructionReader.getInstructionForNode(node, TYPE_INSTRUCTION);
         if (typeAnnotation != null) {
-            final ExpressionResultString resultStr = ExpressionResultString.of(typeAnnotation, this.currentPackage);
-            final ExpressionResult result = this.typeParser.parseExpressionResultString(resultStr);
+            // TODO: Should the type annotation be a ExpressionResultString, or a single type?
+            //       Probably a ExpressionResultString, in case of a `# iter-type:` for certain!
+            //       So we need more/better parsing then? TypeDocParser then?
+            final ExpressionResultString resultStr =
+                TypeStringParser.parseExpressionResultString(typeAnnotation, this.currentPackage);
+            final ExpressionResult result = this.typeReader.parseExpressionResultString(resultStr);
             this.setNodeType(node, result);
         } else {
             // Normal operations apply.
@@ -862,8 +868,8 @@ public class LocalTypeReasoner extends AstWalker {
         final String iterTypeAnnotation = this.instructionReader.getInstructionForNode(node, ITER_TYPE_INSTRUCTION);
         if (iterTypeAnnotation != null) {
             final ExpressionResultString iterResultStr =
-                ExpressionResultString.of(iterTypeAnnotation, this.currentPackage);
-            final ExpressionResult iterResult = this.typeParser.parseExpressionResultString(iterResultStr);
+                TypeStringParser.parseExpressionResultString(iterTypeAnnotation, this.currentPackage);
+            final ExpressionResult iterResult = this.typeReader.parseExpressionResultString(iterResultStr);
             this.setIteratorType(iterResult);
             LOGGER.trace("{} is of iter-type: {}", node, iterResult);
         }
@@ -962,7 +968,7 @@ public class LocalTypeReasoner extends AstWalker {
                 final TypeString resultingTypeRef = binaryOperator != null
                     ? binaryOperator.getResultType()
                     : TypeString.UNDEFINED;
-                final AbstractType resultingType = this.typeKeeper.getType(resultingTypeRef);
+                final AbstractType resultingType = this.typeReader.parseTypeString(resultingTypeRef);
                 result = new ExpressionResult(resultingType);
                 break;
         }
@@ -1085,7 +1091,7 @@ public class LocalTypeReasoner extends AstWalker {
                     final TypeString resultingTypeRef = binaryOperator != null
                         ? binaryOperator.getResultType()
                         : TypeString.UNDEFINED;
-                    final AbstractType resultingType = this.typeKeeper.getType(resultingTypeRef);
+                    final AbstractType resultingType = this.typeReader.parseTypeString(resultingTypeRef);
                     result = new ExpressionResult(resultingType);
                     break;
             }
@@ -1171,7 +1177,7 @@ public class LocalTypeReasoner extends AstWalker {
                 // Call.
                 final ExpressionResultString methodCallResultStr = method.getCallResult();
                 final ExpressionResult methodCallResultBare =
-                    this.typeParser.parseExpressionResultString(methodCallResultStr);
+                    this.typeReader.parseExpressionResultString(methodCallResultStr);
                 ExpressionResult methodCallResult = originalCalledType != SelfType.INSTANCE
                     ? methodCallResultBare.substituteType(SelfType.INSTANCE, calledType)
                     : methodCallResultBare;
@@ -1202,7 +1208,7 @@ public class LocalTypeReasoner extends AstWalker {
                 // Iterator.
                 final ExpressionResultString loopbodyResultStr = method.getLoopbodyResult();
                 final ExpressionResult loopbodyResultBare =
-                    this.typeParser.parseExpressionResultString(loopbodyResultStr);
+                    this.typeReader.parseExpressionResultString(loopbodyResultStr);
                 final ExpressionResult loopbodyResult = originalCalledType != SelfType.INSTANCE
                     ? loopbodyResultBare.substituteType(SelfType.INSTANCE, calledType)
                     : loopbodyResultBare;
@@ -1249,10 +1255,10 @@ public class LocalTypeReasoner extends AstWalker {
             final Method method = methods.stream().findAny().orElse(null);
             Objects.requireNonNull(method);
             final ExpressionResultString callResultStr = method.getCallResult();
-            callResult = this.typeParser.parseExpressionResultString(callResultStr);
+            callResult = this.typeReader.parseExpressionResultString(callResultStr);
 
             final ExpressionResultString loopbodyResultStr = method.getLoopbodyResult();
-            final ExpressionResult loopbodyResult = this.typeParser.parseExpressionResultString(loopbodyResultStr);
+            final ExpressionResult loopbodyResult = this.typeReader.parseExpressionResultString(loopbodyResultStr);
             this.setIteratorType(loopbodyResult);
 
             if (originalCalledType == SelfType.INSTANCE) {
@@ -1281,7 +1287,7 @@ public class LocalTypeReasoner extends AstWalker {
 
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefNode);
         final TypeString typeString = helper.getTypeString();
-        return this.typeKeeper.getType(typeString);
+        return this.typeReader.parseTypeString(typeString);
     }
 
     /**
@@ -1294,7 +1300,7 @@ public class LocalTypeReasoner extends AstWalker {
         final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
         return calledType.getMethods(methodName).stream()
             .map(method -> method.getCallResult())
-            .map(expressionResultString -> this.typeParser.parseExpressionResultString(expressionResultString))
+            .map(expressionResultString -> this.typeReader.parseExpressionResultString(expressionResultString))
             .reduce((result, element) -> new ExpressionResult(result, element, unsetType))
             .orElse(ExpressionResult.UNDEFINED);
     }
