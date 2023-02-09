@@ -14,6 +14,7 @@ Changes
 - Add check FileMethodCount
 - Rename check NewDoc to TypeDoc.
 - Add generics to the type system, which allows collections to be parameterized.
+- Fix SimplifyIfCheck better handling syntax errors
 
 
 0.6.0 (2022-09-12)

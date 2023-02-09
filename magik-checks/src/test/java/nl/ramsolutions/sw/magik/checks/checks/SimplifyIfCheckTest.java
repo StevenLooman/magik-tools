@@ -27,6 +27,20 @@ class SimplifyIfCheckTest extends MagikCheckTestBase {
     }
 
     @Test
+    void testSimplifyIfIfSyntaxError() {
+        final MagikCheck check = new SimplifyIfCheck();
+        final String code = ""
+            + "_if a\n"
+            + "_then\n"
+            + "    _if _err\n"
+            + "    _then\n"
+            + "    _endif\n"
+            + "_endif";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).hasSize(1);
+    }
+
+    @Test
     void testSimplifyIfElseIf() {
         final MagikCheck check = new SimplifyIfCheck();
         final String code = ""
@@ -39,6 +53,19 @@ class SimplifyIfCheckTest extends MagikCheckTestBase {
             + "_endif";
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).hasSize(1);
+    }
+
+    @Test
+    void testSimplifyIfElseIfSyntaxError() {
+        final MagikCheck check = new SimplifyIfCheck();
+        final String code = ""
+            + "_if a\n"
+            + "_then\n"
+            + "_else\n"
+            + "    _err\n"
+            + "_endif";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
     }
 
     @Test
