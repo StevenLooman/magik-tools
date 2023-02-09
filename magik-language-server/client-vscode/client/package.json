@@ -10,15 +10,15 @@
 		"url": "https://github.com/StevenLooman/magik-tools"
 	},
 	"engines": {
-		"vscode": "^1.70.0"
+		"vscode": "^1.75.0"
 	},
 	"dependencies": {
-		"vscode-languageclient": "^7.0.0",
-		"vscode-debugadapter": "^1.43.0",
+		"vscode-languageclient": "^8.0.2",
+		"@vscode/debugadapter": "^1.59.0",
 		"xml2js": "^0.4.23"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.70.0",
-		"@types/xml2js": "^0.4.9"
+		"@types/vscode": "^1.75.0",
+		"@types/xml2js": "^0.4.11"
 	}
 }

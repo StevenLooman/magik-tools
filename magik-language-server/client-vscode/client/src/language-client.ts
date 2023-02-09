@@ -48,12 +48,12 @@ export class MagikLanguageClient implements vscode.Disposable {
 			run: {
 				command: javaExec.toString(),
 				args: ['-jar', jar, '--debug'],
-				transport: vscodeLanguageClient.TransportKind.pipe
+				transport: vscodeLanguageClient.TransportKind.stdio
 			},
 			debug: {
 				command: javaExec.toString(),
 				args: [javaDebuggerOptions, '-jar', jar, '--debug'],
-				transport: vscodeLanguageClient.TransportKind.pipe
+				transport: vscodeLanguageClient.TransportKind.stdio
 			}
 		};
 
@@ -75,8 +75,7 @@ export class MagikLanguageClient implements vscode.Disposable {
 			clientOptions
 		);
 
-		const disposable = this._client.start();
-		this._context.subscriptions.push(disposable);
+		this._client.start();
 	}
 
 	private registerCommands() {
