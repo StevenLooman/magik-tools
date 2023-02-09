@@ -23,10 +23,15 @@ public final class Main {
         .longOpt("debug")
         .desc("Show debug messages")
         .build();
+    private static final Option OPTION_STDIO = Option.builder()
+        .longOpt("stdio")
+        .desc("Use STDIO (default, no other option to interface with this language server)")
+        .build();
 
     static {
         OPTIONS = new Options();
         OPTIONS.addOption(OPTION_DEBUG);
+        OPTIONS.addOption(OPTION_STDIO);
     }
 
     private Main() {
