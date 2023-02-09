@@ -1,7 +1,7 @@
 Changes
 =======
 
-0.6.1 (unreleased)
+0.7.0 (2023-02-09)
 
 - Fix SwMethodDocCheck accepting `##` as a comment.
 - Fix SimplifyIfCheck to not report invalid reduction.
