@@ -61,7 +61,7 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
             return;
         }
 
-        // Test only METHOD_DEFINITION/PROC_DEFINITION.
+        // Test only METHOD_DEFINITION/PROC_DEFINITION contents.
         if (!this.isProcedureOrMethodDefinition(node)) {
             return;
         }
@@ -73,14 +73,19 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
             return;
         }
 
-        // Only test locals.
+        // Only test variables.
         final String identifier = node.getTokenValue();
         final ScopeEntry entry = scope.getScopeEntry(identifier);
         if (entry == null) {
             return;
         }
-        if (!entry.isType(ScopeEntry.Type.LOCAL)
-            && !entry.isType(ScopeEntry.Type.DEFINITION)) {
+        if (!entry.isType(ScopeEntry.Type.LOCAL, ScopeEntry.Type.DEFINITION, ScopeEntry.Type.CONSTANT)) {
+            return;
+        }
+
+        // Ignore constants?
+        if (this.ignoreConstants
+            && entry.isType(ScopeEntry.Type.CONSTANT)) {
             return;
         }
 
@@ -99,9 +104,8 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
     }
 
     private boolean isVariableUsage(final AstNode node) {
-        return node.getParent().is(MagikGrammar.ATOM)
-            && !this.isLhsOfAssignment(node)
-            && !this.isPostfixExpression(node);
+        return node.getParent().is(MagikGrammar.ATOM, MagikGrammar.METHOD_INVOCATION, MagikGrammar.PROCEDURE_INVOCATION)
+            && !this.isLhsOfAssignment(node);
     }
 
     private boolean isProcedureOrMethodDefinition(final AstNode node) {
@@ -117,12 +121,6 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
         }
 
         return globalScope.getScopeForNode(node);
-    }
-
-    private boolean isPostfixExpression(final AstNode node) {
-        return node.getParent() != null
-            && node.getParent().getParent() != null
-            && node.getParent().getParent().is(MagikGrammar.POSTFIX_EXPRESSION);
     }
 
     @Override

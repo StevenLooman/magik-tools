@@ -115,4 +115,54 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
         assertThat(issues).isEmpty();
     }
 
+    @Test
+    void testDistanceNotOkMethod() {
+        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+        check.maxDistance = 2;
+        final String code = ""
+            + "_method object.m\n"
+            + "    _local a << 1\n"
+            + "    do_something()\n"
+            + "    do_something()\n"
+            + "    do_something()\n"
+            + "    a.method1()\n"
+            + "_endmethod";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).hasSize(1);
+    }
+
+    @Test
+    void testIgnoreConstants() {
+        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+        check.maxDistance = 2;
+        check.ignoreConstants = true;  // Defaults to try, but to be explicit.
+        final String code = ""
+            + "_method object.m\n"
+            + "    _constant a << 1\n"
+            + "    do_something()\n"
+            + "    do_something()\n"
+            + "    do_something()\n"
+            + "    a.method1()\n"
+            + "_endmethod";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
+    @Test
+    void testNotIgnoreConstants() {
+        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+        check.maxDistance = 2;
+        check.ignoreConstants = false;
+        final String code = ""
+            + "_method object.m\n"
+            + "    _constant a << 1\n"
+            + "    do_something()\n"
+            + "    do_something()\n"
+            + "    do_something()\n"
+            + "    a.method1()\n"
+            + "_endmethod";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).hasSize(1);
+    }
+
 }
