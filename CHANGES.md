@@ -3,6 +3,8 @@ Changes
 
 0.7.1 (unreleased)
 
+- Fix VariableDeclarationUsageDistance not seeing method invocations as usage
+
 
 0.7.0 (2023-02-09)
 
