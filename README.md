@@ -1,20 +1,13 @@
-# Sonar Magik plugin
-
-Magik analyzed!
+# Magik-tools
 
 `Magik-tools` is a collection of tools for the Magik programming language used by the Smallworld 5 platform. It provides the following tools:
 
-* SonarQube plugin
-* Linter
 * Language server
 * Debug adapter
+* Linter
+* SonarQube plugin
 
 By no means is this product fully tested and production-ready. Use at your own risk, your mileage may vary.
-
-
-## Status
-
-No build status for now.
 
 
 ## SonarQube plugin
@@ -43,17 +36,17 @@ sonar.coverageReportPaths=coverage.xml
 
 ## Magik Linter
 
-A linter for magik is available in the [`magik-lint`](magik-lint) directory. See [`magik-lint/README.md`](magik-lint/README.md) for more information.
+A linter for Magik is available in the [`magik-lint`](magik-lint) directory. See [`magik-lint/README.md`](magik-lint/README.md) for more information.
 
 
 ## Language server
 
-TODO
+A language server for Magik is available in the [`magik-language-server`](magik-language-server) directory. See [`magik-language-server/README.md`](magik-language-server/README.md) for more information.
 
 
 ## Debug adapter
 
-TODO
+A debug adapter for Smallworld 5/Magik is available in the [`magik-debug-adapter`](magik-debug-adapter) directory. See [`magik-debug-adapter/README.md`](magik-debug-adapter/README.md) for more information.
 
 
 ## Building
