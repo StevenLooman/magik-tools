@@ -10,6 +10,6 @@
     "documentation"
   ],
   "defaultSeverity": "Minor",
-  "ruleSpecification": "NewDoc",
-  "sqKey": "new-doc"
+  "ruleSpecification": "TypeDoc",
+  "sqKey": "type-doc"
 }
