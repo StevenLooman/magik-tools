@@ -4,6 +4,7 @@ Changes
 0.7.1 (unreleased)
 
 - Fix VariableDeclarationUsageDistance not seeing method invocations as usage
+- Fix TypeDoc ruleSpecification/sqKey having old name (NewDoc)
 
 
 0.7.0 (2023-02-09)
