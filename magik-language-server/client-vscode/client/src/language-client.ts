@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import * as vscodeLanguageClient from 'vscode-languageclient/node';
 
 import { getJavaExec } from './common';
+import { MAGIK_TOOLS_VERSION } from './const';
 import { MagikSessionProvider } from './magik-session';
 
 
@@ -41,7 +42,7 @@ export class MagikLanguageClient implements vscode.Disposable {
 			vscode.window.showWarningMessage('Could locate java executable, either set Java Home setting ("magik.javaHome") or JAVA_HOME environment variable.');
 			return;
 		}
-		const jar = path.join(__dirname, '..', '..', 'server', 'magik-language-server-0.7.1-SNAPSHOT.jar');
+		const jar = path.join(__dirname, '..', '..', 'server', 'magik-language-server-' + MAGIK_TOOLS_VERSION + '.jar');
 		const javaDebuggerOptions = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,quiet=y,address=5005';
 
 		const serverOptions: vscodeLanguageClient.ServerOptions = {

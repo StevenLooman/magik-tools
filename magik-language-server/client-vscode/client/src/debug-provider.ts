@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { getJavaExec } from './common';
+import { MAGIK_TOOLS_VERSION } from './const';
 
 
 export class MagikDebugProvider implements vscode.Disposable {
@@ -31,7 +32,7 @@ class DebugAdapterExecutableFactory implements vscode.DebugAdapterDescriptorFact
 			vscode.window.showWarningMessage('Could locate java executable, either set Java Home setting ("magik.javaHome") or JAVA_HOME environment variable.');
 			return;
 		}
-		const jar = path.join(__dirname, '..', '..', 'server', 'magik-debug-adapter-0.7.1-SNAPSHOT.jar');
+		const jar = path.join(__dirname, '..', '..', 'server', 'magik-debug-adapter-' + MAGIK_TOOLS_VERSION + '.jar');
 		const javaDebuggerOptions = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,quiet=y,address=5006';
 
 		const command = javaExec.toString();
