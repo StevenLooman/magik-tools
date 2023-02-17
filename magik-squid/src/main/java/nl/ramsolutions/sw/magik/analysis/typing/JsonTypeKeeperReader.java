@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 public final class JsonTypeKeeperReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonTypeKeeperReader.class);
+    private static final TypeString SW_PROCEDURE_REF = TypeString.ofIdentifier("procedure", "sw");
 
     private static final String SW_PAKKAGE = "sw";
 
@@ -182,6 +183,12 @@ public final class JsonTypeKeeperReader {
     private void handleGlobal(final JSONObject instruction) {
         final String name = instruction.getString("name");
         final TypeString typeString = TypeString.ofIdentifier(name, TypeString.DEFAULT_PACKAGE);
+        final AbstractType type = this.typeKeeper.getType(typeString);
+        if (type != UndefinedType.INSTANCE) {
+            // Prevent adding duplicates and/or errors.
+            LOGGER.debug("Skipping already known global: {}", typeString);
+            return;
+        }
 
         final String typeName = instruction.getString("type_name");
         final TypeString aliasedRef = TypeStringParser.parseTypeString(typeName);
@@ -316,8 +323,7 @@ public final class JsonTypeKeeperReader {
         final ExpressionResultString loopResultStr = this.parseExpressionResultString(instruction.get("loop_types"));
 
         final String procedureName = instruction.getString("procedure_name");
-        final TypeString procedureRef = TypeString.ofIdentifier("procedure", "sw");
-        final MagikType procedureType = (MagikType) this.typeKeeper.getType(procedureRef);
+        final MagikType procedureType = (MagikType) this.typeKeeper.getType(SW_PROCEDURE_REF);
         final String methodDoc = instruction.get("doc") != JSONObject.NULL
             ? instruction.getString("doc")
             : null;
@@ -334,6 +340,13 @@ public final class JsonTypeKeeperReader {
         // Create alias to instance.
         final String name = instruction.getString("name");
         final TypeString typeString = TypeString.ofIdentifier(name, TypeString.DEFAULT_PACKAGE);
+        final AbstractType type = this.typeKeeper.getType(typeString);
+        if (type != UndefinedType.INSTANCE) {
+            // Prevent adding duplicates and/or errors.
+            LOGGER.debug("Skipping already known procedure: {}", typeString);
+            return;
+        }
+
         new AliasType(this.typeKeeper, typeString, instance);
     }
 
