@@ -44,14 +44,9 @@ public class MagikLintDiagnosticsProvider {
         final Path path = overrideConfigurationPath != null
             ? overrideConfigurationPath
             : ConfigurationLocator.locateConfiguration();
-
-        if (path != null) {
-            this.configuration = new Configuration(path);
-        } else {
-            // Default configuration.
-            this.configuration = new Configuration();
-        }
-
+        this.configuration = path != null
+            ? new Configuration(path)
+            : new Configuration();  // Default configuration.
         this.reporter = new MagikLintDiagnosticsReporter();
         this.magikLint = new MagikLint(this.configuration, this.reporter);
     }
