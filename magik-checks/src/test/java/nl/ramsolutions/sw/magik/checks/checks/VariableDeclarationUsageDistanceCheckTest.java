@@ -80,6 +80,27 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
     }
 
     @Test
+    void testVariableUsedInChildScope() {
+        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+        check.maxDistance = 2;
+        final String code = ""
+            + "_method object.m\n"
+            + "    a << 1\n"
+            + "    _if x\n"
+            + "    _then\n"
+            + "        a.method1()\n"
+            + "    _endif\n"
+            + "    _if y\n"
+            + "    _then\n"
+            + "        a.method2()\n"
+            + "    _endif\n"
+            + "    >> a\n"
+            + "_endmethod";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
+    @Test
     void testDifferentScopesNotChecked() {
         final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
         check.maxDistance = 2;

@@ -69,7 +69,7 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
         // Get the scope where it is used.
         final Scope scope = this.getScopeForNode(node);
         if (scope == null) {
-            // No scope found.
+            // Robustness: No scope found.
             return;
         }
 
@@ -109,8 +109,7 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
     }
 
     private boolean isProcedureOrMethodDefinition(final AstNode node) {
-        return node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION) != null
-            || node.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) != null;
+        return node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION) != null;
     }
 
     @CheckForNull
@@ -143,10 +142,10 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
 
             distance += 1;
 
-            AstNode previousNode = currentNode.getPreviousSibling();
-            if (previousNode == null) {
-                previousNode = currentNode.getFirstAncestor(MagikGrammar.STATEMENT);
-            }
+            final AstNode previousSibling = currentNode.getPreviousSibling();
+            final AstNode previousNode = previousSibling != null
+                ? previousSibling
+                : currentNode.getFirstAncestor(MagikGrammar.STATEMENT);  // Go up a scope.
             currentNode = previousNode;
         }
 
