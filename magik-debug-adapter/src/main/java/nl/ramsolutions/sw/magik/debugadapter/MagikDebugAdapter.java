@@ -92,6 +92,12 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
 
     @Override
     public CompletableFuture<Capabilities> initialize(final InitializeRequestArguments args) {
+        LOGGER.trace("initialize");
+
+        // Log server version.
+        final String version = this.getClass().getPackage().getImplementationVersion();
+        LOGGER.info("Version: {}", version);
+
         final Capabilities capabilities = new Capabilities();
         capabilities.setSupportsFunctionBreakpoints(true);
         capabilities.setExceptionBreakpointFilters(BreakpointManager.EXCEPTION_BREAKPOINTS_FILTERS);
@@ -100,11 +106,15 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
 
     @Override
     public CompletableFuture<Void> configurationDone(final ConfigurationDoneArguments args) {
+        LOGGER.trace("configurationDone");
+
         return new CompletableFuture<>();
     }
 
     @Override
     public CompletableFuture<Void> attach(final Map<String, Object> args) {
+        LOGGER.trace("attach, args: {}", args);
+
         final String host = this.getHost(args);
         final Integer port = this.getPort(args);
         if (host == null || port == null) {
@@ -196,6 +206,8 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
 
     @Override
     public CompletableFuture<Void> disconnect(final DisconnectArguments args) {
+        LOGGER.trace("disconnect");
+
         return CompletableFuture.runAsync(() -> {
             try {
                 this.slapProtocol.close();
@@ -213,6 +225,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @Override
     public CompletableFuture<ThreadsResponse> threads() {
         LOGGER.trace("threads");
+
         return CompletableFuture.supplyAsync(() -> {
             try {
                 // Get threads.
@@ -235,6 +248,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @Override
     public CompletableFuture<StackTraceResponse> stackTrace(final StackTraceArguments args) {
         LOGGER.trace("stack trace, thread id: {}", args.getThreadId());
+
         return CompletableFuture.supplyAsync(() -> {
             final int threadId = args.getThreadId();
             try {
@@ -258,6 +272,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @Override
     public CompletableFuture<ScopesResponse> scopes(final ScopesArguments args) {
         LOGGER.debug("scopes: frame id: {}", args.getFrameId());
+
         return CompletableFuture.supplyAsync(() -> {
             // Get scopes.
             final int frameId = args.getFrameId();
@@ -273,6 +288,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @Override
     public CompletableFuture<VariablesResponse> variables(final VariablesArguments args) {
         LOGGER.trace("variables: reference: {}", args.getVariablesReference());
+
         return CompletableFuture.supplyAsync(() -> {
             final int reference = args.getVariablesReference();
             try {
@@ -295,6 +311,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @Override
     public CompletableFuture<ContinueResponse> continue_(final ContinueArguments args) {
         LOGGER.trace("continue: thread id: {}", args.getThreadId());
+
         return CompletableFuture.supplyAsync(() -> {
             final int threadId = args.getThreadId();
             try {
@@ -313,6 +330,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @Override
     public CompletableFuture<Void> pause(final PauseArguments args) {
         LOGGER.trace("pause: thread is: {}", args.getThreadId());
+
         return CompletableFuture.runAsync(() -> {
             final int threadId = args.getThreadId();
             try {
@@ -336,6 +354,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @Override
     public CompletableFuture<Void> next(final NextArguments args) {
         LOGGER.trace("next: thread id: {}", args.getThreadId());
+
         return CompletableFuture.runAsync(() -> {
             final int threadId = args.getThreadId();
             try {
@@ -352,6 +371,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @Override
     public CompletableFuture<Void> stepIn(final StepInArguments args) {
         LOGGER.trace("stepIn: {}", args.getThreadId());
+
         return CompletableFuture.runAsync(() -> {
             final int threadId = args.getThreadId();
             try {
@@ -368,6 +388,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @Override
     public CompletableFuture<Void> stepOut(final StepOutArguments args) {
         LOGGER.trace("step out: thread id: {}", args.getThreadId());
+
         return CompletableFuture.runAsync(() -> {
             final int threadId = args.getThreadId();
             try {
@@ -384,6 +405,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @Override
     public CompletableFuture<SetBreakpointsResponse> setBreakpoints(final SetBreakpointsArguments args) {
         LOGGER.trace("setBreakpoints");
+
         return CompletableFuture.supplyAsync(() -> {
             final Source source = args.getSource();
 
@@ -418,6 +440,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     public CompletableFuture<SetFunctionBreakpointsResponse> setFunctionBreakpoints(
             final SetFunctionBreakpointsArguments args) {
         LOGGER.trace("setFunctionBreakpoints");
+
         return CompletableFuture.supplyAsync(() -> {
             try {
                 // Clear existing breakpoints.
@@ -446,6 +469,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     public CompletableFuture<SetExceptionBreakpointsResponse>
             setExceptionBreakpoints(final SetExceptionBreakpointsArguments args) {
         LOGGER.trace("setExceptionBreakpoints");
+
         return CompletableFuture.supplyAsync(() -> {
             final String[] filters = args.getFilters();
             try {
@@ -472,6 +496,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
         LOGGER.trace(
             "evaluate, expression: '{}', frame id: {}",
             args.getExpression(), args.getFrameId());
+
         return CompletableFuture.supplyAsync(() -> {
             final Integer frameId = args.getFrameId();
             final String expression = args.getExpression();
@@ -497,6 +522,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
         LOGGER.trace(
             "source, source: {}",
             args.getSource());
+
         return CompletableFuture.supplyAsync(() -> {
             final Source source = args.getSource();
             final String pathStr = source.getPath();

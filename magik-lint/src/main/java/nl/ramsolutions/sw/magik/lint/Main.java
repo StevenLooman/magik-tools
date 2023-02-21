@@ -43,7 +43,7 @@ public final class Main {
         .build();
     private static final Option OPTION_SHOW_CHECKS = Option.builder()
         .longOpt("show-checks")
-        .desc("Show checks and quit")
+        .desc("Show checks and exit")
         .build();
     private static final Option OPTION_COLUMN_OFFSET = Option.builder()
         .longOpt("column-offset")
@@ -67,9 +67,13 @@ public final class Main {
         .longOpt("debug")
         .desc("Enable showing of debug information")
         .build();
+    private static final Option OPTION_VERSION = Option.builder()
+        .longOpt("version")
+        .desc("Show version and exit")
+        .build();
     private static final Option OPTION_HELP = Option.builder()
         .longOpt("help")
-        .desc("Show this help")
+        .desc("Show this help and exit")
         .build();
 
     static {
@@ -82,6 +86,7 @@ public final class Main {
         OPTIONS.addOption(OPTION_COLUMN_OFFSET);
         OPTIONS.addOption(OPTION_MAX_INFRACTIONS);
         OPTIONS.addOption(OPTION_DEBUG);
+        OPTIONS.addOption(OPTION_VERSION);
     }
 
     private static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING = Map.of(
@@ -159,6 +164,12 @@ public final class Main {
 
         if (commandLine.hasOption(OPTION_DEBUG)) {
             Main.initDebugLogger();
+        }
+
+        if (commandLine.hasOption(OPTION_VERSION)) {
+            final String version = Main.class.getPackage().getImplementationVersion();
+            System.err.println("Version: " + version);
+            System.exit(0);
         }
 
         // Read configuration.

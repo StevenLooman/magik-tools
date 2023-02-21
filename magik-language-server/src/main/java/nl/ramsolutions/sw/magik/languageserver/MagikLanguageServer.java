@@ -51,6 +51,10 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     public CompletableFuture<InitializeResult> initialize(final InitializeParams params) {
         LOGGER.trace("initialize");
 
+        // Log server version.
+        final String version = this.getClass().getPackage().getImplementationVersion();
+        LOGGER.info("Version: {}", version);
+
         final List<WorkspaceFolder> folders = params.getWorkspaceFolders();
         if (folders != null) {
             this.workspaceFolders.addAll(folders);
@@ -153,6 +157,9 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
      */
     public void setSettings(final JsonObject settings) {
         this.settings = new MagikSettings(settings);
+
+        // Log configuration.
+        LOGGER.info("Settings: {}", settings.toString());
     }
 
     /**
