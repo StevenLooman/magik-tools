@@ -6,6 +6,7 @@ Changes
 - Fix VariableDeclarationUsageDistance not seeing method invocations as usage
 - Fix TypeDoc ruleSpecification/sqKey having old name (NewDoc)
 - Fix bug during re-reading the types database using JsonTypeKeeperReader, where a duplicate type would cause an error
+- Report version and settings, if applicable
 
 
 0.7.0 (2023-02-09)
