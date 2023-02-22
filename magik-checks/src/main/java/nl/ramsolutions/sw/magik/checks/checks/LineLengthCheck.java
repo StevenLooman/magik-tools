@@ -61,12 +61,13 @@ public class LineLengthCheck extends MagikCheck {
             });
 
             if (columnNo.get() > this.maxLineLength) {
+                final int lineLength = line.replaceAll("\t", " ".repeat(TAB_WIDTH)).length();
                 final URI uri = this.getMagikFile().getUri();
                 final Position startPosition = new Position(lineNo, issueColumnNo.get() - 1);
-                final Position endPosition = new Position(lineNo, line.length());
+                final Position endPosition = new Position(lineNo, lineLength);
                 final Range range = new Range(startPosition, endPosition);
                 final Location location = new Location(uri, range);
-                final String message = String.format(MESSAGE, line.length(), this.maxLineLength);
+                final String message = String.format(MESSAGE, lineLength, this.maxLineLength);
                 this.addIssue(location, message);
             }
 
