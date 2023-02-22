@@ -285,7 +285,7 @@ public class MagikLint {
             final boolean enabled = !disableds.contains(checkKeyKebabCase);
 
             // Gather parameters from MagikCheck, value from config.
-            final String name = checkClass.getAnnotation(Rule.class).key();
+            final String name = MagikCheckHolder.toKebabCase(checkClass.getAnnotation(Rule.class).key());
             final Set<MagikCheckHolder.Parameter> parameters = Arrays.stream(checkClass.getFields())
                 .map(field -> field.getAnnotation(RuleProperty.class))
                 .filter(Objects::nonNull)
