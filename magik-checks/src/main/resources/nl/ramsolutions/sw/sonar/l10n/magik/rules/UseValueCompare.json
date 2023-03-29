@@ -1,5 +1,5 @@
 {
-  "title": "Unused local variables should be removed",
+  "title": "Compare strings and bignums with the equality-operators",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
@@ -10,6 +10,6 @@
     "error"
   ],
   "defaultSeverity": "Minor",
-  "ruleSpecification": "UnusedVariable",
-  "sqKey": "unused-variable"
+  "ruleSpecification": "UseValueCompare",
+  "sqKey": "use-value-compare"
 }
