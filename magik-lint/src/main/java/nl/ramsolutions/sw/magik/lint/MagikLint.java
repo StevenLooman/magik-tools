@@ -271,18 +271,29 @@ public class MagikLint {
         final List<MagikCheckHolder> holders = new ArrayList<>();
 
         final String disabledProperty = config.getPropertyString("disabled");
-        final String disabled = disabledProperty != null
+        final String disabledString = disabledProperty != null
             ? disabledProperty
             : "";
-        final List<String> disableds = Arrays.stream(disabled.split(","))
+        final List<String> disableds = Arrays.stream(disabledString.split(","))
             .map(String::trim)
             .collect(Collectors.toList());
+
+        final String enabledProperty = config.getPropertyString("enabled");
+        final String enabledString = enabledProperty != null
+            ? enabledProperty
+            : "";
+        final List<String> enableds = Arrays.stream(enabledString.split(","))
+            .map(String::trim)
+            .collect(Collectors.toList());
+        enableds.remove("");
 
         for (final Class<?> checkClass : CheckList.getChecks()) {
             final Rule annotation = checkClass.getAnnotation(Rule.class);
             final String checkKey = annotation.key();
             final String checkKeyKebabCase = MagikCheckHolder.toKebabCase(checkKey);
-            final boolean enabled = !disableds.contains(checkKeyKebabCase);
+            final boolean enabled = !enableds.isEmpty()
+                ? enableds.contains(checkKeyKebabCase)
+                : !disableds.contains(checkKeyKebabCase);
 
             // Gather parameters from MagikCheck, value from config.
             final String name = checkClass.getAnnotation(Rule.class).key();
