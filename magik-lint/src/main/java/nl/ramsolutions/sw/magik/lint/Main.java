@@ -201,7 +201,8 @@ public final class Main {
             final Reporter reporter = new NullReporter();
             final MagikLint lint = new MagikLint(config, reporter);
             final Writer writer = new PrintWriter(System.out);
-            lint.showChecks(writer);
+            lint.showEnabledChecks(writer);
+            lint.showDisabledChecks(writer);
             writer.flush();
             System.exit(0);
         }
