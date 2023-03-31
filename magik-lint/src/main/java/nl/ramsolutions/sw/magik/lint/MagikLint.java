@@ -109,17 +109,20 @@ public class MagikLint {
     /**
      * Show checks active and inactive checks.
      *
+     * @param writer Writer Write to write output to.
+     * @param showDisabled boolean Boolean to show disabled checks or not.
      * @throws ReflectiveOperationException -
      * @throws IOException -
      */
-    void showChecks(final Writer writer) throws ReflectiveOperationException, IOException {
-        final Iterable<MagikCheckHolder> holders = MagikLint.getAllChecks(this.config);
+    void showChecks(final Writer writer, final boolean showDisabled) throws ReflectiveOperationException, IOException {
+        Iterable<MagikCheckHolder> holders = MagikLint.getAllChecks(this.config);
         for (final MagikCheckHolder holder : holders) {
             final String name = holder.getSqKey();
-            if (holder.isEnabled()) {
-                writer.write("Check: " + name + " (" + holder.getTitle() + ")\n");
+
+            if (!showDisabled && holder.isEnabled() || showDisabled && !holder.isEnabled()) {
+                writer.write("- " + name + " (" + holder.getTitle() + ")\n");
             } else {
-                writer.write("Check: " + name + " (disabled) (" + holder.getTitle() + ")\n");
+                continue;
             }
 
             for (final MagikCheckHolder.Parameter parameter : holder.getParameters()) {
@@ -129,6 +132,30 @@ public class MagikLint {
                     + "(" + parameter.getDescription() + ")\n");
             }
         }
+    }
+
+    /**
+     * Show enabled checks.
+     *
+     * @param writer Writer Write to write output to.
+     * @throws ReflectiveOperationException -
+     * @throws IOException -
+     */
+    void showEnabledChecks(final Writer writer) throws ReflectiveOperationException, IOException {
+        writer.write("Enabled checks:\n");
+        this.showChecks(writer, false);
+    }
+
+    /**
+     * Show disabled checks.
+     *
+     * @param writer Writer Write to write output to.
+     * @throws ReflectiveOperationException -
+     * @throws IOException -
+     */
+    void showDisabledChecks(final Writer writer) throws ReflectiveOperationException, IOException {
+        writer.write("Disabled checks:\n");
+        this.showChecks(writer, true);
     }
 
     /**
