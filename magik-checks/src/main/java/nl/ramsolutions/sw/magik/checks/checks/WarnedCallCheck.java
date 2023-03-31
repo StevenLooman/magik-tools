@@ -25,7 +25,7 @@ public class WarnedCallCheck extends MagikCheck {
      * List of Warned calls, separated by ','.
      */
     @RuleProperty(
-        key = "Warned calls",
+        key = "warned calls",
         defaultValue = "" + DEFAULT_WARNED_CALLS,
         description = "List of Warned calls, separated by ','",
         type = "STRING")
