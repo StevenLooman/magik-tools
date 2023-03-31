@@ -51,6 +51,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <junit.version>5.8.2</junit.version>
+    <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
     <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
     <checkstyle.version>9.2.1</checkstyle.version>
@@ -209,6 +210,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven-jar-plugin.version}</version>
         <configuration>
           <archive>
             <manifest>
