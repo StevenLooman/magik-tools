@@ -70,4 +70,16 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
         assertThat(issues).isEmpty();
     }
 
+    @Test
+    void testDocEndingParam() {
+        final MagikCheck check = new SwMethodDocCheck();
+        final String code = ""
+            + "_method a.b(param1, param2, param3)\n"
+            + "    ## There are PARAM1, PARAM2.\n"
+            + "    ## And PARAM3\n"
+            + "_endmethod";
+        final List<MagikIssue> issues = runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
 }
