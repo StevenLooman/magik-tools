@@ -25,7 +25,8 @@ public class SwMethodDocCheck extends MagikCheck {
     public static final String CHECK_KEY = "SwMethodDoc";
     private static final String MESSAGE = "No or invalid method doc: %s.";
 
-    private static final String PARAMETER_REGEXP = "[ \t]?([A-Z0-9_?]+)[ \t\n\r]+";
+    private static final String PARAMETER_REGEXP = "[ \t]?([\\p{Lu}\\d_?]+)[^\\p{Lu}\\d_?]?";
+    private static final Pattern PARAMETER_PATTERN = Pattern.compile(PARAMETER_REGEXP);
 
     @Override
     protected void walkPreMethodDefinition(final AstNode node) {
@@ -83,8 +84,7 @@ public class SwMethodDocCheck extends MagikCheck {
         final String methodDoc = this.extractDoc(node);
         final Set<String> uppercased = new HashSet<>();
 
-        final Pattern pattern = Pattern.compile(PARAMETER_REGEXP);
-        final Matcher matcher = pattern.matcher(methodDoc);
+        final Matcher matcher = PARAMETER_PATTERN.matcher(methodDoc);
         while (matcher.find()) {
             final String name = matcher.group(1);
             uppercased.add(name);
