@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -48,19 +49,17 @@ public class UnusedVariableCheck extends MagikCheck {
     }
 
     private boolean isPartOfMultiVariableDefinition(final AstNode identifierNode) {
-        final AstNode identifiersWithGatherNode = identifierNode.getParent();
-        if (identifiersWithGatherNode == null
-            || !identifiersWithGatherNode.is(MagikGrammar.IDENTIFIERS_WITH_GATHER)) {
-            return false;
-        }
-
-        final AstNode multiVarDeclNode = identifiersWithGatherNode.getParent();
-        if (multiVarDeclNode == null
-            || !multiVarDeclNode.is(MagikGrammar.VARIABLE_DEFINITION_MULTI)) {
-            return false;
-        }
-
-        return true;
+        // Either part of a VARIABLE_DEFINITION_MULTI or FOR_VARIABLES.
+        final AstNode variableDefMultiNode = AstQuery.getParentFromChain(
+            identifierNode,
+            MagikGrammar.IDENTIFIERS_WITH_GATHER,
+            MagikGrammar.VARIABLE_DEFINITION_MULTI);
+        final AstNode forVariablesNode = AstQuery.getParentFromChain(
+            identifierNode,
+            MagikGrammar.IDENTIFIERS_WITH_GATHER,
+            MagikGrammar.FOR_VARIABLES);
+        return variableDefMultiNode != null
+            || forVariablesNode != null;
     }
 
     private boolean isPartOfMultiAssignment(final AstNode identifierNode) {
@@ -81,9 +80,10 @@ public class UnusedVariableCheck extends MagikCheck {
             && assignablesNode.is(MagikGrammar.MULTIPLE_ASSIGNMENT_ASSIGNABLES);
     }
 
-    private boolean anyNextSiblingUsedMultiVarDef(final AstNode identifierNode) {
+    private boolean anyNextSiblingUsed(final AstNode identifierNode) {
         final GlobalScope globalScope = this.getMagikFile().getGlobalScope();
-        final Scope scope = globalScope.getScopeForNode(identifierNode);
+        final AstNode tokenNode = identifierNode.getFirstChild();
+        final Scope scope = globalScope.getScopeForNode(tokenNode);
         Objects.requireNonNull(scope);
         AstNode sibling = identifierNode.getNextSibling();
         while (sibling != null) {
@@ -95,7 +95,7 @@ public class UnusedVariableCheck extends MagikCheck {
             final String siblingIdentifier = sibling.getTokenValue();
             final ScopeEntry siblingEntry = scope.getScopeEntry(siblingIdentifier);
             if (siblingEntry != null
-                    && !siblingEntry.getUsages().isEmpty()) {
+                && !siblingEntry.getUsages().isEmpty()) {
                 return true;
             }
 
@@ -117,7 +117,7 @@ public class UnusedVariableCheck extends MagikCheck {
         for (final ScopeEntry entry : new ArrayList<>(scopeEntries)) {
             final AstNode entryNode = entry.getNode();
             if (this.isPartOfMultiVariableDefinition(entryNode)
-                && this.anyNextSiblingUsedMultiVarDef(entryNode)
+                && this.anyNextSiblingUsed(entryNode)
                 || this.isPartOfMultiAssignment(entryNode)) {
                 scopeEntries.remove(entry);
             }

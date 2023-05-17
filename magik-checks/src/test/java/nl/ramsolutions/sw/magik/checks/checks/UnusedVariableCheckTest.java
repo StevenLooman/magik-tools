@@ -36,6 +36,19 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
     }
 
     @Test
+    void testVariableNotUsedForLoop() {
+        final MagikCheck check = new UnusedVariableCheck();
+        final String code = ""
+            + "_method a.b\n"
+            + "    _for a _over x.fast_elements()\n"
+            + "    _loop\n"
+            + "    _endloop\n"
+            + "_endmethod\n";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).hasSize(1);
+    }
+
+    @Test
     void testVariableNotUsedMultiAssignment() {
         final MagikCheck check = new UnusedVariableCheck();
         final String code = ""
@@ -65,6 +78,20 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
             + "_method a.b\n"
             + "    (a, b) << (_scatter {1,2})\n"
             + "    write(b)\n"
+            + "_endmethod\n";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
+    @Test
+    void testVariableFirstNotUsedForLoop() {
+        final MagikCheck check = new UnusedVariableCheck();
+        final String code = ""
+            + "_method a.b\n"
+            + "    _for a, b _over x.fast_keys_and_elements()\n"
+            + "    _loop\n"
+            + "        write(b)\n"
+            + "    _endloop\n"
             + "_endmethod\n";
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isEmpty();
