@@ -4,6 +4,7 @@ Changes
 0.7.2 (unreleased)
 
 - Fix SwMethodDocCheck not properly matching uppercased parameter in method doc when it is followed by a non-whitespace character.
+- Fix UnusedVariableCheck not properly handling variables of a for loop.
 
 
 0.7.1 (2023-02-21)
