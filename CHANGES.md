@@ -5,6 +5,7 @@ Changes
 
 - Fix SwMethodDocCheck not properly matching uppercased parameter in method doc when it is followed by a non-whitespace character.
 - Fix UnusedVariableCheck not properly handling variables of a for loop.
+- Refactor JsonTypeKeeperReader/JsonTypeKeeperWriter to use defined instructions.
 
 
 0.7.1 (2023-02-21)
