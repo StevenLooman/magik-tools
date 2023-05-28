@@ -274,4 +274,9 @@ public class TypeKeeper implements ITypeKeeper {
         this.conditions.remove(name);
     }
 
+    @Override
+    public Collection<BinaryOperator> getBinaryOperators() {
+        return Collections.unmodifiableCollection(this.binaryOperators);
+    }
+
 }
