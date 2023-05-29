@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test FileMethodCountCheck.
  */
-public class FileMethodCountCheckTest extends MagikCheckTestBase {
+class FileMethodCountCheckTest extends MagikCheckTestBase {
 
     @Test
     void testTooManyMethods() {

@@ -71,7 +71,7 @@ public class SemanticTokenProvider {
         final ArrayList<Integer> data = new ArrayList<>((walkedSemanticTokens.size() - 1) * SIZE_PER_TOKEN);
         final SemanticToken startSemanticToken = this.createStartSemanticToken();
         Stream.concat(Stream.of(startSemanticToken), walkedSemanticTokens.stream())
-            .reduce((s1, s2) -> {
+            .reduce((s1, s2) -> {  // NOSONAR: Data is stored in `data` list.
                 s2.dataToPrevious(s1)
                     .collect(Collectors.toCollection(() -> data));
                 return s2;

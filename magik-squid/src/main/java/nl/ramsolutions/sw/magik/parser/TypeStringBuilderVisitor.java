@@ -79,7 +79,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
         } else if (ast.is(TypeStringGrammar.TYPE_STRING)) {
             this.buildTypeString(ast);
         } else if (ast.is(TypeStringGrammar.SYNTAX_ERROR)) {
-            this.buildSyntaxError(ast);
+            this.buildUndefined(ast);
         } else {
             throw new IllegalStateException("Unknown node type: " + ast.getType());
         }
@@ -120,9 +120,9 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
         final AstNode genericDefinitionsNode = ast.getFirstChild(TypeStringGrammar.TYPE_GENERIC_DEFINITIONS);
         final List<TypeString> generics = genericDefinitionsNode != null
             ? genericDefinitionsNode.getChildren(TypeStringGrammar.TYPE_STRING).stream()
-                .map(childTypeStringNode -> childTypeStringNode.getFirstChild())
+                .map(AstNode::getFirstChild)
                 .map(this.mapping::get)
-                .peek(Objects::requireNonNull)
+                .map(Objects::requireNonNull)
                 .collect(Collectors.toList())
             : Collections.emptyList();
         final TypeString[] genericsArr = generics.toArray(TypeString[]::new);
@@ -152,12 +152,6 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
         final TypeString part = childAsts.size() == 1
             ? childTypeStrings.get(0)
             : TypeString.ofCombination(this.currentPakkage, childTypeStringsArr);
-        this.mapping.put(ast, part);
-    }
-
-    private void buildSyntaxError(final AstNode ast) {
-        final TypeString part = TypeString.UNDEFINED;
-
         this.mapping.put(ast, part);
     }
 

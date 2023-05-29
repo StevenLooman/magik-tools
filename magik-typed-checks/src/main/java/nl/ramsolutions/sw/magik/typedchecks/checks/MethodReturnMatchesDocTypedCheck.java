@@ -48,7 +48,7 @@ public class MethodReturnMatchesDocTypedCheck extends MagikTypedCheck {
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
         final TypeReader typeParser = new TypeReader(typeKeeper);
         final List<AbstractType> docReturnTypes = docParser.getReturnTypes().stream()
-                .map(typeStr -> typeParser.parseTypeString(typeStr))
+                .map(typeParser::parseTypeString)
                 .collect(Collectors.toList());
         return new ExpressionResult(docReturnTypes);
     }

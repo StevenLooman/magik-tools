@@ -218,11 +218,6 @@ class StandardFormattingStrategy extends FormattingStrategy {
                 MagikGrammar.VARIABLE_DEFINITION_MULTI,
                 MagikGrammar.PROCEDURE_INVOCATION,
                 MagikGrammar.METHOD_INVOCATION)) {
-            // Count token nodes.
-            // long count = node.getChildren().stream()
-            //         .filter(childNode -> childNode.isNot(MagikGrammar.values()))
-            //         .count();
-            // Nope, indent only once on stringed binary expression.
             this.indent -= 1;
         }
 

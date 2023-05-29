@@ -275,7 +275,7 @@ public class Method {
 
         private final MagikKeyword keyword;
 
-        Modifier(final @Nullable MagikKeyword keyword) {
+        Modifier(final MagikKeyword keyword) {
             this.keyword = keyword;
         }
 
@@ -316,9 +316,9 @@ public class Method {
      * @param loopbodyResult Result of iterator call.
      */
     @SuppressWarnings({"java:S1319", "checkstyle:ParameterNumber"})
-    public Method(
+    public Method(//NOSONAR
             final @Nullable Location location,
-            final EnumSet<Modifier> modifiers,
+            final Set<Modifier> modifiers,
             final MagikType owner,
             final String name,
             final List<Parameter> parameters,
@@ -327,7 +327,7 @@ public class Method {
             final ExpressionResultString callResult,
             final ExpressionResultString loopbodyResult) {
         this.location = location;
-        this.modifiers = modifiers;
+        this.modifiers = EnumSet.copyOf(modifiers);
         this.owner = owner;
         this.name = name;
         this.parameters = parameters;
@@ -345,7 +345,7 @@ public class Method {
      * Get method modifiers.
      * @return Method modifiers.
      */
-    public EnumSet<Modifier> getModifiers() {
+    public Set<Modifier> getModifiers() {
         return this.modifiers;
     }
 

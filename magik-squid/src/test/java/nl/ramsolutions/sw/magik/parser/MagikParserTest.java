@@ -72,7 +72,7 @@ class MagikParserTest {
         assertThat(syntaxErrorNode.getType()).isEqualTo(MagikGrammar.SYNTAX_ERROR);
         final Token syntaxErrorToken = syntaxErrorNode.getToken();
         assertThat(syntaxErrorToken.getLine()).isEqualTo(1);
-        assertThat(syntaxErrorToken.getColumn()).isEqualTo(0);
+        assertThat(syntaxErrorToken.getColumn()).isZero();
 
         final AstNode transmitNode = node.getChildren().get(1);
         final Token transmitToken = transmitNode.getToken();
@@ -99,7 +99,7 @@ class MagikParserTest {
         final AstNode methodDefinitionNode = node.getChildren().get(0);
         assertThat(methodDefinitionNode.getType()).isEqualTo(MagikGrammar.METHOD_DEFINITION);
         assertThat(methodDefinitionNode.getToken().getLine()).isEqualTo(1);
-        assertThat(methodDefinitionNode.getToken().getColumn()).isEqualTo(0);
+        assertThat(methodDefinitionNode.getToken().getColumn()).isZero();
 
         final AstNode syntaxErrorNode = node.getChildren().get(0).getChildren().get(2);
         assertThat(syntaxErrorNode.getType()).isEqualTo(MagikGrammar.SYNTAX_ERROR);
@@ -123,7 +123,7 @@ class MagikParserTest {
         final AstNode methodDefinitionNode = node.getChildren().get(0);
         assertThat(methodDefinitionNode.getType()).isEqualTo(MagikGrammar.METHOD_DEFINITION);
         assertThat(methodDefinitionNode.getToken().getLine()).isEqualTo(1);
-        assertThat(methodDefinitionNode.getToken().getColumn()).isEqualTo(0);
+        assertThat(methodDefinitionNode.getToken().getColumn()).isZero();
 
         final AstNode simpleVectorNode = methodDefinitionNode.getFirstDescendant(MagikGrammar.SIMPLE_VECTOR);
         assertThat(simpleVectorNode).isNotNull();
@@ -149,7 +149,7 @@ class MagikParserTest {
         final AstNode methodDefinitionNode = node.getChildren().get(0);
         assertThat(methodDefinitionNode.getType()).isEqualTo(MagikGrammar.METHOD_DEFINITION);
         assertThat(methodDefinitionNode.getToken().getLine()).isEqualTo(1);
-        assertThat(methodDefinitionNode.getToken().getColumn()).isEqualTo(0);
+        assertThat(methodDefinitionNode.getToken().getColumn()).isZero();
 
         final AstNode argumentsNode =
             methodDefinitionNode.getFirstDescendant(MagikGrammar.ARGUMENTS);
@@ -175,12 +175,12 @@ class MagikParserTest {
         final AstNode pragmaNode = node.getChildren().get(0);
         assertThat(pragmaNode.getType()).isEqualTo(MagikGrammar.PRAGMA);
         assertThat(pragmaNode.getToken().getLine()).isEqualTo(1);
-        assertThat(pragmaNode.getToken().getColumn()).isEqualTo(0);
+        assertThat(pragmaNode.getToken().getColumn()).isZero();
 
         final AstNode methodDefinitionNode = node.getChildren().get(1);
         assertThat(methodDefinitionNode.getType()).isEqualTo(MagikGrammar.METHOD_DEFINITION);
         assertThat(methodDefinitionNode.getToken().getLine()).isEqualTo(2);
-        assertThat(methodDefinitionNode.getToken().getColumn()).isEqualTo(0);
+        assertThat(methodDefinitionNode.getToken().getColumn()).isZero();
 
         final AstNode eofNode = node.getChildren().get(2);
         final Token eofToken = eofNode.getToken();

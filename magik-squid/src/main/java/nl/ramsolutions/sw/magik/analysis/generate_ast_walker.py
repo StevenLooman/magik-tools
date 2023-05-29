@@ -14,7 +14,7 @@ IGNORE_ELEMENTS = ['WHITESPACE', 'SPACING', 'SPACING_NO_LB', 'NEXT_NOT_LB', 'EOS
 elements = [
   line[4:-2]
   for line in fileinput.input()
-  if re.match(r"[ ]{4}[A-Z_]+", line) and \
+  if re.match(r" {4}[A-Z_]+", line) and \
      line[4:-2] not in IGNORE_ELEMENTS
 ]
 

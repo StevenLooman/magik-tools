@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for ParameterCountCheck.
  */
-public class ParameterCountCheckTest extends MagikCheckTestBase {
+class ParameterCountCheckTest extends MagikCheckTestBase {
 
     @Test
     void testMaxMethodParameterCountExceeded() {

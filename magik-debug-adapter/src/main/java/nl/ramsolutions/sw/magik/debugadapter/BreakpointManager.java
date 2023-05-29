@@ -209,12 +209,12 @@ class BreakpointManager {
             throws IOException, InterruptedException, ExecutionException {
         int line = sourceBreakpoint.getLine();
         final AstNode methodNode = this.getNode(source, line);
-        final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodNode);
         String method = null;
         int methodLine = 0;
         if (methodNode == null) {
             method = "<not_in_method>";
         } else {
+            final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodNode);
             method = helper.getFullExemplarMethodName();
             methodLine = methodNode.getTokenLine();
             if (methodLine == line) {

@@ -19,23 +19,28 @@ public class MagikNotebookDocumentService implements NotebookDocumentService {
         this.magikLanguageServer = magikLanguageServer;
     }
 
+    public void setCapabilities(final ServerCapabilities capabilities) {
+        // Do nothing for now.
+    }
+
     @Override
     public void didOpen(final DidOpenNotebookDocumentParams params) {
+        // Do nothing for now.
     }
 
     @Override
     public void didChange(final DidChangeNotebookDocumentParams params) {
+        // Do nothing for now.
     }
 
     @Override
     public void didSave(final DidSaveNotebookDocumentParams params) {
+        // Do nothing for now.
     }
 
     @Override
     public void didClose(final DidCloseNotebookDocumentParams params) {
-    }
-
-    public void setCapabilities(final ServerCapabilities capabilities) {
+        // Do nothing for now.
     }
 
 }

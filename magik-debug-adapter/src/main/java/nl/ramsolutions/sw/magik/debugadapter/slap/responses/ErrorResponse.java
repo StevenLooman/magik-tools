@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.debugadapter.slap.responses;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ErrorMessage;
@@ -10,7 +11,7 @@ import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
  * Error response.
  */
 @SuppressWarnings("JavadocVariable")
-public class ErrorResponse implements ISlapResponse {
+public class ErrorResponse implements ISlapResponse, Serializable {
 
     // Response layout:
     //  0- 4: uint32, message length
@@ -18,6 +19,8 @@ public class ErrorResponse implements ISlapResponse {
     //  8-12: uint32, request type
     // 12-16: uint32, error type
     public static final int OFFSET_ERROR_TYPE = 12;
+
+    private static final long serialVersionUID = -411188628207257975L;
 
     private final RequestType requestType;
     private final ErrorMessage errorMessage;

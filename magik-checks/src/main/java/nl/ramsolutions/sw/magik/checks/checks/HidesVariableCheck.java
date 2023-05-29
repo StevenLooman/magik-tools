@@ -41,6 +41,7 @@ public class HidesVariableCheck extends MagikCheck {
         final GlobalScope globalScope = magikFile.getGlobalScope();
         Objects.requireNonNull(globalScope);
         final Scope scope = globalScope.getScopeForNode(node);
+        Objects.requireNonNull(scope);
 
         final AstNode identifiersNode = node.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
         for (final AstNode identifierNode : identifiersNode.getChildren(MagikGrammar.IDENTIFIER)) {

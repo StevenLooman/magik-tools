@@ -26,6 +26,7 @@ public class GenericDeclaration extends AbstractType {
         this.name = name;
     }
 
+    @Override
     public Location getLocation() {
         return this.location;
     }

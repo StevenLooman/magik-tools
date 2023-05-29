@@ -21,7 +21,7 @@ public class ExpressionResultString {
      */
     public static final Collector<TypeString, ?, ExpressionResultString> COLLECTOR = Collector.of(
         ArrayList<TypeString>::new,
-        (list, value) -> list.add(value),
+        List::add,
         (list, values) -> {
             list.addAll(values);
             return list;

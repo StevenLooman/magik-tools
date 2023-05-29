@@ -86,11 +86,12 @@ public class DefSlottedExemplarParser extends TypeDefParser {
         // Figure slots.
         final List<SlottedExemplarDefinition.Slot> slots = new ArrayList<>();
         final List<MethodDefinition> methodDefinitions = new ArrayList<>();
-        for (final AstNode slotDefNode : argument1Node.getChildren(MagikGrammar.EXPRESSION)) {
+        for (final AstNode slotDefNode : argument1Node.getChildren(MagikGrammar.EXPRESSION)) {  // NOSONAR
             final SimpleVectorNodeHelper simpleVectorHelper = SimpleVectorNodeHelper.fromExpressionSafe(slotDefNode);
             if (simpleVectorHelper == null) {
                 continue;
             }
+
             final AstNode slotNameNode = simpleVectorHelper.getNth(0, MagikGrammar.SYMBOL);
             if (slotNameNode == null) {
                 continue;
@@ -121,7 +122,7 @@ public class DefSlottedExemplarParser extends TypeDefParser {
         final List<TypeString> parents = this.extractParents(argument2Node);
 
         final SlottedExemplarDefinition slottedExemplarDefinition =
-                new SlottedExemplarDefinition(statementNode, name, slots, parents);
+            new SlottedExemplarDefinition(statementNode, name, slots, parents);
 
         final List<Definition> definitions = new ArrayList<>();
         definitions.add(slottedExemplarDefinition);

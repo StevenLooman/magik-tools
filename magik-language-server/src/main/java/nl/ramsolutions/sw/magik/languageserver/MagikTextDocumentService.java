@@ -246,9 +246,7 @@ public class MagikTextDocumentService implements TextDocumentService {
 
         final MagikTypedFile magikFile = this.openFiles.get(textDocument);
         final Position position = params.getPosition();
-        return CompletableFuture.supplyAsync(() -> {
-            return this.hoverProvider.provideHover(magikFile, position);
-        });
+        return CompletableFuture.supplyAsync(() -> this.hoverProvider.provideHover(magikFile, position));
     }
 
     @Override

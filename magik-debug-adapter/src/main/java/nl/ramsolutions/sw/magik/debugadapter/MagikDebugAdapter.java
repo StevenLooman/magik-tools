@@ -73,6 +73,12 @@ import org.slf4j.LoggerFactory;
 public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikDebugAdapter.class);
+    private static final String CONNECT_ARG = "connect";
+    private static final String HOST_ARG = "host";
+    private static final String PORT_ARG = "port";
+    private static final String PATH_MAPPING_ARG = "path_mapping";
+    private static final String PATH_MAPPING_FROM_ARG = "from";
+    private static final String PATH_MAPPING_TO_ARG = "to";
 
     private IDebugProtocolClient debugClient;
     private SlapProtocol slapProtocol;
@@ -155,8 +161,8 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @SuppressWarnings("unchecked")
     private String getHost(final Map<String, Object> args) {
         try {
-            final Map<String, Object> connect = (Map<String, Object>) args.get("connect");
-            return (String) connect.get("host");
+            final Map<String, Object> connect = (Map<String, Object>) args.get(CONNECT_ARG);
+            return (String) connect.get(HOST_ARG);
         } catch (ClassCastException ex) {
             return null;
         }
@@ -165,8 +171,8 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @SuppressWarnings("unchecked")
     private Integer getPort(final Map<String, Object> args) {
         try {
-            final Map<String, Object> connect = (Map<String, Object>) args.get("connect");
-            final Object portObj = connect.get("port");
+            final Map<String, Object> connect = (Map<String, Object>) args.get(CONNECT_ARG);
+            final Object portObj = connect.get(PORT_ARG);
             if (portObj == null) {
                 return null;
             }
@@ -181,24 +187,24 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     @SuppressWarnings("unchecked")
     private Map<Path, Path> getPathMapping(final Map<String, Object> args) {
         try {
-            final Map<String, Object> connect = (Map<String, Object>) args.get("connect");
-            if (!connect.containsKey("path_mapping")) {
+            final Map<String, Object> connect = (Map<String, Object>) args.get(CONNECT_ARG);
+            if (!connect.containsKey(PATH_MAPPING_ARG)) {
                 return Collections.emptyMap();
             }
 
             final ArrayList<Map<String, String>> pathMappings =
-                (ArrayList<Map<String, String>>) connect.get("path_mapping");
+                (ArrayList<Map<String, String>>) connect.get(PATH_MAPPING_ARG);
             return pathMappings.stream()
                 .map(mapping -> {
-                    final String fromStr = mapping.get("from");
-                    final String toStr = mapping.get("to");
+                    final String fromStr = mapping.get(PATH_MAPPING_FROM_ARG);
+                    final String toStr = mapping.get(PATH_MAPPING_TO_ARG);
                     final Path from = Path.of(fromStr);
                     final Path to = Path.of(toStr);
                     return Map.entry(from, to);
                 })
                 .collect(Collectors.toUnmodifiableMap(
-                    entry -> entry.getKey(),
-                    entry -> entry.getValue()));
+                    Map.Entry::getKey,
+                    Map.Entry::getValue));
         } catch (ClassCastException ex) {
             return Collections.emptyMap();
         }
@@ -535,7 +541,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
                     final String content = Files.readString(mappedPath);
                     sourceResponse.setContent(content);
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    LOGGER.error("Error reading file: " + pathStr, ex);
 
                     sourceResponse.setContent("Error reading file: " + pathStr);
                 }

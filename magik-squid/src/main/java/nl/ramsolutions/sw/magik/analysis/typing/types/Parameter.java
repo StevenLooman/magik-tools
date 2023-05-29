@@ -62,6 +62,7 @@ public class Parameter {
      * @param type Type.
      */
     public Parameter(final String name, final Modifier modifier, final AbstractType type) {
+        // TODO: Parameter `type` should be a type ref!
         this.name = name;
         this.modifier = modifier;
         this.type = type;

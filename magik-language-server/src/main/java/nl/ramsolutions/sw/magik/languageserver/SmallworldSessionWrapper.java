@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.languageserver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -99,7 +100,7 @@ public class SmallworldSessionWrapper {
         environment.put("SMALLWORLD_GIS", this.productDir.toAbsolutePath().toString());
 
         this.process = processBuilder.start();
-        int pid = -1;    // Java 8 does not provide this PID.
+        final int pid = -1;    // Java 8 does not provide this PID.
         LOGGER.debug("Started process, PID: {}", pid);
         this.handler.processStarted(pid);
 
@@ -125,14 +126,17 @@ public class SmallworldSessionWrapper {
                 if (!pumpedIo) {
                     Thread.sleep(50);
                 }
-            } catch (IOException | InterruptedException exception) {
-                exception.printStackTrace();
+            } catch (IOException exception) {
+                LOGGER.error("Caught IOEXception", exception);
                 running = false;
+            } catch (InterruptedException exception) {
+                running = false;
+                Thread.currentThread().interrupt();
             }
         }
 
         if (!this.process.isAlive()) {
-            int exitValue = this.process.exitValue();
+            final int exitValue = this.process.exitValue();
             LOGGER.debug("Started stopped, exitValue: {}", exitValue);
             this.handler.onExit(exitValue);
 
@@ -145,24 +149,24 @@ public class SmallworldSessionWrapper {
 
     private boolean pumpIo() throws IOException {
         boolean pumpedIo = false;
-        InputStream stdoutStream = this.process.getInputStream();
-        InputStream stderrStream = this.process.getErrorStream();
+        final InputStream stdoutStream = this.process.getInputStream();
+        final InputStream stderrStream = this.process.getErrorStream();
 
-        byte[] buffer = new byte[1024];
+        final byte[] buffer = new byte[1024];
         if (stdoutStream.available() != 0) {
             pumpedIo = true;
-            int read = stdoutStream.read(buffer);
+            final int read = stdoutStream.read(buffer);
             if (read > 0) {
-                byte[] bufferCopy = Arrays.copyOfRange(buffer, 0, read);
+                final byte[] bufferCopy = Arrays.copyOfRange(buffer, 0, read);
                 this.handler.handleStdOut(bufferCopy);
             }
         }
 
         if (stderrStream.available() != 0) {
             pumpedIo = true;
-            int read = stdoutStream.read(buffer);
+            final int read = stdoutStream.read(buffer);
             if (read > 0) {
-                byte[] bufferCopy = Arrays.copyOfRange(buffer, 0, read);
+                final byte[] bufferCopy = Arrays.copyOfRange(buffer, 0, read);
                 this.handler.handleStdErr(bufferCopy);
             }
         }
@@ -175,7 +179,7 @@ public class SmallworldSessionWrapper {
      */
     public boolean sessionActive() {
         return this.process != null
-                     && this.process.isAlive();
+            && this.process.isAlive();
     }
 
     /**
@@ -183,7 +187,7 @@ public class SmallworldSessionWrapper {
      */
     public void stopSession() {
         if (this.process == null
-                || !this.process.isAlive()) {
+            || !this.process.isAlive()) {
             throw new IllegalStateException("Process is not active");
         }
 
@@ -200,7 +204,7 @@ public class SmallworldSessionWrapper {
     public void writeData(byte[] data) throws IOException {
         LOGGER.trace("Appending $ to sent data");
 
-        byte[] buffer = new byte[data.length + 2];
+        final byte[] buffer = new byte[data.length + 2];
         System.arraycopy(data, 0, buffer, 0, data.length);
         buffer[data.length + 0] = '$';
         buffer[data.length + 1] = '\n';
@@ -217,7 +221,7 @@ public class SmallworldSessionWrapper {
             LOGGER.trace("Sending data: \"{}\"", str);
         }
 
-        OutputStream stdinStream = this.process.getOutputStream();
+        final OutputStream stdinStream = this.process.getOutputStream();
         stdinStream.write(buffer);
         stdinStream.flush();
     }
@@ -228,43 +232,45 @@ public class SmallworldSessionWrapper {
      * @throws IOException -
      */
     public static void main(String[] args) throws IOException {
-        InputStream stream = Main.class.getClassLoader().getResourceAsStream("logging.properties");
-        LogManager.getLogManager().readConfiguration(stream);
+        final InputStream stream = Main.class.getClassLoader().getResourceAsStream("logging.properties");
+        LogManager.getLogManager().readConfiguration(stream);  // NOSONAR: Own logging configuration.
 
-        Path productDir = Path.of("/home/steven/opt/SW522/core");
-        Path aliasesPath = productDir.resolve(Path.of("config/gis_aliases"));
-        String aliasesEntry = "base";
+        final Path productDir = Path.of("/home/steven/opt/SW522/core");
+        final Path aliasesPath = productDir.resolve(Path.of("config/gis_aliases"));
+        final String aliasesEntry = "base";
+        final PrintStream out = System.out;  // NOSONAR
 
         ISmallworldSessionWrapperHandler handler = new ISmallworldSessionWrapperHandler() {
             @Override
             public void handleStdOut(byte[] buffer) {
-                System.out.print(new String(buffer, CHARSET));
+                out.print(new String(buffer, CHARSET));
             }
 
             @Override
             public void handleStdErr(byte[] buffer) {
-                System.out.print(new String(buffer, CHARSET));
+                out.print(new String(buffer, CHARSET));
             }
 
             @Override
             public void onExit(int exitValue) {
-                System.out.println("Exited: " + exitValue);
+                out.println("Exited: " + exitValue);
             }
 
             @Override
             public void processStarted(int pid) {
-                System.out.println("Process started: " + pid);
+                out.println("Process started: " + pid);
             }
         };
 
-        SmallworldSessionWrapper wrapper = new SmallworldSessionWrapper(productDir, aliasesPath, aliasesEntry, handler);
+        final SmallworldSessionWrapper wrapper =
+            new SmallworldSessionWrapper(productDir, aliasesPath, aliasesEntry, handler);
         wrapper.startSession();
 
         while (wrapper.sessionActive()) {
-            byte[] buffer = new byte[1024];
-            int read = System.in.read(buffer);
+            final byte[] buffer = new byte[1024];
+            final int read = System.in.read(buffer);
             if (read > 0) {
-                byte[] bufferCopy = Arrays.copyOfRange(buffer, 0, read);
+                final byte[] bufferCopy = Arrays.copyOfRange(buffer, 0, read);
                 wrapper.writeData(bufferCopy);
             }
         }

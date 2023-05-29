@@ -39,7 +39,7 @@ public final class Main {
      */
     private static void initLogger() throws IOException {
         final InputStream stream = Main.class.getClassLoader().getResourceAsStream("logging.properties");
-        LogManager.getLogManager().readConfiguration(stream);
+        LogManager.getLogManager().readConfiguration(stream);  // NOSONAR: Own logging configuration.
     }
 
     /**
@@ -49,7 +49,7 @@ public final class Main {
      */
     private static void initDebugLogger() throws IOException {
         final InputStream stream = Main.class.getClassLoader().getResourceAsStream("debug-logging.properties");
-        LogManager.getLogManager().readConfiguration(stream);
+        LogManager.getLogManager().readConfiguration(stream);  // NOSONAR: Own logging configuration.
     }
 
     /**
@@ -79,7 +79,8 @@ public final class Main {
         }
 
         final MagikDebugAdapter server = new MagikDebugAdapter();
-        final Launcher<IDebugProtocolClient> launcher = DSPLauncher.createServerLauncher(server, System.in, System.out);
+        final Launcher<IDebugProtocolClient> launcher =
+            DSPLauncher.createServerLauncher(server, System.in, System.out);  // NOSONAR
 
         final IDebugProtocolClient remoteProxy = launcher.getRemoteProxy();
         server.connect(remoteProxy);

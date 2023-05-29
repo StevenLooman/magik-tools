@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 import com.sonar.sslr.api.AstNode;
 import java.util.Map;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefSlottedExemplarParser;
-import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
@@ -32,14 +31,12 @@ public class TypeDocTypeExistsTypeCheck extends MagikTypedCheck {
 
     private void checkMethodProcedureDefinition(final AstNode node) {
         final TypeDocParser typeDocParser = new TypeDocParser(node);
-        final PackageNodeHelper packageNodeHelper = new PackageNodeHelper(node);
-        final String pakkage = packageNodeHelper.getCurrentPackage();
-        this.checkDefinitionParameters(typeDocParser, pakkage);
-        this.checkDefinitionLoops(typeDocParser, pakkage);
-        this.checkDefinitionReturns(typeDocParser, pakkage);
+        this.checkDefinitionParameters(typeDocParser);
+        this.checkDefinitionLoops(typeDocParser);
+        this.checkDefinitionReturns(typeDocParser);
     }
 
-    private void checkDefinitionParameters(final TypeDocParser typeDocParser, final String pakkage) {
+    private void checkDefinitionParameters(final TypeDocParser typeDocParser) {
         // Test @param types.
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
         final TypeReader typeParser = new TypeReader(typeKeeper);
@@ -53,7 +50,7 @@ public class TypeDocTypeExistsTypeCheck extends MagikTypedCheck {
             });
     }
 
-    private void checkDefinitionLoops(final TypeDocParser typeDocParser, final String pakkage) {
+    private void checkDefinitionLoops(final TypeDocParser typeDocParser) {
         // Test @loop types.
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
         final TypeReader typeParser = new TypeReader(typeKeeper);
@@ -67,7 +64,7 @@ public class TypeDocTypeExistsTypeCheck extends MagikTypedCheck {
             });
     }
 
-    private void checkDefinitionReturns(final TypeDocParser typeDocParser, final String pakkage) {
+    private void checkDefinitionReturns(final TypeDocParser typeDocParser) {
         // Test @return types.
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
         final TypeReader typeParser = new TypeReader(typeKeeper);
