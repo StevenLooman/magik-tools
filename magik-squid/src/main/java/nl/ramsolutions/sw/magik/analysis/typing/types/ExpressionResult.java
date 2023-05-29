@@ -21,7 +21,7 @@ public class ExpressionResult {
      */
     public static final Collector<AbstractType, ?, ExpressionResult> COLLECTOR = Collector.of(
         ArrayList<AbstractType>::new,
-        (list, value) -> list.add(value),
+        List::add,
         (list, values) -> {
             list.addAll(values);
             return list;
@@ -68,18 +68,22 @@ public class ExpressionResult {
      */
     public ExpressionResult(
             final ExpressionResult result1,
-            final ExpressionResult result2,
+            final @Nullable ExpressionResult result2,
             final AbstractType unsetType) {
-        final int size = Math.max(result1.size(), result2.size());
-        final List<AbstractType> combinedTypes = new ArrayList<>(size);
-        for (int i = 0; i < size; ++i) {
-            final AbstractType type1 = result1.get(i, unsetType);
-            final AbstractType type2 = result2.get(i, unsetType);
-            final AbstractType combinedType = CombinedType.combine(type1, type2);
-            combinedTypes.add(combinedType);
-        }
+        if (result2 == null) {
+            this.types = result1.getTypes();
+        } else {
+            final int size = Math.max(result1.size(), result2.size());
+            final List<AbstractType> combinedTypes = new ArrayList<>(size);
+            for (int i = 0; i < size; ++i) {
+                final AbstractType type1 = result1.get(i, unsetType);
+                final AbstractType type2 = result2.get(i, unsetType);
+                final AbstractType combinedType = CombinedType.combine(type1, type2);
+                combinedTypes.add(combinedType);
+            }
 
-        this.types = Collections.unmodifiableList(combinedTypes);
+            this.types = Collections.unmodifiableList(combinedTypes);
+        }
     }
 
     /**

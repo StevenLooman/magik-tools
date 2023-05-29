@@ -76,11 +76,6 @@ public class MagikTypedCheck extends MagikCheck {
      * @return
      */
     protected AbstractType getTypeOfMethodDefinition(final AstNode node) {
-        if (node == null) {
-            // This can happen in case of a procedure definition calling a method on _self.
-            return UndefinedType.INSTANCE;
-        }
-
         final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(node);
         final TypeString typeString = methodDefHelper.getTypeString();
         final ITypeKeeper typeKeeper = this.getTypeKeeper();

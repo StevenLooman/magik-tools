@@ -4,6 +4,8 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
@@ -78,21 +80,23 @@ public class FormattingCheck extends MagikCheck {
         }
 
         int lineNo = 1;
+        final char indentChar = this.getIndentChar();
+        final Pattern pattern = indentChar == '\t'
+            ? Pattern.compile("^( +\t+)\\S+|( {" + this.tabWidth + "}).*", Pattern.MULTILINE)
+            : Pattern.compile("^(\t).*", Pattern.MULTILINE);
+        final String msg = indentChar == '\t'
+            ? "Line must start with tabs"
+            : "Line must start with spaces";
         for (final String line : this.lines) {
-            if (this.getIndentChar() == '\t') {
-                // Tab character for indenting.
-                if (line.matches("^[ ]{" + this.tabWidth + "}.*")
-                    || line.matches("^[ ]+[\t]+.*")) {
-                    final String message = String.format(MESSAGE, "Line must start with tabs");
-                    this.addIssue(lineNo, 1, lineNo, 2, message);
-                }
-            } else {
-                // Space characters for indenting.
-                if (line.matches("^\t.*")) {
-                    final String message = String.format(MESSAGE, "Line must start with spaces");
-                    this.addIssue(lineNo, 1, lineNo, 2, message);
-                }
+            final Matcher matcher = pattern.matcher(line);
+            if (matcher.matches()) {
+                final String message = String.format(MESSAGE, msg);
+                final String group1 = matcher.group(1);
+                final String group = group1 != null ? group1 : matcher.group(2);
+                final int endColumn = group.length();
+                this.addIssue(lineNo, 1, lineNo, endColumn, message);
             }
+
             lineNo += 1;
         }
     }

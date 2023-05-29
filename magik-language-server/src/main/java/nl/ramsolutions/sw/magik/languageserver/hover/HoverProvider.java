@@ -70,33 +70,26 @@ public class HoverProvider {
         final StringBuilder builder = new StringBuilder();
         if (hoveredNode.is(MagikGrammar.PACKAGE_IDENTIFIER)) {
             this.provideHoverPackage(magikFile, hoveredNode, builder);
-        } else if (parentNode != null
-                   && parentNode.is(MagikGrammar.EXEMPLAR_NAME, MagikGrammar.METHOD_NAME)) {
-            this.provideHoverMethodDefinition(magikFile, hoveredNode, builder);
-        } else if (hoveredNode.is(MagikGrammar.IDENTIFIER)
-                   && parentNode != null
-                   && parentNode.is(MagikGrammar.METHOD_INVOCATION)) {
-            this.provideHoverMethodInvocation(magikFile, hoveredNode, builder);
-        } else if (parentNode != null
-                   && parentNode.is(MagikGrammar.ATOM)
-                   || parentNode != null
-                   && parentNode.is(MagikGrammar.SLOT)) {
-            final AstNode atomNode = hoveredNode.getFirstAncestor(MagikGrammar.ATOM);
-            this.provideHoverAtom(magikFile, atomNode, builder);
-        } else if (parentNode != null
-                   && parentNode.is(MagikGrammar.PARAMETER)) {
-            final AstNode parameterNode = hoveredNode.getParent();
-            this.provideHoverAtom(magikFile, parameterNode, builder);
-        } else if (parentNode != null
-                   && parentNode.is(MagikGrammar.VARIABLE_DEFINITION)) {
-            this.provideHoverAtom(magikFile, hoveredNode, builder);
-        } else if (parentNode != null
-                   && parentNode.is(MagikGrammar.EXPRESSION)) {
-            final AstNode expressionNode = hoveredNode.getParent();
-            this.provideHoverExpression(magikFile, expressionNode, builder);
-        } else if (parentNode != null
-                   && parentNode.is(MagikGrammar.CONDITION_NAME)) {
-            this.provideHoverCondition(magikFile, hoveredNode, builder);
+        } else if (parentNode != null) {
+            if (parentNode.is(MagikGrammar.EXEMPLAR_NAME, MagikGrammar.METHOD_NAME)) {
+                this.provideHoverMethodDefinition(magikFile, hoveredNode, builder);
+            } else if (hoveredNode.is(MagikGrammar.IDENTIFIER)
+                       && parentNode.is(MagikGrammar.METHOD_INVOCATION)) {
+                this.provideHoverMethodInvocation(magikFile, hoveredNode, builder);
+            } else if (parentNode.is(MagikGrammar.ATOM) || parentNode.is(MagikGrammar.SLOT)) {
+                final AstNode atomNode = hoveredNode.getFirstAncestor(MagikGrammar.ATOM);
+                this.provideHoverAtom(magikFile, atomNode, builder);
+            } else if (parentNode.is(MagikGrammar.PARAMETER)) {
+                final AstNode parameterNode = hoveredNode.getParent();
+                this.provideHoverAtom(magikFile, parameterNode, builder);
+            } else if (parentNode.is(MagikGrammar.VARIABLE_DEFINITION)) {
+                this.provideHoverAtom(magikFile, hoveredNode, builder);
+            } else if (parentNode.is(MagikGrammar.EXPRESSION)) {
+                final AstNode expressionNode = hoveredNode.getParent();
+                this.provideHoverExpression(magikFile, expressionNode, builder);
+            } else if (parentNode.is(MagikGrammar.CONDITION_NAME)) {
+                this.provideHoverCondition(magikFile, hoveredNode, builder);
+            }
         }
 
         final MarkupContent contents = new MarkupContent(MarkupKind.MARKDOWN, builder.toString());
@@ -207,12 +200,11 @@ public class HoverProvider {
         // Data names.
         builder.append("## Data:\n");
         condition.getDataNameList().stream()
-            .forEach(dataName -> {
+            .forEach(dataName ->
                 builder
                     .append("* ")
                     .append(dataName)
-                    .append("\n");
-            });
+                    .append("\n"));
     }
 
     private void provideHoverExpression(
@@ -504,12 +496,11 @@ public class HoverProvider {
             builder
                 .append("## Generics\n");
             generics.stream()
-                .forEach(generic -> {
+                .forEach(generic ->
                     builder
                         .append("* ")
                         .append(generic.getName())
-                        .append("\n");
-                });
+                        .append("\n"));
             builder
                 .append(SECTION_END);
         }

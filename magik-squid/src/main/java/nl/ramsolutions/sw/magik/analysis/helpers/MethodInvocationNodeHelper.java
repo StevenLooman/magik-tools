@@ -85,7 +85,7 @@ public class MethodInvocationNodeHelper {
         }
 
         return argumentsNode.getChildren(MagikGrammar.ARGUMENT).stream()
-            .map(argNode -> argNode.getFirstChild())
+            .map(AstNode::getFirstChild)
             .collect(Collectors.toList());
     }
 

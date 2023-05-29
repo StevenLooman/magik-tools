@@ -42,6 +42,9 @@ public class LocalImportProcedureCheck extends MagikCheck {
             return;
         }
         final Scope procScope = globalScope.getScopeForNode(bodyNode);
+        if (procScope == null) {
+            return;
+        }
 
         // Get all parent scopes from procedure.
         final List<Scope> parentScopes = procScope.getAncestorScopes();
@@ -49,30 +52,37 @@ public class LocalImportProcedureCheck extends MagikCheck {
         // Get procedure scope and all child scopes from procedure.
         final List<Scope> childScopes = procScope.getSelfAndDescendantScopes();
 
-        // See if any overlap.
+        // Test all scopes for overlap.
         for (final Scope scope : childScopes) {
-            for (final ScopeEntry scopeEntry: scope.getScopeEntriesInScope()) {
-                boolean found = false;
-                if (!scopeEntry.isType(ScopeEntry.Type.LOCAL)
-                    && !scopeEntry.isType(ScopeEntry.Type.DEFINITION)) {
-                    return;
-                }
+            this.checkScope(scope, parentScopes);
+        }
+    }
 
-                final String identifier = scopeEntry.getIdentifier();
-                for (final Scope parentScope : parentScopes) {
-                    if (parentScope.getScopeEntry(identifier) != null) {
-                        this.addIssue(scopeEntry.getNode(), MESSAGE);
-                        found = true;
-                    }
-                }
+    private void checkScope(final Scope scope, final List<Scope> parentScopes) {
+        // See if any ScopeEntry overlaps.
+        for (final ScopeEntry scopeEntry: scope.getScopeEntriesInScope()) {
+            boolean found = false;
 
-                if (found) {
-                    // stop checking this scopeEntry, issue already reported
-                    break;
+            // Only test LOCAL/DEFINITION ScopeEntry.
+            if (!scopeEntry.isType(ScopeEntry.Type.LOCAL)
+                && !scopeEntry.isType(ScopeEntry.Type.DEFINITION)) {
+                return;
+            }
+
+            // Test for overlap.
+            final String identifier = scopeEntry.getIdentifier();
+            for (final Scope parentScope : parentScopes) {
+                if (parentScope.getScopeEntry(identifier) != null) {
+                    this.addIssue(scopeEntry.getNode(), MESSAGE);
+                    found = true;
                 }
+            }
+
+            if (found) {
+                // stop checking this scopeEntry, issue already reported
+                break;
             }
         }
     }
 
 }
-

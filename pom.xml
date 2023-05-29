@@ -66,10 +66,8 @@
     <!-- JaCoCo thresholds. Increase gradually as you add tests. -->
     <jacoco.unit-tests.limit.instruction-ratio>0%</jacoco.unit-tests.limit.instruction-ratio>
     <jacoco.unit-tests.limit.branch-ratio>0%</jacoco.unit-tests.limit.branch-ratio>
-    <!-- <jacoco.unit-tests.limit.class-complexity>20</jacoco.unit-tests.limit.class-complexity> -->
-    <!-- <jacoco.unit-tests.limit.method-complexity>5</jacoco.unit-tests.limit.method-complexity> -->
-    <jacoco.unit-tests.limit.class-complexity>100</jacoco.unit-tests.limit.class-complexity>
-    <jacoco.unit-tests.limit.method-complexity>10</jacoco.unit-tests.limit.method-complexity>
+    <jacoco.unit-tests.limit.class-complexity>100</jacoco.unit-tests.limit.class-complexity> <!-- Preferred/future: 20-->
+    <jacoco.unit-tests.limit.method-complexity>10</jacoco.unit-tests.limit.method-complexity> <!-- Preferred/future: 5-->
 
     <sonar.version>9.2.4.50792</sonar.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
@@ -80,8 +78,9 @@
     <logback.version>1.0.13</logback.version>
     <lsp4j.version>0.19.0</lsp4j.version>
     <commons-cli.version>1.5.0</commons-cli.version>
-    <json.version>20211205</json.version>
+    <json.version>20230227</json.version>
     <assertj.version>3.21.0</assertj.version>
+    <sonar-maven.version>3.9.1.2184</sonar-maven.version>
   </properties>
 
   <dependencyManagement>
@@ -187,6 +186,12 @@
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-api</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-params</artifactId>
         <version>${junit.version}</version>
         <scope>test</scope>
       </dependency>
@@ -400,6 +405,15 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>${sonar-maven.version}</version>
+        <configuration>
+            <sonar.python.version>3</sonar.python.version>
+        </configuration>
+        </plugin>
     </plugins>
   </build>
 

@@ -59,6 +59,18 @@ public abstract class AstWalker {
                 this.walkPostComment(node);
                 break;
 
+            case SPACING_NO_LB_2:
+                this.walkPreSpacingNoLb2(node);
+                this.walkChildren(node);
+                this.walkPostSpacingNoLb2(node);
+                break;
+
+            case NEXT_NOT_COMMENT:
+                this.walkPreNextNotComment(node);
+                this.walkChildren(node);
+                this.walkPostNextNotComment(node);
+                break;
+
             case SYNTAX_ERROR:
                 this.walkPreSyntaxError(node);
                 this.walkChildren(node);
@@ -77,10 +89,34 @@ public abstract class AstWalker {
                 this.walkPostPackageSpecification(node);
                 break;
 
+            case PACKAGE_IDENTIFIER:
+                this.walkPrePackageIdentifier(node);
+                this.walkChildren(node);
+                this.walkPostPackageIdentifier(node);
+                break;
+
             case METHOD_DEFINITION:
                 this.walkPreMethodDefinition(node);
                 this.walkChildren(node);
                 this.walkPostMethodDefinition(node);
+                break;
+
+            case EXEMPLAR_NAME:
+                this.walkPreExemplarName(node);
+                this.walkChildren(node);
+                this.walkPostExemplarName(node);
+                break;
+
+            case METHOD_NAME:
+                this.walkPreMethodName(node);
+                this.walkChildren(node);
+                this.walkPostMethodName(node);
+                break;
+
+            case CONDITION_NAME:
+                this.walkPreConditionName(node);
+                this.walkChildren(node);
+                this.walkPostConditionName(node);
                 break;
 
             case METHOD_DEFINITION_SYNTAX_ERROR:
@@ -689,6 +725,12 @@ public abstract class AstWalker {
                 this.walkPostProcedureDefinition(node);
                 break;
 
+            case PROCEDURE_NAME:
+                this.walkPreProcedureName(node);
+                this.walkChildren(node);
+                this.walkPostProcedureName(node);
+                break;
+
             case PROCEDURE_DEFINITION_SYNTAX_ERROR:
                 this.walkPreProcedureDefinitionSyntaxError(node);
                 this.walkChildren(node);
@@ -767,6 +809,22 @@ public abstract class AstWalker {
         this.walkPostDefault(node);
     }
 
+    protected void walkPreSpacingNoLb2(final AstNode node) {
+        this.walkPreDefault(node);
+    }
+
+    protected void walkPostSpacingNoLb2(final AstNode node) {
+        this.walkPostDefault(node);
+    }
+
+    protected void walkPreNextNotComment(final AstNode node) {
+        this.walkPreDefault(node);
+    }
+
+    protected void walkPostNextNotComment(final AstNode node) {
+        this.walkPostDefault(node);
+    }
+
     protected void walkPreSyntaxError(final AstNode node) {
         this.walkPreDefault(node);
     }
@@ -791,11 +849,43 @@ public abstract class AstWalker {
         this.walkPostDefault(node);
     }
 
+    protected void walkPrePackageIdentifier(final AstNode node) {
+        this.walkPreDefault(node);
+    }
+
+    protected void walkPostPackageIdentifier(final AstNode node) {
+        this.walkPostDefault(node);
+    }
+
     protected void walkPreMethodDefinition(final AstNode node) {
         this.walkPreDefault(node);
     }
 
     protected void walkPostMethodDefinition(final AstNode node) {
+        this.walkPostDefault(node);
+    }
+
+    protected void walkPreExemplarName(final AstNode node) {
+        this.walkPreDefault(node);
+    }
+
+    protected void walkPostExemplarName(final AstNode node) {
+        this.walkPostDefault(node);
+    }
+
+    protected void walkPreMethodName(final AstNode node) {
+        this.walkPreDefault(node);
+    }
+
+    protected void walkPostMethodName(final AstNode node) {
+        this.walkPostDefault(node);
+    }
+
+    protected void walkPreConditionName(final AstNode node) {
+        this.walkPreDefault(node);
+    }
+
+    protected void walkPostConditionName(final AstNode node) {
         this.walkPostDefault(node);
     }
 
@@ -1604,6 +1694,14 @@ public abstract class AstWalker {
     }
 
     protected void walkPostProcedureDefinition(final AstNode node) {
+        this.walkPostDefault(node);
+    }
+
+    protected void walkPreProcedureName(final AstNode node) {
+        this.walkPreDefault(node);
+    }
+
+    protected void walkPostProcedureName(final AstNode node) {
         this.walkPostDefault(node);
     }
 

@@ -7,7 +7,7 @@ import org.sonar.sslr.tests.Assertions;
 /**
  * Tests for TypeStringGrammar.
  */
-public class TypeStringGrammarTest {
+class TypeStringGrammarTest {
 
     private final LexerlessGrammar grammarTypeString = TypeStringGrammar.create(TypeStringGrammar.TYPE_STRING);
     private final LexerlessGrammar grammarExpressionResultString =

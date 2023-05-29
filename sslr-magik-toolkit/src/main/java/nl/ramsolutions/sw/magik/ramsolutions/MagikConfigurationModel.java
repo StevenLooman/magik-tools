@@ -54,10 +54,10 @@ final class MagikConfigurationModel implements ConfigurationModel {
      */
     public List<Tokenizer> getTokenizers() {
         return List.of(
-                new StringTokenizer("<span class=\"s\">", "</span>"),
-                new MagikDocTokenizer("<span class=\"cppd\">", "</span>"),
-                new MagikCommentTokenizer("<span class=\"cd\">", "</span>"),
-                new KeywordsTokenizer("<span class=\"k\">", "</span>", MagikKeyword.keywordValues()));
+                new StringTokenizer("<span class=\"s\">", "</span>"),  // NOSONAR
+                new MagikDocTokenizer("<span class=\"cppd\">", "</span>"),  // NOSONAR
+                new MagikCommentTokenizer("<span class=\"cd\">", "</span>"),  // NOSONAR
+                new KeywordsTokenizer("<span class=\"k\">", "</span>", MagikKeyword.keywordValues()));  // NOSONAR
     }
 
 }

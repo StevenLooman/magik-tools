@@ -108,8 +108,6 @@ public class MagikParser {
      * @throws IOException -
      */
     public AstNode parse(final String source) throws IOException {
-        // final StringReader reader = new StringReader(source);
-        // return this.parse(reader);
         final AstNode magikNode = this.parser.parse(source);
 
         // Update identifiers.

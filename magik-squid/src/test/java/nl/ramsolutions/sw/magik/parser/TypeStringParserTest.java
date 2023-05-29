@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for TypeStringParser.
  */
-public class TypeStringParserTest {
+class TypeStringParserTest {
 
     private static final String SW_PACKAGE = "sw";
 

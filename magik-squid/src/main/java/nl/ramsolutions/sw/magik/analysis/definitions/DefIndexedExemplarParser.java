@@ -43,10 +43,7 @@ public class DefIndexedExemplarParser extends TypeDefParser {
         final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
         final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
         final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
-        if (argument0Node == null) {
-            return false;
-        }
-        return true;
+        return argument0Node != null;
     }
 
     /**

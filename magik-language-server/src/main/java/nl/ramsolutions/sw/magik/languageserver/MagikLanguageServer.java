@@ -159,7 +159,7 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
         this.settings = new MagikSettings(settings);
 
         // Log configuration.
-        LOGGER.info("Settings: {}", settings.toString());
+        LOGGER.info("Settings: {}", settings);
     }
 
     /**

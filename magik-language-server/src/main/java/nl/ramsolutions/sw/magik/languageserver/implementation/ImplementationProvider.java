@@ -57,7 +57,7 @@ public class ImplementationProvider {
         // Get method implementations.
         AstNode currentNode = AstQuery.nodeAt(node, Lsp4jConversion.positionFromLsp4j(position));
         final List<org.eclipse.lsp4j.Location> locations = new ArrayList<>();
-        while (currentNode != null) {
+        while (currentNode != null) {  // NOSONAR
             // If current node is a method invocation, go to that method.
             if (currentNode.is(MagikGrammar.METHOD_INVOCATION)) {
                 final List<org.eclipse.lsp4j.Location> methodLocations =
@@ -71,7 +71,7 @@ public class ImplementationProvider {
                 break;
             } else if (currentNode.is(MagikGrammar.CONDITION_NAME)) {
                 final List<org.eclipse.lsp4j.Location> methodLocations =
-                    this.implentationsForCondition(typeKeeper, reasoner, currentNode);
+                    this.implentationsForCondition(typeKeeper, currentNode);
                 locations.addAll(methodLocations);
                 break;
             }
@@ -83,7 +83,7 @@ public class ImplementationProvider {
     }
 
     private List<org.eclipse.lsp4j.Location> implentationsForCondition(
-            final ITypeKeeper typeKeeper, final LocalTypeReasoner reasoner, final AstNode currentNode) {
+            final ITypeKeeper typeKeeper, final AstNode currentNode) {
         final String conditionName = currentNode.getTokenValue();
         if (conditionName == null) {
             return Collections.emptyList();

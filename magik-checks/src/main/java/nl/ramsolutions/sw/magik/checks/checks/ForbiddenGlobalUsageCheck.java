@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -74,6 +75,7 @@ public class ForbiddenGlobalUsageCheck extends MagikCheck {
         // Ensure global/dynamic.
         final GlobalScope globalScope = this.getMagikFile().getGlobalScope();
         final Scope scope = globalScope.getScopeForNode(node);
+        Objects.requireNonNull(scope);
         final ScopeEntry scopeEntry = scope.getLocalScopeEntry(identifier);
         if (scopeEntry == null) {
             // Robustness.

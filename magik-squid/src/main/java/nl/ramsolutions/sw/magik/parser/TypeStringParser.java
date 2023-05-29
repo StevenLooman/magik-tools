@@ -71,14 +71,14 @@ public final class TypeStringParser {
                 final int currentLine = token.getLine();
                 final int newLine = currentLine - 1 + lineOffset;
                 final Field lineField = Token.class.getDeclaredField("line");
-                lineField.setAccessible(true);
-                lineField.set(token, newLine);
+                lineField.setAccessible(true);  // NOSONAR
+                lineField.set(token, newLine);  // NOSONAR
 
                 final int currentColumn = token.getColumn();
                 final int newColumn = currentColumn + columnOffset;
                 final Field columnField = Token.class.getDeclaredField("column");
-                columnField.setAccessible(true);
-                columnField.set(token, newColumn);
+                columnField.setAccessible(true);  // NOSONAR
+                columnField.set(token, newColumn);  // NOSONAR
             } catch (ReflectiveOperationException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }

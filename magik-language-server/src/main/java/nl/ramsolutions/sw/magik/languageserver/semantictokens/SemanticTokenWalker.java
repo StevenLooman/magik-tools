@@ -136,8 +136,6 @@ public class SemanticTokenWalker extends AstWalker {
         final String value = token.getOriginalValue();
         if (value.startsWith("##")) {
             final Set<SemanticToken.Modifier> docModifier = Set.of(SemanticToken.Modifier.DOCUMENTATION);
-            final Set<SemanticToken.Modifier> constModifier =
-                Set.of(SemanticToken.Modifier.DOCUMENTATION, SemanticToken.Modifier.READONLY);
 
             final List<Token> docTokens = List.of(token);
             final TypeDocParser typeDocParser = new TypeDocParser(docTokens);
@@ -163,35 +161,7 @@ public class SemanticTokenWalker extends AstWalker {
                 // TYPE
                 final AstNode typeNode = elementNode.getFirstChild(TypeDocGrammar.TYPE);
                 if (typeNode != null) {
-                    final List<AstNode> typeValueNodes = typeNode.getChildren(TypeDocGrammar.TYPE_VALUE);
-                    if (!typeValueNodes.isEmpty()) {
-                        final AstNode typeValueNode = typeValueNodes.get(0);
-                        final AstNode typeStringNode = TypeStringParser.getParsedNodeForTypeString(typeValueNode);
-                        final List<AstNode> typeNodes = typeStringNode.getDescendants(
-                            TypeStringGrammar.TYPE_IDENTIFIER,
-                            TypeStringGrammar.TYPE_CLONE,
-                            TypeStringGrammar.TYPE_SELF,
-                            TypeStringGrammar.TYPE_PARAMETER_REFERENCE,
-                            TypeStringGrammar.TYPE_GENERIC);
-                        typeNodes.forEach(typeTypeNode -> {
-                            final String identifier = typeTypeNode.getTokenValue();
-                            final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
-                            if (typeTypeNode.is(TypeStringGrammar.TYPE_CLONE, TypeStringGrammar.TYPE_SELF)) {
-                                this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, constModifier);
-                            } else if (typeTypeNode.is(TypeStringGrammar.TYPE_PARAMETER_REFERENCE)) {
-                                this.addSemanticToken(typeTypeNode, SemanticToken.Type.KEYWORD, docModifier);
-
-                                // Color the parameter name.
-                                final AstNode refNode = typeTypeNode.getChildren().get(2);
-                                this.addSemanticToken(refNode, SemanticToken.Type.PARAMETER, docModifier);
-                            } else if (typeTypeNode.is(TypeStringGrammar.TYPE_GENERIC)) {
-                                final AstNode nameNode = typeTypeNode.getChildren().get(1);
-                                this.addSemanticToken(nameNode, SemanticToken.Type.TYPE_PARAMETER, docModifier);
-                            } else if (this.isKnownType(typeString)) {
-                                this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, docModifier);
-                            }
-                        });
-                    }
+                    this.walkCommentType(typeNode, docModifier);
                 }
 
                 // NAME
@@ -209,6 +179,40 @@ public class SemanticTokenWalker extends AstWalker {
             });
         } else {
             this.addSemanticToken(token, SemanticToken.Type.COMMENT);
+        }
+    }
+
+    private void walkCommentType(final AstNode typeNode, final Set<SemanticToken.Modifier> docModifier) {
+        final Set<SemanticToken.Modifier> constModifier =
+            Set.of(SemanticToken.Modifier.DOCUMENTATION, SemanticToken.Modifier.READONLY);
+        final List<AstNode> typeValueNodes = typeNode.getChildren(TypeDocGrammar.TYPE_VALUE);
+        if (!typeValueNodes.isEmpty()) {
+            final AstNode typeValueNode = typeValueNodes.get(0);
+            final AstNode typeStringNode = TypeStringParser.getParsedNodeForTypeString(typeValueNode);
+            final List<AstNode> typeNodes = typeStringNode.getDescendants(
+                TypeStringGrammar.TYPE_IDENTIFIER,
+                TypeStringGrammar.TYPE_CLONE,
+                TypeStringGrammar.TYPE_SELF,
+                TypeStringGrammar.TYPE_PARAMETER_REFERENCE,
+                TypeStringGrammar.TYPE_GENERIC);
+            typeNodes.forEach(typeTypeNode -> {
+                final String identifier = typeTypeNode.getTokenValue();
+                final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
+                if (typeTypeNode.is(TypeStringGrammar.TYPE_CLONE, TypeStringGrammar.TYPE_SELF)) {
+                    this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, constModifier);
+                } else if (typeTypeNode.is(TypeStringGrammar.TYPE_PARAMETER_REFERENCE)) {
+                    this.addSemanticToken(typeTypeNode, SemanticToken.Type.KEYWORD, docModifier);
+
+                    // Color the parameter name.
+                    final AstNode refNode = typeTypeNode.getChildren().get(2);
+                    this.addSemanticToken(refNode, SemanticToken.Type.PARAMETER, docModifier);
+                } else if (typeTypeNode.is(TypeStringGrammar.TYPE_GENERIC)) {
+                    final AstNode nameNode = typeTypeNode.getChildren().get(1);
+                    this.addSemanticToken(nameNode, SemanticToken.Type.TYPE_PARAMETER, docModifier);
+                } else if (this.isKnownType(typeString)) {
+                    this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, docModifier);
+                }
+            });
         }
     }
 

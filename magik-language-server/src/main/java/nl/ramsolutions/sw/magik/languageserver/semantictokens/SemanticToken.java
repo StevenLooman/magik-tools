@@ -43,10 +43,9 @@ public class SemanticToken {
          */
         public String getSemanticTokenName() {
             final String name = this.name().toLowerCase();
-            final String str = Pattern.compile("_([a-z])")
+            return Pattern.compile("_([a-z])")
                 .matcher(name)
                 .replaceAll(match -> match.group(1).toUpperCase());
-            return str;
         }
 
         public Integer getTokenType() {

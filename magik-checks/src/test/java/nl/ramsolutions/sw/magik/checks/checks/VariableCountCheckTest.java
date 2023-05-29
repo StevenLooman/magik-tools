@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test VariableCountCheck.
  */
-public class VariableCountCheckTest extends MagikCheckTestBase {
+class VariableCountCheckTest extends MagikCheckTestBase {
 
     @Test
     void testMethodTooManyVariables() {

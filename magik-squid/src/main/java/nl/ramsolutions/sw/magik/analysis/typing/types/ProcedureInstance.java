@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -29,11 +28,11 @@ public class ProcedureInstance extends AbstractType {
      * @param procedureName Name of method or procedure.
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
-    public ProcedureInstance(
+    public ProcedureInstance(// NOSONAR
             final MagikType procedureType,
             final @Nullable Location location,
             final @Nullable String procedureName,
-            final EnumSet<Method.Modifier> modifiers,
+            final Set<Method.Modifier> modifiers,
             final List<Parameter> parameters,
             final @Nullable String methodDoc,
             final ExpressionResultString callResult,
@@ -53,7 +52,9 @@ public class ProcedureInstance extends AbstractType {
             callResult,
             loopbodyResult);
 
-        this.setDoc(methodDoc);
+        if (methodDoc != null) {
+            this.setDoc(methodDoc);
+        }
     }
 
     public String getProcedureName() {

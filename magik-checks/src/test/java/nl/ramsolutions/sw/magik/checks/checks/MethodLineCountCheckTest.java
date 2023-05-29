@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test MethodLineCountCheck.
  */
-public class MethodLineCountCheckTest extends MagikCheckTestBase {
+class MethodLineCountCheckTest extends MagikCheckTestBase {
 
     @Test
     void testMethodTooLong() {

@@ -121,13 +121,13 @@ public class ReferencesProvider {
         LOGGER.debug("Finding references to method: {}", methodName);
 
         // Build set of types which may contain this method: type + ancestors.
-        final AbstractType type = typeName.equals(UndefinedType.SERIALIZED_NAME)
+        final AbstractType typeType = typeName.equals(UndefinedType.SERIALIZED_NAME)
             ? UndefinedType.INSTANCE
             : typeKeeper.getType(TypeString.ofIdentifier(typeName, TypeString.DEFAULT_PACKAGE));
         final Set<AbstractType> wantedTypes = new HashSet<>();
         wantedTypes.add(UndefinedType.INSTANCE);  // For unreasoned/undetermined calls.
-        wantedTypes.add(type);
-        wantedTypes.addAll(type.getAncestors());
+        wantedTypes.add(typeType);
+        wantedTypes.addAll(typeType.getAncestors());
 
         final Collection<Method.MethodUsage> wantedMethodUsages = wantedTypes.stream()
             .map(wantedType -> {
@@ -136,11 +136,11 @@ public class ReferencesProvider {
                 return new Method.MethodUsage(wantedTypeRef, methodName);
             })
             .collect(Collectors.toSet());
-        final Predicate<Method.MethodUsage> filterPredicate = methodUsage -> wantedMethodUsages.contains(methodUsage);
+        final Predicate<Method.MethodUsage> filterPredicate = wantedMethodUsages::contains;
 
         // Find references.
         return typeKeeper.getTypes().stream()
-            .flatMap(type_ -> type_.getMethods().stream())
+            .flatMap(type -> type.getMethods().stream())
             .flatMap(method -> method.getMethodUsages().stream())
             .filter(filterPredicate::test)
             .map(Method.MethodUsage::getLocation)
@@ -153,9 +153,9 @@ public class ReferencesProvider {
         LOGGER.debug("Finding references to type: {}", typeName);
 
         final TypeString typeStr = TypeString.ofIdentifier(typeName, TypeString.DEFAULT_PACKAGE);
-        final AbstractType type = typeKeeper.getType(typeStr);
+        final AbstractType typeType = typeKeeper.getType(typeStr);
         final Set<AbstractType> wantedTypes = new HashSet<>();
-        wantedTypes.add(type);
+        wantedTypes.add(typeType);
         // wantedTypes.addAll(type.getAncestors());  // TODO: Ancestors or descendants?
 
         final Collection<Method.GlobalUsage> wantedGlobalUsages = wantedTypes.stream()
@@ -165,11 +165,11 @@ public class ReferencesProvider {
                 return new Method.GlobalUsage(wantedTypeRef, null);
             })
             .collect(Collectors.toSet());
-        final Predicate<Method.GlobalUsage> filterPredicate = globalUsage -> wantedGlobalUsages.contains(globalUsage);
+        final Predicate<Method.GlobalUsage> filterPredicate = wantedGlobalUsages::contains;
 
         // Find references.
         return typeKeeper.getTypes().stream()
-            .flatMap(type_ -> type_.getMethods().stream())
+            .flatMap(type -> type.getMethods().stream())
             .flatMap(method -> method.getGlobalUsages().stream())
             .filter(filterPredicate::test)
             .map(Method.GlobalUsage::getLocation)

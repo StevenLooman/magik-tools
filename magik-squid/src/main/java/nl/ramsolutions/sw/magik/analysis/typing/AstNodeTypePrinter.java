@@ -30,7 +30,7 @@ public final class AstNodeTypePrinter {
         try {
             printer.print(0, rootNode);
         } catch (IOException exception) {
-            exception.printStackTrace();
+            exception.printStackTrace();  // NOSONAR: Debug tooling only.
         }
     }
 

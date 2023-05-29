@@ -379,7 +379,7 @@ public class MagikLint {
             final Set<String> scopeInstructions =
                 instructionReader.getScopeInstructions(scope, MLINT_SCOPE_INSTRUCTION);
             final Map<String, String> parsedScopeInstructions = scopeInstructions.stream()
-                .map(str -> CommentInstructionReader.parseInstructions(str))
+                .map(CommentInstructionReader::parseInstructions)
                 .reduce(
                     instructions,
                     (acc, elem) -> {

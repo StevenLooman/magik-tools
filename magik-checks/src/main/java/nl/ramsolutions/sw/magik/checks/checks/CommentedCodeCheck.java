@@ -78,9 +78,9 @@ public class CommentedCodeCheck extends MagikCheck {
 
             if (startToken == null) {
                 startToken = token;
-            } else if (lastToken != null
-                      && (lastToken.getLine() != token.getLine() - 1
-                          || lastToken.getColumn() != token.getColumn())) {
+            } else if (lastToken != null  // NOSONAR
+                        && (lastToken.getLine() != token.getLine() - 1
+                            || lastToken.getColumn() != token.getColumn())) {
                 // Block broken, either due to line not connecting or indent changed.
 
                 // Save current block.

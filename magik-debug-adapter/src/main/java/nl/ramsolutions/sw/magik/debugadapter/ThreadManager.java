@@ -122,59 +122,65 @@ class ThreadManager {
                 "Stack element, level: {}, language: {}, name: '{}', offset: {}",
                 stackElement.getLevel(), stackElement.getLanguage(), stackElement.getName(), stackElement.getOffset());
 
+            // Don't mess with non-Magik stack frames.
             if (!stackElement.getLanguage().equals(LANGUAGE_MAGIK)) {
                 continue;
             }
 
-            Path path = null;
-            try {
-                String method = stackElement.getName();
-                if (!method.equals(UNNAMED_PROC)
-                    && !method.equals(LOOPBODY)) {
-                    final int indexDot = method.indexOf(".");
-                    final int indexBracket = method.indexOf("[");
-                    final int index = indexDot != -1
-                        ? indexDot + 1
-                        : indexBracket;
-                    if (!method.contains(":") && index != -1) {
-                        // Do some extra work to determine package.
-                        final int level = stackElement.getLevel();
-
-                        final String exemplarName = ":|" + method.substring(0, index - 1) + "|";
-                        final String expr = String.format(EVAL_EXEMPLAR_PACKAGE, exemplarName);
-                        LOGGER.debug("Eval expression: '{}'", expr);
-                        final EvalResponse eval =
-                            (EvalResponse) this.slapProtocol.evaluate(threadId, level, expr).get();
-                        method = eval.getResult() + ":" + method;
-
-                        // Bonus: update exemplar name with package.
-                        stackElement.setName(method);
-                    }
-
-                    // Clear any spaces (before `<<`/`^<<`). Lazy approach...
-                    method = method.replace(" ", "");
-
-                    // Get source file for method.
-                    final CompletableFuture<ISlapResponse> sourceFileFuture = this.slapProtocol.getSourceFile(method);
-                    final SourceFileResponse sourceFile = (SourceFileResponse) sourceFileFuture.get();
-                    final String filename = sourceFile.getFilename();
-                    final Path daPath = Path.of(filename);
-                    path = this.pathMapper.applyMapping(daPath);
-                }
-            } catch (final ExecutionException exception) {
-                final Throwable cause = exception.getCause();
-                if (cause instanceof SlapErrorException
-                    && ((SlapErrorException) cause).getError().getErrorMessage() != ErrorMessage.METHOD_NOT_FOUND) {
-                    throw exception;
-                }
-            }
-
             // This sets the frameId to the given stack frames.
+            final Path path = this.determinePath(threadId, stackElement);
             final StackFrame stackFrame = Lsp4jConversion.toLsp4j(threadId, stackElement, path);
             stackFrames.add(stackFrame);
         }
 
         return stackFrames;
+    }
+
+    private Path determinePath(final long threadId, final ThreadStackResponse.StackElement stackElement)
+            throws InterruptedException, ExecutionException, IOException {
+        try {
+            String method = stackElement.getName();
+            if (!method.equals(UNNAMED_PROC)
+                && !method.equals(LOOPBODY)) {
+                final int indexDot = method.indexOf(".");
+                final int indexBracket = method.indexOf("[");
+                final int index = indexDot != -1
+                    ? indexDot + 1
+                    : indexBracket;
+                if (!method.contains(":") && index != -1) {
+                    // Do some extra work to determine package.
+                    final int level = stackElement.getLevel();
+
+                    final String exemplarName = ":|" + method.substring(0, index - 1) + "|";
+                    final String expr = String.format(EVAL_EXEMPLAR_PACKAGE, exemplarName);
+                    LOGGER.debug("Eval expression: '{}'", expr);
+                    final EvalResponse eval =
+                        (EvalResponse) this.slapProtocol.evaluate(threadId, level, expr).get();
+                    method = eval.getResult() + ":" + method;
+
+                    // Bonus: update exemplar name with package.
+                    stackElement.setName(method);
+                }
+
+                // Clear any spaces (before `<<`/`^<<`). Lazy approach...
+                method = method.replace(" ", "");
+
+                // Get source file for method.
+                final CompletableFuture<ISlapResponse> sourceFileFuture = this.slapProtocol.getSourceFile(method);
+                final SourceFileResponse sourceFile = (SourceFileResponse) sourceFileFuture.get();
+                final String filename = sourceFile.getFilename();
+                final Path daPath = Path.of(filename);
+                return this.pathMapper.applyMapping(daPath);
+            }
+        } catch (final ExecutionException exception) {
+            final Throwable cause = exception.getCause();
+            if (cause instanceof SlapErrorException
+                && ((SlapErrorException) cause).getError().getErrorMessage() != ErrorMessage.METHOD_NOT_FOUND) {
+                throw exception;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -207,7 +213,7 @@ class ThreadManager {
      * @throws InterruptedException -
      * @throws ExecutionException -
      */
-    void continue_(final long threadId) throws IOException, InterruptedException, ExecutionException {
+    void continue_(final long threadId) throws IOException, InterruptedException, ExecutionException {  // NOSONAR
         this.slapProtocol.resumeThread(threadId).get();
     }
 
@@ -386,26 +392,27 @@ class ThreadManager {
     private void waitForStepCompletedEvent() {
         synchronized (this) {
             LOGGER.trace(
-                    "Waiting for step to complete, value: {}",
-                    this.stepCompletedEventReceived);
+                "Waiting for step to complete, value: {}",
+                this.stepCompletedEventReceived);
             while (!this.stepCompletedEventReceived) {
                 try {
                     this.wait();
                 } catch (InterruptedException exception) {
                     // pass; account for spurious wakeups
+                    java.lang.Thread.currentThread().interrupt();
                 }
             }
             this.stepCompletedEventReceived = false;
         }
         LOGGER.trace(
-                "Completed waiting for step to complete, value: {}",
-                this.stepCompletedEventReceived);
+            "Completed waiting for step to complete, value: {}",
+            this.stepCompletedEventReceived);
     }
 
     private void signalStepCompletedEvent() {
         synchronized (this) {
             this.stepCompletedEventReceived = true;
-            this.notify();
+            this.notifyAll();
         }
     }
 

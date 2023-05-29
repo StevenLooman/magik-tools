@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Message format reporter.
@@ -23,6 +25,8 @@ public class MessageFormatReporter implements Reporter {
      * Default format.
      */
     public static final String DEFAULT_FORMAT = "${path}:${line}:${column}:${msg} (${symbol})";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageFormatReporter.class);
 
     private final PrintStream outStream;
     private final String format;
@@ -64,7 +68,7 @@ public class MessageFormatReporter implements Reporter {
             map.put("category", holder.getSeverity());
             map.put("tag", holder.getTag());
         } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
+            LOGGER.error("Could not find file: {}", ex.getMessage(), ex);
         }
 
         final Integer startLine = issue.startLine();

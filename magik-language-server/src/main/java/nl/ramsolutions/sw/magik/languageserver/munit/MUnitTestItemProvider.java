@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.definitions.SwModule;
 import nl.ramsolutions.sw.definitions.SwModuleScanner;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 public class MUnitTestItemProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MUnitTestItemProvider.class);
+    private static final Location DUMMY_LOCATION = new Location(URI.create("file:///"));
     private static final TypeString MUNIT_TEST_CASE_EXEMPLAR_NAME = TypeString.ofIdentifier("test_case", "sw");
     private static final String MUNIT_TEST_METHOD_PREFIX = "test";
 
@@ -164,7 +166,7 @@ public class MUnitTestItemProvider {
 
     private MUnitTestItem createTestItem(final Method method) {
         final String name = method.getName();
-        final Location location = method.getLocation();
+        final Location location = Objects.requireNonNullElse(method.getLocation(), DUMMY_LOCATION);
         return new MUnitTestItem("method:" + name, name, Lsp4jConversion.locationToLsp4j(location));
     }
 

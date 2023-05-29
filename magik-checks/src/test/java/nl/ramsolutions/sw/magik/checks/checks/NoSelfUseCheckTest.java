@@ -4,6 +4,8 @@ import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,52 +14,36 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class NoSelfUseCheckTest extends MagikCheckTestBase {
 
-    @Test
-    void testSelfUse() {
-        final MagikCheck check = new NoSelfUseCheck();
-        final String code = ""
+    @ParameterizedTest
+    @ValueSource(strings = {
+        ""
             + "_method a.b\n"
             + "    _self.m\n"
-            + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
-
-    @Test
-    void testCloneUse() {
-        final MagikCheck check = new NoSelfUseCheck();
-        final String code = ""
+            + "_endmethod",
+        ""
             + "_method a.b\n"
             + "    _clone.m\n"
-            + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
-
-    @Test
-    void testSuperUse() {
-        final MagikCheck check = new NoSelfUseCheck();
-        final String code = ""
+            + "_endmethod",
+        ""
             + "_method a.b\n"
             + "    _super.m\n"
-            + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
-
-    @Test
-    void testSlotUse() {
-        final MagikCheck check = new NoSelfUseCheck();
-        final String code = ""
+            + "_endmethod",
+        ""
             + "_method a.b\n"
             + "    write(.slot)\n"
-            + "_endmethod";
+            + "_endmethod",
+        ""
+            + "_abstract _method a.b\n"
+            + "_endmethod"
+    })
+    void testValid(final String code) {
+        final MagikCheck check = new NoSelfUseCheck();
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isEmpty();
     }
 
     @Test
-    void testNoSelfUse() {
+    void testInvalid() {
         final MagikCheck check = new NoSelfUseCheck();
         final String code = ""
             + "_method a.b\n"
@@ -65,16 +51,6 @@ class NoSelfUseCheckTest extends MagikCheckTestBase {
             + "_endmethod";
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).hasSize(1);
-    }
-
-    @Test
-    void testNoSelfUseAbstractMethod() {
-        final MagikCheck check = new NoSelfUseCheck();
-        final String code = ""
-            + "_abstract _method a.b\n"
-            + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
     }
 
 }

@@ -140,7 +140,7 @@ public class UnusedVariableCheck extends MagikCheck {
         final List<ScopeEntry> scopeEntries = new ArrayList<>();
         final GlobalScope globalScope = this.getMagikFile().getGlobalScope();
         for (final Scope scope : globalScope.getSelfAndDescendantScopes()) {
-            for (final ScopeEntry scopeEntry : scope.getScopeEntriesInScope()) {
+            for (final ScopeEntry scopeEntry : scope.getScopeEntriesInScope()) {  // NOSONAR
                 final AstNode scopeEntryNode = scopeEntry.getNode();
 
                 // But not globals/dynamics which are assigned to directly

@@ -11,6 +11,7 @@ public class SlapErrorException extends SlapException {
      * Serial version UID.
      */
     private static final long serialVersionUID = 4756599758479724128L;
+
     private final ErrorResponse error;
 
     /**
