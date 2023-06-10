@@ -200,7 +200,7 @@
 			"title": "Smallworld/Magik",
 			"properties": {
 				"magik.javaHome": {
-					"description": "Path to Java Runtime, Java 11 minimum.",
+					"description": "Path to Java Runtime, Java 17 minimum.",
 					"type": "string"
 				},
 				"magik.smallworldGis": {
