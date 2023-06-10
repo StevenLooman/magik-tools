@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis;
 
 import com.sonar.sslr.api.Token;
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -14,7 +15,7 @@ public class Position implements Comparable<Position> {
     /**
      * Comparator for {@link Position}s.
      */
-    public class PositionComparator implements Comparator<Position> {
+    public static class PositionComparator implements Comparator<Position>, Serializable {
 
         @Override
         public int compare(final Position position0, final Position position1) {

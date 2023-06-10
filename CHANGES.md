@@ -9,6 +9,7 @@ Changes
 - Fixes/changes/refactoring for Sonar.
 - Upgrade dependencies.
 - Bump Java version to 17.
+- Don't store actual type, but the reference at Parameter.
 
 
 0.7.1 (2023-02-21)

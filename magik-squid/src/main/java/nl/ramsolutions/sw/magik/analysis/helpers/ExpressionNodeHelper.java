@@ -31,11 +31,12 @@ public class ExpressionNodeHelper {
      */
     @CheckForNull
     public String getConstant() {
-        AstNode atomNode = node.getFirstChild(MagikGrammar.ATOM);
+        final AstNode atomNode = node.getFirstChild(MagikGrammar.ATOM);
         if (atomNode == null) {
             return null;
         }
-        AstNode valueNode = atomNode.getFirstChild(
+
+        final AstNode valueNode = atomNode.getFirstChild(
             MagikGrammar.NUMBER,
             MagikGrammar.SYMBOL,
             MagikGrammar.STRING,
@@ -45,6 +46,7 @@ public class ExpressionNodeHelper {
         if (valueNode == null) {
             return null;
         }
+
         return valueNode.getTokens().stream()
             .map(Token::getValue)
             .collect(Collectors.joining());

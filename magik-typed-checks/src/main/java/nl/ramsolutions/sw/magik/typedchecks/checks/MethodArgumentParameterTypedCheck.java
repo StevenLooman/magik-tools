@@ -59,10 +59,12 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
             }
 
             final List<AbstractType> parameterTypes = method.getParameters().stream()
-                .filter(parameter -> parameter.is(Parameter.Modifier.NONE)
-                                     || parameter.is(Parameter.Modifier.OPTIONAL))  // Don't check gather.
+                .filter(parameter ->
+                    parameter.is(Parameter.Modifier.NONE)
+                    || parameter.is(Parameter.Modifier.OPTIONAL))  // Don't check gather.
                 .map(parameter -> {
-                    final AbstractType type = parameter.getType();
+                    final TypeString paramTypeString = parameter.getType();
+                    final AbstractType type = this.getTypeKeeper().getType(paramTypeString);
                     if (parameter.is(Parameter.Modifier.OPTIONAL)) {
                         return CombinedType.combine(type, unsetType);
                     }

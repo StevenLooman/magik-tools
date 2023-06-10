@@ -761,7 +761,8 @@ public class LocalTypeReasoner extends AstWalker {
             }
 
             final AbstractType type = this.getNodeType(parameterNode).get(0, UndefinedType.INSTANCE);
-            final Parameter parameter = new Parameter(identifier, modifier, type);
+            final TypeString typeString = type.getTypeString();
+            final Parameter parameter = new Parameter(identifier, modifier, typeString);
             parameters.add(parameter);
         }
 

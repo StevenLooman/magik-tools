@@ -44,7 +44,12 @@ public final class IgnoreHandler {
             throw new IllegalArgumentException();
         }
 
-        final Path basePath = path.getParent().toAbsolutePath();
+        final Path parentPath = path.getParent();
+        if (parentPath == null) {
+            throw new IllegalArgumentException();
+        }
+
+        final Path basePath = parentPath.toAbsolutePath();
         final FileSystem fileSystem = path.getFileSystem();
         try (Stream<String> lines = Files.lines(path, StandardCharsets.ISO_8859_1)) {
             final Set<PathMatcher> pathMatchers = lines

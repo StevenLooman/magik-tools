@@ -38,7 +38,6 @@ import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.BinaryOperator;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
@@ -93,7 +92,6 @@ public class MagikIndexer {
         CommentInstructionReader.InstructionType.createInstructionType("type");
 
     private final ITypeKeeper typeKeeper;
-    private final TypeReader typeParser;
     private final Map<Path, Set<Package>> indexedPackages = new HashMap<>();
     private final Map<Path, Set<AbstractType>> indexedTypes = new HashMap<>();
     private final Map<Path, Set<Method>> indexedMethods = new HashMap<>();
@@ -103,7 +101,6 @@ public class MagikIndexer {
 
     public MagikIndexer(final ITypeKeeper typeKeeper) {
         this.typeKeeper = typeKeeper;
-        this.typeParser = new TypeReader(this.typeKeeper);
     }
 
     /**
@@ -332,17 +329,11 @@ public class MagikIndexer {
         final List<Parameter> parameters = definition.getParameters().stream()
             .map(parameterDefinition -> {
                 final String name = parameterDefinition.getName();
-                final AbstractType type;
-                if (!parameterTypes.containsKey(name)) {
-                    type = UndefinedType.INSTANCE;
-                } else {
-                    final TypeString parameterType = parameterTypes.get(name);
-                    type = this.typeParser.parseTypeString(parameterType);
-                }
-
+                final TypeString parameterTypeString = parameterTypes.getOrDefault(name, TypeString.UNDEFINED);
+                final ParameterDefinition.Modifier paramModifier = parameterDefinition.getModifier();
                 final Parameter.Modifier modifier =
-                    MagikIndexer.PARAMETER_MODIFIER_MAPPING.get(parameterDefinition.getModifier());
-                return new Parameter(name, modifier, type);
+                    MagikIndexer.PARAMETER_MODIFIER_MAPPING.get(paramModifier);
+                return new Parameter(name, modifier, parameterTypeString);
             })
             .collect(Collectors.toList());
         final ParameterDefinition assignParamDef = definition.getAssignmentParameter();
