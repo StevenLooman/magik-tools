@@ -4,7 +4,6 @@ import java.util.EnumSet;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
@@ -27,13 +26,12 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-        final AbstractType symbolType = typeKeeper.getType(symbolRef);
         integerType.addMethod(
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "m1()",
             List.of(
-                new Parameter("p1", Parameter.Modifier.NONE, symbolType)),
+                new Parameter("p1", Parameter.Modifier.NONE, symbolRef)),
             null,
             null,
             ExpressionResultString.UNDEFINED,

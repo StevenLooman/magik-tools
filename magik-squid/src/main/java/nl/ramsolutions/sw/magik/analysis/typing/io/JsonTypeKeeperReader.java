@@ -15,7 +15,6 @@ import nl.ramsolutions.sw.magik.analysis.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.BinaryOperator;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
@@ -48,11 +47,9 @@ public final class JsonTypeKeeperReader {
     private static final String SW_PAKKAGE = "sw";
 
     private final ITypeKeeper typeKeeper;
-    private final TypeReader typeParser;
 
     private JsonTypeKeeperReader(final ITypeKeeper typeKeeper) {
         this.typeKeeper = typeKeeper;
-        this.typeParser = new TypeReader(this.typeKeeper);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -298,8 +295,7 @@ public final class JsonTypeKeeperReader {
                     : Parameter.Modifier.NONE;
                 final String typeName = parameterObj.getString(InstParameter.TYPE_NAME.getValue());
                 final TypeString typeString = TypeStringParser.parseTypeString(typeName);
-                final AbstractType type = this.typeParser.parseTypeString(typeString);
-                return new Parameter(name, modifier, type);
+                return new Parameter(name, modifier, typeString);
             })
             .collect(Collectors.toList());
     }

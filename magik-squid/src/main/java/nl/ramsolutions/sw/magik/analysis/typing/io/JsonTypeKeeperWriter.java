@@ -177,7 +177,7 @@ public final class JsonTypeKeeperWriter {
                         final JSONObject parameterObject = new JSONObject();
                         parameterObject.put(InstParameter.NAME.getValue(), parameter.getName());
                         parameterObject.put(InstParameter.MODIFIER.getValue(), parameter.getModifier());
-                        parameterObject.put(InstParameter.TYPE_NAME.getValue(), parameter.getType().getFullName());
+                        parameterObject.put(InstParameter.TYPE_NAME.getValue(), parameter.getType().getFullString());
                         return parameterObject;
                     })
                     .collect(Collectors.toList());
@@ -224,7 +224,7 @@ public final class JsonTypeKeeperWriter {
                         final JSONObject parameterObject = new JSONObject();
                         parameterObject.put(InstParameter.NAME.getValue(), parameter.getName());
                         parameterObject.put(InstParameter.MODIFIER.getValue(), parameter.getModifier());
-                        parameterObject.put(InstParameter.TYPE_NAME.getValue(), parameter.getType().getFullName());
+                        parameterObject.put(InstParameter.TYPE_NAME.getValue(), parameter.getType().getFullString());
                         return parameterObject;
                     })
                     .collect(Collectors.toList());
