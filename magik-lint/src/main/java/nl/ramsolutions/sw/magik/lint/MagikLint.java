@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
+import nl.ramsolutions.sw.Utils;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.Location;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -66,11 +67,11 @@ public class MagikLint {
     /**
      * Build context for a file, untabifying if needed.
      *
-     * @param path         Path to file
+     * @param path     Path to file
      * @param untabify Untabify to N-spaces, if given
      * @return Visitor context for file.
      */
-    private MagikFile buildMagikFile(final Path path, final @Nullable Long untabify) {
+    private MagikFile buildMagikFile(final Path path, final @Nullable Integer untabify) {
         final Charset charset = FileCharsetDeterminer.determineCharset(path);
 
         byte[] encoded = null;
@@ -84,9 +85,7 @@ public class MagikLint {
 
         String fileContents = new String(encoded, charset);
         if (untabify != null) {
-            final String formatString = "%" + untabify + "s";
-            final String spaces = String.format(formatString, "");
-            fileContents = fileContents.replace("\t", spaces);
+            fileContents = Utils.untabify(fileContents, untabify);
         }
 
         return new MagikFile(uri, fileContents);
@@ -235,9 +234,12 @@ public class MagikLint {
             ignoreMatchers = new ArrayList<>();
         }
 
-        final Long untabify;
+        final Integer untabify;
         if (this.config.hasProperty("untabify")) {
-            untabify = Long.parseLong(this.config.getPropertyString("untabify"));
+            untabify = Integer.parseInt(this.config.getPropertyString("untabify"));
+            if (untabify < 1) {
+                throw new NumberFormatException("Must be a positive integer.");
+            }
         } else {
             untabify = null;
         }

@@ -66,6 +66,8 @@ class LineLengthCheckTest extends MagikCheckTestBase {
 
         final MagikIssue issue = issues.get(0);
         assertThat(issue.startColumn()).isEqualTo(5);
+        assertThat(issue.endColumn()).isEqualTo(13);
+        assertThat(issue.message()).isEqualTo("Line is too long (48/40)");
     }
 
 }

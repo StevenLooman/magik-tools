@@ -11,6 +11,7 @@ Changes
 - Bump Java version to 17.
 - Don't store actual type, but the reference at Parameter.
 - Prevent traceback when reading .jar files in ClassInfoTypeKeeperReader.
+- Fix LineLengthCheck not properly reporting line lengths in user message.
 
 
 0.7.1 (2023-02-21)

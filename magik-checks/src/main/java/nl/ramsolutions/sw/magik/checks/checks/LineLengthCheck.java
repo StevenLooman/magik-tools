@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
-import java.util.concurrent.atomic.AtomicInteger;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.Location;
 import nl.ramsolutions.sw.magik.analysis.Position;
@@ -45,28 +44,29 @@ public class LineLengthCheck extends MagikCheck {
 
         int lineNo = 1;
         for (final String line : lines) {
-            final AtomicInteger columnNo = new AtomicInteger(0);
-            final AtomicInteger issueColumnNo = new AtomicInteger(0);
-            line.chars().forEachOrdered(chr -> {
-                final int cur;
+            int columnNo = 0;
+            int issueColumnNo = 0;
+            for (int i = 0; i < line.length(); ++i) {
+                final char chr = line.charAt(i);
                 if (chr == '\t') {
-                    cur = columnNo.addAndGet(TAB_WIDTH);
+                    final int mod = columnNo % TAB_WIDTH;
+                    columnNo += TAB_WIDTH - mod;
                 } else {
-                    cur = columnNo.incrementAndGet();
+                    ++columnNo;
                 }
 
-                if (cur <= this.maxLineLength + 1) {
-                    issueColumnNo.incrementAndGet();
+                if (columnNo <= this.maxLineLength + 1) {
+                    ++issueColumnNo;
                 }
-            });
+            }
 
-            if (columnNo.get() > this.maxLineLength) {
+            if (columnNo > this.maxLineLength) {
                 final URI uri = this.getMagikFile().getUri();
-                final Position startPosition = new Position(lineNo, issueColumnNo.get() - 1);
+                final Position startPosition = new Position(lineNo, issueColumnNo - 1);
                 final Position endPosition = new Position(lineNo, line.length());
                 final Range range = new Range(startPosition, endPosition);
                 final Location location = new Location(uri, range);
-                final String message = String.format(MESSAGE, line.length(), this.maxLineLength);
+                final String message = String.format(MESSAGE, columnNo, this.maxLineLength);
                 this.addIssue(location, message);
             }
 
