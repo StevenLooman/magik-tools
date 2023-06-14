@@ -131,6 +131,7 @@ public final class ClassInfoTypeKeeperReader {
                 if (skipList.contains(pragma)) {
                     continue;
                 }
+
                 pragmas.add(pragma);
             }
 
@@ -277,7 +278,7 @@ public final class ClassInfoTypeKeeperReader {
     /**
      * Read types from a jar/class_info file.
      *
-     * @param path             Path to jar file.
+     * @param path Path to jar file.
      * @param typeKeeper {@link TypeKeeper} to fill.
      * @throws IOException -
      */
@@ -296,12 +297,13 @@ public final class ClassInfoTypeKeeperReader {
         try (Stream<Path> paths = Files.list(libsPath)) {
             paths
                 .filter(Files::isRegularFile)
+                .filter(path -> path.toString().toLowerCase().endsWith(".jar"))
                 .forEach(libPath -> {
                     LOGGER.trace("Reading lib: {}", libPath);
                     try {
                         ClassInfoTypeKeeperReader.readTypes(libPath, typeKeeper);
                     } catch (IOException exception) {
-                        LOGGER.error(exception.getMessage(), exception);
+                        LOGGER.error("Error reading file: " + libPath, exception);
                     }
                 });
         } catch (IOException exception) {

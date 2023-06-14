@@ -10,6 +10,7 @@ Changes
 - Upgrade dependencies.
 - Bump Java version to 17.
 - Don't store actual type, but the reference at Parameter.
+- Prevent traceback when reading .jar files in ClassInfoTypeKeeperReader.
 
 
 0.7.1 (2023-02-21)
