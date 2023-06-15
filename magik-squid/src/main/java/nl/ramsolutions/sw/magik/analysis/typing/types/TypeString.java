@@ -160,7 +160,7 @@ public final class TypeString {
     public String getFullString() {
         if (this.isCombined()) {
             return this.combinedTypes.stream()
-                .map(typeStr -> typeStr.getFullString())
+                .map(TypeString::getFullString)
                 .sorted()
                 .collect(Collectors.joining(TypeStringGrammar.Punctuator.TYPE_COMBINATOR.getValue()));
         }

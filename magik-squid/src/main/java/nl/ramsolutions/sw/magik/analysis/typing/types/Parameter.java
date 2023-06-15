@@ -42,7 +42,7 @@ public class Parameter {
 
     private final String name;
     private final Modifier modifier;
-    private AbstractType type;
+    private TypeString type;
 
     /**
      * Constructor.
@@ -52,7 +52,7 @@ public class Parameter {
     public Parameter(final String name, final Modifier modifier) {
         this.name = name;
         this.modifier = modifier;
-        this.type = UndefinedType.INSTANCE;
+        this.type = TypeString.UNDEFINED;
     }
 
     /**
@@ -61,7 +61,7 @@ public class Parameter {
      * @param modifier Parameter modifier.
      * @param type Type.
      */
-    public Parameter(final String name, final Modifier modifier, final AbstractType type) {
+    public Parameter(final String name, final Modifier modifier, final TypeString type) {
         this.name = name;
         this.modifier = modifier;
         this.type = type;
@@ -79,20 +79,20 @@ public class Parameter {
         return this.modifier == isModifier;
     }
 
-    public void setType(AbstractType type) {
+    public void setType(TypeString type) {
         this.type = type;
     }
 
-    public AbstractType getType() {
+    public TypeString getType() {
         return this.type;
     }
 
     @Override
     public String toString() {
         return String.format(
-                "%s@%s(%s)",
-                this.getClass().getName(), Integer.toHexString(this.hashCode()),
-                this.getName());
+            "%s@%s(%s)",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()),
+            this.getName());
     }
 
 }

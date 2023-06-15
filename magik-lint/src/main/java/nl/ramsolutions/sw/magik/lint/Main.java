@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.lint;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -97,6 +98,14 @@ public final class Main {
     private Main() {
     }
 
+    private static PrintStream getOutStream() {
+        return System.out;  // NOSONAR
+    }
+
+    private static PrintStream getErrStream() {
+        return System.err;  // NOSONAR
+    }
+
     /**
      * Parse the command line.
      *
@@ -112,14 +121,9 @@ public final class Main {
     /**
      * Initialize logger from logging.properties.
      */
-    private static void initDebugLogger() {
-        final ClassLoader classLoader = Main.class.getClassLoader();
-        final InputStream stream = classLoader.getResourceAsStream("debug-logging.properties");
-        try {
-            LogManager.getLogManager().readConfiguration(stream);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+    private static void initDebugLogger() throws IOException {
+        final InputStream stream = Main.class.getClassLoader().getResourceAsStream("debug-logging.properties");
+        LogManager.getLogManager().readConfiguration(stream);  // NOSONAR: Own logging configuration.
     }
 
     /**
@@ -130,8 +134,9 @@ public final class Main {
      */
     private static Reporter createReporter(final Configuration configuration) {
         final String msgTemplateOptName = OPTION_MSG_TEMPLATE.getLongOpt();
-        final String template = configuration.hasProperty(msgTemplateOptName)
-            ? configuration.getPropertyString(msgTemplateOptName)
+        final String template = configuration.getPropertyString(msgTemplateOptName);
+        final String format = configuration.hasProperty(msgTemplateOptName) && template != null
+            ? template
             : MessageFormatReporter.DEFAULT_FORMAT;
 
         final String columnOffsetOptName = OPTION_COLUMN_OFFSET.getLongOpt();
@@ -140,7 +145,8 @@ public final class Main {
             ? Long.parseLong(columnOffsetStr)
             : null;
 
-        return new MessageFormatReporter(System.out, template, columnOffset);
+        final PrintStream outStream = Main.getOutStream();
+        return new MessageFormatReporter(outStream, format, columnOffset);
     }
 
     /**
@@ -156,7 +162,8 @@ public final class Main {
         try {
             commandLine = Main.parseCommandline(args);
         } catch (UnrecognizedOptionException exception) {
-            System.err.println("Unrecognized option: " + exception.getMessage());
+            final PrintStream errStream = Main.getErrStream();
+            errStream.println("Unrecognized option: " + exception.getMessage());
 
             System.exit(1);
             return;  // Keep inferer happy.
@@ -168,7 +175,8 @@ public final class Main {
 
         if (commandLine.hasOption(OPTION_VERSION)) {
             final String version = Main.class.getPackage().getImplementationVersion();
-            System.err.println("Version: " + version);
+            final PrintStream errStream = Main.getErrStream();
+            errStream.println("Version: " + version);
             System.exit(0);
         }
 
@@ -178,7 +186,8 @@ public final class Main {
             final File rcfile = (File) commandLine.getParsedOptionValue(OPTION_RCFILE);
             final Path path = rcfile.toPath();
             if (!Files.exists(path)) {
-                System.err.println("RC File does not exist: " + path);
+                final PrintStream errStream = Main.getErrStream();
+                errStream.println("RC File does not exist: " + path);
 
                 System.exit(1);
             }
@@ -200,8 +209,10 @@ public final class Main {
         if (commandLine.hasOption(OPTION_SHOW_CHECKS)) {
             final Reporter reporter = new NullReporter();
             final MagikLint lint = new MagikLint(config, reporter);
-            final Writer writer = new PrintWriter(System.out);
-            lint.showChecks(writer);
+            final PrintStream outStream = Main.getOutStream();
+            final Writer writer = new PrintWriter(outStream);
+            lint.showEnabledChecks(writer);
+            lint.showDisabledChecks(writer);
             writer.flush();
             System.exit(0);
         }
@@ -223,7 +234,7 @@ public final class Main {
         lint.run(paths);
 
         final int exitCode = reporter.reportedSeverities().stream()
-            .map(severity -> SEVERITY_EXIT_CODE_MAPPING.get(severity))
+            .map(Main.SEVERITY_EXIT_CODE_MAPPING::get)
             .reduce(0, (partial, sum) -> sum | partial);
         System.exit(exitCode);
     }

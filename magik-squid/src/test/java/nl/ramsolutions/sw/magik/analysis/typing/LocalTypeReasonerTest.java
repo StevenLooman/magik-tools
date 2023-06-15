@@ -1353,7 +1353,7 @@ class LocalTypeReasonerTest {
         ropeType.addGeneric(null, "E");
         ropeType.addMethod(
             null,
-            null,
+            EnumSet.noneOf(Method.Modifier.class),
             "new()",
             Collections.emptyList(),
             null,
@@ -1363,7 +1363,7 @@ class LocalTypeReasonerTest {
             new ExpressionResultString());
         ropeType.addMethod(
             null,
-            null,
+            EnumSet.noneOf(Method.Modifier.class),
             "an_element()",
             Collections.emptyList(),
             null,
@@ -1403,7 +1403,7 @@ class LocalTypeReasonerTest {
         propertyListType.addGeneric(null, "E");
         propertyListType.addMethod(
             null,
-            null,
+            EnumSet.noneOf(Method.Modifier.class),
             "new()",
             Collections.emptyList(),
             null,
@@ -1413,7 +1413,7 @@ class LocalTypeReasonerTest {
             new ExpressionResultString());
         propertyListType.addMethod(
             null,
-            null,
+            EnumSet.noneOf(Method.Modifier.class),
             "a_key()",
             Collections.emptyList(),
             null,
@@ -1423,7 +1423,7 @@ class LocalTypeReasonerTest {
             new ExpressionResultString());
         propertyListType.addMethod(
             null,
-            null,
+            EnumSet.noneOf(Method.Modifier.class),
             "an_element()",
             Collections.emptyList(),
             null,
@@ -1473,7 +1473,7 @@ class LocalTypeReasonerTest {
         propertyListType.addGeneric(null, "E");
         propertyListType.addMethod(
             null,
-            null,
+            EnumSet.noneOf(Method.Modifier.class),
             "new()",
             Collections.emptyList(),
             null,
@@ -1483,7 +1483,7 @@ class LocalTypeReasonerTest {
             new ExpressionResultString());
         propertyListType.addMethod(
             null,
-            null,
+            EnumSet.noneOf(Method.Modifier.class),
             "fast_keys_and_elements()",
             Collections.emptyList(),
             null,

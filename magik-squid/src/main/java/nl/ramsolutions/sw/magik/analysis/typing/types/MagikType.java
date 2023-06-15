@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -226,9 +225,9 @@ public class MagikType extends AbstractType {
      * @param loopbodyResult {@link MagikType}s the method iterates.
      */
     @SuppressWarnings({"java:S1319", "checkstyle:ParameterNumber"})
-    public Method addMethod(
+    public Method addMethod(// NOSONAR
             final @Nullable Location location,
-            final EnumSet<Method.Modifier> modifiers,
+            final Set<Method.Modifier> modifiers,
             final String methodName,
             final List<Parameter> parameters,
             final @Nullable Parameter assignmentParameter,
@@ -281,7 +280,7 @@ public class MagikType extends AbstractType {
         }
 
         return allMethods.values().stream()
-            .flatMap(typeMethods -> typeMethods.stream())
+            .flatMap(Collection::stream)
             .collect(Collectors.toUnmodifiableSet());
     }
 

@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -41,22 +41,14 @@ public class TypeKeeper implements ITypeKeeper {
         this.packages.clear();
         this.binaryOperators.clear();
 
-        this.registerRequiredPackages();
-        this.registerRequiredTypes();
+        this.registerBaseTypes();
     }
 
-    /**
-     * Register required packages (sw and user).
-     */
-    public void registerRequiredPackages() {
-        new Package(this, "sw");
+    private void registerBaseTypes() {
+        final Package swPakkage = new Package(this, "sw");
 
         final Package userPackage = new Package(this, "user");
         userPackage.addUse("sw");
-    }
-
-    private void registerRequiredTypes() {
-        final Package swPakkage = this.getPackage("sw");
 
         swPakkage.put(
             "object",
@@ -168,7 +160,7 @@ public class TypeKeeper implements ITypeKeeper {
     public void addType(final AbstractType type) {
         if (type instanceof ProcedureInstance) {
             // A procedure instance is never added/globally referrable,
-            // unless it is assigned to a global through a AliasType.
+            // it is assigned to a global through a AliasType.
             return;
         }
 
@@ -180,6 +172,8 @@ public class TypeKeeper implements ITypeKeeper {
         }
 
         final Package pakkage = this.getPackage(pakkageName);
+        Objects.requireNonNull(pakkage);
+
         final String identifier = typeString.getIdentifier();
         if (pakkage.containsKey(identifier)) {
             // Not allowed to overwrite types.
@@ -192,7 +186,7 @@ public class TypeKeeper implements ITypeKeeper {
     @Override
     public AbstractType getType(final TypeString typeString) {
         final String pakkageName = typeString.getPakkage();
-        if (!this.hasPackage(pakkageName)) {
+        if (!this.hasPackage(pakkageName)) {  // TODO: Replace this with getPackage() + null check.
             return UndefinedType.INSTANCE;
         }
 
@@ -201,6 +195,8 @@ public class TypeKeeper implements ITypeKeeper {
         }
 
         final Package pakkage = this.getPackage(pakkageName);
+        Objects.requireNonNull(pakkage);
+
         final String identifier = typeString.getIdentifier();
         final AbstractType type = pakkage.get(identifier);
         if (type == null) {
@@ -223,7 +219,7 @@ public class TypeKeeper implements ITypeKeeper {
     public Collection<AbstractType> getTypes() {
         return this.packages.values().stream()
             .flatMap(pakkage -> pakkage.getTypes().entrySet().stream())
-            .map(Entry::getValue)
+            .map(Map.Entry::getValue)
             .collect(Collectors.toUnmodifiableSet());
     }
 
@@ -272,6 +268,11 @@ public class TypeKeeper implements ITypeKeeper {
     public void removeCondition(final Condition condition) {
         final String name = condition.getName();
         this.conditions.remove(name);
+    }
+
+    @Override
+    public Collection<BinaryOperator> getBinaryOperators() {
+        return Collections.unmodifiableCollection(this.binaryOperators);
     }
 
 }

@@ -28,6 +28,8 @@ public final class ClassInfoTypeKeeperReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassInfoTypeKeeperReader.class);
 
+    private static final String NEXT_NOT_SLASH_PATTERN = "[^/]+";
+
     private final Path path;
     private final ITypeKeeper typeKeeper;
 
@@ -124,16 +126,17 @@ public final class ClassInfoTypeKeeperReader {
             // Read pragmas.
             final List<String> pragmas = new ArrayList<>();
             final List<String> skipList = List.of("private", "classconst", "classvar", "iter");
-            while (scanner.hasNext("[^/]+")) {
+            while (scanner.hasNext(NEXT_NOT_SLASH_PATTERN)) {
                 final String pragma = scanner.next();
                 if (skipList.contains(pragma)) {
                     continue;
                 }
+
                 pragmas.add(pragma);
             }
 
             // Skip path.
-            scanner.nextLine();
+            scanner.nextLine();  // NOSONAR
         }
 
         // Line 3+
@@ -150,7 +153,7 @@ public final class ClassInfoTypeKeeperReader {
             }
         }
 
-        reader.readLine();
+        reader.readLine();  // NOSONAR
     }
 
     private void readSlottedClass(final String line, final BufferedReader reader) throws IOException {
@@ -166,7 +169,7 @@ public final class ClassInfoTypeKeeperReader {
             final String identifier = scanner.next();
             final TypeString typeString = TypeString.ofIdentifier(identifier, TypeString.DEFAULT_PACKAGE);
             if (!this.typeKeeper.hasType(typeString)) {
-                LOGGER.debug("Type not found: {}", identifier);
+                LOGGER.debug("Type not found: {}", identifier);  // NOSONAR
                 type = null;
             } else {
                 type = (MagikType) this.typeKeeper.getType(typeString);
@@ -181,7 +184,7 @@ public final class ClassInfoTypeKeeperReader {
         for (final String parentClass : parentClasses) {
             final TypeString parentTypeString = TypeString.ofIdentifier(parentClass, TypeString.DEFAULT_PACKAGE);
             if (!this.typeKeeper.hasType(parentTypeString)) {
-                LOGGER.debug("Type not found: {}", parentClass);
+                LOGGER.debug("Type not found: {}", parentClass);  // NOSONAR
             }
         }
 
@@ -192,7 +195,7 @@ public final class ClassInfoTypeKeeperReader {
 
             // Pragmas.
             final List<String> pragmas = new ArrayList<>();
-            while (scanner.hasNext("[^/]+")) {
+            while (scanner.hasNext(NEXT_NOT_SLASH_PATTERN)) {
                 final String pragma = scanner.next();
                 pragmas.add(pragma);
             }
@@ -213,7 +216,7 @@ public final class ClassInfoTypeKeeperReader {
             type.setDoc(comment);
         }
 
-        reader.readLine();
+        reader.readLine();  // NOSONAR
     }
 
     private void readMixin(final String line, final BufferedReader reader) throws IOException {
@@ -229,7 +232,7 @@ public final class ClassInfoTypeKeeperReader {
             final String identifier = scanner.next();
             final TypeString typeString = TypeString.ofIdentifier(identifier, TypeString.DEFAULT_PACKAGE);
             if (!this.typeKeeper.hasType(typeString)) {
-                LOGGER.debug("Type not found: {}", identifier);
+                LOGGER.debug("Type not found: {}", identifier);  // NOSONAR
                 type = null;
             } else {
                 type = (MagikType) this.typeKeeper.getType(typeString);
@@ -239,7 +242,7 @@ public final class ClassInfoTypeKeeperReader {
         }
 
         // Line 2
-        reader.readLine(); // Skip "."
+        reader.readLine();  // NOSONAR; skip "."
 
         // Line 3
         final int commentLineCount;
@@ -248,7 +251,7 @@ public final class ClassInfoTypeKeeperReader {
 
             // Read pragmas.
             final List<String> pragmas = new ArrayList<>();
-            while (scanner.hasNext("[^/]+")) {
+            while (scanner.hasNext(NEXT_NOT_SLASH_PATTERN)) {
                 final String pragma = scanner.next();
                 pragmas.add(pragma);
             }
@@ -269,13 +272,13 @@ public final class ClassInfoTypeKeeperReader {
             type.setDoc(comment);
         }
 
-        reader.readLine();
+        reader.readLine();  // NOSONAR
     }
 
     /**
      * Read types from a jar/class_info file.
      *
-     * @param path             Path to jar file.
+     * @param path Path to jar file.
      * @param typeKeeper {@link TypeKeeper} to fill.
      * @throws IOException -
      */
@@ -294,12 +297,13 @@ public final class ClassInfoTypeKeeperReader {
         try (Stream<Path> paths = Files.list(libsPath)) {
             paths
                 .filter(Files::isRegularFile)
+                .filter(path -> path.toString().toLowerCase().endsWith(".jar"))
                 .forEach(libPath -> {
                     LOGGER.trace("Reading lib: {}", libPath);
                     try {
                         ClassInfoTypeKeeperReader.readTypes(libPath, typeKeeper);
                     } catch (IOException exception) {
-                        LOGGER.error(exception.getMessage(), exception);
+                        LOGGER.error("Error reading file: " + libPath, exception);
                     }
                 });
         } catch (IOException exception) {

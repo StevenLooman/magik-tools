@@ -25,7 +25,7 @@ public class CommentRegularExpressionCheck extends MagikCheck {
      * Regular expression to check.
      */
     @RuleProperty(
-        key = "regularExpression",
+        key = "regular expression",
         description = "Regular expression to check",
         type = "STRING")
     @SuppressWarnings("checkstyle:VisibilityModifier")

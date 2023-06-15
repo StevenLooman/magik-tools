@@ -35,14 +35,16 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public final class AstCreator {
 
+  private static final String URI_STR = "tests://unittest";
   private static final URI FAKE_URI;
 
   static {
     try {
-      FAKE_URI = new URI("tests://unittest");
+      FAKE_URI = new URI(URI_STR);
     } catch (URISyntaxException e) {
       // Can't happen
       throw new IllegalStateException(e);
@@ -56,6 +58,7 @@ public final class AstCreator {
   public static AstNode create(ParsingResult parsingResult, LocatedText input) {
     AstNode astNode = new AstCreator(input).visit(parsingResult.getParseTreeRoot());
     // Unwrap AstNodeType for root node:
+    Objects.requireNonNull(astNode);
     astNode.hasToBeSkippedFromAst();
     return astNode;
   }

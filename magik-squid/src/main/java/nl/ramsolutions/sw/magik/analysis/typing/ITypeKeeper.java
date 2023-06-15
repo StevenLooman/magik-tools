@@ -129,6 +129,12 @@ public interface ITypeKeeper {
      * @param binaryOperator Operator.
      */
     void removeBinaryOperator(BinaryOperator binaryOperator);
+
+    /**
+     * Get all binary operators.
+     * @return All binary operators.
+     */
+    Collection<BinaryOperator> getBinaryOperators();
     // endregion
 
     /**

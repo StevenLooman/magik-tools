@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
+import nl.ramsolutions.sw.Utils;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.Location;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -66,11 +67,11 @@ public class MagikLint {
     /**
      * Build context for a file, untabifying if needed.
      *
-     * @param path         Path to file
+     * @param path     Path to file
      * @param untabify Untabify to N-spaces, if given
      * @return Visitor context for file.
      */
-    private MagikFile buildMagikFile(final Path path, final @Nullable Long untabify) {
+    private MagikFile buildMagikFile(final Path path, final @Nullable Integer untabify) {
         final Charset charset = FileCharsetDeterminer.determineCharset(path);
 
         byte[] encoded = null;
@@ -84,9 +85,7 @@ public class MagikLint {
 
         String fileContents = new String(encoded, charset);
         if (untabify != null) {
-            final String formatString = "%" + untabify + "s";
-            final String spaces = String.format(formatString, "");
-            fileContents = fileContents.replace("\t", spaces);
+            fileContents = Utils.untabify(fileContents, untabify);
         }
 
         return new MagikFile(uri, fileContents);
@@ -109,17 +108,20 @@ public class MagikLint {
     /**
      * Show checks active and inactive checks.
      *
+     * @param writer Writer Write to write output to.
+     * @param showDisabled boolean Boolean to show disabled checks or not.
      * @throws ReflectiveOperationException -
      * @throws IOException -
      */
-    void showChecks(final Writer writer) throws ReflectiveOperationException, IOException {
-        final Iterable<MagikCheckHolder> holders = MagikLint.getAllChecks(this.config);
+    void showChecks(final Writer writer, final boolean showDisabled) throws ReflectiveOperationException, IOException {
+        Iterable<MagikCheckHolder> holders = MagikLint.getAllChecks(this.config);
         for (final MagikCheckHolder holder : holders) {
             final String name = holder.getSqKey();
-            if (holder.isEnabled()) {
-                writer.write("Check: " + name + " (" + holder.getTitle() + ")\n");
+
+            if (!showDisabled && holder.isEnabled() || showDisabled && !holder.isEnabled()) {
+                writer.write("- " + name + " (" + holder.getTitle() + ")\n");
             } else {
-                writer.write("Check: " + name + " (disabled) (" + holder.getTitle() + ")\n");
+                continue;
             }
 
             for (final MagikCheckHolder.Parameter parameter : holder.getParameters()) {
@@ -129,6 +131,30 @@ public class MagikLint {
                     + "(" + parameter.getDescription() + ")\n");
             }
         }
+    }
+
+    /**
+     * Show enabled checks.
+     *
+     * @param writer Writer Write to write output to.
+     * @throws ReflectiveOperationException -
+     * @throws IOException -
+     */
+    void showEnabledChecks(final Writer writer) throws ReflectiveOperationException, IOException {
+        writer.write("Enabled checks:\n");
+        this.showChecks(writer, false);
+    }
+
+    /**
+     * Show disabled checks.
+     *
+     * @param writer Writer Write to write output to.
+     * @throws ReflectiveOperationException -
+     * @throws IOException -
+     */
+    void showDisabledChecks(final Writer writer) throws ReflectiveOperationException, IOException {
+        writer.write("Disabled checks:\n");
+        this.showChecks(writer, true);
     }
 
     /**
@@ -208,9 +234,12 @@ public class MagikLint {
             ignoreMatchers = new ArrayList<>();
         }
 
-        final Long untabify;
+        final Integer untabify;
         if (this.config.hasProperty("untabify")) {
-            untabify = Long.parseLong(this.config.getPropertyString("untabify"));
+            untabify = Integer.parseInt(this.config.getPropertyString("untabify"));
+            if (untabify < 1) {
+                throw new NumberFormatException("Must be a positive integer.");
+            }
         } else {
             untabify = null;
         }
@@ -296,7 +325,7 @@ public class MagikLint {
                 : !disableds.contains(checkKeyKebabCase);
 
             // Gather parameters from MagikCheck, value from config.
-            final String name = checkClass.getAnnotation(Rule.class).key();
+            final String name = MagikCheckHolder.toKebabCase(checkClass.getAnnotation(Rule.class).key());
             final Set<MagikCheckHolder.Parameter> parameters = Arrays.stream(checkClass.getFields())
                 .map(field -> field.getAnnotation(RuleProperty.class))
                 .filter(Objects::nonNull)
@@ -363,7 +392,7 @@ public class MagikLint {
             final Set<String> scopeInstructions =
                 instructionReader.getScopeInstructions(scope, MLINT_SCOPE_INSTRUCTION);
             final Map<String, String> parsedScopeInstructions = scopeInstructions.stream()
-                .map(str -> CommentInstructionReader.parseInstructions(str))
+                .map(CommentInstructionReader::parseInstructions)
                 .reduce(
                     instructions,
                     (acc, elem) -> {

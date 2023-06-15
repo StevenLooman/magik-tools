@@ -63,6 +63,7 @@ public class GlobalScope extends Scope {
         }
 
         // If this is a for-loop-variable, use the loop-body scope.
+        // TODO: In upper part a PARAMETER is ok, but here it has to be a token-node...
         final AstNode forNode = AstQuery.getParentFromChain(
             searchNode,
             MagikGrammar.IDENTIFIER,

@@ -235,8 +235,7 @@ public class LocalTypeReasoner extends AstWalker {
      * @return Resulting type.
      */
     public ExpressionResult getLoopbodyNodeTypeSilent(final AstNode node) {
-        final ExpressionResult result = this.loopbodyNodeTypes.get(node);
-        return result;
+        return this.loopbodyNodeTypes.get(node);
     }
 
     /**
@@ -320,10 +319,16 @@ public class LocalTypeReasoner extends AstWalker {
             for (int i = 0; i < identifierNodes.size(); ++i) {
                 final AstNode identifierNode = identifierNodes.get(i);
                 final AstNode identifierPreviousNode = identifierNode.getPreviousSibling();
-                final AbstractType type = identifierPreviousNode != null
-                    && identifierPreviousNode.getTokenValue().equalsIgnoreCase("_gather")
-                    ? this.typeKeeper.getType(SW_SIMPLE_VECTOR)
-                    : this.getIteratorType().get(i, unsetType);
+                final ExpressionResult iteratorResult = this.getIteratorType();
+                final AbstractType type;
+                if (identifierPreviousNode != null
+                    && identifierPreviousNode.getTokenValue().equalsIgnoreCase("_gather")) {
+                    type = this.typeKeeper.getType(SW_SIMPLE_VECTOR);
+                } else if (iteratorResult != null) {
+                    type = iteratorResult.get(i, unsetType);
+                } else {
+                    type = UndefinedType.INSTANCE;
+                }
 
                 final ExpressionResult result = new ExpressionResult(type);
                 this.setNodeType(identifierNode, result);
@@ -756,7 +761,8 @@ public class LocalTypeReasoner extends AstWalker {
             }
 
             final AbstractType type = this.getNodeType(parameterNode).get(0, UndefinedType.INSTANCE);
-            final Parameter parameter = new Parameter(identifier, modifier, type);
+            final TypeString typeString = type.getTypeString();
+            final Parameter parameter = new Parameter(identifier, modifier, typeString);
             parameters.add(parameter);
         }
 
@@ -1152,9 +1158,10 @@ public class LocalTypeReasoner extends AstWalker {
         final AstNode calledNode = node.getPreviousSibling();
         final ExpressionResult calledResult = this.getNodeType(calledNode);
         final AbstractType originalCalledType = calledResult.get(0, unsetType);
-        final AbstractType calledType = calledResult.get(0, unsetType) == SelfType.INSTANCE
-            ? this.getMethodOwnerType(node)
-            : calledResult.get(0, unsetType);
+        final AbstractType methodOwnerType = this.getMethodOwnerType(node);
+        final AbstractType calledType = calledResult.
+            substituteType(SelfType.INSTANCE, methodOwnerType).
+            get(0, unsetType);
 
         // Clear iterator results.
         this.setIteratorType(null);
@@ -1182,30 +1189,14 @@ public class LocalTypeReasoner extends AstWalker {
                     ? methodCallResultBare.substituteType(SelfType.INSTANCE, calledType)
                     : methodCallResultBare;
 
-                final Map<ParameterReferenceType, AbstractType> paramRefTypeMap = IntStream
-                    .range(0, method.getParameters().size())
-                    .mapToObj(i -> {
-                        final Parameter param = method.getParameters().get(i);
-                        final String paramName = param.getName();
-                        final ParameterReferenceType paramRefType = new ParameterReferenceType(paramName);
-                        final AbstractType argType = i < argumentTypes.size()
-                            ? argumentTypes.get(i)
-                            : unsetType;  // TODO: What about gather parameters?
-                        return new AbstractMap.SimpleEntry<>(paramRefType, argType);
-                    })
-                    .collect(Collectors.toMap(
-                        entry -> entry.getKey(),
-                        entry -> entry.getValue()));
-                for (final Map.Entry<ParameterReferenceType, AbstractType> entry : paramRefTypeMap.entrySet()) {
-                    final ParameterReferenceType paramRefType = entry.getKey();
-                    final AbstractType argType = entry.getValue();
-                    methodCallResult = methodCallResult.substituteType(paramRefType, argType);
-                }
-                callResult = callResult == null
-                    ? methodCallResult
-                    : new ExpressionResult(callResult, methodCallResult, unsetType);
+                // Substitute parameters.
+                methodCallResult =
+                    this.substituteParametersForMethodCallResult(method, argumentTypes, methodCallResult);
 
-                // Iterator.
+                // Merge result.
+                callResult = new ExpressionResult(methodCallResult, callResult, unsetType);
+
+                // Iterator result.
                 final ExpressionResultString loopbodyResultStr = method.getLoopbodyResult();
                 final ExpressionResult loopbodyResultBare =
                     this.typeReader.parseExpressionResultString(loopbodyResultStr);
@@ -1225,6 +1216,35 @@ public class LocalTypeReasoner extends AstWalker {
         // Store it!
         Objects.requireNonNull(callResult);  // Keep linters happy.
         this.setNodeType(node, callResult);
+    }
+
+    private ExpressionResult substituteParametersForMethodCallResult(
+            final Method method,
+            final List<AbstractType> argumentTypes,
+            final ExpressionResult methodCallResult) {
+        final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+
+        ExpressionResult result = methodCallResult;
+        final Map<ParameterReferenceType, AbstractType> paramRefTypeMap = IntStream
+            .range(0, method.getParameters().size())
+            .mapToObj(i -> {
+                final Parameter param = method.getParameters().get(i);
+                final String paramName = param.getName();
+                final ParameterReferenceType paramRefType = new ParameterReferenceType(paramName);
+                final AbstractType argType = i < argumentTypes.size()
+                    ? argumentTypes.get(i)
+                    : unsetType;  // TODO: What about gather parameters?
+                return new AbstractMap.SimpleEntry<>(paramRefType, argType);
+            })
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue));
+        for (final Map.Entry<ParameterReferenceType, AbstractType> entry : paramRefTypeMap.entrySet()) {
+            final ParameterReferenceType paramRefType = entry.getKey();
+            final AbstractType argType = entry.getValue();
+            result = result.substituteType(paramRefType, argType);
+        }
+        return result;
     }
 
     @Override
@@ -1263,8 +1283,10 @@ public class LocalTypeReasoner extends AstWalker {
 
             if (originalCalledType == SelfType.INSTANCE) {
                 callResult = callResult.substituteType(SelfType.INSTANCE, calledType);
-                final ExpressionResult subbedResult =
-                    this.getIteratorType().substituteType(SelfType.INSTANCE, calledType);
+                final ExpressionResult iteratorResult = this.getIteratorType();
+                final ExpressionResult subbedResult = iteratorResult != null
+                    ? iteratorResult.substituteType(SelfType.INSTANCE, calledType)
+                    : null;
                 this.setIteratorType(subbedResult);
             }
         }
@@ -1299,8 +1321,8 @@ public class LocalTypeReasoner extends AstWalker {
     private ExpressionResult getMethodInvocationResult(final AbstractType calledType, final String methodName) {
         final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
         return calledType.getMethods(methodName).stream()
-            .map(method -> method.getCallResult())
-            .map(expressionResultString -> this.typeReader.parseExpressionResultString(expressionResultString))
+            .map(Method::getCallResult)
+            .map(this.typeReader::parseExpressionResultString)
             .reduce((result, element) -> new ExpressionResult(result, element, unsetType))
             .orElse(ExpressionResult.UNDEFINED);
     }

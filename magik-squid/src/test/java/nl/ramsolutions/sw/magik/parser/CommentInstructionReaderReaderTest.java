@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for InstructionReader.
  */
-public class CommentInstructionReaderReaderTest {
+class CommentInstructionReaderReaderTest {
 
     private static final CommentInstructionReader.InstructionType STATEMENT_INSTRUCTION_TYPE =
         CommentInstructionReader.InstructionType.createInstructionType("mlint");

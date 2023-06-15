@@ -415,15 +415,10 @@ public enum MagikGrammar implements GrammarRuleKey {
                 VARIABLE_DEFINITION_STATEMENT,
                 PRIMITIVE_STATEMENT));
 
-        // b.rule(STATEMENT_SYNTAX_ERROR).is(
-        //     SPACING,
-        //     b.regexp(".+?(?=[" + LINE_TERMINATOR_REGEXP + "])"));
-
         b.rule(STATEMENT_SEPARATOR).is(
             b.firstOf(
                 b.sequence(
                     SPACING_NO_LB_2,
-                    // b.commentTrivia(MagikPunctuator.SEMICOLON)),
                     b.skippedTrivia(MagikPunctuator.SEMICOLON)),
                 b.sequence(
                     SPACING_NO_LB,

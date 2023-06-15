@@ -38,7 +38,6 @@ import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.BinaryOperator;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
@@ -93,7 +92,6 @@ public class MagikIndexer {
         CommentInstructionReader.InstructionType.createInstructionType("type");
 
     private final ITypeKeeper typeKeeper;
-    private final TypeReader typeParser;
     private final Map<Path, Set<Package>> indexedPackages = new HashMap<>();
     private final Map<Path, Set<AbstractType>> indexedTypes = new HashMap<>();
     private final Map<Path, Set<Method>> indexedMethods = new HashMap<>();
@@ -103,7 +101,6 @@ public class MagikIndexer {
 
     public MagikIndexer(final ITypeKeeper typeKeeper) {
         this.typeKeeper = typeKeeper;
-        this.typeParser = new TypeReader(this.typeKeeper);
     }
 
     /**
@@ -162,7 +159,7 @@ public class MagikIndexer {
         }
     }
 
-    private void handleDefinition(final Path path, final MagikFile magikFile, final Definition definition) {
+    private void handleDefinition(final MagikFile magikFile, final Definition definition) {
         if (definition instanceof PackageDefinition) {
             final PackageDefinition packageDefinition = (PackageDefinition) definition;
             this.handleDefinition(magikFile, packageDefinition);
@@ -203,6 +200,7 @@ public class MagikIndexer {
         } else {
             pakkage = this.typeKeeper.getPackage(name);
         }
+        Objects.requireNonNull(pakkage);
 
         final AstNode node = definition.getNode();
         final URI uri = magikFile.getUri();
@@ -230,12 +228,12 @@ public class MagikIndexer {
         final Map<String, TypeString> slots = Collections.emptyMap();
         final List<TypeString> parents = definition.getParents();
         final TypeString defaultParentRef = TypeString.ofIdentifier("indexed_format_mixin", "sw");
-        this.fillType(magikType, magikFile, node, typeString.getPakkage(), slots, parents, defaultParentRef);
+        this.fillType(magikType, magikFile, node, slots, parents, defaultParentRef);
 
         final Path path = Paths.get(magikFile.getUri());
         this.indexedTypes.get(path).add(magikType);
 
-        LOGGER.debug("Indexed type: {}", magikType);
+        LOGGER.debug("Indexed type: {}", magikType);  // NOSONAR
     }
 
     private void handleDefinition(final MagikFile magikFile, final EnumerationDefinition definition) {
@@ -248,12 +246,12 @@ public class MagikIndexer {
         final Map<String, TypeString> slots = Collections.emptyMap();
         final List<TypeString> parents = definition.getParents();
         final TypeString defaultParentRef = TypeString.ofIdentifier("enumeration_value", "sw");
-        this.fillType(magikType, magikFile, node, typeString.getPakkage(), slots, parents, defaultParentRef);
+        this.fillType(magikType, magikFile, node, slots, parents, defaultParentRef);
 
         final Path path = Paths.get(magikFile.getUri());
         this.indexedTypes.get(path).add(magikType);
 
-        LOGGER.debug("Indexed type: {}", magikType);
+        LOGGER.debug("Indexed type: {}", magikType);  // NOSONAR
     }
 
     private void handleDefinition(final MagikFile magikFile, final SlottedExemplarDefinition definition) {
@@ -274,7 +272,7 @@ public class MagikIndexer {
                 slotName -> slotTypes.getOrDefault(slotName, TypeString.UNDEFINED)));
         final List<TypeString> parents = definition.getParents();
         final TypeString defaultParentRef = TypeString.ofIdentifier("slotted_format_mixin", "sw");
-        this.fillType(magikType, magikFile, node, typeString.getPakkage(), slots, parents, defaultParentRef);
+        this.fillType(magikType, magikFile, node, slots, parents, defaultParentRef);
 
         // Generics.
         docParser.getGenericTypeNodes().entrySet()
@@ -291,7 +289,7 @@ public class MagikIndexer {
         final Path path = Paths.get(magikFile.getUri());
         this.indexedTypes.get(path).add(magikType);
 
-        LOGGER.debug("Indexed type: {}", magikType);
+        LOGGER.debug("Indexed type: {}", magikType);  // NOSONAR
     }
 
     private void handleDefinition(final MagikFile magikFile, final MixinDefinition definition) {
@@ -303,18 +301,17 @@ public class MagikIndexer {
 
         final Map<String, TypeString> slots = Collections.emptyMap();
         final List<TypeString> parents = definition.getParents();
-        this.fillType(magikType, magikFile, node, typeString.getPakkage(), slots, parents, null);
+        this.fillType(magikType, magikFile, node, slots, parents, null);
 
         final Path path = Paths.get(magikFile.getUri());
         this.indexedTypes.get(path).add(magikType);
 
-        LOGGER.debug("Indexed type: {}", magikType);
+        LOGGER.debug("Indexed type: {}", magikType);  // NOSONAR
     }
 
     private void handleDefinition(final MagikFile magikFile, final MethodDefinition definition) {
         this.ensurePackageExists(definition);
 
-        final AstNode node = definition.getNode();
         if (!definition.isActualMethodDefinition()) {
             // No slot accessors, shared variables, shared constants.
             this.handleMethodDefinitionOther(magikFile, definition);
@@ -323,32 +320,20 @@ public class MagikIndexer {
 
         // Get exemplar.
         final TypeString typeString = definition.getExemplarName();
-        final AbstractType exemplarType;
-        if (this.typeKeeper.hasType(typeString)) {
-            exemplarType = this.typeKeeper.getType(typeString);
-        } else {
-            // Create a new "temporary" type, to be updated later when the
-            // definition of that type is found.
-            exemplarType = new MagikType(this.typeKeeper, MagikType.Sort.UNDEFINED, typeString);
-        }
+        final AbstractType exemplarType = this.findOrCreateType(typeString, MagikType.Sort.UNDEFINED);
 
         // Combine parameter types with method docs.
+        final AstNode node = definition.getNode();
         final TypeDocParser typeDocParser = new TypeDocParser(node);
         final Map<String, TypeString> parameterTypes = typeDocParser.getParameterTypes();
         final List<Parameter> parameters = definition.getParameters().stream()
             .map(parameterDefinition -> {
                 final String name = parameterDefinition.getName();
-                final AbstractType type;
-                if (!parameterTypes.containsKey(name)) {
-                    type = UndefinedType.INSTANCE;
-                } else {
-                    final TypeString parameterType = parameterTypes.get(name);
-                    type = this.typeParser.parseTypeString(parameterType);
-                }
-
+                final TypeString parameterTypeString = parameterTypes.getOrDefault(name, TypeString.UNDEFINED);
+                final ParameterDefinition.Modifier paramModifier = parameterDefinition.getModifier();
                 final Parameter.Modifier modifier =
-                    MagikIndexer.PARAMETER_MODIFIER_MAPPING.get(parameterDefinition.getModifier());
-                return new Parameter(name, modifier, type);
+                    MagikIndexer.PARAMETER_MODIFIER_MAPPING.get(paramModifier);
+                return new Parameter(name, modifier, parameterTypeString);
             })
             .collect(Collectors.toList());
         final ParameterDefinition assignParamDef = definition.getAssignmentParameter();
@@ -388,7 +373,7 @@ public class MagikIndexer {
         // Create method.
         final MagikType magikType = (MagikType) exemplarType;
         final EnumSet<Method.Modifier> modifiers = definition.getModifiers().stream()
-            .map(modifier -> MagikIndexer.METHOD_MODIFIER_MAPPING.get(modifier))
+            .map(MagikIndexer.METHOD_MODIFIER_MAPPING::get)
             .collect(Collectors.toCollection(() -> EnumSet.noneOf(Method.Modifier.class)));
         final URI uri = magikFile.getUri();
         final Location location = new Location(uri, node);
@@ -417,8 +402,7 @@ public class MagikIndexer {
                 }
                 final AstNode usageNode = scopeEntry.getNode();
                 final Location usageLocation = new Location(uri, usageNode);
-                final Method.GlobalUsage globalUsage = new Method.GlobalUsage(ref, usageLocation);
-                return globalUsage;
+                return new Method.GlobalUsage(ref, usageLocation);
             })
             .filter(Objects::nonNull)
             .forEach(method::addUsedGlobal);
@@ -520,7 +504,6 @@ public class MagikIndexer {
             final MagikType magikType,
             final MagikFile magikFile,
             final AstNode node,
-            final String packageName,
             final Map<String, TypeString> slots,
             final List<TypeString> parents,
             final @Nullable TypeString defaultParentRef) {
@@ -564,14 +547,7 @@ public class MagikIndexer {
     private void handleMethodDefinitionOther(final MagikFile magikFile, final MethodDefinition definition) {
         // Slot accessors, shared variables, shared constants.
         final TypeString typeString = definition.getExemplarName();
-        final AbstractType exemplarType;
-        if (this.typeKeeper.hasType(typeString)) {
-            exemplarType = this.typeKeeper.getType(typeString);
-        } else {
-            // Create a new "temporary" type, to be updated later when the
-            // definition of that type is found.
-            exemplarType = new MagikType(this.typeKeeper, MagikType.Sort.UNDEFINED, typeString);
-        }
+        final AbstractType exemplarType = this.findOrCreateType(typeString, MagikType.Sort.UNDEFINED);
 
         // Get method return types from docs, if any.
         final AstNode node = definition.getNode();
@@ -604,7 +580,7 @@ public class MagikIndexer {
         // Create method.
         final MagikType magikType = (MagikType) exemplarType;
         final EnumSet<Method.Modifier> modifiers = definition.getModifiers().stream()
-            .map(modifier -> MagikIndexer.METHOD_MODIFIER_MAPPING.get(modifier))
+            .map(MagikIndexer.METHOD_MODIFIER_MAPPING::get)
             .collect(Collectors.toCollection(() -> EnumSet.noneOf(Method.Modifier.class)));
         final URI uri = magikFile.getUri();
         final Location location = new Location(uri, node);
@@ -634,7 +610,8 @@ public class MagikIndexer {
             return new MagikType(this.typeKeeper, sort, typeString);
         } else if (type instanceof MagikType) {
             final MagikType magikType = (MagikType) type;
-            if (magikType.getSort() != MagikType.Sort.UNDEFINED
+            if (sort != MagikType.Sort.UNDEFINED  // If target sort is UNDEFINED, we don't care.
+                && magikType.getSort() != MagikType.Sort.UNDEFINED  // Otherwise ensure it isn't overwritten.
                 && magikType.getSort() != sort) {
                 throw new IllegalStateException();
             }
@@ -661,7 +638,7 @@ public class MagikIndexer {
         try {
             final MagikFile magikFile = new MagikFile(path);
             magikFile.getDefinitions()
-                .forEach(definition -> this.handleDefinition(path, magikFile, definition));
+                .forEach(definition -> this.handleDefinition(magikFile, definition));
         } catch (IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
         }
@@ -677,25 +654,25 @@ public class MagikIndexer {
         this.indexedMethods.remove(path);
 
         this.indexedGlobals.getOrDefault(path, Collections.emptySet())
-            .forEach(type -> this.typeKeeper.removeType(type));
+            .forEach(this.typeKeeper::removeType);
         this.indexedGlobals.remove(path);
 
         this.indexedBinaryOperators.getOrDefault(path, Collections.emptySet())
-            .forEach(binaryOperator -> this.typeKeeper.removeBinaryOperator(binaryOperator));
+            .forEach(this.typeKeeper::removeBinaryOperator);
         this.indexedBinaryOperators.remove(path);
 
         this.indexedTypes.getOrDefault(path, Collections.emptySet()).stream()
             .filter(type -> type.getLocalMethods().isEmpty())
-            .forEach(type -> this.typeKeeper.removeType(type));
+            .forEach(this.typeKeeper::removeType);
         this.indexedTypes.remove(path);
 
         this.indexedPackages.getOrDefault(path, Collections.emptySet()).stream()
             .filter(pakkage -> pakkage.getTypes().isEmpty())
-            .forEach(pakkage -> this.typeKeeper.removePackage(pakkage));
+            .forEach(this.typeKeeper::removePackage);
         this.indexedPackages.remove(path);
 
         this.indexedConditions.getOrDefault(path, Collections.emptySet())
-            .forEach(condition -> this.typeKeeper.removeCondition(condition));
+            .forEach(this.typeKeeper::removeCondition);
         this.indexedConditions.remove(path);
     }
 

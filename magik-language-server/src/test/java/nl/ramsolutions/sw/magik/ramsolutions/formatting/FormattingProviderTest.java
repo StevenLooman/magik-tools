@@ -11,6 +11,8 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -254,7 +256,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testWhitespaceArgumentsSelf() {
+    void testWhitespaceArgumentsSelf() {  // NOSONAR
         final String code = "prc(_self)\n";
         final List<TextEdit> edits = this.getEdits(code);
 
@@ -299,31 +301,26 @@ class FormattingProviderTest {
     // endregion
 
     // region: Indenting.
-    @Test
-    void testIndentBlockStatement() {
-        final String code = ""
+    @ParameterizedTest
+    @ValueSource(strings = {
+        ""
             + "_block\n"
             + "print(1)\n"
-            + "_endblock\n";
-        final List<TextEdit> edits = this.getEdits(code);
-
-        assertThat(edits).hasSize(1);
-
-        final TextEdit edit0 = edits.get(0);
-        final TextEdit expected0 = new TextEdit(
-            new Range(
-                new Position(1, 0),
-                new Position(1, 0)),
-            "\t");
-        assertThat(edit0).isEqualTo(expected0);
-    }
-
-    @Test
-    void testIndentComments() {
-        final String code = ""
+            + "_endblock\n",
+        ""
             + "_block\n"
             + "# comment\n"
-            + "_endblock\n";
+            + "_endblock\n",
+        ""
+            + "_if a() _andif\n"
+            + "b()\n"
+            + "_then _endif\n",
+        ""
+            + "_block\n"
+            + "a << 2\n"
+            + "_endblock\n",
+    })
+    void testIndentBlockStatement(final String code) {
         final List<TextEdit> edits = this.getEdits(code);
 
         assertThat(edits).hasSize(1);
@@ -346,44 +343,6 @@ class FormattingProviderTest {
         final List<TextEdit> edits = this.getEdits(code);
 
         assertThat(edits).isEmpty();
-    }
-
-    @Test
-    void testIndentNewlineExpression() {
-        final String code = ""
-            + "_if a() _andif\n"
-            + "b()\n"
-            + "_then _endif\n";
-        final List<TextEdit> edits = this.getEdits(code);
-
-        assertThat(edits).hasSize(1);
-
-        final TextEdit edit0 = edits.get(0);
-        final TextEdit expected0 = new TextEdit(
-            new Range(
-                new Position(1, 0),
-                new Position(1, 0)),
-            "\t");
-        assertThat(edit0).isEqualTo(expected0);
-    }
-
-    @Test
-    void testIndentAssignmentExpression() {
-        final String code = ""
-            + "_block\n"
-            + "a << 2\n"
-            + "_endblock\n";
-        final List<TextEdit> edits = this.getEdits(code);
-
-        assertThat(edits).hasSize(1);
-
-        final TextEdit edit0 = edits.get(0);
-        final TextEdit expected0 = new TextEdit(
-            new Range(
-                new Position(1, 0),
-                new Position(1, 0)),
-            "\t");
-        assertThat(edit0).isEqualTo(expected0);
     }
 
     @Test
@@ -700,7 +659,7 @@ class FormattingProviderTest {
     }
 
     @Test
-    void testFormatPragma2() {
+    void testFormatPragma2() {  // NOSONAR
         final String code = "_pragma(a=b, c=d, e={f, g})\n";
         final List<TextEdit> edits = this.getEdits(code);
 
@@ -813,7 +772,7 @@ class FormattingProviderTest {
     // endregion
 
     @Test
-    void testLabel() {
+    void testLabel() {  // NOSONAR
         final String code = "@label";
         final List<TextEdit> edits = this.getEdits(code);
 

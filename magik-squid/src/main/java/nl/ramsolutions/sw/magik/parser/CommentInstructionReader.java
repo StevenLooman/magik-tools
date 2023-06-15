@@ -113,7 +113,7 @@ public class CommentInstructionReader {
 
         return this.instructions.get(lineNo).entrySet().stream()
             .filter(entry -> entry.getKey() == instructionType)
-            .map(entry -> entry.getValue())
+            .map(Map.Entry::getValue)
             .findAny()
             .orElse(null);
     }
@@ -157,7 +157,7 @@ public class CommentInstructionReader {
                 }
 
                 final Map<InstructionType, String> instructionsAtLine =
-                    this.instructions.computeIfAbsent(lineNo + 1, HashMap::new);
+                    this.instructions.computeIfAbsent(lineNo + 1, k -> new HashMap<>());
                 final String instruction = matcher.group(1);
                 instructionsAtLine.put(instructionType, instruction);
             }

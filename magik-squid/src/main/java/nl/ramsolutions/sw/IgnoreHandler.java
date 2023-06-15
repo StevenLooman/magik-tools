@@ -44,7 +44,12 @@ public final class IgnoreHandler {
             throw new IllegalArgumentException();
         }
 
-        final Path basePath = path.getParent().toAbsolutePath();
+        final Path parentPath = path.getParent();
+        if (parentPath == null) {
+            throw new IllegalArgumentException();
+        }
+
+        final Path basePath = parentPath.toAbsolutePath();
         final FileSystem fileSystem = path.getFileSystem();
         try (Stream<String> lines = Files.lines(path, StandardCharsets.ISO_8859_1)) {
             final Set<PathMatcher> pathMatchers = lines
@@ -52,7 +57,7 @@ public final class IgnoreHandler {
                 .filter(line -> !line.isBlank())
                 .filter(line -> !line.startsWith("#"))  // Comments.
                 .map(line -> (basePath.toString() + fileSystem.getSeparator() + line).replace("\\", "\\\\"))
-                .peek(pattern -> LOGGER.debug("Using pattern: glob:{}", pattern))
+                // .peek(pattern -> LOGGER.debug("Using pattern: glob:{}", pattern))
                 .map(pattern -> fileSystem.getPathMatcher("glob:" + pattern))
                 .collect(Collectors.toSet());
             this.entries.put(path, pathMatchers);

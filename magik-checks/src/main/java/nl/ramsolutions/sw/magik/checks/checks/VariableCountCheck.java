@@ -54,6 +54,10 @@ public class VariableCountCheck extends MagikCheck {
         final MagikFile magikFile = this.getMagikFile();
         final GlobalScope globalScope = magikFile.getGlobalScope();
         final Scope scope = globalScope.getScopeForNode(body);
+        if (scope == null) {
+            return;
+        }
+
         final long variableCount = scope.getScopeEntriesInScope().stream()
             .filter(scopeEntry -> scopeEntry.isType(
                 ScopeEntry.Type.CONSTANT,

@@ -112,4 +112,9 @@ public class ReadOnlyTypeKeeperAdapter implements ITypeKeeper {
         // Do nothing.
     }
 
+    @Override
+    public Collection<BinaryOperator> getBinaryOperators() {
+        return this.typeKeeper.getBinaryOperators();
+    }
+
 }

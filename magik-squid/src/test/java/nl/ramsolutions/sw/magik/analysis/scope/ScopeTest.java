@@ -91,7 +91,7 @@ class ScopeTest {
         innerBodyScope.addDeclaration(ScopeEntry.Type.LOCAL, "identifier", null, null);
 
         final ScopeEntry entryFromOuter = outerBodyScope.getScopeEntry("identifier");
-        assertThat(entryFromOuter).isEqualTo(null);
+        assertThat(entryFromOuter).isNull();
 
         final ScopeEntry entry = innerBodyScope.getScopeEntry("identifier");
         assertThat(entry).isNotNull();

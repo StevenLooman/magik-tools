@@ -221,7 +221,7 @@ class DefinitionReaderTest {
     }
 
     @Test
-    void testMethodDefinition() {
+    void testMethodDefinition() {  // NOSONAR
         final String code = "_method a.b _endmethod";
         final AstNode node = this.parseCode(code);
         final DefinitionReader reader = new DefinitionReader();
@@ -309,7 +309,7 @@ class DefinitionReaderTest {
     }
 
     @Test
-    void testDefineSlotAccess() {
+    void testDefineSlotAccess() {  // NOSONAR
         final String code = "test_exemplar.define_slot_access(:slot1, :readable, :public)";
         final AstNode node = this.parseCode(code);
         final DefinitionReader reader = new DefinitionReader();
@@ -326,7 +326,7 @@ class DefinitionReaderTest {
     }
 
     @Test
-    void testDefineSlotExternallyReadable() {
+    void testDefineSlotExternallyReadable() {  // NOSONAR
         final String code = "test_exemplar.define_slot_externally_readable(:slot1)";
         final AstNode node = this.parseCode(code);
         final DefinitionReader reader = new DefinitionReader();
@@ -343,7 +343,7 @@ class DefinitionReaderTest {
     }
 
     @Test
-    void testDefineSlotExternallyReadablePublic() {
+    void testDefineSlotExternallyReadablePublic() {  // NOSONAR
         final String code = "test_exemplar.define_slot_externally_readable(:slot1, :public)";
         final AstNode node = this.parseCode(code);
         final DefinitionReader reader = new DefinitionReader();

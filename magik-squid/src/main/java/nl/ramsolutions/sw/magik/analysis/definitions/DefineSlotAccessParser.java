@@ -159,13 +159,15 @@ public class DefineSlotAccessParser {
         final AstNode atomNode = parentNode.getFirstChild();
         if (atomNode.isNot(MagikGrammar.ATOM)) {
             LOGGER.warn(
-                "Unable to read slot access: {}, at line: {}", helper.getMethodName(), this.node.getTokenLine());
+                "Unable to read slot access: {}, at line: {}",  // NOSONAR
+                helper.getMethodName(), this.node.getTokenLine());
             return Collections.emptyList();
         }
         final String identifier = atomNode.getTokenValue();
         if (identifier == null) {
             LOGGER.warn(
-                "Unable to read slot access: {}, at line: {}", helper.getMethodName(), this.node.getTokenLine());
+                "Unable to read slot access: {}, at line: {}",  // NOSONAR
+                helper.getMethodName(), this.node.getTokenLine());
             return Collections.emptyList();
         }
 
@@ -178,7 +180,8 @@ public class DefineSlotAccessParser {
         if (helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_ACCESS)
             && argument1Node == null) {
             LOGGER.warn(
-                "Unable to read slot access: {}, at line: {}", helper.getMethodName(), this.node.getTokenLine());
+                "Unable to read slot access: {}, at line: {}",  // NOSONAR
+                helper.getMethodName(), this.node.getTokenLine());
             return Collections.emptyList();
         }
 
@@ -200,7 +203,7 @@ public class DefineSlotAccessParser {
         } else if (helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_EXTERNALLY_WRITABLE)) {
             flag = DefineSlotAccessParser.FLAG_WRITABLE;
         } else if (helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_ACCESS)) {
-            flag = argument1Node.getTokenValue();
+            flag = argument1Node.getTokenValue();  // NOSONAR: argument1Node cannot be null in this case.
         } else {
             throw new IllegalStateException();
         }

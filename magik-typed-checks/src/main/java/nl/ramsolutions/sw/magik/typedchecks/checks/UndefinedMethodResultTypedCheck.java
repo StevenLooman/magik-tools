@@ -27,19 +27,20 @@ public class UndefinedMethodResultTypedCheck extends MagikTypedCheck {
         if (result == ExpressionResult.UNDEFINED) {
             final AstNode firstIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
             final AstNode issueNode = firstIdentifierNode != null
-                    ? firstIdentifierNode
-                    : node;
+                ? firstIdentifierNode
+                : node;
 
             final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
             final String methodName = helper.getMethodName();
-            String fullName = methodName;
 
+            String fullName = methodName;
             AbstractType calledType = this.getTypeInvokedOn(node);
             if (calledType != null) {
                 final Collection<Method> methods = calledType.getMethods(methodName);
                 if (!methods.isEmpty()) {
                     // Set real called type.
-                    Method method = new ArrayList<>(methods).get(0);
+                    // TODO: Only first method, or should we test all methods?
+                    final Method method = new ArrayList<>(methods).get(0);
                     calledType = method.getOwner();
                 }
                 fullName = calledType.getFullName() + "." + methodName;

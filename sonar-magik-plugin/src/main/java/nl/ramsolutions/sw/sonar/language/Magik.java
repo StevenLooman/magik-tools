@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.sonar.language;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import nl.ramsolutions.sw.sonar.MagikPlugin;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.resources.AbstractLanguage;
@@ -50,5 +51,31 @@ public class Magik extends AbstractLanguage {
             }
         }
         return nonEmptyStrings.toArray(new String[nonEmptyStrings.size()]);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!super.equals(obj)) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final Magik other = (Magik) obj;
+        return Objects.equals(this.configuration, other.configuration);
     }
 }

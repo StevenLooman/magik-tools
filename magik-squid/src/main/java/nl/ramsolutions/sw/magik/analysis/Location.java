@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
+import java.io.Serializable;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -14,7 +15,7 @@ public class Location {
     /**
      * Location/Range comparator.
      */
-    public static class LocationRangeComparator implements Comparator<Location> {
+    public static class LocationRangeComparator implements Comparator<Location>, Serializable {
 
         @Override
         public int compare(final Location location0, final Location location1) {

@@ -10,7 +10,8 @@ import nl.ramsolutions.sw.magik.checks.MagikIssue;
 public class NullReporter implements Reporter {
 
     @Override
-    public void reportIssue(MagikIssue magikIssue) {
+    public void reportIssue(final MagikIssue magikIssue) {
+        // Do nothing.
     }
 
     @Override

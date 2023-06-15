@@ -128,7 +128,7 @@ public class SlapProtocol implements ISlapProtocol {
     private void startReceiverThread() {
         final SlapProtocol protocol = this;
         final Thread receiverThread = new Thread(() -> {
-            while (true) {
+            while (true) {  // NOSONAR
                 try {
                     if (!protocol.isConnected()) {
                         break;
@@ -371,21 +371,15 @@ public class SlapProtocol implements ISlapProtocol {
         // 04-08: uint32, response type
         // 08-12: uint32, request type
         // 12-16: uint32, 0xFFFFFFFF, if multi-message and stop-message
-        RequestType requestType = RequestType.UNKOWN;
-        boolean isEndPacket = false;
-        if (this.state == State.WAITING) {
-            final int val = (int) ByteBufferHelper.readUInt32(buffer, 8);
-            requestType = RequestType.valueOf(val);
-        } else if (this.state == State.WAITING_FOR_MULTIPLE_RESPONSES) {
-            requestType = this.multiResponseRequestType;
-            isEndPacket =
-                (buffer.get(12) & 0xFF) == 0xFF
-                && (buffer.get(13) & 0xFF) == 0xFF
-                && (buffer.get(14) & 0xFF) == 0xFF
-                && (buffer.get(15) & 0xFF) == 0xFF;
-        }
+        final int val = (int) ByteBufferHelper.readUInt32(buffer, 8);
+        final RequestType requestType = this.state == State.WAITING
+            ? RequestType.valueOf(val)
+            : this.multiResponseRequestType;
+        final boolean isEndPacket =
+            this.state == State.WAITING_FOR_MULTIPLE_RESPONSES
+            && this.isEndPacket(buffer);
 
-        ISlapResponse response = null;
+        final ISlapResponse response;
         switch (requestType) {
             case GET_THREAD_LIST:
                 response = ThreadListResponse.decode(buffer);
@@ -406,18 +400,10 @@ public class SlapProtocol implements ISlapProtocol {
             case GET_THREAD_STACK:
                 if (this.state == State.WAITING_FOR_MULTIPLE_RESPONSES) {
                     // Currently receiving multiple responses.
-                    if (isEndPacket) {
-                        // Build final message.
-                        response = new ThreadStackResponse(this.subResponses);
-                        this.subResponses.clear();
-                        this.state = State.WAITING;
-                        this.multiResponseRequestType = null;
-                    } else {
-                        final ISlapResponse subResponse = ThreadStackResponse.StackElement.decode(buffer);
-                        this.subResponses.add(subResponse);
-                    }
+                    response = this.handleMultiGetThreadStack(buffer, isEndPacket);
                 } else {
                     // First packet sets state.
+                    response = null;
                     this.state = State.WAITING_FOR_MULTIPLE_RESPONSES;
                     this.multiResponseRequestType = RequestType.GET_THREAD_STACK;
                 }
@@ -426,18 +412,10 @@ public class SlapProtocol implements ISlapProtocol {
             case GET_FRAME_LOCALS:
                 if (this.state == State.WAITING_FOR_MULTIPLE_RESPONSES) {
                     // Currently receiving multiple responses.
-                    if (isEndPacket) {
-                        // Build final message.
-                        response = new StackFrameLocalsResponse(this.subResponses);
-                        this.subResponses.clear();
-                        this.state = State.WAITING;
-                        this.multiResponseRequestType = null;
-                    } else {
-                        final ISlapResponse subResponse = StackFrameLocalsResponse.Local.decode(buffer);
-                        this.subResponses.add(subResponse);
-                    }
+                    response = handleMultiGetFrameLocals(buffer, isEndPacket);
                 } else {
                     // First packet sets state.
+                    response = null;
                     this.state = State.WAITING_FOR_MULTIPLE_RESPONSES;
                     this.multiResponseRequestType = RequestType.GET_FRAME_LOCALS;
                 }
@@ -479,6 +457,45 @@ public class SlapProtocol implements ISlapProtocol {
             // Complete future.
             this.handleFutureRequest(requestType, response);
         }
+    }
+
+    private ISlapResponse handleMultiGetFrameLocals(final ByteBuffer buffer, final boolean isEndPacket) {
+        final ISlapResponse response;
+        if (isEndPacket) {
+            // Build final message.
+            response = new StackFrameLocalsResponse(this.subResponses);
+            this.subResponses.clear();
+            this.state = State.WAITING;
+            this.multiResponseRequestType = null;
+        } else {
+            response = null;
+            final ISlapResponse subResponse = StackFrameLocalsResponse.Local.decode(buffer);
+            this.subResponses.add(subResponse);
+        }
+        return response;
+    }
+
+    private ISlapResponse handleMultiGetThreadStack(final ByteBuffer buffer, final boolean isEndPacket) {
+        final ISlapResponse response;
+        if (isEndPacket) {
+            // Build final message.
+            response = new ThreadStackResponse(this.subResponses);
+            this.subResponses.clear();
+            this.state = State.WAITING;
+            this.multiResponseRequestType = null;
+        } else {
+            response = null;
+            final ISlapResponse subResponse = ThreadStackResponse.StackElement.decode(buffer);
+            this.subResponses.add(subResponse);
+        }
+        return response;
+    }
+
+    private boolean isEndPacket(final ByteBuffer buffer) {
+        return (buffer.get(12) & 0xFF) == 0xFF
+            && (buffer.get(13) & 0xFF) == 0xFF
+            && (buffer.get(14) & 0xFF) == 0xFF
+            && (buffer.get(15) & 0xFF) == 0xFF;
     }
 
     /**

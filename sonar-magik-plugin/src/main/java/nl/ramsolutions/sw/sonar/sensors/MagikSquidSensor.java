@@ -48,7 +48,6 @@ public class MagikSquidSensor implements Sensor {
     private static final long SLEEP_PERIOD = 100;
 
     private final CheckFactory checkFactory;
-    // private final Checks<MagikCheck> checks;
     private final FileLinesContextFactory fileLinesContextFactory;
     private final NoSonarFilter noSonarFilter;
 
@@ -122,7 +121,7 @@ public class MagikSquidSensor implements Sensor {
         LOGGER.debug("Running checks");
         final Checks<MagikCheck> checks = checkFactory
             .<MagikCheck>create(CheckList.REPOSITORY_KEY)
-            .addAnnotatedChecks((Iterable<Class<?>>) CheckList.getChecks());
+            .addAnnotatedChecks(CheckList.getChecks());
         for (final MagikCheck check : checks.all()) {
             LOGGER.debug("Running check: {}", check);
             final List<MagikIssue> issues = check.scanFileForIssues(magikFile);
@@ -131,7 +130,7 @@ public class MagikSquidSensor implements Sensor {
                 continue;
             }
 
-            this.saveIssues(context, ruleKey, check, issues, inputFile);
+            this.saveIssues(context, ruleKey, issues, inputFile);
         }
 
         // Save highlighted tokens.
@@ -186,7 +185,6 @@ public class MagikSquidSensor implements Sensor {
     private void saveIssues(
             final SensorContext context,
             final RuleKey ruleKey,
-            final MagikCheck magikCheck,
             final List<MagikIssue> magikIssues,
             final InputFile inputFile) {
         for (final MagikIssue magikIssue : magikIssues) {
