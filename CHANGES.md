@@ -12,6 +12,7 @@ Changes
 - Don't store actual type, but the reference at Parameter.
 - Prevent traceback when reading .jar files in ClassInfoTypeKeeperReader.
 - Fix LineLengthCheck not properly reporting line lengths in user message.
+- Find and use magik-lint.properties based on file path, instead of just once, in magik-language-server.
 
 
 0.7.1 (2023-02-21)

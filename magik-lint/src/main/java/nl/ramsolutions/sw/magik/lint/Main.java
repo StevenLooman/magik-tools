@@ -193,7 +193,8 @@ public final class Main {
             }
             config = new Configuration(path);
         } else {
-            final Path path = ConfigurationLocator.locateConfiguration();
+            final Path currentWorkingPath = Path.of("");
+            final Path path = ConfigurationLocator.locateConfiguration(currentWorkingPath);
             config = path != null
                 ? new Configuration(path)
                 : new Configuration();
