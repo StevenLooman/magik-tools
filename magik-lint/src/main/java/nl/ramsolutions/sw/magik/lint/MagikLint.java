@@ -99,8 +99,8 @@ public class MagikLint {
      * @return Issues/infractions found.
      * @throws ReflectiveOperationException -
      */
-    private List<MagikIssue> runCheckOnFile(
-            final MagikFile magikFile, final MagikCheckHolder holder) throws ReflectiveOperationException {
+    private List<MagikIssue> runCheckOnFile(final MagikFile magikFile, final MagikCheckHolder holder)
+            throws ReflectiveOperationException {
         final MagikCheck check = holder.createCheck();
         return check.scanFileForIssues(magikFile);
     }
@@ -114,12 +114,10 @@ public class MagikLint {
      * @throws IOException -
      */
     void showChecks(final Writer writer, final boolean showDisabled) throws ReflectiveOperationException, IOException {
-        Iterable<MagikCheckHolder> holders = MagikLint.getAllChecks(this.config);
+        final Iterable<MagikCheckHolder> holders = MagikLint.getAllChecks(this.config);
         for (final MagikCheckHolder holder : holders) {
-            final String name = holder.getSqKey();
-
             if (!showDisabled && holder.isEnabled() || showDisabled && !holder.isEnabled()) {
-                writer.write("- " + name + " (" + holder.getTitle() + ")\n");
+                writer.write("- " + holder.getSqKey() + " (" + holder.getTitle() + ")\n");
             } else {
                 continue;
             }
@@ -306,12 +304,21 @@ public class MagikLint {
         final List<String> disableds = Arrays.stream(disabled.split(","))
             .map(String::trim)
             .collect(Collectors.toList());
+        final String enabledProperty = config.getPropertyString("enabled");
+        final String enabled = enabledProperty != null
+            ? enabledProperty
+            : "";
+        final List<String> enableds = Arrays.stream(enabled.split(","))
+            .map(String::trim)
+            .collect(Collectors.toList());
 
         for (final Class<?> checkClass : CheckList.getChecks()) {
             final Rule annotation = checkClass.getAnnotation(Rule.class);
             final String checkKey = annotation.key();
             final String checkKeyKebabCase = MagikCheckHolder.toKebabCase(checkKey);
-            final boolean enabled = !disableds.contains(checkKeyKebabCase);
+            final boolean checkEnabled =
+                enableds.contains(checkKeyKebabCase)
+                || !disableds.contains(checkKeyKebabCase) && !disableds.contains("all");
 
             // Gather parameters from MagikCheck, value from config.
             final String name = MagikCheckHolder.toKebabCase(checkClass.getAnnotation(Rule.class).key());
@@ -342,7 +349,8 @@ public class MagikLint {
                 })
                 .collect(Collectors.toSet());
 
-            final MagikCheckHolder holder = new MagikCheckHolder((Class<MagikCheck>) checkClass, parameters, enabled);
+            final MagikCheckHolder holder =
+                new MagikCheckHolder((Class<MagikCheck>) checkClass, parameters, checkEnabled);
             holders.add(holder);
         }
         return holders;
