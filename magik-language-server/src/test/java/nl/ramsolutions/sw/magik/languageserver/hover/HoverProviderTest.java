@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.ramsolutions.hover;
+package nl.ramsolutions.sw.magik.languageserver.hover;
 
 import java.net.URI;
 import java.util.Collections;
@@ -12,7 +12,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.MarkupKind;

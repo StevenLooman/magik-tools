@@ -96,7 +96,8 @@ public class LocalTypeReasoner extends AstWalker {
         MagikOperator.NOT.getValue(), "not",
         MagikKeyword.NOT.getValue(), "not",
         MagikOperator.MINUS.getValue(), "negated",
-        MagikOperator.PLUS.getValue(), "unary_plus");
+        MagikOperator.PLUS.getValue(), "unary_plus",
+        MagikKeyword.SCATTER.getValue(), "for_scatter()");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalTypeReasoner.class);
     @SuppressWarnings("checkstyle:MagicNumber")
@@ -1085,8 +1086,8 @@ public class LocalTypeReasoner extends AstWalker {
                     result = new ExpressionResult(falseType);
                     break;
 
-                case "_andif":  // TODO: Not entirely true.
-                case "_orif":   // TODO: Not entirely true.
+                case "_andif":  // TODO: Not entirely true, returns RHS if LHS is _true, else _false.
+                case "_orif":   // TODO: Not entirely true, return RHS if LHS is _false, else _true.
                     result = new ExpressionResult(falseType);
                     break;
 
@@ -1111,9 +1112,7 @@ public class LocalTypeReasoner extends AstWalker {
     protected void walkPostUnaryExpression(final AstNode node) {
         if (node.getTokenValue().equalsIgnoreCase(MagikKeyword.ALLRESULTS.getValue())) {
             this.assignAtom(node, SW_SIMPLE_VECTOR);
-        } else if (node.getTokenValue().equalsIgnoreCase(MagikKeyword.SCATTER.getValue())) {
-            // We don't know what it will become... for now?
-            this.assignAtom(node, ExpressionResult.UNDEFINED);
+            return;
         }
 
         this.applyUnaryOperator(node);
@@ -1136,8 +1135,8 @@ public class LocalTypeReasoner extends AstWalker {
         final String operatorMethod = UNARY_OPERATOR_METHODS.get(operatorStr);
 
         // Apply opertor to operand and store result.
-        final ExpressionResult result = this.getMethodInvocationResult(type, operatorMethod)
-            .substituteType(SelfType.INSTANCE, type);
+        final ExpressionResult result =
+            this.getMethodInvocationResult(type, operatorMethod).substituteType(SelfType.INSTANCE, type);
 
         this.setNodeType(node, result);
     }

@@ -62,6 +62,7 @@ public class HoverProvider {
         if (hoveredTokenNode == null) {
             return null;
         }
+
         final AstNode hoveredNode = hoveredTokenNode.getParent();
         LOGGER.debug("Hovering on: {}", hoveredNode.getTokenValue());
 
@@ -186,14 +187,19 @@ public class HoverProvider {
 
         // Taxonomy.
         builder.append("## Taxonomy: \n\n");
-        Condition parentCondition = typeKeeper.getCondition(condition.getParent());
-        while (parentCondition != null) {
+        String parentConditionName = condition.getParent();
+        while (parentConditionName != null) {
+            final Condition parentCondition = typeKeeper.getCondition(parentConditionName);
+            if (parentCondition == null) {
+                break;
+            }
+
             final String parentName = parentCondition.getName();
             builder
                 .append(parentName)
                 .append("\n");
 
-            parentCondition = typeKeeper.getCondition(parentCondition.getParent());
+            parentConditionName = parentCondition.getParent();
         }
         builder.append(SECTION_END);
 

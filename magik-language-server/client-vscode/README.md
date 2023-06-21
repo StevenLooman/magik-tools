@@ -12,5 +12,8 @@ Running `vsce`:
 ```bash
 $ DOCKER_BUILDKIT=1 docker build --tag vsce "https://github.com/microsoft/vscode-vsce.git#main"
 $ docker run --rm -it vsce --version
+$ rm -f server/*
+$ cp ../../magik-language-server/target/magik-language-server-*.jar server/
+$ cp ../../magik-debug-adapter/target/magik-debug-adapter-*.jar server/
 $ docker run --rm -it -v "$(pwd)":/workspace vsce package
 ```

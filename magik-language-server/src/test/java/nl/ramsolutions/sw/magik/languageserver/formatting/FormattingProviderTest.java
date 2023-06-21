@@ -1,11 +1,10 @@
-package nl.ramsolutions.sw.magik.ramsolutions.formatting;
+package nl.ramsolutions.sw.magik.languageserver.formatting;
 
 import java.net.URI;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.languageserver.formatting.FormattingProvider;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;

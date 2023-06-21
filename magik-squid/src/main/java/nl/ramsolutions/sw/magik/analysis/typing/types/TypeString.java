@@ -165,6 +165,11 @@ public final class TypeString {
                 .collect(Collectors.joining(TypeStringGrammar.Punctuator.TYPE_COMBINATOR.getValue()));
         }
 
+        if (this.isUndefined()
+            || this.isSelf()) {
+            return this.string;
+        }
+
         if (this.string.contains(":")) {
             return this.string;
         }

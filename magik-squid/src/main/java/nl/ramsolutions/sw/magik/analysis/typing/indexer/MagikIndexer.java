@@ -618,6 +618,14 @@ public class MagikIndexer {
 
             magikType.setSort(sort);
             return magikType;
+        } else if (type instanceof AliasType) {
+            // Get alias and return it.
+            final AliasType aliasType = (AliasType) type;
+            final AbstractType aliasedType = aliasType.getAliasedType();
+            if (aliasedType instanceof MagikType) {
+                final TypeString aliasedTypeString = aliasedType.getTypeString();
+                return this.findOrCreateType(aliasedTypeString, sort);
+            }
         }
 
         throw new IllegalStateException();

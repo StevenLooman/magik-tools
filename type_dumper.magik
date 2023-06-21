@@ -346,6 +346,9 @@ _private _method type_dumper.write_type(type_name, method_table)
 	# Slots.
 	instruction[:slots] << _self.build_slots(method_table)
 
+	# Generics.
+	instruction[:generics] << sw:rope.new()
+
 	_self.write_instruction(instruction)
 _endmethod
 $

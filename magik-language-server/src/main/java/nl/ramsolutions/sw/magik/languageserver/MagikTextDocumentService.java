@@ -95,7 +95,7 @@ public class MagikTextDocumentService implements TextDocumentService {
      * Constructor.
      *
      * @param languageServer Owning language server.
-     * @param typeKeeper         TypeKeeper to use.
+     * @param typeKeeper TypeKeeper to use.
      */
     public MagikTextDocumentService(final MagikLanguageServer languageServer, final ITypeKeeper typeKeeper) {
         this.languageServer = languageServer;

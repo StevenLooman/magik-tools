@@ -59,8 +59,8 @@ public class MagikType extends AbstractType {
     private final Set<TypeString> parents = ConcurrentHashMap.newKeySet();
     private final Map<String, Slot> slots = new ConcurrentHashMap<>();
     private final Queue<GenericDeclaration> generics = new ConcurrentLinkedQueue<>();
+    private final ITypeKeeper typeKeeper;
     private Sort sort;
-    private ITypeKeeper typeKeeper;
 
     /**
      * Constructor.
@@ -68,10 +68,7 @@ public class MagikType extends AbstractType {
      * @param magikTypeType Sort.
      * @param typeString Global reference.
      */
-    public MagikType(
-            final ITypeKeeper typeKeeper,
-            final Sort magikTypeType,
-            final TypeString typeString) {
+    public MagikType(final ITypeKeeper typeKeeper, final Sort magikTypeType, final TypeString typeString) {
         this.typeKeeper = typeKeeper;
         this.sort = magikTypeType;
         this.typeString = typeString;

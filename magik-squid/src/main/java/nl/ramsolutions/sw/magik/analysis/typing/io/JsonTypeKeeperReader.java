@@ -158,7 +158,7 @@ public final class JsonTypeKeeperReader {
             throw new InvalidParameterException("Unknown type: " + typeFormat);
         }
 
-        if (instruction.has(InstType.DOC.getValue())) {
+        if (instruction.get(InstType.DOC.getValue()) != JSONObject.NULL) {
             final String doc = instruction.getString(InstType.DOC.getValue());
             type.setDoc(doc);
         }
@@ -171,15 +171,13 @@ public final class JsonTypeKeeperReader {
             type.addSlot(null, slotName, slotTypeString);
         });
 
-        if (instruction.has(InstType.GENERICS.getValue())) {
-            instruction.getJSONArray(InstType.GENERICS.getValue()).forEach(genericObj -> {
-                final JSONObject generic = (JSONObject) genericObj;
-                final String genericName = generic.getString(InstType.GENERIC_NAME.getValue());
-                final String genericDoc = generic.getString(InstType.GENERIC_DOC.getValue());
-                final GenericDeclaration genericDeclaration = type.addGeneric(null, genericName);
-                genericDeclaration.setDoc(genericDoc);
-            });
-        }
+        instruction.getJSONArray(InstType.GENERICS.getValue()).forEach(genericObj -> {
+            final JSONObject generic = (JSONObject) genericObj;
+            final String genericName = generic.getString(InstType.GENERIC_NAME.getValue());
+            final String genericDoc = generic.getString(InstType.GENERIC_DOC.getValue());
+            final GenericDeclaration genericDeclaration = type.addGeneric(null, genericName);
+            genericDeclaration.setDoc(genericDoc);
+        });
 
         final JSONArray parents = instruction.getJSONArray(InstType.PARENTS.getValue());
         parents.forEach(parentObj -> {
@@ -257,9 +255,13 @@ public final class JsonTypeKeeperReader {
 
     private void handleCondition(final JSONObject instruction) {
         final String name = instruction.getString(InstCondition.NAME.getValue());
-        final String doc = instruction.getString(InstCondition.DOC.getValue());
-        final String parent = instruction.getString(InstCondition.PARENT.getValue());
-        final Location location = instruction.get(InstCondition.SOURCE_FILE.getValue()) != JSONObject.NULL
+        final String doc = instruction.get(InstCondition.DOC.getValue()) != JSONObject.NULL
+            ? instruction.getString(InstCondition.DOC.getValue())
+            : null;
+        final String parent = instruction.optString(InstCondition.PARENT.getValue(), null);
+        final Location location =
+            instruction.has(InstCondition.SOURCE_FILE.getValue())  // Not exported by type_dumper.
+            && instruction.get(InstCondition.SOURCE_FILE.getValue()) != JSONObject.NULL
             ? new Location(Path.of(instruction.getString(InstCondition.SOURCE_FILE.getValue())).toUri())
             : null;
         final JSONArray dataNameListArray = instruction.getJSONArray(InstCondition.DATA_NAME_LIST.getValue());

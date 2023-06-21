@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.ramsolutions.completion;
+package nl.ramsolutions.sw.magik.languageserver.completion;
 
 import java.net.URI;
 import java.util.Collection;
@@ -17,7 +17,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
-import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.Position;
