@@ -33,22 +33,13 @@ public class MagikLintDiagnosticsProvider {
             "Major", DiagnosticSeverity.Error,
             "Minor", DiagnosticSeverity.Warning);
 
-    private final MagikLint magikLint;
-    private final Configuration configuration;
-    private final MagikLintDiagnosticsReporter reporter;
+    private final Path overrideConfigurationPath;
 
     /**
      * Constructor. Locates configuration to be used.
      */
     public MagikLintDiagnosticsProvider(final @Nullable Path overrideConfigurationPath) {
-        final Path path = overrideConfigurationPath != null
-            ? overrideConfigurationPath
-            : ConfigurationLocator.locateConfiguration();
-        this.configuration = path != null
-            ? new Configuration(path)
-            : new Configuration();  // Default configuration.
-        this.reporter = new MagikLintDiagnosticsReporter();
-        this.magikLint = new MagikLint(this.configuration, this.reporter);
+        this.overrideConfigurationPath = overrideConfigurationPath;
     }
 
     /**
@@ -59,17 +50,26 @@ public class MagikLintDiagnosticsProvider {
      * @throws IOException -
      */
     public List<Diagnostic> getDiagnostics(final MagikFile magikFile) throws IOException {
+        final Path searchPath = Path.of(magikFile.getUri()).getParent();
+        final Path configurationPath = this.overrideConfigurationPath != null
+            ? this.overrideConfigurationPath
+            : ConfigurationLocator.locateConfiguration(searchPath);
+        final Configuration configuration = configurationPath != null
+            ? new Configuration(configurationPath)
+            : new Configuration();  // Default configuration.
+        final MagikLintDiagnosticsReporter reporter = new MagikLintDiagnosticsReporter();
+        final MagikLint magikLint = new MagikLint(configuration, reporter);
+
         // Run linter.
-        this.reporter.clearInfractions();
         try {
-            this.magikLint.run(magikFile);
+            magikLint.run(magikFile);
         } catch (ReflectiveOperationException exception) {
             LOGGER.error(exception.getMessage(), exception);
             return Collections.emptyList();
         }
 
         // Return diagnostics.
-        return this.reporter.getMagikIssues().stream()
+        return reporter.getMagikIssues().stream()
             .map(issue -> {
                 final MagikCheckHolder holder = issue.check().getHolder();
 
