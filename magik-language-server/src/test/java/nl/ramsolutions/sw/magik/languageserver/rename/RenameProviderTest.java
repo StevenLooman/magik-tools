@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.ramsolutions.rename;
+package nl.ramsolutions.sw.magik.languageserver.rename;
 
 import java.net.URI;
 import java.util.List;
@@ -6,7 +6,6 @@ import java.util.Map;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.languageserver.rename.RenameProvider;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PrepareRenameDefaultBehavior;
 import org.eclipse.lsp4j.PrepareRenameResult;

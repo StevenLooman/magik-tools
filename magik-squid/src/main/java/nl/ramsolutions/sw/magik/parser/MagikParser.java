@@ -54,6 +54,7 @@ public class MagikParser {
 
         RULE_MAPPING.put(MagikGrammar.ARGUMENTS_PAREN, MagikGrammar.ARGUMENTS);
         RULE_MAPPING.put(MagikGrammar.ARGUMENTS_SQUARE, MagikGrammar.ARGUMENTS);
+
         RULE_MAPPING.put(MagikGrammar.PARAMETERS_PAREN, MagikGrammar.PARAMETERS);
         RULE_MAPPING.put(MagikGrammar.PARAMETERS_SQUARE, MagikGrammar.PARAMETERS);
     }

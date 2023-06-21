@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.ramsolutions.implementation;
+package nl.ramsolutions.sw.magik.languageserver.implementation;
 
 import java.net.URI;
 import java.util.Collections;
@@ -15,7 +15,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
-import nl.ramsolutions.sw.magik.languageserver.implementation.ImplementationProvider;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

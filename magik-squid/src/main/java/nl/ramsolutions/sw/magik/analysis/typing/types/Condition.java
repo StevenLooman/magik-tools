@@ -27,7 +27,7 @@ public class Condition {
     public Condition(
             final @Nullable Location location,
             final String name,
-            final String parent,
+            final @Nullable String parent,
             final List<String> dataNameList,
             final @Nullable String doc) {
         this.location = location;
@@ -62,6 +62,7 @@ public class Condition {
      * Get parent.
      * @return Parent.
      */
+    @CheckForNull
     public String getParent() {
         return this.parent;
     }

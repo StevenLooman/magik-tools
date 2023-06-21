@@ -1,11 +1,9 @@
-package nl.ramsolutions.sw.magik.ramsolutions.semantictokens;
+package nl.ramsolutions.sw.magik.languageserver.semantictokens;
 
 import java.net.URI;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.languageserver.semantictokens.SemanticToken;
-import nl.ramsolutions.sw.magik.languageserver.semantictokens.SemanticTokenProvider;
 import org.eclipse.lsp4j.SemanticTokens;
 import org.junit.jupiter.api.Test;
 
