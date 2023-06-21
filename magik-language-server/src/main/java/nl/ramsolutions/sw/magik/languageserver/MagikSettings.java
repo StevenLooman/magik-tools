@@ -124,7 +124,8 @@ public class MagikSettings {
         }
 
         final String overrideConfigFileStr = overrideConfigFile.getAsString();
-        if (overrideConfigFileStr == null) {
+        if (overrideConfigFileStr == null
+            || overrideConfigFileStr.isEmpty()) {
             return null;
         }
 

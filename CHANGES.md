@@ -13,6 +13,7 @@ Changes
 - Prevent traceback when reading .jar files in ClassInfoTypeKeeperReader.
 - Fix LineLengthCheck not properly reporting line lengths in user message.
 - Find and use magik-lint.properties based on file path, instead of just once, in magik-language-server.
+- Add --enabled=... and --disabled=... to magik-lint; use --disabled=all with --enable=... to enable specific checks.
 
 
 0.7.1 (2023-02-21)

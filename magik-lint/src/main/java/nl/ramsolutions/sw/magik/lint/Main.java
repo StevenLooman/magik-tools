@@ -64,6 +64,16 @@ public final class Main {
         .hasArg()
         .type(PatternOptionBuilder.NUMBER_VALUE)
         .build();
+    private static final Option OPTION_DISABLED = Option.builder()
+        .longOpt("disabled")
+        .desc("Disable checks, use 'all' to disable all checks")
+        .hasArg()
+        .build();
+    private static final Option OPTION_ENABLED = Option.builder()
+        .longOpt("enabled")
+        .desc("Enable checks")
+        .hasArg()
+        .build();
     private static final Option OPTION_DEBUG = Option.builder()
         .longOpt("debug")
         .desc("Enable showing of debug information")
@@ -86,6 +96,8 @@ public final class Main {
         OPTIONS.addOption(OPTION_UNTABIFY);
         OPTIONS.addOption(OPTION_COLUMN_OFFSET);
         OPTIONS.addOption(OPTION_MAX_INFRACTIONS);
+        OPTIONS.addOption(OPTION_DISABLED);
+        OPTIONS.addOption(OPTION_ENABLED);
         OPTIONS.addOption(OPTION_DEBUG);
         OPTIONS.addOption(OPTION_VERSION);
     }
@@ -205,6 +217,8 @@ public final class Main {
         Main.copyOptionToConfig(commandLine, config, OPTION_MAX_INFRACTIONS);
         Main.copyOptionToConfig(commandLine, config, OPTION_COLUMN_OFFSET);
         Main.copyOptionToConfig(commandLine, config, OPTION_MSG_TEMPLATE);
+        Main.copyOptionToConfig(commandLine, config, OPTION_DISABLED);
+        Main.copyOptionToConfig(commandLine, config, OPTION_ENABLED);
 
         // Show checks.
         if (commandLine.hasOption(OPTION_SHOW_CHECKS)) {
