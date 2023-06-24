@@ -46,10 +46,6 @@ public class TypeKeeper implements ITypeKeeper {
 
     private void registerBaseTypes() {
         final Package swPakkage = new Package(this, "sw");
-
-        final Package userPackage = new Package(this, "user");
-        userPackage.addUse("sw");
-
         swPakkage.put(
             "object",
             new MagikType(this, Sort.OBJECT, TypeString.ofIdentifier("object", "sw")));
@@ -107,6 +103,9 @@ public class TypeKeeper implements ITypeKeeper {
         swPakkage.put(
             "slotted_format_mixin",
             new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("slotted_format_mixin", "sw")));
+
+        final Package userPackage = new Package(this, "user");
+        userPackage.addUse("sw");
     }
 
     @Override

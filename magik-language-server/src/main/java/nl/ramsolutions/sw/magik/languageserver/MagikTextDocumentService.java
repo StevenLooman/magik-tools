@@ -19,6 +19,7 @@ import nl.ramsolutions.sw.magik.languageserver.folding.FoldingRangeProvider;
 import nl.ramsolutions.sw.magik.languageserver.formatting.FormattingProvider;
 import nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider;
 import nl.ramsolutions.sw.magik.languageserver.implementation.ImplementationProvider;
+import nl.ramsolutions.sw.magik.languageserver.inlayhint.InlayHintProvider;
 import nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider;
 import nl.ramsolutions.sw.magik.languageserver.rename.RenameProvider;
 import nl.ramsolutions.sw.magik.languageserver.semantictokens.SemanticTokenProvider;
@@ -41,6 +42,8 @@ import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.ImplementationParams;
+import org.eclipse.lsp4j.InlayHint;
+import org.eclipse.lsp4j.InlayHintParams;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.Position;
@@ -96,6 +99,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     private final RenameProvider renameProvider;
     private final DocumentSymbolProvider documentSymbolProvider;
     private final TypeHierarchyProvider typeHierarchyProvider;
+    private final InlayHintProvider inlayHintProvider;
 
     /**
      * Constructor.
@@ -118,6 +122,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.renameProvider = new RenameProvider();
         this.documentSymbolProvider = new DocumentSymbolProvider();
         this.typeHierarchyProvider = new TypeHierarchyProvider(this.typeKeeper);
+        this.inlayHintProvider = new InlayHintProvider();
     }
 
     /**
@@ -139,6 +144,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.renameProvider.setCapabilities(capabilities);
         this.documentSymbolProvider.setCapabilities(capabilities);
         this.typeHierarchyProvider.setCapabilities(capabilities);
+        this.inlayHintProvider.setCapabilities(capabilities);
     }
 
     @Override
@@ -431,6 +437,16 @@ public class MagikTextDocumentService implements TextDocumentService {
 
         return CompletableFuture.supplyAsync(() ->
             this.typeHierarchyProvider.typeHierarchySupertypes(item));
+    }
+
+    @Override
+    public CompletableFuture<List<InlayHint>> inlayHint(final InlayHintParams params) {
+        final TextDocumentIdentifier textDocument = params.getTextDocument();
+        LOGGER.trace("inlayHint, uri: {}", textDocument.getUri());
+
+        final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+        final Range range = params.getRange();
+        return CompletableFuture.supplyAsync(() -> this.inlayHintProvider.provideInlayHints(magikFile, range));
     }
 
 }

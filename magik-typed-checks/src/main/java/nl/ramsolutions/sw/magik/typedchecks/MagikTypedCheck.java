@@ -67,6 +67,7 @@ public class MagikTypedCheck extends MagikCheck {
             final AstNode methodDefNode = node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
             return this.getTypeOfMethodDefinition(methodDefNode);
         }
+
         return type;
     }
 

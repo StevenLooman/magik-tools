@@ -7,6 +7,8 @@ import java.util.Objects;
 
 /**
  * Position in a file.
+ *
+ * Lines start at 1, columns start at 0.
  */
 public class Position implements Comparable<Position> {
 
