@@ -23,6 +23,7 @@ import nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider;
 import nl.ramsolutions.sw.magik.languageserver.rename.RenameProvider;
 import nl.ramsolutions.sw.magik.languageserver.semantictokens.SemanticTokenProvider;
 import nl.ramsolutions.sw.magik.languageserver.signaturehelp.SignatureHelpProvider;
+import nl.ramsolutions.sw.magik.languageserver.typehierarchy.TypeHierarchyProvider;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionParams;
@@ -60,6 +61,10 @@ import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.TypeHierarchyItem;
+import org.eclipse.lsp4j.TypeHierarchyPrepareParams;
+import org.eclipse.lsp4j.TypeHierarchySubtypesParams;
+import org.eclipse.lsp4j.TypeHierarchySupertypesParams;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
@@ -90,6 +95,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     private final SemanticTokenProvider semanticTokenProver;
     private final RenameProvider renameProvider;
     private final DocumentSymbolProvider documentSymbolProvider;
+    private final TypeHierarchyProvider typeHierarchyProvider;
 
     /**
      * Constructor.
@@ -111,6 +117,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.semanticTokenProver = new SemanticTokenProvider();
         this.renameProvider = new RenameProvider();
         this.documentSymbolProvider = new DocumentSymbolProvider();
+        this.typeHierarchyProvider = new TypeHierarchyProvider(this.typeKeeper);
     }
 
     /**
@@ -131,6 +138,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.semanticTokenProver.setCapabilities(capabilities);
         this.renameProvider.setCapabilities(capabilities);
         this.documentSymbolProvider.setCapabilities(capabilities);
+        this.typeHierarchyProvider.setCapabilities(capabilities);
     }
 
     @Override
@@ -390,6 +398,39 @@ public class MagikTextDocumentService implements TextDocumentService {
 
         final MagikTypedFile magikFile = this.openFiles.get(textDocument);
         return CompletableFuture.supplyAsync(() -> this.documentSymbolProvider.provideDocumentSymbol(magikFile));
+    }
+
+    @Override
+    public CompletableFuture<List<TypeHierarchyItem>> prepareTypeHierarchy(final TypeHierarchyPrepareParams params) {
+        final TextDocumentIdentifier textDocument = params.getTextDocument();
+        LOGGER.trace(
+            "prepareTypeHierarchy, uri: {}, position: {},{}",
+            textDocument.getUri(), params.getPosition().getLine(), params.getPosition().getCharacter());
+
+        final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+        final Position position = params.getPosition();
+
+        return CompletableFuture.supplyAsync(() ->
+            this.typeHierarchyProvider.prepareTypeHierarchy(magikFile, position));
+    }
+
+    @Override
+    public CompletableFuture<List<TypeHierarchyItem>> typeHierarchySubtypes(final TypeHierarchySubtypesParams params) {
+        final TypeHierarchyItem item = params.getItem();
+        LOGGER.trace("typeHierarchySubtypes, item: {}", item.getName());
+
+        return CompletableFuture.supplyAsync(() ->
+            this.typeHierarchyProvider.typeHierarchySubtypes(item));
+    }
+
+    @Override
+    public CompletableFuture<List<TypeHierarchyItem>> typeHierarchySupertypes(
+            final TypeHierarchySupertypesParams params) {
+        final TypeHierarchyItem item = params.getItem();
+        LOGGER.trace("typeHierarchySupertypes, item: {}", item.getName());
+
+        return CompletableFuture.supplyAsync(() ->
+            this.typeHierarchyProvider.typeHierarchySupertypes(item));
     }
 
 }
