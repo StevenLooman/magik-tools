@@ -14,6 +14,7 @@ Changes
 - Fix LineLengthCheck not properly reporting line lengths in user message.
 - Find and use magik-lint.properties based on file path, instead of just once, in magik-language-server.
 - Add --enabled=... and --disabled=... to magik-lint; use --disabled=all with --enable=... to enable specific checks.
+- Add type hierarchy provider to magik-language-server.
 - Various small fixes.
 
 
