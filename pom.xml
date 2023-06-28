@@ -82,6 +82,9 @@
     <json.version>20230227</json.version>
     <assertj.version>3.24.2</assertj.version>
     <sonar-maven.version>3.9.1.2184</sonar-maven.version>
+
+    <sonar.organization>stevenlooman</sonar.organization>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
   </properties>
 
   <dependencyManagement>
