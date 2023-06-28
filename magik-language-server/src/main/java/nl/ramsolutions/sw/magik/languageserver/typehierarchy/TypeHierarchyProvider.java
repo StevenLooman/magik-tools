@@ -148,8 +148,9 @@ public class TypeHierarchyProvider {
 
     private TypeHierarchyItem toTypeHierarchyItem(final AbstractType type) {
         final TypeString typeStr = type.getTypeString();
-        final Location location = type.getLocation() != null
-            ? type.getLocation()
+        final Location typeLocation = type.getLocation();
+        final Location location = typeLocation != null
+            ? typeLocation
             : NO_LOCATION;
         return new TypeHierarchyItem(
             typeStr.getFullString(),
