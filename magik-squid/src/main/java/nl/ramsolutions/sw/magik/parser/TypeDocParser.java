@@ -90,7 +90,7 @@ public class TypeDocParser {
                 .filter(Trivia::isComment)
                 .map(Trivia::getToken)
                 .filter(token -> token.getValue().startsWith("##"))
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
     }
 
     @SuppressWarnings("java:S3011")
