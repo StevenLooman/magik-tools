@@ -64,7 +64,7 @@ public class CommentedCodeCheck extends MagikCheck {
 
     private Map<Token, List<Token>> extractCommentBlocks(final AstNode node) {
         final List<Token> commentTokens = MagikCommentExtractor.extractLineComments(node)
-            .collect(Collectors.toList());
+            .toList();
 
         // Iterate over all comment tokens and combine blocks together.
         final Map<Token, List<Token>> commentBlocks = new HashMap<>();

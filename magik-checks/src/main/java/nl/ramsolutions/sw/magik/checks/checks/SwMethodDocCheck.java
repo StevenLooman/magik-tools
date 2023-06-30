@@ -57,7 +57,7 @@ public class SwMethodDocCheck extends MagikCheck {
                 .map(parameterNode -> parameterNode.getFirstChild(MagikGrammar.IDENTIFIER))
                 .map(AstNode::getTokenValue)
                 .map(String::toUpperCase)
-                .collect(Collectors.toList());
+                .toList();
             parameters.addAll(names);
         }
 

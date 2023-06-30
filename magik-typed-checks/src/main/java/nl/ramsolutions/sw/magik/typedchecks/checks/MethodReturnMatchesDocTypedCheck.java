@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
@@ -48,8 +47,8 @@ public class MethodReturnMatchesDocTypedCheck extends MagikTypedCheck {
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
         final TypeReader typeParser = new TypeReader(typeKeeper);
         final List<AbstractType> docReturnTypes = docParser.getReturnTypes().stream()
-                .map(typeParser::parseTypeString)
-                .collect(Collectors.toList());
+            .map(typeParser::parseTypeString)
+            .toList();
         return new ExpressionResult(docReturnTypes);
     }
 

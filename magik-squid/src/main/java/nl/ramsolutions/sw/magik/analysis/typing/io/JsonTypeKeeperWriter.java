@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
@@ -78,7 +77,7 @@ public final class JsonTypeKeeperWriter {
                 instruction.put(InstPackage.NAME.getValue(), pakkage.getName());
                 final List<String> pakkageUses = pakkage.getUses().stream()
                     .map(Package::getName)
-                    .collect(Collectors.toList());
+                    .toList();
                 instruction.put(InstPackage.USES.getValue(), pakkageUses);
                 this.writeInstruction(writer, instruction);
             });
@@ -94,7 +93,7 @@ public final class JsonTypeKeeperWriter {
                 final List<String> parents = type.getParents().stream()
                     .map(AbstractType::getFullName)
                     .sorted()
-                    .collect(Collectors.toList());
+                    .toList();
                 final List<JSONObject> slots = type.getSlots().stream()
                     .sorted(slotNameComparer)
                     .map(slot -> {
@@ -103,11 +102,10 @@ public final class JsonTypeKeeperWriter {
                         slotObject.put(InstType.SLOT_TYPE_NAME.getValue(), slot.getType().getFullString());
                         return slotObject;
                     })
-                    .collect(Collectors.toList());
+                    .toList();
 
                 final List<JSONObject> generics;
-                if (type instanceof MagikType) {
-                    final MagikType magikType = (MagikType) type;
+                if (type instanceof final MagikType magikType) {
                     generics = magikType.getGenerics().stream()
                         .map(generic -> {
                             final JSONObject genericObject = new JSONObject();
@@ -115,7 +113,7 @@ public final class JsonTypeKeeperWriter {
                             genericObject.put(InstType.GENERIC_DOC.getValue(), generic.getDoc());
                             return genericObject;
                         })
-                    .collect(Collectors.toList());
+                        .toList();
                 } else {
                     generics = Collections.emptyList();
                 }
@@ -180,7 +178,7 @@ public final class JsonTypeKeeperWriter {
                         parameterObject.put(InstParameter.TYPE_NAME.getValue(), parameter.getType().getFullString());
                         return parameterObject;
                     })
-                    .collect(Collectors.toList());
+                    .toList();
                 final Path sourceFile = method.getLocation() != null
                     ? method.getLocation().getPath()
                     : null;
@@ -227,7 +225,7 @@ public final class JsonTypeKeeperWriter {
                         parameterObject.put(InstParameter.TYPE_NAME.getValue(), parameter.getType().getFullString());
                         return parameterObject;
                     })
-                    .collect(Collectors.toList());
+                    .toList();
                 final Path sourceFile = invokeMethod.getLocation() != null
                     ? procedure.getLocation().getPath()
                     : null;

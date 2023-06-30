@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.languageserver.signaturehelp;
 import com.sonar.sslr.api.AstNode;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
@@ -81,7 +80,7 @@ public class SignatureHelpProvider {
                 .flatMap(signatureType -> signatureType.getMethods().stream())
                 .filter(method -> method.getName().startsWith(methodName))
                 .map(method -> new SignatureInformation(method.getSignature(), method.getDoc(), null))
-                .collect(Collectors.toList());
+                .toList();
         } else {
             if (type == SelfType.INSTANCE) {
                 final AstNode methodDefNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
@@ -93,7 +92,7 @@ public class SignatureHelpProvider {
             sigInfos = type.getMethods().stream()
                 .filter(method -> method.getName().startsWith(methodName))
                 .map(method -> new SignatureInformation(method.getSignature(), method.getDoc(), null))
-                .collect(Collectors.toList());
+                .toList();
         }
 
         return new SignatureHelp(sigInfos, null, null);

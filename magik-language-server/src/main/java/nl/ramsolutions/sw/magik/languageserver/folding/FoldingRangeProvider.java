@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.languageserver.folding;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.eclipse.lsp4j.FoldingRange;
@@ -41,7 +40,7 @@ public class FoldingRangeProvider {
                 final int endLine = folderNode.getLastToken().getLine() - 1;
                 return new FoldingRange(startLine, endLine);
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 
 }

@@ -66,8 +66,7 @@ public class CombinedType extends AbstractType {
 
         final Set<AbstractType> combinedTypes = Stream.of(types)
             .flatMap(type -> {
-                if (type instanceof CombinedType) {
-                    final CombinedType combinedType = (CombinedType) type;
+                if (type instanceof final CombinedType combinedType) {
                     return combinedType.getTypes().stream();
                 }
 
@@ -188,7 +187,6 @@ public class CombinedType extends AbstractType {
     public TypeString getTypeString() {
         final TypeString[] typeStringsArr = this.types.stream()
             .map(AbstractType::getTypeString)
-            .collect(Collectors.toList())
             .toArray(TypeString[]::new);
         return TypeString.ofCombination(TypeString.DEFAULT_PACKAGE, typeStringsArr);
     }

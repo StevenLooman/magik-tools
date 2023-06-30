@@ -145,38 +145,22 @@ public class FormattingCheck extends MagikCheck {
                 this.visitTokenDot(this.currentToken);
                 break;
 
-            case "{":
-            case "[":
-            case "(":
+            case "{", "[", "(":
                 this.visitTokenBracketOpen(this.currentToken);
                 break;
 
-            case "}":
-            case "]":
-            case ")":
+            case "}", "]", ")":
                 this.visitTokenBracketClose(this.currentToken);
                 break;
 
             //case "+":    // can be unary expression
             //case "-":    // can be unary expression
-            case "*":
-            case "**":
-            case "/":
-            case "=":
-            case "<":
-            case "<=":
-            case ">":
-            case ">=":
-            case "_div":
-            case "_mod":
-            case "_is":
-            case "_isnt":
-            case "_or":
-            case "_orif":
-            case "_and":
-            case "_andif":
-            case "_xor":
-            case "_cf":
+            case "*", "**", "/",
+                 "=", "<", "<=", ">", ">=",
+                 "_div", "_mod",
+                 "_is", "_isnt",
+                 "_or", "_orif", "_and", "_andif", "_xor",
+                 "_cf":
                 if (this.nextToken != null
                     && (this.nextToken.getValue().equals("<<") || this.nextToken.getValue().equals("^<<"))) {
                     // part 1 of augmented assignment
@@ -186,8 +170,7 @@ public class FormattingCheck extends MagikCheck {
                 }
                 break;
 
-            case "<<":
-            case "^<<":
+            case "<<", "^<<":
                 if (this.previousToken != null
                     && AUGMENTED_ASSIGNMENT_TOKENS.contains(this.previousToken.getValue())) {
                     // part 2 of augmented assignment

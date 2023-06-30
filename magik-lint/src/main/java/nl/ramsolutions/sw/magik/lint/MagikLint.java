@@ -202,7 +202,7 @@ public class MagikLint {
             try {
                 final List<MagikIssue> issues = this.runCheckOnFile(magikFile, holder).stream()
                     .filter(magikIssue -> !this.isMagikIssueDisabled(magikFile, magikIssue, instructionReader))
-                    .collect(Collectors.toList());
+                    .toList();
                 magikIssues.addAll(issues);
             } catch (ReflectiveOperationException exception) {
                 LOGGER.error(exception.getMessage(), exception);
@@ -227,7 +227,7 @@ public class MagikLint {
             final FileSystem fs = FileSystems.getDefault();
             ignoreMatchers = Arrays.stream(ignores)
                 .map(fs::getPathMatcher)
-                .collect(Collectors.toList());
+                .toList();
         } else {
             ignoreMatchers = new ArrayList<>();
         }
@@ -266,7 +266,7 @@ public class MagikLint {
             .map(magikFile -> this.runChecksOnFile(magikFile, holders))
             .flatMap(List::stream)
             // ensure ordering
-            .collect(Collectors.toList())
+            .toList()
             .stream()
             .sorted((issue0, issue1) -> locationCompare.compare(issue0.location(), issue1.location()))
             .limit(maxInfractions)
@@ -303,14 +303,14 @@ public class MagikLint {
             : "";
         final List<String> disableds = Arrays.stream(disabled.split(","))
             .map(String::trim)
-            .collect(Collectors.toList());
+            .toList();
         final String enabledProperty = config.getPropertyString("enabled");
         final String enabled = enabledProperty != null
             ? enabledProperty
             : "";
         final List<String> enableds = Arrays.stream(enabled.split(","))
             .map(String::trim)
-            .collect(Collectors.toList());
+            .toList();
 
         for (final Class<?> checkClass : CheckList.getChecks()) {
             final Rule annotation = checkClass.getAnnotation(Rule.class);
