@@ -70,8 +70,7 @@ public class XPathCheck extends MagikCheck {
         final AstNodeXPathQuery<Object> xpath = query();
         if (xpath != null) {
             for (final Object object : xpath.selectNodes(node)) {
-                if (object instanceof AstNode) {
-                    final AstNode astNode = (AstNode) object;
+                if (object instanceof final AstNode astNode) {
                     this.addIssue(astNode, message);
                 } else if (object instanceof Boolean && (boolean) object) {
                     this.addFileIssue(message);

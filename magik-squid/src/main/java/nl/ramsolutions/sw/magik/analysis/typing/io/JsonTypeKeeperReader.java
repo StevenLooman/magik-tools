@@ -267,7 +267,7 @@ public final class JsonTypeKeeperReader {
         final JSONArray dataNameListArray = instruction.getJSONArray(InstCondition.DATA_NAME_LIST.getValue());
         final List<String> dataNameList = StreamSupport.stream(dataNameListArray.spliterator(), false)
             .map(String.class::cast)
-            .collect(Collectors.toList());
+            .toList();
         final Condition condition = new Condition(location, name, parent, dataNameList, doc);
         this.typeKeeper.addCondition(condition);
     }
@@ -299,7 +299,7 @@ public final class JsonTypeKeeperReader {
                 final TypeString typeString = TypeStringParser.parseTypeString(typeName);
                 return new Parameter(name, modifier, typeString);
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private ExpressionResultString parseExpressionResultString(final Object obj) {
@@ -307,13 +307,11 @@ public final class JsonTypeKeeperReader {
             return ExpressionResultString.UNDEFINED;
         }
 
-        if (obj instanceof String) {
-            final String expressionResultString = (String) obj;
+        if (obj instanceof final String expressionResultString) {
             return TypeStringParser.parseExpressionResultString(expressionResultString, TypeString.DEFAULT_PACKAGE);
         }
 
-        if (obj instanceof JSONArray) {
-            final JSONArray array = (JSONArray) obj;
+        if (obj instanceof final JSONArray array) {
             return StreamSupport.stream(array.spliterator(), false)
                 .map(String.class::cast)
                 .map(TypeStringParser::parseTypeString)

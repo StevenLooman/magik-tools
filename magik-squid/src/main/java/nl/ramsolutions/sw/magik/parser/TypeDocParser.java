@@ -193,7 +193,7 @@ public class TypeDocParser {
         return node.getChildren(TypeDocGrammar.GENERIC).stream()
             .filter(this::noEmptyName)
             .map(this::getTypeString)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**
@@ -219,7 +219,7 @@ public class TypeDocParser {
         final AstNode node = this.getTypeDocNode();
         return node.getChildren(TypeDocGrammar.RETURN).stream()
             .map(this::getTypeString)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**
@@ -243,7 +243,7 @@ public class TypeDocParser {
         final AstNode node = this.getTypeDocNode();
         return node.getChildren(TypeDocGrammar.LOOP).stream()
             .map(this::getTypeString)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**

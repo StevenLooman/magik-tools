@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.languageserver.documentsymbols;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
@@ -49,7 +48,7 @@ public class DocumentSymbolProvider {
         return definitionReader.getDefinitions().stream()
             .map(this::convertDefinition)
             .map(Either::<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>forRight)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private DocumentSymbol convertDefinition(final Definition definition) {
@@ -59,8 +58,7 @@ public class DocumentSymbolProvider {
             symbolKind,
             Lsp4jConversion.rangeToLsp4j(new Range(definition.getNode())),
             Lsp4jConversion.rangeToLsp4j(new Range(definition.getNode())));
-        if (definition instanceof SlottedExemplarDefinition) {
-            final SlottedExemplarDefinition exemplarDefinition = (SlottedExemplarDefinition) definition;
+        if (definition instanceof final SlottedExemplarDefinition exemplarDefinition) {
             final List<DocumentSymbol> slotSymbols = this.convertedSlotsFromDefinition(exemplarDefinition);
             documentSymbol.setChildren(slotSymbols);
         }
@@ -90,7 +88,7 @@ public class DocumentSymbolProvider {
                 SymbolKind.Field,
                 Lsp4jConversion.rangeToLsp4j(new Range(slotDefinition.getNode())),
                 Lsp4jConversion.rangeToLsp4j(new Range(slotDefinition.getNode()))))
-            .collect(Collectors.toList());
+            .toList();
     }
 
 }

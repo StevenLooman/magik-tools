@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
@@ -113,7 +112,7 @@ public class DefConditionParser {
                 return dataName;
             })
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
 
         return List.of(
             new ConditionDefinition(statementNode, name, parent, dataNames));

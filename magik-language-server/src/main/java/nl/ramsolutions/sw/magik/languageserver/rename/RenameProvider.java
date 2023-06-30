@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.languageserver.rename;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -114,7 +113,7 @@ public class RenameProvider {
                 .map(Range::new)
                 .map(Lsp4jConversion::rangeToLsp4j)
                 .map(range -> new TextEdit(range, newName))
-                .collect(Collectors.toList());
+                .toList();
         return new WorkspaceEdit(Map.of(uri, textEdits));
     }
 

@@ -31,10 +31,10 @@ public class SemanticTokenProvider {
     private static final SemanticTokensLegend LEGEND = new SemanticTokensLegend(
         Arrays.stream(SemanticToken.Type.values())
             .map(SemanticToken.Type::getSemanticTokenName)
-            .collect(Collectors.toUnmodifiableList()),
+            .toList(),
         Arrays.stream(SemanticToken.Modifier.values())
             .map(SemanticToken.Modifier::getSemanticModifierName)
-            .collect(Collectors.toUnmodifiableList()));
+            .toList());
 
     /**
      * Set server capabilities.
@@ -81,12 +81,12 @@ public class SemanticTokenProvider {
 
     private SemanticToken createStartSemanticToken() {
         final Token startToken = Token.builder()
-                .setLine(1)
-                .setColumn(0)
-                .setValueAndOriginalValue("")
-                .setType(GenericTokenType.UNKNOWN_CHAR)
-                .setURI(URI.create("magik://dummy"))
-                .build();
+            .setLine(1)
+            .setColumn(0)
+            .setValueAndOriginalValue("")
+            .setType(GenericTokenType.UNKNOWN_CHAR)
+            .setURI(URI.create("magik://dummy"))
+            .build();
         return new SemanticToken(startToken, SemanticToken.Type.CLASS, Collections.emptySet());
     }
 

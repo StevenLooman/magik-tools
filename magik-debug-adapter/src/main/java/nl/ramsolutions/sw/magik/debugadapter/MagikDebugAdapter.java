@@ -572,19 +572,15 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
      * @param event Event to process.
      */
     void processEvent(final ISlapEvent event) {
-        if (event instanceof BreakpointEvent) {
-            final BreakpointEvent breakpointEvent = (BreakpointEvent) event;
+        if (event instanceof final BreakpointEvent breakpointEvent) {
             this.breakpointManager.handleBreakpointEvent(breakpointEvent);
             this.threadManager.handleBreakpointEvent(breakpointEvent);
             this.variableManager.handleBreakpointEvent(breakpointEvent);
-        } else if (event instanceof ThreadStartedEvent) {
-            final ThreadStartedEvent threadStartedEvent = (ThreadStartedEvent) event;
+        } else if (event instanceof final ThreadStartedEvent threadStartedEvent) {
             this.threadManager.handleThreadStartedEvent(threadStartedEvent);
-        } else if (event instanceof ThreadEndedEvent) {
-            final ThreadEndedEvent threadEndedEvent = (ThreadEndedEvent) event;
+        } else if (event instanceof final ThreadEndedEvent threadEndedEvent) {
             this.threadManager.handleThreadEndedEvent(threadEndedEvent);
-        } else if (event instanceof StepCompletedEvent) {
-            final StepCompletedEvent stepCompletedEvent = (StepCompletedEvent) event;
+        } else if (event instanceof final StepCompletedEvent stepCompletedEvent) {
             this.threadManager.handleStepCompletedEvent(stepCompletedEvent);
             this.variableManager.handleStepCompletedEvent(stepCompletedEvent);
         } else if (event instanceof DisconnectedEvent) {

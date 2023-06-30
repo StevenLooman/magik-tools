@@ -92,9 +92,10 @@ class ThreadManager {
                 LOGGER.trace("Exception while getting thread, id: {}, exception: {}", threadId, exception.getMessage());
 
                 final Throwable cause = exception.getCause();
-                if (!(cause instanceof SlapErrorException
-                    && ((SlapErrorException) cause).getError().getErrorMessage() == ErrorMessage.UNKNOWN_ERROR)) {
-                    throw exception;
+                if (cause instanceof final SlapErrorException slapErrorException) {
+                    if (slapErrorException.getError().getErrorMessage() == ErrorMessage.UNKNOWN_ERROR) {
+                        throw exception;
+                    }
                 }
             }
         }
@@ -174,9 +175,10 @@ class ThreadManager {
             }
         } catch (final ExecutionException exception) {
             final Throwable cause = exception.getCause();
-            if (cause instanceof SlapErrorException
-                && ((SlapErrorException) cause).getError().getErrorMessage() != ErrorMessage.METHOD_NOT_FOUND) {
-                throw exception;
+            if (cause instanceof final SlapErrorException slapErrorException) {
+                if (slapErrorException.getError().getErrorMessage() == ErrorMessage.METHOD_NOT_FOUND) {
+                    throw exception;
+                }
             }
         }
 
@@ -194,9 +196,8 @@ class ThreadManager {
         try {
             this.slapProtocol.suspendThread(threadId).get();
         } catch (ExecutionException exception) {
-            if (exception.getCause() instanceof SlapErrorException) {
-                final SlapErrorException exception2 = (SlapErrorException) exception.getCause();
-                final ErrorResponse error = exception2.getError();
+            if (exception.getCause() instanceof final SlapErrorException slapErrorException) {
+                final ErrorResponse error = slapErrorException.getError();
                 final ErrorMessage errorMessage = error.getErrorMessage();
                 if (errorMessage != ErrorMessage.THREAD_ALREADY_SUSPENDED) {
                     // Ignore ErrorMessage.THREAD_ALREADY_SUSPENDED.

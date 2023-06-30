@@ -6,7 +6,6 @@ import com.sonar.sslr.api.Token;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -117,7 +116,7 @@ public final class AstQuery {
                 final Range range = new Range(token);
                 return position.isBeforeRange(range);
             })
-            .collect(Collectors.toList());
+            .toList();
         if (nodes.isEmpty()) {
             return null;
         }
@@ -140,7 +139,7 @@ public final class AstQuery {
                 return !position.isBeforeRange(range)
                     && !position.isAfterRange(range);
             })
-            .collect(Collectors.toList());
+            .toList();
         if (nodes.isEmpty()) {
             return null;
         }
@@ -182,7 +181,7 @@ public final class AstQuery {
                 final Range range = new Range(token);
                 return position.isAfterRange(range);
             })
-            .collect(Collectors.toList());
+            .toList();
         if (nodes.isEmpty()) {
             return null;
         }
@@ -214,13 +213,15 @@ public final class AstQuery {
                     && (position.getLine() < lastLine
                         || position.getLine() == lastLine && position.getColumn() <= lastColumn);
             })
-            .collect(Collectors.toList());
+            .toList();
         if (nodes.isEmpty()) {
             return null;
         }
+
         if (nodes.size() > 1 && nodes.get(0).is(MagikGrammar.MAGIK)) {
-            nodes.remove(0);
+            return nodes.get(1);
         }
+
         return nodes.get(0);
     }
 
@@ -253,7 +254,7 @@ public final class AstQuery {
                             || position.getLine() == lastLine && position.getColumn() <= lastColumn);
             })
             .filter(node -> nodeTypesList.contains(node.getType()))
-            .collect(Collectors.toList());
+            .toList();
         if (nodes.isEmpty()) {
             return null;
         }

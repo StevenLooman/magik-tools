@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
@@ -42,11 +41,11 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
         // Get types for arguments.
         final LocalTypeReasoner reasoner = this.getReasoner();
         final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT).stream()
-            .collect(Collectors.toList());
+            .toList();
         final List<ExpressionResult> argumentTypes = argumentNodes.stream()
             .map(argumentNode -> argumentNode.getFirstChild(MagikGrammar.EXPRESSION))
             .map(reasoner::getNodeType)
-            .collect(Collectors.toList());
+            .toList();
 
         // Get methods.
         final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
@@ -70,7 +69,7 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
                     }
                     return type;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
             // Test parameter type against argument type.
             final int size = Math.min(parameterTypes.size(), argumentTypes.size());

@@ -166,8 +166,8 @@ public class MagikTypeInstance extends AbstractType {
     }
 
     private AbstractType substitueGenerics(final AbstractType type) {
-        final AbstractType rawType = type instanceof MagikTypeInstance
-            ? ((MagikTypeInstance) type).getMagikType()
+        final AbstractType rawType = type instanceof final MagikTypeInstance magikTypeInstance
+            ? magikTypeInstance.getMagikType()
             : type;
         final TypeString rawTypeString = rawType.getTypeString();
         return new MagikTypeInstance(this.typeKeeper, rawTypeString, this.genericDefinitions);
