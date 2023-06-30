@@ -69,6 +69,11 @@ $ mvn clean test
 Results will be shown on the console.
 
 
+## SonarCloud
+
+This project can found in SonarCloud at https://sonarcloud.io/project/overview?id=StevenLooman_magik-tools.
+
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for instruction on how to contribute.
