@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.languageserver.codeactions;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import org.eclipse.lsp4j.CodeAction;
@@ -41,7 +42,7 @@ public class CodeActionProvider {
                 this.methodReturnTypeUpdateProvider.provideCodeActions(magikFile, range, context).stream(),
                 this.parameterTypeProvider.provideCodeActions(magikFile, range, context).stream()
             )
-            .toList();
+            .collect(Collectors.toList());
     }
 
 }
