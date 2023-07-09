@@ -65,8 +65,9 @@ public final class TypeReader {
             final List<TypeString> genericTypeStrs = typeString.getGenerics();
             final Set<GenericDefinition> genericDefs = StreamUtils.zip(
                     genericDeclarations.stream(),
-                    genericTypeStrs.stream(),
-                    (genDecl, genTypeStr) -> new GenericDefinition(this.typeKeeper, genDecl.getName(), genTypeStr))
+                    genericTypeStrs.stream())
+                    .filter(entry -> entry.getKey() != null && entry.getValue() != null)
+                    .map(entry -> new GenericDefinition(this.typeKeeper, entry.getKey().getName(), entry.getValue()))
                 .collect(Collectors.toSet());
             return new MagikTypeInstance(this.typeKeeper, typeString, genericDefs);
         } else if (typeString.isCombined()) {

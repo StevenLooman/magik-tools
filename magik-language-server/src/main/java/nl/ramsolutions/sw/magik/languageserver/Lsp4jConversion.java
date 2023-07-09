@@ -22,6 +22,17 @@ public final class Lsp4jConversion {
     }
 
     /**
+     * Convert a Range from LSP4J.
+     * @param range Range to convert.
+     * @return Range in {@code magik.analysis}.
+     */
+    public static Range rangeFromLsp4j(final org.eclipse.lsp4j.Range range) {
+        return new Range(
+            Lsp4jConversion.positionFromLsp4j(range.getStart()),
+            Lsp4jConversion.positionFromLsp4j(range.getEnd()));
+    }
+
+    /**
      * Convert a Position to LSP4J.
      * @param position Position to convert.
      * @return Position in LSP4J.

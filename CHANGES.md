@@ -16,6 +16,7 @@ Changes
 - Add --enabled=... and --disabled=... to magik-lint; use --disabled=all with --enable=... to enable specific checks.
 - Add type hierarchy provider to magik-language-server.
 - Add inlay hint provider to magik-language-server.
+- Add code actions for @parameter and @return type-doc parts.
 - Various small fixes.
 
 

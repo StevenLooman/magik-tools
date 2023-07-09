@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
+import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
 import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikLintDiagnosticsProvider;
 import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikTypeDiagnosticsProvider;
@@ -25,6 +26,10 @@ import nl.ramsolutions.sw.magik.languageserver.rename.RenameProvider;
 import nl.ramsolutions.sw.magik.languageserver.semantictokens.SemanticTokenProvider;
 import nl.ramsolutions.sw.magik.languageserver.signaturehelp.SignatureHelpProvider;
 import nl.ramsolutions.sw.magik.languageserver.typehierarchy.TypeHierarchyProvider;
+import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.CodeActionContext;
+import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionParams;
@@ -82,6 +87,8 @@ import org.slf4j.LoggerFactory;
  */
 public class MagikTextDocumentService implements TextDocumentService {
 
+    // TODO: Better separation of Lsp4J and magik-tools regarding Range/Position.
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikTextDocumentService.class);
 
     private final MagikLanguageServer languageServer;
@@ -100,6 +107,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     private final DocumentSymbolProvider documentSymbolProvider;
     private final TypeHierarchyProvider typeHierarchyProvider;
     private final InlayHintProvider inlayHintProvider;
+    private final CodeActionProvider codeActionProvider;
 
     /**
      * Constructor.
@@ -123,6 +131,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.documentSymbolProvider = new DocumentSymbolProvider();
         this.typeHierarchyProvider = new TypeHierarchyProvider(this.typeKeeper);
         this.inlayHintProvider = new InlayHintProvider();
+        this.codeActionProvider = new CodeActionProvider();
     }
 
     /**
@@ -145,6 +154,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.documentSymbolProvider.setCapabilities(capabilities);
         this.typeHierarchyProvider.setCapabilities(capabilities);
         this.inlayHintProvider.setCapabilities(capabilities);
+        this.codeActionProvider.setCapabilities(capabilities);
     }
 
     @Override
@@ -447,6 +457,22 @@ public class MagikTextDocumentService implements TextDocumentService {
         final MagikTypedFile magikFile = this.openFiles.get(textDocument);
         final Range range = params.getRange();
         return CompletableFuture.supplyAsync(() -> this.inlayHintProvider.provideInlayHints(magikFile, range));
+    }
+
+    @Override
+    public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(final CodeActionParams params) {
+        final TextDocumentIdentifier textDocument = params.getTextDocument();
+        final Range range = params.getRange();
+        LOGGER.trace(
+            "codeAction, uri: {}, range: {},{}-{},{}",
+            textDocument.getUri(),
+            range.getStart().getLine(), range.getStart().getCharacter(),
+            range.getEnd().getLine(), range.getEnd().getCharacter());
+
+        final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+        final CodeActionContext context = params.getContext();
+        return CompletableFuture.supplyAsync(() ->
+            this.codeActionProvider.provideCodeActions(magikFile, range, context));
     }
 
 }

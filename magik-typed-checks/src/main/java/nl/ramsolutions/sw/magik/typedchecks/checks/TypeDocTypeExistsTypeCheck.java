@@ -45,7 +45,7 @@ public class TypeDocTypeExistsTypeCheck extends MagikTypedCheck {
             .forEach(entry -> {
                 final AstNode typeNode = entry.getKey();
                 final TypeString typeString = entry.getValue();
-                final String message = String.format(MESSAGE, typeString);
+                final String message = String.format(MESSAGE, typeString.getFullString());
                 this.addIssue(typeNode, message);
             });
     }

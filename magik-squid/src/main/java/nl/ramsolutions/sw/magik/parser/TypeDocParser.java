@@ -83,14 +83,14 @@ public class TypeDocParser {
                 node == predNode
                 || predNode.isNot(MagikGrammar.PROCEDURE_DEFINITION);
         return AstQuery.dfs(node, predicate)
-                .map(AstNode::getToken)
-                .filter(Objects::nonNull)
-                .distinct()
-                .flatMap(token -> token.getTrivia().stream())
-                .filter(Trivia::isComment)
-                .map(Trivia::getToken)
-                .filter(token -> token.getValue().startsWith("##"))
-                .toList();
+            .map(AstNode::getToken)
+            .filter(Objects::nonNull)
+            .distinct()
+            .flatMap(token -> token.getTrivia().stream())
+            .filter(Trivia::isComment)
+            .map(Trivia::getToken)
+            .filter(token -> token.getValue().startsWith("##"))
+            .toList();
     }
 
     @SuppressWarnings("java:S3011")
@@ -223,7 +223,7 @@ public class TypeDocParser {
     }
 
     /**
-     * Get return type nodes + names.
+     * Get return type nodes + names, ordered via {@code LinkedHashMap}.
      * @return Map with @return type nodes + type names.
      */
     public Map<AstNode, TypeString> getReturnTypeNodes() {
@@ -232,7 +232,9 @@ public class TypeDocParser {
             .filter(this::hasTypeNode)
             .collect(Collectors.toMap(
                 this::getTypeNode,
-                this::getTypeString));
+                this::getTypeString,
+                (a, b) -> a,
+                LinkedHashMap::new));
     }
 
     /**
