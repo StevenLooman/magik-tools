@@ -2,4 +2,4 @@
  * Defaults.
  */
 @javax.annotation.ParametersAreNonnullByDefault
-package nl.ramsolutions.sw.magik.languageserver.implementation;
+package nl.ramsolutions.sw.magik.languageserver.codeactions;

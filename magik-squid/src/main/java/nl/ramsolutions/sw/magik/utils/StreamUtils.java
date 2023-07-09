@@ -1,9 +1,10 @@
 package nl.ramsolutions.sw.magik.utils;
 
+import java.util.AbstractMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.function.BiFunction;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -16,19 +17,16 @@ public final class StreamUtils {
     }
 
     /**
-     * Zip two streams and apply {@code func} to the combinations.
+     * Zip two streams.
      * @param <A> Type A.
      * @param <B> Type B.
-     * @param <C> Type C.
      * @param streamA Stream A to zip.
      * @param streamB Stream B to zip.
-     * @param func Function to apply to elements.
-     * @return Stream of results from {@link func}.
+     * @return Stream of {@code Map.Entry}s with elements from both streams.
      */
-    public static <A, B, C> Stream<C> zip(
+    public static <A, B> Stream<Map.Entry<A, B>> zip(
             final Stream<? extends A> streamA,
-            final Stream<? extends B> streamB,
-            final BiFunction<? super A, ? super B, ? extends C> func) {
+            final Stream<? extends B> streamB) {
         final Spliterator<? extends A> streamASpliterator = streamA.spliterator();
         final Spliterator<? extends B> streamBSpliterator = streamB.spliterator();
 
@@ -40,26 +38,30 @@ public final class StreamUtils {
 
         final long zipSize =
             (characteristics & Spliterator.SIZED) != 0
-            ? Math.min(streamASpliterator.getExactSizeIfKnown(), streamBSpliterator.getExactSizeIfKnown())
+            ? Math.max(streamASpliterator.getExactSizeIfKnown(), streamBSpliterator.getExactSizeIfKnown())
             : -1;
 
         final Iterator<A> streamAIterator = Spliterators.iterator(streamASpliterator);
         final Iterator<B> streamBIterator = Spliterators.iterator(streamBSpliterator);
-        final Iterator<C> streamCIterator = new Iterator<C>() {
+        final Iterator<Map.Entry<A, B>> streamCIterator = new Iterator<Map.Entry<A, B>>() {
 
             @Override
             public boolean hasNext() {
-                return streamAIterator.hasNext() && streamBIterator.hasNext();
+                return streamAIterator.hasNext() || streamBIterator.hasNext();
             }
 
             @Override
-            public C next() {
-                return func.apply(streamAIterator.next(), streamBIterator.next());
+            public Map.Entry<A, B> next() {
+                final A valueA = streamAIterator.hasNext() ? streamAIterator.next() : null;
+                final B valueB = streamBIterator.hasNext() ? streamBIterator.next() : null;
+                // Use a AbstractMap.SimpleImmutableEntry<> to allow for null key values.
+                return new AbstractMap.SimpleImmutableEntry<>(valueA, valueB);
             }
 
         };
 
-        final Spliterator<C> spliterator = Spliterators.spliterator(streamCIterator, zipSize, characteristics);
+        final Spliterator<Map.Entry<A, B>> spliterator =
+            Spliterators.spliterator(streamCIterator, zipSize, characteristics);
         final boolean isParallel = streamA.isParallel() || streamB.isParallel();
         return StreamSupport.stream(spliterator, isParallel);
     }

@@ -260,6 +260,15 @@ public class LocalTypeReasoner extends AstWalker {
     }
 
     @Override
+    protected void walkPostMethodDefinition(final AstNode node) {
+        if (!this.hasNodeType(node)) {
+            // Nothing was assigned to this node, so it must be empty.
+            final ExpressionResult emptyResult = new ExpressionResult();
+            this.setNodeType(node, emptyResult);
+        }
+    }
+
+    @Override
     protected void walkPostBody(final AstNode node) {
         // Get result from upper EXPRESSION.
         final AstNode expressionNode = node.getFirstAncestor(MagikGrammar.EXPRESSION);
@@ -271,7 +280,6 @@ public class LocalTypeReasoner extends AstWalker {
 
         // BODYs don't always have to result in something.
         // Find STATEMENT -> RETURN/EMIT/LEAVE
-        // TODO: what about _loop _if .. _then _leave _with _endif _leave _with _endloop
         AstNode resultingNode = AstQuery.getFirstChildFromChain(
             node, MagikGrammar.STATEMENT, MagikGrammar.RETURN_STATEMENT);
         if (resultingNode == null) {

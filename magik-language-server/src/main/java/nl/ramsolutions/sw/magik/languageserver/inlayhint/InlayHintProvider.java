@@ -48,6 +48,7 @@ public class InlayHintProvider {
         // Get argument hints from method invocations.
         final AstNode topNode = magikFile.getTopNode();
         return topNode.getDescendants(MagikGrammar.METHOD_INVOCATION).stream()
+            // TODO: Filter based on range.
             .map(node -> this.getMethodInvocationInlayHints(magikFile, node))
             .flatMap(List::stream)
             .toList();

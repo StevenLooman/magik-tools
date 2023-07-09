@@ -41,22 +41,26 @@ public final class MagikCommentExtractor {
             .flatMap(token -> {
                 final Stream<Trivia> streamA = token.getTrivia().stream();
                 final Stream<Trivia> streamB = token.getTrivia().stream().skip(1);
-                final Stream<List<Token>> streamC = StreamUtils.zip(streamA, streamB, (previousTrivia, trivia) -> {
-                    final List<Token> lineCommentTokens = new ArrayList<>();
+                final Stream<List<Token>> streamC = StreamUtils.zip(streamA, streamB)
+                    .filter(entry -> entry.getKey() != null && entry.getValue() != null)
+                    .map(entry -> {
+                        final Trivia previousTrivia = entry.getKey();
+                        final Trivia trivia = entry.getValue();
+                        final List<Token> lineCommentTokens = new ArrayList<>();
 
-                    final List<Token> previousTriviaTokens = previousTrivia.getTokens();
-                    final Token previousTriviaLastToken = previousTriviaTokens.get(previousTriviaTokens.size() - 1);
-                    if (trivia.isComment()
-                        && (previousTrivia.isSkippedText()  // Whitespace from start of line.
-                            && previousTriviaLastToken.getColumn() == 0
-                            || previousTrivia.isSkippedText()  // EOL.
-                            && previousTriviaLastToken.getType() == GenericTokenType.EOL)) {
-                        final Token lineCommentToken = trivia.getToken();
-                        lineCommentTokens.add(lineCommentToken);
-                    }
+                        final List<Token> previousTriviaTokens = previousTrivia.getTokens();
+                        final Token previousTriviaLastToken = previousTriviaTokens.get(previousTriviaTokens.size() - 1);
+                        if (trivia.isComment()
+                            && (previousTrivia.isSkippedText()  // Whitespace from start of line.
+                                && previousTriviaLastToken.getColumn() == 0
+                                || previousTrivia.isSkippedText()  // EOL.
+                                && previousTriviaLastToken.getType() == GenericTokenType.EOL)) {
+                            final Token lineCommentToken = trivia.getToken();
+                            lineCommentTokens.add(lineCommentToken);
+                        }
 
-                    return lineCommentTokens;
-                });
+                        return lineCommentTokens;
+                    });
                 return streamC.flatMap(List::stream);
             });
     }

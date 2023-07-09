@@ -33,4 +33,17 @@ public class Range {
         return this.endPosition;
     }
 
+    /**
+     * Extract range from full tree, i.e., all tokens.
+     * @param node Node to extract {@link Range} from.
+     * @return Range of the node tree.
+     */
+    public static Range fromTree(final AstNode node) {
+        final Token firstToken = node.getToken();
+        final Token lastToken = node.getLastToken();
+        final Position startPosition = Position.fromTokenStart(firstToken);
+        final Position endPosition = Position.fromTokenEnd(lastToken);
+        return new Range(startPosition, endPosition);
+    }
+
 }
