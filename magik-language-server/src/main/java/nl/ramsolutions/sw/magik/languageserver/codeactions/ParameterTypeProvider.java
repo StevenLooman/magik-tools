@@ -40,15 +40,15 @@ public class ParameterTypeProvider {
             final org.eclipse.lsp4j.Range range,
             final CodeActionContext context) {
         return magikFile.getDefinitions().stream()
-            .filter(definition -> definition instanceof MethodDefinition)
-            .map(definition -> (MethodDefinition) definition)
-            .filter(methodDefinition -> methodDefinition.isActualMethodDefinition())
+            .filter(MethodDefinition.class::isInstance)
+            .map(MethodDefinition.class::cast)
+            .filter(MethodDefinition::isActualMethodDefinition)
             .filter(methodDefinition -> Lsp4jUtils.rangeOverlaps(
                 range,
                 Lsp4jConversion.rangeToLsp4j(
                     Range.fromTree(methodDefinition.getNode()))))
             .flatMap(methodDefinition -> this.extractParameterCodeActions(magikFile, methodDefinition).stream())
-            .map(codeAction -> Either.<Command, CodeAction>forRight(codeAction))
+            .map(Either::<Command, CodeAction>forRight)
             .collect(Collectors.toList());
     }
 
@@ -87,7 +87,7 @@ public class ParameterTypeProvider {
                     new Position(lastTypeDocParameterLine + 1, 0),
                     new Position(lastTypeDocParameterLine + 1, 0));
                 final String typeDocLine =
-                    String.format("\t## @param {_undefined} %s Description\n", paramDef.getName());
+                    String.format("\t## @param {_undefined} %s Description%n", paramDef.getName());
                 final String description = String.format("Add type-doc for parameter %s", paramDef.getName());
                 return Lsp4jUtils.createCodeAction(magikFile, range, typeDocLine, description);
             })

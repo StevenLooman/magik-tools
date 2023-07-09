@@ -74,7 +74,7 @@ class MethodReturnTypeUpdateProviderTest {
             final List<TextEdit> changes = textDocumentEdit.getEdits();
             assertThat(uri).isEqualTo("tests://unittest");
             assertThat(changes).hasSize(1);
-            assertThat(changes.get(0).getNewText()).isEqualTo("");
+            assertThat(changes.get(0).getNewText()).isEmpty();
         });
     }
 
