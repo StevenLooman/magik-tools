@@ -160,23 +160,32 @@ public class MagikIndexer {
     }
 
     private void handleDefinition(final MagikFile magikFile, final Definition definition) {
-        if (definition instanceof final PackageDefinition packageDefinition) {
+        if (definition instanceof PackageDefinition) {
+            final PackageDefinition packageDefinition = (PackageDefinition) definition;
             this.handleDefinition(magikFile, packageDefinition);
-        } else if (definition instanceof final IndexedExemplarDefinition indexedExemplarDefinition) {
+        } else if (definition instanceof IndexedExemplarDefinition) {
+            final IndexedExemplarDefinition indexedExemplarDefinition = (IndexedExemplarDefinition) definition;
             this.handleDefinition(magikFile, indexedExemplarDefinition);
-        } else if (definition instanceof final EnumerationDefinition enumerationDefinition) {
+        } else if (definition instanceof EnumerationDefinition) {
+            final EnumerationDefinition enumerationDefinition = (EnumerationDefinition) definition;
             this.handleDefinition(magikFile, enumerationDefinition);
-        } else if (definition instanceof final SlottedExemplarDefinition slottedExemplarDefinition) {
+        } else if (definition instanceof SlottedExemplarDefinition) {
+            final SlottedExemplarDefinition slottedExemplarDefinition = (SlottedExemplarDefinition) definition;
             this.handleDefinition(magikFile, slottedExemplarDefinition);
-        } else if (definition instanceof final MixinDefinition mixinDefinition) {
+        } else if (definition instanceof MixinDefinition) {
+            final MixinDefinition mixinDefinition = (MixinDefinition) definition;
             this.handleDefinition(magikFile, mixinDefinition);
-        } else if (definition instanceof final MethodDefinition methodDefinition) {
+        } else if (definition instanceof MethodDefinition) {
+            final MethodDefinition methodDefinition = (MethodDefinition) definition;
             this.handleDefinition(magikFile, methodDefinition);
-        } else if (definition instanceof final GlobalDefinition globalDefinition) {
+        } else if (definition instanceof GlobalDefinition) {
+            final GlobalDefinition globalDefinition = (GlobalDefinition) definition;
             this.handleDefinition(magikFile, globalDefinition);
-        } else if (definition instanceof final BinaryOperatorDefinition binaryOperatorDefinition) {
+        } else if (definition instanceof BinaryOperatorDefinition) {
+            final BinaryOperatorDefinition binaryOperatorDefinition = (BinaryOperatorDefinition) definition;
             this.handleDefinition(magikFile, binaryOperatorDefinition);
-        } else if (definition instanceof final ConditionDefinition conditionDefinition) {
+        } else if (definition instanceof ConditionDefinition) {
+            final ConditionDefinition conditionDefinition = (ConditionDefinition) definition;
             this.handleDefinition(magikFile, conditionDefinition);
         }
     }
@@ -326,7 +335,7 @@ public class MagikIndexer {
                     MagikIndexer.PARAMETER_MODIFIER_MAPPING.get(paramModifier);
                 return new Parameter(name, modifier, parameterTypeString);
             })
-            .toList();
+            .collect(Collectors.toList());
         final ParameterDefinition assignParamDef = definition.getAssignmentParameter();
         final Parameter assignmentParameter = assignParamDef != null
             ? new Parameter(
@@ -599,7 +608,8 @@ public class MagikIndexer {
         final AbstractType type = this.typeKeeper.getType(typeString);
         if (type == UndefinedType.INSTANCE) {
             return new MagikType(this.typeKeeper, sort, typeString);
-        } else if (type instanceof final MagikType magikType) {
+        } else if (type instanceof MagikType) {
+            final MagikType magikType = (MagikType) type;
             if (sort != MagikType.Sort.UNDEFINED  // If target sort is UNDEFINED, we don't care.
                 && magikType.getSort() != MagikType.Sort.UNDEFINED  // Otherwise ensure it isn't overwritten.
                 && magikType.getSort() != sort) {
@@ -608,8 +618,9 @@ public class MagikIndexer {
 
             magikType.setSort(sort);
             return magikType;
-        } else if (type instanceof final AliasType aliasType) {
+        } else if (type instanceof AliasType) {
             // Get alias and return it.
+            final AliasType aliasType = (AliasType) type;
             final AbstractType aliasedType = aliasType.getAliasedType();
             if (aliasedType instanceof MagikType) {
                 final TypeString aliasedTypeString = aliasedType.getTypeString();

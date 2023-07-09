@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.api;
 import com.sonar.sslr.api.GenericTokenType;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.stream.Collectors;
 import org.sonar.sslr.grammar.GrammarRuleKey;
 import org.sonar.sslr.grammar.LexerlessGrammarBuilder;
 import org.sonar.sslr.parser.LexerlessGrammar;
@@ -208,6 +209,7 @@ public enum TypeDocGrammar implements GrammarRuleKey {
         // ANY_ELEMENT.
         final Object[] elementRegexs = Arrays.stream(Element.values())
             .map(e -> b.regexp("(?i)" + e.getValue() + "(?!\\w)"))
+            .collect(Collectors.toList())
             .toArray();
         b.rule(ANY_ELEMENT).is(
             b.firstOf(

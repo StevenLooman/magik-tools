@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.sonar;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.sonar.language.Magik;
 import org.sonar.api.server.rule.RulesDefinition;
@@ -19,7 +20,7 @@ public class MagikRuleRepository implements RulesDefinition {
             .map(checkClass -> checkClass.getAnnotation(org.sonar.check.Rule.class))
             .filter(Objects::nonNull)
             .map(org.sonar.check.Rule::key)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     @Override

@@ -76,7 +76,7 @@ public final class AstCreator {
   }
 
   private AstNode visitTerminal(ParseNode node) {
-    if (node.getMatcher() instanceof TriviaExpression) {  // NOSONAR
+    if (node.getMatcher() instanceof TriviaExpression) {
       TriviaExpression ruleMatcher = (TriviaExpression) node.getMatcher();
       if (ruleMatcher.getTriviaKind() == TriviaKind.SKIPPED_TEXT) {
         handleSkippedTextTrivia(node);
@@ -90,7 +90,7 @@ public final class AstCreator {
       } else {
         throw new IllegalStateException("Unexpected trivia kind: " + ruleMatcher.getTriviaKind());
       }
-    } else if (node.getMatcher() instanceof TokenExpression) {  // NOSONAR
+    } else if (node.getMatcher() instanceof TokenExpression) {
       updateTokenPositionAndValue(node);
       TokenExpression ruleMatcher = (TokenExpression) node.getMatcher();
       tokenBuilder.setType(ruleMatcher.getTokenType());

@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.Location;
@@ -66,7 +67,7 @@ public class TypeHierarchyProvider {
             Lsp4jConversion.positionFromLsp4j(position),
             MagikGrammar.IDENTIFIER);
         if (tokenNode == null) {
-            return null;  // NOSONAR: LSP4J requires null.
+            return null;
         }
 
         // Ensure it is on a class identifier, or a variable.
@@ -100,7 +101,7 @@ public class TypeHierarchyProvider {
             }
         }
 
-        return null;  // NOSONAR: LSP4J requires null.
+        return null;
     }
 
     /**
@@ -113,7 +114,7 @@ public class TypeHierarchyProvider {
         final TypeString typeString = TypeString.ofIdentifier(itemName, "sw");
         final AbstractType type = this.typeKeeper.getType(typeString);
         if (type == UndefinedType.INSTANCE) {
-            return null;  // NOSONAR: LSP4J requires null.
+            return null;
         }
 
         // Find children.
@@ -122,7 +123,7 @@ public class TypeHierarchyProvider {
             .filter(t -> t.getParents().contains(type))
             .map(this::toTypeHierarchyItem)
             .sorted(byName)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     /**
@@ -135,14 +136,14 @@ public class TypeHierarchyProvider {
         final TypeString typeString = TypeString.ofIdentifier(itemName, "sw");
         final AbstractType type = this.typeKeeper.getType(typeString);
         if (type == UndefinedType.INSTANCE) {
-            return null;  // NOSONAR: LSP4J requires null.
+            return null;
         }
 
         final Comparator<TypeHierarchyItem> byName = Comparator.comparing(TypeHierarchyItem::getName);
         return type.getParents().stream()
             .map(this::toTypeHierarchyItem)
             .sorted(byName)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private TypeHierarchyItem toTypeHierarchyItem(final AbstractType type) {

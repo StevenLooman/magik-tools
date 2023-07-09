@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for {@link InlayHintProvider}.
  */
-class InlayHintProviderTest {
+public class InlayHintProviderTest {
 
     private static final URI TEST_URI = URI.create("tests://unittest");
 

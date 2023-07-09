@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.helpers;
 import com.sonar.sslr.api.AstNode;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
@@ -85,7 +86,7 @@ public class MethodInvocationNodeHelper {
 
         return argumentsNode.getChildren(MagikGrammar.ARGUMENT).stream()
             .map(AstNode::getFirstChild)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private boolean anyChildTokenIs(AstNode parentNode, MagikOperator magikOperator) {

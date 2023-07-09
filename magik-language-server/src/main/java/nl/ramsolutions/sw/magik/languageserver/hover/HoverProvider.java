@@ -515,7 +515,8 @@ public class HoverProvider {
         if (!type.getParents().isEmpty()) {
             builder
                 .append("## Inheritance\n");
-            if (type instanceof final CombinedType combinedType) {
+            if (type instanceof CombinedType) {
+                final CombinedType combinedType = (CombinedType) type;
                 combinedType.getTypes().stream()
                     .sorted(Comparator.comparing(AbstractType::getName))
                     .forEach(cType -> this.buildInheritanceDoc(cType, builder, 0));

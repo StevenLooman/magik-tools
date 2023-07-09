@@ -111,8 +111,8 @@ public class MagikType extends AbstractType {
     @Override
     public Collection<AbstractType> getParents() {
         return this.parents.stream()
-            .map(this.typeKeeper::getType)
-            .toList();
+            .map(parentRef -> this.typeKeeper.getType(parentRef))
+            .collect(Collectors.toList());
     }
 
     @Override
