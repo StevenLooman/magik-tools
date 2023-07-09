@@ -20,7 +20,7 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.AstWalker;
 import nl.ramsolutions.sw.magik.analysis.Location;
-import nl.ramsolutions.sw.magik.analysis.helpers.LeaveStatementNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.ContinueLeaveStatementNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
@@ -710,7 +710,7 @@ public class LocalTypeReasoner extends AstWalker {
             : new ExpressionResult();
 
         // Find related BODY/EXPRESION nodes.
-        final LeaveStatementNodeHelper helper = new LeaveStatementNodeHelper(node);
+        final ContinueLeaveStatementNodeHelper helper = new ContinueLeaveStatementNodeHelper(node);
         final AstNode bodyNode = helper.getRelatedBodyNode();
         final AstNode expressionNode = bodyNode.getFirstAncestor(MagikGrammar.EXPRESSION);
         this.addNodeType(expressionNode, result);

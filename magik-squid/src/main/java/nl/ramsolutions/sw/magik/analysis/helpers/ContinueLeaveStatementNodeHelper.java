@@ -4,9 +4,9 @@ import com.sonar.sslr.api.AstNode;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
- * Helper for CONTINUE_STATEMENT nodes.
+ * Helper for CONTINUE_STATEMENT and LEAVE_STATEMENT nodes.
  */
-public class ContinueStatementNodeHelper {
+public class ContinueLeaveStatementNodeHelper {
 
     private final AstNode node;
 
@@ -14,8 +14,8 @@ public class ContinueStatementNodeHelper {
      * Constructor.
      * @param node Node to encapsulate.
      */
-    public ContinueStatementNodeHelper(final AstNode node) {
-        if (!node.is(MagikGrammar.CONTINUE_STATEMENT)) {
+    public ContinueLeaveStatementNodeHelper(final AstNode node) {
+        if (!node.is(MagikGrammar.CONTINUE_STATEMENT, MagikGrammar.LEAVE_STATEMENT)) {
             throw new IllegalArgumentException();
         }
 
