@@ -73,7 +73,7 @@ public class Configuration {
         try (InputStream inputStream = new FileInputStream(file)) {
             this.properties.load(inputStream);
         } catch (FileNotFoundException exception) {
-            LOGGER.warn("Configuration not found at: " + path);
+            LOGGER.warn("Configuration not found at: {}", path);
         } catch (IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
         }

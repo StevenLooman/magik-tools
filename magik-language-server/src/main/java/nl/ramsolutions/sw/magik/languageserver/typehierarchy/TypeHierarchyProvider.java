@@ -67,7 +67,7 @@ public class TypeHierarchyProvider {
             Lsp4jConversion.positionFromLsp4j(position),
             MagikGrammar.IDENTIFIER);
         if (tokenNode == null) {
-            return null;
+            return null;  // NOSONAR: LSP requires null.
         }
 
         // Ensure it is on a class identifier, or a variable.
@@ -101,7 +101,7 @@ public class TypeHierarchyProvider {
             }
         }
 
-        return null;
+        return null;  // NOSONAR: LSP requires null.
     }
 
     /**
@@ -114,7 +114,7 @@ public class TypeHierarchyProvider {
         final TypeString typeString = TypeString.ofIdentifier(itemName, "sw");
         final AbstractType type = this.typeKeeper.getType(typeString);
         if (type == UndefinedType.INSTANCE) {
-            return null;
+            return null;  // NOSONAR: LSP requires null.
         }
 
         // Find children.
@@ -136,7 +136,7 @@ public class TypeHierarchyProvider {
         final TypeString typeString = TypeString.ofIdentifier(itemName, "sw");
         final AbstractType type = this.typeKeeper.getType(typeString);
         if (type == UndefinedType.INSTANCE) {
-            return null;
+            return null;  // NOSONAR: LSP requires null.
         }
 
         final Comparator<TypeHierarchyItem> byName = Comparator.comparing(TypeHierarchyItem::getName);

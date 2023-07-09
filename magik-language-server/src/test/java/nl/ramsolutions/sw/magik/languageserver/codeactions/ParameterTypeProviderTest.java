@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for ParameterTypeProvider.
  */
-public class ParameterTypeProviderTest {
+class ParameterTypeProviderTest {
 
     private List<CodeAction> getCodeActions(
             final String code,
@@ -75,7 +75,7 @@ public class ParameterTypeProviderTest {
             final List<TextEdit> changes = textDocumentEdit.getEdits();
             assertThat(uri).isEqualTo("tests://unittest");
             assertThat(changes).hasSize(1);
-            assertThat(changes.get(0).getNewText()).isEqualTo("");
+            assertThat(changes.get(0).getNewText()).isEmpty();
         });
     }
 

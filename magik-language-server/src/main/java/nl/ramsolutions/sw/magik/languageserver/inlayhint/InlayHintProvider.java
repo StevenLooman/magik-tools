@@ -84,12 +84,9 @@ public class InlayHintProvider {
         final List<AstNode> argumentNodes = argumentsNode.getDescendants(MagikGrammar.ARGUMENT);
         for (int i = 0; i < argumentNodes.size(); ++i) {
             final AstNode argumentNode = argumentNodes.get(i);
-            if (!this.isSimpleAtomArgument(argumentNode)) {
+            if (!this.isSimpleAtomArgument(argumentNode)
+                || i >= parameters.size()) {
                 continue;
-            }
-
-            if (i >= parameters.size()) {
-                break;
             }
 
             final Parameter parameter = parameters.get(i);

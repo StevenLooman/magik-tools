@@ -11,6 +11,7 @@ import nl.ramsolutions.sw.magik.analysis.Position;
 import nl.ramsolutions.sw.magik.analysis.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
@@ -47,15 +48,15 @@ class MethodReturnTypeUpdateProvider {
             final org.eclipse.lsp4j.Range range,
             final CodeActionContext context) {
         return magikFile.getDefinitions().stream()
-            .filter(definition -> definition instanceof MethodDefinition)
-            .map(definition -> (MethodDefinition) definition)
-            .filter(methodDefinition -> methodDefinition.isActualMethodDefinition())
+            .filter(MethodDefinition.class::isInstance)
+            .map(MethodDefinition.class::cast)
+            .filter(MethodDefinition::isActualMethodDefinition)
             .filter(methodDefinition -> Lsp4jUtils.rangeOverlaps(
                 range,
                 Lsp4jConversion.rangeToLsp4j(
                     nl.ramsolutions.sw.magik.analysis.Range.fromTree(methodDefinition.getNode()))))
             .flatMap(methodDefinition -> this.extractReturnTypeCodeActions(magikFile, methodDefinition).stream())
-            .map(codeAction -> Either.<Command, CodeAction>forRight(codeAction))
+            .map(Either::<Command, CodeAction>forRight)
             .collect(Collectors.toList());
     }
 
@@ -66,7 +67,7 @@ class MethodReturnTypeUpdateProvider {
         final AstNode methodDefinitionNode = methodDefinition.getNode();
         final ExpressionResult methodResult = reasoner.getNodeType(methodDefinitionNode);
         final ExpressionResultString methodResultString = methodResult.stream()
-            .map(type -> type.getTypeString())
+            .map(AbstractType::getTypeString)
             .collect(ExpressionResultString.COLLECTOR);
 
         final TypeDocParser typeDocParser = new TypeDocParser(methodDefinition.getNode());
@@ -84,8 +85,7 @@ class MethodReturnTypeUpdateProvider {
                 final Map.Entry<AstNode, TypeString> typeDocEntry = entry.getValue();
                 if (methodTypeString != null && typeDocEntry == null) {
                     // Code action: Add type-doc line.
-                    final int insertLine = -1;
-                    return this.createAddReturnCodeAction(magikFile, methodDefinition, insertLine, methodTypeString);
+                    return this.createAddReturnCodeAction(magikFile, methodDefinition, methodTypeString);
                 }
 
                 final TypeString typeDocTypeString = typeDocEntry.getValue();
@@ -93,7 +93,7 @@ class MethodReturnTypeUpdateProvider {
                 final AstNode typeValueNode = typeDocNode.getFirstChild(TypeDocGrammar.TYPE_VALUE);
                 if (methodTypeString == null && typeDocEntry != null) {
                     // Code action: Remove type-doc line.
-                    return this.createRemoveReturnCodeAction(magikFile, methodDefinition, typeValueNode);
+                    return this.createRemoveReturnCodeAction(magikFile, typeValueNode);
                 } else if (methodTypeString != null  // && typeDocTypeString != null
                     && methodTypeString != TypeString.UNDEFINED
                     && !methodTypeString.equals(typeDocTypeString)) {
@@ -120,7 +120,6 @@ class MethodReturnTypeUpdateProvider {
 
     private CodeAction createRemoveReturnCodeAction(
             final MagikTypedFile magikFile,
-            final MethodDefinition methodDefinition,
             final AstNode typeValueNode) {
         final AstNode typeDocReturnNode = typeValueNode.getParent();
         final Range treeRange = Range.fromTree(typeDocReturnNode);
@@ -136,13 +135,12 @@ class MethodReturnTypeUpdateProvider {
     private CodeAction createAddReturnCodeAction(
             final MagikTypedFile magikFile,
             final MethodDefinition methodDefinition,
-            final int line,
             final TypeString methodTypeString) {
         final int lastMethodDocLine = this.getLastMethodDocLine(methodDefinition);
         final Range range = new Range(
             new Position(lastMethodDocLine + 1, 0),
             new Position(lastMethodDocLine + 1, 0));
-        final String textEdit = String.format("\t## @return {%s} Description\n", methodTypeString.getFullString());
+        final String textEdit = String.format("\t## @return {%s} Description%n", methodTypeString.getFullString());
         final String description = String.format("Add @return type %s", methodTypeString.getFullString());
         return Lsp4jUtils.createCodeAction(magikFile, range, textEdit, description);
     }

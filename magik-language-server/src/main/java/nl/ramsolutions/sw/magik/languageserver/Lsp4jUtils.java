@@ -54,15 +54,12 @@ public final class Lsp4jUtils {
         // 3. wantedRange in testedRange --> true
         // 4. wantedRange in testedRange and after testedRange --> true
         // 5. wantedRange starts after testedRange end --> false
-        // Case 1/5.
-        final PositionComparator comparator = new PositionComparator();
-        if (comparator.compare(range1.getEnd(), range2.getStart()) < 0
-            || comparator.compare(range1.getStart(), range2.getEnd()) > 0) {
-            return false;
-        }
 
-        // Case 3/4.
-        return true;
+        // Testing case 1/5 is enough.
+        final PositionComparator comparator = new PositionComparator();
+        return !(
+            comparator.compare(range1.getEnd(), range2.getStart()) < 0
+            || comparator.compare(range1.getStart(), range2.getEnd()) > 0);
     }
 
     /**
