@@ -92,9 +92,10 @@ class ThreadManager {
                 LOGGER.trace("Exception while getting thread, id: {}, exception: {}", threadId, exception.getMessage());
 
                 final Throwable cause = exception.getCause();
-                if (cause instanceof final SlapErrorException slapErrorException
-                    && slapErrorException.getError().getErrorMessage() == ErrorMessage.UNKNOWN_ERROR) {
-                    throw exception;
+                if (cause instanceof final SlapErrorException slapErrorException) {
+                    if (slapErrorException.getError().getErrorMessage() == ErrorMessage.UNKNOWN_ERROR) {
+                        throw exception;
+                    }
                 }
             }
         }
@@ -174,9 +175,10 @@ class ThreadManager {
             }
         } catch (final ExecutionException exception) {
             final Throwable cause = exception.getCause();
-            if (cause instanceof final SlapErrorException slapErrorException
-                && slapErrorException.getError().getErrorMessage() == ErrorMessage.METHOD_NOT_FOUND) {
-                throw exception;
+            if (cause instanceof final SlapErrorException slapErrorException) {
+                if (slapErrorException.getError().getErrorMessage() == ErrorMessage.METHOD_NOT_FOUND) {
+                    throw exception;
+                }
             }
         }
 

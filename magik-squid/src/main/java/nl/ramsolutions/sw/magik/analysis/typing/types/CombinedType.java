@@ -86,7 +86,7 @@ public class CombinedType extends AbstractType {
     public List<GenericDeclaration> getGenerics() {
         return this.getTypes().stream()
             .flatMap(type -> type.getGenerics().stream())
-            .toList();
+            .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
