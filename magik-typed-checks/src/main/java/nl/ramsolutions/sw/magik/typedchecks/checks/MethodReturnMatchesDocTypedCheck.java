@@ -1,17 +1,19 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Map;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.api.TypeDocGrammar;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
+import nl.ramsolutions.sw.magik.utils.StreamUtils;
 
 /**
  * Check to check if the @return types from method doc matches the reasoned return types.
@@ -27,30 +29,45 @@ public class MethodReturnMatchesDocTypedCheck extends MagikTypedCheck {
             return;
         }
 
-        final ExpressionResult docExpressionResult = this.extractMethodDocResult(node);
-        final ExpressionResult reasonedReturnResult = this.extractReasonedResult(node);
-        if (!docExpressionResult.equals(reasonedReturnResult)) {
-            final String docTypesStr = docExpressionResult.getTypeNames(", ");
-            final String reasonedTypesStr = reasonedReturnResult.getTypeNames(", ");
-            final String message = String.format(MESSAGE, docTypesStr, reasonedTypesStr);
-            this.addIssue(node, message);
-        }
-    }
-
-    private ExpressionResult extractReasonedResult(final AstNode node) {
-        final LocalTypeReasoner reasoner = this.getReasoner();
-        ExpressionResult result = reasoner.getNodeTypeSilent(node);
-        return Objects.requireNonNullElse(result, new ExpressionResult());
-    }
-
-    private ExpressionResult extractMethodDocResult(final AstNode node) {
-        final TypeDocParser docParser = new TypeDocParser(node);
+        final ExpressionResultString methodResultString = this.extractReasonedResult(node);
+        final Map<AstNode, TypeString> typeDocNodes = this.extractMethodDocResult(node);
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
-        final TypeReader typeParser = new TypeReader(typeKeeper);
-        final List<AbstractType> docReturnTypes = docParser.getReturnTypes().stream()
-                .map(typeParser::parseTypeString)
-                .collect(Collectors.toList());
-        return new ExpressionResult(docReturnTypes);
+        final TypeReader typeReader = new TypeReader(typeKeeper);
+        StreamUtils.zip(methodResultString.stream(), typeDocNodes.entrySet().stream())
+            .forEach(entry -> {
+                if (entry.getKey() == null
+                    || entry.getValue() == null) {
+                    // Only bother use with type-doc returns.
+                    return;
+                }
+
+                final TypeString methodReturnTypeString = entry.getKey();
+                final AbstractType methodReturnType = typeReader.parseTypeString(methodReturnTypeString);
+
+                final Map.Entry<AstNode, TypeString> typeDocEntry = entry.getValue();
+                final TypeString docReturnTypeString = typeDocEntry.getValue();
+                final AbstractType docReturnType = typeReader.parseTypeString(docReturnTypeString);
+
+                if (!methodReturnType.equals(docReturnType)) {
+                    final String message = String.format(MESSAGE, docReturnTypeString, methodReturnTypeString);
+                    final AstNode returnTypeNode = typeDocEntry.getKey();
+                    final AstNode typeValueNode = returnTypeNode.getFirstChild(TypeDocGrammar.TYPE_VALUE);
+                    this.addIssue(typeValueNode, message);
+                }
+            });
+    }
+
+    private ExpressionResultString extractReasonedResult(final AstNode node) {
+        final LocalTypeReasoner reasoner = this.getReasoner();
+        final ExpressionResult result = reasoner.getNodeType(node);
+        return result.stream()
+            .map(AbstractType::getTypeString)
+            .collect(ExpressionResultString.COLLECTOR);
+    }
+
+    private Map<AstNode, TypeString> extractMethodDocResult(final AstNode node) {
+        final TypeDocParser docParser = new TypeDocParser(node);
+        return docParser.getReturnTypeNodes();
     }
 
 }
