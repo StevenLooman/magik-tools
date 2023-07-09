@@ -185,7 +185,6 @@ public class ExpressionResult {
     }
 
     @Override
-    @SuppressWarnings("checkstyle:NestedIfDepth")
     public String toString() {
         return String.format(
             "%s@%s(%s)",
