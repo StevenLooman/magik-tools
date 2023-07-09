@@ -289,7 +289,7 @@ public final class TypeString {
         return String.format(
             "%s@%s(%s, %s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
-            this.getPakkage(), this.getString());
+            this.currentPackage, this.string);
     }
 
 }
