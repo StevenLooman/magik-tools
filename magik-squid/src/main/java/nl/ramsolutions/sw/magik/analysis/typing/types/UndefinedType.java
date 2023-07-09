@@ -8,7 +8,7 @@ import nl.ramsolutions.sw.magik.analysis.Location;
 /**
  * Special type used when the {@link TypeReasoner} cannot determine type.
  */
-public final class UndefinedType extends AbstractType {  // NOSONAR: Singleton class.
+public final class UndefinedType extends AbstractType {
 
     /**
      * Instance of {@code UndefinedType} to be used in all cases.

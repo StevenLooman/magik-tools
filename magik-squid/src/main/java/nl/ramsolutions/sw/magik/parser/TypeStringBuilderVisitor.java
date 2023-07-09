@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
@@ -122,7 +123,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
                 .map(AstNode::getFirstChild)
                 .map(this.mapping::get)
                 .map(Objects::requireNonNull)
-                .toList()
+                .collect(Collectors.toList())
             : Collections.emptyList();
         final TypeString[] genericsArr = generics.toArray(TypeString[]::new);
         final TypeString part = TypeString.ofIdentifier(str, this.currentPakkage, genericsArr);
@@ -142,7 +143,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
         final List<TypeString> childTypeStrings = childAsts.stream()
             .map(this.mapping::get)
             .map(Objects::requireNonNull)
-            .toList();
+            .collect(Collectors.toList());
         if (childAsts.isEmpty()) {
             throw new IllegalStateException();
         }

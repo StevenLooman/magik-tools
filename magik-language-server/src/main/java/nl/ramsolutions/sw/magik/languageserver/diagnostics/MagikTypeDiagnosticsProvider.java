@@ -43,7 +43,7 @@ public class MagikTypeDiagnosticsProvider {
                 final String diagnosticSource = "mtype";
                 return new Diagnostic(range, message, severity, diagnosticSource);
             })
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private Set<MagikTypedCheck> createTypedChecks() {

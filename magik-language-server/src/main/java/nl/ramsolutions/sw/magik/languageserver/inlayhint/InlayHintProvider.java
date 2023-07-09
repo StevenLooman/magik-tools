@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.Position;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
@@ -51,7 +52,7 @@ public class InlayHintProvider {
             // TODO: Filter based on range.
             .map(node -> this.getMethodInvocationInlayHints(magikFile, node))
             .flatMap(List::stream)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private List<InlayHint> getMethodInvocationInlayHints(
@@ -83,9 +84,12 @@ public class InlayHintProvider {
         final List<AstNode> argumentNodes = argumentsNode.getDescendants(MagikGrammar.ARGUMENT);
         for (int i = 0; i < argumentNodes.size(); ++i) {
             final AstNode argumentNode = argumentNodes.get(i);
-            if (!this.isSimpleAtomArgument(argumentNode)
-                || i >= parameters.size()) {
+            if (!this.isSimpleAtomArgument(argumentNode)) {
                 continue;
+            }
+
+            if (i >= parameters.size()) {
+                break;
             }
 
             final Parameter parameter = parameters.get(i);

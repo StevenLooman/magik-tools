@@ -146,7 +146,7 @@ public class ReferencesProvider {
             .map(Method.MethodUsage::getLocation)
             .filter(Objects::nonNull)
             .map(Lsp4jConversion::locationToLsp4j)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private List<Location> referencesToType(final ITypeKeeper typeKeeper, final String typeName) {
@@ -175,7 +175,7 @@ public class ReferencesProvider {
             .map(Method.GlobalUsage::getLocation)
             .filter(Objects::nonNull)
             .map(Lsp4jConversion::locationToLsp4j)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private List<Location> referencesToCondition(final ITypeKeeper typeKeeper, final String conditionName) {
@@ -187,7 +187,7 @@ public class ReferencesProvider {
             .filter(conditionUsage -> conditionUsage.getConditionName().equals(conditionName))
             .map(Method.ConditionUsage::getLocation)
             .map(Lsp4jConversion::locationToLsp4j)
-            .toList();
+            .collect(Collectors.toList());
     }
 
 }

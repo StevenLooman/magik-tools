@@ -6,6 +6,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikVisitor;
 import nl.ramsolutions.sw.magik.checks.CheckList;
@@ -88,7 +89,7 @@ public class MagikSquidSensor implements Sensor {
             new ProgressReport("Report about progress of Sonar Magik analyzer", SLEEP_PERIOD);
         final List<String> filenames = inputFiles.stream()
             .map(InputFile::toString)
-            .toList();
+            .collect(Collectors.toList());
         progressReport.start(filenames);
 
         for (final InputFile inputFile : inputFiles) {

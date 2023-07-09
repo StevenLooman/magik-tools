@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
@@ -80,7 +81,7 @@ public class MagikLintDiagnosticsProvider {
                 final String diagnosticSource = String.format("magik-lint (%s)", checkKeyKebabCase);
                 return new Diagnostic(range, message, severity, diagnosticSource);
             })
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private DiagnosticSeverity diagnosticSeverityForMagikLintSeverity(final MagikCheckHolder holder) {

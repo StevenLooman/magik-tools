@@ -8,7 +8,7 @@ import nl.ramsolutions.sw.magik.analysis.Location;
 /**
  * Type to represent self, to be evaluated later when the real type is known.
  */
-public final class SelfType extends AbstractType {  // NOSONAR: Singleton class.
+public final class SelfType extends AbstractType {
 
     /**
      * Instance of {@code _self}/{@code _clone} to be used in all cases.

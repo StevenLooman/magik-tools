@@ -967,11 +967,13 @@ public class LocalTypeReasoner extends AstWalker {
         final AbstractType rightType = rightResult.get(0, unsetType);
         final ExpressionResult result;
         switch (operatorStr.toLowerCase()) {
-            case "_is", "_isnt":
+            case "_is":
+            case "_isnt":
                 result = new ExpressionResult(falseType);
                 break;
 
-            case "_andif", "_orif":   // TODO: Not entirely true.
+            case "_andif":  // TODO: Not entirely true.
+            case "_orif":   // TODO: Not entirely true.
                 result = new ExpressionResult(falseType);
                 break;
 
@@ -1087,11 +1089,13 @@ public class LocalTypeReasoner extends AstWalker {
             final AbstractType rightType = rightResult.get(0, unsetType);
 
             switch (operatorStr.toLowerCase()) {
-                case "_is", "_isnt":
+                case "_is":
+                case "_isnt":
                     result = new ExpressionResult(falseType);
                     break;
 
-                case "_andif", "_orif":   // TODO: Not entirely true, return RHS if LHS is _false, else _true.
+                case "_andif":  // TODO: Not entirely true, returns RHS if LHS is _true, else _false.
+                case "_orif":   // TODO: Not entirely true, return RHS if LHS is _false, else _true.
                     result = new ExpressionResult(falseType);
                     break;
 
@@ -1182,7 +1186,7 @@ public class LocalTypeReasoner extends AstWalker {
             final List<AstNode> argumentExpressionNodes = helper.getArgumentExpressionNodes();
             final List<AbstractType> argumentTypes = argumentExpressionNodes.stream()
                 .map(exprNode -> this.getNodeType(exprNode).get(0, unsetType))
-                .toList();
+                .collect(Collectors.toList());
             for (final Method method : methods) {
                 // Call.
                 final ExpressionResultString methodCallResultStr = method.getCallResult();
@@ -1272,7 +1276,8 @@ public class LocalTypeReasoner extends AstWalker {
 
         // Perform procedure call.
         ExpressionResult callResult = null;
-        if (calledType instanceof final ProcedureInstance procedureType) {
+        if (calledType instanceof ProcedureInstance) {
+            final ProcedureInstance procedureType = (ProcedureInstance) calledType;
             final Collection<Method> methods = procedureType.getMethods("invoke()");
             final Method method = methods.stream().findAny().orElse(null);
             Objects.requireNonNull(method);

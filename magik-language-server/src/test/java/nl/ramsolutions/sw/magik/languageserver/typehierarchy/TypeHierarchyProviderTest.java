@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for TypeHierarchyProvider.
  */
-class TypeHierarchyProviderTest {
+public class TypeHierarchyProviderTest {
 
     private static final URI TEST_URI = URI.create("tests://unittest");
 

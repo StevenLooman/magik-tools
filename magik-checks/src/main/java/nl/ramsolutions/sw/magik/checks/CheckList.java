@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.checks;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.checks.checks.CommentRegularExpressionCheck;
 import nl.ramsolutions.sw.magik.checks.checks.CommentedCodeCheck;
 import nl.ramsolutions.sw.magik.checks.checks.DuplicateMethodInFileCheck;
@@ -104,7 +105,7 @@ public final class CheckList {
     public static List<Class<?>> getDisabledByDefaultChecks() {
         return getChecks().stream()
             .filter(checkClass -> checkClass.getAnnotation(DisabledByDefault.class) != null)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     /**
@@ -114,7 +115,7 @@ public final class CheckList {
     public static List<Class<?>> getTemplatedChecks() {
         return getChecks().stream()
             .filter(checkClass -> checkClass.getAnnotation(TemplatedMagikCheck.class) != null)
-            .toList();
+            .collect(Collectors.toList());
     }
 
 }

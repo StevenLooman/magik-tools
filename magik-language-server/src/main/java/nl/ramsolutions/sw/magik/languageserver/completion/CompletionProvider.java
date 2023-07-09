@@ -282,7 +282,7 @@ public class CompletionProvider {
                 item.setKind(CompletionItemKind.Method);
                 return item;
             })
-            .toList();
+            .collect(Collectors.toList());
     }
 
     /**
@@ -345,7 +345,7 @@ public class CompletionProvider {
                 item.setKind(CompletionItemKind.Keyword);
                 return item;
             })
-            .toList();
+            .collect(Collectors.toList());
     }
 
     /**

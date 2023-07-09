@@ -22,11 +22,13 @@ public final class TypeMatcher {
      * @return True if type matches, false if not.
      */
     public static boolean typeMatches(final AbstractType type, final AbstractType criterium) {
-        if (type instanceof final CombinedType combinedTypeType) {
+        if (type instanceof CombinedType) {
+            final CombinedType combinedTypeType = (CombinedType) type;
             return combinedTypeType.getTypes().stream()
                 .allMatch(typeType -> TypeMatcher.typeMatches(typeType, criterium));
         }
-        if (criterium instanceof final CombinedType combinedTypeCriterium) {
+        if (criterium instanceof CombinedType) {
+            final CombinedType combinedTypeCriterium = (CombinedType) criterium;
             return combinedTypeCriterium.getTypes().stream()
                 .anyMatch(crit -> TypeMatcher.typeMatches(type, crit));
         }

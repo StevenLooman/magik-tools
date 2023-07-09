@@ -45,7 +45,7 @@ public class DuplicateMethodInFileCheck extends MagikCheck {
             .collect(Collectors.toMap(
                 MethodDefinition::getName,
                 List::of,
-                (list1, list2) -> Stream.concat(list1.stream(), list2.stream()).toList()));
+                (list1, list2) -> Stream.concat(list1.stream(), list2.stream()).collect(Collectors.toList())));
         definitions.entrySet().stream()
             .filter(entry -> entry.getValue().size() > 1)
             .flatMap(entry -> entry.getValue().stream())
