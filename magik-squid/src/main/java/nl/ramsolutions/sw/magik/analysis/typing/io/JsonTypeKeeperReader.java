@@ -299,7 +299,7 @@ public final class JsonTypeKeeperReader {
                 final TypeString typeString = TypeStringParser.parseTypeString(typeName);
                 return new Parameter(name, modifier, typeString);
             })
-            .toList();
+            .collect(Collectors.toList());  // NOSONAR: Need a modifiable list.
     }
 
     private ExpressionResultString parseExpressionResultString(final Object obj) {
