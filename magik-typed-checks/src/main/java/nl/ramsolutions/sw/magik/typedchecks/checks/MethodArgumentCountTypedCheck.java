@@ -12,11 +12,16 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
+import org.sonar.check.Rule;
 
 /**
  * Check if argument-count for method invocation matches.
  */
+@Rule(key = MethodArgumentCountTypedCheck.CHECK_KEY)
 public class MethodArgumentCountTypedCheck extends MagikTypedCheck {
+
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final String CHECK_KEY = "MethodArgumentCountTypedCheck";
 
     private static final String MESSAGE = "Not enough arguments for method: %s";
 

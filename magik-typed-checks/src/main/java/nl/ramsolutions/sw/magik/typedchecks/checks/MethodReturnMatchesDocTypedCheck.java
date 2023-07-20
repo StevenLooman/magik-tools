@@ -14,11 +14,16 @@ import nl.ramsolutions.sw.magik.api.TypeDocGrammar;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.utils.StreamUtils;
+import org.sonar.check.Rule;
 
 /**
  * Check to check if the @return types from method doc matches the reasoned return types.
  */
+@Rule(key = MethodReturnMatchesDocTypedCheck.CHECK_KEY)
 public class MethodReturnMatchesDocTypedCheck extends MagikTypedCheck {
+
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final String CHECK_KEY = "MethodReturnMatchesDocTypedCheck";
 
     private static final String MESSAGE = "@return type(s) (%s) do not match method return type(s) (%s).";
 
@@ -37,7 +42,7 @@ public class MethodReturnMatchesDocTypedCheck extends MagikTypedCheck {
             .forEach(entry -> {
                 if (entry.getKey() == null
                     || entry.getValue() == null) {
-                    // Only bother use with type-doc returns.
+                    // Only bother with type-doc returns.
                     return;
                 }
 

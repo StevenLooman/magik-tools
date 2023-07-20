@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeMatcher;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -16,11 +18,16 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
+import org.sonar.check.Rule;
 
 /**
  * Check if argument types match parameter types.
  */
+@Rule(key = MethodArgumentParameterTypedCheck.CHECK_KEY)
 public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
+
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final String CHECK_KEY = "MethodArgumentParameterTypedCheck";
 
     private static final String MESSAGE = "Argument type (%s) does not match parameter type (%s)";
 
@@ -49,6 +56,8 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
             .collect(Collectors.toList());
 
         // Get methods.
+        final ITypeKeeper typeKeeper = this.getTypeKeeper();
+        final TypeReader typeReader = new TypeReader(typeKeeper);
         final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
         final String methodName = helper.getMethodName();
         final AbstractType unsetType = this.getTypeKeeper().getType(TypeString.ofIdentifier("unset", "sw"));
@@ -64,7 +73,7 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
                     || parameter.is(Parameter.Modifier.OPTIONAL))  // Don't check gather.
                 .map(parameter -> {
                     final TypeString paramTypeString = parameter.getType();
-                    final AbstractType type = this.getTypeKeeper().getType(paramTypeString);
+                    final AbstractType type = typeReader.parseTypeString(paramTypeString);
                     if (parameter.is(Parameter.Modifier.OPTIONAL)) {
                         return CombinedType.combine(type, unsetType);
                     }

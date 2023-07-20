@@ -7,11 +7,16 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.Slot;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
+import org.sonar.check.Rule;
 
 /**
  * Check to check if the type the method is defined on has the used slot.
  */
+@Rule(key = SlotExistsTypedCheck.CHECK_KEY)
 public class SlotExistsTypedCheck extends MagikTypedCheck {
+
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final String CHECK_KEY = "SlotExistsTypedCheck";
 
     private static final String MESSAGE = "Unknown slot: %s";
 

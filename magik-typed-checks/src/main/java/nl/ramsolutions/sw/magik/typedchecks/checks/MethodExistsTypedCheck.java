@@ -7,11 +7,16 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
+import org.sonar.check.Rule;
 
 /**
  * Check if method exists on type.
  */
+@Rule(key = MethodExistsTypedCheck.CHECK_KEY)
 public class MethodExistsTypedCheck extends MagikTypedCheck {
+
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final String CHECK_KEY = "MethodExistsTypedCheck";
 
     private static final String MESSAGE = "Unknown method: %s";
 

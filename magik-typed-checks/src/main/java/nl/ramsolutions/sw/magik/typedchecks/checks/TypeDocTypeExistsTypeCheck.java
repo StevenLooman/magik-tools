@@ -11,11 +11,16 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
+import org.sonar.check.Rule;
 
 /**
  * Test if referenced type is known.
  */
+@Rule(key = TypeDocTypeExistsTypeCheck.CHECK_KEY)
 public class TypeDocTypeExistsTypeCheck extends MagikTypedCheck {
+
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final String CHECK_KEY = "TypeDocTypeExistsTypeCheck";
 
     private static final String MESSAGE = "Unknown type: %s";
 
