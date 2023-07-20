@@ -219,7 +219,6 @@ public class MagikWorkspaceService implements WorkspaceService {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public CompletableFuture<
             Either<List<? extends org.eclipse.lsp4j.SymbolInformation>, List<? extends WorkspaceSymbol>>

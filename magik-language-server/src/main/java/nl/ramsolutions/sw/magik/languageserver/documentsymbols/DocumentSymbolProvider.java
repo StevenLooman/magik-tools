@@ -38,7 +38,6 @@ public class DocumentSymbolProvider {
      * @param magikFile Magik file to provide symbols for.
      * @return {@link DocumentSymbol}s.
      */
-    @SuppressWarnings("deprecation")
     public List<Either<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>> provideDocumentSymbol(
             final MagikTypedFile magikFile) {
         final DefinitionReader definitionReader = new DefinitionReader();

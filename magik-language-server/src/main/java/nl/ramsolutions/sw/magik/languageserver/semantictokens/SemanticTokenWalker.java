@@ -138,7 +138,7 @@ public class SemanticTokenWalker extends AstWalker {
             final Set<SemanticToken.Modifier> docModifier = Set.of(SemanticToken.Modifier.DOCUMENTATION);
 
             final List<Token> docTokens = List.of(token);
-            final TypeDocParser typeDocParser = new TypeDocParser(docTokens);
+            final TypeDocParser typeDocParser = new TypeDocParser(docTokens, this.currentPakkage);
             final AstNode typeDocNode = typeDocParser.getTypeDocNode();
 
             // It is either a FUNCTION node or element nodes.

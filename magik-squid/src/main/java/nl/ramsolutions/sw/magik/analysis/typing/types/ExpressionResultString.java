@@ -118,7 +118,7 @@ public class ExpressionResultString {
         if (this.types.size() == MAX_ITEMS) {
             lastType = this.get(firstRepeatingIndex - 1, null);
             for (int i = this.types.size() - 1; i > -1; --i) {
-                TypeString type = this.types.get(i);
+                final TypeString type = this.types.get(i);
                 if (type.equals(lastType)) {
                     firstRepeatingIndex = i;
                 } else {
@@ -130,7 +130,7 @@ public class ExpressionResultString {
         final StringBuilder builder = new StringBuilder();
         final String typesStr = this.types.stream()
             .limit(firstRepeatingIndex)
-            .map(TypeString::getString)
+            .map(TypeString::getFullString)
             .collect(Collectors.joining(separator));
         builder.append(typesStr);
 

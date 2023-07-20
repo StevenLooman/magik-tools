@@ -209,10 +209,11 @@ class BreakpointManager {
             throws IOException, InterruptedException, ExecutionException {
         int line = sourceBreakpoint.getLine();
         final AstNode methodNode = this.getNode(source, line);
-        String method = null;
-        int methodLine = 0;
+        final String method;
+        final int methodLine;
         if (methodNode == null) {
             method = "<not_in_method>";
+            methodLine = 0;
         } else {
             final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodNode);
             method = helper.getFullExemplarMethodName();
@@ -221,7 +222,7 @@ class BreakpointManager {
                 line = 0;
             }
         }
-        String condition = sourceBreakpoint.getCondition();
+        final String condition = sourceBreakpoint.getCondition();
         return this.createBreakpoint(source, method, line, condition);
     }
 
@@ -411,7 +412,7 @@ class BreakpointManager {
             final @Nullable Source source,
             final String method,
             final int line,
-            final String condition)
+            final @Nullable String condition)
             throws IOException, InterruptedException, ExecutionException {
         // Send breakpoint to debugger.
         final MagikBreakpoint magikBreakpoint = this.sendSetBreakpoint(method, line);
@@ -442,6 +443,8 @@ class BreakpointManager {
             final BreakpointSetResponse breakpointSet = (BreakpointSetResponse) breakpointSetFuture.get();
             final long breakpointId = breakpointSet.getBreakpointId();
             magikBreakpoint.setBreakpointId(breakpointId);
+
+            LOGGER.trace("Created breakpoint: {}", magikBreakpoint);
         } catch (ExecutionException exception) {
             final Throwable cause = exception.getCause();
             if (cause instanceof SlapErrorException) {
@@ -449,12 +452,12 @@ class BreakpointManager {
                 final SlapErrorException slapErrorException = (SlapErrorException) cause;
                 final String message = slapErrorException.getError().getErrorMessage().name();
                 magikBreakpoint.setMessage(message);
+
+                LOGGER.trace("Unable to create breakpoint: {}, reason: {}", magikBreakpoint, message);
             } else {
                 throw exception;
             }
         }
-
-        LOGGER.trace("Created breakpoint: {}", magikBreakpoint);
 
         return magikBreakpoint;
     }

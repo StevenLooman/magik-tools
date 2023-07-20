@@ -54,7 +54,9 @@ public class MethodReturnMatchesDocTypedCheck extends MagikTypedCheck {
                 final AbstractType docReturnType = typeReader.parseTypeString(docReturnTypeString);
 
                 if (!methodReturnType.equals(docReturnType)) {
-                    final String message = String.format(MESSAGE, docReturnTypeString, methodReturnTypeString);
+                    final String message = String.format(
+                        MESSAGE,
+                        docReturnTypeString.getFullString(), methodReturnTypeString.getFullString());
                     final AstNode returnTypeNode = typeDocEntry.getKey();
                     final AstNode typeValueNode = returnTypeNode.getFirstChild(TypeDocGrammar.TYPE_VALUE);
                     this.addIssue(typeValueNode, message);

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.Position;
+import nl.ramsolutions.sw.magik.analysis.Range;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
@@ -21,8 +22,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
+import nl.ramsolutions.sw.magik.languageserver.Lsp4jUtils;
 import org.eclipse.lsp4j.InlayHint;
-import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
@@ -45,11 +46,14 @@ public class InlayHintProvider {
      * @param range Range in file.
      * @return List of inlay hints.
      */
-    public List<InlayHint> provideInlayHints(final MagikTypedFile magikFile, final Range range) {
+    public List<InlayHint> provideInlayHints(final MagikTypedFile magikFile, final org.eclipse.lsp4j.Range range) {
         // Get argument hints from method invocations.
         final AstNode topNode = magikFile.getTopNode();
         return topNode.getDescendants(MagikGrammar.METHOD_INVOCATION).stream()
-            // TODO: Filter based on range.
+            .filter(node -> Lsp4jUtils.rangeOverlaps(
+                range,
+                Lsp4jConversion.rangeToLsp4j(
+                    Range.fromTree(node))))
             .map(node -> this.getMethodInvocationInlayHints(magikFile, node))
             .flatMap(List::stream)
             .collect(Collectors.toList());
@@ -76,7 +80,7 @@ public class InlayHintProvider {
             return Collections.emptyList();
         }
 
-        final Method method = methods.iterator().next();  // TODO: Over all methods?
+        final Method method = methods.iterator().next();
         final List<Parameter> parameters = method.getParameters();
 
         // Get argument hints.

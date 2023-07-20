@@ -565,7 +565,7 @@ public class SlapProtocol implements ISlapProtocol {
      * Set a breakpoint.
      *
      * @param method Method to set breakpoint in.
-     * @param line     Line in method, offset from start of method (`_method` token).
+     * @param line Line in method, offset from start of method (`_method` token).
      * @return Response of request.
      * @throws IOException -
      */
