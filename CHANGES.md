@@ -17,6 +17,7 @@ Changes
 - Add inlay hint provider to magik-language-server.
 - Add code actions for @parameter and @return type-doc parts.
 - MethodReturnMatchesDocCheck points to the actual type-doc part.
+- Checks now mark the complete violating part, instead of the first token.
 - Various small fixes.
 
 

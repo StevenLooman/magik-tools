@@ -54,7 +54,11 @@ public class MethodLineCountCheck extends MagikCheck {
             .collect(Collectors.counting());
         if (lineCount > this.maximumLineCount) {
             final String message = String.format(MESSAGE, lineCount, this.maximumLineCount);
-            this.addIssue(node, message);
+            final AstNode markedNode = node.getChildren().stream()
+                .filter(childNode -> childNode.isNot(MagikGrammar.values()))
+                .findFirst()
+                .get();
+            this.addIssue(markedNode, message);
         }
     }
 
