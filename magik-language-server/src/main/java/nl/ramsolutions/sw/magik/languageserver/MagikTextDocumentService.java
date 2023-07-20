@@ -405,7 +405,6 @@ public class MagikTextDocumentService implements TextDocumentService {
         return CompletableFuture.supplyAsync(() -> this.renameProvider.provideRename(magikFile, position, newName));
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public CompletableFuture<List<Either<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>>> documentSymbol(
             final DocumentSymbolParams params) {
