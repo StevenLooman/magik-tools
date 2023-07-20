@@ -18,6 +18,7 @@ Changes
 - Add code actions for @parameter and @return type-doc parts.
 - MethodReturnMatchesDocCheck points to the actual type-doc part.
 - Checks now mark the complete violating part, instead of the first token.
+- Show source-check for magik-typed checks in magik-language-server.
 - Various small fixes.
 
 

@@ -10,11 +10,16 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
+import org.sonar.check.Rule;
 
 /**
  * Check for UNDEFINED method invocation result.
  */
+@Rule(key = UndefinedMethodResultTypedCheck.CHECK_KEY)
 public class UndefinedMethodResultTypedCheck extends MagikTypedCheck {
+
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final String CHECK_KEY = "UndefinedMethodResultTypedCheck";
 
     private static final String MESSAGE = "UNDEFINED results for method: %s";
 

@@ -11,11 +11,16 @@ import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
+import org.sonar.check.Rule;
 
 /**
  * Check if global is a known global.
  */
+@Rule(key = GlobalKnownTypedCheck.CHECK_KEY)
 public class GlobalKnownTypedCheck extends MagikTypedCheck {
+
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final String CHECK_KEY = "GlobalKnownTypedCheck";
 
     private static final String MESSAGE = "Unknown global: %s";
     private static final String DEFAULT_PACKAGE = "user";

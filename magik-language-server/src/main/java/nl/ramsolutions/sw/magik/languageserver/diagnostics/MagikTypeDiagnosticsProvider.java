@@ -1,11 +1,15 @@
 package nl.ramsolutions.sw.magik.languageserver.diagnostics;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
+import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
+import nl.ramsolutions.sw.magik.checks.MagikCheckHolder.Parameter;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import nl.ramsolutions.sw.magik.typedchecks.CheckList;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
@@ -36,21 +40,31 @@ public class MagikTypeDiagnosticsProvider {
         return checks.stream()
             .flatMap(check -> check.scanFileForIssues(magikFile).stream())
             .map(issue -> {
+                final MagikCheckHolder holder = issue.check().getHolder();
+
                 final Location location = Lsp4jConversion.locationToLsp4j(issue.location());
                 final Range range = location.getRange();
                 final String message = issue.message();
                 final DiagnosticSeverity severity = DiagnosticSeverity.Information;
-                final String diagnosticSource = "mtype";
+                final String checkKeyKebabCase = holder.getCheckKeyKebabCase();
+                final String diagnosticSource = String.format("mtype (%s)", checkKeyKebabCase);
                 return new Diagnostic(range, message, severity, diagnosticSource);
             })
             .collect(Collectors.toList());
     }
 
+    @SuppressWarnings("unchecked")
     private Set<MagikTypedCheck> createTypedChecks() {
         return CheckList.getChecks().stream()
             .map(checkClass -> {
                 try {
-                    return (MagikTypedCheck) checkClass.getDeclaredConstructor().newInstance();
+                    final Set<Parameter> parameters = Collections.emptySet();
+                    final MagikCheckHolder holder =
+                        new MagikCheckHolder((Class<MagikCheck>) checkClass, parameters, true);
+                    final MagikTypedCheck magikCheck =
+                        (MagikTypedCheck) checkClass.getDeclaredConstructor().newInstance();
+                    magikCheck.setHolder(holder);
+                    return magikCheck;
                 } catch (final ReflectiveOperationException exception) {
                     LOGGER.error(exception.getMessage(), exception);
                 }
