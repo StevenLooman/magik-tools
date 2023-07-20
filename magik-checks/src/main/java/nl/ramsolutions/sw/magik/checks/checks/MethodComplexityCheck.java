@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.metrics.ComplexityVisitor;
 import org.sonar.check.Rule;
@@ -46,7 +47,11 @@ public class MethodComplexityCheck extends MagikCheck {
         final int complexity = visitor.getComplexity();
         if (complexity > this.maximumComplexity) {
             final String message = String.format(MESSAGE, complexity, this.maximumComplexity);
-            this.addIssue(node, message);
+            final AstNode markedNode = node.getChildren().stream()
+                .filter(childNode -> childNode.isNot(MagikGrammar.values()))
+                .findFirst()
+                .get();
+            this.addIssue(markedNode, message);
         }
     }
 

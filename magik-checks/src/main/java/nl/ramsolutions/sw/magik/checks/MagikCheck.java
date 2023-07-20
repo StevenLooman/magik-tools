@@ -87,8 +87,10 @@ public abstract class MagikCheck extends MagikVisitor {
      * @param message Message of issue.
      */
     public void addIssue(final AstNode node, final String message) {
-        final Token token = node.getToken();
-        this.addIssue(token, message);
+        final URI uri = this.getMagikFile().getUri();
+        final Range range = Range.fromTree(node);
+        final Location location = new Location(uri, range);
+        this.addIssue(location, message);
     }
 
     /**
