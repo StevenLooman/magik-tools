@@ -38,20 +38,18 @@ public class UndefinedMethodResultTypedCheck extends MagikTypedCheck {
             final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
             final String methodName = helper.getMethodName();
 
-            String fullName = methodName;
+            String fullMethodName = methodName;
             AbstractType calledType = this.getTypeInvokedOn(node);
-            if (calledType != null) {
-                final Collection<Method> methods = calledType.getMethods(methodName);
-                if (!methods.isEmpty()) {
-                    // Set real called type.
-                    // TODO: Only first method, or should we test all methods?
-                    final Method method = new ArrayList<>(methods).get(0);
-                    calledType = method.getOwner();
-                }
-                fullName = calledType.getFullName() + "." + methodName;
+            final Collection<Method> methods = calledType.getMethods(methodName);
+            if (!methods.isEmpty()) {
+                // Set real called type.
+                // TODO: Only first method, or should we test all methods?
+                final Method method = new ArrayList<>(methods).get(0);
+                calledType = method.getOwner();
             }
+            fullMethodName = calledType.getFullName() + "." + methodName;
 
-            final String message = String.format(MESSAGE, fullName);
+            final String message = String.format(MESSAGE, fullMethodName);
             this.addIssue(issueNode, message);
         }
     }
