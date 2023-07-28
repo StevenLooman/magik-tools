@@ -57,12 +57,12 @@ public class ParameterTypeProvider {
             final MethodDefinition methodDefinition) {
         // Compare and create Code Actions.
         return Stream.concat(
-                this.createAddParameterCodeAction(magikFile, methodDefinition).stream(),
-                this.createRemoveParameterCodeAction(magikFile, methodDefinition).stream())
+                this.createAddParameterCodeActions(magikFile, methodDefinition).stream(),
+                this.createRemoveParameterCodeActions(magikFile, methodDefinition).stream())
             .collect(Collectors.toList());
     }
 
-    private Collection<CodeAction> createAddParameterCodeAction(
+    private Collection<CodeAction> createAddParameterCodeActions(
             final MagikTypedFile magikFile,
             final MethodDefinition methodDefinition) {
         // Find all method and type-doc parameters.
@@ -94,7 +94,7 @@ public class ParameterTypeProvider {
             .collect(Collectors.toList());
     }
 
-    private Collection<CodeAction> createRemoveParameterCodeAction(
+    private Collection<CodeAction> createRemoveParameterCodeActions(
             final MagikTypedFile magikFile,
             final MethodDefinition methodDefinition) {
         // Find all parameters and type-doc parameters.
