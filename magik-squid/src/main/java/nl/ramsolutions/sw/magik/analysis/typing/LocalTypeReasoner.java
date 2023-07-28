@@ -29,6 +29,7 @@ import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
@@ -1269,6 +1270,9 @@ public class LocalTypeReasoner extends AstWalker {
         if (calledType == SelfType.INSTANCE) {
             // Replace self type with concrete type, need to know the method we call.
             calledType = this.typeKeeper.getType(SW_PROCEDURE);
+        } else if (calledType instanceof AliasType) {
+            final AliasType aliasTyped = (AliasType) calledType;
+            calledType = aliasTyped.getAliasedType();
         }
 
         // Clear iterator results.
