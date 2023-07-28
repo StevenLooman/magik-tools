@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.TypeDocGrammar;
@@ -62,6 +63,7 @@ public class TypeDocParser {
     private final Parser<LexerlessGrammar> parser =
         new ParserAdapter<>(StandardCharsets.ISO_8859_1, TypeDocGrammar.create());
     private final List<Token> tokens;
+    private final String pakkage;
     private AstNode typeDocNode;
 
     /**
@@ -69,12 +71,13 @@ public class TypeDocParser {
      * @param node {@link AstNode} to analyze.
      */
     public TypeDocParser(final AstNode node) {
-        this(TypeDocParser.getCommentTokens(node));
+        this(TypeDocParser.getCommentTokens(node), new PackageNodeHelper(node).getCurrentPackage());
         // No node type check, to be able to parse shared constants etc.
     }
 
-    public TypeDocParser(final List<Token> docTokens) {
+    public TypeDocParser(final List<Token> docTokens, final String pakkage) {
         this.tokens = Collections.unmodifiableList(docTokens);
+        this.pakkage = pakkage;
     }
 
     private static List<Token> getCommentTokens(final AstNode node) {
@@ -329,7 +332,7 @@ public class TypeDocParser {
             .filter(token -> !token.getValue().equals("{") && !token.getValue().equals("}"))
             .map(Token::getValue)
             .collect(Collectors.joining());
-        return TypeStringParser.parseTypeString(value);
+        return TypeStringParser.parseTypeString(value, this.pakkage);
     }
 
     private AstNode getTypeNode(final AstNode node) {

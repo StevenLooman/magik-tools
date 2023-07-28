@@ -46,7 +46,7 @@ public class PackageNodeHelper {
         }
 
         // Default to package.
-        return DEFAULT_PACKAGE;
+        return PackageNodeHelper.DEFAULT_PACKAGE;
     }
 
 }
