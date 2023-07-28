@@ -68,6 +68,7 @@ public class HoverProvider {
 
         // See what we should provide a hover for.
         final AstNode parentNode = hoveredNode.getParent();
+        final AstNode parentParentNode = parentNode != null ? parentNode.getParent() : null;
         final StringBuilder builder = new StringBuilder();
         if (hoveredNode.is(MagikGrammar.PACKAGE_IDENTIFIER)) {
             this.provideHoverPackage(magikFile, hoveredNode, builder);
@@ -84,6 +85,8 @@ public class HoverProvider {
                 final AstNode parameterNode = hoveredNode.getParent();
                 this.provideHoverAtom(magikFile, parameterNode, builder);
             } else if (parentNode.is(MagikGrammar.VARIABLE_DEFINITION)) {
+                this.provideHoverAtom(magikFile, hoveredNode, builder);
+            } else if (parentParentNode != null && parentParentNode.is(MagikGrammar.FOR_VARIABLES)) {
                 this.provideHoverAtom(magikFile, hoveredNode, builder);
             } else if (parentNode.is(MagikGrammar.EXPRESSION)) {
                 final AstNode expressionNode = hoveredNode.getParent();
