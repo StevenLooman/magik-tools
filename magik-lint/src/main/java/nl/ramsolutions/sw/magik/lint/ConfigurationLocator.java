@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.CheckForNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +32,17 @@ public final class ConfigurationLocator {
     public static final String ENV_VAR_MAGIK_LINT_RC = "MAGIKLINTRC";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationLocator.class);
+    private static final Map<Path, Path> CACHE = new ConcurrentHashMap<>();
+    private static final Path DOES_NOT_EXIST = Path.of("DOES_NOT_EXIST");
 
     private ConfigurationLocator() {
+    }
+
+    /**
+     * Reset the directory-cache.
+     */
+    public static void resetCache() {
+        ConfigurationLocator.CACHE.clear();
     }
 
     /**
@@ -49,43 +60,61 @@ public final class ConfigurationLocator {
     public static Path locateConfiguration(final Path searchPath) {
         LOGGER.trace("Search path: {}", searchPath.toAbsolutePath());
 
+        if (ConfigurationLocator.CACHE.containsKey(searchPath)) {
+            final Path configurationPath = ConfigurationLocator.CACHE.get(searchPath);
+            LOGGER.trace("Found in cache: {}", configurationPath);
+
+            if (configurationPath == DOES_NOT_EXIST) {
+                return null;
+            }
+
+            return configurationPath;
+        }
+
         // 1. rc file in current dir.
         final Path currentDirPath = ConfigurationLocator.inCurrentDir(searchPath);
         if (currentDirPath != null) {
+            ConfigurationLocator.CACHE.put(searchPath, currentDirPath);
             return currentDirPath;
         }
 
         // 3. In any upper Smallworld product.
         final Path productDirPath = ConfigurationLocator.inProductDir(searchPath);
         if (productDirPath != null) {
+            ConfigurationLocator.CACHE.put(searchPath, productDirPath);
             return productDirPath;
         }
 
         // 4. In env var MAGIKLINTRC.
         final Path rcEnvVarPath = ConfigurationLocator.rcEnvVar();
         if (rcEnvVarPath != null) {
+            ConfigurationLocator.CACHE.put(searchPath, rcEnvVarPath);
             return rcEnvVarPath;
         }
 
         // 5. In home directory.
         final Path homeDirPath = ConfigurationLocator.inHomeDir();
         if (homeDirPath != null) {
+            ConfigurationLocator.CACHE.put(searchPath, homeDirPath);
             return homeDirPath;
         }
 
         // 6. In your home directory, Java style.
         final Path userHomePath = ConfigurationLocator.inUserHomeDir();
         if (userHomePath != null) {
+            ConfigurationLocator.CACHE.put(searchPath, userHomePath);
             return userHomePath;
         }
 
         // 7. /etc/magik-lint.properties.
         final Path etcPath = ConfigurationLocator.inEtcDir();
         if (etcPath != null) {
+            ConfigurationLocator.CACHE.put(searchPath, etcPath);
             return etcPath;
         }
 
         LOGGER.trace("No configuration found");
+        ConfigurationLocator.CACHE.put(searchPath, DOES_NOT_EXIST);
         return null;
     }
 
