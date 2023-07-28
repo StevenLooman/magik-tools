@@ -51,6 +51,7 @@ public class MagikLintDiagnosticsProvider {
      */
     public List<Diagnostic> getDiagnostics(final MagikFile magikFile) throws IOException {
         final Path searchPath = Path.of(magikFile.getUri()).getParent();
+        ConfigurationLocator.resetCache();
         final Path configurationPath = this.overrideConfigurationPath != null
             ? this.overrideConfigurationPath
             : ConfigurationLocator.locateConfiguration(searchPath);
