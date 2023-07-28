@@ -50,7 +50,7 @@ class InlayHintProviderTest {
         final MagikTypedFile magikFile = new MagikTypedFile(TEST_URI, code, typeKeeper);
 
         final List<InlayHint> inlayHints =
-            provider.provideInlayHints(magikFile, new Range(new Position(), new Position()));
+            provider.provideInlayHints(magikFile, new Range(new Position(0, 0), new Position(2, 0)));
         assertThat(inlayHints).hasSize(2);
 
         final InlayHint inlayHint0 = inlayHints.get(0);
