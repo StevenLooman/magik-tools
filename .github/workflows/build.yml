@@ -27,8 +27,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
       - name: Test and package
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn --batch-mode --update-snapshots package
       - run: mkdir staging && cp **/target/*.jar staging
       - uses: actions/upload-artifact@v3
