@@ -86,7 +86,10 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
             IntStream.range(0, size)
                 .forEach(index -> {
                     final AbstractType parameterType = parameterTypes.get(index);
-                    if (parameterType == UndefinedType.INSTANCE) {
+                    // Don't test undefined types.
+                    if (parameterType == UndefinedType.INSTANCE
+                        || parameterType instanceof CombinedType
+                           && ((CombinedType) parameterType).getTypes().contains(UndefinedType.INSTANCE)) {
                         return;
                     }
 

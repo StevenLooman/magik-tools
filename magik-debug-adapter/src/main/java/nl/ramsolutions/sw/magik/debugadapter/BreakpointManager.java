@@ -210,14 +210,12 @@ class BreakpointManager {
         int line = sourceBreakpoint.getLine();
         final AstNode methodNode = this.getNode(source, line);
         final String method;
-        final int methodLine;
         if (methodNode == null) {
             method = "<not_in_method>";
-            methodLine = 0;
         } else {
             final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodNode);
             method = helper.getFullExemplarMethodName();
-            methodLine = methodNode.getTokenLine();
+            final int methodLine = methodNode.getTokenLine();
             if (methodLine == line) {
                 line = 0;
             }

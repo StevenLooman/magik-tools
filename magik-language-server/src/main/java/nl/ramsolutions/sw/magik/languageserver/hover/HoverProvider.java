@@ -55,6 +55,7 @@ public class HoverProvider {
      * @param position Position in file.
      * @return Hover at position.
      */
+    @SuppressWarnings("java:S3776")
     public Hover provideHover(final MagikTypedFile magikFile, final Position position) {
         // Parse and reason magik.
         final AstNode node = magikFile.getTopNode();
