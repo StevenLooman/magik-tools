@@ -31,6 +31,7 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
 
     private static final String MESSAGE = "Argument type (%s) does not match parameter type (%s)";
 
+    @SuppressWarnings("java:S3776")
     @Override
     protected void walkPostMethodInvocation(final AstNode node) {
         // Ensure there are arguments to check.
