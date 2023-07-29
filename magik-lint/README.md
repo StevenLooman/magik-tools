@@ -62,7 +62,7 @@ Magik-lint can use a configuration file.
 
 The configuration file is located as follows, in order:
 
-1. if '--rcfile' command line argument is given, use it;
+1. if `--rcfile`` command line argument is given, use it;
 2. if `magik-lint.properties` exists in the current working directory, use it;
 3. if `.magik-lint.properties` exists in the current working directory, use it;
 4. if `magik-lint.properties` exists in the current Smallworld product seen from the current working directory, or any parent product, use it;
@@ -74,7 +74,8 @@ If no configuration file is found, defaults are assumed.
 
 The following options are avaiable in the configuration file:
 
-- disabled = <comma separated list of check-names>
+- enabled = <comma separated list of check-names>
+- disabled = <comma separated list of check-names or `all`>
 - <check_name>.<check_attribute> = <value>
 
 I.e., you can disable checks `method-complexity` and `line-length` by setting:
