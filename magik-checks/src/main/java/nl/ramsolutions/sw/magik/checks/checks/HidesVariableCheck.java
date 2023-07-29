@@ -7,7 +7,6 @@ import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry.Type;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
@@ -66,7 +65,8 @@ public class HidesVariableCheck extends MagikCheck {
         for (final Scope ancestorScope : scope.getAncestorScopes()) {
             final ScopeEntry scopeEntry = ancestorScope.getScopeEntry(identifier);
             if (scopeEntry != null
-                && scopeEntry.isType(Type.LOCAL)) {
+                && scopeEntry.isType(ScopeEntry.Type.LOCAL)
+                && scopeEntry.getNode().getTokenLine() < identifierNode.getTokenLine()) {
                 this.addIssue(identifierNode, MESSAGE);
             }
         }
