@@ -154,6 +154,27 @@ public class CombinedType extends AbstractType {
     }
 
     @Override
+    public TypeString getTypeString() {
+        final TypeString[] typeStringsArr = this.types.stream()
+            .map(AbstractType::getTypeString)
+            .collect(Collectors.toList())
+            .toArray(TypeString[]::new);
+        return TypeString.ofCombination(TypeString.DEFAULT_PACKAGE, typeStringsArr);
+    }
+
+    @Override
+    public AbstractType substituteType(final AbstractType from, final AbstractType to) {
+        final Set<AbstractType> substitutedTypes = this.types.stream()
+            .map(type -> type.substituteType(from, to))
+            .collect(Collectors.toUnmodifiableSet());
+        if (substitutedTypes.equals(this.types)) {
+            return this;
+        }
+
+        return new CombinedType(substitutedTypes);
+    }
+
+    @Override
     public String toString() {
         return String.format(
             "%s@%s(%s)",
@@ -182,27 +203,6 @@ public class CombinedType extends AbstractType {
 
         final CombinedType other = (CombinedType) obj;
         return Objects.equals(this.getFullName(), other.getFullName());
-    }
-
-    @Override
-    public TypeString getTypeString() {
-        final TypeString[] typeStringsArr = this.types.stream()
-            .map(AbstractType::getTypeString)
-            .collect(Collectors.toList())
-            .toArray(TypeString[]::new);
-        return TypeString.ofCombination(TypeString.DEFAULT_PACKAGE, typeStringsArr);
-    }
-
-    @Override
-    public AbstractType substituteType(final AbstractType from, final AbstractType to) {
-        final Set<AbstractType> substitutedTypes = this.types.stream()
-            .map(type -> type.substituteType(from, to))
-            .collect(Collectors.toUnmodifiableSet());
-        if (substitutedTypes.equals(this.types)) {
-            return this;
-        }
-
-        return new CombinedType(substitutedTypes);
     }
 
 }
