@@ -29,6 +29,13 @@ class HidesVariableCheckTest extends MagikCheckTestBase {
             + "        _import a\n"
             + "    _endproc\n"
             + "_endblock\n",
+        ""
+            + "_block\n"
+            + "    _block\n"
+            + "        _local a << 20\n"
+            + "    _endblock\n"
+            + "    _local a << 10\n"
+            + "_endblock\n",
     })
     void testValid(final String code) {
         final MagikCheck check = new HidesVariableCheck();
