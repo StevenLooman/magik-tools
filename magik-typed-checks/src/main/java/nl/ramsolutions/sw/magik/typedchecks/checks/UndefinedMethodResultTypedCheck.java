@@ -38,7 +38,6 @@ public class UndefinedMethodResultTypedCheck extends MagikTypedCheck {
             final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
             final String methodName = helper.getMethodName();
 
-            String fullMethodName = methodName;
             AbstractType calledType = this.getTypeInvokedOn(node);
             final Collection<Method> methods = calledType.getMethods(methodName);
             if (!methods.isEmpty()) {
@@ -47,7 +46,7 @@ public class UndefinedMethodResultTypedCheck extends MagikTypedCheck {
                 final Method method = new ArrayList<>(methods).get(0);
                 calledType = method.getOwner();
             }
-            fullMethodName = calledType.getFullName() + "." + methodName;
+            final String fullMethodName = calledType.getFullName() + "." + methodName;
 
             final String message = String.format(MESSAGE, fullMethodName);
             this.addIssue(issueNode, message);

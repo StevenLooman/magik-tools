@@ -73,7 +73,7 @@ public class ScopeCountCheck extends MagikCheck {
             final AstNode markedNode = node.getChildren().stream()
                 .filter(childNode -> childNode.isNot(MagikGrammar.values()))
                 .findFirst()
-                .get();
+                .orElseThrow();
             this.addIssue(markedNode, message);
         }
     }
