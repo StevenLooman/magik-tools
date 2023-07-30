@@ -78,6 +78,7 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
                     if (parameter.is(Parameter.Modifier.OPTIONAL)) {
                         return CombinedType.combine(type, unsetType);
                     }
+
                     return type;
                 })
                 .collect(Collectors.toList());
