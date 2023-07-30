@@ -164,12 +164,15 @@ public enum TypeStringGrammar implements GrammarRuleKey {
 
         b.rule(EXPRESSION_RESULT_STRING).is(
             b.firstOf(
-                Keyword.EXPRESSION_RESULT_UNDEFINED,
+                EXPRESSION_RESULT_STRING_UNDEFINED,
                 b.sequence(
                     TYPE_STRING,
                     b.zeroOrMore(
                         Punctuator.TYPE_SEPARATOR,
                         TYPE_STRING))));
+
+        b.rule(EXPRESSION_RESULT_STRING_UNDEFINED).is(
+            Keyword.EXPRESSION_RESULT_UNDEFINED);
 
         b.rule(SYNTAX_ERROR).is(
             b.regexp(".*"));

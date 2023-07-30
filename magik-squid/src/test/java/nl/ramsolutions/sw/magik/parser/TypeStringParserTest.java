@@ -127,4 +127,12 @@ class TypeStringParserTest {
             .isEqualTo(new ExpressionResultString(TypeString.UNDEFINED));
     }
 
+    @Test
+    void testUndefinedResultString() {
+        final String exprStr = "__UNDEFINED_RESULT__";
+        final ExpressionResultString result = TypeStringParser.parseExpressionResultString(exprStr, SW_PACKAGE);
+        assertThat(result)
+            .isEqualTo(ExpressionResultString.UNDEFINED);
+    }
+
 }
