@@ -1,5 +1,4 @@
-Changes
-=======
+# Changes
 
 0.7.2 (unreleased)
 
