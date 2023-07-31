@@ -5,10 +5,14 @@ on:
       - develop
   pull_request:
     types: [opened, synchronize, reopened]
+
 jobs:
   build:
     name: Build and test
-    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+            os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
         with:
