@@ -1,4 +1,4 @@
-name: Build
+name: Lint, build and test
 on:
   push:
     branches:
@@ -10,8 +10,8 @@ jobs:
   build:
     name: Build and test
     strategy:
-        matrix:
-            os: [ubuntu-latest, windows-latest]
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -38,3 +38,11 @@ jobs:
         with:
           name: Package
           path: staging
+
+  markdown_lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: DavidAnson/markdownlint-cli2-action@v11
+        with:
+          globs: '**/*.md'
