@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ParameterTypeProviderTest {
 
+    private static final String NEWLINE = System.lineSeparator();
+
     private List<CodeAction> getCodeActions(
             final String code,
             final Range range) {
@@ -52,7 +54,7 @@ class ParameterTypeProviderTest {
             final List<TextEdit> changes = textDocumentEdit.getEdits();
             assertThat(uri).isEqualTo("tests://unittest");
             assertThat(changes).hasSize(1);
-            assertThat(changes.get(0).getNewText()).isEqualTo("\t## @param {_undefined} param2 Description\n");
+            assertThat(changes.get(0).getNewText()).isEqualTo("\t## @param {_undefined} param2 Description" + NEWLINE);
         });
     }
 
