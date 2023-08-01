@@ -261,6 +261,15 @@ public class LocalTypeReasoner extends AstWalker {
     }
 
     @Override
+    protected void walkPostExemplarName(final AstNode node) {
+        final String exemplarName = node.getTokenValue();
+        final TypeString typeStr = TypeString.ofIdentifier(exemplarName, this.currentPackage);
+        final AbstractType type = this.typeKeeper.getType(typeStr);
+        final ExpressionResult result = new ExpressionResult(type);
+        this.setNodeType(node, result);
+    }
+
+    @Override
     protected void walkPostMethodDefinition(final AstNode node) {
         if (!this.hasNodeType(node)) {
             // Nothing was assigned to this node, so it must be empty.

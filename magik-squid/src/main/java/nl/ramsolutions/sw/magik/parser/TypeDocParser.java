@@ -324,7 +324,6 @@ public class TypeDocParser {
     private TypeString getTypeString(final AstNode node) {
         final AstNode typeNode = node.getFirstChild(TypeDocGrammar.TYPE);
         if (typeNode == null) {
-            // TODO: UNDEFINED or null?
             return TypeString.UNDEFINED;
         }
 
