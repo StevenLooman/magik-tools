@@ -74,7 +74,9 @@ public class HoverProvider {
         if (hoveredNode.is(MagikGrammar.PACKAGE_IDENTIFIER)) {
             this.provideHoverPackage(magikFile, hoveredNode, builder);
         } else if (parentNode != null) {
-            if (parentNode.is(MagikGrammar.EXEMPLAR_NAME, MagikGrammar.METHOD_NAME)) {
+            if (parentNode.is(MagikGrammar.EXEMPLAR_NAME)) {
+                this.provideHoverAtom(magikFile, parentNode, builder);
+            } else if (parentNode.is(MagikGrammar.METHOD_NAME)) {
                 this.provideHoverMethodDefinition(magikFile, hoveredNode, builder);
             } else if (hoveredNode.is(MagikGrammar.IDENTIFIER)
                        && parentNode.is(MagikGrammar.METHOD_INVOCATION)) {

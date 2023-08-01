@@ -63,7 +63,7 @@ class HoverProviderTest {
     }
 
     @Test
-    void testProvideHoverMethodDefinitionExemplar() {
+    void testProvideHoverExemplarName() {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString hoverMeTypeRef = TypeString.ofIdentifier("hover_me_type", "user");
