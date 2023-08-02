@@ -36,7 +36,7 @@ jobs:
       - run: mkdir staging && cp **/target/*.jar staging
       - uses: actions/upload-artifact@v3
         with:
-          name: Package
+          name: Package-${{ matrix.os }}
           path: staging
 
   markdown_lint:
