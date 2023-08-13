@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Test SwMethodDocCheck.
  */
+@SuppressWarnings("checkstyle:MagicNumber")
 class SwMethodDocCheckTest extends MagikCheckTestBase {
 
     @ParameterizedTest
@@ -65,6 +66,54 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
         final MagikCheck check = new SwMethodDocCheck();
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).hasSize(1);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        ""
+            + "_method a.b\n"
+            + "_endmethod",
+        ""
+            + "_method a.b\n"
+            + "    a.do_something()\n"
+            + "_endmethod",
+        ""
+            + "_method a.b()\n"
+            + "_endmethod",
+        ""
+            + "_method a.b()\n"
+            + "    a.do_something()\n"
+            + "_endmethod",
+    })
+    void testNotAllowBlankMethodDoc(final String code) {
+        final SwMethodDocCheck check = new SwMethodDocCheck();
+        check.allowBlankMethodDoc = false; // Defaults to false, but to be explicit.
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).hasSize(1);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        ""
+            + "_method a.b\n"
+            + "_endmethod",
+        ""
+            + "_method a.b\n"
+            + "    a.do_something()\n"
+            + "_endmethod",
+        ""
+            + "_method a.b()\n"
+            + "_endmethod",
+        ""
+            + "_method a.b()\n"
+            + "    a.do_something()\n"
+            + "_endmethod",
+    })
+    void testAllowBlankMethodDoc(final String code) {
+        final SwMethodDocCheck check = new SwMethodDocCheck();
+        check.allowBlankMethodDoc = true;
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
     }
 
 }
