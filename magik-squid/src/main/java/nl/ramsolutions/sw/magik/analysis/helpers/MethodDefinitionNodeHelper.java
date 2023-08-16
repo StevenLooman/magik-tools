@@ -198,4 +198,20 @@ public class MethodDefinitionNodeHelper {
             .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(magikPunctuator.getValue()));
     }
 
+    /**
+     * Get the node which identifies the name of the method.
+     * This is either the {@link MagikGrammar.METHOD_NAME} node,
+     * or the {@link MagikGrammar.PARAMETERS_SQUARE} node.
+     * @return Node which identifies the method.
+     */
+    public AstNode getMethodNameNode() {
+        final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
+        if (methodNameNode == null) {
+            final AstNode parametersNode = this.node.getFirstChild(MagikGrammar.PARAMETERS);
+            return parametersNode;
+        }
+
+        return methodNameNode;
+    }
+
 }

@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinitionParser;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
 
@@ -53,8 +54,10 @@ public class DuplicateMethodInFileCheck extends MagikCheck {
             .filter(entry -> entry.getValue().size() > 1)
             .flatMap(entry -> entry.getValue().stream())
             .forEach(definition -> {
-                AstNode definitionNode = definition.getNode();
-                this.addIssue(definitionNode, MESSAGE);
+                final AstNode definitionNode = definition.getNode();
+                final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
+                final AstNode methodNameNode = helper.getMethodNameNode();
+                this.addIssue(methodNameNode, MESSAGE);
             });
     }
 
