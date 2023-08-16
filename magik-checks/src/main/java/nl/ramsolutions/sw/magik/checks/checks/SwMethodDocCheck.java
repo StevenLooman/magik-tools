@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
@@ -30,10 +31,12 @@ public class SwMethodDocCheck extends MagikCheck {
 
     @Override
     protected void walkPreMethodDefinition(final AstNode node) {
+        final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
+        final AstNode methodNameNode = helper.getMethodNameNode();
         final String methodDoc = this.extractDoc(node);
         if (methodDoc.isBlank()) {
             final String message = String.format(MESSAGE, "all");
-            this.addIssue(node, message);
+            this.addIssue(methodNameNode, message);
             return;
         }
 
@@ -42,7 +45,7 @@ public class SwMethodDocCheck extends MagikCheck {
         methodParameters.removeAll(docParameters);
         for (final String missing : methodParameters) {
             final String message = String.format(MESSAGE, missing);
-            this.addIssue(node, message);
+            this.addIssue(methodNameNode, message);
         }
     }
 
