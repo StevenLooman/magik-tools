@@ -51,7 +51,7 @@ public class ForbiddenCallCheck extends MagikCheck {
         }
 
         final String message = String.format(MESSAGE, identifier);
-        this.addIssue(node, message);
+        this.addIssue(identifierNode, message);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class ForbiddenCallCheck extends MagikCheck {
         }
 
         final String message = String.format(MESSAGE, identifier);
-        this.addIssue(node, message);
+        this.addIssue(parentNode, message);
     }
 
 }
