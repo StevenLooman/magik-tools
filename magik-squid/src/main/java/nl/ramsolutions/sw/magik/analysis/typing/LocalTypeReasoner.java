@@ -947,7 +947,7 @@ public class LocalTypeReasoner extends AstWalker {
                 // Store slot.
                 this.setNodeType(assignedNode, result);
             } else {
-                LOGGER.debug("Unsupported construct!");  // TODO
+                LOGGER.debug("Unsupported construct!");
             }
         }
 
