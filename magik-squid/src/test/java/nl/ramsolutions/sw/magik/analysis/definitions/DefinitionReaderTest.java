@@ -442,6 +442,23 @@ class DefinitionReaderTest {
     }
 
     @Test
+    void testDefineSharedConstant2() {
+        final String code = "test_exemplar.define_shared_constant(:const1, 1, _false)";
+        final AstNode node = this.parseCode(code);
+        final DefinitionReader reader = new DefinitionReader();
+        reader.walkAst(node);
+
+        final List<Definition> definitions = reader.getDefinitions();
+        assertThat(definitions).hasSize(1);
+
+        assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
+        final MethodDefinition getMethodDef = (MethodDefinition) definitions.get(0);
+        assertThat(getMethodDef.getName()).isEqualTo("test_exemplar.const1");
+        assertThat(getMethodDef.getModifiers()).containsExactly();
+        assertThat(getMethodDef.getParameters()).isEmpty();
+    }
+
+    @Test
     void testAssignGlobal() {
         final String code = "_global g << _unset";
         final AstNode node = this.parseCode(code);

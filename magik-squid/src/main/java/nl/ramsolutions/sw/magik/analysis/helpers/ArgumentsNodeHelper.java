@@ -2,6 +2,8 @@ package nl.ramsolutions.sw.magik.analysis.helpers;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
@@ -40,13 +42,13 @@ public class ArgumentsNodeHelper {
     }
 
     /**
-     * Get the nth argument, with expecting type.
+     * Get the nth argument, with expecting any of the matching types.
      * @param nth Nth argument.
-     * @param type Expected (required) type.
+     * @param types Expected (required) matching types.
      * @return Node of given type.
      */
     @CheckForNull
-    public AstNode getArgument(final int nth, final MagikGrammar type) {
+    public AstNode getArgument(final int nth, final MagikGrammar... types) {
         final AstNode expressionNode = this.getArgument(nth);
         if (expressionNode == null) {
             return null;
@@ -57,7 +59,11 @@ public class ArgumentsNodeHelper {
             return null;
         }
 
-        return atomNode.getFirstChild(type);
+        return Stream.of(types)
+            .map(type -> atomNode.getFirstChild(type))
+            .filter(Objects::nonNull)
+            .findAny()
+            .orElse(null);
     }
 
 }
