@@ -19,7 +19,7 @@ class CommentRegularExpressionCheckTest extends MagikCheckTestBase {
         final String code = ""
             + "# match_me\n"
             + "print(a)";
-        final List<MagikIssue> issues = runCheck(code, check);
+        final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isNotEmpty();
     }
 
@@ -31,7 +31,7 @@ class CommentRegularExpressionCheckTest extends MagikCheckTestBase {
         final String code = ""
             + "# match_me\n"
             + "print(a)";
-        final List<MagikIssue> issues = runCheck(code, check);
+        final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isEmpty();
     }
 }

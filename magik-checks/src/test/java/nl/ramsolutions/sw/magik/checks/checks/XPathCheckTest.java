@@ -20,7 +20,7 @@ class XPathCheckTest extends MagikCheckTestBase {
             + "_method a.b\n"
             + "    _return _self\n"
             + "_endmethod";
-        final List<MagikIssue> issues = runCheck(code, check);
+        final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isNotEmpty();
     }
 
@@ -33,7 +33,7 @@ class XPathCheckTest extends MagikCheckTestBase {
             + "_method a.b\n"
             + "    _return _self\n"
             + "_endmethod";
-        final List<MagikIssue> issues = runCheck(code, check);
+        final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isEmpty();
     }
 

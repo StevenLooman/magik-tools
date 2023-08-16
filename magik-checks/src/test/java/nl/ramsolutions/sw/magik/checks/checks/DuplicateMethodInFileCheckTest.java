@@ -43,7 +43,7 @@ class DuplicateMethodInFileCheckTest extends MagikCheckTestBase {
     })
     void testValid(final String code) {
         final MagikCheck check = new DuplicateMethodInFileCheck();
-        final List<MagikIssue> issues = runCheck(code, check);
+        final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isEmpty();
     }
 
@@ -77,7 +77,7 @@ class DuplicateMethodInFileCheckTest extends MagikCheckTestBase {
     })
     void testInvalid(final String code) {
         final MagikCheck check = new DuplicateMethodInFileCheck();
-        final List<MagikIssue> issues = runCheck(code, check);
+        final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).hasSize(2);
     }
 
