@@ -125,6 +125,7 @@ public class MethodDefinitionNodeHelper {
         if (modifiersNode == null) {
             return Collections.emptySet();
         }
+
         return modifiersNode.getChildren();
     }
 
