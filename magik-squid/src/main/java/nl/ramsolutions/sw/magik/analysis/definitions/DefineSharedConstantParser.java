@@ -63,7 +63,8 @@ public class DefineSharedConstantParser {
         final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
         final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
         final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
-        final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SYMBOL);
+        final AstNode argument2Node =
+            argumentsHelper.getArgument(2, MagikGrammar.SYMBOL, MagikGrammar.TRUE, MagikGrammar.FALSE);
         return argument0Node != null
             && argument2Node != null;
     }
@@ -87,7 +88,8 @@ public class DefineSharedConstantParser {
         final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
         final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
         final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
-        final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SYMBOL);
+        final AstNode argument2Node =
+            argumentsHelper.getArgument(2, MagikGrammar.SYMBOL, MagikGrammar.TRUE, MagikGrammar.FALSE);
         if (argument0Node == null
             || argument2Node == null) {
             throw new IllegalStateException();
