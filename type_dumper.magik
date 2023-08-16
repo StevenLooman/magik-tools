@@ -181,6 +181,7 @@ _private _method type_dumper.int!run()
 	_self.pre_process()
 
 	# Write intro.
+	_self.write_line("// Smallworld version: ", system.sw!version_string)
 	_self.write_line("// self type: ", _self.self_type)
 	_self.write_line("// undefined type: ", _self.undefined_type)
 	_self.write_line("// undefined result: ", _self.undefined_result)
@@ -453,18 +454,30 @@ _private _method type_dumper.write_method(type_name, method)
 			>> {}
 		_endif
 
-	_local source_file <<
 	instruction[:source_file] <<
 		_if _not method.slot_accessor?
 		_then
-			>>  _try _with err
-					>> method.source_file
-				_when error
-					# pass
-				_endtry
+			>>  _try
+				    >> method.source_file
+			    _when error
+				    # pass
+			    _endtry
 		_endif
 
 	instruction[:doc] << method_finder.get_method_comment(method.name, type_name)
+
+	_local type << method.owner.meta_at(:exemplar)
+	instruction[:hash] <<
+		_if _not method.slot_accessor? _andif
+		    _not method.shared_constant? _andif
+		    _not method.shared_variable?
+		_then
+			>> _try
+				   >> sw!method_hash(type, method.name)
+			   _when error
+				   # pass
+			   _endtry
+		_endif
 
 	_self.write_instruction(instruction)
 _endmethod
@@ -553,7 +566,7 @@ _private _iter _method type_dumper.pkg_types(pkg)
 	_loop
 		# Skip procedures.
 		_if element.is_class_of?(sw:procedure) _andif
-			element _isnt sw:procedure
+		    element _isnt sw:procedure
 		_then
 			_continue
 		_endif
@@ -602,7 +615,7 @@ _private _iter _method type_dumper.pkg_type_globals(pkg)
 
 		# Skip procedures.
 		_if element.is_class_of?(sw:procedure) _andif
-			element _isnt sw:procedure
+		    element _isnt sw:procedure
 		_then
 			_continue
 		_endif
@@ -632,7 +645,7 @@ _private _iter _method type_dumper.pkg_procedures(pkg)
 		_local var << pkg.global_at(key)
 		_local value << var.value
 		_if _not value.is_class_of?(sw:procedure) _orif
-			value _is sw:procedure
+		    value _is sw:procedure
 		_then
 			_continue
 		_endif
@@ -707,7 +720,7 @@ _private _method type_dumper.build_params(name, procedure)
 	_loop
 		_local modifier <<
 			_if procedure.gather_arg? _andif
-				index = param_list.size
+			    index = param_list.size
 			_then
 				>> "gather"
 			_elif index > procedure.num_mandatory_args
