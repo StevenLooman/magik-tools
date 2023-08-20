@@ -9,7 +9,6 @@
 
 By no means is this product fully tested and production-ready. Use at your own risk, your mileage may vary.
 
-
 ## SonarQube plugin
 
 ### Installation
@@ -20,12 +19,11 @@ Copy the plugin (`sonar-magik-plugin-<version>.jar`) to your `sonarqube/extensio
 
 Pre-built artifacts/jars can be found at [`magik-tools/releases`](https://github.com/StevenLooman/magik-tools/releases).
 
-
 ### Analyzing projects
 
 Use [sonar-scanner](https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner) to analyze your projects. An example configuration, stored in `sonar-project.properties`, would be:
 
-```
+```properties
 sonar.projectKey=test:test_project
 sonar.projectName=Test project
 sonar.sources=modules/
@@ -33,58 +31,53 @@ sonar.language=magik
 sonar.coverageReportPaths=coverage.xml
 ```
 
-
 ## Magik Linter
 
 A linter for Magik is available in the [`magik-lint`](magik-lint) directory. See [`magik-lint/README.md`](magik-lint/README.md) for more information.
-
 
 ## Language server
 
 A language server for Magik is available in the [`magik-language-server`](magik-language-server) directory. See [`magik-language-server/README.md`](magik-language-server/README.md) for more information.
 
-
 ## Debug adapter
 
 A debug adapter for Smallworld 5/Magik is available in the [`magik-debug-adapter`](magik-debug-adapter) directory. See [`magik-debug-adapter/README.md`](magik-debug-adapter/README.md) for more information.
-
 
 ## Building
 
 You can build the plugin using maven, like so:
 
-```
+```shell
 $ mvn clean package
+[INFO] Scanning for projects...
+...
 ```
-
 
 ## Unit tests
 
 You can run the unit tests using maven, like so:
 
-```
+```shell
 $ mvn clean test
+[INFO] Scanning for projects...
+...
 ```
 
 Results will be shown on the console.
 
-
 ## SonarCloud
 
-This project can found in SonarCloud at https://sonarcloud.io/project/overview?id=StevenLooman_magik-tools.
-
+This project can found at [SonarCloud](https://sonarcloud.io/project/overview?id=StevenLooman_magik-tools).
 
 ## Contributing
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for instruction on how to contribute.
-
 
 ## License
 
 This project is licensed under GPLv3, see [`LICENSE.md`](LICENSE.md).
 
 Note that this has been changed from LGPLv3!
-
 
 ## Commercial use
 

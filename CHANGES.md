@@ -22,14 +22,12 @@
 - Add ForbiddenInheritanceCheck.
 - Various small fixes.
 
-
 0.7.1 (2023-02-21)
 
 - Fix VariableDeclarationUsageDistance not seeing method invocations as usage
 - Fix TypeDoc ruleSpecification/sqKey having old name (NewDoc)
 - Fix bug during re-reading the types database using JsonTypeKeeperReader, where a duplicate type would cause an error
 - Report version and settings, if applicable
-
 
 0.7.0 (2023-02-09)
 
@@ -45,7 +43,6 @@
 - Rename check NewDoc to TypeDoc.
 - Add generics to the type system, which allows collections to be parameterized.
 - Fix SimplifyIfCheck better handling syntax errors
-
 
 0.6.0 (2022-09-12)
 
@@ -65,17 +62,15 @@
 - Various bug fixes
 - Various new features
 
-
 0.5.4 (2022-11-07)
 
 - Remove MethodDoc check
 - Add ParameterCount check
 - Update Sonar way profile
 
-
 0.5.3 (2022-11-04)
-- Fix bug in sonar plugin where all issues were applied to every file
 
+- Fix bug in sonar plugin where all issues were applied to every file
 
 0.5.2 (2022-05-26)
 
@@ -87,7 +82,6 @@
 - Add setting `magik.lint.overrideConfigFile` to override properties file for linter from Language Server
 - Fix bug in HoverProvider where no hover was provided for assigned variable
 
-
 0.5.1 (2022-01-17)
 
 - More robustness for other LSP clients other than VScode
@@ -96,7 +90,6 @@
 - Disable check method-doc by default, in favor of new-doc check
 - Fix bug in JSON type database reader: lines with // are now regarded as comment-lines
 - Fix bug causing magik-lint.jar --show-checks to not work
-
 
 0.5.0 (2022-01-07)
 
@@ -128,7 +121,6 @@
 - Remove --watch option from magik-lint
 - Add check HidesVariable
 
-
 0.4.0 (2020-01-29)
 
 - Make MagikGrammar more consistent
@@ -154,19 +146,16 @@
 - Add setting FormattingCheck.indent\_character (tab/space)
 - Use annotation to mark MagikCheck as templated check
 
-
 0.3.2 (2019-10-29)
 
 - Add check ScopeCount
 - Add check UndefinedVariable
 - Fix LocalImportProcedureCheck not properly handling non-locals/definitions
 
-
 0.3.1 (2019-09-22)
 
 - Prevent CPD errors when SYNTAX\_ERROR token is too long
 - Fix several Magik Grammar bugs
-
 
 0.3.0 (2019-09-22)
 
@@ -182,7 +171,6 @@
 - Properly support \_primitive
 - Move MLint-specific instruction handling to magik-lint + support mlint instructions per scope
 - Unify file contents/line splitting
-
 
 0.2.0 (2019-08-31)
 
@@ -202,7 +190,6 @@
 - Narrow Magik grammar to be more like SW43
 - Fixes for Sonar
 
-
 0.1.4 (2019-07-26)
 
 - Fixes after reducing size of magik-lint jar
@@ -217,11 +204,9 @@
 - Fix bug where rc-file options weren't properly read
 - Fix bug in UnusedVariableCheck where assignment to import is improperly flagged
 
-
 0.1.3 (2019-07-07)
 
 - Fix output of Windows paths in magik-lint
-
 
 0.1.2 (2019-07-06)
 
@@ -230,12 +215,10 @@
 - Fix ScopeBuilder not properly handling optional parameters
 - Reduce size of magik-lint jar by removing dependencies
 
-
 0.1.1 (2019-06-30)
 
-- Add --untabify <n> option to magik-lint
+- Add --untabify \<n\> option to magik-lint
 - Add support for \_class keyword
-
 
 0.1.0 (2019-06-19)
 
