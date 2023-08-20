@@ -11,6 +11,7 @@ import nl.ramsolutions.sw.magik.checks.checks.FileMethodCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.FileNotInLoadListCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenCallCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenGlobalUsageCheck;
+import nl.ramsolutions.sw.magik.checks.checks.ForbiddenInheritanceCheck;
 import nl.ramsolutions.sw.magik.checks.checks.FormattingCheck;
 import nl.ramsolutions.sw.magik.checks.checks.HidesVariableCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ImportMissingDefinitionCheck;
@@ -70,6 +71,7 @@ public final class CheckList {
             FileNotInLoadListCheck.class,
             ForbiddenCallCheck.class,
             ForbiddenGlobalUsageCheck.class,
+            ForbiddenInheritanceCheck.class,
             FormattingCheck.class,
             HidesVariableCheck.class,
             ImportMissingDefinitionCheck.class,

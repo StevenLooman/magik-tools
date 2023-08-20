@@ -26,13 +26,11 @@ public final class MagikFileScanner {
      */
     public static Collection<Path> getFilesFromArgs(final String[] args) throws IOException {
         final List<Path> files = new ArrayList<>();
-
         for (final String arg : args) {
             final Path path = Path.of(arg);
             final Collection<Path> filesFromArg = MagikFileScanner.scanMagikFiles(path);
             files.addAll(filesFromArg);
         }
-
         return files;
     }
 
@@ -52,6 +50,7 @@ public final class MagikFileScanner {
                     && dir.toFile().isHidden()) {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
+
                 return FileVisitResult.CONTINUE;
             }
 
@@ -61,6 +60,7 @@ public final class MagikFileScanner {
                     && file.getFileName().toString().toLowerCase().endsWith(".magik")) {
                     files.add(file);
                 }
+
                 return FileVisitResult.CONTINUE;
             }
         });
