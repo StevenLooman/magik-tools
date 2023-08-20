@@ -10,6 +10,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IndexedExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlottedExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import org.sonar.check.RuleProperty;
@@ -17,6 +18,7 @@ import org.sonar.check.RuleProperty;
 /**
  * Check if forbidden inheritance is used.
  */
+@DisabledByDefault
 public class ForbiddenInheritanceCheck extends MagikCheck {
 
     private static final String DEFAULT_FORBIDDEN_PARENTS = "";
@@ -34,6 +36,10 @@ public class ForbiddenInheritanceCheck extends MagikCheck {
 
     @Override
     protected void walkPostMagik(final AstNode node) {
+        if (this.forbiddenParents.isBlank()) {
+            return;
+        }
+
         final MagikFile magikFile = this.getMagikFile();
         magikFile.getDefinitions().stream()
             .filter(definition ->
