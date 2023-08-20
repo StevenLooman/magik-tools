@@ -14,6 +14,9 @@ import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import org.sonar.check.RuleProperty;
 
+/**
+ * Check if forbidden inheritance is used.
+ */
 public class ForbiddenInheritanceCheck extends MagikCheck {
 
     private static final String DEFAULT_FORBIDDEN_PARENTS = "";
@@ -45,8 +48,8 @@ public class ForbiddenInheritanceCheck extends MagikCheck {
             definition instanceof SlottedExemplarDefinition
             ? ((SlottedExemplarDefinition) definition).getParents()
             : ((IndexedExemplarDefinition) definition).getParents();
-        final Set<TypeString> forbiddenParents = this.getForbiddenParents();
-        return forbiddenParents.stream().anyMatch(parents::contains);
+        final Set<TypeString> theForbiddenParents = this.getForbiddenParents();
+        return theForbiddenParents.stream().anyMatch(parents::contains);
     }
 
     private Set<TypeString> getForbiddenParents() {
