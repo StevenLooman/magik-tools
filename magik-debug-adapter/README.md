@@ -18,8 +18,10 @@ Before this Debug Adapter can connect to your Smallworld session, the Smallworld
 
 A complete example of running a session from `runalias` on Linux, specifying port `32000`, is as follows:
 
-```bash
+```shell
 $ /opt/Smallworld/core/bin/share/runalias -e /opt/Smallworld/core/config/environment -j -agentpath:/opt/Smallworld/core/bin/Linux.x86/libmda.so=socket,port=32000 swaf
+Sourcing ...
+...
 ```
 
 Note that the default port the mda uses is `20000`.

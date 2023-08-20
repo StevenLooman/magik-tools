@@ -13,7 +13,6 @@ A Language Server for Smallworld/Magik. This language server provides functional
 - (real) auto complete
 - ...
 
-
 ## Configuration
 
 This language server has the following settings:
@@ -23,7 +22,6 @@ This language server has the following settings:
 - `magik.typing.typeDatabasePaths`: Path to a database contaning type/method/... definitions
 - `magik.typing.enableChecks`: Enable/disable typing checks
 
-
 ### Additional configuration for VSCode
 
 - `magik.javaHome`: Path to your Java installation
@@ -31,7 +29,6 @@ This language server has the following settings:
 - `magik.environment`: Path to your environment file
 
 Via the VSCode client you can start a new session, using the specified environment and aliases file. The aliases file is parsed and the entries are provided as Tasks.
-
 
 ## Typed Magik
 
@@ -54,6 +51,7 @@ _endmethod
 ### Type database
 
 The standard Smallworld type data (types, methods, ...) can be exported using the `type_dumper.magik` script. The resulting data, called a type database, is written as JSON-lines. The data contains:
+
 - Package definitions
 - Type definitions (exemplars, etc)
 - Global definitions
