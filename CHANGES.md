@@ -19,6 +19,7 @@
 - Checks now mark the complete violating part, instead of the first token.
 - Show source-check for magik-typed checks in magik-language-server.
 - HidesVariableCheck now allows for variable definition in ancestor scope, when defined at lower line.
+- Add ForbiddenInheritanceCheck.
 - Various small fixes.
 
 

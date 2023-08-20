@@ -100,7 +100,7 @@ public class MessageFormatReporter implements Reporter {
     public void reportIssue(final MagikIssue magikIssue) {
         // Create map for find/replace.
         final Path path = magikIssue.location().getPath();
-        final Map<String, String> map = createMapForMagikIssue(path, magikIssue);
+        final Map<String, String> map = this.createMapForMagikIssue(path, magikIssue);
 
         // Save severity.
         final String severity = map.get("severity");
