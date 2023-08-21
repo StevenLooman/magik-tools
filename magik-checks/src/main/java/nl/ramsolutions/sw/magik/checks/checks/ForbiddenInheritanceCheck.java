@@ -13,13 +13,18 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
+import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 
 /**
  * Check if forbidden inheritance is used.
  */
 @DisabledByDefault
+@Rule(key = ForbiddenInheritanceCheck.CHECK_KEY)
 public class ForbiddenInheritanceCheck extends MagikCheck {
+
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final String CHECK_KEY = "ForbiddenInheritance";
 
     private static final String DEFAULT_FORBIDDEN_PARENTS = "";
 
@@ -27,7 +32,7 @@ public class ForbiddenInheritanceCheck extends MagikCheck {
      * Forbidden parents to inhertit from, separated by ','.
      */
     @RuleProperty(
-        key = "fobidden parents",
+        key = "forbidden parents",
         defaultValue = "" + DEFAULT_FORBIDDEN_PARENTS,
         description = "Forbidden parents to inhertit from, separated by ','",
         type = "STRING")
