@@ -32,7 +32,7 @@ public class ForbiddenInheritanceCheck extends MagikCheck {
      * Forbidden parents to inhertit from, separated by ','.
      */
     @RuleProperty(
-        key = "forbidden parent(s)",
+        key = "forbidden parents",
         defaultValue = "" + DEFAULT_FORBIDDEN_PARENTS,
         description = "Forbidden parents to inhertit from, separated by ','",
         type = "STRING")
