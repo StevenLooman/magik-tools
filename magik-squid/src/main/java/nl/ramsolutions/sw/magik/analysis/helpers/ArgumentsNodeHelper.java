@@ -60,7 +60,7 @@ public class ArgumentsNodeHelper {
         }
 
         return Stream.of(types)
-            .map(type -> atomNode.getFirstChild(type))
+            .map(atomNode::getFirstChild)
             .filter(Objects::nonNull)
             .findAny()
             .orElse(null);
