@@ -48,9 +48,9 @@ public class ForbiddenInheritanceCheck extends MagikCheck {
         final MagikFile magikFile = this.getMagikFile();
         magikFile.getDefinitions().stream()
             .filter(definition ->
-                SlottedExemplarDefinition.class.isInstance(definition)
-                || IndexedExemplarDefinition.class.isInstance(definition))
-            .filter(definition -> this.isForbiddenParent(definition))
+                definition instanceof SlottedExemplarDefinition
+                || definition instanceof IndexedExemplarDefinition)
+            .filter(this::isForbiddenParent)
             .forEach(definition -> this.addIssue(definition.getNode(), "Forbidden parent"));
     }
 

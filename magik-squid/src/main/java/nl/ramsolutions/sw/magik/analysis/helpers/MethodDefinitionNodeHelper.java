@@ -208,8 +208,7 @@ public class MethodDefinitionNodeHelper {
     public AstNode getMethodNameNode() {
         final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
         if (methodNameNode == null) {
-            final AstNode parametersNode = this.node.getFirstChild(MagikGrammar.PARAMETERS);
-            return parametersNode;
+            return this.node.getFirstChild(MagikGrammar.PARAMETERS);
         }
 
         return methodNameNode;
