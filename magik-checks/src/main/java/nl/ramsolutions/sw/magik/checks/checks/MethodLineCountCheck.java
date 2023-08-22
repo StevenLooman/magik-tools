@@ -3,6 +3,8 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
@@ -54,10 +56,14 @@ public class MethodLineCountCheck extends MagikCheck {
             .collect(Collectors.counting());
         if (lineCount > this.maximumLineCount) {
             final String message = String.format(MESSAGE, lineCount, this.maximumLineCount);
-            final AstNode markedNode = node.getChildren().stream()
-                .filter(childNode -> childNode.isNot(MagikGrammar.values()))
-                .findFirst()
-                .orElseThrow();
+            final AstNode markedNode;
+            if (node.is(MagikGrammar.METHOD_DEFINITION)) {
+                final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
+                markedNode = helper.getMethodNameNode();
+            } else {
+                final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
+                markedNode = helper.getProcedureNode();
+            }
             this.addIssue(markedNode, message);
         }
     }

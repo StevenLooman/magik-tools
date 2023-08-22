@@ -1,6 +1,8 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.metrics.ComplexityVisitor;
@@ -31,12 +33,12 @@ public class MethodComplexityCheck extends MagikCheck {
     public int maximumComplexity = DEFAULT_MAXIMUM_COMPLEXITY;
 
     @Override
-    protected void walkPreMethodDefinition(final AstNode node) {
+    protected void walkPostMethodDefinition(final AstNode node) {
         this.checkDefinition(node);
     }
 
     @Override
-    protected void walkPreProcedureDefinition(final AstNode node) {
+    protected void walkPostProcedureDefinition(final AstNode node) {
         this.checkDefinition(node);
     }
 
@@ -47,10 +49,14 @@ public class MethodComplexityCheck extends MagikCheck {
         final int complexity = visitor.getComplexity();
         if (complexity > this.maximumComplexity) {
             final String message = String.format(MESSAGE, complexity, this.maximumComplexity);
-            final AstNode markedNode = node.getChildren().stream()
-                .filter(childNode -> childNode.isNot(MagikGrammar.values()))
-                .findFirst()
-                .orElseThrow();
+            final AstNode markedNode;
+            if (node.is(MagikGrammar.METHOD_DEFINITION)) {
+                final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
+                markedNode = helper.getMethodNameNode();
+            } else {
+                final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
+                markedNode = helper.getProcedureNode();
+            }
             this.addIssue(markedNode, message);
         }
     }

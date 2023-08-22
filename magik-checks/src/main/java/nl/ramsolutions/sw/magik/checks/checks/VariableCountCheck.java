@@ -3,6 +3,8 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import com.sonar.sslr.api.AstNode;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -66,7 +68,15 @@ public class VariableCountCheck extends MagikCheck {
             .collect(Collectors.counting());
         if (variableCount > this.maximumVariableCount) {
             final String message = String.format(MESSAGE, variableCount, this.maximumVariableCount);
-            this.addIssue(node, message);
+            final AstNode markedNode;
+            if (node.is(MagikGrammar.METHOD_DEFINITION)) {
+                final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
+                markedNode = helper.getMethodNameNode();
+            } else {
+                final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
+                markedNode = helper.getProcedureNode();
+            }
+            this.addIssue(markedNode, message);
         }
     }
 
