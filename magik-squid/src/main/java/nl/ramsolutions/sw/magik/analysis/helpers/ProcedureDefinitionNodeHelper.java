@@ -56,4 +56,11 @@ public class ProcedureDefinitionNodeHelper {
         return labelNode.getLastChild().getTokenOriginalValue();
     }
 
+    public AstNode getProcedureNode() {
+        return this.node.getChildren().stream()
+            .filter(childNode -> childNode.isNot(MagikGrammar.values()))
+            .findFirst()
+            .orElseThrow();
+    }
+
 }
