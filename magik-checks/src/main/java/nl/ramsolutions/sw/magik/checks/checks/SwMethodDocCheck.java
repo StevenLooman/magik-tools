@@ -14,6 +14,7 @@ import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import org.sonar.check.Rule;
+import org.sonar.check.RuleProperty;
 
 /**
  * Check if method docs are valid, according to SW style.
@@ -26,15 +27,28 @@ public class SwMethodDocCheck extends MagikCheck {
     public static final String CHECK_KEY = "SwMethodDoc";
     private static final String MESSAGE = "No or invalid method doc: %s.";
 
+    private static final boolean DEFAULT_ALLOW_BLANK_METHOD_DOC = false;
     private static final String PARAMETER_REGEXP = "[ \t]?([\\p{Lu}\\d_?]+)[^\\p{Lu}\\d_?]?";
     private static final Pattern PARAMETER_PATTERN = Pattern.compile(PARAMETER_REGEXP);
+
+    /**
+     * Allow blank method doc.
+     */
+    @RuleProperty(
+        key = "allow blank method doc",
+        defaultValue = "" + DEFAULT_ALLOW_BLANK_METHOD_DOC,
+        description = "Allow blank method doc",
+        type = "BOOLEAN")
+    @SuppressWarnings("checkstyle:VisibilityModifier")
+    public boolean allowBlankMethodDoc = DEFAULT_ALLOW_BLANK_METHOD_DOC;
 
     @Override
     protected void walkPreMethodDefinition(final AstNode node) {
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
         final AstNode methodNameNode = helper.getMethodNameNode();
         final String methodDoc = this.extractDoc(node);
-        if (methodDoc.isBlank()) {
+        if (methodDoc.isBlank()
+            && !allowBlankMethodDoc) {
             final String message = String.format(MESSAGE, "all");
             this.addIssue(methodNameNode, message);
             return;
