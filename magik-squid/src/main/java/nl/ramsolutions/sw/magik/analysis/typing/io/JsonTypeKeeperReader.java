@@ -11,7 +11,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import nl.ramsolutions.sw.magik.analysis.Location;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.BinaryOperator;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;

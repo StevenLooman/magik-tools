@@ -9,6 +9,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**

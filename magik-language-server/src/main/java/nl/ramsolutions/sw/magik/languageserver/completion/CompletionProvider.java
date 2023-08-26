@@ -14,8 +14,8 @@ import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
-import nl.ramsolutions.sw.magik.analysis.Range;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -125,7 +125,7 @@ public class CompletionProvider {
      * @return Returns
      */
     private boolean inComment(final AstNode node, final Position position) {
-        final nl.ramsolutions.sw.magik.analysis.Position nativePosition = Lsp4jConversion.positionFromLsp4j(position);
+        final nl.ramsolutions.sw.magik.Position nativePosition = Lsp4jConversion.positionFromLsp4j(position);
         return MagikCommentExtractor.extractComments(node)
             .anyMatch(token -> nativePosition.getLine() == token.getLine()
                                 && nativePosition.getColumn() >= token.getColumn());

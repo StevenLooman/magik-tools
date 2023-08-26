@@ -17,8 +17,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.analysis.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
@@ -270,6 +270,7 @@ public class MagikIndexer {
             .collect(Collectors.toMap(
                 slotName -> slotName,
                 slotName -> slotTypes.getOrDefault(slotName, TypeString.UNDEFINED)));
+
         final List<TypeString> parents = definition.getParents();
         final TypeString defaultParentRef = TypeString.ofIdentifier("slotted_format_mixin", "sw");
         this.fillType(magikType, magikFile, node, slots, parents, defaultParentRef);

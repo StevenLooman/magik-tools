@@ -13,7 +13,7 @@ import nl.ramsolutions.sw.definitions.SwModule;
 import nl.ramsolutions.sw.definitions.SwModuleScanner;
 import nl.ramsolutions.sw.definitions.SwProduct;
 import nl.ramsolutions.sw.definitions.SwProductScanner;
-import nl.ramsolutions.sw.magik.analysis.Location;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;

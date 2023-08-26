@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.checks;
 
-import nl.ramsolutions.sw.magik.analysis.Location;
-import nl.ramsolutions.sw.magik.analysis.Range;
+import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.Range;
 
 /**
  * Magik issue, resulting from a MagikCheck.

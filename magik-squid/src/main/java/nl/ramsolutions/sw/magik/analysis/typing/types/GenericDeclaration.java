@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import nl.ramsolutions.sw.magik.analysis.Location;
+import nl.ramsolutions.sw.magik.Location;
 
 /**
  * Generic declaration.

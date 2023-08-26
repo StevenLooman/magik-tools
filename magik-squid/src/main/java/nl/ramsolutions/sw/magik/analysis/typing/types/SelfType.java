@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.Location;
+import nl.ramsolutions.sw.magik.Location;
 
 /**
  * Type to represent self, to be evaluated later when the real type is known.

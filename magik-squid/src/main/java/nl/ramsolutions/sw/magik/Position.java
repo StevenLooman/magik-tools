@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis;
+package nl.ramsolutions.sw.magik;
 
 import com.sonar.sslr.api.Token;
 import java.io.Serializable;

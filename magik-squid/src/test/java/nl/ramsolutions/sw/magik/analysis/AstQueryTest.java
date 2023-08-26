@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
+import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
 import org.junit.jupiter.api.Test;
 
