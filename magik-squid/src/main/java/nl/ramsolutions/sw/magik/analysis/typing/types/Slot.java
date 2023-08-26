@@ -2,7 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import nl.ramsolutions.sw.magik.analysis.Location;
+import nl.ramsolutions.sw.magik.Location;
 
 /**
  * Slot.

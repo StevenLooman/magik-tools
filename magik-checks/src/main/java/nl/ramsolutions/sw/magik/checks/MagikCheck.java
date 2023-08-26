@@ -9,11 +9,11 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikVisitor;
-import nl.ramsolutions.sw.magik.analysis.Location;
-import nl.ramsolutions.sw.magik.analysis.Position;
-import nl.ramsolutions.sw.magik.analysis.Range;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
 import org.sonar.check.RuleProperty;
 
 /**

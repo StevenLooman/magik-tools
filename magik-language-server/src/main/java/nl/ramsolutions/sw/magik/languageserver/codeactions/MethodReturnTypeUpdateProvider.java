@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.Position;
-import nl.ramsolutions.sw.magik.analysis.Range;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
@@ -54,7 +54,7 @@ class MethodReturnTypeUpdateProvider {
             .filter(methodDefinition -> Lsp4jUtils.rangeOverlaps(
                 range,
                 Lsp4jConversion.rangeToLsp4j(
-                    nl.ramsolutions.sw.magik.analysis.Range.fromTree(methodDefinition.getNode()))))
+                    nl.ramsolutions.sw.magik.Range.fromTree(methodDefinition.getNode()))))
             .flatMap(methodDefinition -> this.extractReturnTypeCodeActions(magikFile, methodDefinition).stream())
             .map(Either::<Command, CodeAction>forRight)
             .collect(Collectors.toList());

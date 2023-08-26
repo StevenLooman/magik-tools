@@ -65,14 +65,14 @@ public final class Lsp4jUtils {
     /**
      * Create a {@link CodeAction}.
      * @param magikFile The {@link MagikTypedFile}.
-     * @param range The {@link nl.ramsolutions.sw.magik.analysis.Range}.
+     * @param range The {@link nl.ramsolutions.sw.magik.Range}.
      * @param newText The new text.
      * @param description The description.
      * @return The {@link CodeAction}.
      */
     public static CodeAction createCodeAction(
             final MagikTypedFile magikFile,
-            final nl.ramsolutions.sw.magik.analysis.Range range,
+            final nl.ramsolutions.sw.magik.Range range,
             final String newText,
             final String description) {
         final Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
