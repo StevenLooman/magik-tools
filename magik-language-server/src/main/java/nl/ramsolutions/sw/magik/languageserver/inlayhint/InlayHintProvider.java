@@ -146,9 +146,18 @@ public class InlayHintProvider {
         final ExpressionResult result = reasoner.getNodeType(previousSibling);
         final AbstractType type = result.get(0, UndefinedType.INSTANCE);
         if (type == SelfType.INSTANCE) {
-            final AstNode methodDefNode = node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
+            final AstNode defNode =
+                node.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION, MagikGrammar.METHOD_DEFINITION);
             final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-            return this.getTypeOfMethodDefinition(typeKeeper, methodDefNode);
+            if (defNode == null) {
+                return UndefinedType.INSTANCE;
+            } else if (defNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
+                final TypeString procRef = TypeString.ofIdentifier("procedure", "sw");
+                return typeKeeper.getType(procRef);
+            } else if (defNode.is(MagikGrammar.METHOD_DEFINITION)) {
+                final AstNode methodDefNode = node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
+                return this.getTypeOfMethodDefinition(typeKeeper, methodDefNode);
+            }
         }
 
         return type;
