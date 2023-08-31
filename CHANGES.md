@@ -20,6 +20,7 @@
 - Show source-check for magik-typed checks in magik-language-server.
 - HidesVariableCheck now allows for variable definition in ancestor scope, when defined at lower line.
 - Add ForbiddenInheritanceCheck.
+- TrailingWhitespaceCheck now marks the actual whitespace.
 - Various small fixes.
 
 0.7.1 (2023-02-21)
