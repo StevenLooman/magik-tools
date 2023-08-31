@@ -174,9 +174,11 @@ public final class JsonTypeKeeperReader {
         instruction.getJSONArray(InstType.GENERICS.getValue()).forEach(genericObj -> {
             final JSONObject generic = (JSONObject) genericObj;
             final String genericName = generic.getString(InstType.GENERIC_NAME.getValue());
-            final String genericDoc = generic.getString(InstType.GENERIC_DOC.getValue());
             final GenericDeclaration genericDeclaration = type.addGeneric(null, genericName);
-            genericDeclaration.setDoc(genericDoc);
+            if (generic.get(InstType.GENERIC_DOC.getValue()) != JSONObject.NULL) {
+                final String genericDoc = generic.getString(InstType.GENERIC_DOC.getValue());
+                genericDeclaration.setDoc(genericDoc);
+            }
         });
 
         final JSONArray parents = instruction.getJSONArray(InstType.PARENTS.getValue());
