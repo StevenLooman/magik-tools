@@ -23,16 +23,17 @@ public class TrailingWhitespaceCheck extends MagikCheck {
 
         int lineNo = 1;
         for (final String line : lines) {
-            String strippedLine = line;
+            final String trimmedLine = line.endsWith("\r")
+                ? line.substring(0, line.length() - 1)  // Strip \r.
+                : line;
 
-            // Strip \r, if any.
-            if (strippedLine.endsWith("\r")) {
-                strippedLine = strippedLine.substring(0, line.length() - 1);
-            }
-
-            if (strippedLine.endsWith(" ")
-                || strippedLine.endsWith("\t")) {
-                this.addIssue(lineNo, strippedLine.length(), lineNo, strippedLine.length() + 1, MESSAGE);
+            if (trimmedLine.endsWith(" ")
+                || trimmedLine.endsWith("\t")) {
+                final String strippedLine = trimmedLine.stripTrailing();
+                this.addIssue(
+                    lineNo, strippedLine.length(),
+                    lineNo, trimmedLine.length(),
+                    MESSAGE);
             }
 
             lineNo += 1;

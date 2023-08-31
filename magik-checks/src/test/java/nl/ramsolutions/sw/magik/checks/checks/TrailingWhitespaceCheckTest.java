@@ -1,6 +1,10 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import java.net.URI;
 import java.util.List;
+import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
@@ -26,7 +30,14 @@ class TrailingWhitespaceCheckTest extends MagikCheckTestBase {
         final MagikCheck check = new TrailingWhitespaceCheck();
         final String code = "a    ";
         final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isNotEmpty();
+        assertThat(issues).hasSize(1);
+        final MagikIssue issue0 = issues.get(0);
+        assertThat(issue0.location()).isEqualTo(
+            new Location(
+                URI.create("tests://unittest"),
+                new Range(
+                    new Position(1, 1),
+                    new Position(1, 5))));
     }
 
     @Test
