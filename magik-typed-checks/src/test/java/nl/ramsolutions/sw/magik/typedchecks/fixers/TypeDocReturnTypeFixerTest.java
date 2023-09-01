@@ -1,25 +1,23 @@
-package nl.ramsolutions.sw.magik.languageserver.codeactions;
+package nl.ramsolutions.sw.magik.typedchecks.fixers;
 
 import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.CodeActionContext;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.TextDocumentEdit;
-import org.eclipse.lsp4j.TextEdit;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for MethodReturnTypeUpdateProvider.
+ * Tests for {@link TypeDocReturnTypeFixer}.
  */
-class MethodReturnTypeUpdateProviderTest {
+@SuppressWarnings("checkstyle:MagicNumber")
+class TypeDocReturnTypeFixerTest {
 
     private static final String NEWLINE = System.lineSeparator();
 
@@ -29,11 +27,8 @@ class MethodReturnTypeUpdateProviderTest {
         final URI uri = URI.create("tests://unittest");
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final MagikTypedFile magikFile = new MagikTypedFile(uri, code, typeKeeper);
-        final MethodReturnTypeUpdateProvider provider = new MethodReturnTypeUpdateProvider();
-        final CodeActionContext context = new CodeActionContext();
-        return provider.provideCodeActions(magikFile, range, context).stream()
-                .map(either -> either.getRight())
-                .collect(Collectors.toList());
+        final TypeDocReturnTypeFixer fixer = new TypeDocReturnTypeFixer();
+        return fixer.provideCodeActions(magikFile, range);
     }
 
     @Test
@@ -48,14 +43,15 @@ class MethodReturnTypeUpdateProviderTest {
         final List<CodeAction> codeactions = this.getCodeActions(code, range);
         assertThat(codeactions).hasSize(1);
         final CodeAction codeAction = codeactions.get(0);
-        codeAction.getEdit().getDocumentChanges().forEach(either -> {
-            final TextDocumentEdit textDocumentEdit = either.getLeft();
-            final String uri = textDocumentEdit.getTextDocument().getUri();
-            final List<TextEdit> changes = textDocumentEdit.getEdits();
-            assertThat(uri).isEqualTo("tests://unittest");
-            assertThat(changes).hasSize(1);
-            assertThat(changes.get(0).getNewText()).isEqualTo("\t## @return {sw:integer} Description" + NEWLINE);
-        });
+        assertThat(codeAction).isEqualTo(
+            new CodeAction(
+                "Add @return type sw:integer",
+                new TextEdit(
+                    new Range(
+                        new Position(2, 0),
+                        new Position(2, 0)),
+                    "\t## @return {sw:integer} Description" + NEWLINE))
+        );
     }
 
     @Test
@@ -70,14 +66,15 @@ class MethodReturnTypeUpdateProviderTest {
         final List<CodeAction> codeactions = this.getCodeActions(code, range);
         assertThat(codeactions).hasSize(1);
         final CodeAction codeAction = codeactions.get(0);
-        codeAction.getEdit().getDocumentChanges().forEach(either -> {
-            final TextDocumentEdit textDocumentEdit = either.getLeft();
-            final String uri = textDocumentEdit.getTextDocument().getUri();
-            final List<TextEdit> changes = textDocumentEdit.getEdits();
-            assertThat(uri).isEqualTo("tests://unittest");
-            assertThat(changes).hasSize(1);
-            assertThat(changes.get(0).getNewText()).isEmpty();
-        });
+        assertThat(codeAction).isEqualTo(
+            new CodeAction(
+                "Remove @return type",
+                new TextEdit(
+                    new Range(
+                        new Position(2, 0),
+                        new Position(3, 0)),
+                    ""))
+        );
     }
 
     @Test
@@ -93,14 +90,14 @@ class MethodReturnTypeUpdateProviderTest {
         final List<CodeAction> codeactions = this.getCodeActions(code, range);
         assertThat(codeactions).hasSize(1);
         final CodeAction codeAction = codeactions.get(0);
-        codeAction.getEdit().getDocumentChanges().forEach(either -> {
-            final TextDocumentEdit textDocumentEdit = either.getLeft();
-            final String uri = textDocumentEdit.getTextDocument().getUri();
-            final List<TextEdit> changes = textDocumentEdit.getEdits();
-            assertThat(uri).isEqualTo("tests://unittest");
-            assertThat(changes).hasSize(1);
-            assertThat(changes.get(0).getNewText()).isEqualTo("sw:integer");
-        });
+        assertThat(codeAction).isEqualTo(
+            new CodeAction(
+                "Update @return type to sw:integer",
+                new TextEdit(
+                    new Range(
+                        new Position(2, 14),
+                        new Position(2, 22)),
+                    "sw:integer")));
     }
 
     @Test

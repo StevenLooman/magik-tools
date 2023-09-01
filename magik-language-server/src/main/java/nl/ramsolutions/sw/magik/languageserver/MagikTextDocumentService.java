@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
@@ -469,9 +470,19 @@ public class MagikTextDocumentService implements TextDocumentService {
             range.getEnd().getLine(), range.getEnd().getCharacter());
 
         final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+        final nl.ramsolutions.sw.magik.Range magikRange = Lsp4jConversion.rangeFromLsp4j(range);
         final CodeActionContext context = params.getContext();
-        return CompletableFuture.supplyAsync(() ->
-            this.codeActionProvider.provideCodeActions(magikFile, range, context));
+        return CompletableFuture.supplyAsync(() -> {
+            final List<nl.ramsolutions.sw.magik.CodeAction> codeActions =
+                this.codeActionProvider.provideCodeActions(magikFile, magikRange, context);
+            return codeActions.stream()
+                .map(codeAction -> Lsp4jUtils.createCodeAction(
+                    magikFile,
+                    codeAction.getTitle(),
+                    codeAction.getEdits()))
+                .map(codeAction -> Either.<Command, CodeAction>forRight(codeAction))
+                .collect(Collectors.toList());
+        });
     }
 
 }

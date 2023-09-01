@@ -22,7 +22,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
-import nl.ramsolutions.sw.magik.languageserver.Lsp4jUtils;
 import org.eclipse.lsp4j.InlayHint;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
@@ -43,17 +42,15 @@ public class InlayHintProvider {
     /**
      * Provide inlay hints for the given file.
      * @param magikFile Magik file.
-     * @param range Range in file.
+     * @param lsp4jrange Range in file.
      * @return List of inlay hints.
      */
-    public List<InlayHint> provideInlayHints(final MagikTypedFile magikFile, final org.eclipse.lsp4j.Range range) {
+    public List<InlayHint> provideInlayHints(final MagikTypedFile magikFile, final org.eclipse.lsp4j.Range lsp4jrange) {
         // Get argument hints from method invocations.
         final AstNode topNode = magikFile.getTopNode();
+        final Range range = Lsp4jConversion.rangeFromLsp4j(lsp4jrange);
         return topNode.getDescendants(MagikGrammar.METHOD_INVOCATION).stream()
-            .filter(node -> Lsp4jUtils.rangeOverlaps(
-                range,
-                Lsp4jConversion.rangeToLsp4j(
-                    Range.fromTree(node))))
+            .filter(node -> Range.fromTree(node).overlapsWith(range))
             .map(node -> this.getMethodInvocationInlayHints(magikFile, node))
             .flatMap(List::stream)
             .collect(Collectors.toList());

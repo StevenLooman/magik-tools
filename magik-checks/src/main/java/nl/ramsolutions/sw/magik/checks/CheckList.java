@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.checks;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.checks.checks.CommentRegularExpressionCheck;
 import nl.ramsolutions.sw.magik.checks.checks.CommentedCodeCheck;
@@ -98,6 +99,14 @@ public final class CheckList {
             VariableNamingCheck.class,
             WarnedCallCheck.class,
             XPathCheck.class);
+    }
+
+    /**
+     * Get the {@link MagikCheck}s which have a {@link MagikCheckFixer}.
+     * @return
+     */
+    public static Map<Class<?>, List<Class<?>>> getFixers() {
+        return Map.of();
     }
 
     /**
