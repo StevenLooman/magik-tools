@@ -29,9 +29,9 @@ public class MagikLintDiagnosticsProvider {
     static final Logger LOGGER = LoggerFactory.getLogger(MagikLintDiagnosticsProvider.class);
 
     private static final Map<String, DiagnosticSeverity> LINT_SEVERITY_MAPPING = Map.of(
-            "Critical", DiagnosticSeverity.Error,
-            "Major", DiagnosticSeverity.Error,
-            "Minor", DiagnosticSeverity.Warning);
+        "Critical", DiagnosticSeverity.Error,
+        "Major", DiagnosticSeverity.Error,
+        "Minor", DiagnosticSeverity.Warning);
 
     private final Path overrideConfigurationPath;
 
@@ -50,8 +50,10 @@ public class MagikLintDiagnosticsProvider {
      * @throws IOException -
      */
     public List<Diagnostic> getDiagnostics(final MagikFile magikFile) throws IOException {
-        final Path searchPath = Path.of(magikFile.getUri()).getParent();
+        // Empty cache, as the configuration may have changed without us knowing it.
         ConfigurationLocator.resetCache();
+
+        final Path searchPath = Path.of(magikFile.getUri()).getParent();
         final Path configurationPath = this.overrideConfigurationPath != null
             ? this.overrideConfigurationPath
             : ConfigurationLocator.locateConfiguration(searchPath);

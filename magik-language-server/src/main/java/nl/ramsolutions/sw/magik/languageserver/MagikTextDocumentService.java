@@ -485,9 +485,4 @@ public class MagikTextDocumentService implements TextDocumentService {
         });
     }
 
-    private boolean isCheckEnabled(final Class<?> checkClass) {
-        // TODO: Implement this.
-        return true;
-    }
-
 }
