@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.languageserver.codeactions;
+package nl.ramsolutions.sw.magik.typedchecks.fixers;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
@@ -8,63 +8,49 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
-import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
-import nl.ramsolutions.sw.magik.languageserver.Lsp4jUtils;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
-import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.CodeActionContext;
-import org.eclipse.lsp4j.Command;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheckFixer;
 
 /**
- * Class to provide code actions for parameter type information.
+ * TypeDoc parameter fixer.
  */
-public class ParameterTypeProvider {
+public class TypeDocParameterFixer extends MagikTypedCheckFixer {
 
     /**
-     * Provide code actions related to method return type updates.
+     * Provide code actions related to parameter types.
      * @param magikFile Magik file.
      * @param range Range to provide code actions for.
-     * @param context Code action context.
      * @return List of code actions.
      */
-    public List<Either<Command, CodeAction>> provideCodeActions(
-            final MagikTypedFile magikFile,
-            final org.eclipse.lsp4j.Range range,
-            final CodeActionContext context) {
+    @Override
+    public List<CodeAction> provideCodeActions(final MagikTypedFile magikFile, final Range range) {
         return magikFile.getDefinitions().stream()
             .filter(MethodDefinition.class::isInstance)
             .map(MethodDefinition.class::cast)
             .filter(MethodDefinition::isActualMethodDefinition)
-            .filter(methodDefinition -> Lsp4jUtils.rangeOverlaps(
-                range,
-                Lsp4jConversion.rangeToLsp4j(
-                    Range.fromTree(methodDefinition.getNode()))))
-            .flatMap(methodDefinition -> this.extractParameterCodeActions(magikFile, methodDefinition).stream())
-            .map(Either::<Command, CodeAction>forRight)
+            .filter(methodDef -> Range.fromTree(methodDef.getNode()).overlapsWith(range))
+            .flatMap(methodDefinition -> this.extractParameterCodeActions(methodDefinition).stream())
             .collect(Collectors.toList());
     }
 
-    private List<CodeAction> extractParameterCodeActions(
-            final MagikTypedFile magikFile,
-            final MethodDefinition methodDefinition) {
-        // Compare and create Code Actions.
+    private List<CodeAction> extractParameterCodeActions(final MethodDefinition methodDefinition) {
+        // Compare and create TextEdits.
         return Stream.concat(
-                this.createAddParameterCodeActions(magikFile, methodDefinition).stream(),
-                this.createRemoveParameterCodeActions(magikFile, methodDefinition).stream())
+                this.createAddParameterTextEdits(methodDefinition).stream(),
+                this.createRemoveParameterTextEdits(methodDefinition).stream())
             .collect(Collectors.toList());
     }
 
-    private Collection<CodeAction> createAddParameterCodeActions(
-            final MagikTypedFile magikFile,
-            final MethodDefinition methodDefinition) {
+    private List<CodeAction> createAddParameterTextEdits(final MethodDefinition methodDefinition) {
         // Find all method and type-doc parameters.
         final List<ParameterDefinition> methodParameters = Stream.concat(
                 methodDefinition.getParameters().stream(),
@@ -89,14 +75,13 @@ public class ParameterTypeProvider {
                 final String typeDocLine =
                     String.format("\t## @param {_undefined} %s Description%n", paramDef.getName());
                 final String description = String.format("Add type-doc for parameter %s", paramDef.getName());
-                return Lsp4jUtils.createCodeAction(magikFile, range, typeDocLine, description);
+                final TextEdit edit = new TextEdit(range, typeDocLine);
+                return new CodeAction(description, edit);
             })
             .collect(Collectors.toList());
     }
 
-    private Collection<CodeAction> createRemoveParameterCodeActions(
-            final MagikTypedFile magikFile,
-            final MethodDefinition methodDefinition) {
+    private List<CodeAction> createRemoveParameterTextEdits(final MethodDefinition methodDefinition) {
         // Find all parameters and type-doc parameters.
         final Set<String> methodParameterNames = Stream.concat(
                 methodDefinition.getParameters().stream(),
@@ -118,7 +103,8 @@ public class ParameterTypeProvider {
                         new Position(treeRange.getEndPosition().getLine() + 1, 0));
                 final String newText = "";
                 final String description = String.format("Remove type-doc for parameter %s", entry.getValue());
-                return Lsp4jUtils.createCodeAction(magikFile, expandedRange, newText, description);
+                final TextEdit edit = new TextEdit(expandedRange, newText);
+                return new CodeAction(description, edit);
             })
             .collect(Collectors.toList());
     }

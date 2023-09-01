@@ -1,25 +1,23 @@
-package nl.ramsolutions.sw.magik.languageserver.codeactions;
+package nl.ramsolutions.sw.magik.typedchecks.fixers;
 
 import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.CodeActionContext;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.TextDocumentEdit;
-import org.eclipse.lsp4j.TextEdit;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for ParameterTypeProvider.
+ * Tests for {@link TypeDocParameterFixer}.
  */
-class ParameterTypeProviderTest {
+@SuppressWarnings("checkstyle:MagicNumber")
+class TypeDocParameterFixerTest {
 
     private static final String NEWLINE = System.lineSeparator();
 
@@ -29,11 +27,8 @@ class ParameterTypeProviderTest {
         final URI uri = URI.create("tests://unittest");
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final MagikTypedFile magikFile = new MagikTypedFile(uri, code, typeKeeper);
-        final ParameterTypeProvider provider = new ParameterTypeProvider();
-        final CodeActionContext context = new CodeActionContext();
-        return provider.provideCodeActions(magikFile, range, context).stream()
-                .map(either -> either.getRight())
-                .collect(Collectors.toList());
+        final TypeDocParameterFixer provider = new TypeDocParameterFixer();
+        return provider.provideCodeActions(magikFile, range);
     }
 
     @Test
@@ -48,14 +43,14 @@ class ParameterTypeProviderTest {
         final List<CodeAction> codeactions = this.getCodeActions(code, range);
         assertThat(codeactions).hasSize(1);
         final CodeAction codeAction = codeactions.get(0);
-        codeAction.getEdit().getDocumentChanges().forEach(either -> {
-            final TextDocumentEdit textDocumentEdit = either.getLeft();
-            final String uri = textDocumentEdit.getTextDocument().getUri();
-            final List<TextEdit> changes = textDocumentEdit.getEdits();
-            assertThat(uri).isEqualTo("tests://unittest");
-            assertThat(changes).hasSize(1);
-            assertThat(changes.get(0).getNewText()).isEqualTo("\t## @param {_undefined} param2 Description" + NEWLINE);
-        });
+        assertThat(codeAction).isEqualTo(
+            new CodeAction(
+                "Add type-doc for parameter param2",
+                new TextEdit(
+                    new Range(
+                        new Position(3, 0),
+                        new Position(3, 0)),
+                    "\t## @param {_undefined} param2 Description" + NEWLINE)));
     }
 
     @Test
@@ -71,14 +66,14 @@ class ParameterTypeProviderTest {
         final List<CodeAction> codeactions = this.getCodeActions(code, range);
         assertThat(codeactions).hasSize(1);
         final CodeAction codeAction = codeactions.get(0);
-        codeAction.getEdit().getDocumentChanges().forEach(either -> {
-            final TextDocumentEdit textDocumentEdit = either.getLeft();
-            final String uri = textDocumentEdit.getTextDocument().getUri();
-            final List<TextEdit> changes = textDocumentEdit.getEdits();
-            assertThat(uri).isEqualTo("tests://unittest");
-            assertThat(changes).hasSize(1);
-            assertThat(changes.get(0).getNewText()).isEmpty();
-        });
+        assertThat(codeAction).isEqualTo(
+            new CodeAction(
+                "Remove type-doc for parameter param3",
+                new TextEdit(
+                    new Range(
+                        new Position(3, 0),
+                        new Position(4, 0)),
+                    "")));
     }
 
     @Test

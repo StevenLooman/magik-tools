@@ -35,6 +35,24 @@ public class Range {
     }
 
     /**
+     * Test if this Range overlaps with other Range.
+     * @param other Other range.
+     * @return True if overlaps, false otherwise.
+     */
+    public boolean overlapsWith(final Range other) {
+        // 5 Cases:
+        // 1. wantedRange ends before testedRange start --> false
+        // 2. wantedRange before testedRange and ends in testedRange --> true
+        // 3. wantedRange in testedRange --> true
+        // 4. wantedRange in testedRange and after testedRange --> true
+        // 5. wantedRange starts after testedRange end --> false
+
+        // Testing case 1/5 is enough.
+        return this.startPosition.compareTo(other.endPosition) <= 0
+            && this.endPosition.compareTo(other.startPosition) >= 0;
+    }
+
+    /**
      * Extract range from full tree, i.e., all tokens.
      * @param node Node to extract {@link Range} from.
      * @return Range of the node tree.

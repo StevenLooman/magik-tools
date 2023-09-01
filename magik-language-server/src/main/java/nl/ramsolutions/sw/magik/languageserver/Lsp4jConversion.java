@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.languageserver;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.TextEdit;
 
 /**
  * Utility class for converting LSP4J <-> MagikLanguageServer.
@@ -62,6 +63,18 @@ public final class Lsp4jConversion {
         final Range range = location.getRange();
         final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
         return new org.eclipse.lsp4j.Location(uri, rangeLsp4j);
+    }
+
+    /**
+     * Convert a TextEdit to LSP4J.
+     * @param textEdit TextEdit to convert.
+     * @return TextEdit in LSP4J.
+     */
+    public static org.eclipse.lsp4j.TextEdit textEditToLsp4j(final TextEdit textEdit) {
+        final Range range = textEdit.getRange();
+        final String newText = textEdit.getNewText();
+        final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
+        return new org.eclipse.lsp4j.TextEdit(rangeLsp4j, newText);
     }
 
 }

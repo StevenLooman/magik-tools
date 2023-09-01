@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.languageserver.codeactions;
+package nl.ramsolutions.sw.magik.typedchecks.fixers;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
@@ -17,46 +19,30 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.TypeDocGrammar;
-import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
-import nl.ramsolutions.sw.magik.languageserver.Lsp4jUtils;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
+import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheckFixer;
 import nl.ramsolutions.sw.magik.utils.StreamUtils;
-import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.CodeActionContext;
-import org.eclipse.lsp4j.Command;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Class to provide a code action to update the @return type of a method.
+ * TypeDoc return type fixer.
  */
-class MethodReturnTypeUpdateProvider {
-
-    static final Logger LOGGER = LoggerFactory.getLogger(MethodReturnTypeUpdateProvider.class);
+public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
 
     /**
-     * Provide code actions related to method return type updates.
+     * Provide code actions related to return types.
      * @param magikFile Magik file.
      * @param range Range to provide code actions for.
-     * @param context Code action context.
      * @return List of code actions.
      */
-    public List<Either<Command, CodeAction>> provideCodeActions(
-            final MagikTypedFile magikFile,
-            final org.eclipse.lsp4j.Range range,
-            final CodeActionContext context) {
+    @Override
+    public List<CodeAction> provideCodeActions(final MagikTypedFile magikFile, final Range range) {
         return magikFile.getDefinitions().stream()
             .filter(MethodDefinition.class::isInstance)
             .map(MethodDefinition.class::cast)
             .filter(MethodDefinition::isActualMethodDefinition)
-            .filter(methodDefinition -> Lsp4jUtils.rangeOverlaps(
-                range,
-                Lsp4jConversion.rangeToLsp4j(
-                    nl.ramsolutions.sw.magik.Range.fromTree(methodDefinition.getNode()))))
+            .filter(methodDef -> Range.fromTree(methodDef.getNode()).overlapsWith(range))
             .flatMap(methodDefinition -> this.extractReturnTypeCodeActions(magikFile, methodDefinition).stream())
-            .map(Either::<Command, CodeAction>forRight)
             .collect(Collectors.toList());
     }
 
@@ -115,7 +101,8 @@ class MethodReturnTypeUpdateProvider {
         final Range range = Range.fromTree(typeValueNode);
         final String methodTypeStringString = methodTypeString.getFullString();
         final String description = String.format("Update @return type to %s", methodTypeStringString);
-        return Lsp4jUtils.createCodeAction(magikFile, range, methodTypeStringString, description);
+        final TextEdit edit = new TextEdit(range, methodTypeStringString);
+        return new CodeAction(description, edit);
     }
 
     private CodeAction createRemoveReturnCodeAction(
@@ -123,13 +110,14 @@ class MethodReturnTypeUpdateProvider {
             final AstNode typeValueNode) {
         final AstNode typeDocReturnNode = typeValueNode.getParent();
         final Range treeRange = Range.fromTree(typeDocReturnNode);
-        final Range expandedRange =
+        final Range range =
             new Range(
                 new Position(treeRange.getStartPosition().getLine(), 0),
                 new Position(treeRange.getEndPosition().getLine() + 1, 0));
         final String textEdit = "";
         final String description = "Remove @return type";
-        return Lsp4jUtils.createCodeAction(magikFile, expandedRange, textEdit, description);
+        final TextEdit edit = new TextEdit(range, textEdit);
+        return new CodeAction(description, edit);
     }
 
     private CodeAction createAddReturnCodeAction(
@@ -142,7 +130,8 @@ class MethodReturnTypeUpdateProvider {
             new Position(lastMethodDocLine + 1, 0));
         final String textEdit = String.format("\t## @return {%s} Description%n", methodTypeString.getFullString());
         final String description = String.format("Add @return type %s", methodTypeString.getFullString());
-        return Lsp4jUtils.createCodeAction(magikFile, range, textEdit, description);
+        final TextEdit edit = new TextEdit(range, textEdit);
+        return new CodeAction(description, edit);
     }
 
     private int getLastMethodDocLine(final MethodDefinition methodDefinition) {
