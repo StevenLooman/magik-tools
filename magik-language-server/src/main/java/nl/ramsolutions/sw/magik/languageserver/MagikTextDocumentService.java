@@ -480,9 +480,14 @@ public class MagikTextDocumentService implements TextDocumentService {
                     magikFile,
                     codeAction.getTitle(),
                     codeAction.getEdits()))
-                .map(codeAction -> Either.<Command, CodeAction>forRight(codeAction))
+                .map(Either::<Command, CodeAction>forRight)
                 .collect(Collectors.toList());
         });
+    }
+
+    private boolean isCheckEnabled(final Class<?> checkClass) {
+        // TODO: Implement this.
+        return true;
     }
 
 }

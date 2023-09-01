@@ -71,7 +71,7 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
                 final Map.Entry<AstNode, TypeString> typeDocEntry = entry.getValue();
                 if (methodTypeString != null && typeDocEntry == null) {
                     // Code action: Add type-doc line.
-                    return this.createAddReturnCodeAction(magikFile, methodDefinition, methodTypeString);
+                    return this.createAddReturnCodeAction(methodDefinition, methodTypeString);
                 }
 
                 final TypeString typeDocTypeString = typeDocEntry.getValue();
@@ -79,13 +79,12 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
                 final AstNode typeValueNode = typeDocNode.getFirstChild(TypeDocGrammar.TYPE_VALUE);
                 if (methodTypeString == null && typeDocEntry != null) {
                     // Code action: Remove type-doc line.
-                    return this.createRemoveReturnCodeAction(magikFile, typeValueNode);
+                    return this.createRemoveReturnCodeAction(typeValueNode);
                 } else if (methodTypeString != null  // && typeDocTypeString != null
                     && methodTypeString != TypeString.UNDEFINED
                     && !methodTypeString.equals(typeDocTypeString)) {
                     // Code action: Update type-doc line.
-                    return this.createUpdateReturnCodeAction(
-                        magikFile, methodTypeString, typeValueNode);
+                    return this.createUpdateReturnCodeAction(methodTypeString, typeValueNode);
                 }
 
                 return null;
@@ -95,7 +94,6 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
     }
 
     private CodeAction createUpdateReturnCodeAction(
-            final MagikTypedFile magikFile,
             final TypeString methodTypeString,
             final AstNode typeValueNode) {
         final Range range = Range.fromTree(typeValueNode);
@@ -106,7 +104,6 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
     }
 
     private CodeAction createRemoveReturnCodeAction(
-            final MagikTypedFile magikFile,
             final AstNode typeValueNode) {
         final AstNode typeDocReturnNode = typeValueNode.getParent();
         final Range treeRange = Range.fromTree(typeDocReturnNode);
@@ -121,7 +118,6 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
     }
 
     private CodeAction createAddReturnCodeAction(
-            final MagikTypedFile magikFile,
             final MethodDefinition methodDefinition,
             final TypeString methodTypeString) {
         final int lastMethodDocLine = this.getLastMethodDocLine(methodDefinition);
