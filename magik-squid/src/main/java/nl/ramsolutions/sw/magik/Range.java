@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
+import java.util.Objects;
 
 /**
  * Range containing a start position and an end position.
@@ -44,6 +45,38 @@ public class Range {
         final Position startPosition = Position.fromTokenStart(firstToken);
         final Position endPosition = Position.fromTokenEnd(lastToken);
         return new Range(startPosition, endPosition);
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "%s@%s(%s, %s)",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()),
+            this.getStartPosition(), this.getEndPosition());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.startPosition, this.endPosition);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final Range other = (Range) obj;
+        return Objects.equals(this.startPosition, other.startPosition)
+            && Objects.equals(this.endPosition, other.endPosition);
     }
 
 }
