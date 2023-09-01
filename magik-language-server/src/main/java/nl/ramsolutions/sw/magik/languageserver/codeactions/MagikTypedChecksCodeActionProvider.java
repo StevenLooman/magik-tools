@@ -28,14 +28,14 @@ public class MagikTypedChecksCodeActionProvider {
             final MagikTypedFile magikFile,
             final Range range,
             final CodeActionContext context) throws ReflectiveOperationException {
-        // TODO: Only for enabled checks.
-
         final List<CodeAction> codeActions = new ArrayList<>();
         for (final Entry<Class<?>, List<Class<?>>> entry : CheckList.getFixers().entrySet()) {
             final Class<?> checkClass = entry.getKey();
             final List<Class<?>> fixerClassses = entry.getValue();
             for (final Class<?> fixerClass : fixerClassses) {
-
+                if (!this.isCheckEnabled(checkClass)) {
+                    continue;
+                }
 
                 final MagikTypedCheckFixer fixer =
                     (MagikTypedCheckFixer) fixerClass.getDeclaredConstructor().newInstance();
@@ -47,6 +47,7 @@ public class MagikTypedChecksCodeActionProvider {
     }
 
     private boolean isCheckEnabled(final Class<?> checkClass) {
+        // TODO: Implement this.
         return true;
     }
 
