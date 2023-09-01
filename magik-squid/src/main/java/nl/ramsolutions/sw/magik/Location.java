@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Location within a file.
@@ -101,6 +102,38 @@ public class Location {
      */
     public Path getPath() {
         return Path.of(this.uri);
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "%s@%s(%s, %s)",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()),
+            this.getUri(), this.getRange());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.uri, this.range);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final Location other = (Location) obj;
+        return Objects.equals(this.uri, other.uri)
+            && Objects.equals(this.range, other.range);
     }
 
 }
