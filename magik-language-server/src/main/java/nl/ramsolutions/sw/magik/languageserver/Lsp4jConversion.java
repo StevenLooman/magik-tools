@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.languageserver;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
-import nl.ramsolutions.sw.magik.TextEdit;
 
 /**
  * Utility class for converting LSP4J <-> MagikLanguageServer.
