@@ -57,6 +57,7 @@ public final class ConfigurationLocator {
      * @param searchPath Path to start looking from, a directory.
      * @return Return the path to the configuration to use.
      */
+    @CheckForNull
     public static Path locateConfiguration(final Path searchPath) {
         LOGGER.trace("Search path: {}", searchPath.toAbsolutePath());
 
