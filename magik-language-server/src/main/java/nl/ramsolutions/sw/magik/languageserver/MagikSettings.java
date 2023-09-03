@@ -12,7 +12,7 @@ import javax.annotation.CheckForNull;
 /**
  * Magik settings.
  */
-public final class MagikSettings {
+public final class MagikSettings {  // NOSONAR
 
     /**
      * Singleton instance.
