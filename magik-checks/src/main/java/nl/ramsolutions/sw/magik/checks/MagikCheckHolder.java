@@ -103,6 +103,14 @@ public class MagikCheckHolder {
     }
 
     /**
+     * Get the {@link MagikCheck} class.
+     * @return {@link MagikCheck} class.
+     */
+    public Class<MagikCheck> getCheckClass() {
+        return this.checkClass;
+    }
+
+    /**
      * Get all parameters.
      *
      * @return List of ParameterInfo
