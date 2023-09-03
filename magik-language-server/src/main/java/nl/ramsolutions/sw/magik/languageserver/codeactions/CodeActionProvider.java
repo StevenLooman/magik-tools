@@ -44,8 +44,8 @@ public class CodeActionProvider {
             final CodeActionContext context) {
         try {
             return Stream.concat(
-                    this.checksCodeActionProvider.provideCodeActions(magikFile, range, context).stream(),
-                    this.typedChecksCodeActionProvider.provideCodeActions(magikFile, range, context).stream()
+                    this.checksCodeActionProvider.provideCodeActions(magikFile, range).stream(),
+                    this.typedChecksCodeActionProvider.provideCodeActions(magikFile, range).stream()
                 )
                 .collect(Collectors.toList());
         } catch (final ReflectiveOperationException exception) {

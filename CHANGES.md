@@ -15,6 +15,7 @@
 - Add type hierarchy provider to magik-language-server.
 - Add inlay hint provider to magik-language-server.
 - Add code actions for @parameter and @return type-doc parts.
+- Code action providers for MagikChecks/MagikTypedChecks are only active if check is enabled in configuration.
 - MethodReturnMatchesDocCheck points to the actual type-doc part.
 - Checks now mark the complete violating part, instead of the first token.
 - Show source-check for magik-typed checks in magik-language-server.

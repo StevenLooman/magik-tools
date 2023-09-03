@@ -1,6 +1,5 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
-import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,6 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     private final MagikWorkspaceService magikWorkspaceService;
     private final MagikNotebookDocumentService magikNotebookDocumentService;
     private LanguageClient languageClient;
-    private MagikSettings settings = MagikSettings.DEFAULT;
 
     /**
      * Constructor.
@@ -149,25 +147,6 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
      */
     public List<WorkspaceFolder> getWorkspaceFolders() {
         return Collections.unmodifiableList(this.workspaceFolders);
-    }
-
-    /**
-     * Set settings for workspace.
-     * @param settings Settings object.
-     */
-    public void setSettings(final JsonObject settings) {
-        this.settings = new MagikSettings(settings);
-
-        // Log configuration.
-        LOGGER.info("Settings: {}", settings);
-    }
-
-    /**
-     * Get settings from workspace.
-     * @return Settings object.
-     */
-    public MagikSettings getMagikSettings() {
-        return this.settings;
     }
 
 }

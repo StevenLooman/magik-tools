@@ -16,6 +16,7 @@ import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoTypeKeeperReader;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.indexer.MagikIndexer;
 import nl.ramsolutions.sw.magik.analysis.typing.io.JsonTypeKeeperReader;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItem;
@@ -84,7 +85,9 @@ public class MagikWorkspaceService implements WorkspaceService {
         LOGGER.trace("didChangeConfiguration");
 
         final JsonObject settings = (JsonObject) params.getSettings();
-        this.languageServer.setSettings(settings);
+
+        LOGGER.debug("New settings: {}", settings);
+        MagikSettings.INSTANCE.setSettings(settings);
 
         this.runIndexersInBackground();
     }
@@ -283,12 +286,11 @@ public class MagikWorkspaceService implements WorkspaceService {
         LOGGER.trace("Run indexers");
 
         // Read types db.
-        final MagikSettings magikSettings = this.languageServer.getMagikSettings();
-        final List<String> typesDbPaths = magikSettings.getTypingTypeDatabasePaths();
+        final List<String> typesDbPaths = MagikSettings.INSTANCE.getTypingTypeDatabasePaths();
         this.readTypesDbs(typesDbPaths);
 
         // Read method docs.
-        final String smallworldGisDir = magikSettings.getSmallworldGis();
+        final String smallworldGisDir = MagikSettings.INSTANCE.getSmallworldGis();
         if (smallworldGisDir != null) {
             this.readLibsDocs(smallworldGisDir);
         }

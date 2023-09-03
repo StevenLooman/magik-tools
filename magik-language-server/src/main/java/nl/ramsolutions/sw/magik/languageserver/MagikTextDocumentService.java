@@ -222,8 +222,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         diagnostics.addAll(diagnosticsLinter);
 
         // Typing diagnostics.
-        final MagikSettings magikSettings = this.languageServer.getMagikSettings();
-        final Boolean typingEnableChecks = magikSettings.getTypingEnableChecks();
+        final Boolean typingEnableChecks = MagikSettings.INSTANCE.getTypingEnableChecks();
         if (Boolean.TRUE.equals(typingEnableChecks)) {
             final List<Diagnostic> diagnosticsTyping = this.getDiagnosticsTyping(magikFile);
             diagnostics.addAll(diagnosticsTyping);
@@ -238,8 +237,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     }
 
     private List<Diagnostic> getDiagnosticsLinter(final MagikTypedFile magikFile) {
-        final MagikSettings magikSettings = this.languageServer.getMagikSettings();
-        final Path overrideSettingsPath = magikSettings.getChecksOverrideSettingsPath();
+        final Path overrideSettingsPath = MagikSettings.INSTANCE.getChecksOverrideSettingsPath();
 
         final MagikLintDiagnosticsProvider lintProvider = new MagikLintDiagnosticsProvider(overrideSettingsPath);
         try {

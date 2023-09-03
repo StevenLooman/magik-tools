@@ -12,22 +12,28 @@ import javax.annotation.CheckForNull;
 /**
  * Magik settings.
  */
-public class MagikSettings {
+public final class MagikSettings {
 
     /**
-     * Default MagikSettings, to prevent NPEs.
+     * Singleton instance.
      */
-    public static final MagikSettings DEFAULT = new MagikSettings(new JsonObject());
+    public static final MagikSettings INSTANCE = new MagikSettings();
 
     private static final String TOP_LEVEL = "magik";
 
-    private final JsonObject settings;
+    private JsonObject settings = new JsonObject();
 
     /**
-     * Constructor.
-     * @param settings Settings from client.
+     * Private constructor.
      */
-    public MagikSettings(final JsonObject settings) {
+    private MagikSettings() {
+    }
+
+    /**
+     * Set new settings.
+     * @param settings
+     */
+    public void setSettings(final JsonObject settings) {
         this.settings = settings;
     }
 
