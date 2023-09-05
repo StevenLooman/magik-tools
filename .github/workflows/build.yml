@@ -34,12 +34,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn --batch-mode --update-snapshots package
       - run: mkdir staging && cp **/target/*.jar staging
+      - run: cd magik-language-server/client-vscode && npm install . && npm run package
+      - run: cp magik-language-server/client-vscode/magik-language-server-*.vsix staging
       - uses: actions/upload-artifact@v3
         with:
           name: Package-${{ matrix.os }}
           path: staging
-      - run: cd magik-language-server/client-vscode && npm install . && npm run package
-      - run: cp **/vsix staging
 
   markdown_lint:
     name: Markdown Lint
