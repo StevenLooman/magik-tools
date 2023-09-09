@@ -257,7 +257,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
         final String identifier = identifierNode.getTokenValue();
         final ScopeEntry existingScopeEntry = this.currentScope.getScopeEntry(identifier);
         if (existingScopeEntry != null) {
-            if (existingScopeEntry.getNode() != identifierNode) {
+            if (existingScopeEntry.getDefinitionNode() != identifierNode) {
                 // Prevent using ourselves.
                 existingScopeEntry.addUsage(node);
             }

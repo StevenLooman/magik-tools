@@ -29,8 +29,8 @@ class ReferencesProviderTest {
         URI.create("tests://unittest"),
         new Range(new Position(0, 0), new Position(0, 0)));
 
-    private List<org.eclipse.lsp4j.Location> getReferences(
-                final String code, final org.eclipse.lsp4j.Position position, final ITypeKeeper typeKeeper) {
+    private List<Location> getReferences(
+                final String code, final Position position, final ITypeKeeper typeKeeper) {
         final MagikTypedFile magikFile = new MagikTypedFile(TEST_URI, code, typeKeeper);
         final ReferencesProvider provider = new ReferencesProvider();
         return provider.provideReferences(magikFile, position);
@@ -59,8 +59,8 @@ class ReferencesProviderTest {
             + "_method integer.refering\n"
             + "    _self.refering\n"
             + "_endmethod\n";
-        final org.eclipse.lsp4j.Position position = new org.eclipse.lsp4j.Position(1, 12);  // On `refering`.
-        final List<org.eclipse.lsp4j.Location> references = this.getReferences(code, position, typeKeeper);
+        final Position position = new Position(2, 12);  // On `refering`.
+        final List<Location> references = this.getReferences(code, position, typeKeeper);
         assertThat(references).hasSize(1);
     }
 
@@ -87,8 +87,8 @@ class ReferencesProviderTest {
             + "_method integer.refering\n"
             + "    _self.refering\n"
             + "_endmethod\n";
-        final org.eclipse.lsp4j.Position position = new org.eclipse.lsp4j.Position(0, 20);    // On `refering`.
-        final List<org.eclipse.lsp4j.Location> references = this.getReferences(code, position, typeKeeper);
+        final Position position = new Position(1, 20);    // On `refering`.
+        final List<Location> references = this.getReferences(code, position, typeKeeper);
         assertThat(references).hasSize(1);
     }
 
@@ -113,8 +113,8 @@ class ReferencesProviderTest {
             + "_method integer.refering\n"
             + "    integer\n"
             + "_endmethod\n";
-        final org.eclipse.lsp4j.Position position = new org.eclipse.lsp4j.Position(1, 4);    // On `integer`.
-        final List<org.eclipse.lsp4j.Location> references = this.getReferences(code, position, typeKeeper);
+        final Position position = new Position(2, 4);    // On `integer`.
+        final List<Location> references = this.getReferences(code, position, typeKeeper);
         assertThat(references).hasSize(1);
     }
 
@@ -139,8 +139,8 @@ class ReferencesProviderTest {
             + "_method integer.refering\n"
             + "    print(integer)\n"
             + "_endmethod\n";
-        final org.eclipse.lsp4j.Position position = new org.eclipse.lsp4j.Position(0, 10);    // On `integer`.
-        final List<org.eclipse.lsp4j.Location> references = this.getReferences(code, position, typeKeeper);
+        final Position position = new Position(1, 10);    // On `integer`.
+        final List<Location> references = this.getReferences(code, position, typeKeeper);
         assertThat(references).hasSize(1);
     }
 

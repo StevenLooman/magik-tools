@@ -368,7 +368,7 @@ class ScopeBuilderVisitorTest {
         final ScopeEntry entryA = methodScope.getScopeEntry("a");
         assertThat(entryA).isNotNull();
         assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
-        assertThat(entryA.getNode().getTokenLine()).isEqualTo(2);
+        assertThat(entryA.getDefinitionNode().getTokenLine()).isEqualTo(2);
         assertThat(entryA.getUsages()).hasSize(1);
         assertThat(entryA.getUsages().get(0).getTokenLine()).isEqualTo(3);
     }
@@ -388,7 +388,7 @@ class ScopeBuilderVisitorTest {
         final ScopeEntry entryA = methodScope.getScopeEntry("a");
         assertThat(entryA).isNotNull();
         assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
-        assertThat(entryA.getNode().getTokenLine()).isEqualTo(2);
+        assertThat(entryA.getDefinitionNode().getTokenLine()).isEqualTo(2);
         assertThat(entryA.getUsages()).hasSize(1);
         assertThat(entryA.getUsages().get(0).getTokenLine()).isEqualTo(3);
 
@@ -415,7 +415,7 @@ class ScopeBuilderVisitorTest {
         assertThat(entryA).isNotNull();
         assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.IMPORT);
         assertThat(entryA.getImportedEntry()).isNotNull();
-        assertThat(entryA.getNode().getTokenLine()).isEqualTo(4);
+        assertThat(entryA.getDefinitionNode().getTokenLine()).isEqualTo(4);
         assertThat(entryA.getUsages()).isEmpty();
     }
 
@@ -438,7 +438,7 @@ class ScopeBuilderVisitorTest {
         assertThat(entryA).isNotNull();
         assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.IMPORT);
         assertThat(entryA.getImportedEntry()).isNull();
-        assertThat(entryA.getNode().getTokenLine()).isEqualTo(4);
+        assertThat(entryA.getDefinitionNode().getTokenLine()).isEqualTo(4);
         assertThat(entryA.getUsages()).isEmpty();
     }
 
@@ -455,7 +455,7 @@ class ScopeBuilderVisitorTest {
         final ScopeEntry entryTracebackShowArgs = procScope.getScopeEntry("!traceback_show_args?!");
         assertThat(entryTracebackShowArgs.getType()).isEqualTo(ScopeEntry.Type.IMPORT);
         assertThat(entryTracebackShowArgs.getImportedEntry()).isNull();
-        assertThat(entryTracebackShowArgs.getNode().getTokenLine()).isEqualTo(2);
+        assertThat(entryTracebackShowArgs.getDefinitionNode().getTokenLine()).isEqualTo(2);
         assertThat(entryTracebackShowArgs.getUsages()).isEmpty();
     }
 

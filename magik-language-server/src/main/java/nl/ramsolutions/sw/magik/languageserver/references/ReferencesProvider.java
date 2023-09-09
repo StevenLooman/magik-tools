@@ -9,20 +9,21 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.scope.Scope;
+import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
-import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
-import org.eclipse.lsp4j.Location;
-import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +56,7 @@ public class ReferencesProvider {
         final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
 
         // Should always be on an identifier.
-        final AstNode currentNode =
-            AstQuery.nodeAt(node, Lsp4jConversion.positionFromLsp4j(position), MagikGrammar.IDENTIFIER);
+        final AstNode currentNode = AstQuery.nodeAt(node, position, MagikGrammar.IDENTIFIER);
         if (currentNode == null) {
             return Collections.emptyList();
         }
@@ -97,15 +97,32 @@ public class ReferencesProvider {
             }
         } else if (wantedNode.is(MagikGrammar.ATOM)
                    && wantedNode.getFirstChild().is(MagikGrammar.IDENTIFIER)) {
-            // A random identifier, regard it as a type.
-            final String pakkage = packageHelper.getCurrentPackage();
+            // TODO: If variable, find references to variable.
+            final Scope scope = magikFile.getGlobalScope().getScopeForNode(wantedNode);
             final String identifier = currentNode.getTokenValue();
-            final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
-            final AbstractType type = typeKeeper.getType(typeString);
-            if (type != UndefinedType.INSTANCE) {
-                final String typeName = type.getFullName();
-                LOGGER.debug("Getting references to type: {}", typeName);
-                return this.referencesToType(typeKeeper, typeName);
+            final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
+            if (scopeEntry == null) {
+                return Collections.emptyList();
+            } else if (scopeEntry.isType(
+                    ScopeEntry.Type.DEFINITION,
+                    ScopeEntry.Type.LOCAL,
+                    ScopeEntry.Type.IMPORT,
+                    ScopeEntry.Type.CONSTANT,
+                    ScopeEntry.Type.PARAMETER)) {
+                final List<AstNode> usages = scopeEntry.getUsages();
+                return usages.stream()
+                    .map(usageNode -> new Location(magikFile.getUri(), usageNode))
+                    .collect(Collectors.toList());
+            } else {
+                // A random identifier, regard it as a type.
+                final String pakkage = packageHelper.getCurrentPackage();
+                final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
+                final AbstractType type = typeKeeper.getType(typeString);
+                if (type != UndefinedType.INSTANCE) {
+                    final String typeName = type.getFullName();
+                    LOGGER.debug("Getting references to type: {}", typeName);
+                    return this.referencesToType(typeKeeper, typeName);
+                }
             }
         } else if (wantedNode.is(MagikGrammar.CONDITION_NAME)) {
             final String conditionName = currentNode.getTokenValue();
@@ -145,7 +162,6 @@ public class ReferencesProvider {
             .filter(filterPredicate::test)
             .map(Method.MethodUsage::getLocation)
             .filter(Objects::nonNull)
-            .map(Lsp4jConversion::locationToLsp4j)
             .collect(Collectors.toList());
     }
 
@@ -174,7 +190,6 @@ public class ReferencesProvider {
             .filter(filterPredicate::test)
             .map(Method.GlobalUsage::getLocation)
             .filter(Objects::nonNull)
-            .map(Lsp4jConversion::locationToLsp4j)
             .collect(Collectors.toList());
     }
 
@@ -186,7 +201,6 @@ public class ReferencesProvider {
             .flatMap(method -> method.getConditionUsages().stream())
             .filter(conditionUsage -> conditionUsage.getConditionName().equals(conditionName))
             .map(Method.ConditionUsage::getLocation)
-            .map(Lsp4jConversion::locationToLsp4j)
             .collect(Collectors.toList());
     }
 

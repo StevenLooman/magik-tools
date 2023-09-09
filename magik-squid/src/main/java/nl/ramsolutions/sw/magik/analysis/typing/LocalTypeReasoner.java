@@ -450,7 +450,7 @@ public class LocalTypeReasoner extends AstWalker {
             final ExpressionResult result = this.getNodeType(lastNodeType);
             this.assignAtom(node, result);
         } else if (scopeEntry.isType(ScopeEntry.Type.PARAMETER)) {
-            final AstNode parameterNode = scopeEntry.getNode();
+            final AstNode parameterNode = scopeEntry.getDefinitionNode();
             final ExpressionResult result = this.getNodeType(parameterNode);
             this.assignAtom(node, result);
         } else {
@@ -651,7 +651,7 @@ public class LocalTypeReasoner extends AstWalker {
         if (scopeEntry.isType(ScopeEntry.Type.LOCAL)
             || scopeEntry.isType(ScopeEntry.Type.DEFINITION)
             || scopeEntry.isType(ScopeEntry.Type.CONSTANT)) {
-            final AstNode scopeEntryNode = scopeEntry.getNode();
+            final AstNode scopeEntryNode = scopeEntry.getDefinitionNode();
             this.setNodeType(scopeEntryNode, result);
 
             // TODO: Test if it isn't a slot node

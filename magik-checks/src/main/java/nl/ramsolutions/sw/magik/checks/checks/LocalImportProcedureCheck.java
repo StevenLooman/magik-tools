@@ -73,7 +73,7 @@ public class LocalImportProcedureCheck extends MagikCheck {
             final String identifier = scopeEntry.getIdentifier();
             for (final Scope parentScope : parentScopes) {
                 if (parentScope.getScopeEntry(identifier) != null) {
-                    this.addIssue(scopeEntry.getNode(), MESSAGE);
+                    this.addIssue(scopeEntry.getDefinitionNode(), MESSAGE);
                     found = true;
                 }
             }

@@ -78,7 +78,7 @@ public class ScopeEntry {
         return this.identifier;
     }
 
-    public AstNode getNode() {
+    public AstNode getDefinitionNode() {
         return this.node;
     }
 

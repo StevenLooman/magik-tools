@@ -66,7 +66,7 @@ public class HidesVariableCheck extends MagikCheck {
             final ScopeEntry scopeEntry = ancestorScope.getScopeEntry(identifier);
             if (scopeEntry != null
                 && scopeEntry.isType(ScopeEntry.Type.LOCAL)
-                && scopeEntry.getNode().getTokenLine() < identifierNode.getTokenLine()) {
+                && scopeEntry.getDefinitionNode().getTokenLine() < identifierNode.getTokenLine()) {
                 this.addIssue(identifierNode, MESSAGE);
             }
         }

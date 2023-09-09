@@ -105,7 +105,7 @@ public class RenameProvider {
 
         // Provide edits.
         final String uri = magikFile.getUri().toString();
-        final AstNode definitionNode = scopeEntry.getNode();
+        final AstNode definitionNode = scopeEntry.getDefinitionNode();
         final List<TextEdit> textEdits =
             Stream.concat(Stream.of(definitionNode), scopeEntry.getUsages().stream())
                 .map(renameNode -> renameNode.isNot(MagikGrammar.IDENTIFIER)

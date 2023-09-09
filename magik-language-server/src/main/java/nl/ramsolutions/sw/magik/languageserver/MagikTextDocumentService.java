@@ -14,6 +14,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
+import nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider;
 import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikLintDiagnosticsProvider;
 import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikTypeDiagnosticsProvider;
 import nl.ramsolutions.sw.magik.languageserver.documentsymbols.DocumentSymbolProvider;
@@ -34,6 +35,7 @@ import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionParams;
+import org.eclipse.lsp4j.DefinitionParams;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
@@ -99,6 +101,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     private final HoverProvider hoverProvider;
     private final ImplementationProvider implementationProvider;
     private final SignatureHelpProvider signatureHelpProvider;
+    private final DefinitionsProvider definitionsProvider;
     private final ReferencesProvider referencesProvider;
     private final CompletionProvider completionProvider;
     private final FormattingProvider formattingProvider;
@@ -123,6 +126,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.hoverProvider = new HoverProvider();
         this.implementationProvider = new ImplementationProvider();
         this.signatureHelpProvider = new SignatureHelpProvider();
+        this.definitionsProvider = new DefinitionsProvider();
         this.referencesProvider = new ReferencesProvider();
         this.completionProvider = new CompletionProvider();
         this.formattingProvider = new FormattingProvider();
@@ -146,6 +150,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.hoverProvider.setCapabilities(capabilities);
         this.implementationProvider.setCapabilities(capabilities);
         this.signatureHelpProvider.setCapabilities(capabilities);
+        this.definitionsProvider.setCapabilities(capabilities);
         this.referencesProvider.setCapabilities(capabilities);
         this.completionProvider.setCapabilities(capabilities);
         this.formattingProvider.setCapabilities(capabilities);
@@ -321,16 +326,41 @@ public class MagikTextDocumentService implements TextDocumentService {
     }
 
     @Override
+    public CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>> definition(
+            final DefinitionParams params) {
+        final TextDocumentIdentifier textDocument = params.getTextDocument();
+        LOGGER.trace("definitions, uri: {}", textDocument.getUri());
+
+        final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+        final Position lsp4jPosition = params.getPosition();
+        final nl.ramsolutions.sw.magik.Position position = Lsp4jConversion.positionFromLsp4j(lsp4jPosition);
+        return CompletableFuture.supplyAsync(() -> {
+            final List<nl.ramsolutions.sw.magik.Location> locations =
+                this.definitionsProvider.provideDefinitions(magikFile, position);
+            LOGGER.debug("Definitions found: {}", locations.size());
+
+            final List<Location> lsp4jLocations = locations.stream()
+                .map(location -> Lsp4jConversion.locationToLsp4j(location))
+                .collect(Collectors.toList());
+            return Either.forLeft(lsp4jLocations);
+        });
+    }
+
+    @Override
     public CompletableFuture<List<? extends Location>> references(final ReferenceParams params) {
         final TextDocumentIdentifier textDocument = params.getTextDocument();
         LOGGER.trace("references, uri: {}", textDocument.getUri());
 
         final MagikTypedFile magikFile = this.openFiles.get(textDocument);
-        final Position position = params.getPosition();
+        final Position lsp4jPosition = params.getPosition();
+        final nl.ramsolutions.sw.magik.Position position = Lsp4jConversion.positionFromLsp4j(lsp4jPosition);
         return CompletableFuture.supplyAsync(() -> {
-            final List<Location> locations = this.referencesProvider.provideReferences(magikFile, position);
+            final List<nl.ramsolutions.sw.magik.Location> locations =
+                this.referencesProvider.provideReferences(magikFile, position);
             LOGGER.debug("References found: {}", locations.size());
-            return locations;
+            return locations.stream()
+                .map(location -> Lsp4jConversion.locationToLsp4j(location))
+                .collect(Collectors.toList());
         });
     }
 
