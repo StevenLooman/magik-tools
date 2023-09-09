@@ -399,7 +399,8 @@
                     <exclude>nl.ramsolutions.sw.magik.languageserver.formatting.StandardFormattingStrategy.requireNoWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.formatting.StandardFormattingStrategy.requireWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider.provideHover(nl.ramsolutions.sw.magik.MagikTypedFile, org.eclipse.lsp4j.Position)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider.provideReferences(nl.ramsolutions.sw.magik.MagikTypedFile, org.eclipse.lsp4j.Position)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider.provideDefinitions(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider.provideReferences(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.semantictokens.SemanticTokenWalker.walkPostIdentifier(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider.getSymbols(java.lang.String)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.lint.ConfigurationLocator.locateConfiguration()</exclude>

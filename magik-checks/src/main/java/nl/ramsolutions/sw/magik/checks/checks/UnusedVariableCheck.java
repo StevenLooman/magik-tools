@@ -115,7 +115,7 @@ public class UnusedVariableCheck extends MagikCheck {
         // - any later identifier(s) of it is used
         // - but this one is not
         for (final ScopeEntry entry : new ArrayList<>(scopeEntries)) {
-            final AstNode entryNode = entry.getNode();
+            final AstNode entryNode = entry.getDefinitionNode();
             if (this.isPartOfMultiVariableDefinition(entryNode)
                 && this.anyNextSiblingUsed(entryNode)
                 || this.isPartOfMultiAssignment(entryNode)) {
@@ -129,7 +129,7 @@ public class UnusedVariableCheck extends MagikCheck {
                 continue;
             }
 
-            final AstNode entryNode = entry.getNode();
+            final AstNode entryNode = entry.getDefinitionNode();
             final String name = entryNode.getTokenValue();
             final String message = String.format(MESSAGE, name);
             this.addIssue(entryNode, message);
@@ -141,7 +141,7 @@ public class UnusedVariableCheck extends MagikCheck {
         final GlobalScope globalScope = this.getMagikFile().getGlobalScope();
         for (final Scope scope : globalScope.getSelfAndDescendantScopes()) {
             for (final ScopeEntry scopeEntry : scope.getScopeEntriesInScope()) {  // NOSONAR
-                final AstNode scopeEntryNode = scopeEntry.getNode();
+                final AstNode scopeEntryNode = scopeEntry.getDefinitionNode();
 
                 // But not globals/dynamics which are assigned to directly
                 if ((scopeEntry.isType(ScopeEntry.Type.GLOBAL) || scopeEntry.isType(ScopeEntry.Type.DYNAMIC))

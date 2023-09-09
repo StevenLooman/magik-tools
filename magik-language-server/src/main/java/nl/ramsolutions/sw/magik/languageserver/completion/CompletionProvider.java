@@ -167,7 +167,7 @@ public class CompletionProvider {
                 scopeForNode.getSelfAndAncestorScopes().stream()
                     .flatMap(scope -> scope.getScopeEntriesInScope().stream())
                     .filter(scopeEntry -> {
-                        final AstNode definingNode = scopeEntry.getNode();
+                        final AstNode definingNode = scopeEntry.getDefinitionNode();
                         final Range range = new Range(definingNode);
                         return Lsp4jConversion.positionFromLsp4j(position).isAfterRange(range);
                     })

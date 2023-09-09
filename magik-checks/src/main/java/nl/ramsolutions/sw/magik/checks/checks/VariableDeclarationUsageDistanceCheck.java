@@ -90,7 +90,7 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
         }
 
         // Only test the first use.
-        final AstNode declarationNode = entry.getNode();
+        final AstNode declarationNode = entry.getDefinitionNode();
         if (this.seenNodes.contains(declarationNode)) {
             return;
         }

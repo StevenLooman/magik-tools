@@ -401,7 +401,7 @@ public class MagikIndexer {
                 } else if (type == SelfType.INSTANCE) {
                     type = magikType;
                 }
-                final AstNode usageNode = scopeEntry.getNode();
+                final AstNode usageNode = scopeEntry.getDefinitionNode();
                 final Location usageLocation = new Location(uri, usageNode);
                 return new Method.GlobalUsage(ref, usageLocation);
             })

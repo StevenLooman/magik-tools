@@ -65,12 +65,12 @@ public class MagikType extends AbstractType {
     /**
      * Constructor.
      * @param typeKeeper TypeKeeper.
-     * @param magikTypeType Sort.
+     * @param magikTypeSort Sort.
      * @param typeString Global reference.
      */
-    public MagikType(final ITypeKeeper typeKeeper, final Sort magikTypeType, final TypeString typeString) {
+    public MagikType(final ITypeKeeper typeKeeper, final Sort magikTypeSort, final TypeString typeString) {
         this.typeKeeper = typeKeeper;
-        this.sort = magikTypeType;
+        this.sort = magikTypeSort;
         this.typeString = typeString;
 
         // Add self to TypeKeeper.

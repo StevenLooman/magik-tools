@@ -24,7 +24,7 @@ public class UndefinedVariableCheck extends MagikCheck {
             .filter(scopeEntry -> scopeEntry.isType(ScopeEntry.Type.GLOBAL))
             .filter(scopeEntry -> this.isPrefixed(scopeEntry.getIdentifier()))
             .forEach(scopeEntry -> {
-                AstNode scopeEntryNode = scopeEntry.getNode();
+                AstNode scopeEntryNode = scopeEntry.getDefinitionNode();
                 String identifier = scopeEntry.getIdentifier();
                 String message = String.format(MESSAGE, identifier);
                 this.addIssue(scopeEntryNode, message);
