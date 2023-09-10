@@ -24,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RenameProviderTest {
 
     private Either3<Range, PrepareRenameResult, PrepareRenameDefaultBehavior> getPrepareRename(
-            String code, final Position position) {
+            final String code, final Position position) {
         final URI uri = URI.create("tests://unittest");
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final MagikTypedFile magikFile = new MagikTypedFile(uri, code, typeKeeper);
