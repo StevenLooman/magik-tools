@@ -129,7 +129,8 @@ public class DefinitionsProvider {
     }
 
     private List<Location> definitionsForMethodInvocation(final MagikTypedFile magikFile, final AstNode wantedNode) {
-        final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(wantedNode);
+        final AstNode methodInvocationNode = wantedNode.getFirstAncestor(MagikGrammar.METHOD_INVOCATION);
+        final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(methodInvocationNode);
         final String methodName = helper.getMethodName();
 
         final AstNode previousSiblingNode = wantedNode.getPreviousSibling();
