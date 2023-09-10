@@ -177,9 +177,26 @@ public final class TypeString {
         return this.currentPackage + ":" + this.string;
     }
 
+    /**
+     * Test if this type is undefined.
+     * @return {@code true} if this type is undefined.
+     */
     public boolean isUndefined() {
         return !this.isCombined()
             && this.getString().equalsIgnoreCase(UndefinedType.SERIALIZED_NAME);
+    }
+
+    /**
+     * Test if this type contains an undefined type.
+     * @return {@code true} if this type contains an undefined type.
+     */
+    public boolean containsUndefined() {
+        if (this.isCombined()) {
+            return this.combinedTypes.stream()
+                .anyMatch(TypeString::containsUndefined);
+        }
+
+        return this.isUndefined();
     }
 
     public boolean isSelf() {

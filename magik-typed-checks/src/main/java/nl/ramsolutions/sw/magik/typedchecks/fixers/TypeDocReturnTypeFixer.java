@@ -63,27 +63,26 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
         return StreamUtils.zip(methodResultString.stream(), typeDocNodes.entrySet().stream())
             .map(entry -> {
                 final TypeString methodTypeString = entry.getKey();
-                if (methodTypeString == TypeString.UNDEFINED) {
+                if (methodTypeString != null && methodTypeString.containsUndefined()) {
                     // Don't propose code actions for undefined types.
                     return null;
                 }
 
                 final Map.Entry<AstNode, TypeString> typeDocEntry = entry.getValue();
                 if (methodTypeString != null && typeDocEntry == null) {
-                    // Code action: Add type-doc line.
                     return this.createAddReturnCodeAction(methodDefinition, methodTypeString);
                 }
 
-                final TypeString typeDocTypeString = typeDocEntry.getValue();
                 final AstNode typeDocNode = typeDocEntry.getKey();
                 final AstNode typeValueNode = typeDocNode.getFirstChild(TypeDocGrammar.TYPE_VALUE);
                 if (methodTypeString == null && typeDocEntry != null) {
-                    // Code action: Remove type-doc line.
                     return this.createRemoveReturnCodeAction(typeValueNode);
-                } else if (methodTypeString != null  // && typeDocTypeString != null
-                    && methodTypeString != TypeString.UNDEFINED
+                }
+
+                final TypeString typeDocTypeString = typeDocEntry.getValue();
+                if (methodTypeString != null  // && typeDocTypeString != null
+                    && !methodTypeString.containsUndefined()
                     && !methodTypeString.equals(typeDocTypeString)) {
-                    // Code action: Update type-doc line.
                     return this.createUpdateReturnCodeAction(methodTypeString, typeValueNode);
                 }
 
