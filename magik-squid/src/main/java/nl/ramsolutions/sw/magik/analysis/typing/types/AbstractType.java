@@ -96,13 +96,13 @@ public abstract class AbstractType {
     }
 
     /**
-     * Test if this type is kind of {@code otherType}.
+     * Test if this type is kind of {@link otherType}.
      *
      * <p>
      * Note that this does not work when testing against a {@link CombinedType}.
      * </p>
      * @param otherType Type to test against.
-     * @return True if kind of {@code otherType}, false otherwise.
+     * @return True if kind of {@link otherType}, false otherwise.
      */
     public boolean isKindOf(final AbstractType otherType) {
         return this.equals(otherType) || this.getAncestors().contains(otherType);

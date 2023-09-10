@@ -286,12 +286,17 @@ public class MagikTextDocumentService implements TextDocumentService {
             textDocument.getUri(), params.getPosition().getLine(), params.getPosition().getCharacter());
 
         final MagikTypedFile magikFile = this.openFiles.get(textDocument);
-        final Position position = params.getPosition();
+        final Position lsp4jPosition = params.getPosition();
+        final nl.ramsolutions.sw.magik.Position position = Lsp4jConversion.positionFromLsp4j(lsp4jPosition);
         return CompletableFuture.supplyAsync(() -> {
-            final List<Location> implementations =
+            final List<nl.ramsolutions.sw.magik.Location> locations =
                 this.implementationProvider.provideImplementations(magikFile, position);
-            LOGGER.debug("Implementations found: {}", implementations.size());
-            return Either.forLeft(implementations);
+            LOGGER.debug("Implementations found: {}", locations.size());
+
+            final List<Location> lsp4jLocations = locations.stream()
+                .map(location -> Lsp4jConversion.locationToLsp4j(location))
+                .collect(Collectors.toList());
+            return Either.forLeft(lsp4jLocations);
         });
     }
 
