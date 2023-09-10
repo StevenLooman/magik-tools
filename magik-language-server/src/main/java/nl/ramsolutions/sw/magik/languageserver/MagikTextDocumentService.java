@@ -25,6 +25,7 @@ import nl.ramsolutions.sw.magik.languageserver.implementation.ImplementationProv
 import nl.ramsolutions.sw.magik.languageserver.inlayhint.InlayHintProvider;
 import nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider;
 import nl.ramsolutions.sw.magik.languageserver.rename.RenameProvider;
+import nl.ramsolutions.sw.magik.languageserver.selectionrange.SelectionRangeProvider;
 import nl.ramsolutions.sw.magik.languageserver.semantictokens.SemanticTokenProvider;
 import nl.ramsolutions.sw.magik.languageserver.signaturehelp.SignatureHelpProvider;
 import nl.ramsolutions.sw.magik.languageserver.typehierarchy.TypeHierarchyProvider;
@@ -62,6 +63,8 @@ import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.RenameParams;
+import org.eclipse.lsp4j.SelectionRange;
+import org.eclipse.lsp4j.SelectionRangeParams;
 import org.eclipse.lsp4j.SemanticTokens;
 import org.eclipse.lsp4j.SemanticTokensParams;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -112,6 +115,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     private final TypeHierarchyProvider typeHierarchyProvider;
     private final InlayHintProvider inlayHintProvider;
     private final CodeActionProvider codeActionProvider;
+    private final SelectionRangeProvider selectionRangeProvider;
 
     /**
      * Constructor.
@@ -137,6 +141,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.typeHierarchyProvider = new TypeHierarchyProvider(this.typeKeeper);
         this.inlayHintProvider = new InlayHintProvider();
         this.codeActionProvider = new CodeActionProvider();
+        this.selectionRangeProvider = new SelectionRangeProvider();
     }
 
     /**
@@ -161,6 +166,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.typeHierarchyProvider.setCapabilities(capabilities);
         this.inlayHintProvider.setCapabilities(capabilities);
         this.codeActionProvider.setCapabilities(capabilities);
+        this.selectionRangeProvider.setCapabilities(capabilities);
     }
 
     @Override
@@ -447,6 +453,19 @@ public class MagikTextDocumentService implements TextDocumentService {
 
         final MagikTypedFile magikFile = this.openFiles.get(textDocument);
         return CompletableFuture.supplyAsync(() -> this.documentSymbolProvider.provideDocumentSymbol(magikFile));
+    }
+
+    @Override
+    public CompletableFuture<List<SelectionRange>> selectionRange(final SelectionRangeParams params) {
+        final TextDocumentIdentifier textDocument = params.getTextDocument();
+        LOGGER.trace("selectionRange, uri: {}", textDocument.getUri());
+
+        final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+        final List<nl.ramsolutions.sw.magik.Position> positions = params.getPositions().stream()
+            .map(Lsp4jConversion::positionFromLsp4j)
+            .collect(Collectors.toList());
+        return CompletableFuture.supplyAsync(() -> this.selectionRangeProvider.provideSelectionRanges(
+            magikFile, positions));
     }
 
     @Override

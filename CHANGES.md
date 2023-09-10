@@ -25,6 +25,7 @@
 - Add defintion functionality to magik-language-server.
 - Move functionality from implementation provider to definition provider in magik-language-server.
 - Implementation provider now provides impementations of abstract methods.
+- Add SelectionRangeProvider to magik-language-server.
 - Various small fixes.
 
 0.7.1 (2023-02-21)
