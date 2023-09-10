@@ -14,7 +14,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,14 +29,26 @@ class ImplementationProviderTest {
         new Range(new Position(0, 0), new Position(0, 0)));
 
     @Test
-    void testProvideImplementation() {
+    void testProvideAbstractMethodImplementation() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
+        final MagikType objectType = (MagikType) typeKeeper.getType(objectRef);
+        objectType.addMethod(
+            EMPTY_LOCATION,
+            EnumSet.of(Method.Modifier.ABSTRACT),
+            "abstract()",
+            Collections.emptyList(),
+            null,
+            null,
+            ExpressionResultString.UNDEFINED,
+            new ExpressionResultString());
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
+        integerType.addParent(objectRef);
         integerType.addMethod(
             EMPTY_LOCATION,
             EnumSet.noneOf(Method.Modifier.class),
-            "implementation()",
+            "abstract()",
             Collections.emptyList(),
             null,
             null,
@@ -46,16 +57,15 @@ class ImplementationProviderTest {
 
         final URI uri = URI.create("tests://unittest");
         final String code = ""
-            + "_method object.b\n"
-            + "    1.implementation()\n"
+            + "_abstract _method object.abstract()\n"
             + "_endmethod";
         final MagikTypedFile magikFile = new MagikTypedFile(uri, code, typeKeeper);
-        final org.eclipse.lsp4j.Position position = new org.eclipse.lsp4j.Position(1, 10);
+        final Position position = new Position(1, 26);  // On `abstract`.
 
         final ImplementationProvider provider = new ImplementationProvider();
-        final List<org.eclipse.lsp4j.Location> implementations = provider.provideImplementations(magikFile, position);
+        final List<Location> implementations = provider.provideImplementations(magikFile, position);
         assertThat(implementations)
-            .containsOnly(Lsp4jConversion.locationToLsp4j(EMPTY_LOCATION));
+            .containsOnly(EMPTY_LOCATION);
     }
 
 }

@@ -63,7 +63,8 @@ public class ReferencesProvider {
 
         final AstNode wantedNode = currentNode.getFirstAncestor(
             MagikGrammar.METHOD_INVOCATION,
-            MagikGrammar.METHOD_DEFINITION,
+            MagikGrammar.METHOD_NAME,
+            MagikGrammar.EXEMPLAR_NAME,
             MagikGrammar.ATOM,
             MagikGrammar.CONDITION_NAME);
         LOGGER.trace("Wanted node: {}", wantedNode);
@@ -75,29 +76,24 @@ public class ReferencesProvider {
             final String methodName = helper.getMethodName();
             LOGGER.debug("Getting references to method: {}", methodName);
             return this.referencesToMethod(typeKeeper, UndefinedType.SERIALIZED_NAME, methodName);
-        } else if (wantedNode.is(MagikGrammar.METHOD_DEFINITION)) {
-            final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(wantedNode);
+        } else if (wantedNode.is(MagikGrammar.METHOD_NAME)) {
+            final AstNode methodDefinitionNode = wantedNode.getParent();
+            final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefinitionNode);
+            final String methodName = helper.getMethodName();
+            LOGGER.debug("Getting references to method: {}", methodName);
+            return this.referencesToMethod(typeKeeper, UndefinedType.SERIALIZED_NAME, methodName);
+        } else if (wantedNode.is(MagikGrammar.EXEMPLAR_NAME)) {
             final String identifier = currentNode.getTokenValue();
-
-            // Name of the method.
-            if (currentNode.getFirstAncestor(MagikGrammar.METHOD_NAME) != null) {
-                final String methodName = helper.getMethodName();
-                LOGGER.debug("Getting references to method: {}", methodName);
-                return this.referencesToMethod(typeKeeper, UndefinedType.SERIALIZED_NAME, methodName);
-            } else if (currentNode.getFirstAncestor(MagikGrammar.EXEMPLAR_NAME) != null) {
-                // Must be the exemplar name.
-                final String pakkage = packageHelper.getCurrentPackage();
-                final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
-                final AbstractType type = typeKeeper.getType(typeString);
-                if (type != UndefinedType.INSTANCE) {
-                    final String typeName = type.getFullName();
-                    LOGGER.debug("Getting references to type: {}", typeName);
-                    return this.referencesToType(typeKeeper, typeName);
-                }
+            final String pakkage = packageHelper.getCurrentPackage();
+            final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
+            final AbstractType type = typeKeeper.getType(typeString);
+            if (type != UndefinedType.INSTANCE) {
+                final String typeName = type.getFullName();
+                LOGGER.debug("Getting references to type: {}", typeName);
+                return this.referencesToType(typeKeeper, typeName);
             }
         } else if (wantedNode.is(MagikGrammar.ATOM)
                    && wantedNode.getFirstChild().is(MagikGrammar.IDENTIFIER)) {
-            // TODO: If variable, find references to variable.
             final Scope scope = magikFile.getGlobalScope().getScopeForNode(wantedNode);
             final String identifier = currentNode.getTokenValue();
             final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
@@ -113,8 +109,7 @@ public class ReferencesProvider {
                 return usages.stream()
                     .map(usageNode -> new Location(magikFile.getUri(), usageNode))
                     .collect(Collectors.toList());
-            } else {
-                // A random identifier, regard it as a type.
+            } else if (scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC)) {
                 final String pakkage = packageHelper.getCurrentPackage();
                 final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
                 final AbstractType type = typeKeeper.getType(typeString);
@@ -129,6 +124,8 @@ public class ReferencesProvider {
             LOGGER.debug("Getting references to condition: {}", conditionName);
             return this.referencesToCondition(typeKeeper, conditionName);
         }
+
+        // TODO: Slot references.
 
         return Collections.emptyList();
     }
