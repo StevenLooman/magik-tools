@@ -67,7 +67,6 @@
               <includes>
                 <include>${project.groupId}:magik-squid</include>
                 <include>org.sonarsource.sslr:sslr-core</include>
-                <include>org.sonarsource.sslr:sslr-xpath</include>
                 <include>org.sonarsource.sonarqube:sonar-plugin-api</include>
                 <include>jaxen:jaxen</include>
                 <include>org.sonarsource.sslr:sslr-toolkit</include>
