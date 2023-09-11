@@ -96,6 +96,7 @@ public class DefinitionsProvider {
 
     private List<Location> definitionsForAtom(final MagikTypedFile magikFile, final AstNode wantedNode) {
         final Scope scope = magikFile.getGlobalScope().getScopeForNode(wantedNode);
+        Objects.requireNonNull(scope);
         final String identifier = wantedNode.getTokenValue();
         final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
         if (scopeEntry == null) {

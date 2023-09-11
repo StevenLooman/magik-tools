@@ -95,6 +95,7 @@ public class ReferencesProvider {
         } else if (wantedNode.is(MagikGrammar.ATOM)
                    && wantedNode.getFirstChild().is(MagikGrammar.IDENTIFIER)) {
             final Scope scope = magikFile.getGlobalScope().getScopeForNode(wantedNode);
+            Objects.requireNonNull(scope);
             final String identifier = currentNode.getTokenValue();
             final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
             if (scopeEntry == null) {
