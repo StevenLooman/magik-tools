@@ -46,17 +46,8 @@ public class Configuration {
     }
 
     private void setDisabledChecks() {
-        final String disabled = this.getTemplatedCheckNames() + "," + this.getDisabledCheckNames();
+        final String disabled = this.getDisabledCheckNames();
         this.properties.put("disabled", disabled);
-    }
-
-    private String getTemplatedCheckNames() {
-        return CheckList.getTemplatedChecks().stream()
-            .map(checkClass -> checkClass.getAnnotation(org.sonar.check.Rule.class))
-            .filter(Objects::nonNull)
-            .map(Rule::key)
-            .map(Configuration::toKebabCase)
-            .collect(Collectors.joining(","));
     }
 
     private String getDisabledCheckNames() {

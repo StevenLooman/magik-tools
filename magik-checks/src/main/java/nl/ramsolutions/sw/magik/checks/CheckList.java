@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.checks;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.magik.checks.checks.CommentRegularExpressionCheck;
 import nl.ramsolutions.sw.magik.checks.checks.CommentedCodeCheck;
 import nl.ramsolutions.sw.magik.checks.checks.DuplicateMethodInFileCheck;
 import nl.ramsolutions.sw.magik.checks.checks.EmptyBlockCheck;
@@ -38,7 +37,6 @@ import nl.ramsolutions.sw.magik.checks.checks.VariableCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.VariableDeclarationUsageDistanceCheck;
 import nl.ramsolutions.sw.magik.checks.checks.VariableNamingCheck;
 import nl.ramsolutions.sw.magik.checks.checks.WarnedCallCheck;
-import nl.ramsolutions.sw.magik.checks.checks.XPathCheck;
 
 /**
  * Check list.
@@ -63,7 +61,6 @@ public final class CheckList {
      */
     public static List<Class<?>> getChecks() {
         return List.of(
-            CommentRegularExpressionCheck.class,
             CommentedCodeCheck.class,
             DuplicateMethodInFileCheck.class,
             EmptyBlockCheck.class,
@@ -97,8 +94,7 @@ public final class CheckList {
             VariableCountCheck.class,
             VariableDeclarationUsageDistanceCheck.class,
             VariableNamingCheck.class,
-            WarnedCallCheck.class,
-            XPathCheck.class);
+            WarnedCallCheck.class);
     }
 
     /**
@@ -116,16 +112,6 @@ public final class CheckList {
     public static List<Class<?>> getDisabledByDefaultChecks() {
         return getChecks().stream()
             .filter(checkClass -> checkClass.getAnnotation(DisabledByDefault.class) != null)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Get {@link MagikCheck}s which are templated.
-     * @return List of {@link MagikCheck}s.
-     */
-    public static List<Class<?>> getTemplatedChecks() {
-        return getChecks().stream()
-            .filter(checkClass -> checkClass.getAnnotation(TemplatedMagikCheck.class) != null)
             .collect(Collectors.toList());
     }
 

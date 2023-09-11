@@ -17,15 +17,11 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.eclipse.lsp4j.ServerCapabilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Implementation provider.
  */
 public class ImplementationProvider {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImplementationProvider.class);
 
     /**
      * Set server capabilities.
