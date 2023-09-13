@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.RecognitionException;
 import com.sonar.sslr.api.Token;
 import java.util.ArrayList;
@@ -72,7 +71,8 @@ public class CommentedCodeCheck extends MagikCheck {
         Token lastToken = null;
         List<Token> connectingTokens = new ArrayList<>();
         for (final Token token : commentTokens) {
-            if (token.getValue().startsWith("##")) {
+            if (token.getValue().startsWith("##")
+                || token.getValue().trim().equals("#")) {  // Empty comment line.
                 continue;
             }
 
@@ -82,7 +82,6 @@ public class CommentedCodeCheck extends MagikCheck {
                         && (lastToken.getLine() != token.getLine() - 1
                             || lastToken.getColumn() != token.getColumn())) {
                 // Block broken, either due to line not connecting or indent changed.
-
                 // Save current block.
                 commentBlocks.put(startToken, connectingTokens);
 
@@ -99,6 +98,7 @@ public class CommentedCodeCheck extends MagikCheck {
         if (startToken != null) {
             commentBlocks.put(startToken, connectingTokens);
         }
+
         return commentBlocks;
     }
 
@@ -108,8 +108,7 @@ public class CommentedCodeCheck extends MagikCheck {
         try {
             final AstNode magikNode = parser.parseSafe(bareComment);
             return magikNode.getChildren().stream()
-                .anyMatch(node -> !node.is(MagikGrammar.SYNTAX_ERROR)
-                                && !node.is(GenericTokenType.EOF));
+                .allMatch(node -> !node.is(MagikGrammar.SYNTAX_ERROR));
         } catch (RecognitionException exception) {
             return false;
         }

@@ -88,7 +88,7 @@ class CommentedCodeCheckTest extends MagikCheckTestBase {
     }
 
     @Test
-    void testIgnoreMehtodDoc() {
+    void testIgnoreMethodDoc() {
         final CommentedCodeCheck check = new CommentedCodeCheck();
         check.minLines = 2;
         final String code = ""
@@ -98,6 +98,28 @@ class CommentedCodeCheckTest extends MagikCheckTestBase {
             + "    # x\n"
             + "    print(1)"
             + "_endmethod";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
+    @Test
+    void testHeaderAccepted() {
+        final String code = ""
+            + "  # Author         : Me\n"
+            + "  # Date written   : 01/95\n"
+            + "  # Date changed   :\n";
+        final CommentedCodeCheck check = new CommentedCodeCheck();
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
+    @Test
+    void testBlockWithEmptyLines() {
+        final String code = ""
+            + "#\n"
+            + "# Add/Remove\n"
+            + "#\n";
+        final CommentedCodeCheck check = new CommentedCodeCheck();
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isEmpty();
     }
