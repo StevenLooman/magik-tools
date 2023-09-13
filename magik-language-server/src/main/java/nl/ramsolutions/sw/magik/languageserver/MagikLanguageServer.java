@@ -49,6 +49,10 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     public CompletableFuture<InitializeResult> initialize(final InitializeParams params) {
         LOGGER.trace("initialize");
 
+        // Log PID.
+        final ProcessHandle processHandle = ProcessHandle.current();
+        LOGGER.info("PID: {}", processHandle.pid());
+
         // Log server version.
         final String version = this.getClass().getPackage().getImplementationVersion();
         LOGGER.info("Version: {}", version);
