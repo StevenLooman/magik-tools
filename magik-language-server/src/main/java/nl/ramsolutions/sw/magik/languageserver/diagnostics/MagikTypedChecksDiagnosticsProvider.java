@@ -61,8 +61,7 @@ public class MagikTypedChecksDiagnosticsProvider {
                     final Set<Parameter> parameters = Collections.emptySet();
                     final MagikCheckHolder holder =
                         new MagikCheckHolder((Class<MagikCheck>) checkClass, parameters, true);
-                    final MagikTypedCheck magikCheck = (MagikTypedCheck) holder.createCheck();
-                    return magikCheck;
+                    return (MagikTypedCheck) holder.createCheck();
                 } catch (final ReflectiveOperationException exception) {
                     LOGGER.error(exception.getMessage(), exception);
                 }

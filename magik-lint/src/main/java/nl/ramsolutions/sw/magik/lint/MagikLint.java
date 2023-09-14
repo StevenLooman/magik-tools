@@ -260,7 +260,9 @@ public class MagikLint {
         final URI uri = magikFile.getUri();
         final Path magikFilePath = Path.of(uri);
         final Path configPath = ConfigurationLocator.locateConfiguration(magikFilePath);
-        final MagikChecksConfiguration checksConfig = new MagikChecksConfiguration(configPath);
+        final MagikChecksConfiguration checksConfig = configPath != null
+            ? new MagikChecksConfiguration(configPath)
+            : new MagikChecksConfiguration();
         final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
         final Comparator<MagikIssue> byLine = Comparator.comparing(MagikIssue::startLine);
         final Comparator<MagikIssue> byColumn = Comparator.comparing(MagikIssue::startColumn);

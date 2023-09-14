@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -31,7 +30,7 @@ public class MagikToolsProperties {
         LOGGER.debug("Read default configuration from: {}", DEFAULT_PROPERTIES_FILENAME);
     }
 
-    public MagikToolsProperties(final Path path) throws FileNotFoundException, IOException {
+    public MagikToolsProperties(final Path path) throws IOException {
         this(new FileInputStream(path.toFile()));
         LOGGER.debug("Read configuration from: {}", path.toAbsolutePath());
     }

@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test DefinitionsProvider.
  */
 @SuppressWarnings("checkstyle:MagicNumber")
-public class DefinitionsProviderTest {
+class DefinitionsProviderTest {
 
     private static final URI TEST_URI = URI.create("tests://unittest");
     private static final Location EMPTY_LOCATION = new Location(
