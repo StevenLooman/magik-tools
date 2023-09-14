@@ -15,8 +15,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
 import nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider;
-import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikLintDiagnosticsProvider;
-import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikTypeDiagnosticsProvider;
+import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikChecksDiagnosticsProvider;
+import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikTypedChecksDiagnosticsProvider;
 import nl.ramsolutions.sw.magik.languageserver.documentsymbols.DocumentSymbolProvider;
 import nl.ramsolutions.sw.magik.languageserver.folding.FoldingRangeProvider;
 import nl.ramsolutions.sw.magik.languageserver.formatting.FormattingProvider;
@@ -250,7 +250,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     private List<Diagnostic> getDiagnosticsLinter(final MagikTypedFile magikFile) {
         final Path overrideSettingsPath = MagikSettings.INSTANCE.getChecksOverrideSettingsPath();
 
-        final MagikLintDiagnosticsProvider lintProvider = new MagikLintDiagnosticsProvider(overrideSettingsPath);
+        final MagikChecksDiagnosticsProvider lintProvider = new MagikChecksDiagnosticsProvider(overrideSettingsPath);
         try {
             return lintProvider.getDiagnostics(magikFile);
         } catch (final IOException exception) {
@@ -261,7 +261,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     }
 
     private List<Diagnostic> getDiagnosticsTyping(final MagikTypedFile magikFile) {
-        final MagikTypeDiagnosticsProvider typeProvider = new MagikTypeDiagnosticsProvider();
+        final MagikTypedChecksDiagnosticsProvider typeProvider = new MagikTypedChecksDiagnosticsProvider();
         try {
             return typeProvider.getDiagnostics(magikFile);
         } catch (final IOException exception) {

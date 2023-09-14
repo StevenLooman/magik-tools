@@ -13,13 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class CommentInstructionReaderReaderTest {
 
-    private static final CommentInstructionReader.InstructionType STATEMENT_INSTRUCTION_TYPE =
-        CommentInstructionReader.InstructionType.createInstructionType("mlint");
-    private static final CommentInstructionReader.InstructionType SCOPE_INSTRUCTION_TYPE =
+    private static final CommentInstructionReader.InstructionType MLINT_LINE_INSTRUCTION =
+        CommentInstructionReader.InstructionType.createStatementInstructionType("mlint");
+    private static final CommentInstructionReader.InstructionType MLINT_SCOPE_INSTRUCTION =
         CommentInstructionReader.InstructionType.createScopeInstructionType("mlint");
 
     @Test
-    void testReadInstruction() {
+    void testReadStatementInstruction() {
         final String code = ""
             + "_proc()\n"
             + "  print(10)  # mlint: disable=forbidden-call\n"
@@ -27,16 +27,16 @@ class CommentInstructionReaderReaderTest {
         final MagikFile magikFile = new MagikFile("tests://unittest", code);
 
         final CommentInstructionReader instructionReader =
-            new CommentInstructionReader(magikFile, Set.of(STATEMENT_INSTRUCTION_TYPE));
+            new CommentInstructionReader(magikFile, Set.of(MLINT_LINE_INSTRUCTION));
 
         final String instructionAtLine =
-            instructionReader.getInstructionsAtLine(2, STATEMENT_INSTRUCTION_TYPE);
+            instructionReader.getInstructionsAtLine(2, MLINT_LINE_INSTRUCTION);
         assertThat(instructionAtLine).isEqualTo("disable=forbidden-call");
 
         // Cannot read instruction via scope.
         final GlobalScope globalScope = magikFile.getGlobalScope();
-        final Scope scope = globalScope.getScopeForLineColumn(1, 99);
-        final Set<String> scopeInstructions = instructionReader.getScopeInstructions(scope, SCOPE_INSTRUCTION_TYPE);
+        final Scope scope = globalScope.getChildScopes().get(0);
+        final Set<String> scopeInstructions = instructionReader.getScopeInstructions(scope, MLINT_SCOPE_INSTRUCTION);
         assertThat(scopeInstructions).isEmpty();
     }
 
@@ -45,26 +45,49 @@ class CommentInstructionReaderReaderTest {
         final String code = ""
             + "_proc()\n"
             + "  # mlint: disable=no-self-use\n"
-            + "  print(10)  # mlint: disable=forbidden-call\n"
+            + "  print(10, 20)  # mlint: disable=forbidden-call\n"
+            + "  _block\n"
+            + "    show(:a, :b, :c)\n"
+            + "  _endblock\n"
             + "_endproc";
         final MagikFile magikFile = new MagikFile("tests://unittest", code);
 
         final CommentInstructionReader instructionReader =
-            new CommentInstructionReader(magikFile, Set.of(SCOPE_INSTRUCTION_TYPE));
+            new CommentInstructionReader(magikFile, Set.of(MLINT_LINE_INSTRUCTION, MLINT_SCOPE_INSTRUCTION));
 
-        // Can read a scope/single line instruction at the specific line.
-        final String instructionAtLine2 = instructionReader.getInstructionsAtLine(2, SCOPE_INSTRUCTION_TYPE);
-        assertThat(instructionAtLine2).isEqualTo("disable=no-self-use");
-
-        // Can read instruction via scope.
+        // Read no instruction in global scope.
         final GlobalScope globalScope = magikFile.getGlobalScope();
-        final Scope scope = globalScope.getScopeForLineColumn(1, 99);
-        final Set<String> scopeInstructions = instructionReader.getScopeInstructions(scope, SCOPE_INSTRUCTION_TYPE);
-        assertThat(scopeInstructions).containsOnly("disable=no-self-use");
+        final Set<String> globalScopeInstructions =
+            instructionReader.getScopeInstructions(globalScope, MLINT_SCOPE_INSTRUCTION);
+        assertThat(globalScopeInstructions).isEmpty();
 
-        // Does not match the statement instruction.
-        final String instructionAtLine3 = instructionReader.getInstructionsAtLine(3, STATEMENT_INSTRUCTION_TYPE);
-        assertThat(instructionAtLine3).isNull();
+        // Read the scope instruction in proc scope.
+        final Scope procScope = globalScope.getChildScopes().get(0);
+        final Set<String> procScopeInstructions =
+            instructionReader.getScopeInstructions(procScope, MLINT_SCOPE_INSTRUCTION);
+        assertThat(procScopeInstructions).containsOnly("disable=no-self-use");
+
+        // Read the scope instruction in block scope.
+        final Scope blockScope = procScope.getChildScopes().get(0);
+        final Set<String> blockScopeInstructions =
+            instructionReader.getScopeInstructions(blockScope, MLINT_SCOPE_INSTRUCTION);
+        assertThat(blockScopeInstructions).isEmpty();
+
+        // No line instruction.
+        final String instructionAtLine1 = instructionReader.getInstructionsAtLine(1, MLINT_LINE_INSTRUCTION);
+        assertThat(instructionAtLine1).isNull();
+
+        // No line instruction; Line instruction does not match the scope instruction.
+        final String instructionAtLine2 = instructionReader.getInstructionsAtLine(2, MLINT_LINE_INSTRUCTION);
+        assertThat(instructionAtLine2).isNull();
+
+        // Read line instruction.
+        final String instructionAtLine3 = instructionReader.getInstructionsAtLine(3, MLINT_LINE_INSTRUCTION);
+        assertThat(instructionAtLine3).isEqualTo("disable=forbidden-call");
+
+        // No line instruction.
+        final String instructionAtLine4 = instructionReader.getInstructionsAtLine(4, MLINT_LINE_INSTRUCTION);
+        assertThat(instructionAtLine4).isNull();
     }
 
 }

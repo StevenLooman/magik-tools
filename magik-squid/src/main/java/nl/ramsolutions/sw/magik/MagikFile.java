@@ -7,12 +7,21 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
+import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeBuilderVisitor;
+import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
+import nl.ramsolutions.sw.magik.parser.CommentInstructionReader.InstructionType;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
 
 /**
@@ -25,6 +34,10 @@ public class MagikFile {
     private AstNode astNode;
     private GlobalScope globalScope;
     private List<Definition> definitions;
+    private final Map<CommentInstructionReader.InstructionType, Map<Integer, Map<String, String>>> lineInstructions
+        = new HashMap<>();
+    private final Map<CommentInstructionReader.InstructionType, Map<Scope, Map<String, String>>> scopeInstructions
+        = new HashMap<>();
 
     /**
      * Constructor.
@@ -88,10 +101,7 @@ public class MagikFile {
         if (this.astNode == null) {
             final MagikParser parser = new MagikParser();
             final String magikSource = this.getSource();
-            this.astNode = parser.parseSafe(magikSource);
-
-            // Update URI.
-            MagikParser.updateUri(this.astNode, this.uri);
+            this.astNode = parser.parseSafe(magikSource, this.uri);
         }
 
         return this.astNode;
@@ -125,6 +135,74 @@ public class MagikFile {
         }
 
         return Collections.unmodifiableList(this.definitions);
+    }
+
+    /**
+     * Get all the line instructions for {@link CommentInstructionReader.InstructionType}.
+     * @param instructionType Instruction type to get.
+     * @return Map with all instructions, keyed by line number.
+     */
+    public synchronized Map<Integer, Map<String, String>> getLineInstructions(
+            final CommentInstructionReader.InstructionType instructionType) {
+        if (!this.lineInstructions.containsKey(instructionType)) {
+            final Map<Integer, Map<String, String>> instructions = this.readLineInstructions(instructionType);
+            this.lineInstructions.put(instructionType, instructions);
+        }
+
+        return Collections.unmodifiableMap(this.lineInstructions.get(instructionType));
+    }
+
+    private Map<Integer, Map<String, String>> readLineInstructions(final InstructionType instructionType) {
+        final CommentInstructionReader instructionReader = new CommentInstructionReader(this, Set.of(instructionType));
+
+        final String[] sourceLines = this.getSourceLines();
+        return IntStream.range(0, sourceLines.length)
+            .mapToObj(line -> {
+                final String instrAtLine = instructionReader.getInstructionsAtLine(line, instructionType);
+                final String lineInstrsStr = Objects.requireNonNullElse(instrAtLine, "");
+                final Map<String, String> lineInstrs = CommentInstructionReader.parseInstructions(lineInstrsStr);
+                return Map.entry(line, lineInstrs);
+            })
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                Map.Entry::getValue));
+    }
+
+    /**
+     * Get all the Scope instructions for {@link CommentInstructionReader.InstructionType}.
+     * @param instructionType Instruction type to get.
+     * @return Map with all instructions, keyed by {@link Scope}.
+     */
+    public synchronized Map<Scope, Map<String, String>> getScopeInstructions(
+            final CommentInstructionReader.InstructionType instructionType) {
+        if (!this.scopeInstructions.containsKey(instructionType)) {
+            final Map<Scope, Map<String, String>> instructions = this.readScopeInstructions(instructionType);
+            this.scopeInstructions.put(instructionType, instructions);
+        }
+
+        return Collections.unmodifiableMap(this.scopeInstructions.get(instructionType));
+    }
+
+    private Map<Scope, Map<String, String>> readScopeInstructions(final InstructionType instructionType) {
+        final Map<Scope, Map<String, String>> instructions = new HashMap<>();
+        final GlobalScope glblScope = this.getGlobalScope();
+        Objects.requireNonNull(glblScope);
+
+        final CommentInstructionReader instructionReader = new CommentInstructionReader(this, Set.of(instructionType));
+        glblScope.getSelfAndDescendantScopes().stream()
+            .forEach(scope -> {
+                final Map<String, String> scopeInstrs =
+                    instructionReader.getScopeInstructions(scope, instructionType).stream()
+                        .map(instr -> Objects.requireNonNullElse(instr, ""))
+                        .map(CommentInstructionReader::parseInstructions)
+                        .flatMap(instrs -> instrs.entrySet().stream())
+                        .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue));
+                instructions.put(scope, scopeInstrs);
+            });
+
+        return instructions;
     }
 
     @Override

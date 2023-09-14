@@ -32,6 +32,7 @@ import org.sonar.sslr.parser.ParserAdapter;
 public class MagikParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikParser.class);
+    private static final URI DEFAULT_URI = URI.create("file:///");
 
     private static final Map<MagikGrammar, MagikGrammar> RULE_MAPPING = new EnumMap<>(MagikGrammar.class);
 
@@ -69,18 +70,29 @@ public class MagikParser {
     }
 
     /**
-     * Parse a string and return the AstNode.
-     * IOExceptions are caught, not handled.
-     *
-     * @param source Source to parse
-     * @return Tree
+     * Parse safe and set {@link MagikParser.DEFAULT_URI}.
+     * @param source Source to parse.
+     * @return Parsed source.
      */
     public AstNode parseSafe(final String source) {
+        return this.parseSafe(source, MagikParser.DEFAULT_URI);
+    }
+
+    /**
+     * Parse safe and set {@link URI}.
+     * @param source Source to parse.
+     * @param uri URI to set.
+     * @return Parsed source.
+     */
+    public AstNode parseSafe(final String source, final URI uri) {
         try {
-            return this.parse(source);
+            final AstNode node = this.parse(source);
+            this.updateUri(node, uri);
+            return node;
         } catch (final IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
         }
+
         return null;
     }
 
@@ -172,7 +184,7 @@ public class MagikParser {
      * @param node Node to start at.
      * @param newUri New URI to set.
      */
-    public static void updateUri(final AstNode node, final URI newUri) {
+    private void updateUri(final AstNode node, final URI newUri) {
         final Token token = node.getToken();
         if (token != null) {
             try {
@@ -184,7 +196,7 @@ public class MagikParser {
             }
         }
 
-        node.getChildren().forEach(childNode -> MagikParser.updateUri(childNode, newUri));
+        node.getChildren().forEach(childNode -> this.updateUri(childNode, newUri));
     }
 
     /**

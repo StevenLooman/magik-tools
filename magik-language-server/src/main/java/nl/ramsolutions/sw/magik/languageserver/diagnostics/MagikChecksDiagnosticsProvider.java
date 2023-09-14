@@ -11,9 +11,9 @@ import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
-import nl.ramsolutions.sw.magik.lint.Configuration;
 import nl.ramsolutions.sw.magik.lint.ConfigurationLocator;
 import nl.ramsolutions.sw.magik.lint.MagikLint;
+import nl.ramsolutions.sw.magik.lint.MagikLintConfiguration;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Location;
@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory;
 /**
  * MagikLint diagnostics provider.
  */
-public class MagikLintDiagnosticsProvider {
+public class MagikChecksDiagnosticsProvider {
 
-    static final Logger LOGGER = LoggerFactory.getLogger(MagikLintDiagnosticsProvider.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(MagikChecksDiagnosticsProvider.class);
 
     private static final Map<String, DiagnosticSeverity> LINT_SEVERITY_MAPPING = Map.of(
         "Critical", DiagnosticSeverity.Error,
@@ -38,7 +38,7 @@ public class MagikLintDiagnosticsProvider {
     /**
      * Constructor. Locates configuration to be used.
      */
-    public MagikLintDiagnosticsProvider(final @Nullable Path overrideConfigurationPath) {
+    public MagikChecksDiagnosticsProvider(final @Nullable Path overrideConfigurationPath) {
         this.overrideConfigurationPath = overrideConfigurationPath;
     }
 
@@ -57,9 +57,9 @@ public class MagikLintDiagnosticsProvider {
         final Path configurationPath = this.overrideConfigurationPath != null
             ? this.overrideConfigurationPath
             : ConfigurationLocator.locateConfiguration(searchPath);
-        final Configuration configuration = configurationPath != null
-            ? new Configuration(configurationPath)
-            : new Configuration();  // Default configuration.
+        final MagikLintConfiguration configuration = configurationPath != null
+            ? new MagikLintConfiguration(configurationPath)
+            : new MagikLintConfiguration();  // Default configuration.
         final MagikLintDiagnosticsReporter reporter = new MagikLintDiagnosticsReporter();
         final MagikLint magikLint = new MagikLint(configuration, reporter);
 

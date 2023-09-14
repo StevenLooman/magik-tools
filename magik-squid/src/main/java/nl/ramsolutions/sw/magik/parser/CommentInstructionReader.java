@@ -32,8 +32,8 @@ public class CommentInstructionReader {
             this.type = type;
             this.isScopeInstruction = isScopeInstruction;
             this.pattern = isScopeInstruction
-                ? Pattern.compile("^\\s*#[ \t]*" + Pattern.quote(type) + ": ?(.*)")
-                : Pattern.compile(".*#[ \t]*" + Pattern.quote(type) + ": ?(.*)");
+                ? Pattern.compile("^\\s*#\\s*" + Pattern.quote(type) + ":\\s*(.*)$")
+                : Pattern.compile("^\\s*[^\\s].*#\\s*" + Pattern.quote(type) + ":\\s*(.*)$");
         }
 
         public String getType() {
@@ -53,7 +53,7 @@ public class CommentInstructionReader {
          * @param type Name of type.
          * @return New `InstructionType`.
          */
-        public static InstructionType createInstructionType(final String type) {
+        public static InstructionType createStatementInstructionType(final String type) {
             return new InstructionType(type, false);
         }
 
@@ -67,6 +67,30 @@ public class CommentInstructionReader {
             return new InstructionType(type, true);
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.type, this.isScopeInstruction, this.pattern);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            if (obj == null) {
+                return false;
+            }
+
+            if (this.getClass() != obj.getClass()) {
+                return false;
+            }
+
+            final InstructionType other = (InstructionType) obj;
+            return Objects.equals(this.type, other.type)
+                && Objects.equals(this.isScopeInstruction, other.isScopeInstruction)
+                && Objects.equals(this.pattern, other.pattern);
+        }
     }
 
     private final MagikFile magikFile;
@@ -119,7 +143,7 @@ public class CommentInstructionReader {
     }
 
     /**
-     * Get instructions for this scope.
+     * Get instructions for this scope. This scope only and not any of its child scopes.
      * @param scope Scope to get instructions from.
      * @param instructionType Instruction type.
      * @return Instructions in scope.
@@ -132,6 +156,11 @@ public class CommentInstructionReader {
         final int fromLine = scope.getStartLine();
         final int toLine = scope.getEndLine();
         return IntStream.range(fromLine, toLine)
+            .filter(line ->
+                // Filter any lines where a child scope lives.
+                scope.getChildScopes().stream()
+                    .anyMatch(childScope ->
+                        childScope.getStartLine() >= line && line < childScope.getEndLine()))
             .mapToObj(line -> this.getInstructionsAtLine(line, instructionType))
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());

@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.languageserver.codeactions;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ public class CodeActionProvider {
      * @param range Range to provide code actions for.
      * @param context Code action context.
      * @return List of code actions.
+     * @throws IOException -
      */
     public List<CodeAction> provideCodeActions(
             final MagikTypedFile magikFile,
@@ -48,7 +50,7 @@ public class CodeActionProvider {
                     this.typedChecksCodeActionProvider.provideCodeActions(magikFile, range).stream()
                 )
                 .collect(Collectors.toList());
-        } catch (final ReflectiveOperationException exception) {
+        } catch (final IOException | ReflectiveOperationException exception) {
             LOGGER.error(exception.getMessage(), exception);
         }
 
