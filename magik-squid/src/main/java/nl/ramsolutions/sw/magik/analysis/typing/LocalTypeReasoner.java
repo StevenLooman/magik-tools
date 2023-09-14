@@ -105,9 +105,9 @@ public class LocalTypeReasoner extends AstWalker {
     private static final long BIGNUM_START = 1 << 29;
     private static final String DEFAULT_PACKAGE = "user";
     private static final CommentInstructionReader.InstructionType TYPE_INSTRUCTION =
-        CommentInstructionReader.InstructionType.createInstructionType("type");
+        CommentInstructionReader.InstructionType.createStatementInstructionType("type");
     private static final CommentInstructionReader.InstructionType ITER_TYPE_INSTRUCTION =
-        CommentInstructionReader.InstructionType.createInstructionType("iter-type");
+        CommentInstructionReader.InstructionType.createStatementInstructionType("iter-type");
 
     private final AstNode topNode;
     private final ITypeKeeper typeKeeper;

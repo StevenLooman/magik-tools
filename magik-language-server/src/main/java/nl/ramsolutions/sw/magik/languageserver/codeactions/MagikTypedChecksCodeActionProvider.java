@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.languageserver.codeactions;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +10,9 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
+import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import nl.ramsolutions.sw.magik.languageserver.MagikSettings;
-import nl.ramsolutions.sw.magik.lint.Configuration;
 import nl.ramsolutions.sw.magik.lint.ConfigurationLocator;
-import nl.ramsolutions.sw.magik.lint.MagikLint;
 import nl.ramsolutions.sw.magik.typedchecks.CheckList;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheckFixer;
@@ -28,10 +28,11 @@ public class MagikTypedChecksCodeActionProvider {
      * @param range {@link Range} to get {@link CodeAction}s for.
      * @return List of {@link CodeAction}s.
      * @throws ReflectiveOperationException
+     * @throws IOException -
      */
     public List<CodeAction> provideCodeActions(
             final MagikTypedFile magikFile,
-            final Range range) throws ReflectiveOperationException {
+            final Range range) throws ReflectiveOperationException, IOException {
         final List<CodeAction> codeActions = new ArrayList<>();
         for (final Entry<Class<?>, List<Class<?>>> entry : CheckList.getFixers().entrySet()) {
             final Class<?> checkClass = entry.getKey();
@@ -50,15 +51,15 @@ public class MagikTypedChecksCodeActionProvider {
         return codeActions;
     }
 
-    private boolean isCheckEnabled(final MagikFile magikFile, final Class<?> checkClass) {
+    private boolean isCheckEnabled(final MagikFile magikFile, final Class<?> checkClass) throws IOException {
         final Path searchPath = Path.of(magikFile.getUri()).getParent();
         final Path configPath = MagikSettings.INSTANCE.getChecksOverrideSettingsPath() != null
             ? MagikSettings.INSTANCE.getChecksOverrideSettingsPath()
             : ConfigurationLocator.locateConfiguration(searchPath);
-        final Configuration config = configPath != null
-            ? new Configuration(configPath)
-            : new Configuration();
-        final List<MagikCheckHolder> allChecks = MagikLint.getAllChecks(config);
+        final MagikChecksConfiguration config = configPath != null
+            ? new MagikChecksConfiguration(configPath)
+            : new MagikChecksConfiguration();
+        final List<MagikCheckHolder> allChecks = config.getAllChecks();
         for (final MagikCheckHolder checkHolder : allChecks) {
             if (checkHolder.getCheckClass().equals(checkClass)) {
                 return checkHolder.isEnabled();

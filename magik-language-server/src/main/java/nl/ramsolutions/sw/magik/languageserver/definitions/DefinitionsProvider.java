@@ -134,7 +134,7 @@ public class DefinitionsProvider {
         final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(methodInvocationNode);
         final String methodName = helper.getMethodName();
 
-        final AstNode previousSiblingNode = wantedNode.getPreviousSibling();
+        final AstNode previousSiblingNode = methodInvocationNode.getPreviousSibling();
         final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
         final ExpressionResult result = reasoner.getNodeType(previousSiblingNode);
 

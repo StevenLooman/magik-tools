@@ -400,6 +400,7 @@
                     <exclude>nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider.getSymbols(java.lang.String)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.lint.ConfigurationLocator.locateConfiguration()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.parser.MagikWhitespaceTriviaAdder.createWhitespaceTokens(com.sonar.sslr.api.Token, com.sonar.sslr.api.Token)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.typedchecks.fixers.TypeDocReturnTypeFixer.lambda$extractReturnTypeCodeActions$2(nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition, java.util.Map.Entry)</exclude>
                   </excludes>
                 </rule>
               </rules>

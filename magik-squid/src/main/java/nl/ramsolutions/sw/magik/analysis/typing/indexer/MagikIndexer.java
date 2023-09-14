@@ -89,7 +89,7 @@ public class MagikIndexer {
         MethodDefinition.Modifier.PRIVATE, Method.Modifier.PRIVATE);
 
     private static final CommentInstructionReader.InstructionType TYPE_INSTRUCTION =
-        CommentInstructionReader.InstructionType.createInstructionType("type");
+        CommentInstructionReader.InstructionType.createStatementInstructionType("type");
 
     private final ITypeKeeper typeKeeper;
     private final Map<Path, Set<Package>> indexedPackages = new HashMap<>();

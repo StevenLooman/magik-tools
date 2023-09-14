@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 /**
  * MagikType diagnostics provider.
  */
-public class MagikTypeDiagnosticsProvider {
+public class MagikTypedChecksDiagnosticsProvider {
 
-    static final Logger LOGGER = LoggerFactory.getLogger(MagikTypeDiagnosticsProvider.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(MagikTypedChecksDiagnosticsProvider.class);
 
     /**
      * Get {@link Diagnostic}s for typing errors..
@@ -61,9 +61,7 @@ public class MagikTypeDiagnosticsProvider {
                     final Set<Parameter> parameters = Collections.emptySet();
                     final MagikCheckHolder holder =
                         new MagikCheckHolder((Class<MagikCheck>) checkClass, parameters, true);
-                    final MagikTypedCheck magikCheck =
-                        (MagikTypedCheck) checkClass.getDeclaredConstructor().newInstance();
-                    magikCheck.setHolder(holder);
+                    final MagikTypedCheck magikCheck = (MagikTypedCheck) holder.createCheck();
                     return magikCheck;
                 } catch (final ReflectiveOperationException exception) {
                     LOGGER.error(exception.getMessage(), exception);

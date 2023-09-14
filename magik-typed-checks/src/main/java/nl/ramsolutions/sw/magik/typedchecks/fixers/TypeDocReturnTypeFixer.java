@@ -79,6 +79,10 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
                     return this.createRemoveReturnCodeAction(typeValueNode);
                 }
 
+                if (typeDocEntry == null) {  // Keep checker happy.
+                    return null;
+                }
+
                 final TypeString typeDocTypeString = typeDocEntry.getValue();
                 if (methodTypeString != null  // && typeDocTypeString != null
                     && !methodTypeString.containsUndefined()

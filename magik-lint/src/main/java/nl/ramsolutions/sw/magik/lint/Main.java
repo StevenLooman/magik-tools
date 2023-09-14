@@ -64,16 +64,6 @@ public final class Main {
         .hasArg()
         .type(PatternOptionBuilder.NUMBER_VALUE)
         .build();
-    private static final Option OPTION_DISABLED = Option.builder()
-        .longOpt("disabled")
-        .desc("Disable checks, use 'all' to disable all checks")
-        .hasArg()
-        .build();
-    private static final Option OPTION_ENABLED = Option.builder()
-        .longOpt("enabled")
-        .desc("Enable checks")
-        .hasArg()
-        .build();
     private static final Option OPTION_DEBUG = Option.builder()
         .longOpt("debug")
         .desc("Enable showing of debug information")
@@ -96,8 +86,6 @@ public final class Main {
         OPTIONS.addOption(OPTION_UNTABIFY);
         OPTIONS.addOption(OPTION_COLUMN_OFFSET);
         OPTIONS.addOption(OPTION_MAX_INFRACTIONS);
-        OPTIONS.addOption(OPTION_DISABLED);
-        OPTIONS.addOption(OPTION_ENABLED);
         OPTIONS.addOption(OPTION_DEBUG);
         OPTIONS.addOption(OPTION_VERSION);
     }
@@ -144,18 +132,13 @@ public final class Main {
      * @param configuration Configuration.
      * @return Reporter.
      */
-    private static Reporter createReporter(final Configuration configuration) {
-        final String msgTemplateOptName = OPTION_MSG_TEMPLATE.getLongOpt();
-        final String template = configuration.getPropertyString(msgTemplateOptName);
-        final String format = configuration.hasProperty(msgTemplateOptName) && template != null
-            ? template
+    private static Reporter createReporter(final MagikLintConfiguration configuration) {
+        final String configReporterFormat = configuration.getReporterFormat();
+        final String format = configReporterFormat != null
+            ? configReporterFormat
             : MessageFormatReporter.DEFAULT_FORMAT;
 
-        final String columnOffsetOptName = OPTION_COLUMN_OFFSET.getLongOpt();
-        final String columnOffsetStr = configuration.getPropertyString(columnOffsetOptName);
-        final Long columnOffset = configuration.hasProperty(columnOffsetOptName)
-            ? Long.parseLong(columnOffsetStr)
-            : null;
+        final Long columnOffset = configuration.getColumnOffset();
 
         final PrintStream outStream = Main.getOutStream();
         return new MessageFormatReporter(outStream, format, columnOffset);
@@ -193,7 +176,7 @@ public final class Main {
         }
 
         // Read configuration.
-        final Configuration config;
+        final MagikLintConfiguration config;
         if (commandLine.hasOption(OPTION_RCFILE)) {
             final File rcfile = (File) commandLine.getParsedOptionValue(OPTION_RCFILE);
             final Path path = rcfile.toPath();
@@ -203,22 +186,17 @@ public final class Main {
 
                 System.exit(1);
             }
-            config = new Configuration(path);
+            config = new MagikLintConfiguration(path);
         } else {
             final Path currentWorkingPath = Path.of("");
             final Path path = ConfigurationLocator.locateConfiguration(currentWorkingPath);
             config = path != null
-                ? new Configuration(path)
-                : new Configuration();
+                ? new MagikLintConfiguration(path)
+                : new MagikLintConfiguration();
         }
 
-        // Fill configuration from command line.
-        Main.copyOptionToConfig(commandLine, config, OPTION_UNTABIFY);
-        Main.copyOptionToConfig(commandLine, config, OPTION_MAX_INFRACTIONS);
-        Main.copyOptionToConfig(commandLine, config, OPTION_COLUMN_OFFSET);
-        Main.copyOptionToConfig(commandLine, config, OPTION_MSG_TEMPLATE);
-        Main.copyOptionToConfig(commandLine, config, OPTION_DISABLED);
-        Main.copyOptionToConfig(commandLine, config, OPTION_ENABLED);
+        // Copy configuration from command line.
+        Main.copyOptionsToConfig(commandLine, config);
 
         // Show checks.
         if (commandLine.hasOption(OPTION_SHOW_CHECKS)) {
@@ -254,14 +232,28 @@ public final class Main {
         System.exit(exitCode);
     }
 
-    private static void copyOptionToConfig(
-            final CommandLine commandLine,
-            final Configuration config,
-            final Option option) {
-        final String key = option.getLongOpt();
-        if (commandLine.hasOption(key)) {
-            final String value = commandLine.getOptionValue(key);
-            config.setProperty(key, value);
+    private static void copyOptionsToConfig(final CommandLine commandLine, final MagikLintConfiguration config) {
+        if (commandLine.hasOption(OPTION_UNTABIFY)) {
+            final String value = commandLine.getOptionValue(OPTION_UNTABIFY);
+            final Integer untabify = Integer.parseInt(value);
+            config.setUntabify(untabify);
+        }
+
+        if (commandLine.hasOption(OPTION_MAX_INFRACTIONS)) {
+            final String value = commandLine.getOptionValue(OPTION_MAX_INFRACTIONS);
+            final Long maxInfractions = Long.parseLong(value);
+            config.setMaxInfractions(maxInfractions);
+        }
+
+        if (commandLine.hasOption(OPTION_COLUMN_OFFSET)) {
+            final String value = commandLine.getOptionValue(OPTION_COLUMN_OFFSET);
+            final Long maxInfractions = Long.parseLong(value);
+            config.setColumnOffset(maxInfractions);
+        }
+
+        if (commandLine.hasOption(OPTION_MSG_TEMPLATE)) {
+            final String value = commandLine.getOptionValue(OPTION_MSG_TEMPLATE);
+            config.setReporterFormat(value);
         }
     }
 

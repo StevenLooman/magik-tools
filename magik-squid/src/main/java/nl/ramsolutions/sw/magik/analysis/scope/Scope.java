@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,11 +48,19 @@ public abstract class Scope {
     }
 
     /**
-     * Add a child scope to self.
+     * Add a child {@link Scope} to self.
      * @param childScope Child scope to add.
      */
     void addChildScope(final Scope childScope) {
         this.childScopes.add(childScope);
+    }
+
+    /**
+     * Get child {@link Scope}s.
+     * @return Children.
+     */
+    public List<Scope> getChildScopes() {
+        return Collections.unmodifiableList(this.childScopes);
     }
 
     /**
