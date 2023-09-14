@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Test SelectionRangeProvider.
  */
 @SuppressWarnings("checkstyle:MagicNumber")
-public class SelectionRangeProviderTest {
+class SelectionRangeProviderTest {
 
     private List<SelectionRange> getSelectionRanges(
             final String code,

@@ -300,7 +300,7 @@ public class MagikTextDocumentService implements TextDocumentService {
             LOGGER.debug("Implementations found: {}", locations.size());
 
             final List<Location> lsp4jLocations = locations.stream()
-                .map(location -> Lsp4jConversion.locationToLsp4j(location))
+                .map(Lsp4jConversion::locationToLsp4j)
                 .collect(Collectors.toList());
             return Either.forLeft(lsp4jLocations);
         });
@@ -351,7 +351,7 @@ public class MagikTextDocumentService implements TextDocumentService {
             LOGGER.debug("Definitions found: {}", locations.size());
 
             final List<Location> lsp4jLocations = locations.stream()
-                .map(location -> Lsp4jConversion.locationToLsp4j(location))
+                .map(Lsp4jConversion::locationToLsp4j)
                 .collect(Collectors.toList());
             return Either.forLeft(lsp4jLocations);
         });
@@ -370,7 +370,7 @@ public class MagikTextDocumentService implements TextDocumentService {
                 this.referencesProvider.provideReferences(magikFile, position);
             LOGGER.debug("References found: {}", locations.size());
             return locations.stream()
-                .map(location -> Lsp4jConversion.locationToLsp4j(location))
+                .map(Lsp4jConversion::locationToLsp4j)
                 .collect(Collectors.toList());
         });
     }

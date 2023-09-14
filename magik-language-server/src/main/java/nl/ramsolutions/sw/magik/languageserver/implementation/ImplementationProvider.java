@@ -73,7 +73,7 @@ public class ImplementationProvider {
             .filter(anyType -> anyType != type)
             .filter(anyType -> anyType.isKindOf(type))
             .flatMap(anyType -> anyType.getLocalMethods(methodName).stream())
-            .map(method -> method.getLocation())
+            .map(Method::getLocation)
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
