@@ -27,6 +27,7 @@
 - Implementation provider now provides impementations of abstract methods.
 - Add SelectionRangeProvider to magik-language-server.
 - Drop templated check support, including checks CommentRegularExpressionCheck and XPathCheck.
+- Fix CommentedCodeCheck matching too many things as Magik code
 - Various small fixes.
 
 0.7.1 (2023-02-21)
