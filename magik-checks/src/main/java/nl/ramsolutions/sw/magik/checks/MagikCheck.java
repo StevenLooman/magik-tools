@@ -42,6 +42,10 @@ public abstract class MagikCheck extends MagikVisitor {
      */
     @SuppressWarnings("java:S3011")
     public void setParameter(final String name, final @Nullable Object value) throws IllegalAccessException {
+        if (this.holder == null) {
+            throw new IllegalStateException();
+        }
+
         boolean found = false;
         for (final Field field : this.getClass().getFields()) {
             final RuleProperty ruleProperty = field.getAnnotation(RuleProperty.class);
@@ -49,7 +53,7 @@ public abstract class MagikCheck extends MagikVisitor {
                 continue;
             }
 
-            final String checkKey = this.getHolder().getCheckKeyKebabCase();
+            final String checkKey = this.holder.getCheckKeyKebabCase();
             final String parameterKey = ruleProperty.key().replace(" ", "-");
             final String fullKey = checkKey + "." + parameterKey;
             if (fullKey.equals(name)) {
