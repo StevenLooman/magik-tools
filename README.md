@@ -9,9 +9,13 @@
 
 By no means is this product fully tested and production-ready. Use at your own risk, your mileage may vary.
 
-## SonarQube plugin
+## Components
 
-### Installation
+This project consists of several components.
+
+### SonarQube plugin
+
+#### Installation
 
 After building, the artifact/jar will be created at `sonar-magik-plugin/target/sonar-magik-plugin-<version>.jar`.
 
@@ -19,7 +23,7 @@ Copy the plugin (`sonar-magik-plugin-<version>.jar`) to your `sonarqube/extensio
 
 Pre-built artifacts/jars can be found at [`magik-tools/releases`](https://github.com/StevenLooman/magik-tools/releases).
 
-### Analyzing projects
+#### Analyzing projects
 
 Use [sonar-scanner](https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner) to analyze your projects. An example configuration, stored in `sonar-project.properties`, would be:
 
@@ -31,19 +35,21 @@ sonar.language=magik
 sonar.coverageReportPaths=coverage.xml
 ```
 
-## Magik Linter
+### Magik Linter
 
 A linter for Magik is available in the [`magik-lint`](magik-lint) directory. See [`magik-lint/README.md`](magik-lint/README.md) for more information.
 
-## Language server
+### Language server
 
 A language server for Magik is available in the [`magik-language-server`](magik-language-server) directory. See [`magik-language-server/README.md`](magik-language-server/README.md) for more information.
 
-## Debug adapter
+### Debug adapter
 
 A debug adapter for Smallworld 5/Magik is available in the [`magik-debug-adapter`](magik-debug-adapter) directory. See [`magik-debug-adapter/README.md`](magik-debug-adapter/README.md) for more information.
 
-## Building
+## Development
+
+### Building
 
 You can build the plugin using maven, like so:
 
@@ -53,7 +59,7 @@ $ mvn clean package
 ...
 ```
 
-## Unit tests
+### Unit tests
 
 You can run the unit tests using maven, like so:
 
@@ -65,7 +71,20 @@ $ mvn clean test
 
 Results will be shown on the console.
 
-## SonarCloud
+### Releasing
+
+You can update versions using the [Versions Maven Plugin](https://www.mojohaus.org/versions/versions-maven-plugin/index.html).
+
+To update all projects:
+
+```shell
+$ mvn -B versions:set -DnewVersion=<version> -DgenerateBackupPoms=false
+...
+```
+
+Creation and uploading of artifacts is currently done by hand.
+
+### SonarCloud
 
 This project can found at [SonarCloud](https://sonarcloud.io/project/overview?id=StevenLooman_magik-tools).
 
