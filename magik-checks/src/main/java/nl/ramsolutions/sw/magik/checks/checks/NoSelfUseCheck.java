@@ -34,7 +34,9 @@ public class NoSelfUseCheck extends MagikCheck {
             return;
         }
 
-        this.addIssue(node, MESSAGE);
+        final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
+        final AstNode methodNameNode = helper.getMethodNameNode();
+        this.addIssue(methodNameNode, MESSAGE);
     }
 
     private boolean isAbstractMethod(final AstNode node) {
