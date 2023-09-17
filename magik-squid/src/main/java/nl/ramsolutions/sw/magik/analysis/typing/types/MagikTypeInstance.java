@@ -136,6 +136,23 @@ public class MagikTypeInstance extends AbstractType {
 
     private Method substitueGenerics(final Method method) {
         final Map<TypeString, TypeString> genericTypeMapping = this.getGenericTypeMapping();
+
+        // Substitute parameters.
+        final List<Parameter> newParameters = method.getParameters().stream()
+            .map(param -> {
+                final String name = param.getName();
+                final Parameter.Modifier modifier = param.getModifier();
+                TypeString newTypeStr = param.getType();
+                for (final Map.Entry<TypeString, TypeString> entry : genericTypeMapping.entrySet()) {
+                    final TypeString from = entry.getKey();
+                    final TypeString to = entry.getValue();
+                    newTypeStr = newTypeStr.substituteType(from, to);
+                }
+                return new Parameter(name, modifier, newTypeStr);
+            })
+            .collect(Collectors.toList());
+
+        // Subsitute results.
         ExpressionResultString callResult = method.getCallResult();
         ExpressionResultString loopbodyResult = method.getLoopbodyResult();
         for (final Map.Entry<TypeString, TypeString> entry : genericTypeMapping.entrySet()) {
@@ -144,12 +161,13 @@ public class MagikTypeInstance extends AbstractType {
             callResult = callResult.substituteType(from, to);
             loopbodyResult = loopbodyResult.substituteType(from, to);
         }
+
         return new Method(
             method.getLocation(),
             method.getModifiers(),
             method.getOwner(),
             method.getName(),
-            method.getParameters(),
+            newParameters,
             method.getAssignmentParameter(),
             method.getDoc(),
             callResult,
