@@ -264,7 +264,7 @@ public class MagikIndexer {
         // Slots.
         final TypeDocParser docParser = new TypeDocParser(node);
         final Map<String, TypeString> slotTypes = docParser.getSlotTypes();
-        // This needs a default value ("") due to https://bugs.openjdk.java.net/browse/JDK-8148463
+        // This needs a default value (TypeString.UNDEFINED) due to https://bugs.openjdk.java.net/browse/JDK-8148463
         final Map<String, TypeString> slots = definition.getSlots().stream()
             .map(SlottedExemplarDefinition.Slot::getName)
             .collect(Collectors.toMap(

@@ -466,9 +466,10 @@ public class HoverProvider {
 
     private void buildTypeSignatureDoc(final AbstractType type, final StringBuilder builder) {
         // Type signature.
+        final TypeString typeStr = type.getTypeString();
         builder
             .append("## ")
-            .append(type.getFullName())
+            .append(typeStr.getFullString().replace("<", "&lt;").replace(">", "&gt;"))
             .append(SECTION_END);
 
         // Type doc.
@@ -502,12 +503,12 @@ public class HoverProvider {
                 .append(SECTION_END);
         }
 
-        // Type generics.
-        final Collection<GenericDeclaration> generics = type.getGenerics();
-        if (!generics.isEmpty()) {
+        // Type generic declarations.
+        final Collection<GenericDeclaration> genericDeclarations = type.getGenerics();
+        if (!genericDeclarations.isEmpty()) {
             builder
-                .append("## Generics\n");
-            generics.stream()
+                .append("## Generic declarations\n");
+            genericDeclarations.stream()
                 .forEach(generic ->
                     builder
                         .append("* ")

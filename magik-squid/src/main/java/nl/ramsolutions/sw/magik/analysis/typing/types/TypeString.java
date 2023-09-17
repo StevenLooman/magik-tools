@@ -26,6 +26,9 @@ public final class TypeString {
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final TypeString SELF = new TypeString(SelfType.SERIALIZED_NAME, DEFAULT_PACKAGE);
 
+    private static final String GENERIC = "_generic";
+    private static final String PARAMETER = "_parameter";
+
     private final String string;
     private final String currentPackage;
     private final List<TypeString> combinedTypes;
@@ -73,7 +76,7 @@ public final class TypeString {
      * @return {@link TypeString}.
      */
     public static TypeString ofGeneric(final String identifier) {
-        return new TypeString(identifier, "_generic");
+        return new TypeString(identifier, TypeString.GENERIC);
     }
 
     /**
@@ -82,7 +85,7 @@ public final class TypeString {
      * @return {@link TypeString}.
      */
     public static TypeString ofParameterRef(final String identifier) {
-        return new TypeString(identifier, "_parameter");
+        return new TypeString(identifier, PARAMETER);
     }
 
     /**
@@ -170,11 +173,20 @@ public final class TypeString {
             return this.string;
         }
 
+        final String genericDefs = !this.generics.isEmpty()
+            ? this.generics.stream()
+                .map(TypeString::getFullString)
+                .collect(Collectors.joining(
+                    TypeStringGrammar.Punctuator.TYPE_GENERIC_SEPARATOR.getValue(),
+                    TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue(),
+                    TypeStringGrammar.Punctuator.TYPE_GENERIC_CLOSE.getValue()))
+            : "";
+
         if (this.string.contains(":")) {
-            return this.string;
+            return this.string + genericDefs;
         }
 
-        return this.currentPackage + ":" + this.string;
+        return this.currentPackage + ":" + this.string + genericDefs;
     }
 
     /**
@@ -264,6 +276,14 @@ public final class TypeString {
     public TypeString substituteType(final TypeString from, final TypeString to) {
         if (from.equals(this)) {
             return to;
+        }
+
+        if (this.isCombined()) {
+            final TypeString[] combinedSubstitutedArr = this.combinedTypes.stream()
+                .map(typeString -> typeString.substituteType(from, to))
+                .collect(Collectors.toList())
+                .toArray(TypeString[]::new);
+            return TypeString.ofCombination(this.currentPackage, combinedSubstitutedArr);
         }
 
         return this;

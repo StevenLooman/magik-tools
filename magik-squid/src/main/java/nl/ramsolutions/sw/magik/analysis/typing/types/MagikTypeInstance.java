@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
+import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
 
 /**
  * MagikType for which Generics are filled.
@@ -220,19 +221,24 @@ public class MagikTypeInstance extends AbstractType {
                 (a, b) -> a,
                 LinkedHashMap::new));  // We want order!
 
-        final String genericsStr = generics.entrySet().stream()
-            .map(entry -> {
-                final GenericDeclaration genericDecl = entry.getKey();
-                final GenericDefinition genericDef = entry.getValue();
-                if (genericDef == null) {
-                    return genericDecl.getTypeString().getFullString();
-                }
+        final String genericsStr = !generics.isEmpty()
+            ? generics.entrySet().stream()
+                .map(entry -> {
+                    final GenericDeclaration genericDecl = entry.getKey();
+                    final GenericDefinition genericDef = entry.getValue();
+                    if (genericDef == null) {
+                        return genericDecl.getTypeString().getFullString();
+                    }
 
-                return genericDef.getTypeString().getFullString();
-            })
-            .collect(Collectors.joining(","));
+                    return genericDef.getTypeString().getFullString();
+                })
+                .collect(Collectors.joining(
+                    TypeStringGrammar.Punctuator.TYPE_GENERIC_SEPARATOR.getValue(),
+                    TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue(),
+                    TypeStringGrammar.Punctuator.TYPE_GENERIC_CLOSE.getValue()))
+            : "";
         return String.format(
-            "%s@%s(%s<%s>)",
+            "%s@%s(%s%s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
             this.getFullName(), genericsStr);
     }
