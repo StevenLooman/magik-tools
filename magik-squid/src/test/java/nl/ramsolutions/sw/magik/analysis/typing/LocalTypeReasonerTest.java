@@ -21,6 +21,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -1516,6 +1517,50 @@ class LocalTypeReasonerTest {
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType actualType1 = eResult.get(0, null);
         assertThat(actualType1)
+            .isNotNull()
+            .isEqualTo(integerType);
+    }
+
+    @Test
+    void testGenericSlot() {
+        final String code = ""
+            + "_method exemplar.m\n"
+            + "  _return .stack.pop()\n"
+            + "_endmethod\n";
+
+        // Set up TypeKeeper/TypeReasoner.
+        final TypeKeeper typeKeeper = new TypeKeeper();
+
+        final TypeString stackRef = TypeString.ofIdentifier("stack", "sw");
+        final MagikType stackType = new MagikType(typeKeeper, Sort.SLOTTED, stackRef);
+        stackType.addGeneric(null, "E");
+        stackType.addMethod(
+            null,
+            EnumSet.noneOf(Method.Modifier.class),
+            "pop()",
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(
+                TypeString.ofGeneric("E")),
+            new ExpressionResultString());
+
+        final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "sw");
+        final MagikType exemplarType = new MagikType(typeKeeper, Sort.SLOTTED, exemplarRef);
+        final TypeString slotTypeRef = TypeStringParser.parseTypeString("sw:stack<sw:integer>", "sw");
+        exemplarType.addSlot(null, "stack", slotTypeRef);
+
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
+        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+        final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
+        final AbstractType integerType = typeKeeper.getType(integerRef);
+        final AbstractType actualType = result.get(0, null);
+        assertThat(actualType)
             .isNotNull()
             .isEqualTo(integerType);
     }

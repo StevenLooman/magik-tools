@@ -49,8 +49,10 @@ public abstract class MagikCheck extends MagikVisitor {
                 continue;
             }
 
-            final String key = ruleProperty.key().replace(" ", "-");
-            if (key.equals(name)) {
+            final String checkKey = this.getHolder().getCheckKeyKebabCase();
+            final String parameterKey = ruleProperty.key().replace(" ", "-");
+            final String fullKey = checkKey + "." + parameterKey;
+            if (fullKey.equals(name)) {
                 field.set(this, value);
                 found = true;
             }
