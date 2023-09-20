@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -166,9 +167,9 @@ public class MagikLint {
         final Integer line = magikIssue.startLine();
         final Scope scope = magikFile.getGlobalScope().getScopeForLineColumn(line, Integer.MAX_VALUE);
         final Map<String, String> scopeInstructions =
-            magikFile.getScopeInstructions(MLINT_SCOPE_INSTRUCTION).get(scope);
+            magikFile.getScopeInstructions(MLINT_SCOPE_INSTRUCTION).getOrDefault(scope, Collections.emptyMap());
         final Map<String, String> lineInstructions =
-            magikFile.getLineInstructions(MLINT_LINE_INSTRUCTION).get(line);
+            magikFile.getLineInstructions(MLINT_LINE_INSTRUCTION).getOrDefault(line, Collections.emptyMap());
         final String[] scopeDisableds = scopeInstructions.getOrDefault(MagikLint.KEY_DISABLE, "").split(",");
         final String[] lineDisableds = lineInstructions.getOrDefault(MagikLint.KEY_DISABLE, "").split(",");
         final String checkKey = holder.getCheckKeyKebabCase();
