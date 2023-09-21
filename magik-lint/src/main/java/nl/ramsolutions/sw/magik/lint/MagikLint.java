@@ -79,12 +79,12 @@ public class MagikLint {
 
         final URI uri = path.toUri();
 
-        String fileContents = new String(encoded, charset);
-        if (untabify != null) {
-            fileContents = Utils.untabify(fileContents, untabify);
-        }
+        final String originalFileContents = new String(encoded, charset);
+        final String fileContents = untabify != null
+            ? Utils.untabify(originalFileContents, untabify)
+            : originalFileContents;
 
-        return new MagikFile(uri, fileContents);
+        return new MagikFile(uri, fileContents, originalFileContents);
     }
 
     /**

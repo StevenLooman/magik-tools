@@ -74,7 +74,7 @@ public class FormattingCheck extends MagikCheck {
     @Override
     protected void walkPreMagik(final AstNode node) {
         final MagikFile magikFile = this.getMagikFile();
-        this.lines = magikFile.getSourceLines();
+        this.lines = magikFile.getOriginalSourceLines();
         if (this.lines == null) {
             this.lines = new String[]{};
         }

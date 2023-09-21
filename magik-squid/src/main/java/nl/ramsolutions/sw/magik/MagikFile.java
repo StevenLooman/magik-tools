@@ -31,6 +31,7 @@ public class MagikFile {
 
     private final URI uri;
     private final String source;
+    private final String originalSource;
     private AstNode astNode;
     private GlobalScope globalScope;
     private List<Definition> definitions;
@@ -44,9 +45,21 @@ public class MagikFile {
      * @param uri URI.
      * @param source Source.
      */
+    public MagikFile(final URI uri, final String source, final String originalSource) {
+        this.uri = uri;
+        this.source = source;
+        this.originalSource = originalSource;
+    }
+
+    /**
+     * Constructor.
+     * @param uri URI.
+     * @param source Source.
+     */
     public MagikFile(final URI uri, final String source) {
         this.uri = uri;
         this.source = source;
+        this.originalSource = source;
     }
 
     /**
@@ -67,6 +80,7 @@ public class MagikFile {
         this.uri = path.toUri();
         final Charset charset = FileCharsetDeterminer.determineCharset(path);
         this.source = Files.readString(path, charset);
+        this.originalSource = this.source;
     }
 
     /**
@@ -86,11 +100,27 @@ public class MagikFile {
     }
 
     /**
+     * Get the original (untabified) source text.
+     * @return Original source text.
+     */
+    public String getOriginalSource() {
+        return this.originalSource;
+    }
+
+    /**
      * Get the source lines.
      * @return Source lines.
      */
     public String[] getSourceLines() {
         return this.source.split("\r\n|\n|\r");
+    }
+
+    /**
+     * Get the original source lines.
+     * @return Original source lines.
+     */
+    public String[] getOriginalSourceLines() {
+        return this.originalSource.split("\r\n|\n|\r");
     }
 
     /**
