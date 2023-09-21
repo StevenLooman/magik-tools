@@ -74,7 +74,7 @@ public class MagikLintConfiguration {
     }
 
     public void setMaxInfractions(final Long maxInfractions) {
-        this.properties.setProperty(KEY_UNTABIFY, maxInfractions);
+        this.properties.setProperty(KEY_MAX_INFRACTIONS, maxInfractions);
     }
 
     /**
