@@ -82,6 +82,8 @@ $ mvn -B versions:set -DnewVersion=<version> -DgenerateBackupPoms=false
 ...
 ```
 
+Be sure to also update the symbolic links in `magik-language-server/client-vscode/server`, and update `magik-language-server/client-vscode/client/src/const.ts`.
+
 Creation and uploading of artifacts is currently done by hand.
 
 ### SonarCloud
