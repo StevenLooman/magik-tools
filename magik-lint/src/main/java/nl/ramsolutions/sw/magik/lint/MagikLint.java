@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.Utils;
 import nl.ramsolutions.sw.magik.Location;

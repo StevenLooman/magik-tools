@@ -19,11 +19,6 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>magik-lint</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
       <artifactId>magik-typed-checks</artifactId>
       <version>${project.version}</version>
     </dependency>

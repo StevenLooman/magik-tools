@@ -14,12 +14,16 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikVisitor;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.check.RuleProperty;
 
 /**
  * MagikCheck class.
  */
 public abstract class MagikCheck extends MagikVisitor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MagikCheck.class);
 
     private final List<MagikIssue> issues = new ArrayList<>();
     private MagikCheckHolder holder;
@@ -57,6 +61,7 @@ public abstract class MagikCheck extends MagikVisitor {
             final String parameterKey = ruleProperty.key().replace(" ", "-");
             final String fullKey = checkKey + "." + parameterKey;
             if (fullKey.equals(name)) {
+                LOGGER.debug("Setting parameter for check {}: '{}' to '{}'", checkKey, parameterKey, value);
                 field.set(this, value);
                 found = true;
             }

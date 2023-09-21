@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.lint;
+package nl.ramsolutions.sw;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
