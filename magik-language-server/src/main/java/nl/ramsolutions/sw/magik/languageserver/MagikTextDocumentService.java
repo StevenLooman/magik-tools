@@ -250,7 +250,8 @@ public class MagikTextDocumentService implements TextDocumentService {
     private List<Diagnostic> getDiagnosticsLinter(final MagikTypedFile magikFile) {
         final Path overrideSettingsPath = MagikSettings.INSTANCE.getChecksOverrideSettingsPath();
 
-        final MagikChecksDiagnosticsProvider lintProvider = new MagikChecksDiagnosticsProvider(overrideSettingsPath);
+        final MagikChecksDiagnosticsProvider lintProvider =
+            new MagikChecksDiagnosticsProvider(overrideSettingsPath);
         try {
             return lintProvider.getDiagnostics(magikFile);
         } catch (final IOException exception) {
@@ -261,7 +262,10 @@ public class MagikTextDocumentService implements TextDocumentService {
     }
 
     private List<Diagnostic> getDiagnosticsTyping(final MagikTypedFile magikFile) {
-        final MagikTypedChecksDiagnosticsProvider typeProvider = new MagikTypedChecksDiagnosticsProvider();
+        final Path overrideSettingsPath = MagikSettings.INSTANCE.getChecksOverrideSettingsPath();
+
+        final MagikTypedChecksDiagnosticsProvider typeProvider =
+            new MagikTypedChecksDiagnosticsProvider(overrideSettingsPath);
         try {
             return typeProvider.getDiagnostics(magikFile);
         } catch (final IOException exception) {

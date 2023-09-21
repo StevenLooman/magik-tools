@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 import java.util.logging.LogManager;
+import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.magik.lint.output.MessageFormatReporter;
 import nl.ramsolutions.sw.magik.lint.output.NullReporter;
 import nl.ramsolutions.sw.magik.lint.output.Reporter;
