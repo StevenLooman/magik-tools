@@ -10,7 +10,6 @@ import nl.ramsolutions.sw.MagikToolsProperties;
  */
 public class MagikLintConfiguration {
 
-    private static final String KEY_UNTABIFY = "untabify";
     private static final String KEY_MAX_INFRACTIONS = "max-infractions";
     private static final String KEY_COLUMN_OFFSET = "column-offset";
     private static final String KEY_MSG_TEMPLATE = "msg-template";
@@ -40,24 +39,6 @@ public class MagikLintConfiguration {
     @CheckForNull
     public Path getPath() {
         return this.path;
-    }
-
-    /**
-     * Get untabify.
-     * @return Untabify.
-     */
-    @CheckForNull
-    public Integer getUntabify() {
-        final String untabifyStr = this.properties.getPropertyString(KEY_UNTABIFY);
-        if (untabifyStr == null) {
-            return null;
-        }
-
-        return Integer.parseInt(untabifyStr);
-    }
-
-    public void setUntabify(final Integer untabify) {
-        this.properties.setProperty(KEY_UNTABIFY, untabify);
     }
 
     /**

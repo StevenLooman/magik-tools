@@ -59,12 +59,6 @@ public final class Main {
         .hasArg()
         .type(PatternOptionBuilder.NUMBER_VALUE)
         .build();
-    private static final Option OPTION_UNTABIFY = Option.builder()
-        .longOpt("untabify")
-        .desc("Expand tabs to N spaces")
-        .hasArg()
-        .type(PatternOptionBuilder.NUMBER_VALUE)
-        .build();
     private static final Option OPTION_DEBUG = Option.builder()
         .longOpt("debug")
         .desc("Enable showing of debug information")
@@ -84,7 +78,6 @@ public final class Main {
         OPTIONS.addOption(OPTION_MSG_TEMPLATE);
         OPTIONS.addOption(OPTION_RCFILE);
         OPTIONS.addOption(OPTION_SHOW_CHECKS);
-        OPTIONS.addOption(OPTION_UNTABIFY);
         OPTIONS.addOption(OPTION_COLUMN_OFFSET);
         OPTIONS.addOption(OPTION_MAX_INFRACTIONS);
         OPTIONS.addOption(OPTION_DEBUG);
@@ -234,12 +227,6 @@ public final class Main {
     }
 
     private static void copyOptionsToConfig(final CommandLine commandLine, final MagikLintConfiguration config) {
-        if (commandLine.hasOption(OPTION_UNTABIFY)) {
-            final String value = commandLine.getOptionValue(OPTION_UNTABIFY);
-            final Integer untabify = Integer.parseInt(value);
-            config.setUntabify(untabify);
-        }
-
         if (commandLine.hasOption(OPTION_MAX_INFRACTIONS)) {
             final String value = commandLine.getOptionValue(OPTION_MAX_INFRACTIONS);
             final Long maxInfractions = Long.parseLong(value);

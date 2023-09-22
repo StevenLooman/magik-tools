@@ -17,10 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
-import nl.ramsolutions.sw.Utils;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -61,30 +59,23 @@ public class MagikLint {
     }
 
     /**
-     * Build context for a file, untabifying if needed.
-     *
-     * @param path     Path to file
-     * @param untabify Untabify to N-spaces, if given
+     * Build context for a file.
+     * @param path Path to file
      * @return Visitor context for file.
      */
-    private MagikFile buildMagikFile(final Path path, final @Nullable Integer untabify) {
+    private MagikFile buildMagikFile(final Path path) {
         final Charset charset = FileCharsetDeterminer.determineCharset(path);
 
         byte[] encoded = null;
         try {
             encoded = Files.readAllBytes(path);
-        } catch (IOException exception) {
+        } catch (final IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
         }
 
         final URI uri = path.toUri();
-
-        final String originalFileContents = new String(encoded, charset);
-        final String fileContents = untabify != null
-            ? Utils.untabify(originalFileContents, untabify)
-            : originalFileContents;
-
-        return new MagikFile(uri, fileContents, originalFileContents);
+        final String fileContents = new String(encoded, charset);
+        return new MagikFile(uri, fileContents);
     }
 
     /**
@@ -225,7 +216,6 @@ public class MagikLint {
         final List<PathMatcher> ignoreMatchers = checksConfig.getIgnores().stream()
             .map(fs::getPathMatcher)
             .collect(Collectors.toList());
-        final Integer untabify = this.config.getUntabify();
         final long maxInfractions = this.config.getMaxInfractions();
 
         // Sorting.
@@ -241,7 +231,7 @@ public class MagikLint {
                 }
                 return !matches;
             })
-            .map(path -> this.buildMagikFile(path, untabify))
+            .map(path -> this.buildMagikFile(path))
             .map(magikFile -> this.runChecksOnFile(magikFile, holders))
             .flatMap(List::stream)
             // ensure ordering
