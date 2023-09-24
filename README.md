@@ -98,10 +98,8 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for instruction on how to contribute.
 
 This project is licensed under GPLv3, see [`LICENSE.md`](LICENSE.md).
 
-Note that this has been changed from LGPLv3!
-
 ## Commercial use
 
-By no means is this product fully tested and production-ready. Use at your own risk, your mileage may vary.
+Commercial use is allowed. By no means is this product fully tested. Use at your own risk, your mileage may vary.
 
-If you do use this, please do inform me.
+If you do use this - commercially or not - please do inform me.
