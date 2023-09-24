@@ -318,7 +318,7 @@ public class MagikWorkspaceService implements WorkspaceService {
             progressParams.setToken(token);
 
             final WorkDoneProgressBegin begin = new WorkDoneProgressBegin();
-            begin.setTitle("Indexing");
+            begin.setTitle("Indexing Magik sources");
             progressParams.setValue(Either.forLeft(begin));
             languageClient.notifyProgress(progressParams);
 
@@ -329,10 +329,10 @@ public class MagikWorkspaceService implements WorkspaceService {
             }
 
             final WorkDoneProgressEnd end = new WorkDoneProgressEnd();
-            end.setMessage("Done indexing");
+            end.setMessage("Done indexing Magik sources");
             progressParams.setValue(Either.forLeft(end));
             languageClient.notifyProgress(progressParams);
-            LOGGER.trace("Done indexing in background");
+            LOGGER.trace("Done indexing Magik sources in background");
         });
     }
 
