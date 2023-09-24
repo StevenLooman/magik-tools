@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.io.Writer;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 
 /**

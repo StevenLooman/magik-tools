@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -826,7 +827,7 @@ class LocalTypeReasonerTest {
             + "_method object.test\n"
             + "    _for a, b _over fn()  # iter-type: sw:integer, sw:float\n"
             + "    _loop\n"
-            + "      _return a, b"
+            + "      _return a, b\n"
             + "    _endloop\n"
             + "_endmethod\n";
 
@@ -842,22 +843,18 @@ class LocalTypeReasonerTest {
         final AstNode aNode = forVariablesNode.getDescendants(MagikGrammar.IDENTIFIER).get(0);
         final ExpressionResult aResult = reasoner.getNodeType(aNode);
         assertThat(aResult.size()).isEqualTo(1);
-
+        final AbstractType aResultType = aResult.get(0, null);
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
-        final AbstractType aResultType = aResult.get(0, null);
-        assertThat(aResultType)
-            .isEqualTo(integerType);
+        assertThat(aResultType).isEqualTo(integerType);
 
         final AstNode bNode = forVariablesNode.getDescendants(MagikGrammar.IDENTIFIER).get(1);
         final ExpressionResult bResult = reasoner.getNodeType(bNode);
         assertThat(bResult.size()).isEqualTo(1);
-
+        final AbstractType bResultType = bResult.get(0, null);
         final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
         final AbstractType floatType = typeKeeper.getType(floatRef);
-        final AbstractType bResultType = bResult.get(0, null);
-        assertThat(bResultType)
-            .isEqualTo(floatType);
+        assertThat(bResultType).isEqualTo(floatType);
     }
 
     @Test
