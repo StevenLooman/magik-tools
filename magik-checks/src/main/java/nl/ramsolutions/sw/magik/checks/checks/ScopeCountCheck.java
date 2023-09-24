@@ -4,6 +4,8 @@ import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -70,10 +72,14 @@ public class ScopeCountCheck extends MagikCheck {
         final int scopeCount = procedureScopeEntries.size();
         if (scopeCount > this.maxScopeCount) {
             final String message = String.format(MESSAGE, scopeCount, this.maxScopeCount);
-            final AstNode markedNode = node.getChildren().stream()
-                .filter(childNode -> childNode.isNot(MagikGrammar.values()))
-                .findFirst()
-                .orElseThrow();
+            final AstNode markedNode;
+            if (node.is(MagikGrammar.METHOD_DEFINITION)) {
+                final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
+                markedNode = helper.getMethodNameNode();
+            } else {
+                final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
+                markedNode = helper.getProcedureNode();
+            }
             this.addIssue(markedNode, message);
         }
     }
