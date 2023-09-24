@@ -82,7 +82,7 @@ public class InlayHintProvider {
 
         // Get argument hints.
         final List<InlayHint> inlayHints = new ArrayList<>();
-        final List<AstNode> argumentNodes = argumentsNode.getDescendants(MagikGrammar.ARGUMENT);
+        final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT);
         for (int i = 0; i < argumentNodes.size(); ++i) {
             final AstNode argumentNode = argumentNodes.get(i);
             if (!this.isSimpleAtomArgument(argumentNode)
