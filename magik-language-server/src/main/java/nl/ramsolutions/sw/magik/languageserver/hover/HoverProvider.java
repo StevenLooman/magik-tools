@@ -10,7 +10,7 @@ import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;

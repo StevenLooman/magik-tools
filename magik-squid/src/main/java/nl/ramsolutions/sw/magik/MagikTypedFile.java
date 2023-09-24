@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
 
 /**
  * Typed magik file.

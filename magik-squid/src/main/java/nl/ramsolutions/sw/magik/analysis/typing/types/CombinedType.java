@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -23,7 +23,7 @@ public class CombinedType extends AbstractType {
      * @param types Combined types.
      */
     public CombinedType(final AbstractType... types) {
-        this(Set.of(types));
+        this(Arrays.asList(types));
     }
 
     /**
@@ -31,7 +31,7 @@ public class CombinedType extends AbstractType {
      * @param types Combined types.
      */
     public CombinedType(final Collection<AbstractType> types) {
-        this.types = Collections.unmodifiableSet(Set.copyOf(types));
+        this.types = Set.copyOf(types);
     }
 
     public Collection<AbstractType> getTypes() {

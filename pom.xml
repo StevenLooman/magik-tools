@@ -372,7 +372,6 @@
                   </limits>
                   <excludes>
                     <exclude>nl.ramsolutions.sw.magik.analysis.AstWalker</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.analysis.typing.LocalTypeReasoner</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader</exclude>
                   </excludes>
                 </rule>
