@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  */
 class SuperHandler extends LocalTypeReasonerHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalTypeReasonerHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SuperHandler.class);
 
     /**
      * Constructor.

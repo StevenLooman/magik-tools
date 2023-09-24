@@ -198,7 +198,7 @@ public class MagikLint {
                 }
                 return !matches;
             })
-            .map(path -> this.buildMagikFile(path))
+            .map(this::buildMagikFile)
             .map(magikFile -> this.runChecksOnFile(magikFile, holders))
             .flatMap(List::stream)
             // ensure ordering
