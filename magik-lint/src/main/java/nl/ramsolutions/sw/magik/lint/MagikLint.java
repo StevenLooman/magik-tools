@@ -11,23 +11,19 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
+import nl.ramsolutions.sw.magik.checks.MagikIssueDisabledChecker;
 import nl.ramsolutions.sw.magik.lint.output.Reporter;
-import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +33,6 @@ import org.slf4j.LoggerFactory;
 public class MagikLint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikLint.class);
-
-    private static final String KEY_DISABLE = "disable";
-    private static final CommentInstructionReader.InstructionType MLINT_LINE_INSTRUCTION =
-        CommentInstructionReader.InstructionType.createStatementInstructionType("mlint");
-    private static final CommentInstructionReader.InstructionType MLINT_SCOPE_INSTRUCTION =
-        CommentInstructionReader.InstructionType.createScopeInstructionType("mlint");
 
     private final MagikLintConfiguration config;
     private final Reporter reporter;
@@ -147,29 +137,6 @@ public class MagikLint {
     }
 
     /**
-     * Check if a found issue/infraction is disabled via line or scope.
-     * @param magikIssue Issue to check.
-     * @param instructionsHandler Instruction handler to use.
-     * @return true if issue is disabled at line.
-     */
-    private boolean isMagikIssueDisabled(final MagikFile magikFile, final MagikIssue magikIssue) {
-        final MagikCheckHolder holder = magikIssue.check().getHolder();
-        Objects.requireNonNull(holder);
-
-        final Integer line = magikIssue.startLine();
-        final Scope scope = magikFile.getGlobalScope().getScopeForLineColumn(line, Integer.MAX_VALUE);
-        final Map<String, String> scopeInstructions =
-            magikFile.getScopeInstructions(MLINT_SCOPE_INSTRUCTION).getOrDefault(scope, Collections.emptyMap());
-        final Map<String, String> lineInstructions =
-            magikFile.getLineInstructions(MLINT_LINE_INSTRUCTION).getOrDefault(line, Collections.emptyMap());
-        final String[] scopeDisableds = scopeInstructions.getOrDefault(MagikLint.KEY_DISABLE, "").split(",");
-        final String[] lineDisableds = lineInstructions.getOrDefault(MagikLint.KEY_DISABLE, "").split(",");
-        final String checkKey = holder.getCheckKeyKebabCase();
-        return List.of(scopeDisableds).contains(checkKey)
-            || List.of(lineDisableds).contains(checkKey);
-    }
-
-    /**
      * Run {@link MagikCheckHolder}s on {@link MagikFile}.
      * @param magikFile File to run on.
      * @param holders {@link MagikCheckHolder}s to run.
@@ -188,7 +155,7 @@ public class MagikLint {
 
             try {
                 final List<MagikIssue> issues = this.runCheckOnFile(magikFile, holder).stream()
-                    .filter(magikIssue -> !this.isMagikIssueDisabled(magikFile, magikIssue))
+                    .filter(magikIssue -> !MagikIssueDisabledChecker.issueDisabled(magikFile, magikIssue))
                     .collect(Collectors.toList());
                 magikIssues.addAll(issues);
             } catch (ReflectiveOperationException exception) {

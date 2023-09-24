@@ -14,6 +14,7 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
+import nl.ramsolutions.sw.magik.checks.MagikIssueDisabledChecker;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.eclipse.lsp4j.Diagnostic;
@@ -55,6 +56,7 @@ public class MagikChecksDiagnosticsProvider {
 
         return this.createChecks(magikFile).stream()
             .flatMap(check -> check.scanFileForIssues(magikFile).stream())
+            .filter(magikIssue -> !MagikIssueDisabledChecker.issueDisabled(magikFile, magikIssue))
             .map(issue -> {
                 final MagikCheckHolder holder = issue.check().getHolder();
                 final Location location = Lsp4jConversion.locationToLsp4j(issue.location());
