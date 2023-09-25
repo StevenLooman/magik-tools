@@ -82,7 +82,7 @@ $ mvn -B versions:set -DnewVersion=<version> -DgenerateBackupPoms=false
 ...
 ```
 
-Be sure to also update the symbolic links in `magik-language-server/client-vscode/server`, and update `magik-language-server/client-vscode/client/src/const.ts`.
+Be sure to also update the symbolic links in `magik-language-server/client-vscode/server`. Then update `magik-language-server/client-vscode/client/src/const.ts`, and `magik-language-server/client-vscode/client/package.json` and related package files.
 
 Creation and uploading of artifacts is currently done by hand.
 
