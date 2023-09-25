@@ -3,7 +3,7 @@
 	"description": "Magik Language Server and Debug Adapter client for VSCode",
 	"author": "Steven Looman",
 	"license": "GPL-3.0-only",
-	"version": "0.7.2-SNAPSHOT",
+	"version": "0.8.0-SNAPSHOT",
 	"publisher": "StevenLooman",
 	"repository": {
 		"type": "git",
