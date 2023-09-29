@@ -5,12 +5,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -32,17 +29,10 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
 
     /**
      * Constructor.
-     * @param magikFile MagikFile
-     * @param nodeTypes Node types.
-     * @param nodeIterTypes Node iter types.
-     * @param currentScopeEntryNodes Current scope entry nodes.
+     * @param state Reasoner state.
      */
-    ProcedureDefinitionHandler(
-            final MagikTypedFile magikFile,
-            final Map<AstNode, ExpressionResult> nodeTypes,
-            final Map<AstNode, ExpressionResult> nodeIterTypes,
-            final Map<ScopeEntry, AstNode> currentScopeEntryNodes) {
-        super(magikFile, nodeTypes, nodeIterTypes, currentScopeEntryNodes);
+    ProcedureDefinitionHandler(final LocalTypeReasonerState state) {
+        super(state);
     }
 
     /**
@@ -78,18 +68,18 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
                 modifier = Parameter.Modifier.NONE;
             }
 
-            final AbstractType type = this.getNodeType(parameterNode).get(0, UndefinedType.INSTANCE);
+            final AbstractType type = this.state.getNodeType(parameterNode).get(0, UndefinedType.INSTANCE);
             final TypeString typeString = type.getTypeString();
             final Parameter parameter = new Parameter(identifier, modifier, typeString);
             parameters.add(parameter);
         }
 
         // Result.
-        final ExpressionResult procResult = this.getNodeType(node);
+        final ExpressionResult procResult = this.state.getNodeType(node);
         final ExpressionResultString procResultStr = TypeReader.unparseExpressionResult(procResult);
 
         // Loopbody result.
-        final ExpressionResult loopbodyResult = this.getNodeIterType(node);
+        final ExpressionResult loopbodyResult = this.state.getNodeIterType(node);
         final ExpressionResultString loopbodyResultStr = TypeReader.unparseExpressionResult(loopbodyResult);
 
         // Create procedure instance.

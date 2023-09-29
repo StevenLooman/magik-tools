@@ -6,7 +6,7 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
@@ -24,14 +24,14 @@ public class MagikTypedCheck extends MagikCheck {
      * Get LocalTypeReasoner.
      * @return LocalTypeReasner.
      */
-    protected LocalTypeReasoner getReasoner() {
+    protected LocalTypeReasonerState getTypeReasonerState() {
         final MagikFile magikFile = this.getMagikFile();
         if (!(magikFile instanceof MagikTypedFile)) {
             throw new IllegalStateException();
         }
 
         final MagikTypedFile magikTypedFile = (MagikTypedFile) magikFile;
-        return magikTypedFile.getTypeReasoner();
+        return magikTypedFile.getTypeReasonerState();
     }
 
     /**
@@ -60,8 +60,8 @@ public class MagikTypedCheck extends MagikCheck {
         }
 
         final AstNode previousSibling = node.getPreviousSibling();
-        final LocalTypeReasoner reasoner = this.getReasoner();
-        final ExpressionResult result = reasoner.getNodeType(previousSibling);
+        final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
+        final ExpressionResult result = reasonerState.getNodeType(previousSibling);
         final AbstractType type = result.get(0, UndefinedType.INSTANCE);
         if (type == SelfType.INSTANCE) {
             final AstNode methodDefNode = node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);

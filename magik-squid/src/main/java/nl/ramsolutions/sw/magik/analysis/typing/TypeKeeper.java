@@ -51,7 +51,7 @@ public class TypeKeeper implements ITypeKeeper {
             new MagikType(this, Sort.OBJECT, TypeString.ofIdentifier("object", "sw")));
         swPakkage.put(
             "unset",
-            new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("unset", "sw")));
+            new MagikType(this, Sort.INTRINSIC, TypeString.SW_UNSET));
         swPakkage.put(
             "false",
             new MagikType(this, Sort.INTRINSIC, TypeString.ofIdentifier("false", "sw")));

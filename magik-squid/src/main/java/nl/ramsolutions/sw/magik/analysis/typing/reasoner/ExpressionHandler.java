@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.ForNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -31,7 +30,6 @@ import nl.ramsolutions.sw.magik.parser.TypeStringParser;
  */
 class ExpressionHandler extends LocalTypeReasonerHandler {
 
-    private static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", "sw");
     private static final TypeString SW_FALSE = TypeString.ofIdentifier("false", "sw");
     private static final TypeString SW_SIMPLE_VECTOR = TypeString.ofIdentifier("simple_vector", "sw");
     private static final Map<String, String> UNARY_OPERATOR_METHODS = Map.of(
@@ -49,19 +47,12 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
 
     /**
      * Constructor.
-     * @param magikFile MagikFile
-     * @param nodeTypes Node types.
-     * @param nodeIterTypes Node iter types.
-     * @param currentScopeEntryNodes Current scope entry nodes.
+     * @param state Reasoner state.
      */
-    ExpressionHandler(
-            final MagikTypedFile magikFile,
-            final Map<AstNode, ExpressionResult> nodeTypes,
-            final Map<AstNode, ExpressionResult> nodeIterTypes,
-            final Map<ScopeEntry, AstNode> currentScopeEntryNodes) {
-        super(magikFile, nodeTypes, nodeIterTypes, currentScopeEntryNodes);
+    ExpressionHandler(final LocalTypeReasonerState state) {
+        super(state);
         this.instructionReader = new CommentInstructionReader(
-            magikFile, Set.of(TYPE_INSTRUCTION, ITER_TYPE_INSTRUCTION));
+            this.state.getMagikFile(), Set.of(TYPE_INSTRUCTION, ITER_TYPE_INSTRUCTION));
     }
 
     /**
@@ -69,12 +60,12 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
      * @param node BINARY_EXPRESSION node.
      */
     void handleBinaryExpression(final AstNode node) {
-        final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+        final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
         final AbstractType falseType = this.typeKeeper.getType(SW_FALSE);
 
         // Take left hand side as current.
         final AstNode currentNode = node.getFirstChild();
-        ExpressionResult result = this.getNodeType(currentNode);
+        ExpressionResult result = this.state.getNodeType(currentNode);
 
         final List<AstNode> chainNodes = new ArrayList<>(node.getChildren());
         chainNodes.remove(0);
@@ -85,7 +76,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
 
             // Get right hand side.
             final AstNode rightNode = chainNodes.get(i + 1);
-            final ExpressionResult rightResult = this.getNodeType(rightNode);
+            final ExpressionResult rightResult = this.state.getNodeType(rightNode);
 
             // Evaluate binary operator.
             final AbstractType leftType = result.get(0, unsetType);
@@ -117,7 +108,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         }
 
         // Apply operator to operands and store result.
-        this.setNodeType(node, result);
+        this.state.setNodeType(node, result);
     }
 
     /**
@@ -125,16 +116,16 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
      * @param node AUGMENTED_ASSIGNMENT_EXPRESSION node.
      */
     void handleAugmentedAssignmentExpression(final AstNode node) {
-        final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+        final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
         final AbstractType falseType = this.typeKeeper.getType(SW_FALSE);
 
         // Take result from right hand.
         final AstNode rightNode = node.getLastChild();
-        final ExpressionResult rightResult = this.getNodeType(rightNode);
+        final ExpressionResult rightResult = this.state.getNodeType(rightNode);
 
         // Get left hand result.
         final AstNode assignedNode = node.getFirstChild();
-        final ExpressionResult leftResult = this.getNodeType(assignedNode);
+        final ExpressionResult leftResult = this.state.getNodeType(assignedNode);
 
         // Get operator.
         final AstNode operatorNode = node.getChildren().get(1);
@@ -169,19 +160,19 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         }
 
         // Store result of expression.
-        this.setNodeType(node, result);
+        this.state.setNodeType(node, result);
 
         if (assignedNode.is(MagikGrammar.ATOM)) {
             // Store 'active' type for future reference.
-            final GlobalScope globalScope = magikFile.getGlobalScope();
+            final GlobalScope globalScope = this.getGlobalScope();
             final Scope scope = globalScope.getScopeForNode(assignedNode);
             Objects.requireNonNull(scope);
 
             final String identifier = assignedNode.getTokenValue();
             final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
-            this.currentScopeEntryNodes.put(scopeEntry, assignedNode);
+            this.state.setCurrentScopeEntryNode(scopeEntry, assignedNode);
 
-            this.setNodeType(assignedNode, result);
+            this.state.setNodeType(assignedNode, result);
         }
     }
 
@@ -195,11 +186,11 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
             return;
         }
 
-        final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+        final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
 
         // Get operand.
         final AstNode operatedNode = node.getLastChild();
-        final ExpressionResult operatedResult = this.getNodeType(operatedNode);
+        final ExpressionResult operatedResult = this.state.getNodeType(operatedNode);
         final AbstractType type = operatedResult.get(0, unsetType);
 
         // Get operator.
@@ -210,7 +201,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         final ExpressionResult result =
             this.getMethodInvocationResult(type, operatorMethod).substituteType(SelfType.INSTANCE, type);
 
-        this.setNodeType(node, result);
+        this.state.setNodeType(node, result);
     }
 
     /**
@@ -218,20 +209,20 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
      * @param node TUPLE node.
      */
     void handleTuple(final AstNode node) {
-        final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+        final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
 
         final List<AstNode> childNodes = node.getChildren(MagikGrammar.EXPRESSION);
         final ExpressionResult result;
         if (childNodes.size() == 1) {
             final AstNode firstChildNode = childNodes.get(0);
-            result = this.getNodeType(firstChildNode);
+            result = this.state.getNodeType(firstChildNode);
         } else {
             result = node.getChildren(MagikGrammar.EXPRESSION).stream()
-                .map(this::getNodeType)
+                .map(this.state::getNodeType)
                 .map(expressionResult -> expressionResult.get(0, unsetType))
                 .collect(ExpressionResult.COLLECTOR);
         }
-        this.setNodeType(node, result);
+        this.state.setNodeType(node, result);
     }
 
     /**
@@ -239,9 +230,9 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
      * @param node ITERABLE_EXPRESSION node.
      */
     void handleIterableExpression(final AstNode node) {
-        final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+        final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
         final AstNode expressionNode = node.getFirstChild();
-        final ExpressionResult iteratorResult = this.getNodeIterType(expressionNode);
+        final ExpressionResult iteratorResult = this.state.getNodeIterType(expressionNode);
 
         // Bind to identifiers, if any.
         final AstNode overNode = node.getParent();
@@ -265,14 +256,14 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 }
 
                 final ExpressionResult result = new ExpressionResult(type);
-                this.setNodeType(identifierNode, result);
+                this.state.setNodeType(identifierNode, result);
 
-                final GlobalScope globalScope = this.magikFile.getGlobalScope();
+                final GlobalScope globalScope = this.getGlobalScope();
                 final Scope scope = globalScope.getScopeForNode(bodyNode);
                 Objects.requireNonNull(scope);
                 final String identifier = identifierNode.getTokenValue();
                 final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
-                this.currentScopeEntryNodes.put(scopeEntry, identifierNode);
+                this.state.setCurrentScopeEntryNode(scopeEntry, identifierNode);
             }
         }
     }
@@ -282,24 +273,24 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
      * @param node LOOPBODY node.
      */
     void handleLoopbody(final AstNode node) {
-        final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+        final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
 
         // Get results.
         final AstNode multiValueExprNode = node.getFirstChild(MagikGrammar.TUPLE);
-        final ExpressionResult result = this.getNodeType(multiValueExprNode);
+        final ExpressionResult result = this.state.getNodeType(multiValueExprNode);
 
         // Find related node to store at.
         final AstNode procMethodDefNode = node.getFirstAncestor(
             MagikGrammar.PROCEDURE_DEFINITION, MagikGrammar.METHOD_DEFINITION);
 
         // Save results.
-        if (this.hasNodeType(procMethodDefNode)) {
+        if (this.state.hasNodeType(procMethodDefNode)) {
             // Combine types.
-            final ExpressionResult existingResult = this.getNodeType(procMethodDefNode);
+            final ExpressionResult existingResult = this.state.getNodeType(procMethodDefNode);
             final ExpressionResult combinedResult = new ExpressionResult(existingResult, result, unsetType);
-            this.setNodeIterType(procMethodDefNode, combinedResult);
+            this.state.setNodeIterType(procMethodDefNode, combinedResult);
         } else {
-            this.setNodeIterType(procMethodDefNode, result);
+            this.state.setNodeIterType(procMethodDefNode, result);
         }
     }
 
@@ -315,7 +306,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
             return;
         }
 
-        ExpressionResult result = this.getNodeType(expressionNode);
+        ExpressionResult result = this.state.getNodeType(expressionNode);
 
         // BODYs don't always have to result in something.
         // Find STATEMENT -> RETURN/EMIT/LEAVE
@@ -331,12 +322,12 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
             // Result can also be an unset, as no resulting statement was found.
             // TODO: but... "_block _block _return 1 _endblock _endblock"
             final ExpressionResult emptyResult = new ExpressionResult();
-            final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+            final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
             result = new ExpressionResult(result, emptyResult, unsetType);
         }
 
         // Set parent EXPRESSION result.
-        this.setNodeType(expressionNode, result);
+        this.state.setNodeType(expressionNode, result);
     }
 
     /**
@@ -347,17 +338,17 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         final AstNode childNode = node.getFirstChild();
 
         // Copy type of child node to EXPRESSION node.
-        final ExpressionResult callResult = this.getNodeType(childNode);
-        if (this.hasNodeType(childNode)
+        final ExpressionResult callResult = this.state.getNodeType(childNode);
+        if (this.state.hasNodeType(childNode)
             && callResult != ExpressionResult.UNDEFINED) {
-            this.setNodeType(node, callResult);
+            this.state.setNodeType(node, callResult);
         }
 
         // Copy iter-type of child node to EXPRESSION node.
-        final ExpressionResult iterCallResult = this.getNodeIterType(childNode);
-        if (this.hasNodeIterType(childNode)
+        final ExpressionResult iterCallResult = this.state.getNodeIterType(childNode);
+        if (this.state.hasNodeIterType(childNode)
             && iterCallResult != ExpressionResult.UNDEFINED) {
-            this.setNodeIterType(node, iterCallResult);
+            this.state.setNodeIterType(node, iterCallResult);
         }
 
         // Check for type annotations, those overrule normal operations.
@@ -368,7 +359,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 TypeStringParser.parseExpressionResultString(typeAnnotation, currentPackage);
             final ExpressionResult overrideResult =
                 this.typeReader.parseExpressionResultString(overrideResultStr);
-            this.setNodeType(node, overrideResult);
+            this.state.setNodeType(node, overrideResult);
         }
 
         // Check for iter type annotations, those overrule normal operations.
@@ -379,7 +370,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 TypeStringParser.parseExpressionResultString(iterTypeAnnotation, currentPackage);
             final ExpressionResult overrideIterResult =
                 this.typeReader.parseExpressionResultString(overrideIterResultStr);
-            this.setNodeIterType(node, overrideIterResult);
+            this.state.setNodeIterType(node, overrideIterResult);
         }
     }
 
@@ -391,12 +382,12 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         final AstNode rightNode = node.getLastChild();
 
         // Copy type of child node to POSTFIX_EXPRESSION node.
-        final ExpressionResult callResult = this.getNodeType(rightNode);
-        this.setNodeType(node, callResult);
+        final ExpressionResult callResult = this.state.getNodeType(rightNode);
+        this.state.setNodeType(node, callResult);
 
         // Copy iter-type of child node to POSTFIX_EXPRESSION node.
-        final ExpressionResult iterCallResult = this.getNodeIterType(rightNode);
-        this.setNodeIterType(node, iterCallResult);
+        final ExpressionResult iterCallResult = this.state.getNodeIterType(rightNode);
+        this.state.setNodeIterType(node, iterCallResult);
     }
 
     /**
@@ -405,10 +396,10 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
      */
     void handleMethodDefinition(final AstNode node) {
         // Technically, a method definition is not an expression... but this has to live somewhere.
-        if (!this.hasNodeType(node)) {
+        if (!this.state.hasNodeType(node)) {
             // Nothing was assigned to this node, so it must be empty.
             final ExpressionResult emptyResult = new ExpressionResult();
-            this.setNodeType(node, emptyResult);
+            this.state.setNodeType(node, emptyResult);
         }
     }
 

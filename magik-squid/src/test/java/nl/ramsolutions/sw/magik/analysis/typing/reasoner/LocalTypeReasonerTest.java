@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing;
+package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
@@ -8,7 +8,9 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.BinaryOperator;
+import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -51,12 +53,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.isEmpty()).isTrue();
     }
 
@@ -84,12 +86,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
@@ -112,12 +114,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType integerType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
@@ -143,12 +145,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType combinedType = new CombinedType(
@@ -172,12 +174,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final SelfType resultType = (SelfType) result.get(0, null);
@@ -220,12 +222,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
@@ -268,12 +270,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
@@ -305,12 +307,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
@@ -335,12 +337,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType char16VectorType = typeKeeper.getType(char16VectorRef);
@@ -371,12 +373,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType char16VectorType = typeKeeper.getType(char16VectorRef);
@@ -400,12 +402,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(3);
 
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
@@ -444,12 +446,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
@@ -486,12 +488,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
@@ -526,12 +528,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
@@ -569,17 +571,17 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final CombinedType expectedType = new CombinedType(
             typeKeeper.getType(TypeString.ofIdentifier("integer", "sw")),
-            typeKeeper.getType(TypeString.ofIdentifier("unset", "sw")));
+            typeKeeper.getType(TypeString.SW_UNSET));
         final CombinedType resultType = (CombinedType) result.get(0, null);
         assertThat(resultType)
             .isNotNull()
@@ -598,12 +600,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.resul
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result).isEqualTo(ExpressionResult.UNDEFINED);
 
         final UndefinedType resultType = (UndefinedType) result.get(0, null);
@@ -624,12 +626,12 @@ class LocalTypeReasonerTest {
         // Do analysis.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final ProcedureInstance resultType = (ProcedureInstance) result.get(0, null);
@@ -663,12 +665,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
@@ -703,12 +705,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
@@ -742,12 +744,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final SelfType resultType = (SelfType) result.get(0, null);
@@ -779,12 +781,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
@@ -806,12 +808,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType integerType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
@@ -834,14 +836,14 @@ class LocalTypeReasonerTest {
         // Do analysis.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode forVariablesNode = topNode.getFirstDescendant(MagikGrammar.FOR_VARIABLES);
 
         final AstNode aNode = forVariablesNode.getDescendants(MagikGrammar.IDENTIFIER).get(0);
-        final ExpressionResult aResult = reasoner.getNodeType(aNode);
+        final ExpressionResult aResult = reasonerState.getNodeType(aNode);
         assertThat(aResult.size()).isEqualTo(1);
         final AbstractType aResultType = aResult.get(0, null);
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
@@ -849,7 +851,7 @@ class LocalTypeReasonerTest {
         assertThat(aResultType).isEqualTo(integerType);
 
         final AstNode bNode = forVariablesNode.getDescendants(MagikGrammar.IDENTIFIER).get(1);
-        final ExpressionResult bResult = reasoner.getNodeType(bNode);
+        final ExpressionResult bResult = reasonerState.getNodeType(bNode);
         assertThat(bResult.size()).isEqualTo(1);
         final AbstractType bResultType = bResult.get(0, null);
         final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
@@ -870,19 +872,18 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final AbstractType unsetType = typeKeeper.getType(TypeString.ofIdentifier("unset", "sw"));
         final AbstractType resultType = result.get(0, null);
         assertThat(resultType)
             .isNotNull()
-            .isEqualTo(unsetType);
+            .isEqualTo(TypeString.SW_UNSET);
     }
 
     @Test
@@ -905,12 +906,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
@@ -930,14 +931,14 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode parameterNode = topNode
             .getFirstDescendant(MagikGrammar.PARAMETER)
             .getFirstChild(MagikGrammar.IDENTIFIER);
-        final ExpressionResult result = reasoner.getNodeType(parameterNode);
+        final ExpressionResult result = reasonerState.getNodeType(parameterNode);
 
         final TypeString simpleVectorRef = TypeString.ofIdentifier("simple_vector", "sw");
         final AbstractType simpleVectorType = typeKeeper.getType(simpleVectorRef);
@@ -962,13 +963,13 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode procNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
         final AstNode importNode = procNode.getFirstDescendant(MagikGrammar.VARIABLE_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(importNode);
+        final ExpressionResult result = reasonerState.getNodeType(importNode);
 
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
@@ -991,12 +992,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         // Assert user:object.test type determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(2);
 
         final AbstractType integerType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
@@ -1026,11 +1027,11 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode tryVarNode = topNode.getFirstDescendant(MagikGrammar.TRY_VARIABLE);
-        final ExpressionResult result = reasoner.getNodeType(tryVarNode);
+        final ExpressionResult result = reasonerState.getNodeType(tryVarNode);
         assertThat(result).isNotNull();
 
         final AbstractType conditionType = typeKeeper.getType(TypeString.ofIdentifier("condition", "sw"));
@@ -1053,11 +1054,11 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodDefNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodDefNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefNode);
         assertThat(result).isNotNull();
 
         // First is integer + undefined.
@@ -1071,9 +1072,8 @@ class LocalTypeReasonerTest {
                 .isEqualTo(intAndUndefinedType);
 
         // The rest is unset + undefined, as merging the two yields unset for the rest.
-        final TypeString unsetRef = TypeString.ofIdentifier("unset", "sw");
         final AbstractType unsetAndUndefinedType = new CombinedType(
-            typeKeeper.getType(unsetRef),
+            typeKeeper.getType(TypeString.SW_UNSET),
             UndefinedType.INSTANCE);
         result.getTypes().stream()
             .skip(1)
@@ -1101,11 +1101,11 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode superNode = topNode.getFirstDescendant(MagikGrammar.SUPER).getParent();
-        final ExpressionResult result = reasoner.getNodeType(superNode);
+        final ExpressionResult result = reasonerState.getNodeType(superNode);
         assertThat(result).isNotNull();
 
         final AbstractType resultType0 = result.get(0, null);
@@ -1134,11 +1134,11 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode superNode = topNode.getFirstDescendant(MagikGrammar.SUPER).getParent();
-        final ExpressionResult result = reasoner.getNodeType(superNode);
+        final ExpressionResult result = reasonerState.getNodeType(superNode);
         assertThat(result).isNotNull();
 
         final AbstractType resultType0 = result.get(0, null);
@@ -1160,7 +1160,7 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
         final AbstractType floatType = typeKeeper.getType(floatRef);
@@ -1170,7 +1170,7 @@ class LocalTypeReasonerTest {
         final AstNode parameterNode = topNode
             .getFirstDescendant(MagikGrammar.PARAMETER)
             .getFirstChild(MagikGrammar.IDENTIFIER);
-        final ExpressionResult actualParameterResult = reasoner.getNodeType(parameterNode);
+        final ExpressionResult actualParameterResult = reasonerState.getNodeType(parameterNode);
         final AbstractType actualParameterType = actualParameterResult.get(0, null);
         assertThat(actualParameterType)
             .isNotNull()
@@ -1179,7 +1179,7 @@ class LocalTypeReasonerTest {
         // Test parameter usage.
         final AstNode procInvocationNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_INVOCATION);
         final AstNode atomNode = procInvocationNode.getFirstDescendant(MagikGrammar.ATOM);
-        final ExpressionResult actualAtomResult = reasoner.getNodeType(atomNode);
+        final ExpressionResult actualAtomResult = reasonerState.getNodeType(atomNode);
         final AbstractType actualAtomType = actualAtomResult.get(0, null);
         assertThat(actualAtomType)
             .isNotNull()
@@ -1198,13 +1198,13 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode parameterNode = topNode
             .getFirstDescendant(MagikGrammar.PARAMETER)
             .getFirstChild(MagikGrammar.IDENTIFIER);
-        final ExpressionResult result = reasoner.getNodeType(parameterNode);
+        final ExpressionResult result = reasonerState.getNodeType(parameterNode);
         final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
         final AbstractType floatType = typeKeeper.getType(floatRef);
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
@@ -1240,11 +1240,11 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
         final AbstractType expectedType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
         final AbstractType actualType = result.get(0, null);
         assertThat(actualType)
@@ -1286,11 +1286,11 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
         final AbstractType expectedType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
         final AbstractType actualType = result.get(0, null);
         assertThat(actualType)
@@ -1323,13 +1323,12 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
-        final TypeString unsetRef = TypeString.ofIdentifier("unset", "sw");
-        final AbstractType expectedType = typeKeeper.getType(unsetRef);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
+        final AbstractType expectedType = typeKeeper.getType(TypeString.SW_UNSET);
         final AbstractType actualType = result.get(0, null);
         assertThat(actualType)
             .isNotNull()
@@ -1372,11 +1371,11 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType actualType = result.get(0, null);
@@ -1432,11 +1431,11 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
 
         final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
@@ -1493,14 +1492,14 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode forVariablesNode = topNode.getFirstDescendant(MagikGrammar.FOR_VARIABLES);
         final List<AstNode> identifierNodes = forVariablesNode.getDescendants(MagikGrammar.IDENTIFIER);
 
         final AstNode kIdentifierNode = identifierNodes.get(0);
-        final ExpressionResult kResult = reasoner.getNodeType(kIdentifierNode);
+        final ExpressionResult kResult = reasonerState.getNodeType(kIdentifierNode);
         final AbstractType actualType0 = kResult.get(0, null);
         final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
@@ -1509,7 +1508,7 @@ class LocalTypeReasonerTest {
             .isEqualTo(symbolType);
 
         final AstNode eIdentifierNode = identifierNodes.get(1);
-        final ExpressionResult eResult = reasoner.getNodeType(eIdentifierNode);
+        final ExpressionResult eResult = reasonerState.getNodeType(eIdentifierNode);
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType actualType1 = eResult.get(0, null);
@@ -1549,11 +1548,11 @@ class LocalTypeReasonerTest {
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
-        final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType actualType = result.get(0, null);

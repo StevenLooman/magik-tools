@@ -5,6 +5,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 
 /**
  * Typed magik file.
@@ -12,7 +13,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
 public class MagikTypedFile extends MagikFile {
 
     private final ITypeKeeper typeKeeper;
-    private LocalTypeReasoner typeReasoner;
+    private LocalTypeReasonerState reasonerState;
 
     /**
      * Constructor.
@@ -54,16 +55,17 @@ public class MagikTypedFile extends MagikFile {
     }
 
     /**
-     * Run the (cached) {@link LocalTypeReasoner} and return it.
-     * @return The used {@link LocalTypeReasoner}.
+     * Get the resulting state from the {@link LocalTypeReasoner}.
+     * @return The {@link LocalTypeReasonerState}.
      */
-    public synchronized LocalTypeReasoner getTypeReasoner() {
-        if (this.typeReasoner == null) {
-            this.typeReasoner = new LocalTypeReasoner(this);
-            this.typeReasoner.run();
+    public synchronized LocalTypeReasonerState getTypeReasonerState() {
+        if (this.reasonerState == null) {
+            final LocalTypeReasoner reasoner = new LocalTypeReasoner(this);
+            reasoner.run();
+            this.reasonerState = reasoner.getState();
         }
 
-        return this.typeReasoner;
+        return this.reasonerState;
     }
 
     @Override

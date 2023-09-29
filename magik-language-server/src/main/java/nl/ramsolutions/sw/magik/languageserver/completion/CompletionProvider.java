@@ -21,6 +21,7 @@ import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
@@ -256,7 +257,8 @@ public class CompletionProvider {
             return Collections.emptyList();
         }
 
-        final ExpressionResult result = reasoner.getNodeType(wantedNode);
+        final LocalTypeReasonerState state = reasoner.getState();
+        final ExpressionResult result = state.getNodeType(wantedNode);
         AbstractType type = result.get(0, UndefinedType.INSTANCE);
         if (type == SelfType.INSTANCE) {
             final AstNode methodDefNode = tokenNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);

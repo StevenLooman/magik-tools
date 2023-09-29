@@ -4,7 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.util.ArrayList;
 import java.util.Collection;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
@@ -26,9 +26,8 @@ public class UndefinedMethodResultTypedCheck extends MagikTypedCheck {
     @Override
     @SuppressWarnings("checkstyle:NestedIfDepth")
     protected void walkPostMethodInvocation(final AstNode node) {
-        final LocalTypeReasoner reasoner = this.getReasoner();
-
-        final ExpressionResult result = reasoner.getNodeType(node);
+        final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
+        final ExpressionResult result = reasonerState.getNodeType(node);
         if (result == ExpressionResult.UNDEFINED) {
             final AstNode firstIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
             final AstNode issueNode = firstIdentifierNode != null

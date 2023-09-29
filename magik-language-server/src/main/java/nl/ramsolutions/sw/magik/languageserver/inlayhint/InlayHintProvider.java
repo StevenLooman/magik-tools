@@ -12,7 +12,7 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
@@ -139,8 +139,8 @@ public class InlayHintProvider {
         }
 
         final AstNode previousSibling = node.getPreviousSibling();
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
-        final ExpressionResult result = reasoner.getNodeType(previousSibling);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+        final ExpressionResult result = reasonerState.getNodeType(previousSibling);
         final AbstractType type = result.get(0, UndefinedType.INSTANCE);
         if (type == SelfType.INSTANCE) {
             final AstNode defNode =
