@@ -3,6 +3,7 @@
 0.8.1 (unreleased)
 
 - Better handle syntax errors in Copy/Paste Detection step in sonar-magik-plugin.
+- Fix sslr-magik-toolkit pointing to wrong Main class.
 
 0.8.0 (2023-09-27)
 

@@ -47,7 +47,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>nl.ramsolutions.sw.magik.toolkit.MagikToolkit</mainClass>
+              <mainClass>nl.ramsolutions.sw.magik.ramsolutions.Main</mainClass>
             </manifest>
           </archive>
         </configuration>
