@@ -1,0 +1,33 @@
+_package user
+
+_method object.test
+_endmethod
+$
+
+# ----------
+# Example
+# ----------
+read_message_patch(:object)
+$
+
+:test             :nl_nl        Test van Dialog
+$
+
+# ----------
+# Example 2
+# ----------
+read_message_patch(:object)
+$
+
+:test             :en_gb        Test of Dialog
+:test             :nl_nl        Test van Dialog
+$
+
+# ----------
+# Example 3
+# ----------
+
+_block
+	show(:me)
+_endblock
+$
