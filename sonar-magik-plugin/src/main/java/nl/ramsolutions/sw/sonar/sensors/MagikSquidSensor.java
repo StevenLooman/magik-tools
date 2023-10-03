@@ -1,10 +1,8 @@
 package nl.ramsolutions.sw.sonar.sensors;
 
-import com.sonar.sslr.api.Token;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikFile;
@@ -13,8 +11,8 @@ import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.metrics.FileMetrics;
-import nl.ramsolutions.sw.sonar.TokenLocation;
 import nl.ramsolutions.sw.sonar.language.Magik;
+import nl.ramsolutions.sw.sonar.sensors.cpd.CpdTokenSaver;
 import nl.ramsolutions.sw.sonar.visitors.MagikHighlighterVisitor;
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
@@ -26,7 +24,6 @@ import org.sonar.api.batch.rule.Checks;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.issue.NoSonarFilter;
@@ -68,8 +65,8 @@ public class MagikSquidSensor implements Sensor {
     @Override
     public void describe(final SensorDescriptor descriptor) {
         descriptor
-            .onlyOnLanguage(Magik.KEY)
             .name("Magik Squid Sensor")
+            .onlyOnLanguage(Magik.KEY)
             .onlyOnFileType(Type.MAIN);
     }
 
@@ -140,7 +137,8 @@ public class MagikSquidSensor implements Sensor {
 
         // Save CPD tokens.
         LOGGER.debug("Saving CPD tokens");
-        this.saveCpdTokens(context, magikFile, inputFile);
+        final CpdTokenSaver cpdTokenSaver = new CpdTokenSaver(context);
+        cpdTokenSaver.saveCpdTokens(inputFile, magikFile);
     }
 
     private void saveMetrics(final SensorContext context, final InputFile inputFile, final MagikFile magikFile) {
@@ -202,25 +200,4 @@ public class MagikSquidSensor implements Sensor {
         }
     }
 
-    private void saveCpdTokens(final SensorContext context, final MagikFile magikFile, final InputFile inputFile) {
-        LOGGER.debug("Saving CPD tokens, file: {}", inputFile);
-
-        final NewCpdTokens newCpdTokens = context.newCpdTokens().onFile(inputFile);
-        final List<Token> tokens = magikFile.getTopNode().getTokens();
-
-        // For some reason, tokens sometimes get swapped.
-        // We work around this by sorting the tokens.
-        final Comparator<TokenLocation> byLine = Comparator.comparing(TokenLocation::line);
-        final Comparator<TokenLocation> byColumn = Comparator.comparing(TokenLocation::column);
-
-        tokens.stream()
-            .filter(token -> !token.getValue().trim().equals(""))
-            .map(TokenLocation::new)
-            .sorted(byLine.thenComparing(byColumn))
-            .forEach(tokenLocation -> newCpdTokens.addToken(
-                tokenLocation.line(), tokenLocation.column(),
-                tokenLocation.endLine(), tokenLocation.endColumn(),
-                tokenLocation.getValue()));
-        newCpdTokens.save();
-    }
 }

@@ -2,6 +2,8 @@
 
 0.8.1 (unreleased)
 
+- Better handle syntax errors in Copy/Paste Detection step in sonar-magik-plugin.
+
 0.8.0 (2023-09-27)
 
 - Fix SwMethodDocCheck not properly matching uppercased parameter in method doc when it is followed by a non-whitespace character.
