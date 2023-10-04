@@ -13,9 +13,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ForbiddenCallCheckTest extends MagikCheckTestBase {
 
     @Test
-    void testOk() {
+    void testProcedureDoSomething() {
         final MagikCheck check = new ForbiddenCallCheck();
         final String code = "do_something(1)";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
+    @Test
+    void testProcedureSwDoSomething() {
+        final MagikCheck check = new ForbiddenCallCheck();
+        final String code = "sw:do_something(1)";
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isEmpty();
     }
@@ -24,6 +32,14 @@ class ForbiddenCallCheckTest extends MagikCheckTestBase {
     void testProcedureShow() {
         final MagikCheck check = new ForbiddenCallCheck();
         final String code = "show(1)";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).hasSize(1);
+    }
+
+    @Test
+    void testProcedureSwShow() {
+        final MagikCheck check = new ForbiddenCallCheck();
+        final String code = "sw:show(1)";
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).hasSize(1);
     }
