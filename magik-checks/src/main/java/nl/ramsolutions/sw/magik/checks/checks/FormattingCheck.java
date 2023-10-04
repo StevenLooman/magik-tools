@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
+import com.sonar.sslr.api.Trivia;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -204,6 +205,8 @@ public class FormattingCheck extends MagikCheck {
             default:
                 break;
         }
+
+        this.requireMaxNewlines(this.currentToken);
     }
 
     private boolean isPragmaLine(final Token token) {
@@ -355,6 +358,24 @@ public class FormattingCheck extends MagikCheck {
 
     private void visitTokenTransmit(final Token token) {
         this.requireEmptyLineAfter(token);
+    }
+
+    private void requireMaxNewlines(final Token token) {
+        // Test if there are no more than 2 successive newline tokens.
+        int count = 0;
+        for (final Trivia trivia : token.getTrivia()) {
+            final String tokenValue = trivia.getToken().getOriginalValue().strip();
+            if ("".equals(tokenValue)) {  // Whitespace + newline is stripped.
+                count += 1;
+            } else {
+                count = 0;
+            }
+
+            if (count > 2) {
+                final String message = String.format(MESSAGE, "only single empty line allowed");
+                this.addIssue(token, message);
+            }
+        }
     }
 
     private char getIndentChar() {

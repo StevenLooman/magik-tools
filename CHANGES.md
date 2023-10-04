@@ -6,6 +6,7 @@
 - `magik-lint.properties` is searched for from path of current file in magik-lint, unless `--rcfile` is used.
 - Paths specified in setting `ignore` in `magik-lint.properties` in magik-lint are respected.
 - Fix grammar not supporting end labels in `_loop`/`_endloop` constructs.
+- Extend FormattingCheck to require at most 2 successive empty lines.
 
 0.8.1 (2023-10-15)
 
