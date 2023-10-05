@@ -364,10 +364,9 @@ public class FormattingCheck extends MagikCheck {
         // Test if there are no more than 2 successive newline tokens.
         int count = 0;
         for (final Trivia trivia : token.getTrivia()) {
-            final String tokenValue = trivia.getToken().getOriginalValue().strip();
-            if ("".equals(tokenValue)) {  // Whitespace + newline is stripped.
+            if (trivia.getToken().getType() == GenericTokenType.EOL) {
                 count += 1;
-            } else {
+            } else if (trivia.getToken().getType() != GenericTokenType.WHITESPACE) {
                 count = 0;
             }
 

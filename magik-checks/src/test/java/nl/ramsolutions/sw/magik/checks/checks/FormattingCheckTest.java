@@ -127,4 +127,18 @@ class FormattingCheckTest extends MagikCheckTestBase {
         assertThat(issues).hasSize(1);
     }
 
+    @Test
+    void testMultipleWhitelinesMethodDoc() {
+        final MagikCheck check = new FormattingCheck();
+        final String code = ""
+            + "_method object.method(param)\n"
+            + "\t##\n"
+            + "\n"
+            + "\t>> param + 1\n"
+            + "_endmethod\n"
+            + "$\n";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
 }
