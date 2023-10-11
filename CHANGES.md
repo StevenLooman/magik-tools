@@ -7,6 +7,7 @@
 - Add datamodel_type_dumper.magik.
 - Fix ForbiddenCallCheck default forbidden calls not seeing the `sw:`-prefixed versions.
 - Fix LocalTypeReasoner error on assignment parameter.
+- Fix source name in language server diagnostics.
 
 0.8.0 (2023-09-27)
 
