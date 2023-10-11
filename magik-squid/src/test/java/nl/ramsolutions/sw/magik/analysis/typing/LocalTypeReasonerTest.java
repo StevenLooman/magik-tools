@@ -93,9 +93,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(ropeType);
+        assertThat(resultType).isEqualTo(ropeType);
     }
 
     @Test
@@ -122,9 +120,7 @@ class LocalTypeReasonerTest {
 
         final AbstractType integerType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
         final AbstractType resultType = (AbstractType) result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType).isEqualTo(integerType);
     }
 
     @Test
@@ -155,9 +151,7 @@ class LocalTypeReasonerTest {
             typeKeeper.getType(TypeString.ofIdentifier("integer", "sw")),
             typeKeeper.getType(TypeString.ofIdentifier("symbol", "sw")));
         final AbstractType resultType = (AbstractType) result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(combinedType);
+        assertThat(resultType).isEqualTo(combinedType);
     }
 
     @Test
@@ -181,9 +175,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final SelfType resultType = (SelfType) result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(SelfType.INSTANCE);
+        assertThat(resultType).isEqualTo(SelfType.INSTANCE);
     }
 
     @Test
@@ -229,9 +221,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(ropeType);
+        assertThat(resultType).isEqualTo(ropeType);
     }
 
     @Test
@@ -277,9 +267,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(ropeType);
+        assertThat(resultType).isEqualTo(ropeType);
     }
 
     @Test
@@ -314,9 +302,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(falseType);
+        assertThat(resultType).isEqualTo(falseType);
     }
 
     @Test
@@ -345,9 +331,7 @@ class LocalTypeReasonerTest {
 
         final AbstractType char16VectorType = typeKeeper.getType(char16VectorRef);
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(char16VectorType);
+        assertThat(resultType).isEqualTo(char16VectorType);
     }
 
     @Test
@@ -381,9 +365,7 @@ class LocalTypeReasonerTest {
 
         final AbstractType char16VectorType = typeKeeper.getType(char16VectorRef);
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(char16VectorType);
+        assertThat(resultType).isEqualTo(char16VectorType);
     }
 
     @Test
@@ -411,19 +393,13 @@ class LocalTypeReasonerTest {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType resultType1 = result.get(0, null);
-        assertThat(resultType1)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType1).isEqualTo(integerType);
 
         final AbstractType resultType2 = result.get(1, null);
-        assertThat(resultType2)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType2).isEqualTo(integerType);
 
         final AbstractType resultType3 = result.get(2, null);
-        assertThat(resultType3)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType3).isEqualTo(integerType);
     }
 
     @Test
@@ -455,9 +431,7 @@ class LocalTypeReasonerTest {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType).isEqualTo(integerType);
     }
 
     @Test
@@ -495,9 +469,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType).isEqualTo(integerType);
     }
 
     @Test
@@ -535,9 +507,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType).isEqualTo(integerType);
     }
 
     @Test
@@ -581,9 +551,7 @@ class LocalTypeReasonerTest {
             typeKeeper.getType(TypeString.ofIdentifier("integer", "sw")),
             typeKeeper.getType(TypeString.ofIdentifier("unset", "sw")));
         final CombinedType resultType = (CombinedType) result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(expectedType);
+        assertThat(resultType).isEqualTo(expectedType);
     }
 
     @Test
@@ -607,9 +575,7 @@ class LocalTypeReasonerTest {
         assertThat(result).isEqualTo(ExpressionResult.UNDEFINED);
 
         final UndefinedType resultType = (UndefinedType) result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(UndefinedType.INSTANCE);
+        assertThat(resultType).isEqualTo(UndefinedType.INSTANCE);
     }
 
     @Test
@@ -633,7 +599,6 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final ProcedureInstance resultType = (ProcedureInstance) result.get(0, null);
-        assertThat(resultType).isNotNull();
         assertThat(resultType.getProcedureName()).isEqualTo("test");
 
         final Collection<Method> invokeMethods = resultType.getMethods("invoke()");
@@ -644,9 +609,7 @@ class LocalTypeReasonerTest {
             assertThat(procResult.size()).isEqualTo(1);
 
             final TypeString procResultTypeString = procResult.get(0, null);
-            assertThat(procResultTypeString)
-                .isNotNull()
-                .isEqualTo(integerRef);
+            assertThat(procResultTypeString).isEqualTo(integerRef);
         });
     }
 
@@ -673,9 +636,7 @@ class LocalTypeReasonerTest {
 
         final AbstractType resultType = result.get(0, null);
         final AbstractType integerType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType).isEqualTo(integerType);
     }
 
     @Test
@@ -712,9 +673,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(propertyListType);
+        assertThat(resultType).isEqualTo(propertyListType);
     }
 
     // region: self
@@ -751,9 +710,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final SelfType resultType = (SelfType) result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(SelfType.INSTANCE);
+        assertThat(resultType).isEqualTo(SelfType.INSTANCE);
     }
 
     @Test
@@ -788,9 +745,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(ropeType);
+        assertThat(resultType).isEqualTo(ropeType);
     }
     // endregion
 
@@ -816,9 +771,7 @@ class LocalTypeReasonerTest {
 
         final AbstractType integerType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType).isEqualTo(integerType);
     }
 
     @Test
@@ -880,9 +833,7 @@ class LocalTypeReasonerTest {
 
         final AbstractType unsetType = typeKeeper.getType(TypeString.ofIdentifier("unset", "sw"));
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(unsetType);
+        assertThat(resultType).isEqualTo(unsetType);
     }
 
     @Test
@@ -914,9 +865,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(floatType);
+        assertThat(resultType).isEqualTo(floatType);
     }
 
     @Test
@@ -942,9 +891,7 @@ class LocalTypeReasonerTest {
         final TypeString simpleVectorRef = TypeString.ofIdentifier("simple_vector", "sw");
         final AbstractType simpleVectorType = typeKeeper.getType(simpleVectorRef);
         final AbstractType actualResultType = result.get(0, null);
-        assertThat(actualResultType)
-            .isNotNull()
-            .isEqualTo(simpleVectorType);
+        assertThat(actualResultType).isEqualTo(simpleVectorType);
     }
 
     @Test
@@ -973,9 +920,7 @@ class LocalTypeReasonerTest {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType).isEqualTo(integerType);
     }
 
     @Test
@@ -1001,14 +946,10 @@ class LocalTypeReasonerTest {
 
         final AbstractType integerType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
         final AbstractType resultType1 = result.get(0, null);
-        assertThat(resultType1)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType1).isEqualTo(integerType);
 
         final AbstractType resultType2 = result.get(1, null);
-        assertThat(resultType2)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(resultType2).isEqualTo(integerType);
     }
 
     @Test
@@ -1035,9 +976,7 @@ class LocalTypeReasonerTest {
 
         final AbstractType conditionType = typeKeeper.getType(TypeString.ofIdentifier("condition", "sw"));
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType)
-            .isNotNull()
-            .isEqualTo(conditionType);
+        assertThat(resultType).isEqualTo(conditionType);
     }
 
     @Test
@@ -1066,9 +1005,7 @@ class LocalTypeReasonerTest {
             typeKeeper.getType(integerRef),
             UndefinedType.INSTANCE);
         final AbstractType resultType0 = result.get(0, null);
-        assertThat(resultType0)
-                .isNotNull()
-                .isEqualTo(intAndUndefinedType);
+        assertThat(resultType0).isEqualTo(intAndUndefinedType);
 
         // The rest is unset + undefined, as merging the two yields unset for the rest.
         final TypeString unsetRef = TypeString.ofIdentifier("unset", "sw");
@@ -1078,9 +1015,7 @@ class LocalTypeReasonerTest {
         result.getTypes().stream()
             .skip(1)
             .forEach(type -> {
-                assertThat(type)
-                    .isNotNull()
-                    .isEqualTo(unsetAndUndefinedType);
+                assertThat(type).isEqualTo(unsetAndUndefinedType);
             });
     }
 
@@ -1109,9 +1044,7 @@ class LocalTypeReasonerTest {
         assertThat(result).isNotNull();
 
         final AbstractType resultType0 = result.get(0, null);
-        assertThat(resultType0)
-                .isNotNull()
-                .isEqualTo(sType);
+        assertThat(resultType0).isEqualTo(sType);
     }
 
     @Test
@@ -1142,9 +1075,7 @@ class LocalTypeReasonerTest {
         assertThat(result).isNotNull();
 
         final AbstractType resultType0 = result.get(0, null);
-        assertThat(resultType0)
-                .isNotNull()
-                .isEqualTo(rType);
+        assertThat(resultType0).isEqualTo(rType);
     }
 
     @Test
@@ -1172,18 +1103,49 @@ class LocalTypeReasonerTest {
             .getFirstChild(MagikGrammar.IDENTIFIER);
         final ExpressionResult actualParameterResult = reasoner.getNodeType(parameterNode);
         final AbstractType actualParameterType = actualParameterResult.get(0, null);
-        assertThat(actualParameterType)
-            .isNotNull()
-            .isEqualTo(floatType);
+        assertThat(actualParameterType).isEqualTo(floatType);
 
         // Test parameter usage.
         final AstNode procInvocationNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_INVOCATION);
         final AstNode atomNode = procInvocationNode.getFirstDescendant(MagikGrammar.ATOM);
         final ExpressionResult actualAtomResult = reasoner.getNodeType(atomNode);
         final AbstractType actualAtomType = actualAtomResult.get(0, null);
-        assertThat(actualAtomType)
-            .isNotNull()
-            .isEqualTo(floatType);
+        assertThat(actualAtomType).isEqualTo(floatType);
+    }
+
+    @Test
+    void testAssignmentParameterType() {
+        final String code = ""
+            + "_method a.b << p1\n"
+            + "  ## @param {sw:float} p1\n"
+            + "  show(p1)"
+            + "_endmethod";
+
+        // Set up TypeKeeper/TypeReasoner.
+        final TypeKeeper typeKeeper = new TypeKeeper();
+
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
+        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+
+        final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
+        final AbstractType floatType = typeKeeper.getType(floatRef);
+        final AstNode topNode = magikFile.getTopNode();
+
+        // Test parameter definition.
+        final AstNode parameterNode = topNode
+            .getFirstDescendant(MagikGrammar.PARAMETER)
+            .getFirstChild(MagikGrammar.IDENTIFIER);
+        final ExpressionResult actualParameterResult = reasoner.getNodeType(parameterNode);
+        final AbstractType actualParameterType = actualParameterResult.get(0, null);
+        assertThat(actualParameterType).isEqualTo(floatType);
+
+        // Test parameter usage.
+        final AstNode procInvocationNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_INVOCATION);
+        final AstNode atomNode = procInvocationNode.getFirstDescendant(MagikGrammar.ATOM);
+        final ExpressionResult actualAtomResult = reasoner.getNodeType(atomNode);
+        final AbstractType actualAtomType = actualAtomResult.get(0, null);
+        assertThat(actualAtomType).isEqualTo(floatType);
     }
 
     @Test
@@ -1211,9 +1173,7 @@ class LocalTypeReasonerTest {
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType expectedType = CombinedType.combine(floatType, integerType);
         final AbstractType actualType = result.get(0, null);
-        assertThat(actualType)
-            .isNotNull()
-            .isEqualTo(expectedType);
+        assertThat(actualType).isEqualTo(expectedType);
     }
 
     @Test
@@ -1247,9 +1207,7 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
         final AbstractType expectedType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
         final AbstractType actualType = result.get(0, null);
-        assertThat(actualType)
-            .isNotNull()
-            .isEqualTo(expectedType);
+        assertThat(actualType).isEqualTo(expectedType);
     }
 
     @Test
@@ -1293,9 +1251,7 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
         final AbstractType expectedType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
         final AbstractType actualType = result.get(0, null);
-        assertThat(actualType)
-            .isNotNull()
-            .isEqualTo(expectedType);
+        assertThat(actualType).isEqualTo(expectedType);
     }
 
     @Test
@@ -1331,9 +1287,7 @@ class LocalTypeReasonerTest {
         final TypeString unsetRef = TypeString.ofIdentifier("unset", "sw");
         final AbstractType expectedType = typeKeeper.getType(unsetRef);
         final AbstractType actualType = result.get(0, null);
-        assertThat(actualType)
-            .isNotNull()
-            .isEqualTo(expectedType);
+        assertThat(actualType).isEqualTo(expectedType);
     }
 
     @Test
@@ -1380,9 +1334,7 @@ class LocalTypeReasonerTest {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType actualType = result.get(0, null);
-        assertThat(actualType)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(actualType).isEqualTo(integerType);
     }
 
     @Test
@@ -1441,16 +1393,12 @@ class LocalTypeReasonerTest {
         final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final AbstractType actualType0 = result.get(0, null);
-        assertThat(actualType0)
-            .isNotNull()
-            .isEqualTo(symbolType);
+        assertThat(actualType0).isEqualTo(symbolType);
 
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType actualType1 = result.get(1, null);
-        assertThat(actualType1)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(actualType1).isEqualTo(integerType);
     }
 
     @Test
@@ -1504,18 +1452,14 @@ class LocalTypeReasonerTest {
         final AbstractType actualType0 = kResult.get(0, null);
         final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
-        assertThat(actualType0)
-            .isNotNull()
-            .isEqualTo(symbolType);
+        assertThat(actualType0).isEqualTo(symbolType);
 
         final AstNode eIdentifierNode = identifierNodes.get(1);
         final ExpressionResult eResult = reasoner.getNodeType(eIdentifierNode);
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType actualType1 = eResult.get(0, null);
-        assertThat(actualType1)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(actualType1).isEqualTo(integerType);
     }
 
     @Test
@@ -1557,9 +1501,7 @@ class LocalTypeReasonerTest {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType integerType = typeKeeper.getType(integerRef);
         final AbstractType actualType = result.get(0, null);
-        assertThat(actualType)
-            .isNotNull()
-            .isEqualTo(integerType);
+        assertThat(actualType).isEqualTo(integerType);
     }
 
 }
