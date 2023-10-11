@@ -6,6 +6,7 @@
 - Fix sslr-magik-toolkit pointing to wrong Main class.
 - Add datamodel_type_dumper.magik.
 - Fix ForbiddenCallCheck default forbidden calls not seeing the `sw:`-prefixed versions.
+- Fix LocalTypeReasoner error on assignment parameter.
 
 0.8.0 (2023-09-27)
 

@@ -80,8 +80,4 @@ class ParameterHandler extends LocalTypeReasonerHandler {
         this.currentScopeEntryNodes.put(scopeEntry, node);
     }
 
-    void handleAssignmentParameter(final AstNode node) {
-        this.handleParameter(node);
-    }
-
 }
