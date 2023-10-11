@@ -64,7 +64,7 @@ public class MagikChecksDiagnosticsProvider {
                 final String message = issue.message();
                 final DiagnosticSeverity severity = this.getCheckSeverity(holder);
                 final String checkKeyKebabCase = holder.getCheckKeyKebabCase();
-                final String diagnosticSource = String.format("mtype (%s)", checkKeyKebabCase);
+                final String diagnosticSource = String.format("mlint (%s)", checkKeyKebabCase);
                 return new Diagnostic(range, message, severity, diagnosticSource);
             })
             .collect(Collectors.toList());
