@@ -264,10 +264,10 @@ public class MagikTextDocumentService implements TextDocumentService {
     private List<Diagnostic> getDiagnosticsTyping(final MagikTypedFile magikFile) {
         final Path overrideSettingsPath = MagikSettings.INSTANCE.getChecksOverrideSettingsPath();
 
-        final MagikTypedChecksDiagnosticsProvider typeProvider =
+        final MagikTypedChecksDiagnosticsProvider typedDiagnosticsProvider =
             new MagikTypedChecksDiagnosticsProvider(overrideSettingsPath);
         try {
-            return typeProvider.getDiagnostics(magikFile);
+            return typedDiagnosticsProvider.getDiagnostics(magikFile);
         } catch (final IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
         }

@@ -23,7 +23,7 @@ import org.sonar.check.Rule;
 public class MethodReturnMatchesDocTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "MethodReturnMatchesDocTypedCheck";
+    public static final String CHECK_KEY = "MethodReturnMatchesDoc";
 
     private static final String MESSAGE = "@return type(s) (%s) do not match method return type(s) (%s).";
 

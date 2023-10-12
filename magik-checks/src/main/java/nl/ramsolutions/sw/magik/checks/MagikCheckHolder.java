@@ -125,7 +125,9 @@ public class MagikCheckHolder {
             synchronized (this) {
                 // determine path
                 final String simpleName = this.checkClass.getSimpleName();
-                final String name = simpleName.substring(0, simpleName.length() - "Check".length()); // strip Check
+                final String name = simpleName.endsWith("TypedCheck")
+                    ? simpleName.substring(0, simpleName.length() - "TypedCheck".length()) // strip TypedCheck
+                    : simpleName.substring(0, simpleName.length() - "Check".length()); // strip Check
                 final String filename = String.format(
                         "/%s/%s.json",
                         CheckList.PROFILE_DIR, name);

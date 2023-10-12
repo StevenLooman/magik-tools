@@ -8,6 +8,7 @@
 - Fix ForbiddenCallCheck default forbidden calls not seeing the `sw:`-prefixed versions.
 - Fix LocalTypeReasoner error on assignment parameter.
 - Fix source name in language server diagnostics.
+- Fix language server not showing typed Magik diagnostics.
 
 0.8.0 (2023-09-27)
 

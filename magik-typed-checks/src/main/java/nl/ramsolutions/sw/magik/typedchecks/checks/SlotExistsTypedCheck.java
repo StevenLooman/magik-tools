@@ -16,7 +16,7 @@ import org.sonar.check.Rule;
 public class SlotExistsTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "SlotExistsTypedCheck";
+    public static final String CHECK_KEY = "SlotExists";
 
     private static final String MESSAGE = "Unknown slot: %s";
 

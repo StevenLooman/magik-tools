@@ -1,0 +1,15 @@
+{
+    "title": "Undefined Method Result",
+    "type": "CODE_SMELL",
+    "status": "ready",
+    "remediation": {
+      "func": "Constant\/Issue",
+      "constantCost": "30min"
+    },
+    "tags": [
+      "error"
+    ],
+    "defaultSeverity": "Minor",
+    "ruleSpecification": "UndefinedMethodResult",
+    "sqKey": "undefined-method-result"
+  }
