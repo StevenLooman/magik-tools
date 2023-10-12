@@ -21,7 +21,7 @@ import org.sonar.check.Rule;
 public class MethodArgumentCountTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "MethodArgumentCountTypedCheck";
+    public static final String CHECK_KEY = "MethodArgumentCount";
 
     private static final String MESSAGE = "Not enough arguments for method: %s";
 

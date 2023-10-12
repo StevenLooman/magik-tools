@@ -16,7 +16,7 @@ import org.sonar.check.Rule;
 public class MethodExistsTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "MethodExistsTypedCheck";
+    public static final String CHECK_KEY = "MethodExists";
 
     private static final String MESSAGE = "Unknown method: %s";
 

@@ -20,7 +20,7 @@ import org.sonar.check.Rule;
 public class GlobalKnownTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "GlobalKnownTypedCheck";
+    public static final String CHECK_KEY = "GlobalKnown";
 
     private static final String MESSAGE = "Unknown global: %s";
     private static final String DEFAULT_PACKAGE = "user";

@@ -1,0 +1,15 @@
+{
+    "title": "Method Exists",
+    "type": "BUG",
+    "status": "ready",
+    "remediation": {
+      "func": "Constant\/Issue",
+      "constantCost": "30min"
+    },
+    "tags": [
+      "error"
+    ],
+    "defaultSeverity": "Major",
+    "ruleSpecification": "MethodExists",
+    "sqKey": "method-exists"
+  }

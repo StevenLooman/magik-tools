@@ -1,0 +1,15 @@
+{
+    "title": "Global is known",
+    "type": "BUG",
+    "status": "ready",
+    "remediation": {
+      "func": "Constant\/Issue",
+      "constantCost": "5min"
+    },
+    "tags": [
+      "error"
+    ],
+    "defaultSeverity": "Major",
+    "ruleSpecification": "GlobalKnown",
+    "sqKey": "global-known"
+  }

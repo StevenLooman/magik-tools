@@ -1,0 +1,15 @@
+{
+    "title": "Method Argument Count",
+    "type": "BUG",
+    "status": "ready",
+    "remediation": {
+      "func": "Constant\/Issue",
+      "constantCost": "30min"
+    },
+    "tags": [
+      "error"
+    ],
+    "defaultSeverity": "Major",
+    "ruleSpecification": "MethodArgumentCount",
+    "sqKey": "method-argument-count"
+  }

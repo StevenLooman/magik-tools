@@ -18,6 +18,7 @@ import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
@@ -93,8 +94,8 @@ public class MagikLint {
     void showChecks(final Writer writer, final boolean showDisabled) throws ReflectiveOperationException, IOException {
         final Path configPath = this.config.getPath();
         final MagikChecksConfiguration checksConfig = configPath != null
-            ? new MagikChecksConfiguration(configPath)
-            : new MagikChecksConfiguration();
+            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
+            : new MagikChecksConfiguration(CheckList.getChecks());
         final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
         for (final MagikCheckHolder holder : holders) {
             if (!showDisabled && holder.isEnabled() || showDisabled && !holder.isEnabled()) {
@@ -175,8 +176,8 @@ public class MagikLint {
     public void run(final Collection<Path> paths) throws IOException, ReflectiveOperationException {
         final Path configPath = this.config.getPath();
         final MagikChecksConfiguration checksConfig = configPath != null
-            ? new MagikChecksConfiguration(configPath)
-            : new MagikChecksConfiguration();
+            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
+            : new MagikChecksConfiguration(CheckList.getChecks());
 
         // Gather ignore matchers.
         final FileSystem fs = FileSystems.getDefault();
@@ -220,8 +221,8 @@ public class MagikLint {
         final Path magikFilePath = Path.of(uri);
         final Path configPath = ConfigurationLocator.locateConfiguration(magikFilePath);
         final MagikChecksConfiguration checksConfig = configPath != null
-            ? new MagikChecksConfiguration(configPath)
-            : new MagikChecksConfiguration();
+            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
+            : new MagikChecksConfiguration(CheckList.getChecks());
         final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
         final Comparator<MagikIssue> byLine = Comparator.comparing(MagikIssue::startLine);
         final Comparator<MagikIssue> byColumn = Comparator.comparing(MagikIssue::startColumn);

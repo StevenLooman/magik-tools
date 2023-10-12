@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import nl.ramsolutions.sw.magik.checks.MagikIssueDisabledChecker;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
-import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Location;
@@ -77,11 +77,10 @@ public class MagikChecksDiagnosticsProvider {
             ? overrideConfigurationPath
             : ConfigurationLocator.locateConfiguration(magikFilePath);
         final MagikChecksConfiguration checksConfig = configPath != null
-            ? new MagikChecksConfiguration(configPath)
-            : new MagikChecksConfiguration();
+            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
+            : new MagikChecksConfiguration(CheckList.getChecks());
         final List<MagikCheckHolder> holders = checksConfig.getAllChecks();
         return holders.stream()
-            .filter(holder -> !holder.getCheckClass().isInstance(MagikTypedCheck.class))
             .filter(MagikCheckHolder::isEnabled)
             .map(holder -> {
                 try {

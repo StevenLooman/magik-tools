@@ -20,7 +20,7 @@ import org.sonar.check.Rule;
 public class TypeDocTypeExistsTypeCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "TypeDocTypeExistsTypeCheck";
+    public static final String CHECK_KEY = "TypeDocTypeExists";
 
     private static final String MESSAGE = "Unknown type: %s";
 
