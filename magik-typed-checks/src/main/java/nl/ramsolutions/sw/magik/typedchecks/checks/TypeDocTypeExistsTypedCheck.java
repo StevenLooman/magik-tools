@@ -16,8 +16,8 @@ import org.sonar.check.Rule;
 /**
  * Test if referenced type is known.
  */
-@Rule(key = TypeDocTypeExistsTypeCheck.CHECK_KEY)
-public class TypeDocTypeExistsTypeCheck extends MagikTypedCheck {
+@Rule(key = TypeDocTypeExistsTypedCheck.CHECK_KEY)
+public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final String CHECK_KEY = "TypeDocTypeExists";

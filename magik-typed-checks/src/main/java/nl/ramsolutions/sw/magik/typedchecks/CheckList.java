@@ -13,7 +13,7 @@ import nl.ramsolutions.sw.magik.typedchecks.checks.MethodArgumentParameterTypedC
 import nl.ramsolutions.sw.magik.typedchecks.checks.MethodExistsTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.MethodReturnMatchesDocTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.SlotExistsTypedCheck;
-import nl.ramsolutions.sw.magik.typedchecks.checks.TypeDocTypeExistsTypeCheck;
+import nl.ramsolutions.sw.magik.typedchecks.checks.TypeDocTypeExistsTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.UndefinedMethodResultTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.fixers.TypeDocParameterFixer;
 import nl.ramsolutions.sw.magik.typedchecks.fixers.TypeDocReturnTypeFixer;
@@ -37,7 +37,7 @@ public final class CheckList {
             MethodArgumentParameterTypedCheck.class,
             MethodExistsTypedCheck.class,
             MethodReturnMatchesDocTypedCheck.class,
-            TypeDocTypeExistsTypeCheck.class,
+            TypeDocTypeExistsTypedCheck.class,
             SlotExistsTypedCheck.class,
             UndefinedMethodResultTypedCheck.class);
     }
