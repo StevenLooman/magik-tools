@@ -1,5 +1,7 @@
 # Changes
 
+0.8.2 (unreleased)
+
 0.8.1 (2023-10-15)
 
 - Better handle syntax errors in Copy/Paste Detection step in sonar-magik-plugin.
