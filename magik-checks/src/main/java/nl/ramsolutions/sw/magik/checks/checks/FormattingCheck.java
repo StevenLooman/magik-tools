@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
+import com.sonar.sslr.api.TokenType;
 import com.sonar.sslr.api.Trivia;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -364,15 +365,17 @@ public class FormattingCheck extends MagikCheck {
         // Test if there are no more than 2 successive newline tokens.
         int count = 0;
         for (final Trivia trivia : token.getTrivia()) {
-            if (trivia.getToken().getType() == GenericTokenType.EOL) {
+            final Token triviaToken = trivia.getToken();
+            final TokenType tokenType = triviaToken.getType();
+            if (tokenType == GenericTokenType.EOL) {
                 count += 1;
-            } else if (trivia.getToken().getType() != GenericTokenType.WHITESPACE) {
+            } else if (tokenType != GenericTokenType.WHITESPACE) {
                 count = 0;
             }
 
             if (count > 2) {
                 final String message = String.format(MESSAGE, "only single empty line allowed");
-                this.addIssue(token, message);
+                this.addIssue(triviaToken, message);
             }
         }
     }

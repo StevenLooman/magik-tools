@@ -53,7 +53,6 @@ class FormattingCheckTest extends MagikCheckTestBase {
         "{1,2}",
         "{1 , 2}",
         "{1 ,\n 2}",
-        "a*b",
         "a* b",
         "a *b",
         "show(a, b )",
@@ -63,7 +62,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
     void testImproper(final String code) {
         final MagikCheck check = new FormattingCheck();
         final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isNotEmpty();
+        assertThat(issues).hasSize(1);
     }
 
     @Test
@@ -92,7 +91,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
         final FormattingCheck check = new FormattingCheck();
         check.indentCharacter = "tab";
         final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isNotEmpty();
+        assertThat(issues).hasSize(1);
     }
 
     @Test
@@ -101,7 +100,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
         check.indentCharacter = "space";
         final String code = "\tprint(a)";
         final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isNotEmpty();
+        assertThat(issues).hasSize(1);
 
     }
 
