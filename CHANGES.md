@@ -2,6 +2,8 @@
 
 0.8.2 (unreleased)
 
+- Fix not finding appropriate node to register issue on when method contains a syntax error.
+
 0.8.1 (2023-10-15)
 
 - Better handle syntax errors in Copy/Paste Detection step in sonar-magik-plugin.
