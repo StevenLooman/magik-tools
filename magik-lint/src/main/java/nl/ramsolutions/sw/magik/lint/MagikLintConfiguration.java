@@ -75,6 +75,10 @@ public class MagikLintConfiguration {
         this.properties.setProperty(KEY_COLUMN_OFFSET, columnOffset);
     }
 
+    /**
+     * Get reporter format.
+     * @return Reporter format.
+     */
     @CheckForNull
     public String getReporterFormat() {
         return this.properties.getPropertyString(KEY_MSG_TEMPLATE);

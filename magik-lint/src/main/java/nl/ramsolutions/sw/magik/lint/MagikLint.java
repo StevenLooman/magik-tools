@@ -8,10 +8,8 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationLocator;
@@ -42,7 +40,7 @@ public class MagikLint {
      * Constructor, parses command line and reads configuration.
      *
      * @param configuration Configuration.
-     * @param reporter            Reporter.
+     * @param reporter Reporter.
      */
     public MagikLint(final MagikLintConfiguration configuration, final Reporter reporter) {
         this.config = configuration;
@@ -138,17 +136,66 @@ public class MagikLint {
     }
 
     /**
+     * Run the linter on {@code paths}.
+     *
+     * @throws IOException -
+     * @throws ReflectiveOperationException -
+     */
+    public void run(final Collection<Path> paths) throws IOException, ReflectiveOperationException {
+        final long maxInfractions = this.config.getMaxInfractions();
+        final Location.LocationRangeComparator locationCompare = new Location.LocationRangeComparator();
+        paths.stream()
+            .parallel()
+            .filter(path -> !this.isFileIgnored(path))
+            .map(this::buildMagikFile)
+            .map(magikFile -> this.runChecksOnFile(magikFile))
+            .flatMap(List::stream)
+            .sorted((issue0, issue1) -> locationCompare.compare(issue0.location(), issue1.location()))
+            .limit(maxInfractions)
+            .forEach(this.reporter::reportIssue);
+    }
+
+    private MagikChecksConfiguration getChecksConfig(final Path path) {
+        final Path configPath = this.config.getPath() != null
+            ? this.config.getPath()
+            : ConfigurationLocator.locateConfiguration(path);
+        try {
+            return configPath != null
+                ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
+                : new MagikChecksConfiguration(CheckList.getChecks());
+        } catch (final IOException exception) {
+            throw new IllegalStateException(exception);
+        }
+    }
+
+    private boolean isFileIgnored(final Path path) {
+        final MagikChecksConfiguration checksConfig = this.getChecksConfig(path);
+        final FileSystem fs = FileSystems.getDefault();
+        final boolean isIgnored = checksConfig.getIgnores().stream()
+            .map(fs::getPathMatcher)
+            .anyMatch(matcher -> matcher.matches(path));
+        if (isIgnored) {
+            LOGGER.trace("Thread: {}, ignoring file: {}", Thread.currentThread().getName(), path);
+        }
+        return isIgnored;
+    }
+
+    /**
      * Run {@link MagikCheckHolder}s on {@link MagikFile}.
      * @param magikFile File to run on.
      * @param holders {@link MagikCheckHolder}s to run.
      * @return List of {@link MagikIssue}s for the given file.
      */
-    private List<MagikIssue> runChecksOnFile(final MagikFile magikFile, final Iterable<MagikCheckHolder> holders) {
+    private List<MagikIssue> runChecksOnFile(final MagikFile magikFile) {
         LOGGER.trace("Thread: {}, checking file: {}", Thread.currentThread().getName(), magikFile);
 
         final List<MagikIssue> magikIssues = new ArrayList<>();
 
         // run checks on files
+        final URI uri = magikFile.getUri();
+        final Path path = Path.of(uri);
+        final MagikChecksConfiguration checksConfig = this.getChecksConfig(path);
+        final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
         for (final MagikCheckHolder holder : holders) {
             if (!holder.isEnabled()) {
                 continue;
@@ -165,70 +212,6 @@ public class MagikLint {
         }
 
         return magikIssues;
-    }
-
-    /**
-     * Run the linter on {@code paths}.
-     *
-     * @throws IOException -
-     * @throws ReflectiveOperationException -
-     */
-    public void run(final Collection<Path> paths) throws IOException, ReflectiveOperationException {
-        final Path configPath = this.config.getPath();
-        final MagikChecksConfiguration checksConfig = configPath != null
-            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
-            : new MagikChecksConfiguration(CheckList.getChecks());
-
-        // Gather ignore matchers.
-        final FileSystem fs = FileSystems.getDefault();
-        final List<PathMatcher> ignoreMatchers = checksConfig.getIgnores().stream()
-            .map(fs::getPathMatcher)
-            .collect(Collectors.toList());
-        final long maxInfractions = this.config.getMaxInfractions();
-
-        // Sorting.
-        final Location.LocationRangeComparator locationCompare = new Location.LocationRangeComparator();
-        final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
-        paths.stream()
-            .parallel()
-            .filter(path -> {
-                final boolean matches = ignoreMatchers.stream()
-                    .anyMatch(matcher -> matcher.matches(path));
-                if (matches) {
-                    LOGGER.trace("Thread: {}, ignoring file: {}", Thread.currentThread().getName(), path);
-                }
-                return !matches;
-            })
-            .map(this::buildMagikFile)
-            .map(magikFile -> this.runChecksOnFile(magikFile, holders))
-            .flatMap(List::stream)
-            // ensure ordering
-            .collect(Collectors.toList())
-            .stream()
-            .sorted((issue0, issue1) -> locationCompare.compare(issue0.location(), issue1.location()))
-            .limit(maxInfractions)
-            .forEach(this.reporter::reportIssue);
-    }
-
-    /**
-     * Run the linter on {@link MagikFile}.
-     * @param magikFile File to run on.
-     * @throws ReflectiveOperationException -
-     * @throws IOException -
-     */
-    public void run(final MagikFile magikFile) throws ReflectiveOperationException, IOException {
-        final URI uri = magikFile.getUri();
-        final Path magikFilePath = Path.of(uri);
-        final Path configPath = ConfigurationLocator.locateConfiguration(magikFilePath);
-        final MagikChecksConfiguration checksConfig = configPath != null
-            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
-            : new MagikChecksConfiguration(CheckList.getChecks());
-        final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
-        final Comparator<MagikIssue> byLine = Comparator.comparing(MagikIssue::startLine);
-        final Comparator<MagikIssue> byColumn = Comparator.comparing(MagikIssue::startColumn);
-        this.runChecksOnFile(magikFile, holders).stream()
-            .sorted(byLine.thenComparing(byColumn))
-            .forEach(this.reporter::reportIssue);
     }
 
 }

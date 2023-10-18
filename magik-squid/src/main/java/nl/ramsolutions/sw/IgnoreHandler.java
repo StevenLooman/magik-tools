@@ -57,7 +57,6 @@ public final class IgnoreHandler {
                 .filter(line -> !line.isBlank())
                 .filter(line -> !line.startsWith("#"))  // Comments.
                 .map(line -> (basePath.toString() + fileSystem.getSeparator() + line).replace("\\", "\\\\"))
-                // .peek(pattern -> LOGGER.debug("Using pattern: glob:{}", pattern))
                 .map(pattern -> fileSystem.getPathMatcher("glob:" + pattern))
                 .collect(Collectors.toSet());
             this.entries.put(path, pathMatchers);
