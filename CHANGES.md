@@ -5,6 +5,7 @@
 - Fix not finding appropriate node to register issue on when method contains a syntax error.
 - `magik-lint.properties` is searched for from path of current file in magik-lint, unless `--rcfile` is used.
 - Paths specified in setting `ignore` in `magik-lint.properties` in magik-lint are respected.
+- Fix grammar not supporting end labels in `_loop`/`_endloop` constructs.
 
 0.8.1 (2023-10-15)
 

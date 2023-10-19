@@ -228,7 +228,8 @@ class MagikGrammarTest {
             .matches("_loop _finally _with total _endloop")
             .matches("_loop _finally _with _gather total _endloop")
             .matches("_loop _continue _with _false _endloop")
-            .matches("_loop a << _loopbody(1) _endloop");
+            .matches("_loop a << _loopbody(1) _endloop")
+            .matches("_loop @start_label _endloop @end_label");
         MagikRuleRequiredAssert.assertThat(g.rule(MagikGrammar.LOOP), MagikGrammar.LOOP_SYNTAX_ERROR)
             .matches("_loop _a _endloop");
     }
@@ -542,17 +543,17 @@ class MagikGrammarTest {
             .matches("# comment")
             .matches("write(1)")
             .matches("write(1)\nwrite(2)")
-            .matches("write(1) ; write(2)")
-            // Syntax errors.
-            .matches("_block _endblo")
-            .matches("_blocki _endblock");
+            .matches("write(1) ; write(2)");
 
         MagikRuleForbiddenAssert.assertThat(g.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
             .matches("_block\n _local x << 10  # type: integer\n write(x)\n _endblock\n")
-            .matches("_package a\n:a");
+            .matches("_package a\n:a")
+            .matches("_block\n_loop\n_endloop@get_object\n_endblock\n");
 
         MagikRuleRequiredAssert.assertThat(g.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
-            .matches("_package a:a");
+            .matches("_package a:a")
+            .matches("_block _endblo")
+            .matches("_blocki _endblock");
     }
 
 }
