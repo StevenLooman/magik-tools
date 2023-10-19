@@ -23,9 +23,9 @@ public class MagikRuleRequiredAssert extends MagikRuleAssert {
 
     }
 
-    private MagikGrammar requiredRuleKey;
+    private final MagikGrammar requiredRuleKey;
 
-    public MagikRuleRequiredAssert(Rule actual, MagikGrammar requiredRuleKey) {
+    public MagikRuleRequiredAssert(final Rule actual, final MagikGrammar requiredRuleKey) {
         super(actual);
         this.requiredRuleKey = requiredRuleKey;
     }
@@ -33,12 +33,12 @@ public class MagikRuleRequiredAssert extends MagikRuleAssert {
     /**
      * Test if input matches.
      */
-    public MagikRuleRequiredAssert matches(String input) {
-        ParsingResult parsingResult = this.parseInput(input);
+    public MagikRuleRequiredAssert matches(final String input) {
+        final ParsingResult parsingResult = this.parseInput(input);
 
         // Ensure requiredRuleKey was matched.
-        ParseNode parseTree = parsingResult.getParseTreeRoot();
-        ParseNode foundTree = this.findParseTreeWithRule(parseTree, this.requiredRuleKey);
+        final ParseNode parseTree = parsingResult.getParseTreeRoot();
+        final ParseNode foundTree = this.findParseTreeWithRule(parseTree, this.requiredRuleKey);
         if (foundTree == null) {
             throw new RequiredRuleNotUsed(this.requiredRuleKey);
         }
@@ -46,7 +46,7 @@ public class MagikRuleRequiredAssert extends MagikRuleAssert {
         return this;
     }
 
-    public static MagikRuleRequiredAssert assertThat(Rule actual, MagikGrammar requiredRuleKey) {
+    public static MagikRuleRequiredAssert assertThat(final Rule actual, final MagikGrammar requiredRuleKey) {
         return new MagikRuleRequiredAssert(actual, requiredRuleKey);
     }
 

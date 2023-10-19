@@ -636,7 +636,8 @@ public enum MagikGrammar implements GrammarRuleKey {
                     b.optional(FINALLY),
                     b.next(MagikKeyword.ENDLOOP)),
                 LOOP_SYNTAX_ERROR),
-            MagikKeyword.ENDLOOP);
+            MagikKeyword.ENDLOOP,
+            b.optional(MagikGrammar.LABEL));
         b.rule(LOOP_SYNTAX_ERROR).is(
             SPACING,
             b.regexp(MagikGrammar.syntaxErrorRegexp(MagikKeyword.ENDLOOP)));
