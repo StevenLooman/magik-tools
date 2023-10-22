@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public class MUnitTestItemProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MUnitTestItemProvider.class);
-    private static final Location DUMMY_LOCATION = new Location(URI.create("file:///"));
+    private static final Location DUMMY_LOCATION = new Location(URI.create("tests://unittest"));
     private static final TypeString MUNIT_TEST_CASE_EXEMPLAR_NAME = TypeString.ofIdentifier("test_case", "sw");
     private static final String MUNIT_TEST_METHOD_PREFIX = "test";
 

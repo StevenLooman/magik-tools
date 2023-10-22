@@ -31,6 +31,7 @@ public class MagikTypeInstance extends AbstractType {
             final ITypeKeeper typeKeeper,
             final TypeString typeString,
             final Set<GenericDefinition> genericDefinitions) {
+        super(null);
         this.typeKeeper = typeKeeper;
         this.typeString = typeString;
         this.genericDefinitions = Set.copyOf(genericDefinitions);
@@ -163,6 +164,7 @@ public class MagikTypeInstance extends AbstractType {
         }
 
         return new Method(
+            method.getModuleName(),
             method.getLocation(),
             method.getModifiers(),
             method.getOwner(),
@@ -259,6 +261,11 @@ public class MagikTypeInstance extends AbstractType {
             "%s@%s(%s%s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
             this.getFullName(), genericsStr);
+    }
+
+    @Override
+    public String getModuleName() {
+        return this.getMagikType().getModuleName();
     }
 
 }

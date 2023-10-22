@@ -34,6 +34,7 @@ class InlayHintProviderTest {
         final MagikType objectType = (MagikType) typeKeeper.getType(objectRef);
         objectType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "method()",
             List.of(

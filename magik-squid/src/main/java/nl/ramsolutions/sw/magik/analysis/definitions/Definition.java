@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
@@ -8,6 +9,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
  */
 public abstract class Definition {
 
+    private final String moduleName;
     private final AstNode node;
     private final TypeString name;
 
@@ -15,14 +17,24 @@ public abstract class Definition {
      * Constructor.
      * @param node Node.
      * @param name Name of definition, if applicable.
+     * @param moduleName Name of the module this definition resides in.
      */
-    protected Definition(final AstNode node, final TypeString name) {
+    protected Definition(final @Nullable String moduleName, final AstNode node, final TypeString name) {
         if (!name.isSingle()) {
             throw new IllegalStateException();
         }
 
+        this.moduleName = moduleName;
         this.node = node;
         this.name = name;
+    }
+
+    /**
+     * Get the name of the module this definition resides in.
+     * @return Module name.
+     */
+    public String getModuleName() {
+        return this.moduleName;
     }
 
     /**

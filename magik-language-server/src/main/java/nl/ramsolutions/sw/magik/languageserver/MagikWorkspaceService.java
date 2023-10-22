@@ -274,7 +274,7 @@ public class MagikWorkspaceService implements WorkspaceService {
         final Path workspacePath = Path.of(uri);
 
         return Files.walk(workspacePath)
-                .filter(path -> !this.ignoreHandler.isIgnored(path));
+            .filter(path -> !this.ignoreHandler.isIgnored(path));
     }
 
     private void runIndexers() {

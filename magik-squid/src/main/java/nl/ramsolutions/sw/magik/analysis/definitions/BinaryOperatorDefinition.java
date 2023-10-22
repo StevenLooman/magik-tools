@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
@@ -21,12 +22,13 @@ public class BinaryOperatorDefinition extends Definition {
      * @param rhs Right Hand Side type.
      */
     public BinaryOperatorDefinition(
+            final @Nullable String moduleName,
             final AstNode node,
             final String pakkage,
             final String operator,
             final TypeString lhs,
             final TypeString rhs) {
-        super(node, TypeString.UNDEFINED);
+        super(moduleName, node, TypeString.UNDEFINED);
 
         if (!lhs.isSingle()) {
             throw new IllegalStateException();

@@ -22,6 +22,7 @@ public class GenericDeclaration extends AbstractType {
      * @param name Name of generic
      */
     public GenericDeclaration(final @Nullable Location location, final String name) {
+        super(null);
         this.location = location;
         this.name = name;
     }

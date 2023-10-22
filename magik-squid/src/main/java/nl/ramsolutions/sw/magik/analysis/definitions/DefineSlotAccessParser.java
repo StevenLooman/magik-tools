@@ -1,11 +1,14 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
@@ -185,6 +188,10 @@ public class DefineSlotAccessParser {
             return Collections.emptyList();
         }
 
+        // Figure module name.
+        final URI uri = this.node.getToken().getURI();
+        final String moduleName = SwModuleScanner.getModuleName(uri);
+
         // Figure statement node.
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
 
@@ -209,11 +216,12 @@ public class DefineSlotAccessParser {
         }
         final TypeString exemplarName = TypeString.ofIdentifier(identifier, pakkage);
         final List<MethodDefinition> methodDefinitions =
-            this.generateSlotMethods(statementNode, exemplarName, slotName, flag, flavor);
+            this.generateSlotMethods(moduleName, statementNode, exemplarName, slotName, flag, flavor);
         return List.copyOf(methodDefinitions);
     }
 
     private List<MethodDefinition> generateSlotMethods(
+            final @Nullable String moduleName,
             final AstNode definitionNode,
             final TypeString exemplarName,
             final String slotName,
@@ -230,7 +238,7 @@ public class DefineSlotAccessParser {
             }
             final List<ParameterDefinition> getParameters = Collections.emptyList();
             final MethodDefinition getMethod = new MethodDefinition(
-                definitionNode, exemplarName, getName, getModifiers, getParameters, null);
+                moduleName, definitionNode, exemplarName, getName, getModifiers, getParameters, null);
             methodDefinitions.add(getMethod);
         } else if (flag.equals(FLAG_WRITE)
                    || flag.equals(FLAG_WRITABLE)) {
@@ -241,7 +249,7 @@ public class DefineSlotAccessParser {
             }
             final List<ParameterDefinition> getParameters = Collections.emptyList();
             final MethodDefinition getMethod = new MethodDefinition(
-                definitionNode, exemplarName, slotName, getModifiers, getParameters, null);
+                moduleName, definitionNode, exemplarName, slotName, getModifiers, getParameters, null);
             methodDefinitions.add(getMethod);
 
             // set
@@ -252,15 +260,15 @@ public class DefineSlotAccessParser {
             }
             final List<ParameterDefinition> setParameters = Collections.emptyList();
             final ParameterDefinition assignmentParam =
-                new ParameterDefinition(definitionNode, "val", ParameterDefinition.Modifier.NONE);
+                new ParameterDefinition(moduleName, definitionNode, "val", ParameterDefinition.Modifier.NONE);
             final MethodDefinition setMethod = new MethodDefinition(
-                definitionNode, exemplarName, setName, setModifiers, setParameters, assignmentParam);
+                moduleName, definitionNode, exemplarName, setName, setModifiers, setParameters, assignmentParam);
             methodDefinitions.add(setMethod);
 
             // boot
             final String bootName = slotName + MagikOperator.BOOT_CHEVRON.getValue();
             final MethodDefinition bootMethod = new MethodDefinition(
-                definitionNode, exemplarName, bootName, setModifiers, setParameters, assignmentParam);
+                moduleName, definitionNode, exemplarName, bootName, setModifiers, setParameters, assignmentParam);
             methodDefinitions.add(bootMethod);
         }
         return methodDefinitions;

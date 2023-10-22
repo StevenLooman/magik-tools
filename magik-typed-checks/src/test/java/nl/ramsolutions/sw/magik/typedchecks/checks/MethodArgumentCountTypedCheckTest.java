@@ -39,6 +39,7 @@ class MethodArgumentCountTypedCheckTest extends MagikTypedCheckTestBase {
         final MagikType objectType = (MagikType) typeKeeper.getType(objectTypeStr);
         objectType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "m()",
             List.of(
@@ -64,6 +65,7 @@ class MethodArgumentCountTypedCheckTest extends MagikTypedCheckTestBase {
         final TypeString objectTypeStr = TypeString.ofIdentifier("object", "sw");
         final MagikType objectType = (MagikType) typeKeeper.getType(objectTypeStr);
         objectType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "m()",

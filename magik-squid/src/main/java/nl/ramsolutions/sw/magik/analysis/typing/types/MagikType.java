@@ -67,8 +67,14 @@ public class MagikType extends AbstractType {
      * @param typeKeeper TypeKeeper.
      * @param magikTypeSort Sort.
      * @param typeString Global reference.
+     * @param moduleName Module name.
      */
-    public MagikType(final ITypeKeeper typeKeeper, final Sort magikTypeSort, final TypeString typeString) {
+    public MagikType(
+            final ITypeKeeper typeKeeper,
+            final @Nullable String moduleName,
+            final Sort magikTypeSort,
+            final TypeString typeString) {
+        super(moduleName);
         this.typeKeeper = typeKeeper;
         this.sort = magikTypeSort;
         this.typeString = typeString;
@@ -213,6 +219,7 @@ public class MagikType extends AbstractType {
 
     /**
      * Add the resulting types of a method and loopbody, overwrites existing methods.
+     * @param moduleName Module name.
      * @param location Location of method.
      * @param methodName Name of method.
      * @param parameters Parameters for method.
@@ -223,6 +230,7 @@ public class MagikType extends AbstractType {
      */
     @SuppressWarnings({"java:S1319", "checkstyle:ParameterNumber"})
     public Method addMethod(// NOSONAR
+            final @Nullable String moduleName,
             final @Nullable Location location,
             final Set<Method.Modifier> modifiers,
             final String methodName,
@@ -232,6 +240,7 @@ public class MagikType extends AbstractType {
             final ExpressionResultString callResult,
             final ExpressionResultString loopbodyResult) {
         final Method method = new Method(
+            moduleName,
             location,
             modifiers,
             this,

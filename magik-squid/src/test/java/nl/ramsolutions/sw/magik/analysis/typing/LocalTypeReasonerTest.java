@@ -71,8 +71,9 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = new MagikType(typeKeeper, null, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "new()",
@@ -190,8 +191,9 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = new MagikType(typeKeeper, null, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "new()",
@@ -201,6 +203,7 @@ class LocalTypeReasonerTest {
             new ExpressionResultString(TypeString.SELF),
             new ExpressionResultString());
         ropeType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "add()",
@@ -236,8 +239,9 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = new MagikType(typeKeeper, null, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "new()",
@@ -247,6 +251,7 @@ class LocalTypeReasonerTest {
             new ExpressionResultString(TypeString.SELF),
             new ExpressionResultString());
         ropeType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "add()",
@@ -282,6 +287,7 @@ class LocalTypeReasonerTest {
         final TypeString falseRef = TypeString.ofIdentifier("false", "sw");
         final MagikType falseType = (MagikType) typeKeeper.getType(falseRef);
         falseType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "not",
@@ -450,6 +456,7 @@ class LocalTypeReasonerTest {
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "upto()",
             Collections.emptyList(),
@@ -487,6 +494,7 @@ class LocalTypeReasonerTest {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "upto()",
@@ -528,6 +536,7 @@ class LocalTypeReasonerTest {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "upto()",
@@ -650,9 +659,11 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
+        final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
         final MagikType propertyListType =
-            new MagikType(typeKeeper, Sort.INDEXED, TypeString.ofIdentifier("property_list", "sw"));
+            new MagikType(typeKeeper, null, Sort.INDEXED, propertyListRef);
         propertyListType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "new()",
@@ -691,6 +702,7 @@ class LocalTypeReasonerTest {
         final MagikType objectType = (MagikType) typeKeeper.getType(objectRef);
         objectType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "test1",
             Collections.emptyList(),
@@ -723,8 +735,9 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = new MagikType(typeKeeper, null, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "new()",
@@ -1029,9 +1042,9 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString sRef = TypeString.ofIdentifier("s", "sw");
-        final MagikType sType = new MagikType(typeKeeper, Sort.SLOTTED, sRef);
+        final MagikType sType = new MagikType(typeKeeper, null, Sort.SLOTTED, sRef);
         final TypeString tRef = TypeString.ofIdentifier("t", "sw");
-        final MagikType tType = new MagikType(typeKeeper, Sort.SLOTTED, tRef);
+        final MagikType tType = new MagikType(typeKeeper, null, Sort.SLOTTED, tRef);
         tType.addParent(sRef);
 
         // Do analysis.
@@ -1057,11 +1070,11 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString rRef = TypeString.ofIdentifier("r", "sw");
-        final MagikType rType = new MagikType(typeKeeper, Sort.SLOTTED, rRef);
+        final MagikType rType = new MagikType(typeKeeper, null, Sort.SLOTTED, rRef);
         final TypeString sRef = TypeString.ofIdentifier("s", "sw");
-        new MagikType(typeKeeper, Sort.SLOTTED, sRef);
+        new MagikType(typeKeeper, null, Sort.SLOTTED, sRef);
         final TypeString tRef = TypeString.ofIdentifier("t", "sw");
-        final MagikType tType = new MagikType(typeKeeper, Sort.SLOTTED, tRef);
+        final MagikType tType = new MagikType(typeKeeper, null, Sort.SLOTTED, tRef);
         tType.addParent(rRef);
         tType.addParent(sRef);
 
@@ -1185,9 +1198,11 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, TypeString.ofIdentifier("a", "user"));
+        final TypeString aRef = TypeString.ofIdentifier("a", "user");
+        final MagikType aType = new MagikType(typeKeeper, null, Sort.SLOTTED, aRef);
         final TypeString param1Ref = TypeString.ofParameterRef("p1");
         aType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "returns_param()",
@@ -1219,9 +1234,11 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, TypeString.ofIdentifier("a", "user"));
+        final TypeString aRef = TypeString.ofIdentifier("a", "user");
+        final MagikType aType = new MagikType(typeKeeper, null, Sort.SLOTTED, aRef);
         final TypeString param1Ref = TypeString.ofParameterRef("p1");
         aType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "returns_param()",
@@ -1232,6 +1249,7 @@ class LocalTypeReasonerTest {
             new ExpressionResultString(param1Ref),
             new ExpressionResultString());
         aType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "returns_param2()",
@@ -1264,9 +1282,10 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString aRef = TypeString.ofIdentifier("a", "user");
-        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, aRef);
+        final MagikType aType = new MagikType(typeKeeper, null, Sort.SLOTTED, aRef);
         final TypeString param1Ref = TypeString.ofParameterRef("p1");
         aType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "returns_param()",
@@ -1301,9 +1320,10 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = new MagikType(typeKeeper, null, Sort.SLOTTED, ropeRef);
         ropeType.addGeneric(null, "E");
         ropeType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "new()",
@@ -1314,6 +1334,7 @@ class LocalTypeReasonerTest {
                 TypeString.SELF),
             new ExpressionResultString());
         ropeType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "an_element()",
@@ -1348,10 +1369,11 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
-        final MagikType propertyListType = new MagikType(typeKeeper, Sort.SLOTTED, propertyListRef);
+        final MagikType propertyListType = new MagikType(typeKeeper, null, Sort.SLOTTED, propertyListRef);
         propertyListType.addGeneric(null, "K");
         propertyListType.addGeneric(null, "E");
         propertyListType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "new()",
@@ -1363,6 +1385,7 @@ class LocalTypeReasonerTest {
             new ExpressionResultString());
         propertyListType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "a_key()",
             Collections.emptyList(),
@@ -1372,6 +1395,7 @@ class LocalTypeReasonerTest {
                 TypeString.ofGeneric("K")),  // Possibly also `sw:unset`, but for testing purposes...
             new ExpressionResultString());
         propertyListType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "an_element()",
@@ -1414,10 +1438,11 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
-        final MagikType propertyListType = new MagikType(typeKeeper, Sort.SLOTTED, propertyListRef);
+        final MagikType propertyListType = new MagikType(typeKeeper, null, Sort.SLOTTED, propertyListRef);
         propertyListType.addGeneric(null, "K");
         propertyListType.addGeneric(null, "E");
         propertyListType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "new()",
@@ -1428,6 +1453,7 @@ class LocalTypeReasonerTest {
                 TypeString.SELF),
             new ExpressionResultString());
         propertyListType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "fast_keys_and_elements()",
@@ -1473,9 +1499,10 @@ class LocalTypeReasonerTest {
         final TypeKeeper typeKeeper = new TypeKeeper();
 
         final TypeString stackRef = TypeString.ofIdentifier("stack", "sw");
-        final MagikType stackType = new MagikType(typeKeeper, Sort.SLOTTED, stackRef);
+        final MagikType stackType = new MagikType(typeKeeper, null, Sort.SLOTTED, stackRef);
         stackType.addGeneric(null, "E");
         stackType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "pop()",
@@ -1487,7 +1514,7 @@ class LocalTypeReasonerTest {
             new ExpressionResultString());
 
         final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "sw");
-        final MagikType exemplarType = new MagikType(typeKeeper, Sort.SLOTTED, exemplarRef);
+        final MagikType exemplarType = new MagikType(typeKeeper, null, Sort.SLOTTED, exemplarRef);
         final TypeString slotTypeRef = TypeStringParser.parseTypeString("sw:stack<sw:integer>", "sw");
         exemplarType.addSlot(null, "stack", slotTypeRef);
 

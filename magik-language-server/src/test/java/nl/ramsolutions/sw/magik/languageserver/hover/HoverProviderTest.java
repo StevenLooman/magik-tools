@@ -41,6 +41,7 @@ class HoverProviderTest {
         final MagikType objectType = (MagikType) typeKeeper.getType(objectRef);
         objectType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "hover_me_method()",
             Collections.emptyList(),
@@ -67,7 +68,7 @@ class HoverProviderTest {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString hoverMeTypeRef = TypeString.ofIdentifier("hover_me_type", "user");
-        final MagikType hoverMeType = new MagikType(typeKeeper, Sort.SLOTTED, hoverMeTypeRef);
+        final MagikType hoverMeType = new MagikType(typeKeeper, null, Sort.SLOTTED, hoverMeTypeRef);
         hoverMeType.setDoc("type_doc");
 
         final String code = ""
@@ -90,6 +91,7 @@ class HoverProviderTest {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "hover_me()",

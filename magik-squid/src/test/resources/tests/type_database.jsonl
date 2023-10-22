@@ -1,0 +1,12 @@
+// Test type database.
+// self type: _self
+// undefined type: _undefined
+// undefined result: __UNDEFINED_RESULT__
+// packages
+{"instruction":"package","name":"sw","uses":[]}
+{"instruction":"package","name":"user","uses":["sw"]}
+// types
+{"instruction":"type","type_name":"user:a","type_format":"slotted","doc":"Test exemplar a","parents":["sw:object"],"slots":[{"name":"slot1","type_name":"sw:integer"},{"name":"slot2","type_name":"sw:float"}],"module":"test_module"}
+{"instruction":"type","type_name":"user:b","type_format":"indexed","doc":"Test exemplar b","parents":["sw:object"],"slots":[]}
+// methods
+{"instruction":"method","type_name":"user:b","method_name":"m1()","modifiers":[],"parameters":[{"name":"param1","modifier":null,"type_name":"sw:symbol"}],"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m1()"}

@@ -19,7 +19,8 @@ enum InstType {
     GENERIC_NAME("name"),
     GENERIC_DOC("doc"),
     PARENTS("parents"),
-    DOC("doc");
+    DOC("doc"),
+    MODULE("module");
 
     private final String value;
 

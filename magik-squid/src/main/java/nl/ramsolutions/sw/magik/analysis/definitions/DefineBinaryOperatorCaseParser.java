@@ -1,7 +1,9 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.List;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
@@ -99,6 +101,10 @@ public class DefineBinaryOperatorCaseParser {
             throw new IllegalStateException();
         }
 
+        // Figure module name.
+        final URI uri = this.node.getToken().getURI();
+        final String moduleName = SwModuleScanner.getModuleName(uri);
+
         // Figure statement node.
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
 
@@ -112,7 +118,7 @@ public class DefineBinaryOperatorCaseParser {
         final String rhsName = argument2Node.getTokenValue();
         final TypeString rhs = TypeString.ofIdentifier(rhsName, currentPakkage);
         final BinaryOperatorDefinition operatorDefinition =
-            new BinaryOperatorDefinition(statementNode, currentPakkage, operator, lhs, rhs);
+            new BinaryOperatorDefinition(moduleName, statementNode, currentPakkage, operator, lhs, rhs);
         return List.of(operatorDefinition);
     }
 

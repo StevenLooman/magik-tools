@@ -12,8 +12,13 @@ import nl.ramsolutions.sw.magik.Location;
  */
 public abstract class AbstractType {
 
+    private final String moduleName;
     private Location location;
     private String doc;
+
+    protected AbstractType(final String moduleName) {
+        this.moduleName = moduleName;
+    }
 
     /**
      * Get the global reference to this type.
@@ -206,6 +211,15 @@ public abstract class AbstractType {
         }
 
         return this;
+    }
+
+    /**
+     * Get the module name of this type.
+     * @return
+     */
+    @CheckForNull
+    public String getModuleName() {
+        return this.moduleName;
     }
 
 }

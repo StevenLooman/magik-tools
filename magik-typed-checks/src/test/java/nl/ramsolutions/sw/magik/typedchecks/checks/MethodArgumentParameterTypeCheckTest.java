@@ -28,6 +28,7 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         integerType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "m1()",
             List.of(

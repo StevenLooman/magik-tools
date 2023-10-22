@@ -128,6 +128,7 @@ public final class JsonTypeKeeperWriter {
                 instruction.put(InstType.SLOTS.getValue(), slots);
                 instruction.put(InstType.GENERICS.getValue(), generics);
                 instruction.put(InstType.DOC.getValue(), type.getDoc());
+                instruction.put(InstType.MODULE.getValue(), type.getModuleName());
                 this.writeInstruction(writer, instruction);
             });
     }
@@ -207,6 +208,7 @@ public final class JsonTypeKeeperWriter {
                 }
                 instruction.put(InstMethod.SOURCE_FILE.getValue(), sourceFile);
                 instruction.put(InstMethod.DOC.getValue(), method.getDoc());
+                instruction.put(InstMethod.MODULE.getValue(), method.getModuleName());
                 this.writeInstruction(writer, instruction);
             });
     }

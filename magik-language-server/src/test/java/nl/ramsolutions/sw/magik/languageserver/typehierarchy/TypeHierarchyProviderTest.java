@@ -33,7 +33,7 @@ class TypeHierarchyProviderTest {
     void testPrepareTypeHierarchyMethodDefinitionExemplarName() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
-        new MagikType(typeKeeper, MagikType.Sort.SLOTTED, exemplarRef);
+        new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, exemplarRef);
 
         final String code = ""
             + "_method exemplar.method\n"
@@ -50,7 +50,7 @@ class TypeHierarchyProviderTest {
     void testPrepareTypeHierarchyGlobal() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        new MagikType(typeKeeper, MagikType.Sort.SLOTTED, ropeRef);
+        new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, ropeRef);
 
         final String code = ""
             + "_method exemplar.method\n"
@@ -68,9 +68,9 @@ class TypeHierarchyProviderTest {
     void testGetSubtypes() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
-        new MagikType(typeKeeper, MagikType.Sort.SLOTTED, exemplarRef);
+        new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, exemplarRef);
         final TypeString subExemplarRef = TypeString.ofIdentifier("sub_exemplar", "user");
-        final MagikType subExemplarType = new MagikType(typeKeeper, MagikType.Sort.SLOTTED, subExemplarRef);
+        final MagikType subExemplarType = new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, subExemplarRef);
         subExemplarType.addParent(exemplarRef);
 
         final TypeHierarchyItem item = new TypeHierarchyItem(
@@ -90,7 +90,7 @@ class TypeHierarchyProviderTest {
     void testGetSupertypes() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
-        final MagikType exemplarType = new MagikType(typeKeeper, MagikType.Sort.SLOTTED, exemplarRef);
+        final MagikType exemplarType = new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, exemplarRef);
         final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
         exemplarType.addParent(objectRef);
 

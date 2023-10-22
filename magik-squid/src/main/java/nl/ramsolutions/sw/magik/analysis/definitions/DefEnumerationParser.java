@@ -1,8 +1,10 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
@@ -64,6 +66,10 @@ public class DefEnumerationParser extends TypeDefParser {
             throw new IllegalStateException();
         }
 
+        // Figure module name.
+        final URI uri = this.node.getToken().getURI();
+        final String moduleName = SwModuleScanner.getModuleName(uri);
+
         // Figure statement node.
         final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
 
@@ -78,7 +84,7 @@ public class DefEnumerationParser extends TypeDefParser {
         final List<TypeString> parents = Collections.emptyList();
 
         final EnumerationDefinition enumerationDefinition =
-            new EnumerationDefinition(statementNode, name, parents);
+            new EnumerationDefinition(moduleName, statementNode, name, parents);
         return List.of(enumerationDefinition);
     }
 

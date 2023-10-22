@@ -34,6 +34,7 @@ class ImplementationProviderTest {
         final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
         final MagikType objectType = (MagikType) typeKeeper.getType(objectRef);
         objectType.addMethod(
+            null,
             EMPTY_LOCATION,
             EnumSet.of(Method.Modifier.ABSTRACT),
             "abstract()",
@@ -46,6 +47,7 @@ class ImplementationProviderTest {
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addParent(objectRef);
         integerType.addMethod(
+            null,
             EMPTY_LOCATION,
             EnumSet.noneOf(Method.Modifier.class),
             "abstract()",

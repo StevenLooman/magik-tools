@@ -350,6 +350,16 @@ _private _method type_dumper.write_type(type_name, method_table)
 	# Generics.
 	instruction[:generics] << sw:rope.new()
 
+	# Pragma.
+	instruction[:pragma] << metadata[:topic].default({})
+
+	# Module name.
+	instruction[:module] <<
+		_if metadata[:exemplar] _isnt _unset
+		_then
+			>> metadata[:exemplar].module_name
+		_endif
+
 	_self.write_instruction(instruction)
 _endmethod
 $
@@ -479,6 +489,20 @@ _private _method type_dumper.write_method(type_name, method)
 			   _endtry
 		_endif
 
+	instruction[:module] <<
+		_try
+			>> method.source_module.name
+		_when error
+			# pass
+		_endtry
+
+	instruction[:pragma] <<
+		_try
+			>> method.compiler_info[:topic]
+		_when error
+			>> {}
+		_endtry
+
 	_self.write_instruction(instruction)
 _endmethod
 $
@@ -524,6 +548,8 @@ _private _method type_dumper.write_procedure(var)
 		_then
 			>> method_finder.get_method_comment(var.key, "<global>").default("")
 		_endif
+
+	instruction[:module] << _unset
 
 	_self.write_instruction(instruction)
 _endmethod

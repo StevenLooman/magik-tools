@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
@@ -25,12 +26,17 @@ public class ParameterDefinition extends Definition {
 
     /**
      * Constructor.
+     * @param moduleName Name of module where this is defined.
      * @param node Node of parameter.
      * @param name Name of parameter.
      * @param modifier Modifier of parameter.
      */
-    protected ParameterDefinition(final AstNode node, final String name, final Modifier modifier) {
-        super(node, TypeString.UNDEFINED);
+    protected ParameterDefinition(
+            final @Nullable String moduleName,
+            final AstNode node,
+            final String name,
+            final Modifier modifier) {
+        super(moduleName, node, TypeString.UNDEFINED);
         this.name = name;
         this.modifier = modifier;
     }

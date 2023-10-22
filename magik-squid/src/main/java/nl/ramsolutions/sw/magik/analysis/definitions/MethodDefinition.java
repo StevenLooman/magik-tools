@@ -32,6 +32,7 @@ public class MethodDefinition extends Definition {
 
     /**
      * Constructor.
+     * @param moduleName Name of module this method is defined in.
      * @param node Node for definition.
      * @param exemplarName Name of exemplar.
      * @param methodName Name of method.
@@ -40,13 +41,14 @@ public class MethodDefinition extends Definition {
      * @param assignmentParameter Assignment parameter.
      */
     public MethodDefinition(
+            final @Nullable String moduleName,
             final AstNode node,
             final TypeString exemplarName,
             final String methodName,
             final Set<Modifier> modifiers,
             final List<ParameterDefinition> parameters,
             final @Nullable ParameterDefinition assignmentParameter) {
-        super(node, exemplarName);
+        super(moduleName, node, exemplarName);
         this.exemplarName = exemplarName;
         this.methodName = methodName;
         this.modifiers = Set.copyOf(modifiers);

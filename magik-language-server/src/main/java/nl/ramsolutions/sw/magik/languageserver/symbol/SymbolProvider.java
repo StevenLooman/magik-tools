@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 public class SymbolProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SymbolProvider.class);
-    private static final Location DUMMY_LOCATION = new Location(URI.create("file:///"));
+    private static final Location DUMMY_LOCATION = new Location(URI.create("tests://unittest"));
 
     private final ITypeKeeper typeKeeper;
 

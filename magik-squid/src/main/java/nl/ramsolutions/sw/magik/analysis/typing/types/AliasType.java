@@ -23,6 +23,7 @@ public class AliasType extends AbstractType {
             final ITypeKeeper typeKeeper,
             final TypeString typeString,
             final TypeString aliasedTypeString) {
+        super(null);
         this.typeKeeper = typeKeeper;
         this.typeString = typeString;
         this.aliasedTypeString = aliasedTypeString;
@@ -39,6 +40,7 @@ public class AliasType extends AbstractType {
             final ITypeKeeper typeKeeper,
             final TypeString typeString,
             final AbstractType aliasedType) {
+        super(null);
         this.typeKeeper = typeKeeper;
         this.typeString = typeString;
         this.aliasedTypeString = null;

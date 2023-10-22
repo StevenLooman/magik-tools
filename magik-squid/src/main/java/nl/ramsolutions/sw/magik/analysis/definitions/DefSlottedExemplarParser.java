@@ -1,11 +1,14 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.SimpleVectorNodeHelper;
@@ -62,7 +65,7 @@ public class DefSlottedExemplarParser extends TypeDefParser {
      */
     @Override
     public List<Definition> parseDefinitions() {
-        final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+        final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
         final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
         final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
         if (argument0Node == null) {
@@ -72,6 +75,10 @@ public class DefSlottedExemplarParser extends TypeDefParser {
         if (argument1Node == null) {
             throw new IllegalStateException();
         }
+
+        // Figure module name.
+        final URI uri = this.node.getToken().getURI();
+        final String moduleName = SwModuleScanner.getModuleName(uri);
 
         // Figure statement node.
         final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
@@ -112,7 +119,7 @@ public class DefSlottedExemplarParser extends TypeDefParser {
                 final String flavor = flavorNode.getTokenValue();
                 final TypeString exemplarName = TypeString.ofIdentifier(identifier, currentPakkage);
                 final List<MethodDefinition> slotMethodDefinitions =
-                    this.generateSlotMethods(slotDefNode, exemplarName, slotName, flag, flavor);
+                    this.generateSlotMethods(moduleName, slotDefNode, exemplarName, slotName, flag, flavor);
                 methodDefinitions.addAll(slotMethodDefinitions);
             }
         }
@@ -122,7 +129,7 @@ public class DefSlottedExemplarParser extends TypeDefParser {
         final List<TypeString> parents = this.extractParents(argument2Node);
 
         final SlottedExemplarDefinition slottedExemplarDefinition =
-            new SlottedExemplarDefinition(statementNode, name, slots, parents);
+            new SlottedExemplarDefinition(moduleName, statementNode, name, slots, parents);
 
         final List<Definition> definitions = new ArrayList<>();
         definitions.add(slottedExemplarDefinition);
@@ -131,6 +138,7 @@ public class DefSlottedExemplarParser extends TypeDefParser {
     }
 
     private List<MethodDefinition> generateSlotMethods(
+            final @Nullable String moduleName,
             final AstNode node,
             final TypeString exemplarName,
             final String slotName,
@@ -147,7 +155,7 @@ public class DefSlottedExemplarParser extends TypeDefParser {
             }
             final List<ParameterDefinition> getParameters = Collections.emptyList();
             final MethodDefinition getMethod = new MethodDefinition(
-                node, exemplarName, getName, getModifiers, getParameters, null);
+                moduleName, node, exemplarName, getName, getModifiers, getParameters, null);
             methodDefinitions.add(getMethod);
         } else if (flag.equals(FLAG_WRITE)
                    || flag.equals(FLAG_WRITABLE)) {
@@ -158,7 +166,7 @@ public class DefSlottedExemplarParser extends TypeDefParser {
             }
             final List<ParameterDefinition> getParameters = Collections.emptyList();
             final MethodDefinition getMethod = new MethodDefinition(
-                node, exemplarName, slotName, getModifiers, getParameters, null);
+                moduleName, node, exemplarName, slotName, getModifiers, getParameters, null);
             methodDefinitions.add(getMethod);
 
             // set
@@ -169,15 +177,15 @@ public class DefSlottedExemplarParser extends TypeDefParser {
             }
             final List<ParameterDefinition> setParameters = Collections.emptyList();
             final ParameterDefinition assignmentParam =
-                    new ParameterDefinition(node, "val", ParameterDefinition.Modifier.NONE);
+                    new ParameterDefinition(moduleName, node, "val", ParameterDefinition.Modifier.NONE);
             final MethodDefinition setMethod = new MethodDefinition(
-                node, exemplarName, setName, setModifiers, setParameters, assignmentParam);
+                moduleName, node, exemplarName, setName, setModifiers, setParameters, assignmentParam);
             methodDefinitions.add(setMethod);
 
             // boot
             final String bootName = slotName + MagikOperator.BOOT_CHEVRON.getValue();
             final MethodDefinition bootMethod = new MethodDefinition(
-                node, exemplarName, bootName, setModifiers, setParameters, assignmentParam);
+                moduleName, node, exemplarName, bootName, setModifiers, setParameters, assignmentParam);
             methodDefinitions.add(bootMethod);
         }
         return methodDefinitions;

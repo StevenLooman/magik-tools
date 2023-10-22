@@ -1,10 +1,12 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
@@ -95,6 +97,10 @@ public class DefineSharedConstantParser {
             throw new IllegalStateException();
         }
 
+        // Figure module name.
+        final URI uri = this.node.getToken().getURI();
+        final String moduleName = SwModuleScanner.getModuleName(uri);
+
         // Figure statement node.
         final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
 
@@ -113,7 +119,7 @@ public class DefineSharedConstantParser {
         final List<ParameterDefinition> parameters = Collections.emptyList();
         final TypeString exemplarName = TypeString.ofIdentifier(identifier, pakkage);
         final MethodDefinition methodDefinition =
-            new MethodDefinition(statementNode, exemplarName, constantName, modifiers, parameters, null);
+            new MethodDefinition(moduleName, statementNode, exemplarName, constantName, modifiers, parameters, null);
         return List.of(methodDefinition);
     }
 

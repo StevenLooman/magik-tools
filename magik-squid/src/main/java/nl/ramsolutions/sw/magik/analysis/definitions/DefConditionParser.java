@@ -1,9 +1,11 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
@@ -95,6 +97,10 @@ public class DefConditionParser {
             throw new IllegalStateException();
         }
 
+        // Figure module name.
+        final URI uri = this.node.getToken().getURI();
+        final String moduleName = SwModuleScanner.getModuleName(uri);
+
         // Figure statement node.
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
 
@@ -116,7 +122,7 @@ public class DefConditionParser {
             .collect(Collectors.toList());
 
         return List.of(
-            new ConditionDefinition(statementNode, name, parent, dataNames));
+            new ConditionDefinition(moduleName, statementNode, name, parent, dataNames));
     }
 
 }

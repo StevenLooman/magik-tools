@@ -30,6 +30,7 @@ public class ProcedureInstance extends AbstractType {
     @SuppressWarnings("checkstyle:ParameterNumber")
     public ProcedureInstance(// NOSONAR
             final MagikType procedureType,
+            final @Nullable String moduleName,
             final @Nullable Location location,
             final @Nullable String procedureName,
             final Set<Method.Modifier> modifiers,
@@ -37,11 +38,13 @@ public class ProcedureInstance extends AbstractType {
             final @Nullable String methodDoc,
             final ExpressionResultString callResult,
             final ExpressionResultString loopbodyResult) {
+        super(null);
         this.procedureType = procedureType;
         this.procedureName = procedureName != null
             ? procedureName
             : ANONYMOUS_PROCEDURE;
         this.invokeMethod = new Method(
+            moduleName,
             location,
             modifiers,
             this.procedureType,

@@ -1,7 +1,9 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.List;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -44,6 +46,10 @@ public class GlobalDefinitionParser {
             throw new IllegalStateException();
         }
 
+        // Figure module name.
+        final URI uri = this.node.getToken().getURI();
+        final String moduleName = SwModuleScanner.getModuleName(uri);
+
         // Figure pakkage.
         final String pakkage = this.getCurrentPakkage();
 
@@ -52,7 +58,7 @@ public class GlobalDefinitionParser {
         final AstNode identifierNode = variableDefinitionNode.getFirstChild(MagikGrammar.IDENTIFIER);
         final String identifier = identifierNode.getTokenValue();
         final TypeString name = TypeString.ofIdentifier(identifier, pakkage);
-        final GlobalDefinition globalDefinition = new GlobalDefinition(node, name);
+        final GlobalDefinition globalDefinition = new GlobalDefinition(moduleName, node, name);
         return List.of(globalDefinition);
     }
 

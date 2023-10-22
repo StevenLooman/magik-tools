@@ -223,7 +223,8 @@ public class MagikIndexer {
 
         final AstNode node = definition.getNode();
         final TypeString typeString = definition.getTypeString();
-        final MagikType magikType = this.findOrCreateType(typeString, MagikType.Sort.INDEXED);
+        final String moduleName = definition.getModuleName();
+        final MagikType magikType = this.findOrCreateType(moduleName, typeString, MagikType.Sort.INDEXED);
 
         final Map<String, TypeString> slots = Collections.emptyMap();
         final List<TypeString> parents = definition.getParents();
@@ -241,7 +242,8 @@ public class MagikIndexer {
 
         final AstNode node = definition.getNode();
         final TypeString typeString = definition.getTypeString();
-        final MagikType magikType = this.findOrCreateType(typeString, MagikType.Sort.SLOTTED);
+        final String moduleName = definition.getModuleName();
+        final MagikType magikType = this.findOrCreateType(moduleName, typeString, MagikType.Sort.SLOTTED);
 
         final Map<String, TypeString> slots = Collections.emptyMap();
         final List<TypeString> parents = definition.getParents();
@@ -259,7 +261,8 @@ public class MagikIndexer {
 
         final AstNode node = definition.getNode();
         final TypeString typeString = definition.getTypeString();
-        final MagikType magikType = this.findOrCreateType(typeString, MagikType.Sort.SLOTTED);
+        final String moduleName = definition.getModuleName();
+        final MagikType magikType = this.findOrCreateType(moduleName, typeString, MagikType.Sort.SLOTTED);
 
         // Slots.
         final TypeDocParser docParser = new TypeDocParser(node);
@@ -298,7 +301,8 @@ public class MagikIndexer {
 
         final AstNode node = definition.getNode();
         final TypeString typeString = definition.getTypeString();
-        final MagikType magikType = this.findOrCreateType(typeString, MagikType.Sort.INTRINSIC);
+        final String moduleName = definition.getModuleName();
+        final MagikType magikType = this.findOrCreateType(moduleName, typeString, MagikType.Sort.INTRINSIC);
 
         final Map<String, TypeString> slots = Collections.emptyMap();
         final List<TypeString> parents = definition.getParents();
@@ -313,6 +317,7 @@ public class MagikIndexer {
     private void handleDefinition(final MagikFile magikFile, final MethodDefinition definition) {
         this.ensurePackageExists(definition);
 
+        final String moduleName = definition.getModuleName();
         if (!definition.isActualMethodDefinition()) {
             // No slot accessors, shared variables, shared constants.
             this.handleMethodDefinitionOther(magikFile, definition);
@@ -321,7 +326,7 @@ public class MagikIndexer {
 
         // Get exemplar.
         final TypeString typeString = definition.getExemplarName();
-        final AbstractType exemplarType = this.findOrCreateType(typeString, MagikType.Sort.UNDEFINED);
+        final AbstractType exemplarType = this.findOrCreateType(moduleName, typeString, MagikType.Sort.UNDEFINED);
 
         // Combine parameter types with method docs.
         final AstNode node = definition.getNode();
@@ -380,7 +385,15 @@ public class MagikIndexer {
         final Location location = new Location(uri, node);
         final String methodName = definition.getMethodName();
         final Method method = magikType.addMethod(
-            location, modifiers, methodName, parameters, assignmentParameter, methodDoc, callResult, loopResult);
+            moduleName,
+            location,
+            modifiers,
+            methodName,
+            parameters,
+            assignmentParameter,
+            methodDoc,
+            callResult,
+            loopResult);
 
         // Save used types.
         final AstNode bodyNode = node.getFirstChild(MagikGrammar.BODY);
@@ -545,10 +558,14 @@ public class MagikIndexer {
         magikType.setDoc(typeDoc);
     }
 
-    private void handleMethodDefinitionOther(final MagikFile magikFile, final MethodDefinition definition) {
+    private void handleMethodDefinitionOther(
+            final MagikFile magikFile,
+            final MethodDefinition definition) {
+        final String moduleName = definition.getModuleName();
+
         // Slot accessors, shared variables, shared constants.
         final TypeString typeString = definition.getExemplarName();
-        final AbstractType exemplarType = this.findOrCreateType(typeString, MagikType.Sort.UNDEFINED);
+        final AbstractType exemplarType = this.findOrCreateType(moduleName, typeString, MagikType.Sort.UNDEFINED);
 
         // Get method return types from docs, if any.
         final AstNode node = definition.getNode();
@@ -590,7 +607,15 @@ public class MagikIndexer {
         final Parameter assignmentParameter = null;
         final ExpressionResultString loopbodyResult = new ExpressionResultString();
         final Method method = magikType.addMethod(
-            location, modifiers, methodName, parameters, assignmentParameter, methodDoc, result, loopbodyResult);
+            moduleName,
+            location,
+            modifiers,
+            methodName,
+            parameters,
+            assignmentParameter,
+            methodDoc,
+            result,
+            loopbodyResult);
 
         final Path path = Paths.get(magikFile.getUri());
         this.indexedMethods.get(path).add(method);
@@ -605,10 +630,13 @@ public class MagikIndexer {
         }
     }
 
-    private MagikType findOrCreateType(final TypeString typeString, final MagikType.Sort sort) {
+    private MagikType findOrCreateType(
+            final @Nullable String moduleName,
+            final TypeString typeString,
+            final MagikType.Sort sort) {
         final AbstractType type = this.typeKeeper.getType(typeString);
         if (type == UndefinedType.INSTANCE) {
-            return new MagikType(this.typeKeeper, sort, typeString);
+            return new MagikType(this.typeKeeper, moduleName, sort, typeString);
         } else if (type instanceof MagikType) {
             final MagikType magikType = (MagikType) type;
             if (sort != MagikType.Sort.UNDEFINED  // If target sort is UNDEFINED, we don't care.
@@ -625,7 +653,7 @@ public class MagikIndexer {
             final AbstractType aliasedType = aliasType.getAliasedType();
             if (aliasedType instanceof MagikType) {
                 final TypeString aliasedTypeString = aliasedType.getTypeString();
-                return this.findOrCreateType(aliasedTypeString, sort);
+                return this.findOrCreateType(moduleName, aliasedTypeString, sort);
             }
         }
 

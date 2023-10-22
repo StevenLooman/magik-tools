@@ -3,6 +3,7 @@
 0.9.0 (unreleased)
 
 - Support configurable libs dirs.
+- Read and register in which module a definition lives.
 
 0.8.3 (unreleased)
 

@@ -142,23 +142,26 @@ public final class JsonTypeKeeperReader {
     private void handleType(final JSONObject instruction) {
         final String typeFormat = instruction.getString(InstType.TYPE_FORMAT.getValue());
         final String name = instruction.getString(InstType.TYPE_NAME.getValue());
+        final String moduleName = !instruction.isNull(InstType.MODULE.getValue())
+            ? instruction.getString(InstType.MODULE.getValue())
+            : null;
         final TypeString typeString = TypeStringParser.parseTypeString(name);
         final MagikType type;
         if (this.typeKeeper.getType(typeString) != UndefinedType.INSTANCE) {
             type = (MagikType) this.typeKeeper.getType(typeString);
         } else if (InstType.INTRINSIC.getValue().equals(typeFormat)) {
-            type = new MagikType(this.typeKeeper, Sort.INTRINSIC, typeString);
+            type = new MagikType(this.typeKeeper, moduleName, Sort.INTRINSIC, typeString);
         } else if (InstType.SLOTTED.getValue().equals(typeFormat)) {
-            type = new MagikType(this.typeKeeper, Sort.SLOTTED, typeString);
+            type = new MagikType(this.typeKeeper, moduleName, Sort.SLOTTED, typeString);
         } else if (InstType.INDEXED.getValue().equals(typeFormat)) {
-            type = new MagikType(this.typeKeeper, Sort.INDEXED, typeString);
+            type = new MagikType(this.typeKeeper, moduleName, Sort.INDEXED, typeString);
         } else if (InstType.OBJECT.getValue().equals(typeFormat)) {
-            type = new MagikType(this.typeKeeper, Sort.OBJECT, typeString);
+            type = new MagikType(this.typeKeeper, moduleName, Sort.OBJECT, typeString);
         } else {
             throw new InvalidParameterException("Unknown type: " + typeFormat);
         }
 
-        if (instruction.get(InstType.DOC.getValue()) != JSONObject.NULL) {
+        if (!instruction.isNull(InstType.DOC.getValue())) {
             final String doc = instruction.getString(InstType.DOC.getValue());
             type.setDoc(doc);
         }
@@ -171,15 +174,17 @@ public final class JsonTypeKeeperReader {
             type.addSlot(null, slotName, slotTypeString);
         });
 
-        instruction.getJSONArray(InstType.GENERICS.getValue()).forEach(genericObj -> {
-            final JSONObject generic = (JSONObject) genericObj;
-            final String genericName = generic.getString(InstType.GENERIC_NAME.getValue());
-            final GenericDeclaration genericDeclaration = type.addGeneric(null, genericName);
-            if (generic.get(InstType.GENERIC_DOC.getValue()) != JSONObject.NULL) {
-                final String genericDoc = generic.getString(InstType.GENERIC_DOC.getValue());
-                genericDeclaration.setDoc(genericDoc);
-            }
-        });
+        if (!instruction.isNull(InstType.GENERICS.getValue())) {
+            instruction.getJSONArray(InstType.GENERICS.getValue()).forEach(genericObj -> {
+                final JSONObject generic = (JSONObject) genericObj;
+                final String genericName = generic.getString(InstType.GENERIC_NAME.getValue());
+                final GenericDeclaration genericDeclaration = type.addGeneric(null, genericName);
+                if (!generic.isNull(InstType.GENERIC_DOC.getValue())) {
+                    final String genericDoc = generic.getString(InstType.GENERIC_DOC.getValue());
+                    genericDeclaration.setDoc(genericDoc);
+                }
+            });
+        }
 
         final JSONArray parents = instruction.getJSONArray(InstType.PARENTS.getValue());
         parents.forEach(parentObj -> {
@@ -217,7 +222,7 @@ public final class JsonTypeKeeperReader {
 
         // What if method already exists? Might be improved by taking the line into account as well.
         final String methodName = instruction.getString(InstMethod.METHOD_NAME.getValue());
-        final Location location = instruction.get(InstMethod.SOURCE_FILE.getValue()) != JSONObject.NULL
+        final Location location = !instruction.isNull(InstMethod.SOURCE_FILE.getValue())
             ? new Location(Path.of(instruction.getString(InstMethod.SOURCE_FILE.getValue())).toUri())
             : null;
         final boolean isAlreadyKnown = type.getLocalMethods(methodName).stream()
@@ -249,21 +254,31 @@ public final class JsonTypeKeeperReader {
             this.parseExpressionResultString(instruction.get(InstMethod.RETURN_TYPES.getValue()));
         final ExpressionResultString loopResult =
             this.parseExpressionResultString(instruction.get(InstMethod.LOOP_TYPES.getValue()));
-        final String methodDoc = instruction.get(InstMethod.DOC.getValue()) != JSONObject.NULL
+        final String methodDoc = !instruction.isNull(InstMethod.DOC.getValue())
             ? instruction.getString(InstMethod.DOC.getValue())
             : null;
-        type.addMethod(location, modifiers, methodName, parameters, assignmentParameter, methodDoc, result, loopResult);
+        final String moduleName = !instruction.isNull(InstMethod.MODULE.getValue())
+            ? instruction.getString(InstMethod.MODULE.getValue())
+            : null;
+        type.addMethod(
+            moduleName,
+            location,
+            modifiers,
+            methodName,
+            parameters,
+            assignmentParameter,
+            methodDoc,
+            result,
+            loopResult);
     }
 
     private void handleCondition(final JSONObject instruction) {
         final String name = instruction.getString(InstCondition.NAME.getValue());
-        final String doc = instruction.get(InstCondition.DOC.getValue()) != JSONObject.NULL
+        final String doc = !instruction.isNull(InstCondition.DOC.getValue())
             ? instruction.getString(InstCondition.DOC.getValue())
             : null;
         final String parent = instruction.optString(InstCondition.PARENT.getValue(), null);
-        final Location location =
-            instruction.has(InstCondition.SOURCE_FILE.getValue())  // Not exported by type_dumper.
-            && instruction.get(InstCondition.SOURCE_FILE.getValue()) != JSONObject.NULL
+        final Location location = !instruction.isNull(InstCondition.SOURCE_FILE.getValue())
             ? new Location(Path.of(instruction.getString(InstCondition.SOURCE_FILE.getValue())).toUri())
             : null;
         final JSONArray dataNameListArray = instruction.getJSONArray(InstCondition.DATA_NAME_LIST.getValue());
@@ -292,8 +307,7 @@ public final class JsonTypeKeeperReader {
             .map(parameterThing -> {
                 final JSONObject parameterObj = (JSONObject) parameterThing;
                 final String name = parameterObj.getString(InstParameter.NAME.getValue());
-                final Parameter.Modifier modifier =
-                    parameterObj.get(InstParameter.MODIFIER.getValue()) != JSONObject.NULL
+                final Parameter.Modifier modifier = !parameterObj.isNull(InstParameter.MODIFIER.getValue())
                     ? Parameter.Modifier.valueOf(
                         parameterObj.getString(InstParameter.MODIFIER.getValue()).toUpperCase())
                     : Parameter.Modifier.NONE;
@@ -326,13 +340,16 @@ public final class JsonTypeKeeperReader {
     }
 
     private void handleProcedure(final JSONObject instruction) {
+        final String moduleName = !instruction.isNull(InstProcedure.MODULE.getValue())
+            ? instruction.getString(InstType.MODULE.getValue())
+            : null;
         final JSONArray modifiersArray = instruction.getJSONArray(InstProcedure.MODIFIERS.getValue());
         final EnumSet<Method.Modifier> modifiers = StreamSupport.stream(modifiersArray.spliterator(), false)
             .map(String.class::cast)
             .map(String::toUpperCase)
             .map(Method.Modifier::valueOf)
             .collect(Collectors.toCollection(() -> EnumSet.noneOf(Method.Modifier.class)));
-        final Location location = instruction.get(InstProcedure.SOURCE_FILE.getValue()) != JSONObject.NULL
+        final Location location = !instruction.isNull(InstProcedure.SOURCE_FILE.getValue())
             ? new Location(Path.of(instruction.getString(InstProcedure.SOURCE_FILE.getValue())).toUri())
             : null;
         final List<Parameter> parameters =
@@ -344,11 +361,12 @@ public final class JsonTypeKeeperReader {
 
         final String procedureName = instruction.getString(InstProcedure.PROCEDURE_NAME.getValue());
         final MagikType procedureType = (MagikType) this.typeKeeper.getType(SW_PROCEDURE_REF);
-        final String methodDoc = instruction.get(InstProcedure.DOC.getValue()) != JSONObject.NULL
+        final String methodDoc = !instruction.isNull(InstProcedure.DOC.getValue())
             ? instruction.getString(InstProcedure.DOC.getValue())
             : null;
         final ProcedureInstance instance = new ProcedureInstance(
             procedureType,
+            moduleName,
             location,
             procedureName,
             modifiers,

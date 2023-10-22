@@ -70,7 +70,7 @@ class TypeReaderTest {
     void testParseGeneric() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = new MagikType(typeKeeper, null, Sort.SLOTTED, ropeRef);
         ropeType.addGeneric(null, "E");
 
         final TypeString typeStr = TypeString.ofIdentifier(

@@ -1,8 +1,10 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
@@ -67,6 +69,10 @@ public class DefPackageParser {
             throw new IllegalStateException();
         }
 
+        // Figure module name.
+        final URI uri = this.node.getToken().getURI();
+        final String moduleName = SwModuleScanner.getModuleName(uri);
+
         // Figure statement node.
         final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
 
@@ -93,7 +99,7 @@ public class DefPackageParser {
             uses.add("sw");
         }
 
-        final PackageDefinition packageDefinition = new PackageDefinition(statementNode, name, uses);
+        final PackageDefinition packageDefinition = new PackageDefinition(moduleName, statementNode, name, uses);
         return List.of(packageDefinition);
     }
 

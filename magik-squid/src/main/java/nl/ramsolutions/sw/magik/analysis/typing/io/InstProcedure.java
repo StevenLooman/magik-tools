@@ -13,7 +13,8 @@ enum InstProcedure {
     MODIFIERS("modifiers"),
     PARAMETERS("parameters"),
     RETURN_TYPES("return_types"),
-    LOOP_TYPES("loop_types");
+    LOOP_TYPES("loop_types"),
+    MODULE("module");
 
     private final String value;
 

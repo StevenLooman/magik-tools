@@ -15,12 +15,13 @@ public class PackageDefinition extends Definition {
 
     /**
      * Constructor.
+     * @param moduleName Module where this package is defined.
      * @param node Node of package definition.
      * @param name Name of package.
      * @param uses Uses by package.
      */
-    public PackageDefinition(final AstNode node, final String name, final List<String> uses) {
-        super(node, TypeString.UNDEFINED);
+    public PackageDefinition(final String moduleName, final AstNode node, final String name, final List<String> uses) {
+        super(moduleName, node, TypeString.UNDEFINED);
         this.name = name;
         this.uses = List.copyOf(uses);
     }

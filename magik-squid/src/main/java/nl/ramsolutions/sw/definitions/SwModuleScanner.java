@@ -1,15 +1,17 @@
 package nl.ramsolutions.sw.definitions;
 
 import com.sonar.sslr.api.AstNode;
-import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.definitions.api.SwModuleDefGrammar;
 import nl.ramsolutions.sw.definitions.parser.SwModuleDefParser;
@@ -65,6 +67,9 @@ public final class SwModuleScanner {
 
     }
 
+    private static final Map<Path, Path> CACHE = new ConcurrentHashMap<>();
+    private static final Path DOES_NOT_EXIST = Path.of("DOES_NOT_EXIST");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SwModuleScanner.class);
 
     private static final Path SW_MODULE_DEF_PATH = Path.of(SwModule.SW_MODULE_DEF);
@@ -73,17 +78,45 @@ public final class SwModuleScanner {
     private SwModuleScanner() {
     }
 
-    /**
-     * Scan for module.def files.
-     * @param path Path to scan from.
-     * @return    private static final Logger LOGGER = LoggerFactory.getLogger(MUnitTestItemProvider.class);
+    public static void resetCache() {
+        SwModuleScanner.CACHE.clear();
+    }
 
+    /**
+     * Scan for `module.def` files.
+     * @param path Path to scan from.
+     * @return Set of found {@link SwModule}s.
      * @throws IOException
      */
     public static Set<SwModule> scanModules(final Path path) throws IOException {
         final ModuleDefFileVisitor fileVistor = new ModuleDefFileVisitor(path);
         Files.walkFileTree(path, fileVistor);
         return fileVistor.getModules();
+    }
+
+    @CheckForNull
+    private static Path moduleDefAtPath(final Path startPath) throws IOException {
+        final Path cachedPath = SwModuleScanner.CACHE.get(startPath);
+        if (cachedPath != null) {
+            if (cachedPath == SwModuleScanner.DOES_NOT_EXIST) {
+                return null;
+            }
+
+            return cachedPath;
+        }
+
+        Path path = startPath;
+        while (path != null) {
+            final Path moduleDefPath = path.resolve(SW_MODULE_DEF_PATH);
+            if (Files.exists(moduleDefPath)) {
+                SwModuleScanner.CACHE.put(startPath, moduleDefPath);
+                return moduleDefPath;
+            }
+
+            path = path.getParent();
+        }
+
+        return null;
     }
 
     /**
@@ -93,19 +126,13 @@ public final class SwModuleScanner {
      * @throws IOException -
      */
     @CheckForNull
-    public static SwModule moduleAtPath(final Path startPath) throws IOException {
-        Path path = startPath;
-        while (path != null) {
-            final Path moduleDefPath = path.resolve(SW_MODULE_DEF_PATH);
-            final File moduleDefFile = moduleDefPath.toFile();
-            if (moduleDefFile.exists()) {
-                return SwModuleScanner.readModuleDefinition(moduleDefPath);
-            }
-
-            path = path.getParent();
+    public static SwModule swModuleForPath(final Path startPath) throws IOException {
+        final Path moduleDefPath = SwModuleScanner.moduleDefAtPath(startPath);
+        if (moduleDefPath == null) {
+            return null;
         }
 
-        return null;
+        return SwModuleScanner.readModuleDefinition(moduleDefPath);
     }
 
     /**
@@ -121,6 +148,38 @@ public final class SwModuleScanner {
         final AstNode identfierNode = moduleIdentNode.getFirstChild(SwModuleDefGrammar.IDENTIFIER);
         final String moduleName = identfierNode.getTokenValue();
         return new SwModule(moduleName, path);
+    }
+
+    /**
+     * Get the module name from a given uri.
+     * @param uri {@link URI} to start searching from.
+     * @return SwModule name, or null if no module was found.
+     */
+    @CheckForNull
+    public static String getModuleName(final URI uri) {
+        if (!uri.getScheme().equals("file")) {
+            // For unit tests.
+            return null;
+        }
+
+        final Path path = Path.of(uri);
+        final Path fileName = path.getFileName();
+        final Path searchPath = fileName.toString().toLowerCase().endsWith(".magik")
+            ? path.getParent()
+            : path;
+
+        final SwModule swModule;
+        try {
+            swModule = SwModuleScanner.swModuleForPath(searchPath);
+        } catch (final IOException exception) {
+            throw new IllegalStateException(exception);
+        }
+
+        if (swModule == null) {
+            return null;
+        }
+
+        return swModule.getName();
     }
 
 }

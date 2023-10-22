@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class TypeHierarchyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeHierarchyProvider.class);
-    private static final Location NO_LOCATION = new Location(URI.create("file:///"));
+    private static final Location NO_LOCATION = new Location(URI.create("tests://unittest"));
 
     private final ITypeKeeper typeKeeper;
 
