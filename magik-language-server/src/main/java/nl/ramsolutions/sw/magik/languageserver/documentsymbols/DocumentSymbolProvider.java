@@ -1,13 +1,11 @@
 package nl.ramsolutions.sw.magik.languageserver.documentsymbols;
 
-import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
-import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.definitions.EnumerationDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IndexedExemplarDefinition;
@@ -40,12 +38,8 @@ public class DocumentSymbolProvider {
      */
     public List<Either<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>> provideDocumentSymbol(
             final MagikTypedFile magikFile) {
-        final DefinitionReader definitionReader = new DefinitionReader();
-        final AstNode topNode = magikFile.getTopNode();
-        definitionReader.walkAst(topNode);
-
         // Convert definitions to DocumentSymbols.
-        return definitionReader.getDefinitions().stream()
+        return magikFile.getDefinitions().stream()
             .map(this::convertDefinition)
             .map(Either::<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>forRight)
             .collect(Collectors.toList());
