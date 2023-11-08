@@ -71,7 +71,7 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, null, Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
             null,
             null,
@@ -191,7 +191,7 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, null, Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
             null,
             null,
@@ -239,7 +239,7 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, null, Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
             null,
             null,
@@ -322,7 +322,13 @@ class LocalTypeReasonerTest {
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString char16VectorRef = TypeString.ofIdentifier("char16_vector", "sw");
         final BinaryOperator binOp = new BinaryOperator(
-            BinaryOperator.Operator.valueFor("+"), char16VectorRef, char16VectorRef, char16VectorRef);
+            null,
+            null,
+            BinaryOperator.Operator.valueFor("+"),
+            char16VectorRef,
+            char16VectorRef,
+            char16VectorRef,
+            null);
         typeKeeper.addBinaryOperator(binOp);
 
         // Do analysis.
@@ -352,11 +358,23 @@ class LocalTypeReasonerTest {
         final TypeString char16VectorRef = TypeString.ofIdentifier("char16_vector", "sw");
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-        final BinaryOperator binOp1 =
-            new BinaryOperator(BinaryOperator.Operator.valueFor("+"), integerRef, symbolRef, symbolRef);
+        final BinaryOperator binOp1 = new BinaryOperator(
+            null,
+            null,
+            BinaryOperator.Operator.valueFor("+"),
+            integerRef,
+            symbolRef,
+            symbolRef,
+            null);
         typeKeeper.addBinaryOperator(binOp1);
-        final BinaryOperator binOp2 =
-            new BinaryOperator(BinaryOperator.Operator.valueFor("+"), symbolRef, char16VectorRef, char16VectorRef);
+        final BinaryOperator binOp2 = new BinaryOperator(
+            null,
+            null,
+            BinaryOperator.Operator.valueFor("+"),
+            symbolRef,
+            char16VectorRef,
+            char16VectorRef,
+            null);
         typeKeeper.addBinaryOperator(binOp2);
 
         // Do analysis.
@@ -661,7 +679,7 @@ class LocalTypeReasonerTest {
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
         final MagikType propertyListType =
-            new MagikType(typeKeeper, null, Sort.INDEXED, propertyListRef);
+            new MagikType(typeKeeper, null, null, Sort.INDEXED, propertyListRef);
         propertyListType.addMethod(
             null,
             null,
@@ -735,7 +753,7 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, null, Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, ropeRef);
         ropeType.addMethod(
             null,
             null,
@@ -863,8 +881,14 @@ class LocalTypeReasonerTest {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
         final AbstractType floatType = typeKeeper.getType(floatRef);
-        final BinaryOperator binaryOperator =
-            new BinaryOperator(BinaryOperator.Operator.valueFor("+"), integerRef, floatRef, floatRef);
+        final BinaryOperator binaryOperator = new BinaryOperator(
+            null,
+            null,
+            BinaryOperator.Operator.valueFor("+"),
+            integerRef,
+            floatRef,
+            floatRef,
+            null);
         typeKeeper.addBinaryOperator(binaryOperator);
 
         // Do analysis.
@@ -1042,9 +1066,9 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString sRef = TypeString.ofIdentifier("s", "sw");
-        final MagikType sType = new MagikType(typeKeeper, null, Sort.SLOTTED, sRef);
+        final MagikType sType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, sRef);
         final TypeString tRef = TypeString.ofIdentifier("t", "sw");
-        final MagikType tType = new MagikType(typeKeeper, null, Sort.SLOTTED, tRef);
+        final MagikType tType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, tRef);
         tType.addParent(sRef);
 
         // Do analysis.
@@ -1070,11 +1094,11 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString rRef = TypeString.ofIdentifier("r", "sw");
-        final MagikType rType = new MagikType(typeKeeper, null, Sort.SLOTTED, rRef);
+        final MagikType rType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, rRef);
         final TypeString sRef = TypeString.ofIdentifier("s", "sw");
-        new MagikType(typeKeeper, null, Sort.SLOTTED, sRef);
+        new MagikType(typeKeeper, null, null, Sort.SLOTTED, sRef);
         final TypeString tRef = TypeString.ofIdentifier("t", "sw");
-        final MagikType tType = new MagikType(typeKeeper, null, Sort.SLOTTED, tRef);
+        final MagikType tType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, tRef);
         tType.addParent(rRef);
         tType.addParent(sRef);
 
@@ -1199,7 +1223,7 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString aRef = TypeString.ofIdentifier("a", "user");
-        final MagikType aType = new MagikType(typeKeeper, null, Sort.SLOTTED, aRef);
+        final MagikType aType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, aRef);
         final TypeString param1Ref = TypeString.ofParameterRef("p1");
         aType.addMethod(
             null,
@@ -1207,7 +1231,7 @@ class LocalTypeReasonerTest {
             EnumSet.noneOf(Method.Modifier.class),
             "returns_param()",
             List.of(
-                new Parameter("p1", Parameter.Modifier.NONE)),
+                new Parameter(null, "p1", Parameter.Modifier.NONE)),
             null,
             null,
             new ExpressionResultString(param1Ref),
@@ -1235,7 +1259,7 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString aRef = TypeString.ofIdentifier("a", "user");
-        final MagikType aType = new MagikType(typeKeeper, null, Sort.SLOTTED, aRef);
+        final MagikType aType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, aRef);
         final TypeString param1Ref = TypeString.ofParameterRef("p1");
         aType.addMethod(
             null,
@@ -1243,7 +1267,7 @@ class LocalTypeReasonerTest {
             EnumSet.noneOf(Method.Modifier.class),
             "returns_param()",
             List.of(
-                new Parameter("p1", Parameter.Modifier.NONE)),
+                new Parameter(null, "p1", Parameter.Modifier.NONE)),
             null,
             null,
             new ExpressionResultString(param1Ref),
@@ -1254,7 +1278,7 @@ class LocalTypeReasonerTest {
             EnumSet.noneOf(Method.Modifier.class),
             "returns_param2()",
             List.of(
-                new Parameter("p1", Parameter.Modifier.NONE)),
+                new Parameter(null, "p1", Parameter.Modifier.NONE)),
             null,
             null,
             new ExpressionResultString(param1Ref),
@@ -1282,7 +1306,7 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString aRef = TypeString.ofIdentifier("a", "user");
-        final MagikType aType = new MagikType(typeKeeper, null, Sort.SLOTTED, aRef);
+        final MagikType aType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, aRef);
         final TypeString param1Ref = TypeString.ofParameterRef("p1");
         aType.addMethod(
             null,
@@ -1290,7 +1314,7 @@ class LocalTypeReasonerTest {
             EnumSet.noneOf(Method.Modifier.class),
             "returns_param()",
             List.of(
-                new Parameter("p1", Parameter.Modifier.OPTIONAL)),
+                new Parameter(null, "p1", Parameter.Modifier.OPTIONAL)),
             null,
             null,
             new ExpressionResultString(param1Ref),
@@ -1320,7 +1344,7 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, null, Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, ropeRef);
         ropeType.addGeneric(null, "E");
         ropeType.addMethod(
             null,
@@ -1369,7 +1393,7 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
-        final MagikType propertyListType = new MagikType(typeKeeper, null, Sort.SLOTTED, propertyListRef);
+        final MagikType propertyListType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, propertyListRef);
         propertyListType.addGeneric(null, "K");
         propertyListType.addGeneric(null, "E");
         propertyListType.addMethod(
@@ -1438,7 +1462,7 @@ class LocalTypeReasonerTest {
         // Set up TypeKeeper/TypeReasoner.
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
-        final MagikType propertyListType = new MagikType(typeKeeper, null, Sort.SLOTTED, propertyListRef);
+        final MagikType propertyListType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, propertyListRef);
         propertyListType.addGeneric(null, "K");
         propertyListType.addGeneric(null, "E");
         propertyListType.addMethod(
@@ -1499,7 +1523,7 @@ class LocalTypeReasonerTest {
         final TypeKeeper typeKeeper = new TypeKeeper();
 
         final TypeString stackRef = TypeString.ofIdentifier("stack", "sw");
-        final MagikType stackType = new MagikType(typeKeeper, null, Sort.SLOTTED, stackRef);
+        final MagikType stackType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, stackRef);
         stackType.addGeneric(null, "E");
         stackType.addMethod(
             null,
@@ -1514,7 +1538,7 @@ class LocalTypeReasonerTest {
             new ExpressionResultString());
 
         final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "sw");
-        final MagikType exemplarType = new MagikType(typeKeeper, null, Sort.SLOTTED, exemplarRef);
+        final MagikType exemplarType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, exemplarRef);
         final TypeString slotTypeRef = TypeStringParser.parseTypeString("sw:stack<sw:integer>", "sw");
         exemplarType.addSlot(null, "stack", slotTypeRef);
 

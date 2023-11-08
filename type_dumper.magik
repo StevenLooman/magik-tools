@@ -316,10 +316,10 @@ _private _method type_dumper.write_type(type_name, method_table)
 	instruction[:type_name] << type_name
 
 	_local metadata << method_table.metadata
-	instruction[:type_format] << metadata[:instance_format]
+	instruction[:sort] << metadata[:instance_format]
 	_if metadata[:exemplar] _is sw:object
 	_then
-		instruction[:type_format] << "object"
+		instruction[:sort] << "object"
 	_endif
 
 	instruction[:doc] << method_finder.get_class_comment(type_name).default("")
@@ -347,14 +347,14 @@ _private _method type_dumper.write_type(type_name, method_table)
 	# Slots.
 	instruction[:slots] << _self.build_slots(method_table)
 
-	# Generics.
-	instruction[:generics] << sw:rope.new()
+	# Generic declarations.
+	instruction[:generic_declarations] << sw:rope.new()
 
 	# Pragma.
 	instruction[:pragma] << metadata[:topic].default({})
 
 	# Module name.
-	instruction[:module] <<
+	instruction[:module_name] <<
 		_if metadata[:exemplar] _isnt _unset
 		_then
 			>> metadata[:exemplar].module_name
@@ -371,7 +371,7 @@ _private _method type_dumper.write_global(type_name, method_table)
 	## @param {sw:method_table} method_table
 	_local instruction << sw:property_list.new_with(:instruction, "global")
 
-	instruction[:name] << type_name
+	instruction[:type_name] << type_name
 
 	_local metadata << method_table.metadata
 	_local global_var <<
@@ -381,7 +381,7 @@ _private _method type_dumper.write_global(type_name, method_table)
 		_else
 			>> write_string("@sw:", metadata[:exemplar_name]).evaluate()
 		_endif
-	instruction[:type_name] << _self.name_from_type(global_var.package, global_var.key, method_table)
+	instruction[:aliased_type_name] << _self.name_from_type(global_var.package, global_var.key, method_table)
 
 	_self.write_instruction(instruction)
 _endmethod
@@ -442,10 +442,12 @@ _private _method type_dumper.write_method(type_name, method)
 	_local is_assignment? << method.name.matches?(:|*<<|)
 	_if is_assignment?
 	_then
-		# Move last parameter in case of assignment.
-		params << params.subseq(2).new_appending(params[1])
+		instruction[:parameters] << params.subseq(2)
+		instruction[:assignment_parameter] << params[1]
+	_else
+		instruction[:parameters] << params
 	_endif
-	instruction[:parameters] << params
+
 
 	instruction[:return_types] <<
 		_if method.shared_constant?
@@ -467,11 +469,11 @@ _private _method type_dumper.write_method(type_name, method)
 	instruction[:source_file] <<
 		_if _not method.slot_accessor?
 		_then
-			>>  _try
-				    >> method.source_file
-			    _when error
-				    # pass
-			    _endtry
+			>> _try
+				   >> method.source_file
+			   _when error
+				   # pass
+			   _endtry
 		_endif
 
 	instruction[:doc] << method_finder.get_method_comment(method.name, type_name)
@@ -489,7 +491,7 @@ _private _method type_dumper.write_method(type_name, method)
 			   _endtry
 		_endif
 
-	instruction[:module] <<
+	instruction[:module_name] <<
 		_try
 			>> method.source_module.name
 		_when error
@@ -503,6 +505,11 @@ _private _method type_dumper.write_method(type_name, method)
 			>> {}
 		_endtry
 
+	instruction[:used_slots] << {}
+	instruction[:used_globals] << {}
+	instruction[:used_methods] << {}
+	instruction[:used_conditions] << {}
+
 	_self.write_instruction(instruction)
 _endmethod
 $
@@ -514,7 +521,7 @@ _private _method type_dumper.write_procedure(var)
 	_local instruction << sw:property_list.new_with(:instruction, "procedure")
 
 	_local procedure << var.value
-	instruction[:name] << var.package.name + :|:| + var.key
+	instruction[:type_name] << var.package.name + :|:| + var.key
 	instruction[:procedure_name] << procedure.name
 
 	_local modifiers << rope.new()
@@ -549,7 +556,11 @@ _private _method type_dumper.write_procedure(var)
 			>> method_finder.get_method_comment(var.key, "<global>").default("")
 		_endif
 
-	instruction[:module] << _unset
+	instruction[:module_name] << _unset
+
+	instruction[:used_globals] << {}
+	instruction[:used_methods] << {}
+	instruction[:used_conditions] << {}
 
 	_self.write_instruction(instruction)
 _endmethod
@@ -780,7 +791,7 @@ _private _method type_dumper.write_condition(cond)
 	## @param {sw:condition} cond
 	_local instruction << sw:property_list.new_with(:instruction, "condition")
 	instruction[:name] << cond.name
-	instruction[:data_name_list] << cond.data_name_list
+	instruction[:data_names] << cond.data_name_list
 	instruction[:parent] <<
 		_if cond.taxonomy.size > 1
 		_then

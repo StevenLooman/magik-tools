@@ -9,12 +9,15 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
+import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 
 /**
  * {@code define_shared_variable()} parser.
@@ -94,8 +97,11 @@ public class DefineSharedVariableParser {
             throw new IllegalStateException();
         }
 
-        // Figure module name.
+        // Figure location.
         final URI uri = this.node.getToken().getURI();
+        final Location location = new Location(uri, this.node);
+
+        // Figure module name.
         final String moduleName = SwModuleScanner.getModuleName(uri);
 
         // Figure statement node.
@@ -104,21 +110,26 @@ public class DefineSharedVariableParser {
         // Figure pakkage.
         final String pakkage = this.getCurrentPakkage();
 
+        // Figure doc.
+        final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+
         final String variableNameSymbol = argument0Node.getTokenValue();
         final String variableName = variableNameSymbol.substring(1);
         final String flavor = argument2Node.getTokenValue();
         final TypeString exemplarName = TypeString.ofIdentifier(identifier, pakkage);
         final List<MethodDefinition> methodDefinitions =
-            this.generateVariableMethods(moduleName, statementNode, exemplarName, variableName, flavor);
+            this.generateVariableMethods(location, moduleName, statementNode, exemplarName, variableName, flavor, doc);
         return List.copyOf(methodDefinitions);
     }
 
     private List<MethodDefinition> generateVariableMethods(
+            final @Nullable Location location,
             final @Nullable String moduleName,
             final AstNode definitionNode,
             final TypeString exemplarName,
             final String variableName,
-            final String flavor) {
+            final String flavor,
+            final String doc) {
         final List<MethodDefinition> methodDefinitions = new ArrayList<>();
 
         // get
@@ -128,7 +139,17 @@ public class DefineSharedVariableParser {
         }
         final List<ParameterDefinition> getParameters = Collections.emptyList();
         final MethodDefinition getMethod = new MethodDefinition(
-            moduleName, definitionNode, exemplarName, variableName, getModifiers, getParameters, null);
+            location,
+            moduleName,
+            definitionNode,
+            exemplarName,
+            variableName,
+            getModifiers,
+            getParameters,
+            null,
+            doc,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.UNDEFINED);
         methodDefinitions.add(getMethod);
 
         // set
@@ -138,16 +159,42 @@ public class DefineSharedVariableParser {
             setModifiers.add(MethodDefinition.Modifier.PRIVATE);
         }
         final List<ParameterDefinition> setParameters = Collections.emptyList();
-        final ParameterDefinition assignmentParam =
-            new ParameterDefinition(moduleName, definitionNode, "val", ParameterDefinition.Modifier.NONE);
+        final ParameterDefinition assignmentParam = new ParameterDefinition(
+            location,
+            moduleName,
+            definitionNode,
+            "val",
+            ParameterDefinition.Modifier.NONE,
+            TypeString.UNDEFINED,
+            null);
         final MethodDefinition setMethod = new MethodDefinition(
-            moduleName, definitionNode, exemplarName, setName, setModifiers, setParameters, assignmentParam);
+            location,
+            moduleName,
+            definitionNode,
+            exemplarName,
+            setName,
+            setModifiers,
+            setParameters,
+            assignmentParam,
+            doc,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.UNDEFINED);
         methodDefinitions.add(setMethod);
 
         // boot
         final String bootName = variableName + MagikOperator.BOOT_CHEVRON.getValue();
         final MethodDefinition bootMethod = new MethodDefinition(
-            moduleName, definitionNode, exemplarName, bootName, setModifiers, setParameters, assignmentParam);
+            location,
+            moduleName,
+            definitionNode,
+            exemplarName,
+            bootName,
+            setModifiers,
+            setParameters,
+            assignmentParam,
+            doc,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.UNDEFINED);
         methodDefinitions.add(bootMethod);
 
         return methodDefinitions;

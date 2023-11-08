@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
 import javax.annotation.Nullable;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
@@ -23,6 +24,7 @@ public class ParameterDefinition extends Definition {
 
     private final String name;
     private final Modifier modifier;
+    private final TypeString typeName;
 
     /**
      * Constructor.
@@ -31,14 +33,18 @@ public class ParameterDefinition extends Definition {
      * @param name Name of parameter.
      * @param modifier Modifier of parameter.
      */
-    protected ParameterDefinition(
+    public ParameterDefinition(
+            final @Nullable Location location,
             final @Nullable String moduleName,
-            final AstNode node,
+            final @Nullable AstNode node,
             final String name,
-            final Modifier modifier) {
-        super(moduleName, node, TypeString.UNDEFINED);
+            final Modifier modifier,
+            final TypeString typeName,
+            final String doc) {
+        super(location, moduleName, node, doc);
         this.name = name;
         this.modifier = modifier;
+        this.typeName = typeName;
     }
 
     public Modifier getModifier() {
@@ -48,6 +54,15 @@ public class ParameterDefinition extends Definition {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    public TypeString getTypeName() {
+        return this.typeName;
+    }
+
+    @Override
+    public String getPackage() {
+        return null;
     }
 
 }

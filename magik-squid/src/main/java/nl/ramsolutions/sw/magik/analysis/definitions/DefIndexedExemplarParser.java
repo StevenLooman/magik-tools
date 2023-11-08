@@ -2,12 +2,15 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 
 /**
  * {@code def_indexed_exemplar} parser.
@@ -54,7 +57,7 @@ public class DefIndexedExemplarParser extends TypeDefParser {
      */
     @Override
     public List<Definition> parseDefinitions() {
-        final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+        final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
         final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
 
         // Some sanity.
@@ -63,12 +66,15 @@ public class DefIndexedExemplarParser extends TypeDefParser {
             throw new IllegalStateException();
         }
 
-        // Figure module name.
+        // Figure location.
         final URI uri = this.node.getToken().getURI();
+        final Location location = new Location(uri, this.node);
+
+        // Figure module name.
         final String moduleName = SwModuleScanner.getModuleName(uri);
 
         // Figure statement node.
-        final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
+        final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
 
         // Figure pakkage.
         final String pakkage = this.getCurrentPakkage();
@@ -77,12 +83,24 @@ public class DefIndexedExemplarParser extends TypeDefParser {
         final String identifier = argument0Node.getTokenValue().substring(1);
         final TypeString name = TypeString.ofIdentifier(identifier, pakkage);
 
-        // Parents.
+        // Figure parents.
         final AstNode argument2Node = argumentsHelper.getArgument(2);
         final List<TypeString> parents = this.extractParents(argument2Node);
 
-        final IndexedExemplarDefinition indexedExemplarDefinition =
-            new IndexedExemplarDefinition(moduleName, statementNode, name, parents);
+        // Figure doc.
+        final AstNode parentNode = this.node.getParent();
+        final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+
+        final ExemplarDefinition indexedExemplarDefinition = new ExemplarDefinition(
+            location,
+            moduleName,
+            statementNode,
+            ExemplarDefinition.Sort.INDEXED,
+            name,
+            Collections.emptyList(),
+            parents,
+            doc,
+            Collections.emptyList());
         return List.of(indexedExemplarDefinition);
     }
 

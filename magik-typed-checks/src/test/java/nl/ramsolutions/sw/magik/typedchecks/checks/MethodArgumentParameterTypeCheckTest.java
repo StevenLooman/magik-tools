@@ -32,7 +32,7 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
             EnumSet.noneOf(Method.Modifier.class),
             "m1()",
             List.of(
-                new Parameter("p1", Parameter.Modifier.NONE, symbolRef)),
+                new Parameter(null, "p1", Parameter.Modifier.NONE, symbolRef)),
             null,
             null,
             ExpressionResultString.UNDEFINED,

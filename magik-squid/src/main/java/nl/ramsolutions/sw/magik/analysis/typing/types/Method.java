@@ -306,8 +306,8 @@ public class Method {
 
     /**
      * Constructor.
-     * @param moduleName Module name where this method is defined.
      * @param location Location of definition.
+     * @param moduleName Module name where this method is defined.
      * @param modifiers Modifiers.
      * @param owner Owner of method.
      * @param name Name of method.
@@ -319,8 +319,8 @@ public class Method {
      */
     @SuppressWarnings({"java:S1319", "checkstyle:ParameterNumber"})
     public Method(//NOSONAR
-            final @Nullable String moduleName,
             final @Nullable Location location,
+            final @Nullable String moduleName,
             final Set<Modifier> modifiers,
             final MagikType owner,
             final String name,

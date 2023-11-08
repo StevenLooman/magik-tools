@@ -19,6 +19,7 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
+import nl.ramsolutions.sw.magik.checks.MagikCheckMetadata;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.checks.MagikIssueDisabledChecker;
@@ -96,8 +97,9 @@ public class MagikLint {
             : new MagikChecksConfiguration(CheckList.getChecks());
         final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
         for (final MagikCheckHolder holder : holders) {
+            final MagikCheckMetadata metadata = holder.getMetadata();
             if (!showDisabled && holder.isEnabled() || showDisabled && !holder.isEnabled()) {
-                writer.write("- " + holder.getSqKey() + " (" + holder.getTitle() + ")\n");
+                writer.write("- " + metadata.getSqKey() + " (" + metadata.getTitle() + ")\n");
             } else {
                 continue;
             }

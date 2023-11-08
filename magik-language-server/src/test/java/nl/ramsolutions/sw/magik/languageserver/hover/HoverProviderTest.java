@@ -68,7 +68,7 @@ class HoverProviderTest {
         // Set up a method.
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString hoverMeTypeRef = TypeString.ofIdentifier("hover_me_type", "user");
-        final MagikType hoverMeType = new MagikType(typeKeeper, null, Sort.SLOTTED, hoverMeTypeRef);
+        final MagikType hoverMeType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, hoverMeTypeRef);
         hoverMeType.setDoc("type_doc");
 
         final String code = ""
@@ -206,8 +206,14 @@ class HoverProviderTest {
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.setDoc("type_doc");
 
-        final BinaryOperator binaryOperator =
-            new BinaryOperator(BinaryOperator.Operator.STAR, integerRef, integerRef, integerRef);
+        final BinaryOperator binaryOperator = new BinaryOperator(
+            null,
+            null,
+            BinaryOperator.Operator.STAR,
+            integerRef,
+            integerRef,
+            integerRef,
+            null);
         typeKeeper.addBinaryOperator(binaryOperator);
 
         final String code = ""

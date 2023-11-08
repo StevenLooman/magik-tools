@@ -7,11 +7,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 
 /**
  * {@code define_shared_constant()} parser.
@@ -97,8 +100,11 @@ public class DefineSharedConstantParser {
             throw new IllegalStateException();
         }
 
-        // Figure module name.
+        // Figure location.
         final URI uri = this.node.getToken().getURI();
+        final Location location = new Location(uri, this.node);
+
+        // Figure module name.
         final String moduleName = SwModuleScanner.getModuleName(uri);
 
         // Figure statement node.
@@ -106,6 +112,9 @@ public class DefineSharedConstantParser {
 
         // Figure pakkage.
         final String pakkage = this.getCurrentPakkage();
+
+        // Figure doc.
+        final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
         final String constantNameSymbol = argument0Node.getTokenValue();
         final String constantName = constantNameSymbol.substring(1);
@@ -118,8 +127,18 @@ public class DefineSharedConstantParser {
         }
         final List<ParameterDefinition> parameters = Collections.emptyList();
         final TypeString exemplarName = TypeString.ofIdentifier(identifier, pakkage);
-        final MethodDefinition methodDefinition =
-            new MethodDefinition(moduleName, statementNode, exemplarName, constantName, modifiers, parameters, null);
+        final MethodDefinition methodDefinition = new MethodDefinition(
+            location,
+            moduleName,
+            statementNode,
+            exemplarName,
+            constantName,
+            modifiers,
+            parameters,
+            null,
+            doc,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.UNDEFINED);
         return List.of(methodDefinition);
     }
 

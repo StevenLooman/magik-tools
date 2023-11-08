@@ -45,66 +45,66 @@ public class TypeKeeper implements ITypeKeeper {
     }
 
     private void registerBaseTypes() {
-        final Package swPakkage = new Package(this, "sw");
+        final Package swPakkage = new Package(this, null, null, "sw");
         swPakkage.put(
             "object",
-            new MagikType(this, null, Sort.OBJECT, TypeString.ofIdentifier("object", "sw")));
+            new MagikType(this, null, null, Sort.OBJECT, TypeString.ofIdentifier("object", "sw")));
         swPakkage.put(
             "unset",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("unset", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("unset", "sw")));
         swPakkage.put(
             "false",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("false", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("false", "sw")));
         swPakkage.put(
             "maybe",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("maybe", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("maybe", "sw")));
         swPakkage.put(
             "integer",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("integer", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("integer", "sw")));
         swPakkage.put(
             "bignum",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("bignum", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("bignum", "sw")));
         swPakkage.put(
             "float",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("float", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("float", "sw")));
         swPakkage.put(
             "symbol",
-            new MagikType(this, null, Sort.INDEXED, TypeString.ofIdentifier("symbol", "sw")));
+            new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("symbol", "sw")));
         swPakkage.put(
             "character",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("character", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("character", "sw")));
         swPakkage.put(
             "sw_regexp",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("sw_regexp", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("sw_regexp", "sw")));
         swPakkage.put(
             "procedure",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("procedure", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("procedure", "sw")));
         swPakkage.put(
             "char16_vector",
-            new MagikType(this, null, Sort.INDEXED, TypeString.ofIdentifier("char16_vector", "sw")));
+            new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("char16_vector", "sw")));
         swPakkage.put(
             "simple_vector",
-            new MagikType(this, null, Sort.INDEXED, TypeString.ofIdentifier("simple_vector", "sw")));
+            new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("simple_vector", "sw")));
         swPakkage.put(
             "heavy_thread",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("heavy_thread", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("heavy_thread", "sw")));
         swPakkage.put(
             "light_thread",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("light_thread", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("light_thread", "sw")));
         swPakkage.put(
             "condition",
-            new MagikType(this, null, Sort.SLOTTED, TypeString.ofIdentifier("condition", "sw")));
+            new MagikType(this, null, null, Sort.SLOTTED, TypeString.ofIdentifier("condition", "sw")));
         swPakkage.put(
             "enumeration_value",
-            new MagikType(this, null, Sort.SLOTTED, TypeString.ofIdentifier("enumeration_value", "sw")));
+            new MagikType(this, null, null, Sort.SLOTTED, TypeString.ofIdentifier("enumeration_value", "sw")));
         swPakkage.put(
             "indexed_format_mixin",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("indexed_format_mixin", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("indexed_format_mixin", "sw")));
         swPakkage.put(
             "slotted_format_mixin",
-            new MagikType(this, null, Sort.INTRINSIC, TypeString.ofIdentifier("slotted_format_mixin", "sw")));
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("slotted_format_mixin", "sw")));
 
-        final Package userPackage = new Package(this, "user");
+        final Package userPackage = new Package(this, null, null, "user");
         userPackage.addUse("sw");
     }
 
@@ -163,8 +163,8 @@ public class TypeKeeper implements ITypeKeeper {
             return;
         }
 
-        final TypeString typeString = type.getTypeString();
-        final String pakkageName = typeString.getPakkage();
+        final TypeString typeRef = type.getTypeString();
+        final String pakkageName = typeRef.getPakkage();
         if (!this.hasPackage(pakkageName)) {
             // Not allowed to add packages.
             throw new IllegalStateException("Unknown package: " + pakkageName);
@@ -173,10 +173,10 @@ public class TypeKeeper implements ITypeKeeper {
         final Package pakkage = this.getPackage(pakkageName);
         Objects.requireNonNull(pakkage);
 
-        final String identifier = typeString.getIdentifier();
-        if (pakkage.containsKey(identifier)) {
+        final String identifier = typeRef.getIdentifier();
+        if (pakkage.containsKeyLocal(identifier)) {
             // Not allowed to overwrite types.
-            throw new IllegalStateException("Type already defined: " + typeString.getFullString());
+            throw new IllegalStateException("Type already defined: " + typeRef.getFullString());
         }
 
         pakkage.put(identifier, type);
@@ -231,13 +231,13 @@ public class TypeKeeper implements ITypeKeeper {
     @Override
     public BinaryOperator getBinaryOperator(
             final BinaryOperator.Operator operator,
-            final AbstractType leftType,
-            final AbstractType rightType) {
+            final TypeString leftType,
+            final TypeString rightType) {
         return this.binaryOperators.stream()
             .filter(binaryOperator ->
                 binaryOperator.getOperator() == operator
-                && binaryOperator.getLeftType().equals(leftType.getTypeString())
-                && binaryOperator.getRightType().equals(rightType.getTypeString()))
+                && binaryOperator.getLeftType().equals(leftType)
+                && binaryOperator.getRightType().equals(rightType))
             .findAny()
             .orElse(null);
     }

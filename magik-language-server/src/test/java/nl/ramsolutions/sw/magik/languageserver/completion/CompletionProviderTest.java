@@ -100,7 +100,7 @@ class CompletionProviderTest {
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString aRef = TypeString.ofIdentifier("a", "user");
-        final MagikType aType = new MagikType(typeKeeper, null, Sort.SLOTTED, aRef);
+        final MagikType aType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, aRef);
         aType.addMethod(
             null,
             null,
@@ -209,7 +209,7 @@ class CompletionProviderTest {
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString aRef = TypeString.ofIdentifier("a", "user");
-        final MagikType aType = new MagikType(typeKeeper, null, Sort.SLOTTED, aRef);
+        final MagikType aType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, aRef);
         aType.addSlot(null, "slot1", TypeString.UNDEFINED);
         final Position position = new Position(1, 2);    // On ''.
         final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);

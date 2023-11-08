@@ -36,7 +36,7 @@ class DefinitionsProviderTest {
     void testProvideDefinitionsFromGlobal() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = (MagikType) new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, ropeRef);
+        final MagikType ropeType = (MagikType) new MagikType(typeKeeper, null, null, MagikType.Sort.SLOTTED, ropeRef);
         ropeType.setLocation(EMPTY_LOCATION);
 
         final String code = ""

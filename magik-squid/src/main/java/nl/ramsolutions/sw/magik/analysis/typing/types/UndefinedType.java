@@ -24,7 +24,7 @@ public final class UndefinedType extends AbstractType {  // NOSONAR: Singleton.
      * Private constructor.
      */
     private UndefinedType() {
-        super(null);
+        super(null, null);
     }
 
     @Override

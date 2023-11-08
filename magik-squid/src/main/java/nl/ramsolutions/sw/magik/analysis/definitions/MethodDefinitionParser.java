@@ -1,19 +1,26 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.Token;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 
 /**
  * Method definition parser.
@@ -45,8 +52,11 @@ public class MethodDefinitionParser {
             return List.of();
         }
 
-        // Figure module name.
+        // Figure location.
         final URI uri = this.node.getToken().getURI();
+        final Location location = new Location(uri, this.node);
+
+        // Figure module name.
         final String moduleName = SwModuleScanner.getModuleName(uri);
 
         // Figure exemplar name & method name.
@@ -67,27 +77,70 @@ public class MethodDefinitionParser {
         }
 
         // Figure parameters.
+        final TypeDocParser typeDocParser = new TypeDocParser(this.node);
+        final Map<String, TypeString> parameterTypes = typeDocParser.getParameterTypes();
         final AstNode parametersNode = this.node.getFirstChild(MagikGrammar.PARAMETERS);
-        final List<ParameterDefinition> parameters = this.createParameterDefinitions(moduleName, parametersNode);
-
+        final List<ParameterDefinition> parameters =
+            this.createParameterDefinitions(moduleName, parametersNode, parameterTypes);
         final AstNode assignmentParameterNode = node.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
         final ParameterDefinition assignmentParamter =
-            this.createAssignmentParameterDefinition(moduleName, assignmentParameterNode);
+            this.createAssignmentParameterDefinition(moduleName, assignmentParameterNode, parameterTypes);
+
+        // Get return types from method docs.
+        final List<TypeString> callResultDocs = typeDocParser.getReturnTypes();
+        // Ensure we can believe the docs, sort of.
+        final boolean returnsAnything = helper.returnsAnything();
+        final ExpressionResultString callResult =
+            !callResultDocs.isEmpty()
+            || callResultDocs.isEmpty() && !returnsAnything
+            ? new ExpressionResultString(callResultDocs)
+            : ExpressionResultString.UNDEFINED;
+
+        // Get iterator types from method docs.
+        final List<TypeString> loopResultDocs = typeDocParser.getLoopTypes();
+        // Ensure method docs match actual loopbody, sort of.
+        final boolean hasLoopbody = helper.hasLoopbody();
+        final ExpressionResultString loopResult =
+            !loopResultDocs.isEmpty()
+            || loopResultDocs.isEmpty() && !hasLoopbody
+            ? new ExpressionResultString(loopResultDocs)
+            : ExpressionResultString.UNDEFINED;
+
+        // Method doc.
+        final String doc = MagikCommentExtractor.extractDocCommentTokens(node)
+            .map(Token::getValue)
+            .map(line -> line.substring(2))  // Strip '##'
+            .map(String::trim)
+            .collect(Collectors.joining("\n"));
 
         final MethodDefinition methodDefinition = new MethodDefinition(
-            moduleName, this.node, exemplarName, methodName, modifiers, parameters, assignmentParamter);
+            location,
+            moduleName,
+            this.node,
+            exemplarName,
+            methodName,
+            modifiers,
+            parameters,
+            assignmentParamter,
+            doc,
+            callResult,
+            loopResult);
         return List.of(methodDefinition);
     }
 
     private List<ParameterDefinition> createParameterDefinitions(
             final @Nullable String moduleName,
-            final @Nullable AstNode parametersNode) {
+            final @Nullable AstNode parametersNode,
+            final Map<String, TypeString> parameterTypes) {
         if (parametersNode == null) {
             return Collections.emptyList();
         }
 
+        final URI uri = this.node.getToken().getURI();
         final List<ParameterDefinition> parameterDefinitions = new ArrayList<>();
         for (final AstNode parameterNode : parametersNode.getChildren(MagikGrammar.PARAMETER)) {
+            final Location location = new Location(uri, parameterNode);
+
             final AstNode identifierNode = parameterNode.getFirstChild(MagikGrammar.IDENTIFIER);
             final String identifier = identifierNode.getTokenValue();
 
@@ -101,8 +154,16 @@ public class MethodDefinitionParser {
                 modifier = ParameterDefinition.Modifier.NONE;
             }
 
-            final ParameterDefinition parameterDefinition =
-                new ParameterDefinition(moduleName, parameterNode, identifier, modifier);
+            final TypeString typeRef = parameterTypes.getOrDefault(identifier, TypeString.UNDEFINED);
+
+            final ParameterDefinition parameterDefinition = new ParameterDefinition(
+                location,
+                moduleName,
+                parameterNode,
+                identifier,
+                modifier,
+                typeRef,
+                null);
             parameterDefinitions.add(parameterDefinition);
         }
 
@@ -112,14 +173,25 @@ public class MethodDefinitionParser {
     @CheckForNull
     private ParameterDefinition createAssignmentParameterDefinition(
             final @Nullable String moduleName,
-            final @Nullable AstNode assignmentParameterNode) {
+            final @Nullable AstNode assignmentParameterNode,
+            final Map<String, TypeString> parameterTypes) {
         if (assignmentParameterNode == null) {
             return null;
         }
 
         final AstNode parameterNode = assignmentParameterNode.getFirstChild(MagikGrammar.PARAMETER);
+        final URI uri = this.node.getToken().getURI();
+        final Location location = new Location(uri, parameterNode);
         final String identifier = parameterNode.getTokenValue();
-        return new ParameterDefinition(moduleName, parameterNode, identifier, ParameterDefinition.Modifier.NONE);
+        final TypeString typeRef = parameterTypes.getOrDefault(identifier, TypeString.UNDEFINED);
+        return new ParameterDefinition(
+            location,
+            moduleName,
+            parameterNode,
+            identifier,
+            ParameterDefinition.Modifier.NONE,
+            typeRef,
+            null);
     }
 
 }

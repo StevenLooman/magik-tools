@@ -1,38 +1,38 @@
 package nl.ramsolutions.sw.magik.analysis.typing.io;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.security.InvalidParameterException;
-import java.util.EnumSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.analysis.typing.BinaryOperator;
+import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeperDefinitionInserter;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GenericDeclaration;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ProcedureInstance;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,15 +41,75 @@ import org.slf4j.LoggerFactory;
  */
 public final class JsonTypeKeeperReader {
 
+    private static class TypeStringDeserializer implements JsonDeserializer<TypeString> {
+
+        @Override
+        public TypeString deserialize(
+                final JsonElement json,
+                final Type typeOfT,
+                final JsonDeserializationContext context)
+                throws JsonParseException {
+            final String identifier = json.getAsString();
+            return TypeStringParser.parseTypeString(identifier);
+        }
+
+    }
+
+    private static class ExpressionResultStringDeserializer implements JsonDeserializer<ExpressionResultString> {
+
+        @Override
+        public ExpressionResultString deserialize(
+                final JsonElement json,
+                final Type typeOfT,
+                final JsonDeserializationContext context)
+                throws JsonParseException {
+            if (json.isJsonPrimitive() && json.getAsString().equals(ExpressionResultString.UNDEFINED_SERIALIZED_NAME)) {
+                return ExpressionResultString.UNDEFINED;
+            } else if (json.isJsonArray()) {
+                final List<TypeString> types = json.getAsJsonArray().asList().stream()
+                    .map(jsonElement -> jsonElement.getAsString())
+                    .map(identifier -> TypeStringParser.parseTypeString(identifier))
+                    .collect(Collectors.toList());
+                return new ExpressionResultString(types);
+            }
+
+            throw new IllegalStateException();
+        }
+
+    }
+
+    private static class LowerCaseEnumDeserializer<E extends Enum<?>> implements JsonDeserializer<E> {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public E deserialize(
+                final JsonElement json,
+                final Type typeOfT,
+                final JsonDeserializationContext context)
+                throws JsonParseException {
+            final String value = json.getAsString().toUpperCase();
+            if (typeOfT instanceof Class) {
+                final Class<?> clazz = (Class<?>) typeOfT;
+                if (clazz.isEnum()) {
+                    return Arrays.stream(clazz.getEnumConstants())
+                        .filter(enumValue -> enumValue.toString().equals(value))
+                        .map(enumValue -> (E) enumValue)
+                        .findFirst()
+                        .orElseThrow();
+                }
+            }
+
+            throw new IllegalStateException("Value '" + value + "' is not a known Enum value");
+        }
+
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonTypeKeeperReader.class);
-    private static final TypeString SW_PROCEDURE_REF = TypeString.ofIdentifier("procedure", "sw");
 
-    private static final String SW_PAKKAGE = "sw";
-
-    private final ITypeKeeper typeKeeper;
+    private final TypeKeeperDefinitionInserter typeKeeperInserter;
 
     private JsonTypeKeeperReader(final ITypeKeeper typeKeeper) {
-        this.typeKeeper = typeKeeper;
+        this.typeKeeperInserter = new TypeKeeperDefinitionInserter(typeKeeper);
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
@@ -67,7 +127,7 @@ public final class JsonTypeKeeperReader {
                 ++lineNo;
                 line = bufferedReader.readLine();
             }
-        } catch (final JSONException exception) {
+        } catch (final JsonParseException exception) {
             // This will never be hit, the catch block above handles it.
             LOGGER.error("JSON Error reading line no: {}", lineNo);
             throw new IllegalStateException(exception);
@@ -85,15 +145,14 @@ public final class JsonTypeKeeperReader {
     }
 
     private void processLine(final String line) {
-        if (line.startsWith("//")) {
+        if (line.trim().startsWith("//")) {
             // Ignore comments.
             return;
         }
 
-        final JSONTokener tokener = new JSONTokener(line);
-        final JSONObject obj = new JSONObject(tokener);
-        final String instructionStr = obj.getString(InstInstruction.INSTRUCTION.getValue());
-        final InstInstruction instruction = InstInstruction.fromValue(instructionStr);
+        final JsonObject obj = JsonParser.parseString(line).getAsJsonObject();
+        final String instructionStr = obj.get(Instruction.INSTRUCTION.getValue()).getAsString();
+        final Instruction instruction = Instruction.fromValue(instructionStr);
         switch (instruction) {
             case PACKAGE:
                 this.handlePackage(obj);
@@ -101,10 +160,6 @@ public final class JsonTypeKeeperReader {
 
             case TYPE:
                 this.handleType(obj);
-                break;
-
-            case GLOBAL:
-                this.handleGlobal(obj);
                 break;
 
             case METHOD:
@@ -123,276 +178,71 @@ public final class JsonTypeKeeperReader {
                 this.handleBinaryOperator(obj);
                 break;
 
+            case GLOBAL:
+                this.handleGlobal(obj);
+                break;
+
             default:
                 break;
         }
     }
 
-    private void handlePackage(final JSONObject instruction) {
-        final String pakkageName = instruction.getString(InstPackage.NAME.getValue());
-        final Package pakkage = this.ensurePackage(pakkageName);
-
-        instruction.getJSONArray(InstPackage.USES.getValue()).forEach(useObj -> {
-            final String use = (String) useObj;
-            this.ensurePackage(use);
-            pakkage.addUse(use);
-        });
+    private Gson buildGson() {
+        return new GsonBuilder()
+            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .registerTypeAdapter(TypeString.class, new TypeStringDeserializer())
+            .registerTypeAdapter(
+                ExemplarDefinition.Sort.class, new LowerCaseEnumDeserializer<ExemplarDefinition.Sort>())
+            .registerTypeAdapter(
+                MethodDefinition.Modifier.class, new LowerCaseEnumDeserializer<MethodDefinition.Modifier>())
+            .registerTypeAdapter(
+                ProcedureDefinition.Modifier.class, new LowerCaseEnumDeserializer<ProcedureDefinition.Modifier>())
+            .registerTypeAdapter(
+                ParameterDefinition.Modifier.class, new LowerCaseEnumDeserializer<ParameterDefinition.Modifier>())
+            .registerTypeAdapter(ExpressionResultString.class, new ExpressionResultStringDeserializer())
+            .create();
     }
 
-    private void handleType(final JSONObject instruction) {
-        final String typeFormat = instruction.getString(InstType.TYPE_FORMAT.getValue());
-        final String name = instruction.getString(InstType.TYPE_NAME.getValue());
-        final String moduleName = !instruction.isNull(InstType.MODULE.getValue())
-            ? instruction.getString(InstType.MODULE.getValue())
-            : null;
-        final TypeString typeString = TypeStringParser.parseTypeString(name);
-        final MagikType type;
-        if (this.typeKeeper.getType(typeString) != UndefinedType.INSTANCE) {
-            type = (MagikType) this.typeKeeper.getType(typeString);
-        } else if (InstType.INTRINSIC.getValue().equals(typeFormat)) {
-            type = new MagikType(this.typeKeeper, moduleName, Sort.INTRINSIC, typeString);
-        } else if (InstType.SLOTTED.getValue().equals(typeFormat)) {
-            type = new MagikType(this.typeKeeper, moduleName, Sort.SLOTTED, typeString);
-        } else if (InstType.INDEXED.getValue().equals(typeFormat)) {
-            type = new MagikType(this.typeKeeper, moduleName, Sort.INDEXED, typeString);
-        } else if (InstType.OBJECT.getValue().equals(typeFormat)) {
-            type = new MagikType(this.typeKeeper, moduleName, Sort.OBJECT, typeString);
-        } else {
-            throw new InvalidParameterException("Unknown type: " + typeFormat);
-        }
-
-        if (!instruction.isNull(InstType.DOC.getValue())) {
-            final String doc = instruction.getString(InstType.DOC.getValue());
-            type.setDoc(doc);
-        }
-
-        instruction.getJSONArray(InstType.SLOTS.getValue()).forEach(slotObj -> {
-            final JSONObject slot = (JSONObject) slotObj;
-            final String slotName = slot.getString(InstType.SLOT_NAME.getValue());
-            final String slotTypeName = slot.getString(InstType.SLOT_TYPE_NAME.getValue());
-            final TypeString slotTypeString = TypeStringParser.parseTypeString(slotTypeName);
-            type.addSlot(null, slotName, slotTypeString);
-        });
-
-        if (!instruction.isNull(InstType.GENERICS.getValue())) {
-            instruction.getJSONArray(InstType.GENERICS.getValue()).forEach(genericObj -> {
-                final JSONObject generic = (JSONObject) genericObj;
-                final String genericName = generic.getString(InstType.GENERIC_NAME.getValue());
-                final GenericDeclaration genericDeclaration = type.addGeneric(null, genericName);
-                if (!generic.isNull(InstType.GENERIC_DOC.getValue())) {
-                    final String genericDoc = generic.getString(InstType.GENERIC_DOC.getValue());
-                    genericDeclaration.setDoc(genericDoc);
-                }
-            });
-        }
-
-        final JSONArray parents = instruction.getJSONArray(InstType.PARENTS.getValue());
-        parents.forEach(parentObj -> {
-            final String parentStr = (String) parentObj;
-            final TypeString parentRef = TypeString.ofIdentifier(parentStr, SW_PAKKAGE);
-            type.addParent(parentRef);
-        });
+    private void handlePackage(final JsonObject instruction) {
+        final Gson gson = this.buildGson();
+        final PackageDefinition definition = gson.fromJson(instruction, PackageDefinition.class);
+        this.typeKeeperInserter.feed(definition);
     }
 
-    private void handleGlobal(final JSONObject instruction) {
-        final String name = instruction.getString(InstGlobal.NAME.getValue());
-        final TypeString typeString = TypeString.ofIdentifier(name, TypeString.DEFAULT_PACKAGE);
-        final AbstractType type = this.typeKeeper.getType(typeString);
-        if (type != UndefinedType.INSTANCE) {
-            // Prevent adding duplicates and/or errors.
-            LOGGER.debug("Skipping already known global: {}", typeString);
-            return;
-        }
-
-        final String typeName = instruction.getString(InstGlobal.TYPE_NAME.getValue());
-        final TypeString aliasedRef = TypeStringParser.parseTypeString(typeName);
-
-        final AliasType global = new AliasType(this.typeKeeper, typeString, aliasedRef);
-        this.typeKeeper.addType(global);
+    private void handleType(final JsonObject instruction) {
+        final Gson gson = this.buildGson();
+        final ExemplarDefinition definition = gson.fromJson(instruction, ExemplarDefinition.class);
+        this.typeKeeperInserter.feed(definition);
     }
 
-    private void handleMethod(final JSONObject instruction) {
-        final String typeName = instruction.getString(InstMethod.TYPE_NAME.getValue());
-        final TypeString typeRef = TypeString.ofIdentifier(typeName, TypeString.DEFAULT_PACKAGE);
-        final AbstractType abstractType = this.typeKeeper.getType(typeRef);
-        if (abstractType == UndefinedType.INSTANCE) {
-            throw new IllegalStateException("Unknown type: " + typeName);
-        }
-        final MagikType type = (MagikType) abstractType;
-
-        // What if method already exists? Might be improved by taking the line into account as well.
-        final String methodName = instruction.getString(InstMethod.METHOD_NAME.getValue());
-        final Location location = !instruction.isNull(InstMethod.SOURCE_FILE.getValue())
-            ? new Location(Path.of(instruction.getString(InstMethod.SOURCE_FILE.getValue())).toUri())
-            : null;
-        final boolean isAlreadyKnown = type.getLocalMethods(methodName).stream()
-            .anyMatch(method ->
-                method.getLocation() == null && location == null
-                || method.getLocation() != null && method.getLocation().equals(location));
-        if (isAlreadyKnown) {
-            LOGGER.debug("Skipping already known method: {}.{}", typeName, methodName);
-            return;
-        }
-
-        final JSONArray modifiersArray = instruction.getJSONArray(InstMethod.MODIFIERS.getValue());
-        final EnumSet<Method.Modifier> modifiers = StreamSupport.stream(modifiersArray.spliterator(), false)
-            .map(String.class::cast)
-            .map(String::toUpperCase)
-            .map(Method.Modifier::valueOf)
-            .collect(Collectors.toCollection(() -> EnumSet.noneOf(Method.Modifier.class)));
-        final List<Parameter> parameters =
-            this.parseParameters(instruction.getJSONArray(InstMethod.PARAMETERS.getValue()));
-        final Parameter assignmentParameter;
-        if (methodName.contains("<<")) {
-            int lastIdx = parameters.size() - 1;
-            assignmentParameter = parameters.get(lastIdx);
-            parameters.remove(lastIdx);
-        } else {
-            assignmentParameter = null;
-        }
-        final ExpressionResultString result =
-            this.parseExpressionResultString(instruction.get(InstMethod.RETURN_TYPES.getValue()));
-        final ExpressionResultString loopResult =
-            this.parseExpressionResultString(instruction.get(InstMethod.LOOP_TYPES.getValue()));
-        final String methodDoc = !instruction.isNull(InstMethod.DOC.getValue())
-            ? instruction.getString(InstMethod.DOC.getValue())
-            : null;
-        final String moduleName = !instruction.isNull(InstMethod.MODULE.getValue())
-            ? instruction.getString(InstMethod.MODULE.getValue())
-            : null;
-        type.addMethod(
-            moduleName,
-            location,
-            modifiers,
-            methodName,
-            parameters,
-            assignmentParameter,
-            methodDoc,
-            result,
-            loopResult);
+    private void handleMethod(final JsonObject instruction) {
+        final Gson gson = this.buildGson();
+        final MethodDefinition definition = gson.fromJson(instruction, MethodDefinition.class);
+        this.typeKeeperInserter.feed(definition);
     }
 
-    private void handleCondition(final JSONObject instruction) {
-        final String name = instruction.getString(InstCondition.NAME.getValue());
-        final String doc = !instruction.isNull(InstCondition.DOC.getValue())
-            ? instruction.getString(InstCondition.DOC.getValue())
-            : null;
-        final String parent = instruction.optString(InstCondition.PARENT.getValue(), null);
-        final Location location = !instruction.isNull(InstCondition.SOURCE_FILE.getValue())
-            ? new Location(Path.of(instruction.getString(InstCondition.SOURCE_FILE.getValue())).toUri())
-            : null;
-        final JSONArray dataNameListArray = instruction.getJSONArray(InstCondition.DATA_NAME_LIST.getValue());
-        final List<String> dataNameList = StreamSupport.stream(dataNameListArray.spliterator(), false)
-            .map(String.class::cast)
-            .collect(Collectors.toList());
-        final Condition condition = new Condition(location, name, parent, dataNameList, doc);
-        this.typeKeeper.addCondition(condition);
+    private void handleCondition(final JsonObject instruction) {
+        final Gson gson = this.buildGson();
+        final ConditionDefinition definition = gson.fromJson(instruction, ConditionDefinition.class);
+        this.typeKeeperInserter.feed(definition);
     }
 
-    private void handleBinaryOperator(final JSONObject instruction) {
-        final BinaryOperator.Operator operator =
-            BinaryOperator.Operator.valueFor(instruction.getString(InstBinaryOperator.OPERATOR.getValue()));
-        final String lhsTypeStr = instruction.getString(InstBinaryOperator.LHS_TYPE.getValue());
-        final TypeString lhsTypeRef = TypeStringParser.parseTypeString(lhsTypeStr);
-        final String rhsTypeStr = instruction.getString(InstBinaryOperator.RHS_TYPE.getValue());
-        final TypeString rhsTypeRef = TypeStringParser.parseTypeString(rhsTypeStr);
-        final String returnTypeStr = instruction.getString(InstBinaryOperator.RETURN_TYPE.getValue());
-        final TypeString resultTypeRef = TypeStringParser.parseTypeString(returnTypeStr);
-        final BinaryOperator binaryOperator = new BinaryOperator(operator, lhsTypeRef, rhsTypeRef, resultTypeRef);
-        this.typeKeeper.addBinaryOperator(binaryOperator);
+    private void handleBinaryOperator(final JsonObject instruction) {
+        final Gson gson = this.buildGson();
+        final BinaryOperatorDefinition definition = gson.fromJson(instruction, BinaryOperatorDefinition.class);
+        this.typeKeeperInserter.feed(definition);
     }
 
-    private List<Parameter> parseParameters(final JSONArray parametersArray) {
-        return StreamSupport.stream(parametersArray.spliterator(), false)
-            .map(parameterThing -> {
-                final JSONObject parameterObj = (JSONObject) parameterThing;
-                final String name = parameterObj.getString(InstParameter.NAME.getValue());
-                final Parameter.Modifier modifier = !parameterObj.isNull(InstParameter.MODIFIER.getValue())
-                    ? Parameter.Modifier.valueOf(
-                        parameterObj.getString(InstParameter.MODIFIER.getValue()).toUpperCase())
-                    : Parameter.Modifier.NONE;
-                final String typeName = parameterObj.getString(InstParameter.TYPE_NAME.getValue());
-                final TypeString typeString = TypeStringParser.parseTypeString(typeName);
-                return new Parameter(name, modifier, typeString);
-            })
-            .collect(Collectors.toList());
+    private void handleProcedure(final JsonObject instruction) {
+        final Gson gson = this.buildGson();
+        final ProcedureDefinition definition = gson.fromJson(instruction, ProcedureDefinition.class);
+        this.typeKeeperInserter.feed(definition);
     }
 
-    private ExpressionResultString parseExpressionResultString(final Object obj) {
-        if (obj == JSONObject.NULL) {
-            return ExpressionResultString.UNDEFINED;
-        }
-
-        if (obj instanceof String) {
-            final String expressionResultString = (String) obj;
-            return TypeStringParser.parseExpressionResultString(expressionResultString, TypeString.DEFAULT_PACKAGE);
-        }
-
-        if (obj instanceof JSONArray) {
-            final JSONArray array = (JSONArray) obj;
-            return StreamSupport.stream(array.spliterator(), false)
-                .map(String.class::cast)
-                .map(TypeStringParser::parseTypeString)
-                .collect(ExpressionResultString.COLLECTOR);
-        }
-
-        throw new InvalidParameterException("Don't know what to do with: " + obj);
-    }
-
-    private void handleProcedure(final JSONObject instruction) {
-        final String moduleName = !instruction.isNull(InstProcedure.MODULE.getValue())
-            ? instruction.getString(InstType.MODULE.getValue())
-            : null;
-        final JSONArray modifiersArray = instruction.getJSONArray(InstProcedure.MODIFIERS.getValue());
-        final EnumSet<Method.Modifier> modifiers = StreamSupport.stream(modifiersArray.spliterator(), false)
-            .map(String.class::cast)
-            .map(String::toUpperCase)
-            .map(Method.Modifier::valueOf)
-            .collect(Collectors.toCollection(() -> EnumSet.noneOf(Method.Modifier.class)));
-        final Location location = !instruction.isNull(InstProcedure.SOURCE_FILE.getValue())
-            ? new Location(Path.of(instruction.getString(InstProcedure.SOURCE_FILE.getValue())).toUri())
-            : null;
-        final List<Parameter> parameters =
-            this.parseParameters(instruction.getJSONArray(InstProcedure.PARAMETERS.getValue()));
-        final ExpressionResultString resultStr =
-            this.parseExpressionResultString(instruction.get(InstProcedure.RETURN_TYPES.getValue()));
-        final ExpressionResultString loopResultStr =
-            this.parseExpressionResultString(instruction.get(InstProcedure.LOOP_TYPES.getValue()));
-
-        final String procedureName = instruction.getString(InstProcedure.PROCEDURE_NAME.getValue());
-        final MagikType procedureType = (MagikType) this.typeKeeper.getType(SW_PROCEDURE_REF);
-        final String methodDoc = !instruction.isNull(InstProcedure.DOC.getValue())
-            ? instruction.getString(InstProcedure.DOC.getValue())
-            : null;
-        final ProcedureInstance instance = new ProcedureInstance(
-            procedureType,
-            moduleName,
-            location,
-            procedureName,
-            modifiers,
-            parameters,
-            methodDoc,
-            resultStr,
-            loopResultStr);
-
-        // Create alias to instance.
-        final String name = instruction.getString(InstProcedure.NAME.getValue());
-        final TypeString typeString = TypeString.ofIdentifier(name, TypeString.DEFAULT_PACKAGE);
-        final AbstractType type = this.typeKeeper.getType(typeString);
-        if (type != UndefinedType.INSTANCE) {
-            // Prevent adding duplicates and/or errors.
-            LOGGER.debug("Skipping already known procedure: {}", typeString);
-            return;
-        }
-
-        new AliasType(this.typeKeeper, typeString, instance);
-    }
-
-    private Package ensurePackage(final String pakkageName) {
-        if (!this.typeKeeper.hasPackage(pakkageName)) {
-            new Package(this.typeKeeper, pakkageName);
-        }
-        return this.typeKeeper.getPackage(pakkageName);
+    private void handleGlobal(final JsonObject instruction) {
+        final Gson gson = this.buildGson();
+        final GlobalDefinition definition = gson.fromJson(instruction, GlobalDefinition.class);
+        this.typeKeeperInserter.feed(definition);
     }
 
     /**
@@ -401,7 +251,7 @@ public final class JsonTypeKeeperReader {
      * @param typeKeeper {@link TypeKeeper} to fill.
      * @throws IOException -
      */
-    public static void readTypes(final Path path, final ITypeKeeper typeKeeper) throws IOException {
+    public static void read(final Path path, final ITypeKeeper typeKeeper) throws IOException {
         final JsonTypeKeeperReader reader = new JsonTypeKeeperReader(typeKeeper);
         reader.run(path);
     }

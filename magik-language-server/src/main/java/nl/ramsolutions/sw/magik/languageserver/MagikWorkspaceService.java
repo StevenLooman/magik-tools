@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.IgnoreHandler;
-import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoTypeKeeperReader;
+import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;

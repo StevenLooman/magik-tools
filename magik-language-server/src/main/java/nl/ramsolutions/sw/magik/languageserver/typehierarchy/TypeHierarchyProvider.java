@@ -1,12 +1,12 @@
 package nl.ramsolutions.sw.magik.languageserver.typehierarchy;
 
 import com.sonar.sslr.api.AstNode;
-import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 public class TypeHierarchyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeHierarchyProvider.class);
-    private static final Location NO_LOCATION = new Location(URI.create("tests://unittest"));
 
     private final ITypeKeeper typeKeeper;
 
@@ -149,15 +148,14 @@ public class TypeHierarchyProvider {
     private TypeHierarchyItem toTypeHierarchyItem(final AbstractType type) {
         final TypeString typeStr = type.getTypeString();
         final Location typeLocation = type.getLocation();
-        final Location location = typeLocation != null
-            ? typeLocation
-            : NO_LOCATION;
+        final Location location = Location.validLocation(typeLocation);
+        final Range range = location.getRange();
         return new TypeHierarchyItem(
             typeStr.getFullString(),
             SymbolKind.Class,
             location.getUri().toString(),
-            Lsp4jConversion.rangeToLsp4j(location.getRange()),
-            Lsp4jConversion.rangeToLsp4j(location.getRange()));
+            Lsp4jConversion.rangeToLsp4j(range),
+            Lsp4jConversion.rangeToLsp4j(range));
     }
 
 }

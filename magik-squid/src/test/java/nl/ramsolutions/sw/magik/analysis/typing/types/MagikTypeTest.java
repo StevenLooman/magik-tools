@@ -17,7 +17,7 @@ class MagikTypeTest {
     void testCreateGenericType1() {
         final TypeKeeper typeKeeper = new TypeKeeper();
         final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
-        final MagikType magikType = new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, propertyListRef);
+        final MagikType magikType = new MagikType(typeKeeper, null, null, MagikType.Sort.SLOTTED, propertyListRef);
         final GenericDeclaration key = magikType.addGeneric(null, "K");
         final GenericDeclaration element = magikType.addGeneric(null, "E");
 

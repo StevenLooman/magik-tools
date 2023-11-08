@@ -147,7 +147,7 @@ public class HoverProvider {
 
         final String indentStr = "&nbsp;&nbsp;".repeat(indent);
         final Comparator<Package> byName = Comparator.comparing(Package::getName);
-        pakkage.getUses().stream()
+        pakkage.getUsesPackages().stream()
             .sorted(byName)
             .forEach(uses -> {
                 builder

@@ -23,7 +23,7 @@ public class SwModuleDefParser {
      * @return Tree
      * @throws IOException -
      */
-    public AstNode parse(Path path) throws IOException {
+    public AstNode parse(final Path path) throws IOException {
         final Charset charset = FileCharsetDeterminer.determineCharset(path);
         final Parser<LexerlessGrammar> parser = new ParserAdapter<>(charset, SwModuleDefGrammar.create());
         final File file = path.toFile();

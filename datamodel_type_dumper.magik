@@ -445,8 +445,13 @@ _private _method datamodel_type_dumper.write_collection_field(type_name, field)
 	instruction[:loop_types] << {}
 	instruction[:source_file] << _unset
 	instruction[:doc] << field.external_name
-	instruction[:module] << _unset
+	instruction[:module_name] << _unset
 	instruction[:pragma] << _unset
+	instruction[:hash] << _unset
+	instruction[:used_slots] << {}
+	instruction[:used_globals] << {}
+	instruction[:used_methods] << {}
+	instruction[:used_conditions] << {}
 
 	_self.write_instruction(instruction)
 _endmethod

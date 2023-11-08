@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.languageserver.typehierarchy;
 
 import java.net.URI;
 import java.util.List;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
@@ -21,6 +22,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TypeHierarchyProviderTest {
 
     private static final URI TEST_URI = URI.create("tests://unittest");
+    private static final Location TEST_LOCATION = new Location(
+        TEST_URI,
+        new nl.ramsolutions.sw.magik.Range(
+            new nl.ramsolutions.sw.magik.Position(1, 1),
+            new nl.ramsolutions.sw.magik.Position(1, 1)));
 
     private List<TypeHierarchyItem> getPrepareTypeHierarchy(
             final String code, final Position position, final ITypeKeeper typeKeeper) {
@@ -33,7 +39,7 @@ class TypeHierarchyProviderTest {
     void testPrepareTypeHierarchyMethodDefinitionExemplarName() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
-        new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, exemplarRef);
+        new MagikType(typeKeeper, TypeHierarchyProviderTest.TEST_LOCATION, null, MagikType.Sort.SLOTTED, exemplarRef);
 
         final String code = ""
             + "_method exemplar.method\n"
@@ -50,7 +56,7 @@ class TypeHierarchyProviderTest {
     void testPrepareTypeHierarchyGlobal() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, ropeRef);
+        new MagikType(typeKeeper, TypeHierarchyProviderTest.TEST_LOCATION, null, MagikType.Sort.SLOTTED, ropeRef);
 
         final String code = ""
             + "_method exemplar.method\n"
@@ -68,9 +74,9 @@ class TypeHierarchyProviderTest {
     void testGetSubtypes() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
-        new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, exemplarRef);
+        new MagikType(typeKeeper, TypeHierarchyProviderTest.TEST_LOCATION, null, MagikType.Sort.SLOTTED, exemplarRef);
         final TypeString subExemplarRef = TypeString.ofIdentifier("sub_exemplar", "user");
-        final MagikType subExemplarType = new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, subExemplarRef);
+        final MagikType subExemplarType = new MagikType(typeKeeper, null, null, MagikType.Sort.SLOTTED, subExemplarRef);
         subExemplarType.addParent(exemplarRef);
 
         final TypeHierarchyItem item = new TypeHierarchyItem(
@@ -90,9 +96,12 @@ class TypeHierarchyProviderTest {
     void testGetSupertypes() {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
-        final MagikType exemplarType = new MagikType(typeKeeper, null, MagikType.Sort.SLOTTED, exemplarRef);
-        final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
-        exemplarType.addParent(objectRef);
+        new MagikType(
+            typeKeeper,
+            TypeHierarchyProviderTest.TEST_LOCATION,
+            null,
+            MagikType.Sort.SLOTTED,
+            exemplarRef);
 
         final TypeHierarchyItem item = new TypeHierarchyItem(
             "user:exemplar",
@@ -102,8 +111,8 @@ class TypeHierarchyProviderTest {
             new Range());
 
         final TypeHierarchyProvider provider = new TypeHierarchyProvider(typeKeeper);
-        final List<TypeHierarchyItem> supertypes =  provider.typeHierarchySupertypes(item);
-        assertThat(supertypes)
+        final List<TypeHierarchyItem> superTypes =  provider.typeHierarchySupertypes(item);
+        assertThat(superTypes)
             .isNotNull()
             .hasSize(1);
     }

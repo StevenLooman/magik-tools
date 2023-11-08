@@ -4,11 +4,13 @@ import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.util.List;
 import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 
 /**
  * {@code define_binary_operator_case()} parser.
@@ -101,8 +103,11 @@ public class DefineBinaryOperatorCaseParser {
             throw new IllegalStateException();
         }
 
-        // Figure module name.
+        // Figure location.
         final URI uri = this.node.getToken().getURI();
+        final Location location = new Location(uri, this.node);
+
+        // Figure module name.
         final String moduleName = SwModuleScanner.getModuleName(uri);
 
         // Figure statement node.
@@ -111,14 +116,26 @@ public class DefineBinaryOperatorCaseParser {
         // Figure pakkage.
         final String currentPakkage = this.getCurrentPakkage();
 
+        // Figure doc.
+        final AstNode parentNode = this.node.getParent();
+        final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+
         // Figure operator & lhs & rhs.
         final String operator = operatorSymbol.substring(1);
         final String lhsName = argument1Node.getTokenValue();
         final TypeString lhs = TypeString.ofIdentifier(lhsName, currentPakkage);
         final String rhsName = argument2Node.getTokenValue();
         final TypeString rhs = TypeString.ofIdentifier(rhsName, currentPakkage);
-        final BinaryOperatorDefinition operatorDefinition =
-            new BinaryOperatorDefinition(moduleName, statementNode, currentPakkage, operator, lhs, rhs);
+        final TypeString result = TypeString.UNDEFINED;
+        final BinaryOperatorDefinition operatorDefinition = new BinaryOperatorDefinition(
+            location,
+            moduleName,
+            statementNode,
+            operator,
+            lhs,
+            rhs,
+            result,
+            doc);
         return List.of(operatorDefinition);
     }
 

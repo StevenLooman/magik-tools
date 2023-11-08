@@ -13,7 +13,7 @@ public class ParameterReferenceType extends AbstractType {
     private final String parameterName;
 
     public ParameterReferenceType(final String parameterName) {
-        super(null);
+        super(null, null);
         this.parameterName = parameterName;
     }
 

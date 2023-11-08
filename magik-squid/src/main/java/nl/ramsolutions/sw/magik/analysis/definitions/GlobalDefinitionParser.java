@@ -4,10 +4,13 @@ import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.util.List;
 import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
+import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 
 /**
  * {@code _global} parser.
@@ -46,19 +49,37 @@ public class GlobalDefinitionParser {
             throw new IllegalStateException();
         }
 
-        // Figure module name.
+        // Figure location.
         final URI uri = this.node.getToken().getURI();
+        final Location location = new Location(uri, this.node);
+
+        // Figure module name.
         final String moduleName = SwModuleScanner.getModuleName(uri);
 
-        // Figure pakkage.
-        final String pakkage = this.getCurrentPakkage();
-
         // Figure name.
+        final String packageName = this.getCurrentPakkage();
         final AstNode variableDefinitionNode = this.node.getFirstChild(MagikGrammar.VARIABLE_DEFINITION);
         final AstNode identifierNode = variableDefinitionNode.getFirstChild(MagikGrammar.IDENTIFIER);
         final String identifier = identifierNode.getTokenValue();
-        final TypeString name = TypeString.ofIdentifier(identifier, pakkage);
-        final GlobalDefinition globalDefinition = new GlobalDefinition(moduleName, node, name);
+        final TypeString typeName = TypeString.ofIdentifier(identifier, packageName);
+
+        // Figure type.
+        final TypeDocParser docParser = new TypeDocParser(node);
+        final TypeString aliasedTypeRef = docParser.getReturnTypes().stream()
+            .findFirst()
+            .orElse(TypeString.UNDEFINED);
+
+        // Figure doc.
+        final AstNode parentNode = this.node.getParent();
+        final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+
+        final GlobalDefinition globalDefinition = new GlobalDefinition(
+            location,
+            moduleName,
+            this.node,
+            typeName,
+            aliasedTypeRef,
+            doc);
         return List.of(globalDefinition);
     }
 

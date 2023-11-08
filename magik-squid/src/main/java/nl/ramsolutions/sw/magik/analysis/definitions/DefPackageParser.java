@@ -5,10 +5,12 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 
 /**
  * {@code def_package()} parser.
@@ -69,8 +71,11 @@ public class DefPackageParser {
             throw new IllegalStateException();
         }
 
-        // Figure module name.
+        // Figure location.
         final URI uri = this.node.getToken().getURI();
+        final Location location = new Location(uri, this.node);
+
+        // Figure module name.
         final String moduleName = SwModuleScanner.getModuleName(uri);
 
         // Figure statement node.
@@ -99,7 +104,17 @@ public class DefPackageParser {
             uses.add("sw");
         }
 
-        final PackageDefinition packageDefinition = new PackageDefinition(moduleName, statementNode, name, uses);
+        // Figure doc.
+        final AstNode parentNode = this.node.getParent();
+        final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+
+        final PackageDefinition packageDefinition = new PackageDefinition(
+            location,
+            moduleName,
+            statementNode,
+            name,
+            uses,
+            doc);
         return List.of(packageDefinition);
     }
 

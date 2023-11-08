@@ -24,7 +24,7 @@ public final class SelfType extends AbstractType {  // NOSONAR: Singleton.
      * Private constructor.
      */
     private SelfType() {
-        super(null);
+        super(null, null);
     }
 
     @Override

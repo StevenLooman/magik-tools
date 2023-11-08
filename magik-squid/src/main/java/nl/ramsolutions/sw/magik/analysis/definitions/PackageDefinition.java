@@ -3,14 +3,15 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import com.sonar.sslr.api.AstNode;
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import javax.annotation.Nullable;
+import nl.ramsolutions.sw.magik.Location;
 
 /**
  * Package definition.
  */
 public class PackageDefinition extends Definition {
 
-    private String name;
+    private final String name;
     private final List<String> uses;
 
     /**
@@ -20,8 +21,14 @@ public class PackageDefinition extends Definition {
      * @param name Name of package.
      * @param uses Uses by package.
      */
-    public PackageDefinition(final String moduleName, final AstNode node, final String name, final List<String> uses) {
-        super(moduleName, node, TypeString.UNDEFINED);
+    public PackageDefinition(
+            final @Nullable Location location,
+            final @Nullable String moduleName,
+            final @Nullable AstNode node,
+            final String name,
+            final List<String> uses,
+            final String doc) {
+        super(location, moduleName, node, doc);
         this.name = name;
         this.uses = List.copyOf(uses);
     }
@@ -33,6 +40,11 @@ public class PackageDefinition extends Definition {
 
     public List<String> getUses() {
         return Collections.unmodifiableList(this.uses);
+    }
+
+    @Override
+    public String getPackage() {
+        return this.name;
     }
 
 }

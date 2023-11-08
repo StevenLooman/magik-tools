@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
 
 /**
@@ -16,7 +17,8 @@ public abstract class AbstractType {
     private Location location;
     private String doc;
 
-    protected AbstractType(final String moduleName) {
+    protected AbstractType(final @Nullable Location location, final @Nullable String moduleName) {
+        this.location = location;
         this.moduleName = moduleName;
     }
 
