@@ -35,7 +35,10 @@
             "label": "clean package magik-lint",
             "type": "shell",
             "command": "mvn clean package -pl magik-lint -am -DskipTests=true",
-            "group": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "problemMatcher": []
         },
         {
