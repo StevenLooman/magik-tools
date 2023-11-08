@@ -38,6 +38,9 @@ class FormattingCheckTest extends MagikCheckTestBase {
             + "{\r\n"
             + "\t2\r\n"
             + "}\r\n",
+        ""
+            + "show(  # comment\n"
+            + "  param1)",
     })
     void testProper(final String code) {
         final MagikCheck check = new FormattingCheck();

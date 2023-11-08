@@ -235,7 +235,7 @@ public class FormattingCheck extends MagikCheck {
     }
 
     private Character charAfter(final Token token) {
-        final String line = getLineFor(token);
+        final String line = this.getLineFor(token);
         final int nextColumn = token.getColumn() + token.getValue().length();
         if (line.length() <= nextColumn) {
             return null;
@@ -279,6 +279,14 @@ public class FormattingCheck extends MagikCheck {
      * @param token Token to test
      */
     private void requireNonWhitespaceAfter(final Token token) {
+        // Do allow comments after this token.
+        final String line = this.getLineFor(token);
+        final int lineOffset = token.getColumn() + token.getOriginalValue().length();
+        final String restLine = line.substring(lineOffset).trim();
+        if (restLine.startsWith("#")) {
+            return;
+        }
+
         final Character next = this.charAfter(token);
         if (next != null
             && Character.isWhitespace(next)) {
