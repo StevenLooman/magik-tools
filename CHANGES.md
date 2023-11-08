@@ -18,6 +18,7 @@
 - Fix language server not showing typed Magik diagnostics.
 - Fix misnamed class TypeDocTypeExistsTypeCheck --> TypeDocTypeExistsTypedCheck.
 - Fix to allow comments after tokens in FormattingCheck.
+- Fix default/example to also include package-prefix global in ForbiddenGlobalUsageCheck.
 
 0.8.0 (2023-09-27)
 

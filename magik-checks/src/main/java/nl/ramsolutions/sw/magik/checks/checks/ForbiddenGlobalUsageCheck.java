@@ -23,7 +23,7 @@ public class ForbiddenGlobalUsageCheck extends MagikCheck {
     public static final String CHECK_KEY = "ForbiddenGlobalUsage";
     private static final String MESSAGE = "Usage of global '%s' is forbidden.";
 
-    private static final String DEFAULT_FORBIDDEN_GLOBALS = "!current_grs!";
+    private static final String DEFAULT_FORBIDDEN_GLOBALS = "!current_grs!,sw:!current_grs!";
 
     /**
      * List of forbidden calls, separated by ','.
