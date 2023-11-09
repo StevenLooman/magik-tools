@@ -159,8 +159,8 @@ public class FormattingCheck extends MagikCheck {
                 this.visitTokenBracketClose(this.currentToken);
                 break;
 
-            //case "+":    // can be unary expression
-            //case "-":    // can be unary expression
+            //case "+":    // Can be unary expression.
+            //case "-":    // Can be unary expression.
             case "*":
             case "**":
             case "/":
@@ -181,7 +181,7 @@ public class FormattingCheck extends MagikCheck {
             case "_cf":
                 if (this.nextToken != null
                     && (this.nextToken.getValue().equals("<<") || this.nextToken.getValue().equals("^<<"))) {
-                    // part 1 of augmented assignment
+                    // Part 1 of augmented assignment.
                     this.visitTokenAugmentedAssignmentExpression1(this.currentToken);
                 } else {
                     this.visitTokenBinaryOperator(this.currentToken);
@@ -192,7 +192,7 @@ public class FormattingCheck extends MagikCheck {
             case "^<<":
                 if (this.previousToken != null
                     && AUGMENTED_ASSIGNMENT_TOKENS.contains(this.previousToken.getValue())) {
-                    // part 2 of augmented assignment
+                    // Part 2 of augmented assignment.
                     this.visitTokenAugmentedAssignmentExpression2(this.currentToken);
                 } else {
                     this.visitTokenBinaryOperator(this.currentToken);
@@ -228,7 +228,7 @@ public class FormattingCheck extends MagikCheck {
 
         final String line = this.getLineFor(token);
         int prevColumn = token.getColumn() - 1;
-        // special case: '% ', cheat by getting the %
+        // Special case: `% `, cheat by getting the `%`.
         if (this.previousToken.getValue().equals("% ")) {
             prevColumn -= 1;
         }
