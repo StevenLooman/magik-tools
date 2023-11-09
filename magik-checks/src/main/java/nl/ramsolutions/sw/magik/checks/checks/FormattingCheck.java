@@ -132,6 +132,8 @@ public class FormattingCheck extends MagikCheck {
             return;
         }
 
+        this.requireMaxNewlines(this.currentToken);
+
         // Don't care about pragma.
         if (this.isPragmaLine(this.currentToken)) {
             return;
@@ -206,8 +208,6 @@ public class FormattingCheck extends MagikCheck {
             default:
                 break;
         }
-
-        this.requireMaxNewlines(this.currentToken);
     }
 
     private boolean isPragmaLine(final Token token) {
@@ -235,6 +235,7 @@ public class FormattingCheck extends MagikCheck {
         if (prevColumn < 0) {
             return null;
         }
+
         return line.charAt(prevColumn);
     }
 
@@ -244,10 +245,12 @@ public class FormattingCheck extends MagikCheck {
         if (line.length() <= nextColumn) {
             return null;
         }
+
         final char charAfter = line.charAt(nextColumn);
         if (charAfter == '\r') {
             return null;
         }
+
         return charAfter;
     }
 
