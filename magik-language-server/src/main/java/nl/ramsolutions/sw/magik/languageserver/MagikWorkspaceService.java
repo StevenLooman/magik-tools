@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoTypeKeeperReader;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
@@ -106,7 +105,7 @@ public class MagikWorkspaceService implements WorkspaceService {
                     .forEach(path -> {
                         try {
                             this.ignoreHandler.addIgnoreFile(path);
-                        } catch (IOException exception) {
+                        } catch (final IOException exception) {
                             LOGGER.error(exception.getMessage(), exception);
                         }
                     });
@@ -129,26 +128,22 @@ public class MagikWorkspaceService implements WorkspaceService {
         }
     }
 
-    private void readLibsDocs(final @Nullable String smallworldGisDir) {
-        LOGGER.trace("Reading libs docs from: {}", smallworldGisDir);
+    private void readLibsClassInfos(final List<String> libsDirs) {
+        LOGGER.trace("Reading libs docs from: {}", libsDirs);
 
-        if (smallworldGisDir == null
-            || smallworldGisDir.trim().isEmpty()) {
-            LOGGER.info("No smallworld gis directory configured");
-            return;
-        }
+        libsDirs.forEach(pathStr -> {
+            final Path path = Path.of(pathStr);
+            if (!Files.exists(path)) {
+                LOGGER.warn("Path to libs dir does not exist: {}", pathStr);
+                return;
+            }
 
-        final Path libsDirPath = Path.of(smallworldGisDir).resolve("sw_core").resolve("libs");
-        if (!Files.exists(libsDirPath)) {
-            return;
-        }
-
-        // Move to ClassInfoTypeKeeperReader class.
-        try {
-            ClassInfoTypeKeeperReader.readLibsDirectory(libsDirPath, this.typeKeeper);
-        } catch (IOException exception) {
-            LOGGER.error(exception.getMessage(), exception);
-        }
+            try {
+                ClassInfoTypeKeeperReader.readLibsDirectory(path, this.typeKeeper);
+            } catch (final IOException exception) {
+                LOGGER.error(exception.getMessage(), exception);
+            }
+        });
     }
 
     /**
@@ -166,8 +161,8 @@ public class MagikWorkspaceService implements WorkspaceService {
             }
 
             try {
-                JsonTypeKeeperReader.readTypes(path, this.typeKeeper);
-            } catch (IOException exception) {
+                JsonTypeKeeperReader.read(path, this.typeKeeper);
+            } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
         });
@@ -289,11 +284,9 @@ public class MagikWorkspaceService implements WorkspaceService {
         final List<String> typesDbPaths = MagikSettings.INSTANCE.getTypingTypeDatabasePaths();
         this.readTypesDbs(typesDbPaths);
 
-        // Read method docs.
-        final String smallworldGisDir = MagikSettings.INSTANCE.getSmallworldGis();
-        if (smallworldGisDir != null) {
-            this.readLibsDocs(smallworldGisDir);
-        }
+        // Read class_infos from libs/ dirs.
+        final List<String> libsDirs = MagikSettings.INSTANCE.getLibsDirs();
+        this.readLibsClassInfos(libsDirs);
 
         // Index .magik-tools-ignore files.
         this.runIgnoreFilesIndexer();
@@ -324,7 +317,7 @@ public class MagikWorkspaceService implements WorkspaceService {
 
             try {
                 this.runIndexers();
-            } catch (Exception exception) {
+            } catch (final Exception exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
 
