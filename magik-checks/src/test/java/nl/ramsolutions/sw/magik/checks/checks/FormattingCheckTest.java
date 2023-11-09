@@ -125,6 +125,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
             + "$\n"
             + "\n"
             + "\n"
+            + "\n"
             + "_pragma(classify_level=basic)\n"
             + "_method a.a(parameter)\n"
             + "_endmethod\n",

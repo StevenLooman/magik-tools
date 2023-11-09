@@ -365,21 +365,34 @@ public class FormattingCheck extends MagikCheck {
     }
 
     private void requireMaxNewlines(final Token token) {
-        // Test if there are no more than 2 successive newline tokens.
+        // Test if there are no more than 2 successive newline tokens (disregarding whitespace).
         int count = 0;
+        Token fromToken = null;
+        Token toToken = null;
         for (final Trivia trivia : token.getTrivia()) {
             final Token triviaToken = trivia.getToken();
             final TokenType tokenType = triviaToken.getType();
             if (tokenType == GenericTokenType.EOL) {
+                if (count == 1) {
+                    fromToken = triviaToken;
+                }
+
                 count += 1;
             } else if (tokenType != GenericTokenType.WHITESPACE) {
                 count = 0;
             }
 
             if (count > 2) {
-                final String message = String.format(MESSAGE, "only single empty line allowed");
-                this.addIssue(triviaToken, message);
+                toToken = triviaToken;
             }
+        }
+
+        if (fromToken != null && toToken != null) {
+            final String message = String.format(MESSAGE, "only single empty line allowed");
+            this.addIssue(
+                fromToken.getLine(), 0,
+                toToken.getLine(), toToken.getColumn(),  // TODO: toToken.getColumn() + 1 ?
+                message);
         }
     }
 
