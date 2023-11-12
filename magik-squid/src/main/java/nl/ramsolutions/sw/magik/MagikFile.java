@@ -50,15 +50,6 @@ public class MagikFile {
     }
 
     /**
-     * Constructor.
-     * @param uri URI.
-     * @param source Source.
-     */
-    public MagikFile(final String uri, final String source) {
-        this(URI.create(uri), source);
-    }
-
-    /**
      * Constructor. Read file at path.
      * @param path File to read.
      * @throws IOException -
