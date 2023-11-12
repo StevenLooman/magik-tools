@@ -40,10 +40,14 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         MagikOperator.MINUS.getValue(), "negated",
         MagikOperator.PLUS.getValue(), "unary_plus",
         MagikKeyword.SCATTER.getValue(), "for_scatter()");
-    private static final CommentInstructionReader.InstructionType TYPE_INSTRUCTION =
-        CommentInstructionReader.InstructionType.createStatementInstructionType("type");
-    private static final CommentInstructionReader.InstructionType ITER_TYPE_INSTRUCTION =
-        CommentInstructionReader.InstructionType.createStatementInstructionType("iter-type");
+    private static final CommentInstructionReader.Instruction TYPE_INSTRUCTION =
+        new CommentInstructionReader.Instruction(
+            "type",
+            CommentInstructionReader.Instruction.Sort.STATEMENT);
+    private static final CommentInstructionReader.Instruction ITER_TYPE_INSTRUCTION =
+        new CommentInstructionReader.Instruction(
+            "iter-type",
+            CommentInstructionReader.Instruction.Sort.STATEMENT);
 
     private final CommentInstructionReader instructionReader;
 
