@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.parser;
 
+import java.net.URI;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -9,14 +10,17 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for InstructionReader.
+ * Tests for CommentInstructionReader.
  */
-class CommentInstructionReaderReaderTest {
+class CommentInstructionReaderTest {
 
-    private static final CommentInstructionReader.InstructionType MLINT_LINE_INSTRUCTION =
-        CommentInstructionReader.InstructionType.createStatementInstructionType("mlint");
-    private static final CommentInstructionReader.InstructionType MLINT_SCOPE_INSTRUCTION =
-        CommentInstructionReader.InstructionType.createScopeInstructionType("mlint");
+    private static final URI DEFAULT_URI = URI.create("tests://unittest");
+
+    private static final String NAME_MLINT = "mlint";
+    private static final CommentInstructionReader.Instruction MLINT_STATEMENT_INSTRUCTION =
+        new CommentInstructionReader.Instruction(NAME_MLINT, CommentInstructionReader.Instruction.Sort.STATEMENT);
+    private static final CommentInstructionReader.Instruction MLINT_SCOPE_INSTRUCTION =
+        new CommentInstructionReader.Instruction(NAME_MLINT, CommentInstructionReader.Instruction.Sort.SCOPE);
 
     @Test
     void testReadStatementInstruction() {
@@ -24,14 +28,14 @@ class CommentInstructionReaderReaderTest {
             + "_proc()\n"
             + "  print(10)  # mlint: disable=forbidden-call\n"
             + "_endproc";
-        final MagikFile magikFile = new MagikFile("tests://unittest", code);
+        final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
 
         final CommentInstructionReader instructionReader =
-            new CommentInstructionReader(magikFile, Set.of(MLINT_LINE_INSTRUCTION));
+            new CommentInstructionReader(magikFile, Set.of(MLINT_STATEMENT_INSTRUCTION));
 
-        final String instructionAtLine =
-            instructionReader.getInstructionsAtLine(2, MLINT_LINE_INSTRUCTION);
-        assertThat(instructionAtLine).isEqualTo("disable=forbidden-call");
+        final String instructionAtLine1 =
+            instructionReader.getInstructionsAtLine(1, MLINT_STATEMENT_INSTRUCTION);
+        assertThat(instructionAtLine1).isEqualTo("disable=forbidden-call");
 
         // Cannot read instruction via scope.
         final GlobalScope globalScope = magikFile.getGlobalScope();
@@ -43,6 +47,7 @@ class CommentInstructionReaderReaderTest {
     @Test
     void testReadScopeInstruction() {
         final String code = ""
+            + "# mlint: disable=file-method-count\n"
             + "_proc()\n"
             + "  # mlint: disable=no-self-use\n"
             + "  print(10, 20)  # mlint: disable=forbidden-call\n"
@@ -50,16 +55,16 @@ class CommentInstructionReaderReaderTest {
             + "    show(:a, :b, :c)\n"
             + "  _endblock\n"
             + "_endproc";
-        final MagikFile magikFile = new MagikFile("tests://unittest", code);
+        final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
 
         final CommentInstructionReader instructionReader =
-            new CommentInstructionReader(magikFile, Set.of(MLINT_LINE_INSTRUCTION, MLINT_SCOPE_INSTRUCTION));
+            new CommentInstructionReader(magikFile, Set.of(MLINT_SCOPE_INSTRUCTION));
 
         // Read no instruction in global scope.
         final GlobalScope globalScope = magikFile.getGlobalScope();
         final Set<String> globalScopeInstructions =
             instructionReader.getScopeInstructions(globalScope, MLINT_SCOPE_INSTRUCTION);
-        assertThat(globalScopeInstructions).isEmpty();
+        assertThat(globalScopeInstructions).containsOnly("disable=file-method-count");
 
         // Read the scope instruction in proc scope.
         final Scope procScope = globalScope.getChildScopes().get(0);
@@ -74,19 +79,23 @@ class CommentInstructionReaderReaderTest {
         assertThat(blockScopeInstructions).isEmpty();
 
         // No line instruction.
-        final String instructionAtLine1 = instructionReader.getInstructionsAtLine(1, MLINT_LINE_INSTRUCTION);
+        final String instructionAtLine0 = instructionReader.getInstructionsAtLine(0, MLINT_STATEMENT_INSTRUCTION);
+        assertThat(instructionAtLine0).isNull();
+
+        // No line instruction.
+        final String instructionAtLine1 = instructionReader.getInstructionsAtLine(1, MLINT_STATEMENT_INSTRUCTION);
         assertThat(instructionAtLine1).isNull();
 
         // No line instruction; Line instruction does not match the scope instruction.
-        final String instructionAtLine2 = instructionReader.getInstructionsAtLine(2, MLINT_LINE_INSTRUCTION);
+        final String instructionAtLine2 = instructionReader.getInstructionsAtLine(2, MLINT_STATEMENT_INSTRUCTION);
         assertThat(instructionAtLine2).isNull();
 
-        // Read line instruction.
-        final String instructionAtLine3 = instructionReader.getInstructionsAtLine(3, MLINT_LINE_INSTRUCTION);
-        assertThat(instructionAtLine3).isEqualTo("disable=forbidden-call");
+        // No line instruction; Statement instruction does not match scope instruction.
+        final String instructionAtLine3 = instructionReader.getInstructionsAtLine(3, MLINT_STATEMENT_INSTRUCTION);
+        assertThat(instructionAtLine3).isNull();
 
         // No line instruction.
-        final String instructionAtLine4 = instructionReader.getInstructionsAtLine(4, MLINT_LINE_INSTRUCTION);
+        final String instructionAtLine4 = instructionReader.getInstructionsAtLine(4, MLINT_STATEMENT_INSTRUCTION);
         assertThat(instructionAtLine4).isNull();
     }
 
