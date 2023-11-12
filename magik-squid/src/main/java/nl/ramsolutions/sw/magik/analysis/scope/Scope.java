@@ -13,6 +13,8 @@ import javax.annotation.Nullable;
 
 /**
  * Base scope.
+ *
+ * Line numbers are 1-based, column numbers are 0-based.
  */
 public abstract class Scope {
 
@@ -218,46 +220,43 @@ public abstract class Scope {
     }
 
     /**
-     * Get the start line of this scope.
+     * Get the start line of this scope, 1-based.
      * @return Start line.
      */
     public int getStartLine() {
         final AstNode parentNode = this.node.getParent();
-        final List<Token> tokens = parentNode.getTokens();
-        final Token firstToken = tokens.get(0);
+        final Token firstToken = parentNode.getToken();
         return firstToken.getLine();
     }
 
     /**
-     * Get the start column of this scope.
+     * Get the start column of this scope, 0-based.
      * @return Start column.
      */
     public int getStartColumn() {
         final AstNode parentNode = this.node.getParent();
-        final List<Token> tokens = parentNode.getTokens();
-        final Token firstToken = tokens.get(0);
+        final Token firstToken = parentNode.getToken();
         return firstToken.getColumn() + firstToken.getOriginalValue().length();
     }
 
     /**
-     * Get the end line of this scope.
+     * Get the end line of this scope, 1-based.
      * @return End line.
      */
     public int getEndLine() {
         final AstNode parentNode = this.node.getParent();
-        final List<Token> tokens = parentNode.getTokens();
-        final Token lastToken = tokens.get(tokens.size() - 1);
-        return lastToken.getLine();
+        final AstNode lastChildNode = parentNode.getLastChild();
+        return lastChildNode.getTokenLine();
     }
 
     /**
-     * Get the end column of this scope.
+     * Get the end column of this scope, 0-based.
      * @return End column.
      */
     public int getEndColumn() {
         final AstNode parentNode = this.node.getParent();
-        final List<Token> tokens = parentNode.getTokens();
-        final Token lastToken = tokens.get(tokens.size() - 1);
+        final AstNode lastChildNode = parentNode.getLastChild();
+        final Token lastToken = lastChildNode.getToken();
         return lastToken.getColumn();
     }
 

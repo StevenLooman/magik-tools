@@ -54,7 +54,7 @@ public class MagikCheckHolder {
         }
     }
 
-    private final Class<MagikCheck> checkClass;
+    private final Class<? extends MagikCheck> checkClass;
     private final Set<Parameter> parameters;
     private final boolean enabled;
     private JSONObject metadata;
@@ -67,7 +67,7 @@ public class MagikCheckHolder {
      * @param enabled Check is enabled.
      */
     public MagikCheckHolder(
-            final Class<MagikCheck> checkClass, final Set<Parameter> parameters, final boolean enabled) {
+            final Class<? extends MagikCheck> checkClass, final Set<Parameter> parameters, final boolean enabled) {
         this.checkClass = checkClass;
         this.parameters = parameters;
         this.enabled = enabled;
@@ -106,7 +106,7 @@ public class MagikCheckHolder {
      * Get the {@link MagikCheck} class.
      * @return {@link MagikCheck} class.
      */
-    public Class<MagikCheck> getCheckClass() {
+    public Class<? extends MagikCheck> getCheckClass() {
         return this.checkClass;
     }
 

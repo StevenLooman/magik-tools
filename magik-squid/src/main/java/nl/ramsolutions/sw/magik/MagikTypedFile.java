@@ -26,17 +26,6 @@ public class MagikTypedFile extends MagikFile {
     }
 
     /**
-     * Constructor.
-     * @param uri URI.
-     * @param text Text.
-     * @param typeKeeper TypeKeeper.
-     */
-    public MagikTypedFile(final String uri, final String text, final ITypeKeeper typeKeeper) {
-        super(uri, text);
-        this.typeKeeper = typeKeeper;
-    }
-
-    /**
      * Constructor. Read file at path.
      * @param path File to read.
      * @throws IOException -

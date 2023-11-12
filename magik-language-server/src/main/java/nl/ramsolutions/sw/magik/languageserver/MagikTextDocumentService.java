@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -175,8 +176,9 @@ public class MagikTextDocumentService implements TextDocumentService {
         LOGGER.debug("didOpen, uri: {}", textDocument.getUri());
 
         // Store file contents.
-        final String uri = textDocument.getUri();
-        final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uri);
+        final String uriStr = textDocument.getUri();
+        final URI uri = URI.create(uriStr);
+        final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uriStr);
         final String text = textDocument.getText();
         final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.typeKeeper);
         this.openFiles.put(textDocumentIdentifier, openFile);
@@ -194,8 +196,9 @@ public class MagikTextDocumentService implements TextDocumentService {
         final List<TextDocumentContentChangeEvent> contentChangeEvents = params.getContentChanges();
         final TextDocumentContentChangeEvent contentChangeEvent = contentChangeEvents.get(0);
         final String text = contentChangeEvent.getText();
-        final String uri = versionedTextDocumentIdentifier.getUri();
-        final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uri);
+        final String uriStr = versionedTextDocumentIdentifier.getUri();
+        final URI uri = URI.create(uriStr);
+        final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uriStr);
         final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.typeKeeper);
         this.openFiles.put(textDocumentIdentifier, openFile);
 

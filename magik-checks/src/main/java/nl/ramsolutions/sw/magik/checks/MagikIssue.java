@@ -33,7 +33,7 @@ public class MagikIssue {
     }
 
     /**
-     * Get the start line of the issue.
+     * Get the start line of the issue, 1-based.
      * @return Start line of the issue, defaults to 1 if no range.
      */
     public int startLine() {
@@ -51,7 +51,7 @@ public class MagikIssue {
     }
 
     /**
-     * Get the end line of the issue.
+     * Get the end line of the issue, 1-based.
      * @return End line of the issue, defaults to 1 if no range.
      */
     public int endLine() {
