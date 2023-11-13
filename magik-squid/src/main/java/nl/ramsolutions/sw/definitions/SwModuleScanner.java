@@ -9,12 +9,14 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.CheckForNull;
-import nl.ramsolutions.sw.definitions.api.SwModuleDefGrammar;
+import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionGrammar;
 import nl.ramsolutions.sw.definitions.parser.SwModuleDefParser;
+import nl.ramsolutions.sw.magik.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,14 +31,14 @@ public final class SwModuleScanner {
 
     private static class ModuleDefFileVisitor extends SimpleFileVisitor<Path> {
 
-        private Set<SwModule> modules = new HashSet<>();
+        private Set<SwModuleDefinition> modules = new HashSet<>();
         private final Path startPath;
 
         ModuleDefFileVisitor(final Path startPath) {
             this.startPath = startPath;
         }
 
-        public Set<SwModule> getModules() {
+        public Set<SwModuleDefinition> getModules() {
             return this.modules;
         }
 
@@ -58,7 +60,7 @@ public final class SwModuleScanner {
 
         private void addModule(final Path path) {
             try {
-                SwModule swModule = SwModuleScanner.readModuleDefinition(path);
+                SwModuleDefinition swModule = SwModuleScanner.readModuleDefinition(path);
                 this.modules.add(swModule);
             } catch (IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
@@ -67,13 +69,18 @@ public final class SwModuleScanner {
 
     }
 
+    /**
+     * Module definition filename.
+     */
+    public static final String SW_MODULE_DEF = "module.def";
+
     private static final Map<Path, Path> CACHE = new ConcurrentHashMap<>();
     private static final Path DOES_NOT_EXIST = Path.of("DOES_NOT_EXIST");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SwModuleScanner.class);
 
-    private static final Path SW_MODULE_DEF_PATH = Path.of(SwModule.SW_MODULE_DEF);
-    private static final Path SW_PRODUCT_DEF_PATH = Path.of(SwProduct.SW_PRODUCT_DEF);
+    private static final Path SW_MODULE_DEF_PATH = Path.of(SwModuleScanner.SW_MODULE_DEF);
+    private static final Path SW_PRODUCT_DEF_PATH = Path.of(SwProductScanner.SW_PRODUCT_DEF);
 
     private SwModuleScanner() {
     }
@@ -85,10 +92,10 @@ public final class SwModuleScanner {
     /**
      * Scan for `module.def` files.
      * @param path Path to scan from.
-     * @return Set of found {@link SwModule}s.
+     * @return Set of found {@link SwModuleDefinition}s.
      * @throws IOException
      */
-    public static Set<SwModule> scanModules(final Path path) throws IOException {
+    public static Set<SwModuleDefinition> scanModules(final Path path) throws IOException {
         final ModuleDefFileVisitor fileVistor = new ModuleDefFileVisitor(path);
         Files.walkFileTree(path, fileVistor);
         return fileVistor.getModules();
@@ -126,7 +133,7 @@ public final class SwModuleScanner {
      * @throws IOException -
      */
     @CheckForNull
-    public static SwModule swModuleForPath(final Path startPath) throws IOException {
+    public static SwModuleDefinition swModuleForPath(final Path startPath) throws IOException {
         final Path moduleDefPath = SwModuleScanner.moduleDefAtPath(startPath);
         if (moduleDefPath == null) {
             return null;
@@ -141,13 +148,26 @@ public final class SwModuleScanner {
      * @return Parsed module definition.
      * @throws IOException -
      */
-    public static SwModule readModuleDefinition(final Path path) throws IOException {
+    public static SwModuleDefinition readModuleDefinition(final Path path) throws IOException {
         final SwModuleDefParser parser = new SwModuleDefParser();
         final AstNode node = parser.parse(path);
-        final AstNode moduleIdentNode = node.getFirstChild(SwModuleDefGrammar.MODULE_IDENTIFICATION);
-        final AstNode identfierNode = moduleIdentNode.getFirstChild(SwModuleDefGrammar.IDENTIFIER);
+
+        final AstNode moduleIdentNode = node.getFirstChild(SwModuleDefinitionGrammar.MODULE_IDENTIFICATION);
+        final AstNode identfierNode = moduleIdentNode.getFirstChild(SwModuleDefinitionGrammar.IDENTIFIER);
         final String moduleName = identfierNode.getTokenValue();
-        return new SwModule(moduleName, path);
+        final List<AstNode> versionNodes = moduleIdentNode.getChildren(SwModuleDefinitionGrammar.VERSION);
+        final AstNode baseVersionNode = versionNodes.get(0);
+        final String baseVersion = baseVersionNode.getTokenValue();
+        final AstNode currentVersionNode = versionNodes.size() > 1
+            ? versionNodes.get(1)
+            : null;
+        final String currentVersion = currentVersionNode != null
+            ? currentVersionNode.getTokenValue()
+            : null;
+
+        final URI uri = path.toUri();
+        final Location location = new Location(uri);
+        return new SwModuleDefinition(location, moduleName, baseVersion, currentVersion);
     }
 
     /**
@@ -168,7 +188,7 @@ public final class SwModuleScanner {
             ? path.getParent()
             : path;
 
-        final SwModule swModule;
+        final SwModuleDefinition swModule;
         try {
             swModule = SwModuleScanner.swModuleForPath(searchPath);
         } catch (final IOException exception) {

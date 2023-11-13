@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
-import nl.ramsolutions.sw.definitions.SwModule;
+import nl.ramsolutions.sw.definitions.SwModuleDefinition;
 import nl.ramsolutions.sw.definitions.SwModuleScanner;
-import nl.ramsolutions.sw.definitions.SwProduct;
+import nl.ramsolutions.sw.definitions.SwProductDefinition;
 import nl.ramsolutions.sw.definitions.SwProductScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
@@ -62,7 +62,7 @@ public class MUnitTestItemProvider {
     public Collection<MUnitTestItem> getTestItems() {
         LOGGER.debug("Getting test items");
 
-        final Map<SwProduct, MUnitTestItem> swProductTestItems = new HashMap<>();
+        final Map<SwProductDefinition, MUnitTestItem> swProductTestItems = new HashMap<>();
 
         // Get all test methods of test cases, group by product,module,type
         this.getTestMethods().forEach(testMethod -> {
@@ -78,7 +78,7 @@ public class MUnitTestItemProvider {
 
     private void createTestItems(
             final Method testMethod,
-            final Map<SwProduct, MUnitTestItem> swProductTestItems) throws IOException {
+            final Map<SwProductDefinition, MUnitTestItem> swProductTestItems) throws IOException {
         final Location location = testMethod.getLocation();
         if (location == null) {
             LOGGER.warn("Test method without location: {}", testMethod);
@@ -89,11 +89,11 @@ public class MUnitTestItemProvider {
         final Path path = Path.of(uri);
 
         // Get or create product TestItem.
-        final SwProduct swProduct = this.getSwProduct(path);
+        final SwProductDefinition swProduct = this.getSwProduct(path);
         final MUnitTestItem swProductTestItem = swProductTestItems.computeIfAbsent(swProduct, this::createTestItem);
 
         // Get or create module TestItem.
-        final SwModule swModule = this.getSwModule(path);
+        final SwModuleDefinition swModule = this.getSwModule(path);
         final MUnitTestItem newSwModuleTestItem = this.createTestItem(swModule);
         final MUnitTestItem swModuleTestItem = swProductTestItem.addChild(newSwModuleTestItem);
 
@@ -119,12 +119,12 @@ public class MUnitTestItemProvider {
             .filter(method -> method.getName().toLowerCase().startsWith(MUNIT_TEST_METHOD_PREFIX));
     }
 
-    private SwProduct getSwProduct(final Path path) throws IOException {
-        final Path productDefPath = path.resolve(SwProduct.SW_PRODUCT_DEF);
+    private SwProductDefinition getSwProduct(final Path path) throws IOException {
+        final Path productDefPath = path.resolve(SwProductScanner.SW_PRODUCT_DEF);
         if (!Files.exists(productDefPath)) {
             final Path parentPath = path.getParent();
             if (parentPath == null) {
-                return new SwProduct("<no_product>", null);
+                return new SwProductDefinition(null, "<no_product>", "", null);
             }
 
             return this.getSwProduct(parentPath);
@@ -134,12 +134,12 @@ public class MUnitTestItemProvider {
         return SwProductScanner.readProductDefinition(productDefPath);
     }
 
-    private SwModule getSwModule(final Path path) throws IOException {
-        final Path moduleDefPath = path.resolve(SwModule.SW_MODULE_DEF);
+    private SwModuleDefinition getSwModule(final Path path) throws IOException {
+        final Path moduleDefPath = path.resolve(SwModuleScanner.SW_MODULE_DEF);
         if (!Files.exists(moduleDefPath)) {
             final Path parentPath = path.getParent();
             if (parentPath == null) {
-                return new SwModule("<no_module>", null);
+                return new SwModuleDefinition(null, "<no_module>", "", "1");
             }
 
             return this.getSwModule(parentPath);
@@ -149,12 +149,12 @@ public class MUnitTestItemProvider {
         return SwModuleScanner.readModuleDefinition(moduleDefPath);
     }
 
-    private MUnitTestItem createTestItem(final SwProduct swProduct) {
+    private MUnitTestItem createTestItem(final SwProductDefinition swProduct) {
         final String productName = swProduct.getName();
         return new MUnitTestItem("product:" + productName, productName, null);
     }
 
-    private MUnitTestItem createTestItem(final SwModule swModule) {
+    private MUnitTestItem createTestItem(final SwModuleDefinition swModule) {
         final String moduleName = swModule.getName();
         return new MUnitTestItem("module:" + moduleName, moduleName, null);
     }

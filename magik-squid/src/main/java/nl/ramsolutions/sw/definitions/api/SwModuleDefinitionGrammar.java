@@ -5,10 +5,10 @@ import org.sonar.sslr.grammar.LexerlessGrammarBuilder;
 import org.sonar.sslr.parser.LexerlessGrammar;
 
 /**
- * Module.def grammar.
+ * Module definition grammar.
  */
 @SuppressWarnings("checkstyle:JavadocVariable")
-public enum SwModuleDefGrammar implements GrammarRuleKey {
+public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
 
     MODULE_DEFINITION,
 
@@ -87,7 +87,7 @@ public enum SwModuleDefGrammar implements GrammarRuleKey {
 
             SPACING)).skip();
 
-        builder.rule(MODULE_IDENTIFICATION).is(IDENTIFIER, WHITESPACE, NUMBER, builder.optional(WHITESPACE, NUMBER));
+        builder.rule(MODULE_IDENTIFICATION).is(IDENTIFIER, WHITESPACE, VERSION, builder.optional(WHITESPACE, VERSION));
         builder.rule(CONDITION_MESSAGE_ACCESSOR).is("condition_message_accessor", WHITESPACE, IDENTIFIER);
         builder.rule(DESCRIPTION).is("description", SPACING, FREE_LINES, "end");
         builder.rule(HIDDEN).is("hidden");
