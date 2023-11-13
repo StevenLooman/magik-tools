@@ -19,7 +19,7 @@ public class WarnedCallCheck extends MagikCheck {
     public static final String CHECK_KEY = "WarnedCall";
 
     private static final String MESSAGE = "Call is warned.";
-    private static final String DEFAULT_WARNED_CALLS = "write()";
+    private static final String DEFAULT_WARNED_CALLS = "write(), sw:write()";
 
     /**
      * List of Warned calls, separated by ','.

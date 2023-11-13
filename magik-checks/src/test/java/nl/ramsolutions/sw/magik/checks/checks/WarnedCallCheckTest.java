@@ -33,7 +33,15 @@ class WarnedCallCheckTest extends MagikCheckTestBase {
         final MagikCheck check = new WarnedCallCheck();
         final String code = "write(1)";
         final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isNotEmpty();
+        assertThat(issues).hasSize(1);
+    }
+
+    @Test
+    void testProcedureSwWrite() {
+        final MagikCheck check = new WarnedCallCheck();
+        final String code = "sw:write(1)";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).hasSize(1);
     }
 
 }

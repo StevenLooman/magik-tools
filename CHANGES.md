@@ -7,6 +7,7 @@
 - Paths specified in setting `ignore` in `magik-lint.properties` in magik-lint are respected.
 - Fix grammar not supporting end labels in `_loop`/`_endloop` constructs.
 - Fix reading mlint-instructions in scope.
+- Fix WarnedCallCheck default warned calls not seeing the `sw:`-prefixed versions.
 
 0.8.1 (2023-10-15)
 
