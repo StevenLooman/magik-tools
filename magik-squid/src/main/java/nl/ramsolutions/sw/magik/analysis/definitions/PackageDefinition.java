@@ -47,4 +47,12 @@ public class PackageDefinition extends Definition {
         return this.name;
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+            "%s@%s(%s)",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()),
+            this.getName());
+    }
+
 }

@@ -94,7 +94,7 @@ public class TypeKeeperDefinitionInserter {
             // Create a new type. Note that we might overwrite something?
             if (this.typeKeeper.hasType(typeRef)) {
                 final AbstractType removedType = this.typeKeeper.getType(typeRef);
-                LOGGER.debug("Overwriting type: {}", removedType);
+                LOGGER.debug("Overwriting type: {}, with: {}", removedType, definition);
                 this.typeKeeper.removeType(removedType);
             }
 
@@ -191,7 +191,7 @@ public class TypeKeeperDefinitionInserter {
         final TypeString typeRef = definition.getTypeString();
         final AbstractType abstractType = this.typeKeeper.getType(typeRef);
         if (abstractType != UndefinedType.INSTANCE) {
-            LOGGER.debug("Removing type: {}", abstractType);
+            LOGGER.debug("Overwriting type: {}, with: {}", abstractType, definition);
             this.typeKeeper.removeType(abstractType);
         }
 

@@ -52,4 +52,12 @@ public class GlobalDefinition extends Definition {
         return this.typeName.getPakkage();
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+            "%s@%s(%s, %s)",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()),
+            this.getTypeString().getFullString(), this.getAliasedTypeName().getFullString());
+    }
+
 }

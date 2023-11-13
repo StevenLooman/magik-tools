@@ -161,4 +161,12 @@ public class MethodDefinition extends Definition {
         return this.typeName.getPakkage();
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+            "%s@%s(%s, %s)",
+            this.getClass().getName(), Integer.toHexString(this.hashCode()),
+            this.getTypeName().getFullString(), this.getMethodName());
+    }
+
 }

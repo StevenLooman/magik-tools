@@ -131,7 +131,7 @@ public class AliasType extends AbstractType {
         return String.format(
             "%s@%s(%s, %s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
-            this.getFullName(), this.getAliasedType());
+            this.getFullName(), this.getAliasedType().getFullName());
     }
 
 }
