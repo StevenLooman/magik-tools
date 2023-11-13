@@ -373,7 +373,7 @@ public class FormattingCheck extends MagikCheck {
             final Token triviaToken = trivia.getToken();
             final TokenType tokenType = triviaToken.getType();
             if (tokenType == GenericTokenType.EOL) {
-                if (count == 1) {
+                if (count == 2) {
                     fromToken = triviaToken;
                 }
 
@@ -391,7 +391,7 @@ public class FormattingCheck extends MagikCheck {
             final String message = String.format(MESSAGE, "only single empty line allowed");
             this.addIssue(
                 fromToken.getLine(), 0,
-                toToken.getLine(), toToken.getColumn(),  // TODO: toToken.getColumn() + 1 ?
+                toToken.getLine() + 1, toToken.getColumn(),
                 message);
         }
     }
