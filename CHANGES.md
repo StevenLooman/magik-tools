@@ -1,6 +1,6 @@
 # Changes
 
-0.8.2 (unreleased)
+0.8.2 (2023-11-14)
 
 - Fix not finding appropriate node to register issue on when method contains a syntax error.
 - `magik-lint.properties` is searched for from path of current file in magik-lint, unless `--rcfile` is used.
