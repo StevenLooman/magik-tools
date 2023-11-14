@@ -1,18 +1,13 @@
-name: Lint and package
+name: Package and create a release with assets
 on:
   push:
-    branches:
-      - develop
-  pull_request:
-    types: [opened, synchronize, reopened]
+    tags:
+      - "*"
 
 jobs:
   build:
-    name: Build, test and package
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    name: Package and create a release with assets
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -36,15 +31,9 @@ jobs:
       - run: mkdir staging && cp **/target/*.jar staging
       - run: cd magik-language-server/client-vscode && npm install . && npm run package
       - run: cp magik-language-server/client-vscode/magik-language-server-*.vsix staging
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Package-${{ matrix.os }}
-          path: staging
 
-  markdown_lint:
-    name: Markdown Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: DavidAnson/markdownlint-cli2-action@v11
+      - name: Release
+        uses: softprops/action-gh-release@v1
         with:
-          globs: '**/*.md'
+          files: |
+            staging/*
