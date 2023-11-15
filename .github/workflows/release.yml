@@ -31,6 +31,7 @@ jobs:
       - run: mkdir staging && cp **/target/*.jar staging
       - run: cd magik-language-server/client-vscode && npm install . && npm run package
       - run: cp magik-language-server/client-vscode/magik-language-server-*.vsix staging
+      - run: rm -f staging/original-*.jar
 
       - name: Release
         uses: softprops/action-gh-release@v1
