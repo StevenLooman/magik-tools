@@ -42,7 +42,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

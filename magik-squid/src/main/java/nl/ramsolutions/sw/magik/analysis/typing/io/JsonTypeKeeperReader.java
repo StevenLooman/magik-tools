@@ -251,7 +251,7 @@ public final class JsonTypeKeeperReader {
      * @param typeKeeper {@link TypeKeeper} to fill.
      * @throws IOException -
      */
-    public static void read(final Path path, final ITypeKeeper typeKeeper) throws IOException {
+    public static void readTypes(final Path path, final ITypeKeeper typeKeeper) throws IOException {
         final JsonTypeKeeperReader reader = new JsonTypeKeeperReader(typeKeeper);
         reader.run(path);
     }

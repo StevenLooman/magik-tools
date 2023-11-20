@@ -139,7 +139,7 @@ public class MagikWorkspaceService implements WorkspaceService {
             }
 
             try {
-                ClassInfoTypeKeeperReader.readLibsDirectory(path, this.typeKeeper);
+                ClassInfoDefinitionReader.readLibsDirectory(path, this.typeKeeper);
             } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }

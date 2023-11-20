@@ -32,7 +32,7 @@ class JsonTypeKeeperReaderTest {
     private ITypeKeeper readTypes() throws IOException {
         final Path path = Path.of("src/test/resources/tests/type_database.jsonl");
         final ITypeKeeper typeKeeper = new TypeKeeper();
-        JsonTypeKeeperReader.read(path, typeKeeper);
+        JsonTypeKeeperReader.readTypes(path, typeKeeper);
         return typeKeeper;
     }
 

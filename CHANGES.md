@@ -4,7 +4,6 @@
 
 - Support configurable libs dirs.
 - Read and register in which module a definition lives.
-- Read and register in which module a definition lives.
 - Refactor MagikIndexer/JsonTypeKeeperReader/JsonTypeKeeperWriter/ClassInfoTypeKeeperReader to share more functionality.
 
 0.8.3 (unreleased)
