@@ -207,6 +207,10 @@
 					"description": "Path to Smallworld Core.",
 					"type": "string"
 				},
+				"magik.libsDirs": {
+					"description": "Paths to libs dirs of Smallworld products",
+					"type": "array"
+				},
 				"magik.aliases": {
 					"description": "Path to gis_aliases file.",
 					"type": "string"

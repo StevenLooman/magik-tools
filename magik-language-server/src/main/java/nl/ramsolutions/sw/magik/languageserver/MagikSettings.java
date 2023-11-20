@@ -57,6 +57,29 @@ public final class MagikSettings {  // NOSONAR
     }
 
     /**
+     * Get magik.libsDirs.
+     * @return magik.libsDirs.
+     */
+    public List<String> getLibsDirs() {
+        final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+        if (magik == null) {
+            return Collections.emptyList();
+        }
+
+        final JsonArray libsDirs = magik.getAsJsonArray("libsDirs");
+        if (libsDirs == null) {
+            return Collections.emptyList();
+        }
+
+        final List<String> paths = new ArrayList<>();
+        libsDirs.forEach(jsonElement -> {
+            final String path = jsonElement.getAsString();
+            paths.add(path);
+        });
+        return paths;
+    }
+
+    /**
      * Get magik.typing.typeDatabasePath.
      * @return magik.typing.typeDatabasePath.
      */
