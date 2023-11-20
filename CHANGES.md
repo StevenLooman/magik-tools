@@ -3,6 +3,7 @@
 0.8.3 (unreleased)
 
 - Fix error finding start/end line/column for Scopes, when encountering an empty block.
+- Fix error when determining issue is disabled via MagikIssueDisabledChecker in certain cases.
 
 0.8.2 (2023-11-14)
 
