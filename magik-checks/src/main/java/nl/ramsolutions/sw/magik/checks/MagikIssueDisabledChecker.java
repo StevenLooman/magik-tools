@@ -42,6 +42,7 @@ public final class MagikIssueDisabledChecker {
         final String checkKey = holder.getCheckKeyKebabCase();
 
         final Integer issueLineNo = magikIssue.startLine();  // 1-based.
+        final Integer columnNo = magikIssue.startColumn();
         final Integer fileLineNo = issueLineNo - 1;  // 0-based.
 
         final Map<String, String> statementInstructions =
@@ -56,7 +57,7 @@ public final class MagikIssueDisabledChecker {
         }
 
         final GlobalScope globalScope = magikFile.getGlobalScope();
-        final Scope issueScope = globalScope.getScopeForLineColumn(issueLineNo, Integer.MAX_VALUE);
+        final Scope issueScope = globalScope.getScopeForLineColumn(issueLineNo, columnNo);
         Objects.requireNonNull(issueScope);
         return issueScope.getSelfAndAncestorScopes().stream()
             .map(scope ->
