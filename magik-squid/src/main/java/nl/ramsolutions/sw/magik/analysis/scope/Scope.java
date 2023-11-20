@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
  * Base scope.
@@ -33,6 +34,10 @@ public abstract class Scope {
      * @param node Node.
      */
     protected Scope(final Scope parentScope, final AstNode node) {
+        if (!node.is(MagikGrammar.BODY)) {
+            throw new IllegalArgumentException();
+        }
+
         this.parentScope = parentScope;
         this.node = node;
 
@@ -219,14 +224,20 @@ public abstract class Scope {
         return this.scopeEntries.values();
     }
 
+    private Token getStartToken() {
+        return this.node.getPreviousAstNode().getLastToken();
+    }
+
+    private Token getEndToken() {
+        return this.node.getNextAstNode().getToken();
+    }
+
     /**
      * Get the start line of this scope, 1-based.
      * @return Start line.
      */
     public int getStartLine() {
-        final AstNode parentNode = this.node.getParent();
-        final Token firstToken = parentNode.getToken();
-        return firstToken.getLine();
+        return this.getStartToken().getLine();
     }
 
     /**
@@ -234,9 +245,8 @@ public abstract class Scope {
      * @return Start column.
      */
     public int getStartColumn() {
-        final AstNode parentNode = this.node.getParent();
-        final Token firstToken = parentNode.getToken();
-        return firstToken.getColumn() + firstToken.getOriginalValue().length();
+        final Token token = this.getStartToken();
+        return token.getColumn() + token.getOriginalValue().length();
     }
 
     /**
@@ -244,9 +254,7 @@ public abstract class Scope {
      * @return End line.
      */
     public int getEndLine() {
-        final AstNode parentNode = this.node.getParent();
-        final AstNode lastChildNode = parentNode.getLastChild();
-        return lastChildNode.getTokenLine();
+        return this.getEndToken().getLine();
     }
 
     /**
@@ -254,10 +262,7 @@ public abstract class Scope {
      * @return End column.
      */
     public int getEndColumn() {
-        final AstNode parentNode = this.node.getParent();
-        final AstNode lastChildNode = parentNode.getLastChild();
-        final Token lastToken = lastChildNode.getToken();
-        return lastToken.getColumn();
+        return this.getEndToken().getColumn();
     }
 
     /**

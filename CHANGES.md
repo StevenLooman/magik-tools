@@ -2,6 +2,8 @@
 
 0.8.3 (unreleased)
 
+- Fix error finding start/end line/column for Scopes, when encountering an empty block.
+
 0.8.2 (2023-11-14)
 
 - Fix not finding appropriate node to register issue on when method contains a syntax error.
