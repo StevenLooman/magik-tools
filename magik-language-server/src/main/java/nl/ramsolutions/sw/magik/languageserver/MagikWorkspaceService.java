@@ -161,7 +161,7 @@ public class MagikWorkspaceService implements WorkspaceService {
             }
 
             try {
-                JsonTypeKeeperReader.read(path, this.typeKeeper);
+                JsonTypeKeeperReader.readTypes(path, this.typeKeeper);
             } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
