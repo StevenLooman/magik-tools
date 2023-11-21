@@ -1,12 +1,16 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 
 /**
  * {@code def_enumeration_from}/{@code def_enumeration} parser.
@@ -17,6 +21,8 @@ public class DefEnumerationParser extends TypeDefParser {
     private static final String DEF_ENUMERATION = "def_enumeration";
     private static final String SW_DEF_ENUMERATION_FROM = "sw:def_enumeration_from";
     private static final String SW_DEF_ENUMERATION = "sw:def_enumeration";
+    private static final List<TypeString> ENUM_PARENTS = List.of(
+        TypeString.ofIdentifier("enumeration_value", "sw"));
 
     /**
      * Constructor.
@@ -57,12 +63,19 @@ public class DefEnumerationParser extends TypeDefParser {
      */
     @Override
     public List<Definition> parseDefinitions() {
-        final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+        final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
         final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
         final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
         if (argument0Node == null) {
             throw new IllegalStateException();
         }
+
+        // Figure location.
+        final URI uri = this.node.getToken().getURI();
+        final Location location = new Location(uri, this.node);
+
+        // Figure module name.
+        final String moduleName = SwModuleScanner.getModuleName(uri);
 
         // Figure statement node.
         final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
@@ -74,12 +87,21 @@ public class DefEnumerationParser extends TypeDefParser {
         final String identifier = argument0Node.getTokenValue().substring(1);
         final TypeString name = TypeString.ofIdentifier(identifier, pakkage);
 
-        // Figure parents.
-        final List<TypeString> parents = Collections.emptyList();
+        // Figure doc.
+        final AstNode parentNode = this.node.getParent();
+        final String doc  = MagikCommentExtractor.extractDocComment(parentNode);
 
-        final EnumerationDefinition enumerationDefinition =
-            new EnumerationDefinition(statementNode, name, parents);
-        return List.of(enumerationDefinition);
+        final ExemplarDefinition definition = new ExemplarDefinition(
+            location,
+            moduleName,
+            statementNode,
+            ExemplarDefinition.Sort.SLOTTED,
+            name,
+            Collections.emptyList(),
+            DefEnumerationParser.ENUM_PARENTS,
+            doc,
+            Collections.emptyList());
+        return List.of(definition);
     }
 
 }

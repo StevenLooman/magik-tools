@@ -18,6 +18,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  * - define_slot_access
  * - define_shared_variable
  * - define_shared_constant
+ * - define_binary_operator_case
  */
 public class DefinitionReader extends AstWalker {
 

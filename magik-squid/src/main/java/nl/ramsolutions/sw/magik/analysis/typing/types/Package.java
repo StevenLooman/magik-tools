@@ -16,23 +16,35 @@ import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
  */
 public class Package {
 
+    private final String moduleName;
     private final String name;
     private final Set<String> uses = ConcurrentHashMap.newKeySet();
     private final Map<String, AbstractType> types = new ConcurrentHashMap<>();
+    private final ITypeKeeper typeKeeper;
     private Location location;
     private String doc;
-    private ITypeKeeper typeKeeper;
 
     /**
      * Constructor.
      * @param name Name of package.
      */
-    public Package(final ITypeKeeper typeKeeper, final String name) {
+    public Package(
+            final ITypeKeeper typeKeeper,
+            final @Nullable Location location,
+            final @Nullable String moduleName,
+            final String name) {
         this.typeKeeper = typeKeeper;
+        this.location = location;
+        this.moduleName = moduleName;
         this.name = name;
 
-        this.setLocation(null);
+        // Add self to TypeKeeper.
         this.typeKeeper.addPackage(this);
+    }
+
+    @CheckForNull
+    public String getModuleName() {
+        return this.moduleName;
     }
 
     /**
@@ -53,14 +65,6 @@ public class Package {
     }
 
     /**
-     * Set the location where the package is defined.
-     * @param location Location of package definition.
-     */
-    public void setLocation(final @Nullable Location location) {
-        this.location = location;
-    }
-
-    /**
      * Add a use of another package.
      * @param pakkageName Other package.
      */
@@ -76,10 +80,18 @@ public class Package {
     }
 
     /**
+     * Get used packages.
+     * @return Used packages.
+     */
+    public Set<String> getUses() {
+        return Collections.unmodifiableSet(this.uses);
+    }
+
+    /**
      * Get all used packages.
      * @return All used packages.
      */
-    public Set<Package> getUses() {
+    public Set<Package> getUsesPackages() {
         return this.uses.stream()
             .map(this.typeKeeper::getPackage)
             .filter(Objects::nonNull)
@@ -87,13 +99,21 @@ public class Package {
     }
 
     /**
-     * See if {@code key} is defined in this package.
-     * This also includes used packages.
+     * See if {@code key} is defined in this package or a used package.
      * @param key Key to check.
-     * @return true if defined in this package, false otherwise.
+     * @return true if defined in this or any used package, false otherwise.
      */
     public boolean containsKey(final String key) {
         return this.get(key) != null;
+    }
+
+    /**
+     * See if {@code key} is defined in this package.
+     * @param key Key to check.
+     * @return true if defined in this, false otherwise.
+     */
+    public boolean containsKeyLocal(final String key) {
+        return this.types.containsKey(key);
     }
 
     /**
@@ -116,7 +136,7 @@ public class Package {
     @CheckForNull
     public AbstractType get(final String key) {
         if (!this.types.containsKey(key)) {
-            for (final Package usedPackage : this.getUses()) {
+            for (final Package usedPackage : this.getUsesPackages()) {
                 final AbstractType type = usedPackage.get(key);
                 if (type != null) {
                     return type;
@@ -180,7 +200,7 @@ public class Package {
 
     @Override
     public String toString() {
-        final String usesParts = this.getUses().stream()
+        final String usesParts = this.getUsesPackages().stream()
                 .map(Package::getName)
                 .collect(Collectors.joining(","));
         return String.format(

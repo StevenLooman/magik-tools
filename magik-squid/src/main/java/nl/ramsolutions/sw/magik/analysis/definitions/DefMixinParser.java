@@ -1,11 +1,16 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
+import java.util.Collections;
 import java.util.List;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 
 /**
  * {@code def_mixin()} parser.
@@ -62,21 +67,39 @@ public class DefMixinParser extends TypeDefParser {
             throw new IllegalStateException();
         }
 
+        // Figure location.
+        final URI uri = this.node.getToken().getURI();
+        final Location location = new Location(uri, this.node);
+
+        // Figure module name.
+        final String moduleName = SwModuleScanner.getModuleName(uri);
+
         // Figure statement node.
         final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
 
-        // Figure pakkage.
-        final String pakkage = this.getCurrentPakkage();
-
         // Figure name.
+        final String packageName = this.getCurrentPakkage();
         final String identifier = argument0Node.getTokenValue().substring(1);
-        final TypeString name = TypeString.ofIdentifier(identifier, pakkage);
+        final TypeString name = TypeString.ofIdentifier(identifier, packageName);
 
-        // Parents.
+        // Figure parents.
         final AstNode argument1Node = argumentsHelper.getArgument(1);
         final List<TypeString> parents = this.extractParents(argument1Node);
 
-        final MixinDefinition mixinDefinition = new MixinDefinition(statementNode, name, parents);
+        // Figure doc.
+        final AstNode parentNode = this.node.getParent();
+        final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+
+        final ExemplarDefinition mixinDefinition = new ExemplarDefinition(
+            location,
+            moduleName,
+            statementNode,
+            ExemplarDefinition.Sort.INTRINSIC,
+            name,
+            Collections.emptyList(),
+            parents,
+            doc,
+            Collections.emptyList());
         return List.of(mixinDefinition);
     }
 

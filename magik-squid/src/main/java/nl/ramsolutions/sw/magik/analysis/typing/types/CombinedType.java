@@ -31,6 +31,7 @@ public class CombinedType extends AbstractType {
      * @param types Combined types.
      */
     public CombinedType(final Collection<AbstractType> types) {
+        super(null, null);
         this.types = Set.copyOf(types);
     }
 

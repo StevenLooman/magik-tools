@@ -3,6 +3,9 @@
 0.9.0 (unreleased)
 
 - Support configurable libs dirs.
+- Read and register in which module a definition lives.
+- Use com.google.gson instead of org.json.
+- Refactor MagikIndexer/JsonTypeKeeperReader/JsonTypeKeeperWriter/ClassInfoTypeKeeperReader to share more functionality, via *Definition classes.
 
 0.8.3 (unreleased)
 

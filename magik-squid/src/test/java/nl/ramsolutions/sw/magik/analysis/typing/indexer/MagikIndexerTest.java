@@ -5,6 +5,7 @@ import java.util.Collection;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Slot;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
@@ -108,7 +109,7 @@ class MagikIndexerTest {
     }
 
     @Test
-    void testTypeDoc() {
+    void testTypeDocExemplar() {
         final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer_with_type_doc.magik");
         final Path fixedPath = this.getPath(path).toAbsolutePath();
         final ITypeKeeper typeKeeper = new TypeKeeper();
@@ -119,6 +120,13 @@ class MagikIndexerTest {
         final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
         final AbstractType type = typeKeeper.getType(typeString);
         assertThat(type).isNotEqualTo(UndefinedType.INSTANCE);
+
+        // Test doc.
+        final String doc = type.getDoc();
+        assertThat(doc).isEqualTo(""
+            + "Test exemplar.\n"
+            + "@slot {sw:rope} slot_a\n"
+            + "@slot {sw:property_list<sw:symbol, sw:integer>} slot_b");
 
         // Test methods.
         final Collection<Method> newMethods = type.getLocalMethods("new()");
@@ -148,6 +156,34 @@ class MagikIndexerTest {
                     TypeString.ofIdentifier("property_list", "sw",
                         TypeString.ofIdentifier("symbol", "sw"),
                         TypeString.ofIdentifier("integer", "sw")));
+    }
+
+    @Test
+    void testTypeDocMethod() {
+        final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer_with_type_doc.magik");
+        final Path fixedPath = this.getPath(path).toAbsolutePath();
+        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final MagikIndexer magikIndexer = new MagikIndexer(typeKeeper);
+        magikIndexer.indexPathCreated(fixedPath);
+
+        final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
+        final AbstractType type = typeKeeper.getType(typeString);
+
+        final Method newMethod = type.getLocalMethods("new()").stream()
+            .findAny()
+            .orElseThrow();
+        assertThat(newMethod)
+            .extracting("doc")
+                .isEqualTo(""
+                    + "Constructor.\n"
+                    + "@return {_self}");
+        assertThat(newMethod)
+            .extracting("callResult")
+                .isEqualTo(new ExpressionResultString(
+                    TypeString.SELF));
+        assertThat(newMethod)
+            .extracting("loopbodyResult")
+                .isEqualTo(new ExpressionResultString());
     }
 
 }

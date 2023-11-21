@@ -78,8 +78,8 @@ public class ReadOnlyTypeKeeperAdapter implements ITypeKeeper {
     @Override
     public BinaryOperator getBinaryOperator(
             final BinaryOperator.Operator operator,
-            final AbstractType leftType,
-            final AbstractType rightType) {
+            final TypeString leftType,
+            final TypeString rightType) {
         return this.typeKeeper.getBinaryOperator(operator, leftType, rightType);
     }
 

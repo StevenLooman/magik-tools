@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
@@ -54,6 +55,11 @@ public class MagikType extends AbstractType {
 
     }
 
+    private static final TypeString DEFAULT_PARENT_INDEXED_EXEMPLAR =
+        TypeString.ofIdentifier("indexed_format_mixin", "sw");
+    private static final TypeString DEFAULT_PARENT_SLOTTED_EXEMPLAR =
+        TypeString.ofIdentifier("slotted_format_mixin", "sw");
+
     private final TypeString typeString;
     private final Set<Method> methods = ConcurrentHashMap.newKeySet();
     private final Set<TypeString> parents = ConcurrentHashMap.newKeySet();
@@ -65,12 +71,19 @@ public class MagikType extends AbstractType {
     /**
      * Constructor.
      * @param typeKeeper TypeKeeper.
-     * @param magikTypeSort Sort.
+     * @param moduleName Module name.
+     * @param sort Sort.
      * @param typeString Global reference.
      */
-    public MagikType(final ITypeKeeper typeKeeper, final Sort magikTypeSort, final TypeString typeString) {
+    public MagikType(
+            final ITypeKeeper typeKeeper,
+            final @Nullable Location location,
+            final @Nullable String moduleName,
+            final Sort sort,
+            final TypeString typeString) {
+        super(location, moduleName);
         this.typeKeeper = typeKeeper;
-        this.sort = magikTypeSort;
+        this.sort = sort;
         this.typeString = typeString;
 
         // Add self to TypeKeeper.
@@ -108,9 +121,45 @@ public class MagikType extends AbstractType {
         this.parents.add(parentTypeString);
     }
 
+    /**
+     * Get parent {@link TypeString}s.
+     * @return Parents.
+     */
+    public Set<TypeString> getParentsTypeRefs() {
+        final Set<TypeString> defaultParents;
+        if (this.getSort() == MagikType.Sort.INDEXED) {
+            defaultParents = Set.of(DEFAULT_PARENT_INDEXED_EXEMPLAR);
+        } else if (this.getSort() == MagikType.Sort.SLOTTED) {
+            defaultParents = Set.of(DEFAULT_PARENT_SLOTTED_EXEMPLAR);
+        } else {
+            defaultParents = Collections.emptySet();
+        }
+
+        if (this.getSort() == MagikType.Sort.INDEXED
+            || this.getSort() == MagikType.Sort.SLOTTED) {
+            // Ensure correct parents. As we only know the actual parents during this evaluation,
+            // we need to do this at runtime.
+            final boolean parentNonIntrinsicType = this.parents.stream()
+                .map(parentTypeRef -> this.typeKeeper.getType(parentTypeRef))
+                .filter(MagikType.class::isInstance)
+                .map(MagikType.class::cast)
+                .anyMatch(parentType ->
+                    parentType.getSort() == Sort.SLOTTED
+                    || parentType.getSort() == Sort.INDEXED);
+            if (!parentNonIntrinsicType) {
+                return Stream.concat(
+                    this.parents.stream(),
+                    defaultParents.stream())
+                    .collect(Collectors.toSet());
+            }
+        }
+
+        return Collections.unmodifiableSet(this.parents);
+    }
+
     @Override
     public Collection<AbstractType> getParents() {
-        return this.parents.stream()
+        return this.getParentsTypeRefs().stream()
             .map(this.typeKeeper::getType)
             .collect(Collectors.toList());
     }
@@ -213,6 +262,7 @@ public class MagikType extends AbstractType {
 
     /**
      * Add the resulting types of a method and loopbody, overwrites existing methods.
+     * @param moduleName Module name.
      * @param location Location of method.
      * @param methodName Name of method.
      * @param parameters Parameters for method.
@@ -224,6 +274,7 @@ public class MagikType extends AbstractType {
     @SuppressWarnings({"java:S1319", "checkstyle:ParameterNumber"})
     public Method addMethod(// NOSONAR
             final @Nullable Location location,
+            final @Nullable String moduleName,
             final Set<Method.Modifier> modifiers,
             final String methodName,
             final List<Parameter> parameters,
@@ -233,6 +284,7 @@ public class MagikType extends AbstractType {
             final ExpressionResultString loopbodyResult) {
         final Method method = new Method(
             location,
+            moduleName,
             modifiers,
             this,
             methodName,

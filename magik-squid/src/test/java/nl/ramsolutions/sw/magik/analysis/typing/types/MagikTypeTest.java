@@ -16,12 +16,13 @@ class MagikTypeTest {
     @Test
     void testCreateGenericType1() {
         final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType magikType =
-            new MagikType(typeKeeper, MagikType.Sort.SLOTTED, TypeString.ofIdentifier("property_list", "sw"));
+        final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
+        final MagikType magikType = new MagikType(typeKeeper, null, null, MagikType.Sort.SLOTTED, propertyListRef);
         final GenericDeclaration key = magikType.addGeneric(null, "K");
         final GenericDeclaration element = magikType.addGeneric(null, "E");
 
         final Method method = magikType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "fast_keys_and_elements()",

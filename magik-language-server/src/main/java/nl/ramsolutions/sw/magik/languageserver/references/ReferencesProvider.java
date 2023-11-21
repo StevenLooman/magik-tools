@@ -159,7 +159,7 @@ public class ReferencesProvider {
             .flatMap(method -> method.getMethodUsages().stream())
             .filter(filterPredicate::test)
             .map(Method.MethodUsage::getLocation)
-            .filter(Objects::nonNull)
+            .map(Location::validLocation)
             .collect(Collectors.toList());
     }
 
@@ -187,7 +187,7 @@ public class ReferencesProvider {
             .flatMap(method -> method.getGlobalUsages().stream())
             .filter(filterPredicate::test)
             .map(Method.GlobalUsage::getLocation)
-            .filter(Objects::nonNull)
+            .map(Location::validLocation)
             .collect(Collectors.toList());
     }
 
@@ -199,6 +199,7 @@ public class ReferencesProvider {
             .flatMap(method -> method.getConditionUsages().stream())
             .filter(conditionUsage -> conditionUsage.getConditionName().equals(conditionName))
             .map(Method.ConditionUsage::getLocation)
+            .map(Location::validLocation)
             .collect(Collectors.toList());
     }
 

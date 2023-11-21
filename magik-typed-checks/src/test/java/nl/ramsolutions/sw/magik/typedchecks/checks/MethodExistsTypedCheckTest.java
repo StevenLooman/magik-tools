@@ -39,6 +39,7 @@ class MethodExistsTypedCheckTest extends MagikTypedCheckTestBase {
         final MagikType objectType = (MagikType) typeKeeper.getType(objectTypeStr);
         objectType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "m()",
             Collections.emptyList(),

@@ -34,12 +34,13 @@ class InlayHintProviderTest {
         final MagikType objectType = (MagikType) typeKeeper.getType(objectRef);
         objectType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "method()",
             List.of(
-                new Parameter("param1", Parameter.Modifier.NONE),
-                new Parameter("param2", Parameter.Modifier.NONE),
-                new Parameter("param3", Parameter.Modifier.NONE)),
+                new Parameter(null, "param1", Parameter.Modifier.NONE),
+                new Parameter(null, "param2", Parameter.Modifier.NONE),
+                new Parameter(null, "param3", Parameter.Modifier.NONE)),
             null,
             null,
             new ExpressionResultString(),

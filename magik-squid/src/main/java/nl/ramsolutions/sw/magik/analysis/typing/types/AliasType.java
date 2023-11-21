@@ -2,6 +2,8 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.Nullable;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 
 /**
@@ -11,7 +13,7 @@ public class AliasType extends AbstractType {
 
     private final ITypeKeeper typeKeeper;
     private final TypeString typeString;
-    private final TypeString aliasedTypeString;
+    private final TypeString aliasedTypeRef;
     private final AbstractType aliasedType;
 
     /**
@@ -21,12 +23,18 @@ public class AliasType extends AbstractType {
      */
     public AliasType(
             final ITypeKeeper typeKeeper,
+            final @Nullable Location location,
+            final @Nullable String moduleName,
             final TypeString typeString,
             final TypeString aliasedTypeString) {
+        super(location, moduleName);
         this.typeKeeper = typeKeeper;
         this.typeString = typeString;
-        this.aliasedTypeString = aliasedTypeString;
+        this.aliasedTypeRef = aliasedTypeString;
         this.aliasedType = null;
+
+        // Add self to TypeKeeper.
+        this.typeKeeper.addType(this);
     }
 
     /**
@@ -37,13 +45,17 @@ public class AliasType extends AbstractType {
      */
     public AliasType(
             final ITypeKeeper typeKeeper,
+            final @Nullable Location location,
+            final @Nullable String moduleName,
             final TypeString typeString,
             final AbstractType aliasedType) {
+        super(location, moduleName);
         this.typeKeeper = typeKeeper;
         this.typeString = typeString;
-        this.aliasedTypeString = null;
+        this.aliasedTypeRef = null;
         this.aliasedType = aliasedType;
 
+        // Add self to TypeKeeper.
         this.typeKeeper.addType(this);
     }
 
@@ -57,8 +69,8 @@ public class AliasType extends AbstractType {
      * @return Aliased type.
      */
     public AbstractType getAliasedType() {
-        if (this.aliasedTypeString != null) {
-            return this.typeKeeper.getType(this.aliasedTypeString);
+        if (this.aliasedTypeRef != null) {
+            return this.typeKeeper.getType(this.aliasedTypeRef);
         }
 
         return this.aliasedType;
@@ -90,12 +102,12 @@ public class AliasType extends AbstractType {
     }
 
     @Override
-    public Collection<Method> getSuperMethods(String methodName) {
+    public Collection<Method> getSuperMethods(final String methodName) {
         return this.getAliasedType().getSuperMethods(methodName);
     }
 
     @Override
-    public Collection<Method> getSuperMethods(String methodName, String superName) {
+    public Collection<Method> getSuperMethods(final String methodName, final String superName) {
         return this.getAliasedType().getSuperMethods(methodName, superName);
     }
 
@@ -119,7 +131,7 @@ public class AliasType extends AbstractType {
         return String.format(
             "%s@%s(%s, %s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
-            this.getFullName(), this.getAliasedType());
+            this.getFullName(), this.getAliasedType().getFullName());
     }
 
 }

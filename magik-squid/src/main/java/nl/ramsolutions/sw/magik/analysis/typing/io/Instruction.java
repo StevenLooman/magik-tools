@@ -4,7 +4,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.io;
  * Json TypeKeeper Reader/Writer instructions.
  */
 @SuppressWarnings("checkstyle:JavadocVariable")
-enum InstInstruction {
+enum Instruction {
 
     INSTRUCTION("instruction"),
     PACKAGE("package"),
@@ -17,7 +17,7 @@ enum InstInstruction {
 
     private final String value;
 
-    InstInstruction(final String value) {
+    Instruction(final String value) {
         this.value = value;
     }
 
@@ -30,8 +30,8 @@ enum InstInstruction {
      * @param value Value to get enum from.
      * @return Enum.
      */
-    public static InstInstruction fromValue(final String value) {
-        for (final InstInstruction instruction : InstInstruction.values()) {
+    public static Instruction fromValue(final String value) {
+        for (final Instruction instruction : Instruction.values()) {
             if (instruction.getValue().equals(value)) {
                 return instruction;
             }

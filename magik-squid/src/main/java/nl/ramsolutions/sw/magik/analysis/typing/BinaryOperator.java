@@ -1,6 +1,9 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
 import java.util.Objects;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
@@ -70,26 +73,47 @@ public class BinaryOperator {
 
     }
 
+    private final Location location;
+    private final String moduleName;
     private final Operator operator;
     private final TypeString leftRef;
     private final TypeString rightRef;
     private final TypeString resultRef;
+    private final String doc;
 
     /**
      * Constructor.
+     * @param location Location.
+     * @param moduleName Module name.
      * @param operator Operator name.
      * @param leftRef Left {@link MagikType}.
      * @param rightRef Right {@link MagikType}.
      */
     public BinaryOperator(
+            final @Nullable Location location,
+            final @Nullable String moduleName,
             final Operator operator,
             final TypeString leftRef,
             final TypeString rightRef,
-            final TypeString resultRef) {
+            final TypeString resultRef,
+            final String doc) {
+        this.location = location;
+        this.moduleName = moduleName;
         this.operator = operator;
         this.leftRef = leftRef;
         this.rightRef = rightRef;
         this.resultRef = resultRef;
+        this.doc = doc;
+    }
+
+    @CheckForNull
+    public Location getLocation() {
+        return this.location;
+    }
+
+    @CheckForNull
+    public String getModuleName() {
+        return this.moduleName;
     }
 
     /**
@@ -121,7 +145,11 @@ public class BinaryOperator {
      * @return Result type.
      */
     public TypeString getResultType() {
-        return resultRef;
+        return this.resultRef;
+    }
+
+    public String getDoc() {
+        return this.doc;
     }
 
     @Override

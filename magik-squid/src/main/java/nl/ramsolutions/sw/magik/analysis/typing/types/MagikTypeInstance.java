@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
 
@@ -31,6 +32,7 @@ public class MagikTypeInstance extends AbstractType {
             final ITypeKeeper typeKeeper,
             final TypeString typeString,
             final Set<GenericDefinition> genericDefinitions) {
+        super(null, null);
         this.typeKeeper = typeKeeper;
         this.typeString = typeString;
         this.genericDefinitions = Set.copyOf(genericDefinitions);
@@ -140,6 +142,7 @@ public class MagikTypeInstance extends AbstractType {
         // Substitute parameters.
         final List<Parameter> newParameters = method.getParameters().stream()
             .map(param -> {
+                final Location location = param.getLocation();
                 final String name = param.getName();
                 final Parameter.Modifier modifier = param.getModifier();
                 TypeString newTypeStr = param.getType();
@@ -148,7 +151,7 @@ public class MagikTypeInstance extends AbstractType {
                     final TypeString to = entry.getValue();
                     newTypeStr = newTypeStr.substituteType(from, to);
                 }
-                return new Parameter(name, modifier, newTypeStr);
+                return new Parameter(location, name, modifier, newTypeStr);
             })
             .collect(Collectors.toList());
 
@@ -164,6 +167,7 @@ public class MagikTypeInstance extends AbstractType {
 
         return new Method(
             method.getLocation(),
+            method.getModuleName(),
             method.getModifiers(),
             method.getOwner(),
             method.getName(),
@@ -259,6 +263,11 @@ public class MagikTypeInstance extends AbstractType {
             "%s@%s(%s%s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
             this.getFullName(), genericsStr);
+    }
+
+    @Override
+    public String getModuleName() {
+        return this.getMagikType().getModuleName();
     }
 
 }

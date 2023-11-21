@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.languageserver.hover;
 import com.sonar.sslr.api.AstNode;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
@@ -146,7 +147,7 @@ public class HoverProvider {
 
         final String indentStr = "&nbsp;&nbsp;".repeat(indent);
         final Comparator<Package> byName = Comparator.comparing(Package::getName);
-        pakkage.getUses().stream()
+        pakkage.getUsesPackages().stream()
             .sorted(byName)
             .forEach(uses -> {
                 builder
@@ -452,6 +453,13 @@ public class HoverProvider {
             .append(method.getCallResult().getTypeNames(", "))
             .append(SECTION_END);
 
+        // Method module.
+        final String moduleName = Objects.requireNonNullElse(method.getModuleName(), "");
+        builder
+            .append("Module: ")
+            .append(moduleName)
+            .append(SECTION_END);
+
         // Method doc.
         final String methodDoc = method.getDoc();
         if (methodDoc != null) {
@@ -470,6 +478,13 @@ public class HoverProvider {
         builder
             .append("## ")
             .append(typeStr.getFullString().replace("<", "&lt;").replace(">", "&gt;"))
+            .append(SECTION_END);
+
+        // Method module.
+        final String moduleName = Objects.requireNonNullElse(type.getModuleName(), "");
+        builder
+            .append("Module: ")
+            .append(moduleName)
             .append(SECTION_END);
 
         // Type doc.

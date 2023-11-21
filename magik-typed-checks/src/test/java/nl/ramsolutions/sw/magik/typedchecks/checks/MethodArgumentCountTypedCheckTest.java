@@ -39,11 +39,12 @@ class MethodArgumentCountTypedCheckTest extends MagikTypedCheckTestBase {
         final MagikType objectType = (MagikType) typeKeeper.getType(objectTypeStr);
         objectType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "m()",
             List.of(
-                new Parameter("p1", Parameter.Modifier.NONE, objectTypeStr),
-                new Parameter("p2", Parameter.Modifier.NONE, objectTypeStr)),
+                new Parameter(null, "p1", Parameter.Modifier.NONE, objectTypeStr),
+                new Parameter(null, "p2", Parameter.Modifier.NONE, objectTypeStr)),
             null,
             "method_doc",
             new ExpressionResultString(),
@@ -65,11 +66,12 @@ class MethodArgumentCountTypedCheckTest extends MagikTypedCheckTestBase {
         final MagikType objectType = (MagikType) typeKeeper.getType(objectTypeStr);
         objectType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "m()",
             List.of(
-                new Parameter("p1", Parameter.Modifier.NONE, objectTypeStr),
-                new Parameter("p2", Parameter.Modifier.NONE, objectTypeStr)),
+                new Parameter(null, "p1", Parameter.Modifier.NONE, objectTypeStr),
+                new Parameter(null, "p2", Parameter.Modifier.NONE, objectTypeStr)),
             null,
             "method_doc",
             new ExpressionResultString(),

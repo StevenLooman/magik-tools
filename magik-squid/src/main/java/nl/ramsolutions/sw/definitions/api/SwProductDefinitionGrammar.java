@@ -5,10 +5,10 @@ import org.sonar.sslr.grammar.LexerlessGrammarBuilder;
 import org.sonar.sslr.parser.LexerlessGrammar;
 
 /**
- * Product.def grammar.
+ * Product definition grammar.
  */
 @SuppressWarnings("checkstyle:JavadocVariable")
-public enum SwProductDefGrammar implements GrammarRuleKey {
+public enum SwProductDefinitionGrammar implements GrammarRuleKey {
 
     PRODUCT_DEFINITION,
 
@@ -24,6 +24,7 @@ public enum SwProductDefGrammar implements GrammarRuleKey {
     PRODUCT_REFS,
     PRODUCT_REF,
     VERSION_NUMBER,
+    VERSION_COMMENT,
     FREE_LINES,
     FREE_LINE,
 
@@ -58,17 +59,16 @@ public enum SwProductDefGrammar implements GrammarRuleKey {
         builder.rule(DESCRIPTION).is("description", SPACING, FREE_LINES, "end");
         builder.rule(REQUIRES).is("requires", SPACING, PRODUCT_REFS, "end");
         builder.rule(TITLE).is("title", SPACING, FREE_LINES, "end");
-        builder.rule(VERSION).is("version", WHITESPACE, VERSION_NUMBER);
+        builder.rule(VERSION).is("version", WHITESPACE, VERSION_NUMBER, builder.optional(WHITESPACE, REST_OF_LINE));
 
         builder.rule(PRODUCT_TYPE).is(builder.firstOf(
             "layered_product",
             "customisation_product",
             "config_product"));
         builder.rule(PRODUCT_REFS).is(builder.zeroOrMore(PRODUCT_REF, SPACING));
-        builder.rule(PRODUCT_REF).is(IDENTIFIER, builder.optional(WHITESPACE, VERSION));
+        builder.rule(PRODUCT_REF).is(IDENTIFIER, builder.optional(WHITESPACE, VERSION_NUMBER));
         builder.rule(VERSION_NUMBER).is(
-            NUMBER, ".", NUMBER, builder.optional(".", NUMBER),
-            builder.optional(WHITESPACE, REST_OF_LINE));
+            NUMBER, builder.zeroOrMore(".", NUMBER));
         builder.rule(FREE_LINES).is(builder.zeroOrMore(FREE_LINE));
         builder.rule(FREE_LINE).is(builder.regexp("(?!end).*[\r\n]+"));
 

@@ -24,6 +24,7 @@ public class GenericDefinition extends AbstractType {
             final ITypeKeeper typeKeeper,
             final String name,
             final TypeString typeString) {
+        super(null, null);
         this.typeKeeper = typeKeeper;
         this.name = name;
         this.typeString = typeString;

@@ -1,13 +1,17 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 
 /**
  * Condition definition parser.
@@ -95,6 +99,13 @@ public class DefConditionParser {
             throw new IllegalStateException();
         }
 
+        // Figure location.
+        final URI uri = this.node.getToken().getURI();
+        final Location location = new Location(uri, this.node);
+
+        // Figure module name.
+        final String moduleName = SwModuleScanner.getModuleName(uri);
+
         // Figure statement node.
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
 
@@ -115,8 +126,18 @@ public class DefConditionParser {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-        return List.of(
-            new ConditionDefinition(statementNode, name, parent, dataNames));
+        // Figure doc.
+        final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+
+        final ConditionDefinition definition = new ConditionDefinition(
+            location,
+            moduleName,
+            statementNode,
+            name,
+            parent,
+            dataNames,
+            doc);
+        return List.of(definition);
     }
 
 }

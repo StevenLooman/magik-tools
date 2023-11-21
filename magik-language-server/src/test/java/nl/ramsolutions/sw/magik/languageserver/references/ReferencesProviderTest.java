@@ -43,6 +43,7 @@ class ReferencesProviderTest {
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final Method referingMethod = integerType.addMethod(
             EMPTY_LOCATION,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "refering",
             Collections.emptyList(),
@@ -71,6 +72,7 @@ class ReferencesProviderTest {
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final Method referingMethod = integerType.addMethod(
             EMPTY_LOCATION,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "refering",
             Collections.emptyList(),
@@ -99,6 +101,7 @@ class ReferencesProviderTest {
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final Method referingMethod = integerType.addMethod(
             EMPTY_LOCATION,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "refering",
             Collections.emptyList(),
@@ -125,6 +128,7 @@ class ReferencesProviderTest {
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final Method referingMethod = integerType.addMethod(
             EMPTY_LOCATION,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "refering",
             Collections.emptyList(),

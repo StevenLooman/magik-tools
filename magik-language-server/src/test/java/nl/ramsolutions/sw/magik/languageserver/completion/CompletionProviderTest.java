@@ -72,6 +72,7 @@ class CompletionProviderTest {
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
             null,
+            null,
             EnumSet.noneOf(Method.Modifier.class),
             "find_me()",
             Collections.emptyList(),
@@ -99,8 +100,9 @@ class CompletionProviderTest {
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString aRef = TypeString.ofIdentifier("a", "user");
-        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, aRef);
+        final MagikType aType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, aRef);
         aType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "find_me()",
@@ -131,6 +133,7 @@ class CompletionProviderTest {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         integerType.addMethod(
+            null,
             null,
             EnumSet.noneOf(Method.Modifier.class),
             "find_me()",
@@ -206,7 +209,7 @@ class CompletionProviderTest {
             + "_endmethod";
         final ITypeKeeper typeKeeper = new TypeKeeper();
         final TypeString aRef = TypeString.ofIdentifier("a", "user");
-        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, aRef);
+        final MagikType aType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, aRef);
         aType.addSlot(null, "slot1", TypeString.UNDEFINED);
         final Position position = new Position(1, 2);    // On ''.
         final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
