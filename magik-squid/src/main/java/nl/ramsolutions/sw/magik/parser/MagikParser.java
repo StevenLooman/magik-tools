@@ -32,7 +32,7 @@ import org.sonar.sslr.parser.ParserAdapter;
 public class MagikParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikParser.class);
-    private static final URI DEFAULT_URI = URI.create("file:///");
+    private static final URI DEFAULT_URI = URI.create("tests://unittest");
 
     private static final Map<MagikGrammar, MagikGrammar> RULE_MAPPING = new EnumMap<>(MagikGrammar.class);
 

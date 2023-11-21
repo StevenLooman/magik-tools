@@ -64,10 +64,10 @@ class DefinitionReaderTest {
         final List<Definition> definitions = reader.getDefinitions();
         assertThat(definitions).hasSize(1);
 
-        assertThat(definitions.get(0)).isInstanceOf(EnumerationDefinition.class);
-        final EnumerationDefinition enumDef = (EnumerationDefinition) definitions.get(0);
-        assertThat(enumDef.getName()).isEqualTo("test_enum");
-        assertThat(enumDef.getNode()).isEqualTo(node.getFirstDescendant(MagikGrammar.STATEMENT));
+        assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
+        final ExemplarDefinition definition = (ExemplarDefinition) definitions.get(0);
+        assertThat(definition.getName()).isEqualTo("user:test_enum");
+        assertThat(definition.getNode()).isEqualTo(node.getFirstDescendant(MagikGrammar.STATEMENT));
     }
 
     @Test
@@ -80,16 +80,16 @@ class DefinitionReaderTest {
         final List<Definition> definitions = reader.getDefinitions();
         assertThat(definitions).hasSize(1);
 
-        assertThat(definitions.get(0)).isInstanceOf(SlottedExemplarDefinition.class);
-        final SlottedExemplarDefinition slottedExemplarDef = (SlottedExemplarDefinition) definitions.get(0);
-        assertThat(slottedExemplarDef.getName()).isEqualTo("test_exemplar");
+        assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
+        final ExemplarDefinition slottedExemplarDef = (ExemplarDefinition) definitions.get(0);
+        assertThat(slottedExemplarDef.getName()).isEqualTo("user:test_exemplar");
         assertThat(slottedExemplarDef.getNode()).isEqualTo(node.getFirstDescendant(MagikGrammar.STATEMENT));
 
         assertThat(slottedExemplarDef.getSlots()).hasSize(2);
-        final SlottedExemplarDefinition.Slot slot1 = slottedExemplarDef.getSlots().get(0);
+        final ExemplarDefinition.Slot slot1 = slottedExemplarDef.getSlots().get(0);
         assertThat(slot1.getName()).isEqualTo("slot1");
 
-        final SlottedExemplarDefinition.Slot slot2 = slottedExemplarDef.getSlots().get(1);
+        final ExemplarDefinition.Slot slot2 = slottedExemplarDef.getSlots().get(1);
         assertThat(slot2.getName()).isEqualTo("slot2");
     }
 
@@ -103,13 +103,13 @@ class DefinitionReaderTest {
         final List<Definition> definitions = reader.getDefinitions();
         assertThat(definitions).hasSize(4);
 
-        assertThat(definitions.get(0)).isInstanceOf(SlottedExemplarDefinition.class);
-        final SlottedExemplarDefinition slottedExemplarDef = (SlottedExemplarDefinition) definitions.get(0);
+        assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
+        final ExemplarDefinition slottedExemplarDef = (ExemplarDefinition) definitions.get(0);
         assertThat(slottedExemplarDef.getPackage()).isEqualTo("user");
-        assertThat(slottedExemplarDef.getName()).isEqualTo("test_exemplar");
+        assertThat(slottedExemplarDef.getName()).isEqualTo("user:test_exemplar");
         assertThat(slottedExemplarDef.getSlots()).hasSize(1);
 
-        final SlottedExemplarDefinition.Slot slot1 = slottedExemplarDef.getSlots().get(0);
+        final ExemplarDefinition.Slot slot1 = slottedExemplarDef.getSlots().get(0);
         assertThat(slot1.getName()).isEqualTo("slot1");
 
         assertThat(definitions.get(1)).isInstanceOf(MethodDefinition.class);
@@ -141,9 +141,9 @@ class DefinitionReaderTest {
         final List<Definition> definitions = reader.getDefinitions();
         assertThat(definitions).hasSize(1);
 
-        assertThat(definitions.get(0)).isInstanceOf(SlottedExemplarDefinition.class);
-        final SlottedExemplarDefinition slottedExemplarDef = (SlottedExemplarDefinition) definitions.get(0);
-        assertThat(slottedExemplarDef.getName()).isEqualTo("test_exemplar");
+        assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
+        final ExemplarDefinition slottedExemplarDef = (ExemplarDefinition) definitions.get(0);
+        assertThat(slottedExemplarDef.getName()).isEqualTo("user:test_exemplar");
         assertThat(slottedExemplarDef.getNode()).isEqualTo(node.getFirstDescendant(MagikGrammar.STATEMENT));
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
         assertThat(slottedExemplarDef.getParents()).containsExactly(ropeRef);
@@ -159,9 +159,9 @@ class DefinitionReaderTest {
         final List<Definition> definitions = reader.getDefinitions();
         assertThat(definitions).hasSize(1);
 
-        assertThat(definitions.get(0)).isInstanceOf(SlottedExemplarDefinition.class);
-        final SlottedExemplarDefinition slottedExemplarDef = (SlottedExemplarDefinition) definitions.get(0);
-        assertThat(slottedExemplarDef.getName()).isEqualTo("test_exemplar");
+        assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
+        final ExemplarDefinition slottedExemplarDef = (ExemplarDefinition) definitions.get(0);
+        assertThat(slottedExemplarDef.getName()).isEqualTo("user:test_exemplar");
         assertThat(slottedExemplarDef.getNode()).isEqualTo(node.getFirstDescendant(MagikGrammar.STATEMENT));
         assertThat(slottedExemplarDef.getParents()).containsExactly(
             TypeString.ofIdentifier("mixin1", "user"),
@@ -178,10 +178,10 @@ class DefinitionReaderTest {
         final List<Definition> definitions = reader.getDefinitions();
         assertThat(definitions).hasSize(1);
 
-        assertThat(definitions.get(0)).isInstanceOf(IndexedExemplarDefinition.class);
-        final IndexedExemplarDefinition indexedExemplarDef = (IndexedExemplarDefinition) definitions.get(0);
-        assertThat(indexedExemplarDef.getTypeString()).isEqualTo(TypeString.ofIdentifier("test_exemplar", "user"));
-        assertThat(indexedExemplarDef.getParents()).containsExactly(
+        assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
+        final ExemplarDefinition exemplarDef = (ExemplarDefinition) definitions.get(0);
+        assertThat(exemplarDef.getTypeString()).isEqualTo(TypeString.ofIdentifier("test_exemplar", "user"));
+        assertThat(exemplarDef.getParents()).containsExactly(
             TypeString.ofIdentifier("mixin1", "user"),
             TypeString.ofIdentifier("user:integer", "user"));
     }
@@ -196,10 +196,10 @@ class DefinitionReaderTest {
         final List<Definition> definitions = reader.getDefinitions();
         assertThat(definitions).hasSize(1);
 
-        assertThat(definitions.get(0)).isInstanceOf(MixinDefinition.class);
-        final MixinDefinition mixinDef = (MixinDefinition) definitions.get(0);
-        assertThat(mixinDef.getTypeString()).isEqualTo(TypeString.ofIdentifier("test_mixin", "user"));
-        assertThat(mixinDef.getParents()).containsExactly(TypeString.ofIdentifier("mixin1", "user"));
+        assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
+        final ExemplarDefinition defintion = (ExemplarDefinition) definitions.get(0);
+        assertThat(defintion.getTypeString()).isEqualTo(TypeString.ofIdentifier("test_mixin", "user"));
+        assertThat(defintion.getParents()).containsExactly(TypeString.ofIdentifier("mixin1", "user"));
     }
 
     @Test
@@ -216,8 +216,8 @@ class DefinitionReaderTest {
         final BinaryOperatorDefinition operatorDefinition = (BinaryOperatorDefinition) definitions.get(0);
         assertThat(operatorDefinition.getName()).isEqualTo("user:integer > user:float");
         assertThat(operatorDefinition.getOperator()).isEqualTo(">");
-        assertThat(operatorDefinition.getLhs()).isEqualTo(TypeString.ofIdentifier("integer", "user"));
-        assertThat(operatorDefinition.getRhs()).isEqualTo(TypeString.ofIdentifier("float", "user"));
+        assertThat(operatorDefinition.getLhsTypeName()).isEqualTo(TypeString.ofIdentifier("integer", "user"));
+        assertThat(operatorDefinition.getRhsTypeName()).isEqualTo(TypeString.ofIdentifier("float", "user"));
     }
 
     @Test
@@ -470,7 +470,7 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(GlobalDefinition.class);
         final GlobalDefinition globalDef = (GlobalDefinition) definitions.get(0);
-        assertThat(globalDef.getName()).isEqualTo("g");
+        assertThat(globalDef.getName()).isEqualTo("user:g");
     }
 
     @Test

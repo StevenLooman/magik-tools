@@ -16,7 +16,7 @@ import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
  * - {@code "_self|sw:unset"}
  * - {@code "sw:rope<sw:integer>"}
  */
-public final class TypeString {
+public final class TypeString implements Comparable<TypeString> {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final String DEFAULT_PACKAGE = "user";
@@ -327,6 +327,11 @@ public final class TypeString {
             "%s@%s(%s, %s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
             this.currentPackage, this.string);
+    }
+
+    @Override
+    public int compareTo(final TypeString other) {
+        return this.getFullString().compareTo(other.getFullString());
     }
 
 }

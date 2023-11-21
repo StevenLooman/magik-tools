@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.IgnoreHandler;
-import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoTypeKeeperReader;
+import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
@@ -139,7 +139,7 @@ public class MagikWorkspaceService implements WorkspaceService {
             }
 
             try {
-                ClassInfoTypeKeeperReader.readLibsDirectory(path, this.typeKeeper);
+                ClassInfoDefinitionReader.readLibsDirectory(path, this.typeKeeper);
             } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
@@ -274,7 +274,7 @@ public class MagikWorkspaceService implements WorkspaceService {
         final Path workspacePath = Path.of(uri);
 
         return Files.walk(workspacePath)
-                .filter(path -> !this.ignoreHandler.isIgnored(path));
+            .filter(path -> !this.ignoreHandler.isIgnored(path));
     }
 
     private void runIndexers() {

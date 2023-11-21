@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
-import nl.ramsolutions.sw.definitions.api.SwProductDefGrammar;
+import nl.ramsolutions.sw.definitions.api.SwProductDefinitionGrammar;
 import org.sonar.sslr.parser.LexerlessGrammar;
 import org.sonar.sslr.parser.ParserAdapter;
 
@@ -23,9 +23,9 @@ public class SwProductDefParser {
      * @return Tree
      * @throws IOException -
      */
-    public AstNode parse(Path path) throws IOException {
+    public AstNode parse(final Path path) throws IOException {
         final Charset charset = FileCharsetDeterminer.determineCharset(path);
-        final Parser<LexerlessGrammar> parser = new ParserAdapter<>(charset, SwProductDefGrammar.create());
+        final Parser<LexerlessGrammar> parser = new ParserAdapter<>(charset, SwProductDefinitionGrammar.create());
         final File file = path.toFile();
         return parser.parse(file);
     }

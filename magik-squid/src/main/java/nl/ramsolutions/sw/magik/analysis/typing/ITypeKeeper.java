@@ -122,7 +122,7 @@ public interface ITypeKeeper {
      * @return Resulting type.
      */
     @CheckForNull
-    BinaryOperator getBinaryOperator(BinaryOperator.Operator operator, AbstractType leftType, AbstractType rightType);
+    BinaryOperator getBinaryOperator(BinaryOperator.Operator operator, TypeString leftType, TypeString rightType);
 
     /**
      * Remove a binary operator.

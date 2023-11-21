@@ -1,17 +1,19 @@
 package nl.ramsolutions.sw.magik.lint.output;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
+import nl.ramsolutions.sw.magik.checks.MagikCheckMetadata;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,13 +64,19 @@ public class MessageFormatReporter implements Reporter {
         map.put("abspath", path.toAbsolutePath().toString());
         map.put("msg", issue.message());
         try {
-            map.put("msg_id", holder.getSqKey());
-            map.put("symbol", holder.getSqKey());
-            map.put("severity", holder.getSeverity());
-            map.put("category", holder.getSeverity());
-            map.put("tag", holder.getTag());
-        } catch (FileNotFoundException ex) {
-            LOGGER.error("Could not find file: {}", ex.getMessage(), ex);
+            final MagikCheckMetadata metadata = holder.getMetadata();
+            map.put("msg_id", metadata.getSqKey());
+            map.put("symbol", metadata.getSqKey());
+            map.put("severity", metadata.getDefaultSeverity());
+            map.put("category", metadata.getDefaultSeverity());
+
+            final List<String> tags = metadata.getTags();
+            final String tag = !tags.isEmpty()
+                ? tags.get(0)
+                : null;
+            map.put("tag", tag);
+        } catch (final IOException exception) {
+            LOGGER.error("Could not find file: {}", exception.getMessage(), exception);
         }
 
         final Integer startLine = issue.startLine();

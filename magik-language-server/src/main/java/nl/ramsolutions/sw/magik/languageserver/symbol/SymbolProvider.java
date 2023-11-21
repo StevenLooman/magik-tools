@@ -1,10 +1,8 @@
 package nl.ramsolutions.sw.magik.languageserver.symbol;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -28,7 +26,6 @@ import org.slf4j.LoggerFactory;
 public class SymbolProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SymbolProvider.class);
-    private static final Location DUMMY_LOCATION = new Location(URI.create("file:///"));
 
     private final ITypeKeeper typeKeeper;
 
@@ -74,7 +71,8 @@ public class SymbolProvider {
         final Predicate<AbstractType> typePredicate = this.buildTypePredicate(query);
         for (final AbstractType type : this.typeKeeper.getTypes()) {
             if (typePredicate.test(type)) {
-                final Location location = Objects.requireNonNullElse(type.getLocation(), DUMMY_LOCATION);
+                final Location typeLocation = type.getLocation();
+                final Location location = Location.validLocation(typeLocation);
                 final WorkspaceSymbol symbol = new WorkspaceSymbol(
                     "Exemplar: " + type.getFullName(),
                     SymbolKind.Class,
@@ -89,8 +87,9 @@ public class SymbolProvider {
         final BiPredicate<AbstractType, Method> typeMethodPredicate = this.buildTypeMethodPredicate(query);
         for (final AbstractType type : this.typeKeeper.getTypes()) {
             for (final Method method : type.getLocalMethods()) {
+                final Location methodLocation = method.getLocation();
+                final Location location = Location.validLocation(methodLocation);
                 if (methodPredicate.test(method)) {
-                    final Location location = Objects.requireNonNullElse(method.getLocation(), DUMMY_LOCATION);
                     final WorkspaceSymbol symbol = new WorkspaceSymbol(
                         "Method: " + method.getSignature(),
                         SymbolKind.Method,
@@ -99,7 +98,6 @@ public class SymbolProvider {
                 }
 
                 if (typeMethodPredicate.test(type, method)) {
-                    final Location location = Objects.requireNonNullElse(method.getLocation(), DUMMY_LOCATION);
                     final WorkspaceSymbol symbol = new WorkspaceSymbol(
                         "Method: " + method.getSignature(),
                         SymbolKind.Method,
@@ -119,7 +117,8 @@ public class SymbolProvider {
         final Predicate<Condition> conditionPredicate = this.buildConditionPredicate(query);
         for (final Condition condition : this.typeKeeper.getConditions()) {
             if (conditionPredicate.test(condition)) {
-                final Location location = Objects.requireNonNullElse(condition.getLocation(), DUMMY_LOCATION);
+                final Location conditionLocation = condition.getLocation();
+                final Location location = Location.validLocation(conditionLocation);
                 final WorkspaceSymbol symbol = new WorkspaceSymbol(
                     "Condition: " + condition.getName(),
                     SymbolKind.Class,
