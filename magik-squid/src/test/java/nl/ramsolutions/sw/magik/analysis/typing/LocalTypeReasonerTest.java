@@ -265,7 +265,7 @@ class LocalTypeReasonerTest {
         final MagikTypedFile magikFile = this.createMagikFile(code, typeKeeper);
         final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
 
-        // Assert user:object.test type determined.
+        // Assert user:object.test call result determined.
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
         final ExpressionResult result = reasoner.getNodeType(methodNode);

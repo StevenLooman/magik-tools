@@ -50,6 +50,11 @@ public class ReadOnlyTypeKeeperAdapter implements ITypeKeeper {
     }
 
     @Override
+    public boolean hasTypeInPackage(final TypeString typeString) {
+        return this.typeKeeper.hasTypeInPackage(typeString);
+    }
+
+    @Override
     public void addType(final AbstractType type) {
         // Do nothing.
     }
@@ -57,6 +62,11 @@ public class ReadOnlyTypeKeeperAdapter implements ITypeKeeper {
     @Override
     public AbstractType getType(final TypeString typeString) {
         return this.typeKeeper.getType(typeString);
+    }
+
+    @Override
+    public AbstractType getTypeInPackage(final TypeString typeString) {
+        return this.typeKeeper.getTypeInPackage(typeString);
     }
 
     @Override

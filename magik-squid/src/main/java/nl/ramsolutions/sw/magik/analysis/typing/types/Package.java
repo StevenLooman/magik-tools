@@ -19,7 +19,6 @@ public class Package {
     private final String moduleName;
     private final String name;
     private final Set<String> uses = ConcurrentHashMap.newKeySet();
-    private final Map<String, AbstractType> types = new ConcurrentHashMap<>();
     private final ITypeKeeper typeKeeper;
     private Location location;
     private String doc;
@@ -99,86 +98,15 @@ public class Package {
     }
 
     /**
-     * See if {@code key} is defined in this package or a used package.
-     * @param key Key to check.
-     * @return true if defined in this or any used package, false otherwise.
-     */
-    public boolean containsKey(final String key) {
-        return this.get(key) != null;
-    }
-
-    /**
-     * See if {@code key} is defined in this package.
-     * @param key Key to check.
-     * @return true if defined in this, false otherwise.
-     */
-    public boolean containsKeyLocal(final String key) {
-        return this.types.containsKey(key);
-    }
-
-    /**
-     * Test if type is contained by this package.
-     * @param type Type to check.
-     * @return True if contained, false otherwise.
-     */
-    public boolean containsTypeLocal(final AbstractType type) {
-        final String identifier = type.getTypeString().getIdentifier();
-        return this.types.containsKey(identifier)
-            && this.types.get(identifier).equals(type);
-    }
-
-    /**
-     * Get a {@link AbstractType} defined in this package.
-     * This also includes used packages.
-     * @param key Key to get.
-     * @return {@link AbstractType} if found, otherwise null.
-     */
-    @CheckForNull
-    public AbstractType get(final String key) {
-        if (!this.types.containsKey(key)) {
-            for (final Package usedPackage : this.getUsesPackages()) {
-                final AbstractType type = usedPackage.get(key);
-                if (type != null) {
-                    return type;
-                }
-            }
-        }
-
-        return this.types.get(key);
-    }
-
-    /**
-     * Put a type associated with key.
-     * @param key Key of type.
-     * @param type Type.
-     */
-    public void put(final String key, final AbstractType type) {
-        this.types.put(key, type);
-    }
-
-    /**
-     * Put all types.
-     * @param newTypes Types to add.
-     */
-    public void putAll(final Map<String, AbstractType> newTypes) {
-        this.types.putAll(newTypes);
-    }
-
-    /**
      * Get all types in this package.
      * @return All types in this pacakge.
      */
     public Map<String, AbstractType> getTypes() {
-        return Collections.unmodifiableMap(this.types);
-    }
-
-    /**
-     * Remove a type from this package.
-     * @param type Type to remove.
-     */
-    public void remove(final AbstractType type) {
-        final String identifier = type.getTypeString().getIdentifier();
-        this.types.remove(identifier);
+        return this.typeKeeper.getTypes().stream()
+            .filter(type -> type.getTypeString().getPakkage().equals(this.name))
+            .collect(Collectors.toMap(
+                type -> type.getName(),
+                type -> type));
     }
 
     /**

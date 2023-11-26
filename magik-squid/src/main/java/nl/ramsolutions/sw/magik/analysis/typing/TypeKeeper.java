@@ -2,9 +2,11 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
@@ -25,7 +27,7 @@ public class TypeKeeper implements ITypeKeeper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeKeeper.class);
 
-    private final Map<String, Package> packages = new ConcurrentHashMap<>();
+    private final Map<Package, Map<TypeString, AbstractType>> types = new ConcurrentHashMap<>();
     private final Set<BinaryOperator> binaryOperators = ConcurrentHashMap.newKeySet();
     private final Map<String, Condition> conditions = new ConcurrentHashMap<>();
 
@@ -38,71 +40,33 @@ public class TypeKeeper implements ITypeKeeper {
 
     @Override
     public void clear() {
-        this.packages.clear();
+        this.types.clear();
         this.binaryOperators.clear();
 
         this.registerBaseTypes();
     }
 
     private void registerBaseTypes() {
-        final Package swPakkage = new Package(this, null, null, "sw");
-        swPakkage.put(
-            "object",
-            new MagikType(this, null, null, Sort.OBJECT, TypeString.ofIdentifier("object", "sw")));
-        swPakkage.put(
-            "unset",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("unset", "sw")));
-        swPakkage.put(
-            "false",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("false", "sw")));
-        swPakkage.put(
-            "maybe",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("maybe", "sw")));
-        swPakkage.put(
-            "integer",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("integer", "sw")));
-        swPakkage.put(
-            "bignum",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("bignum", "sw")));
-        swPakkage.put(
-            "float",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("float", "sw")));
-        swPakkage.put(
-            "symbol",
-            new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("symbol", "sw")));
-        swPakkage.put(
-            "character",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("character", "sw")));
-        swPakkage.put(
-            "sw_regexp",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("sw_regexp", "sw")));
-        swPakkage.put(
-            "procedure",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("procedure", "sw")));
-        swPakkage.put(
-            "char16_vector",
-            new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("char16_vector", "sw")));
-        swPakkage.put(
-            "simple_vector",
-            new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("simple_vector", "sw")));
-        swPakkage.put(
-            "heavy_thread",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("heavy_thread", "sw")));
-        swPakkage.put(
-            "light_thread",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("light_thread", "sw")));
-        swPakkage.put(
-            "condition",
-            new MagikType(this, null, null, Sort.SLOTTED, TypeString.ofIdentifier("condition", "sw")));
-        swPakkage.put(
-            "enumeration_value",
-            new MagikType(this, null, null, Sort.SLOTTED, TypeString.ofIdentifier("enumeration_value", "sw")));
-        swPakkage.put(
-            "indexed_format_mixin",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("indexed_format_mixin", "sw")));
-        swPakkage.put(
-            "slotted_format_mixin",
-            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("slotted_format_mixin", "sw")));
+        new Package(this, null, null, "sw");
+        new MagikType(this, null, null, Sort.OBJECT, TypeString.ofIdentifier("object", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("unset", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("false", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("maybe", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("integer", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("bignum", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("float", "sw"));
+        new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("symbol", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("character", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("sw_regexp", "sw"));
+        new  MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("procedure", "sw"));
+        new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("char16_vector", "sw"));
+        new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("simple_vector", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("heavy_thread", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("light_thread", "sw"));
+        new MagikType(this, null, null, Sort.SLOTTED, TypeString.ofIdentifier("condition", "sw"));
+        new MagikType(this, null, null, Sort.SLOTTED, TypeString.ofIdentifier("enumeration_value", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("indexed_format_mixin", "sw"));
+        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("slotted_format_mixin", "sw"));
 
         final Package userPackage = new Package(this, null, null, "user");
         userPackage.addUse("sw");
@@ -115,32 +79,34 @@ public class TypeKeeper implements ITypeKeeper {
             throw new IllegalStateException();
         }
 
-        this.packages.put(pakkageName, pakkage);
+        this.types.put(pakkage, new HashMap<>());
     }
 
     public boolean hasPackage(final String pakkageName) {
-        return this.packages.containsKey(pakkageName);
+        return this.types.keySet().stream()
+            .anyMatch(pakkage -> pakkage.getName().equals(pakkageName));
     }
 
     @Override
     public Package getPackage(final String pakkageName) {
-        if (!this.packages.containsKey(pakkageName)) {
+        if (!this.hasPackage(pakkageName)) {
             LOGGER.debug("Undefined package: {}", pakkageName);
         }
 
-        return this.packages.get(pakkageName);
+        return this.types.keySet().stream()
+            .filter(pkg -> pkg.getName().equals(pakkageName))
+            .findAny()
+            .orElse(null);
     }
 
     @Override
     public void removePackage(final Package pakkage) {
-        final String pakkageName = pakkage.getName();
-        this.packages.remove(pakkageName);
+        this.types.remove(pakkage);
     }
 
     @Override
     public Set<Package> getPackages() {
-        return this.packages.values().stream()
-            .collect(Collectors.toUnmodifiableSet());
+        return Collections.unmodifiableSet(this.types.keySet());
     }
 
     @Override
@@ -149,10 +115,24 @@ public class TypeKeeper implements ITypeKeeper {
             throw new IllegalStateException();
         }
 
+        return this.getType(typeString) != UndefinedType.INSTANCE;
+    }
+
+    @Override
+    public boolean hasTypeInPackage(final TypeString typeString) {
+        if (!typeString.isSingle()) {
+            throw new IllegalStateException();
+        }
+
         final String pakkageName = typeString.getPakkage();
         final Package pakkage = this.getPackage(pakkageName);
-        final String identifier = typeString.getIdentifier();
-        return pakkage != null && pakkage.containsKey(identifier);
+        if (pakkage == null) {
+            return false;
+        }
+
+        final Map<TypeString, AbstractType> pakkageTypes = this.types.get(pakkage);
+        final TypeString bareTypeString = typeString.getWithoutGenerics();
+        return pakkageTypes.containsKey(bareTypeString);
     }
 
     @Override
@@ -163,8 +143,8 @@ public class TypeKeeper implements ITypeKeeper {
             return;
         }
 
-        final TypeString typeRef = type.getTypeString();
-        final String pakkageName = typeRef.getPakkage();
+        final TypeString typeString = type.getTypeString();
+        final String pakkageName = typeString.getPakkage();
         if (!this.hasPackage(pakkageName)) {
             // Not allowed to add packages.
             throw new IllegalStateException("Unknown package: " + pakkageName);
@@ -172,53 +152,78 @@ public class TypeKeeper implements ITypeKeeper {
 
         final Package pakkage = this.getPackage(pakkageName);
         Objects.requireNonNull(pakkage);
-
-        final String identifier = typeRef.getIdentifier();
-        if (pakkage.containsKeyLocal(identifier)) {
+        final Map<TypeString, AbstractType> pakkageTypes = this.types.get(pakkage);
+        final TypeString bareTypeString = typeString.getWithoutGenerics();
+        if (pakkageTypes.containsKey(bareTypeString)) {
             // Not allowed to overwrite types.
-            throw new IllegalStateException("Type already defined: " + typeRef.getFullString());
+            throw new IllegalStateException("Type already defined: " + bareTypeString.getFullString());
         }
 
-        pakkage.put(identifier, type);
+        pakkageTypes.put(bareTypeString, type);
     }
 
     @Override
     public AbstractType getType(final TypeString typeString) {
-        final String pakkageName = typeString.getPakkage();
-        if (!this.hasPackage(pakkageName)) {  // TODO: Replace this with getPackage() + null check.
-            return UndefinedType.INSTANCE;
-        }
-
         if (!typeString.isSingle()) {
             throw new IllegalStateException();
         }
 
+        final String pakkageName = typeString.getPakkage();
         final Package pakkage = this.getPackage(pakkageName);
-        Objects.requireNonNull(pakkage);
-
-        final String identifier = typeString.getIdentifier();
-        final AbstractType type = pakkage.get(identifier);
-        if (type == null) {
+        if (pakkage == null) {
             return UndefinedType.INSTANCE;
         }
 
-        return type;
+        final Stack<Package> pakkages = new Stack<>();
+        pakkages.push(pakkage);
+        while (!pakkages.isEmpty()) {
+            final Package pkg = pakkages.pop();
+            final TypeString pkgTypeString = TypeString.ofIdentifier(typeString.getIdentifier(), pkg.getName());
+            final Map<TypeString, AbstractType> pakkageTypes = this.types.get(pkg);
+            if (pakkageTypes.containsKey(pkgTypeString)) {
+                return pakkageTypes.get(pkgTypeString);
+            }
+
+            pkg.getUses().stream()
+                .map(this::getPackage)
+                .filter(Objects::nonNull)
+                .forEach(pakkages::push);
+        }
+
+        return UndefinedType.INSTANCE;
+    }
+
+    public AbstractType getTypeInPackage(final TypeString typeString) {
+        if (!typeString.isSingle()) {
+            throw new IllegalStateException();
+        }
+
+        final String pakkageName = typeString.getPakkage();
+        final Package pakkage = this.getPackage(pakkageName);
+        if (pakkage == null) {
+            return UndefinedType.INSTANCE;
+        }
+
+        final Map<TypeString, AbstractType> pakkageTypes = this.types.get(pakkage);
+        final TypeString bareTypeString = typeString.getWithoutGenerics();
+        return pakkageTypes.getOrDefault(bareTypeString, UndefinedType.INSTANCE);
     }
 
     @Override
     public void removeType(final AbstractType type) {
-        for (final Package pakkage : this.packages.values()) {
-            if (pakkage.containsTypeLocal(type)) {
-                pakkage.remove(type);
+        final TypeString typeString = type.getTypeString();
+        for (final Package pakkage : this.types.keySet()) {
+            final Map<TypeString, AbstractType> pakkageTypes = this.types.get(pakkage);
+            if (pakkageTypes.containsKey(typeString)) {
+                pakkageTypes.remove(typeString);
             }
         }
     }
 
     @Override
     public Collection<AbstractType> getTypes() {
-        return this.packages.values().stream()
-            .flatMap(pakkage -> pakkage.getTypes().entrySet().stream())
-            .map(Map.Entry::getValue)
+        return this.types.values().stream()
+            .flatMap(pakkageTypes -> pakkageTypes.values().stream())
             .collect(Collectors.toUnmodifiableSet());
     }
 
