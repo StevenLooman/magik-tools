@@ -66,6 +66,12 @@ public class Position implements Comparable<Position> {
             : null;
 
         final String[] lines = tokenValue.split(NEWLINE_REGEXP);
+        if (lines.length == 0) {
+            final int line = token.getLine();
+            final int column = token.getColumn();
+            return new Position(line, column);
+        }
+
         final String lastLine = lines[lines.length - 1];
         final int line = lines.length == 1
             ? token.getLine()
