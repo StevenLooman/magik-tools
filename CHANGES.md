@@ -6,6 +6,7 @@
 - Read and register in which module a definition lives.
 - Use com.google.gson instead of org.json.
 - Refactor MagikIndexer/JsonTypeKeeperReader/JsonTypeKeeperWriter/ClassInfoTypeKeeperReader to share more functionality, via *Definition classes.
+- Extend FormattingCheck to require at most 2 successive empty lines.
 
 0.8.3 (unreleased)
 
