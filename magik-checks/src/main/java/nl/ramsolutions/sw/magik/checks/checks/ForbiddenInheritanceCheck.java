@@ -7,8 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
-import nl.ramsolutions.sw.magik.analysis.definitions.IndexedExemplarDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.SlottedExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
@@ -47,18 +46,14 @@ public class ForbiddenInheritanceCheck extends MagikCheck {
 
         final MagikFile magikFile = this.getMagikFile();
         magikFile.getDefinitions().stream()
-            .filter(definition ->
-                definition instanceof SlottedExemplarDefinition
-                || definition instanceof IndexedExemplarDefinition)
+            .filter(definition -> definition instanceof ExemplarDefinition)
             .filter(this::isForbiddenParent)
             .forEach(definition -> this.addIssue(definition.getNode(), "Forbidden parent"));
     }
 
     private boolean isForbiddenParent(final Definition definition) {
-        final List<TypeString> parents =
-            definition instanceof SlottedExemplarDefinition
-            ? ((SlottedExemplarDefinition) definition).getParents()
-            : ((IndexedExemplarDefinition) definition).getParents();
+        final ExemplarDefinition exemplarDefinition = (ExemplarDefinition) definition;
+        final List<TypeString> parents = exemplarDefinition.getParents();
         final Set<TypeString> theForbiddenParents = this.getForbiddenParents();
         return theForbiddenParents.stream().anyMatch(parents::contains);
     }

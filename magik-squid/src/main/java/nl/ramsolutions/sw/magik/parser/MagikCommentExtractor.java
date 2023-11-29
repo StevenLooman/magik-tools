@@ -6,6 +6,7 @@ import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.utils.StreamUtils;
 
@@ -66,16 +67,29 @@ public final class MagikCommentExtractor {
     }
 
     /**
-     * Extract Doc comments for {@link node}.
+     * Extract Doc comment tokens for {@link node}.
      * @param node Node containing {@link Trivia} with comments.
      * @return Stream of Doc comment {@link Token}s.
      */
-    public static Stream<Token> extractDocComments(final AstNode node) {
+    public static Stream<Token> extractDocCommentTokens(final AstNode node) {
         return node.getTokens().stream()
             .flatMap(token -> token.getTrivia().stream())
             .filter(Trivia::isComment)
             .map(Trivia::getToken)
             .filter(token -> token.getValue().startsWith("##"));
+    }
+
+    /**
+     * Extract Doc comment for {@link node}.
+     * @param node Node containing {@link Trivia} with comments.
+     * @return Doc.
+     */
+    public static String extractDocComment(final AstNode node) {
+        return MagikCommentExtractor.extractDocCommentTokens(node)
+            .map(Token::getValue)
+            .map(line -> line.substring(2))  // Strip '##'
+            .map(String::trim)
+            .collect(Collectors.joining("\n"));
     }
 
 }

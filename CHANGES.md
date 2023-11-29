@@ -1,12 +1,26 @@
 # Changes
 
-0.8.2 (unreleased)
+0.9.0 (unreleased)
+
+- Support configurable libs dirs.
+- Read and register in which module a definition lives.
+- Use com.google.gson instead of org.json.
+- Refactor MagikIndexer/JsonTypeKeeperReader/JsonTypeKeeperWriter/ClassInfoTypeKeeperReader to share more functionality, via *Definition classes.
+- Extend FormattingCheck to require at most 2 successive empty lines.
+
+0.8.3 (unreleased)
+
+- Fix error finding start/end line/column for Scopes, when encountering an empty block.
+- Fix error when determining issue is disabled via MagikIssueDisabledChecker in certain cases.
+
+0.8.2 (2023-11-14)
 
 - Fix not finding appropriate node to register issue on when method contains a syntax error.
 - `magik-lint.properties` is searched for from path of current file in magik-lint, unless `--rcfile` is used.
 - Paths specified in setting `ignore` in `magik-lint.properties` in magik-lint are respected.
 - Fix grammar not supporting end labels in `_loop`/`_endloop` constructs.
-- Extend FormattingCheck to require at most 2 successive empty lines.
+- Fix reading mlint-instructions in scope.
+- Fix WarnedCallCheck default forbidden calls not seeing the `sw:`-prefixed versions.
 
 0.8.1 (2023-10-15)
 

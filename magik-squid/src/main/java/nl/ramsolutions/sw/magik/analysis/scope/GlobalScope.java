@@ -83,7 +83,7 @@ public class GlobalScope extends Scope {
 
     @Override
     public int getStartLine() {
-        return 0;
+        return 1;
     }
 
     @Override

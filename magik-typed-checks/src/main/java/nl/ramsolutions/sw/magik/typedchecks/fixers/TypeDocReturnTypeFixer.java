@@ -146,7 +146,7 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
         }
 
         final int bodyStart = bodyNode.getTokenLine() - 1;  // Body starts at first method body token, so subtract 1.
-        return MagikCommentExtractor.extractDocComments(methodDefinitionNode)
+        return MagikCommentExtractor.extractDocCommentTokens(methodDefinitionNode)
             .mapToInt(Token::getLine)
             .max()
             .orElse(bodyStart);

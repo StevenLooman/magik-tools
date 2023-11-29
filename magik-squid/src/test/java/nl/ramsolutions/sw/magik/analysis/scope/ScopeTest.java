@@ -1,5 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.scope;
 
+import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +23,8 @@ class ScopeTest {
     @Test
     void testProcedureScopeDeclaration() {
         final Scope globalScope = new GlobalScope();
-        final Scope procedureScope = new ProcedureScope(globalScope, null);
+        final AstNode node = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope procedureScope = new ProcedureScope(globalScope, node);
         procedureScope.addDeclaration(ScopeEntry.Type.LOCAL, "identifier", null, null);
 
         final ScopeEntry entry = procedureScope.getScopeEntry("identifier");
@@ -31,7 +34,8 @@ class ScopeTest {
     @Test
     void testBodyScopeDeclaration() {
         final Scope globalScope = new GlobalScope();
-        final Scope bodyScope = new BodyScope(globalScope, null);
+        final AstNode node = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope bodyScope = new BodyScope(globalScope, node);
         bodyScope.addDeclaration(ScopeEntry.Type.LOCAL, "identifier", null, null);
 
         final ScopeEntry entry = bodyScope.getScopeEntry("identifier");
@@ -50,7 +54,8 @@ class ScopeTest {
     @Test
     void testProcedureScopeDefinition() {
         final Scope globalScope = new GlobalScope();
-        final Scope procedureScope = new ProcedureScope(globalScope, null);
+        final AstNode node = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope procedureScope = new ProcedureScope(globalScope, node);
         procedureScope.addDeclaration(ScopeEntry.Type.DEFINITION, "identifier", null, null);
 
         final ScopeEntry entry = procedureScope.getScopeEntry("identifier");
@@ -60,7 +65,8 @@ class ScopeTest {
     @Test
     void testBodyScopeDefinition() {
         final Scope globalScope = new GlobalScope();
-        final Scope bodyScope = new BodyScope(globalScope, null);
+        final AstNode node = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope bodyScope = new BodyScope(globalScope, node);
         bodyScope.addDeclaration(ScopeEntry.Type.DEFINITION, "identifier", null, null);
 
         final ScopeEntry entry = bodyScope.getScopeEntry("identifier");
@@ -70,8 +76,10 @@ class ScopeTest {
     @Test
     void testBodyBodyScopeDeclarationOuter() {
         final Scope globalScope = new GlobalScope();
-        final Scope outerBodyScope = new BodyScope(globalScope, null);
-        final Scope innerBodyScopy = new BodyScope(outerBodyScope, null);
+        final AstNode outerBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope outerBodyScope = new BodyScope(globalScope, outerBodyNode);
+        final AstNode innerBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope innerBodyScopy = new BodyScope(outerBodyScope, innerBodyNode);
 
         outerBodyScope.addDeclaration(ScopeEntry.Type.LOCAL, "identifier", null, null);
 
@@ -85,8 +93,10 @@ class ScopeTest {
     @Test
     void testBodyBodyScopeDeclarationInner() {
         final Scope globalScope = new GlobalScope();
-        final Scope outerBodyScope = new BodyScope(globalScope, null);
-        final Scope innerBodyScope = new BodyScope(outerBodyScope, null);
+        final AstNode outerBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope outerBodyScope = new BodyScope(globalScope, outerBodyNode);
+        final AstNode innerBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope innerBodyScope = new BodyScope(outerBodyScope, innerBodyNode);
 
         innerBodyScope.addDeclaration(ScopeEntry.Type.LOCAL, "identifier", null, null);
 
@@ -100,8 +110,10 @@ class ScopeTest {
     @Test
     void testBodyBodyScopeDefinitionFromOuter() {
         final Scope globalScope = new GlobalScope();
-        final Scope outerBodyScope = new BodyScope(globalScope, null);
-        final Scope innerBodyScope = new BodyScope(outerBodyScope, null);
+        final AstNode outerBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope outerBodyScope = new BodyScope(globalScope, outerBodyNode);
+        final AstNode innerBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope innerBodyScope = new BodyScope(outerBodyScope, innerBodyNode);
 
         // defined in outer scope
         outerBodyScope.addDeclaration(ScopeEntry.Type.DEFINITION, "identifier", null, null);
@@ -116,8 +128,10 @@ class ScopeTest {
     @Test
     void testBodyBodyScopeDefinitionFromInner() {
         final Scope globalScope = new GlobalScope();
-        final Scope outerBodyScope = new BodyScope(globalScope, null);
-        final Scope innerBodyScope = new BodyScope(outerBodyScope, null);
+        final AstNode outerBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope outerBodyScope = new BodyScope(globalScope, outerBodyNode);
+        final AstNode innerBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope innerBodyScope = new BodyScope(outerBodyScope, innerBodyNode);
 
         // defined in inner scope
         innerBodyScope.addDeclaration(ScopeEntry.Type.DEFINITION, "identifier", null, null);
@@ -132,8 +146,10 @@ class ScopeTest {
     @Test
     void testMethodProcedureScope() {
         final Scope globalScope = new GlobalScope();
-        final Scope methodScope = new ProcedureScope(globalScope, null);
-        final Scope procedureScope = new ProcedureScope(methodScope, null);
+        final AstNode methodBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope methodScope = new ProcedureScope(globalScope, methodBodyNode);
+        final AstNode procedureBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope procedureScope = new ProcedureScope(methodScope, procedureBodyNode);
 
         // defined in method scope
         methodScope.addDeclaration(ScopeEntry.Type.LOCAL, "identifier", null, null);
@@ -145,8 +161,10 @@ class ScopeTest {
     @Test
     void testMethodProcedureScopeImport() {
         final Scope globalScope = new GlobalScope();
-        final Scope methodScope = new ProcedureScope(globalScope, null);
-        final Scope procedureScope = new ProcedureScope(methodScope, null);
+        final AstNode methodBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope methodScope = new ProcedureScope(globalScope, methodBodyNode);
+        final AstNode procedureBodyNode = new AstNode(MagikGrammar.BODY, "BODY", null);
+        final Scope procedureScope = new ProcedureScope(methodScope, procedureBodyNode);
 
         // defined in method scope
         methodScope.addDeclaration(ScopeEntry.Type.LOCAL, "identifier", null, null);

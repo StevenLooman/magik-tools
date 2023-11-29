@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
+import java.util.Objects;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
@@ -54,6 +55,31 @@ public class Slot {
             "%s@%s(%s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
             this.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.location, this.name, this.type);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final Slot other = (Slot) obj;
+        return Objects.equals(this.location, other.location)
+            && Objects.equals(this.name, other.name)
+            && Objects.equals(this.type, other.type);
     }
 
 }

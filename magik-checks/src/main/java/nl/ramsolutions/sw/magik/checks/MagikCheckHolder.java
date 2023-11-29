@@ -1,17 +1,15 @@
 package nl.ramsolutions.sw.magik.checks;
 
-import java.io.FileNotFoundException;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.sonar.check.Rule;
 
 /**
@@ -54,10 +52,10 @@ public class MagikCheckHolder {
         }
     }
 
-    private final Class<MagikCheck> checkClass;
+    private final Class<? extends MagikCheck> checkClass;
     private final Set<Parameter> parameters;
     private final boolean enabled;
-    private JSONObject metadata;
+    private MagikCheckMetadata metadata;
 
     /**
      * Constructor.
@@ -67,7 +65,7 @@ public class MagikCheckHolder {
      * @param enabled Check is enabled.
      */
     public MagikCheckHolder(
-            final Class<MagikCheck> checkClass, final Set<Parameter> parameters, final boolean enabled) {
+            final Class<? extends MagikCheck> checkClass, final Set<Parameter> parameters, final boolean enabled) {
         this.checkClass = checkClass;
         this.parameters = parameters;
         this.enabled = enabled;
@@ -106,7 +104,7 @@ public class MagikCheckHolder {
      * Get the {@link MagikCheck} class.
      * @return {@link MagikCheck} class.
      */
-    public Class<MagikCheck> getCheckClass() {
+    public Class<? extends MagikCheck> getCheckClass() {
         return this.checkClass;
     }
 
@@ -120,7 +118,12 @@ public class MagikCheckHolder {
         return this.parameters;
     }
 
-    private JSONObject readMetadata() {
+    /**
+     * Get metadata for the {@link MagikCheck}.
+     * @return Metadata.
+     * @throws IOException -
+     */
+    public MagikCheckMetadata getMetadata() throws IOException {
         if (this.metadata == null) {
             synchronized (this) {
                 // determine path
@@ -133,77 +136,16 @@ public class MagikCheckHolder {
                         CheckList.PROFILE_DIR, name);
 
                 // parse json
-                final InputStream inputStream = this.getClass().getResourceAsStream(filename);
-                final JSONTokener tokener = new JSONTokener(inputStream);
-                this.metadata = new JSONObject(tokener);
+                final Gson gson = new Gson();
+                try (InputStream inputStream = this.getClass().getResourceAsStream(filename)) {
+                    final InputStreamReader reader = new InputStreamReader(inputStream);
+                    final JsonReader jsonReader = gson.newJsonReader(reader);
+                    this.metadata = gson.fromJson(jsonReader, MagikCheckMetadata.class);
+                }
             }
         }
 
         return this.metadata;
-    }
-
-    /**
-     * Get SQ-key.
-     *
-     * @return SQ-key.
-     * @throws FileNotFoundException -
-     */
-    public String getSqKey() throws FileNotFoundException {
-        final JSONObject readMetadata = this.readMetadata();
-        return readMetadata.getString("sqKey");
-    }
-
-    /**
-     * Get severity.
-     *
-     * @return Severity.
-     * @throws FileNotFoundException -
-     */
-    public String getSeverity() throws FileNotFoundException {
-        final JSONObject readMetadata = this.readMetadata();
-        return readMetadata.getString("defaultSeverity");
-    }
-
-    /**
-     * Get tags for this check.
-     *
-     * @return List of tags.
-     * @throws FileNotFoundException -
-     */
-    public List<String> getTags() throws FileNotFoundException {
-        final JSONObject readMetadata = this.readMetadata();
-        final JSONArray tags = readMetadata.getJSONArray("tags");
-        final List<String> tagsList = new ArrayList<>();
-        for (int i = 0; i < tags.length(); ++i) {
-            final String tag = tags.getString(i);
-            tagsList.add(tag);
-        }
-        return tagsList;
-    }
-
-    /**
-     * Get the first tag for this check.
-     *
-     * @return First tag.
-     * @throws FileNotFoundException -
-     */
-    public String getTag() throws FileNotFoundException {
-        final List<String> tags = this.getTags();
-        if (tags.isEmpty()) {
-            return null;
-        }
-        return tags.get(0);
-    }
-
-    /**
-     * Get the title of the check.
-     *
-     * @return Title.
-     * @throws FileNotFoundException -
-     */
-    public String getTitle() throws FileNotFoundException {
-        final JSONObject readMetadata = this.readMetadata();
-        return readMetadata.getString("title");
     }
 
     /**

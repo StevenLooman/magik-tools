@@ -1,6 +1,8 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 
 /**
@@ -40,16 +42,19 @@ public class Parameter {
 
     }
 
+    private final Location location;
     private final String name;
     private final Modifier modifier;
     private TypeString type;
 
     /**
      * Constructor.
+     * @param location Location.
      * @param name Name of parameter.
      * @param modifier Parameter modifier.
      */
-    public Parameter(final String name, final Modifier modifier) {
+    public Parameter(final @Nullable Location location, final String name, final Modifier modifier) {
+        this.location = location;
         this.name = name;
         this.modifier = modifier;
         this.type = TypeString.UNDEFINED;
@@ -57,14 +62,25 @@ public class Parameter {
 
     /**
      * Constructor.
+     * @param location Location.
      * @param name Name of parameter.
      * @param modifier Parameter modifier.
      * @param type Type.
      */
-    public Parameter(final String name, final Modifier modifier, final TypeString type) {
+    public Parameter(
+            final @Nullable Location location,
+            final String name,
+            final Modifier modifier,
+            final TypeString type) {
+        this.location = location;
         this.name = name;
         this.modifier = modifier;
         this.type = type;
+    }
+
+    @CheckForNull
+    public Location getLocation() {
+        return this.location;
     }
 
     public String getName() {

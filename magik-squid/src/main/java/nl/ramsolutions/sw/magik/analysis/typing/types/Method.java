@@ -301,11 +301,13 @@ public class Method {
     private final Set<MethodUsage> calledMethods;
     private final Set<SlotUsage> usedSlots;
     private final Set<ConditionUsage> usedConditions;
+    private final String moduleName;
     private String doc;
 
     /**
      * Constructor.
      * @param location Location of definition.
+     * @param moduleName Module name where this method is defined.
      * @param modifiers Modifiers.
      * @param owner Owner of method.
      * @param name Name of method.
@@ -318,6 +320,7 @@ public class Method {
     @SuppressWarnings({"java:S1319", "checkstyle:ParameterNumber"})
     public Method(//NOSONAR
             final @Nullable Location location,
+            final @Nullable String moduleName,
             final Set<Modifier> modifiers,
             final MagikType owner,
             final String name,
@@ -335,6 +338,7 @@ public class Method {
         this.doc = methodDoc;
         this.callResult = callResult;
         this.loopbodyResult = loopbodyResult;
+        this.moduleName = moduleName;
         this.usedGlobals = new HashSet<>();
         this.calledMethods = new HashSet<>();
         this.usedSlots = new HashSet<>();
@@ -492,8 +496,18 @@ public class Method {
      * Get the method doc/headers.
      * @return Method doc.
      */
+    @CheckForNull
     public String getDoc() {
         return this.doc;
+    }
+
+    /**
+     * Get name of module this method is defined in.
+     * @return
+     */
+    @CheckForNull
+    public String getModuleName() {
+        return this.moduleName;
     }
 
     /**

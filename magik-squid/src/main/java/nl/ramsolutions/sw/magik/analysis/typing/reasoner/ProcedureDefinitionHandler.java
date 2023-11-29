@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import nl.ramsolutions.sw.definitions.SwModuleScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
@@ -16,7 +17,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ProcedureInstance;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
@@ -50,6 +50,10 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
      * @param node PROCEDURE_DEFINITION node.
      */
     void handleProcedureDefinition(final AstNode node) {
+        // Location.
+        final URI uri = node.getToken().getURI();
+        final Location location = new Location(uri, node);
+
         // Get name of procedure.
         final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
         final String procedureName = helper.getProcedureName();
@@ -65,6 +69,7 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
         final List<Parameter> parameters = new ArrayList<>();
         final List<AstNode> parameterNodes = parametersNode.getChildren(MagikGrammar.PARAMETER);
         for (final AstNode parameterNode : parameterNodes) {
+            final Location parameterLocation = new Location(uri, parameterNode);
             final AstNode identifierNode = parameterNode.getFirstChild(MagikGrammar.IDENTIFIER);
             final String identifier = identifierNode.getTokenValue();
 
@@ -80,7 +85,7 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
 
             final AbstractType type = this.getNodeType(parameterNode).get(0, UndefinedType.INSTANCE);
             final TypeString typeString = type.getTypeString();
-            final Parameter parameter = new Parameter(identifier, modifier, typeString);
+            final Parameter parameter = new Parameter(parameterLocation, identifier, modifier, typeString);
             parameters.add(parameter);
         }
 
@@ -93,13 +98,13 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
         final ExpressionResultString loopbodyResultStr = TypeReader.unparseExpressionResult(loopbodyResult);
 
         // Create procedure instance.
-        final EnumSet<Method.Modifier> modifiers = EnumSet.noneOf(Method.Modifier.class);
-        final URI uri = node.getToken().getURI();
-        final Location location = new Location(uri, node);
+        final EnumSet<ProcedureInstance.Modifier> modifiers = EnumSet.noneOf(ProcedureInstance.Modifier.class);
+        final String moduleName = SwModuleScanner.getModuleName(uri);
         final MagikType procedureType = (MagikType) this.typeKeeper.getType(SW_PROCEDURE);
         final ProcedureInstance procType = new ProcedureInstance(
-            procedureType,
             location,
+            moduleName,
+            procedureType,
             procedureName,
             modifiers,
             parameters,
