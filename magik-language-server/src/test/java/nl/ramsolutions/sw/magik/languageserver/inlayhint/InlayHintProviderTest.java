@@ -74,21 +74,25 @@ class InlayHintProviderTest {
 
         final List<InlayHint> inlayHints =
             provider.provideInlayHints(magikFile, new Range(new Position(0, 0), new Position(2, 0)));
-        assertThat(inlayHints).hasSize(2);
-
-        final InlayHint inlayHint0 = inlayHints.get(0);
-        assertThat(inlayHint0)
-            .isEqualTo(
+        assertThat(inlayHints).isEqualTo(
+            List.of(
                 new InlayHint(
                     new Position(0, 14),
-                    Either.forLeft("param1:")));
-
-        final InlayHint inlayHint1 = inlayHints.get(1);
-        assertThat(inlayHint1)
-            .isEqualTo(
+                    Either.forLeft("param1:")),
                 new InlayHint(
                     new Position(0, 22),
-                    Either.forLeft("param2:")));
+                    Either.forLeft("param2:"))//,
+
+                // new InlayHint(
+                //     new Position(0, 0),
+                //     Either.forLeft("sw:object")),
+                // new InlayHint(
+                //     new Position(0, 14),
+                //     Either.forLeft("sw:unset")),
+                // new InlayHint(
+                //     new Position(0, 22),
+                //     Either.forLeft("sw:symbol"))
+                    ));
     }
 
 }

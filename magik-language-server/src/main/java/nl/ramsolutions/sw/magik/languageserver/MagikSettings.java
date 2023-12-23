@@ -108,6 +108,52 @@ public final class MagikSettings {  // NOSONAR
     }
 
     /**
+     * Get magik.typing.showAtomInlayHints.
+     * @return magik.typing.showAtomInlayHints
+     */
+    public boolean getTypingShowAtomInlayHints() {
+        final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+        if (magik == null) {
+            return false;
+        }
+
+        final JsonObject typing = magik.getAsJsonObject("typing");
+        if (typing == null) {
+            return false;
+        }
+
+        final JsonElement showAtomInlayHints = typing.get("showAtomInlayHints");
+        if (showAtomInlayHints == null) {
+            return false;
+        }
+
+        return showAtomInlayHints.getAsBoolean();
+    }
+
+    /**
+     * Get magik.typing.showArgumentInlayHints.
+     * @return magik.typing.showArgumentInlayHints
+     */
+    public boolean getTypingShowArgumentInlayHints() {
+        final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+        if (magik == null) {
+            return true;
+        }
+
+        final JsonObject typing = magik.getAsJsonObject("typing");
+        if (typing == null) {
+            return true;
+        }
+
+        final JsonElement showArgumentInlayHints = typing.get("showArgumentInlayHints");
+        if (showArgumentInlayHints == null) {
+            return true;
+        }
+
+        return showArgumentInlayHints.getAsBoolean();
+    }
+
+    /**
      * Get magik.typing.enableChecks, defaults to false if no config is provided.
      * @return magik.typing.enableChecks.
      */

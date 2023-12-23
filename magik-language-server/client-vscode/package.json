@@ -227,6 +227,16 @@
 					"description": "Paths to type databases.",
 					"type": "array"
 				},
+				"magik.typing.showAtomInlayHints": {
+					"description": "Show atom type inlay hints.",
+					"type": "boolean",
+					"default": false
+				},
+				"magik.typing.showArgumentInlayHints": {
+					"description": "Show (certain) argument name inlay hints.",
+					"type": "boolean",
+					"default": false
+				},
 				"magik.typing.enableChecks": {
 					"description": "Enable typing checks.",
 					"type": "boolean",
