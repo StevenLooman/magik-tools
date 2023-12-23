@@ -260,8 +260,8 @@ public class CompletionProvider {
             return Collections.emptyList();
         }
 
-        final LocalTypeReasonerState state = reasoner.getState();
-        final ExpressionResult result = state.getNodeType(wantedNode);
+        final LocalTypeReasonerState reasonerState = reasoner.getState();
+        final ExpressionResult result = reasonerState.getNodeType(wantedNode);
         AbstractType type = result.get(0, UndefinedType.INSTANCE);
         if (type == SelfType.INSTANCE) {
             final AstNode methodDefNode = tokenNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
