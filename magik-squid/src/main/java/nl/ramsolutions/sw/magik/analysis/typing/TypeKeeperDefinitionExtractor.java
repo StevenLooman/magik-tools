@@ -14,6 +14,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
@@ -54,10 +55,10 @@ public class TypeKeeperDefinitionExtractor {
             .map(pakkage -> new PackageDefinition(
                 pakkage.getLocation(),
                 pakkage.getModuleName(),
+                pakkage.getDoc(),
                 null,
                 pakkage.getName(),
-                List.copyOf(pakkage.getUses()),
-                pakkage.getDoc()))
+                List.copyOf(pakkage.getUses())))
             .collect(Collectors.toSet());
     }
 
@@ -75,9 +76,11 @@ public class TypeKeeperDefinitionExtractor {
                 final List<ExemplarDefinition.GenericDeclaration> genericDeclarations = type.getGenerics().stream()
                     .map(genericDecl -> new ExemplarDefinition.GenericDeclaration(null, genericDecl.getName()))
                     .collect(Collectors.toList());
-                final List<ExemplarDefinition.Slot> slots = type.getSlots().stream()
-                    .map(slot -> new ExemplarDefinition.Slot(
+                final List<SlotDefinition> slots = type.getSlots().stream()
+                    .map(slot -> new SlotDefinition(
                         slot.getLocation(),
+                        type.getModuleName(),
+                        null,
                         null,
                         slot.getName(),
                         slot.getType()))
@@ -85,12 +88,12 @@ public class TypeKeeperDefinitionExtractor {
                 return new ExemplarDefinition(
                     type.getLocation(),
                     type.getModuleName(),
+                    type.getDoc(),
                     null,
                     sort,
                     type.getTypeString(),
                     slots,
                     parents,
-                    type.getDoc(),
                     genericDeclarations);
             })
             .collect(Collectors.toSet());
@@ -107,10 +110,10 @@ public class TypeKeeperDefinitionExtractor {
                             parameter.getLocation(),
                             method.getModuleName(),
                             null,
+                            null,
                             parameter.getName(),
                             TypeKeeperDefinitionExtractor.PARAMETER_MODIFIER_MAPPING.get(parameter.getModifier()),
-                            parameter.getType(),
-                            null);
+                            parameter.getType());
                     })
                     .collect(Collectors.toList());
                 final Parameter assignmentParameter = method.getAssignmentParameter();
@@ -119,10 +122,10 @@ public class TypeKeeperDefinitionExtractor {
                         assignmentParameter.getLocation(),
                         method.getModuleName(),
                         null,
+                        null,
                         assignmentParameter.getName(),
                         TypeKeeperDefinitionExtractor.PARAMETER_MODIFIER_MAPPING.get(assignmentParameter.getModifier()),
-                        assignmentParameter.getType(),
-                        null)
+                        assignmentParameter.getType())
                     : null;
                 final Set<MethodDefinition.Modifier> modifiers = method.getModifiers().stream()
                     .map(TypeKeeperDefinitionExtractor.METHOD_MODIFIER_MAPPING::get)
@@ -130,13 +133,13 @@ public class TypeKeeperDefinitionExtractor {
                 return new MethodDefinition(
                     method.getLocation(),
                     method.getModuleName(),
+                    method.getDoc(),
                     null,
                     method.getOwner().getTypeString(),
                     method.getName(),
                     modifiers,
                     parameterDefs,
                     assignmentParameterDef,
-                    method.getDoc(),
                     method.getCallResult(),
                     method.getLoopbodyResult());
             })
@@ -160,10 +163,10 @@ public class TypeKeeperDefinitionExtractor {
                             parameter.getLocation(),
                             method.getModuleName(),
                             null,
+                            null,
                             parameter.getName(),
                             TypeKeeperDefinitionExtractor.PARAMETER_MODIFIER_MAPPING.get(parameter.getModifier()),
-                            parameter.getType(),
-                            null);
+                            parameter.getType());
                     })
                     .collect(Collectors.toList());
                 final Set<ProcedureDefinition.Modifier> modifiers = method.getModifiers().stream()
@@ -172,12 +175,12 @@ public class TypeKeeperDefinitionExtractor {
                 return new ProcedureDefinition(
                     type.getLocation(),
                     type.getModuleName(),
+                    type.getDoc(),
                     null,
                     modifiers,
                     type.getTypeString(),  // TODO: Is this right? Shouldn't this be the alias?
                     type.getName(),
                     parameterDefs,
-                    type.getDoc(),
                     method.getCallResult(),
                     method.getLoopbodyResult());
             })
@@ -193,10 +196,10 @@ public class TypeKeeperDefinitionExtractor {
                 return new GlobalDefinition(
                     type.getLocation(),
                     type.getModuleName(),
+                    type.getDoc(),
                     null,
                     type.getTypeString(),
-                    type.getAliasedType().getTypeString(),
-                    type.getDoc());
+                    type.getAliasedType().getTypeString());
             })
             .collect(Collectors.toSet());
     }
@@ -207,11 +210,11 @@ public class TypeKeeperDefinitionExtractor {
                 return new ConditionDefinition(
                     condition.getLocation(),
                     condition.getModuleName(),
+                    condition.getDoc(),
                     null,
                     condition.getName(),
                     condition.getParent(),
-                    condition.getDataNameList(),
-                    condition.getDoc());
+                    condition.getDataNameList());
             })
             .collect(Collectors.toSet());
     }
@@ -222,12 +225,12 @@ public class TypeKeeperDefinitionExtractor {
                 return new BinaryOperatorDefinition(
                     operator.getLocation(),
                     operator.getModuleName(),
+                    operator.getDoc(),
                     null,
                     operator.getOperator().toString().toLowerCase(),
                     operator.getLeftType(),
                     operator.getRightType(),
-                    operator.getResultType(),
-                    operator.getDoc());
+                    operator.getResultType());
             })
             .collect(Collectors.toSet());
     }

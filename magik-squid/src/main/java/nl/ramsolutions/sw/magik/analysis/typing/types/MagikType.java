@@ -85,9 +85,6 @@ public class MagikType extends AbstractType {
         this.typeKeeper = typeKeeper;
         this.sort = sort;
         this.typeString = typeString;
-
-        // Add self to TypeKeeper.
-        this.typeKeeper.addType(this);
     }
 
     /**
@@ -126,32 +123,22 @@ public class MagikType extends AbstractType {
      * @return Parents.
      */
     public Set<TypeString> getParentsTypeRefs() {
-        final Set<TypeString> defaultParents;
-        if (this.getSort() == MagikType.Sort.INDEXED) {
-            defaultParents = Set.of(DEFAULT_PARENT_INDEXED_EXEMPLAR);
-        } else if (this.getSort() == MagikType.Sort.SLOTTED) {
-            defaultParents = Set.of(DEFAULT_PARENT_SLOTTED_EXEMPLAR);
-        } else {
-            defaultParents = Collections.emptySet();
-        }
-
-        if (this.getSort() == MagikType.Sort.INDEXED
-            || this.getSort() == MagikType.Sort.SLOTTED) {
-            // Ensure correct parents. As we only know the actual parents during this evaluation,
-            // we need to do this at runtime.
-            final boolean parentNonIntrinsicType = this.parents.stream()
-                .map(parentTypeRef -> this.typeKeeper.getType(parentTypeRef))
-                .filter(MagikType.class::isInstance)
-                .map(MagikType.class::cast)
-                .anyMatch(parentType ->
-                    parentType.getSort() == Sort.SLOTTED
-                    || parentType.getSort() == Sort.INDEXED);
-            if (!parentNonIntrinsicType) {
-                return Stream.concat(
-                    this.parents.stream(),
-                    defaultParents.stream())
-                    .collect(Collectors.toSet());
+        // TODO: This does not work properly. Types don't provide any hints whether
+        //       it inherits `sw:slotted_format_mixin`, such as `sw:rope_mixin`,
+        //       or not, such as as `sw:ace_access_mixin`. `ExemplarDefinition.Sort`
+        //       does not provide any usable information.
+        if (this.parents.isEmpty()) {
+            final Set<TypeString> defaultParents;
+            if (this.getSort() == MagikType.Sort.INDEXED) {
+                defaultParents = Set.of(DEFAULT_PARENT_INDEXED_EXEMPLAR);
+            } else if (this.getSort() == MagikType.Sort.SLOTTED) {
+                defaultParents = Set.of(DEFAULT_PARENT_SLOTTED_EXEMPLAR);
+            } else {
+                defaultParents = Collections.emptySet();
             }
+
+            return Stream.concat(this.parents.stream(), defaultParents.stream())
+                .collect(Collectors.toSet());
         }
 
         return Collections.unmodifiableSet(this.parents);

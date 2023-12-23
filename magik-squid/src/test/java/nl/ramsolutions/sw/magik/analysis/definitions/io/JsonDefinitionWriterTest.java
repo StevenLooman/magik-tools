@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing.io;
+package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
 import java.io.IOException;
 import java.net.URI;
@@ -18,25 +18,40 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for JsonTypeKeeperWriter.
+ * Tests for JsonDefinitionWriter.
  */
-class JsonTypeKeeperWriterTest {
+class JsonDefinitionWriterTest {
+
+    private Path tempPath;
+
+    @BeforeEach
+    void createTempFile() throws IOException {
+        this.tempPath = Files.createTempFile("type_database", ".jsonl");
+    }
+
+    @AfterEach
+    void unlinkTempFile() throws IOException {
+        if (Files.exists(tempPath)) {
+            Files.delete(this.tempPath);
+        }
+    }
 
     @Test
     void testWritePackage() throws IOException {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         new Package(typeKeeper, null, null, "test_package");
 
-        final Path path = Files.createTempFile("type_database", ".jsonl");
-        JsonTypeKeeperWriter.write(path, typeKeeper);
+        JsonDefinitionWriter.write(this.tempPath, typeKeeper);
 
-        assertThat(Files.exists(path)).isTrue();
-        assertThat(Files.size(path)).isNotEqualTo(0);
+        assertThat(Files.exists(this.tempPath)).isTrue();
+        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
     }
 
     @Test
@@ -45,11 +60,10 @@ class JsonTypeKeeperWriterTest {
         final TypeString aRef = TypeString.ofIdentifier("user:a", "user");
         new MagikType(typeKeeper, null, "test_module", MagikType.Sort.SLOTTED, aRef);
 
-        final Path path = Files.createTempFile("type_database", ".jsonl");
-        JsonTypeKeeperWriter.write(path, typeKeeper);
+        JsonDefinitionWriter.write(this.tempPath, typeKeeper);
 
-        assertThat(Files.exists(path)).isTrue();
-        assertThat(Files.size(path)).isNotEqualTo(0);
+        assertThat(Files.exists(this.tempPath)).isTrue();
+        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
     }
 
     @Test
@@ -67,13 +81,12 @@ class JsonTypeKeeperWriterTest {
             null,
             "Test method m1().",
             ExpressionResultString.UNDEFINED,
-            new ExpressionResultString());
+            ExpressionResultString.EMPTY);
 
-        final Path path = Files.createTempFile("type_database", ".jsonl");
-        JsonTypeKeeperWriter.write(path, typeKeeper);
+        JsonDefinitionWriter.write(this.tempPath, typeKeeper);
 
-        assertThat(Files.exists(path)).isTrue();
-        assertThat(Files.size(path)).isNotEqualTo(0);
+        assertThat(Files.exists(this.tempPath)).isTrue();
+        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
     }
 
     @Test
@@ -98,11 +111,10 @@ class JsonTypeKeeperWriterTest {
             "Unknown value");
         typeKeeper.addCondition(unknownValueCondition);
 
-        final Path path = Files.createTempFile("type_database", ".jsonl");
-        JsonTypeKeeperWriter.write(path, typeKeeper);
+        JsonDefinitionWriter.write(this.tempPath, typeKeeper);
 
-        assertThat(Files.exists(path)).isTrue();
-        assertThat(Files.size(path)).isNotEqualTo(0);
+        assertThat(Files.exists(this.tempPath)).isTrue();
+        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
     }
 
     @Test
@@ -110,11 +122,10 @@ class JsonTypeKeeperWriterTest {
         final ITypeKeeper typeKeeper = new TypeKeeper();
         // TODO
 
-        final Path path = Files.createTempFile("type_database", ".jsonl");
-        JsonTypeKeeperWriter.write(path, typeKeeper);
+        JsonDefinitionWriter.write(this.tempPath, typeKeeper);
 
-        assertThat(Files.exists(path)).isTrue();
-        assertThat(Files.size(path)).isNotEqualTo(0);
+        assertThat(Files.exists(this.tempPath)).isTrue();
+        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
     }
 
     @Test
@@ -124,11 +135,10 @@ class JsonTypeKeeperWriterTest {
         final TypeString aliasedRef = TypeString.ofIdentifier("alias", "user");
         new AliasType(typeKeeper, null, null, aliasedRef, integerRef);
 
-        final Path path = Files.createTempFile("type_database", ".jsonl");
-        JsonTypeKeeperWriter.write(path, typeKeeper);
+        JsonDefinitionWriter.write(this.tempPath, typeKeeper);
 
-        assertThat(Files.exists(path)).isTrue();
-        assertThat(Files.size(path)).isNotEqualTo(0);
+        assertThat(Files.exists(this.tempPath)).isTrue();
+        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
     }
 
     @Test
@@ -148,11 +158,10 @@ class JsonTypeKeeperWriterTest {
             null);
         typeKeeper.addBinaryOperator(binaryOperator);
 
-        final Path path = Files.createTempFile("type_database", ".jsonl");
-        JsonTypeKeeperWriter.write(path, typeKeeper);
+        JsonDefinitionWriter.write(this.tempPath, typeKeeper);
 
-        assertThat(Files.exists(path)).isTrue();
-        assertThat(Files.size(path)).isNotEqualTo(0);
+        assertThat(Files.exists(this.tempPath)).isTrue();
+        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
     }
 
 }

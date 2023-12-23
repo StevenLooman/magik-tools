@@ -2,11 +2,13 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import java.util.Objects;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.Location;
 
 /**
  * Slot usage.
  */
+@Immutable
 public class SlotUsage {
 
     private final String slotName;
@@ -58,8 +60,8 @@ public class SlotUsage {
         }
 
         final SlotUsage other = (SlotUsage) obj;
-        return Objects.equals(other.getSlotName(), this.getSlotName())
-            && Objects.equals(other.getLocation(), this.getLocation());
+        // Location is not tested!
+        return Objects.equals(other.getSlotName(), this.getSlotName());
     }
 
 }

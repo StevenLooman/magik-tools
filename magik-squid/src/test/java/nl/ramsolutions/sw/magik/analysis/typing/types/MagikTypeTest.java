@@ -29,7 +29,7 @@ class MagikTypeTest {
             Collections.emptyList(),
             null,
             null,
-            new ExpressionResultString(),
+            ExpressionResultString.EMPTY,
             new ExpressionResultString(
                 TypeString.ofGeneric("K"),
                 TypeString.ofGeneric("E")));

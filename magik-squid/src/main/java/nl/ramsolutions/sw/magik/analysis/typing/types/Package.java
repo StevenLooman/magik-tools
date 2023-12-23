@@ -36,9 +36,6 @@ public class Package {
         this.location = location;
         this.moduleName = moduleName;
         this.name = name;
-
-        // Add self to TypeKeeper.
-        this.typeKeeper.addPackage(this);
     }
 
     @CheckForNull

@@ -9,6 +9,14 @@ import java.util.Objects;
  */
 public class Range {
 
+    /**
+     * Default range, to be used in case Location.range is null.
+     */
+    public static final Range DEFAULT_RANGE =
+        new Range(
+            new Position(1, 0),
+            new Position(1, 0));
+
     private final Position startPosition;
     private final Position endPosition;
 

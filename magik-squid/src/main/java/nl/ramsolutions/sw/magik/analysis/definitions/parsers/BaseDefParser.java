@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.definitions;
+package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.ArrayList;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
@@ -16,7 +17,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  * Base type parser.
  */
 @SuppressWarnings("checkstyle:VisibilityModifier")
-abstract class TypeDefParser {
+abstract class BaseDefParser {
 
     static final String FLAG_READ = ":read";
     static final String FLAG_READABLE = ":readable";
@@ -35,7 +36,7 @@ abstract class TypeDefParser {
      * Constructor.
      * @param node Definition node.
      */
-    protected TypeDefParser(final AstNode node) {
+    protected BaseDefParser(final AstNode node) {
         if (node.isNot(MagikGrammar.PROCEDURE_INVOCATION)) {
             throw new IllegalArgumentException();
         }

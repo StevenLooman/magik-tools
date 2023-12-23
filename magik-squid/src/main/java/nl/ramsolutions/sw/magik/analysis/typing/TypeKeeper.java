@@ -47,28 +47,31 @@ public class TypeKeeper implements ITypeKeeper {
     }
 
     private void registerBaseTypes() {
-        new Package(this, null, null, "sw");
-        new MagikType(this, null, null, Sort.OBJECT, TypeString.ofIdentifier("object", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("unset", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("false", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("maybe", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("integer", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("bignum", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("float", "sw"));
-        new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("symbol", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("character", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("sw_regexp", "sw"));
-        new  MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("procedure", "sw"));
-        new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("char16_vector", "sw"));
-        new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("simple_vector", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("heavy_thread", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("light_thread", "sw"));
-        new MagikType(this, null, null, Sort.SLOTTED, TypeString.ofIdentifier("condition", "sw"));
-        new MagikType(this, null, null, Sort.SLOTTED, TypeString.ofIdentifier("enumeration_value", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("indexed_format_mixin", "sw"));
-        new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("slotted_format_mixin", "sw"));
+        this.addPackage(new Package(this, null, null, "sw"));
+        this.addType(new MagikType(this, null, null, Sort.OBJECT, TypeString.ofIdentifier("object", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("unset", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("false", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("maybe", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("integer", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("bignum", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("float", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("symbol", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("character", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("sw_regexp", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("procedure", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("char16_vector", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INDEXED, TypeString.ofIdentifier("simple_vector", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("heavy_thread", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("light_thread", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.SLOTTED, TypeString.ofIdentifier("condition", "sw")));
+        this.addType(new MagikType(this, null, null, Sort.SLOTTED, TypeString.ofIdentifier("enumeration_value", "sw")));
+        this.addType(
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("indexed_format_mixin", "sw")));
+        this.addType(
+            new MagikType(this, null, null, Sort.INTRINSIC, TypeString.ofIdentifier("slotted_format_mixin", "sw")));
 
         final Package userPackage = new Package(this, null, null, "user");
+        this.addPackage(userPackage);
         userPackage.addUse("sw");
     }
 
@@ -193,6 +196,9 @@ public class TypeKeeper implements ITypeKeeper {
         return UndefinedType.INSTANCE;
     }
 
+    /**
+     * Get the type explicitly from the package.
+     */
     public AbstractType getTypeInPackage(final TypeString typeString) {
         if (!typeString.isSingle()) {
             throw new IllegalStateException();

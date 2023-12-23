@@ -318,9 +318,9 @@ public class TypeKeeperDefinitionInserter {
             null,
             null,
             null,
+            null,
             name,
-            Collections.emptyList(),
-            null);
+            Collections.emptyList());
         this.feed(definition);
     }
 
@@ -333,11 +333,11 @@ public class TypeKeeperDefinitionInserter {
                 null,
                 null,
                 null,
+                null,
                 ExemplarDefinition.Sort.UNDEFINED,
                 typeRef,
                 Collections.emptyList(),
                 Collections.emptyList(),
-                null,
                 Collections.emptyList());
             this.feed(exemplarDefinition);
         }

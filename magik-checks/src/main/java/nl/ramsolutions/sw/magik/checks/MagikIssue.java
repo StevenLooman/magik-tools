@@ -33,20 +33,31 @@ public class MagikIssue {
     }
 
     /**
+     * Get the {@link Range} of the issue.
+     * @return Return {@link Range} if non null, else defaults to {@link DEFAULT_RANGE}.
+     */
+    public Range range() {
+        final Range range = this.location.getRange();
+        return range != null
+            ? range
+            : Range.DEFAULT_RANGE;
+    }
+
+    /**
      * Get the start line of the issue, 1-based.
      * @return Start line of the issue, defaults to 1 if no range.
      */
     public int startLine() {
-        final Range range = this.location.getRange();
+        final Range range = this.range();
         return range.getStartPosition().getLine();
     }
 
     /**
      * Get the start column of the issue.
-     * @return Start column of the issue, defaults to 1 if no range.
+     * @return Start column of the issue, defaults to 0 if no range.
      */
     public int startColumn() {
-        final Range range = this.location.getRange();
+        final Range range = this.range();
         return range.getStartPosition().getColumn();
     }
 
@@ -55,16 +66,16 @@ public class MagikIssue {
      * @return End line of the issue, defaults to 1 if no range.
      */
     public int endLine() {
-        final Range range = this.location.getRange();
+        final Range range = this.range();
         return range.getEndPosition().getLine();
     }
 
     /**
      * Get the end column of the issue.
-     * @return End column of the issue, defaults to 1 if no range.
+     * @return End column of the issue, defaults to 0 if no range.
      */
     public int endColumn() {
-        final Range range = this.location.getRange();
+        final Range range = this.range();
         return range.getEndPosition().getColumn();
     }
 

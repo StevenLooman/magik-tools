@@ -3,12 +3,14 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import java.util.Objects;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
  * Global usage.
  */
+@Immutable
 public class GlobalUsage {
 
     private final TypeString typeName;
@@ -53,8 +55,8 @@ public class GlobalUsage {
         }
 
         final GlobalUsage other = (GlobalUsage) obj;
-        return Objects.equals(other.getTypeName(), this.getTypeName())
-            && Objects.equals(other.getLocation(), this.getLocation());
+        // Location is not tested!
+        return Objects.equals(other.getTypeName(), this.getTypeName());
     }
 
 }

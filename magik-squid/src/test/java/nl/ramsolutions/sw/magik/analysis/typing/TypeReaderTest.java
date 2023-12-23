@@ -72,6 +72,7 @@ class TypeReaderTest {
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
         final MagikType ropeType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, ropeRef);
         ropeType.addGeneric(null, "E");
+        typeKeeper.addType(ropeType);
 
         final TypeString typeStr = TypeString.ofIdentifier(
             "rope", "sw",

@@ -3,15 +3,19 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import com.sonar.sslr.api.AstNode;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
  * Exemplar definition.
  */
-public class ExemplarDefinition extends Definition {
+@Immutable
+public class ExemplarDefinition extends TypeStringDefinition {
 
     /**
      * Exemplar sort.
@@ -23,54 +27,6 @@ public class ExemplarDefinition extends Definition {
         INDEXED,
         INTRINSIC,
         OBJECT;
-    }
-
-    /**
-     * Slot definition.
-     */
-    public static class Slot {
-
-        private final Location location;
-        private final AstNode node;
-        private final String name;
-        private final TypeString typeName;
-
-        /**
-         * Constructor.
-         * @param location
-         * @param node
-         * @param name
-         * @param typeName
-         */
-        public Slot(
-                final @Nullable Location location,
-                final @Nullable AstNode node,
-                final String name,
-                final TypeString typeName) {
-            this.location = location;
-            this.node = node;
-            this.name = name;
-            this.typeName = typeName;
-        }
-
-        @CheckForNull
-        public Location getLocation() {
-            return this.location;
-        }
-
-        @CheckForNull
-        public AstNode getNode() {
-            return node;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public TypeString getTypeName() {
-            return this.typeName;
-        }
-
     }
 
     /**
@@ -99,7 +55,7 @@ public class ExemplarDefinition extends Definition {
 
     private final Sort sort;
     private final TypeString typeName;
-    private final List<Slot> slots;
+    private final List<SlotDefinition> slots;
     private final List<TypeString> parents;
     private final List<GenericDeclaration> genericDeclarations;
 
@@ -116,14 +72,14 @@ public class ExemplarDefinition extends Definition {
     public ExemplarDefinition(
             final @Nullable Location location,
             final @Nullable String moduleName,
+            final @Nullable String doc,
             final @Nullable AstNode node,
             final Sort sort,
             final TypeString typeName,
-            final List<Slot> slots,
+            final List<SlotDefinition> slots,
             final List<TypeString> parents,
-            final String doc,
             final List<GenericDeclaration> genericDeclarations) {
-        super(location, moduleName, node, doc);
+        super(location, moduleName, doc, node);
 
         if (!typeName.isSingle()) {
             throw new IllegalStateException();
@@ -133,11 +89,24 @@ public class ExemplarDefinition extends Definition {
         this.typeName = typeName;
         this.slots = List.copyOf(slots);
         this.parents = List.copyOf(parents);
-        this.genericDeclarations = genericDeclarations;
+        this.genericDeclarations = List.copyOf(genericDeclarations);
     }
 
-    public List<Slot> getSlots() {
+    public List<SlotDefinition> getSlots() {
         return Collections.unmodifiableList(this.slots);
+    }
+
+    /**
+     * Get slot by name.
+     * @param name Name of slot.
+     * @return Slot.
+     */
+    @CheckForNull
+    public SlotDefinition getSlot(final String name) {
+        return this.slots.stream()
+            .filter(slot -> slot.getName().equals(name))
+            .findAny()
+            .orElse(null);
     }
 
     public List<TypeString> getParents() {
@@ -167,11 +136,65 @@ public class ExemplarDefinition extends Definition {
     }
 
     @Override
+    public ExemplarDefinition getWithoutNode() {
+        return new ExemplarDefinition(
+            this.getLocation(),
+            this.getModuleName(),
+            this.getDoc(),
+            null,
+            this.sort,
+            this.typeName,
+            this.slots.stream()
+                .map(slotDef -> slotDef.getWithoutNode())
+                .collect(Collectors.toList()),
+            this.parents,
+            this.genericDeclarations);
+    }
+
+    @Override
     public String toString() {
         return String.format(
             "%s@%s(%s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
             this.getTypeString().getFullString());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            this.getLocation(),
+            this.getModuleName(),
+            this.getDoc(),
+            this.sort,
+            this.typeName,
+            this.slots,
+            this.parents,
+            this.genericDeclarations);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final ExemplarDefinition other = (ExemplarDefinition) obj;
+        return Objects.equals(this.getLocation(), other.getLocation())
+            && Objects.equals(this.getModuleName(), other.getModuleName())
+            && Objects.equals(this.getDoc(), other.getDoc())
+            && Objects.equals(this.sort, other.sort)
+            && Objects.equals(this.typeName, other.typeName)
+            && Objects.equals(this.slots, other.slots)
+            && Objects.equals(this.parents, other.parents)
+            && Objects.equals(this.genericDeclarations, other.genericDeclarations);
     }
 
 }

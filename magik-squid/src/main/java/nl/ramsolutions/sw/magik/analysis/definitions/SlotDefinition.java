@@ -1,72 +1,62 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
- * Package definition.
+ * Slot definition.
  */
 @Immutable
-public class PackageDefinition extends Definition {
+public class SlotDefinition extends Definition {
 
     private final String name;
-    private final List<String> uses;
+    private final TypeString typeName;
 
     /**
      * Constructor.
-     * @param moduleName Module where this package is defined.
-     * @param node Node of package definition.
-     * @param name Name of package.
-     * @param uses Uses by package.
+     * @param location
+     * @param node
+     * @param name
+     * @param typeName
      */
-    public PackageDefinition(
+    public SlotDefinition(
             final @Nullable Location location,
             final @Nullable String moduleName,
             final @Nullable String doc,
             final @Nullable AstNode node,
             final String name,
-            final List<String> uses) {
+            final TypeString typeName) {
         super(location, moduleName, doc, node);
         this.name = name;
-        this.uses = List.copyOf(uses);
+        this.typeName = typeName;
     }
 
-    @Override
     public String getName() {
-        return this.name;
+        return name;
     }
 
-    public List<String> getUses() {
-        return Collections.unmodifiableList(this.uses);
+    public TypeString getTypeName() {
+        return this.typeName;
     }
 
     @Override
     public String getPackage() {
-        return this.name;
+        return null;
     }
 
     @Override
-    public PackageDefinition getWithoutNode() {
-        return new PackageDefinition(
+    public SlotDefinition getWithoutNode() {
+        return new SlotDefinition(
             this.getLocation(),
             this.getModuleName(),
             this.getDoc(),
             null,
-            name,
-            uses);
-    }
-
-    @Override
-    public String toString() {
-        return String.format(
-            "%s@%s(%s)",
-            this.getClass().getName(), Integer.toHexString(this.hashCode()),
-            this.getName());
+            this.name,
+            this.typeName);
     }
 
     @Override
@@ -76,7 +66,7 @@ public class PackageDefinition extends Definition {
             this.getModuleName(),
             this.getDoc(),
             this.name,
-            this.uses);
+            this.typeName);
     }
 
     @Override
@@ -93,12 +83,12 @@ public class PackageDefinition extends Definition {
             return false;
         }
 
-        final PackageDefinition other = (PackageDefinition) obj;
+        final SlotDefinition other = (SlotDefinition) obj;
         return Objects.equals(other.getLocation(), this.getLocation())
             && Objects.equals(other.getName(), this.getName())
             && Objects.equals(other.getDoc(), this.getDoc())
             && Objects.equals(other.name, this.name)
-            && Objects.equals(other.uses, this.uses);
+            && Objects.equals(other.typeName, this.typeName);
     }
 
 }

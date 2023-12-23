@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing.io;
+package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * JSON-line TypeKeeper writer.
  */
-public final class JsonTypeKeeperWriter {
+public final class JsonDefinitionWriter {
 
     private static class TypeStringSerializer implements JsonSerializer<TypeString> {
 
@@ -76,11 +76,11 @@ public final class JsonTypeKeeperWriter {
 
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonTypeKeeperWriter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonDefinitionWriter.class);
 
     private final TypeKeeperDefinitionExtractor typeKeeperExtractor;
 
-    private JsonTypeKeeperWriter(final ITypeKeeper typeKeeper) {
+    private JsonDefinitionWriter(final ITypeKeeper typeKeeper) {
         this.typeKeeperExtractor = new TypeKeeperDefinitionExtractor(typeKeeper);
     }
 
@@ -228,7 +228,7 @@ public final class JsonTypeKeeperWriter {
      * @throws IOException -
      */
     public static void write(final Path path, final ITypeKeeper typeKeeper) throws IOException {
-        final JsonTypeKeeperWriter reader = new JsonTypeKeeperWriter(typeKeeper);
+        final JsonDefinitionWriter reader = new JsonDefinitionWriter(typeKeeper);
         reader.run(path);
     }
 

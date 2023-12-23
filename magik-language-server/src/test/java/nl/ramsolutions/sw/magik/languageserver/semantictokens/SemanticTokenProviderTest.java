@@ -2,8 +2,8 @@ package nl.ramsolutions.sw.magik.languageserver.semantictokens;
 
 import java.net.URI;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.eclipse.lsp4j.SemanticTokens;
 import org.junit.jupiter.api.Test;
 
@@ -17,8 +17,8 @@ class SemanticTokenProviderTest {
 
     private SemanticTokens getSemanticTokens(final String code) {
         final URI uri = URI.create("tests://unittest");
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, typeKeeper);
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
         final SemanticTokenProvider provider = new SemanticTokenProvider();
         return provider.provideSemanticTokensFull(magikFile);
     }
