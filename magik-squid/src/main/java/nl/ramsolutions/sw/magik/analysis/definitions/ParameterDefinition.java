@@ -1,16 +1,17 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Objects;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
  * Parameter definition.
  */
+@Immutable
 public class ParameterDefinition extends Definition {
-
-    // TODO: Duplicate with nl.ramsolutions.sw.magik.analysis.typing.types.Parameter
 
     /**
      * Parameter modifier.
@@ -36,12 +37,12 @@ public class ParameterDefinition extends Definition {
     public ParameterDefinition(
             final @Nullable Location location,
             final @Nullable String moduleName,
+            final @Nullable String doc,
             final @Nullable AstNode node,
             final String name,
             final Modifier modifier,
-            final TypeString typeName,
-            final String doc) {
-        super(location, moduleName, node, doc);
+            final TypeString typeName) {
+        super(location, moduleName, doc, node);
         this.name = name;
         this.modifier = modifier;
         this.typeName = typeName;
@@ -63,6 +64,52 @@ public class ParameterDefinition extends Definition {
     @Override
     public String getPackage() {
         return null;
+    }
+
+    @Override
+    public ParameterDefinition getWithoutNode() {
+        return new ParameterDefinition(
+            this.getLocation(),
+            this.getModuleName(),
+            this.getDoc(),
+            null,
+            this.name,
+            this.modifier,
+            this.typeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            this.getLocation(),
+            this.getModuleName(),
+            this.getDoc(),
+            this.name,
+            this.modifier,
+            this.typeName);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final ParameterDefinition other = (ParameterDefinition) obj;
+        return Objects.equals(other.getLocation(), this.getLocation())
+            && Objects.equals(other.getName(), this.getName())
+            && Objects.equals(other.getDoc(), this.getDoc())
+            && Objects.equals(other.name, this.name)
+            && Objects.equals(other.modifier, this.modifier)
+            && Objects.equals(other.typeName, this.typeName);
     }
 
 }

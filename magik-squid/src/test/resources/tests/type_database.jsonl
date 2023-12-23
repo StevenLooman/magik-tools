@@ -13,11 +13,11 @@
 {"instruction":"global","type_name":"sw:!print_float_precision!","aliased_type_name":"sw:integer"}
 {"instruction":"global","type_name":"sw:tab_char","aliased_type_name":"sw:character"}
 // methods
-{"instruction":"method","type_name":"user:b","method_name":"m1()","modifiers":[],"parameters":[{"name":"param1","modifier":"gather","type_name":"sw:symbol"},{"name":"param1","modifier":null,"type_name":"_undefined"}],"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m1()","module_name":"test_module"}
-{"instruction":"method","type_name":"user:b","method_name":"m2<<","modifiers":["private"],"parameters":[],"assignment_parameter":{"name":"param2","modifier":null,"type_name":"sw:symbol"},"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m2()","module_name":"test_module"}
+{"instruction":"method","type_name":"user:b","method_name":"m1()","modifiers":[],"parameters":[{"name":"param1","modifier":"gather","type_name":"sw:symbol"},{"name":"param1","modifier":"none","type_name":"_undefined"}],"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m1()","module_name":"test_module"}
+{"instruction":"method","type_name":"user:b","method_name":"m2<<","modifiers":["private"],"parameters":[],"assignment_parameter":{"name":"param2","modifier":"none","type_name":"sw:symbol"},"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m2()","module_name":"test_module"}
 // procedures
 {"instruction":"procedure","type_name":"sw:quit","procedure_name":"quit","modifiers":[],"parameters":[{"name":"status","modifier":"optional","type_name":"_undefined"}],"return_types":"__UNDEFINED_RESULT__","loop_types":[],"source_file":null,"doc":"Quit!","module_name":"test_module"}
-{"instruction":"procedure","type_name":"sw:range","procedure_name":"range","modifiers":["iter"],"parameters":[{"name":"start","modifier":null,"type_name":"_undefined"},{"name":"end","modifier":null,"type_name":"_undefined"},{"name":"step","modifier":"optional","type_name":"_undefined"}],"return_types":[],"loop_types":["sw:integer"],"source_file":null,"doc":"Range iterator."}
+{"instruction":"procedure","type_name":"sw:range","procedure_name":"range","modifiers":["iter"],"parameters":[{"name":"start","modifier":"none","type_name":"_undefined"},{"name":"end","modifier":"none","type_name":"_undefined"},{"name":"step","modifier":"optional","type_name":"_undefined"}],"return_types":[],"loop_types":["sw:integer"],"source_file":null,"doc":"Range iterator."}
 // conditions
 {"instruction":"condition","name":"error","data_names":["string"],"parent":null,"doc":null}
 {"instruction":"condition","name":"unknown_value","data_names":["value","permitted_values"],"parent":"error","doc":"Unknown value"}

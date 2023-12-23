@@ -4,8 +4,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PrepareRenameDefaultBehavior;
 import org.eclipse.lsp4j.PrepareRenameResult;
@@ -26,16 +26,16 @@ class RenameProviderTest {
     private Either3<Range, PrepareRenameResult, PrepareRenameDefaultBehavior> getPrepareRename(
             final String code, final Position position) {
         final URI uri = URI.create("tests://unittest");
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, typeKeeper);
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
         final RenameProvider provider = new RenameProvider();
         return provider.providePrepareRename(magikFile, position);
     }
 
     private WorkspaceEdit getRename(final String code, final Position position, final String newName) {
         final URI uri = URI.create("tests://unittest");
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, typeKeeper);
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
         final RenameProvider provider = new RenameProvider();
         return provider.provideRename(magikFile, position, newName);
     }

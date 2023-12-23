@@ -1,8 +1,8 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,9 +31,9 @@ class TypeDocTypeExistsTypedCheckTest extends MagikTypedCheckTestBase {
             + "_endmethod",
     })
     void testInvalid(final String code) {
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final MagikTypedCheck check = new TypeDocTypeExistsTypedCheck();
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final List<MagikIssue> issues = this.runCheck(code, typeKeeper, check);
+        final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
         assertThat(issues).hasSize(1);
     }
 
@@ -49,9 +49,9 @@ class TypeDocTypeExistsTypedCheckTest extends MagikTypedCheckTestBase {
             + "_endmethod",
     })
     void testValid(final String code) {
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final MagikTypedCheck check = new TypeDocTypeExistsTypedCheck();
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final List<MagikIssue> issues = this.runCheck(code, typeKeeper, check);
+        final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
         assertThat(issues).isEmpty();
     }
 

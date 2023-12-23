@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.languageserver.implementation;
 import com.sonar.sslr.api.AstNode;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -69,7 +70,7 @@ public class ImplementationProvider {
         }
 
         return typeKeeper.getTypes().stream()
-            .filter(anyType -> anyType != type)
+            .filter(anyType -> !Objects.equals(anyType.getTypeString(), type.getTypeString()))
             .filter(anyType -> anyType.isKindOf(type))
             .flatMap(anyType -> anyType.getLocalMethods(methodName).stream())
             .map(Method::getLocation)

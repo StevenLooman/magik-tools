@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
 
 /**
@@ -16,6 +17,7 @@ import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
  * - {@code "_self|sw:unset"}
  * - {@code "sw:rope<sw:integer>"}
  */
+@Immutable
 public final class TypeString implements Comparable<TypeString> {
 
     @SuppressWarnings("checkstyle:JavadocVariable")

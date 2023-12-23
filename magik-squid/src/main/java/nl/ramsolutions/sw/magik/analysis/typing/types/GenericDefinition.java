@@ -18,16 +18,16 @@ public class GenericDefinition extends AbstractType {
      * Constructor.
      * @param typeKeeper TypeKeeper.
      * @param name Name of generic.
-     * @param typeString Defined type of generic.
+     * @param typeName Defined type of generic.
      */
     public GenericDefinition(
             final ITypeKeeper typeKeeper,
             final String name,
-            final TypeString typeString) {
+            final TypeString typeName) {
         super(null, null);
         this.typeKeeper = typeKeeper;
         this.name = name;
-        this.typeString = typeString;
+        this.typeString = typeName;
     }
 
     public String getName() {

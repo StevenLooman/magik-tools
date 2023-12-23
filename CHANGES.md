@@ -7,6 +7,8 @@
 - Use com.google.gson instead of org.json.
 - Refactor MagikIndexer/JsonTypeKeeperReader/JsonTypeKeeperWriter/ClassInfoTypeKeeperReader to share more functionality, via *Definition classes.
 - Extend FormattingCheck to require at most 2 successive empty lines.
+- Use DefinitionKeeper to store *Definition classes.
+- Add DefinitionKeeperTypeKeeperAdapter for compatibility with previous type system.
 
 0.8.3 (unreleased)
 

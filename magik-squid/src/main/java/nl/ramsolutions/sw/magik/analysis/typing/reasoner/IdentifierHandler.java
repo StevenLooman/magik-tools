@@ -66,9 +66,9 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
             final ExpressionResult result = this.getNodeType(parameterNode);
             this.assignAtom(node, result);
         } else {
-            final AstNode lastNodeType = this.currentScopeEntryNodes.get(scopeEntry);
-            if (lastNodeType != null) {
-                final ExpressionResult result = this.getNodeType(lastNodeType);
+            final AstNode lastNode = this.currentScopeEntryNodes.get(scopeEntry);
+            if (lastNode != null) {
+                final ExpressionResult result = this.getNodeType(lastNode);
                 this.assignAtom(node, result);
             }
         }

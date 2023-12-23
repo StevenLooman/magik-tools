@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing.io;
+package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -21,13 +21,11 @@ import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeperDefinitionExtractor;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import org.slf4j.Logger;
@@ -36,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * JSON-line TypeKeeper writer.
  */
-public final class JsonTypeKeeperWriter {
+public final class JsonDefinitionWriter {
 
     private static class TypeStringSerializer implements JsonSerializer<TypeString> {
 
@@ -58,7 +56,8 @@ public final class JsonTypeKeeperWriter {
                 final ExpressionResultString src,
                 final Type typeOfSrc,
                 final JsonSerializationContext context) {
-            throw new UnsupportedOperationException("Unimplemented method 'serialize'");
+            final String fullString = src.getFullString();
+            return new JsonPrimitive(fullString);
         }
 
     }
@@ -76,12 +75,12 @@ public final class JsonTypeKeeperWriter {
 
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonTypeKeeperWriter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonDefinitionWriter.class);
 
-    private final TypeKeeperDefinitionExtractor typeKeeperExtractor;
+    private final IDefinitionKeeper definitionKeeper;
 
-    private JsonTypeKeeperWriter(final ITypeKeeper typeKeeper) {
-        this.typeKeeperExtractor = new TypeKeeperDefinitionExtractor(typeKeeper);
+    private JsonDefinitionWriter(final IDefinitionKeeper definitionKeeper) {
+        this.definitionKeeper = definitionKeeper;
     }
 
     private void run(final Path path) throws IOException {
@@ -128,7 +127,7 @@ public final class JsonTypeKeeperWriter {
 
     private void writePackages(final Writer writer) {
         final Comparator<PackageDefinition> sorter = Comparator.comparing(PackageDefinition::getName);
-        this.typeKeeperExtractor.getPackageDefinitions().stream()
+        this.definitionKeeper.getPackageDefinitions().stream()
             .sorted(sorter)
             .forEach(definition -> {
                 final Gson gson = this.buildGson();
@@ -140,7 +139,7 @@ public final class JsonTypeKeeperWriter {
 
     private void writeExemplars(final Writer writer) {
         final Comparator<ExemplarDefinition> sorter = Comparator.comparing(ExemplarDefinition::getTypeString);
-        this.typeKeeperExtractor.getExemplarDefinitions().stream()
+        this.definitionKeeper.getExemplarDefinitions().stream()
             .sorted(sorter)
             .forEach(definition -> {
                 final Gson gson = this.buildGson();
@@ -154,7 +153,7 @@ public final class JsonTypeKeeperWriter {
         final Comparator<MethodDefinition> typeNameComparer = Comparator.comparing(MethodDefinition::getTypeName);
         final Comparator<MethodDefinition> nameComparer = Comparator.comparing(MethodDefinition::getName);
         final Comparator<MethodDefinition> sorter = typeNameComparer.thenComparing(nameComparer);
-        this.typeKeeperExtractor.getMethodDefinitions().stream()
+        this.definitionKeeper.getMethodDefinitions().stream()
             .sorted(sorter)
             .forEach(definition -> {
                 final Gson gson = this.buildGson();
@@ -166,7 +165,7 @@ public final class JsonTypeKeeperWriter {
 
     private void writeProcedures(final Writer writer) {
         final Comparator<ProcedureDefinition> sorter = Comparator.comparing(ProcedureDefinition::getTypeName);
-        this.typeKeeperExtractor.getProcedureDefinitions().stream()
+        this.definitionKeeper.getProcedureDefinitions().stream()
             .sorted(sorter)
             .forEach(definition -> {
                 final Gson gson = this.buildGson();
@@ -178,7 +177,7 @@ public final class JsonTypeKeeperWriter {
 
     private void writeConditions(final BufferedWriter writer) {
         final Comparator<ConditionDefinition> sorter = Comparator.comparing(ConditionDefinition::getName);
-        this.typeKeeperExtractor.getConditionDefinitions().stream()
+        this.definitionKeeper.getConditionDefinitions().stream()
             .sorted(sorter)
             .forEach(definition -> {
                 final Gson gson = this.buildGson();
@@ -198,7 +197,7 @@ public final class JsonTypeKeeperWriter {
         final Comparator<BinaryOperatorDefinition> sorter = lhsComparer
             .thenComparing(rhsComparer)
             .thenComparing(resultComparer);
-        this.typeKeeperExtractor.getBinaryOperatorDefinitions().stream()
+        this.definitionKeeper.getBinaryOperatorDefinitions().stream()
             .sorted(sorter)
             .forEach(definition -> {
                 final Gson gson = this.buildGson();
@@ -211,7 +210,7 @@ public final class JsonTypeKeeperWriter {
 
     private void writeGlobals(final Writer writer) {
         final Comparator<GlobalDefinition> sorter = Comparator.comparing(GlobalDefinition::getTypeString);
-        this.typeKeeperExtractor.getGlobalDefinitions().stream()
+        this.definitionKeeper.getGlobalDefinitions().stream()
             .sorted(sorter)
             .forEach(definition -> {
                 final Gson gson = this.buildGson();
@@ -224,11 +223,11 @@ public final class JsonTypeKeeperWriter {
     /**
      * Write types to a JSON-line file.
      * @param path Path to JSON-line file.
-     * @param typeKeeper {@link TypeKeeper} to dump.
+     * @param definitionKeeper {@link IDefinitionKeeper} to dump.
      * @throws IOException -
      */
-    public static void write(final Path path, final ITypeKeeper typeKeeper) throws IOException {
-        final JsonTypeKeeperWriter reader = new JsonTypeKeeperWriter(typeKeeper);
+    public static void write(final Path path, final IDefinitionKeeper definitionKeeper) throws IOException {
+        final JsonDefinitionWriter reader = new JsonDefinitionWriter(definitionKeeper);
         reader.run(path);
     }
 

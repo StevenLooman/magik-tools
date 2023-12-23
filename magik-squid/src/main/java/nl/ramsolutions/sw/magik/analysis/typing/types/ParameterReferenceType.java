@@ -67,6 +67,11 @@ public class ParameterReferenceType extends AbstractType {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(this.parameterName);
+    }
+
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
@@ -81,12 +86,7 @@ public class ParameterReferenceType extends AbstractType {
         }
 
         final ParameterReferenceType other = (ParameterReferenceType) obj;
-        return Objects.equals(this.getParameterName(), other.getParameterName());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.parameterName);
+        return Objects.equals(this.parameterName, other.parameterName);
     }
 
     @Override

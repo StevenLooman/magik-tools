@@ -3,12 +3,14 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import java.util.Objects;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
  * Method usage.
  */
+@Immutable
 public class MethodUsage {
 
     private final TypeString typeName;
@@ -69,9 +71,9 @@ public class MethodUsage {
         }
 
         final MethodUsage other = (MethodUsage) obj;
+        // Location is not tested!
         return Objects.equals(other.getTypeName(), this.getTypeName())
-            && Objects.equals(other.getMethodName(), this.getMethodName())
-            && Objects.equals(other.getLocation(), this.getLocation());
+            && Objects.equals(other.getMethodName(), this.getMethodName());
     }
 
 }

@@ -2,9 +2,9 @@ package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.definitions.DefSlottedExemplarParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefSlottedExemplarParser;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;

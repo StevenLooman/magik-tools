@@ -1,8 +1,8 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
@@ -18,10 +18,10 @@ class GlobalKnownTypedCheckTest extends MagikTypedCheckTestBase {
     void testKnownGlobal() {
         final String code = ""
             + "float.m";
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
         final MagikTypedCheck check = new GlobalKnownTypedCheck();
-        final List<MagikIssue> checkResults = this.runCheck(code, typeKeeper, check);
+        final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
         assertThat(checkResults)
             .isEmpty();
     }
@@ -30,10 +30,10 @@ class GlobalKnownTypedCheckTest extends MagikTypedCheckTestBase {
     void testUnknownGlobal() {
         final String code = ""
             + "abc.m";
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
         final MagikTypedCheck check = new GlobalKnownTypedCheck();
-        final List<MagikIssue> checkResults = this.runCheck(code, typeKeeper, check);
+        final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
         assertThat(checkResults)
             .hasSize(1);
     }
