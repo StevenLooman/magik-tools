@@ -9,6 +9,7 @@
 - Extend FormattingCheck to require at most 2 successive empty lines.
 - Use DefinitionKeeper to store *Definition classes.
 - Add DefinitionKeeperTypeKeeperAdapter for compatibility with previous type system.
+- Show inlayhints for ATOM nodes, as a configurable option.
 
 0.8.3 (unreleased)
 
