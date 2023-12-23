@@ -1,0 +1,15 @@
+{
+    "title": "Type-doc Type Exists",
+    "type": "BUG",
+    "status": "ready",
+    "remediation": {
+      "func": "Constant\/Issue",
+      "constantCost": "30min"
+    },
+    "tags": [
+      "error"
+    ],
+    "defaultSeverity": "Major",
+    "ruleSpecification": "TypeDocTypeExists",
+    "sqKey": "type-doc-type-exists"
+  }

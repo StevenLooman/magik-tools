@@ -5,7 +5,7 @@
   <parent>
     <groupId>nl.ramsolutions</groupId>
     <artifactId>magik-tools</artifactId>
-    <version>0.8.1-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>magik-squid</artifactId>
@@ -23,8 +23,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
     </dependency>
 
     <dependency>

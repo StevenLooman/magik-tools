@@ -12,9 +12,11 @@ import javax.annotation.Nullable;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
+import nl.ramsolutions.sw.magik.checks.MagikCheckMetadata;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import nl.ramsolutions.sw.magik.checks.MagikIssueDisabledChecker;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
+import nl.ramsolutions.sw.magik.typedchecks.CheckList;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -77,11 +79,11 @@ public class MagikTypedChecksDiagnosticsProvider {
             ? overrideConfigurationPath
             : ConfigurationLocator.locateConfiguration(magikFilePath);
         final MagikChecksConfiguration checksConfig = configPath != null
-            ? new MagikChecksConfiguration(configPath)
-            : new MagikChecksConfiguration();
+            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
+            : new MagikChecksConfiguration(CheckList.getChecks());
         final List<MagikCheckHolder> holders = checksConfig.getAllChecks();
         return holders.stream()
-            .filter(holder -> holder.getCheckClass().isInstance(MagikTypedCheck.class))
+            .filter(MagikCheckHolder::isEnabled)
             .map(holder -> {
                 try {
                     return (MagikTypedCheck) holder.createCheck();
@@ -98,7 +100,8 @@ public class MagikTypedChecksDiagnosticsProvider {
     private DiagnosticSeverity getCheckSeverity(final MagikCheckHolder holder) {
         final String severity;
         try {
-            severity = holder.getSeverity();
+            final MagikCheckMetadata metadata = holder.getMetadata();
+            severity = metadata.getDefaultSeverity();
         } catch (final IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
             return DiagnosticSeverity.Error;

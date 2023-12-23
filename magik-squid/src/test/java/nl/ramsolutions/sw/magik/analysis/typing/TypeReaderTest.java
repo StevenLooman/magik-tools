@@ -1,10 +1,12 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
+import java.util.List;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikTypeInstance;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ParameterReferenceType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
@@ -25,12 +27,14 @@ class TypeReaderTest {
     }
 
     private AbstractType parseTypeString(final TypeString typeStr) {
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
         return this.parseTypeString(typeStr, typeKeeper);
     }
 
     private ExpressionResult parseExpressionResultString(final ExpressionResultString expressionResultstring) {
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
         final TypeReader reader = new TypeReader(typeKeeper);
         return reader.parseExpressionResultString(expressionResultstring);
     }
@@ -68,11 +72,22 @@ class TypeReaderTest {
 
     @Test
     void testParseGeneric() {
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-        final MagikType ropeType = new MagikType(typeKeeper, Sort.SLOTTED, ropeRef);
-        ropeType.addGeneric(null, "E");
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                "test_module",
+                null,
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                ropeRef,
+                List.of(),
+                List.of(),
+                List.of(
+                    new ExemplarDefinition.GenericDeclaration(null, "E"))));
 
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
         final TypeString typeStr = TypeString.ofIdentifier(
             "rope", "sw",
             TypeString.ofIdentifier("integer", "sw"));

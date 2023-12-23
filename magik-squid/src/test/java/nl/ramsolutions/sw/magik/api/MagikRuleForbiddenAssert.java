@@ -23,9 +23,9 @@ public class MagikRuleForbiddenAssert extends MagikRuleAssert {
 
     }
 
-    private MagikGrammar forbiddenRuleKey;
+    private final MagikGrammar forbiddenRuleKey;
 
-    public MagikRuleForbiddenAssert(Rule actual, MagikGrammar forbiddenRuleKey) {
+    public MagikRuleForbiddenAssert(final Rule actual, final MagikGrammar forbiddenRuleKey) {
         super(actual);
         this.forbiddenRuleKey = forbiddenRuleKey;
     }
@@ -33,12 +33,12 @@ public class MagikRuleForbiddenAssert extends MagikRuleAssert {
     /**
      * Test if input matches.
      */
-    public MagikRuleForbiddenAssert matches(String input) {
-        ParsingResult parsingResult = this.parseInput(input);
+    public MagikRuleForbiddenAssert matches(final String input) {
+        final ParsingResult parsingResult = this.parseInput(input);
 
         // Ensure forbiddenRuleKey was never matched.
-        ParseNode parseTree = parsingResult.getParseTreeRoot();
-        ParseNode foundTree = this.findParseTreeWithRule(parseTree, this.forbiddenRuleKey);
+        final ParseNode parseTree = parsingResult.getParseTreeRoot();
+        final ParseNode foundTree = this.findParseTreeWithRule(parseTree, this.forbiddenRuleKey);
         if (foundTree != null) {
             throw new ForbiddenRuleUsed(this.forbiddenRuleKey);
         }
@@ -46,7 +46,7 @@ public class MagikRuleForbiddenAssert extends MagikRuleAssert {
         return this;
     }
 
-    public static MagikRuleForbiddenAssert assertThat(Rule actual, MagikGrammar forbiddenRuleKey) {
+    public static MagikRuleForbiddenAssert assertThat(final Rule actual, final MagikGrammar forbiddenRuleKey) {
         return new MagikRuleForbiddenAssert(actual, forbiddenRuleKey);
     }
 

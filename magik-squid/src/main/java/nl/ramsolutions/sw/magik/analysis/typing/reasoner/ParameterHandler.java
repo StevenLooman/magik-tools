@@ -71,8 +71,4 @@ class ParameterHandler extends LocalTypeReasonerHandler {
         this.state.setCurrentScopeEntryNode(scopeEntry, node);
     }
 
-    void handleAssignmentParameter(final AstNode node) {
-        this.handleParameter(node);
-    }
-
 }

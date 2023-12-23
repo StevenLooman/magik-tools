@@ -1,1 +1,1 @@
-export const MAGIK_TOOLS_VERSION = '0.8.1-SNAPSHOT';
+export const MAGIK_TOOLS_VERSION = '0.9.0-SNAPSHOT';

@@ -38,10 +38,14 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         MagikOperator.MINUS.getValue(), "negated",
         MagikOperator.PLUS.getValue(), "unary_plus",
         MagikKeyword.SCATTER.getValue(), "for_scatter()");
-    private static final CommentInstructionReader.InstructionType TYPE_INSTRUCTION =
-        CommentInstructionReader.InstructionType.createStatementInstructionType("type");
-    private static final CommentInstructionReader.InstructionType ITER_TYPE_INSTRUCTION =
-        CommentInstructionReader.InstructionType.createStatementInstructionType("iter-type");
+    private static final CommentInstructionReader.Instruction TYPE_INSTRUCTION =
+        new CommentInstructionReader.Instruction(
+            "type",
+            CommentInstructionReader.Instruction.Sort.STATEMENT);
+    private static final CommentInstructionReader.Instruction ITER_TYPE_INSTRUCTION =
+        new CommentInstructionReader.Instruction(
+            "iter-type",
+            CommentInstructionReader.Instruction.Sort.STATEMENT);
 
     private final CommentInstructionReader instructionReader;
 
@@ -80,7 +84,9 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
 
             // Evaluate binary operator.
             final AbstractType leftType = result.get(0, unsetType);
+            final TypeString leftRef = leftType.getTypeString();
             final AbstractType rightType = rightResult.get(0, unsetType);
+            final TypeString rightRef = rightType.getTypeString();
             switch (operatorStr.toLowerCase()) {
                 case "_is":
                 case "_isnt":
@@ -97,7 +103,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 default:
                     final BinaryOperator.Operator operator = BinaryOperator.Operator.valueFor(operatorStr);
                     final BinaryOperator binaryOperator =
-                        this.typeKeeper.getBinaryOperator(operator, leftType, rightType);
+                        this.typeKeeper.getBinaryOperator(operator, leftRef, rightRef);
                     final TypeString resultingTypeRef = binaryOperator != null
                         ? binaryOperator.getResultType()
                         : TypeString.UNDEFINED;
@@ -133,7 +139,9 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
 
         // Evaluate binary operator.
         final AbstractType leftType = leftResult.get(0, unsetType);
+        final TypeString leftRef = leftType.getTypeString();
         final AbstractType rightType = rightResult.get(0, unsetType);
+        final TypeString rightRef = rightType.getTypeString();
         final ExpressionResult result;
         switch (operatorStr.toLowerCase()) {
             case "_is":
@@ -150,7 +158,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
 
             default:
                 final BinaryOperator.Operator operator = BinaryOperator.Operator.valueFor(operatorStr);
-                final BinaryOperator binaryOperator = this.typeKeeper.getBinaryOperator(operator, leftType, rightType);
+                final BinaryOperator binaryOperator = this.typeKeeper.getBinaryOperator(operator, leftRef, rightRef);
                 final TypeString resultingTypeRef = binaryOperator != null
                     ? binaryOperator.getResultType()
                     : TypeString.UNDEFINED;
@@ -266,6 +274,8 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 this.state.setCurrentScopeEntryNode(scopeEntry, identifierNode);
             }
         }
+
+        // TODO: WHILE node.
     }
 
     /**

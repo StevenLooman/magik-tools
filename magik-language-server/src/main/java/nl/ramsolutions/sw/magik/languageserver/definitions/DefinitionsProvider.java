@@ -85,13 +85,13 @@ public class DefinitionsProvider {
         final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
         final String conditionName = wantedNode.getTokenValue();
         final Condition condition = typeKeeper.getCondition(conditionName);
-        if (condition != null
-            && condition.getLocation() != null) {
-            final Location conditionLocation = condition.getLocation();
-            return List.of(conditionLocation);
+        if (condition == null) {
+            return Collections.emptyList();
         }
 
-        return Collections.emptyList();
+        final Location conditionLocation = condition.getLocation();
+        return List.of(
+            Location.validLocation(conditionLocation));
     }
 
     private List<Location> definitionsForAtom(final MagikTypedFile magikFile, final AstNode wantedNode) {
@@ -120,13 +120,13 @@ public class DefinitionsProvider {
         final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
         final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
         final AbstractType type = typeKeeper.getType(typeString);
-        if (type != UndefinedType.INSTANCE
-            && type.getLocation() != null) {
-            final Location typeLocation = type.getLocation();
-            return List.of(typeLocation);
+        if (type == UndefinedType.INSTANCE) {
+            return Collections.emptyList();
         }
 
-        return Collections.emptyList();
+        final Location typeLocation = type.getLocation();
+        return List.of(
+            Location.validLocation(typeLocation));
     }
 
     private List<Location> definitionsForMethodInvocation(final MagikTypedFile magikFile, final AstNode wantedNode) {
@@ -148,6 +148,7 @@ public class DefinitionsProvider {
                 .flatMap(anyType -> anyType.getMethods().stream())
                 .filter(m -> m.getName().equals(methodName))
                 .map(Method::getLocation)
+                .map(Location::validLocation)
                 .forEach(locations::add);
         } else {
             if (type == SelfType.INSTANCE) {
@@ -159,7 +160,7 @@ public class DefinitionsProvider {
             LOGGER.debug("Finding implementations for type:, {}, method: {}", type.getFullName(), methodName);
             type.getMethods(methodName).stream()
                 .map(Method::getLocation)
-                .filter(Objects::nonNull)
+                .map(Location::validLocation)
                 .forEach(locations::add);
         }
 

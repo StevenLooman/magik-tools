@@ -3,18 +3,16 @@ package nl.ramsolutions.sw.magik.languageserver.completion;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import org.eclipse.lsp4j.CompletionItem;
@@ -32,17 +30,17 @@ class CompletionProviderTest {
 
     private List<CompletionItem> getCompletions(
             final String code,
-            final ITypeKeeper typeKeeper,
+            final IDefinitionKeeper definitionKeeper,
             final Position position) {
         final URI uri = URI.create("tests://unittest");
-        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, typeKeeper);
+        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
         final CompletionProvider provider = new CompletionProvider();
         return provider.provideCompletions(magikFile, position);
     }
 
     private List<CompletionItem> getCompletions(final String code, final Position position) {
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        return this.getCompletions(code, typeKeeper, position);
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        return this.getCompletions(code, definitionKeeper, position);
     }
 
     @Test
@@ -67,20 +65,23 @@ class CompletionProviderTest {
             + "_method a.b\n"
             + "    1.\n"
             + "_endmethod";
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
-        integerType.addMethod(
-            null,
-            EnumSet.noneOf(Method.Modifier.class),
-            "find_me()",
-            Collections.emptyList(),
-            null,
-            null,
-            ExpressionResultString.UNDEFINED,
-            new ExpressionResultString());
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                integerRef,
+                "find_me()",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                ExpressionResultString.UNDEFINED,
+                ExpressionResultString.EMPTY));
         final Position position = new Position(1, 6);    // On '.'.
-        final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
+        final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
 
         assertThat(completions).hasSize(1);
 
@@ -97,23 +98,35 @@ class CompletionProviderTest {
             + "_method a.b\n"
             + "    _self.\n"
             + "_endmethod";
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString aRef = TypeString.ofIdentifier("a", "user");
-        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, aRef);
-        aType.addMethod(
-            null,
-            EnumSet.noneOf(Method.Modifier.class),
-            "find_me()",
-            Collections.emptyList(),
-            null,
-            null,
-            ExpressionResultString.UNDEFINED,
-            new ExpressionResultString());
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                aRef,
+                Collections.emptyList(),
+                Collections.emptyList(),
+                Collections.emptyList()));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                aRef,
+                "find_me()",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                ExpressionResultString.UNDEFINED,
+                ExpressionResultString.EMPTY));
         final Position position = new Position(1, 10);    // On '.'.
-        final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
-
+        final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
         assertThat(completions).hasSize(1);
-
         final CompletionItem item = completions.get(0);
         assertThat(item.getKind()).isEqualTo(CompletionItemKind.Method);
         assertThat(item.getInsertText()).isEqualTo("find_me()");
@@ -127,20 +140,23 @@ class CompletionProviderTest {
             + "_method a.b\n"
             + "    1.fi\n"
             + "_endmethod";
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
-        integerType.addMethod(
-            null,
-            EnumSet.noneOf(Method.Modifier.class),
-            "find_me()",
-            Collections.emptyList(),
-            null,
-            null,
-            ExpressionResultString.UNDEFINED,
-            new ExpressionResultString());
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                integerRef,
+                "find_me()",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                ExpressionResultString.UNDEFINED,
+                ExpressionResultString.EMPTY));
         final Position position = new Position(1, 8);    // On 'i'.
-        final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
+        final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
 
         assertThat(completions).hasSize(1);
 
@@ -157,11 +173,11 @@ class CompletionProviderTest {
             + "_method a.b\n"
             + "    \n"
             + "_endmethod";
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final Position position = new Position(1, 2);    // On ''.
-        final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
+        final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
 
-        final Collection<AbstractType> defaultTypes = typeKeeper.getTypes();
+        final Collection<ExemplarDefinition> defaultTypes = definitionKeeper.getExemplarDefinitions();
         assertThat(completions).hasSize(defaultTypes.size() + MagikKeyword.values().length);
 
         final Set<CompletionItemKind> itemKinds = completions.stream()
@@ -179,11 +195,11 @@ class CompletionProviderTest {
             + "    _local x << 10\n"
             + "    \n"
             + "_endmethod";
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final Position position = new Position(2, 2);    // On ''.
-        final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
+        final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
 
-        final Collection<AbstractType> defaultTypes = typeKeeper.getTypes();
+        final Collection<ExemplarDefinition> defaultTypes = definitionKeeper.getExemplarDefinitions();
         assertThat(completions).hasSize(
             defaultTypes.size()
             + MagikKeyword.values().length
@@ -204,14 +220,31 @@ class CompletionProviderTest {
             + "_method a.b\n"
             + "    \n"
             + "_endmethod";
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString aRef = TypeString.ofIdentifier("a", "user");
-        final MagikType aType = new MagikType(typeKeeper, Sort.SLOTTED, aRef);
-        aType.addSlot(null, "slot1", TypeString.UNDEFINED);
-        final Position position = new Position(1, 2);    // On ''.
-        final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                aRef,
+                List.of(
+                    new SlotDefinition(
+                        null,
+                        code,
+                        code,
+                        null,
+                        code,
+                        aRef)),
+                Collections.emptyList(),
+                Collections.emptyList()));
 
-        final Collection<AbstractType> defaultTypes = typeKeeper.getTypes();
+        final Position position = new Position(1, 2);    // On ''.
+        final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
+
+        final Collection<ExemplarDefinition> defaultTypes = definitionKeeper.getExemplarDefinitions();
         assertThat(completions).hasSize(
             defaultTypes.size()
             + MagikKeyword.values().length
@@ -230,9 +263,9 @@ class CompletionProviderTest {
     void testNoCompletionInComment() {
         final String code = ""
             + "abc # ";
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final Position position = new Position(0, 5);    // On ' ', in comment.
-        final List<CompletionItem> completions = this.getCompletions(code, typeKeeper, position);
+        final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
         assertThat(completions).isEmpty();
     }
 

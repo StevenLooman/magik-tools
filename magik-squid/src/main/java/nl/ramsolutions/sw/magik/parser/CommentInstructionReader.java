@@ -16,60 +16,57 @@ import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 
 /**
  * Comment Instruction reader.
+ *
+ * Any line number is 0-based, as is in {@link MagikFile}.
  */
 public class CommentInstructionReader {
 
     /**
-     * Instruction type.
+     * Instruction.
      */
-    public static final class InstructionType {
+    public static final class Instruction {
 
-        private final String type;
-        private final boolean isScopeInstruction;
+        /**
+         * Sort of instruction.
+         */
+        @SuppressWarnings("checkstyle:JavadocVariable")
+        public enum Sort {
+            STATEMENT,
+            SCOPE
+        }
+
+        private final String name;
+        private final Sort sort;
         private final Pattern pattern;
 
-        private InstructionType(final String type, final boolean isScopeInstruction) {
-            this.type = type;
-            this.isScopeInstruction = isScopeInstruction;
-            this.pattern = isScopeInstruction
-                ? Pattern.compile("^\\s*#\\s*" + Pattern.quote(type) + ":\\s*(.*)$")
-                : Pattern.compile("^\\s*[^\\s].*#\\s*" + Pattern.quote(type) + ":\\s*(.*)$");
+        /**
+         * Constructor.
+         * @param name Name.
+         * @param sort Sort.
+         */
+        public Instruction(final String name, final Sort sort) {
+            this.name = name;
+            this.sort = sort;
+            this.pattern = sort == Sort.SCOPE
+                ? Pattern.compile("^\\s*#\\s*" + Pattern.quote(name) + ":\\s*(.*)$")
+                : Pattern.compile("^\\s*[^\\s].*#\\s*" + Pattern.quote(name) + ":\\s*(.*)$");
         }
 
-        public String getType() {
-            return this.type;
+        public String getName() {
+            return this.name;
         }
 
-        public boolean isScopeInstruction() {
-            return this.isScopeInstruction;
+        public Sort getSort() {
+            return this.sort;
         }
 
         public Pattern getPattern() {
             return this.pattern;
         }
 
-        /**
-         * Create a new `InstructionType`.
-         * @param type Name of type.
-         * @return New `InstructionType`.
-         */
-        public static InstructionType createStatementInstructionType(final String type) {
-            return new InstructionType(type, false);
-        }
-
-        /**
-         * Create a new `InstructionType` which only matches in a scope/on its own line.
-         * To be used, for example, to specify instructions which appyl to the whole scope.
-         * @param type Name of type.
-         * @return New `InstructionType`.
-         */
-        public static InstructionType createScopeInstructionType(final String type) {
-            return new InstructionType(type, true);
-        }
-
         @Override
         public int hashCode() {
-            return Objects.hash(this.type, this.isScopeInstruction, this.pattern);
+            return Objects.hash(this.name, this.sort, this.pattern);
         }
 
         @Override
@@ -86,57 +83,57 @@ public class CommentInstructionReader {
                 return false;
             }
 
-            final InstructionType other = (InstructionType) obj;
-            return Objects.equals(this.type, other.type)
-                && Objects.equals(this.isScopeInstruction, other.isScopeInstruction)
+            final Instruction other = (Instruction) obj;
+            return Objects.equals(this.name, other.name)
+                && Objects.equals(this.sort, other.sort)
                 && Objects.equals(this.pattern, other.pattern);
         }
     }
 
     private final MagikFile magikFile;
-    private final Set<InstructionType> instructionTypes;
-    private final Map<Integer, Map<InstructionType, String>> instructions = new HashMap<>();
+    private final Set<Instruction> instructions;
+    private final Map<Integer, Map<Instruction, String>> lineInstructions = new HashMap<>();
     private boolean isRead;
 
     /**
      * Constructor.
      * @param magikFile Magik file.
-     * @param instructionTypes Instrunction types to read.
+     * @param instructions Instrunction to read.
      */
-    public CommentInstructionReader(final MagikFile magikFile, final Set<InstructionType> instructionTypes) {
+    public CommentInstructionReader(final MagikFile magikFile, final Set<Instruction> instructions) {
         this.magikFile = magikFile;
-        this.instructionTypes = instructionTypes;
+        this.instructions = instructions;
     }
 
     /**
      * Get instruction for node.
      * Simply takes line number from node and gets instruction(s) at line.
      * @param node Node.
-     * @param instructionType Instruction type.
+     * @param instruction Instruction.
      * @return Instruction, if any.
      */
     @CheckForNull
-    public String getInstructionForNode(final AstNode node, final InstructionType instructionType) {
-        final int lineNo = node.getTokenLine();
-        return this.getInstructionsAtLine(lineNo, instructionType);
+    public String getInstructionForNode(final AstNode node, final Instruction instruction) {
+        final int lineNo = node.getTokenLine() - 1;  // 1-based to 0-based.
+        return this.getInstructionsAtLine(lineNo, instruction);
     }
 
     /**
      * Get instructions at line.
      * @param lineNo Line number.
-     * @param instructionType Instruction type.
+     * @param instruction Instruction.
      * @return Instruction, if any.
      */
     @CheckForNull
-    public String getInstructionsAtLine(final int lineNo, final InstructionType instructionType) {
+    public String getInstructionsAtLine(final int lineNo, final Instruction instruction) {
         this.ensureRead();
 
-        if (!this.instructions.containsKey(lineNo)) {
+        if (!this.lineInstructions.containsKey(lineNo)) {
             return null;
         }
 
-        return this.instructions.get(lineNo).entrySet().stream()
-            .filter(entry -> entry.getKey() == instructionType)
+        return this.lineInstructions.get(lineNo).entrySet().stream()
+            .filter(entry -> entry.getKey() == instruction)
             .map(Map.Entry::getValue)
             .findAny()
             .orElse(null);
@@ -145,12 +142,12 @@ public class CommentInstructionReader {
     /**
      * Get instructions for this scope. This scope only and not any of its child scopes.
      * @param scope Scope to get instructions from.
-     * @param instructionType Instruction type.
+     * @param instruction Instruction.
      * @return Instructions in scope.
      */
-    public Set<String> getScopeInstructions(final Scope scope, final InstructionType instructionType) {
-        if (!instructionType.isScopeInstruction()) {
-            throw new IllegalStateException("Excepted scope instruction");
+    public Set<String> getScopeInstructions(final Scope scope, final Instruction instruction) {
+        if (instruction.getSort() != Instruction.Sort.SCOPE) {
+            throw new IllegalStateException("Excepted Scope instruction");
         }
 
         final int fromLine = scope.getStartLine();
@@ -159,9 +156,9 @@ public class CommentInstructionReader {
             .filter(line ->
                 // Filter any lines where a child scope lives.
                 scope.getChildScopes().stream()
-                    .anyMatch(childScope ->
-                        childScope.getStartLine() >= line && line < childScope.getEndLine()))
-            .mapToObj(line -> this.getInstructionsAtLine(line, instructionType))
+                    .noneMatch(childScope -> line >= childScope.getStartLine()
+                                          && line < childScope.getEndLine()))
+            .mapToObj(line -> this.getInstructionsAtLine(line - 1, instruction))
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
     }
@@ -176,8 +173,8 @@ public class CommentInstructionReader {
             return;
         }
 
-        this.instructionTypes.forEach(instructionType -> {
-            final Pattern pattern = instructionType.getPattern();
+        this.instructions.forEach(instruction -> {
+            final Pattern pattern = instruction.getPattern();
             for (int lineNo = 0; lineNo < lines.length; ++lineNo) {
                 final String line = lines[lineNo];
                 final Matcher matcher = pattern.matcher(line);
@@ -185,10 +182,10 @@ public class CommentInstructionReader {
                     continue;
                 }
 
-                final Map<InstructionType, String> instructionsAtLine =
-                    this.instructions.computeIfAbsent(lineNo + 1, k -> new HashMap<>());
-                final String instruction = matcher.group(1);
-                instructionsAtLine.put(instructionType, instruction);
+                final Map<Instruction, String> instructionsAtLine =
+                    this.lineInstructions.computeIfAbsent(lineNo, k -> new HashMap<>());
+                final String readInstruction = matcher.group(1);
+                instructionsAtLine.put(instruction, readInstruction);
             }
         });
 

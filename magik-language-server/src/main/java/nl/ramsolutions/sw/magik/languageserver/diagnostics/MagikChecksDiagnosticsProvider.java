@@ -11,12 +11,13 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
+import nl.ramsolutions.sw.magik.checks.MagikCheckMetadata;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import nl.ramsolutions.sw.magik.checks.MagikIssueDisabledChecker;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
-import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Location;
@@ -64,7 +65,7 @@ public class MagikChecksDiagnosticsProvider {
                 final String message = issue.message();
                 final DiagnosticSeverity severity = this.getCheckSeverity(holder);
                 final String checkKeyKebabCase = holder.getCheckKeyKebabCase();
-                final String diagnosticSource = String.format("mtype (%s)", checkKeyKebabCase);
+                final String diagnosticSource = String.format("mlint (%s)", checkKeyKebabCase);
                 return new Diagnostic(range, message, severity, diagnosticSource);
             })
             .collect(Collectors.toList());
@@ -77,11 +78,10 @@ public class MagikChecksDiagnosticsProvider {
             ? overrideConfigurationPath
             : ConfigurationLocator.locateConfiguration(magikFilePath);
         final MagikChecksConfiguration checksConfig = configPath != null
-            ? new MagikChecksConfiguration(configPath)
-            : new MagikChecksConfiguration();
+            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
+            : new MagikChecksConfiguration(CheckList.getChecks());
         final List<MagikCheckHolder> holders = checksConfig.getAllChecks();
         return holders.stream()
-            .filter(holder -> !holder.getCheckClass().isInstance(MagikTypedCheck.class))
             .filter(MagikCheckHolder::isEnabled)
             .map(holder -> {
                 try {
@@ -99,7 +99,8 @@ public class MagikChecksDiagnosticsProvider {
     private DiagnosticSeverity getCheckSeverity(final MagikCheckHolder holder) {
         final String severity;
         try {
-            severity = holder.getSeverity();
+            final MagikCheckMetadata metadata = holder.getMetadata();
+            severity = metadata.getDefaultSeverity();
         } catch (final IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
             return DiagnosticSeverity.Error;

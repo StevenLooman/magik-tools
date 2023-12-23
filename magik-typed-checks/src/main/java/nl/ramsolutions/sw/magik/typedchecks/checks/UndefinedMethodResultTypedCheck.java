@@ -19,7 +19,7 @@ import org.sonar.check.Rule;
 public class UndefinedMethodResultTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "UndefinedMethodResultTypedCheck";
+    public static final String CHECK_KEY = "UndefinedMethodResult";
 
     private static final String MESSAGE = "UNDEFINED results for method: %s";
 

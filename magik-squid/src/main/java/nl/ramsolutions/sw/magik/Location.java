@@ -7,11 +7,17 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Objects;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 /**
  * Location within a file.
  */
 public class Location {
+
+    private static final Location DUMMY_LOCATION = new Location(
+        URI.create("tests://unittest"),
+        Range.DEFAULT_RANGE);
 
     /**
      * Location/Range comparator.
@@ -39,14 +45,14 @@ public class Location {
     }
 
     private final URI uri;
-    private final Range range;
+    private final @Nullable Range range;
 
     /**
      * Constructor.
      * @param uri Path to file.
      * @param range Range in file.
      */
-    public Location(final URI uri, final Range range) {
+    public Location(final URI uri, final @Nullable Range range) {
         this.uri = uri;
         this.range = range;
     }
@@ -77,7 +83,7 @@ public class Location {
      */
     public Location(final URI uri) {
         this.uri = uri;
-        this.range = new Range(new Position(1, 0), new Position(1, 0));
+        this.range = null;
     }
 
     /**
@@ -92,6 +98,7 @@ public class Location {
      * Get Range.
      * @return Range in file.
      */
+    @CheckForNull
     public Range getRange() {
         return this.range;
     }
@@ -134,6 +141,28 @@ public class Location {
         final Location other = (Location) obj;
         return Objects.equals(this.uri, other.uri)
             && Objects.equals(this.range, other.range);
+    }
+
+    /**
+     * Ensure a complete location, with a range.
+     * @param location Range to derive from.
+     * @return Location.
+     */
+    public static Location validLocation(final Location location) {
+        if (location == null) {
+            return DUMMY_LOCATION;
+        }
+
+        final Range range = location.getRange();
+        if (range == null) {
+            return new Location(
+                location.getUri(),
+                new Range(
+                    new Position(1, 0),
+                    new Position(1, 0)));
+        }
+
+        return location;
     }
 
 }

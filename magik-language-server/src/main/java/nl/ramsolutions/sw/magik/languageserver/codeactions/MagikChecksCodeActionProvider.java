@@ -57,8 +57,8 @@ public class MagikChecksCodeActionProvider {
             ? MagikSettings.INSTANCE.getChecksOverrideSettingsPath()
             : ConfigurationLocator.locateConfiguration(searchPath);
         final MagikChecksConfiguration config = configPath != null
-            ? new MagikChecksConfiguration(configPath)
-            : new MagikChecksConfiguration();
+            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
+            : new MagikChecksConfiguration(CheckList.getChecks());
         final List<MagikCheckHolder> allChecks = config.getAllChecks();
         for (final MagikCheckHolder checkHolder : allChecks) {
             if (checkHolder.getCheckClass().equals(checkClass)) {

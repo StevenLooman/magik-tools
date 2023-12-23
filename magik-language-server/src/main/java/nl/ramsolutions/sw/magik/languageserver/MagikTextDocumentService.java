@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,8 +11,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
 import nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider;
@@ -99,7 +99,7 @@ public class MagikTextDocumentService implements TextDocumentService {
 
     private final MagikLanguageServer languageServer;
     private final Map<TextDocumentIdentifier, MagikTypedFile> openFiles = new HashMap<>();
-    private final ITypeKeeper typeKeeper;
+    private final IDefinitionKeeper definitionKeeper;
 
     private final HoverProvider hoverProvider;
     private final ImplementationProvider implementationProvider;
@@ -121,11 +121,13 @@ public class MagikTextDocumentService implements TextDocumentService {
      * Constructor.
      *
      * @param languageServer Owning language server.
-     * @param typeKeeper TypeKeeper to use.
+     * @param definitionKeeper IDefinitionKeeper to use.
      */
-    public MagikTextDocumentService(final MagikLanguageServer languageServer, final ITypeKeeper typeKeeper) {
+    public MagikTextDocumentService(
+            final MagikLanguageServer languageServer,
+            final IDefinitionKeeper definitionKeeper) {
         this.languageServer = languageServer;
-        this.typeKeeper = new ReadOnlyTypeKeeperAdapter(typeKeeper);
+        this.definitionKeeper = definitionKeeper;
 
         this.hoverProvider = new HoverProvider();
         this.implementationProvider = new ImplementationProvider();
@@ -138,7 +140,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.semanticTokenProver = new SemanticTokenProvider();
         this.renameProvider = new RenameProvider();
         this.documentSymbolProvider = new DocumentSymbolProvider();
-        this.typeHierarchyProvider = new TypeHierarchyProvider(this.typeKeeper);
+        this.typeHierarchyProvider = new TypeHierarchyProvider(this.definitionKeeper);
         this.inlayHintProvider = new InlayHintProvider();
         this.codeActionProvider = new CodeActionProvider();
         this.selectionRangeProvider = new SelectionRangeProvider();
@@ -175,10 +177,11 @@ public class MagikTextDocumentService implements TextDocumentService {
         LOGGER.debug("didOpen, uri: {}", textDocument.getUri());
 
         // Store file contents.
-        final String uri = textDocument.getUri();
-        final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uri);
+        final String uriStr = textDocument.getUri();
+        final URI uri = URI.create(uriStr);
+        final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uriStr);
         final String text = textDocument.getText();
-        final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.typeKeeper);
+        final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.definitionKeeper);
         this.openFiles.put(textDocumentIdentifier, openFile);
 
         // Publish diagnostics to client.
@@ -194,9 +197,10 @@ public class MagikTextDocumentService implements TextDocumentService {
         final List<TextDocumentContentChangeEvent> contentChangeEvents = params.getContentChanges();
         final TextDocumentContentChangeEvent contentChangeEvent = contentChangeEvents.get(0);
         final String text = contentChangeEvent.getText();
-        final String uri = versionedTextDocumentIdentifier.getUri();
-        final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uri);
-        final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.typeKeeper);
+        final String uriStr = versionedTextDocumentIdentifier.getUri();
+        final URI uri = URI.create(uriStr);
+        final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uriStr);
+        final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.definitionKeeper);
         this.openFiles.put(textDocumentIdentifier, openFile);
 
         // Publish diagnostics to client.
@@ -264,10 +268,10 @@ public class MagikTextDocumentService implements TextDocumentService {
     private List<Diagnostic> getDiagnosticsTyping(final MagikTypedFile magikFile) {
         final Path overrideSettingsPath = MagikSettings.INSTANCE.getChecksOverrideSettingsPath();
 
-        final MagikTypedChecksDiagnosticsProvider typeProvider =
+        final MagikTypedChecksDiagnosticsProvider typedDiagnosticsProvider =
             new MagikTypedChecksDiagnosticsProvider(overrideSettingsPath);
         try {
-            return typeProvider.getDiagnostics(magikFile);
+            return typedDiagnosticsProvider.getDiagnostics(magikFile);
         } catch (final IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
         }

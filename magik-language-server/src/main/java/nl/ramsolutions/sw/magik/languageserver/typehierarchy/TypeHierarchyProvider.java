@@ -1,15 +1,19 @@
 package nl.ramsolutions.sw.magik.languageserver.typehierarchy;
 
 import com.sonar.sslr.api.AstNode;
-import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -30,16 +34,15 @@ import org.slf4j.LoggerFactory;
 public class TypeHierarchyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TypeHierarchyProvider.class);
-    private static final Location NO_LOCATION = new Location(URI.create("file:///"));
 
-    private final ITypeKeeper typeKeeper;
+    private final IDefinitionKeeper definitionKeeper;
 
     /**
      * Constructor.
-     * @param typeKeeper Type keeper.
+     * @param definitionKeeper {@link IDefinitionKeeper}.
      */
-    public TypeHierarchyProvider(final ITypeKeeper typeKeeper) {
-        this.typeKeeper = typeKeeper;
+    public TypeHierarchyProvider(final IDefinitionKeeper definitionKeeper) {
+        this.definitionKeeper = definitionKeeper;
     }
 
     /**
@@ -71,7 +74,7 @@ public class TypeHierarchyProvider {
         }
 
         // Ensure it is on a class identifier, or a variable.
-        final ITypeKeeper fileTypeKeeper = magikFile.getTypeKeeper();
+        final TypeStringResolver resolver = new TypeStringResolver(this.definitionKeeper);
         final AstNode methodDefinitionNode = AstQuery.getParentFromChain(
             tokenNode,
             MagikGrammar.IDENTIFIER,
@@ -85,8 +88,12 @@ public class TypeHierarchyProvider {
             final MethodDefinitionNodeHelper methodDefinitionNodeHelper =
                 new MethodDefinitionNodeHelper(methodDefinitionNode);
             final TypeString typeStr = methodDefinitionNodeHelper.getTypeString();
-            final AbstractType type = fileTypeKeeper.getType(typeStr);
-            final TypeHierarchyItem item = this.toTypeHierarchyItem(type);
+            final ExemplarDefinition definition = resolver.getExemplarDefinition(typeStr);
+            if (definition == null) {
+                return null;  // NOSONAR: LSP requires null.
+            }
+
+            final TypeHierarchyItem item = this.toTypeHierarchyItem(definition);
             return List.of(item);
         } else if (atomNode != null) {
             // Get type from node.
@@ -96,7 +103,8 @@ public class TypeHierarchyProvider {
             if (type != null
                 && type != UndefinedType.INSTANCE) {
                 final TypeString typeStr = type.getTypeString();
-                final TypeHierarchyItem item = this.toTypeHierarchyItem(fileTypeKeeper.getType(typeStr));
+                final ExemplarDefinition definition = resolver.getExemplarDefinition(typeStr);
+                final TypeHierarchyItem item = this.toTypeHierarchyItem(definition);
                 return List.of(item);
             }
         }
@@ -109,18 +117,21 @@ public class TypeHierarchyProvider {
      * @param item Item to get sub types for.
      * @return List of sub types.
      */
+    @CheckForNull
     public List<TypeHierarchyItem> typeHierarchySubtypes(final TypeHierarchyItem item) {
+        final TypeStringResolver resolver = new TypeStringResolver(this.definitionKeeper);
         final String itemName = item.getName();
         final TypeString typeString = TypeString.ofIdentifier(itemName, "sw");
-        final AbstractType type = this.typeKeeper.getType(typeString);
-        if (type == UndefinedType.INSTANCE) {
+        final ExemplarDefinition definition = resolver.getExemplarDefinition(typeString);
+        if (definition == null) {
             return null;  // NOSONAR: LSP requires null.
         }
 
         // Find children.
+        final TypeString searchedTypeString = definition.getTypeString();
         final Comparator<TypeHierarchyItem> byName = Comparator.comparing(TypeHierarchyItem::getName);
-        return this.typeKeeper.getTypes().stream()
-            .filter(t -> t.getParents().contains(type))
+        return this.definitionKeeper.getExemplarDefinitions().stream()
+            .filter(def -> def.getParents().contains(searchedTypeString))
             .map(this::toTypeHierarchyItem)
             .sorted(byName)
             .collect(Collectors.toList());
@@ -131,33 +142,36 @@ public class TypeHierarchyProvider {
      * @param item Item to get super types for.
      * @return List of super types.
      */
+    @CheckForNull
     public List<TypeHierarchyItem> typeHierarchySupertypes(final TypeHierarchyItem item) {
+        final TypeStringResolver resolver = new TypeStringResolver(this.definitionKeeper);
         final String itemName = item.getName();
         final TypeString typeString = TypeString.ofIdentifier(itemName, "sw");
-        final AbstractType type = this.typeKeeper.getType(typeString);
-        if (type == UndefinedType.INSTANCE) {
+        final ExemplarDefinition definition = resolver.getExemplarDefinition(typeString);
+        if (definition ==  null) {
             return null;  // NOSONAR: LSP requires null.
         }
 
         final Comparator<TypeHierarchyItem> byName = Comparator.comparing(TypeHierarchyItem::getName);
-        return type.getParents().stream()
+        return definition.getParents().stream()
+            .map(resolver::getExemplarDefinition)
+            .filter(Objects::nonNull)
             .map(this::toTypeHierarchyItem)
             .sorted(byName)
             .collect(Collectors.toList());
     }
 
-    private TypeHierarchyItem toTypeHierarchyItem(final AbstractType type) {
-        final TypeString typeStr = type.getTypeString();
-        final Location typeLocation = type.getLocation();
-        final Location location = typeLocation != null
-            ? typeLocation
-            : NO_LOCATION;
+    private TypeHierarchyItem toTypeHierarchyItem(final ExemplarDefinition definition) {
+        final TypeString typeStr = definition.getTypeString();
+        final Location typeLocation = definition.getLocation();
+        final Location location = Location.validLocation(typeLocation);
+        final Range range = location.getRange();
         return new TypeHierarchyItem(
             typeStr.getFullString(),
             SymbolKind.Class,
             location.getUri().toString(),
-            Lsp4jConversion.rangeToLsp4j(location.getRange()),
-            Lsp4jConversion.rangeToLsp4j(location.getRange()));
+            Lsp4jConversion.rangeToLsp4j(range),
+            Lsp4jConversion.rangeToLsp4j(range));
     }
 
 }

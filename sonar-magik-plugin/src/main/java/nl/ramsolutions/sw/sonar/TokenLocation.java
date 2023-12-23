@@ -38,30 +38,34 @@ public class TokenLocation {
      * @return End line.
      */
     public int endLine() {
-        final String[] lines = this.token.getValue().split("\\r\\n|\\n|\\r");
+        final String tokenValue = this.token.getOriginalValue();
+        final String[] lines = tokenValue.split("\\r\\n|\\n|\\r");
         return this.token.getLine() + lines.length - 1;
     }
 
     /**
      * Get end column.
+     *
+     * Try to handle syntax errors (which might end in \r|\n|\r\n) gracefully.
      * @return End column.
      */
     public int endColumn() {
-        int endLineOffset = this.token.getColumn() + this.token.getValue().length();
-        if (endLine() != this.token.getLine()) {
-            final String[] lines = this.token.getValue().split("\\r\\n|\\n|\\r");
-            endLineOffset = lines[lines.length - 1].length();
+        final String tokenValue = this.token.getOriginalValue().stripTrailing();
+        int endLineOffset = this.token.getColumn() + tokenValue.length();
+        if (this.endLine() != this.token.getLine()) {
+            final String[] lines = tokenValue.split("\\r\\n|\\n|\\r");
+            endLineOffset = lines[lines.length - 1].length() - 1;
         }
 
         return endLineOffset;
     }
 
     /**
-     * Get value of token.
+     * Get (original) value of token.
      * @return Value of token.
      */
     public String getValue() {
-        return this.token.getValue();
+        return this.token.getOriginalValue();
     }
 
     /**

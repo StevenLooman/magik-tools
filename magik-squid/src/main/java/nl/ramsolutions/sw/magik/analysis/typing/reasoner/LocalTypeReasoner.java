@@ -100,11 +100,6 @@ public class LocalTypeReasoner extends AstWalker {
         this.parameterHandler.handleParameter(node);
     }
 
-    @Override
-    protected void walkPostAssignmentParameter(final AstNode node) {
-        this.parameterHandler.handleAssignmentParameter(node);
-    }
-
     // region: Atoms
     @Override
     protected void walkPostSlot(final AstNode node) {

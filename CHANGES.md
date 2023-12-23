@@ -1,6 +1,42 @@
 # Changes
 
-0.8.1 (unreleased)
+0.9.0 (unreleased)
+
+- Support configurable libs dirs.
+- Read and register in which module a definition lives.
+- Use com.google.gson instead of org.json.
+- Refactor MagikIndexer/JsonTypeKeeperReader/JsonTypeKeeperWriter/ClassInfoTypeKeeperReader to share more functionality, via *Definition classes.
+- Extend FormattingCheck to require at most 2 successive empty lines.
+- Use DefinitionKeeper to store *Definition classes.
+- Add DefinitionKeeperTypeKeeperAdapter for compatibility with previous type system.
+- Show inlayhints for ATOM nodes, as a configurable option.
+
+0.8.3 (unreleased)
+
+- Fix error finding start/end line/column for Scopes, when encountering an empty block.
+- Fix error when determining issue is disabled via MagikIssueDisabledChecker in certain cases.
+
+0.8.2 (2023-11-14)
+
+- Fix not finding appropriate node to register issue on when method contains a syntax error.
+- `magik-lint.properties` is searched for from path of current file in magik-lint, unless `--rcfile` is used.
+- Paths specified in setting `ignore` in `magik-lint.properties` in magik-lint are respected.
+- Fix grammar not supporting end labels in `_loop`/`_endloop` constructs.
+- Fix reading mlint-instructions in scope.
+- Fix WarnedCallCheck default forbidden calls not seeing the `sw:`-prefixed versions.
+
+0.8.1 (2023-10-15)
+
+- Better handle syntax errors in Copy/Paste Detection step in sonar-magik-plugin.
+- Fix sslr-magik-toolkit pointing to wrong Main class.
+- Add datamodel_type_dumper.magik.
+- Fix ForbiddenCallCheck default forbidden calls not seeing the `sw:`-prefixed versions.
+- Fix LocalTypeReasoner error on assignment parameter.
+- Fix source name in language server diagnostics.
+- Fix language server not showing typed Magik diagnostics.
+- Fix misnamed class TypeDocTypeExistsTypeCheck --> TypeDocTypeExistsTypedCheck.
+- Fix to allow comments after tokens in FormattingCheck.
+- Fix default/example to also include package-prefix global in ForbiddenGlobalUsageCheck.
 
 0.8.0 (2023-09-27)
 

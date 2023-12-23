@@ -1,34 +1,70 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
-import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import nl.ramsolutions.sw.magik.Location;
 
 /**
  * Base class for definitions.
  */
 public abstract class Definition {
 
-    private final AstNode node;
-    private final TypeString name;
+    private final @Nullable Location location;
+    private final @Nullable String moduleName;
+    private final @Nullable String doc;
+    private final @Nullable AstNode node;
 
     /**
      * Constructor.
+     * @param location Location.
+     * @param moduleName Name of the module this definition resides in.
+     * @param doc Doc.
      * @param node Node.
-     * @param name Name of definition, if applicable.
      */
-    protected Definition(final AstNode node, final TypeString name) {
-        if (!name.isSingle()) {
-            throw new IllegalStateException();
-        }
-
+    protected Definition(
+            final @Nullable Location location,
+            final @Nullable String moduleName,
+            final @Nullable String doc,
+            final @Nullable AstNode node) {
+        this.location = location;
+        this.moduleName = moduleName;
+        this.doc = doc;
         this.node = node;
-        this.name = name;
+    }
+
+    /**
+     * Get the location of the definition.
+     * @return Location of definition.
+     */
+    @CheckForNull
+    public Location getLocation() {
+        return this.location;
+    }
+
+    /**
+     * Get the name of the module this definition resides in.
+     * @return Module name.
+     */
+    @CheckForNull
+    public String getModuleName() {
+        return this.moduleName;
+    }
+
+    /**
+     * Get doc.
+     * @return
+     */
+    @CheckForNull
+    public String getDoc() {
+        return this.doc;
     }
 
     /**
      * Get parsed node.
      * @return
      */
+    @CheckForNull
     public AstNode getNode() {
         return this.node;
     }
@@ -37,24 +73,19 @@ public abstract class Definition {
      * Get name of definition.
      * @return Name of definition.
      */
-    public String getName() {
-        return this.name.getIdentifier();
-    }
+    public abstract String getName();
 
     /**
      * Get name of package this definition lives in.
      * @return Package name.
      */
-    public String getPackage() {
-        return this.name.getPakkage();
-    }
+    @CheckForNull
+    public abstract String getPackage();
 
-    @Override
-    public String toString() {
-        return String.format(
-            "%s@%s(%s, %s)",
-            this.getClass().getName(), Integer.toHexString(this.hashCode()),
-            this.getPackage(), this.getName());
-    }
+    /**
+     * Get a(n equal) copy of self, without the {@link AstNode}.
+     * @return Copy of self.
+     */
+    public abstract Definition getWithoutNode();
 
 }

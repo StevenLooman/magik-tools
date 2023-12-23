@@ -1,9 +1,11 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
+import java.util.List;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType.Sort;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import org.junit.jupiter.api.Test;
 
@@ -16,9 +18,22 @@ class TypeMatcherTest {
 
     @Test
     void testTypeEquals() {
-        final TypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString typeRef = TypeString.ofIdentifier("type", "sw");
-        final AbstractType type = new MagikType(typeKeeper, Sort.INTRINSIC, typeRef);
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                typeRef,
+                List.of(),
+                List.of(),
+                List.of()));
+
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final AbstractType type = typeKeeper.getType(typeRef);
 
         final boolean matches = TypeMatcher.typeMatches(type, type);
         assertThat(matches).isTrue();
@@ -26,11 +41,35 @@ class TypeMatcherTest {
 
     @Test
     void testTypeNotEquals() {
-        final TypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString type1Ref = TypeString.ofIdentifier("type1", "sw");
         final TypeString type2Ref = TypeString.ofIdentifier("type2", "sw");
-        final AbstractType type = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
-        final AbstractType criterium = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type1Ref,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type2Ref,
+                List.of(),
+                List.of(),
+                List.of()));
+
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final AbstractType type = typeKeeper.getType(type1Ref);
+        final AbstractType criterium = typeKeeper.getType(type2Ref);
 
         final boolean matches = TypeMatcher.typeMatches(type, criterium);
         assertThat(matches).isFalse();
@@ -38,12 +77,35 @@ class TypeMatcherTest {
 
     @Test
     void testTypeIsKindOf() {
-        final ITypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString baseRef = TypeString.ofIdentifier("base", "sw");
-        final MagikType baseType = new MagikType(typeKeeper, Sort.INTRINSIC, baseRef);
         final TypeString childRef = TypeString.ofIdentifier("child", "sw");
-        final MagikType childType = new MagikType(typeKeeper, Sort.INTRINSIC, childRef);
-        childType.addParent(baseRef);
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                baseRef,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                childRef,
+                List.of(),
+                List.of(baseRef),
+                List.of()));
+
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final AbstractType baseType = typeKeeper.getType(baseRef);
+        final AbstractType childType = typeKeeper.getType(childRef);
 
         final boolean matches = TypeMatcher.typeMatches(childType, baseType);
         assertThat(matches).isTrue();
@@ -51,82 +113,248 @@ class TypeMatcherTest {
 
     @Test
     void testTypeMatchesCombinedType() {
-        final TypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString type1Ref = TypeString.ofIdentifier("type1", "sw");
-        final MagikType type1 = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
         final TypeString type2Ref = TypeString.ofIdentifier("type2", "sw");
-        final MagikType type2 = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
-        final AbstractType criterium = new CombinedType(type1, type2);
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type1Ref,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type2Ref,
+                List.of(),
+                List.of(),
+                List.of()));
 
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final AbstractType type1 = typeKeeper.getType(type1Ref);
+        final AbstractType type2 = typeKeeper.getType(type2Ref);
+
+        final AbstractType criterium = new CombinedType(type1, type2);
         final boolean matches = TypeMatcher.typeMatches(type1, criterium);
         assertThat(matches).isTrue();
     }
 
     @Test
     void testTypeNotMatchesCombinedType() {
-        final TypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString type3Ref = TypeString.ofIdentifier("type3", "sw");
-        final AbstractType type3 = new MagikType(typeKeeper, Sort.INTRINSIC, type3Ref);
         final TypeString type1Ref = TypeString.ofIdentifier("type1", "sw");
-        final MagikType type1 = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
         final TypeString type2Ref = TypeString.ofIdentifier("type2", "sw");
-        final MagikType type2 = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
-        final AbstractType criterium = new CombinedType(type1, type2);
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type1Ref,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type2Ref,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type3Ref,
+                List.of(),
+                List.of(),
+                List.of()));
 
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final AbstractType type1 = typeKeeper.getType(type1Ref);
+        final AbstractType type2 = typeKeeper.getType(type2Ref);
+        final AbstractType type3 = typeKeeper.getType(type3Ref);
+
+        final AbstractType criterium = new CombinedType(type1, type2);
         final boolean matches = TypeMatcher.typeMatches(type3, criterium);
         assertThat(matches).isFalse();
     }
 
     @Test
     void testCombinedTypeMatchesCombinedType() {
-        final TypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString type1Ref = TypeString.ofIdentifier("type1", "sw");
-        final MagikType type1 = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
         final TypeString type2Ref = TypeString.ofIdentifier("type2", "sw");
-        final MagikType type2 = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
-        final AbstractType type = new CombinedType(type1, type2);
         final TypeString type3Ref = TypeString.ofIdentifier("type3", "sw");
-        final MagikType type3 = new MagikType(typeKeeper, Sort.INTRINSIC, type3Ref);
-        final AbstractType criterium = new CombinedType(type1, type2, type3);
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type1Ref,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type2Ref,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type3Ref,
+                List.of(),
+                List.of(),
+                List.of()));
 
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final AbstractType type1 = typeKeeper.getType(type1Ref);
+        final AbstractType type2 = typeKeeper.getType(type2Ref);
+        final AbstractType type3 = typeKeeper.getType(type3Ref);
+
+        final AbstractType type = new CombinedType(type1, type2);
+        final AbstractType criterium = new CombinedType(type1, type2, type3);
         final boolean matches = TypeMatcher.typeMatches(type, criterium);
         assertThat(matches).isTrue();
     }
 
     @Test
     void testCombinedTypeNotMatchesCombinedType() {
-        final TypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString type1Ref = TypeString.ofIdentifier("type1", "sw");
-        final MagikType type1 = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
         final TypeString type2Ref = TypeString.ofIdentifier("type2", "sw");
-        final MagikType type2 = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
-        final AbstractType type = new CombinedType(type1, type2);
         final TypeString type3Ref = TypeString.ofIdentifier("type3", "sw");
-        final MagikType type3 = new MagikType(typeKeeper, Sort.INTRINSIC, type3Ref);
-        final AbstractType criterium = new CombinedType(type2, type3);
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type1Ref,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type2Ref,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type3Ref,
+                List.of(),
+                List.of(),
+                List.of()));
 
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final AbstractType type1 = typeKeeper.getType(type1Ref);
+        final AbstractType type2 = typeKeeper.getType(type2Ref);
+        final AbstractType type3 = typeKeeper.getType(type3Ref);
+
+        final AbstractType type = new CombinedType(type1, type2);
+        final AbstractType criterium = new CombinedType(type2, type3);
         final boolean matches = TypeMatcher.typeMatches(type, criterium);
         assertThat(matches).isFalse();
     }
 
     @Test
     void testIsKindOfEquals() {
-        final TypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString typeRef = TypeString.ofIdentifier("type", "sw");
-        final AbstractType type = new MagikType(typeKeeper, Sort.INTRINSIC, typeRef);
-        final AbstractType criterium = type;
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                typeRef,
+                List.of(),
+                List.of(),
+                List.of()));
 
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final AbstractType type = typeKeeper.getType(typeRef);
+
+        final AbstractType criterium = type;
         final boolean isKindOf = TypeMatcher.isKindOf(type, criterium);
         assertThat(isKindOf).isTrue();
     }
 
     @Test
     void testIsKindOfNotEquals() {
-        final TypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString type1Ref = TypeString.ofIdentifier("type1", "sw");
-        final AbstractType type = new MagikType(typeKeeper, Sort.INTRINSIC, type1Ref);
         final TypeString type2Ref = TypeString.ofIdentifier("type2", "sw");
-        final AbstractType criterium = new MagikType(typeKeeper, Sort.INTRINSIC, type2Ref);
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type1Ref,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                type2Ref,
+                List.of(),
+                List.of(),
+                List.of()));
+
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final AbstractType type = typeKeeper.getType(type1Ref);
+        final AbstractType criterium = typeKeeper.getType(type2Ref);
 
         final boolean isKindOf = TypeMatcher.isKindOf(type, criterium);
         assertThat(isKindOf).isFalse();
@@ -134,12 +362,35 @@ class TypeMatcherTest {
 
     @Test
     void testIsKindOfDirectParent() {
-        final TypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString baseRef = TypeString.ofIdentifier("base", "sw");
         final TypeString childRef = TypeString.ofIdentifier("child", "sw");
-        final MagikType childType = new MagikType(typeKeeper, Sort.INTRINSIC, childRef);
-        childType.addParent(baseRef);
-        final AbstractType criterium = new MagikType(typeKeeper, Sort.INTRINSIC, baseRef);
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                baseRef,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                childRef,
+                List.of(),
+                List.of(baseRef),
+                List.of()));
+
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final AbstractType childType = typeKeeper.getType(childRef);
+        final AbstractType criterium = typeKeeper.getType(baseRef);
 
         final boolean isKindOf = TypeMatcher.isKindOf(childType, criterium);
         assertThat(isKindOf).isTrue();
@@ -147,17 +398,49 @@ class TypeMatcherTest {
 
     @Test
     void testIsKindOfIndirectParent() {
-        final TypeKeeper typeKeeper = new TypeKeeper();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final TypeString baseRef = TypeString.ofIdentifier("base", "sw");
-        final AbstractType baseType = new MagikType(typeKeeper, Sort.INTRINSIC, baseRef);
         final TypeString child1Ref = TypeString.ofIdentifier("child1", "sw");
-        final MagikType child1Type = new MagikType(typeKeeper, Sort.INTRINSIC, child1Ref);
-        child1Type.addParent(baseRef);
         final TypeString child2Ref = TypeString.ofIdentifier("child2", "sw");
-        final MagikType child2Type = new MagikType(typeKeeper, Sort.INTRINSIC, child2Ref);
-        child2Type.addParent(child1Ref);
-        final AbstractType criterium = baseType;
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                baseRef,
+                List.of(),
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                child1Ref,
+                List.of(),
+                List.of(baseRef),
+                List.of()));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                child2Ref,
+                List.of(),
+                List.of(child1Ref),
+                List.of()));
 
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final AbstractType baseType = typeKeeper.getType(baseRef);
+        final AbstractType child2Type = typeKeeper.getType(child2Ref);
+
+        final AbstractType criterium = baseType;
         final boolean isKindOf = TypeMatcher.isKindOf(child2Type, criterium);
         assertThat(isKindOf).isTrue();
     }

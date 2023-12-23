@@ -1,4 +1,4 @@
-name: Lint, build and test
+name: Lint and package
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build and test
+    name: Build, test and package
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]

@@ -2,12 +2,16 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.api.MagikKeyword;
 
 /**
  * Procedure instance.
@@ -15,9 +19,36 @@ import nl.ramsolutions.sw.magik.Location;
 public class ProcedureInstance extends AbstractType {
 
     /**
+     * Procedure modifier.
+     */
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public enum Modifier {
+
+        ITER(MagikKeyword.ITER);
+
+        private final MagikKeyword keyword;
+
+        Modifier(final MagikKeyword keyword) {
+            this.keyword = keyword;
+        }
+
+        /**
+         * Get modifier value.
+         * @return Modifier value.
+         */
+        public String getValue() {
+            return this.keyword.getValue();
+        }
+
+    }
+
+    /**
      * Serializer name for anonymouse procedure.
      */
     public static final String ANONYMOUS_PROCEDURE = "__anonymous_procedure";
+
+    private static final Map<Modifier, Method.Modifier> METHOD_MODIFIER_MAPPING = Map.of(
+        Modifier.ITER, Method.Modifier.ITER);
 
     private final MagikType procedureType;
     private final String procedureName;
@@ -29,21 +60,27 @@ public class ProcedureInstance extends AbstractType {
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public ProcedureInstance(// NOSONAR
-            final MagikType procedureType,
             final @Nullable Location location,
+            final @Nullable String moduleName,
+            final MagikType procedureType,
             final @Nullable String procedureName,
-            final Set<Method.Modifier> modifiers,
+            final Set<Modifier> modifiers,
             final List<Parameter> parameters,
             final @Nullable String methodDoc,
             final ExpressionResultString callResult,
             final ExpressionResultString loopbodyResult) {
+        super(location, moduleName);
         this.procedureType = procedureType;
         this.procedureName = procedureName != null
             ? procedureName
             : ANONYMOUS_PROCEDURE;
+        final EnumSet<Method.Modifier> methodModifiers = modifiers.stream()
+            .map(ProcedureInstance.METHOD_MODIFIER_MAPPING::get)
+            .collect(Collectors.toCollection(() -> EnumSet.noneOf(Method.Modifier.class)));
         this.invokeMethod = new Method(
             location,
-            modifiers,
+            moduleName,
+            methodModifiers,
             this.procedureType,
             "invoke()",
             parameters,

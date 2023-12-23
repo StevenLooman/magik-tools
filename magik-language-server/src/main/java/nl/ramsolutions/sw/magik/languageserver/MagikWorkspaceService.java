@@ -11,14 +11,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.IgnoreHandler;
-import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoTypeKeeperReader;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
+import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.typing.indexer.MagikIndexer;
-import nl.ramsolutions.sw.magik.analysis.typing.io.JsonTypeKeeperReader;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItem;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItemProvider;
 import nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider;
@@ -49,7 +46,7 @@ public class MagikWorkspaceService implements WorkspaceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikWorkspaceService.class);
 
     private final MagikLanguageServer languageServer;
-    private final ITypeKeeper typeKeeper;
+    private final IDefinitionKeeper definitionKeeper;
     private final IgnoreHandler ignoreHandler;
     private final MagikIndexer magikIndexer;
     private final SymbolProvider symbolProvider;
@@ -58,17 +55,16 @@ public class MagikWorkspaceService implements WorkspaceService {
     /**
      * Constructor.
      * @param languageServer Owner language server.
-     * @param typeKeeper {@link TypeKeeper} used for type storage.
+     * @param definitionKeeper {@link IDefinitionKeeper} used for definition storage.
      */
-    public MagikWorkspaceService(final MagikLanguageServer languageServer, final ITypeKeeper typeKeeper) {
+    public MagikWorkspaceService(final MagikLanguageServer languageServer, final IDefinitionKeeper definitionKeeper) {
         this.languageServer = languageServer;
-        this.typeKeeper = typeKeeper;
+        this.definitionKeeper = definitionKeeper;
 
         this.ignoreHandler = new IgnoreHandler();
-        this.magikIndexer = new MagikIndexer(typeKeeper);
-        final ITypeKeeper roTypeKeeper = new ReadOnlyTypeKeeperAdapter(typeKeeper);
-        this.symbolProvider = new SymbolProvider(roTypeKeeper);
-        this.testItemProvider = new MUnitTestItemProvider(roTypeKeeper);
+        this.magikIndexer = new MagikIndexer(this.definitionKeeper);
+        this.symbolProvider = new SymbolProvider(this.definitionKeeper);
+        this.testItemProvider = new MUnitTestItemProvider(this.definitionKeeper);
     }
 
     /**
@@ -106,7 +102,7 @@ public class MagikWorkspaceService implements WorkspaceService {
                     .forEach(path -> {
                         try {
                             this.ignoreHandler.addIgnoreFile(path);
-                        } catch (IOException exception) {
+                        } catch (final IOException exception) {
                             LOGGER.error(exception.getMessage(), exception);
                         }
                     });
@@ -129,26 +125,22 @@ public class MagikWorkspaceService implements WorkspaceService {
         }
     }
 
-    private void readLibsDocs(final @Nullable String smallworldGisDir) {
-        LOGGER.trace("Reading libs docs from: {}", smallworldGisDir);
+    private void readLibsClassInfos(final List<String> libsDirs) {
+        LOGGER.trace("Reading libs docs from: {}", libsDirs);
 
-        if (smallworldGisDir == null
-            || smallworldGisDir.trim().isEmpty()) {
-            LOGGER.info("No smallworld gis directory configured");
-            return;
-        }
+        libsDirs.forEach(pathStr -> {
+            final Path path = Path.of(pathStr);
+            if (!Files.exists(path)) {
+                LOGGER.warn("Path to libs dir does not exist: {}", pathStr);
+                return;
+            }
 
-        final Path libsDirPath = Path.of(smallworldGisDir).resolve("sw_core").resolve("libs");
-        if (!Files.exists(libsDirPath)) {
-            return;
-        }
-
-        // Move to ClassInfoTypeKeeperReader class.
-        try {
-            ClassInfoTypeKeeperReader.readLibsDirectory(libsDirPath, this.typeKeeper);
-        } catch (IOException exception) {
-            LOGGER.error(exception.getMessage(), exception);
-        }
+            try {
+                ClassInfoDefinitionReader.readLibsDirectory(path, this.definitionKeeper);
+            } catch (final IOException exception) {
+                LOGGER.error(exception.getMessage(), exception);
+            }
+        });
     }
 
     /**
@@ -166,8 +158,8 @@ public class MagikWorkspaceService implements WorkspaceService {
             }
 
             try {
-                JsonTypeKeeperReader.readTypes(path, this.typeKeeper);
-            } catch (IOException exception) {
+                JsonDefinitionReader.readTypes(path, this.definitionKeeper);
+            } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
         });
@@ -225,7 +217,8 @@ public class MagikWorkspaceService implements WorkspaceService {
     @Override
     public CompletableFuture<
             Either<List<? extends org.eclipse.lsp4j.SymbolInformation>, List<? extends WorkspaceSymbol>>
-            > symbol(WorkspaceSymbolParams params) {
+            >
+            symbol(WorkspaceSymbolParams params) {
         final String query = params.getQuery();
         LOGGER.trace("symbol, query: {}", query);
 
@@ -244,7 +237,7 @@ public class MagikWorkspaceService implements WorkspaceService {
     @JsonRequest(value = "custom/reIndex")
     public CompletableFuture<Void> reIndex() {
         return CompletableFuture.runAsync(() -> {
-            this.typeKeeper.clear();
+            this.definitionKeeper.clear();
 
             this.runIndexersInBackground();
         });
@@ -279,7 +272,7 @@ public class MagikWorkspaceService implements WorkspaceService {
         final Path workspacePath = Path.of(uri);
 
         return Files.walk(workspacePath)
-                .filter(path -> !this.ignoreHandler.isIgnored(path));
+            .filter(path -> !this.ignoreHandler.isIgnored(path));
     }
 
     private void runIndexers() {
@@ -289,11 +282,9 @@ public class MagikWorkspaceService implements WorkspaceService {
         final List<String> typesDbPaths = MagikSettings.INSTANCE.getTypingTypeDatabasePaths();
         this.readTypesDbs(typesDbPaths);
 
-        // Read method docs.
-        final String smallworldGisDir = MagikSettings.INSTANCE.getSmallworldGis();
-        if (smallworldGisDir != null) {
-            this.readLibsDocs(smallworldGisDir);
-        }
+        // Read class_infos from libs/ dirs.
+        final List<String> libsDirs = MagikSettings.INSTANCE.getLibsDirs();
+        this.readLibsClassInfos(libsDirs);
 
         // Index .magik-tools-ignore files.
         this.runIgnoreFilesIndexer();
@@ -324,7 +315,7 @@ public class MagikWorkspaceService implements WorkspaceService {
 
             try {
                 this.runIndexers();
-            } catch (Exception exception) {
+            } catch (final Exception exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
 

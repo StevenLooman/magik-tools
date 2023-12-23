@@ -38,6 +38,9 @@ class FormattingCheckTest extends MagikCheckTestBase {
             + "{\r\n"
             + "\t2\r\n"
             + "}\r\n",
+        ""
+            + "show(  # comment\n"
+            + "  param1)",
     })
     void testProper(final String code) {
         final MagikCheck check = new FormattingCheck();
@@ -50,7 +53,6 @@ class FormattingCheckTest extends MagikCheckTestBase {
         "{1,2}",
         "{1 , 2}",
         "{1 ,\n 2}",
-        "a*b",
         "a* b",
         "a *b",
         "show(a, b )",
@@ -60,7 +62,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
     void testImproper(final String code) {
         final MagikCheck check = new FormattingCheck();
         final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isNotEmpty();
+        assertThat(issues).hasSize(1);
     }
 
     @Test
@@ -89,7 +91,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
         final FormattingCheck check = new FormattingCheck();
         check.indentCharacter = "tab";
         final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isNotEmpty();
+        assertThat(issues).hasSize(1);
     }
 
     @Test
@@ -98,7 +100,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
         check.indentCharacter = "space";
         final String code = "\tprint(a)";
         final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isNotEmpty();
+        assertThat(issues).hasSize(1);
 
     }
 
@@ -107,6 +109,43 @@ class FormattingCheckTest extends MagikCheckTestBase {
         final FormattingCheck check = new FormattingCheck();
         check.indentCharacter = "space";
         final String code = "                print(a)";
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).isEmpty();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        ""
+            + "_package user\n"
+            + "\n"
+            + "\n"
+            + "def_slotted_exemplar(:a, {})\n"
+            + "$\n",
+        ""
+            + "$\n"
+            + "\n"
+            + "\n"
+            + "\n"
+            + "_pragma(classify_level=basic)\n"
+            + "_method a.a(parameter)\n"
+            + "_endmethod\n",
+    })
+    void testMultipleWhitelines(final String code) {
+        final MagikCheck check = new FormattingCheck();
+        final List<MagikIssue> issues = this.runCheck(code, check);
+        assertThat(issues).hasSize(1);
+    }
+
+    @Test
+    void testMultipleWhitelinesMethodDoc() {
+        final MagikCheck check = new FormattingCheck();
+        final String code = ""
+            + "_method object.method(param)\n"
+            + "\t##\n"
+            + "\n"
+            + "\t>> param + 1\n"
+            + "_endmethod\n"
+            + "$\n";
         final List<MagikIssue> issues = this.runCheck(code, check);
         assertThat(issues).isEmpty();
     }

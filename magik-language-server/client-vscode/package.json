@@ -3,7 +3,7 @@
 	"description": "Magik Language Server",
 	"author": "Steven Looman",
 	"license": "GPL-3.0-only",
-	"version": "0.8.1-SNAPSHOT",
+	"version": "0.9.0-SNAPSHOT",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/StevenLooman/magik-tools"
@@ -207,6 +207,10 @@
 					"description": "Path to Smallworld Core.",
 					"type": "string"
 				},
+				"magik.libsDirs": {
+					"description": "Paths to libs dirs of Smallworld products",
+					"type": "array"
+				},
 				"magik.aliases": {
 					"description": "Path to gis_aliases file.",
 					"type": "string"
@@ -222,6 +226,16 @@
 				"magik.typing.typeDatabasePaths": {
 					"description": "Paths to type databases.",
 					"type": "array"
+				},
+				"magik.typing.showAtomInlayHints": {
+					"description": "Show atom type inlay hints.",
+					"type": "boolean",
+					"default": false
+				},
+				"magik.typing.showArgumentInlayHints": {
+					"description": "Show (certain) argument name inlay hints.",
+					"type": "boolean",
+					"default": false
 				},
 				"magik.typing.enableChecks": {
 					"description": "Enable typing checks.",

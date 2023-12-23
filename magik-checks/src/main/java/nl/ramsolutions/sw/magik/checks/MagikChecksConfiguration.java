@@ -22,21 +22,26 @@ public class MagikChecksConfiguration {
     private static final String KEY_IGNORED_PATHS = "ignore";
 
     private final MagikToolsProperties properties;
+    private final List<Class<?>> checkClasses;
 
     /**
      * Constructor.
+     * @param checkClasses {@link Class}es of {@link MagikCheck}s.
      * @throws IOException
      */
-    public MagikChecksConfiguration() throws IOException {
+    public MagikChecksConfiguration(final List<Class<?>> checkClasses) throws IOException {
+        this.checkClasses = checkClasses;
         this.properties = new MagikToolsProperties();
     }
 
     /**
      * Constructor which reads properties from {@code path}.
+     * @param checkClasses {@link Class}es of {@link MagikCheck}s.
      * @param path {@link Path} to read properties from.
      * @throws IOException
      */
-    public MagikChecksConfiguration(final Path path) throws IOException {
+    public MagikChecksConfiguration(final List<Class<?>> checkClasses, final Path path) throws IOException {
+        this.checkClasses = checkClasses;
         this.properties = new MagikToolsProperties(path);
     }
 
@@ -54,7 +59,7 @@ public class MagikChecksConfiguration {
         final List<String> disableds = this.properties.getPropertyList(KEY_DISABLED_CHECKS);
         final List<String> enableds = this.properties.getPropertyList(KEY_ENABLED_CHECKS);
 
-        for (final Class<?> checkClass : CheckList.getChecks()) {
+        for (final Class<?> checkClass : this.checkClasses) {
             final String checkKey = MagikChecksConfiguration.checkKey(checkClass);
             final boolean checkEnabled =
                 enableds.contains(checkKey)

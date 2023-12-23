@@ -10,9 +10,12 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
  * Base scope.
+ *
+ * Line numbers are 1-based, column numbers are 0-based.
  */
 public abstract class Scope {
 
@@ -31,6 +34,10 @@ public abstract class Scope {
      * @param node Node.
      */
     protected Scope(final Scope parentScope, final AstNode node) {
+        if (!node.is(MagikGrammar.BODY)) {
+            throw new IllegalArgumentException();
+        }
+
         this.parentScope = parentScope;
         this.node = node;
 
@@ -217,48 +224,45 @@ public abstract class Scope {
         return this.scopeEntries.values();
     }
 
+    private Token getStartToken() {
+        return this.node.getPreviousAstNode().getLastToken();
+    }
+
+    private Token getEndToken() {
+        return this.node.getNextAstNode().getToken();
+    }
+
     /**
-     * Get the start line of this scope.
+     * Get the start line of this scope, 1-based.
      * @return Start line.
      */
     public int getStartLine() {
-        final AstNode parentNode = this.node.getParent();
-        final List<Token> tokens = parentNode.getTokens();
-        final Token firstToken = tokens.get(0);
-        return firstToken.getLine();
+        return this.getStartToken().getLine();
     }
 
     /**
-     * Get the start column of this scope.
+     * Get the start column of this scope, 0-based.
      * @return Start column.
      */
     public int getStartColumn() {
-        final AstNode parentNode = this.node.getParent();
-        final List<Token> tokens = parentNode.getTokens();
-        final Token firstToken = tokens.get(0);
-        return firstToken.getColumn() + firstToken.getOriginalValue().length();
+        final Token token = this.getStartToken();
+        return token.getColumn() + token.getOriginalValue().length();
     }
 
     /**
-     * Get the end line of this scope.
+     * Get the end line of this scope, 1-based.
      * @return End line.
      */
     public int getEndLine() {
-        final AstNode parentNode = this.node.getParent();
-        final List<Token> tokens = parentNode.getTokens();
-        final Token lastToken = tokens.get(tokens.size() - 1);
-        return lastToken.getLine();
+        return this.getEndToken().getLine();
     }
 
     /**
-     * Get the end column of this scope.
+     * Get the end column of this scope, 0-based.
      * @return End column.
      */
     public int getEndColumn() {
-        final AstNode parentNode = this.node.getParent();
-        final List<Token> tokens = parentNode.getTokens();
-        final Token lastToken = tokens.get(tokens.size() - 1);
-        return lastToken.getColumn();
+        return this.getEndToken().getColumn();
     }
 
     /**

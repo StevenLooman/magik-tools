@@ -27,7 +27,7 @@ import org.sonar.check.Rule;
 public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "MethodArgumentParameterTypedCheck";
+    public static final String CHECK_KEY = "MethodArgumentParameter";
 
     private static final String MESSAGE = "Argument type (%s) does not match parameter type (%s)";
 

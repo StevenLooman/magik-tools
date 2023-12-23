@@ -70,11 +70,11 @@ public class ImplementationProvider {
         }
 
         return typeKeeper.getTypes().stream()
-            .filter(anyType -> anyType != type)
+            .filter(anyType -> !Objects.equals(anyType.getTypeString(), type.getTypeString()))
             .filter(anyType -> anyType.isKindOf(type))
             .flatMap(anyType -> anyType.getLocalMethods(methodName).stream())
             .map(Method::getLocation)
-            .filter(Objects::nonNull)
+            .map(Location::validLocation)
             .collect(Collectors.toList());
     }
 

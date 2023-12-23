@@ -1,0 +1,15 @@
+{
+    "title": "Method Argument Parameter",
+    "type": "BUG",
+    "status": "ready",
+    "remediation": {
+      "func": "Constant\/Issue",
+      "constantCost": "30min"
+    },
+    "tags": [
+      "error"
+    ],
+    "defaultSeverity": "Major",
+    "ruleSpecification": "MethodArgumentParameter",
+    "sqKey": "method-argument-parameter"
+  }
