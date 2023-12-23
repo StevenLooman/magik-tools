@@ -330,7 +330,9 @@ public class Method {
             final ExpressionResultString callResult,
             final ExpressionResultString loopbodyResult) {
         this.location = location;
-        this.modifiers = EnumSet.copyOf(modifiers);
+        this.modifiers = !modifiers.isEmpty()
+            ? EnumSet.copyOf(modifiers)
+            : EnumSet.noneOf(Modifier.class);
         this.owner = owner;
         this.name = name;
         this.parameters = parameters;

@@ -11,14 +11,15 @@ import nl.ramsolutions.sw.magik.Location;
 /**
  * Smallworld product.
  */
-public class SwProductDefinition {
+public class ProductDefinition {
 
-    private final @Nullable Location location;
     private final String name;
+    private final @Nullable Location location;
     private final @Nullable String version;
     private final @Nullable String versionComment;
-    private final Set<SwProductDefinition> children = new HashSet<>();
-    private final Set<SwModuleDefinition> modules = new HashSet<>();
+    private final Set<String> children = new HashSet<>();
+    private final Set<String> modules = new HashSet<>();
+    private final Set<String> requireds = new HashSet<>();
 
     /**
      * Constructor.
@@ -27,7 +28,7 @@ public class SwProductDefinition {
      * @param version
      * @param versionComment
      */
-    public SwProductDefinition(
+    public ProductDefinition(
             final @Nullable Location location,
             final String name,
             final @Nullable String version,
@@ -66,35 +67,47 @@ public class SwProductDefinition {
     }
 
     /**
-     * Get child {@link SwProductDefinition}s of this product.
-     * @return Child {@link SwProductDefinition}s of this product.
+     * Get child product definitions of this product.
+     * @return Child product definitions of this product.
      */
-    public Set<SwProductDefinition> getChildren() {
+    public Set<String> getChildren() {
         return Collections.unmodifiableSet(this.children);
     }
 
     /**
-     * Add a {@link SwProductDefinition} to this product.
-     * @param swProduct {@link SwProductDefinition} to add.
+     * Add a {@link ProductDefinition} to this product.
+     * @param productName {@link ProductDefinition} to add.
      */
-    public void addChild(final SwProductDefinition swProduct) {
-        this.children.add(swProduct);
+    public void addChild(final String productName) {
+        this.children.add(productName);
     }
 
     /**
-     * Get {@link SwModuleDefinition}s in this product.
-     * @return Collection of {@link SwModuleDefinition}s in this product.
+     * Get module names in this product.
+     * @return Collection of module names in this product.
      */
-    public Set<SwModuleDefinition> getModules() {
-        return Collections.unmodifiableSet(modules);
+    public Set<String> getModules() {
+        return Collections.unmodifiableSet(this.modules);
     }
 
     /**
-     * Add a {@link SwModuleDefinition} to this product.
-     * @param swModule {@link SwModuleDefinition} to add.
+     * Add a module name to this product.
+     * @param swModule Modulename  to add.
      */
-    public void addModule(final SwModuleDefinition swModule) {
+    public void addModule(final String swModule) {
         this.modules.add(swModule);
+    }
+
+    /**
+     * Get required products for this product.
+     * @return Collection of required products for this product.
+     */
+    public Set<String> getRequireds() {
+        return Collections.unmodifiableSet(this.requireds);
+    }
+
+    public void addRequired(final String productName) {
+        this.requireds.add(productName);
     }
 
     @Override
@@ -119,7 +132,7 @@ public class SwProductDefinition {
             return false;
         }
 
-        final SwProductDefinition otherSwProduct = (SwProductDefinition) obj;
+        final ProductDefinition otherSwProduct = (ProductDefinition) obj;
         return Objects.equals(otherSwProduct.getLocation(), this.getLocation())
             && Objects.equals(otherSwProduct.getName(), this.getName())
             && Objects.equals(otherSwProduct.getVersion(), this.getVersion())

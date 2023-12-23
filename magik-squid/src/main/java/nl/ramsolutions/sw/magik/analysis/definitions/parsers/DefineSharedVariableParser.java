@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.definitions;
+package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
@@ -8,8 +8,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
-import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
@@ -102,7 +105,7 @@ public class DefineSharedVariableParser {
         final Location location = new Location(uri, this.node);
 
         // Figure module name.
-        final String moduleName = SwModuleScanner.getModuleName(uri);
+        final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
 
         // Figure statement node.
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
@@ -141,13 +144,13 @@ public class DefineSharedVariableParser {
         final MethodDefinition getMethod = new MethodDefinition(
             location,
             moduleName,
+            doc,
             definitionNode,
             exemplarName,
             variableName,
             getModifiers,
             getParameters,
             null,
-            doc,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.UNDEFINED);
         methodDefinitions.add(getMethod);
@@ -162,21 +165,21 @@ public class DefineSharedVariableParser {
         final ParameterDefinition assignmentParam = new ParameterDefinition(
             location,
             moduleName,
+            null,
             definitionNode,
             "val",
             ParameterDefinition.Modifier.NONE,
-            TypeString.UNDEFINED,
-            null);
+            TypeString.UNDEFINED);
         final MethodDefinition setMethod = new MethodDefinition(
             location,
             moduleName,
+            doc,
             definitionNode,
             exemplarName,
             setName,
             setModifiers,
             setParameters,
             assignmentParam,
-            doc,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.UNDEFINED);
         methodDefinitions.add(setMethod);
@@ -186,13 +189,13 @@ public class DefineSharedVariableParser {
         final MethodDefinition bootMethod = new MethodDefinition(
             location,
             moduleName,
+            doc,
             definitionNode,
             exemplarName,
             bootName,
             setModifiers,
             setParameters,
             assignmentParam,
-            doc,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.UNDEFINED);
         methodDefinitions.add(bootMethod);

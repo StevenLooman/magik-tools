@@ -12,12 +12,10 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.indexer.MagikIndexer;
-import nl.ramsolutions.sw.magik.analysis.typing.io.JsonTypeKeeperReader;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItem;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItemProvider;
 import nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider;
@@ -48,7 +46,7 @@ public class MagikWorkspaceService implements WorkspaceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikWorkspaceService.class);
 
     private final MagikLanguageServer languageServer;
-    private final ITypeKeeper typeKeeper;
+    private final IDefinitionKeeper definitionKeeper;
     private final IgnoreHandler ignoreHandler;
     private final MagikIndexer magikIndexer;
     private final SymbolProvider symbolProvider;
@@ -57,17 +55,16 @@ public class MagikWorkspaceService implements WorkspaceService {
     /**
      * Constructor.
      * @param languageServer Owner language server.
-     * @param typeKeeper {@link TypeKeeper} used for type storage.
+     * @param definitionKeeper {@link IDefinitionKeeper} used for definition storage.
      */
-    public MagikWorkspaceService(final MagikLanguageServer languageServer, final ITypeKeeper typeKeeper) {
+    public MagikWorkspaceService(final MagikLanguageServer languageServer, final IDefinitionKeeper definitionKeeper) {
         this.languageServer = languageServer;
-        this.typeKeeper = typeKeeper;
+        this.definitionKeeper = definitionKeeper;
 
         this.ignoreHandler = new IgnoreHandler();
-        this.magikIndexer = new MagikIndexer(typeKeeper);
-        final ITypeKeeper roTypeKeeper = new ReadOnlyTypeKeeperAdapter(typeKeeper);
-        this.symbolProvider = new SymbolProvider(roTypeKeeper);
-        this.testItemProvider = new MUnitTestItemProvider(roTypeKeeper);
+        this.magikIndexer = new MagikIndexer(this.definitionKeeper);
+        this.symbolProvider = new SymbolProvider(this.definitionKeeper);
+        this.testItemProvider = new MUnitTestItemProvider(this.definitionKeeper);
     }
 
     /**
@@ -139,7 +136,7 @@ public class MagikWorkspaceService implements WorkspaceService {
             }
 
             try {
-                ClassInfoDefinitionReader.readLibsDirectory(path, this.typeKeeper);
+                ClassInfoDefinitionReader.readLibsDirectory(path, this.definitionKeeper);
             } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
@@ -161,7 +158,7 @@ public class MagikWorkspaceService implements WorkspaceService {
             }
 
             try {
-                JsonTypeKeeperReader.readTypes(path, this.typeKeeper);
+                JsonDefinitionReader.readTypes(path, this.definitionKeeper);
             } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
@@ -220,7 +217,8 @@ public class MagikWorkspaceService implements WorkspaceService {
     @Override
     public CompletableFuture<
             Either<List<? extends org.eclipse.lsp4j.SymbolInformation>, List<? extends WorkspaceSymbol>>
-            > symbol(WorkspaceSymbolParams params) {
+            >
+            symbol(WorkspaceSymbolParams params) {
         final String query = params.getQuery();
         LOGGER.trace("symbol, query: {}", query);
 
@@ -239,7 +237,7 @@ public class MagikWorkspaceService implements WorkspaceService {
     @JsonRequest(value = "custom/reIndex")
     public CompletableFuture<Void> reIndex() {
         return CompletableFuture.runAsync(() -> {
-            this.typeKeeper.clear();
+            this.definitionKeeper.clear();
 
             this.runIndexersInBackground();
         });

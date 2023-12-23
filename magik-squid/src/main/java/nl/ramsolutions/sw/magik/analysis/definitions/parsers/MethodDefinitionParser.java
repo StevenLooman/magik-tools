@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.definitions;
+package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
@@ -12,8 +12,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
@@ -49,7 +52,7 @@ public class MethodDefinitionParser {
         // Don't burn ourselves on syntax errors.
         final AstNode syntaxErrorNode = this.node.getFirstChild(MagikGrammar.SYNTAX_ERROR);
         if (syntaxErrorNode != null) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         // Figure location.
@@ -57,7 +60,7 @@ public class MethodDefinitionParser {
         final Location location = new Location(uri, this.node);
 
         // Figure module name.
-        final String moduleName = SwModuleScanner.getModuleName(uri);
+        final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
 
         // Figure exemplar name & method name.
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(this.node);
@@ -116,13 +119,13 @@ public class MethodDefinitionParser {
         final MethodDefinition methodDefinition = new MethodDefinition(
             location,
             moduleName,
+            doc,
             this.node,
             exemplarName,
             methodName,
             modifiers,
             parameters,
             assignmentParamter,
-            doc,
             callResult,
             loopResult);
         return List.of(methodDefinition);
@@ -159,11 +162,11 @@ public class MethodDefinitionParser {
             final ParameterDefinition parameterDefinition = new ParameterDefinition(
                 location,
                 moduleName,
+                null,
                 parameterNode,
                 identifier,
                 modifier,
-                typeRef,
-                null);
+                typeRef);
             parameterDefinitions.add(parameterDefinition);
         }
 
@@ -187,11 +190,11 @@ public class MethodDefinitionParser {
         return new ParameterDefinition(
             location,
             moduleName,
+            null,
             parameterNode,
             identifier,
             ParameterDefinition.Modifier.NONE,
-            typeRef,
-            null);
+            typeRef);
     }
 
 }

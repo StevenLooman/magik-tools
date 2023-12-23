@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing.io;
+package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
 /**
  * Json TypeKeeper Reader/Writer instructions.

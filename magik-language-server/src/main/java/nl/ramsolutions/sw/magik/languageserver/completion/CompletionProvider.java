@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.languageserver.completion;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,6 +17,7 @@ import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -231,10 +233,11 @@ public class CompletionProvider {
      * @return List with {@link CompletionItem}s.
      */
     private List<CompletionItem> provideMethodInvocationCompletion(
-            final MagikTypedFile magikFile, final AstNode tokenNode, final String tokenValue) {
+            final MagikTypedFile magikFile,
+            final AstNode tokenNode,
+            final String tokenValue) {
         // Reason (on newly parsed source, thus not from magikFile) and get type.
-        final LocalTypeReasoner reasoner = new LocalTypeReasoner(magikFile);
-        reasoner.run();
+        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
 
         // Token -->
         // - parent: any --> parent: ATOM
@@ -384,7 +387,9 @@ public class CompletionProvider {
             final String[] items = this.cleanSource(source, position);
             final String cleanedSource = items[0];
             cleanedToken = items[1];
-            newMagikFile = new MagikTypedFile(magikFile.getUri(), cleanedSource, magikFile.getTypeKeeper());
+            final URI uri = magikFile.getUri();
+            final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
+            newMagikFile = new MagikTypedFile(uri, cleanedSource, definitionKeeper);
         }
 
         return Map.entry(newMagikFile, cleanedToken);

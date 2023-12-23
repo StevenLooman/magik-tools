@@ -1,8 +1,8 @@
 package nl.ramsolutions.sw.magik;
 
-import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Path;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.DefinitionKeeperTypeKeeperAdapter;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
 
@@ -11,34 +11,36 @@ import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
  */
 public class MagikTypedFile extends MagikFile {
 
-    private final ITypeKeeper typeKeeper;
+    private final IDefinitionKeeper definitionKeeper;
+    private ITypeKeeper typeKeeper;
     private LocalTypeReasoner typeReasoner;
 
     /**
      * Constructor.
      * @param uri URI.
      * @param text Text.
-     * @param typeKeeper TypeKeeper.
+     * @param definitionKeeper {@link IDefinitionKeeper}.
      */
-    public MagikTypedFile(final URI uri, final String text, final ITypeKeeper typeKeeper) {
+    public MagikTypedFile(final URI uri, final String text, final IDefinitionKeeper definitionKeeper) {
         super(uri, text);
-        this.typeKeeper = typeKeeper;
+        this.definitionKeeper = definitionKeeper;
     }
 
     /**
-     * Constructor. Read file at path.
-     * @param path File to read.
-     * @throws IOException -
+     * Get the {@link IDefinitionKeeper}.
      */
-    public MagikTypedFile(final Path path, final ITypeKeeper typeKeeper) throws IOException {
-        super(path);
-        this.typeKeeper = typeKeeper;
+    public IDefinitionKeeper getDefinitionKeeper() {
+        return this.definitionKeeper;
     }
 
     /**
-     * Get the {@link ITypeKeeper} used for the {@link LocalTypeReasoner}.
+     * Get the {@link ITypeKeeper}.
      */
     public ITypeKeeper getTypeKeeper() {
+        if (this.typeKeeper == null) {
+            this.typeKeeper = new DefinitionKeeperTypeKeeperAdapter(this.definitionKeeper);
+        }
+
         return this.typeKeeper;
     }
 

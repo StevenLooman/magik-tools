@@ -29,8 +29,10 @@ import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
@@ -56,16 +58,16 @@ public final class ClassInfoDefinitionReader {
     private static final String NEXT_NOT_SLASH_PATTERN = "[^/]+";
 
     private final Path path;
-    private final TypeKeeperDefinitionInserter typeKeeperInserter;
+    private final IDefinitionKeeper definitionKeeper;
 
     /**
      * Constructor.
      * @param path Path to jar file.
      * @param typeKeeper Typekeeper to fill.
      */
-    private ClassInfoDefinitionReader(final Path path, final ITypeKeeper typeKeeper) {
+    private ClassInfoDefinitionReader(final Path path, final IDefinitionKeeper definitionKeeper) {
         this.path = path;
-        this.typeKeeperInserter = new TypeKeeperDefinitionInserter(typeKeeper);
+        this.definitionKeeper = definitionKeeper;
     }
 
     @SuppressWarnings("checkstyle:MagicNumber")
@@ -191,11 +193,11 @@ public final class ClassInfoDefinitionReader {
         final GlobalDefinition definition = new GlobalDefinition(
             location,
             moduleName,
+            doc,
             null,
             typeString,
-            TypeString.UNDEFINED,
-            doc);
-        this.typeKeeperInserter.feed(definition);
+            TypeString.UNDEFINED);
+        this.definitionKeeper.add(definition);
     }
 
     private List<ParameterDefinition> readParameterDefinitions(final String moduleName, final Scanner scanner) {
@@ -212,10 +214,10 @@ public final class ClassInfoDefinitionReader {
                 null,
                 moduleName,
                 null,
+                null,
                 next,
                 paramModifier,
-                TypeString.UNDEFINED,
-                null);
+                TypeString.UNDEFINED);
             paramDefs.add(paramDef);
         }
         return paramDefs;
@@ -279,12 +281,12 @@ public final class ClassInfoDefinitionReader {
         final ConditionDefinition definition = new ConditionDefinition(
             location,
             moduleName,
+            doc,
             null,
             name,
             parent,
-            dataNames,
-            doc);
-        this.typeKeeperInserter.feed(definition);
+            dataNames);
+        this.definitionKeeper.add(definition);
     }
 
     private void readMethod(
@@ -360,16 +362,16 @@ public final class ClassInfoDefinitionReader {
         final MethodDefinition definition = new MethodDefinition(
             location,
             moduleName,
+            doc,
             null,
             typeString,
             methodName,
             modifiers,
             parameters,
             assignmentParameter,
-            doc,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.UNDEFINED);
-        this.typeKeeperInserter.feed(definition);
+        this.definitionKeeper.add(definition);
     }
 
     private void readSlottedClass(
@@ -383,7 +385,7 @@ public final class ClassInfoDefinitionReader {
         // 4+: <n lines of comments>
         // Line 1
         final TypeString typeString;
-        final List<ExemplarDefinition.Slot> slots;
+        final List<SlotDefinition> slots;
         try (Scanner scanner = new Scanner(line)) {
             scanner.next(); // "slotted_class"
 
@@ -394,7 +396,9 @@ public final class ClassInfoDefinitionReader {
             final Spliterator<String> slotsSpliterator =
                 Spliterators.spliterator(scanner, Long.MAX_VALUE, Spliterator.ORDERED | Spliterator.NONNULL);
             slots = StreamSupport.stream(slotsSpliterator, false)
-                .map(slotName -> new ExemplarDefinition.Slot(
+                .map(slotName -> new SlotDefinition(
+                    null,
+                    moduleName,
                     null,
                     null,
                     slotName,
@@ -442,14 +446,14 @@ public final class ClassInfoDefinitionReader {
         final ExemplarDefinition definition = new ExemplarDefinition(
             location,
             moduleName,
+            doc,
             null,
             ExemplarDefinition.Sort.UNDEFINED,
             typeString,
             slots,
             parents,
-            doc,
             Collections.emptyList());
-        this.typeKeeperInserter.feed(definition);
+        this.definitionKeeper.add(definition);
     }
 
     private void readMixin(
@@ -506,35 +510,38 @@ public final class ClassInfoDefinitionReader {
         final ExemplarDefinition definition = new ExemplarDefinition(
             location,
             moduleName,
+            doc,
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             typeString,
             Collections.emptyList(),
             Collections.emptyList(),
-            doc,
             Collections.emptyList());
-        this.typeKeeperInserter.feed(definition);
+        this.definitionKeeper.add(definition);
     }
 
     /**
      * Read types from a jar/class_info file.
      *
      * @param path Path to jar file.
-     * @param typeKeeper {@link TypeKeeper} to fill.
+     * @param definitionKeeper {@link IDefinitionKeeper} to fill.
      * @throws IOException -
      */
-    public static void readTypes(final Path path, final ITypeKeeper typeKeeper) throws IOException {
-        final ClassInfoDefinitionReader reader = new ClassInfoDefinitionReader(path, typeKeeper);
+    public static void readTypes(final Path path, final IDefinitionKeeper definitionKeeper) throws IOException {
+        final ClassInfoDefinitionReader reader = new ClassInfoDefinitionReader(path, definitionKeeper);
         reader.run();
     }
 
     /**
      * Read libs directory.
      * @param libsPath Path to libs directory.
-     * @param typeKeeper {@link TypeKeeper} to fill.
+     * @param definitionKeeper {@link IDefinitionKeeper} to fill.
      * @throws IOException -
      */
-    public static void readLibsDirectory(final Path libsPath, final ITypeKeeper typeKeeper) throws IOException {
+    public static void readLibsDirectory(
+            final Path libsPath,
+            final IDefinitionKeeper definitionKeeper)
+            throws IOException {
         try (Stream<Path> paths = Files.list(libsPath)) {
             paths
                 .filter(Files::isRegularFile)
@@ -542,12 +549,12 @@ public final class ClassInfoDefinitionReader {
                 .forEach(libPath -> {
                     LOGGER.trace("Reading lib: {}", libPath);
                     try {
-                        ClassInfoDefinitionReader.readTypes(libPath, typeKeeper);
-                    } catch (IOException exception) {
+                        ClassInfoDefinitionReader.readTypes(libPath, definitionKeeper);
+                    } catch (final IOException exception) {
                         LOGGER.error("Error reading file: " + libPath, exception);
                     }
                 });
-        } catch (IOException exception) {
+        } catch (final IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
         }
     }

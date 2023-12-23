@@ -1,10 +1,12 @@
-package nl.ramsolutions.sw.magik.analysis.definitions;
+package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.util.List;
-import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
@@ -108,7 +110,7 @@ public class DefineBinaryOperatorCaseParser {
         final Location location = new Location(uri, this.node);
 
         // Figure module name.
-        final String moduleName = SwModuleScanner.getModuleName(uri);
+        final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
 
         // Figure statement node.
         final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
@@ -130,12 +132,12 @@ public class DefineBinaryOperatorCaseParser {
         final BinaryOperatorDefinition operatorDefinition = new BinaryOperatorDefinition(
             location,
             moduleName,
+            doc,
             statementNode,
             operator,
             lhs,
             rhs,
-            result,
-            doc);
+            result);
         return List.of(operatorDefinition);
     }
 

@@ -86,10 +86,10 @@ class DefinitionReaderTest {
         assertThat(slottedExemplarDef.getNode()).isEqualTo(node.getFirstDescendant(MagikGrammar.STATEMENT));
 
         assertThat(slottedExemplarDef.getSlots()).hasSize(2);
-        final ExemplarDefinition.Slot slot1 = slottedExemplarDef.getSlots().get(0);
+        final SlotDefinition slot1 = slottedExemplarDef.getSlots().get(0);
         assertThat(slot1.getName()).isEqualTo("slot1");
 
-        final ExemplarDefinition.Slot slot2 = slottedExemplarDef.getSlots().get(1);
+        final SlotDefinition slot2 = slottedExemplarDef.getSlots().get(1);
         assertThat(slot2.getName()).isEqualTo("slot2");
     }
 
@@ -109,26 +109,26 @@ class DefinitionReaderTest {
         assertThat(slottedExemplarDef.getName()).isEqualTo("user:test_exemplar");
         assertThat(slottedExemplarDef.getSlots()).hasSize(1);
 
-        final ExemplarDefinition.Slot slot1 = slottedExemplarDef.getSlots().get(0);
+        final SlotDefinition slot1 = slottedExemplarDef.getSlots().get(0);
         assertThat(slot1.getName()).isEqualTo("slot1");
 
         assertThat(definitions.get(1)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition getMethodDefinition = (MethodDefinition) definitions.get(1);
         assertThat(getMethodDefinition.getPackage()).isEqualTo("user");
         assertThat(getMethodDefinition.getModifiers()).isEmpty();
-        assertThat(getMethodDefinition.getName()).isEqualTo("test_exemplar.slot1");
+        assertThat(getMethodDefinition.getName()).isEqualTo("user:test_exemplar.slot1");
 
         assertThat(definitions.get(2)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition setMethodDefinition = (MethodDefinition) definitions.get(2);
         assertThat(setMethodDefinition.getPackage()).isEqualTo("user");
         assertThat(setMethodDefinition.getModifiers()).containsExactly(MethodDefinition.Modifier.PRIVATE);
-        assertThat(setMethodDefinition.getName()).isEqualTo("test_exemplar.slot1<<");
+        assertThat(setMethodDefinition.getName()).isEqualTo("user:test_exemplar.slot1<<");
 
         assertThat(definitions.get(3)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition bootMethodDefinition = (MethodDefinition) definitions.get(3);
         assertThat(bootMethodDefinition.getPackage()).isEqualTo("user");
         assertThat(bootMethodDefinition.getModifiers()).containsExactly(MethodDefinition.Modifier.PRIVATE);
-        assertThat(bootMethodDefinition.getName()).isEqualTo("test_exemplar.slot1^<<");
+        assertThat(bootMethodDefinition.getName()).isEqualTo("user:test_exemplar.slot1^<<");
     }
 
     @Test
@@ -232,7 +232,7 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
-        assertThat(methodDef.getName()).isEqualTo("a.b");
+        assertThat(methodDef.getName()).isEqualTo("user:a.b");
         assertThat(methodDef.getModifiers()).isEmpty();
         assertThat(methodDef.getParameters()).isEmpty();
     }
@@ -260,7 +260,7 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
-        assertThat(methodDef.getName()).isEqualTo("a.b()");
+        assertThat(methodDef.getName()).isEqualTo("user:a.b()");
         assertThat(methodDef.getModifiers()).containsOnly(
             MethodDefinition.Modifier.PRIVATE,
             MethodDefinition.Modifier.ABSTRACT,
@@ -280,7 +280,7 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
-        assertThat(methodDef.getName()).isEqualTo("a.b()<<");
+        assertThat(methodDef.getName()).isEqualTo("user:a.b()<<");
         assertThat(methodDef.getModifiers()).isEmpty();
 
         final List<ParameterDefinition> parameters = methodDef.getParameters();
@@ -320,7 +320,7 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
-        assertThat(methodDef.getName()).isEqualTo("test_exemplar.slot1");
+        assertThat(methodDef.getName()).isEqualTo("user:test_exemplar.slot1");
         assertThat(methodDef.getModifiers()).isEmpty();
         assertThat(methodDef.getParameters()).isEmpty();
     }
@@ -337,7 +337,7 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
-        assertThat(methodDef.getName()).isEqualTo("test_exemplar.slot1");
+        assertThat(methodDef.getName()).isEqualTo("user:test_exemplar.slot1");
         assertThat(methodDef.getModifiers()).isEmpty();
         assertThat(methodDef.getParameters()).isEmpty();
     }
@@ -354,7 +354,7 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
-        assertThat(methodDef.getName()).isEqualTo("test_exemplar.slot1");
+        assertThat(methodDef.getName()).isEqualTo("user:test_exemplar.slot1");
         assertThat(methodDef.getModifiers()).isEmpty();
         assertThat(methodDef.getParameters()).isEmpty();
     }
@@ -371,19 +371,19 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition getMethodDef = (MethodDefinition) definitions.get(0);
-        assertThat(getMethodDef.getName()).isEqualTo("test_exemplar.slot1");
+        assertThat(getMethodDef.getName()).isEqualTo("user:test_exemplar.slot1");
         assertThat(getMethodDef.getModifiers()).isEmpty();
         assertThat(getMethodDef.getParameters()).isEmpty();
 
         assertThat(definitions.get(1)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition setMethodDef = (MethodDefinition) definitions.get(1);
-        assertThat(setMethodDef.getName()).isEqualTo("test_exemplar.slot1<<");
+        assertThat(setMethodDef.getName()).isEqualTo("user:test_exemplar.slot1<<");
         assertThat(setMethodDef.getModifiers()).isEmpty();
         assertThat(setMethodDef.getParameters()).isEmpty();
 
         assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition bootMethodDef = (MethodDefinition) definitions.get(2);
-        assertThat(bootMethodDef.getName()).isEqualTo("test_exemplar.slot1^<<");
+        assertThat(bootMethodDef.getName()).isEqualTo("user:test_exemplar.slot1^<<");
         assertThat(bootMethodDef.getModifiers()).isEmpty();
         assertThat(bootMethodDef.getParameters()).isEmpty();
     }
@@ -400,14 +400,14 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition getMethodDef = (MethodDefinition) definitions.get(0);
-        assertThat(getMethodDef.getName()).isEqualTo("test_exemplar.var1");
+        assertThat(getMethodDef.getName()).isEqualTo("user:test_exemplar.var1");
         assertThat(getMethodDef.getModifiers()).isEmpty();
         assertThat(getMethodDef.getParameters()).isEmpty();
         assertThat(getMethodDef.getAssignmentParameter()).isNull();
 
         assertThat(definitions.get(1)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition setMethodDef = (MethodDefinition) definitions.get(1);
-        assertThat(setMethodDef.getName()).isEqualTo("test_exemplar.var1<<");
+        assertThat(setMethodDef.getName()).isEqualTo("user:test_exemplar.var1<<");
         assertThat(setMethodDef.getModifiers()).containsExactly(MethodDefinition.Modifier.PRIVATE);
         assertThat(setMethodDef.getParameters()).isEmpty();
         final ParameterDefinition setAssignParam = setMethodDef.getAssignmentParameter();
@@ -416,7 +416,7 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(2)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition bootMethodDef = (MethodDefinition) definitions.get(2);
-        assertThat(bootMethodDef.getName()).isEqualTo("test_exemplar.var1^<<");
+        assertThat(bootMethodDef.getName()).isEqualTo("user:test_exemplar.var1^<<");
         assertThat(bootMethodDef.getModifiers()).containsExactly(MethodDefinition.Modifier.PRIVATE);
         assertThat(bootMethodDef.getParameters()).isEmpty();
         final ParameterDefinition bootAssignParam = bootMethodDef.getAssignmentParameter();
@@ -436,7 +436,7 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition getMethodDef = (MethodDefinition) definitions.get(0);
-        assertThat(getMethodDef.getName()).isEqualTo("test_exemplar.const1");
+        assertThat(getMethodDef.getName()).isEqualTo("user:test_exemplar.const1");
         assertThat(getMethodDef.getModifiers()).containsExactly(MethodDefinition.Modifier.PRIVATE);
         assertThat(getMethodDef.getParameters()).isEmpty();
     }
@@ -453,7 +453,7 @@ class DefinitionReaderTest {
 
         assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
         final MethodDefinition getMethodDef = (MethodDefinition) definitions.get(0);
-        assertThat(getMethodDef.getName()).isEqualTo("test_exemplar.const1");
+        assertThat(getMethodDef.getName()).isEqualTo("user:test_exemplar.const1");
         assertThat(getMethodDef.getModifiers()).containsExactly();
         assertThat(getMethodDef.getParameters()).isEmpty();
     }

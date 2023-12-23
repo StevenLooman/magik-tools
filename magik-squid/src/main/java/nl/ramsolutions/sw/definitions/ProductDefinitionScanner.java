@@ -10,7 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.definitions.api.SwProductDefinitionGrammar;
@@ -22,38 +24,23 @@ import org.slf4j.LoggerFactory;
 /**
  * product.def file scanner.
  */
-public final class SwProductScanner {
-
-    private static class RootSwProduct extends SwProductDefinition {
-
-        RootSwProduct(final Location location) {
-            super(location, "root", null, null);
-        }
-
-    }
+public final class ProductDefinitionScanner {
 
     private static class ProductDefFileVisitor extends SimpleFileVisitor<Path> {
 
-        private final Deque<SwProductDefinition> stack = new ArrayDeque<>();
-        private final SwProductDefinition rootProduct;
+        private final Deque<ProductDefinition> stack = new ArrayDeque<>();
+        private final Set<ProductDefinition> products = new HashSet<>();
 
-        ProductDefFileVisitor(final Path path) {
-            final URI uri = path.toUri();
-            final Location location = new Location(uri);
-            this.rootProduct = new RootSwProduct(location);
-            this.stack.add(rootProduct);
-        }
-
-        public SwProductDefinition getRootProduct() {
-            return this.rootProduct;
+        public Set<ProductDefinition> getProducts() {
+            return Collections.unmodifiableSet(products);
         }
 
         @Override
         public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
-            final SwProductDefinition parentProduct = this.stack.peek();
+            final ProductDefinition parentProduct = this.stack.peek();
 
             final Path productDefPath = dir.resolve(SW_PRODUCT_DEF_PATH);
-            final SwProductDefinition currentProduct = Files.exists(productDefPath)
+            final ProductDefinition currentProduct = Files.exists(productDefPath)
                 ? this.addProduct(productDefPath)
                 : parentProduct;
             this.stack.push(currentProduct);
@@ -68,17 +55,20 @@ public final class SwProductScanner {
             return FileVisitResult.CONTINUE;
         }
 
-        private SwProductDefinition addProduct(final Path path) {
-            final SwProductDefinition parentProduct = this.stack.peek();
+        private ProductDefinition addProduct(final Path path) {
+            final ProductDefinition parentProduct = this.stack.peek();
 
             try {
-                final SwProductDefinition currentProduct = SwProductScanner.readProductDefinition(path);
+                final ProductDefinition currentProduct = ProductDefinitionScanner.readProductDefinition(path);
+                this.products.add(currentProduct);
+
                 if (parentProduct != null) {
-                    parentProduct.addChild(currentProduct);
+                    final String currentProductName = currentProduct.getName();
+                    parentProduct.addChild(currentProductName);
                 }
 
                 return currentProduct;
-            } catch (IOException exception) {
+            } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
 
@@ -92,10 +82,10 @@ public final class SwProductScanner {
      */
     public static final String SW_PRODUCT_DEF = "product.def";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SwProductScanner.class);
-    private static final Path SW_PRODUCT_DEF_PATH = Path.of(SwProductScanner.SW_PRODUCT_DEF);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProductDefinitionScanner.class);
+    private static final Path SW_PRODUCT_DEF_PATH = Path.of(ProductDefinitionScanner.SW_PRODUCT_DEF);
 
-    private SwProductScanner() {
+    private ProductDefinitionScanner() {
     }
 
     /**
@@ -104,10 +94,10 @@ public final class SwProductScanner {
      * @return All found product definitions.
      * @throws IOException -
      */
-    public static Set<SwProductDefinition> scanProducts(final Path path) throws IOException {
-        final ProductDefFileVisitor fileVisitor = new ProductDefFileVisitor(path);
+    public static Set<ProductDefinition> scanProducts(final Path path) throws IOException {
+        final ProductDefFileVisitor fileVisitor = new ProductDefFileVisitor();
         Files.walkFileTree(path, fileVisitor);
-        return fileVisitor.getRootProduct().getChildren();
+        return fileVisitor.getProducts();
     }
 
     /**
@@ -117,13 +107,13 @@ public final class SwProductScanner {
      * @throws IOException -
      */
     @CheckForNull
-    public static SwProductDefinition productForPath(final Path startPath) throws IOException {
+    public static ProductDefinition productForPath(final Path startPath) throws IOException {
         Path path = startPath;
         while (path != null) {
             final Path productDefPath = path.resolve(SW_PRODUCT_DEF_PATH);
             final File productDefFile = productDefPath.toFile();
             if (productDefFile.exists()) {
-                return SwProductScanner.readProductDefinition(productDefPath);
+                return ProductDefinitionScanner.readProductDefinition(productDefPath);
             }
 
             path = path.getParent();
@@ -138,7 +128,7 @@ public final class SwProductScanner {
      * @return Parsed product definition.
      * @throws IOException -
      */
-    public static SwProductDefinition readProductDefinition(final Path path) throws IOException {
+    public static ProductDefinition readProductDefinition(final Path path) throws IOException {
         final SwProductDefParser parser = new SwProductDefParser();
         final AstNode node = parser.parse(path);
 
@@ -157,7 +147,7 @@ public final class SwProductScanner {
             ? versionNode.getFirstChild(SwProductDefinitionGrammar.REST_OF_LINE).getTokenValue()
             : null;
 
-        return new SwProductDefinition(location, productName, version, versionComment);
+        return new ProductDefinition(location, productName, version, versionComment);
     }
 
 }

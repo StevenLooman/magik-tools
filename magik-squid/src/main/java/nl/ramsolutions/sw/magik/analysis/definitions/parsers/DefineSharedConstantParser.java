@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.definitions;
+package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
@@ -6,8 +6,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
@@ -105,7 +108,7 @@ public class DefineSharedConstantParser {
         final Location location = new Location(uri, this.node);
 
         // Figure module name.
-        final String moduleName = SwModuleScanner.getModuleName(uri);
+        final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
 
         // Figure statement node.
         final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
@@ -130,13 +133,13 @@ public class DefineSharedConstantParser {
         final MethodDefinition methodDefinition = new MethodDefinition(
             location,
             moduleName,
+            doc,
             statementNode,
             exemplarName,
             constantName,
             modifiers,
             parameters,
             null,
-            doc,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.UNDEFINED);
         return List.of(methodDefinition);

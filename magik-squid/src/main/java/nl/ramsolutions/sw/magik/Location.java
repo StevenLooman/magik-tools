@@ -17,9 +17,7 @@ public class Location {
 
     private static final Location DUMMY_LOCATION = new Location(
         URI.create("tests://unittest"),
-        new Range(
-            new Position(1, 0),
-            new Position(1, 0)));
+        Range.DEFAULT_RANGE);
 
     /**
      * Location/Range comparator.
@@ -47,7 +45,7 @@ public class Location {
     }
 
     private final URI uri;
-    private final Range range;
+    private final @Nullable Range range;
 
     /**
      * Constructor.

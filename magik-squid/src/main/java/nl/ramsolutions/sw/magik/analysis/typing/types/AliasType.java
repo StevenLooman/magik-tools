@@ -32,9 +32,6 @@ public class AliasType extends AbstractType {
         this.typeString = typeString;
         this.aliasedTypeRef = aliasedTypeString;
         this.aliasedType = null;
-
-        // Add self to TypeKeeper.
-        this.typeKeeper.addType(this);
     }
 
     /**
@@ -54,9 +51,6 @@ public class AliasType extends AbstractType {
         this.typeString = typeString;
         this.aliasedTypeRef = null;
         this.aliasedType = aliasedType;
-
-        // Add self to TypeKeeper.
-        this.typeKeeper.addType(this);
     }
 
     @Override

@@ -2,12 +2,11 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import java.util.EnumSet;
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
@@ -22,46 +21,55 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
 
-    private void addTestMethod(final ITypeKeeper typeKeeper) {
+    private void addTestMethod(final IDefinitionKeeper definitionKeeper) {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        final MagikType integerType = (MagikType) typeKeeper.getType(integerRef);
         final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-        integerType.addMethod(
-            null,
-            null,
-            EnumSet.noneOf(Method.Modifier.class),
-            "m1()",
-            List.of(
-                new Parameter(null, "p1", Parameter.Modifier.NONE, symbolRef)),
-            null,
-            null,
-            ExpressionResultString.UNDEFINED,
-            new ExpressionResultString());
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                integerRef,
+                "m1()",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                List.of(
+                    new ParameterDefinition(
+                        null,
+                        null,
+                        null,
+                        null,
+                        "p1",
+                        ParameterDefinition.Modifier.NONE,
+                        symbolRef)),
+                null,
+                ExpressionResultString.UNDEFINED,
+                ExpressionResultString.EMPTY));
     }
 
     @ParameterizedTest
     @ValueSource(strings = {
         "integer.m1(:symbol)",
-        "integer.m1()",
-        "integer.m1(:symbol, :symbol)",
+        "integer.m1()",  // No argument, nothing to check.
+        "integer.m1(:symbol, :symbol)",  // We only test type, not number of arguments.
     })
     void testValid(final String code) {
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        this.addTestMethod(typeKeeper);
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        this.addTestMethod(definitionKeeper);
 
         final MagikTypedCheck check = new MethodArgumentParameterTypedCheck();
-        final List<MagikIssue> checkResults = this.runCheck(code, typeKeeper, check);
+        final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
         assertThat(checkResults).isEmpty();
     }
 
     @Test
     void testArgumentTypeNotMatches() {
         final String code = "integer.m1(1)";
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        this.addTestMethod(typeKeeper);
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        this.addTestMethod(definitionKeeper);
 
         final MagikTypedCheck check = new MethodArgumentParameterTypedCheck();
-        final List<MagikIssue> checkResults = this.runCheck(code, typeKeeper, check);
+        final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
         assertThat(checkResults).hasSize(1);
     }
 

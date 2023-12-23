@@ -11,7 +11,7 @@ import nl.ramsolutions.sw.magik.Location;
 /**
  * Smallworld module.
  */
-public class SwModuleDefinition {
+public class ModuleDefinition {
 
     private final @Nullable Location location;
     private final String name;
@@ -24,7 +24,7 @@ public class SwModuleDefinition {
      * @param name Name of module.
      * @param location {@link Location} of the module definition.
      */
-    public SwModuleDefinition(
+    public ModuleDefinition(
             final @Nullable Location location,
             final String name,
             final String baseVersion,
@@ -56,6 +56,10 @@ public class SwModuleDefinition {
         return Collections.unmodifiableList(this.requireds);
     }
 
+    public void addRequired(final String moduleName) {
+        this.requireds.add(moduleName);
+    }
+
     @Override
     public String toString() {
         return String.format(
@@ -78,7 +82,7 @@ public class SwModuleDefinition {
             return false;
         }
 
-        final SwModuleDefinition otherSwModule = (SwModuleDefinition) obj;
+        final ModuleDefinition otherSwModule = (ModuleDefinition) obj;
         return Objects.equals(otherSwModule.getLocation(), this.getLocation())
             && Objects.equals(otherSwModule.getName(), this.getName())
             && Objects.equals(otherSwModule.getBaseVersion(), this.getBaseVersion())

@@ -1,8 +1,9 @@
-package nl.ramsolutions.sw.magik.analysis.typing.io;
+package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -18,18 +19,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeperDefinitionInserter;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * JSON-line TypeKeeper reader.
  */
-public final class JsonTypeKeeperReader {
+public final class JsonDefinitionReader {
 
     private static class TypeStringDeserializer implements JsonDeserializer<TypeString> {
 
@@ -104,15 +104,36 @@ public final class JsonTypeKeeperReader {
 
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JsonTypeKeeperReader.class);
+    private static class MethodDefinitionCreator implements InstanceCreator<MethodDefinition> {
 
-    private final TypeKeeperDefinitionInserter typeKeeperInserter;
+        @Override
+        public MethodDefinition createInstance(final Type type) {
+            // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
+            // even if these were not set in the source JSON.
+            return new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                Set.of(),
+                List.of(),
+                null,
+                null,
+                null);
+        }
 
-    private JsonTypeKeeperReader(final ITypeKeeper typeKeeper) {
-        this.typeKeeperInserter = new TypeKeeperDefinitionInserter(typeKeeper);
     }
 
-    @SuppressWarnings("checkstyle:IllegalCatch")
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonDefinitionReader.class);
+
+    private final IDefinitionKeeper definitionKeeper;
+
+    private JsonDefinitionReader(final IDefinitionKeeper definitionKeeper) {
+        this.definitionKeeper = definitionKeeper;
+    }
+
     private void run(final Path path) throws IOException {
         LOGGER.debug("Reading type database from path: {}", path);
 
@@ -128,14 +149,13 @@ public final class JsonTypeKeeperReader {
                 line = bufferedReader.readLine();
             }
         } catch (final JsonParseException exception) {
-            // This will never be hit, the catch block above handles it.
             LOGGER.error("JSON Error reading line no: {}", lineNo);
             throw new IllegalStateException(exception);
         }
     }
 
     @SuppressWarnings("checkstyle:IllegalCatch")
-    private void processLineSafe(int lineNo, String line) {
+    private void processLineSafe(final int lineNo, final String line) {
         try {
             this.processLine(line);
         } catch (final RuntimeException exception) {
@@ -200,59 +220,68 @@ public final class JsonTypeKeeperReader {
             .registerTypeAdapter(
                 ParameterDefinition.Modifier.class, new LowerCaseEnumDeserializer<ParameterDefinition.Modifier>())
             .registerTypeAdapter(ExpressionResultString.class, new ExpressionResultStringDeserializer())
+            .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionCreator())
             .create();
     }
 
     private void handlePackage(final JsonObject instruction) {
         final Gson gson = this.buildGson();
         final PackageDefinition definition = gson.fromJson(instruction, PackageDefinition.class);
-        this.typeKeeperInserter.feed(definition);
+        this.definitionKeeper.add(definition);
     }
 
     private void handleType(final JsonObject instruction) {
         final Gson gson = this.buildGson();
         final ExemplarDefinition definition = gson.fromJson(instruction, ExemplarDefinition.class);
-        this.typeKeeperInserter.feed(definition);
+
+        // We are allowed to overwrite definitions which have no location, as these will most likely
+        // be the default definitions from DefaultDefinitionsAdder.
+        final TypeString typeString = definition.getTypeString();
+        this.definitionKeeper.getExemplarDefinitions(typeString).stream()
+            .filter(def -> def.getLocation() == null)
+            .forEach(this.definitionKeeper::remove);
+
+        this.definitionKeeper.add(definition);
     }
 
     private void handleMethod(final JsonObject instruction) {
         final Gson gson = this.buildGson();
         final MethodDefinition definition = gson.fromJson(instruction, MethodDefinition.class);
-        this.typeKeeperInserter.feed(definition);
+        this.definitionKeeper.add(definition);
     }
 
     private void handleCondition(final JsonObject instruction) {
         final Gson gson = this.buildGson();
         final ConditionDefinition definition = gson.fromJson(instruction, ConditionDefinition.class);
-        this.typeKeeperInserter.feed(definition);
+        this.definitionKeeper.add(definition);
     }
 
     private void handleBinaryOperator(final JsonObject instruction) {
         final Gson gson = this.buildGson();
         final BinaryOperatorDefinition definition = gson.fromJson(instruction, BinaryOperatorDefinition.class);
-        this.typeKeeperInserter.feed(definition);
+        this.definitionKeeper.add(definition);
     }
 
     private void handleProcedure(final JsonObject instruction) {
         final Gson gson = this.buildGson();
         final ProcedureDefinition definition = gson.fromJson(instruction, ProcedureDefinition.class);
-        this.typeKeeperInserter.feed(definition);
+        this.definitionKeeper.add(definition);
     }
 
     private void handleGlobal(final JsonObject instruction) {
         final Gson gson = this.buildGson();
         final GlobalDefinition definition = gson.fromJson(instruction, GlobalDefinition.class);
-        this.typeKeeperInserter.feed(definition);
+        this.definitionKeeper.add(definition);
     }
 
     /**
      * Read types from a JSON-line file.
      * @param path Path to JSON-line file.
-     * @param typeKeeper {@link TypeKeeper} to fill.
+     * @param definitionKeeper {@link IDefinitionKeeper} to fill.
      * @throws IOException -
      */
-    public static void readTypes(final Path path, final ITypeKeeper typeKeeper) throws IOException {
-        final JsonTypeKeeperReader reader = new JsonTypeKeeperReader(typeKeeper);
+    public static void readTypes(final Path path, final IDefinitionKeeper definitionKeeper) throws IOException {
+        final JsonDefinitionReader reader = new JsonDefinitionReader(definitionKeeper);
         reader.run(path);
     }
 

@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.SelectionRange;
@@ -23,8 +23,8 @@ class SelectionRangeProviderTest {
             final List<nl.ramsolutions.sw.magik.Position> positions) {
         final var provider = new SelectionRangeProvider();
         final var uri = URI.create("tests://unittest");
-        final var typeKeeper = new TypeKeeper();
-        final var magikFile = new MagikTypedFile(uri, code, typeKeeper);
+        final var definitionKeeper = new DefinitionKeeper();
+        final var magikFile = new MagikTypedFile(uri, code, definitionKeeper);
         return provider.provideSelectionRanges(magikFile, positions);
     }
 

@@ -3,15 +3,17 @@ package nl.ramsolutions.sw.magik.languageserver.symbol;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
+import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.TypeStringDefinition;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SymbolKind;
@@ -27,10 +29,10 @@ public class SymbolProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SymbolProvider.class);
 
-    private final ITypeKeeper typeKeeper;
+    private final IDefinitionKeeper definitionKeeper;
 
-    public SymbolProvider(final ITypeKeeper typeKeeper) {
-        this.typeKeeper = typeKeeper;
+    public SymbolProvider(final IDefinitionKeeper definitionKeeper) {
+        this.definitionKeeper = definitionKeeper;
     }
 
     /**
@@ -55,11 +57,13 @@ public class SymbolProvider {
 
         final List<WorkspaceSymbol> workspaceSymbols = new ArrayList<>();
         try {
+            // TODO: Products
+            // TODO: Modules
             this.gatherTypes(query, workspaceSymbols);
             this.gatherMethods(query, workspaceSymbols);
             this.gatherConditions(query, workspaceSymbols);
-        } catch (PatternSyntaxException ex) {
-            LOGGER.info("Ignoring caught exception: {}", ex.getMessage());
+        } catch (final PatternSyntaxException exception) {
+            LOGGER.info("Ignoring caught exception: {}", exception.getMessage());
             return Collections.emptyList();
         }
 
@@ -68,13 +72,13 @@ public class SymbolProvider {
     }
 
     private void gatherTypes(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
-        final Predicate<AbstractType> typePredicate = this.buildTypePredicate(query);
-        for (final AbstractType type : this.typeKeeper.getTypes()) {
-            if (typePredicate.test(type)) {
-                final Location typeLocation = type.getLocation();
+        final Predicate<TypeStringDefinition> predicate = this.buildTypePredicate(query);
+        for (final ExemplarDefinition definition : this.definitionKeeper.getExemplarDefinitions()) {
+            if (predicate.test(definition)) {
+                final Location typeLocation = definition.getLocation();
                 final Location location = Location.validLocation(typeLocation);
                 final WorkspaceSymbol symbol = new WorkspaceSymbol(
-                    "Exemplar: " + type.getFullName(),
+                    "Exemplar: " + definition.getTypeString().getFullString(),
                     SymbolKind.Class,
                     Either.forLeft(Lsp4jConversion.locationToLsp4j(location)));
                 workspaceSymbols.add(symbol);
@@ -83,27 +87,16 @@ public class SymbolProvider {
     }
 
     private void gatherMethods(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
-        final Predicate<Method> methodPredicate = this.buildMethodPredicate(query);
-        final BiPredicate<AbstractType, Method> typeMethodPredicate = this.buildTypeMethodPredicate(query);
-        for (final AbstractType type : this.typeKeeper.getTypes()) {
-            for (final Method method : type.getLocalMethods()) {
-                final Location methodLocation = method.getLocation();
+        final Predicate<MethodDefinition> predicate = this.buildMethodPredicate(query);
+        for (final MethodDefinition definition : this.definitionKeeper.getMethodDefinitions()) {
+            if (predicate.test(definition)) {
+                final Location methodLocation = definition.getLocation();
                 final Location location = Location.validLocation(methodLocation);
-                if (methodPredicate.test(method)) {
-                    final WorkspaceSymbol symbol = new WorkspaceSymbol(
-                        "Method: " + method.getSignature(),
-                        SymbolKind.Method,
-                        Either.forLeft(Lsp4jConversion.locationToLsp4j(location)));
-                    workspaceSymbols.add(symbol);
-                }
-
-                if (typeMethodPredicate.test(type, method)) {
-                    final WorkspaceSymbol symbol = new WorkspaceSymbol(
-                        "Method: " + method.getSignature(),
-                        SymbolKind.Method,
-                        Either.forLeft(Lsp4jConversion.locationToLsp4j(location)));
-                    workspaceSymbols.add(symbol);
-                }
+                final WorkspaceSymbol symbol = new WorkspaceSymbol(
+                    "Method: " + definition.getName(),
+                    SymbolKind.Method,
+                    Either.forLeft(Lsp4jConversion.locationToLsp4j(location)));
+                workspaceSymbols.add(symbol);
             }
         }
     }
@@ -114,13 +107,13 @@ public class SymbolProvider {
      * @param workspaceSymbols List to add results to.
      */
     private void gatherConditions(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
-        final Predicate<Condition> conditionPredicate = this.buildConditionPredicate(query);
-        for (final Condition condition : this.typeKeeper.getConditions()) {
-            if (conditionPredicate.test(condition)) {
-                final Location conditionLocation = condition.getLocation();
+        final Predicate<ConditionDefinition> predicate = this.buildConditionPredicate(query);
+        for (final ConditionDefinition definition : this.definitionKeeper.getConditionDefinitions()) {
+            if (predicate.test(definition)) {
+                final Location conditionLocation = definition.getLocation();
                 final Location location = Location.validLocation(conditionLocation);
                 final WorkspaceSymbol symbol = new WorkspaceSymbol(
-                    "Condition: " + condition.getName(),
+                    "Condition: " + definition.getName(),
                     SymbolKind.Class,
                     Either.forLeft(Lsp4jConversion.locationToLsp4j(location)));
                 workspaceSymbols.add(symbol);
@@ -129,80 +122,67 @@ public class SymbolProvider {
     }
 
     /**
-     * Build {@link Predicate} which matches {@link AbstractType}. This only gives a matchable
-     * predicate if no '.' appears in the query.
+     * Build {@link Predicate} which matches {@link ExemplarDefinition}/{@link ProcedureDefinition}/
+     * {@link GlobalDefinition}.
+     *
+     * This only gives a matchable * predicate if no '.' appears in the query.
      *
      * @param query Query string
-     * @return Predicate to match {@link AbstractType}.
+     * @return Predicate to match with.
      */
-    private Predicate<AbstractType> buildTypePredicate(final String query) {
+    private Predicate<TypeStringDefinition> buildTypePredicate(final String query) {
         final int dotIndex = query.indexOf('.');
         if (dotIndex != -1) {
             return type -> false;
         }
 
-        final String regexp = ".*" + query + ".*";
-        return type -> type.getFullName().matches(regexp);
+        final Pattern pattern = Pattern.compile(".*" + query + ".*");
+        return definition -> pattern.matcher(definition.getTypeString().getFullString()).matches();
     }
 
     /**
-     * Build {@link Predicate} which matches {@link Method}.
-     * This only gives a matchable predicate if no '.' appears in the query.
-     * @param query Query string
-     * @return Predicate to match {@link Method}
-     */
-    private Predicate<Method> buildMethodPredicate(final String query) {
-        final int dotIndex = query.indexOf('.');
-        if (dotIndex != -1) {
-            return method -> false;
-        }
-
-        final String regexp = ".*" + query + ".*";
-        return method -> method.getName().matches(regexp);
-    }
-
-    /**
-     * Build {@link BiPredicate} which matches {@link AbstractType} and {@link Method}.
+     * Build {@link Predicate} which matches {@link MethodDefinition}.
      * This only gives a matchable predicate if '.' appears in the query.
+     *
      * @param query Query string
-     * @return {@link BiPredicate} to match {@link AbstractType} and {@link Method}
+     * @return Predicate to match with.
      */
-    private BiPredicate<AbstractType, Method> buildTypeMethodPredicate(final String query) {
+    private Predicate<MethodDefinition> buildMethodPredicate(final String query) {
         final int dotIndex = query.indexOf('.');
         if (dotIndex == -1) {
-            // Only match if query contains a '.'.
-            return (type, method) -> false;
+            // No `.`, match only based on method name.
+            final Pattern pattern = Pattern.compile(".*" + query + ".*");
+            return definition -> pattern.matcher(definition.getMethodName()).matches();
         }
 
         final String typeQuery = query.substring(0, dotIndex);
         LOGGER.trace("Type query: {}", typeQuery);
-        final String typeRegex = ".*" + Pattern.quote(typeQuery) + ".*";
-        final Predicate<AbstractType> typePredicate = type -> type.getFullName().matches(typeRegex);
+        final Pattern typePattern = Pattern.compile(".*" + Pattern.quote(typeQuery) + ".*");
 
         final String methodQuery = query.substring(dotIndex + 1);
-        final String methodRegexp = ".*" + Pattern.quote(methodQuery) + ".*";
         LOGGER.trace("Method query: {}", methodQuery);
-        final Predicate<Method> methodPredicate = method -> method.getName().matches(methodRegexp);
+        final Pattern methodPattern = Pattern.compile(".*" + Pattern.quote(methodQuery) + ".*");
 
-        return (type, method) -> typePredicate.test(type)
-            && methodPredicate.test(method);
+        return definition ->
+            typePattern.matcher(definition.getTypeName().getFullString()).matches()
+            && methodPattern.matcher(definition.getMethodName()).matches();
     }
 
     /**
-     * Build {@link Predicate} which matches {@link Condition}. This only gives a matchable
-     * predicate if no '.' appears in the query.
+     * Build {@link Predicate} which matches {@link ConditionDefinition}.
+     * This only gives a matchable predicate if no '.' appears in the query.
      *
      * @param query Query string
-     * @return {@link Predicate} to match {@link Condition}
+     * @return Predicate to match with.
      */
-    private Predicate<Condition> buildConditionPredicate(final String query) {
+    private Predicate<ConditionDefinition> buildConditionPredicate(final String query) {
         final int dotIndex = query.indexOf('.');
         if (dotIndex != -1) {
             return type -> false;
         }
 
-        final String regexp = ".*" + query + ".*";
-        return condition -> condition.getName().matches(regexp);
+        final Pattern pattern = Pattern.compile(".*" + query + ".*");
+        return definition -> pattern.matcher(definition.getName()).matches();
     }
 
 }

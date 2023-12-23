@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
@@ -99,7 +99,7 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
 
         // Create procedure instance.
         final EnumSet<ProcedureInstance.Modifier> modifiers = EnumSet.noneOf(ProcedureInstance.Modifier.class);
-        final String moduleName = SwModuleScanner.getModuleName(uri);
+        final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
         final MagikType procedureType = (MagikType) this.typeKeeper.getType(SW_PROCEDURE);
         final ProcedureInstance procType = new ProcedureInstance(
             location,

@@ -1,11 +1,12 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
@@ -28,7 +29,7 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikLanguageServer.class);
 
-    private final ITypeKeeper typeKeeper = new TypeKeeper();
+    private final IDefinitionKeeper definitionKeeper;
     private final List<WorkspaceFolder> workspaceFolders = new ArrayList<>();
     private final MagikTextDocumentService magikTextDocumentService;
     private final MagikWorkspaceService magikWorkspaceService;
@@ -37,10 +38,12 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
 
     /**
      * Constructor.
+     * @throws IOException
      */
     public MagikLanguageServer() {
-        this.magikTextDocumentService = new MagikTextDocumentService(this, this.typeKeeper);
-        this.magikWorkspaceService = new MagikWorkspaceService(this, this.typeKeeper);
+        this.definitionKeeper = new DefinitionKeeper();
+        this.magikTextDocumentService = new MagikTextDocumentService(this, this.definitionKeeper);
+        this.magikWorkspaceService = new MagikWorkspaceService(this, this.definitionKeeper);
         this.magikNotebookDocumentService = new MagikNotebookDocumentService(this);
     }
 

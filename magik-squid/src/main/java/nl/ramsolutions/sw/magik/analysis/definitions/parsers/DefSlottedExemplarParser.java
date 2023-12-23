@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.definitions;
+package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
@@ -11,9 +11,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import nl.ramsolutions.sw.definitions.SwModuleScanner;
+import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.GenericDeclaration;
+import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.SimpleVectorNodeHelper;
@@ -27,7 +31,7 @@ import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 /**
  * {@code def_slotted_exemplar} parser.
  */
-public class DefSlottedExemplarParser extends TypeDefParser {
+public class DefSlottedExemplarParser extends BaseDefParser {
 
     private static final String DEF_SLOTTED_EXEMPLAR = "def_slotted_exemplar";
     private static final String SW_DEF_SLOTTED_EXEMPLAR = "sw:def_slotted_exemplar";
@@ -89,7 +93,7 @@ public class DefSlottedExemplarParser extends TypeDefParser {
         final Location location = new Location(uri, this.node);
 
         // Figure module name.
-        final String moduleName = SwModuleScanner.getModuleName(uri);
+        final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
 
         // Figure statement node.
         final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
@@ -107,7 +111,7 @@ public class DefSlottedExemplarParser extends TypeDefParser {
         final Map<String, TypeString> slotTypes = docParser.getSlotTypes();
 
         // Figure slots.
-        final List<ExemplarDefinition.Slot> slots = new ArrayList<>();
+        final List<SlotDefinition> slots = new ArrayList<>();
         final List<MethodDefinition> methodDefinitions = new ArrayList<>();
         for (final AstNode slotDefNode : argument1Node.getChildren(MagikGrammar.EXPRESSION)) {  // NOSONAR
             final SimpleVectorNodeHelper simpleVectorHelper = SimpleVectorNodeHelper.fromExpressionSafe(slotDefNode);
@@ -127,8 +131,14 @@ public class DefSlottedExemplarParser extends TypeDefParser {
             final TypeString slotTypeRef = Objects.requireNonNullElse(
                 slotTypes.get(slotName),
                 TypeString.UNDEFINED);
-            final ExemplarDefinition.Slot slot =
-                new ExemplarDefinition.Slot(slotLocation, slotDefNode, slotName, slotTypeRef);
+            final SlotDefinition slot =
+                new SlotDefinition(
+                    slotLocation,
+                    moduleName,
+                    null,
+                    slotDefNode,
+                    slotName,
+                    slotTypeRef);
             slots.add(slot);
 
             // Method definitions.
@@ -153,25 +163,26 @@ public class DefSlottedExemplarParser extends TypeDefParser {
         final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
         // Figure generics.
-        final List<GenericDeclaration> genericDeclarations = docParser.getGenericTypeNodes().entrySet().stream()
+        final List<ExemplarDefinition.GenericDeclaration> genericDeclarations =
+            docParser.getGenericTypeNodes().entrySet().stream()
             .map(entry -> {
                 final AstNode genericNode = entry.getKey();
                 final Location genericLocation = new Location(uri, genericNode);
                 final TypeString genericTypeStr = entry.getValue();
                 final String genericName = genericTypeStr.getIdentifier();
-                return new GenericDeclaration(genericLocation, genericName);
+                return new ExemplarDefinition.GenericDeclaration(genericLocation, genericName);
             })
             .collect(Collectors.toList());
 
         final ExemplarDefinition slottedExemplarDefinition = new ExemplarDefinition(
             location,
             moduleName,
+            doc,
             statementNode,
             ExemplarDefinition.Sort.SLOTTED,
             name,
             slots,
             parents,
-            doc,
             genericDeclarations);
 
         final List<Definition> definitions = new ArrayList<>();
@@ -205,12 +216,12 @@ public class DefSlottedExemplarParser extends TypeDefParser {
             final MethodDefinition getMethod = new MethodDefinition(
                 location,
                 moduleName,
+                null,
                 node,
                 exemplarName,
                 getName,
                 getModifiers,
                 getParameters,
-                null,
                 null,
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.UNDEFINED);
@@ -226,12 +237,12 @@ public class DefSlottedExemplarParser extends TypeDefParser {
             final MethodDefinition getMethod = new MethodDefinition(
                 location,
                 moduleName,
+                null,
                 node,
                 exemplarName,
                 slotName,
                 getModifiers,
                 getParameters,
-                null,
                 null,
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.UNDEFINED);
@@ -247,21 +258,21 @@ public class DefSlottedExemplarParser extends TypeDefParser {
             final ParameterDefinition assignmentParam = new ParameterDefinition(
                 location,
                 moduleName,
+                null,
                 node,
                 "val",
                 ParameterDefinition.Modifier.NONE,
-                TypeString.UNDEFINED,
-                null);
+                TypeString.UNDEFINED);
             final MethodDefinition setMethod = new MethodDefinition(
                 location,
                 moduleName,
+                null,
                 node,
                 exemplarName,
                 setName,
                 setModifiers,
                 setParameters,
                 assignmentParam,
-                null,
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.UNDEFINED);
             methodDefinitions.add(setMethod);
@@ -271,13 +282,13 @@ public class DefSlottedExemplarParser extends TypeDefParser {
             final MethodDefinition bootMethod = new MethodDefinition(
                 location,
                 moduleName,
+                null,
                 node,
                 exemplarName,
                 bootName,
                 setModifiers,
                 setParameters,
                 assignmentParam,
-                null,
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.UNDEFINED);
             methodDefinitions.add(bootMethod);

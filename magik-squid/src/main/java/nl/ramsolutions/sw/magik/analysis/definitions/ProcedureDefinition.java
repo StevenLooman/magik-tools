@@ -4,9 +4,12 @@ import com.sonar.sslr.api.AstNode;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
@@ -14,7 +17,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 /**
  * Procedure definition.
  */
-public class ProcedureDefinition extends Definition {
+@Immutable
+public class ProcedureDefinition extends TypeStringDefinition {
 
     /**
      * Procedure definition modifier.
@@ -50,19 +54,19 @@ public class ProcedureDefinition extends Definition {
     public ProcedureDefinition(
             final @Nullable Location location,
             final @Nullable String moduleName,
+            final @Nullable String doc,
             final @Nullable AstNode node,
             final Set<Modifier> modifiers,
-            final @Nullable TypeString typeName,
-            final String procedureName,
+            final @Nullable TypeString typeName,  // TODO: Rename to typeString.
+            final @Nullable String procedureName,
             final List<ParameterDefinition> parameters,
-            final String doc,
             final ExpressionResultString returnTypes,
             final ExpressionResultString loopTypes) {
-        super(location, moduleName, node, doc);
+        super(location, moduleName, doc, node);
         this.modifiers = Set.copyOf(modifiers);
         this.typeName = typeName;
         this.procedureName = procedureName;
-        this.parameters = parameters;
+        this.parameters = List.copyOf(parameters);
         this.returnTypes = returnTypes;
         this.loopTypes = loopTypes;
     }
@@ -73,6 +77,12 @@ public class ProcedureDefinition extends Definition {
 
     @CheckForNull
     public TypeString getTypeName() {
+        return this.typeName;
+    }
+
+    @CheckForNull
+    @Override
+    public TypeString getTypeString() {
         return this.typeName;
     }
 
@@ -116,6 +126,63 @@ public class ProcedureDefinition extends Definition {
         }
 
         return TypeString.UNDEFINED.getPakkage();
+    }
+
+    @Override
+    public ProcedureDefinition getWithoutNode() {
+        return new ProcedureDefinition(
+            this.getLocation(),
+            this.getModuleName(),
+            this.getDoc(),
+            null,
+            this.modifiers,
+            this.typeName,
+            this.procedureName,
+            this.parameters.stream()
+                .map(paramDef -> paramDef.getWithoutNode())
+                .collect(Collectors.toList()),
+            this.returnTypes,
+            this.loopTypes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            this.getLocation(),
+            this.getModuleName(),
+            this.getDoc(),
+            this.modifiers,
+            this.typeName,
+            this.procedureName,
+            this.parameters,
+            this.returnTypes,
+            this.loopTypes);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final ProcedureDefinition other = (ProcedureDefinition) obj;
+        return Objects.equals(other.getLocation(), this.getLocation())
+            && Objects.equals(other.getName(), this.getName())
+            && Objects.equals(other.getDoc(), this.getDoc())
+            && Objects.equals(this.modifiers, other.modifiers)
+            && Objects.equals(this.typeName, other.typeName)
+            && Objects.equals(this.procedureName, other.procedureName)
+            && Objects.equals(this.parameters, other.parameters)
+            && Objects.equals(this.returnTypes, other.returnTypes)
+            && Objects.equals(this.loopTypes, other.loopTypes);
     }
 
 }

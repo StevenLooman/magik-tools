@@ -10,26 +10,27 @@ import nl.ramsolutions.sw.magik.Location;
  */
 public abstract class Definition {
 
-    private final Location location;
-    private final String moduleName;
-    private final AstNode node;
-    private final String doc;
+    private final @Nullable Location location;
+    private final @Nullable String moduleName;
+    private final @Nullable String doc;
+    private final @Nullable AstNode node;
 
     /**
      * Constructor.
      * @param location Location.
      * @param moduleName Name of the module this definition resides in.
+     * @param doc Doc.
      * @param node Node.
      */
     protected Definition(
             final @Nullable Location location,
             final @Nullable String moduleName,
-            final @Nullable AstNode node,
-            final @Nullable String doc) {
+            final @Nullable String doc,
+            final @Nullable AstNode node) {
         this.location = location;
         this.moduleName = moduleName;
-        this.node = node;
         this.doc = doc;
+        this.node = node;
     }
 
     /**
@@ -51,21 +52,21 @@ public abstract class Definition {
     }
 
     /**
-     * Get parsed node.
-     * @return
-     */
-    @CheckForNull
-    public AstNode getNode() {
-        return this.node;
-    }
-
-    /**
      * Get doc.
      * @return
      */
     @CheckForNull
     public String getDoc() {
         return this.doc;
+    }
+
+    /**
+     * Get parsed node.
+     * @return
+     */
+    @CheckForNull
+    public AstNode getNode() {
+        return this.node;
     }
 
     /**
@@ -80,5 +81,11 @@ public abstract class Definition {
      */
     @CheckForNull
     public abstract String getPackage();
+
+    /**
+     * Get a(n equal) copy of self, without the {@link AstNode}.
+     * @return Copy of self.
+     */
+    public abstract Definition getWithoutNode();
 
 }

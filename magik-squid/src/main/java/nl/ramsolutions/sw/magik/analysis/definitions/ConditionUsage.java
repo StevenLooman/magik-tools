@@ -2,11 +2,13 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import java.util.Objects;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.Location;
 
 /**
  * Condition usage.
  */
+@Immutable
 public class ConditionUsage {
 
     private final String conditionName;
@@ -58,8 +60,8 @@ public class ConditionUsage {
         }
 
         final ConditionUsage other = (ConditionUsage) obj;
-        return Objects.equals(other.getConditionName(), this.getConditionName())
-            && Objects.equals(other.getLocation(), this.getLocation());
+        // Location is not tested!
+        return Objects.equals(other.getConditionName(), this.getConditionName());
     }
 
 }

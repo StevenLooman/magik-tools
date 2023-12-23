@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.languageserver.references;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,16 +14,18 @@ import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
@@ -53,7 +56,7 @@ public class ReferencesProvider {
     public List<Location> provideReferences(final MagikTypedFile magikFile, final Position position) {
         // Parse magik.
         final AstNode node = magikFile.getTopNode();
-        final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
+        final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
 
         // Should always be on an identifier.
         final AstNode currentNode = AstQuery.nodeAt(node, position, MagikGrammar.IDENTIFIER);
@@ -74,24 +77,17 @@ public class ReferencesProvider {
         } else if (wantedNode.is(MagikGrammar.METHOD_INVOCATION)) {
             final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(wantedNode);
             final String methodName = helper.getMethodName();
-            LOGGER.debug("Getting references to method: {}", methodName);
-            return this.referencesToMethod(typeKeeper, UndefinedType.SERIALIZED_NAME, methodName);
+            return this.referencesToMethod(definitionKeeper, TypeString.UNDEFINED, methodName);
         } else if (wantedNode.is(MagikGrammar.METHOD_NAME)) {
             final AstNode methodDefinitionNode = wantedNode.getParent();
             final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefinitionNode);
             final String methodName = helper.getMethodName();
-            LOGGER.debug("Getting references to method: {}", methodName);
-            return this.referencesToMethod(typeKeeper, UndefinedType.SERIALIZED_NAME, methodName);
+            return this.referencesToMethod(definitionKeeper, TypeString.UNDEFINED, methodName);
         } else if (wantedNode.is(MagikGrammar.EXEMPLAR_NAME)) {
             final String identifier = currentNode.getTokenValue();
             final String pakkage = packageHelper.getCurrentPackage();
             final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
-            final AbstractType type = typeKeeper.getType(typeString);
-            if (type != UndefinedType.INSTANCE) {
-                final String typeName = type.getFullName();
-                LOGGER.debug("Getting references to type: {}", typeName);
-                return this.referencesToType(typeKeeper, typeName);
-            }
+            return this.referencesToType(definitionKeeper, typeString);
         } else if (wantedNode.is(MagikGrammar.ATOM)
                    && wantedNode.getFirstChild().is(MagikGrammar.IDENTIFIER)) {
             final Scope scope = magikFile.getGlobalScope().getScopeForNode(wantedNode);
@@ -107,23 +103,19 @@ public class ReferencesProvider {
                     ScopeEntry.Type.CONSTANT,
                     ScopeEntry.Type.PARAMETER)) {
                 final List<AstNode> usages = scopeEntry.getUsages();
+                final URI uri = magikFile.getUri();
                 return usages.stream()
-                    .map(usageNode -> new Location(magikFile.getUri(), usageNode))
+                    .map(usageNode -> new Location(uri, usageNode))
                     .collect(Collectors.toList());
             } else if (scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC)) {
                 final String pakkage = packageHelper.getCurrentPackage();
                 final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
-                final AbstractType type = typeKeeper.getType(typeString);
-                if (type != UndefinedType.INSTANCE) {
-                    final String typeName = type.getFullName();
-                    LOGGER.debug("Getting references to type: {}", typeName);
-                    return this.referencesToType(typeKeeper, typeName);
-                }
+                return this.referencesToType(definitionKeeper, typeString);
             }
         } else if (wantedNode.is(MagikGrammar.CONDITION_NAME)) {
             final String conditionName = currentNode.getTokenValue();
             LOGGER.debug("Getting references to condition: {}", conditionName);
-            return this.referencesToCondition(typeKeeper, conditionName);
+            return this.referencesToCondition(definitionKeeper, conditionName);
         }
 
         // TODO: Slot references.
@@ -132,73 +124,64 @@ public class ReferencesProvider {
     }
 
     private List<Location> referencesToMethod(
-            final ITypeKeeper typeKeeper, final String typeName, final String methodName) {
+            final IDefinitionKeeper definitionKeeper,
+            final TypeString typeName,
+            final String methodName) {
         LOGGER.debug("Finding references to method: {}", methodName);
 
         // Build set of types which may contain this method: type + ancestors.
-        final AbstractType typeType = typeName.equals(UndefinedType.SERIALIZED_NAME)
-            ? UndefinedType.INSTANCE
-            : typeKeeper.getType(TypeString.ofIdentifier(typeName, TypeString.DEFAULT_PACKAGE));
-        final Set<AbstractType> wantedTypes = new HashSet<>();
-        wantedTypes.add(UndefinedType.INSTANCE);  // For unreasoned/undetermined calls.
-        wantedTypes.add(typeType);
-        wantedTypes.addAll(typeType.getAncestors());
+        final Set<TypeString> wantedTypeRefs = new HashSet<>();
+        wantedTypeRefs.add(TypeString.UNDEFINED);  // For unreasoned/undetermined calls.
+        wantedTypeRefs.add(typeName);
+        // TODO: Add all ancestors too?
 
-        final Collection<Method.MethodUsage> wantedMethodUsages = wantedTypes.stream()
-            .map(wantedType -> {
-                final String wantedTypeName = wantedType.getFullName();
-                final TypeString wantedTypeRef = TypeString.ofIdentifier(wantedTypeName, TypeString.DEFAULT_PACKAGE);
-                return new Method.MethodUsage(wantedTypeRef, methodName);
-            })
+        final Collection<MethodUsage> searchedMethodUsages = wantedTypeRefs.stream()
+            .map(wantedTypeRef -> new MethodUsage(wantedTypeRef, methodName))
             .collect(Collectors.toSet());
-        final Predicate<Method.MethodUsage> filterPredicate = wantedMethodUsages::contains;
+        final Predicate<MethodUsage> filterPredicate = searchedMethodUsages::contains;
 
         // Find references.
-        return typeKeeper.getTypes().stream()
-            .flatMap(type -> type.getMethods().stream())
-            .flatMap(method -> method.getMethodUsages().stream())
+        return definitionKeeper.getMethodDefinitions().stream()
+            .flatMap(def -> def.getUsedMethods().stream())
             .filter(filterPredicate::test)
-            .map(Method.MethodUsage::getLocation)
+            .map(MethodUsage::getLocation)
             .map(Location::validLocation)
             .collect(Collectors.toList());
     }
 
-    private List<Location> referencesToType(final ITypeKeeper typeKeeper, final String typeName) {
-        LOGGER.debug("Finding references to type: {}", typeName);
+    private List<Location> referencesToType(final IDefinitionKeeper definitionKeeper, final TypeString typeString) {
+        LOGGER.debug("Finding references to type: {}", typeString);
 
-        final TypeString typeStr = TypeString.ofIdentifier(typeName, TypeString.DEFAULT_PACKAGE);
-        final AbstractType typeType = typeKeeper.getType(typeStr);
-        final Set<AbstractType> wantedTypes = new HashSet<>();
-        wantedTypes.add(typeType);
-        // wantedTypes.addAll(type.getAncestors());  // TODO: Ancestors or descendants?
+        final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+        final ExemplarDefinition exemplarDefinition = resolver.getExemplarDefinition(typeString);
+        if (exemplarDefinition == null) {
+            return Collections.emptyList();
+        }
 
-        final Collection<Method.GlobalUsage> wantedGlobalUsages = wantedTypes.stream()
-            .map(wantedType -> {
-                final String wantedTypeName = wantedType.getFullName();
-                final TypeString wantedTypeRef = TypeString.ofIdentifier(wantedTypeName, TypeString.DEFAULT_PACKAGE);
-                return new Method.GlobalUsage(wantedTypeRef, null);
-            })
+        final TypeString exemplarTypeString = exemplarDefinition.getTypeString();
+        final Set<TypeString> searchedTypes = Set.of(exemplarTypeString);
+        final Collection<GlobalUsage> wantedGlobalUsages = searchedTypes.stream()
+            .map(wantedTypeRef -> new GlobalUsage(wantedTypeRef, null))
             .collect(Collectors.toSet());
-        final Predicate<Method.GlobalUsage> filterPredicate = wantedGlobalUsages::contains;
+        final Predicate<GlobalUsage> filterPredicate = wantedGlobalUsages::contains;
 
         // Find references.
-        return typeKeeper.getTypes().stream()
-            .flatMap(type -> type.getMethods().stream())
-            .flatMap(method -> method.getGlobalUsages().stream())
+        // TODO: Also parameters.
+        // TODO: Also slots.
+        return definitionKeeper.getMethodDefinitions().stream()
+            .flatMap(def -> def.getUsedGlobals().stream())
             .filter(filterPredicate::test)
-            .map(Method.GlobalUsage::getLocation)
+            .map(GlobalUsage::getLocation)
             .map(Location::validLocation)
             .collect(Collectors.toList());
     }
 
-    private List<Location> referencesToCondition(final ITypeKeeper typeKeeper, final String conditionName) {
+    private List<Location> referencesToCondition(final IDefinitionKeeper definitionKeeper, final String conditionName) {
         LOGGER.debug("Finding references to condition: {}", conditionName);
-
-        return typeKeeper.getTypes().stream()
-            .flatMap(type -> type.getLocalMethods().stream())
-            .flatMap(method -> method.getConditionUsages().stream())
+        return definitionKeeper.getMethodDefinitions().stream()
+            .flatMap(def -> def.getUsedConditions().stream())
             .filter(conditionUsage -> conditionUsage.getConditionName().equals(conditionName))
-            .map(Method.ConditionUsage::getLocation)
+            .map(ConditionUsage::getLocation)
             .map(Location::validLocation)
             .collect(Collectors.toList());
     }

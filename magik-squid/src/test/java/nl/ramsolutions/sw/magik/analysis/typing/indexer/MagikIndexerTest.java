@@ -2,14 +2,16 @@ package nl.ramsolutions.sw.magik.analysis.typing.indexer;
 
 import java.nio.file.Path;
 import java.util.Collection;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Slot;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,29 +39,125 @@ class MagikIndexerTest {
     void testFileCreated() {
         final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer.magik");
         final Path fixedPath = this.getPath(path).toAbsolutePath();
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikIndexer magikIndexer = new MagikIndexer(typeKeeper);
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
         magikIndexer.indexPathCreated(fixedPath);
 
-        // Test type.
+        // Test exemplar.
         final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
-        final AbstractType type = typeKeeper.getType(typeString);
-        assertThat(type).isNotEqualTo(UndefinedType.INSTANCE);
+        final Collection<ExemplarDefinition> exemplarDefs = definitionKeeper.getExemplarDefinitions(typeString);
+        assertThat(exemplarDefs).hasSize(1);
+        final ExemplarDefinition exemplarDef = exemplarDefs.stream().findAny().orElseThrow();
 
-        // Test methods.
-        final Collection<Method> newMethods = type.getLocalMethods("new()");
-        assertThat(newMethods).hasSize(1);
-        final Collection<Method> initMethods = type.getLocalMethods("init()");
-        assertThat(initMethods).hasSize(1);
+        // Test doc.
+        final String doc = exemplarDef.getDoc();
+        assertThat(doc).isEqualTo("Test exemplar.");
 
         // Test slots.
-        final Collection<Slot> slots = type.getSlots();
-        assertThat(slots)
-            .hasSize(1);
-        final Slot slot = slots.iterator().next();
-        assertThat(slot)
-            .extracting("name")
-                .isEqualTo("slot_a");
+        final Collection<SlotDefinition> slots = exemplarDef.getSlots();
+        assertThat(slots).hasSize(2);
+        final SlotDefinition slotA = exemplarDef.getSlot("slot_a");
+        assertThat(slotA.getName()).isEqualTo("slot_a");
+        assertThat(slotA.getTypeName()).isEqualTo(TypeString.UNDEFINED);
+
+        final SlotDefinition slotB = exemplarDef.getSlot("slot_b");
+        assertThat(slotB.getName()).isEqualTo("slot_b");
+        assertThat(slotB.getTypeName()).isEqualTo(TypeString.UNDEFINED);
+
+        // Test methods.
+        final Collection<MethodDefinition> newMethodDefs = definitionKeeper.getMethodDefinitions(typeString).stream()
+            .filter(def -> def.getMethodName().equals("new()"))
+            .collect(Collectors.toSet());
+        assertThat(newMethodDefs).hasSize(1);
+        final MethodDefinition newMethodDef = newMethodDefs.stream().findAny().orElseThrow();
+        assertThat(newMethodDef.getDoc()).isEqualTo("Constructor.");
+        assertThat(newMethodDef.getReturnTypes()).isEqualTo(ExpressionResultString.UNDEFINED);
+        assertThat(newMethodDef.getLoopTypes()).isEqualTo(ExpressionResultString.EMPTY);
+
+        final Collection<MethodDefinition> initMethodDefs = definitionKeeper.getMethodDefinitions(typeString).stream()
+            .filter(def -> def.getMethodName().equals("init()"))
+            .collect(Collectors.toSet());
+        assertThat(initMethodDefs).hasSize(1);
+        final MethodDefinition initMethodDef = initMethodDefs.stream().findAny().orElseThrow();
+        assertThat(initMethodDef.getDoc()).isEqualTo("Initializer.");
+        assertThat(initMethodDef.getReturnTypes()).isEqualTo(ExpressionResultString.UNDEFINED);
+        assertThat(initMethodDef.getLoopTypes()).isEqualTo(ExpressionResultString.EMPTY);
+
+        // Test globals.
+        final Collection<GlobalDefinition> globalDefs = definitionKeeper.getGlobalDefinitions();
+        assertThat(globalDefs).hasSize(1);
+        final GlobalDefinition globalDef = globalDefs.stream().findAny().orElseThrow();
+        assertThat(globalDef.getTypeString()).isEqualTo(TypeString.ofIdentifier("!test_global!", "user"));
+        assertThat(globalDef.getAliasedTypeName()).isEqualTo(TypeString.UNDEFINED);
+
+        // Test binary expressions.
+        final Collection<BinaryOperatorDefinition> binOpDefs = definitionKeeper.getBinaryOperatorDefinitions();
+        assertThat(binOpDefs).hasSize(1);
+        final BinaryOperatorDefinition binOpDef = binOpDefs.stream().findAny().orElseThrow();
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "user");
+        assertThat(binOpDef.getLhsTypeName()).isEqualTo(integerRef);
+        assertThat(binOpDef.getRhsTypeName()).isEqualTo(integerRef);
+        assertThat(binOpDef.getResultTypeName()).isEqualTo(TypeString.UNDEFINED);
+    }
+
+    @Test
+    void testFileCreatedWithTypeDoc() {
+        final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer_with_type_doc.magik");
+        final Path fixedPath = this.getPath(path).toAbsolutePath();
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
+        magikIndexer.indexPathCreated(fixedPath);
+
+        // Test exemplar.
+        final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
+        final Collection<ExemplarDefinition> exemplarDefs = definitionKeeper.getExemplarDefinitions(typeString);
+        assertThat(exemplarDefs).hasSize(1);
+        final ExemplarDefinition exemplarDef = exemplarDefs.stream().findAny().orElseThrow();
+
+        // Test doc.
+        final String doc = exemplarDef.getDoc();
+        assertThat(doc).isEqualTo(""
+            + "Test exemplar.\n"
+            + "@slot {sw:rope} slot_a\n"
+            + "@slot {sw:property_list<sw:symbol, sw:integer>} slot_b");
+
+        // Test slots.
+        final Collection<SlotDefinition> slots = exemplarDef.getSlots();
+        assertThat(slots).hasSize(2);
+        final SlotDefinition slotA = exemplarDef.getSlot("slot_a");
+        assertThat(slotA.getName()).isEqualTo("slot_a");
+        final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
+        assertThat(slotA.getTypeName()).isEqualTo(ropeRef);
+
+        final SlotDefinition slotB = exemplarDef.getSlot("slot_b");
+        assertThat(slotB.getName()).isEqualTo("slot_b");
+        assertThat(slotB.getTypeName()).isEqualTo(
+            TypeString.ofIdentifier("sw:property_list", "user",
+                TypeString.ofIdentifier("sw:symbol", "user"),
+                TypeString.ofIdentifier("sw:integer", "user")));
+
+        // Test methods.
+        final Collection<MethodDefinition> newMethodDefs = definitionKeeper.getMethodDefinitions(typeString).stream()
+            .filter(def -> def.getMethodName().equals("new()"))
+            .collect(Collectors.toSet());
+        assertThat(newMethodDefs).hasSize(1);
+        final MethodDefinition newMethodDef = newMethodDefs.stream().findAny().orElseThrow();
+        assertThat(newMethodDef.getDoc()).isEqualTo(""
+            + "Constructor.\n"
+            + "@return {_self}");
+        assertThat(newMethodDef.getReturnTypes()).isEqualTo(new ExpressionResultString(TypeString.SELF));
+        assertThat(newMethodDef.getLoopTypes()).isEqualTo(ExpressionResultString.EMPTY);
+
+        final Collection<MethodDefinition> initMethodDefs = definitionKeeper.getMethodDefinitions(typeString).stream()
+            .filter(def -> def.getMethodName().equals("init()"))
+            .collect(Collectors.toSet());
+        assertThat(initMethodDefs).hasSize(1);
+        final MethodDefinition initMethodDef = initMethodDefs.stream().findAny().orElseThrow();
+        assertThat(initMethodDef.getDoc()).isEqualTo(""
+            + "Initializer.\n"
+            + "@return {_self}");
+        assertThat(initMethodDef.getReturnTypes()).isEqualTo(new ExpressionResultString(TypeString.SELF));
+        assertThat(initMethodDef.getLoopTypes()).isEqualTo(ExpressionResultString.EMPTY);
     }
 
     @Test
@@ -67,8 +165,8 @@ class MagikIndexerTest {
         // Read first.
         final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer.magik");
         final Path fixedPath = this.getPath(path).toAbsolutePath();
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikIndexer magikIndexer = new MagikIndexer(typeKeeper);
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
         magikIndexer.indexPathCreated(fixedPath);
 
         // Pretend update.
@@ -76,14 +174,20 @@ class MagikIndexerTest {
 
         // Test type.
         final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
-        final AbstractType type = typeKeeper.getType(typeString);
-        assertThat(type).isNotEqualTo(UndefinedType.INSTANCE);
+        final Collection<ExemplarDefinition> exemplarDefs = definitionKeeper.getExemplarDefinitions(typeString);
+        assertThat(exemplarDefs).hasSize(1);
+        final ExemplarDefinition exemplarDef = exemplarDefs.stream().findAny().orElseThrow();
+        assertThat(exemplarDef).isNotNull();
 
         // Test methods.
-        final Collection<Method> newMethods = type.getLocalMethods("new()");
-        assertThat(newMethods).hasSize(1);
-        final Collection<Method> initMethods = type.getLocalMethods("init()");
-        assertThat(initMethods).hasSize(1);
+        final Collection<MethodDefinition> newMethodDefs = definitionKeeper.getMethodDefinitions(typeString).stream()
+            .filter(def -> def.getMethodName().equals("new()"))
+            .collect(Collectors.toSet());
+        assertThat(newMethodDefs).hasSize(1);
+        final Collection<MethodDefinition> initMethodDefs = definitionKeeper.getMethodDefinitions(typeString).stream()
+            .filter(def -> def.getMethodName().equals("init()"))
+            .collect(Collectors.toSet());
+        assertThat(initMethodDefs).hasSize(1);
     }
 
     @Test
@@ -91,99 +195,23 @@ class MagikIndexerTest {
         // Read first.
         final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer.magik");
         final Path fixedPath = this.getPath(path).toAbsolutePath();
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikIndexer magikIndexer = new MagikIndexer(typeKeeper);
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
         magikIndexer.indexPathCreated(fixedPath);
 
         // Test type.
         final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
-        final AbstractType type = typeKeeper.getType(typeString);
-        assertThat(type).isNotEqualTo(UndefinedType.INSTANCE);
+        final Collection<ExemplarDefinition> preExemplarDefs = definitionKeeper.getExemplarDefinitions(typeString);
+        assertThat(preExemplarDefs).hasSize(1);
+        final ExemplarDefinition preExemplarDef = preExemplarDefs.stream().findAny().orElseThrow();
+        assertThat(preExemplarDef).isNotNull();
 
         // Pretend delete.
         magikIndexer.indexPathDeleted(fixedPath);
 
         // Test type.
-        final AbstractType typeRemoved = typeKeeper.getType(typeString);
-        assertThat(typeRemoved).isEqualTo(UndefinedType.INSTANCE);
-    }
-
-    @Test
-    void testTypeDocExemplar() {
-        final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer_with_type_doc.magik");
-        final Path fixedPath = this.getPath(path).toAbsolutePath();
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikIndexer magikIndexer = new MagikIndexer(typeKeeper);
-        magikIndexer.indexPathCreated(fixedPath);
-
-        // Test type.
-        final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
-        final AbstractType type = typeKeeper.getType(typeString);
-        assertThat(type).isNotEqualTo(UndefinedType.INSTANCE);
-
-        // Test doc.
-        final String doc = type.getDoc();
-        assertThat(doc).isEqualTo(""
-            + "Test exemplar.\n"
-            + "@slot {sw:rope} slot_a\n"
-            + "@slot {sw:property_list<sw:symbol, sw:integer>} slot_b");
-
-        // Test methods.
-        final Collection<Method> newMethods = type.getLocalMethods("new()");
-        assertThat(newMethods).hasSize(1);
-        final Collection<Method> initMethods = type.getLocalMethods("init()");
-        assertThat(initMethods).hasSize(1);
-
-        // Test slots.
-        final Collection<Slot> slots = type.getSlots();
-        assertThat(slots)
-            .hasSize(2);
-        final Slot slotA = slots.stream()
-            .filter(slot -> slot.getName().equals("slot_a"))
-            .findAny()
-            .orElseThrow();
-        assertThat(slotA)
-            .extracting("type")
-                .isEqualTo(TypeString.ofIdentifier("rope", "sw"));
-
-        final Slot slotB = slots.stream()
-            .filter(slot -> slot.getName().equals("slot_b"))
-            .findAny()
-            .orElseThrow();
-        assertThat(slotB)
-            .extracting("type")
-                .isEqualTo(
-                    TypeString.ofIdentifier("property_list", "sw",
-                        TypeString.ofIdentifier("symbol", "sw"),
-                        TypeString.ofIdentifier("integer", "sw")));
-    }
-
-    @Test
-    void testTypeDocMethod() {
-        final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer_with_type_doc.magik");
-        final Path fixedPath = this.getPath(path).toAbsolutePath();
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikIndexer magikIndexer = new MagikIndexer(typeKeeper);
-        magikIndexer.indexPathCreated(fixedPath);
-
-        final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
-        final AbstractType type = typeKeeper.getType(typeString);
-
-        final Method newMethod = type.getLocalMethods("new()").stream()
-            .findAny()
-            .orElseThrow();
-        assertThat(newMethod)
-            .extracting("doc")
-                .isEqualTo(""
-                    + "Constructor.\n"
-                    + "@return {_self}");
-        assertThat(newMethod)
-            .extracting("callResult")
-                .isEqualTo(new ExpressionResultString(
-                    TypeString.SELF));
-        assertThat(newMethod)
-            .extracting("loopbodyResult")
-                .isEqualTo(new ExpressionResultString());
+        final Collection<ExemplarDefinition> postExemplarDefs = definitionKeeper.getExemplarDefinitions(typeString);
+        assertThat(postExemplarDefs).isEmpty();
     }
 
 }
