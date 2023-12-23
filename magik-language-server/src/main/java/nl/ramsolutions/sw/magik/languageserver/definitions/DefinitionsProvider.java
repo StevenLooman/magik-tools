@@ -15,7 +15,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -135,12 +135,11 @@ public class DefinitionsProvider {
         final String methodName = helper.getMethodName();
 
         final AstNode previousSiblingNode = methodInvocationNode.getPreviousSibling();
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
-        final ExpressionResult result = reasoner.getNodeType(previousSiblingNode);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+        final ExpressionResult result = reasonerState.getNodeType(previousSiblingNode);
 
-        final TypeString unsetTypeString = TypeString.ofIdentifier("unset", "sw");
         final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-        final AbstractType unsetType = typeKeeper.getType(unsetTypeString);
+        final AbstractType unsetType = typeKeeper.getType(TypeString.SW_UNSET);
         AbstractType type = result.get(0, unsetType);
         final List<Location> locations = new ArrayList<>();
         if (type == UndefinedType.INSTANCE) {

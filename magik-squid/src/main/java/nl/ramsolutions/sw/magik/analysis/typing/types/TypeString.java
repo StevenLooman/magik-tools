@@ -22,11 +22,15 @@ public final class TypeString implements Comparable<TypeString> {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final String DEFAULT_PACKAGE = "user";
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final String SW_PACKAGE = "sw";
 
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final TypeString UNDEFINED = new TypeString(UndefinedType.SERIALIZED_NAME, DEFAULT_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final TypeString SELF = new TypeString(SelfType.SERIALIZED_NAME, DEFAULT_PACKAGE);
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", SW_PACKAGE);
 
     private static final String GENERIC = "_generic";
     private static final String PARAMETER = "_parameter";

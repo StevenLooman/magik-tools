@@ -46,8 +46,7 @@ class ExpressionResultTest {
     void testToStringRepeating() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
-        final TypeString unsetRef = TypeString.ofIdentifier("unset", "sw");
-        final AbstractType unsetType = typeKeeper.getType(unsetRef);
+        final AbstractType unsetType = typeKeeper.getType(TypeString.SW_UNSET);
         final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType symbolType = typeKeeper.getType(symbolRef);
         final ExpressionResult result1 = ExpressionResult.UNDEFINED;
