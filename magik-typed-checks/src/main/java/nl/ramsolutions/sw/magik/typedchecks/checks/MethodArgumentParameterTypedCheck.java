@@ -8,7 +8,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeMatcher;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -48,12 +48,12 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
         }
 
         // Get types for arguments.
-        final LocalTypeReasoner reasoner = this.getReasoner();
+        final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
         final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT).stream()
             .collect(Collectors.toList());
         final List<ExpressionResult> argumentTypes = argumentNodes.stream()
             .map(argumentNode -> argumentNode.getFirstChild(MagikGrammar.EXPRESSION))
-            .map(reasoner::getNodeType)
+            .map(reasonerState::getNodeType)
             .collect(Collectors.toList());
 
         // Get methods.
@@ -61,7 +61,7 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
         final TypeReader typeReader = new TypeReader(typeKeeper);
         final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
         final String methodName = helper.getMethodName();
-        final AbstractType unsetType = this.getTypeKeeper().getType(TypeString.ofIdentifier("unset", "sw"));
+        final AbstractType unsetType = this.getTypeKeeper().getType(TypeString.SW_UNSET);
         for (final Method method : calledType.getMethods(methodName)) {
             final List<Parameter> parameters = method.getParameters();
             if (parameters.isEmpty()) {

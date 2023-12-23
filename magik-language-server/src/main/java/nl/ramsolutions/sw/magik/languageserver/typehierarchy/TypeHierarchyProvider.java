@@ -14,7 +14,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
@@ -97,8 +97,8 @@ public class TypeHierarchyProvider {
             return List.of(item);
         } else if (atomNode != null) {
             // Get type from node.
-            final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
-            final ExpressionResult expressionResult = reasoner.getNodeType(atomNode);
+            final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+            final ExpressionResult expressionResult = reasonerState.getNodeType(atomNode);
             final AbstractType type = expressionResult.get(0, null);
             if (type != null
                 && type != UndefinedType.INSTANCE) {

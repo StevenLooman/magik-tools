@@ -8,9 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -27,22 +25,14 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
  */
 class InvocationHandler extends LocalTypeReasonerHandler {
 
-    private static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", "sw");
     private static final TypeString SW_PROCEDURE = TypeString.ofIdentifier("procedure", "sw");
 
     /**
      * Constructor.
-     * @param magikFile MagikFile
-     * @param nodeTypes Node types.
-     * @param nodeIterTypes Node iter types.
-     * @param currentScopeEntryNodes Current scope entry nodes.
+     * @param state Reasoner state.
      */
-    InvocationHandler(
-            final MagikTypedFile magikFile,
-            final Map<AstNode, ExpressionResult> nodeTypes,
-            final Map<AstNode, ExpressionResult> nodeIterTypes,
-            final Map<ScopeEntry, AstNode> currentScopeEntryNodes) {
-        super(magikFile, nodeTypes, nodeIterTypes, currentScopeEntryNodes);
+    InvocationHandler(final LocalTypeReasonerState state) {
+        super(state);
     }
 
     /**
@@ -50,11 +40,11 @@ class InvocationHandler extends LocalTypeReasonerHandler {
      * @param node METHOD_INVOCATION node.
      */
     void handleMethodInvocation(final AstNode node) {
-        final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+        final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
 
         // Get called type for method.
         final AstNode calledNode = node.getPreviousSibling();
-        final ExpressionResult calledResult = this.getNodeType(calledNode);
+        final ExpressionResult calledResult = this.state.getNodeType(calledNode);
         final AbstractType originalCalledType = calledResult.get(0, unsetType);
         final AbstractType methodOwnerType = this.getMethodOwnerType(node);
         final AbstractType calledType = calledResult.
@@ -74,7 +64,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
         } else {
             final List<AstNode> argumentExpressionNodes = helper.getArgumentExpressionNodes();
             final List<AbstractType> argumentTypes = argumentExpressionNodes.stream()
-                .map(exprNode -> this.getNodeType(exprNode).get(0, unsetType))
+                .map(exprNode -> this.state.getNodeType(exprNode).get(0, unsetType))
                 .collect(Collectors.toList());
             for (final Method method : methods) {
                 // Call result.
@@ -105,9 +95,9 @@ class InvocationHandler extends LocalTypeReasonerHandler {
 
         // Store it!
         Objects.requireNonNull(callResult);
-        this.setNodeType(node, callResult);
+        this.state.setNodeType(node, callResult);
         Objects.requireNonNull(iterCallResult);
-        this.setNodeIterType(node, iterCallResult);
+        this.state.setNodeIterType(node, iterCallResult);
     }
 
     /**
@@ -115,13 +105,13 @@ class InvocationHandler extends LocalTypeReasonerHandler {
      * @param node PROCEDURE_INVOCATION node.
      */
     void handleProcedureInvocation(final AstNode node) {
-        final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+        final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
 
         // TODO: Handle sw:obj/sw:prototype.
 
         // Get called type for invocation.
         final AstNode calledNode = node.getPreviousSibling();
-        final ExpressionResult calledNodeResult = this.getNodeType(calledNode);
+        final ExpressionResult calledNodeResult = this.state.getNodeType(calledNode);
         final AbstractType originalCalledNodeType = calledNodeResult.get(0, unsetType);
         AbstractType calledType = originalCalledNodeType;
 
@@ -163,15 +153,15 @@ class InvocationHandler extends LocalTypeReasonerHandler {
         }
 
         // Store it!
-        this.setNodeType(node, callResult);
-        this.setNodeIterType(node, iterCallResult);
+        this.state.setNodeType(node, callResult);
+        this.state.setNodeIterType(node, iterCallResult);
     }
 
     private ExpressionResult substituteParametersForMethodCallResult(
             final Method method,
             final List<AbstractType> argumentTypes,
             final ExpressionResult methodCallResult) {
-        final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+        final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
 
         ExpressionResult result = methodCallResult;
         final Map<ParameterReferenceType, AbstractType> paramRefTypeMap = IntStream

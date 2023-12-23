@@ -11,7 +11,7 @@ import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
@@ -224,12 +224,12 @@ public class HoverProvider {
             final MagikTypedFile magikFile,
             final AstNode expressionNode,
             final StringBuilder builder) {
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
-        final ExpressionResult result = reasoner.getNodeTypeSilent(expressionNode);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+        final ExpressionResult result = reasonerState.getNodeTypeSilent(expressionNode);
         if (result != null) {
             LOGGER.debug("Providing hover for node: {}", expressionNode.getTokenValue());
             final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-            this.buildTypeDoc(typeKeeper, reasoner, expressionNode, builder);
+            this.buildTypeDoc(typeKeeper, reasonerState, expressionNode, builder);
         }
     }
 
@@ -240,12 +240,12 @@ public class HoverProvider {
      * @param builder Builder to add text to.
      */
     private void provideHoverAtom(final MagikTypedFile magikFile, final AstNode atomNode, final StringBuilder builder) {
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
-        final ExpressionResult result = reasoner.getNodeTypeSilent(atomNode);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+        final ExpressionResult result = reasonerState.getNodeTypeSilent(atomNode);
         if (result != null) {
             LOGGER.debug("Providing hover for node: {}", atomNode.getTokenValue());
             final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-            this.buildTypeDoc(typeKeeper, reasoner, atomNode, builder);
+            this.buildTypeDoc(typeKeeper, reasonerState, atomNode, builder);
         }
     }
 
@@ -268,8 +268,8 @@ public class HoverProvider {
                     previousSiblingNode.getTokenValue(), methodName);
             if (methodName != null) {
                 final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-                final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
-                this.buildMethodDoc(typeKeeper, reasoner, previousSiblingNode, methodName, builder);
+                final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+                this.buildMethodDoc(typeKeeper, reasonerState, previousSiblingNode, methodName, builder);
             }
         }
     }
@@ -319,17 +319,17 @@ public class HoverProvider {
     /**
      * Build hover text for type doc.
      * @param typeKeeper TypeKeeper.
-     * @param reasoner {@link LocalTypeReasoner} which has reasoned over the AST.
+     * @param reasonerState {@link LocalTypeReasonerState} which holds the types of the nodes.
      * @param node {@link AstNode} to get info from.
      * @param builder {@link StringBuilder} to fill.
      */
     private void buildTypeDoc(
             final ITypeKeeper typeKeeper,
-            final LocalTypeReasoner reasoner,
+            final LocalTypeReasonerState reasonerState,
             final AstNode node,
             final StringBuilder builder) {
         // Get type from reasoner.
-        final ExpressionResult result = reasoner.getNodeType(node);
+        final ExpressionResult result = reasonerState.getNodeType(node);
 
         // We know what self is.
         AbstractType type = result.get(0, UndefinedType.INSTANCE);
@@ -376,19 +376,19 @@ public class HoverProvider {
     /**
      * Build hover text for method doc.
      * @param typeKeeper TypeKeeper.
-     * @param reasoner LocalTypeReasoner.
+     * @param reasonerState LocalTypeReasonerState.
      * @param node AstNode, METHOD_INVOCATION.
      * @param methodName Name of invoked method.
      * @param builder {@link StringBuilder} to fill.
      */
     private void buildMethodDoc(
             final ITypeKeeper typeKeeper,
-            final LocalTypeReasoner reasoner,
+            final LocalTypeReasonerState reasonerState,
             final AstNode node,
             final String methodName,
             final StringBuilder builder) {
         // Get type from reasoner.
-        final ExpressionResult result = reasoner.getNodeType(node);
+        final ExpressionResult result = reasonerState.getNodeType(node);
 
         // We know what self is.
         AbstractType type = result.get(0, UndefinedType.INSTANCE);
