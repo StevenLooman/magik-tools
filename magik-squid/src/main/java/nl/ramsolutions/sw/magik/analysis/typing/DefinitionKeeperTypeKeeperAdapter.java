@@ -249,7 +249,11 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
                 slotDef.getName(),
                 slotDef.getTypeName()));
 
-        // TODO: Add generic declarations.
+        // Add generic declarations.
+        exemplarDefinition.getGenericDeclarations().stream()
+            .forEach(genDef -> magikType.addGeneric(
+                genDef.getLocation(),
+                genDef.getName()));
 
         // TODO: Add generic definitions.
 
