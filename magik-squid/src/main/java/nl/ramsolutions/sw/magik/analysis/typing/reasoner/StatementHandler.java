@@ -39,15 +39,15 @@ class StatementHandler extends LocalTypeReasonerHandler {
         final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
         Objects.requireNonNull(scopeEntry);
 
-        // Right side
-        final AstNode expressionNode = node.getFirstChild(MagikGrammar.EXPRESSION);
-        ExpressionResult result = expressionNode == null
-            ? new ExpressionResult(this.typeKeeper.getType(TypeString.SW_UNSET))
-            : this.state.getNodeType(expressionNode);
-
         if (scopeEntry.isType(ScopeEntry.Type.LOCAL)
             || scopeEntry.isType(ScopeEntry.Type.DEFINITION)
             || scopeEntry.isType(ScopeEntry.Type.CONSTANT)) {
+            final AstNode expressionNode = node.getFirstChild(MagikGrammar.EXPRESSION);
+            final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
+            final ExpressionResult result = expressionNode == null
+                ? new ExpressionResult(unsetType)
+                : this.state.getNodeType(expressionNode);
+
             final AstNode scopeEntryNode = scopeEntry.getDefinitionNode();
             this.state.setNodeType(scopeEntryNode, result);
 
@@ -57,7 +57,7 @@ class StatementHandler extends LocalTypeReasonerHandler {
             // TODO: globals/dynamics/...?
             final ScopeEntry importedScopeEntry = scopeEntry.getImportedEntry();
             final AstNode activeImportedNode = this.state.getCurrentScopeEntryNode(importedScopeEntry);
-            result = this.state.getNodeType(activeImportedNode);
+            final ExpressionResult result = this.state.getNodeType(activeImportedNode);
             this.state.setNodeType(node, result);
         }
     }

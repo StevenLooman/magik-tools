@@ -15,7 +15,6 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -946,7 +945,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        final TypeString unsetRef = TypeString.ofIdentifier("unset", "sw");
+        final TypeString unsetRef = TypeString.SW_UNSET;
         assertThat(resultType.getTypeString()).isEqualTo(unsetRef);
     }
 

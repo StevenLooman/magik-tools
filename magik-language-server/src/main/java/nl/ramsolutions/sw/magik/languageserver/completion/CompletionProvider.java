@@ -22,7 +22,6 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -237,9 +236,6 @@ public class CompletionProvider {
             final MagikTypedFile magikFile,
             final AstNode tokenNode,
             final String tokenValue) {
-        // Reason (on newly parsed source, thus not from magikFile) and get type.
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
-
         // Token -->
         // - parent: any --> parent: ATOM
         // - parent: IDENTIFIER --> parent: METHOD_INVOCATION --> previous sibling: ATOM
@@ -260,7 +256,7 @@ public class CompletionProvider {
             return Collections.emptyList();
         }
 
-        final LocalTypeReasonerState reasonerState = reasoner.getState();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
         final ExpressionResult result = reasonerState.getNodeType(wantedNode);
         AbstractType type = result.get(0, UndefinedType.INSTANCE);
         if (type == SelfType.INSTANCE) {

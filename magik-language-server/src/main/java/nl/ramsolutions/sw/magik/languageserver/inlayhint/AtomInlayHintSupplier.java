@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ParameterReferenceType;
@@ -39,9 +39,10 @@ class AtomInlayHintSupplier {
     }
 
     private Stream<InlayHint> getInlayHintsForAtoms(final MagikTypedFile magikFile, final AstNode atomNode) {
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
-        final ExpressionResult result = reasoner.getNodeTypeSilent(atomNode);
-        if (result == ExpressionResult.UNDEFINED) {
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+        final ExpressionResult result = reasonerState.getNodeTypeSilent(atomNode);
+        if (result == null
+            || result == ExpressionResult.UNDEFINED) {
             return Stream.empty();
         }
 

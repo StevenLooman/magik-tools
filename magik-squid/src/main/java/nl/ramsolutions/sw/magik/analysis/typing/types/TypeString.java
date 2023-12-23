@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.concurrent.Immutable;
-import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
 
 /**
@@ -23,6 +22,7 @@ public final class TypeString implements Comparable<TypeString> {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final String DEFAULT_PACKAGE = "user";
+    @SuppressWarnings("checkstyle:JavadocVariable")
     public static final String SW_PACKAGE = "sw";
 
     @SuppressWarnings("checkstyle:JavadocVariable")
@@ -30,7 +30,7 @@ public final class TypeString implements Comparable<TypeString> {
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final TypeString SELF = new TypeString(SelfType.SERIALIZED_NAME, DEFAULT_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_UNSET = TypeString.ofIdentifier(MagikKeyword.UNSET.getValue(), SW_PACKAGE);
+    public static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", SW_PACKAGE);
 
     private static final String GENERIC = "_generic";
     private static final String PARAMETER = "_parameter";
