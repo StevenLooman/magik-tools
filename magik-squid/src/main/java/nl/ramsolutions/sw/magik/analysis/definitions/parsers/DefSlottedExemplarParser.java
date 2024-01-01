@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
@@ -162,18 +161,6 @@ public class DefSlottedExemplarParser extends BaseDefParser {
         // Figure doc.
         final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
-        // Figure generics.
-        final List<ExemplarDefinition.GenericDeclaration> genericDeclarations =
-            docParser.getGenericTypeNodes().entrySet().stream()
-            .map(entry -> {
-                final AstNode genericNode = entry.getKey();
-                final Location genericLocation = new Location(uri, genericNode);
-                final TypeString genericTypeStr = entry.getValue();
-                final String genericName = genericTypeStr.getIdentifier();
-                return new ExemplarDefinition.GenericDeclaration(genericLocation, genericName);
-            })
-            .collect(Collectors.toList());
-
         final ExemplarDefinition slottedExemplarDefinition = new ExemplarDefinition(
             location,
             moduleName,
@@ -182,8 +169,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
             ExemplarDefinition.Sort.SLOTTED,
             name,
             slots,
-            parents,
-            genericDeclarations);
+            parents);
 
         final List<Definition> definitions = new ArrayList<>();
         definitions.add(slottedExemplarDefinition);

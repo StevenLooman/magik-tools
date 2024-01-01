@@ -16,7 +16,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GenericDeclaration;
+import nl.ramsolutions.sw.magik.analysis.typing.types.GenericDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
@@ -370,7 +370,7 @@ public class HoverProvider {
             return;
         }
 
-        methods.forEach(method -> this.buildMethodSignatureDoc(method, builder));
+        methods.forEach(method -> this.buildMethodSignatureDoc(type, method, builder));
     }
 
     /**
@@ -411,22 +411,26 @@ public class HoverProvider {
             return;
         }
 
-        methods.forEach(method -> this.buildMethodSignatureDoc(method, builder));
+        for (final Method method : methods) {
+            this.buildMethodSignatureDoc(type, method, builder);
+        }
     }
 
     private void buildInheritanceDoc(final AbstractType type, final StringBuilder builder, final int indent) {
+        final TypeString typeStr = type.getTypeString();
         if (indent == 0) {
             builder
-                .append(type.getFullName())
+                .append(this.formatTypeString(typeStr))
                 .append("\n\n");
         }
 
         final String indentStr = "&nbsp;&nbsp;".repeat(indent);
         type.getParents().forEach(parentType -> {
+            final TypeString parentTypeStr = parentType.getTypeString();
             builder
                 .append(indentStr)
                 .append(" ↳ ")
-                .append(parentType.getFullName())
+                .append(this.formatTypeString(parentTypeStr))
                 .append("\n\n");
 
             this.buildInheritanceDoc(parentType, builder, indent + 1);
@@ -434,24 +438,46 @@ public class HoverProvider {
     }
 
     private void buildMethodUnknownDoc(final AbstractType type, final String methodName, final StringBuilder builder) {
+        final TypeString typeStr = type.getTypeString();
         builder
             .append("Unknown method ")
             .append(methodName)
             .append(" on type ")
-            .append(type.getFullName())
+            .append(this.formatTypeString(typeStr))
             .append("\n")
             .append(SECTION_END);
     }
 
-    private void buildMethodSignatureDoc(final Method method, final StringBuilder builder) {
+    private void buildMethodSignatureDoc(final AbstractType type, final Method method, final StringBuilder builder) {
         // Method signature.
+        final TypeString typeStr = type.getTypeString();
+        final String joiner = method.getName().startsWith("[")
+            ? ""
+            : ".";
         builder
             .append("## ")
-            .append(method.getSignature())
-            .append("\n")
-            .append(" → ")
-            .append(method.getCallResult().getTypeNames(", "))
-            .append(SECTION_END);
+            .append(this.formatTypeString(typeStr))
+            .append(joiner)
+            .append(method.getNameWithParameters())
+            .append("\n\n")
+            .append(" → ");
+
+        final String callResultString = method.getCallResult().stream()
+            .map(this::formatTypeString)
+            .collect(Collectors.joining(", "));
+        builder.append(callResultString);
+
+        if (method.getModifiers().contains(Method.Modifier.ITER)) {
+            builder
+                .append("\n\n")
+                .append(" ⟳ ");
+            final String iterResultString = method.getLoopbodyResult().stream()
+                .map(this::formatTypeString)
+                .collect(Collectors.joining(", "));
+            builder.append(iterResultString);
+        }
+
+        builder.append(SECTION_END);
 
         // Method module.
         final String moduleName = Objects.requireNonNullElse(method.getModuleName(), "");
@@ -477,7 +503,7 @@ public class HoverProvider {
         final TypeString typeStr = type.getTypeString();
         builder
             .append("## ")
-            .append(typeStr.getFullString().replace("<", "&lt;").replace(">", "&gt;"))
+            .append(this.formatTypeString(typeStr))
             .append(SECTION_END);
 
         // Method module.
@@ -511,7 +537,7 @@ public class HoverProvider {
                         .append("* ")
                         .append(slot.getName())
                         .append(": ")
-                        .append(slotType.getFullString())
+                        .append(this.formatTypeString(slotType))
                         .append("\n");
                 });
             builder
@@ -519,16 +545,18 @@ public class HoverProvider {
         }
 
         // Type generic declarations.
-        final Collection<GenericDeclaration> genericDeclarations = type.getGenerics();
+        final Collection<GenericDefinition> genericDeclarations = type.getGenericDefinitions();
         if (!genericDeclarations.isEmpty()) {
             builder
-                .append("## Generic declarations\n");
+                .append("## Generic definitions\n");
             genericDeclarations.stream()
-                .forEach(generic ->
+                .forEach(generic -> {
+                    final TypeString genericTypeStr = generic.getTypeString();
                     builder
                         .append("* ")
-                        .append(generic.getName())
-                        .append("\n"));
+                        .append(this.formatTypeString(genericTypeStr))
+                        .append("\n");
+                });
             builder
                 .append(SECTION_END);
         }
@@ -540,7 +568,7 @@ public class HoverProvider {
             if (type instanceof CombinedType) {
                 final CombinedType combinedType = (CombinedType) type;
                 combinedType.getTypes().stream()
-                    .sorted(Comparator.comparing(AbstractType::getName))
+                    .sorted(Comparator.comparing(AbstractType::getTypeString))
                     .forEach(cType -> this.buildInheritanceDoc(cType, builder, 0));
             } else {
                 this.buildInheritanceDoc(type, builder, 0);
@@ -548,6 +576,10 @@ public class HoverProvider {
             builder
                 .append(SECTION_END);
         }
+    }
+
+    private String formatTypeString(final TypeString typeStr) {
+        return typeStr.getFullString().replace("<", "[").replace(">", "]");
     }
 
 }

@@ -11,6 +11,7 @@
 - Add DefinitionKeeperTypeKeeperAdapter for compatibility with previous type system.
 - Show inlayhints for ATOM nodes, as a configurable option.
 - Refactor LocalTypeReasoner state to own class.
+- Improve handling of/reasoning with generics.
 
 0.8.3 (unreleased)
 

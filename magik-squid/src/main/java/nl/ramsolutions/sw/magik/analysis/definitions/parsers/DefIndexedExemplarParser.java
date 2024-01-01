@@ -101,8 +101,7 @@ public class DefIndexedExemplarParser extends BaseDefParser {
             ExemplarDefinition.Sort.INDEXED,
             name,
             Collections.emptyList(),
-            parents,
-            Collections.emptyList());
+            parents);
         return List.of(indexedExemplarDefinition);
     }
 

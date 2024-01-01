@@ -25,8 +25,23 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     private final Map<TypeString, Set<GlobalDefinition>> globalDefinitions = new ConcurrentHashMap<>();
     private final Map<TypeString, Set<ProcedureDefinition>> procedureDefinitions = new ConcurrentHashMap<>();
 
+    /**
+     * Constructor.
+     */
     public DefinitionKeeper() {
+        this(true);
+    }
+
+    /**
+     * Constructor to allow adding default types or not.
+     * @param addDefaultTypes Do add default types?
+     */
+    public DefinitionKeeper(final boolean addDefaultTypes) {
         this.clear();
+
+        if (addDefaultTypes) {
+            DefaultDefinitionsAdder.addDefaultDefinitions(this);
+        }
     }
 
     @Override
@@ -55,7 +70,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
     @Override
     public void add(final ExemplarDefinition definition) {
-        final TypeString typeString = definition.getTypeString();
+        // Store without generics.
+        final TypeString typeString = definition.getTypeString().getWithoutGenerics();
         final Set<ExemplarDefinition> definitions =
             this.exemplarDefinitions.computeIfAbsent(typeString, k -> ConcurrentHashMap.newKeySet());
         definitions.add(definition);
@@ -217,8 +233,10 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
     @Override
     public Collection<ExemplarDefinition> getExemplarDefinitions(final TypeString typeString) {
+        // Get without generics.
+        final TypeString bareTypeString = typeString.getWithoutGenerics();
         final Collection<ExemplarDefinition> definitions =
-            this.exemplarDefinitions.getOrDefault(typeString, Collections.emptySet());
+            this.exemplarDefinitions.getOrDefault(bareTypeString, Collections.emptySet());
         return Collections.unmodifiableCollection(definitions);
     }
 
@@ -313,6 +331,9 @@ public class DefinitionKeeper implements IDefinitionKeeper {
             .collect(Collectors.toSet());
     }
 
+    /**
+     * Clear any contained {@link Definition}s.
+     */
     @Override
     public void clear() {
         this.productDefinitions.clear();
@@ -324,8 +345,6 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         this.methodDefinitions.clear();
         this.globalDefinitions.clear();
         this.procedureDefinitions.clear();
-
-        DefaultDefinitionsAdder.addDefaultDefinitions(this);
     }
 
 }

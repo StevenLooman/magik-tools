@@ -77,7 +77,6 @@ class HoverProviderTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 hoverMeTypeRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList()));
 
         final String code = ""

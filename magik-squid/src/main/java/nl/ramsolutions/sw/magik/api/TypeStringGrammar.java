@@ -28,8 +28,14 @@ public enum TypeStringGrammar implements GrammarRuleKey {
     TYPE_CLONE,
     TYPE_PARAMETER_REFERENCE,
     TYPE_IDENTIFIER,
-    TYPE_GENERIC,
-    TYPE_GENERIC_DEFINITIONS,
+
+    TYPE_GENERICS,
+    TYPE_GENERIC_DEFINITION_SINGLE,
+    TYPE_GENERIC_REFERENCE_SINGLE,
+    TYPE_GENERIC_DEFINITION,
+    TYPE_GENERIC_REFERENCE,
+
+    SIMPLE_IDENTIFIER,
 
     EXPRESSION_RESULT_STRING_UNDEFINED;
 
@@ -44,7 +50,8 @@ public enum TypeStringGrammar implements GrammarRuleKey {
         TYPE_ARG_CLOSE(")"),
         TYPE_GENERIC_OPEN("<"),
         TYPE_GENERIC_CLOSE(">"),
-        TYPE_GENERIC_SEPARATOR(",");
+        TYPE_GENERIC_SEPARATOR(","),
+        TYPE_GENERIC_ASSIGN("=");
 
         private final String value;
 
@@ -108,38 +115,53 @@ public enum TypeStringGrammar implements GrammarRuleKey {
         TypeStringGrammar.punctuators(b);
         TypeStringGrammar.keywords(b);
 
-        b.rule(TYPE_UNDEFINED).is(
+        b.rule(SIMPLE_IDENTIFIER).is(
             SPACING_NO_LB,
+            b.regexp(SIMPLE_IDENTIFIER_REGEXP));
+        b.rule(TYPE_UNDEFINED).is(
             Keyword.TYPE_STRING_UNDEFINED);
         b.rule(TYPE_SELF).is(
-            SPACING_NO_LB,
             Keyword.TYPE_STRING_SELF);
         b.rule(TYPE_CLONE).is(
-            SPACING_NO_LB,
             Keyword.TYPE_STRING_CLONE);
+
         b.rule(TYPE_PARAMETER_REFERENCE).is(
-            SPACING_NO_LB,
             Keyword.TYPE_STRING_PARAMETER,
             Punctuator.TYPE_ARG_OPEN,
-            b.regexp(SIMPLE_IDENTIFIER_REGEXP),
+            SIMPLE_IDENTIFIER,
             Punctuator.TYPE_ARG_CLOSE);
-        b.rule(TYPE_GENERIC).is(
-            SPACING_NO_LB,
+
+        b.rule(TYPE_GENERIC_DEFINITION_SINGLE).is(
             Punctuator.TYPE_GENERIC_OPEN,
-            b.regexp(SIMPLE_IDENTIFIER_REGEXP),
-            Punctuator.TYPE_GENERIC_CLOSE);
+            TYPE_GENERIC_DEFINITION,
+            Punctuator.TYPE_GENERIC_CLOSE).skip();
+        b.rule(TYPE_GENERIC_REFERENCE_SINGLE).is(
+            Punctuator.TYPE_GENERIC_OPEN,
+            TYPE_GENERIC_REFERENCE,
+            Punctuator.TYPE_GENERIC_CLOSE).skip();
+        b.rule(TYPE_GENERIC_DEFINITION).is(
+            TYPE_IDENTIFIER,
+            Punctuator.TYPE_GENERIC_ASSIGN,
+            TYPE_STRING);
+        b.rule(TYPE_GENERIC_REFERENCE).is(
+            SIMPLE_IDENTIFIER);
+
         b.rule(TYPE_IDENTIFIER).is(
             SPACING_NO_LB,
             b.regexp(TYPE_IDENTIFIER_REGEXP),
-            b.optional(TYPE_GENERIC_DEFINITIONS));
+            b.optional(TYPE_GENERICS));
 
-        b.rule(TYPE_GENERIC_DEFINITIONS).is(
+        b.rule(TYPE_GENERICS).is(
             Punctuator.TYPE_GENERIC_OPEN,
-            TYPE_STRING,
+            b.firstOf(
+                TYPE_GENERIC_DEFINITION,
+                TYPE_GENERIC_REFERENCE),
             b.zeroOrMore(
                 Punctuator.TYPE_GENERIC_SEPARATOR,
-                TYPE_STRING),
-            Punctuator.TYPE_GENERIC_CLOSE);
+                b.firstOf(
+                    TYPE_GENERIC_DEFINITION,
+                    TYPE_GENERIC_REFERENCE)),
+            Punctuator.TYPE_GENERIC_CLOSE).skip();
 
         b.rule(TYPE_STRING).is(
             b.firstOf(
@@ -148,7 +170,8 @@ public enum TypeStringGrammar implements GrammarRuleKey {
                         TYPE_UNDEFINED,
                         TYPE_SELF,
                         TYPE_CLONE,
-                        TYPE_GENERIC,
+                        TYPE_GENERIC_DEFINITION_SINGLE,
+                        TYPE_GENERIC_REFERENCE_SINGLE,
                         TYPE_PARAMETER_REFERENCE,
                         TYPE_IDENTIFIER),
                     b.zeroOrMore(
@@ -157,7 +180,8 @@ public enum TypeStringGrammar implements GrammarRuleKey {
                             TYPE_UNDEFINED,
                             TYPE_SELF,
                             TYPE_CLONE,
-                            TYPE_GENERIC,
+                            TYPE_GENERIC_DEFINITION_SINGLE,
+                            TYPE_GENERIC_REFERENCE_SINGLE,
                             TYPE_PARAMETER_REFERENCE,
                             TYPE_IDENTIFIER))),
                 SYNTAX_ERROR));
