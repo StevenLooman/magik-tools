@@ -13,12 +13,14 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.GenericDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ProcedureInstance;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Slot;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
@@ -71,6 +73,7 @@ public class HoverProvider {
         // See what we should provide a hover for.
         final AstNode parentNode = hoveredNode.getParent();
         final AstNode parentParentNode = parentNode != null ? parentNode.getParent() : null;
+        final AstNode parentNextSibling = parentNode != null ? parentNode.getNextSibling() : null;
         final StringBuilder builder = new StringBuilder();
         if (hoveredNode.is(MagikGrammar.PACKAGE_IDENTIFIER)) {
             this.provideHoverPackage(magikFile, hoveredNode, builder);
@@ -79,6 +82,10 @@ public class HoverProvider {
                 this.provideHoverAtom(magikFile, parentNode, builder);
             } else if (parentNode.is(MagikGrammar.METHOD_NAME)) {
                 this.provideHoverMethodDefinition(magikFile, hoveredNode, builder);
+            } else if (hoveredNode.is(MagikGrammar.IDENTIFIER)
+                    && parentNextSibling != null
+                    && parentNextSibling.is(MagikGrammar.PROCEDURE_INVOCATION)) {
+                this.provideHoverProcedureInvocation(magikFile, hoveredNode, builder);
             } else if (hoveredNode.is(MagikGrammar.IDENTIFIER)
                        && parentNode.is(MagikGrammar.METHOD_INVOCATION)) {
                 this.provideHoverMethodInvocation(magikFile, hoveredNode, builder);
@@ -228,8 +235,7 @@ public class HoverProvider {
         final ExpressionResult result = reasonerState.getNodeTypeSilent(expressionNode);
         if (result != null) {
             LOGGER.debug("Providing hover for node: {}", expressionNode.getTokenValue());
-            final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-            this.buildTypeDoc(typeKeeper, reasonerState, expressionNode, builder);
+            this.buildTypeDoc(magikFile, expressionNode, builder);
         }
     }
 
@@ -244,8 +250,29 @@ public class HoverProvider {
         final ExpressionResult result = reasonerState.getNodeTypeSilent(atomNode);
         if (result != null) {
             LOGGER.debug("Providing hover for node: {}", atomNode.getTokenValue());
-            final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-            this.buildTypeDoc(typeKeeper, reasonerState, atomNode, builder);
+            this.buildTypeDoc(magikFile, atomNode, builder);
+        }
+    }
+
+    /**
+     * Provide hover for a procedure invocation.
+     * @param magikFile Magik file.
+     * @param atomNode Hovered node.
+     * @param builder Builder to add text to.
+     */
+    private void provideHoverProcedureInvocation(
+            final MagikTypedFile magikFile,
+            final AstNode hoveredNode,
+            final StringBuilder builder) {
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+        final AstNode providingNode = hoveredNode.getParent();
+        if (providingNode != null) {
+            final ExpressionResult result = reasonerState.getNodeType(providingNode);
+            final AbstractType type = result.get(0, null);
+            if (type != null) {
+                LOGGER.debug("Providing hover for node: {}", providingNode.getTokenValue());
+                this.buildProcDoc(magikFile, providingNode, builder);
+            }
         }
     }
 
@@ -264,18 +291,19 @@ public class HoverProvider {
         if (previousSiblingNode != null) {
             final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(providingNode);
             final String methodName = helper.getMethodName();
-            LOGGER.debug("Providing hover for node: {}, method: {}",
-                    previousSiblingNode.getTokenValue(), methodName);
+            LOGGER.debug(
+                "Providing hover for node: {}, method: {}",
+                previousSiblingNode.getTokenValue(), methodName);
             if (methodName != null) {
-                final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-                final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-                this.buildMethodDoc(typeKeeper, reasonerState, previousSiblingNode, methodName, builder);
+                final AbstractType type = this.getNodeType(magikFile, previousSiblingNode);
+                final Collection<Method> methods = type.getMethods(methodName);
+                methods.forEach(method -> this.buildMethodSignatureDoc(type, method, builder));
             }
         }
     }
 
     /**
-     * Provide hover for a method definition. Either the exemplar or the method name.
+     * Provide hover for a method definition.
      * @param magikFile Magik file.
      * @param hoveredNode Hovered node.
      * @param builder Builder to add text to.
@@ -284,136 +312,56 @@ public class HoverProvider {
             final MagikTypedFile magikFile,
             final AstNode hoveredNode,
             final StringBuilder builder) {
-        final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
         final AstNode methodDefNode = hoveredNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
+        final AstNode exemplarNameNode = methodDefNode.getFirstChild(MagikGrammar.EXEMPLAR_NAME);
+        final AbstractType type = this.getNodeType(magikFile, exemplarNameNode);
         final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(methodDefNode);
-        final AstNode exemplarNameNode = methodDefNode.getFirstChild(MagikGrammar.EXEMPLAR_NAME).getFirstChild();
-        final AstNode methodNameNode = methodDefNode.getFirstChild(MagikGrammar.METHOD_NAME).getFirstChild();
-        final TypeString typeString = methodDefHelper.getTypeString();
-        if (hoveredNode == exemplarNameNode) {
-            // Hovered over exemplar.
-            LOGGER.debug("Providing hover for type: {}", typeString);
-            this.buildTypeDoc(typeKeeper, typeString, builder);
-        } else if (hoveredNode == methodNameNode) {
-            // Hovered over method name.
-            final String methodName = methodDefHelper.getMethodName();
-            LOGGER.debug("Providing hover for type: {}, method: {}", typeString, methodName);
-            this.buildMethodDoc(typeKeeper, typeString, methodName, builder);
-        }
+        final String methodName = methodDefHelper.getMethodName();
+        final Collection<Method> localMethods = type.getLocalMethods(methodName);
+        localMethods.forEach(method -> this.buildMethodSignatureDoc(type, method, builder));
     }
 
     /**
      * Build hover text for type doc.
-     * @param typeKeeper TypeKeeper to use.
-     * @param typeString Global reference to type.
-     * @param builder {@link StringBuilder} to fill.
-     */
-    private void buildTypeDoc(
-            final ITypeKeeper typeKeeper,
-            final TypeString typeString,
-            final StringBuilder builder) {
-        final AbstractType type = typeKeeper.getType(typeString);
-        this.buildTypeSignatureDoc(type, builder);
-    }
-
-    /**
-     * Build hover text for type doc.
-     * @param typeKeeper TypeKeeper.
-     * @param reasonerState {@link LocalTypeReasonerState} which holds the types of the nodes.
+     * @param magikFile Magik file.
      * @param node {@link AstNode} to get info from.
      * @param builder {@link StringBuilder} to fill.
      */
     private void buildTypeDoc(
-            final ITypeKeeper typeKeeper,
-            final LocalTypeReasonerState reasonerState,
+            final MagikTypedFile magikFile,
             final AstNode node,
             final StringBuilder builder) {
-        // Get type from reasoner.
-        final ExpressionResult result = reasonerState.getNodeType(node);
-
-        // We know what self is.
-        AbstractType type = result.get(0, UndefinedType.INSTANCE);
-        if (type == SelfType.INSTANCE) {
-            final AstNode methodDefNode = node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-            if (methodDefNode == null) {
-                // This can happen in case of a procedure definition calling a method on _self.
-                type = UndefinedType.INSTANCE;
-            } else {
-                final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(methodDefNode);
-                final TypeString typeString = methodDefHelper.getTypeString();
-                type = typeKeeper.getType(typeString);
-            }
-        }
-
+        // Get type.
+        final AbstractType type = this.getNodeType(magikFile, node);
         this.buildTypeSignatureDoc(type, builder);
     }
 
-    /**
-     * Build hover text for method doc.
-     * @param typeKeeper TypeKeeper.
-     * @param pakkage Name of package.
-     * @param typeName Name of type.
-     * @param methodName Name of method.
-     * @param builder {@link StringBuilder} to fill.
-     */
-    private void buildMethodDoc(
-            final ITypeKeeper typeKeeper,
-            final TypeString typeString,
-            final String methodName,
-            final StringBuilder builder) {
-        final AbstractType type = typeKeeper.getType(typeString);
-
-        // Get method info.
-        final Collection<Method> methods = type.getMethods(methodName);
-        if (methods.isEmpty()) {
-            this.buildMethodUnknownDoc(type, methodName, builder);
-            return;
-        }
-
-        methods.forEach(method -> this.buildMethodSignatureDoc(type, method, builder));
-    }
-
-    /**
-     * Build hover text for method doc.
-     * @param typeKeeper TypeKeeper.
-     * @param reasonerState LocalTypeReasonerState.
-     * @param node AstNode, METHOD_INVOCATION.
-     * @param methodName Name of invoked method.
-     * @param builder {@link StringBuilder} to fill.
-     */
-    private void buildMethodDoc(
-            final ITypeKeeper typeKeeper,
-            final LocalTypeReasonerState reasonerState,
+    private void buildProcDoc(
+            final MagikTypedFile magikFile,
             final AstNode node,
-            final String methodName,
             final StringBuilder builder) {
-        // Get type from reasoner.
-        final ExpressionResult result = reasonerState.getNodeType(node);
-
-        // We know what self is.
-        AbstractType type = result.get(0, UndefinedType.INSTANCE);
-        if (type == SelfType.INSTANCE) {
-            final AstNode methodDefNode = node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-            if (methodDefNode == null) {
-                // This can happen in case of a procedure definition calling a method on _self.
-                type = UndefinedType.INSTANCE;
+        final AbstractType type = this.getNodeType(magikFile, node);
+        final ProcedureInstance procInstance;
+        if (type instanceof AliasType) {
+            final AliasType aliasType = (AliasType) type;
+            final AbstractType aliasedType = aliasType.getAliasedType();
+            if (aliasedType instanceof ProcedureInstance) {
+                procInstance = (ProcedureInstance) aliasedType;
             } else {
-                final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefNode);
-                final TypeString typeString = helper.getTypeString();
-                type = typeKeeper.getType(typeString);
+                procInstance = null;
             }
+        } else if (type instanceof ProcedureInstance) {
+            procInstance = (ProcedureInstance) type;
+        } else {
+            procInstance = null;
         }
 
-        // Get method info.
-        final Collection<Method> methods = type.getMethods(methodName);
-        if (methods.isEmpty()) {
-            this.buildMethodUnknownDoc(type, methodName, builder);
+        if (procInstance == null) {
             return;
         }
 
-        for (final Method method : methods) {
-            this.buildMethodSignatureDoc(type, method, builder);
-        }
+        final Method invokeMethod = procInstance.getInvokeMethod();
+        this.buildMethodSignatureDoc(procInstance, invokeMethod, builder);
     }
 
     private void buildInheritanceDoc(final AbstractType type, final StringBuilder builder, final int indent) {
@@ -437,44 +385,36 @@ public class HoverProvider {
         });
     }
 
-    private void buildMethodUnknownDoc(final AbstractType type, final String methodName, final StringBuilder builder) {
-        final TypeString typeStr = type.getTypeString();
-        builder
-            .append("Unknown method ")
-            .append(methodName)
-            .append(" on type ")
-            .append(this.formatTypeString(typeStr))
-            .append("\n")
-            .append(SECTION_END);
-    }
-
     private void buildMethodSignatureDoc(final AbstractType type, final Method method, final StringBuilder builder) {
         // Method signature.
         final TypeString typeStr = type.getTypeString();
+        final AbstractType ownerType = method.getOwner();
+        final TypeString ownerTypeStr = ownerType.getTypeString();
+        final TypeString ownerTypeStrWithGenerics =
+            TypeString.ofIdentifier(
+                ownerTypeStr.getIdentifier(), ownerTypeStr.getPakkage(),
+                typeStr.getGenerics().toArray(TypeString[]::new));
+
         final String joiner = method.getName().startsWith("[")
             ? ""
             : ".";
         builder
             .append("## ")
-            .append(this.formatTypeString(typeStr))
+            .append(this.formatTypeString(ownerTypeStrWithGenerics))
             .append(joiner)
             .append(method.getNameWithParameters())
             .append("\n\n")
             .append(" → ");
 
-        final String callResultString = method.getCallResult().stream()
-            .map(this::formatTypeString)
-            .collect(Collectors.joining(", "));
-        builder.append(callResultString);
+        final String callResultString = method.getCallResult().getTypeNames(", ");
+        builder.append(this.formatTypeString(callResultString));
 
         if (method.getModifiers().contains(Method.Modifier.ITER)) {
             builder
                 .append("\n\n")
                 .append(" ⟳ ");
-            final String iterResultString = method.getLoopbodyResult().stream()
-                .map(this::formatTypeString)
-                .collect(Collectors.joining(", "));
-            builder.append(iterResultString);
+            final String iterResultString = method.getLoopbodyResult().getTypeNames(", ");
+            builder.append(this.formatTypeString(iterResultString));
         }
 
         builder.append(SECTION_END);
@@ -578,8 +518,35 @@ public class HoverProvider {
         }
     }
 
+    private AbstractType getNodeType(final MagikTypedFile magikFile, final AstNode node) {
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+        final ExpressionResult result = reasonerState.getNodeTypeSilent(node);
+        final AbstractType type = result.get(0, UndefinedType.INSTANCE);
+        if (type == SelfType.INSTANCE) {
+            final AstNode defNode = node.getFirstAncestor(
+                MagikGrammar.PROCEDURE_DEFINITION,
+                MagikGrammar.METHOD_DEFINITION);
+            if (defNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
+                final ExpressionResult defResult = reasonerState.getNodeTypeSilent(defNode);
+                return defResult.get(0, UndefinedType.INSTANCE);
+            } else if (defNode.is(MagikGrammar.METHOD_DEFINITION)) {
+                final AstNode exemplaNameNode = defNode.getFirstChild(MagikGrammar.EXEMPLAR_NAME);
+                final ExpressionResult defResult = reasonerState.getNodeTypeSilent(exemplaNameNode);
+                return defResult.get(0, UndefinedType.INSTANCE);
+            } else {
+                throw new IllegalStateException();
+            }
+        }
+
+        return type;
+    }
+
     private String formatTypeString(final TypeString typeStr) {
-        return typeStr.getFullString().replace("<", "[").replace(">", "]");
+        return this.formatTypeString(typeStr.getFullString());
+    }
+
+    private String formatTypeString(final String typeStr) {
+        return typeStr.replace("<", "[").replace(">", "]");
     }
 
 }

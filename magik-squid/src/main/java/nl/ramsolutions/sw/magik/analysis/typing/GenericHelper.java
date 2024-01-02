@@ -126,6 +126,11 @@ public class GenericHelper {
      * @return {@link ExpressionResultString} with generics substituted.
      */
     public ExpressionResultString substituteGenerics(final ExpressionResultString expressionResultString) {
+        if (expressionResultString == ExpressionResultString.UNDEFINED) {
+            // Nothing to substitute.
+            return ExpressionResultString.UNDEFINED;
+        }
+
         ExpressionResultString substitutedResultString = expressionResultString;
         final Map<TypeString, TypeString> genericTypeMapping = this.getGenericDefinitionTypeMapping();
         for (final Map.Entry<TypeString, TypeString> entry : genericTypeMapping.entrySet()) {

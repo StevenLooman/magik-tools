@@ -189,8 +189,8 @@ public final class TypeString implements Comparable<TypeString> {
         }
 
         if (this.isGenericDefinition()) {
-            return TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue()  // TODO: This gives duplicate <>
-                + this.string + "="
+            return TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue()
+                + this.string + TypeStringGrammar.Punctuator.TYPE_GENERIC_ASSIGN.getValue()
                 + this.generics.get(0).getFullString()
                 + TypeStringGrammar.Punctuator.TYPE_GENERIC_CLOSE.getValue();
         }
@@ -203,7 +203,17 @@ public final class TypeString implements Comparable<TypeString> {
 
         final String genericDefs = !this.generics.isEmpty()
             ? this.generics.stream()
-                .map(TypeString::getFullString)
+                .map(typeStr -> {
+                    if (typeStr.isGenericReference()) {
+                        return typeStr.getIdentifier();
+                    } else if (typeStr.isGenericDefinition()) {
+                        return typeStr.string
+                            + TypeStringGrammar.Punctuator.TYPE_GENERIC_ASSIGN.getValue()
+                            + this.generics.get(0).generics.get(0).getFullString();
+                    }
+
+                    throw new IllegalStateException();
+                })
                 .collect(Collectors.joining(
                     TypeStringGrammar.Punctuator.TYPE_GENERIC_SEPARATOR.getValue(),
                     TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue(),

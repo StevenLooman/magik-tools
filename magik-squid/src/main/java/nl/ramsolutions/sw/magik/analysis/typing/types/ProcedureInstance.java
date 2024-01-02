@@ -94,6 +94,10 @@ public class ProcedureInstance extends AbstractType {
         }
     }
 
+    public Method getInvokeMethod() {
+        return this.invokeMethod;
+    }
+
     public String getProcedureName() {
         return this.procedureName;
     }
