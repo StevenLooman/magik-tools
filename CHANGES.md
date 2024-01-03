@@ -13,6 +13,7 @@
 - Refactor LocalTypeReasoner state to own class.
 - Improve handling of/reasoning with generics.
 - Index products and modules.
+- Add TodoComment check.
 
 0.8.3 (unreleased)
 

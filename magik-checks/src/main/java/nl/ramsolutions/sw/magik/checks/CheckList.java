@@ -28,6 +28,7 @@ import nl.ramsolutions.sw.magik.checks.checks.SimplifyIfCheck;
 import nl.ramsolutions.sw.magik.checks.checks.SizeZeroEmptyCheck;
 import nl.ramsolutions.sw.magik.checks.checks.SwMethodDocCheck;
 import nl.ramsolutions.sw.magik.checks.checks.SyntaxErrorCheck;
+import nl.ramsolutions.sw.magik.checks.checks.TodoCommentCheck;
 import nl.ramsolutions.sw.magik.checks.checks.TrailingWhitespaceCheck;
 import nl.ramsolutions.sw.magik.checks.checks.TypeDocCheck;
 import nl.ramsolutions.sw.magik.checks.checks.UndefinedVariableCheck;
@@ -86,6 +87,7 @@ public final class CheckList {
             SizeZeroEmptyCheck.class,
             SwMethodDocCheck.class,
             SyntaxErrorCheck.class,
+            TodoCommentCheck.class,
             TrailingWhitespaceCheck.class,
             TypeDocCheck.class,
             UndefinedVariableCheck.class,
