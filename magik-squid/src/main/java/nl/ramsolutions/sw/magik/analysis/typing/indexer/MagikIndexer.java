@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Indexes all the magik files in the workspace.
+ * Magik file indexer.
  */
 public class MagikIndexer {
 
@@ -47,7 +47,9 @@ public class MagikIndexer {
      * @throws IOException -
      */
     public void indexPaths(final Stream<Path> paths) throws IOException {
-        paths.forEach(this::indexPathCreated);
+        paths
+            .filter(path -> path.toString().toLowerCase().endsWith(".magik"))
+            .forEach(this::indexPathCreated);
     }
 
     /**

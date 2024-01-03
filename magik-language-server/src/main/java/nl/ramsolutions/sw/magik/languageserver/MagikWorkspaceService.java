@@ -16,6 +16,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.typing.indexer.MagikIndexer;
+import nl.ramsolutions.sw.magik.analysis.typing.indexer.ProductIndexer;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItem;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItemProvider;
 import nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider;
@@ -48,6 +49,7 @@ public class MagikWorkspaceService implements WorkspaceService {
     private final MagikLanguageServer languageServer;
     private final IDefinitionKeeper definitionKeeper;
     private final IgnoreHandler ignoreHandler;
+    private final ProductIndexer productIndexer;
     private final MagikIndexer magikIndexer;
     private final SymbolProvider symbolProvider;
     private final MUnitTestItemProvider testItemProvider;
@@ -62,6 +64,7 @@ public class MagikWorkspaceService implements WorkspaceService {
         this.definitionKeeper = definitionKeeper;
 
         this.ignoreHandler = new IgnoreHandler();
+        this.productIndexer = new ProductIndexer(this.definitionKeeper);
         this.magikIndexer = new MagikIndexer(this.definitionKeeper);
         this.symbolProvider = new SymbolProvider(this.definitionKeeper);
         this.testItemProvider = new MUnitTestItemProvider(this.definitionKeeper);
@@ -112,8 +115,19 @@ public class MagikWorkspaceService implements WorkspaceService {
         }
     }
 
-    private void runIndexer() {
-        LOGGER.trace("Running MagikIndexer");
+    private void runProductIndexer() {
+        for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
+            try {
+                LOGGER.debug("Running ProductIndexer from: {}", workspaceFolder.getUri());
+                final Stream<Path> indexableFiles = this.getIndexableFiles(workspaceFolder);
+                this.productIndexer.indexPaths(indexableFiles);
+            } catch (final IOException exception) {
+                LOGGER.error(exception.getMessage(), exception);
+            }
+        }
+    }
+
+    private void runMagikIndexer() {
         for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
             try {
                 LOGGER.debug("Running MagikIndexer from: {}", workspaceFolder.getUri());
@@ -173,12 +187,32 @@ public class MagikWorkspaceService implements WorkspaceService {
                 final Path path = Path.of(uri);
                 final FileSystem fileSystem = path.getFileSystem();
 
-                if (fileSystem.getPathMatcher("glob:**/*.magik").matches(path)) {
+                if (fileSystem.getPathMatcher("glob:**/*.def").matches(path)) {
+                    this.handleDefFileChange(fileEvent);
+                } else if (fileSystem.getPathMatcher("glob:**/*.magik").matches(path)) {
                     this.handleMagikFileChange(fileEvent);
                 } else if (fileSystem.getPathMatcher("glob:**/.magik-tools-ignore").matches(path)) {
                     this.handleIgnoreFileChange(fileEvent);
                 }
             });
+    }
+
+    private void handleDefFileChange(final FileEvent fileEvent) {
+        final URI uri = URI.create(fileEvent.getUri());
+        final Path path = Path.of(uri);
+
+        // Don't index if ignored.
+        if (this.ignoreHandler.isIgnored(path)) {
+            return;
+        }
+
+        if (fileEvent.getType() == FileChangeType.Created) {
+            this.productIndexer.indexPathCreated(path);
+        } else if (fileEvent.getType() == FileChangeType.Changed) {
+            this.productIndexer.indexPathChanged(path);
+        } else if (fileEvent.getType() == FileChangeType.Deleted) {
+            this.productIndexer.indexPathDeleted(path);
+        }
     }
 
     private void handleMagikFileChange(final FileEvent fileEvent) {
@@ -289,8 +323,11 @@ public class MagikWorkspaceService implements WorkspaceService {
         // Index .magik-tools-ignore files.
         this.runIgnoreFilesIndexer();
 
-        // Run indexer.
-        this.runIndexer();
+        // Run product/module indexer.
+        this.runProductIndexer();
+
+        // Run magik indexer.
+        this.runMagikIndexer();
     }
 
     @SuppressWarnings("IllegalCatch")
@@ -304,12 +341,12 @@ public class MagikWorkspaceService implements WorkspaceService {
         languageClient.createProgress(params);
 
         CompletableFuture.runAsync(() -> {
-            LOGGER.trace("Start indexing in background");
+            LOGGER.trace("Start indexing workspace in background");
             final ProgressParams progressParams = new ProgressParams();
             progressParams.setToken(token);
 
             final WorkDoneProgressBegin begin = new WorkDoneProgressBegin();
-            begin.setTitle("Indexing Magik sources");
+            begin.setTitle("Indexing workspace");
             progressParams.setValue(Either.forLeft(begin));
             languageClient.notifyProgress(progressParams);
 
@@ -320,10 +357,10 @@ public class MagikWorkspaceService implements WorkspaceService {
             }
 
             final WorkDoneProgressEnd end = new WorkDoneProgressEnd();
-            end.setMessage("Done indexing Magik sources");
+            end.setMessage("Done indexing workspace");
             progressParams.setValue(Either.forLeft(end));
             languageClient.notifyProgress(progressParams);
-            LOGGER.trace("Done indexing Magik sources in background");
+            LOGGER.trace("Done indexing workspace in background");
         });
     }
 

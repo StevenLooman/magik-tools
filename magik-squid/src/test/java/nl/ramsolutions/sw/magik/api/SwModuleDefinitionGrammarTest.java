@@ -91,6 +91,12 @@ class SwModuleDefinitionGrammarTest {
     }
 
     @Test
+    void testRequiresJava() {
+        assertThat(g.rule(SwModuleDefinitionGrammar.REQUIRES_JAVA))
+            .matches("requires_java\n\tcom.gesmallworld.magik.http\nend");
+    }
+
+    @Test
     void testRequiresDatamodel() {
         assertThat(g.rule(SwModuleDefinitionGrammar.REQUIRES_DATAMODEL))
             .matches("requires_datamodel\nend")
@@ -105,8 +111,8 @@ class SwModuleDefinitionGrammarTest {
     @Test
     void testTemplates() {
         assertThat(g.rule(SwModuleDefinitionGrammar.TEMPLATES))
-            .matches("templates x")
-            .matches("templates x y z");
+            .matches("templates\nend")
+            .matches("templates\ndb\nend");
     }
 
     @Test
@@ -178,4 +184,5 @@ class SwModuleDefinitionGrammarTest {
             .matches("system_installation\nx\ny\nz\nend")
             .matches("system_installation\nx y z\nend");
     }
+
 }

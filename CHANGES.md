@@ -12,6 +12,7 @@
 - Show inlayhints for ATOM nodes, as a configurable option.
 - Refactor LocalTypeReasoner state to own class.
 - Improve handling of/reasoning with generics.
+- Index products and modules.
 
 0.8.3 (unreleased)
 

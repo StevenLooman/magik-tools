@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.definitions.api;
 
+import com.sonar.sslr.api.GenericTokenType;
 import org.sonar.sslr.grammar.GrammarRuleKey;
 import org.sonar.sslr.grammar.LexerlessGrammarBuilder;
 import org.sonar.sslr.parser.LexerlessGrammar;
@@ -14,7 +15,6 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
 
     MODULE_IDENTIFICATION,
 
-    CLAUSE,
     CONDITION_MESSAGE_ACCESSOR,
     DESCRIPTION,
     HIDDEN,
@@ -23,6 +23,7 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
     OPTIONAL,
     REQUIRES,
     REQUIRES_DATAMODEL,
+    REQUIRES_JAVA,
     TEMPLATES,
     TEST,
     TESTS_MODULES,
@@ -36,6 +37,8 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
 
     MODULE_REFS,
     MODULE_REF,
+    JAVA_MODULE_REFS,
+    JAVA_MODULE_REF,
     REQUIRES_DATAMODEL_ENTRIES,
     REQUIRES_DATAMODEL_ENTRY,
     TEST_ENTRIES,
@@ -44,7 +47,7 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
     FREE_LINE,
 
     SPACING,
-    WHITESPACE_NEWLINE,
+    NEWLINE,
     WHITESPACE,
     COMMENT,
     IDENTIFIER,
@@ -60,32 +63,35 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
      * @return The grammar.
      */
     public static LexerlessGrammar create() {
-        LexerlessGrammarBuilder builder = LexerlessGrammarBuilder.create();
+        final LexerlessGrammarBuilder builder = LexerlessGrammarBuilder.create();
 
-        builder.rule(MODULE_DEFINITION).is(builder.zeroOrMore(CLAUSE));
-
-        builder.rule(CLAUSE).is(builder.firstOf(
+        builder.rule(MODULE_DEFINITION).is(
+            builder.optional(SPACING),
             MODULE_IDENTIFICATION,
-            CONDITION_MESSAGE_ACCESSOR,
-            DESCRIPTION,
-            HIDDEN,
-            INSTALL_REQUIRES,
-            LANGUAGE,
-            MESSAGES,
-            OPTIONAL,
-            REQUIRES,
-            REQUIRES_DATAMODEL,
-            TEMPLATES,
-            TEST,
-            TESTS_MODULES,
+            builder.zeroOrMore(
+                builder.firstOf(
+                    CONDITION_MESSAGE_ACCESSOR,
+                    DESCRIPTION,
+                    HIDDEN,
+                    INSTALL_REQUIRES,
+                    LANGUAGE,
+                    MESSAGES,
+                    OPTIONAL,
+                    REQUIRES,
+                    REQUIRES_DATAMODEL,
+                    REQUIRES_JAVA,
+                    TEMPLATES,
+                    TEST,
+                    TESTS_MODULES,
 
-            ACE_INSTALLATION,
-            AUTH_INSTALLATION,
-            CASE_INSTALLATION,
-            STYLE_INSTALLATION,
-            SYSTEM_INSTALLATION,
+                    ACE_INSTALLATION,
+                    AUTH_INSTALLATION,
+                    CASE_INSTALLATION,
+                    STYLE_INSTALLATION,
+                    SYSTEM_INSTALLATION,
 
-            SPACING)).skip();
+                    SPACING)),
+            builder.token(GenericTokenType.EOF, builder.endOfInput()));
 
         builder.rule(MODULE_IDENTIFICATION).is(IDENTIFIER, WHITESPACE, VERSION, builder.optional(WHITESPACE, VERSION));
         builder.rule(CONDITION_MESSAGE_ACCESSOR).is("condition_message_accessor", WHITESPACE, IDENTIFIER);
@@ -96,8 +102,9 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
         builder.rule(MESSAGES).is("messages", WHITESPACE, IDENTIFIERS);
         builder.rule(OPTIONAL).is("optional", SPACING, MODULE_REFS, "end");
         builder.rule(REQUIRES).is("requires", SPACING, MODULE_REFS, "end");
+        builder.rule(REQUIRES_JAVA).is("requires_java", SPACING, JAVA_MODULE_REFS, "end");
         builder.rule(REQUIRES_DATAMODEL).is("requires_datamodel", SPACING, REQUIRES_DATAMODEL_ENTRIES, "end");
-        builder.rule(TEMPLATES).is("templates", WHITESPACE, IDENTIFIERS);
+        builder.rule(TEMPLATES).is("templates", SPACING, FREE_LINES, "end");
         builder.rule(TEST).is("test", SPACING, TEST_ENTRIES, "end");
         builder.rule(TESTS_MODULES).is("tests_modules", SPACING, MODULE_REFS, "end");
 
@@ -116,6 +123,11 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
                         builder.optional(NUMBER)))));
         builder.rule(MODULE_REFS).is(builder.zeroOrMore(MODULE_REF, SPACING));
         builder.rule(MODULE_REF).is(IDENTIFIER, builder.optional(WHITESPACE, VERSION));
+        builder.rule(JAVA_MODULE_REFS).is(builder.zeroOrMore(JAVA_MODULE_REF, SPACING));
+        builder.rule(JAVA_MODULE_REF).is(
+            IDENTIFIER,
+            builder.zeroOrMore(".", IDENTIFIER),
+            builder.optional(WHITESPACE, VERSION));
         builder.rule(TEST_ENTRIES).is(builder.zeroOrMore(TEST_ENTRY, SPACING));
         builder.rule(TEST_ENTRY).is(builder.firstOf(
             builder.sequence("name", WHITESPACE, IDENTIFIER),
@@ -134,12 +146,17 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
         builder.rule(IDENTIFIER_LIST)
             .is(builder.optional(IDENTIFIER, builder.zeroOrMore(builder.optional(WHITESPACE), ",", IDENTIFIER)));
 
-        builder.rule(SPACING).is(builder.oneOrMore(builder.firstOf(WHITESPACE_NEWLINE, COMMENT))).skip();
+        builder.rule(SPACING).is(
+            builder.oneOrMore(
+                builder.firstOf(
+                    WHITESPACE,
+                    NEWLINE,
+                    COMMENT))).skip();
 
-        builder.rule(WHITESPACE_NEWLINE).is(builder.skippedTrivia(builder.regexp("[ \n\r\t\f]+"))).skip();
-        builder.rule(WHITESPACE).is(builder.skippedTrivia(builder.regexp("[ \t]+"))).skip();
-        builder.rule(COMMENT).is(builder.commentTrivia(builder.regexp("#[^\r\n]*"))).skip();
-        builder.rule(IDENTIFIER).is(builder.regexp("(?!end)\\w+"));
+        builder.rule(NEWLINE).is(builder.skippedTrivia(builder.regexp("(?:\\n|\\r\\n|\\r)"))).skip();
+        builder.rule(WHITESPACE).is(builder.skippedTrivia(builder.regexp("[\\t\\u0020\\u00A0\\uFEFF]+"))).skip();
+        builder.rule(COMMENT).is(builder.commentTrivia(builder.regexp("(?s)#[^\r\n]*"))).skip();
+        builder.rule(IDENTIFIER).is(builder.regexp("(?!end)[a-zA-Z0-9_!]+"));
         builder.rule(NUMBER).is(builder.regexp("[0-9]+"));
         builder.rule(VERSION).is(builder.regexp("[0-9]+"));
         builder.rule(REST_OF_LINE).is(builder.regexp("[^\r\n]*"));

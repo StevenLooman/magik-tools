@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import nl.ramsolutions.sw.definitions.ModuleDefinition;
+import nl.ramsolutions.sw.definitions.ProductDefinition;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -57,8 +59,8 @@ public class SymbolProvider {
 
         final List<WorkspaceSymbol> workspaceSymbols = new ArrayList<>();
         try {
-            // TODO: Products
-            // TODO: Modules
+            this.gatherProducts(query, workspaceSymbols);
+            this.gatherModules(query, workspaceSymbols);
             this.gatherTypes(query, workspaceSymbols);
             this.gatherMethods(query, workspaceSymbols);
             this.gatherConditions(query, workspaceSymbols);
@@ -69,6 +71,38 @@ public class SymbolProvider {
 
         LOGGER.debug("Finished searching for: '{}', result count: {}", query, workspaceSymbols.size());
         return workspaceSymbols;
+    }
+
+    private void gatherProducts(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
+        final Pattern pattern = Pattern.compile(".*" + query + ".*");
+        final Predicate<ProductDefinition> predicate = definition -> pattern.matcher(definition.getName()).matches();
+        for (final ProductDefinition definition : this.definitionKeeper.getProductDefinitions()) {
+            if (predicate.test(definition)) {
+                final Location conditionLocation = definition.getLocation();
+                final Location location = Location.validLocation(conditionLocation);
+                final WorkspaceSymbol symbol = new WorkspaceSymbol(
+                    "Product: " + definition.getName(),
+                    SymbolKind.Package,
+                    Either.forLeft(Lsp4jConversion.locationToLsp4j(location)));
+                workspaceSymbols.add(symbol);
+            }
+        }
+    }
+
+    private void gatherModules(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
+        final Pattern pattern = Pattern.compile(".*" + query + ".*");
+        final Predicate<ModuleDefinition> predicate = definition -> pattern.matcher(definition.getName()).matches();
+        for (final ModuleDefinition definition : this.definitionKeeper.getModuleDefinitions()) {
+            if (predicate.test(definition)) {
+                final Location conditionLocation = definition.getLocation();
+                final Location location = Location.validLocation(conditionLocation);
+                final WorkspaceSymbol symbol = new WorkspaceSymbol(
+                    "Module: " + definition.getName(),
+                    SymbolKind.Module,
+                    Either.forLeft(Lsp4jConversion.locationToLsp4j(location)));
+                workspaceSymbols.add(symbol);
+            }
+        }
     }
 
     private void gatherTypes(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
