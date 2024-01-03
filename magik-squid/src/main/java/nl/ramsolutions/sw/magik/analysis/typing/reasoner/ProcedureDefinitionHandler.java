@@ -25,7 +25,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  */
 class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
 
-    private static final TypeString SW_PROCEDURE = TypeString.ofIdentifier("procedure", "sw");
+    private static final TypeString SW_PROCEDURE_REF = TypeString.ofIdentifier("procedure", "sw");
 
     /**
      * Constructor.
@@ -40,6 +40,12 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
      * @param node PROCEDURE_DEFINITION node.
      */
     void handleProcedureDefinition(final AstNode node) {
+        final AbstractType abstractProcedureType = this.typeKeeper.getType(SW_PROCEDURE_REF);
+        if (abstractProcedureType == UndefinedType.INSTANCE) {
+            // Must be missing definition for sw:procedure, don't try anything.
+            return;
+        }
+
         // Location.
         final URI uri = node.getToken().getURI();
         final Location location = new Location(uri, node);
@@ -90,7 +96,7 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
         // Create procedure instance.
         final EnumSet<ProcedureInstance.Modifier> modifiers = EnumSet.noneOf(ProcedureInstance.Modifier.class);
         final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
-        final MagikType procedureType = (MagikType) this.typeKeeper.getType(SW_PROCEDURE);
+        final MagikType procedureType = (MagikType) abstractProcedureType;
         final ProcedureInstance procType = new ProcedureInstance(
             location,
             moduleName,

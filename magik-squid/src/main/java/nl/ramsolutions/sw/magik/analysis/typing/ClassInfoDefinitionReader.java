@@ -451,8 +451,7 @@ public final class ClassInfoDefinitionReader {
             ExemplarDefinition.Sort.UNDEFINED,
             typeString,
             slots,
-            parents,
-            Collections.emptyList());
+            parents);
         this.definitionKeeper.add(definition);
     }
 
@@ -514,7 +513,6 @@ public final class ClassInfoDefinitionReader {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             typeString,
-            Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList());
         this.definitionKeeper.add(definition);

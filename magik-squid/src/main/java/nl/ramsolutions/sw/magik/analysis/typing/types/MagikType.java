@@ -8,14 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.typing.GenericHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 
 /**
@@ -64,7 +63,7 @@ public class MagikType extends AbstractType {
     private final Set<Method> methods = ConcurrentHashMap.newKeySet();
     private final Set<TypeString> parents = ConcurrentHashMap.newKeySet();
     private final Map<String, Slot> slots = new ConcurrentHashMap<>();
-    private final Queue<GenericDeclaration> generics = new ConcurrentLinkedQueue<>();
+    private final Set<GenericDefinition> genericDefinitions = ConcurrentHashMap.newKeySet();
     private final ITypeKeeper typeKeeper;
     private Sort sort;
 
@@ -85,6 +84,56 @@ public class MagikType extends AbstractType {
         this.typeKeeper = typeKeeper;
         this.sort = sort;
         this.typeString = typeString;
+    }
+
+    /**
+     * Create a copy of {@link MagikType}, but set the new {@link TypeString}.
+     *
+     * Used for
+     * @param magikType Type to copy from.
+     * @param newTypeString New {@link TypeString} to use.
+     */
+    public MagikType(final MagikType magikType, final TypeString newTypeString) {
+        super(magikType.getLocation(), magikType.getModuleName());
+
+        this.typeKeeper = magikType.typeKeeper;
+        this.sort = magikType.sort;
+        this.typeString = newTypeString;
+
+        // Copy existing parts.
+        this.parents.addAll(magikType.parents);
+        magikType.slots.values().forEach(slot ->
+            this.addSlot(slot.getLocation(), slot.getName(), slot.getType()));
+        magikType.methods.forEach(method -> {
+            final Method newMethod = this.addMethod(
+                method.getLocation(),
+                method.getModuleName(),
+                method.getModifiers(),
+                method.getName(),
+                method.getParameters(),  // TODO: Duplicate parameters?
+                method.getAssignmentParameter(),
+                method.getDoc(),
+                method.getCallResult(),
+                method.getLoopbodyResult());
+            method.getGlobalUsages().forEach(globalUsage ->
+                newMethod.addUsedGlobal(
+                    new Method.GlobalUsage(globalUsage.getGlobal(), globalUsage.getLocation())));
+            method.getMethodUsages().forEach(methodUsage ->
+                newMethod.addCalledMethod(
+                    new Method.MethodUsage(
+                        methodUsage.getType(),
+                        methodUsage.getMethodName(),
+                        methodUsage.getLocation())));
+            method.getUsedSlots().forEach(slotUsage ->
+                newMethod.addUsedSlot(
+                    new Method.SlotUsage(slotUsage.getSlotName(), slotUsage.getLocation())));
+            method.getConditionUsages().forEach(conditionUsage ->
+                newMethod.addUsedCondition(
+                    new Method.ConditionUsage(conditionUsage.getConditionName(), conditionUsage.getLocation())));
+
+        });
+        typeString.getGenerics()
+            .forEach(genDefTypeStr -> this.addGenericDefinition(null, genDefTypeStr));
     }
 
     /**
@@ -127,28 +176,32 @@ public class MagikType extends AbstractType {
         //       it inherits `sw:slotted_format_mixin`, such as `sw:rope_mixin`,
         //       or not, such as as `sw:ace_access_mixin`. `ExemplarDefinition.Sort`
         //       does not provide any usable information.
+        final Set<TypeString> implicitParents = new HashSet<>();
         if (this.parents.isEmpty()) {
-            final Set<TypeString> defaultParents;
             if (this.getSort() == MagikType.Sort.INDEXED) {
-                defaultParents = Set.of(DEFAULT_PARENT_INDEXED_EXEMPLAR);
+                implicitParents.add(DEFAULT_PARENT_INDEXED_EXEMPLAR);
             } else if (this.getSort() == MagikType.Sort.SLOTTED) {
-                defaultParents = Set.of(DEFAULT_PARENT_SLOTTED_EXEMPLAR);
-            } else {
-                defaultParents = Collections.emptySet();
+                implicitParents.add(DEFAULT_PARENT_SLOTTED_EXEMPLAR);
             }
-
-            return Stream.concat(this.parents.stream(), defaultParents.stream())
-                .collect(Collectors.toSet());
         }
 
-        return Collections.unmodifiableSet(this.parents);
+        final TypeString[] thisGenDefs = this.typeString.getGenerics().toArray(TypeString[]::new);
+        return Stream.concat(this.parents.stream(), implicitParents.stream())
+            .map(typeStr -> {
+                // Let all parents inherit generic definitions.
+                // TODO: Keep existing genDefs, but overwrite any found.
+                return TypeString.ofIdentifier(
+                    typeStr.getIdentifier(), typeStr.getPakkage(),
+                    thisGenDefs);
+            })
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
     public Collection<AbstractType> getParents() {
         return this.getParentsTypeRefs().stream()
             .map(this.typeKeeper::getType)
-            .collect(Collectors.toList());
+            .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
@@ -168,21 +221,21 @@ public class MagikType extends AbstractType {
 
     /**
      * Add a {@link GenericDefinition}.
-     * @param location Location GenericDefinition.
-     * @param name Name of GenericDefinition.
+     * @param location {@link Location} of {@link GenericDefinition}.
+     * @param genericTypeString {@link TypeString} of GenericDefinition.
      * @return
      */
-    public GenericDeclaration addGeneric(final @Nullable Location location, final String name) {
-        // TODO: Parameter `name` should be a TypeString?
-        // TODO: Don't do this on the fly, but only at definition...
-        final GenericDeclaration declaration = new GenericDeclaration(location, name);
-        this.generics.add(declaration);
-        return declaration;
+    public GenericDefinition addGenericDefinition(
+            final @Nullable Location location,
+            final TypeString genericTypeString) {
+        final GenericDefinition definition = new GenericDefinition(this.typeKeeper, genericTypeString);
+        this.genericDefinitions.add(definition);
+        return definition;
     }
 
     @Override
-    public List<GenericDeclaration> getGenerics() {
-        return List.copyOf(this.generics);
+    public List<GenericDefinition> getGenericDefinitions() {
+        return List.copyOf(this.genericDefinitions);
     }
 
     /**
@@ -193,7 +246,6 @@ public class MagikType extends AbstractType {
      * @return Added slot.
      */
     public Slot addSlot(final @Nullable Location location, final String name, final TypeString slotTypeString) {
-        // TODO: Don't do this on the fly, but only at definition...
         final Slot slot = new Slot(location, name, slotTypeString);
         this.slots.put(name, slot);
         return slot;
@@ -207,13 +259,16 @@ public class MagikType extends AbstractType {
     @Override
     public Slot getSlot(final String name) {
         if (this.slots.containsKey(name)) {
-            return this.slots.get(name);
+            final GenericHelper genericHelper = new GenericHelper(typeKeeper, this);
+            final Slot slot = this.slots.get(name);
+            return genericHelper.substituteGenerics(slot);
         }
 
         for (final AbstractType parent : this.getParents()) {
             final Slot slot = parent.getSlot(name);
             if (slot != null) {
-                return slot;
+                final GenericHelper genericHelper = new GenericHelper(typeKeeper, this);
+                return genericHelper.substituteGenerics(slot);
             }
         }
 
@@ -221,11 +276,12 @@ public class MagikType extends AbstractType {
     }
 
     /**
-     * Get all slots from this type, including sub-types.
+     * Get all slots from this type, including super-types.
      * @return Slots.
      */
     @Override
     public Collection<Slot> getSlots() {
+        final GenericHelper genericHelper = new GenericHelper(typeKeeper, this);
         final Collection<Slot> allSlots = new HashSet<>();
 
         allSlots.addAll(this.slots.values());
@@ -233,11 +289,20 @@ public class MagikType extends AbstractType {
             allSlots.addAll(parentType.getSlots());
         }
 
-        return allSlots;
+        return allSlots.stream()
+            .map(genericHelper::substituteGenerics)
+            .collect(Collectors.toUnmodifiableSet());
     }
 
+    /**
+     * Get slots defined for this type, excluding super-types.
+     * @return
+     */
     public Collection<Slot> getLocalSlots() {
-        return Collections.unmodifiableCollection(this.slots.values());
+        final GenericHelper genericHelper = new GenericHelper(typeKeeper, this);
+        return this.slots.values().stream()
+            .map(genericHelper::substituteGenerics)
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     /**
@@ -285,7 +350,7 @@ public class MagikType extends AbstractType {
     }
 
     /**
-     * Get all methods this type has, including sub-types.
+     * Get all methods this type has, including super-types.
      * @return Methods for this type.
      */
     @Override
@@ -315,14 +380,19 @@ public class MagikType extends AbstractType {
             });
         }
 
+        final GenericHelper genericHelper = new GenericHelper(typeKeeper, this);
         return allMethods.values().stream()
             .flatMap(Collection::stream)
+            .map(genericHelper::substituteGenerics)
             .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
     public Collection<Method> getLocalMethods() {
-        return Collections.unmodifiableSet(this.methods);
+        final GenericHelper genericHelper = new GenericHelper(typeKeeper, this);
+        return this.methods.stream()
+            .map(genericHelper::substituteGenerics)
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     /**
@@ -333,9 +403,11 @@ public class MagikType extends AbstractType {
     @Override
     public Collection<Method> getSuperMethods(final String methodName) {
         // Try to get the wanted method from all super types, first one wins.
+        final GenericHelper genericHelper = new GenericHelper(typeKeeper, this);
         return this.getParents().stream()
             .flatMap(parent -> parent.getMethods(methodName).stream())
-            .collect(Collectors.toSet());
+            .map(genericHelper::substituteGenerics)
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     /**
@@ -353,7 +425,10 @@ public class MagikType extends AbstractType {
             return Collections.emptySet();
         }
 
-        return superType.get().getMethods(methodName);
+        final GenericHelper genericHelper = new GenericHelper(typeKeeper, this);
+        return superType.get().getMethods(methodName).stream()
+            .map(genericHelper::substituteGenerics)
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     /**

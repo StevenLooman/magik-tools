@@ -95,6 +95,19 @@ public class ExpressionResult {
     }
 
     /**
+     * Test if this contains any {@link UndefinedType}.
+     * @return True if this contains any {@link UndefinedType}, false otherwise.
+     */
+    public boolean containsUndefined() {
+        if (this == ExpressionResult.UNDEFINED) {
+            return true;
+        }
+
+        return this.stream()
+            .anyMatch(type -> type == UndefinedType.INSTANCE);
+    }
+
+    /**
      * Get types.
      * @return
      */

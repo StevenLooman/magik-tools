@@ -14,6 +14,14 @@ class TypeStringParserTest {
     private static final String SW_PACKAGE = "sw";
 
     @Test
+    void testUndefined() {
+        final String typeStr = "_undefined";
+        final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+        assertThat(typeString)
+            .isEqualTo(TypeString.UNDEFINED);
+    }
+
+    @Test
     void testSelf() {
         final String typeStr = "_self";
         final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
@@ -30,11 +38,11 @@ class TypeStringParserTest {
     }
 
     @Test
-    void testGeneric() {
+    void testGenericReference() {
         final String typeStr = "<E>";
         final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
         assertThat(typeString)
-            .isEqualTo(TypeString.ofGeneric("E"));
+            .isEqualTo(TypeString.ofGenericReference("E"));
     }
 
     @Test
@@ -47,35 +55,35 @@ class TypeStringParserTest {
 
     @Test
     void testGenericDefinitions() {
-        final String typeStr = "sw:rope<sw:symbol>";
+        final String typeStr = "sw:rope<E=sw:symbol>";
         final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
         assertThat(typeString)
             .isEqualTo(
                 TypeString.ofIdentifier("rope", SW_PACKAGE,
-                    TypeString.ofIdentifier("symbol", SW_PACKAGE)));
+                    TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("symbol", SW_PACKAGE))));
     }
 
     @Test
     void testGenericDefinitions2() {
-        final String typeStr = "sw:property_list<sw:symbol, sw:integer>";
+        final String typeStr = "sw:property_list<K=sw:symbol, E=sw:integer>";
         final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
         assertThat(typeString)
             .isEqualTo(
                 TypeString.ofIdentifier("property_list", SW_PACKAGE,
-                    TypeString.ofIdentifier("symbol", SW_PACKAGE),
-                    TypeString.ofIdentifier("integer", SW_PACKAGE)));
+                    TypeString.ofGenericDefinition("K", TypeString.ofIdentifier("sw:symbol", SW_PACKAGE)),
+                    TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("sw:integer", SW_PACKAGE))));
     }
 
     @Test
     void testGenericDefinitionsNested() {
-        final String typeStr = "sw:property_list<sw:symbol, sw:rope<sw:integer>>";
+        final String typeStr = "sw:property_list<K=sw:symbol, E=sw:rope<E=sw:integer>>";
         final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
         assertThat(typeString)
             .isEqualTo(
                 TypeString.ofIdentifier("property_list", SW_PACKAGE,
-                    TypeString.ofIdentifier("symbol", SW_PACKAGE),
-                    TypeString.ofIdentifier("rope", SW_PACKAGE,
-                        TypeString.ofIdentifier("integer", SW_PACKAGE))));
+                    TypeString.ofGenericDefinition("K", TypeString.ofIdentifier("symbol", SW_PACKAGE)),
+                    TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("rope", SW_PACKAGE,
+                        TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("integer", SW_PACKAGE))))));
     }
 
     @Test

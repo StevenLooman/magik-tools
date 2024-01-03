@@ -14,6 +14,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
@@ -82,7 +83,6 @@ class LocalTypeReasonerTest {
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 ropeRef,
-                Collections.emptyList(),
                 Collections.emptyList(),
                 Collections.emptyList()));
         definitionKeeper.add(
@@ -220,7 +220,6 @@ class LocalTypeReasonerTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 ropeRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList()));
         definitionKeeper.add(
             new MethodDefinition(
@@ -283,7 +282,6 @@ class LocalTypeReasonerTest {
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 ropeRef,
-                Collections.emptyList(),
                 Collections.emptyList(),
                 Collections.emptyList()));
         definitionKeeper.add(
@@ -744,7 +742,6 @@ class LocalTypeReasonerTest {
                 ExemplarDefinition.Sort.INDEXED,
                 propertyListRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList()));
         definitionKeeper.add(
             new MethodDefinition(
@@ -832,7 +829,6 @@ class LocalTypeReasonerTest {
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 ropeRef,
-                Collections.emptyList(),
                 Collections.emptyList(),
                 Collections.emptyList()));
         definitionKeeper.add(
@@ -1155,7 +1151,6 @@ class LocalTypeReasonerTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 sRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList()));
         final TypeString tRef = TypeString.ofIdentifier("t", "sw");
         definitionKeeper.add(
@@ -1167,8 +1162,7 @@ class LocalTypeReasonerTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 tRef,
                 Collections.emptyList(),
-                List.of(sRef),
-                Collections.emptyList()));
+                List.of(sRef)));
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -1202,7 +1196,6 @@ class LocalTypeReasonerTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 rRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList()));
 
         final TypeString tRef = TypeString.ofIdentifier("t", "sw");
@@ -1215,8 +1208,7 @@ class LocalTypeReasonerTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 tRef,
                 Collections.emptyList(),
-                List.of(rRef),
-                Collections.emptyList()));
+                List.of(rRef)));
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -1347,7 +1339,6 @@ class LocalTypeReasonerTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 aRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList()));
         final TypeString param1Ref = TypeString.ofParameterRef("p1");
         definitionKeeper.add(
@@ -1402,7 +1393,6 @@ class LocalTypeReasonerTest {
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 aRef,
-                Collections.emptyList(),
                 Collections.emptyList(),
                 Collections.emptyList()));
         final TypeString param1Ref = TypeString.ofParameterRef("p1");
@@ -1480,7 +1470,6 @@ class LocalTypeReasonerTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 aRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList()));
         final TypeString param1Ref = TypeString.ofParameterRef("p1");
         definitionKeeper.add(
@@ -1517,231 +1506,357 @@ class LocalTypeReasonerTest {
         assertThat(actualType.getTypeString()).isEqualTo(unsetRef);
     }
 
-    // @Test
-    // void testGenericMethodInvocation1() {
-    //     final String code = ""
-    //         + "_method object.m\n"
-    //         + "  _local r << sw:rope.new()  # type: sw:rope<sw:integer>\n"
-    //         + "  _return r.an_element()\n"
-    //         + "_endmethod\n";
+    @Test
+    void testGenericMethodInvocation1() {
+        final String code = ""
+            + "_method object.m\n"
+            + "  _local r << sw:rope.new()  # type: sw:rope<E=sw:integer>\n"
+            + "  _return r.an_element()\n"
+            + "_endmethod\n";
 
-    //     // Set up TypeKeeper/TypeReasoner.
-    //     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    //     final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-    //     final MagikType ropeType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, ropeRef);
-    //     typeKeeper.addType(ropeType);
-    //     ropeType.addGeneric(null, "E");
-    //     ropeType.addMethod(
-    //         null,
-    //         null,
-    //         EnumSet.noneOf(Method.Modifier.class),
-    //         "new()",
-    //         Collections.emptyList(),
-    //         null,
-    //         null,
-    //         new ExpressionResultString(
-    //             TypeString.SELF),
-    //         ExpressionResultString.EMPTY);
-    //     ropeType.addMethod(
-    //         null,
-    //         null,
-    //         EnumSet.noneOf(Method.Modifier.class),
-    //         "an_element()",
-    //         Collections.emptyList(),
-    //         null,
-    //         null,
-    //         new ExpressionResultString(
-    //             TypeString.ofGeneric("E")),  // Possibly also `sw:unset`, but for testing purposes...
-    //         ExpressionResultString.EMPTY);
+        // Set up TypeKeeper/TypeReasoner.
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                ropeRef,
+                Collections.emptyList(),
+                Collections.emptyList()));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                ropeRef,
+                "new()",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                new ExpressionResultString(
+                    TypeString.SELF),
+                ExpressionResultString.EMPTY));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                ropeRef,
+                "an_element()",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                new ExpressionResultString(
+                    TypeString.ofGenericReference("E")),  // Possibly also `sw:unset`, but for testing purposes...
+                ExpressionResultString.EMPTY));
 
-    //     // Do analysis.
-    //     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
-    //     final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
-    //     final AstNode topNode = magikFile.getTopNode();
-    //     final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
-    //     final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
-    //     final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-    //     final AbstractType integerType = typeKeeper.getType(integerRef);
-    //     final AbstractType actualType = result.get(0, null);
-    //     assertThat(actualType).isEqualTo(integerType);
-    // }
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
+        final AbstractType actualType = result.get(0, null);
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
+        assertThat(actualType.getTypeString()).isEqualTo(integerRef);
+    }
 
-    // @Test
-    // void testGenericMethodInvocation2() {
-    //     final String code = ""
-    //         + "_method object.m\n"
-    //         + "  _local pl << sw:property_list.new()  # type: sw:property_list<sw:symbol, sw:integer>\n"
-    //         + "  _return pl.a_key(), pl.an_element()\n"
-    //         + "_endmethod\n";
+    @Test
+    void testGenericMethodInvocation2() {
+        final String code = ""
+            + "_method object.m\n"
+            + "  _local pl << sw:property_list.new()  # type: sw:property_list<K=sw:symbol, E=sw:integer>\n"
+            + "  _return pl.a_key(), pl.an_element()\n"
+            + "_endmethod\n";
 
-    //     // Set up TypeKeeper/TypeReasoner.
-    //     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    //     final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
-    //     final MagikType propertyListType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, propertyListRef);
-    //     typeKeeper.addType(propertyListType);
-    //     propertyListType.addGeneric(null, "K");
-    //     propertyListType.addGeneric(null, "E");
-    //     propertyListType.addMethod(
-    //         null,
-    //         null,
-    //         EnumSet.noneOf(Method.Modifier.class),
-    //         "new()",
-    //         Collections.emptyList(),
-    //         null,
-    //         null,
-    //         new ExpressionResultString(
-    //             TypeString.SELF),
-    //         ExpressionResultString.EMPTY);
-    //     propertyListType.addMethod(
-    //         null,
-    //         null,
-    //         EnumSet.noneOf(Method.Modifier.class),
-    //         "a_key()",
-    //         Collections.emptyList(),
-    //         null,
-    //         null,
-    //         new ExpressionResultString(
-    //             TypeString.ofGeneric("K")),  // Possibly also `sw:unset`, but for testing purposes...
-    //         ExpressionResultString.EMPTY);
-    //     propertyListType.addMethod(
-    //         null,
-    //         null,
-    //         EnumSet.noneOf(Method.Modifier.class),
-    //         "an_element()",
-    //         Collections.emptyList(),
-    //         null,
-    //         null,
-    //         new ExpressionResultString(
-    //             TypeString.ofGeneric("E")),  // Possibly also `sw:unset`, but for testing purposes...
-    //         ExpressionResultString.EMPTY);
+        // Set up TypeKeeper/TypeReasoner.
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INDEXED,
+                propertyListRef,
+                Collections.emptyList(),
+                Collections.emptyList()));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                propertyListRef,
+                "new()",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                new ExpressionResultString(
+                    TypeString.SELF),
+                ExpressionResultString.EMPTY));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                propertyListRef,
+                "a_key()",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                new ExpressionResultString(
+                    TypeString.ofGenericReference("K")),  // Possibly also `sw:unset`, but for testing purposes...
+                ExpressionResultString.EMPTY));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                propertyListRef,
+                "an_element()",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                new ExpressionResultString(
+                    TypeString.ofGenericReference("E")),  // Possibly also `sw:unset`, but for testing purposes...
+                ExpressionResultString.EMPTY));
 
-    //     // Do analysis.
-    //     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
-    //     final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
-    //     final AstNode topNode = magikFile.getTopNode();
-    //     final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
-    //     final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
 
-    //     final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-    //     final AbstractType symbolType = typeKeeper.getType(symbolRef);
-    //     final AbstractType actualType0 = result.get(0, null);
-    //     assertThat(actualType0).isEqualTo(symbolType);
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
+        final AbstractType actualType0 = result.get(0, null);
+        assertThat(actualType0.getTypeString()).isEqualTo(symbolRef);
 
-    //     final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-    //     final AbstractType integerType = typeKeeper.getType(integerRef);
-    //     final AbstractType actualType1 = result.get(1, null);
-    //     assertThat(actualType1).isEqualTo(integerType);
-    // }
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
+        final AbstractType actualType1 = result.get(1, null);
+        assertThat(actualType1.getTypeString()).isEqualTo(integerRef);
+    }
 
-    // @Test
-    // void testGenericIterMethodInvocation() {
-    //     final String code = ""
-    //         + "_method object.m\n"
-    //         + "  _local pl << sw:property_list.new()  # type: sw:property_list<sw:symbol, sw:integer>\n"
-    //         + "  _for k, e _over pl.fast_keys_and_elements()\n"
-    //         + "  _loop\n"
-    //         + "  _endloop\n"
-    //         + "_endmethod\n";
+    @Test
+    void testGenericMethodInvocation3() {
+        final String code = ""
+            + "_method object.m\n"
+            + "  _local r << sw:rope.new()  # type: sw:rope<E=sw:integer>\n"
+            + "  _return r.as_simple_vector()\n"
+            + "_endmethod\n";
 
-    //     // Set up TypeKeeper/TypeReasoner.
-    //     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    //     final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
-    //     final MagikType propertyListType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, propertyListRef);
-    //     typeKeeper.addType(propertyListType);
-    //     propertyListType.addGeneric(null, "K");
-    //     propertyListType.addGeneric(null, "E");
-    //     propertyListType.addMethod(
-    //         null,
-    //         null,
-    //         EnumSet.noneOf(Method.Modifier.class),
-    //         "new()",
-    //         Collections.emptyList(),
-    //         null,
-    //         null,
-    //         new ExpressionResultString(
-    //             TypeString.SELF),
-    //         ExpressionResultString.EMPTY);
-    //     propertyListType.addMethod(
-    //         null,
-    //         null,
-    //         EnumSet.noneOf(Method.Modifier.class),
-    //         "fast_keys_and_elements()",
-    //         Collections.emptyList(),
-    //         null,
-    //         null,
-    //         ExpressionResultString.EMPTY,
-    //         new ExpressionResultString(
-    //             TypeString.ofGeneric("K"),
-    //             TypeString.ofGeneric("E")));
+        // Set up TypeKeeper/TypeReasoner.
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                ropeRef,
+                Collections.emptyList(),
+                Collections.emptyList()));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                ropeRef,
+                "new()",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                new ExpressionResultString(
+                    TypeString.SELF),
+                ExpressionResultString.EMPTY));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                ropeRef,
+                "as_simple_vector()",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                new ExpressionResultString(
+                    TypeString.ofIdentifier("simple_vector", "sw",
+                        TypeString.ofGenericReference("E"))),
+                ExpressionResultString.EMPTY));
 
-    //     // Do analysis.
-    //     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
-    //     final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
-    //     final AstNode topNode = magikFile.getTopNode();
-    //     final AstNode forVariablesNode = topNode.getFirstDescendant(MagikGrammar.FOR_VARIABLES);
-    //     final List<AstNode> identifierNodes = forVariablesNode.getDescendants(MagikGrammar.IDENTIFIER);
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
+        final AbstractType actualType = result.get(0, null);
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
+        final TypeString simpleVectorRefWithGeneric =
+            TypeString.ofIdentifier("simple_vector", "sw",
+                TypeString.ofGenericDefinition("E", integerRef));
+        assertThat(actualType.getTypeString()).isEqualTo(simpleVectorRefWithGeneric);
+    }
 
-    //     final AstNode kIdentifierNode = identifierNodes.get(0);
-    //     final ExpressionResult kResult = reasoner.getNodeType(kIdentifierNode);
-    //     final AbstractType actualType0 = kResult.get(0, null);
-    //     final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-    //     final AbstractType symbolType = typeKeeper.getType(symbolRef);
-    //     assertThat(actualType0).isEqualTo(symbolType);
+    @Test
+    void testGenericIterMethodInvocation() {
+        final String code = ""
+            + "_method object.m\n"
+            + "  _local pl << sw:property_list.new()  # type: sw:property_list<K=sw:symbol, E=sw:integer>\n"
+            + "  _for k, e _over pl.fast_keys_and_elements()\n"
+            + "  _loop\n"
+            + "  _endloop\n"
+            + "_endmethod\n";
 
-    //     final AstNode eIdentifierNode = identifierNodes.get(1);
-    //     final ExpressionResult eResult = reasoner.getNodeType(eIdentifierNode);
-    //     final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-    //     final AbstractType integerType = typeKeeper.getType(integerRef);
-    //     final AbstractType actualType1 = eResult.get(0, null);
-    //     assertThat(actualType1).isEqualTo(integerType);
-    // }
+        // Set up TypeKeeper/TypeReasoner.
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INDEXED,
+                propertyListRef,
+                Collections.emptyList(),
+                Collections.emptyList()));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                propertyListRef,
+                "new()",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                new ExpressionResultString(
+                    TypeString.SELF),
+                ExpressionResultString.EMPTY));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                propertyListRef,
+                "fast_keys_and_elements()",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                ExpressionResultString.EMPTY,
+                new ExpressionResultString(
+                    TypeString.ofGenericReference("K"),
+                    TypeString.ofGenericReference("E"))));
 
-    // @Test
-    // void testGenericSlot() {
-    //     final String code = ""
-    //         + "_method exemplar.m\n"
-    //         + "  _return .stack.pop()\n"
-    //         + "_endmethod\n";
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
-    //     // Set up TypeKeeper/TypeReasoner.
-    //     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode forVariablesNode = topNode.getFirstDescendant(MagikGrammar.FOR_VARIABLES);
+        final List<AstNode> identifierNodes = forVariablesNode.getDescendants(MagikGrammar.IDENTIFIER);
 
-    //     final TypeString stackRef = TypeString.ofIdentifier("stack", "sw");
-    //     final MagikType stackType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, stackRef);
-    //     typeKeeper.addType(stackType);
-    //     stackType.addGeneric(null, "E");
-    //     stackType.addMethod(
-    //         null,
-    //         null,
-    //         EnumSet.noneOf(Method.Modifier.class),
-    //         "pop()",
-    //         Collections.emptyList(),
-    //         null,
-    //         null,
-    //         new ExpressionResultString(
-    //             TypeString.ofGeneric("E")),
-    //         ExpressionResultString.EMPTY);
+        final AstNode kIdentifierNode = identifierNodes.get(0);
+        final ExpressionResult kResult = reasonerState.getNodeType(kIdentifierNode);
+        final AbstractType actualType0 = kResult.get(0, null);
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
+        assertThat(actualType0.getTypeString()).isEqualTo(symbolRef);
 
-    //     final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "sw");
-    //     final MagikType exemplarType = new MagikType(typeKeeper, null, null, Sort.SLOTTED, exemplarRef);
-    //     typeKeeper.addType(exemplarType);
-    //     final TypeString slotTypeRef = TypeStringParser.parseTypeString("sw:stack<sw:integer>", "sw");
-    //     exemplarType.addSlot(null, "stack", slotTypeRef);
+        final AstNode eIdentifierNode = identifierNodes.get(1);
+        final ExpressionResult eResult = reasonerState.getNodeType(eIdentifierNode);
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
+        final AbstractType actualType1 = eResult.get(0, null);
+        assertThat(actualType1.getTypeString()).isEqualTo(integerRef);
+    }
 
-    //     // Do analysis.
-    //     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
-    //     final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+    @Test
+    void testGenericSlot() {
+        final String code = ""
+            + "_method exemplar.m\n"
+            + "  _return .stack.pop()\n"
+            + "_endmethod\n";
 
-    //     final AstNode topNode = magikFile.getTopNode();
-    //     final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
-    //     final ExpressionResult result = reasoner.getNodeType(methodDefinitionNode);
-    //     final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-    //     final AbstractType integerType = typeKeeper.getType(integerRef);
-    //     final AbstractType actualType = result.get(0, null);
-    //     assertThat(actualType).isEqualTo(integerType);
-    // }
+        // Set up TypeKeeper/TypeReasoner.
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+        final TypeString stackRef = TypeString.ofIdentifier("stack", "sw");
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                stackRef,
+                Collections.emptyList(),
+                Collections.emptyList()));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                stackRef,
+                "pop()",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                new ExpressionResultString(
+                    TypeString.ofGenericReference("E")),  // Possibly also `sw:unset`, but for testing purposes...
+                ExpressionResultString.EMPTY));
+
+        final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "sw");
+        final TypeString slotTypeRef =
+            TypeString.ofIdentifier("stack", "sw",
+                TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("integer", "sw")));
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                exemplarRef,
+                List.of(
+                    new SlotDefinition(
+                        null,
+                        null,
+                        null,
+                        null,
+                        "stack",
+                        slotTypeRef)),
+                Collections.emptyList()));
+
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
+        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
+        final AbstractType actualType = result.get(0, null);
+        assertThat(actualType.getTypeString()).isEqualTo(integerRef);
+    }
 
 }
