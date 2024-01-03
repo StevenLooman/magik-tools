@@ -144,8 +144,9 @@ class StatementHandler extends LocalTypeReasonerHandler {
             : new ExpressionResult();
 
         // Find related node to store on.
-        final AstNode definitionNode =
-            node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+        final AstNode definitionNode = node.getFirstAncestor(
+            MagikGrammar.METHOD_DEFINITION,
+            MagikGrammar.PROCEDURE_DEFINITION);
 
         // Save results at returned node.
         this.addNodeType(definitionNode, result);
