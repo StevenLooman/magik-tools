@@ -207,10 +207,10 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
         final AbstractType type;
         if (definition instanceof ExemplarDefinition) {
             final ExemplarDefinition exemplarDefinition = (ExemplarDefinition) definition;
-            type = this.createType(exemplarDefinition);
+            type = this.createType(exemplarDefinition, typeString);
         } else if (definition instanceof ProcedureDefinition) {
             final ProcedureDefinition procedureDefinition = (ProcedureDefinition) definition;
-            type = this.createType(procedureDefinition);
+            type = this.createType(procedureDefinition, typeString);
         } else if (definition instanceof GlobalDefinition) {
             final GlobalDefinition globalDefinition = (GlobalDefinition) definition;
             type = this.createType(globalDefinition);
@@ -225,7 +225,7 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
         return type;
     }
 
-    private AbstractType createType(final ExemplarDefinition exemplarDefinition) {
+    private AbstractType createType(final ExemplarDefinition exemplarDefinition, final TypeString searchTypeString) {
         // Construct type.
         final TypeString definitionTypeString = exemplarDefinition.getTypeString();
         final Location location = exemplarDefinition.getLocation();
@@ -249,17 +249,12 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
                 slotDef.getName(),
                 slotDef.getTypeName()));
 
-        // Add generic declarations.
-        exemplarDefinition.getGenericDeclarations().stream()
-            .forEach(genDef -> magikType.addGeneric(
-                genDef.getLocation(),
-                genDef.getName()));
-
-        // TODO: Add generic definitions.
+        // Add generic definitions.
+        searchTypeString.getGenerics().stream()
+            .forEach(genTypeStr -> magikType.addGenericDefinition(null, genTypeStr));
 
         // Add methods.
         this.definitionKeeper.getMethodDefinitions(definitionTypeString).stream()
-            .filter(methodDef -> methodDef.getTypeName().equals(definitionTypeString))
             .forEach(methodDef -> {
                 final Method method = magikType.addMethod(
                     methodDef.getLocation(),
@@ -313,7 +308,7 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
         return magikType;
     }
 
-    private AbstractType createType(final ProcedureDefinition procedureDefinition) {
+    private AbstractType createType(final ProcedureDefinition procedureDefinition, final TypeString searchTypeString) {
         final AbstractType abstractType = this.getType(DefinitionKeeperTypeKeeperAdapter.SW_PROCEDURE_REF);
         final MagikType procedureType = (MagikType) abstractType;
 

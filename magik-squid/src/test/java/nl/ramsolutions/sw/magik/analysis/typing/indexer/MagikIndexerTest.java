@@ -119,7 +119,7 @@ class MagikIndexerTest {
         assertThat(doc).isEqualTo(""
             + "Test exemplar.\n"
             + "@slot {sw:rope} slot_a\n"
-            + "@slot {sw:property_list<sw:symbol, sw:integer>} slot_b");
+            + "@slot {sw:property_list<K=sw:symbol, E=sw:integer>} slot_b");
 
         // Test slots.
         final Collection<SlotDefinition> slots = exemplarDef.getSlots();
@@ -133,8 +133,8 @@ class MagikIndexerTest {
         assertThat(slotB.getName()).isEqualTo("slot_b");
         assertThat(slotB.getTypeName()).isEqualTo(
             TypeString.ofIdentifier("sw:property_list", "user",
-                TypeString.ofIdentifier("sw:symbol", "user"),
-                TypeString.ofIdentifier("sw:integer", "user")));
+                TypeString.ofGenericDefinition("K", TypeString.ofIdentifier("sw:symbol", "user")),
+                TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("sw:integer", "user"))));
 
         // Test methods.
         final Collection<MethodDefinition> newMethodDefs = definitionKeeper.getMethodDefinitions(typeString).stream()

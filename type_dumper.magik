@@ -347,9 +347,6 @@ _private _method type_dumper.write_type(type_name, method_table)
 	# Slots.
 	instruction[:slots] << _self.build_slots(method_table)
 
-	# Generic declarations.
-	instruction[:generic_declarations] << sw:rope.new()
-
 	# Pragma.
 	instruction[:pragma] << metadata[:topic].default({})
 
@@ -729,7 +726,7 @@ _private _method type_dumper.build_params(name, procedure)
 	_then
 		_if name.matches?(:|*<<|)
 		_then
-			_local param << sw:property_list.new_with(:name, "value", :modifier, _unset, :type_name, _self.undefined_type)
+			_local param << sw:property_list.new_with(:name, "value", :modifier, "none", :type_name, _self.undefined_type)
 			params.add_last(param)
 			_return params
 		_else
@@ -737,10 +734,10 @@ _private _method type_dumper.build_params(name, procedure)
 		_endif
 	_elif procedure.class_name _is :sys_slot_procedure
 	_then
-		_local param_val << sw:property_list.new_with(:name, "value", :modifier, _unset, :type_name, _self.undefined_type)
+		_local param_val << sw:property_list.new_with(:name, "value", :modifier, "none", :type_name, _self.undefined_type)
 		params.add_last(param_val)
 
-		_local param_key << sw:property_list.new_with(:name, "key", :modifier, _unset, :type_name, _self.undefined_type)
+		_local param_key << sw:property_list.new_with(:name, "key", :modifier, "none", :type_name, _self.undefined_type)
 		params.add_last(param_key)
 
 		_return params

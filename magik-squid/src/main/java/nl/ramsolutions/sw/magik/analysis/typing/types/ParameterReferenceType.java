@@ -98,7 +98,7 @@ public class ParameterReferenceType extends AbstractType {
     }
 
     @Override
-    public List<GenericDeclaration> getGenerics() {
+    public List<GenericDefinition> getGenericDefinitions() {
         return Collections.emptyList();
     }
 

@@ -67,13 +67,6 @@ class JsonDefinitionReaderTest {
         final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
         assertThat(slot2Def.getName()).isEqualTo("slot2");
         assertThat(slot2Def.getTypeName()).isEqualTo(floatRef);
-
-        List<ExemplarDefinition.GenericDeclaration> genericDeclaration = aDef.getGenericDeclarations();
-        final ExemplarDefinition.GenericDeclaration kGenericDecl = genericDeclaration.get(0);
-        assertThat(kGenericDecl.getName()).isEqualTo("K");
-
-        final ExemplarDefinition.GenericDeclaration eGenericDecl = genericDeclaration.get(1);
-        assertThat(eGenericDecl.getName()).isEqualTo("E");
     }
 
     @Test

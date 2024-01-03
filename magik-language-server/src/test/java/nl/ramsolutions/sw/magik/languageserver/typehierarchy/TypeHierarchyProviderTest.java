@@ -45,7 +45,6 @@ class TypeHierarchyProviderTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 exemplarRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList()));
 
         final String code = ""
@@ -71,7 +70,6 @@ class TypeHierarchyProviderTest {
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 ropeRef,
-                Collections.emptyList(),
                 Collections.emptyList(),
                 Collections.emptyList()));
 
@@ -100,7 +98,6 @@ class TypeHierarchyProviderTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 exemplarRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList()));
         final TypeString subExemplarRef = TypeString.ofIdentifier("sub_exemplar", "user");
         definitionKeeper.add(
@@ -112,8 +109,7 @@ class TypeHierarchyProviderTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 subExemplarRef,
                 Collections.emptyList(),
-                List.of(exemplarRef),
-                Collections.emptyList()));
+                List.of(exemplarRef)));
 
         final TypeHierarchyItem item = new TypeHierarchyItem(
             "user:exemplar",
@@ -146,8 +142,7 @@ class TypeHierarchyProviderTest {
                 exemplarRef,
                 Collections.emptyList(),
                 List.of(
-                    TypeString.ofIdentifier("slotted_format_mixin", "sw")),
-                Collections.emptyList()));
+                    TypeString.ofIdentifier("slotted_format_mixin", "sw"))));
 
         final TypeHierarchyItem item = new TypeHierarchyItem(
             "user:exemplar",

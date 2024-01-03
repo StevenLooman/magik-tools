@@ -100,8 +100,7 @@ public class DefMixinParser extends BaseDefParser {
             ExemplarDefinition.Sort.INTRINSIC,
             name,
             Collections.emptyList(),
-            parents,
-            Collections.emptyList());
+            parents);
         return List.of(mixinDefinition);
     }
 

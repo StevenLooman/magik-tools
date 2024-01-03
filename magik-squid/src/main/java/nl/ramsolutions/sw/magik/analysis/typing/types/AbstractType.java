@@ -152,17 +152,18 @@ public abstract class AbstractType {
      * Get the {@link GenericDefinition}s.
      * @return List of {@link GenericDefinition}s.
      */
-    public abstract List<GenericDeclaration> getGenerics();
+    public abstract List<GenericDefinition> getGenericDefinitions();
 
     /**
      * Get the {@link GenericDefinition} by name.
-     * @param name Name of GenericDefinition.
+     * @param name Name of {@link GenericDefinition}.
      * @return
      */
     @CheckForNull
-    public GenericDeclaration getGeneric(final String name) {
-        return this.getGenerics().stream()
-            .filter(genericDefinition -> genericDefinition.getName().equals(name))
+    public GenericDefinition getGenericDefinition(final String name) {
+        final TypeString typeStr = TypeString.ofGenericReference(name);
+        return this.getGenericDefinitions().stream()
+            .filter(genericDefinition -> genericDefinition.getTypeString().equals(typeStr))
             .findAny()
             .orElse(null);
     }

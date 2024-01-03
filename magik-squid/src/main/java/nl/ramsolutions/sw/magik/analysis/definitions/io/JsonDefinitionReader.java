@@ -211,6 +211,7 @@ public final class JsonDefinitionReader {
         return new GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .registerTypeAdapter(TypeString.class, new TypeStringDeserializer())
+            .registerTypeAdapter(ExpressionResultString.class, new ExpressionResultStringDeserializer())
             .registerTypeAdapter(
                 ExemplarDefinition.Sort.class, new LowerCaseEnumDeserializer<ExemplarDefinition.Sort>())
             .registerTypeAdapter(
@@ -219,7 +220,6 @@ public final class JsonDefinitionReader {
                 ProcedureDefinition.Modifier.class, new LowerCaseEnumDeserializer<ProcedureDefinition.Modifier>())
             .registerTypeAdapter(
                 ParameterDefinition.Modifier.class, new LowerCaseEnumDeserializer<ParameterDefinition.Modifier>())
-            .registerTypeAdapter(ExpressionResultString.class, new ExpressionResultStringDeserializer())
             .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionCreator())
             .create();
     }

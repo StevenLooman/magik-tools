@@ -1,23 +1,17 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GenericDeclaration;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GenericDefinition;
+import nl.ramsolutions.sw.magik.analysis.typing.types.GenericReference;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikTypeInstance;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ParameterReferenceType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
-import nl.ramsolutions.sw.magik.utils.StreamUtils;
 
 /**
  * Type reader. Interprets {@link TypeString}/{@link ExpressionResultString}, and returns a
@@ -36,8 +30,8 @@ public final class TypeReader {
     }
 
     /**
-     * Parse a type string and return the type. The result can be a {@Link CombinedType} type when types are combined
-     * with a {@code |}-sign.
+     * Parse a type string and return the type. The result can be a
+     * {@link CombinedType} type when types are combined with a {@code |}-sign.
      * @param typeString String to parse.
      * @return Parsed type.
      */
@@ -49,27 +43,18 @@ public final class TypeReader {
         } else if (typeString.isSelf()) {
             return SelfType.INSTANCE;
         } else if (typeString.isParameterReference()) {
-            final String paramName = typeString.referencedParameter();
+            final String paramName = typeString.getReferencedParameter();
             return new ParameterReferenceType(paramName);
-        } else if (typeString.isGeneric()) {
-            final String genericName = typeString.getString();
-            return new GenericDeclaration(null, genericName);
-        } else if (typeString.isGenericParametered()) {
+        } else if (typeString.isGenericReference()) {
+            return new GenericReference(null, typeString);
+        } else if (typeString.hasGenerics()) {
             final AbstractType mainType = this.typeKeeper.getType(typeString);
             if (!(mainType instanceof MagikType)) {
                 return mainType;
             }
 
             final MagikType magikType = (MagikType) mainType;
-            final List<GenericDeclaration> genericDeclarations = magikType.getGenerics();
-            final List<TypeString> genericTypeStrs = typeString.getGenerics();
-            final Set<GenericDefinition> genericDefs = StreamUtils.zip(
-                    genericDeclarations.stream(),
-                    genericTypeStrs.stream())
-                    .filter(entry -> entry.getKey() != null && entry.getValue() != null)
-                    .map(entry -> new GenericDefinition(this.typeKeeper, entry.getKey().getName(), entry.getValue()))
-                .collect(Collectors.toSet());
-            return new MagikTypeInstance(this.typeKeeper, typeString, genericDefs);
+            return new MagikType(magikType, typeString);
         } else if (typeString.isCombined()) {
             return typeString.getCombinedTypes().stream()
                 .map(this::parseTypeString)

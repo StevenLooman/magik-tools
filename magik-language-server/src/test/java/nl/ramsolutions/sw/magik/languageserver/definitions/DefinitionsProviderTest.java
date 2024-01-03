@@ -48,7 +48,6 @@ class DefinitionsProviderTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 ropeRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList()));
 
         final String code = ""

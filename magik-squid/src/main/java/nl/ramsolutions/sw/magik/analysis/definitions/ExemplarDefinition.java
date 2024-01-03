@@ -29,35 +29,10 @@ public class ExemplarDefinition extends TypeStringDefinition {
         OBJECT;
     }
 
-    /**
-     * Generic declaration.
-     */
-    public static class GenericDeclaration {
-
-        private final Location location;
-        private final String name;
-
-        public GenericDeclaration(final @Nullable Location location, final String name) {
-            this.location = location;
-            this.name = name;
-        }
-
-        @CheckForNull
-        public Location getLocation() {
-            return this.location;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-    }
-
     private final Sort sort;
     private final TypeString typeName;
     private final List<SlotDefinition> slots;
     private final List<TypeString> parents;
-    private final List<GenericDeclaration> genericDeclarations;
 
     /**
      * Constructor.
@@ -77,8 +52,7 @@ public class ExemplarDefinition extends TypeStringDefinition {
             final Sort sort,
             final TypeString typeName,
             final List<SlotDefinition> slots,
-            final List<TypeString> parents,
-            final List<GenericDeclaration> genericDeclarations) {
+            final List<TypeString> parents) {
         super(location, moduleName, doc, node);
 
         if (!typeName.isSingle()) {
@@ -89,7 +63,6 @@ public class ExemplarDefinition extends TypeStringDefinition {
         this.typeName = typeName;
         this.slots = List.copyOf(slots);
         this.parents = List.copyOf(parents);
-        this.genericDeclarations = List.copyOf(genericDeclarations);
     }
 
     public List<SlotDefinition> getSlots() {
@@ -111,10 +84,6 @@ public class ExemplarDefinition extends TypeStringDefinition {
 
     public List<TypeString> getParents() {
         return Collections.unmodifiableList(this.parents);
-    }
-
-    public List<GenericDeclaration> getGenericDeclarations() {
-        return Collections.unmodifiableList(this.genericDeclarations);
     }
 
     public TypeString getTypeString() {
@@ -147,8 +116,7 @@ public class ExemplarDefinition extends TypeStringDefinition {
             this.slots.stream()
                 .map(slotDef -> slotDef.getWithoutNode())
                 .collect(Collectors.toList()),
-            this.parents,
-            this.genericDeclarations);
+            this.parents);
     }
 
     @Override
@@ -168,8 +136,7 @@ public class ExemplarDefinition extends TypeStringDefinition {
             this.sort,
             this.typeName,
             this.slots,
-            this.parents,
-            this.genericDeclarations);
+            this.parents);
     }
 
     @Override
@@ -193,8 +160,7 @@ public class ExemplarDefinition extends TypeStringDefinition {
             && Objects.equals(this.sort, other.sort)
             && Objects.equals(this.typeName, other.typeName)
             && Objects.equals(this.slots, other.slots)
-            && Objects.equals(this.parents, other.parents)
-            && Objects.equals(this.genericDeclarations, other.genericDeclarations);
+            && Objects.equals(this.parents, other.parents);
     }
 
 }

@@ -101,8 +101,7 @@ public class DefEnumerationParser extends BaseDefParser {
             ExemplarDefinition.Sort.SLOTTED,
             name,
             Collections.emptyList(),
-            DefEnumerationParser.ENUM_PARENTS,
-            Collections.emptyList());
+            DefEnumerationParser.ENUM_PARENTS);
         return List.of(definition);
     }
 

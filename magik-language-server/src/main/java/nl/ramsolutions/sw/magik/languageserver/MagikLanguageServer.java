@@ -41,7 +41,8 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
      * @throws IOException
      */
     public MagikLanguageServer() {
-        this.definitionKeeper = new DefinitionKeeper();
+        // We assume the DefinitionKeeper gets its types from a types database (.jsonl file).
+        this.definitionKeeper = new DefinitionKeeper(false);
         this.magikTextDocumentService = new MagikTextDocumentService(this, this.definitionKeeper);
         this.magikWorkspaceService = new MagikWorkspaceService(this, this.definitionKeeper);
         this.magikNotebookDocumentService = new MagikNotebookDocumentService(this);
@@ -117,7 +118,9 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
 
     @Override
     public void exit() {
-        // Nothing to do.
+        LOGGER.trace("exit");
+
+        System.exit(0);
     }
 
     @Override

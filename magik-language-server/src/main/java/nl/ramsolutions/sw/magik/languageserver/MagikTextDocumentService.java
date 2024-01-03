@@ -512,10 +512,14 @@ public class MagikTextDocumentService implements TextDocumentService {
     @Override
     public CompletableFuture<List<InlayHint>> inlayHint(final InlayHintParams params) {
         final TextDocumentIdentifier textDocument = params.getTextDocument();
-        LOGGER.trace("inlayHint, uri: {}", textDocument.getUri());
+        final Range range = params.getRange();
+        LOGGER.trace(
+            "inlayHint, uri: {}, range: {},{}-{},{}",
+            textDocument.getUri(),
+            range.getStart().getLine(), range.getStart().getCharacter(),
+            range.getEnd().getLine(), range.getEnd().getCharacter());
 
         final MagikTypedFile magikFile = this.openFiles.get(textDocument);
-        final Range range = params.getRange();
         return CompletableFuture.supplyAsync(() -> this.inlayHintProvider.provideInlayHints(magikFile, range));
     }
 

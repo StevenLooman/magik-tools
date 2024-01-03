@@ -8,23 +8,30 @@ import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
 
 /**
- * Generic declaration.
+ * Generic reference.
  */
-public class GenericDeclaration extends AbstractType {
+public class GenericReference extends AbstractType {
+
+    // TODO: Where do we use this?
 
     private final Location location;
-    private final String name;
+    private final TypeString typeString;
     private String doc;
 
     /**
      * Constructor.
      * @param location Location where this generic is defined.
-     * @param name Name of generic
+     * @param typeString Name of generic
      */
-    public GenericDeclaration(final @Nullable Location location, final String name) {
+    public GenericReference(final @Nullable Location location, final TypeString typeString) {
         super(location, null);
+
+        if (!typeString.isGenericReference()) {
+            throw new IllegalArgumentException();
+        }
+
         this.location = location;
-        this.name = name;
+        this.typeString = typeString;
     }
 
     @Override
@@ -32,21 +39,14 @@ public class GenericDeclaration extends AbstractType {
         return this.location;
     }
 
+    @Override
     public String getName() {
-        return this.name;
-    }
-
-    /**
-     * Get name a {@link TypeString}.
-     * @return {@link TypeString} of self.
-     */
-    public TypeString getNameAsTypeString() {
-        return TypeString.ofGeneric(this.name);
+        return this.typeString.getString();
     }
 
     @Override
     public String getFullName() {
-        return this.getNameAsTypeString().getIdentifier();
+        return this.typeString.getFullString();
     }
 
     @Override
@@ -61,30 +61,12 @@ public class GenericDeclaration extends AbstractType {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.name);
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj == null) {
-            return false;
-        }
-
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-
-        final GenericDeclaration other = (GenericDeclaration) obj;
-        return Objects.equals(this.name, other.name);
+        return Objects.hash(this.typeString);
     }
 
     @Override
     public TypeString getTypeString() {
-        return TypeString.ofGeneric(this.name);
+        return this.typeString;
     }
 
     @Override
@@ -103,12 +85,12 @@ public class GenericDeclaration extends AbstractType {
     }
 
     @Override
-    public Collection<Method> getSuperMethods(String methodName) {
+    public Collection<Method> getSuperMethods(final String methodName) {
         return Collections.emptySet();
     }
 
     @Override
-    public Collection<Method> getSuperMethods(String methodName, String superName) {
+    public Collection<Method> getSuperMethods(final String methodName, final String superName) {
         return Collections.emptySet();
     }
 
@@ -118,8 +100,26 @@ public class GenericDeclaration extends AbstractType {
     }
 
     @Override
-    public List<GenericDeclaration> getGenerics() {
+    public List<GenericDefinition> getGenericDefinitions() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final GenericReference other = (GenericReference) obj;
+        return Objects.equals(this.typeString, other.typeString);
     }
 
 }
