@@ -115,7 +115,7 @@ public final class UndefinedType extends AbstractType {  // NOSONAR: Singleton.
     }
 
     @Override
-    public List<GenericDeclaration> getGenerics() {
+    public List<GenericDefinition> getGenericDefinitions() {
         return Collections.emptyList();
     }
 

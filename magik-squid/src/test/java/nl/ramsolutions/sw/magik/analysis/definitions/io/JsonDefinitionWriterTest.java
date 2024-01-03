@@ -74,7 +74,6 @@ class JsonDefinitionWriterTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 aRef,
                 List.of(),
-                List.of(),
                 List.of()));
 
         JsonDefinitionWriter.write(this.tempPath, definitionKeeper);

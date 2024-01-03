@@ -109,7 +109,6 @@ class CompletionProviderTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 aRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 Collections.emptyList()));
         definitionKeeper.add(
             new MethodDefinition(
@@ -238,7 +237,6 @@ class CompletionProviderTest {
                         null,
                         code,
                         aRef)),
-                Collections.emptyList(),
                 Collections.emptyList()));
 
         final Position position = new Position(1, 2);    // On ''.

@@ -60,7 +60,6 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
                 aRef,
                 List.of(
                     new SlotDefinition(null, null, null, null, "slot", TypeString.UNDEFINED)),
-                Collections.emptyList(),
                 Collections.emptyList()));
         final MagikTypedCheck check = new SlotExistsTypedCheck();
         final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);

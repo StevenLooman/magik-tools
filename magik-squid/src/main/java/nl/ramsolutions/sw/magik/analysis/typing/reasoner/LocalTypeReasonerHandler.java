@@ -19,6 +19,8 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 @SuppressWarnings("visibilitymodifier")
 abstract class LocalTypeReasonerHandler {
 
+    private static final TypeString SW_PROCEDURE_REF = TypeString.ofIdentifier("procedure", "sw");
+
     protected final LocalTypeReasonerState state;
     protected final ITypeKeeper typeKeeper;
     protected final TypeReader typeReader;
@@ -87,13 +89,18 @@ abstract class LocalTypeReasonerHandler {
      * @return Method owner type.
      */
     protected AbstractType getMethodOwnerType(final AstNode node) {
-        final AstNode methodDefNode = node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-        if (methodDefNode == null) {
-            // This can happen in case of a procedure definition calling a method on _self.
+        final AstNode defNode = node.getFirstAncestor(
+            MagikGrammar.PROCEDURE_DEFINITION,
+            MagikGrammar.METHOD_DEFINITION);
+        if (defNode == null) {
+            // Lets try to be safe.
             return UndefinedType.INSTANCE;
+        } else if (defNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
+            return this.typeReader.parseTypeString(LocalTypeReasonerHandler.SW_PROCEDURE_REF);
         }
 
-        final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefNode);
+        // Method definition.
+        final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(defNode);
         final TypeString typeString = helper.getTypeString();
         return this.typeReader.parseTypeString(typeString);
     }

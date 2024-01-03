@@ -24,9 +24,10 @@ class TypeStringGrammarTest {
             .matches("_self|sw:unset")
             .matches("integer|float")
             .matches("sw:integer| sw:float")
-            .matches("sw:rope<sw:float>")
-            .matches("sw:property_list<symbol, float>")
-            .matches("sw:rope<sw:property_list<sw:symbol, sw:float>>");
+            .matches("<E>")
+            .matches("sw:rope<E=sw:float>")
+            .matches("sw:property_list<K=symbol, E=float>")
+            .matches("sw:rope<E=sw:property_list<K=sw:symbol, E=sw:float>>");
     }
 
     @Test
@@ -39,8 +40,9 @@ class TypeStringGrammarTest {
             .matches("integer, integer")
             .matches("integer, sw:integer")
             .matches("integer, sw:integer|sw:float")
-            .matches("sw:rope<sw:float>, integer")
-            .matches("sw:property_list<symbol, float>, sw:property_list<symbol, float>")
+            .matches("sw:rope<E=sw:float>, integer")
+            .matches("<E>, integer")
+            .matches("sw:property_list<K=symbol, E=float>, sw:property_list<K=symbol, E=float>")
             .matches("__UNDEFINED_RESULT__");
     }
 

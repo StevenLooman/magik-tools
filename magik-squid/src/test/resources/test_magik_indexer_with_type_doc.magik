@@ -2,7 +2,7 @@ _package user
 
 ## Test exemplar.
 ## @slot {sw:rope} slot_a
-## @slot {sw:property_list<sw:symbol, sw:integer>} slot_b
+## @slot {sw:property_list<K=sw:symbol, E=sw:integer>} slot_b
 def_slotted_exemplar(
     :test_exemplar,
     {

@@ -29,7 +29,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.SLOTTED,
                 typeRef,
                 List.of(),
-                List.of(),
                 List.of()));
 
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
@@ -53,7 +52,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 type1Ref,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -63,7 +61,6 @@ class TypeMatcherTest {
                 null,
                 ExemplarDefinition.Sort.INTRINSIC,
                 type2Ref,
-                List.of(),
                 List.of(),
                 List.of()));
 
@@ -89,7 +86,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 baseRef,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -100,8 +96,7 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 childRef,
                 List.of(),
-                List.of(baseRef),
-                List.of()));
+                List.of(baseRef)));
 
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
         final AbstractType baseType = typeKeeper.getType(baseRef);
@@ -125,7 +120,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 type1Ref,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -135,7 +129,6 @@ class TypeMatcherTest {
                 null,
                 ExemplarDefinition.Sort.INTRINSIC,
                 type2Ref,
-                List.of(),
                 List.of(),
                 List.of()));
 
@@ -163,7 +156,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 type1Ref,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -174,7 +166,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 type2Ref,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -184,7 +175,6 @@ class TypeMatcherTest {
                 null,
                 ExemplarDefinition.Sort.INTRINSIC,
                 type3Ref,
-                List.of(),
                 List.of(),
                 List.of()));
 
@@ -213,7 +203,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 type1Ref,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -224,7 +213,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 type2Ref,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -234,7 +222,6 @@ class TypeMatcherTest {
                 null,
                 ExemplarDefinition.Sort.INTRINSIC,
                 type3Ref,
-                List.of(),
                 List.of(),
                 List.of()));
 
@@ -264,7 +251,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 type1Ref,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -275,7 +261,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 type2Ref,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -285,7 +270,6 @@ class TypeMatcherTest {
                 null,
                 ExemplarDefinition.Sort.INTRINSIC,
                 type3Ref,
-                List.of(),
                 List.of(),
                 List.of()));
 
@@ -313,7 +297,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 typeRef,
                 List.of(),
-                List.of(),
                 List.of()));
 
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
@@ -338,7 +321,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 type1Ref,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -348,7 +330,6 @@ class TypeMatcherTest {
                 null,
                 ExemplarDefinition.Sort.INTRINSIC,
                 type2Ref,
-                List.of(),
                 List.of(),
                 List.of()));
 
@@ -374,7 +355,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 baseRef,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -385,8 +365,7 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 childRef,
                 List.of(),
-                List.of(baseRef),
-                List.of()));
+                List.of(baseRef)));
 
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
         final AbstractType childType = typeKeeper.getType(childRef);
@@ -411,7 +390,6 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 baseRef,
                 List.of(),
-                List.of(),
                 List.of()));
         definitionKeeper.add(
             new ExemplarDefinition(
@@ -422,8 +400,7 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 child1Ref,
                 List.of(),
-                List.of(baseRef),
-                List.of()));
+                List.of(baseRef)));
         definitionKeeper.add(
             new ExemplarDefinition(
                 null,
@@ -433,8 +410,7 @@ class TypeMatcherTest {
                 ExemplarDefinition.Sort.INTRINSIC,
                 child2Ref,
                 List.of(),
-                List.of(child1Ref),
-                List.of()));
+                List.of(child1Ref)));
 
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
         final AbstractType baseType = typeKeeper.getType(baseRef);
