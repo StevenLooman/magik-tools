@@ -143,8 +143,11 @@ public final class ProductDefinitionScanner {
         final String version = versionNode != null
             ? versionNode.getFirstChild(SwProductDefinitionGrammar.VERSION_NUMBER).getTokenValue()
             : null;
-        final String versionComment = versionNode != null
-            ? versionNode.getFirstChild(SwProductDefinitionGrammar.REST_OF_LINE).getTokenValue()
+        final AstNode versionCommentNode = versionNode != null
+            ? versionNode.getFirstChild(SwProductDefinitionGrammar.REST_OF_LINE)
+            : null;
+        final String versionComment = versionCommentNode != null
+            ? versionCommentNode.getTokenValue()
             : null;
 
         return new ProductDefinition(location, productName, version, versionComment);

@@ -388,12 +388,14 @@ public class Method {
         String signature = this.getSignature();
         final int bracketIndex = signature.indexOf("[");
         if (bracketIndex != -1) {
-            signature = signature.substring(bracketIndex);
+            return signature.substring(bracketIndex);
         }
-        int dotIndex = signature.indexOf(".");
+
+        final int dotIndex = signature.indexOf(".");
         if (dotIndex != -1) {
-            signature = signature.substring(dotIndex + 1);
+            return signature.substring(dotIndex + 1);
         }
+
         return signature;
     }
 

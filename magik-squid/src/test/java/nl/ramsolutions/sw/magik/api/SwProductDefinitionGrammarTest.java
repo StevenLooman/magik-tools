@@ -82,7 +82,7 @@ class SwProductDefinitionGrammarTest {
     }
 
     @Test
-    void testProductsDefinitions() {
+    void testProductsDefinition() {
         assertThat(g.rule(SwProductDefinitionGrammar.PRODUCT_DEFINITION))
             .matches("id layered_product\n#comment");
     }

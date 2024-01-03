@@ -106,8 +106,8 @@ public class AliasType extends AbstractType {
     }
 
     @Override
-    public List<GenericDeclaration> getGenerics() {
-        return this.getAliasedType().getGenerics();
+    public List<GenericDefinition> getGenericDefinitions() {
+        return this.getAliasedType().getGenericDefinitions();
     }
 
     @Override

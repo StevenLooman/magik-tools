@@ -94,6 +94,10 @@ public class ProcedureInstance extends AbstractType {
         }
     }
 
+    public Method getInvokeMethod() {
+        return this.invokeMethod;
+    }
+
     public String getProcedureName() {
         return this.procedureName;
     }
@@ -104,7 +108,7 @@ public class ProcedureInstance extends AbstractType {
     }
 
     @Override
-    public List<GenericDeclaration> getGenerics() {
+    public List<GenericDefinition> getGenericDefinitions() {
         return Collections.emptyList();
     }
 
