@@ -19,7 +19,7 @@ public class TodoCommentCheck extends MagikCheck {
     public static final String CHECK_KEY = "CommentTodo";
     private static final String MESSAGE = "Todo comment: %s.";
 
-    private static final String DEFAULT_FORBIDDEN_WORDS = "TODO,FIXME,HACK,XXX";
+    private static final String DEFAULT_FORBIDDEN_WORDS = "TODO,FIXME,HACK,NOTE,TEMP,XXX";
 
     /**
      * List of comment words, separated by ','.
