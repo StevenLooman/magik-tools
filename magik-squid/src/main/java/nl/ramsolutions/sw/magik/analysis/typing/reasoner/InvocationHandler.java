@@ -47,9 +47,9 @@ class InvocationHandler extends LocalTypeReasonerHandler {
         final ExpressionResult calledResult = this.state.getNodeType(calledNode);
         final AbstractType originalCalledType = calledResult.get(0, unsetType);
         final AbstractType methodOwnerType = this.getMethodOwnerType(node);
-        final AbstractType calledType = calledResult.
-            substituteType(SelfType.INSTANCE, methodOwnerType).
-            get(0, unsetType);
+        final AbstractType calledType = calledResult
+            .substituteType(SelfType.INSTANCE, methodOwnerType)
+            .get(0, unsetType);
 
         // Perform method call and store iterator result(s).
         final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
