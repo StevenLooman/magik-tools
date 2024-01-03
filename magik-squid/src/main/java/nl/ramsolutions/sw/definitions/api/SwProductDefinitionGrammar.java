@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.definitions.api;
 
+import com.sonar.sslr.api.GenericTokenType;
 import org.sonar.sslr.grammar.GrammarRuleKey;
 import org.sonar.sslr.grammar.LexerlessGrammarBuilder;
 import org.sonar.sslr.parser.LexerlessGrammar;
@@ -15,9 +16,9 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
     PRODUCT_IDENTIFICATION,
     PRODUCT_TYPE,
 
-    CLAUSE,
     DESCRIPTION,
     REQUIRES,
+    OPTIONAL,
     TITLE,
     VERSION,
 
@@ -29,9 +30,8 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
     FREE_LINE,
 
     SPACING,
-    WHITESPACE_NEWLINE,
+    NEWLINE,
     WHITESPACE,
-    OPTIONAL_WHITESPACE,
     COMMENT,
     IDENTIFIER,
     NUMBER,
@@ -42,22 +42,25 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
      * @return The grammar.
      */
     public static LexerlessGrammar create() {
-        LexerlessGrammarBuilder builder = LexerlessGrammarBuilder.create();
+        final LexerlessGrammarBuilder builder = LexerlessGrammarBuilder.create();
 
-        builder.rule(PRODUCT_DEFINITION).is(builder.zeroOrMore(CLAUSE));
-
-        builder.rule(CLAUSE).is(builder.firstOf(
+        builder.rule(PRODUCT_DEFINITION).is(
+            builder.optional(SPACING),
             PRODUCT_IDENTIFICATION,
-            DESCRIPTION,
-            REQUIRES,
-            TITLE,
-            VERSION,
-            SPACING
-        )).skip();
+            builder.zeroOrMore(
+                builder.firstOf(
+                    DESCRIPTION,
+                    REQUIRES,
+                    OPTIONAL,
+                    TITLE,
+                    VERSION,
+                    SPACING)),
+            builder.token(GenericTokenType.EOF, builder.endOfInput()));
 
         builder.rule(PRODUCT_IDENTIFICATION).is(IDENTIFIER, WHITESPACE, PRODUCT_TYPE);
         builder.rule(DESCRIPTION).is("description", SPACING, FREE_LINES, "end");
         builder.rule(REQUIRES).is("requires", SPACING, PRODUCT_REFS, "end");
+        builder.rule(OPTIONAL).is("optional", SPACING, PRODUCT_REFS, "end");
         builder.rule(TITLE).is("title", SPACING, FREE_LINES, "end");
         builder.rule(VERSION).is("version", WHITESPACE, VERSION_NUMBER, builder.optional(WHITESPACE, REST_OF_LINE));
 
@@ -72,13 +75,17 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
         builder.rule(FREE_LINES).is(builder.zeroOrMore(FREE_LINE));
         builder.rule(FREE_LINE).is(builder.regexp("(?!end).*[\r\n]+"));
 
-        builder.rule(SPACING).is(builder.oneOrMore(builder.firstOf(WHITESPACE_NEWLINE, COMMENT))).skip();
+        builder.rule(SPACING).is(
+            builder.oneOrMore(
+                builder.firstOf(
+                    WHITESPACE,
+                    NEWLINE,
+                    COMMENT))).skip();
 
-        builder.rule(WHITESPACE_NEWLINE).is(builder.skippedTrivia(builder.regexp("[ \n\r\t\f]+"))).skip();
-        builder.rule(WHITESPACE).is(builder.skippedTrivia(builder.regexp("[ \t]+"))).skip();
-        builder.rule(OPTIONAL_WHITESPACE).is(builder.skippedTrivia(builder.regexp("[ \n\r\t\f]*"))).skip();
-        builder.rule(COMMENT).is(builder.commentTrivia(builder.regexp("#[^\r\n]*"))).skip();
-        builder.rule(IDENTIFIER).is(builder.regexp("(?!end)\\w+"));
+        builder.rule(NEWLINE).is(builder.skippedTrivia(builder.regexp("(?:\\n|\\r\\n|\\r)"))).skip();
+        builder.rule(WHITESPACE).is(builder.skippedTrivia(builder.regexp("[\\t\\u0020\\u00A0\\uFEFF]+"))).skip();
+        builder.rule(COMMENT).is(builder.commentTrivia(builder.regexp("(?s)#[^\r\n]*"))).skip();
+        builder.rule(IDENTIFIER).is(builder.regexp("(?!end)[a-zA-Z0-9_!]+"));
         builder.rule(NUMBER).is(builder.regexp("[0-9]+"));
         builder.rule(REST_OF_LINE).is(builder.regexp("[^\r\n]*+"));
 
