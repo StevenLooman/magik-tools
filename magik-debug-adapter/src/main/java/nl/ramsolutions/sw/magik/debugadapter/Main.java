@@ -38,8 +38,9 @@ public final class Main {
      * @throws IOException -
      */
     private static void initLogger() throws IOException {
-        final InputStream stream = Main.class.getClassLoader().getResourceAsStream("logging.properties");
-        LogManager.getLogManager().readConfiguration(stream);  // NOSONAR: Own logging configuration.
+        try (InputStream stream = Main.class.getClassLoader().getResourceAsStream("logging.properties")) {
+            LogManager.getLogManager().readConfiguration(stream);  // NOSONAR: Own logging configuration.
+        }
     }
 
     /**
@@ -48,8 +49,9 @@ public final class Main {
      * @throws IOException -
      */
     private static void initDebugLogger() throws IOException {
-        final InputStream stream = Main.class.getClassLoader().getResourceAsStream("debug-logging.properties");
-        LogManager.getLogManager().readConfiguration(stream);  // NOSONAR: Own logging configuration.
+        try (InputStream stream = Main.class.getClassLoader().getResourceAsStream("debug-logging.properties")) {
+            LogManager.getLogManager().readConfiguration(stream);  // NOSONAR: Own logging configuration.
+        }
     }
 
     /**

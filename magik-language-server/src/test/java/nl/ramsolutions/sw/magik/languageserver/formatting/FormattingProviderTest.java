@@ -3,8 +3,8 @@ package nl.ramsolutions.sw.magik.languageserver.formatting;
 import java.net.URI;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
@@ -28,8 +28,8 @@ class FormattingProviderTest {
 
     private List<TextEdit> getEdits(final String code, final FormattingOptions options) {
         final URI uri = URI.create("tests://unittest");
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, typeKeeper);
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
 
         final FormattingProvider provider = new FormattingProvider();
         return provider.provideFormatting(magikFile, options);

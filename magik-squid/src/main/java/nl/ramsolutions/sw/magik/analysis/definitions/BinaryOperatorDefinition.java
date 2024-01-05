@@ -1,61 +1,131 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Objects;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
  * Binary operator definition.
  */
+@Immutable
 public class BinaryOperatorDefinition extends Definition {
 
     private final String operator;
-    private final TypeString lhs;
-    private final TypeString rhs;
+    private final TypeString lhsTypeName;
+    private final TypeString rhsTypeName;
+    private final TypeString resultTypeName;
 
     /**
      * Constructor.
+     * @param moduleName Module name.
      * @param node Node for definition.
-     * @param pakkage Package defined in.
      * @param operator Operator name.
-     * @param lhs Left Hand Side type.
-     * @param rhs Right Hand Side type.
+     * @param lhsTypeName Left Hand Side type.
+     * @param rhsTypeName Right Hand Side type.
+     * @param resultTypeName Result type.
      */
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public BinaryOperatorDefinition(
-            final AstNode node,
-            final String pakkage,
+            final @Nullable Location location,
+            final @Nullable String moduleName,
+            final @Nullable String doc,
+            final @Nullable AstNode node,
             final String operator,
-            final TypeString lhs,
-            final TypeString rhs) {
-        super(node, TypeString.UNDEFINED);
+            final TypeString lhsTypeName,
+            final TypeString rhsTypeName,
+            final TypeString resultTypeName) {
+        super(location, moduleName, doc, node);
 
-        if (!lhs.isSingle()) {
+        if (!lhsTypeName.isSingle()) {
             throw new IllegalStateException();
         }
 
-        if (!rhs.isSingle()) {
+        if (!rhsTypeName.isSingle()) {
             throw new IllegalStateException();
         }
 
         this.operator = operator;
-        this.lhs = lhs;
-        this.rhs = rhs;
+        this.lhsTypeName = lhsTypeName;
+        this.rhsTypeName = rhsTypeName;
+        this.resultTypeName = resultTypeName;
     }
 
     public String getOperator() {
         return this.operator;
     }
 
-    public TypeString getLhs() {
-        return this.lhs;
+    public TypeString getLhsTypeName() {
+        return this.lhsTypeName;
     }
 
-    public TypeString getRhs() {
-        return this.rhs;
+    public TypeString getRhsTypeName() {
+        return this.rhsTypeName;
+    }
+
+    public TypeString getResultTypeName() {
+        return this.resultTypeName;
     }
 
     @Override
     public String getName() {
-        return this.lhs.getFullString() + " " + this.operator + " " + this.rhs.getFullString();
+        return this.lhsTypeName.getFullString() + " " + this.operator + " " + this.rhsTypeName.getFullString();
+    }
+
+    @Override
+    public String getPackage() {
+        return null;
+    }
+
+    @Override
+    public Definition getWithoutNode() {
+        return new BinaryOperatorDefinition(
+            this.getLocation(),
+            this.getModuleName(),
+            this.getDoc(),
+            null,
+            this.operator,
+            this.lhsTypeName,
+            this.rhsTypeName,
+            this.resultTypeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+            this.getLocation(),
+            this.getModuleName(),
+            this.getDoc(),
+            this.operator,
+            this.lhsTypeName,
+            this.rhsTypeName,
+            this.resultTypeName);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final BinaryOperatorDefinition other = (BinaryOperatorDefinition) obj;
+        return Objects.equals(this.getLocation(), other.getLocation())
+            && Objects.equals(this.getModuleName(), other.getModuleName())
+            && Objects.equals(this.getDoc(), other.getDoc())
+            && Objects.equals(this.operator, other.operator)
+            && Objects.equals(this.lhsTypeName, other.lhsTypeName)
+            && Objects.equals(this.rhsTypeName, other.rhsTypeName)
+            && Objects.equals(this.resultTypeName, other.resultTypeName);
     }
 
 }

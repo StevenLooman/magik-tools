@@ -15,7 +15,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -85,13 +85,13 @@ public class DefinitionsProvider {
         final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
         final String conditionName = wantedNode.getTokenValue();
         final Condition condition = typeKeeper.getCondition(conditionName);
-        if (condition != null
-            && condition.getLocation() != null) {
-            final Location conditionLocation = condition.getLocation();
-            return List.of(conditionLocation);
+        if (condition == null) {
+            return Collections.emptyList();
         }
 
-        return Collections.emptyList();
+        final Location conditionLocation = condition.getLocation();
+        return List.of(
+            Location.validLocation(conditionLocation));
     }
 
     private List<Location> definitionsForAtom(final MagikTypedFile magikFile, final AstNode wantedNode) {
@@ -120,13 +120,13 @@ public class DefinitionsProvider {
         final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
         final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
         final AbstractType type = typeKeeper.getType(typeString);
-        if (type != UndefinedType.INSTANCE
-            && type.getLocation() != null) {
-            final Location typeLocation = type.getLocation();
-            return List.of(typeLocation);
+        if (type == UndefinedType.INSTANCE) {
+            return Collections.emptyList();
         }
 
-        return Collections.emptyList();
+        final Location typeLocation = type.getLocation();
+        return List.of(
+            Location.validLocation(typeLocation));
     }
 
     private List<Location> definitionsForMethodInvocation(final MagikTypedFile magikFile, final AstNode wantedNode) {
@@ -135,12 +135,11 @@ public class DefinitionsProvider {
         final String methodName = helper.getMethodName();
 
         final AstNode previousSiblingNode = methodInvocationNode.getPreviousSibling();
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
-        final ExpressionResult result = reasoner.getNodeType(previousSiblingNode);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+        final ExpressionResult result = reasonerState.getNodeType(previousSiblingNode);
 
-        final TypeString unsetTypeString = TypeString.ofIdentifier("unset", "sw");
         final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-        final AbstractType unsetType = typeKeeper.getType(unsetTypeString);
+        final AbstractType unsetType = typeKeeper.getType(TypeString.SW_UNSET);
         AbstractType type = result.get(0, unsetType);
         final List<Location> locations = new ArrayList<>();
         if (type == UndefinedType.INSTANCE) {
@@ -149,6 +148,7 @@ public class DefinitionsProvider {
                 .flatMap(anyType -> anyType.getMethods().stream())
                 .filter(m -> m.getName().equals(methodName))
                 .map(Method::getLocation)
+                .map(Location::validLocation)
                 .forEach(locations::add);
         } else {
             if (type == SelfType.INSTANCE) {
@@ -160,7 +160,7 @@ public class DefinitionsProvider {
             LOGGER.debug("Finding implementations for type:, {}, method: {}", type.getFullName(), methodName);
             type.getMethods(methodName).stream()
                 .map(Method::getLocation)
-                .filter(Objects::nonNull)
+                .map(Location::validLocation)
                 .forEach(locations::add);
         }
 

@@ -1,0 +1,25 @@
+// Test type database.
+// self type: _self
+// undefined type: _undefined
+// undefined result: __UNDEFINED_RESULT__
+// packages
+{"instruction":"package","name":"sw","uses":[]}
+{"instruction":"package","name":"user","uses":["sw"]}
+{"instruction":"package","name":"test_package","uses":["user"]}
+// types
+{"instruction":"type","type_name":"user:a","sort":"slotted","doc":"Test exemplar a","parents":["sw:object"],"slots":[{"name":"slot1","type_name":"sw:integer"},{"name":"slot2","type_name":"sw:float"}],"module_name":"test_module","generic_declarations":[{"location":null,"name":"K"},{"location":null,"name":"E"}]}
+{"instruction":"type","type_name":"user:b","sort":"indexed","doc":"Test exemplar b","parents":["sw:object"],"slots":[],"module_name":null,"generic_declarations":[]}
+// globals
+{"instruction":"global","type_name":"sw:!print_float_precision!","aliased_type_name":"sw:integer"}
+{"instruction":"global","type_name":"sw:tab_char","aliased_type_name":"sw:character"}
+// methods
+{"instruction":"method","type_name":"user:b","method_name":"m1()","modifiers":[],"parameters":[{"name":"param1","modifier":"gather","type_name":"sw:symbol"},{"name":"param1","modifier":"none","type_name":"_undefined"}],"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m1()","module_name":"test_module"}
+{"instruction":"method","type_name":"user:b","method_name":"m2<<","modifiers":["private"],"parameters":[],"assignment_parameter":{"name":"param2","modifier":"none","type_name":"sw:symbol"},"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m2()","module_name":"test_module"}
+// procedures
+{"instruction":"procedure","type_name":"sw:quit","procedure_name":"quit","modifiers":[],"parameters":[{"name":"status","modifier":"optional","type_name":"_undefined"}],"return_types":"__UNDEFINED_RESULT__","loop_types":[],"source_file":null,"doc":"Quit!","module_name":"test_module"}
+{"instruction":"procedure","type_name":"sw:range","procedure_name":"range","modifiers":["iter"],"parameters":[{"name":"start","modifier":"none","type_name":"_undefined"},{"name":"end","modifier":"none","type_name":"_undefined"},{"name":"step","modifier":"optional","type_name":"_undefined"}],"return_types":[],"loop_types":["sw:integer"],"source_file":null,"doc":"Range iterator."}
+// conditions
+{"instruction":"condition","name":"error","data_names":["string"],"parent":null,"doc":null}
+{"instruction":"condition","name":"unknown_value","data_names":["value","permitted_values"],"parent":"error","doc":"Unknown value"}
+// binary operators
+{"instruction":"binary_operator","operator":"=","lhs_type_name":"sw:char16_vector","rhs_type_name":"sw:symbol","result_type_name":"sw:char16_vector","module_name":"test_module"}

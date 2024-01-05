@@ -29,17 +29,25 @@ public class ExpressionResultString {
         ExpressionResultString::new);
 
     /**
-     * Instance of {@link ExpressionResult} to be used in all cases of undefined expression results.
+     * Max number of items in a {@link ExpressionResultString}.
      */
-    public static final ExpressionResultString UNDEFINED = new ExpressionResultString(
-        Collections.nCopies(1024, TypeString.UNDEFINED));    // 1024 is max for _scatter
+    public static final int MAX_ITEMS = 1024;   // 1024 is max for _scatter
 
     /**
-     * Serialized name of {@code ExpressionResult.UNDEFINED}.
+     * Instance of {@link ExpressionResultString} to be used in all cases of undefined expression results.
+     */
+    public static final ExpressionResultString UNDEFINED = new ExpressionResultString(
+        Collections.nCopies(MAX_ITEMS, TypeString.UNDEFINED));
+
+    /**
+     * Serialized name of {@link ExpressionResultString.UNDEFINED}.
      */
     public static final String UNDEFINED_SERIALIZED_NAME = "__UNDEFINED_RESULT__";
 
-    private static final int MAX_ITEMS = 1024;
+    /**
+     * Instance of an empty {@link ExpressionResultString}.
+     */
+    public static final ExpressionResultString EMPTY = new ExpressionResultString();
 
     private final List<TypeString> types;
 
@@ -153,6 +161,20 @@ public class ExpressionResultString {
      */
     public Stream<TypeString> stream() {
         return this.types.stream();
+    }
+
+    /**
+     * Get full string.
+     * @return Full string.
+     */
+    public String getFullString() {
+        if (this == UNDEFINED) {
+            return UNDEFINED_SERIALIZED_NAME;
+        }
+
+        return this.types.stream()
+            .map(TypeString::getFullString)
+            .collect(Collectors.joining(","));
     }
 
     @Override

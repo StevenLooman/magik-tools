@@ -1,13 +1,9 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.Map;
 import java.util.Objects;
-import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Slot;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
@@ -19,7 +15,6 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  */
 class AtomHandler extends LocalTypeReasonerHandler {
 
-    private static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", "sw");
     private static final TypeString SW_FALSE = TypeString.ofIdentifier("false", "sw");
     private static final TypeString SW_MAYBE = TypeString.ofIdentifier("maybe", "sw");
     private static final TypeString SW_CHARACTER = TypeString.ofIdentifier("character", "sw");
@@ -38,17 +33,10 @@ class AtomHandler extends LocalTypeReasonerHandler {
 
     /**
      * Constructor.
-     * @param magikFile MagikFile
-     * @param nodeTypes Node types.
-     * @param nodeIterTypes Node iter types.
-     * @param currentScopeEntryNodes Current scope entry nodes.
+     * @param state Reasoner state.
      */
-    AtomHandler(
-            final MagikTypedFile magikFile,
-            final Map<AstNode, ExpressionResult> nodeTypes,
-            final Map<AstNode, ExpressionResult> nodeIterTypes,
-            final Map<ScopeEntry, AstNode> currentScopeEntryNodes) {
-        super(magikFile, nodeTypes, nodeIterTypes, currentScopeEntryNodes);
+    AtomHandler(final LocalTypeReasonerState state) {
+        super(state);
     }
 
     /**
@@ -117,7 +105,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
      * @param node UNSET node.
      */
     void handleUnset(final AstNode node) {
-        this.assignAtom(node, SW_UNSET);
+        this.assignAtom(node, TypeString.SW_UNSET);
     }
 
     /**

@@ -98,12 +98,9 @@ public final class IgnoreHandler {
     public boolean isIgnored(final Path path) {
         // Try defaults first.
         final Path filename = path.getFileName();
-        final FileSystem fileSystem = path.getFileSystem();
-        final PathMatcher matcher = fileSystem.getPathMatcher("glob:**/*.magik");
         if (!Files.isRegularFile(path)
             || filename.startsWith(".")
-            || filename.startsWith("#")
-            || !matcher.matches(path)) {
+            || filename.startsWith("#")) {
             return true;
         }
 

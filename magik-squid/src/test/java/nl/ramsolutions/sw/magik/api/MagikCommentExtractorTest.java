@@ -60,7 +60,7 @@ class MagikCommentExtractorTest {
 
         final AstNode node = this.parseMagik(code);
         final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final List<Token> docTokenComments = MagikCommentExtractor.extractDocComments(methodDefNode)
+        final List<Token> docTokenComments = MagikCommentExtractor.extractDocCommentTokens(methodDefNode)
             .collect(Collectors.toList());
         final List<String> docComments = docTokenComments.stream()
             .map(token -> token.getValue())
@@ -80,7 +80,7 @@ class MagikCommentExtractorTest {
 
         final AstNode node = this.parseMagik(code);
         final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final List<Token> docTokenComments = MagikCommentExtractor.extractDocComments(methodDefNode)
+        final List<Token> docTokenComments = MagikCommentExtractor.extractDocCommentTokens(methodDefNode)
             .collect(Collectors.toList());
         final List<String> docComments = docTokenComments.stream()
             .map(token -> token.getValue())
@@ -102,7 +102,7 @@ class MagikCommentExtractorTest {
 
         final AstNode node = this.parseMagik(code);
         final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final List<Token> docTokenComments = MagikCommentExtractor.extractDocComments(methodDefNode)
+        final List<Token> docTokenComments = MagikCommentExtractor.extractDocCommentTokens(methodDefNode)
             .collect(Collectors.toList());
         final List<String> docComments = docTokenComments.stream()
             .map(token -> token.getValue())
@@ -125,7 +125,7 @@ class MagikCommentExtractorTest {
 
         final AstNode node = this.parseMagik(code);
         final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
-        final List<Token> docTokenComments = MagikCommentExtractor.extractDocComments(methodDefNode)
+        final List<Token> docTokenComments = MagikCommentExtractor.extractDocCommentTokens(methodDefNode)
             .collect(Collectors.toList());
         final List<String> docComments = docTokenComments.stream()
             .map(token -> token.getValue())
@@ -144,7 +144,7 @@ class MagikCommentExtractorTest {
 
         final AstNode node = this.parseMagik(code);
         final AstNode statementNode = node.getFirstChild(MagikGrammar.STATEMENT);
-        final List<Token> docTokenComments = MagikCommentExtractor.extractDocComments(statementNode)
+        final List<Token> docTokenComments = MagikCommentExtractor.extractDocCommentTokens(statementNode)
             .collect(Collectors.toList());
         final List<String> docComments = docTokenComments.stream()
             .map(token -> token.getValue())

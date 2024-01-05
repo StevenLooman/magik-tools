@@ -57,6 +57,14 @@ public interface ITypeKeeper {
     boolean hasType(TypeString typeString);
 
     /**
+     * Test if the type reference can be resolved in the given package.
+     * No used packages are tested.
+     * @param typeString Reference.
+     * @return True if reference points to something in the package.
+     */
+    boolean hasTypeInPackage(TypeString typeString);
+
+    /**
      * Add a global type, such as an exemplar.
      * @param type Type to add.
      */
@@ -68,6 +76,9 @@ public interface ITypeKeeper {
      * @return Type, or UndefinedType if not found.
      */
     AbstractType getType(TypeString typeString);
+
+    @CheckForNull
+    AbstractType getTypeInPackage(TypeString typeString);
 
     /**
      * Remove a type. Searches all packages.
@@ -122,7 +133,7 @@ public interface ITypeKeeper {
      * @return Resulting type.
      */
     @CheckForNull
-    BinaryOperator getBinaryOperator(BinaryOperator.Operator operator, AbstractType leftType, AbstractType rightType);
+    BinaryOperator getBinaryOperator(BinaryOperator.Operator operator, TypeString leftType, TypeString rightType);
 
     /**
      * Remove a binary operator.

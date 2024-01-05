@@ -1,6 +1,9 @@
 package nl.ramsolutions.sw.magik.analysis.helpers;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
@@ -49,6 +52,21 @@ public class ProcedureInvocationNodeHelper {
     public boolean isProcedureInvocationOf(final String procedureName) {
         String identifier = this.getInvokedIdentifier();
         return procedureName.equalsIgnoreCase(identifier);
+    }
+
+    /**
+     * Get ARGUMENTS -> ARGUMENT -> EXPRESSION nodes.
+     * @return
+     */
+    public List<AstNode> getArgumentExpressionNodes() {
+        final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
+        if (argumentsNode == null) {
+            return Collections.emptyList();
+        }
+
+        return argumentsNode.getChildren(MagikGrammar.ARGUMENT).stream()
+            .map(AstNode::getFirstChild)
+            .collect(Collectors.toList());
     }
 
 }

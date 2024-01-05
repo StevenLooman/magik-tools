@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
 
 /**
@@ -12,8 +13,14 @@ import nl.ramsolutions.sw.magik.Location;
  */
 public abstract class AbstractType {
 
+    private final String moduleName;
     private Location location;
     private String doc;
+
+    protected AbstractType(final @Nullable Location location, final @Nullable String moduleName) {
+        this.location = location;
+        this.moduleName = moduleName;
+    }
 
     /**
      * Get the global reference to this type.
@@ -145,17 +152,18 @@ public abstract class AbstractType {
      * Get the {@link GenericDefinition}s.
      * @return List of {@link GenericDefinition}s.
      */
-    public abstract List<GenericDeclaration> getGenerics();
+    public abstract List<GenericDefinition> getGenericDefinitions();
 
     /**
      * Get the {@link GenericDefinition} by name.
-     * @param name Name of GenericDefinition.
+     * @param name Name of {@link GenericDefinition}.
      * @return
      */
     @CheckForNull
-    public GenericDeclaration getGeneric(final String name) {
-        return this.getGenerics().stream()
-            .filter(genericDefinition -> genericDefinition.getName().equals(name))
+    public GenericDefinition getGenericDefinition(final String name) {
+        final TypeString typeStr = TypeString.ofGenericReference(name);
+        return this.getGenericDefinitions().stream()
+            .filter(genericDefinition -> genericDefinition.getTypeString().equals(typeStr))
             .findAny()
             .orElse(null);
     }
@@ -206,6 +214,15 @@ public abstract class AbstractType {
         }
 
         return this;
+    }
+
+    /**
+     * Get the module name of this type.
+     * @return
+     */
+    @CheckForNull
+    public String getModuleName() {
+        return this.moduleName;
     }
 
 }

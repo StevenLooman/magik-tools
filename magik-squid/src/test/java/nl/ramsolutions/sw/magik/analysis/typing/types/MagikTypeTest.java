@@ -1,9 +1,13 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
+import java.util.List;
+import java.util.Set;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.typing.DefinitionKeeperTypeKeeperAdapter;
+import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,35 +18,51 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MagikTypeTest {
 
     @Test
-    void testCreateGenericType1() {
-        final TypeKeeper typeKeeper = new TypeKeeper();
-        final MagikType magikType =
-            new MagikType(typeKeeper, MagikType.Sort.SLOTTED, TypeString.ofIdentifier("property_list", "sw"));
-        final GenericDeclaration key = magikType.addGeneric(null, "K");
-        final GenericDeclaration element = magikType.addGeneric(null, "E");
+    void testCreateMethodGenericWithRefs() {
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final TypeString propertyListRef = TypeString.ofIdentifier("property_list", "sw");
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                "test_module",
+                null,
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                propertyListRef,
+                List.of(),
+                List.of()));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                propertyListRef,
+                "fast_keys_and_elements()",
+                Set.of(),
+                List.of(),
+                null,
+                ExpressionResultString.EMPTY,
+                new ExpressionResultString(
+                    TypeString.ofGenericReference("K"),
+                    TypeString.ofGenericReference("E"))));
 
-        final Method method = magikType.addMethod(
-            null,
-            EnumSet.noneOf(Method.Modifier.class),
-            "fast_keys_and_elements()",
-            Collections.emptyList(),
-            null,
-            null,
-            new ExpressionResultString(),
-            new ExpressionResultString(
-                TypeString.ofGeneric("K"),
-                TypeString.ofGeneric("E")));
+        final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
+        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
+        final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
+        final TypeString propertyListGenericRef = TypeString.ofIdentifier("property_list", "sw",
+                TypeString.ofGenericDefinition("K", symbolRef),
+                TypeString.ofGenericDefinition("E", floatRef));
+        final AbstractType magikType = typeKeeper.getType(propertyListGenericRef);
+        final Method magikMethod = magikType.getMethods("fast_keys_and_elements()").iterator().next();
+        final ExpressionResultString loopbodyResultString = magikMethod.getLoopbodyResult();
+        // TODO: We should test loopbodyResultString, not TypeReader etc.
 
-        final TypeReader typeReader = new TypeReader(typeKeeper);
-        final ExpressionResultString loopbodyResultString = method.getLoopbodyResult();
-        final ExpressionResult loopbody = typeReader.parseExpressionResultString(loopbodyResultString);
-        final GenericDeclaration genericKey = (GenericDeclaration) loopbody.get(0, null);
-        assertThat(genericKey)
-            .isEqualTo(key);
+        final TypeString kTypeString = loopbodyResultString.get(0, null);
+        assertThat(kTypeString).isEqualTo(symbolRef);
 
-        final GenericDeclaration genericElement = (GenericDeclaration) loopbody.get(1, null);
-        assertThat(genericElement)
-            .isEqualTo(element);
+        final TypeString eTypeString = loopbodyResultString.get(1, null);
+        assertThat(eTypeString).isEqualTo(floatRef);
     }
 
 }

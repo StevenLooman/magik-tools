@@ -1,19 +1,14 @@
 package nl.ramsolutions.sw.magik.languageserver.documentsymbols;
 
-import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
-import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader;
-import nl.ramsolutions.sw.magik.analysis.definitions.EnumerationDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.IndexedExemplarDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.MixinDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.SlottedExemplarDefinition;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -40,12 +35,8 @@ public class DocumentSymbolProvider {
      */
     public List<Either<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>> provideDocumentSymbol(
             final MagikTypedFile magikFile) {
-        final DefinitionReader definitionReader = new DefinitionReader();
-        final AstNode topNode = magikFile.getTopNode();
-        definitionReader.walkAst(topNode);
-
         // Convert definitions to DocumentSymbols.
-        return definitionReader.getDefinitions().stream()
+        return magikFile.getDefinitions().stream()
             .map(this::convertDefinition)
             .map(Either::<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>forRight)
             .collect(Collectors.toList());
@@ -58,8 +49,8 @@ public class DocumentSymbolProvider {
             symbolKind,
             Lsp4jConversion.rangeToLsp4j(new Range(definition.getNode())),
             Lsp4jConversion.rangeToLsp4j(new Range(definition.getNode())));
-        if (definition instanceof SlottedExemplarDefinition) {
-            final SlottedExemplarDefinition exemplarDefinition = (SlottedExemplarDefinition) definition;
+        if (definition instanceof ExemplarDefinition) {
+            final ExemplarDefinition exemplarDefinition = (ExemplarDefinition) definition;
             final List<DocumentSymbol> slotSymbols = this.convertedSlotsFromDefinition(exemplarDefinition);
             documentSymbol.setChildren(slotSymbols);
         }
@@ -73,16 +64,13 @@ public class DocumentSymbolProvider {
             return SymbolKind.Operator;
         } else if (definition instanceof GlobalDefinition) {
             return SymbolKind.Variable;
-        } else if (definition instanceof EnumerationDefinition
-                || definition instanceof IndexedExemplarDefinition
-                || definition instanceof SlottedExemplarDefinition
-                || definition instanceof MixinDefinition) {
+        } else if (definition instanceof ExemplarDefinition) {
             return SymbolKind.Class;
         }
         return SymbolKind.Method;
     }
 
-    private List<DocumentSymbol> convertedSlotsFromDefinition(final SlottedExemplarDefinition exemplarDefinition) {
+    private List<DocumentSymbol> convertedSlotsFromDefinition(final ExemplarDefinition exemplarDefinition) {
         return exemplarDefinition.getSlots().stream()
             .map(slotDefinition -> new DocumentSymbol(
                 slotDefinition.getName(),

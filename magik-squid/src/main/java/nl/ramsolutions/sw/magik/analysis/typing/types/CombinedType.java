@@ -31,6 +31,7 @@ public class CombinedType extends AbstractType {
      * @param types Combined types.
      */
     public CombinedType(final Collection<AbstractType> types) {
+        super(null, null);
         this.types = Set.copyOf(types);
     }
 
@@ -84,9 +85,9 @@ public class CombinedType extends AbstractType {
     }
 
     @Override
-    public List<GenericDeclaration> getGenerics() {
+    public List<GenericDefinition> getGenericDefinitions() {
         return this.getTypes().stream()
-            .flatMap(type -> type.getGenerics().stream())
+            .flatMap(type -> type.getGenericDefinitions().stream())
             .collect(Collectors.toUnmodifiableList());
     }
 

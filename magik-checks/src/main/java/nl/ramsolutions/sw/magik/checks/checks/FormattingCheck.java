@@ -3,6 +3,8 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
+import com.sonar.sslr.api.TokenType;
+import com.sonar.sslr.api.Trivia;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -130,6 +132,8 @@ public class FormattingCheck extends MagikCheck {
             return;
         }
 
+        this.requireMaxNewlines(this.currentToken);
+
         // Don't care about pragma.
         if (this.isPragmaLine(this.currentToken)) {
             return;
@@ -157,8 +161,8 @@ public class FormattingCheck extends MagikCheck {
                 this.visitTokenBracketClose(this.currentToken);
                 break;
 
-            //case "+":    // can be unary expression
-            //case "-":    // can be unary expression
+            //case "+":    // Can be unary expression.
+            //case "-":    // Can be unary expression.
             case "*":
             case "**":
             case "/":
@@ -179,7 +183,7 @@ public class FormattingCheck extends MagikCheck {
             case "_cf":
                 if (this.nextToken != null
                     && (this.nextToken.getValue().equals("<<") || this.nextToken.getValue().equals("^<<"))) {
-                    // part 1 of augmented assignment
+                    // Part 1 of augmented assignment.
                     this.visitTokenAugmentedAssignmentExpression1(this.currentToken);
                 } else {
                     this.visitTokenBinaryOperator(this.currentToken);
@@ -190,7 +194,7 @@ public class FormattingCheck extends MagikCheck {
             case "^<<":
                 if (this.previousToken != null
                     && AUGMENTED_ASSIGNMENT_TOKENS.contains(this.previousToken.getValue())) {
-                    // part 2 of augmented assignment
+                    // Part 2 of augmented assignment.
                     this.visitTokenAugmentedAssignmentExpression2(this.currentToken);
                 } else {
                     this.visitTokenBinaryOperator(this.currentToken);
@@ -224,13 +228,14 @@ public class FormattingCheck extends MagikCheck {
 
         final String line = this.getLineFor(token);
         int prevColumn = token.getColumn() - 1;
-        // special case: '% ', cheat by getting the %
+        // Special case: `% `, cheat by getting the `%`.
         if (this.previousToken.getValue().equals("% ")) {
             prevColumn -= 1;
         }
         if (prevColumn < 0) {
             return null;
         }
+
         return line.charAt(prevColumn);
     }
 
@@ -240,10 +245,12 @@ public class FormattingCheck extends MagikCheck {
         if (line.length() <= nextColumn) {
             return null;
         }
+
         final char charAfter = line.charAt(nextColumn);
         if (charAfter == '\r') {
             return null;
         }
+
         return charAfter;
     }
 
@@ -355,6 +362,38 @@ public class FormattingCheck extends MagikCheck {
 
     private void visitTokenTransmit(final Token token) {
         this.requireEmptyLineAfter(token);
+    }
+
+    private void requireMaxNewlines(final Token token) {
+        // Test if there are no more than 2 successive newline tokens (disregarding whitespace).
+        int count = 0;
+        Token fromToken = null;
+        Token toToken = null;
+        for (final Trivia trivia : token.getTrivia()) {
+            final Token triviaToken = trivia.getToken();
+            final TokenType tokenType = triviaToken.getType();
+            if (tokenType == GenericTokenType.EOL) {
+                if (count == 2) {
+                    fromToken = triviaToken;
+                }
+
+                count += 1;
+            } else if (tokenType != GenericTokenType.WHITESPACE) {
+                count = 0;
+            }
+
+            if (count > 2) {
+                toToken = triviaToken;
+            }
+        }
+
+        if (fromToken != null && toToken != null) {
+            final String message = String.format(MESSAGE, "only single empty line allowed");
+            this.addIssue(
+                fromToken.getLine(), 0,
+                toToken.getLine() + 1, toToken.getColumn(),
+                message);
+        }
     }
 
     private char getIndentChar() {

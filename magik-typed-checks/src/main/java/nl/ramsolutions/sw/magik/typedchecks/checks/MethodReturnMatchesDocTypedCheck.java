@@ -5,7 +5,7 @@ import java.util.Map;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
@@ -65,8 +65,8 @@ public class MethodReturnMatchesDocTypedCheck extends MagikTypedCheck {
     }
 
     private ExpressionResultString extractReasonedResult(final AstNode node) {
-        final LocalTypeReasoner reasoner = this.getReasoner();
-        final ExpressionResult result = reasoner.getNodeType(node);
+        final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
+        final ExpressionResult result = reasonerState.getNodeType(node);
         return result.stream()
             .map(AbstractType::getTypeString)
             .collect(ExpressionResultString.COLLECTOR);

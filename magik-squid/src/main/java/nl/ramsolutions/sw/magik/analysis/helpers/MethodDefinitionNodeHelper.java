@@ -37,12 +37,12 @@ public class MethodDefinitionNodeHelper {
      * @return Method name.
      */
     public String getMethodName() {
-        final AstNode parametersNode = node.getFirstChild(MagikGrammar.PARAMETERS);
+        final AstNode parametersNode = this.node.getFirstChild(MagikGrammar.PARAMETERS);
         final List<AstNode> parameterNodes = parametersNode != null
             ? parametersNode.getChildren(MagikGrammar.PARAMETER)
             : Collections.emptyList();
 
-        final AstNode methodNameNode = node.getFirstChild(MagikGrammar.METHOD_NAME);
+        final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
         final StringBuilder builder = new StringBuilder();
         if (methodNameNode != null) {
             final String tokenValue = methodNameNode.getTokenValue();
@@ -60,10 +60,10 @@ public class MethodDefinitionNodeHelper {
                 builder.append("()");
             }
         }
-        if (this.anyChildTokenIs(node, MagikOperator.CHEVRON)) {
+        if (this.anyChildTokenIs(this.node, MagikOperator.CHEVRON)) {
             builder.append(MagikOperator.CHEVRON.getValue());
         }
-        if (this.anyChildTokenIs(node, MagikOperator.BOOT_CHEVRON)) {
+        if (this.anyChildTokenIs(this.node, MagikOperator.BOOT_CHEVRON)) {
             builder.append(MagikOperator.BOOT_CHEVRON.getValue());
         }
 
@@ -164,14 +164,14 @@ public class MethodDefinitionNodeHelper {
      * @return
      */
     public boolean returnsAnything() {
-        final List<AstNode> returnStatementNodes = node.getDescendants(MagikGrammar.RETURN_STATEMENT);
+        final List<AstNode> returnStatementNodes = this.node.getDescendants(MagikGrammar.RETURN_STATEMENT);
         final boolean hasReturn = returnStatementNodes.stream()
             .filter(statementNode -> statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == null)
             .anyMatch(statementNode -> statementNode.hasDescendant(MagikGrammar.TUPLE));
 
-        final List<AstNode> emitStatementNodes =
-            node.getFirstChild(MagikGrammar.BODY).getChildren(MagikGrammar.EMIT_STATEMENT);
-        final boolean hasEmit = !emitStatementNodes.isEmpty();
+        final boolean hasEmit = this.node.getFirstChild(MagikGrammar.BODY)
+            .getChildren(MagikGrammar.STATEMENT).stream()
+            .anyMatch(statementNode -> !statementNode.getChildren(MagikGrammar.EMIT_STATEMENT).isEmpty());
 
         return hasReturn || hasEmit;
     }
@@ -181,7 +181,7 @@ public class MethodDefinitionNodeHelper {
      * @return
      */
     public boolean hasLoopbody() {
-        return node.getDescendants(MagikGrammar.LOOPBODY).stream()
+        return this.node.getDescendants(MagikGrammar.LOOPBODY).stream()
             .anyMatch(statementNode -> statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == null);
     }
 

@@ -57,6 +57,29 @@ public final class MagikSettings {  // NOSONAR
     }
 
     /**
+     * Get magik.libsDirs.
+     * @return magik.libsDirs.
+     */
+    public List<String> getLibsDirs() {
+        final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+        if (magik == null) {
+            return Collections.emptyList();
+        }
+
+        final JsonArray libsDirs = magik.getAsJsonArray("libsDirs");
+        if (libsDirs == null) {
+            return Collections.emptyList();
+        }
+
+        final List<String> paths = new ArrayList<>();
+        libsDirs.forEach(jsonElement -> {
+            final String path = jsonElement.getAsString();
+            paths.add(path);
+        });
+        return paths;
+    }
+
+    /**
      * Get magik.typing.typeDatabasePath.
      * @return magik.typing.typeDatabasePath.
      */
@@ -82,6 +105,52 @@ public final class MagikSettings {  // NOSONAR
             paths.add(path);
         });
         return paths;
+    }
+
+    /**
+     * Get magik.typing.showAtomInlayHints.
+     * @return magik.typing.showAtomInlayHints
+     */
+    public boolean getTypingShowAtomInlayHints() {
+        final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+        if (magik == null) {
+            return false;
+        }
+
+        final JsonObject typing = magik.getAsJsonObject("typing");
+        if (typing == null) {
+            return false;
+        }
+
+        final JsonElement showAtomInlayHints = typing.get("showAtomInlayHints");
+        if (showAtomInlayHints == null) {
+            return false;
+        }
+
+        return showAtomInlayHints.getAsBoolean();
+    }
+
+    /**
+     * Get magik.typing.showArgumentInlayHints.
+     * @return magik.typing.showArgumentInlayHints
+     */
+    public boolean getTypingShowArgumentInlayHints() {
+        final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+        if (magik == null) {
+            return true;
+        }
+
+        final JsonObject typing = magik.getAsJsonObject("typing");
+        if (typing == null) {
+            return true;
+        }
+
+        final JsonElement showArgumentInlayHints = typing.get("showArgumentInlayHints");
+        if (showArgumentInlayHints == null) {
+            return true;
+        }
+
+        return showArgumentInlayHints.getAsBoolean();
     }
 
     /**
