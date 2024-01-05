@@ -1,6 +1,6 @@
 # Changes
 
-0.8.3 (unreleased)
+0.8.3 (2024-01-05)
 
 - Fix error finding start/end line/column for Scopes, when encountering an empty block.
 - Fix error when determining issue is disabled via MagikIssueDisabledChecker in certain cases.
