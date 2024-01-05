@@ -98,6 +98,8 @@ public final class TypeStringParser {
             final String currentPakkage) {
         if (expressionResultStr == null) {
             return ExpressionResultString.UNDEFINED;
+        } else if (expressionResultStr.isBlank()) {
+            return ExpressionResultString.EMPTY;
         }
 
         final Parser<LexerlessGrammar> parser = new ParserAdapter<>(

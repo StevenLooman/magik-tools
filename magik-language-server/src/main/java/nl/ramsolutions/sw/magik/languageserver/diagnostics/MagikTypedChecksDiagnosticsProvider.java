@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
+import nl.ramsolutions.sw.magik.checks.MagikCheckMetadata;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import nl.ramsolutions.sw.magik.checks.MagikIssueDisabledChecker;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
@@ -99,7 +100,8 @@ public class MagikTypedChecksDiagnosticsProvider {
     private DiagnosticSeverity getCheckSeverity(final MagikCheckHolder holder) {
         final String severity;
         try {
-            severity = holder.getSeverity();
+            final MagikCheckMetadata metadata = holder.getMetadata();
+            severity = metadata.getDefaultSeverity();
         } catch (final IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
             return DiagnosticSeverity.Error;

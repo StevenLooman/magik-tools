@@ -7,8 +7,8 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,8 +25,8 @@ class TypeDocParameterFixerTest {
             final String code,
             final Range range) {
         final URI uri = URI.create("tests://unittest");
-        final ITypeKeeper typeKeeper = new TypeKeeper();
-        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, typeKeeper);
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
         final TypeDocParameterFixer provider = new TypeDocParameterFixer();
         return provider.provideCodeActions(magikFile, range);
     }

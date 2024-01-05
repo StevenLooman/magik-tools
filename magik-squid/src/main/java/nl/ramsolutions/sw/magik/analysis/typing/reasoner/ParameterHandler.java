@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import java.util.Map;
 import java.util.Objects;
-import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -20,22 +19,14 @@ import nl.ramsolutions.sw.magik.parser.TypeDocParser;
  */
 class ParameterHandler extends LocalTypeReasonerHandler {
 
-    private static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", "sw");
     private static final TypeString SW_SIMPLE_VECTOR = TypeString.ofIdentifier("simple_vector", "sw");
 
     /**
      * Constructor.
-     * @param magikFile MagikFile
-     * @param nodeTypes Node types.
-     * @param nodeIterTypes Node iter types.
-     * @param currentScopeEntryNodes Current scope entry nodes.
+     * @param state Reasoner state.
      */
-    ParameterHandler(
-            final MagikTypedFile magikFile,
-            final Map<AstNode, ExpressionResult> nodeTypes,
-            final Map<AstNode, ExpressionResult> nodeIterTypes,
-            final Map<ScopeEntry, AstNode> currentScopeEntryNodes) {
-        super(magikFile, nodeTypes, nodeIterTypes, currentScopeEntryNodes);
+    ParameterHandler(final LocalTypeReasonerState state) {
+        super(state);
     }
 
     /**
@@ -61,7 +52,7 @@ class ParameterHandler extends LocalTypeReasonerHandler {
         } else if (parameterTypeString != null && !parameterTypeString.isUndefined()) {
             final AbstractType type = this.typeReader.parseTypeString(parameterTypeString);
             if (helper.isOptionalParameter()) {
-                final AbstractType unsetType = this.typeKeeper.getType(SW_UNSET);
+                final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
                 final AbstractType optionalType = new CombinedType(type, unsetType);
                 result = new ExpressionResult(optionalType);
             } else {
@@ -71,13 +62,13 @@ class ParameterHandler extends LocalTypeReasonerHandler {
             result = ExpressionResult.UNDEFINED;
         }
 
-        this.setNodeType(identifierNode, result);
+        this.state.setNodeType(identifierNode, result);
 
-        final GlobalScope globalScope = this.magikFile.getGlobalScope();
+        final GlobalScope globalScope = this.getGlobalScope();
         final Scope scope = globalScope.getScopeForNode(node);
         Objects.requireNonNull(scope);
         final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
-        this.currentScopeEntryNodes.put(scopeEntry, node);
+        this.state.setCurrentScopeEntryNode(scopeEntry, node);
     }
 
 }

@@ -1,5 +1,21 @@
 # Changes
 
+0.9.0 (unreleased)
+
+- Support configurable libs dirs.
+- Read and register in which module a definition lives.
+- Use com.google.gson instead of org.json.
+- Refactor MagikIndexer/JsonTypeKeeperReader/JsonTypeKeeperWriter/ClassInfoTypeKeeperReader to share more functionality, via *Definition classes.
+- Extend FormattingCheck to require at most 2 successive empty lines.
+- Use DefinitionKeeper to store *Definition classes.
+- Add DefinitionKeeperTypeKeeperAdapter for compatibility with previous type system.
+- Show inlayhints for ATOM nodes, as a configurable option.
+- Refactor LocalTypeReasoner state to own class.
+- Improve handling of/reasoning with generics.
+- Index products and modules.
+- Add TodoComment check.
+- Minor fixes.
+
 0.8.3 (2024-01-05)
 
 - Fix error finding start/end line/column for Scopes, when encountering an empty block.

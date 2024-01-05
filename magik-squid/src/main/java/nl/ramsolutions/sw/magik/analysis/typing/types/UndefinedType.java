@@ -24,6 +24,7 @@ public final class UndefinedType extends AbstractType {  // NOSONAR: Singleton.
      * Private constructor.
      */
     private UndefinedType() {
+        super(null, null);
     }
 
     @Override
@@ -114,7 +115,7 @@ public final class UndefinedType extends AbstractType {  // NOSONAR: Singleton.
     }
 
     @Override
-    public List<GenericDeclaration> getGenerics() {
+    public List<GenericDefinition> getGenericDefinitions() {
         return Collections.emptyList();
     }
 

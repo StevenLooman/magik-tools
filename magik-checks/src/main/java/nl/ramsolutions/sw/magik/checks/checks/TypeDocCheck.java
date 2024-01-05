@@ -4,10 +4,10 @@ import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.magik.analysis.definitions.DefSlottedExemplarParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
-import nl.ramsolutions.sw.magik.analysis.definitions.SlottedExemplarDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.SlottedExemplarDefinition.Slot;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefSlottedExemplarParser;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -88,11 +88,11 @@ public class TypeDocCheck extends MagikCheck {
 
         final DefSlottedExemplarParser parser = new DefSlottedExemplarParser(node);
         final List<Definition> definitions = parser.parseDefinitions();
-        final SlottedExemplarDefinition exemplarDefinition = (SlottedExemplarDefinition) definitions.get(0);
-        final List<Slot> slots = exemplarDefinition.getSlots();
-        final Map<String, Slot> slotNames = slots.stream()
+        final ExemplarDefinition exemplarDefinition = (ExemplarDefinition) definitions.get(0);
+        final List<SlotDefinition> slots = exemplarDefinition.getSlots();
+        final Map<String, SlotDefinition> slotNames = slots.stream()
             .collect(Collectors.toMap(
-                Slot::getName,
+                SlotDefinition::getName,
                 slot -> slot));
 
         // Compare parameters.

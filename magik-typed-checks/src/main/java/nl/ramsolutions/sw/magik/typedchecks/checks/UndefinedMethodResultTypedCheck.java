@@ -1,10 +1,9 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.ArrayList;
 import java.util.Collection;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
@@ -26,10 +25,9 @@ public class UndefinedMethodResultTypedCheck extends MagikTypedCheck {
     @Override
     @SuppressWarnings("checkstyle:NestedIfDepth")
     protected void walkPostMethodInvocation(final AstNode node) {
-        final LocalTypeReasoner reasoner = this.getReasoner();
-
-        final ExpressionResult result = reasoner.getNodeType(node);
-        if (result == ExpressionResult.UNDEFINED) {
+        final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
+        final ExpressionResult result = reasonerState.getNodeType(node);
+        if (result.containsUndefined()) {
             final AstNode firstIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
             final AstNode issueNode = firstIdentifierNode != null
                 ? firstIdentifierNode
@@ -43,7 +41,7 @@ public class UndefinedMethodResultTypedCheck extends MagikTypedCheck {
             if (!methods.isEmpty()) {
                 // Set real called type.
                 // TODO: Only first method, or should we test all methods?
-                final Method method = new ArrayList<>(methods).get(0);
+                final Method method = methods.iterator().next();
                 calledType = method.getOwner();
             }
             final String fullMethodName = calledType.getFullName() + "." + methodName;

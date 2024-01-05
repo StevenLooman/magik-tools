@@ -11,14 +11,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.IgnoreHandler;
-import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoTypeKeeperReader;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
+import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.typing.indexer.MagikIndexer;
-import nl.ramsolutions.sw.magik.analysis.typing.io.JsonTypeKeeperReader;
+import nl.ramsolutions.sw.magik.analysis.typing.indexer.ProductIndexer;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItem;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItemProvider;
 import nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider;
@@ -49,8 +47,9 @@ public class MagikWorkspaceService implements WorkspaceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikWorkspaceService.class);
 
     private final MagikLanguageServer languageServer;
-    private final ITypeKeeper typeKeeper;
+    private final IDefinitionKeeper definitionKeeper;
     private final IgnoreHandler ignoreHandler;
+    private final ProductIndexer productIndexer;
     private final MagikIndexer magikIndexer;
     private final SymbolProvider symbolProvider;
     private final MUnitTestItemProvider testItemProvider;
@@ -58,17 +57,17 @@ public class MagikWorkspaceService implements WorkspaceService {
     /**
      * Constructor.
      * @param languageServer Owner language server.
-     * @param typeKeeper {@link TypeKeeper} used for type storage.
+     * @param definitionKeeper {@link IDefinitionKeeper} used for definition storage.
      */
-    public MagikWorkspaceService(final MagikLanguageServer languageServer, final ITypeKeeper typeKeeper) {
+    public MagikWorkspaceService(final MagikLanguageServer languageServer, final IDefinitionKeeper definitionKeeper) {
         this.languageServer = languageServer;
-        this.typeKeeper = typeKeeper;
+        this.definitionKeeper = definitionKeeper;
 
         this.ignoreHandler = new IgnoreHandler();
-        this.magikIndexer = new MagikIndexer(typeKeeper);
-        final ITypeKeeper roTypeKeeper = new ReadOnlyTypeKeeperAdapter(typeKeeper);
-        this.symbolProvider = new SymbolProvider(roTypeKeeper);
-        this.testItemProvider = new MUnitTestItemProvider(roTypeKeeper);
+        this.productIndexer = new ProductIndexer(this.definitionKeeper);
+        this.magikIndexer = new MagikIndexer(this.definitionKeeper);
+        this.symbolProvider = new SymbolProvider(this.definitionKeeper);
+        this.testItemProvider = new MUnitTestItemProvider(this.definitionKeeper);
     }
 
     /**
@@ -106,7 +105,7 @@ public class MagikWorkspaceService implements WorkspaceService {
                     .forEach(path -> {
                         try {
                             this.ignoreHandler.addIgnoreFile(path);
-                        } catch (IOException exception) {
+                        } catch (final IOException exception) {
                             LOGGER.error(exception.getMessage(), exception);
                         }
                     });
@@ -116,8 +115,19 @@ public class MagikWorkspaceService implements WorkspaceService {
         }
     }
 
-    private void runIndexer() {
-        LOGGER.trace("Running MagikIndexer");
+    private void runProductIndexer() {
+        for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
+            try {
+                LOGGER.debug("Running ProductIndexer from: {}", workspaceFolder.getUri());
+                final Stream<Path> indexableFiles = this.getIndexableFiles(workspaceFolder);
+                this.productIndexer.indexPaths(indexableFiles);
+            } catch (final IOException exception) {
+                LOGGER.error(exception.getMessage(), exception);
+            }
+        }
+    }
+
+    private void runMagikIndexer() {
         for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
             try {
                 LOGGER.debug("Running MagikIndexer from: {}", workspaceFolder.getUri());
@@ -129,26 +139,22 @@ public class MagikWorkspaceService implements WorkspaceService {
         }
     }
 
-    private void readLibsDocs(final @Nullable String smallworldGisDir) {
-        LOGGER.trace("Reading libs docs from: {}", smallworldGisDir);
+    private void readLibsClassInfos(final List<String> libsDirs) {
+        LOGGER.trace("Reading libs docs from: {}", libsDirs);
 
-        if (smallworldGisDir == null
-            || smallworldGisDir.trim().isEmpty()) {
-            LOGGER.info("No smallworld gis directory configured");
-            return;
-        }
+        libsDirs.forEach(pathStr -> {
+            final Path path = Path.of(pathStr);
+            if (!Files.exists(path)) {
+                LOGGER.warn("Path to libs dir does not exist: {}", pathStr);
+                return;
+            }
 
-        final Path libsDirPath = Path.of(smallworldGisDir).resolve("sw_core").resolve("libs");
-        if (!Files.exists(libsDirPath)) {
-            return;
-        }
-
-        // Move to ClassInfoTypeKeeperReader class.
-        try {
-            ClassInfoTypeKeeperReader.readLibsDirectory(libsDirPath, this.typeKeeper);
-        } catch (IOException exception) {
-            LOGGER.error(exception.getMessage(), exception);
-        }
+            try {
+                ClassInfoDefinitionReader.readLibsDirectory(path, this.definitionKeeper);
+            } catch (final IOException exception) {
+                LOGGER.error(exception.getMessage(), exception);
+            }
+        });
     }
 
     /**
@@ -166,8 +172,8 @@ public class MagikWorkspaceService implements WorkspaceService {
             }
 
             try {
-                JsonTypeKeeperReader.readTypes(path, this.typeKeeper);
-            } catch (IOException exception) {
+                JsonDefinitionReader.readTypes(path, this.definitionKeeper);
+            } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
         });
@@ -181,12 +187,32 @@ public class MagikWorkspaceService implements WorkspaceService {
                 final Path path = Path.of(uri);
                 final FileSystem fileSystem = path.getFileSystem();
 
-                if (fileSystem.getPathMatcher("glob:**/*.magik").matches(path)) {
+                if (fileSystem.getPathMatcher("glob:**/*.def").matches(path)) {
+                    this.handleDefFileChange(fileEvent);
+                } else if (fileSystem.getPathMatcher("glob:**/*.magik").matches(path)) {
                     this.handleMagikFileChange(fileEvent);
                 } else if (fileSystem.getPathMatcher("glob:**/.magik-tools-ignore").matches(path)) {
                     this.handleIgnoreFileChange(fileEvent);
                 }
             });
+    }
+
+    private void handleDefFileChange(final FileEvent fileEvent) {
+        final URI uri = URI.create(fileEvent.getUri());
+        final Path path = Path.of(uri);
+
+        // Don't index if ignored.
+        if (this.ignoreHandler.isIgnored(path)) {
+            return;
+        }
+
+        if (fileEvent.getType() == FileChangeType.Created) {
+            this.productIndexer.indexPathCreated(path);
+        } else if (fileEvent.getType() == FileChangeType.Changed) {
+            this.productIndexer.indexPathChanged(path);
+        } else if (fileEvent.getType() == FileChangeType.Deleted) {
+            this.productIndexer.indexPathDeleted(path);
+        }
     }
 
     private void handleMagikFileChange(final FileEvent fileEvent) {
@@ -225,7 +251,8 @@ public class MagikWorkspaceService implements WorkspaceService {
     @Override
     public CompletableFuture<
             Either<List<? extends org.eclipse.lsp4j.SymbolInformation>, List<? extends WorkspaceSymbol>>
-            > symbol(WorkspaceSymbolParams params) {
+            >
+            symbol(WorkspaceSymbolParams params) {
         final String query = params.getQuery();
         LOGGER.trace("symbol, query: {}", query);
 
@@ -244,7 +271,7 @@ public class MagikWorkspaceService implements WorkspaceService {
     @JsonRequest(value = "custom/reIndex")
     public CompletableFuture<Void> reIndex() {
         return CompletableFuture.runAsync(() -> {
-            this.typeKeeper.clear();
+            this.definitionKeeper.clear();
 
             this.runIndexersInBackground();
         });
@@ -279,7 +306,7 @@ public class MagikWorkspaceService implements WorkspaceService {
         final Path workspacePath = Path.of(uri);
 
         return Files.walk(workspacePath)
-                .filter(path -> !this.ignoreHandler.isIgnored(path));
+            .filter(path -> !this.ignoreHandler.isIgnored(path));
     }
 
     private void runIndexers() {
@@ -289,17 +316,18 @@ public class MagikWorkspaceService implements WorkspaceService {
         final List<String> typesDbPaths = MagikSettings.INSTANCE.getTypingTypeDatabasePaths();
         this.readTypesDbs(typesDbPaths);
 
-        // Read method docs.
-        final String smallworldGisDir = MagikSettings.INSTANCE.getSmallworldGis();
-        if (smallworldGisDir != null) {
-            this.readLibsDocs(smallworldGisDir);
-        }
+        // Read class_infos from libs/ dirs.
+        final List<String> libsDirs = MagikSettings.INSTANCE.getLibsDirs();
+        this.readLibsClassInfos(libsDirs);
 
         // Index .magik-tools-ignore files.
         this.runIgnoreFilesIndexer();
 
-        // Run indexer.
-        this.runIndexer();
+        // Run product/module indexer.
+        this.runProductIndexer();
+
+        // Run magik indexer.
+        this.runMagikIndexer();
     }
 
     @SuppressWarnings("IllegalCatch")
@@ -313,26 +341,26 @@ public class MagikWorkspaceService implements WorkspaceService {
         languageClient.createProgress(params);
 
         CompletableFuture.runAsync(() -> {
-            LOGGER.trace("Start indexing in background");
+            LOGGER.trace("Start indexing workspace in background");
             final ProgressParams progressParams = new ProgressParams();
             progressParams.setToken(token);
 
             final WorkDoneProgressBegin begin = new WorkDoneProgressBegin();
-            begin.setTitle("Indexing Magik sources");
+            begin.setTitle("Indexing workspace");
             progressParams.setValue(Either.forLeft(begin));
             languageClient.notifyProgress(progressParams);
 
             try {
                 this.runIndexers();
-            } catch (Exception exception) {
+            } catch (final Exception exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
 
             final WorkDoneProgressEnd end = new WorkDoneProgressEnd();
-            end.setMessage("Done indexing Magik sources");
+            end.setMessage("Done indexing workspace");
             progressParams.setValue(Either.forLeft(end));
             languageClient.notifyProgress(progressParams);
-            LOGGER.trace("Done indexing Magik sources in background");
+            LOGGER.trace("Done indexing workspace in background");
         });
     }
 

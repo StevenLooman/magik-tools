@@ -9,7 +9,7 @@ import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
@@ -64,12 +64,11 @@ public class SignatureHelpProvider {
         if (methodName == null) {
             return new SignatureHelp(Collections.emptyList(), null, null);
         }
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
         final AstNode previousSiblingNode = currentNode.getPreviousSibling();
-        final ExpressionResult result = reasoner.getNodeType(previousSiblingNode);
+        final ExpressionResult result = reasonerState.getNodeType(previousSiblingNode);
         final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-        final TypeString unsetTypeString = TypeString.ofIdentifier("unset", "sw");
-        final AbstractType unsetType = typeKeeper.getType(unsetTypeString);
+        final AbstractType unsetType = typeKeeper.getType(TypeString.UNDEFINED);
         AbstractType type = result.get(0, unsetType);
 
         LOGGER.debug("Provide signature for type: {}, method: {}", type.getFullName(), methodName);

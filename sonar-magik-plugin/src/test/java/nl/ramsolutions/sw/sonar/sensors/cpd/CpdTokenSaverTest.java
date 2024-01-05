@@ -30,6 +30,7 @@ class CpdTokenSaverTest {
         final Path filePath = TEST_PRODUCT_PATH.resolve("test_module/test.magik");
         final String fileContents =
             Files.readString(TEST_PRODUCT_PATH.resolve("test_module/test.magik"), StandardCharsets.ISO_8859_1);
+        @SuppressWarnings("deprecation")
         final InputFile inputFile = TestInputFileBuilder.create("moduleKey", "test.magik")
             .setModuleBaseDir(filePath)
             .setCharset(StandardCharsets.ISO_8859_1)

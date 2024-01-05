@@ -12,7 +12,7 @@ import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
@@ -49,9 +49,9 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
     private List<CodeAction> extractReturnTypeCodeActions(
             final MagikTypedFile magikFile,
             final MethodDefinition methodDefinition) {
-        final LocalTypeReasoner reasoner = magikFile.getTypeReasoner();
         final AstNode methodDefinitionNode = methodDefinition.getNode();
-        final ExpressionResult methodResult = reasoner.getNodeType(methodDefinitionNode);
+        final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+        final ExpressionResult methodResult = state.getNodeType(methodDefinitionNode);
         final ExpressionResultString methodResultString = methodResult.stream()
             .map(AbstractType::getTypeString)
             .collect(ExpressionResultString.COLLECTOR);
@@ -146,7 +146,7 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
         }
 
         final int bodyStart = bodyNode.getTokenLine() - 1;  // Body starts at first method body token, so subtract 1.
-        return MagikCommentExtractor.extractDocComments(methodDefinitionNode)
+        return MagikCommentExtractor.extractDocCommentTokens(methodDefinitionNode)
             .mapToInt(Token::getLine)
             .max()
             .orElse(bodyStart);

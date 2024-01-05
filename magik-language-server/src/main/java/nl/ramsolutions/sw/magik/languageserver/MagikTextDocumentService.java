@@ -11,8 +11,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
 import nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider;
@@ -100,7 +99,7 @@ public class MagikTextDocumentService implements TextDocumentService {
 
     private final MagikLanguageServer languageServer;
     private final Map<TextDocumentIdentifier, MagikTypedFile> openFiles = new HashMap<>();
-    private final ITypeKeeper typeKeeper;
+    private final IDefinitionKeeper definitionKeeper;
 
     private final HoverProvider hoverProvider;
     private final ImplementationProvider implementationProvider;
@@ -122,11 +121,13 @@ public class MagikTextDocumentService implements TextDocumentService {
      * Constructor.
      *
      * @param languageServer Owning language server.
-     * @param typeKeeper TypeKeeper to use.
+     * @param definitionKeeper IDefinitionKeeper to use.
      */
-    public MagikTextDocumentService(final MagikLanguageServer languageServer, final ITypeKeeper typeKeeper) {
+    public MagikTextDocumentService(
+            final MagikLanguageServer languageServer,
+            final IDefinitionKeeper definitionKeeper) {
         this.languageServer = languageServer;
-        this.typeKeeper = new ReadOnlyTypeKeeperAdapter(typeKeeper);
+        this.definitionKeeper = definitionKeeper;
 
         this.hoverProvider = new HoverProvider();
         this.implementationProvider = new ImplementationProvider();
@@ -139,7 +140,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         this.semanticTokenProver = new SemanticTokenProvider();
         this.renameProvider = new RenameProvider();
         this.documentSymbolProvider = new DocumentSymbolProvider();
-        this.typeHierarchyProvider = new TypeHierarchyProvider(this.typeKeeper);
+        this.typeHierarchyProvider = new TypeHierarchyProvider(this.definitionKeeper);
         this.inlayHintProvider = new InlayHintProvider();
         this.codeActionProvider = new CodeActionProvider();
         this.selectionRangeProvider = new SelectionRangeProvider();
@@ -180,7 +181,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         final URI uri = URI.create(uriStr);
         final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uriStr);
         final String text = textDocument.getText();
-        final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.typeKeeper);
+        final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.definitionKeeper);
         this.openFiles.put(textDocumentIdentifier, openFile);
 
         // Publish diagnostics to client.
@@ -199,7 +200,7 @@ public class MagikTextDocumentService implements TextDocumentService {
         final String uriStr = versionedTextDocumentIdentifier.getUri();
         final URI uri = URI.create(uriStr);
         final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uriStr);
-        final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.typeKeeper);
+        final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.definitionKeeper);
         this.openFiles.put(textDocumentIdentifier, openFile);
 
         // Publish diagnostics to client.
@@ -511,10 +512,14 @@ public class MagikTextDocumentService implements TextDocumentService {
     @Override
     public CompletableFuture<List<InlayHint>> inlayHint(final InlayHintParams params) {
         final TextDocumentIdentifier textDocument = params.getTextDocument();
-        LOGGER.trace("inlayHint, uri: {}", textDocument.getUri());
+        final Range range = params.getRange();
+        LOGGER.trace(
+            "inlayHint, uri: {}, range: {},{}-{},{}",
+            textDocument.getUri(),
+            range.getStart().getLine(), range.getStart().getCharacter(),
+            range.getEnd().getLine(), range.getEnd().getCharacter());
 
         final MagikTypedFile magikFile = this.openFiles.get(textDocument);
-        final Range range = params.getRange();
         return CompletableFuture.supplyAsync(() -> this.inlayHintProvider.provideInlayHints(magikFile, range));
     }
 

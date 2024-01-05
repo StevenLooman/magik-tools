@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
 
 /**
@@ -14,19 +15,26 @@ import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
  * - {@code "sw:char16_vector|sw:symbol|sw:unset"}
  * - {@code "_undefined"}
  * - {@code "_self|sw:unset"}
- * - {@code "sw:rope<sw:integer>"}
+ * - {@code "sw:rope<E=sw:integer>"}
+ * - {@code "<E>"}
  */
-public final class TypeString {
+@Immutable
+public final class TypeString implements Comparable<TypeString> {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final String DEFAULT_PACKAGE = "user";
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final String SW_PACKAGE = "sw";
 
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final TypeString UNDEFINED = new TypeString(UndefinedType.SERIALIZED_NAME, DEFAULT_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final TypeString SELF = new TypeString(SelfType.SERIALIZED_NAME, DEFAULT_PACKAGE);
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", SW_PACKAGE);
 
-    private static final String GENERIC = "_generic";
+    private static final String GENERIC_DEFINITION = "_generic_def";
+    private static final String GENERIC_REFERENCE = "_generic_ref";
     private static final String PARAMETER = "_parameter";
 
     private final String string;
@@ -71,12 +79,21 @@ public final class TypeString {
     }
 
     /**
-     * Create a {@link TypeString} of a generic.
+     * Create a {@link TypeString} of a generic definition.
      * @param identifier Name of generic.
+     * @param definition Type of the generic, singular.
      * @return {@link TypeString}.
      */
-    public static TypeString ofGeneric(final String identifier) {
-        return new TypeString(identifier, TypeString.GENERIC);
+    public static TypeString ofGenericDefinition(final String identifier, final TypeString... definition) {
+        if (definition.length != 1) {
+            throw new IllegalStateException();
+        }
+
+        return new TypeString(identifier, TypeString.GENERIC_DEFINITION, definition);
+    }
+
+    public static TypeString ofGenericReference(final String identifier) {
+        return new TypeString(identifier, TypeString.GENERIC_REFERENCE);
     }
 
     /**
@@ -108,9 +125,7 @@ public final class TypeString {
      * @param combinations Types to combine.
      * @return {@link TypeString}.
      */
-    public static TypeString ofCombination(
-            final String currentPakkage,
-            final TypeString... combinations) {
+    public static TypeString ofCombination(final String currentPakkage, final TypeString... combinations) {
         return new TypeString(currentPakkage, combinations);
     }
 
@@ -173,9 +188,32 @@ public final class TypeString {
             return this.string;
         }
 
+        if (this.isGenericDefinition()) {
+            return TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue()
+                + this.string + TypeStringGrammar.Punctuator.TYPE_GENERIC_ASSIGN.getValue()
+                + this.generics.get(0).getFullString()
+                + TypeStringGrammar.Punctuator.TYPE_GENERIC_CLOSE.getValue();
+        }
+
+        if (this.isGenericReference()) {
+            return TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue()
+                + this.string
+                + TypeStringGrammar.Punctuator.TYPE_GENERIC_CLOSE.getValue();
+        }
+
         final String genericDefs = !this.generics.isEmpty()
             ? this.generics.stream()
-                .map(TypeString::getFullString)
+                .map(typeStr -> {
+                    if (typeStr.isGenericReference()) {
+                        return typeStr.getIdentifier();
+                    } else if (typeStr.isGenericDefinition()) {
+                        return typeStr.string
+                            + TypeStringGrammar.Punctuator.TYPE_GENERIC_ASSIGN.getValue()
+                            + this.generics.get(0).generics.get(0).getFullString();
+                    }
+
+                    throw new IllegalStateException();
+                })
                 .collect(Collectors.joining(
                     TypeStringGrammar.Punctuator.TYPE_GENERIC_SEPARATOR.getValue(),
                     TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue(),
@@ -224,12 +262,20 @@ public final class TypeString {
         return !this.combinedTypes.isEmpty();
     }
 
-    public boolean isGeneric() {
-        return TypeStringGrammar.Keyword.TYPE_STRING_GENERIC.getValue().equalsIgnoreCase(this.currentPackage);
+    public boolean isGenericDefinition() {
+        return TypeString.GENERIC_DEFINITION.equalsIgnoreCase(this.currentPackage);
     }
 
-    public boolean isGenericParametered() {
+    public boolean isGenericReference() {
+        return TypeString.GENERIC_REFERENCE.equalsIgnoreCase(this.currentPackage);
+    }
+
+    public boolean hasGenerics() {
         return !this.generics.isEmpty();
+    }
+
+    public boolean isParameterReference() {
+        return TypeString.PARAMETER.equalsIgnoreCase(this.currentPackage);
     }
 
     /**
@@ -255,15 +301,15 @@ public final class TypeString {
         return Collections.unmodifiableList(this.combinedTypes);
     }
 
-    public boolean isParameterReference() {
-        return TypeStringGrammar.Keyword.TYPE_STRING_PARAMETER.getValue().equalsIgnoreCase(this.currentPackage);
-    }
-
     /**
      * Get reference parameter.
      * @return Referenced parameter.
      */
-    public String referencedParameter() {
+    public String getReferencedParameter() {
+        if (!this.isParameterReference()) {
+            throw new IllegalStateException();
+        }
+
         return this.string;
     }
 
@@ -284,6 +330,22 @@ public final class TypeString {
                 .collect(Collectors.toList())
                 .toArray(TypeString[]::new);
             return TypeString.ofCombination(this.currentPackage, combinedSubstitutedArr);
+        }
+
+        if (this.hasGenerics()) {
+            final TypeString[] genericsSubstitutedArr = this.generics.stream()
+                .map(genTypeStr -> {
+                    if (!genTypeStr.isGenericReference()) {
+                        return genTypeStr;
+                    }
+
+                    final String identifier = genTypeStr.getIdentifier();
+                    final TypeString subbedTypeStr = genTypeStr.substituteType(from, to);
+                    return TypeString.ofGenericDefinition(identifier, subbedTypeStr);
+                })
+                .collect(Collectors.toList())
+                .toArray(TypeString[]::new);
+            return TypeString.ofIdentifier(this.string, this.currentPackage, genericsSubstitutedArr);
         }
 
         return this;
@@ -324,9 +386,14 @@ public final class TypeString {
     @Override
     public String toString() {
         return String.format(
-            "%s@%s(%s, %s)",
+            "%s@%s(%s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
-            this.currentPackage, this.string);
+            this.getFullString());
+    }
+
+    @Override
+    public int compareTo(final TypeString other) {
+        return this.getFullString().compareTo(other.getFullString());
     }
 
 }

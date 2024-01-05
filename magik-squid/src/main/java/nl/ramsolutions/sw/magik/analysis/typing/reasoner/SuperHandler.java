@@ -1,9 +1,6 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.Map;
-import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
@@ -21,17 +18,10 @@ class SuperHandler extends LocalTypeReasonerHandler {
 
     /**
      * Constructor.
-     * @param magikFile MagikFile
-     * @param nodeTypes Node types.
-     * @param nodeIterTypes Node iter types.
-     * @param currentScopeEntryNodes Current scope entry nodes.
+     * @param state Reasoner state.
      */
-    SuperHandler(
-            final MagikTypedFile magikFile,
-            final Map<AstNode, ExpressionResult> nodeTypes,
-            final Map<AstNode, ExpressionResult> nodeIterTypes,
-            final Map<ScopeEntry, AstNode> currentScopeEntryNodes) {
-        super(magikFile, nodeTypes, nodeIterTypes, currentScopeEntryNodes);
+    SuperHandler(final LocalTypeReasonerState state) {
+        super(state);
     }
 
     /**

@@ -10,6 +10,7 @@ import nl.ramsolutions.sw.magik.Location;
  */
 public class Condition {
 
+    private final String moduleName;
     private final Location location;
     private final String name;
     private final List<String> dataNameList;
@@ -18,6 +19,7 @@ public class Condition {
 
     /**
      * Constructor.
+     * @param moduleName Module name.
      * @param location Location of condition.
      * @param name Name of condition.
      * @param parent Parent of the condition.
@@ -25,16 +27,22 @@ public class Condition {
      * @param doc Doc.
      */
     public Condition(
+            final @Nullable String moduleName,
             final @Nullable Location location,
             final String name,
             final @Nullable String parent,
             final List<String> dataNameList,
             final @Nullable String doc) {
+        this.moduleName = moduleName;
         this.location = location;
         this.name = name;
         this.dataNameList = dataNameList;
         this.parent = parent;
         this.doc = doc;
+    }
+
+    public String getModuleName() {
+        return this.moduleName;
     }
 
     @CheckForNull

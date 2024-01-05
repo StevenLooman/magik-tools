@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>nl.ramsolutions</groupId>
   <artifactId>magik-tools</artifactId>
-  <version>0.8.3</version>
+  <version>0.9.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Magik Tools</name>
@@ -64,6 +64,7 @@
     <versions-maven-plugin.version>2.8.1</versions-maven-plugin.version>
     <spotbugs-maven-plugin.version>4.2.3</spotbugs-maven-plugin.version>
     <spotbugs.version>4.7.3</spotbugs.version>
+
     <!-- JaCoCo thresholds. Increase gradually as you add tests. -->
     <jacoco.unit-tests.limit.instruction-ratio>0%</jacoco.unit-tests.limit.instruction-ratio>
     <jacoco.unit-tests.limit.branch-ratio>0%</jacoco.unit-tests.limit.branch-ratio>
@@ -79,9 +80,10 @@
     <logback.version>1.0.13</logback.version>
     <lsp4j.version>0.21.0</lsp4j.version>
     <commons-cli.version>1.5.0</commons-cli.version>
-    <json.version>20231013</json.version>
+    <gson.version>2.10.1</gson.version>
     <assertj.version>3.24.2</assertj.version>
     <sonar-maven.version>3.9.1.2184</sonar-maven.version>
+    <sqlite-jdbc.version>3.44.1.0</sqlite-jdbc.version>
 
     <sonar.organization>stevenlooman</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -142,9 +144,9 @@
       </dependency>
 
       <dependency>
-        <groupId>org.json</groupId>
-        <artifactId>json</artifactId>
-        <version>${json.version}</version>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>${gson.version}</version>
       </dependency>
 
       <dependency>
@@ -392,14 +394,20 @@
                   </limits>
                   <excludes>
                     <exclude>nl.ramsolutions.sw.magik.analysis.AstWalker.*</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition.equals(java.lang.Object)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.equals(java.lang.Object)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition.equals(java.lang.Object)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinitionParser.parseDefinitions()</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition.equals(java.lang.Object)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.checks.checks.FormattingCheck.handleToken()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.stackTrace(long)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.slap.SlapProtocol.handleReplyMessage(java.nio.ByteBuffer)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider.provideDefinitions(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.formatting.StandardFormattingStrategy.requireNoWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.formatting.StandardFormattingStrategy.requireWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider.provideHover(nl.ramsolutions.sw.magik.MagikTypedFile, org.eclipse.lsp4j.Position)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider.provideDefinitions(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider.provideReferences(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.semantictokens.SemanticTokenWalker.walkPostIdentifier(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider.getSymbols(java.lang.String)</exclude>
@@ -434,26 +442,5 @@
       </plugin>
     </plugins>
   </reporting>
-
-  <profiles>
-    <!-- Publish coverage report to Coveralls, only when running in Travis. -->
-    <profile>
-      <id>travis</id>
-      <activation>
-        <property>
-          <name>env.TRAVIS</name>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eluder.coveralls</groupId>
-            <artifactId>coveralls-maven-plugin</artifactId>
-            <version>${coveralls-maven-plugin.version}</version>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
 </project>

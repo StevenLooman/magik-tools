@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 
 /**
@@ -11,30 +12,34 @@ import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 public class GenericDefinition extends AbstractType {
 
     private final ITypeKeeper typeKeeper;
-    private final String name;
     private final TypeString typeString;
 
     /**
      * Constructor.
      * @param typeKeeper TypeKeeper.
-     * @param name Name of generic.
      * @param typeString Defined type of generic.
      */
     public GenericDefinition(
             final ITypeKeeper typeKeeper,
-            final String name,
             final TypeString typeString) {
+        super(null, null);
+
+        if (!typeString.isGenericDefinition()) {
+            throw new IllegalArgumentException();
+        }
+
         this.typeKeeper = typeKeeper;
-        this.name = name;
         this.typeString = typeString;
     }
 
-    public String getName() {
-        return this.name;
+    public TypeString getGenericReference() {
+        final String name = this.typeString.getIdentifier();
+        return TypeString.ofGenericReference(name);
     }
 
-    public TypeString getNameAsTypeString() {
-        return TypeString.ofGeneric(this.name);
+    @Override
+    public String getName() {
+        return this.typeString.getFullString();
     }
 
     public TypeString getTypeString() {
@@ -81,8 +86,31 @@ public class GenericDefinition extends AbstractType {
     }
 
     @Override
-    public List<GenericDeclaration> getGenerics() {
+    public List<GenericDefinition> getGenericDefinitions() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.typeString);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null) {
+            return false;
+        }
+
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        final GenericDefinition other = (GenericDefinition) obj;
+        return Objects.equals(this.typeString, other.typeString);
     }
 
 }

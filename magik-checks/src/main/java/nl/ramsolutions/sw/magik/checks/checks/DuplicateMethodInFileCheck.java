@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinitionParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodDefinitionParser;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;

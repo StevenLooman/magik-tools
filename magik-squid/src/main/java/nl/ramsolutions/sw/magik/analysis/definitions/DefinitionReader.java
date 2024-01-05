@@ -5,6 +5,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.AstWalker;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefConditionParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefEnumerationParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefIndexedExemplarParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefMixinParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefPackageParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefSlottedExemplarParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefineBinaryOperatorCaseParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefineSharedConstantParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefineSharedVariableParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefineSlotAccessParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.GlobalDefinitionParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodDefinitionParser;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
@@ -18,6 +30,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  * - define_slot_access
  * - define_shared_variable
  * - define_shared_constant
+ * - define_binary_operator_case
  */
 public class DefinitionReader extends AstWalker {
 
