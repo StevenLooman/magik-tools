@@ -116,8 +116,6 @@ public class MUnitTestItemProvider {
     }
 
     private Stream<ExemplarDefinition> getTestCaseExemplars() {
-        this.definitionKeeper.getExemplarDefinitions();
-
         final ExemplarDefinition testCaseDefinition =
             this.definitionKeeper.getExemplarDefinitions(MUNIT_TEST_CASE_EXEMPLAR_NAME).stream()
             .findAny()
