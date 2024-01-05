@@ -148,7 +148,7 @@ public class Location {
      * @param location Range to derive from.
      * @return Location.
      */
-    public static Location validLocation(final Location location) {
+    public static Location validLocation(final @Nullable Location location) {
         if (location == null) {
             return DUMMY_LOCATION;
         }
