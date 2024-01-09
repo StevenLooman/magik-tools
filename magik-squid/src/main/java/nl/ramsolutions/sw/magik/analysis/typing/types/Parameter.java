@@ -91,8 +91,14 @@ public class Parameter {
         return this.modifier;
     }
 
-    public boolean is(Modifier isModifier) {
-        return this.modifier == isModifier;
+    public boolean is(Modifier... isModifiers) {
+        for (final Modifier isModifier : isModifiers) {
+            if (this.is(isModifier)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void setType(TypeString type) {

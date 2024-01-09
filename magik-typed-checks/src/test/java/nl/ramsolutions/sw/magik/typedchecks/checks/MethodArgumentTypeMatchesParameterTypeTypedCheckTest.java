@@ -17,9 +17,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test MethodArgumentParameterTypeCheck.
+ * Test {@link MethodArgumentTypeMatchesParameterTypeTypedCheck}.
  */
-class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
+class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedCheckTestBase {
 
     private void addTestMethod(final IDefinitionKeeper definitionKeeper) {
         final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
@@ -57,7 +57,7 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         this.addTestMethod(definitionKeeper);
 
-        final MagikTypedCheck check = new MethodArgumentParameterTypedCheck();
+        final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
         final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
         assertThat(checkResults).isEmpty();
     }
@@ -68,7 +68,7 @@ class MethodArgumentParameterTypeCheckTest extends MagikTypedCheckTestBase {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         this.addTestMethod(definitionKeeper);
 
-        final MagikTypedCheck check = new MethodArgumentParameterTypedCheck();
+        final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
         final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
         assertThat(checkResults).hasSize(1);
     }

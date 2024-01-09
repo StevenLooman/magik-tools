@@ -10,7 +10,7 @@
     "convention",
     "design"
   ],
-  "defaultSeverity": "Minor",
+  "defaultSeverity": "Major",
   "ruleSpecification": "ForbiddenGlobalUsage",
   "sqKey": "forbidden-global-usage"
 }

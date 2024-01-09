@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for TypeDocTypeExistsTypeCheck.
+ * Test {@link TypeDocTypeExistsTypedCheck}.
  */
 class TypeDocTypeExistsTypedCheckTest extends MagikTypedCheckTestBase {
 

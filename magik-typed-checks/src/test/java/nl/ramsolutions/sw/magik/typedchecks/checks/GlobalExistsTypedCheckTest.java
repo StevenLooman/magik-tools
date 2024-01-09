@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test GlobalKnownTypedCheck.
+ * Test {@link GlobalExistsTypedCheck}.
  */
-class GlobalKnownTypedCheckTest extends MagikTypedCheckTestBase {
+class GlobalExistsTypedCheckTest extends MagikTypedCheckTestBase {
 
     @Test
     void testKnownGlobal() {
@@ -20,7 +20,7 @@ class GlobalKnownTypedCheckTest extends MagikTypedCheckTestBase {
             + "float.m";
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
-        final MagikTypedCheck check = new GlobalKnownTypedCheck();
+        final MagikTypedCheck check = new GlobalExistsTypedCheck();
         final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
         assertThat(checkResults)
             .isEmpty();
@@ -32,7 +32,7 @@ class GlobalKnownTypedCheckTest extends MagikTypedCheckTestBase {
             + "abc.m";
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
-        final MagikTypedCheck check = new GlobalKnownTypedCheck();
+        final MagikTypedCheck check = new GlobalExistsTypedCheck();
         final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
         assertThat(checkResults)
             .hasSize(1);
