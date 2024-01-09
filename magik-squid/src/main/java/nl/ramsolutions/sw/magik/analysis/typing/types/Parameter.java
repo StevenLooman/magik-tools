@@ -91,9 +91,14 @@ public class Parameter {
         return this.modifier;
     }
 
+    /**
+     * Test if parameter has modifier.
+     * @param isModifiers Modifiers to test.
+     * @return True if parameter has modifier.
+     */
     public boolean is(Modifier... isModifiers) {
         for (final Modifier isModifier : isModifiers) {
-            if (this.is(isModifier)) {
+            if (this.modifier == isModifier) {
                 return true;
             }
         }
