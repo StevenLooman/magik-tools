@@ -7,7 +7,9 @@
     "constantCost": "10min"
   },
   "tags": [
-    "warning"
+    "bad-practice",
+    "brain-overload",
+    "confusing"
   ],
   "defaultSeverity": "Minor",
   "ruleSpecification": "HidesVariable",

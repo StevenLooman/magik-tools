@@ -7,7 +7,8 @@
     "constantCost": "1min"
   },
   "tags": [
-    "convention"
+    "convention",
+    "user-experience"
   ],
   "defaultSeverity": "Minor",
   "ruleSpecification": "VariableNaming",

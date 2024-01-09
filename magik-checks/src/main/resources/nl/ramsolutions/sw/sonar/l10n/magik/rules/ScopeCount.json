@@ -7,7 +7,9 @@
     "constantCost": "30min"
   },
   "tags": [
-    "complexity"
+    "brain-overload",
+    "complexity",
+    "convention"
   ],
   "defaultSeverity": "Major",
   "ruleSpecification": "ScopeCount",

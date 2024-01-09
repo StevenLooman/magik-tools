@@ -1,15 +1,18 @@
 {
-    "title": "Files should not contain too many methods",
-    "type": "CODE_SMELL",
-    "status": "ready",
-    "remediation": {
-      "func": "Constant\/Issue",
-      "constantCost": "60min"
-    },
-    "tags": [
-      "complexity"
-    ],
-    "defaultSeverity": "Major",
-    "ruleSpecification": "FileMethodCount",
-    "sqKey": "file-method-count"
-  }
+  "title": "File has too many methods defined",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Linear with offset",
+    "linearDesc": "per complexity point above the threshold",
+    "linearOffset": "10min",
+    "linearFactor": "1min"
+  },
+  "tags": [
+    "brain-overload",
+    "complexity"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "FileMethodCount",
+  "sqKey": "file-method-count"
+}

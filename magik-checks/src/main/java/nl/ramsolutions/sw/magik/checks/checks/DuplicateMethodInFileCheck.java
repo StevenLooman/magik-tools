@@ -23,7 +23,7 @@ public class DuplicateMethodInFileCheck extends MagikCheck {
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final String CHECK_KEY = "DuplicateMethodInFile";
 
-    private static final String MESSAGE = "Duplicate method definition in this file.";
+    private static final String MESSAGE = "Duplicate method definition in file.";
 
     private final Set<MethodDefinition> methodDefinitions = new HashSet<>();
 
