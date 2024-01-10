@@ -148,8 +148,14 @@ public class DefSlottedExemplarParser extends BaseDefParser {
                 final String flag = flagNode.getTokenValue();
                 final String flavor = flavorNode.getTokenValue();
                 final TypeString exemplarName = TypeString.ofIdentifier(identifier, packageName);
-                final List<MethodDefinition> slotMethodDefinitions =
-                    this.generateSlotMethods(moduleName, slotDefNode, exemplarName, slotName, flag, flavor);
+                final List<MethodDefinition> slotMethodDefinitions = this.generateSlotMethods(
+                    moduleName,
+                    slotDefNode,
+                    exemplarName,
+                    slotName,
+                    flag,
+                    flavor,
+                    slotTypeRef);
                 methodDefinitions.addAll(slotMethodDefinitions);
             }
         }
@@ -183,7 +189,8 @@ public class DefSlottedExemplarParser extends BaseDefParser {
             final TypeString exemplarName,
             final String slotName,
             final String flag,
-            final String flavor) {
+            final String flavor,
+            final TypeString slotTypeRef) {
         final List<MethodDefinition> methodDefinitions = new ArrayList<>();
 
         // Figure location.
@@ -209,8 +216,8 @@ public class DefSlottedExemplarParser extends BaseDefParser {
                 getModifiers,
                 getParameters,
                 null,
-                ExpressionResultString.UNDEFINED,
-                ExpressionResultString.UNDEFINED);
+                new ExpressionResultString(slotTypeRef),
+                ExpressionResultString.EMPTY);
             methodDefinitions.add(getMethod);
         } else if (flag.equals(FLAG_WRITE)
                    || flag.equals(FLAG_WRITABLE)) {
@@ -230,8 +237,8 @@ public class DefSlottedExemplarParser extends BaseDefParser {
                 getModifiers,
                 getParameters,
                 null,
-                ExpressionResultString.UNDEFINED,
-                ExpressionResultString.UNDEFINED);
+                new ExpressionResultString(slotTypeRef),
+                ExpressionResultString.EMPTY);
             methodDefinitions.add(getMethod);
 
             // set
@@ -248,7 +255,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
                 node,
                 "val",
                 ParameterDefinition.Modifier.NONE,
-                TypeString.UNDEFINED);
+                slotTypeRef);
             final MethodDefinition setMethod = new MethodDefinition(
                 location,
                 moduleName,
@@ -259,8 +266,9 @@ public class DefSlottedExemplarParser extends BaseDefParser {
                 setModifiers,
                 setParameters,
                 assignmentParam,
-                ExpressionResultString.UNDEFINED,
-                ExpressionResultString.UNDEFINED);
+                new ExpressionResultString(
+                    TypeString.ofParameterRef("val")),
+                ExpressionResultString.EMPTY);
             methodDefinitions.add(setMethod);
 
             // boot
@@ -275,8 +283,8 @@ public class DefSlottedExemplarParser extends BaseDefParser {
                 setModifiers,
                 setParameters,
                 assignmentParam,
-                ExpressionResultString.UNDEFINED,
-                ExpressionResultString.UNDEFINED);
+                new ExpressionResultString(slotTypeRef),
+                ExpressionResultString.EMPTY);
             methodDefinitions.add(bootMethod);
         }
         return methodDefinitions;

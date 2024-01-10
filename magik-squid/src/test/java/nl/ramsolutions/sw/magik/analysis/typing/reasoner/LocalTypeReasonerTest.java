@@ -1004,7 +1004,37 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasonerState.getNodeType(parameterNode);
 
         final AbstractType actualResultType = result.get(0, null);
-        final TypeString simpleVectorRef = TypeString.ofIdentifier("simple_vector", "sw");
+        final TypeString simpleVectorRef = TypeString.ofIdentifier(
+            "simple_vector", "sw",
+            TypeString.ofGenericDefinition("E", TypeString.UNDEFINED));
+        assertThat(actualResultType.getTypeString()).isEqualTo(simpleVectorRef);
+    }
+
+    @Test
+    void testGatherParametersGeneric() {
+        final String code = ""
+            + "_method object.test(_gather args)\n"
+            + "  ## @param {sw:symbol} args\n"
+            + "_endmethod\n";
+
+        // Set up TypeKeeper/TypeReasoner.
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+
+        // Assert user:object.test type determined.
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode parameterNode = topNode
+            .getFirstDescendant(MagikGrammar.PARAMETER)
+            .getFirstChild(MagikGrammar.IDENTIFIER);
+        final ExpressionResult result = reasonerState.getNodeType(parameterNode);
+
+        final AbstractType actualResultType = result.get(0, null);
+        final TypeString simpleVectorRef = TypeString.ofIdentifier(
+            "simple_vector", "sw",
+            TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("symbol", "sw")));
         assertThat(actualResultType.getTypeString()).isEqualTo(simpleVectorRef);
     }
 

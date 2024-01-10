@@ -18,6 +18,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 
 /**
  * {@code define_shared_constant()} parser.
@@ -118,6 +119,9 @@ public class DefineSharedConstantParser {
 
         // Figure doc.
         final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+        final TypeDocParser docParser = new TypeDocParser(parentNode);
+        final List<TypeString> returnTypeRefs = docParser.getReturnTypes();
+        final TypeString typeRef = returnTypeRefs.isEmpty() ? TypeString.UNDEFINED : returnTypeRefs.get(0);
 
         final String constantNameSymbol = argument0Node.getTokenValue();
         final String constantName = constantNameSymbol.substring(1);
@@ -140,8 +144,8 @@ public class DefineSharedConstantParser {
             modifiers,
             parameters,
             null,
-            ExpressionResultString.UNDEFINED,
-            ExpressionResultString.UNDEFINED);
+            new ExpressionResultString(typeRef),
+            ExpressionResultString.EMPTY);
         return List.of(methodDefinition);
     }
 
