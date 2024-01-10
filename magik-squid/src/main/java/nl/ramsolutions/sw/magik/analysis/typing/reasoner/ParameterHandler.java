@@ -10,6 +10,7 @@ import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
@@ -42,14 +43,21 @@ class ParameterHandler extends LocalTypeReasonerHandler {
             node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
         final TypeDocParser docParser = new TypeDocParser(definitionNode);
         final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
-        final TypeString parameterTypeString = parameterTypes.get(identifier);
+        final TypeString parameterTypeString = parameterTypes.getOrDefault(identifier, TypeString.UNDEFINED);
 
         final ExpressionResult result;
         final ParameterNodeHelper helper = new ParameterNodeHelper(node);
         if (helper.isGatherParameter()) {
             final AbstractType simpleVectorType = this.typeKeeper.getType(SW_SIMPLE_VECTOR);
-            result = new ExpressionResult(simpleVectorType);
-        } else if (parameterTypeString != null && !parameterTypeString.isUndefined()) {
+            final TypeString newTypeString = TypeString.ofIdentifier(
+                SW_SIMPLE_VECTOR.getIdentifier(), SW_SIMPLE_VECTOR.getPakkage(),
+                TypeString.ofGenericDefinition("E", parameterTypeString));
+            final AbstractType paramType = simpleVectorType instanceof MagikType
+                ? new MagikType((MagikType) simpleVectorType, newTypeString)
+                : simpleVectorType;
+
+            result = new ExpressionResult(paramType);
+        } else if (!parameterTypeString.isUndefined()) {
             final AbstractType type = this.typeReader.parseTypeString(parameterTypeString);
             if (helper.isOptionalParameter()) {
                 final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);

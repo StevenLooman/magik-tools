@@ -21,6 +21,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 
 /**
  * {@code define_shared_variable()} parser.
@@ -115,16 +116,27 @@ public class DefineSharedVariableParser {
 
         // Figure doc.
         final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+        final TypeDocParser docParser = new TypeDocParser(parentNode);
+        final List<TypeString> returnTypeRefs = docParser.getReturnTypes();
+        final TypeString typeRef = returnTypeRefs.isEmpty() ? TypeString.UNDEFINED : returnTypeRefs.get(0);
 
         final String variableNameSymbol = argument0Node.getTokenValue();
         final String variableName = variableNameSymbol.substring(1);
         final String flavor = argument2Node.getTokenValue();
         final TypeString exemplarName = TypeString.ofIdentifier(identifier, pakkage);
-        final List<MethodDefinition> methodDefinitions =
-            this.generateVariableMethods(location, moduleName, statementNode, exemplarName, variableName, flavor, doc);
+        final List<MethodDefinition> methodDefinitions = this.generateVariableMethods(
+            location,
+            moduleName,
+            statementNode,
+            exemplarName,
+            variableName,
+            flavor,
+            doc,
+            typeRef);
         return List.copyOf(methodDefinitions);
     }
 
+    @SuppressWarnings("checkstyle:ParameterNumber")
     private List<MethodDefinition> generateVariableMethods(
             final @Nullable Location location,
             final @Nullable String moduleName,
@@ -132,7 +144,8 @@ public class DefineSharedVariableParser {
             final TypeString exemplarName,
             final String variableName,
             final String flavor,
-            final String doc) {
+            final String doc,
+            final TypeString typeRef) {
         final List<MethodDefinition> methodDefinitions = new ArrayList<>();
 
         // get
@@ -151,8 +164,8 @@ public class DefineSharedVariableParser {
             getModifiers,
             getParameters,
             null,
-            ExpressionResultString.UNDEFINED,
-            ExpressionResultString.UNDEFINED);
+            new ExpressionResultString(typeRef),
+            ExpressionResultString.EMPTY);
         methodDefinitions.add(getMethod);
 
         // set
@@ -169,7 +182,7 @@ public class DefineSharedVariableParser {
             definitionNode,
             "val",
             ParameterDefinition.Modifier.NONE,
-            TypeString.UNDEFINED);
+            typeRef);
         final MethodDefinition setMethod = new MethodDefinition(
             location,
             moduleName,
@@ -180,8 +193,9 @@ public class DefineSharedVariableParser {
             setModifiers,
             setParameters,
             assignmentParam,
-            ExpressionResultString.UNDEFINED,
-            ExpressionResultString.UNDEFINED);
+            new ExpressionResultString(
+                TypeString.ofParameterRef("val")),
+            ExpressionResultString.EMPTY);
         methodDefinitions.add(setMethod);
 
         // boot
@@ -196,8 +210,8 @@ public class DefineSharedVariableParser {
             setModifiers,
             setParameters,
             assignmentParam,
-            ExpressionResultString.UNDEFINED,
-            ExpressionResultString.UNDEFINED);
+            new ExpressionResultString(typeRef),
+            ExpressionResultString.EMPTY);
         methodDefinitions.add(bootMethod);
 
         return methodDefinitions;

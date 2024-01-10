@@ -110,7 +110,7 @@ public class MagikType extends AbstractType {
                 method.getModuleName(),
                 method.getModifiers(),
                 method.getName(),
-                method.getParameters(),  // TODO: Duplicate parameters?
+                method.getParameters(),
                 method.getAssignmentParameter(),
                 method.getDoc(),
                 method.getCallResult(),
@@ -467,7 +467,7 @@ public class MagikType extends AbstractType {
         }
 
         final MagikType other = (MagikType) obj;
-        return Objects.equals(this.getTypeString(), other.getTypeString());
+        return Objects.equals(this.typeString, other.typeString);
     }
 
 }
