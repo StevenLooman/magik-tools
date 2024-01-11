@@ -9,9 +9,10 @@
     "linearFactor": "1min"
   },
   "tags": [
+    "brain-overload",
     "complexity"
   ],
-  "defaultSeverity": "Critical",
+  "defaultSeverity": "Major",
   "ruleSpecification": "MethodComplexity",
   "sqKey": "method-complexity"
 }

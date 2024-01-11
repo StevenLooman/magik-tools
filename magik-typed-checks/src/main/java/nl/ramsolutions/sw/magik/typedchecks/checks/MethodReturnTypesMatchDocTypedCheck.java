@@ -19,11 +19,11 @@ import org.sonar.check.Rule;
 /**
  * Check to check if the @return types from method doc matches the reasoned return types.
  */
-@Rule(key = MethodReturnMatchesDocTypedCheck.CHECK_KEY)
-public class MethodReturnMatchesDocTypedCheck extends MagikTypedCheck {
+@Rule(key = MethodReturnTypesMatchDocTypedCheck.CHECK_KEY)
+public class MethodReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "MethodReturnMatchesDoc";
+    public static final String CHECK_KEY = "MethodReturnTypesMatchDoc";
 
     private static final String MESSAGE = "@return type(s) (%s) do not match method return type(s) (%s).";
 

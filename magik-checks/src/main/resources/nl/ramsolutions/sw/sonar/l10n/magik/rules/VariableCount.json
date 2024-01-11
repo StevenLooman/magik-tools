@@ -6,7 +6,10 @@
     "func": "Constant/Issue",
     "constantCost": "20min"
   },
-  "tags": ["complexity"],
+  "tags": [
+    "brain-overload",
+    "complexity"
+  ],
   "defaultSeverity": "Minor",
   "ruleSpecification": "VariableCount",
   "sqKey": "variable-count"

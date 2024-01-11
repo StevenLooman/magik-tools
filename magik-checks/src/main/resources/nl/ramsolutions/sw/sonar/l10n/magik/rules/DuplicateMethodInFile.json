@@ -1,13 +1,16 @@
 {
-  "title": "Method is defined multiple times in this file",
+  "title": "Duplicate method definition in file",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
     "func": "Constant\/Issue",
-    "constantCost": "10min"
+    "constantCost": "5min"
   },
   "tags": [
-    "error"
+    "confusing",
+    "duplicate",
+    "pitfall",
+    "unused"
   ],
   "defaultSeverity": "Major",
   "ruleSpecification": "DuplicateMethodInFile",

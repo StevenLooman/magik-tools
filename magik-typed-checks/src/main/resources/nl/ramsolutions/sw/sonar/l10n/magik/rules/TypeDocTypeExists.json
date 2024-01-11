@@ -7,7 +7,8 @@
       "constantCost": "30min"
     },
     "tags": [
-      "error"
+      "bug",
+      "typing"
     ],
     "defaultSeverity": "Major",
     "ruleSpecification": "TypeDocTypeExists",

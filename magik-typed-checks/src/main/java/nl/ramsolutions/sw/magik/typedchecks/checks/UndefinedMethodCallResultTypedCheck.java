@@ -12,13 +12,13 @@ import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.sonar.check.Rule;
 
 /**
- * Check for UNDEFINED method invocation result.
+ * Check for UNDEFINED method call result.
  */
-@Rule(key = UndefinedMethodResultTypedCheck.CHECK_KEY)
-public class UndefinedMethodResultTypedCheck extends MagikTypedCheck {
+@Rule(key = UndefinedMethodCallResultTypedCheck.CHECK_KEY)
+public class UndefinedMethodCallResultTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "UndefinedMethodResult";
+    public static final String CHECK_KEY = "UndefinedMethodCallResult";
 
     private static final String MESSAGE = "UNDEFINED results for method: %s";
 

@@ -1,5 +1,5 @@
 {
-  "title": "Don't leave commented code",
+  "title": "Remove commented code",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
@@ -7,7 +7,9 @@
     "constantCost": "5min"
   },
   "tags": [
-    "convention"
+    "bad-practice",
+    "confusing",
+    "unused"
   ],
   "defaultSeverity": "Minor",
   "ruleSpecification": "CommentedCode",

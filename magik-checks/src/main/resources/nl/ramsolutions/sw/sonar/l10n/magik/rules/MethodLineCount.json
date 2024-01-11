@@ -6,7 +6,10 @@
     "func": "Constant/Issue",
     "constantCost": "20min"
   },
-  "tags": ["convention"],
+  "tags": [
+    "brain-overload",
+    "complexity"
+  ],
   "defaultSeverity": "Minor",
   "ruleSpecification": "MethodLineCount",
   "sqKey": "method-line-count"

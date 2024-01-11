@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test MethodArgumentCountTypedCheck.
+ * Test {@link MethodArgumentCountMatchesParameterCountTypedCheck}.
  */
-class MethodArgumentCountTypedCheckTest extends MagikTypedCheckTestBase {
+class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedCheckTestBase {
 
     @Test
     void testMethodUnknown() {
@@ -26,7 +26,7 @@ class MethodArgumentCountTypedCheckTest extends MagikTypedCheckTestBase {
             + "  object.m()\n"
             + "_endblock";
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final MagikTypedCheck check = new MethodArgumentCountTypedCheck();
+        final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
         final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
         assertThat(issues).isEmpty();
     }
@@ -56,7 +56,7 @@ class MethodArgumentCountTypedCheckTest extends MagikTypedCheckTestBase {
             + "_block\n"
             + "  object.m(object, object)\n"
             + "_endblock";
-        final MagikTypedCheck check = new MethodArgumentCountTypedCheck();
+        final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
         final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
         assertThat(issues).isEmpty();
     }
@@ -86,7 +86,7 @@ class MethodArgumentCountTypedCheckTest extends MagikTypedCheckTestBase {
             + "_block\n"
             + "  object.m(object)\n"
             + "_endblock";
-        final MagikTypedCheck check = new MethodArgumentCountTypedCheck();
+        final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
         final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
         assertThat(issues).hasSize(1);
     }

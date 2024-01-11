@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test UndefinedMethodResultTypedCheck.
+ * Test {@link UndefinedMethodCallResultTypedCheck}.
  */
-class UndefinedMethodResultTypedCheckTest extends MagikTypedCheckTestBase {
+class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
 
     @Test
     void testMethodInvocationUndefined() {
@@ -26,7 +26,7 @@ class UndefinedMethodResultTypedCheckTest extends MagikTypedCheckTestBase {
             + "  object.m()\n"
             + "_endblock";
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final MagikTypedCheck check = new UndefinedMethodResultTypedCheck();
+        final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
         final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
         assertThat(issues).hasSize(1);
     }
@@ -53,7 +53,7 @@ class UndefinedMethodResultTypedCheckTest extends MagikTypedCheckTestBase {
                 new ExpressionResultString(objectRef),
                 ExpressionResultString.EMPTY));
 
-        final MagikTypedCheck check = new UndefinedMethodResultTypedCheck();
+        final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
         final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
         assertThat(issues).isEmpty();
     }

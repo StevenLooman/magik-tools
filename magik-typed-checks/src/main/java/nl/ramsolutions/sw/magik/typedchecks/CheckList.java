@@ -7,14 +7,14 @@ import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckFixer;
 import nl.ramsolutions.sw.magik.checks.checks.TypeDocCheck;
-import nl.ramsolutions.sw.magik.typedchecks.checks.GlobalKnownTypedCheck;
-import nl.ramsolutions.sw.magik.typedchecks.checks.MethodArgumentCountTypedCheck;
-import nl.ramsolutions.sw.magik.typedchecks.checks.MethodArgumentParameterTypedCheck;
+import nl.ramsolutions.sw.magik.typedchecks.checks.GlobalExistsTypedCheck;
+import nl.ramsolutions.sw.magik.typedchecks.checks.MethodArgumentCountMatchesParameterCountTypedCheck;
+import nl.ramsolutions.sw.magik.typedchecks.checks.MethodArgumentTypeMatchesParameterTypeTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.MethodExistsTypedCheck;
-import nl.ramsolutions.sw.magik.typedchecks.checks.MethodReturnMatchesDocTypedCheck;
+import nl.ramsolutions.sw.magik.typedchecks.checks.MethodReturnTypesMatchDocTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.SlotExistsTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.TypeDocTypeExistsTypedCheck;
-import nl.ramsolutions.sw.magik.typedchecks.checks.UndefinedMethodResultTypedCheck;
+import nl.ramsolutions.sw.magik.typedchecks.checks.UndefinedMethodCallResultTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.fixers.TypeDocParameterFixer;
 import nl.ramsolutions.sw.magik.typedchecks.fixers.TypeDocReturnTypeFixer;
 
@@ -32,14 +32,14 @@ public final class CheckList {
      */
     public static List<Class<?>> getChecks() {
         return List.of(
-            GlobalKnownTypedCheck.class,
-            MethodArgumentCountTypedCheck.class,
-            MethodArgumentParameterTypedCheck.class,
+            GlobalExistsTypedCheck.class,
+            MethodArgumentCountMatchesParameterCountTypedCheck.class,
+            MethodArgumentTypeMatchesParameterTypeTypedCheck.class,
             MethodExistsTypedCheck.class,
-            MethodReturnMatchesDocTypedCheck.class,
+            MethodReturnTypesMatchDocTypedCheck.class,
             TypeDocTypeExistsTypedCheck.class,
             SlotExistsTypedCheck.class,
-            UndefinedMethodResultTypedCheck.class);
+            UndefinedMethodCallResultTypedCheck.class);
     }
 
     /**

@@ -14,6 +14,8 @@
 - Improve handling of/reasoning with generics.
 - Index products and modules.
 - Add TodoComment check.
+- Fixes to checks metadata.
+- Refactoring/renaming of typed checks.
 - Minor fixes.
 
 0.8.3 (2024-01-05)

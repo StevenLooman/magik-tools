@@ -7,7 +7,8 @@
     "constantCost": "5min"
   },
   "tags": [
-    "convention"
+    "bad-practice",
+    "confusing"
   ],
   "defaultSeverity": "Minor",
   "ruleSpecification": "FileNotInLoadList",

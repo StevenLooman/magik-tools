@@ -16,11 +16,11 @@ import org.sonar.check.Rule;
 /**
  * Check if global is a known global.
  */
-@Rule(key = GlobalKnownTypedCheck.CHECK_KEY)
-public class GlobalKnownTypedCheck extends MagikTypedCheck {
+@Rule(key = GlobalExistsTypedCheck.CHECK_KEY)
+public class GlobalExistsTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "GlobalKnown";
+    public static final String CHECK_KEY = "GlobalExists";
 
     private static final String MESSAGE = "Unknown global: %s";
     private static final String DEFAULT_PACKAGE = "user";

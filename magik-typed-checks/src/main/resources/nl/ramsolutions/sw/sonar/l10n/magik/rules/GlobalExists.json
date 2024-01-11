@@ -1,5 +1,5 @@
 {
-    "title": "Global is known",
+    "title": "Global exists",
     "type": "BUG",
     "status": "ready",
     "remediation": {
@@ -7,9 +7,10 @@
       "constantCost": "5min"
     },
     "tags": [
-      "error"
+      "bugrisk",
+      "typing"
     ],
     "defaultSeverity": "Major",
-    "ruleSpecification": "GlobalKnown",
-    "sqKey": "global-known"
+    "ruleSpecification": "GlobalExists",
+    "sqKey": "global-exists"
   }

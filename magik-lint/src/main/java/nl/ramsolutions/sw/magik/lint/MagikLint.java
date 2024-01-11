@@ -150,7 +150,7 @@ public class MagikLint {
             .parallel()
             .filter(path -> !this.isFileIgnored(path))
             .map(this::buildMagikFile)
-            .map(magikFile -> this.runChecksOnFile(magikFile))
+            .map(this::runChecksOnFile)
             .flatMap(List::stream)
             .sorted((issue0, issue1) -> locationCompare.compare(issue0.location(), issue1.location()))
             .limit(maxInfractions)

@@ -7,7 +7,8 @@
     "constantCost": "5min"
   },
   "tags": [
-    "error"
+    "bad-practice",
+    "potential-bug"
   ],
   "defaultSeverity": "Minor",
   "ruleSpecification": "UseValueCompare",

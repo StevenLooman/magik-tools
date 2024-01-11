@@ -1,5 +1,5 @@
 {
-    "title": "Method Exists",
+    "title": "Method argument count matches parameter count",
     "type": "BUG",
     "status": "ready",
     "remediation": {
@@ -11,6 +11,6 @@
       "typing"
     ],
     "defaultSeverity": "Major",
-    "ruleSpecification": "MethodExists",
-    "sqKey": "method-exists"
+    "ruleSpecification": "MethodArgumentCountMatchesParameterCount",
+    "sqKey": "method-argument-count-matches-parameter-count"
   }

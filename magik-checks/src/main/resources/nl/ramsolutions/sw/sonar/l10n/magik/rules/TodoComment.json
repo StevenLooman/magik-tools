@@ -1,15 +1,16 @@
 {
-    "title": "TODO comment",
-    "type": "CODE_SMELL",
-    "status": "ready",
-    "remediation": {
-      "func": "Constant\/Issue",
-      "constantCost": "15min"
-    },
-    "tags": [
-      "convention"
-    ],
-    "defaultSeverity": "Minor",
-    "ruleSpecification": "CommentTodo",
-    "sqKey": "comment-todo"
-  }
+  "title": "TODO comment",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "best-practice",
+    "convention"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "CommentTodo",
+  "sqKey": "comment-todo"
+}
