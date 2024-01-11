@@ -60,6 +60,13 @@ _method method_finder.get_method_comment(method, class)
 _endmethod
 $
 
+_if smallworld_product.product(:sw5_java_object_wrapper) _isnt _unset
+_then
+    smallworld_product.add_product(:sw5_java_object_wrapper)
+    sw_module_manager.load_module(:sw5_java_object_wrapper)
+_endif
+$
+
 
 
 _pragma(classify_level=basic, topic=type_dumper)
