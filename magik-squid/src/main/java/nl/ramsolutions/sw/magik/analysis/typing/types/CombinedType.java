@@ -32,7 +32,12 @@ public class CombinedType extends AbstractType {
      */
     public CombinedType(final Collection<AbstractType> types) {
         super(null, null);
-        this.types = Set.copyOf(types);
+        this.types = types.stream()
+            .flatMap(type ->
+                type instanceof CombinedType
+                ? ((CombinedType) type).getTypes().stream()
+                : Stream.of(type))
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     public Collection<AbstractType> getTypes() {
