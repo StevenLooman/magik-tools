@@ -7,6 +7,8 @@
     "constantCost": "5min"
   },
   "tags": [
+    "brain-overload",
+    "complexity",
     "convention"
   ],
   "defaultSeverity": "Minor",

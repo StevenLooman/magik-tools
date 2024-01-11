@@ -7,7 +7,9 @@
     "constantCost": "1min"
   },
   "tags": [
-    "convention"
+    "convention",
+    "readability",
+    "user-experience"
   ],
   "defaultSeverity": "Minor",
   "ruleSpecification": "LineLength",

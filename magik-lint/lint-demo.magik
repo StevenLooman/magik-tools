@@ -3,7 +3,7 @@ _package user
 
 _method object.abc
     ## Test method.
-    ## @returns {sw:integer}
+    ## @return {sw:integer}
     _local x << 10
     _return 10
 _endmethod

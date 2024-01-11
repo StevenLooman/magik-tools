@@ -17,11 +17,11 @@ import org.sonar.check.Rule;
 /**
  * Check if argument-count for method invocation matches.
  */
-@Rule(key = MethodArgumentCountTypedCheck.CHECK_KEY)
-public class MethodArgumentCountTypedCheck extends MagikTypedCheck {
+@Rule(key = MethodArgumentCountMatchesParameterCountTypedCheck.CHECK_KEY)
+public class MethodArgumentCountMatchesParameterCountTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "MethodArgumentCount";
+    public static final String CHECK_KEY = "MethodArgumentCountMatchesParameterCount";
 
     private static final String MESSAGE = "Not enough arguments for method: %s";
 

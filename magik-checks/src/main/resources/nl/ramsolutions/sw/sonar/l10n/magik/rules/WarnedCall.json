@@ -4,10 +4,11 @@
   "status": "ready",
   "remediation": {
     "func": "Constant\/Issue",
-    "constantCost": "15min"
+    "constantCost": "5min"
   },
   "tags": [
-    "error"
+    "design",
+    "convention"
   ],
   "defaultSeverity": "Minor",
   "ruleSpecification": "WarnedCall",

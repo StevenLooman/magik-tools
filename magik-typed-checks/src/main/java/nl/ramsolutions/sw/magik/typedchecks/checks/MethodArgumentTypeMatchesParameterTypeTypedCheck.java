@@ -23,11 +23,11 @@ import org.sonar.check.Rule;
 /**
  * Check if argument types match parameter types.
  */
-@Rule(key = MethodArgumentParameterTypedCheck.CHECK_KEY)
-public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
+@Rule(key = MethodArgumentTypeMatchesParameterTypeTypedCheck.CHECK_KEY)
+public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTypedCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "MethodArgumentParameter";
+    public static final String CHECK_KEY = "MethodArgumentTypeMatchesParameterType";
 
     private static final String MESSAGE = "Argument type (%s) does not match parameter type (%s)";
 
@@ -49,8 +49,7 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
 
         // Get types for arguments.
         final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
-        final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT).stream()
-            .collect(Collectors.toList());
+        final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT);
         final List<ExpressionResult> argumentTypes = argumentNodes.stream()
             .map(argumentNode -> argumentNode.getFirstChild(MagikGrammar.EXPRESSION))
             .map(reasonerState::getNodeType)
@@ -69,9 +68,7 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
             }
 
             final List<AbstractType> parameterTypes = method.getParameters().stream()
-                .filter(parameter ->
-                    parameter.is(Parameter.Modifier.NONE)
-                    || parameter.is(Parameter.Modifier.OPTIONAL))  // Don't check gather.
+                .filter(parameter -> parameter.is(Parameter.Modifier.NONE, Parameter.Modifier.OPTIONAL))  // No gather.
                 .map(parameter -> {
                     final TypeString paramTypeString = parameter.getType();
                     final AbstractType type = typeReader.parseTypeString(paramTypeString);
@@ -96,6 +93,11 @@ public class MethodArgumentParameterTypedCheck extends MagikTypedCheck {
                     }
 
                     final AbstractType argumentType = argumentTypes.get(index).get(0, UndefinedType.INSTANCE);
+                    if (argumentType == UndefinedType.INSTANCE) {
+                        // Don't test undefined arguments.
+                        return;
+                    }
+
                     if (!TypeMatcher.typeMatches(argumentType, parameterType)) {
                         final AstNode argumentNode = argumentNodes.get(index);
                         final String message =

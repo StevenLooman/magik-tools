@@ -1,5 +1,5 @@
 {
-    "title": "Undefined Method Result",
+    "title": "Undefined method call result",
     "type": "CODE_SMELL",
     "status": "ready",
     "remediation": {
@@ -7,9 +7,10 @@
       "constantCost": "30min"
     },
     "tags": [
-      "error"
+      "convention",
+      "typing"
     ],
     "defaultSeverity": "Minor",
-    "ruleSpecification": "UndefinedMethodResult",
-    "sqKey": "undefined-method-result"
+    "ruleSpecification": "UndefinedMethodCallResult",
+    "sqKey": "undefined-method-call-result"
   }

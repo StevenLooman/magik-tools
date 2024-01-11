@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test SlotExistsTypedCheck.
+ * Test {@link SlotExistsTypedCheck}.
  */
 class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
 

@@ -1,5 +1,5 @@
 {
-    "title": "Method Exists",
+    "title": "Argument type does not match parameter type",
     "type": "BUG",
     "status": "ready",
     "remediation": {
@@ -11,6 +11,6 @@
       "typing"
     ],
     "defaultSeverity": "Major",
-    "ruleSpecification": "MethodExists",
-    "sqKey": "method-exists"
+    "ruleSpecification": "MethodArgumentTypeMatchesParameterType",
+    "sqKey": "method-argument-type-matches-parameter-type"
   }

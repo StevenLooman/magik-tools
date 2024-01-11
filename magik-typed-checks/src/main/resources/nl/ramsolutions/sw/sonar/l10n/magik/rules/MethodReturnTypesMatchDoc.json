@@ -1,5 +1,5 @@
 {
-    "title": "Method Argument Parameter",
+    "title": "Method return types match doc",
     "type": "BUG",
     "status": "ready",
     "remediation": {
@@ -7,9 +7,10 @@
       "constantCost": "30min"
     },
     "tags": [
-      "error"
+      "bug",
+      "typing"
     ],
     "defaultSeverity": "Major",
-    "ruleSpecification": "MethodArgumentParameter",
-    "sqKey": "method-argument-parameter"
+    "ruleSpecification": "MethodReturnTypesMatchDoc",
+    "sqKey": "method-return-types-match-doc"
   }
