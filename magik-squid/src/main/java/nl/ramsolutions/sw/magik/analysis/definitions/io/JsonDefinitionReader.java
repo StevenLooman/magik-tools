@@ -67,8 +67,8 @@ public final class JsonDefinitionReader {
                 return ExpressionResultString.UNDEFINED;
             } else if (json.isJsonArray()) {
                 final List<TypeString> types = json.getAsJsonArray().asList().stream()
-                    .map(jsonElement -> jsonElement.getAsString())
-                    .map(identifier -> TypeStringParser.parseTypeString(identifier))
+                    .map(JsonElement::getAsString)
+                    .map(TypeStringParser::parseTypeString)
                     .collect(Collectors.toList());
                 return new ExpressionResultString(types);
             }
