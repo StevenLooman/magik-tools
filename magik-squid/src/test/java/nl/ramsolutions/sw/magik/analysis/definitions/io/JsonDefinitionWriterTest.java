@@ -85,14 +85,13 @@ class JsonDefinitionWriterTest {
     @Test
     void testWriteMethod() throws IOException {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 "Test method m1().",
                 null,
-                objectRef,
+                TypeString.SW_OBJECT,
                 "m1()",
                 Set.of(MethodDefinition.Modifier.PRIVATE),
                 List.of(
@@ -169,7 +168,6 @@ class JsonDefinitionWriterTest {
     @Test
     void testWriteGlobal() throws IOException {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final TypeString aliasedRef = TypeString.ofIdentifier("alias", "user");
         definitionKeeper.add(
             new GlobalDefinition(
@@ -178,7 +176,7 @@ class JsonDefinitionWriterTest {
                 null,
                 null,
                 aliasedRef,
-                integerRef));
+                TypeString.SW_INTEGER));
 
         JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
@@ -190,8 +188,6 @@ class JsonDefinitionWriterTest {
     void testWriteBinaryOperator() throws IOException {
         final Location location = Location.validLocation(null);
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString char16VectorRef = TypeString.ofIdentifier("sw:char16_vector", "sw");
-        final TypeString symbolRef = TypeString.ofIdentifier("sw:char16_vector", "sw");
         definitionKeeper.add(
             new BinaryOperatorDefinition(
                 location,
@@ -199,9 +195,9 @@ class JsonDefinitionWriterTest {
                 null,
                 null,
                 "+",
-                char16VectorRef,
-                symbolRef,
-                char16VectorRef));
+                TypeString.SW_CHAR16_VECTOR,
+                TypeString.SW_SYMBOL,
+                TypeString.SW_CHAR16_VECTOR));
 
         JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 

@@ -16,8 +16,6 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  */
 class IdentifierHandler extends LocalTypeReasonerHandler {
 
-    private static final TypeString SW_CONDITION = TypeString.ofIdentifier("condition", "sw");
-
     /**
      * Constructor.
      * @param state Reasoner state.
@@ -83,7 +81,7 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
             this.state.setCurrentScopeEntryNode(scopeEntry, node);
         }
 
-        final AbstractType conditionType = this.typeKeeper.getType(SW_CONDITION);
+        final AbstractType conditionType = this.typeKeeper.getType(TypeString.SW_CONDITION);
         final ExpressionResult result = new ExpressionResult(conditionType);
         this.state.setNodeType(node, result);
     }

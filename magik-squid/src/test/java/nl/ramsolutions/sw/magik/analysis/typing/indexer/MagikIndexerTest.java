@@ -94,10 +94,10 @@ class MagikIndexerTest {
         final Collection<BinaryOperatorDefinition> binOpDefs = definitionKeeper.getBinaryOperatorDefinitions();
         assertThat(binOpDefs).hasSize(1);
         final BinaryOperatorDefinition binOpDef = binOpDefs.stream().findAny().orElseThrow();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "user");
-        assertThat(binOpDef.getLhsTypeName()).isEqualTo(integerRef);
-        assertThat(binOpDef.getRhsTypeName()).isEqualTo(integerRef);
-        assertThat(binOpDef.getResultTypeName()).isEqualTo(TypeString.UNDEFINED);
+        assertThat(binOpDef.getLhsTypeName()).isEqualTo(TypeString.ofIdentifier("integer", "user"));
+        assertThat(binOpDef.getRhsTypeName()).isEqualTo(TypeString.ofIdentifier("integer", "user"));
+        assertThat(binOpDef.getResultTypeName()).isEqualTo(
+            TypeString.ofCombination(TypeString.DEFAULT_PACKAGE, TypeString.SW_FALSE, TypeString.SW_MAYBE));
     }
 
     @Test
@@ -133,8 +133,8 @@ class MagikIndexerTest {
         assertThat(slotB.getName()).isEqualTo("slot_b");
         assertThat(slotB.getTypeName()).isEqualTo(
             TypeString.ofIdentifier("sw:property_list", "user",
-                TypeString.ofGenericDefinition("K", TypeString.ofIdentifier("sw:symbol", "user")),
-                TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("sw:integer", "user"))));
+                TypeString.ofGenericDefinition("K", TypeString.SW_SYMBOL),
+                TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER)));
 
         // Test methods.
         final Collection<MethodDefinition> newMethodDefs = definitionKeeper.getMethodDefinitions(typeString).stream()

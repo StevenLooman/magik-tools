@@ -29,14 +29,13 @@ class InlayHintProviderTest {
     @Test
     void testProvideParameterHint() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                objectRef,
+                TypeString.SW_OBJECT,
                 "method()",
                 Collections.emptySet(),
                 List.of(

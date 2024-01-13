@@ -25,8 +25,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
  */
 class InvocationHandler extends LocalTypeReasonerHandler {
 
-    private static final TypeString SW_PROCEDURE_REF = TypeString.ofIdentifier("procedure", "sw");
-
     /**
      * Constructor.
      * @param state Reasoner state.
@@ -114,7 +112,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
         final AbstractType originalCalledType = calledNodeResult.get(0, unsetType);
         final AbstractType calledType =
             originalCalledType == SelfType.INSTANCE
-            ? this.typeKeeper.getType(SW_PROCEDURE_REF)
+            ? this.typeKeeper.getType(TypeString.SW_PROCEDURE)
             : originalCalledType instanceof AliasType
                 ? ((AliasType) originalCalledType).getAliasedType()
                 : originalCalledType;

@@ -30,8 +30,6 @@ import nl.ramsolutions.sw.magik.parser.TypeStringParser;
  */
 class ExpressionHandler extends LocalTypeReasonerHandler {
 
-    private static final TypeString SW_FALSE = TypeString.ofIdentifier("false", "sw");
-    private static final TypeString SW_SIMPLE_VECTOR = TypeString.ofIdentifier("simple_vector", "sw");
     private static final Map<String, String> UNARY_OPERATOR_METHODS = Map.of(
         MagikOperator.NOT.getValue(), "not",
         MagikKeyword.NOT.getValue(), "not",
@@ -65,7 +63,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
      */
     void handleBinaryExpression(final AstNode node) {
         final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
-        final AbstractType falseType = this.typeKeeper.getType(SW_FALSE);
+        final AbstractType falseType = this.typeKeeper.getType(TypeString.SW_FALSE);
 
         // Take left hand side as current.
         final AstNode currentNode = node.getFirstChild();
@@ -123,7 +121,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
      */
     void handleAugmentedAssignmentExpression(final AstNode node) {
         final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
-        final AbstractType falseType = this.typeKeeper.getType(SW_FALSE);
+        final AbstractType falseType = this.typeKeeper.getType(TypeString.SW_FALSE);
 
         // Take result from right hand.
         final AstNode rightNode = node.getLastChild();
@@ -190,7 +188,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
      */
     void handleUnaryExpression(final AstNode node) {
         if (node.getTokenValue().equalsIgnoreCase(MagikKeyword.ALLRESULTS.getValue())) {
-            this.assignAtom(node, SW_SIMPLE_VECTOR);  // TODO: Generics?
+            this.assignAtom(node, TypeString.SW_SIMPLE_VECTOR);  // TODO: Generics?
             return;
         }
 
@@ -256,7 +254,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 final AbstractType type;
                 if (identifierPreviousNode != null
                     && identifierPreviousNode.getTokenValue().equalsIgnoreCase("_gather")) {
-                    type = this.typeKeeper.getType(SW_SIMPLE_VECTOR);
+                    type = this.typeKeeper.getType(TypeString.SW_SIMPLE_VECTOR);
                 } else if (iteratorResult != null) {
                     type = iteratorResult.get(i, unsetType);
                 } else {

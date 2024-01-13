@@ -48,21 +48,19 @@ class MagikTypeTest {
                     TypeString.ofGenericReference("E"))));
 
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-        final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
         final TypeString propertyListGenericRef = TypeString.ofIdentifier("property_list", "sw",
-                TypeString.ofGenericDefinition("K", symbolRef),
-                TypeString.ofGenericDefinition("E", floatRef));
+                TypeString.ofGenericDefinition("K", TypeString.SW_SYMBOL),
+                TypeString.ofGenericDefinition("E", TypeString.SW_FLOAT));
         final AbstractType magikType = typeKeeper.getType(propertyListGenericRef);
         final Method magikMethod = magikType.getMethods("fast_keys_and_elements()").iterator().next();
         final ExpressionResultString loopbodyResultString = magikMethod.getLoopbodyResult();
         // TODO: We should test loopbodyResultString, not TypeReader etc.
 
         final TypeString kTypeString = loopbodyResultString.get(0, null);
-        assertThat(kTypeString).isEqualTo(symbolRef);
+        assertThat(kTypeString).isEqualTo(TypeString.SW_SYMBOL);
 
         final TypeString eTypeString = loopbodyResultString.get(1, null);
-        assertThat(eTypeString).isEqualTo(floatRef);
+        assertThat(eTypeString).isEqualTo(TypeString.SW_FLOAT);
     }
 
 }

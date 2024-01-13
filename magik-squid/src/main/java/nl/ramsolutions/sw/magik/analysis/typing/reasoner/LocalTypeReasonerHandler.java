@@ -19,8 +19,6 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 @SuppressWarnings("visibilitymodifier")
 abstract class LocalTypeReasonerHandler {
 
-    private static final TypeString SW_PROCEDURE_REF = TypeString.ofIdentifier("procedure", "sw");
-
     protected final LocalTypeReasonerState state;
     protected final ITypeKeeper typeKeeper;
     protected final TypeReader typeReader;
@@ -96,7 +94,7 @@ abstract class LocalTypeReasonerHandler {
             // Lets try to be safe.
             return UndefinedType.INSTANCE;
         } else if (defNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
-            return this.typeReader.parseTypeString(LocalTypeReasonerHandler.SW_PROCEDURE_REF);
+            return this.typeReader.parseTypeString(TypeString.SW_PROCEDURE);
         }
 
         // Method definition.

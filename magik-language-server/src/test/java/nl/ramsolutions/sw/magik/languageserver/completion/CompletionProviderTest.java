@@ -66,14 +66,13 @@ class CompletionProviderTest {
             + "    1.\n"
             + "_endmethod";
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                integerRef,
+                TypeString.SW_INTEGER,
                 "find_me()",
                 Collections.emptySet(),
                 Collections.emptyList(),
@@ -140,14 +139,13 @@ class CompletionProviderTest {
             + "    1.fi\n"
             + "_endmethod";
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                integerRef,
+                TypeString.SW_INTEGER,
                 "find_me()",
                 Collections.emptySet(),
                 Collections.emptyList(),
@@ -202,7 +200,7 @@ class CompletionProviderTest {
         assertThat(completions).hasSize(
             defaultTypes.size()
             + MagikKeyword.values().length
-            + 1);  // local variable.
+            + 1);  // Local variable.
 
         final Set<CompletionItemKind> itemKinds = completions.stream()
             .map(item -> item.getKind())
@@ -246,7 +244,7 @@ class CompletionProviderTest {
         assertThat(completions).hasSize(
             defaultTypes.size()
             + MagikKeyword.values().length
-            + 1);  // slot.
+            + 1);  // Slot.
 
         final Set<CompletionItemKind> itemKinds = completions.stream()
             .map(item -> item.getKind())

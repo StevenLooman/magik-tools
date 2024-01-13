@@ -22,15 +22,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedCheckTestBase {
 
     private void addTestMethod(final IDefinitionKeeper definitionKeeper) {
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                integerRef,
+                TypeString.SW_INTEGER,
                 "m1()",
                 EnumSet.noneOf(MethodDefinition.Modifier.class),
                 List.of(
@@ -41,7 +39,7 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
                         null,
                         "p1",
                         ParameterDefinition.Modifier.NONE,
-                        symbolRef)),
+                        TypeString.SW_SYMBOL)),
                 null,
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.EMPTY));

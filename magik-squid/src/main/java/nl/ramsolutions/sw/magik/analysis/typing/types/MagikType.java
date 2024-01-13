@@ -54,11 +54,6 @@ public class MagikType extends AbstractType {
 
     }
 
-    private static final TypeString DEFAULT_PARENT_INDEXED_EXEMPLAR =
-        TypeString.ofIdentifier("indexed_format_mixin", "sw");
-    private static final TypeString DEFAULT_PARENT_SLOTTED_EXEMPLAR =
-        TypeString.ofIdentifier("slotted_format_mixin", "sw");
-
     private final TypeString typeString;
     private final Set<Method> methods = ConcurrentHashMap.newKeySet();
     private final Set<TypeString> parents = ConcurrentHashMap.newKeySet();
@@ -179,9 +174,9 @@ public class MagikType extends AbstractType {
         final Set<TypeString> implicitParents = new HashSet<>();
         if (this.parents.isEmpty()) {
             if (this.getSort() == MagikType.Sort.INDEXED) {
-                implicitParents.add(DEFAULT_PARENT_INDEXED_EXEMPLAR);
+                implicitParents.add(TypeString.SW_INDEXED_FORMAT_MIXIN);
             } else if (this.getSort() == MagikType.Sort.SLOTTED) {
-                implicitParents.add(DEFAULT_PARENT_SLOTTED_EXEMPLAR);
+                implicitParents.add(TypeString.SW_SLOTTED_FORMAT_MIXIN);
             }
         }
 

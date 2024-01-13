@@ -24,8 +24,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
  */
 public class TypeStringResolver {
 
-    private static final TypeString SW_PROCEDURE_REF = TypeString.ofIdentifier("procedure", "sw");
-
     private final IDefinitionKeeper definitionKeeper;
 
     public TypeStringResolver(final IDefinitionKeeper definitionKeeper) {
@@ -138,7 +136,7 @@ public class TypeStringResolver {
 
         // Treat a procedure definition as the exemplar `procedure`.
         if (definition instanceof ProcedureDefinition) {
-            definitions = this.resolve(SW_PROCEDURE_REF);
+            definitions = this.resolve(TypeString.SW_PROCEDURE);
             if (definitions.isEmpty()) {
                 return null;
             }
@@ -196,7 +194,7 @@ public class TypeStringResolver {
         if (definition instanceof ExemplarDefinition) {
             return ((ExemplarDefinition) definition).getParents();
         } else if (definition instanceof ProcedureDefinition) {
-            return Set.of(TypeStringResolver.SW_PROCEDURE_REF);
+            return Set.of(TypeString.SW_PROCEDURE);
         } else if (definition instanceof GlobalDefinition) {
             final TypeString typeString = ((GlobalDefinition) definition).getAliasedTypeName();
             final Definition aliasedDefinition = this.resolve(typeString).stream()

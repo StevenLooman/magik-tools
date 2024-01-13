@@ -25,8 +25,6 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  */
 class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
 
-    private static final TypeString SW_PROCEDURE_REF = TypeString.ofIdentifier("procedure", "sw");
-
     /**
      * Constructor.
      * @param state Reasoner state.
@@ -40,7 +38,7 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
      * @param node PROCEDURE_DEFINITION node.
      */
     void handleProcedureDefinition(final AstNode node) {
-        final AbstractType abstractProcedureType = this.typeKeeper.getType(SW_PROCEDURE_REF);
+        final AbstractType abstractProcedureType = this.typeKeeper.getType(TypeString.SW_PROCEDURE);
         if (abstractProcedureType == UndefinedType.INSTANCE) {
             // Must be missing definition for sw:procedure, don't try anything.
             return;

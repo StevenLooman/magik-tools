@@ -39,14 +39,13 @@ class ReferencesProviderTest {
     @Test
     void testProvideMethodReferenceFromMethodInvocation() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 EMPTY_LOCATION,
                 null,
                 null,
                 null,
-                integerRef,
+                TypeString.SW_INTEGER,
                 "refering",
                 Collections.emptySet(),
                 Collections.emptyList(),
@@ -71,14 +70,13 @@ class ReferencesProviderTest {
     @Test
     void testProvideMethodReferenceFromMethodDefintion() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 EMPTY_LOCATION,
                 null,
                 null,
                 null,
-                integerRef,
+                TypeString.SW_INTEGER,
                 "refering",
                 Collections.emptySet(),
                 Collections.emptyList(),
@@ -103,14 +101,13 @@ class ReferencesProviderTest {
     @Test
     void testProvideTypeReferenceFromAtom() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 EMPTY_LOCATION,
                 null,
                 null,
                 null,
-                integerRef,
+                TypeString.SW_INTEGER,
                 "refering",
                 Collections.emptySet(),
                 Collections.emptyList(),
@@ -118,7 +115,7 @@ class ReferencesProviderTest {
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.EMPTY,
                 Set.of(
-                    new GlobalUsage(integerRef, EMPTY_LOCATION)),
+                    new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION)),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 Collections.emptySet()));
@@ -135,14 +132,13 @@ class ReferencesProviderTest {
     @Test
     void testProvideTypeReferenceFromMethodDefinition() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 EMPTY_LOCATION,
                 null,
                 null,
                 null,
-                integerRef,
+                TypeString.SW_INTEGER,
                 "refering",
                 Collections.emptySet(),
                 Collections.emptyList(),
@@ -150,7 +146,7 @@ class ReferencesProviderTest {
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.EMPTY,
                 Set.of(
-                    new GlobalUsage(integerRef, EMPTY_LOCATION)),
+                    new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION)),
                 Collections.emptySet(),
                 Collections.emptySet(),
                 Collections.emptySet()));

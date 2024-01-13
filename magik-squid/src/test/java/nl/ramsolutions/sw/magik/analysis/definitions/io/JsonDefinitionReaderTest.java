@@ -59,14 +59,12 @@ class JsonDefinitionReaderTest {
         assertThat(aDef.getModuleName()).isEqualTo("test_module");
 
         final SlotDefinition slot1Def = aDef.getSlot("slot1");
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         assertThat(slot1Def.getName()).isEqualTo("slot1");
-        assertThat(slot1Def.getTypeName()).isEqualTo(integerRef);
+        assertThat(slot1Def.getTypeName()).isEqualTo(TypeString.SW_INTEGER);
 
         final SlotDefinition slot2Def = aDef.getSlot("slot2");
-        final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
         assertThat(slot2Def.getName()).isEqualTo("slot2");
-        assertThat(slot2Def.getTypeName()).isEqualTo(floatRef);
+        assertThat(slot2Def.getTypeName()).isEqualTo(TypeString.SW_FLOAT);
     }
 
     @Test
@@ -90,14 +88,13 @@ class JsonDefinitionReaderTest {
         final ParameterDefinition m1Parameter0 = m1Parameters.get(0);
         assertThat(m1Parameter0.getName()).isEqualTo("param1");
         assertThat(m1Parameter0.getModifier()).isEqualTo(ParameterDefinition.Modifier.GATHER);
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-        assertThat(m1Parameter0.getTypeName()).isEqualTo(symbolRef);
+        assertThat(m1Parameter0.getTypeName()).isEqualTo(TypeString.SW_SYMBOL);
         assertThat(m1Def.getAssignmentParameter()).isNull();
 
         final ExpressionResultString m1ReturnTypes = m1Def.getReturnTypes();
         assertThat(m1ReturnTypes).isEqualTo(
             new ExpressionResultString(
-                symbolRef));
+                TypeString.SW_SYMBOL));
         final ExpressionResultString m1LoopTypes = m1Def.getLoopTypes();
         assertThat(m1LoopTypes).isEqualTo(
             ExpressionResultString.EMPTY);
@@ -116,12 +113,11 @@ class JsonDefinitionReaderTest {
         final ParameterDefinition m2AssignmentParameter = m2Def.getAssignmentParameter();
         assertThat(m2AssignmentParameter.getName()).isEqualTo("param2");
         assertThat(m2AssignmentParameter.getModifier()).isEqualTo(ParameterDefinition.Modifier.NONE);
-        assertThat(m2AssignmentParameter.getTypeName()).isEqualTo(symbolRef);
+        assertThat(m2AssignmentParameter.getTypeName()).isEqualTo(TypeString.SW_SYMBOL);
 
         final ExpressionResultString m2ReturnTypes = m2Def.getReturnTypes();
         assertThat(m2ReturnTypes).isEqualTo(
-            new ExpressionResultString(
-                TypeString.ofIdentifier("symbol", "sw")));
+            new ExpressionResultString(TypeString.SW_SYMBOL));
         final ExpressionResultString m2LoopTypes = m2Def.getLoopTypes();
         assertThat(m2LoopTypes).isEqualTo(
             ExpressionResultString.EMPTY);
@@ -182,10 +178,9 @@ class JsonDefinitionReaderTest {
     //     final Method rangeMethod = rangeInstance.getLocalMethods("invoke()").stream()
     //         .findAny()
     //         .orElseThrow();
-    //     final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
     //     assertThat(rangeMethod.getModifiers()).isEqualTo(Set.of(Method.Modifier.ITER));
     //     assertThat(rangeMethod.getCallResult()).isEqualTo(ExpressionResultString.EMPTY);
-    //     assertThat(rangeMethod.getLoopbodyResult()).isEqualTo(new ExpressionResultString(integerRef));
+    //     assertThat(rangeMethod.getLoopbodyResult()).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
     // }
 
     @Test
@@ -197,8 +192,7 @@ class JsonDefinitionReaderTest {
         assertThat(tabCharGlobalDefs).hasSize(1);
 
         final GlobalDefinition tabCharGlobalDef = tabCharGlobalDefs.stream().findAny().orElseThrow();
-        final TypeString characterRef = TypeString.ofIdentifier("character", "sw");
-        assertThat(tabCharGlobalDef.getAliasedTypeName()).isEqualTo(characterRef);
+        assertThat(tabCharGlobalDef.getAliasedTypeName()).isEqualTo(TypeString.SW_CHARACTER);
 
         final TypeString printFloatPrecisionRef = TypeString.ofIdentifier("!print_float_precision!", "sw");
         final Collection<GlobalDefinition> printFloatPrecisionDefs =
@@ -206,27 +200,24 @@ class JsonDefinitionReaderTest {
         assertThat(printFloatPrecisionDefs).hasSize(1);
 
         final GlobalDefinition printFloatPrecisionDef = printFloatPrecisionDefs.stream().findAny().orElseThrow();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        assertThat(printFloatPrecisionDef.getAliasedTypeName()).isEqualTo(integerRef);
+        assertThat(printFloatPrecisionDef.getAliasedTypeName()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
     void testReadBinaryOperator() throws IOException {
         final IDefinitionKeeper definitionKeeper = this.readTypes();
 
-        final TypeString char16VectorRef = TypeString.ofIdentifier("char16_vector", "sw");
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final Collection<BinaryOperatorDefinition> binOps = definitionKeeper.getBinaryOperatorDefinitions(
             "=",
-            char16VectorRef,
-            symbolRef);
+            TypeString.SW_CHAR16_VECTOR,
+            TypeString.SW_SYMBOL);
         assertThat(binOps).hasSize(1);
 
         final BinaryOperatorDefinition binOp = binOps.stream().findAny().orElseThrow();
         assertThat(binOp.getModuleName()).isEqualTo("test_module");
-        assertThat(binOp.getLhsTypeName()).isEqualTo(char16VectorRef);
-        assertThat(binOp.getRhsTypeName()).isEqualTo(symbolRef);
-        assertThat(binOp.getResultTypeName()).isEqualTo(char16VectorRef);
+        assertThat(binOp.getLhsTypeName()).isEqualTo(TypeString.SW_CHAR16_VECTOR);
+        assertThat(binOp.getRhsTypeName()).isEqualTo(TypeString.SW_SYMBOL);
+        assertThat(binOp.getResultTypeName()).isEqualTo(TypeString.SW_CHAR16_VECTOR);
     }
 
 }

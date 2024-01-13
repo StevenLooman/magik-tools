@@ -92,8 +92,6 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
 
     }
 
-    private static final TypeString SW_PROCEDURE_REF = TypeString.ofIdentifier("procedure", "sw");
-
     private static final Map<ExemplarDefinition.Sort, MagikType.Sort> EXEMPLAR_SORT_MAPPING = Map.of(
         ExemplarDefinition.Sort.UNDEFINED, MagikType.Sort.UNDEFINED,
         ExemplarDefinition.Sort.OBJECT, MagikType.Sort.OBJECT,
@@ -309,7 +307,7 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
     }
 
     private AbstractType createType(final ProcedureDefinition procedureDefinition, final TypeString searchTypeString) {
-        final AbstractType abstractType = this.getType(DefinitionKeeperTypeKeeperAdapter.SW_PROCEDURE_REF);
+        final AbstractType abstractType = this.getType(TypeString.SW_PROCEDURE);
         final MagikType procedureType = (MagikType) abstractType;
 
         final EnumSet<ProcedureInstance.Modifier> modifiers = procedureDefinition.getModifiers().stream()

@@ -87,14 +87,14 @@ class TypeReaderTest {
 
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
         final TypeString ropeRefWithGeneric = TypeString.ofIdentifier("rope", "sw",
-            TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("integer", "sw")));
+            TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
         final AbstractType parsedType = this.parseTypeString(ropeRefWithGeneric, typeKeeper);
         assertThat(parsedType).isInstanceOf(MagikType.class);
         final MagikType parsedMagikType = (MagikType) parsedType;
         assertThat(parsedMagikType.getTypeString()).isEqualTo(
             TypeString.ofIdentifier(
                 "rope", "sw",
-                TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("integer", "sw"))));
+                TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER)));
     }
 
 }

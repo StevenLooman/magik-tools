@@ -50,7 +50,7 @@ class TypeStringParserTest {
         final String typeStr = "sw:integer";
         final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
         assertThat(typeString)
-            .isEqualTo(TypeString.ofIdentifier("integer", "sw"));
+            .isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -60,7 +60,7 @@ class TypeStringParserTest {
         assertThat(typeString)
             .isEqualTo(
                 TypeString.ofIdentifier("rope", SW_PACKAGE,
-                    TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("symbol", SW_PACKAGE))));
+                    TypeString.ofGenericDefinition("E", TypeString.SW_SYMBOL)));
     }
 
     @Test
@@ -70,8 +70,8 @@ class TypeStringParserTest {
         assertThat(typeString)
             .isEqualTo(
                 TypeString.ofIdentifier("property_list", SW_PACKAGE,
-                    TypeString.ofGenericDefinition("K", TypeString.ofIdentifier("sw:symbol", SW_PACKAGE)),
-                    TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("sw:integer", SW_PACKAGE))));
+                    TypeString.ofGenericDefinition("K", TypeString.SW_SYMBOL),
+                    TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER)));
     }
 
     @Test
@@ -81,9 +81,9 @@ class TypeStringParserTest {
         assertThat(typeString)
             .isEqualTo(
                 TypeString.ofIdentifier("property_list", SW_PACKAGE,
-                    TypeString.ofGenericDefinition("K", TypeString.ofIdentifier("symbol", SW_PACKAGE)),
+                    TypeString.ofGenericDefinition("K", TypeString.SW_SYMBOL),
                     TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("rope", SW_PACKAGE,
-                        TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("integer", SW_PACKAGE))))));
+                        TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER)))));
     }
 
     @Test
@@ -94,8 +94,8 @@ class TypeStringParserTest {
             .isEqualTo(
                 TypeString.ofCombination(
                     SW_PACKAGE,
-                    TypeString.ofIdentifier("integer", SW_PACKAGE),
-                    TypeString.ofIdentifier("float", SW_PACKAGE)));
+                    TypeString.SW_INTEGER,
+                    TypeString.SW_FLOAT));
     }
 
     @Test
