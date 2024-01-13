@@ -252,7 +252,8 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
             .forEach(genTypeStr -> magikType.addGenericDefinition(null, genTypeStr));
 
         // Add methods.
-        this.definitionKeeper.getMethodDefinitions(definitionTypeString).stream()
+        final TypeString bareDefinitionTypeString = definitionTypeString.getWithoutGenerics();
+        this.definitionKeeper.getMethodDefinitions(bareDefinitionTypeString).stream()
             .forEach(methodDef -> {
                 final Method method = magikType.addMethod(
                     methodDef.getLocation(),
@@ -333,7 +334,7 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
             procedureDefinition.getReturnTypes(),
             procedureDefinition.getLoopTypes());
 
-        final TypeString typeRef = procedureDefinition.getTypeName();
+        final TypeString typeRef = procedureDefinition.getTypeString();
         if (typeRef == null) {
             throw new IllegalStateException("Cannot feed ProcedureDefinition without a type reference.");
         }

@@ -13,6 +13,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 
 /**
  * {@code define_binary_operator_case()} parser.
@@ -122,13 +123,20 @@ public class DefineBinaryOperatorCaseParser {
         final AstNode parentNode = this.node.getParent();
         final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
+        // Figure type doc.
+        final AstNode procDefNode = argument3Node.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
+        final TypeDocParser typeDocParser = new TypeDocParser(procDefNode);
+        final List<TypeString> returnTypes = typeDocParser.getReturnTypes();
+        final TypeString returnType = returnTypes.isEmpty()
+            ? TypeString.UNDEFINED
+            : returnTypes.get(0);
+
         // Figure operator & lhs & rhs.
         final String operator = operatorSymbol.substring(1);
         final String lhsName = argument1Node.getTokenValue();
         final TypeString lhs = TypeString.ofIdentifier(lhsName, currentPakkage);
         final String rhsName = argument2Node.getTokenValue();
         final TypeString rhs = TypeString.ofIdentifier(rhsName, currentPakkage);
-        final TypeString result = TypeString.UNDEFINED;
         final BinaryOperatorDefinition operatorDefinition = new BinaryOperatorDefinition(
             location,
             moduleName,
@@ -137,7 +145,7 @@ public class DefineBinaryOperatorCaseParser {
             operator,
             lhs,
             rhs,
-            result);
+            returnType);
         return List.of(operatorDefinition);
     }
 

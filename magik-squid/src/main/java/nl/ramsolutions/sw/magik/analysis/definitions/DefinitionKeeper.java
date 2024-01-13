@@ -71,25 +71,25 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     @Override
     public void add(final ExemplarDefinition definition) {
         // Store without generics.
-        final TypeString typeString = definition.getTypeString().getWithoutGenerics();
+        final TypeString bareTypeString = definition.getTypeString().getWithoutGenerics();
         final Set<ExemplarDefinition> definitions =
-            this.exemplarDefinitions.computeIfAbsent(typeString, k -> ConcurrentHashMap.newKeySet());
+            this.exemplarDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
         definitions.add(definition);
     }
 
     @Override
     public void add(final MethodDefinition definition) {
-        final TypeString typeString = definition.getTypeName();
+        final TypeString bareTypeString = definition.getTypeName().getWithoutGenerics();
         final Set<MethodDefinition> definitions =
-            this.methodDefinitions.computeIfAbsent(typeString, k -> ConcurrentHashMap.newKeySet());
+            this.methodDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
         definitions.add(definition);
     }
 
     @Override
     public void add(final GlobalDefinition definition) {
-        final TypeString typeString = definition.getTypeString();
+        final TypeString bareTypeString = definition.getTypeString().getWithoutGenerics();
         final Set<GlobalDefinition> definitions =
-            this.globalDefinitions.computeIfAbsent(typeString, k -> ConcurrentHashMap.newKeySet());
+            this.globalDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
         definitions.add(definition);
     }
 
@@ -111,9 +111,9 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
     @Override
     public void add(final ProcedureDefinition definition) {
-        final TypeString typeString = definition.getTypeName();
+        final TypeString bareTypeString = definition.getTypeString().getWithoutGenerics();
         final Set<ProcedureDefinition> definitions =
-            this.procedureDefinitions.computeIfAbsent(typeString, k -> ConcurrentHashMap.newKeySet());
+            this.procedureDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
         definitions.add(definition);
     }
 
@@ -143,25 +143,25 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
     @Override
     public void remove(ExemplarDefinition definition) {
-        final TypeString typeString = definition.getTypeString();
+        final TypeString bareTypeString = definition.getTypeString().getWithoutGenerics();
         final Set<ExemplarDefinition> definitions =
-            this.exemplarDefinitions.computeIfAbsent(typeString, k -> ConcurrentHashMap.newKeySet());
+            this.exemplarDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
         definitions.remove(definition);
     }
 
     @Override
     public void remove(final MethodDefinition definition) {
-        final TypeString typeString = definition.getTypeName();
+        final TypeString bareTypeString = definition.getTypeName().getWithoutGenerics();
         final Set<MethodDefinition> definitions =
-            this.methodDefinitions.computeIfAbsent(typeString, k -> ConcurrentHashMap.newKeySet());
+            this.methodDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
         definitions.remove(definition);
     }
 
     @Override
     public void remove(final GlobalDefinition definition) {
-        final TypeString typeString = definition.getTypeString();
+        final TypeString bareTypeString = definition.getTypeString().getWithoutGenerics();
         final Set<GlobalDefinition> definitions =
-            this.globalDefinitions.computeIfAbsent(typeString, k -> ConcurrentHashMap.newKeySet());
+            this.globalDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
         definitions.remove(definition);
     }
 
@@ -183,9 +183,9 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
     @Override
     public void remove(final ProcedureDefinition definition) {
-        final TypeString typeString = definition.getTypeName();
+        final TypeString bareTypeString = definition.getTypeString().getWithoutGenerics();
         final Set<ProcedureDefinition> definitions =
-            this.procedureDefinitions.computeIfAbsent(typeString, k -> ConcurrentHashMap.newKeySet());
+            this.procedureDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
         definitions.remove(definition);
     }
 
@@ -249,8 +249,9 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
     @Override
     public Collection<MethodDefinition> getMethodDefinitions(final TypeString typeString) {
+        final TypeString bareTypeString = typeString.getWithoutGenerics();
         final Collection<MethodDefinition> definitions =
-            this.methodDefinitions.getOrDefault(typeString, Collections.emptySet());
+            this.methodDefinitions.getOrDefault(bareTypeString, Collections.emptySet());
         return definitions.stream()
             .filter(def -> def.getTypeName().equals(typeString))
             .collect(Collectors.toSet());
@@ -279,8 +280,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
     private String getKey(final BinaryOperatorDefinition definition) {
         return definition.getOperator()
-            + "_" + definition.getLhsTypeName().getFullString()
-            + "_" + definition.getRhsTypeName().getFullString();
+            + "_" + definition.getLhsTypeName().getWithoutGenerics().getFullString()
+            + "_" + definition.getRhsTypeName().getWithoutGenerics().getFullString();
     }
 
     @Override
@@ -289,8 +290,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
             final TypeString lhs,
             final TypeString rhs) {
         final String key = operator
-            + "_" + lhs.getFullString()
-            + "_" + rhs.getFullString();
+            + "_" + lhs.getWithoutGenerics().getFullString()
+            + "_" + rhs.getWithoutGenerics().getFullString();
         final Collection<BinaryOperatorDefinition> definitions =
             this.binaryOperatorDefinitions.getOrDefault(key, Collections.emptySet());
         return Collections.unmodifiableCollection(definitions);
@@ -319,8 +320,9 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
     @Override
     public Collection<ProcedureDefinition> getProcedureDefinitions(final TypeString typeString) {
+        final TypeString bareTypeString = typeString.getWithoutGenerics();
         final Collection<ProcedureDefinition> definitions =
-            this.procedureDefinitions.getOrDefault(typeString, Collections.emptySet());
+            this.procedureDefinitions.getOrDefault(bareTypeString, Collections.emptySet());
         return Collections.unmodifiableCollection(definitions);
     }
 

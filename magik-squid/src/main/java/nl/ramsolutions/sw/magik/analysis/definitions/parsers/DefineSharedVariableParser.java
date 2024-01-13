@@ -116,9 +116,13 @@ public class DefineSharedVariableParser {
 
         // Figure doc.
         final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+
+        // Figure type doc.
         final TypeDocParser docParser = new TypeDocParser(parentNode);
         final List<TypeString> returnTypeRefs = docParser.getReturnTypes();
-        final TypeString typeRef = returnTypeRefs.isEmpty() ? TypeString.UNDEFINED : returnTypeRefs.get(0);
+        final TypeString typeRef = returnTypeRefs.isEmpty()
+            ? TypeString.UNDEFINED
+            : returnTypeRefs.get(0);
 
         final String variableNameSymbol = argument0Node.getTokenValue();
         final String variableName = variableNameSymbol.substring(1);
