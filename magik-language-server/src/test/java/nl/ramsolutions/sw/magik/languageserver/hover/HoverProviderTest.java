@@ -35,14 +35,13 @@ class HoverProviderTest {
     void testProvideHoverMethodDefinitionName() {
         // Set up a method in the TypeKeeper.
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 "method_doc",
                 null,
-                objectRef,
+                TypeString.SW_OBJECT,
                 "hover_me_method()",
                 Collections.emptySet(),
                 Collections.emptyList(),
@@ -96,14 +95,13 @@ class HoverProviderTest {
     void testProvideHoverMethod() {
         // Set up a method.
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 "method_doc",
                 null,
-                integerRef,
+                TypeString.SW_INTEGER,
                 "hover_me()",
                 Collections.emptySet(),
                 Collections.emptyList(),
@@ -202,7 +200,6 @@ class HoverProviderTest {
     @Test
     void testBinaryOperatorTimes() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         definitionKeeper.add(
             new BinaryOperatorDefinition(
                 null,
@@ -210,9 +207,9 @@ class HoverProviderTest {
                 null,
                 null,
                 "*",
-                integerRef,
-                integerRef,
-                integerRef));
+                TypeString.SW_INTEGER,
+                TypeString.SW_INTEGER,
+                TypeString.SW_INTEGER));
 
         final String code = ""
             + "_method a.b\n"

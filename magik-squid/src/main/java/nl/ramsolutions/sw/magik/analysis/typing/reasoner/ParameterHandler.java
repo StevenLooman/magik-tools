@@ -20,8 +20,6 @@ import nl.ramsolutions.sw.magik.parser.TypeDocParser;
  */
 class ParameterHandler extends LocalTypeReasonerHandler {
 
-    private static final TypeString SW_SIMPLE_VECTOR = TypeString.ofIdentifier("simple_vector", "sw");
-
     /**
      * Constructor.
      * @param state Reasoner state.
@@ -48,9 +46,9 @@ class ParameterHandler extends LocalTypeReasonerHandler {
         final ExpressionResult result;
         final ParameterNodeHelper helper = new ParameterNodeHelper(node);
         if (helper.isGatherParameter()) {
-            final AbstractType simpleVectorType = this.typeKeeper.getType(SW_SIMPLE_VECTOR);
+            final AbstractType simpleVectorType = this.typeKeeper.getType(TypeString.SW_SIMPLE_VECTOR);
             final TypeString newTypeString = TypeString.ofIdentifier(
-                SW_SIMPLE_VECTOR.getIdentifier(), SW_SIMPLE_VECTOR.getPakkage(),
+                TypeString.SW_SIMPLE_VECTOR.getIdentifier(), TypeString.SW_SIMPLE_VECTOR.getPakkage(),
                 TypeString.ofGenericDefinition("E", parameterTypeString));
             final AbstractType paramType = simpleVectorType instanceof MagikType
                 ? new MagikType((MagikType) simpleVectorType, newTypeString)

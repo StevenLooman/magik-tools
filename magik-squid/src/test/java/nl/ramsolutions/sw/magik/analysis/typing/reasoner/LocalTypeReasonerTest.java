@@ -138,7 +138,7 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final AbstractType integerType = typeKeeper.getType(TypeString.ofIdentifier("integer", "sw"));
+        final AbstractType integerType = typeKeeper.getType(TypeString.SW_INTEGER);
         final AbstractType resultType = (AbstractType) result.get(0, null);
         assertThat(resultType).isEqualTo(integerType);
     }
@@ -169,8 +169,8 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType combinedType = new CombinedType(
-            typeKeeper.getType(TypeString.ofIdentifier("integer", "sw")),
-            typeKeeper.getType(TypeString.ofIdentifier("symbol", "sw")));
+            typeKeeper.getType(TypeString.SW_INTEGER),
+            typeKeeper.getType(TypeString.SW_SYMBOL));
         final AbstractType resultType = (AbstractType) result.get(0, null);
         assertThat(resultType).isEqualTo(combinedType);
     }
@@ -334,14 +334,13 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString falseRef = TypeString.ofIdentifier("false", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                falseRef,
+                TypeString.SW_FALSE,
                 "not",
                 EnumSet.noneOf(MethodDefinition.Modifier.class),
                 Collections.emptyList(),
@@ -360,7 +359,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType.getTypeString()).isEqualTo(falseRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_FALSE);
     }
 
     @Test
@@ -372,7 +371,6 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString char16VectorRef = TypeString.ofIdentifier("char16_vector", "sw");
         definitionKeeper.add(
             new BinaryOperatorDefinition(
                 null,
@@ -380,9 +378,9 @@ class LocalTypeReasonerTest {
                 code,
                 null,
                 "+",
-                char16VectorRef,
-                char16VectorRef,
-                char16VectorRef));
+                TypeString.SW_CHAR16_VECTOR,
+                TypeString.SW_CHAR16_VECTOR,
+                TypeString.SW_CHAR16_VECTOR));
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -395,7 +393,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType.getTypeString()).isEqualTo(char16VectorRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_CHAR16_VECTOR);
     }
 
     @Test
@@ -407,9 +405,6 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString char16VectorRef = TypeString.ofIdentifier("char16_vector", "sw");
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         definitionKeeper.add(
             new BinaryOperatorDefinition(
                 null,
@@ -417,9 +412,9 @@ class LocalTypeReasonerTest {
                 code,
                 null,
                 "+",
-                integerRef,
-                symbolRef,
-                symbolRef));
+                TypeString.SW_INTEGER,
+                TypeString.SW_SYMBOL,
+                TypeString.SW_SYMBOL));
         definitionKeeper.add(
             new BinaryOperatorDefinition(
                 null,
@@ -427,9 +422,9 @@ class LocalTypeReasonerTest {
                 code,
                 null,
                 "+",
-                symbolRef,
-                char16VectorRef,
-                char16VectorRef));
+                TypeString.SW_SYMBOL,
+                TypeString.SW_CHAR16_VECTOR,
+                TypeString.SW_CHAR16_VECTOR));
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -442,7 +437,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType.getTypeString()).isEqualTo(char16VectorRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_CHAR16_VECTOR);
     }
 
     @Test
@@ -467,15 +462,14 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(3);
 
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType resultType1 = result.get(0, null);
-        assertThat(resultType1.getTypeString()).isEqualTo(integerRef);
+        assertThat(resultType1.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
 
         final AbstractType resultType2 = result.get(1, null);
-        assertThat(resultType2.getTypeString()).isEqualTo(integerRef);
+        assertThat(resultType2.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
 
         final AbstractType resultType3 = result.get(2, null);
-        assertThat(resultType3.getTypeString()).isEqualTo(integerRef);
+        assertThat(resultType3.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -504,9 +498,8 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType.getTypeString()).isEqualTo(integerRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -521,20 +514,19 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                integerRef,
+                TypeString.SW_INTEGER,
                 "upto()",
                 EnumSet.noneOf(MethodDefinition.Modifier.class),
                 Collections.emptyList(),
                 null,
                 ExpressionResultString.UNDEFINED,
-                new ExpressionResultString(integerRef)));
+                new ExpressionResultString(TypeString.SW_INTEGER)));
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -547,7 +539,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType.getTypeString()).isEqualTo(integerRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -562,20 +554,19 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                integerRef,
+                TypeString.SW_INTEGER,
                 "upto()",
                 EnumSet.noneOf(MethodDefinition.Modifier.class),
                 Collections.emptyList(),
                 null,
                 ExpressionResultString.UNDEFINED,
-                new ExpressionResultString(integerRef)));
+                new ExpressionResultString(TypeString.SW_INTEGER)));
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -588,7 +579,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType.getTypeString()).isEqualTo(integerRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -606,20 +597,19 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                integerRef,
+                TypeString.SW_INTEGER,
                 "upto()",
                 EnumSet.noneOf(MethodDefinition.Modifier.class),
                 Collections.emptyList(),
                 null,
                 ExpressionResultString.UNDEFINED,
-                new ExpressionResultString(integerRef)));
+                new ExpressionResultString(TypeString.SW_INTEGER)));
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -633,7 +623,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final CombinedType expectedType = new CombinedType(
-            typeKeeper.getType(TypeString.ofIdentifier("integer", "sw")),
+            typeKeeper.getType(TypeString.SW_INTEGER),
             typeKeeper.getType(TypeString.SW_UNSET));
         final CombinedType resultType = (CombinedType) result.get(0, null);
         assertThat(resultType).isEqualTo(expectedType);
@@ -685,13 +675,12 @@ class LocalTypeReasonerTest {
 
         final Collection<Method> invokeMethods = resultType.getMethods("invoke()");
         assertThat(invokeMethods).isNotEmpty();
-        final TypeString integerRef = TypeString.ofIdentifier("sw:integer", "sw");
         invokeMethods.forEach(procMethod -> {
             final ExpressionResultString procResult = procMethod.getCallResult();
             assertThat(procResult.size()).isEqualTo(1);
 
             final TypeString procResultTypeString = procResult.get(0, null);
-            assertThat(procResultTypeString).isEqualTo(integerRef);
+            assertThat(procResultTypeString).isEqualTo(TypeString.SW_INTEGER);
         });
     }
 
@@ -717,8 +706,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        assertThat(resultType.getTypeString()).isEqualTo(integerRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -782,14 +770,13 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                objectRef,
+                TypeString.SW_OBJECT,
                 "test1",
                 EnumSet.noneOf(MethodDefinition.Modifier.class),
                 Collections.emptyList(),
@@ -881,8 +868,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        assertThat(resultType.getTypeString()).isEqualTo(integerRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -908,15 +894,13 @@ class LocalTypeReasonerTest {
         final ExpressionResult aResult = reasonerState.getNodeType(aNode);
         assertThat(aResult.size()).isEqualTo(1);
         final AbstractType aResultType = aResult.get(0, null);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        assertThat(aResultType.getTypeString()).isEqualTo(integerRef);
+        assertThat(aResultType.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
 
         final AstNode bNode = forVariablesNode.getDescendants(MagikGrammar.IDENTIFIER).get(1);
         final ExpressionResult bResult = reasonerState.getNodeType(bNode);
         assertThat(bResult.size()).isEqualTo(1);
         final AbstractType bResultType = bResult.get(0, null);
-        final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
-        assertThat(bResultType.getTypeString()).isEqualTo(floatRef);
+        assertThat(bResultType.getTypeString()).isEqualTo(TypeString.SW_FLOAT);
     }
 
     @Test
@@ -956,8 +940,6 @@ class LocalTypeReasonerTest {
 
         // Set up TypeKeeper/TypeReasoner.
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
         definitionKeeper.add(
             new BinaryOperatorDefinition(
                 null,
@@ -965,9 +947,9 @@ class LocalTypeReasonerTest {
                 code,
                 null,
                 "+",
-                integerRef,
-                floatRef,
-                floatRef));
+                TypeString.SW_INTEGER,
+                TypeString.SW_FLOAT,
+                TypeString.SW_FLOAT));
 
         // Do analysis.
         final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -980,7 +962,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType.getTypeString()).isEqualTo(floatRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_FLOAT);
     }
 
     @Test
@@ -1034,7 +1016,7 @@ class LocalTypeReasonerTest {
         final AbstractType actualResultType = result.get(0, null);
         final TypeString simpleVectorRef = TypeString.ofIdentifier(
             "simple_vector", "sw",
-            TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("symbol", "sw")));
+            TypeString.ofGenericDefinition("E", TypeString.SW_SYMBOL));
         assertThat(actualResultType.getTypeString()).isEqualTo(simpleVectorRef);
     }
 
@@ -1061,9 +1043,8 @@ class LocalTypeReasonerTest {
         final AstNode importNode = procNode.getFirstDescendant(MagikGrammar.VARIABLE_DEFINITION);
         final ExpressionResult result = reasonerState.getNodeType(importNode);
 
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType resultType = result.get(0, null);
-        assertThat(resultType.getTypeString()).isEqualTo(integerRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -1088,11 +1069,10 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(2);
 
         final AbstractType resultType1 = result.get(0, null);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        assertThat(resultType1.getTypeString()).isEqualTo(integerRef);
+        assertThat(resultType1.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
 
         final AbstractType resultType2 = result.get(1, null);
-        assertThat(resultType2.getTypeString()).isEqualTo(integerRef);
+        assertThat(resultType2.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -1118,8 +1098,7 @@ class LocalTypeReasonerTest {
         assertThat(result).isNotNull();
 
         final AbstractType resultType = result.get(0, null);
-        final TypeString conditionRef = TypeString.ofIdentifier("condition", "sw");
-        assertThat(resultType.getTypeString()).isEqualTo(conditionRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_CONDITION);
     }
 
     @Test
@@ -1144,9 +1123,8 @@ class LocalTypeReasonerTest {
         assertThat(result).isNotNull();
 
         // First is integer + undefined.
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType intAndUndefinedType = new CombinedType(
-            typeKeeper.getType(integerRef),
+            typeKeeper.getType(TypeString.SW_INTEGER),
             UndefinedType.INSTANCE);
         final AbstractType resultType0 = result.get(0, null);
         assertThat(resultType0).isEqualTo(intAndUndefinedType);
@@ -1268,7 +1246,6 @@ class LocalTypeReasonerTest {
         final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
         final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
-        final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
         final AstNode topNode = magikFile.getTopNode();
 
         // Test parameter definition.
@@ -1277,14 +1254,14 @@ class LocalTypeReasonerTest {
             .getFirstChild(MagikGrammar.IDENTIFIER);
         final ExpressionResult actualParameterResult = reasonerState.getNodeType(parameterNode);
         final AbstractType actualParameterType = actualParameterResult.get(0, null);
-        assertThat(actualParameterType.getTypeString()).isEqualTo(floatRef);
+        assertThat(actualParameterType.getTypeString()).isEqualTo(TypeString.SW_FLOAT);
 
         // Test parameter usage.
         final AstNode procInvocationNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_INVOCATION);
         final AstNode atomNode = procInvocationNode.getFirstDescendant(MagikGrammar.ATOM);
         final ExpressionResult actualAtomResult = reasonerState.getNodeType(atomNode);
         final AbstractType actualAtomType = actualAtomResult.get(0, null);
-        assertThat(actualAtomType.getTypeString()).isEqualTo(floatRef);
+        assertThat(actualAtomType.getTypeString()).isEqualTo(TypeString.SW_FLOAT);
     }
 
     @Test
@@ -1302,7 +1279,6 @@ class LocalTypeReasonerTest {
         final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
         final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
 
-        final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
         final AstNode topNode = magikFile.getTopNode();
 
         // Test parameter definition.
@@ -1311,14 +1287,14 @@ class LocalTypeReasonerTest {
             .getFirstChild(MagikGrammar.IDENTIFIER);
         final ExpressionResult actualParameterResult = reasonerState.getNodeType(parameterNode);
         final AbstractType actualParameterType = actualParameterResult.get(0, null);
-        assertThat(actualParameterType.getTypeString()).isEqualTo(floatRef);
+        assertThat(actualParameterType.getTypeString()).isEqualTo(TypeString.SW_FLOAT);
 
         // Test parameter usage.
         final AstNode procInvocationNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_INVOCATION);
         final AstNode atomNode = procInvocationNode.getFirstDescendant(MagikGrammar.ATOM);
         final ExpressionResult actualAtomResult = reasonerState.getNodeType(atomNode);
         final AbstractType actualAtomType = actualAtomResult.get(0, null);
-        assertThat(actualAtomType.getTypeString()).isEqualTo(floatRef);
+        assertThat(actualAtomType.getTypeString()).isEqualTo(TypeString.SW_FLOAT);
     }
 
     @Test
@@ -1341,10 +1317,8 @@ class LocalTypeReasonerTest {
             .getFirstChild(MagikGrammar.IDENTIFIER);
         final ExpressionResult result = reasonerState.getNodeType(parameterNode);
         final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-        final TypeString floatRef = TypeString.ofIdentifier("float", "sw");
-        final AbstractType floatType = typeKeeper.getType(floatRef);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        final AbstractType integerType = typeKeeper.getType(integerRef);
+        final AbstractType floatType = typeKeeper.getType(TypeString.SW_FLOAT);
+        final AbstractType integerType = typeKeeper.getType(TypeString.SW_INTEGER);
         final AbstractType expectedType = CombinedType.combine(floatType, integerType);
         final AbstractType actualType = result.get(0, null);
         assertThat(actualType).isEqualTo(expectedType);
@@ -1401,8 +1375,7 @@ class LocalTypeReasonerTest {
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
         final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
         final AbstractType actualType = result.get(0, null);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        assertThat(actualType.getTypeString()).isEqualTo(integerRef);
+        assertThat(actualType.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -1477,8 +1450,7 @@ class LocalTypeReasonerTest {
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
         final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
         final AbstractType actualType = result.get(0, null);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        assertThat(actualType.getTypeString()).isEqualTo(integerRef);
+        assertThat(actualType.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -1532,8 +1504,7 @@ class LocalTypeReasonerTest {
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
         final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
         final AbstractType actualType = result.get(0, null);
-        final TypeString unsetRef = TypeString.ofIdentifier("unset", "sw");
-        assertThat(actualType.getTypeString()).isEqualTo(unsetRef);
+        assertThat(actualType.getTypeString()).isEqualTo(TypeString.SW_UNSET);
     }
 
     @Test
@@ -1594,8 +1565,7 @@ class LocalTypeReasonerTest {
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
         final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
         final AbstractType actualType = result.get(0, null);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        assertThat(actualType.getTypeString()).isEqualTo(integerRef);
+        assertThat(actualType.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -1670,13 +1640,11 @@ class LocalTypeReasonerTest {
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
         final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
 
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
         final AbstractType actualType0 = result.get(0, null);
-        assertThat(actualType0.getTypeString()).isEqualTo(symbolRef);
+        assertThat(actualType0.getTypeString()).isEqualTo(TypeString.SW_SYMBOL);
 
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType actualType1 = result.get(1, null);
-        assertThat(actualType1.getTypeString()).isEqualTo(integerRef);
+        assertThat(actualType1.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -1809,14 +1777,12 @@ class LocalTypeReasonerTest {
         final AstNode kIdentifierNode = identifierNodes.get(0);
         final ExpressionResult kResult = reasonerState.getNodeType(kIdentifierNode);
         final AbstractType actualType0 = kResult.get(0, null);
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-        assertThat(actualType0.getTypeString()).isEqualTo(symbolRef);
+        assertThat(actualType0.getTypeString()).isEqualTo(TypeString.SW_SYMBOL);
 
         final AstNode eIdentifierNode = identifierNodes.get(1);
         final ExpressionResult eResult = reasonerState.getNodeType(eIdentifierNode);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType actualType1 = eResult.get(0, null);
-        assertThat(actualType1.getTypeString()).isEqualTo(integerRef);
+        assertThat(actualType1.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
     }
 
     @Test
@@ -1858,7 +1824,7 @@ class LocalTypeReasonerTest {
         final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "sw");
         final TypeString slotTypeRef =
             TypeString.ofIdentifier("stack", "sw",
-                TypeString.ofGenericDefinition("E", TypeString.ofIdentifier("integer", "sw")));
+                TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
         definitionKeeper.add(
             new ExemplarDefinition(
                 null,

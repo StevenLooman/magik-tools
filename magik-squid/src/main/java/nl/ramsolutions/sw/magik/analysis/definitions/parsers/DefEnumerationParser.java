@@ -24,7 +24,7 @@ public class DefEnumerationParser extends BaseDefParser {
     private static final String SW_DEF_ENUMERATION_FROM = "sw:def_enumeration_from";
     private static final String SW_DEF_ENUMERATION = "sw:def_enumeration";
     private static final List<TypeString> ENUM_PARENTS = List.of(
-        TypeString.ofIdentifier("enumeration_value", "sw"));
+        TypeString.SW_ENUMERATION_VALUE);
 
     /**
      * Constructor.

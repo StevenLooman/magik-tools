@@ -34,19 +34,32 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
     @Test
     void testArgumentCountMatches() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                objectRef,
+                TypeString.SW_OBJECT,
                 "m()",
                 EnumSet.noneOf(MethodDefinition.Modifier.class),
                 List.of(
-                    new ParameterDefinition(null, null, null, null, "p1", ParameterDefinition.Modifier.NONE, objectRef),
-                    new ParameterDefinition(null, null, null, null, "p2", ParameterDefinition.Modifier.NONE, objectRef)
+                    new ParameterDefinition(
+                        null,
+                        null,
+                        null,
+                        null,
+                        "p1",
+                        ParameterDefinition.Modifier.NONE,
+                        TypeString.SW_OBJECT),
+                    new ParameterDefinition(
+                        null,
+                        null,
+                        null,
+                        null,
+                        "p2",
+                        ParameterDefinition.Modifier.NONE,
+                        TypeString.SW_OBJECT)
                 ),
                 null,
                 ExpressionResultString.EMPTY,
@@ -64,20 +77,32 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
     @Test
     void testArgumentMissing() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                objectRef,
+                TypeString.SW_OBJECT,
                 "m()",
                 EnumSet.noneOf(MethodDefinition.Modifier.class),
                 List.of(
-                    new ParameterDefinition(null, null, null, null, "p1", ParameterDefinition.Modifier.NONE, objectRef),
-                    new ParameterDefinition(null, null, null, null, "p2", ParameterDefinition.Modifier.NONE, objectRef)
-                ),
+                    new ParameterDefinition(
+                        null,
+                        null,
+                        null,
+                        null,
+                        "p1",
+                        ParameterDefinition.Modifier.NONE,
+                        TypeString.SW_OBJECT),
+                    new ParameterDefinition(
+                        null,
+                        null,
+                        null,
+                        null,
+                        "p2",
+                        ParameterDefinition.Modifier.NONE,
+                        TypeString.SW_OBJECT)),
                 null,
                 ExpressionResultString.EMPTY,
                 ExpressionResultString.EMPTY));

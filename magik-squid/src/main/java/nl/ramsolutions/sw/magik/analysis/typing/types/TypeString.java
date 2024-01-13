@@ -32,6 +32,49 @@ public final class TypeString implements Comparable<TypeString> {
     public static final TypeString SELF = new TypeString(SelfType.SERIALIZED_NAME, DEFAULT_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", SW_PACKAGE);
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_FALSE = TypeString.ofIdentifier("false", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_MAYBE = TypeString.ofIdentifier("maybe", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_CHARACTER = TypeString.ofIdentifier("character", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_BIGNUM = TypeString.ofIdentifier("bignum", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_INTEGER = TypeString.ofIdentifier("integer", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_FLOAT = TypeString.ofIdentifier("float", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_SW_REGEXP = TypeString.ofIdentifier("sw_regexp", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_CHAR16_VECTOR = TypeString.ofIdentifier("char16_vector", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_CHAR16_VECTOR_WITH_GENERICS =
+        TypeString.ofIdentifier(SW_CHAR16_VECTOR.getIdentifier(), SW_CHAR16_VECTOR.getPakkage(),
+        TypeString.ofGenericDefinition("K", TypeString.SW_INTEGER),
+        TypeString.ofGenericDefinition("E", TypeString.SW_CHARACTER));
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_SYMBOL = TypeString.ofIdentifier("symbol", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_SIMPLE_VECTOR = TypeString.ofIdentifier("simple_vector", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_HEAVY_THREAD = TypeString.ofIdentifier("heavy_thread", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_LIGHT_THREAD = TypeString.ofIdentifier("light_thread", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_GLOBAL_VARIABLE = TypeString.ofIdentifier("global_variable", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_PROCEDURE = TypeString.ofIdentifier("procedure", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_OBJECT = TypeString.ofIdentifier("object", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_CONDITION = TypeString.ofIdentifier("condition", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_ENUMERATION_VALUE = TypeString.ofIdentifier("enumeration_value", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_INDEXED_FORMAT_MIXIN = TypeString.ofIdentifier("indexed_format_mixin", "sw");
+    @SuppressWarnings("checkstyle:JavadocVariable")
+    public static final TypeString SW_SLOTTED_FORMAT_MIXIN = TypeString.ofIdentifier("slotted_format_mixin", "sw");
 
     private static final String GENERIC_DEFINITION = "_generic_def";
     private static final String GENERIC_REFERENCE = "_generic_ref";

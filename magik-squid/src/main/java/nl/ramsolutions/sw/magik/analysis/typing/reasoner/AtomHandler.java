@@ -15,19 +15,6 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  */
 class AtomHandler extends LocalTypeReasonerHandler {
 
-    private static final TypeString SW_FALSE = TypeString.ofIdentifier("false", "sw");
-    private static final TypeString SW_MAYBE = TypeString.ofIdentifier("maybe", "sw");
-    private static final TypeString SW_CHARACTER = TypeString.ofIdentifier("character", "sw");
-    private static final TypeString SW_BIGNUM = TypeString.ofIdentifier("bignum", "sw");
-    private static final TypeString SW_INTEGER = TypeString.ofIdentifier("integer", "sw");
-    private static final TypeString SW_FLOAT = TypeString.ofIdentifier("float", "sw");
-    private static final TypeString SW_SW_REGEXP = TypeString.ofIdentifier("sw_regexp", "sw");
-    private static final TypeString SW_CHAR16_VECTOR = TypeString.ofIdentifier("char16_vector", "sw");
-    private static final TypeString SW_SYMBOL = TypeString.ofIdentifier("symbol", "sw");
-    private static final TypeString SW_SIMPLE_VECTOR = TypeString.ofIdentifier("simple_vector", "sw");
-    private static final TypeString SW_HEAVY_THREAD = TypeString.ofIdentifier("heavy_thread", "sw");
-    private static final TypeString SW_LIGHT_THREAD = TypeString.ofIdentifier("light_thread", "sw");
-    private static final TypeString SW_GLOBAL_VARIABLE = TypeString.ofIdentifier("global_variable", "sw");
     @SuppressWarnings("checkstyle:MagicNumber")
     private static final long BIGNUM_START = 1 << 29;
 
@@ -50,9 +37,9 @@ class AtomHandler extends LocalTypeReasonerHandler {
         try {
             Long value = Long.parseLong(tokenValue);
             if (value > BIGNUM_START) {
-                this.assignAtom(node, SW_BIGNUM);
+                this.assignAtom(node, TypeString.SW_BIGNUM);
             } else {
-                this.assignAtom(node, SW_INTEGER);
+                this.assignAtom(node, TypeString.SW_INTEGER);
             }
             return;
         } catch (NumberFormatException ex) {
@@ -62,7 +49,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
         // Parsable by Float?
         try {
             Float.parseFloat(tokenValue);
-            this.assignAtom(node, SW_FLOAT);
+            this.assignAtom(node, TypeString.SW_FLOAT);
         } catch (NumberFormatException ex) {
             // pass
         }
@@ -89,7 +76,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
      * @param node TRUE/FALSE node.
      */
     void handleFalse(final AstNode node) {
-        this.assignAtom(node, SW_FALSE);
+        this.assignAtom(node, TypeString.SW_FALSE);
     }
 
     /**
@@ -97,7 +84,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
      * @param node MAYBE node.
      */
     void handleMaybe(final AstNode node) {
-        this.assignAtom(node, SW_MAYBE);
+        this.assignAtom(node, TypeString.SW_MAYBE);
     }
 
     /**
@@ -113,7 +100,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
      * @param node CHARACTER node.
      */
     void handleCharacter(final AstNode node) {
-        this.assignAtom(node, SW_CHARACTER);
+        this.assignAtom(node, TypeString.SW_CHARACTER);
     }
 
     /**
@@ -121,7 +108,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
      * @param node SW_REGEXP node.
      */
     void handleRegexp(final AstNode node) {
-        this.assignAtom(node, SW_SW_REGEXP);
+        this.assignAtom(node, TypeString.SW_SW_REGEXP);
     }
 
     /**
@@ -129,7 +116,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
      * @param node STRING node.
      */
     void handleString(final AstNode node) {
-        this.assignAtom(node, SW_CHAR16_VECTOR);
+        this.assignAtom(node, TypeString.SW_CHAR16_VECTOR_WITH_GENERICS);
     }
 
     /**
@@ -137,7 +124,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
      * @param node SYMBOL node.
      */
     void handleSymbol(final AstNode node) {
-        this.assignAtom(node, SW_SYMBOL);
+        this.assignAtom(node, TypeString.SW_SYMBOL);
     }
 
     /**
@@ -153,7 +140,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
      * @param node GLOBAL_REF node.
      */
     void handleGlobalRef(final AstNode node) {
-        this.assignAtom(node, SW_GLOBAL_VARIABLE);
+        this.assignAtom(node, TypeString.SW_GLOBAL_VARIABLE);
     }
 
     /**
@@ -161,8 +148,8 @@ class AtomHandler extends LocalTypeReasonerHandler {
      * @param node THISTHREAD node.
      */
     void handleThread(final AstNode node) {
-        final AbstractType heavyThreadType = this.typeKeeper.getType(SW_HEAVY_THREAD);
-        final AbstractType lightThreadType = this.typeKeeper.getType(SW_LIGHT_THREAD);
+        final AbstractType heavyThreadType = this.typeKeeper.getType(TypeString.SW_HEAVY_THREAD);
+        final AbstractType lightThreadType = this.typeKeeper.getType(TypeString.SW_LIGHT_THREAD);
         final AbstractType threadType = CombinedType.combine(lightThreadType, heavyThreadType);
         this.assignAtom(node, threadType);
     }

@@ -17,8 +17,7 @@ class ExpressionResultTest {
     void testToStringOne() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-        final AbstractType symbolType = typeKeeper.getType(symbolRef);
+        final AbstractType symbolType = typeKeeper.getType(TypeString.SW_SYMBOL);
         final ExpressionResult result = new ExpressionResult(symbolType);
         final String toString = result.toString();
         assertThat(toString).contains("(sw:symbol)");
@@ -28,8 +27,7 @@ class ExpressionResultTest {
     void testToStringThree() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        final AbstractType integerType = typeKeeper.getType(integerRef);
+        final AbstractType integerType = typeKeeper.getType(TypeString.SW_INTEGER);
         final ExpressionResult result = new ExpressionResult(integerType, integerType, integerType);
         final String toString = result.toString();
         assertThat(toString).contains("(sw:integer,sw:integer,sw:integer)");
@@ -47,8 +45,7 @@ class ExpressionResultTest {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
         final AbstractType unsetType = typeKeeper.getType(TypeString.SW_UNSET);
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-        final AbstractType symbolType = typeKeeper.getType(symbolRef);
+        final AbstractType symbolType = typeKeeper.getType(TypeString.SW_SYMBOL);
         final ExpressionResult result1 = ExpressionResult.UNDEFINED;
         final ExpressionResult result2 = new ExpressionResult(symbolType);
         final ExpressionResult result = new ExpressionResult(result1, result2, unsetType);
@@ -60,10 +57,8 @@ class ExpressionResultTest {
     void testSubstituteType1() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-        final AbstractType symbolType = typeKeeper.getType(symbolRef);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        final AbstractType integerType = typeKeeper.getType(integerRef);
+        final AbstractType symbolType = typeKeeper.getType(TypeString.SW_SYMBOL);
+        final AbstractType integerType = typeKeeper.getType(TypeString.SW_INTEGER);
 
         final ExpressionResult result = new ExpressionResult(symbolType);
         final ExpressionResult newResult = result.substituteType(symbolType, integerType);
@@ -75,10 +70,8 @@ class ExpressionResultTest {
     void testSubstituteType2() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-        final AbstractType symbolType = typeKeeper.getType(symbolRef);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
-        final AbstractType integerType = typeKeeper.getType(integerRef);
+        final AbstractType symbolType = typeKeeper.getType(TypeString.SW_SYMBOL);
+        final AbstractType integerType = typeKeeper.getType(TypeString.SW_INTEGER);
         final CombinedType combinedType = new CombinedType(symbolType, integerType);
 
         final ExpressionResult result = new ExpressionResult(combinedType);
@@ -92,8 +85,7 @@ class ExpressionResultTest {
     void testSubstituteType3() {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
-        final TypeString symbolRef = TypeString.ofIdentifier("symbol", "sw");
-        final AbstractType symbolType = typeKeeper.getType(symbolRef);
+        final AbstractType symbolType = typeKeeper.getType(TypeString.SW_SYMBOL);
         final AbstractType parameterReferenceType = new ParameterReferenceType("p1");
         final CombinedType combinedType = new CombinedType(symbolType, parameterReferenceType);
 

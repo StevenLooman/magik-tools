@@ -140,8 +140,7 @@ class ArgumentInlayHintSupplier {
             if (defNode == null) {
                 return UndefinedType.INSTANCE;
             } else if (defNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
-                final TypeString procRef = TypeString.ofIdentifier("procedure", "sw");
-                return typeKeeper.getType(procRef);
+                return typeKeeper.getType(TypeString.SW_PROCEDURE);
             } else if (defNode.is(MagikGrammar.METHOD_DEFINITION)) {
                 final AstNode methodDefNode = node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
                 return this.getTypeOfMethodDefinition(typeKeeper, methodDefNode);

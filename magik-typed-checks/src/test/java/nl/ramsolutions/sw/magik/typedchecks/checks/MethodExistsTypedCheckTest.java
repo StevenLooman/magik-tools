@@ -38,19 +38,18 @@ class MethodExistsTypedCheckTest extends MagikTypedCheckTestBase {
             + "  object.m()\n"
             + "_endblock";
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-        final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
         definitionKeeper.add(
             new MethodDefinition(
                 null,
                 null,
                 null,
                 null,
-                objectRef,
+                TypeString.SW_OBJECT,
                 "m()",
                 EnumSet.noneOf(MethodDefinition.Modifier.class),
                 Collections.emptyList(),
                 null,
-                new ExpressionResultString(objectRef),
+                new ExpressionResultString(TypeString.SW_OBJECT),
                 ExpressionResultString.EMPTY));
         final MagikTypedCheck check = new MethodExistsTypedCheck();
         final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
