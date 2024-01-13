@@ -177,11 +177,8 @@ public final class TypeString implements Comparable<TypeString> {
      * @return Package.
      */
     public String getPakkage() {
-        if (!this.isSingle()) {
-            throw new IllegalStateException();
-        }
-
-        if (this.string.contains(":")) {
+        if (this.isSingle()
+            && this.string.contains(":")) {
             final String[] parts = this.string.split(":");
             return parts[0];
         }
@@ -252,7 +249,7 @@ public final class TypeString implements Comparable<TypeString> {
                     } else if (typeStr.isGenericDefinition()) {
                         return typeStr.string
                             + TypeStringGrammar.Punctuator.TYPE_GENERIC_ASSIGN.getValue()
-                            + this.generics.get(0).generics.get(0).getFullString();
+                            + typeStr.generics.get(0).getFullString();
                     }
 
                     throw new IllegalStateException();
@@ -326,6 +323,10 @@ public final class TypeString implements Comparable<TypeString> {
      * @return Bare type without any generics.
      */
     public TypeString getWithoutGenerics() {
+        if (!this.hasGenerics()) {
+            return this;
+        }
+
         return TypeString.ofIdentifier(this.getIdentifier(), this.getPakkage());
     }
 

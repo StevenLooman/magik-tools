@@ -1694,8 +1694,10 @@ class LocalTypeReasonerTest {
                 Collections.emptyList(),
                 null,
                 new ExpressionResultString(
-                    TypeString.ofIdentifier("simple_vector", "sw",
-                        TypeString.ofGenericReference("E"))),
+                    TypeString.ofIdentifier(
+                        TypeString.SW_SIMPLE_VECTOR.getIdentifier(), TypeString.SW_SIMPLE_VECTOR.getPakkage(),
+                        TypeString.ofGenericDefinition(
+                            "E", TypeString.ofGenericReference("E")))),
                 ExpressionResultString.EMPTY));
 
         // Do analysis.
@@ -1706,11 +1708,93 @@ class LocalTypeReasonerTest {
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
         final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
         final AbstractType actualType = result.get(0, null);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final TypeString simpleVectorRefWithGeneric =
             TypeString.ofIdentifier("simple_vector", "sw",
-                TypeString.ofGenericDefinition("E", integerRef));
+                TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
         assertThat(actualType.getTypeString()).isEqualTo(simpleVectorRefWithGeneric);
+    }
+
+    @Test
+    void testGenericMethodInvocation4() {
+        final String code = ""
+            + "_method object.m\n"
+            + "  _local str << 'abc'\n"
+            + "  _return str.keys, str.elements\n"
+            + "_endmethod\n";
+
+        // Set up TypeKeeper/TypeReasoner.
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final ExemplarDefinition char16VectorDef =
+            definitionKeeper.getExemplarDefinitions(TypeString.SW_CHAR16_VECTOR).iterator().next();
+        definitionKeeper.remove(char16VectorDef);
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                null,
+                null,
+                ExemplarDefinition.Sort.INDEXED,
+                TypeString.ofIdentifier(
+                    TypeString.SW_CHAR16_VECTOR.getIdentifier(), TypeString.SW_CHAR16_VECTOR.getPakkage(),
+                    TypeString.ofGenericDefinition("K", TypeString.SW_INTEGER),
+                    TypeString.ofGenericDefinition("E", TypeString.SW_CHARACTER)),
+                Collections.emptyList(),
+                Collections.emptyList()));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                TypeString.SW_CHAR16_VECTOR,
+                "keys",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                new ExpressionResultString(
+                    TypeString.ofIdentifier(
+                        TypeString.SW_SIMPLE_VECTOR.getIdentifier(), TypeString.SW_SIMPLE_VECTOR.getPakkage(),
+                        TypeString.ofGenericDefinition(
+                            "E", TypeString.ofGenericReference("K")))),
+                ExpressionResultString.EMPTY));
+        definitionKeeper.add(
+            new MethodDefinition(
+                null,
+                null,
+                null,
+                null,
+                TypeString.SW_CHAR16_VECTOR,
+                "elements",
+                EnumSet.noneOf(MethodDefinition.Modifier.class),
+                Collections.emptyList(),
+                null,
+                new ExpressionResultString(
+                    TypeString.ofIdentifier(
+                        TypeString.SW_SIMPLE_VECTOR.getIdentifier(), TypeString.SW_SIMPLE_VECTOR.getPakkage(),
+                        TypeString.ofGenericDefinition(
+                            "E", TypeString.ofGenericReference("E")))),
+                ExpressionResultString.EMPTY));
+
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
+        final AbstractType actualType0 = result.get(0, null);
+        final TypeString simpleVectorWithIntegerRef =
+            TypeString.ofIdentifier(
+                TypeString.SW_SIMPLE_VECTOR.getIdentifier(), TypeString.SW_SIMPLE_VECTOR.getPakkage(),
+                TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
+        assertThat(actualType0.getTypeString()).isEqualTo(simpleVectorWithIntegerRef);
+
+        final AbstractType actualType1 = result.get(1, null);
+        final TypeString simpleVectorWithCharacterRef =
+            TypeString.ofIdentifier(
+                TypeString.SW_SIMPLE_VECTOR.getIdentifier(), TypeString.SW_SIMPLE_VECTOR.getPakkage(),
+                TypeString.ofGenericDefinition("E", TypeString.SW_CHARACTER));
+        assertThat(actualType1.getTypeString()).isEqualTo(simpleVectorWithCharacterRef);
     }
 
     @Test
@@ -1850,9 +1934,34 @@ class LocalTypeReasonerTest {
         final AstNode topNode = magikFile.getTopNode();
         final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
         final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
-        final TypeString integerRef = TypeString.ofIdentifier("integer", "sw");
         final AbstractType actualType = result.get(0, null);
-        assertThat(actualType.getTypeString()).isEqualTo(integerRef);
+        assertThat(actualType.getTypeString()).isEqualTo(TypeString.SW_INTEGER);
+    }
+
+    @Test
+    void testGenericSimpleVector() {
+        final String code = ""
+            + "_method exemplar.m\n"
+            + "  _return {1, :a}\n"
+            + "_endmethod\n";
+
+        // Set up TypeKeeper/TypeReasoner.
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+        // Do analysis.
+        final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+
+        final AstNode topNode = magikFile.getTopNode();
+        final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+        final ExpressionResult result = reasonerState.getNodeType(methodDefinitionNode);
+        final AbstractType actualType = result.get(0, null);
+        assertThat(actualType.getTypeString()).isEqualTo(
+            TypeString.ofIdentifier(
+                TypeString.SW_SIMPLE_VECTOR.getIdentifier(), TypeString.SW_SIMPLE_VECTOR.getPakkage(),
+                TypeString.ofGenericDefinition(
+                    "E", TypeString.ofCombination(
+                        TypeString.DEFAULT_PACKAGE, TypeString.SW_INTEGER, TypeString.SW_SYMBOL))));
     }
 
 }

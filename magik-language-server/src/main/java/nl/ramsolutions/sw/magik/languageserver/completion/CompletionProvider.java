@@ -142,7 +142,9 @@ public class CompletionProvider {
      */
     @SuppressWarnings("checkstyle:NestedIfDepth")
     private List<CompletionItem> provideGlobalCompletion(
-            final MagikTypedFile magikFile, final Position position, final @Nullable AstNode tokenNode) {
+            final MagikTypedFile magikFile,
+            final Position position,
+            final @Nullable AstNode tokenNode) {
         final List<CompletionItem> items = new ArrayList<>();
 
         // Keyword entries.

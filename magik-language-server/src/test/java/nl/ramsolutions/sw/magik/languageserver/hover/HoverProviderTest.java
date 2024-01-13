@@ -139,7 +139,7 @@ class HoverProviderTest {
         final Hover hover = this.provideHover(code, position, definitionKeeper);
         final MarkupContent content = hover.getContents().getRight();
         assertThat(content.getKind()).isEqualTo(MarkupKind.MARKDOWN);
-        assertThat(content.getValue()).isEqualTo("");  // No data.
+        assertThat(content.getValue()).isEmpty();  // No data.
     }
 
     @Test

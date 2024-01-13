@@ -40,20 +40,14 @@ public class GenericHelper {
             return method;
         }
 
-        final Map<TypeString, TypeString> genericTypeMapping = this.getGenericDefinitionTypeMapping();
-
         // Substitute parameters.
         final List<Parameter> parameters = method.getParameters().stream()
             .map(param -> {
                 final Location location = param.getLocation();
                 final String name = param.getName();
                 final Parameter.Modifier modifier = param.getModifier();
-                TypeString newTypeStr = param.getType();
-                for (final Map.Entry<TypeString, TypeString> entry : genericTypeMapping.entrySet()) {
-                    final TypeString from = entry.getKey();
-                    final TypeString to = entry.getValue();
-                    newTypeStr = newTypeStr.substituteType(from, to);
-                }
+                final TypeString typeStr = param.getType();
+                final TypeString newTypeStr = this.substituteGenerics(typeStr);
                 return new Parameter(location, name, modifier, newTypeStr);
             })
             .collect(Collectors.toList());
@@ -84,9 +78,8 @@ public class GenericHelper {
             return slot;
         }
 
-        final Map<TypeString, TypeString> genericTypes = this.getGenericDefinitionTypeMapping();
         final TypeString slotType = slot.getType();
-        final TypeString newSlotType = genericTypes.getOrDefault(slotType, slotType);
+        final TypeString newSlotType = this.substituteGenerics(slotType);
         return new Slot(
             slot.getLocation(),
             slot.getName(),
@@ -104,17 +97,11 @@ public class GenericHelper {
         }
 
         final TypeString typeString = sourceType.getTypeString();
-        final TypeString[] genTypeStrsArr = this.type.getGenericDefinitions().stream()
-            .map(genDef -> genDef.getTypeString())
-            .toArray(TypeString[]::new);
-        final TypeString typeStringWithGenerics =
-            TypeString.ofIdentifier(
-                typeString.getIdentifier(), typeString.getPakkage(),
-                genTypeStrsArr);
+        final TypeString newTypeString = this.substituteGenerics(typeString);
         final MagikType.Sort sort = sourceType instanceof MagikType
             ? ((MagikType) sourceType).getSort()
             : MagikType.Sort.UNDEFINED;
-        final MagikType newType = new MagikType(this.typeKeeper, null, null, sort, typeStringWithGenerics);
+        final MagikType newType = new MagikType(this.typeKeeper, null, null, sort, newTypeString);
         this.type.getGenericDefinitions()
             .forEach(genDef -> newType.addGenericDefinition(genDef.getLocation(), genDef.getTypeString()));
         return newType;
@@ -131,22 +118,45 @@ public class GenericHelper {
             return ExpressionResultString.UNDEFINED;
         }
 
-        ExpressionResultString substitutedResultString = expressionResultString;
-        final Map<TypeString, TypeString> genericTypeMapping = this.getGenericDefinitionTypeMapping();
-        for (final Map.Entry<TypeString, TypeString> entry : genericTypeMapping.entrySet()) {
-            final TypeString from = entry.getKey();
-            final TypeString to = entry.getValue();
-            substitutedResultString = substitutedResultString.substituteType(from, to);
-        }
-
-        return substitutedResultString;
+        return expressionResultString.stream()
+            .map(this::substituteGenerics)
+            .collect(ExpressionResultString.COLLECTOR);
     }
 
-    private Map<TypeString, TypeString> getGenericDefinitionTypeMapping() {
+    /**
+     * Substitute generics for {@link TypeString}.
+     * @param typeString {@link TypeString} to rebuild.
+     * @return {@link TypeString} with generics substituted.
+     */
+    public TypeString substituteGenerics(final TypeString typeString) {
+        if (typeString == TypeString.UNDEFINED) {
+            return TypeString.UNDEFINED;
+        }
+
+        final Map<TypeString, TypeString> genericTypeMapping = this.getGenericReferenceTypeMapping();
+        final TypeString newTypeString = genericTypeMapping.getOrDefault(typeString, typeString);
+        if (newTypeString.isCombined()) {
+            final TypeString[] newTypeStrings = newTypeString.getCombinedTypes().stream()
+                .map(this::substituteGenerics)
+                .collect(Collectors.toList())
+                .toArray(TypeString[]::new);
+            return TypeString.ofCombination(newTypeString.getPakkage(), newTypeStrings);
+        }
+
+        final TypeString[] generics = typeString.getGenerics().stream()
+            .map(this::substituteGenerics)
+            .collect(Collectors.toList())
+            .toArray(TypeString[]::new);
+        return TypeString.ofIdentifier(
+            newTypeString.getIdentifier(),
+            newTypeString.getPakkage(),
+            generics);
+    }
+
+    private Map<TypeString, TypeString> getGenericReferenceTypeMapping() {
         return this.type.getGenericDefinitions().stream()
             .collect(Collectors.toMap(
                 def -> def.getGenericReference(),
-                // TODO: Use GenericDefinition? Or substituted type?
                 def -> def.getTypeString().getGenerics().get(0)));
     }
 

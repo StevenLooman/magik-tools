@@ -5,7 +5,7 @@ import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /**
- * Default definitions adder.
+ * Default definitions adder for {@link IDefinitionKeeper}.
  */
 public final class DefaultDefinitionsAdder {
 

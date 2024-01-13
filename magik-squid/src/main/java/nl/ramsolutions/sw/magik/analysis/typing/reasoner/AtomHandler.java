@@ -1,7 +1,9 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
@@ -132,7 +134,22 @@ class AtomHandler extends LocalTypeReasonerHandler {
      * @param node SIMPLE_VECTOR node.
      */
     void handleSimpleVector(final AstNode node) {
-        this.assignAtom(node, SW_SIMPLE_VECTOR);  // TODO: Generics?
+        // Find all child expression types, and use that for generic <E>.
+        final List<AbstractType> containedTypes = node.getChildren(MagikGrammar.EXPRESSION).stream()
+            .map(this.state::getNodeType)
+            .map(result -> result.get(0, UndefinedType.INSTANCE))
+            .collect(Collectors.toList());
+        if (!containedTypes.isEmpty()) {
+            final AbstractType[] combinedTypesArr = containedTypes.toArray(AbstractType[]::new);
+            final AbstractType combinedType = CombinedType.combine(combinedTypesArr);
+            final TypeString genericsTypeString = TypeString.ofIdentifier(
+                TypeString.SW_SIMPLE_VECTOR.getIdentifier(), TypeString.SW_SIMPLE_VECTOR.getPakkage(),
+                TypeString.ofGenericDefinition("E", combinedType.getTypeString()));
+            this.assignAtom(node, genericsTypeString);
+            return;
+        }
+
+        this.assignAtom(node, TypeString.SW_SIMPLE_VECTOR);
     }
 
     /**

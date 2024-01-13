@@ -164,7 +164,7 @@ public final class JsonDefinitionWriter {
     }
 
     private void writeProcedures(final Writer writer) {
-        final Comparator<ProcedureDefinition> sorter = Comparator.comparing(ProcedureDefinition::getTypeName);
+        final Comparator<ProcedureDefinition> sorter = Comparator.comparing(ProcedureDefinition::getTypeString);
         this.definitionKeeper.getProcedureDefinitions().stream()
             .sorted(sorter)
             .forEach(definition -> {

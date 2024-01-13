@@ -86,6 +86,7 @@ public class ExemplarDefinition extends TypeStringDefinition {
         return Collections.unmodifiableList(this.parents);
     }
 
+    @Override
     public TypeString getTypeString() {
         return this.typeName;
     }

@@ -30,7 +30,7 @@ public class ProcedureDefinition extends TypeStringDefinition {
 
     private final Set<Modifier> modifiers;
     private final TypeString typeName;
-    private final String procedureName;
+    private final @Nullable String procedureName;
     private final List<ParameterDefinition> parameters;
     private final ExpressionResultString returnTypes;
     private final ExpressionResultString loopTypes;
@@ -57,7 +57,7 @@ public class ProcedureDefinition extends TypeStringDefinition {
             final @Nullable String doc,
             final @Nullable AstNode node,
             final Set<Modifier> modifiers,
-            final @Nullable TypeString typeName,  // TODO: Rename to typeString.
+            final TypeString typeName,
             final @Nullable String procedureName,
             final List<ParameterDefinition> parameters,
             final ExpressionResultString returnTypes,
@@ -75,17 +75,12 @@ public class ProcedureDefinition extends TypeStringDefinition {
         return this.modifiers;
     }
 
-    @CheckForNull
-    public TypeString getTypeName() {
-        return this.typeName;
-    }
-
-    @CheckForNull
     @Override
     public TypeString getTypeString() {
         return this.typeName;
     }
 
+    @CheckForNull
     public String getProcedureName() {
         return this.procedureName;
     }
