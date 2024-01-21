@@ -59,7 +59,10 @@ public class TodoCommentCheck extends MagikCheck {
                     }
 
                     final String message = String.format(MESSAGE, word);
-                    this.addIssue(token.getLine(), fromIndex, token.getLine(), fromIndex + word.length(), message);
+                    this.addIssue(
+                        token.getLine(), token.getColumn() + fromIndex,
+                        token.getLine(), token.getColumn() + fromIndex + word.length(),
+                        message);
 
                     fromIndex += word.length();
                 }
