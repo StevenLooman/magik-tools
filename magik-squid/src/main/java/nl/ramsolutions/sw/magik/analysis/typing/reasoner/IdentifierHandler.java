@@ -34,6 +34,12 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
             return;
         }
 
+        // Already assigned, perhaps another "plugin" has assigned it.
+        final AstNode atomNode = node.getParent();
+        if (this.state.hasNodeType(atomNode)) {
+            return;
+        }
+
         final GlobalScope globalScope = this.getGlobalScope();
         final Scope scope = globalScope.getScopeForNode(node);
         Objects.requireNonNull(scope);
@@ -51,6 +57,7 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
             final ExpressionResult result = this.state.getNodeType(lastNodeType);
             this.assignAtom(node, result);
         } else if (scopeEntry.isType(ScopeEntry.Type.PARAMETER)) {
+            // TODO: This does not handle assigning to parameter properly!
             final AstNode parameterNode = scopeEntry.getDefinitionNode();
             final ExpressionResult result = this.state.getNodeType(parameterNode);
             this.assignAtom(node, result);
@@ -68,8 +75,6 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
      * @param node TRY_VARIABLE node.
      */
     void handleTryVariable(final AstNode node) {
-        final String identifier = node.getTokenValue();
-
         final AstNode tryNode = node.getParent();
         final List<AstNode> whenNodes = tryNode.getChildren(MagikGrammar.WHEN);
         for (final AstNode whenNode : whenNodes) {
@@ -77,7 +82,8 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
             final GlobalScope globalScope = this.getGlobalScope();
             final Scope scope = globalScope.getScopeForNode(whenBodyNode);
             Objects.requireNonNull(scope);
-            final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
+            final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
+            final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
             this.state.setCurrentScopeEntryNode(scopeEntry, node);
         }
 

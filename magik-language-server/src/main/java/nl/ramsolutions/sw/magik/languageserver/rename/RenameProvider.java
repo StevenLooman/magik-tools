@@ -59,7 +59,8 @@ public class RenameProvider {
         }
 
         // Set up scope.
-        final ScopeEntry scopeEntry = this.findScopeEntry(magikFile, node);
+        final AstNode identifierNode = node.getParent();
+        final ScopeEntry scopeEntry = this.findScopeEntry(magikFile, identifierNode);
         if (scopeEntry == null
             || scopeEntry.isType(ScopeEntry.Type.GLOBAL)
             || scopeEntry.isType(ScopeEntry.Type.DYNAMIC)
@@ -95,11 +96,10 @@ public class RenameProvider {
         }
 
         // Set up scope.
-        final ScopeEntry scopeEntry = this.findScopeEntry(magikFile, node);
+        final AstNode identifierNode = node.getParent();
+        final ScopeEntry scopeEntry = this.findScopeEntry(magikFile, identifierNode);
         if (scopeEntry == null
-            || scopeEntry.isType(ScopeEntry.Type.GLOBAL)
-            || scopeEntry.isType(ScopeEntry.Type.DYNAMIC)
-            || scopeEntry.isType(ScopeEntry.Type.IMPORT)) {
+            || scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC, ScopeEntry.Type.IMPORT)) {
             return null;
         }
 
@@ -126,8 +126,7 @@ public class RenameProvider {
             return null;
         }
 
-        final String identifier = node.getTokenValue();
-        return scope.getScopeEntry(identifier);
+        return scope.getScopeEntry(node);
     }
 
 }

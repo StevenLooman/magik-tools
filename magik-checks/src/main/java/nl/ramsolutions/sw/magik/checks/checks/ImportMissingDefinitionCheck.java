@@ -39,8 +39,7 @@ public class ImportMissingDefinitionCheck extends MagikCheck {
             .map(variableDefinitionNode ->
                 variableDefinitionNode.getFirstChild(MagikGrammar.IDENTIFIER))
             .forEach(identifierNode -> {
-                final String identifier = identifierNode.getTokenValue();
-                final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
+                final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
                 if (scopeEntry.isType(Type.IMPORT)
                     && scopeEntry.getImportedEntry() == null) {
                     final String originalIdentifier = identifierNode.getTokenOriginalValue();

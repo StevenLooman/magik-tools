@@ -66,7 +66,6 @@ public class GlobalScope extends Scope {
         // TODO: In upper part a PARAMETER is ok, but here it has to be a token-node...
         final AstNode forNode = AstQuery.getParentFromChain(
             searchNode,
-            MagikGrammar.IDENTIFIER,
             MagikGrammar.IDENTIFIERS_WITH_GATHER,
             MagikGrammar.FOR_VARIABLES,
             MagikGrammar.FOR);

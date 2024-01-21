@@ -37,6 +37,14 @@ public class MethodInvocationNodeHelper {
     }
 
     /**
+     * Get the node the method is being invoked on.
+     * @return Receiver node.
+     */
+    public AstNode getReceiverNode() {
+        return this.node.getPreviousSibling();
+    }
+
+    /**
      * Get invoked method name.
      * @return Invoked method name.
      */

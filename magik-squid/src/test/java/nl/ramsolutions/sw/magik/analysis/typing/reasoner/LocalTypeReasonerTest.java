@@ -925,8 +925,7 @@ class LocalTypeReasonerTest {
         assertThat(result.size()).isEqualTo(1);
 
         final AbstractType resultType = result.get(0, null);
-        final TypeString unsetRef = TypeString.SW_UNSET;
-        assertThat(resultType.getTypeString()).isEqualTo(unsetRef);
+        assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_UNSET);
     }
 
     @Test
@@ -1095,8 +1094,6 @@ class LocalTypeReasonerTest {
         final AstNode topNode = magikFile.getTopNode();
         final AstNode tryVarNode = topNode.getFirstDescendant(MagikGrammar.TRY_VARIABLE);
         final ExpressionResult result = reasonerState.getNodeType(tryVarNode);
-        assertThat(result).isNotNull();
-
         final AbstractType resultType = result.get(0, null);
         assertThat(resultType.getTypeString()).isEqualTo(TypeString.SW_CONDITION);
     }

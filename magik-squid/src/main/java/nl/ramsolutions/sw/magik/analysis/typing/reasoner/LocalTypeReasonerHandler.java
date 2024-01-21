@@ -12,12 +12,16 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for handlers.
  */
 @SuppressWarnings("visibilitymodifier")
 abstract class LocalTypeReasonerHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalTypeReasonerHandler.class);
 
     protected final LocalTypeReasonerState state;
     protected final ITypeKeeper typeKeeper;
@@ -59,8 +63,18 @@ abstract class LocalTypeReasonerHandler {
         this.assignAtom(node, result);
     }
 
+    /**
+     * Assign result to an ATOM-child-node.
+     * @param node Node to assign result to.
+     * @param result Result to assign.
+     */
     protected void assignAtom(final AstNode node, final ExpressionResult result) {
         final AstNode atomNode = node.getParent();
+        if (this.state.hasNodeType(atomNode)) {
+            final ExpressionResult existingResult = this.state.getNodeType(atomNode);
+            LOGGER.debug("Atom node {} already has type: {}, overwriting with {}", atomNode, existingResult, result);
+        }
+
         this.state.setNodeType(atomNode, result);
     }
 
@@ -109,7 +123,6 @@ abstract class LocalTypeReasonerHandler {
     }
 
     protected GlobalScope getGlobalScope() {
-        // TODO: Or should there be a method LocalTypeReasonerState.getGlobalScope()?
         return this.state.getMagikFile().getGlobalScope();
     }
 

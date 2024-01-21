@@ -13,6 +13,7 @@
 - Refactor LocalTypeReasoner state to own class.
 - Improve handling of/reasoning with generics.
 - Index products and modules.
+- Add conditional expression reasoning, where an expression might limit the type of the variable(s).
 - Add TodoComment check.
 - Fixes to checks metadata.
 - Refactoring/renaming of typed checks.

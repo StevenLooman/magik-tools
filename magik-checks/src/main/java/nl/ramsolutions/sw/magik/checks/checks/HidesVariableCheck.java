@@ -61,9 +61,8 @@ public class HidesVariableCheck extends MagikCheck {
             }
         }
 
-        final String identifier = identifierNode.getTokenValue();
         for (final Scope ancestorScope : scope.getAncestorScopes()) {
-            final ScopeEntry scopeEntry = ancestorScope.getScopeEntry(identifier);
+            final ScopeEntry scopeEntry = ancestorScope.getScopeEntry(identifierNode);
             if (scopeEntry != null
                 && scopeEntry.isType(ScopeEntry.Type.LOCAL)
                 && scopeEntry.getDefinitionNode().getTokenLine() < identifierNode.getTokenLine()) {

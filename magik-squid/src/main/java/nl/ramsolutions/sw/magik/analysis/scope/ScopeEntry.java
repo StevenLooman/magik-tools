@@ -53,7 +53,10 @@ public class ScopeEntry {
      * @param importedEntry Parent of entry, in case of an _import
      */
     public ScopeEntry(
-            final Type type, final String identifier, final AstNode node, final @Nullable ScopeEntry importedEntry) {
+            final Type type,
+            final String identifier,
+            final AstNode node,
+            final @Nullable ScopeEntry importedEntry) {
         this.type = type;
         this.identifier = identifier;
         this.node = node;

@@ -27,4 +27,5 @@
         "connectionId": "SonarCloud",
         "projectKey": "StevenLooman_magik-tools"
     },
+    "java.debug.settings.showLogicalStructure": true,
 }

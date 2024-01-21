@@ -204,7 +204,23 @@ public abstract class Scope {
         if (parentScope == null) {
             return null;
         }
+
         return this.parentScope.getScopeEntry(identifier);
+    }
+
+    /**
+     * Get a ScopeEntry by its identifier {@link AstNode}.
+     * @param identifierNode Identifier {@link AstNode} of the ScopeEntry.
+     * @return Scope entry by identifier.
+     */
+    @CheckForNull
+    public ScopeEntry getScopeEntry(final AstNode identifierNode) {
+        if (identifierNode.isNot(MagikGrammar.IDENTIFIER)) {
+            throw new IllegalArgumentException();
+        }
+
+        final String identifier = identifierNode.getTokenValue();
+        return this.getScopeEntry(identifier);
     }
 
     /**

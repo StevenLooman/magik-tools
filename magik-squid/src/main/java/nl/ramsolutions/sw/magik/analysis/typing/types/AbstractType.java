@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
@@ -223,6 +224,46 @@ public abstract class AbstractType {
     @CheckForNull
     public String getModuleName() {
         return this.moduleName;
+    }
+
+    /**
+     * Get the intersection of two types.
+     * @param type1 Type 1.
+     * @param type2 Type 2.
+     * @return Intersection of type 1 and type 2.
+     */
+    @CheckForNull
+    public static AbstractType intersection(final AbstractType type1, final AbstractType type2) {
+        final Set<AbstractType> type1s = type1 instanceof CombinedType
+            ? Set.copyOf(((CombinedType) type1).getTypes())
+            : Set.of(type1);
+        final Set<AbstractType> type2s = type2 instanceof CombinedType
+            ? Set.copyOf(((CombinedType) type2).getTypes())
+            : Set.of(type2);
+        final Set<AbstractType> intersection = type1s.stream()
+            .filter(type2s::contains)
+            .collect(Collectors.toSet());
+        return CombinedType.combine(intersection.toArray(AbstractType[]::new));
+    }
+
+    /**
+     * Get the difference of two types.
+     * @param type1 Type 1.
+     * @param type2 Type 2.
+     * @return Difference between type 1 and type 2.
+     */
+    @CheckForNull
+    public static AbstractType difference(final AbstractType type1, final AbstractType type2) {
+        final Set<AbstractType> type1s = type1 instanceof CombinedType
+            ? Set.copyOf(((CombinedType) type1).getTypes())
+            : Set.of(type1);
+        final Set<AbstractType> type2s = type2 instanceof CombinedType
+            ? Set.copyOf(((CombinedType) type2).getTypes())
+            : Set.of(type2);
+        final Set<AbstractType> difference = type1s.stream()
+            .filter(type -> !type2s.contains(type))
+            .collect(Collectors.toSet());
+        return CombinedType.combine(difference.toArray(AbstractType[]::new));
     }
 
 }
