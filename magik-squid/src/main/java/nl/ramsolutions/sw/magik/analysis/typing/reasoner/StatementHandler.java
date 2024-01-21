@@ -35,8 +35,7 @@ class StatementHandler extends LocalTypeReasonerHandler {
         final Scope scope = globalScope.getScopeForNode(node);
         Objects.requireNonNull(scope);
         final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-        final String identifier = identifierNode.getTokenValue();
-        final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
+        final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
         Objects.requireNonNull(scopeEntry);
 
         if (scopeEntry.isType(ScopeEntry.Type.LOCAL)
@@ -87,8 +86,7 @@ class StatementHandler extends LocalTypeReasonerHandler {
             final GlobalScope globalScope = this.getGlobalScope();
             final Scope scope = globalScope.getScopeForNode(node);
             Objects.requireNonNull(scope);
-            final String identifier = identifierNode.getTokenValue();
-            final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
+            final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
             // TODO: Test if it isn't a slot node.
             this.state.setCurrentScopeEntryNode(scopeEntry, identifierNode);
         }

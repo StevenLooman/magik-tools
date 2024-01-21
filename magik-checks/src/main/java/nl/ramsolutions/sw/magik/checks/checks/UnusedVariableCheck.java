@@ -82,8 +82,7 @@ public class UnusedVariableCheck extends MagikCheck {
 
     private boolean anyNextSiblingUsed(final AstNode identifierNode) {
         final GlobalScope globalScope = this.getMagikFile().getGlobalScope();
-        final AstNode tokenNode = identifierNode.getFirstChild();
-        final Scope scope = globalScope.getScopeForNode(tokenNode);
+        final Scope scope = globalScope.getScopeForNode(identifierNode);
         Objects.requireNonNull(scope);
         AstNode sibling = identifierNode.getNextSibling();
         while (sibling != null) {
@@ -92,8 +91,7 @@ public class UnusedVariableCheck extends MagikCheck {
                 continue;
             }
 
-            final String siblingIdentifier = sibling.getTokenValue();
-            final ScopeEntry siblingEntry = scope.getScopeEntry(siblingIdentifier);
+            final ScopeEntry siblingEntry = scope.getScopeEntry(sibling);
             if (siblingEntry != null
                 && !siblingEntry.getUsages().isEmpty()) {
                 return true;
@@ -114,7 +112,7 @@ public class UnusedVariableCheck extends MagikCheck {
         // - part of a VARIABLE_DEFINITION_STATEMENT/MULTIPLE_ASSIGNMENT_STATEMENT
         // - any later identifier(s) of it is used
         // - but this one is not
-        for (final ScopeEntry entry : new ArrayList<>(scopeEntries)) {
+        for (final ScopeEntry entry : List.copyOf(scopeEntries)) {
             final AstNode entryNode = entry.getDefinitionNode();
             if (this.isPartOfMultiVariableDefinition(entryNode)
                 && this.anyNextSiblingUsed(entryNode)
@@ -144,7 +142,7 @@ public class UnusedVariableCheck extends MagikCheck {
                 final AstNode scopeEntryNode = scopeEntry.getDefinitionNode();
 
                 // But not globals/dynamics which are assigned to directly
-                if ((scopeEntry.isType(ScopeEntry.Type.GLOBAL) || scopeEntry.isType(ScopeEntry.Type.DYNAMIC))
+                if ((scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC))
                     && this.isAssignedToDirectly(scopeEntryNode)) {
                     continue;
                 }

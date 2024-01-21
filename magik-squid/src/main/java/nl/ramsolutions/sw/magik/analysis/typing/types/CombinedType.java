@@ -61,7 +61,7 @@ public class CombinedType extends AbstractType {
     }
 
     /**
-     * Combine {@link AbstractType}s.
+     * Combine {@link AbstractType}s. Any {@link CombinedType}s will be flattened.
      * @param types Types {@link AbstractType} to combine.
      * @return {@link CombinedType} representing both types, or {@link AbstractType} if singular.
      */
@@ -178,6 +178,28 @@ public class CombinedType extends AbstractType {
         }
 
         return new CombinedType(substitutedTypes);
+    }
+
+    /**
+     * Remove a type from ourselves. Does not remove from any children which are a CombinedType.
+     * @param type Type to remove.
+     * @return New type without the removed type.
+     */
+    public AbstractType withoutType(final AbstractType type) {
+        // TODO: Does this handle type = CombinedType properly?
+        final Set<AbstractType> newTypes = this.types.stream()
+            .filter(childType -> !childType.equals(type))
+            .collect(Collectors.toUnmodifiableSet());
+        return CombinedType.combine(newTypes.toArray(AbstractType[]::new));
+    }
+
+    /**
+     * Test if we contain a type.
+     * @param type Type to test.
+     * @return True if we contain the type.
+     */
+    public boolean containsType(final AbstractType type) {
+        return this.types.contains(type);
     }
 
     @Override

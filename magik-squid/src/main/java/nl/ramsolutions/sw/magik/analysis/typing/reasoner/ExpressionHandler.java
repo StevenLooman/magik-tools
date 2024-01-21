@@ -267,8 +267,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 final GlobalScope globalScope = this.getGlobalScope();
                 final Scope scope = globalScope.getScopeForNode(bodyNode);
                 Objects.requireNonNull(scope);
-                final String identifier = identifierNode.getTokenValue();
-                final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
+                final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
                 this.state.setCurrentScopeEntryNode(scopeEntry, identifierNode);
             }
         }

@@ -2,4 +2,4 @@
  * Defaults.
  */
 @javax.annotation.ParametersAreNonnullByDefault
-package nl.ramsolutions.sw.magik.typedchecks.checks;
+package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
