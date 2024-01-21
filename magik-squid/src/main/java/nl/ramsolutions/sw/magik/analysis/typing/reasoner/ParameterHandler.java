@@ -34,13 +34,13 @@ class ParameterHandler extends LocalTypeReasonerHandler {
      */
     void handleParameter(final AstNode node) {
         final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-        final String identifier = identifierNode.getTokenValue();
 
         // Parse method/proc docs and extract parameter type.
         final AstNode definitionNode =
             node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
         final TypeDocParser docParser = new TypeDocParser(definitionNode);
         final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
+        final String identifier = identifierNode.getTokenValue();
         final TypeString parameterTypeString = parameterTypes.getOrDefault(identifier, TypeString.UNDEFINED);
 
         final ExpressionResult result;
@@ -73,7 +73,7 @@ class ParameterHandler extends LocalTypeReasonerHandler {
         final GlobalScope globalScope = this.getGlobalScope();
         final Scope scope = globalScope.getScopeForNode(node);
         Objects.requireNonNull(scope);
-        final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
+        final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
         this.state.setCurrentScopeEntryNode(scopeEntry, node);
     }
 

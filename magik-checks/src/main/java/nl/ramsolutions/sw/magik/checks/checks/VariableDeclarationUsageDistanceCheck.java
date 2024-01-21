@@ -74,8 +74,7 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
         }
 
         // Only test variables.
-        final String identifier = node.getTokenValue();
-        final ScopeEntry entry = scope.getScopeEntry(identifier);
+        final ScopeEntry entry = scope.getScopeEntry(node);
         if (entry == null) {
             return;
         }

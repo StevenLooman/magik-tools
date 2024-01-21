@@ -44,8 +44,7 @@ public class GlobalExistsTypedCheck extends MagikTypedCheck {
         final Scope scope = globalScope.getScopeForNode(node);
         Objects.requireNonNull(scope);
 
-        final String identifier = node.getTokenValue();
-        final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
+        final ScopeEntry scopeEntry = scope.getScopeEntry(node);
         if (scopeEntry == null) {
             return;
         }
@@ -56,6 +55,7 @@ public class GlobalExistsTypedCheck extends MagikTypedCheck {
         }
 
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
+        final String identifier = node.getTokenValue();
         final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
         if (typeKeeper.hasType(typeString)) {
             return;
