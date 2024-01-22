@@ -143,6 +143,15 @@ public class GenericHelper {
             return TypeString.ofCombination(newTypeString.getPakkage(), newTypeStrings);
         }
 
+        if (newTypeString.isGenericDefinition()) {
+            final TypeString genericTypeString = typeString.getGenericType();
+            final TypeString newGenericTypeString =
+                genericTypeMapping.getOrDefault(genericTypeString, genericTypeString);
+            return TypeString.ofGenericDefinition(
+                newTypeString.getIdentifier(),
+                newGenericTypeString);
+        }
+
         final TypeString[] generics = typeString.getGenerics().stream()
             .map(this::substituteGenerics)
             .collect(Collectors.toList())
@@ -157,7 +166,7 @@ public class GenericHelper {
         return this.type.getGenericDefinitions().stream()
             .collect(Collectors.toMap(
                 def -> def.getGenericReference(),
-                def -> def.getTypeString().getGenerics().get(0)));
+                def -> def.getTypeString().getGenericType()));
     }
 
 }
