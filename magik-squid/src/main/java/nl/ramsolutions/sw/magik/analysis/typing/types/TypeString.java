@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
 
@@ -27,54 +29,56 @@ public final class TypeString implements Comparable<TypeString> {
     public static final String SW_PACKAGE = "sw";
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString UNDEFINED = new TypeString(UndefinedType.SERIALIZED_NAME, DEFAULT_PACKAGE);
+    public static final TypeString UNDEFINED = TypeString.ofIdentifier(UndefinedType.SERIALIZED_NAME, DEFAULT_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SELF = new TypeString(SelfType.SERIALIZED_NAME, DEFAULT_PACKAGE);
+    public static final TypeString SELF = TypeString.ofIdentifier(SelfType.SERIALIZED_NAME, DEFAULT_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_FALSE = TypeString.ofIdentifier("false", "sw");
+    public static final TypeString SW_FALSE = TypeString.ofIdentifier("false", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_MAYBE = TypeString.ofIdentifier("maybe", "sw");
+    public static final TypeString SW_MAYBE = TypeString.ofIdentifier("maybe", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_CHARACTER = TypeString.ofIdentifier("character", "sw");
+    public static final TypeString SW_CHARACTER = TypeString.ofIdentifier("character", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_BIGNUM = TypeString.ofIdentifier("bignum", "sw");
+    public static final TypeString SW_BIGNUM = TypeString.ofIdentifier("bignum", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_INTEGER = TypeString.ofIdentifier("integer", "sw");
+    public static final TypeString SW_INTEGER = TypeString.ofIdentifier("integer", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_FLOAT = TypeString.ofIdentifier("float", "sw");
+    public static final TypeString SW_FLOAT = TypeString.ofIdentifier("float", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_SW_REGEXP = TypeString.ofIdentifier("sw_regexp", "sw");
+    public static final TypeString SW_SW_REGEXP = TypeString.ofIdentifier("sw_regexp", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_CHAR16_VECTOR = TypeString.ofIdentifier("char16_vector", "sw");
+    public static final TypeString SW_CHAR16_VECTOR = TypeString.ofIdentifier("char16_vector", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
     public static final TypeString SW_CHAR16_VECTOR_WITH_GENERICS =
         TypeString.ofIdentifier(SW_CHAR16_VECTOR.getIdentifier(), SW_CHAR16_VECTOR.getPakkage(),
         TypeString.ofGenericDefinition("K", TypeString.SW_INTEGER),
         TypeString.ofGenericDefinition("E", TypeString.SW_CHARACTER));
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_SYMBOL = TypeString.ofIdentifier("symbol", "sw");
+    public static final TypeString SW_SYMBOL = TypeString.ofIdentifier("symbol", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_SIMPLE_VECTOR = TypeString.ofIdentifier("simple_vector", "sw");
+    public static final TypeString SW_SIMPLE_VECTOR = TypeString.ofIdentifier("simple_vector", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_HEAVY_THREAD = TypeString.ofIdentifier("heavy_thread", "sw");
+    public static final TypeString SW_HEAVY_THREAD = TypeString.ofIdentifier("heavy_thread", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_LIGHT_THREAD = TypeString.ofIdentifier("light_thread", "sw");
+    public static final TypeString SW_LIGHT_THREAD = TypeString.ofIdentifier("light_thread", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_GLOBAL_VARIABLE = TypeString.ofIdentifier("global_variable", "sw");
+    public static final TypeString SW_GLOBAL_VARIABLE = TypeString.ofIdentifier("global_variable", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_PROCEDURE = TypeString.ofIdentifier("procedure", "sw");
+    public static final TypeString SW_PROCEDURE = TypeString.ofIdentifier("procedure", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_OBJECT = TypeString.ofIdentifier("object", "sw");
+    public static final TypeString SW_OBJECT = TypeString.ofIdentifier("object", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_CONDITION = TypeString.ofIdentifier("condition", "sw");
+    public static final TypeString SW_CONDITION = TypeString.ofIdentifier("condition", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_ENUMERATION_VALUE = TypeString.ofIdentifier("enumeration_value", "sw");
+    public static final TypeString SW_ENUMERATION_VALUE = TypeString.ofIdentifier("enumeration_value", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_INDEXED_FORMAT_MIXIN = TypeString.ofIdentifier("indexed_format_mixin", "sw");
+    public static final TypeString SW_INDEXED_FORMAT_MIXIN =
+        TypeString.ofIdentifier("indexed_format_mixin", SW_PACKAGE);
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final TypeString SW_SLOTTED_FORMAT_MIXIN = TypeString.ofIdentifier("slotted_format_mixin", "sw");
+    public static final TypeString SW_SLOTTED_FORMAT_MIXIN =
+        TypeString.ofIdentifier("slotted_format_mixin", SW_PACKAGE);
 
     private static final String GENERIC_DEFINITION = "_generic_def";
     private static final String GENERIC_REFERENCE = "_generic_ref";
@@ -84,29 +88,30 @@ public final class TypeString implements Comparable<TypeString> {
     private final String currentPackage;
     private final List<TypeString> combinedTypes;
     private final List<TypeString> generics;
-
-    /**
-     * Constructor.
-     * @param identifier Identifier, e.g., {@code "sw:rope"}.
-     * @param currentPackage The current package, e.g., {@code "user"}.
-     */
-    private TypeString(final String identifier, final String currentPackage) {
-        this.string = identifier.trim();
-        this.currentPackage = currentPackage.trim();
-        this.combinedTypes = Collections.emptyList();
-        this.generics = Collections.emptyList();
-    }
+    private final @Nullable TypeString genericType;
 
     /**
      * Constructor for generics.
      * @param identifier Identifier, e.g., {@code "sw:rope"}.
      * @param currentPackage The current package, e.g., {@code "user"}.
+     * @param genericType Generic type.
+     * @param generics Generics.
      */
-    private TypeString(final String identifier, final String currentPackage, final TypeString... generics) {
+    private TypeString(
+            final String identifier,
+            final String currentPackage,
+            final @Nullable TypeString genericType,
+            final TypeString... generics) {
         this.string = identifier.trim();
         this.currentPackage = currentPackage.trim();
         this.combinedTypes = Collections.emptyList();
         this.generics = Arrays.asList(generics);
+        this.generics.stream()
+            .filter(gen -> !gen.isGenericDefinition())
+            .forEach(typeStr -> {
+                throw new IllegalStateException();
+            });
+        this.genericType = genericType;
     }
 
     /**
@@ -119,24 +124,21 @@ public final class TypeString implements Comparable<TypeString> {
         this.currentPackage = currentPackage.trim();
         this.combinedTypes = Arrays.asList(combinations);
         this.generics = Collections.emptyList();
+        this.genericType = null;
     }
 
     /**
      * Create a {@link TypeString} of a generic definition.
      * @param identifier Name of generic.
-     * @param definition Type of the generic, singular.
+     * @param genericTypeString Type of the generic.
      * @return {@link TypeString}.
      */
-    public static TypeString ofGenericDefinition(final String identifier, final TypeString... definition) {
-        if (definition.length != 1) {
-            throw new IllegalStateException();
-        }
-
-        return new TypeString(identifier, TypeString.GENERIC_DEFINITION, definition);
+    public static TypeString ofGenericDefinition(final String identifier, final TypeString genericTypeString) {
+        return new TypeString(identifier, TypeString.GENERIC_DEFINITION, genericTypeString);
     }
 
     public static TypeString ofGenericReference(final String identifier) {
-        return new TypeString(identifier, TypeString.GENERIC_REFERENCE);
+        return new TypeString(identifier, TypeString.GENERIC_REFERENCE, null);
     }
 
     /**
@@ -145,7 +147,7 @@ public final class TypeString implements Comparable<TypeString> {
      * @return {@link TypeString}.
      */
     public static TypeString ofParameterRef(final String identifier) {
-        return new TypeString(identifier, PARAMETER);
+        return new TypeString(identifier, PARAMETER, null);
     }
 
     /**
@@ -159,7 +161,7 @@ public final class TypeString implements Comparable<TypeString> {
             final String identifier,
             final String currentPakkage,
             final TypeString... generics) {
-        return new TypeString(identifier, currentPakkage, generics);
+        return new TypeString(identifier, currentPakkage, null, generics);
     }
 
     /**
@@ -231,7 +233,7 @@ public final class TypeString implements Comparable<TypeString> {
         if (this.isGenericDefinition()) {
             return TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue()
                 + this.string + TypeStringGrammar.Punctuator.TYPE_GENERIC_ASSIGN.getValue()
-                + this.generics.get(0).getFullString()
+                + this.genericType.getFullString()
                 + TypeStringGrammar.Punctuator.TYPE_GENERIC_CLOSE.getValue();
         }
 
@@ -249,7 +251,7 @@ public final class TypeString implements Comparable<TypeString> {
                     } else if (typeStr.isGenericDefinition()) {
                         return typeStr.string
                             + TypeStringGrammar.Punctuator.TYPE_GENERIC_ASSIGN.getValue()
-                            + typeStr.generics.get(0).getFullString();
+                            + typeStr.genericType.getFullString();
                     }
 
                     throw new IllegalStateException();
@@ -332,10 +334,19 @@ public final class TypeString implements Comparable<TypeString> {
 
     /**
      * Get types, in order, used for generics.
-     * @return Types of generics.
+     * @return Generic definitions.
      */
     public List<TypeString> getGenerics() {
         return this.generics;
+    }
+
+    /**
+     * Get the type of the generic.
+     * @return Generic type.
+     */
+    @CheckForNull
+    public TypeString getGenericType() {
+        return this.genericType;
     }
 
     /**
