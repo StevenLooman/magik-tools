@@ -59,7 +59,7 @@ public class MagikCheckMetadata {
      * @param ruleSpecification Rule specification.
      * @param sqKey SonarQube key.
      */
-    @SuppressWarnings("checkstyle:ParameterNumber")
+    @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
     public MagikCheckMetadata(
             final String title,
             final Type type,

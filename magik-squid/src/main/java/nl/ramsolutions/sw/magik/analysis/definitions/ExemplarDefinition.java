@@ -43,7 +43,7 @@ public class ExemplarDefinition extends TypeStringDefinition {
      * @param slots Slots of slotted exemplar.
      * @param parents Parents of slotted exemplar.
      */
-    @SuppressWarnings("checkstyle:ParameterNumber")
+    @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
     public ExemplarDefinition(
             final @Nullable Location location,
             final @Nullable String moduleName,
@@ -115,7 +115,7 @@ public class ExemplarDefinition extends TypeStringDefinition {
             this.sort,
             this.typeName,
             this.slots.stream()
-                .map(slotDef -> slotDef.getWithoutNode())
+                .map(SlotDefinition::getWithoutNode)
                 .collect(Collectors.toList()),
             this.parents);
     }

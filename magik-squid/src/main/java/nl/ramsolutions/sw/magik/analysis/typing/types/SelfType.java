@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
 
 /**
@@ -95,7 +96,7 @@ public final class SelfType extends AbstractType {  // NOSONAR: Singleton.
     }
 
     @Override
-    public void setLocation(final Location location) {
+    public void setLocation(final @Nullable Location location) {
         throw new IllegalStateException();
     }
 
@@ -105,7 +106,7 @@ public final class SelfType extends AbstractType {  // NOSONAR: Singleton.
     }
 
     @Override
-    public void setDoc(final String comment) {
+    public void setDoc(final @Nullable String doc) {
         throw new IllegalStateException();
     }
 

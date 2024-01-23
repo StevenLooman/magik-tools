@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.Objects;
-import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.Location;
@@ -40,7 +39,6 @@ public class GlobalDefinition extends TypeStringDefinition {
         return this.typeName;
     }
 
-    @CheckForNull
     public TypeString getAliasedTypeName() {
         return this.aliasedTypeName;
     }
@@ -71,7 +69,7 @@ public class GlobalDefinition extends TypeStringDefinition {
         return String.format(
             "%s@%s(%s, %s)",
             this.getClass().getName(), Integer.toHexString(this.hashCode()),
-            this.getTypeString().getFullString(), this.getAliasedTypeName().getFullString());
+            this.typeName.getFullString(), this.aliasedTypeName.getFullString());
     }
 
     @Override

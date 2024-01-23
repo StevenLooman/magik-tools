@@ -104,6 +104,7 @@ public class TypeHierarchyProvider {
                 && type != UndefinedType.INSTANCE) {
                 final TypeString typeStr = type.getTypeString();
                 final ExemplarDefinition definition = resolver.getExemplarDefinition(typeStr);
+                Objects.requireNonNull(definition);
                 final TypeHierarchyItem item = this.toTypeHierarchyItem(definition);
                 return List.of(item);
             }
@@ -166,6 +167,7 @@ public class TypeHierarchyProvider {
         final Location typeLocation = definition.getLocation();
         final Location location = Location.validLocation(typeLocation);
         final Range range = location.getRange();
+        Objects.requireNonNull(range);
         return new TypeHierarchyItem(
             typeStr.getFullString(),
             SymbolKind.Class,

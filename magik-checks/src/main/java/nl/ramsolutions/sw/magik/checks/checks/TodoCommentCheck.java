@@ -10,7 +10,7 @@ import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 
 /**
- * Todo/Fixme/... comment check.
+ * Todo/Fixme/... comment check.  // NOSONAR
  */
 @Rule(key = TodoCommentCheck.CHECK_KEY)
 public class TodoCommentCheck extends MagikCheck {

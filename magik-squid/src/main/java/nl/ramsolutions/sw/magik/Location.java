@@ -35,7 +35,9 @@ public class Location {
 
             // compare start of range
             final Range range0 = location0.getRange();
+            Objects.requireNonNull(range0);
             final Range range1 = location1.getRange();
+            Objects.requireNonNull(range1);
 
             final Position position0 = range0.getStartPosition();
             final Position position1 = range1.getStartPosition();

@@ -74,6 +74,7 @@ class ParameterHandler extends LocalTypeReasonerHandler {
         final Scope scope = globalScope.getScopeForNode(node);
         Objects.requireNonNull(scope);
         final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
+        Objects.requireNonNull(scopeEntry);
         this.state.setCurrentScopeEntryNode(scopeEntry, node);
     }
 

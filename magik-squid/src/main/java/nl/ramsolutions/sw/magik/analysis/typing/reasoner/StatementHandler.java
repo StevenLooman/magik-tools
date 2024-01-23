@@ -55,6 +55,7 @@ class StatementHandler extends LocalTypeReasonerHandler {
         } else if (scopeEntry.isType(ScopeEntry.Type.IMPORT)) {
             // TODO: globals/dynamics/...?
             final ScopeEntry importedScopeEntry = scopeEntry.getImportedEntry();
+            Objects.requireNonNull(importedScopeEntry);
             final AstNode activeImportedNode = this.state.getCurrentScopeEntryNode(importedScopeEntry);
             final ExpressionResult result = this.state.getNodeType(activeImportedNode);
             this.state.setNodeType(node, result);
@@ -87,6 +88,7 @@ class StatementHandler extends LocalTypeReasonerHandler {
             final Scope scope = globalScope.getScopeForNode(node);
             Objects.requireNonNull(scope);
             final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
+            Objects.requireNonNull(scopeEntry);
             // TODO: Test if it isn't a slot node.
             this.state.setCurrentScopeEntryNode(scopeEntry, identifierNode);
         }

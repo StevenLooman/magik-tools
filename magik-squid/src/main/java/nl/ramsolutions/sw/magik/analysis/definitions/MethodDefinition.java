@@ -55,7 +55,7 @@ public class MethodDefinition extends Definition {
      * @param returnTypes Return types.
      * @param loopTypes Loop types.
      */
-    @SuppressWarnings("checkstyle:ParameterNumber")
+    @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
     public MethodDefinition(
             final @Nullable Location location,
             final @Nullable String moduleName,
@@ -95,7 +95,7 @@ public class MethodDefinition extends Definition {
      * @param returnTypes Return types.
      * @param loopTypes Loop types.
      */
-    @SuppressWarnings("checkstyle:ParameterNumber")
+    @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
     public MethodDefinition(
             final @Nullable Location location,
             final @Nullable String moduleName,
@@ -179,7 +179,9 @@ public class MethodDefinition extends Definition {
      * @return True if actual method, false otherwise.
      */
     public boolean isActualMethodDefinition() {
-        return this.getNode().is(MagikGrammar.METHOD_DEFINITION);
+        final AstNode node = this.getNode();
+        Objects.requireNonNull(node);
+        return node.is(MagikGrammar.METHOD_DEFINITION);
     }
 
     /**
@@ -223,7 +225,7 @@ public class MethodDefinition extends Definition {
             this.methodName,
             this.modifiers,
             this.parameters.stream()
-                .map(paramDef -> paramDef.getWithoutNode())
+                .map(ParameterDefinition::getWithoutNode)
                 .collect(Collectors.toList()),
             this.assignmentParameter != null
                 ? this.assignmentParameter.getWithoutNode()

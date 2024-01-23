@@ -234,7 +234,7 @@ public class HoverProvider {
         final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
         final ExpressionResult result = reasonerState.getNodeTypeSilent(expressionNode);
         if (result != null) {
-            LOGGER.debug("Providing hover for node: {}", expressionNode.getTokenValue());
+            LOGGER.debug("Providing hover for node: {}", expressionNode.getTokenValue());  // NOSONAR
             this.buildTypeDoc(magikFile, expressionNode, builder);
         }
     }
@@ -249,7 +249,7 @@ public class HoverProvider {
         final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
         final ExpressionResult result = reasonerState.getNodeTypeSilent(atomNode);
         if (result != null) {
-            LOGGER.debug("Providing hover for node: {}", atomNode.getTokenValue());
+            LOGGER.debug("Providing hover for node: {}", atomNode.getTokenValue());  // NOSONAR
             this.buildTypeDoc(magikFile, atomNode, builder);
         }
     }
@@ -270,7 +270,7 @@ public class HoverProvider {
             final ExpressionResult result = reasonerState.getNodeType(providingNode);
             final AbstractType type = result.get(0, null);
             if (type != null) {
-                LOGGER.debug("Providing hover for node: {}", providingNode.getTokenValue());
+                LOGGER.debug("Providing hover for node: {}", providingNode.getTokenValue());  // NOSONAR
                 this.buildProcDoc(magikFile, providingNode, builder);
             }
         }
@@ -520,18 +520,18 @@ public class HoverProvider {
 
     private AbstractType getNodeType(final MagikTypedFile magikFile, final AstNode node) {
         final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-        final ExpressionResult result = reasonerState.getNodeTypeSilent(node);
+        final ExpressionResult result = reasonerState.getNodeType(node);
         final AbstractType type = result.get(0, UndefinedType.INSTANCE);
         if (type == SelfType.INSTANCE) {
             final AstNode defNode = node.getFirstAncestor(
                 MagikGrammar.PROCEDURE_DEFINITION,
                 MagikGrammar.METHOD_DEFINITION);
             if (defNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
-                final ExpressionResult defResult = reasonerState.getNodeTypeSilent(defNode);
+                final ExpressionResult defResult = reasonerState.getNodeType(defNode);
                 return defResult.get(0, UndefinedType.INSTANCE);
             } else if (defNode.is(MagikGrammar.METHOD_DEFINITION)) {
                 final AstNode exemplaNameNode = defNode.getFirstChild(MagikGrammar.EXEMPLAR_NAME);
-                final ExpressionResult defResult = reasonerState.getNodeTypeSilent(exemplaNameNode);
+                final ExpressionResult defResult = reasonerState.getNodeType(exemplaNameNode);
                 return defResult.get(0, UndefinedType.INSTANCE);
             } else {
                 throw new IllegalStateException();

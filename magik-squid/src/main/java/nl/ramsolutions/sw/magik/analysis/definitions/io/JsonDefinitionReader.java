@@ -18,8 +18,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
@@ -115,13 +115,13 @@ public final class JsonDefinitionReader {
                 null,
                 null,
                 null,
+                TypeString.UNDEFINED,
+                "dummy_method",
+                Collections.emptySet(),
+                Collections.emptyList(),
                 null,
-                null,
-                Set.of(),
-                List.of(),
-                null,
-                null,
-                null);
+                ExpressionResultString.UNDEFINED,
+                ExpressionResultString.UNDEFINED);
         }
 
     }

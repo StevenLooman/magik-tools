@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
 
 /**
@@ -145,7 +146,7 @@ public class CombinedType extends AbstractType {
     }
 
     @Override
-    public void setLocation(final Location location) {
+    public void setLocation(final @Nullable Location location) {
         throw new IllegalStateException();
     }
 
@@ -155,7 +156,7 @@ public class CombinedType extends AbstractType {
     }
 
     @Override
-    public void setDoc(final String comment) {
+    public void setDoc(final @Nullable String doc) {
         throw new IllegalStateException();
     }
 

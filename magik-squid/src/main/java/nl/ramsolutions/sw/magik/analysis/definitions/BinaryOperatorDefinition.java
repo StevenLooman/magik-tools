@@ -27,7 +27,7 @@ public class BinaryOperatorDefinition extends Definition {
      * @param rhsTypeName Right Hand Side type.
      * @param resultTypeName Result type.
      */
-    @SuppressWarnings("checkstyle:ParameterNumber")
+    @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
     public BinaryOperatorDefinition(
             final @Nullable Location location,
             final @Nullable String moduleName,

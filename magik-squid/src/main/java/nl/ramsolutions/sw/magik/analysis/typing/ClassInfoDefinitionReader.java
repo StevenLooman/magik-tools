@@ -56,6 +56,7 @@ public final class ClassInfoDefinitionReader {
         "_gather", ParameterDefinition.Modifier.GATHER);
     private static final List<String> METHOD_PRAGMA_SKIP_LIST = List.of("classconst", "classvar");
     private static final String NEXT_NOT_SLASH_PATTERN = "[^/]+";
+    private static final String FILE_URI_PREFIX = "file://";
 
     private final Path path;
     private final IDefinitionKeeper definitionKeeper;
@@ -154,9 +155,8 @@ public final class ClassInfoDefinitionReader {
             final String globalName = scanner.next();
             typeString = TypeString.ofIdentifier(globalName, "sw");
 
-            //  Parameters!
-            final List<ParameterDefinition> paramDefs = this.readParameterDefinitions(moduleName, scanner);
-            paramDefs.size();  // Prevent linter errors.
+            // Parameters!
+            this.readParameterDefinitions(moduleName, scanner);  // NOSONAR: Unused.
 
             // TODO: Is it always a procedure when it has parameters?
         }
@@ -177,7 +177,7 @@ public final class ClassInfoDefinitionReader {
 
             // Source file.
             final String sourceFile = scanner.nextLine().trim();
-            final URI uri = URI.create("file:///" + sourceFile);
+            final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
             location = new Location(uri);
         }
 
@@ -265,7 +265,7 @@ public final class ClassInfoDefinitionReader {
 
             // Source file.
             final String sourceFile = scanner.nextLine().trim();
-            final URI uri = URI.create("file:///" + sourceFile);
+            final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
             location = new Location(uri);
         }
 
@@ -346,7 +346,7 @@ public final class ClassInfoDefinitionReader {
 
             // Source file.
             final String sourceFile = scanner.nextLine().trim();
-            final URI uri = URI.create("file:///" + sourceFile);
+            final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
             location = new Location(uri);
         }
 
@@ -429,7 +429,7 @@ public final class ClassInfoDefinitionReader {
 
             // Source file.
             final String sourceFile = scanner.nextLine().trim();
-            final URI uri = URI.create("file:///" + sourceFile);
+            final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
             location = new Location(uri);
         }
 
@@ -474,8 +474,7 @@ public final class ClassInfoDefinitionReader {
         }
 
         // Line 2
-        final String line2 = reader.readLine();
-        line2.length();  // Keep linters happy.
+        reader.readLine();  // NOSONAR: Unused.
 
         // Line 3
         final String line3 = reader.readLine();
@@ -493,7 +492,7 @@ public final class ClassInfoDefinitionReader {
 
             // Source file.
             final String sourceFile = scanner.nextLine().trim();
-            final URI uri = URI.create("file:///" + sourceFile);
+            final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
             location = new Location(uri);
         }
 

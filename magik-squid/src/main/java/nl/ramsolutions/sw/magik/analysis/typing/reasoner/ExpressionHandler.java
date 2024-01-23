@@ -176,6 +176,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
 
             final String identifier = assignedNode.getTokenValue();
             final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
+            Objects.requireNonNull(scopeEntry);
             this.state.setCurrentScopeEntryNode(scopeEntry, assignedNode);
 
             this.state.setNodeType(assignedNode, result);
@@ -268,6 +269,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 final Scope scope = globalScope.getScopeForNode(bodyNode);
                 Objects.requireNonNull(scope);
                 final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
+                Objects.requireNonNull(scopeEntry);
                 this.state.setCurrentScopeEntryNode(scopeEntry, identifierNode);
             }
         }

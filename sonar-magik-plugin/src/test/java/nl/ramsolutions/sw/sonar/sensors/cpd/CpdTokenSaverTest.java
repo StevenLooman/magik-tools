@@ -5,6 +5,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.sonar.language.Magik;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,10 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.fs.internal.DefaultFileSystem;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
+import org.sonar.api.batch.sensor.cpd.internal.TokensLine;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for CpdTokenSaver.
@@ -22,6 +26,7 @@ class CpdTokenSaverTest {
     private static final Path TEST_PRODUCT_PATH =
         Path.of("src/test/resources/test_product");
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     @Test
     void testSyntaxError() throws IOException {
         final SensorContextTester context = SensorContextTester.create(TEST_PRODUCT_PATH);
@@ -46,6 +51,9 @@ class CpdTokenSaverTest {
         final String fileContent = inputFile.contents();
         final MagikFile magikFile = new MagikFile(uri, fileContent);
         tokenSaver.saveCpdTokens(inputFile, magikFile);
+
+        final List<TokensLine> cpdTokens = context.cpdTokens("moduleKey:test.magik");
+        assertThat(cpdTokens).hasSize(16);
     }
 
 }

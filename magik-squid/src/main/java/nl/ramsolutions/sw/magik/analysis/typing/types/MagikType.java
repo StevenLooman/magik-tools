@@ -182,13 +182,12 @@ public class MagikType extends AbstractType {
 
         final TypeString[] thisGenDefs = this.typeString.getGenerics().toArray(TypeString[]::new);
         return Stream.concat(this.parents.stream(), implicitParents.stream())
-            .map(typeStr -> {
+            .map(typeStr ->
                 // Let all parents inherit generic definitions.
                 // TODO: Keep existing genDefs, but overwrite any found.
-                return TypeString.ofIdentifier(
+                TypeString.ofIdentifier(
                     typeStr.getIdentifier(), typeStr.getPakkage(),
-                    thisGenDefs);
-            })
+                    thisGenDefs))
             .collect(Collectors.toUnmodifiableSet());
     }
 

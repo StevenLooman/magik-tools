@@ -5,6 +5,7 @@ import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
@@ -93,6 +94,8 @@ class InvocationHandler extends LocalTypeReasonerHandler {
         }
 
         // Store it!
+        Objects.requireNonNull(callResult);
+        Objects.requireNonNull(iterResult);
         this.state.setNodeType(node, callResult);
         this.state.setNodeIterType(node, iterResult);
     }
@@ -113,7 +116,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
         final AbstractType calledType =
             originalCalledType == SelfType.INSTANCE
             ? this.typeKeeper.getType(TypeString.SW_PROCEDURE)
-            : originalCalledType instanceof AliasType
+            : originalCalledType instanceof AliasType  // NOSONAR
                 ? ((AliasType) originalCalledType).getAliasedType()
                 : originalCalledType;
 

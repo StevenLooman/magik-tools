@@ -102,7 +102,7 @@ public class Package {
         return this.typeKeeper.getTypes().stream()
             .filter(type -> type.getTypeString().getPakkage().equals(this.name))
             .collect(Collectors.toMap(
-                type -> type.getName(),
+                AbstractType::getName,
                 type -> type));
     }
 

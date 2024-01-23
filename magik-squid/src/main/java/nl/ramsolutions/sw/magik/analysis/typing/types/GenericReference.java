@@ -55,8 +55,8 @@ public class GenericReference extends AbstractType {
     }
 
     @Override
-    public void setDoc(final String comment) {
-        this.doc = comment;
+    public void setDoc(final @Nullable String doc) {
+        this.doc = doc;
     }
 
     @Override

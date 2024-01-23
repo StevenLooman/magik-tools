@@ -96,7 +96,7 @@ public class BinaryOperator {
             final TypeString leftRef,
             final TypeString rightRef,
             final TypeString resultRef,
-            final String doc) {
+            final @Nullable String doc) {
         this.location = location;
         this.moduleName = moduleName;
         this.operator = operator;

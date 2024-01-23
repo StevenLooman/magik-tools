@@ -140,7 +140,7 @@ public class DefineSharedVariableParser {
         return List.copyOf(methodDefinitions);
     }
 
-    @SuppressWarnings("checkstyle:ParameterNumber")
+    @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
     private List<MethodDefinition> generateVariableMethods(
             final @Nullable Location location,
             final @Nullable String moduleName,

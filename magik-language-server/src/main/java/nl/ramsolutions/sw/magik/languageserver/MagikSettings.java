@@ -20,6 +20,15 @@ public final class MagikSettings {  // NOSONAR
     public static final MagikSettings INSTANCE = new MagikSettings();
 
     private static final String TOP_LEVEL = "magik";
+    private static final String TYPING = "typing";
+    private static final String LINT = "lint";
+    private static final String SMALLWORLD_GIS = "smallworldGis";
+    private static final String LIBS_DIRS = "libsDirs";
+    private static final String TYPE_DATABASE_PATHS = "typeDatabasePaths";
+    private static final String SHOW_ATOM_INLAY_HINTS = "showAtomInlayHints";
+    private static final String SHOW_ARGUMENT_INLAY_HINTS = "showArgumentInlayHints";
+    private static final String ENABLE_CHECKS = "enableChecks";
+    private static final String OVERRIDE_CONFIG_FILE = "overrideConfigFile";
 
     private JsonObject settings = new JsonObject();
 
@@ -48,7 +57,7 @@ public final class MagikSettings {  // NOSONAR
             return null;
         }
 
-        final JsonElement smallworldGis = magik.get("smallworldGis");
+        final JsonElement smallworldGis = magik.get(SMALLWORLD_GIS);
         if (smallworldGis == null) {
             return null;
         }
@@ -66,7 +75,7 @@ public final class MagikSettings {  // NOSONAR
             return Collections.emptyList();
         }
 
-        final JsonArray libsDirs = magik.getAsJsonArray("libsDirs");
+        final JsonArray libsDirs = magik.getAsJsonArray(LIBS_DIRS);
         if (libsDirs == null) {
             return Collections.emptyList();
         }
@@ -89,12 +98,12 @@ public final class MagikSettings {  // NOSONAR
             return Collections.emptyList();
         }
 
-        final JsonObject typing = magik.getAsJsonObject("typing");
+        final JsonObject typing = magik.getAsJsonObject(TYPING);
         if (typing == null) {
             return Collections.emptyList();
         }
 
-        final JsonArray typesDatabasePaths = typing.getAsJsonArray("typeDatabasePaths");
+        final JsonArray typesDatabasePaths = typing.getAsJsonArray(TYPE_DATABASE_PATHS);
         if (typesDatabasePaths == null) {
             return Collections.emptyList();
         }
@@ -117,12 +126,12 @@ public final class MagikSettings {  // NOSONAR
             return false;
         }
 
-        final JsonObject typing = magik.getAsJsonObject("typing");
+        final JsonObject typing = magik.getAsJsonObject(TYPING);
         if (typing == null) {
             return false;
         }
 
-        final JsonElement showAtomInlayHints = typing.get("showAtomInlayHints");
+        final JsonElement showAtomInlayHints = typing.get(SHOW_ATOM_INLAY_HINTS);
         if (showAtomInlayHints == null) {
             return false;
         }
@@ -140,12 +149,12 @@ public final class MagikSettings {  // NOSONAR
             return true;
         }
 
-        final JsonObject typing = magik.getAsJsonObject("typing");
+        final JsonObject typing = magik.getAsJsonObject(TYPING);
         if (typing == null) {
             return true;
         }
 
-        final JsonElement showArgumentInlayHints = typing.get("showArgumentInlayHints");
+        final JsonElement showArgumentInlayHints = typing.get(SHOW_ARGUMENT_INLAY_HINTS);
         if (showArgumentInlayHints == null) {
             return true;
         }
@@ -164,12 +173,12 @@ public final class MagikSettings {  // NOSONAR
             return false;
         }
 
-        final JsonObject typing = magik.getAsJsonObject("typing");
+        final JsonObject typing = magik.getAsJsonObject(TYPING);
         if (typing == null) {
             return false;
         }
 
-        final JsonElement enableChecks = typing.get("enableChecks");
+        final JsonElement enableChecks = typing.get(ENABLE_CHECKS);
         if (enableChecks == null) {
             return false;
         }
@@ -188,12 +197,12 @@ public final class MagikSettings {  // NOSONAR
             return null;
         }
 
-        final JsonObject lint = magik.getAsJsonObject("lint");
+        final JsonObject lint = magik.getAsJsonObject(LINT);
         if (lint == null) {
             return null;
         }
 
-        final JsonElement overrideConfigFile = lint.get("overrideConfigFile");
+        final JsonElement overrideConfigFile = lint.get(OVERRIDE_CONFIG_FILE);
         if (overrideConfigFile == null) {
             return null;
         }

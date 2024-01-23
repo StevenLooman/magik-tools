@@ -1,6 +1,8 @@
 package nl.ramsolutions.sw.magik.languageserver.documentsymbols;
 
+import com.sonar.sslr.api.AstNode;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
@@ -44,11 +46,13 @@ public class DocumentSymbolProvider {
 
     private DocumentSymbol convertDefinition(final Definition definition) {
         final SymbolKind symbolKind = this.symbolKindForDefinition(definition);
+        final AstNode definitionNode = definition.getNode();
+        Objects.requireNonNull(definitionNode);
         final DocumentSymbol documentSymbol = new DocumentSymbol(
             definition.getName(),
             symbolKind,
-            Lsp4jConversion.rangeToLsp4j(new Range(definition.getNode())),
-            Lsp4jConversion.rangeToLsp4j(new Range(definition.getNode())));
+            Lsp4jConversion.rangeToLsp4j(new Range(definitionNode)),
+            Lsp4jConversion.rangeToLsp4j(new Range(definitionNode)));
         if (definition instanceof ExemplarDefinition) {
             final ExemplarDefinition exemplarDefinition = (ExemplarDefinition) definition;
             final List<DocumentSymbol> slotSymbols = this.convertedSlotsFromDefinition(exemplarDefinition);
