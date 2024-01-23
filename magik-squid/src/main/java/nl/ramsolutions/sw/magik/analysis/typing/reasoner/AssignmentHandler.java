@@ -66,6 +66,7 @@ class AssignmentHandler extends LocalTypeReasonerHandler {
                 Objects.requireNonNull(scope);
                 final AstNode identifierNode = assignedNode.getFirstChild(MagikGrammar.IDENTIFIER);
                 final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
+                Objects.requireNonNull(scopeEntry);
                 this.state.setCurrentScopeEntryNode(scopeEntry, assignedNode);
 
                 this.state.setNodeType(assignedNode, result);
@@ -112,6 +113,7 @@ class AssignmentHandler extends LocalTypeReasonerHandler {
                 final Scope scope = globalScope.getScopeForNode(node);
                 Objects.requireNonNull(scope);
                 final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
+                Objects.requireNonNull(scopeEntry);
                 // TODO: Test if it isn't a slot node.
                 this.state.setCurrentScopeEntryNode(scopeEntry, expressionNode);
             }

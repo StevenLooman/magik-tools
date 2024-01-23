@@ -1,12 +1,13 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
@@ -31,17 +32,20 @@ public class TypeStringResolver {
     }
 
     private List<PackageDefinition> getPackageHierarchy(final TypeString typeString) {
-        final Stack<String> packages = new Stack<>();
+        final Deque<String> packages = new ArrayDeque<>();
         final String startPackage = typeString.getPakkage();
         packages.push(startPackage);
 
         // Iterate through package structure and find exemplar definitions.
         final List<PackageDefinition> seen = new ArrayList<>();
-        while (!packages.empty()) {
+        while (!packages.isEmpty()) {
             final String packageName = packages.pop();
             this.definitionKeeper.getPackageDefinitions(packageName).stream()
                 .filter(def -> !seen.contains(def))
-                .peek(seen::add)
+                .map(def -> {
+                    seen.add(def);
+                    return def;
+                })
                 .flatMap(def -> def.getUses().stream())
                 .forEach(packages::push);
         }
@@ -49,7 +53,6 @@ public class TypeStringResolver {
         return seen;
     }
 
-    @CheckForNull
     private Collection<ExemplarDefinition> findExemplarDefinitions(final TypeString typeString) {
         return this.getPackageHierarchy(typeString).stream()
             .sequential()
@@ -62,7 +65,6 @@ public class TypeStringResolver {
             .collect(Collectors.toSet());
     }
 
-    @CheckForNull
     private Collection<ProcedureDefinition> findProcedureDefinitions(final TypeString typeString) {
         return this.getPackageHierarchy(typeString).stream()
             .sequential()
@@ -75,7 +77,6 @@ public class TypeStringResolver {
             .collect(Collectors.toSet());
     }
 
-    @CheckForNull
     private Collection<GlobalDefinition> findGlobalDefinitions(final TypeString typeString) {
         return this.getPackageHierarchy(typeString).stream()
             .sequential()

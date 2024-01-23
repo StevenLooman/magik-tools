@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class MagikIndexer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikIndexer.class);
-    private static final long MAX_SIZE = 1024 * 1024 * 10;  // 10 MB
+    private static final long MAX_SIZE = 1024L * 1024L * 10L;  // 10 MB
 
     private final IDefinitionKeeper definitionKeeper;
     private final Map<Path, Set<PackageDefinition>> indexedPackages = new HashMap<>();

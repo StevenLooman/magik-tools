@@ -53,6 +53,7 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
             this.assignAtom(node, typeString);
         } else if (scopeEntry.isType(ScopeEntry.Type.IMPORT)) {
             final ScopeEntry parentScopeEntry = scopeEntry.getImportedEntry();
+            Objects.requireNonNull(parentScopeEntry);
             final AstNode lastNodeType = this.state.getCurrentScopeEntryNode(parentScopeEntry);
             final ExpressionResult result = this.state.getNodeType(lastNodeType);
             this.assignAtom(node, result);
@@ -84,6 +85,7 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
             Objects.requireNonNull(scope);
             final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
             final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
+            Objects.requireNonNull(scopeEntry);
             this.state.setCurrentScopeEntryNode(scopeEntry, node);
         }
 

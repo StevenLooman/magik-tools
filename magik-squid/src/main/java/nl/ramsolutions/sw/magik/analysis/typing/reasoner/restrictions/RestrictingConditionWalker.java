@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.AstWalker;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -157,7 +158,7 @@ public class RestrictingConditionWalker extends AstWalker {
     }
 
     private TypeRestriction createRestrictionForValueType(
-            final ScopeEntry leftScopeEntry, final ScopeEntry rightScopeEntry,
+            final @Nullable ScopeEntry leftScopeEntry, final @Nullable ScopeEntry rightScopeEntry,
             final AstNode leftNode, final AstNode literalTypeNode) {
         final TypeRestriction restriction;
         final ScopeEntry scopeEntry = literalTypeNode == leftNode
@@ -172,8 +173,10 @@ public class RestrictingConditionWalker extends AstWalker {
     }
 
     private TypeRestriction createRestrictionForVariableType(
-            final ScopeEntry leftScopeEntry, final AbstractType leftType,
-            final ScopeEntry rightScopeEntry, final AbstractType rightType) {
+            @Nullable final ScopeEntry leftScopeEntry, final AbstractType leftType,
+            @Nullable final ScopeEntry rightScopeEntry, final AbstractType rightType) {
+        Objects.requireNonNull(leftScopeEntry);
+        Objects.requireNonNull(rightScopeEntry);
         return new IsVariableTypeRestriction(leftScopeEntry, leftType, rightScopeEntry, rightType);
     }
 
@@ -188,8 +191,8 @@ public class RestrictingConditionWalker extends AstWalker {
     }
 
     private TypeRestriction createRestrictionForSingletonType(
-            final ScopeEntry leftScopeEntry, final AbstractType leftType,
-            final ScopeEntry rightScopeEntry, final AbstractType rightType,
+            final @Nullable ScopeEntry leftScopeEntry, final AbstractType leftType,
+            final @Nullable ScopeEntry rightScopeEntry, final AbstractType rightType,
             final AstNode leftNode, final AstNode singletonTypeNode) {
         final TypeRestriction restriction;
         final ScopeEntry variableScopeEntry;
@@ -204,6 +207,7 @@ public class RestrictingConditionWalker extends AstWalker {
             variableType = leftType;
             restrictedType = rightType;
         }
+        Objects.requireNonNull(variableScopeEntry);
         restriction = new IsTypeRestriction(variableScopeEntry, variableType, restrictedType);
         return restriction;
     }

@@ -60,8 +60,9 @@ public final class Lsp4jConversion {
      */
     public static org.eclipse.lsp4j.Location locationToLsp4j(final Location location) {
         final String uri = location.getUri().toString();
-        final Range range = location.getRange() != null
-            ? location.getRange()
+        final Range locationRange = location.getRange();
+        final Range range = locationRange != null
+            ? locationRange
             : new Range(
                 new Position(1, 0),
                 new Position(1, 0));

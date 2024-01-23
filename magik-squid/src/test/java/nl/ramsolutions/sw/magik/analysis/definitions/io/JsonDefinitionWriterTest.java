@@ -58,7 +58,7 @@ class JsonDefinitionWriterTest {
         JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
         assertThat(Files.exists(this.tempPath)).isTrue();
-        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
+        assertThat(Files.size(this.tempPath)).isNotZero();
     }
 
     @Test
@@ -79,7 +79,7 @@ class JsonDefinitionWriterTest {
         JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
         assertThat(Files.exists(this.tempPath)).isTrue();
-        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
+        assertThat(Files.size(this.tempPath)).isNotZero();
     }
 
     @Test
@@ -110,7 +110,7 @@ class JsonDefinitionWriterTest {
         JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
         assertThat(Files.exists(this.tempPath)).isTrue();
-        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
+        assertThat(Files.size(this.tempPath)).isNotZero();
     }
 
     @Test
@@ -140,7 +140,7 @@ class JsonDefinitionWriterTest {
         JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
         assertThat(Files.exists(this.tempPath)).isTrue();
-        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
+        assertThat(Files.size(this.tempPath)).isNotZero();
     }
 
     @Test
@@ -162,7 +162,7 @@ class JsonDefinitionWriterTest {
         JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
         assertThat(Files.exists(this.tempPath)).isTrue();
-        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
+        assertThat(Files.size(this.tempPath)).isNotZero();
     }
 
     @Test
@@ -181,7 +181,7 @@ class JsonDefinitionWriterTest {
         JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
         assertThat(Files.exists(this.tempPath)).isTrue();
-        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
+        assertThat(Files.size(this.tempPath)).isNotZero();
     }
 
     @Test
@@ -202,7 +202,7 @@ class JsonDefinitionWriterTest {
         JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
         assertThat(Files.exists(this.tempPath)).isTrue();
-        assertThat(Files.size(this.tempPath)).isNotEqualTo(0);
+        assertThat(Files.size(this.tempPath)).isNotZero();
     }
 
 }

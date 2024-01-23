@@ -15,8 +15,8 @@ import nl.ramsolutions.sw.magik.Location;
 public abstract class AbstractType {
 
     private final String moduleName;
-    private Location location;
-    private String doc;
+    private @Nullable Location location;
+    private @Nullable String doc;
 
     protected AbstractType(final @Nullable Location location, final @Nullable String moduleName) {
         this.location = location;
@@ -182,7 +182,7 @@ public abstract class AbstractType {
      * Set {@link Location} for exemplar.
      * @param location Set {@link Location} where exemplar is defined.
      */
-    public void setLocation(final Location location) {
+    public void setLocation(final @Nullable Location location) {
         this.location = location;
     }
 
@@ -190,7 +190,7 @@ public abstract class AbstractType {
      * Set type documentation.
      * @param doc Type doc.
      */
-    public void setDoc(final String doc) {
+    public void setDoc(final @Nullable String doc) {
         this.doc = doc;
     }
 

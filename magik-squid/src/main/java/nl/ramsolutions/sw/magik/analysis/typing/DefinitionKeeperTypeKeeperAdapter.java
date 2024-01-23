@@ -150,9 +150,11 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
         final Package pakkage = new Package(this, location, moduleName, name);
         definition.getUses().forEach(pakkage::addUse);
 
-        LOGGER.debug(
-            "{} Created package, package name: {}, package: {}",
-            Integer.toHexString(this.hashCode()), pakkageName, pakkage);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                "{} Created package, package name: {}, package: {}",
+                Integer.toHexString(this.hashCode()), pakkageName, pakkage);
+        }
         this.packageCache.put(pakkageName, pakkage);
         return pakkage;
     }
@@ -208,7 +210,7 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
             type = this.createType(exemplarDefinition, typeString);
         } else if (definition instanceof ProcedureDefinition) {
             final ProcedureDefinition procedureDefinition = (ProcedureDefinition) definition;
-            type = this.createType(procedureDefinition, typeString);
+            type = this.createType(procedureDefinition);
         } else if (definition instanceof GlobalDefinition) {
             final GlobalDefinition globalDefinition = (GlobalDefinition) definition;
             type = this.createType(globalDefinition);
@@ -216,9 +218,11 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
             type = UndefinedType.INSTANCE;
         }
 
-        LOGGER.debug(
-            "{} Created type, typeString: {} type: {}, method count: {}",
-            Integer.toHexString(this.hashCode()), typeString.getFullString(), type, type.getLocalMethods().size());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                "{} Created type, typeString: {} type: {}, method count: {}",
+                Integer.toHexString(this.hashCode()), typeString.getFullString(), type, type.getLocalMethods().size());
+        }
         this.typeCache.put(typeString, type);
         return type;
     }
@@ -307,7 +311,7 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
         return magikType;
     }
 
-    private AbstractType createType(final ProcedureDefinition procedureDefinition, final TypeString searchTypeString) {
+    private AbstractType createType(final ProcedureDefinition procedureDefinition) {
         final AbstractType abstractType = this.getType(TypeString.SW_PROCEDURE);
         final MagikType procedureType = (MagikType) abstractType;
 
@@ -349,12 +353,13 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
 
     private AbstractType createType(final GlobalDefinition globalDefinition) {
         final TypeString typeRef = globalDefinition.getTypeString();
+        final TypeString aliasedTypeName = globalDefinition.getAliasedTypeName();
         return new AliasType(
             this,
             globalDefinition.getLocation(),
             globalDefinition.getModuleName(),
             typeRef,
-            globalDefinition.getAliasedTypeName());
+            aliasedTypeName);
     }
 
     @Override
@@ -411,9 +416,11 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
             definition.getDataNames(),
             definition.getDoc());
 
-        LOGGER.debug(
-            "{} Created condition, name: {}, condition: {}",
-            Integer.toHexString(this.hashCode()), name, condition);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                "{} Created condition, name: {}, condition: {}",
+                Integer.toHexString(this.hashCode()), name, condition);
+        }
         this.conditionCache.put(name, condition);
         return condition;
     }
@@ -466,9 +473,11 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
             definition.getResultTypeName(),
             definition.getDoc());
 
-        LOGGER.debug(
-            "{} Binary operator, key: {}, binary operator: {}",
-            Integer.toHexString(this.hashCode()), key.getString(), binaryOperator);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                "{} Binary operator, key: {}, binary operator: {}",
+                Integer.toHexString(this.hashCode()), key.getString(), binaryOperator);
+        }
         this.binaryOperatorCache.put(key, binaryOperator);
         return binaryOperator;
     }

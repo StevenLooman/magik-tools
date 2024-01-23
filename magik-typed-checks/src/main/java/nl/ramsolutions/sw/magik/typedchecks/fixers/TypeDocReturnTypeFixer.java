@@ -50,13 +50,14 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
             final MagikTypedFile magikFile,
             final MethodDefinition methodDefinition) {
         final AstNode methodDefinitionNode = methodDefinition.getNode();
+        Objects.requireNonNull(methodDefinitionNode);
         final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
         final ExpressionResult methodResult = state.getNodeType(methodDefinitionNode);
         final ExpressionResultString methodResultString = methodResult.stream()
             .map(AbstractType::getTypeString)
             .collect(ExpressionResultString.COLLECTOR);
 
-        final TypeDocParser typeDocParser = new TypeDocParser(methodDefinition.getNode());
+        final TypeDocParser typeDocParser = new TypeDocParser(methodDefinitionNode);
         final Map<AstNode, TypeString> typeDocNodes = typeDocParser.getReturnTypeNodes();
 
         // Construct Code Actions.
@@ -135,6 +136,7 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
 
     private int getLastMethodDocLine(final MethodDefinition methodDefinition) {
         final AstNode methodDefinitionNode = methodDefinition.getNode();
+        Objects.requireNonNull(methodDefinitionNode);
         final AstNode bodyNode = methodDefinitionNode.getFirstChild(MagikGrammar.BODY);
         if (bodyNode == null) {
             throw new IllegalStateException();

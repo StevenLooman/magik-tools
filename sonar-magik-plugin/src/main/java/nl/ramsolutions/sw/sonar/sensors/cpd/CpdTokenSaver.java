@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.sonar.TokenLocation;
-import nl.ramsolutions.sw.sonar.sensors.MagikSquidSensor;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.cpd.NewCpdTokens;
@@ -17,7 +16,7 @@ import org.sonar.api.utils.log.Loggers;
  */
 public class CpdTokenSaver {
 
-    private static final Logger LOGGER = Loggers.get(MagikSquidSensor.class);
+    private static final Logger LOGGER = Loggers.get(CpdTokenSaver.class);
 
     private final SensorContext context;
 

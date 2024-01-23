@@ -38,8 +38,8 @@ public class ProductIndexer {
         paths
             .filter(path -> path.getFileName() != null)
             .filter(path ->
-                path.getFileName().toString().toLowerCase().equals("product.def")
-                || path.getFileName().toString().toLowerCase().equals("module.def"))
+                path.getFileName().toString().equalsIgnoreCase("product.def")
+                || path.getFileName().toString().equalsIgnoreCase("module.def"))
             .forEach(this::indexPathCreated);
     }
 
@@ -97,9 +97,9 @@ public class ProductIndexer {
     private void readDefinition(final Path path) {
         final Path filename = path.getFileName();
         try {
-            if (filename.toString().toLowerCase().equals("product.def")) {
+            if (filename.toString().equalsIgnoreCase("product.def")) {
                 this.readProductDefinition(path);
-            } else if (filename.toString().toLowerCase().equals("module.def")) {
+            } else if (filename.toString().equalsIgnoreCase("module.def")) {
                 this.readModuleDefinition(path);
             } else {
                 throw new IllegalArgumentException();

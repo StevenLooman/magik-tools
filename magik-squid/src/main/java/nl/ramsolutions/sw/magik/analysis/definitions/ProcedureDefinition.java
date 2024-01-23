@@ -50,7 +50,7 @@ public class ProcedureDefinition extends TypeStringDefinition {
      * @param returnTypes Return types.
      * @param loopTypes Loop types.
      */
-    @SuppressWarnings("checkstyle:ParameterNumber")
+    @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
     public ProcedureDefinition(
             final @Nullable Location location,
             final @Nullable String moduleName,
@@ -134,7 +134,7 @@ public class ProcedureDefinition extends TypeStringDefinition {
             this.typeName,
             this.procedureName,
             this.parameters.stream()
-                .map(paramDef -> paramDef.getWithoutNode())
+                .map(ParameterDefinition::getWithoutNode)
                 .collect(Collectors.toList()),
             this.returnTypes,
             this.loopTypes);

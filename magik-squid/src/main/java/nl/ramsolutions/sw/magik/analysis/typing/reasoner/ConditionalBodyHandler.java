@@ -134,7 +134,7 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
     private List<AstNode> getUsageInBody(final ScopeEntry scopeEntry, final AstNode bodyNode) {
         final List<AstNode> upToAssignmentNodes = new ArrayList<>();
         final List<AstNode> atomNodesInBodyNode = bodyNode.getDescendants(MagikGrammar.ATOM);
-        for (final AstNode usageNode : scopeEntry.getUsages()) {
+        for (final AstNode usageNode : scopeEntry.getUsages()) {  // NOSONAR
             if (!atomNodesInBodyNode.contains(usageNode)) {
                 continue;
             }

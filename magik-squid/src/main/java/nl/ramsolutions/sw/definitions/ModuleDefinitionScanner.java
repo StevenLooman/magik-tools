@@ -102,7 +102,7 @@ public final class ModuleDefinitionScanner {
     }
 
     @CheckForNull
-    private static Path moduleDefAtPath(final Path startPath) throws IOException {
+    private static Path moduleDefAtPath(final Path startPath) {
         final Path cachedPath = ModuleDefinitionScanner.CACHE.get(startPath);
         if (cachedPath != null) {
             if (cachedPath == ModuleDefinitionScanner.DOES_NOT_EXIST) {

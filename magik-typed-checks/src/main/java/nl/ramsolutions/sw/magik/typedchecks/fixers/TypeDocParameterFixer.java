@@ -5,6 +5,7 @@ import com.sonar.sslr.api.Token;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,7 +57,9 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
                 methodDefinition.getParameters().stream(),
                 Stream.ofNullable(methodDefinition.getAssignmentParameter()))
             .collect(Collectors.toList());
-        final TypeDocParser typeDocParser = new TypeDocParser(methodDefinition.getNode());
+        final AstNode methodDefinitionNode = methodDefinition.getNode();
+        Objects.requireNonNull(methodDefinitionNode);
+        final TypeDocParser typeDocParser = new TypeDocParser(methodDefinitionNode);
         final Map<AstNode, String> typeDocParameters = typeDocParser.getParameterNameNodes();
         final Collection<String> typeDocParameterNames = typeDocParameters.values();
 
@@ -88,7 +91,9 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
                 Stream.ofNullable(methodDefinition.getAssignmentParameter()))
             .map(ParameterDefinition::getName)
             .collect(Collectors.toSet());
-        final TypeDocParser typeDocParser = new TypeDocParser(methodDefinition.getNode());
+        final AstNode methodDefinitionNode = methodDefinition.getNode();
+        Objects.requireNonNull(methodDefinitionNode);
+        final TypeDocParser typeDocParser = new TypeDocParser(methodDefinitionNode);
         final Map<AstNode, String> typeDocParameters = typeDocParser.getParameterNameNodes();
 
         return typeDocParameters.entrySet().stream()
@@ -111,6 +116,7 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
 
     private int getLastMethodDocLine(final MethodDefinition methodDefinition) {
         final AstNode methodDefinitionNode = methodDefinition.getNode();
+        Objects.requireNonNull(methodDefinitionNode);
         final AstNode bodyNode = methodDefinitionNode.getFirstChild(MagikGrammar.BODY);
         if (bodyNode == null) {
             throw new IllegalStateException();
