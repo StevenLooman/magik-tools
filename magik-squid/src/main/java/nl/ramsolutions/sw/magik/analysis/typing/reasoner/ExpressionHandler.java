@@ -247,6 +247,11 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         if (forNode.is(MagikGrammar.FOR)) {
             final AstNode loopNode = overNode.getFirstChild(MagikGrammar.LOOP);
             final AstNode bodyNode = loopNode.getFirstChild(MagikGrammar.BODY);
+            if (bodyNode == null) {
+                // Don't error on syntax error.
+                return;
+            }
+
             final ForNodeHelper helper = new ForNodeHelper(forNode);
             final List<AstNode> identifierNodes = helper.getLoopIdentifierNodes();
             for (int i = 0; i < identifierNodes.size(); ++i) {
@@ -273,8 +278,6 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 this.state.setCurrentScopeEntryNode(scopeEntry, identifierNode);
             }
         }
-
-        // TODO: WHILE node.
     }
 
     /**

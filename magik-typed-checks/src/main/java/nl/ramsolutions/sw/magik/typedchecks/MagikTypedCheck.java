@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.typedchecks;
 
 import com.sonar.sslr.api.AstNode;
+import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
@@ -76,7 +77,11 @@ public class MagikTypedCheck extends MagikCheck {
      * @param node METHOD_DEFINITION node.
      * @return
      */
-    protected AbstractType getTypeOfMethodDefinition(final AstNode node) {
+    protected AbstractType getTypeOfMethodDefinition(final @Nullable AstNode node) {
+        if (node == null) {
+            return UndefinedType.INSTANCE;
+        }
+
         final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(node);
         final TypeString typeString = methodDefHelper.getTypeString();
         final ITypeKeeper typeKeeper = this.getTypeKeeper();
