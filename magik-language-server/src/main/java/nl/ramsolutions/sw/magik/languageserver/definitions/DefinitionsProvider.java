@@ -129,6 +129,7 @@ public class DefinitionsProvider {
             Location.validLocation(typeLocation));
     }
 
+    @SuppressWarnings("checkstyle:NestedIfDepth")
     private List<Location> definitionsForMethodInvocation(final MagikTypedFile magikFile, final AstNode wantedNode) {
         final AstNode methodInvocationNode = wantedNode.getFirstAncestor(MagikGrammar.METHOD_INVOCATION);
         final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(methodInvocationNode);
@@ -153,9 +154,13 @@ public class DefinitionsProvider {
         } else {
             if (type == SelfType.INSTANCE) {
                 final AstNode methodDefNode = wantedNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-                final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(methodDefNode);
-                final TypeString typeString = methodDefHelper.getTypeString();
-                type = typeKeeper.getType(typeString);
+                if (methodDefNode == null) {
+                    type = UndefinedType.INSTANCE;
+                } else {
+                    final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(methodDefNode);
+                    final TypeString typeString = methodDefHelper.getTypeString();
+                    type = typeKeeper.getType(typeString);
+                }
             }
             LOGGER.debug("Finding implementations for type:, {}, method: {}", type.getFullName(), methodName);
             type.getMethods(methodName).stream()

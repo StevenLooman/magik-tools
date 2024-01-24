@@ -526,7 +526,9 @@ public class HoverProvider {
             final AstNode defNode = node.getFirstAncestor(
                 MagikGrammar.PROCEDURE_DEFINITION,
                 MagikGrammar.METHOD_DEFINITION);
-            if (defNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
+            if (defNode == null) {
+                return UndefinedType.INSTANCE;
+            } else if (defNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
                 final ExpressionResult defResult = reasonerState.getNodeType(defNode);
                 return defResult.get(0, UndefinedType.INSTANCE);
             } else if (defNode.is(MagikGrammar.METHOD_DEFINITION)) {
