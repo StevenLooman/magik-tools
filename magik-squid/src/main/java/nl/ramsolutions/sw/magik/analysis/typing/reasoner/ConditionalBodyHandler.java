@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -54,9 +55,9 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
         }
 
         // Apply all restrictions to nodes in body.
-        final TypeRestriction typeRestriction = this.getTypeRestriction(node);
-        final Map<ScopeEntry, AbstractType> restrictions = typeRestriction.getRestrictions();
-        restrictions.entrySet()
+        final Set<TypeRestriction> restrictions = this.getTypeRestriction(node);
+        restrictions.stream()
+            .map(TypeRestriction::getRestriction)
             .forEach(entry -> {
                 final ScopeEntry scopeEntry = entry.getKey();
                 final List<AstNode> usages = this.getUsageInBody(scopeEntry, bodyNode);
@@ -87,9 +88,10 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
                 ifNode.getChildren(MagikGrammar.ELIF).stream()
                     .map(elifNode -> elifNode.getFirstChild(MagikGrammar.CONDITIONAL_EXPRESSION)))
             .collect(Collectors.toList());
-        final List<TypeRestriction> allRestrictions = conditionalExpressionNodes.stream()
+        final Set<TypeRestriction> allRestrictions = conditionalExpressionNodes.stream()
             .map(this::getTypeRestriction)
-            .collect(Collectors.toList());
+            .flatMap(Set::stream)
+            .collect(Collectors.toSet());
 
         // Combine and invert all previous restrictions.
         final Map<ScopeEntry, AbstractType> restrictions = this.combineAndInvertRestrictions(allRestrictions);
@@ -110,7 +112,7 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
      * @param conditionNode CONDITIONAL_EXPRESSION node.
      * @return Top {@link TypeRestriction}.
      */
-    private TypeRestriction getTypeRestriction(final AstNode conditionNode) {
+    private Set<TypeRestriction> getTypeRestriction(final AstNode conditionNode) {
         final GlobalScope globalScope = this.state.getMagikFile().getGlobalScope();
         final RestrictingConditionWalker walker = new RestrictingConditionWalker(this.state, globalScope);
         walker.walkAst(conditionNode);
@@ -118,13 +120,12 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
         return walker.getTypeRestriction();
     }
 
-    private Map<ScopeEntry, AbstractType> combineAndInvertRestrictions(final List<TypeRestriction> allRestrictions) {
+    private Map<ScopeEntry, AbstractType> combineAndInvertRestrictions(final Set<TypeRestriction> allRestrictions) {
         // Invert restrictions and combine grouped by scope entry.
         // Intersect all restrictions for each scope entry.
         return allRestrictions.stream()
             .map(TypeRestriction::not)
-            .map(TypeRestriction::getRestrictions)
-            .flatMap(map -> map.entrySet().stream())
+            .map(TypeRestriction::getRestriction)
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 Map.Entry::getValue,
