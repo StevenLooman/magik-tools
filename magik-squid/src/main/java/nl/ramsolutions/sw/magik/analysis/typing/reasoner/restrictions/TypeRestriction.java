@@ -7,22 +7,18 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 /**
  * Type restriction.
  */
-public abstract class TypeRestriction {
+public interface TypeRestriction {
 
     /**
      * Get the inverse of ourselves.
-     * @return
+     * @return Inverse of ourselves
      */
-    public abstract TypeRestriction not();
+    TypeRestriction not();
 
     /**
-     * Get the restricted nodes.
-     * @return Restricted nodes.
+     * Get the restricted ScopeEntry with its reasoned type.
+     * @return Restricted scope entry with its reasoned type.
      */
-    public abstract Map<ScopeEntry, AbstractType> getRestrictions();
-
-    public boolean isDeterminable() {
-        return true;
-    }
+    Map.Entry<ScopeEntry, AbstractType> getRestriction();
 
 }
