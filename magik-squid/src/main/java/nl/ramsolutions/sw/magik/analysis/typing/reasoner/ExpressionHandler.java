@@ -169,17 +169,18 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         this.state.setNodeType(node, result);
 
         if (assignedNode.is(MagikGrammar.ATOM)) {
+            this.state.setNodeType(assignedNode, result);
+
             // Store 'active' type for future reference.
             final GlobalScope globalScope = this.getGlobalScope();
             final Scope scope = globalScope.getScopeForNode(assignedNode);
             Objects.requireNonNull(scope);
 
-            final String identifier = assignedNode.getTokenValue();
-            final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
-            Objects.requireNonNull(scopeEntry);
-            this.state.setCurrentScopeEntryNode(scopeEntry, assignedNode);
-
-            this.state.setNodeType(assignedNode, result);
+            final AstNode identifierNode = assignedNode.getFirstChild(MagikGrammar.IDENTIFIER);
+            if (identifierNode != null) {
+                final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
+                this.state.setCurrentScopeEntryNode(scopeEntry, assignedNode);
+            }
         }
     }
 

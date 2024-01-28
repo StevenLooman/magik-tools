@@ -29,6 +29,7 @@ public final class MagikSettings {  // NOSONAR
     private static final String SHOW_ARGUMENT_INLAY_HINTS = "showArgumentInlayHints";
     private static final String ENABLE_CHECKS = "enableChecks";
     private static final String OVERRIDE_CONFIG_FILE = "overrideConfigFile";
+    private static final String ENABLE_USAGES_INDEXING = "enableUsagesIndexing";
 
     private JsonObject settings = new JsonObject();
 
@@ -184,6 +185,30 @@ public final class MagikSettings {  // NOSONAR
         }
 
         return enableChecks.getAsBoolean();
+    }
+
+    /**
+     * Get magik.typing.usagesIndexingEnabled, defaults to false if no config is provided.
+     * @return
+     */
+    @CheckForNull
+    public Boolean getTypingUsagesIndexingEnabled() {
+        final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+        if (magik == null) {
+            return false;
+        }
+
+        final JsonObject typing = magik.getAsJsonObject(TYPING);
+        if (typing == null) {
+            return false;
+        }
+
+        final JsonElement enableUsagesIndexing = typing.get(ENABLE_USAGES_INDEXING);
+        if (enableUsagesIndexing == null) {
+            return false;
+        }
+
+        return enableUsagesIndexing.getAsBoolean();
     }
 
     /**

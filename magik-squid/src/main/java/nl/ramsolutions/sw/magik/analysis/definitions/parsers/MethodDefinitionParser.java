@@ -8,17 +8,30 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
+import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
+import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
+import nl.ramsolutions.sw.magik.analysis.scope.Scope;
+import nl.ramsolutions.sw.magik.analysis.scope.ScopeBuilderVisitor;
+import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -29,6 +42,11 @@ import nl.ramsolutions.sw.magik.parser.TypeDocParser;
  * Method definition parser.
  */
 public class MethodDefinitionParser {
+
+    private static final String CONDITION = "condition";
+    private static final String SW_CONDITION = "sw:condition";
+    private static final String NEW_CALL = "new()";
+    private static final String RAISE_CALL = "raise()";
 
     private final AstNode node;
 
@@ -116,6 +134,12 @@ public class MethodDefinitionParser {
             .map(String::trim)
             .collect(Collectors.joining("\n"));
 
+        // TODO: Make these toggleable from settings in language server.
+        final Set<GlobalUsage> usedGlobals = this.getUsedGlobals();
+        final Set<MethodUsage> usedMethods = this.getUsedMethods();
+        final Set<SlotUsage> usedSlots = this.getUsedSlots();
+        final Set<ConditionUsage> usedConditions = this.getUsedConditions();
+
         final MethodDefinition methodDefinition = new MethodDefinition(
             location,
             moduleName,
@@ -127,8 +151,110 @@ public class MethodDefinitionParser {
             parameters,
             assignmentParamter,
             callResult,
-            loopResult);
+            loopResult,
+            usedGlobals,
+            usedMethods,
+            usedSlots,
+            usedConditions);
         return List.of(methodDefinition);
+    }
+
+    private Set<GlobalUsage> getUsedGlobals() {
+        final ScopeBuilderVisitor scopeBuilderVisitor = new ScopeBuilderVisitor();
+        scopeBuilderVisitor.createGlobalScope(this.node);
+        scopeBuilderVisitor.walkAst(this.node);
+        final GlobalScope globalScope = scopeBuilderVisitor.getGlobalScope();
+        final AstNode bodyNode = this.node.getFirstChild(MagikGrammar.BODY);
+        final Scope bodyScope = globalScope.getScopeForNode(bodyNode);
+        Objects.requireNonNull(bodyScope);
+
+        final PackageNodeHelper packageNodeHelper = new PackageNodeHelper(node);
+        final String currentPakkage = packageNodeHelper.getCurrentPackage();
+        return bodyScope.getSelfAndDescendantScopes().stream()
+            .flatMap(scope -> scope.getScopeEntriesInScope().stream())
+            .filter(scopeEntry -> scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC))
+            .map(scopeEntry -> {
+                final String identifier = scopeEntry.getIdentifier();
+                final TypeString ref = TypeString.ofIdentifier(identifier, currentPakkage);
+                final URI uri = this.node.getToken().getURI();
+                final Location location = new Location(uri, scopeEntry.getDefinitionNode());
+                final Location validLocation = Location.validLocation(location);
+                // TODO: The type should be resolved here, but we don't have a type resolver yet.
+                //       Now you might "see" the ref user:char16_vector, or any other package which is a child of `sw`.
+                //       This will most likely be indexed invalidly.
+                //       Though, we might be able to resolve it during the query itself.
+                return new GlobalUsage(ref, validLocation);
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private Set<MethodUsage> getUsedMethods() {
+        // TODO: To be implemented.
+        return Collections.emptySet();
+    }
+
+    private Set<SlotUsage> getUsedSlots() {
+        return this.node.getDescendants(MagikGrammar.SLOT).stream()
+            .map(slotNode -> {
+                final String slotName = slotNode.getFirstChild(MagikGrammar.IDENTIFIER).getTokenValue();
+                final URI uri = this.node.getToken().getURI();
+                final Location location = new Location(uri, slotNode);
+                final Location validLocation = Location.validLocation(location);
+                return new SlotUsage(slotName, validLocation);
+            })
+            .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private Set<ConditionUsage> getUsedConditions() {
+        final URI uri = this.node.getToken().getURI();
+        final Stream<ConditionUsage> handledConditions = this.node.getDescendants(MagikGrammar.CONDITION_NAME).stream()
+            .map(conditionNameNode -> {
+                final String conditionName = conditionNameNode.getTokenValue();
+                final Location location = new Location(uri, conditionNameNode);
+                final Location validLocation = Location.validLocation(location);
+                return new ConditionUsage(conditionName, validLocation);
+            });
+        final Stream<ConditionUsage> raisedConditions =
+            this.node.getDescendants(MagikGrammar.METHOD_INVOCATION).stream()
+            .map(invocationNode -> {
+                final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(invocationNode);
+                final AstNode receiverNode = helper.getReceiverNode();
+                if (receiverNode == null
+                    || !receiverNode.is(MagikGrammar.ATOM)) {
+                    return null;
+                }
+
+                final String identifier = receiverNode.getTokenValue();
+                if (!identifier.equalsIgnoreCase(CONDITION)
+                    && !identifier.equalsIgnoreCase(SW_CONDITION)) {
+                    return null;
+                }
+
+                if (!helper.isMethodInvocationOf(NEW_CALL)
+                    && !helper.isMethodInvocationOf(RAISE_CALL)) {
+                    return null;
+                }
+
+                final AstNode argumentsNode = invocationNode.getFirstChild(MagikGrammar.ARGUMENTS);
+                if (argumentsNode == null) {
+                    return null;
+                }
+
+                final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+                final AstNode argumentNode = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+                if (argumentNode == null) {
+                    return null;
+                }
+
+                final String conditionName = argumentNode.getTokenValue().substring(1);
+                final Location location = new Location(uri, argumentsNode);
+                final Location validLocation = Location.validLocation(location);
+                return new ConditionUsage(conditionName, validLocation);
+            })
+            .filter(Objects::nonNull);
+        return Stream.concat(handledConditions, raisedConditions)
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     private List<ParameterDefinition> createParameterDefinitions(

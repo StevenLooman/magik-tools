@@ -158,6 +158,9 @@ public class ReferencesProvider {
             return Collections.emptyList();
         }
 
+        // TODO: We need to resolve the referenced types, as the indexed globals might not have the right
+        //       (unresolved) package. I.e., We might need to match only on identifier, as the usedGlobal might have a
+        //       different package? This is because the ref might be stored with the current package.
         final TypeString exemplarTypeString = exemplarDefinition.getTypeString();
         final Set<TypeString> searchedTypes = Set.of(exemplarTypeString);
         final Collection<GlobalUsage> wantedGlobalUsages = searchedTypes.stream()
@@ -166,8 +169,9 @@ public class ReferencesProvider {
         final Predicate<GlobalUsage> filterPredicate = wantedGlobalUsages::contains;
 
         // Find references.
-        // TODO: Also parameters.
-        // TODO: Also slots.
+        // TODO: Also parameters, return types of methods/procedures.
+        // TODO: Also slots of methods.
+        // TODO: Also search in all procedures.
         return definitionKeeper.getMethodDefinitions().stream()
             .flatMap(def -> def.getUsedGlobals().stream())
             .filter(filterPredicate::test)
