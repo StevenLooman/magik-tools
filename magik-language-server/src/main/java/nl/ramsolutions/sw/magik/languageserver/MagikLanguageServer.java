@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.eclipse.lsp4j.InitializeParams;
@@ -29,6 +30,7 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikLanguageServer.class);
 
+    private final MagikAnalysisConfiguration analysisConfiguration;
     private final IDefinitionKeeper definitionKeeper;
     private final List<WorkspaceFolder> workspaceFolders = new ArrayList<>();
     private final MagikTextDocumentService magikTextDocumentService;
@@ -40,11 +42,13 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
      * Constructor.
      * @throws IOException
      */
-    public MagikLanguageServer() {
+    public MagikLanguageServer() throws IOException {
         // We assume the DefinitionKeeper gets its types from a types database (.jsonl file).
+        this.analysisConfiguration = new MagikAnalysisConfiguration();
         this.definitionKeeper = new DefinitionKeeper(false);
-        this.magikTextDocumentService = new MagikTextDocumentService(this, this.definitionKeeper);
-        this.magikWorkspaceService = new MagikWorkspaceService(this, this.definitionKeeper);
+        this.magikTextDocumentService =
+            new MagikTextDocumentService(this, this.analysisConfiguration, this.definitionKeeper);
+        this.magikWorkspaceService = new MagikWorkspaceService(this, this.analysisConfiguration, this.definitionKeeper);
         this.magikNotebookDocumentService = new MagikNotebookDocumentService(this);
     }
 

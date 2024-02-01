@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.AstWalker;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefConditionParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefEnumerationParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefIndexedExemplarParser;
@@ -34,7 +35,12 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  */
 public class DefinitionReader extends AstWalker {
 
+    private final MagikAnalysisConfiguration configuration;
     private final List<Definition> definitions = new ArrayList<>();
+
+    public DefinitionReader(final MagikAnalysisConfiguration configuration) {
+        this.configuration = configuration;
+    }
 
     public List<Definition> getDefinitions() {
         return Collections.unmodifiableList(this.definitions);
@@ -42,7 +48,7 @@ public class DefinitionReader extends AstWalker {
 
     @Override
     protected void walkPostMethodDefinition(final AstNode node) {
-        final MethodDefinitionParser parser = new MethodDefinitionParser(node);
+        final MethodDefinitionParser parser = new MethodDefinitionParser(this.configuration, node);
         final List<Definition> parsedDefinitions = parser.parseDefinitions();
         this.definitions.addAll(parsedDefinitions);
     }

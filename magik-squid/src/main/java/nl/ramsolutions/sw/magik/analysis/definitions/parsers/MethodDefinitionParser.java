@@ -16,6 +16,7 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
@@ -48,17 +49,19 @@ public class MethodDefinitionParser {
     private static final String NEW_CALL = "new()";
     private static final String RAISE_CALL = "raise()";
 
+    private final MagikAnalysisConfiguration configuration;
     private final AstNode node;
 
     /**
      * Constructor.
      * @param node Method definition node.
      */
-    public MethodDefinitionParser(final AstNode node) {
+    public MethodDefinitionParser(final MagikAnalysisConfiguration configuration, final AstNode node) {
         if (node.isNot(MagikGrammar.METHOD_DEFINITION)) {
             throw new IllegalArgumentException();
         }
 
+        this.configuration = configuration;
         this.node = node;
     }
 
@@ -134,11 +137,18 @@ public class MethodDefinitionParser {
             .map(String::trim)
             .collect(Collectors.joining("\n"));
 
-        // TODO: Make these toggleable from settings in language server.
-        final Set<GlobalUsage> usedGlobals = this.getUsedGlobals();
-        final Set<MethodUsage> usedMethods = this.getUsedMethods();
-        final Set<SlotUsage> usedSlots = this.getUsedSlots();
-        final Set<ConditionUsage> usedConditions = this.getUsedConditions();
+        final Set<GlobalUsage> usedGlobals = this.configuration.getMagikIndexerIndexUsages()
+            ? this.getUsedGlobals()
+            : Collections.emptySet();
+        final Set<MethodUsage> usedMethods = this.configuration.getMagikIndexerIndexUsages()
+            ? this.getUsedMethods()
+            : Collections.emptySet();
+        final Set<SlotUsage> usedSlots = this.configuration.getMagikIndexerIndexUsages()
+            ? this.getUsedSlots()
+            : Collections.emptySet();
+        final Set<ConditionUsage> usedConditions = this.configuration.getMagikIndexerIndexUsages()
+            ? this.getUsedConditions()
+            : Collections.emptySet();
 
         final MethodDefinition methodDefinition = new MethodDefinition(
             location,

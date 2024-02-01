@@ -16,6 +16,7 @@ import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
@@ -52,8 +53,9 @@ public class MagikLint {
      * Build context for a file.
      * @param path Path to file
      * @return Visitor context for file.
+     * @throws IOException
      */
-    private MagikFile buildMagikFile(final Path path) {
+    private MagikFile buildMagikFile(final Path path)  {
         final Charset charset = FileCharsetDeterminer.determineCharset(path);
 
         byte[] encoded = null;
@@ -65,7 +67,15 @@ public class MagikLint {
 
         final URI uri = path.toUri();
         final String fileContents = new String(encoded, charset);
-        return new MagikFile(uri, fileContents);
+        final MagikAnalysisConfiguration configuration;
+        try {
+            configuration = new MagikAnalysisConfiguration();
+        } catch (final IOException exception) {
+            LOGGER.error("Unable to create magik file", exception);
+            throw new IllegalStateException(exception);
+        }
+
+        return new MagikFile(configuration, uri, fileContents);
     }
 
     /**

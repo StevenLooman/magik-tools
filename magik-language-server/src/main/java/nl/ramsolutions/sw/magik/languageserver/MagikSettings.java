@@ -29,7 +29,7 @@ public final class MagikSettings {  // NOSONAR
     private static final String SHOW_ARGUMENT_INLAY_HINTS = "showArgumentInlayHints";
     private static final String ENABLE_CHECKS = "enableChecks";
     private static final String OVERRIDE_CONFIG_FILE = "overrideConfigFile";
-    private static final String ENABLE_USAGES_INDEXING = "enableUsagesIndexing";
+    private static final String INDEX_USAGES = "indexUsages";
 
     private JsonObject settings = new JsonObject();
 
@@ -188,11 +188,11 @@ public final class MagikSettings {  // NOSONAR
     }
 
     /**
-     * Get magik.typing.usagesIndexingEnabled, defaults to false if no config is provided.
+     * Get magik.typing.indexUsages, defaults to false if no config is provided.
      * @return
      */
     @CheckForNull
-    public Boolean getTypingUsagesIndexingEnabled() {
+    public Boolean getTypingIndexUsages() {
         final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
         if (magik == null) {
             return false;
@@ -203,12 +203,12 @@ public final class MagikSettings {  // NOSONAR
             return false;
         }
 
-        final JsonElement enableUsagesIndexing = typing.get(ENABLE_USAGES_INDEXING);
-        if (enableUsagesIndexing == null) {
+        final JsonElement indexUsages = typing.get(INDEX_USAGES);
+        if (indexUsages == null) {
             return false;
         }
 
-        return enableUsagesIndexing.getAsBoolean();
+        return indexUsages.getAsBoolean();
     }
 
     /**
