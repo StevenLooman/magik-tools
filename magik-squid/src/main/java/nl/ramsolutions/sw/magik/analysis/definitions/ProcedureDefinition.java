@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -34,9 +33,9 @@ public class ProcedureDefinition extends TypeStringDefinition {
     private final List<ParameterDefinition> parameters;
     private final ExpressionResultString returnTypes;
     private final ExpressionResultString loopTypes;
-    private final Set<GlobalUsage> usedGlobals = new HashSet<>();
-    private final Set<MethodUsage> usedMethods = new HashSet<>();
-    private final Set<ConditionUsage> usedConditions = new HashSet<>();
+    private final Set<GlobalUsage> usedGlobals;
+    private final Set<MethodUsage> usedMethods;
+    private final Set<ConditionUsage> usedConditions;
 
     /**
      * Constructor.
@@ -69,6 +68,48 @@ public class ProcedureDefinition extends TypeStringDefinition {
         this.parameters = List.copyOf(parameters);
         this.returnTypes = returnTypes;
         this.loopTypes = loopTypes;
+        this.usedGlobals = Collections.emptySet();
+        this.usedMethods = Collections.emptySet();
+        this.usedConditions = Collections.emptySet();
+    }
+
+    /**
+     * Constructor.
+     * @param moduleName Module name.
+     * @param node Node.
+     * @param modifiers Modifiers.
+     * @param typeName Type name.
+     * @param procedureName Procedure name.
+     * @param parameters Parameters.
+     * @param doc Doc.
+     * @param returnTypes Return types.
+     * @param loopTypes Loop types.
+     */
+    @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+    public ProcedureDefinition(
+            final @Nullable Location location,
+            final @Nullable String moduleName,
+            final @Nullable String doc,
+            final @Nullable AstNode node,
+            final Set<Modifier> modifiers,
+            final TypeString typeName,
+            final @Nullable String procedureName,
+            final List<ParameterDefinition> parameters,
+            final ExpressionResultString returnTypes,
+            final ExpressionResultString loopTypes,
+            final Set<GlobalUsage> usedGlobals,
+            final Set<MethodUsage> usedMethods,
+            final Set<ConditionUsage> usedConditions) {
+        super(location, moduleName, doc, node);
+        this.modifiers = Set.copyOf(modifiers);
+        this.typeName = typeName;
+        this.procedureName = procedureName;
+        this.parameters = List.copyOf(parameters);
+        this.returnTypes = returnTypes;
+        this.loopTypes = loopTypes;
+        this.usedGlobals = Collections.unmodifiableSet(usedGlobals);
+        this.usedMethods = Collections.unmodifiableSet(usedMethods);
+        this.usedConditions = Collections.unmodifiableSet(usedConditions);
     }
 
     public Set<Modifier> getModifiers() {
@@ -137,7 +178,10 @@ public class ProcedureDefinition extends TypeStringDefinition {
                 .map(ParameterDefinition::getWithoutNode)
                 .collect(Collectors.toList()),
             this.returnTypes,
-            this.loopTypes);
+            this.loopTypes,
+            this.usedGlobals,
+            this.usedMethods,
+            this.usedConditions);
     }
 
     @Override

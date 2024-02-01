@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik;
 
 import java.net.URI;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.DefinitionKeeperTypeKeeperAdapter;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
@@ -18,11 +19,30 @@ public class MagikTypedFile extends MagikFile {
 
     /**
      * Constructor.
+     * @param configuration Magik analysis configuration.
      * @param uri URI.
      * @param text Text.
      * @param definitionKeeper {@link IDefinitionKeeper}.
      */
-    public MagikTypedFile(final URI uri, final String text, final IDefinitionKeeper definitionKeeper) {
+    public MagikTypedFile(
+            final MagikAnalysisConfiguration configuration,
+            final URI uri,
+            final String text,
+            final IDefinitionKeeper definitionKeeper) {
+        super(configuration, uri, text);
+        this.definitionKeeper = definitionKeeper;
+    }
+
+    /**
+     * Constructor.
+     * @param uri URI.
+     * @param text Text.
+     * @param definitionKeeper {@link IDefinitionKeeper}.
+     */
+    public MagikTypedFile(
+            final URI uri,
+            final String text,
+            final IDefinitionKeeper definitionKeeper) {
         super(uri, text);
         this.definitionKeeper = definitionKeeper;
     }

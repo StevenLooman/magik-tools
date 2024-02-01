@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader;
@@ -47,6 +48,7 @@ public class MagikWorkspaceService implements WorkspaceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikWorkspaceService.class);
 
     private final MagikLanguageServer languageServer;
+    private final MagikAnalysisConfiguration analysisConfiguration;
     private final IDefinitionKeeper definitionKeeper;
     private final IgnoreHandler ignoreHandler;
     private final ProductIndexer productIndexer;
@@ -58,9 +60,14 @@ public class MagikWorkspaceService implements WorkspaceService {
      * Constructor.
      * @param languageServer Owner language server.
      * @param definitionKeeper {@link IDefinitionKeeper} used for definition storage.
+     * @throws IOException
      */
-    public MagikWorkspaceService(final MagikLanguageServer languageServer, final IDefinitionKeeper definitionKeeper) {
+    public MagikWorkspaceService(
+            final MagikLanguageServer languageServer,
+            final MagikAnalysisConfiguration analysisConfiguration,
+            final IDefinitionKeeper definitionKeeper) {
         this.languageServer = languageServer;
+        this.analysisConfiguration = analysisConfiguration;
         this.definitionKeeper = definitionKeeper;
 
         this.ignoreHandler = new IgnoreHandler();
@@ -87,6 +94,10 @@ public class MagikWorkspaceService implements WorkspaceService {
 
         LOGGER.debug("New settings: {}", settings);
         MagikSettings.INSTANCE.setSettings(settings);
+
+        // Update magik analysis settings.
+        final boolean magikIndexerIndexUsages = MagikSettings.INSTANCE.getTypingIndexUsages();
+        this.analysisConfiguration.setMagikIndexerIndexUsages(magikIndexerIndexUsages);
 
         this.runIndexersInBackground();
     }
@@ -132,7 +143,7 @@ public class MagikWorkspaceService implements WorkspaceService {
             try {
                 LOGGER.debug("Running MagikIndexer from: {}", workspaceFolder.getUri());
                 final Stream<Path> indexableFiles = this.getIndexableFiles(workspaceFolder);
-                this.magikIndexer.indexPaths(indexableFiles);
+                this.magikIndexer.indexPaths(this.analysisConfiguration, indexableFiles);
             } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
             }
@@ -225,9 +236,9 @@ public class MagikWorkspaceService implements WorkspaceService {
         }
 
         if (fileEvent.getType() == FileChangeType.Created) {
-            this.magikIndexer.indexPathCreated(path);
+            this.magikIndexer.indexPathCreated(this.analysisConfiguration, path);
         } else if (fileEvent.getType() == FileChangeType.Changed) {
-            this.magikIndexer.indexPathChanged(path);
+            this.magikIndexer.indexPathChanged(this.analysisConfiguration, path);
         } else if (fileEvent.getType() == FileChangeType.Deleted) {
             this.magikIndexer.indexPathDeleted(path);
         }

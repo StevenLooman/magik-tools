@@ -231,7 +231,11 @@ public class MethodDefinition extends Definition {
                 ? this.assignmentParameter.getWithoutNode()
                 : null,
             this.returnTypes,
-            this.loopTypes);
+            this.loopTypes,
+            this.usedGlobals,
+            this.usedMethods,
+            this.usedSlots,
+            this.usedConditions);
     }
 
     @Override

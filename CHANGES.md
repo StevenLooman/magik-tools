@@ -17,6 +17,7 @@
 - Add TodoComment check.
 - Fixes to checks metadata.
 - Refactoring/renaming of typed checks.
+- Make indexing usages toggable via `magik.typing.indexUsages`.
 - Minor fixes.
 
 0.8.3 (2024-01-05)

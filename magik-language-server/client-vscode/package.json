@@ -12,6 +12,7 @@
 	"categories": [
 		"Programming Languages",
 		"Debuggers",
+		"Testing",
 		"Linters",
 		"Formatters",
 		"Snippets"
@@ -241,6 +242,11 @@
 					"description": "Enable typing checks.",
 					"type": "boolean",
 					"default": false
+				},
+				"magik.typing.indexUsages": {
+					"description": "Enable indexing of usages of globals/methods/slots/conditions by methods.",
+					"type": "boolean",
+					"default": true
 				}
 			}
 		}

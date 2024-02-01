@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
@@ -98,8 +99,10 @@ public class MagikTextDocumentService implements TextDocumentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikTextDocumentService.class);
 
     private final MagikLanguageServer languageServer;
-    private final Map<TextDocumentIdentifier, MagikTypedFile> openFiles = new HashMap<>();
+    private final MagikAnalysisConfiguration analysisConfiguration;
     private final IDefinitionKeeper definitionKeeper;
+
+    private final Map<TextDocumentIdentifier, MagikTypedFile> openFiles = new HashMap<>();
 
     private final HoverProvider hoverProvider;
     private final ImplementationProvider implementationProvider;
@@ -125,8 +128,10 @@ public class MagikTextDocumentService implements TextDocumentService {
      */
     public MagikTextDocumentService(
             final MagikLanguageServer languageServer,
+            final MagikAnalysisConfiguration analysisConfiguration,
             final IDefinitionKeeper definitionKeeper) {
         this.languageServer = languageServer;
+        this.analysisConfiguration = analysisConfiguration;
         this.definitionKeeper = definitionKeeper;
 
         this.hoverProvider = new HoverProvider();
@@ -181,7 +186,8 @@ public class MagikTextDocumentService implements TextDocumentService {
         final URI uri = URI.create(uriStr);
         final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uriStr);
         final String text = textDocument.getText();
-        final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.definitionKeeper);
+        final MagikTypedFile openFile =
+            new MagikTypedFile(this.analysisConfiguration, uri, text, this.definitionKeeper);
         this.openFiles.put(textDocumentIdentifier, openFile);
 
         // Publish diagnostics to client.
@@ -200,7 +206,8 @@ public class MagikTextDocumentService implements TextDocumentService {
         final String uriStr = versionedTextDocumentIdentifier.getUri();
         final URI uri = URI.create(uriStr);
         final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uriStr);
-        final MagikTypedFile openFile = new MagikTypedFile(uri, text, this.definitionKeeper);
+        final MagikTypedFile openFile =
+            new MagikTypedFile(this.analysisConfiguration, uri, text, this.definitionKeeper);
         this.openFiles.put(textDocumentIdentifier, openFile);
 
         // Publish diagnostics to client.

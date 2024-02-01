@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.indexer;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -41,7 +42,7 @@ class MagikIndexerTest {
         final Path fixedPath = this.getPath(path).toAbsolutePath();
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
-        magikIndexer.indexPathCreated(fixedPath);
+        magikIndexer.indexPathCreated(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, fixedPath);
 
         // Test exemplar.
         final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
@@ -106,7 +107,7 @@ class MagikIndexerTest {
         final Path fixedPath = this.getPath(path).toAbsolutePath();
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
-        magikIndexer.indexPathCreated(fixedPath);
+        magikIndexer.indexPathCreated(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, fixedPath);
 
         // Test exemplar.
         final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
@@ -167,10 +168,10 @@ class MagikIndexerTest {
         final Path fixedPath = this.getPath(path).toAbsolutePath();
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
-        magikIndexer.indexPathCreated(fixedPath);
+        magikIndexer.indexPathCreated(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, fixedPath);
 
         // Pretend update.
-        magikIndexer.indexPathChanged(fixedPath);
+        magikIndexer.indexPathChanged(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, fixedPath);
 
         // Test type.
         final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
@@ -197,7 +198,7 @@ class MagikIndexerTest {
         final Path fixedPath = this.getPath(path).toAbsolutePath();
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
         final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
-        magikIndexer.indexPathCreated(fixedPath);
+        magikIndexer.indexPathCreated(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, fixedPath);
 
         // Test type.
         final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");

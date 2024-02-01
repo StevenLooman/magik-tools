@@ -81,6 +81,20 @@ public class MagikToolsProperties {
     }
 
     /**
+     * Set property.
+     * @param key Key of property.
+     * @param value Value of property.
+     */
+    public void setProperty(final String key, @Nullable final Boolean value) {
+        if (value == null) {
+            this.properties.remove(key);
+        } else {
+            final String valueStr = Boolean.toString(value);
+            this.properties.setProperty(key, valueStr);
+        }
+    }
+
+    /**
      * Get property.
      * @param key Key of property.
      * @return Value of property.

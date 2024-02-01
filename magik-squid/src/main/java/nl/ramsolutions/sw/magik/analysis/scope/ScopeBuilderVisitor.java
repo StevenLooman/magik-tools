@@ -39,6 +39,18 @@ public class ScopeBuilderVisitor extends MagikVisitor {
         return this.globalScope;
     }
 
+    /**
+     * Create the {@link GlobalScope} for the given node.
+     * To be used when not fully analyzing a file/tree, but only a specific part, like a METHOD_DEFINITION.
+     * @param node Any {@link AstNode}, the top of the tree will be derived automatically.
+     */
+    public void createGlobalScope(final AstNode node) {
+        final AstNode magikNode = node.is(MagikGrammar.MAGIK)
+            ? node
+            : node.getFirstAncestor(MagikGrammar.MAGIK);
+        this.walkPreMagik(magikNode);
+    }
+
     @Override
     protected void walkPreMagik(final AstNode node) {
         this.globalScope = new GlobalScope(this.scopeIndex, node);
@@ -51,8 +63,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
     protected void walkPreBody(final AstNode node) {
         // Push new scope.
         final AstNode parentNode = node.getParent();
-        if (parentNode.is(MagikGrammar.METHOD_DEFINITION)
-            || parentNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
+        if (parentNode.is(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION)) {
             this.walkPreBodyMethodProcDefinition(node, parentNode);
         } else if (parentNode.is(MagikGrammar.WHEN)) {
             this.walkPreBodyWhen(node, parentNode);
