@@ -44,12 +44,11 @@ public class ScopeEntryTypeRestriction implements TypeRestriction {
      */
     public Map.Entry<ScopeEntry, AbstractType> getRestriction() {
         final TypeString restrictedTypeString = this.restrictedType.getTypeString();
+        // Unset/Maybe: No doubt, restricted type is a very specific type.
+        // Undefined: Reasoned type of scope entry is undefined, we are narrowing it now.
         if (restrictedTypeString.equals(TypeString.SW_UNSET)
-            || restrictedTypeString.equals(TypeString.SW_MAYBE)) {
-            // No doubt, restricted type is a very specific type.
-            return Map.entry(this.scopeEntry, this.restrictedType);
-        } else if (this.unrestrictedType == UndefinedType.INSTANCE) {
-            // Reasoned type of scope entry is undefined, we are narrowing it now.
+            || restrictedTypeString.equals(TypeString.SW_MAYBE)
+            || this.unrestrictedType == UndefinedType.INSTANCE) {
             return Map.entry(this.scopeEntry, this.restrictedType);
         }
 

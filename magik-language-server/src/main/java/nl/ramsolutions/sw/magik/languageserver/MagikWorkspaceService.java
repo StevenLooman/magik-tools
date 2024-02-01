@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -96,7 +97,9 @@ public class MagikWorkspaceService implements WorkspaceService {
         MagikSettings.INSTANCE.setSettings(settings);
 
         // Update magik analysis settings.
-        final boolean magikIndexerIndexUsages = MagikSettings.INSTANCE.getTypingIndexUsages();
+        final boolean magikIndexerIndexUsages = Objects.requireNonNullElse(
+            MagikSettings.INSTANCE.getTypingIndexUsages(),
+            false);
         this.analysisConfiguration.setMagikIndexerIndexUsages(magikIndexerIndexUsages);
 
         this.runIndexersInBackground();
