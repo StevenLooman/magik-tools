@@ -71,7 +71,6 @@ public class MagikLint {
         try {
             configuration = new MagikAnalysisConfiguration();
         } catch (final IOException exception) {
-            LOGGER.error("Unable to create magik file", exception);
             throw new IllegalStateException(exception);
         }
 

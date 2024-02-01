@@ -179,6 +179,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
             final AstNode identifierNode = assignedNode.getFirstChild(MagikGrammar.IDENTIFIER);
             if (identifierNode != null) {
                 final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
+                Objects.requireNonNull(scopeEntry);
                 this.state.setCurrentScopeEntryNode(scopeEntry, assignedNode);
             }
         }
