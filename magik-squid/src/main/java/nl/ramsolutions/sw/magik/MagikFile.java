@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -29,6 +30,7 @@ import nl.ramsolutions.sw.magik.parser.MagikParser;
  */
 public class MagikFile {
 
+    private final MagikAnalysisConfiguration configuration;
     private final URI uri;
     private final String source;
     private AstNode astNode;
@@ -45,6 +47,16 @@ public class MagikFile {
      * @param source Source.
      */
     public MagikFile(final URI uri, final String source) {
+        this(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, uri, source);
+    }
+
+    /**
+     * Constructor.
+     * @param uri URI.
+     * @param source Source.
+     */
+    public MagikFile(final MagikAnalysisConfiguration configuration, final URI uri, final String source) {
+        this.configuration = configuration;
         this.uri = uri;
         this.source = source;
     }
@@ -54,7 +66,8 @@ public class MagikFile {
      * @param path File to read.
      * @throws IOException -
      */
-    public MagikFile(final Path path) throws IOException {
+    public MagikFile(final MagikAnalysisConfiguration configuration, final Path path) throws IOException {
+        this.configuration = configuration;
         this.uri = path.toUri();
         final Charset charset = FileCharsetDeterminer.determineCharset(path);
         this.source = Files.readString(path, charset);
@@ -119,7 +132,7 @@ public class MagikFile {
      */
     public synchronized List<Definition> getDefinitions() {
         if (this.definitions == null) {
-            final DefinitionReader definitionReader = new DefinitionReader();
+            final DefinitionReader definitionReader = new DefinitionReader(this.configuration);
             final AstNode topNode = this.getTopNode();
             definitionReader.walkAst(topNode);
             this.definitions = definitionReader.getDefinitions();

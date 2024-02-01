@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
@@ -43,13 +44,17 @@ public class MagikIndexer {
 
     /**
      * Index all magik file(s).
+     * @param analysisConfiguration Analysis configuration.
      * @param paths Paths to index.
      * @throws IOException -
      */
-    public void indexPaths(final Stream<Path> paths) throws IOException {
+    public void indexPaths(
+            final MagikAnalysisConfiguration analysisConfiguration,
+            final Stream<Path> paths)
+            throws IOException {
         paths
             .filter(path -> path.toString().toLowerCase().endsWith(".magik"))
-            .forEach(this::indexPathCreated);
+            .forEach(path -> this.indexPathCreated(analysisConfiguration, path));
     }
 
     /**
@@ -57,12 +62,12 @@ public class MagikIndexer {
      * @param path Path to magik file.
      */
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void indexPathCreated(final Path path) {
+    public void indexPathCreated(final MagikAnalysisConfiguration analysisConfiguration, final Path path) {
         LOGGER.debug("Scanning created file: {}", path);
 
         try {
             this.scrubDefinitions(path);
-            this.readDefinitions(path);
+            this.readDefinitions(analysisConfiguration, path);
         } catch (final Exception exception) {
             LOGGER.error("Error indexing created file: " + path, exception);
         }
@@ -73,12 +78,12 @@ public class MagikIndexer {
      * @param path Path to magik file.
      */
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public void indexPathChanged(final Path path) {
+    public void indexPathChanged(final MagikAnalysisConfiguration analysisConfiguration, final Path path) {
         LOGGER.debug("Scanning changed file: {}", path);
 
         try {
             this.scrubDefinitions(path);
-            this.readDefinitions(path);
+            this.readDefinitions(analysisConfiguration, path);
         } catch (final Exception exception) {
             LOGGER.error("Error indexing changed file: " + path, exception);
         }
@@ -148,7 +153,7 @@ public class MagikIndexer {
      * Read definitions from path.
      * @param path Path to magik file.
      */
-    private void readDefinitions(final Path path) {
+    private void readDefinitions(final MagikAnalysisConfiguration analysisConfiguration, final Path path) {
         this.indexedMethods.put(path, new HashSet<>());
         this.indexedGlobals.put(path, new HashSet<>());
         this.indexedBinaryOperators.put(path, new HashSet<>());
@@ -162,7 +167,7 @@ public class MagikIndexer {
                 LOGGER.warn("Ignoring file: {}, due to size: {}, max size: {}", path, size, MagikIndexer.MAX_SIZE);
             }
 
-            final MagikFile magikFile = new MagikFile(path);
+            final MagikFile magikFile = new MagikFile(analysisConfiguration, path);
             magikFile.getDefinitions()
                 .forEach(definition -> this.handleDefinition(magikFile, definition));
         } catch (final IOException exception) {

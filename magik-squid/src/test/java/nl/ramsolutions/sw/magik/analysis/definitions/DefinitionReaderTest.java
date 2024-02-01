@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
@@ -24,7 +25,7 @@ class DefinitionReaderTest {
     void testPackageDefintion() {
         final String code = "def_package(:test)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -41,7 +42,7 @@ class DefinitionReaderTest {
     void testPackageDefintionUses() {
         final String code = "def_package(:test, :uses, {:p1, :p2})";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -58,7 +59,7 @@ class DefinitionReaderTest {
     void testEnumeratorDefintion() {
         final String code = "sw:def_enumeration(:test_enum, _false, :a)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -74,7 +75,7 @@ class DefinitionReaderTest {
     void testDefSlottedExemplar() {
         final String code = "def_slotted_exemplar(:test_exemplar, {{:slot1, _unset}, {:slot2, _unset}})";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -97,7 +98,7 @@ class DefinitionReaderTest {
     void testDefSlottedExemplarSlotAccessMethods() {
         final String code = "def_slotted_exemplar(:test_exemplar, {{:slot1, _unset, :writable, :read_only}})";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -135,7 +136,7 @@ class DefinitionReaderTest {
     void testDefSlottedExemplarParentsSingle() {
         final String code = "def_slotted_exemplar(:test_exemplar, {}, @sw:rope)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -153,7 +154,7 @@ class DefinitionReaderTest {
     void testDefSlottedExemplarParentsMultiple() {
         final String code = "def_slotted_exemplar(:test_exemplar, {}, {:mixin1, :rope})";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -172,7 +173,7 @@ class DefinitionReaderTest {
     void testDefIndexeExemplar() {
         final String code = "def_indexed_exemplar(:test_exemplar, _unset, {:mixin1, :integer})";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -190,7 +191,7 @@ class DefinitionReaderTest {
     void testDefMixin() {
         final String code = "def_mixin(:test_mixin, :mixin1)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -206,7 +207,7 @@ class DefinitionReaderTest {
     void testDefineBinaryOperatorCase() {
         final String code = "define_binary_operator_case(:|>|, integer, float, _proc(a, b) _endproc)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -224,7 +225,7 @@ class DefinitionReaderTest {
     void testMethodDefinition() {  // NOSONAR
         final String code = "_method a.b _endmethod";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -241,7 +242,7 @@ class DefinitionReaderTest {
     void testMethodDefinitionSyntaxError() {
         final String code = "_method a.b _a _endmethod";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -252,7 +253,7 @@ class DefinitionReaderTest {
     void testMethodDefinitionPrivateAbstractIter() {
         final String code = "_abstract _private _iter _method a.b() _endmethod";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -272,7 +273,7 @@ class DefinitionReaderTest {
     void testMethodDefinitionParameters() {
         final String code = "_method a.b(a, _optional b, c, _gather d) << z _endmethod";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -312,7 +313,7 @@ class DefinitionReaderTest {
     void testDefineSlotAccess() {  // NOSONAR
         final String code = "test_exemplar.define_slot_access(:slot1, :readable, :public)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -329,7 +330,7 @@ class DefinitionReaderTest {
     void testDefineSlotExternallyReadable() {  // NOSONAR
         final String code = "test_exemplar.define_slot_externally_readable(:slot1)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -346,7 +347,7 @@ class DefinitionReaderTest {
     void testDefineSlotExternallyReadablePublic() {  // NOSONAR
         final String code = "test_exemplar.define_slot_externally_readable(:slot1, :public)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -363,7 +364,7 @@ class DefinitionReaderTest {
     void testDefineSlotExternallyWritable() {
         final String code = "test_exemplar.define_slot_externally_writable(:slot1, :public)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -392,7 +393,7 @@ class DefinitionReaderTest {
     void testDefineSharedVariable() {
         final String code = "test_exemplar.define_shared_variable(:var1, 1, :readonly)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -428,7 +429,7 @@ class DefinitionReaderTest {
     void testDefineSharedConstant() {
         final String code = "test_exemplar.define_shared_constant(:const1, 1, :private)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -445,7 +446,7 @@ class DefinitionReaderTest {
     void testDefineSharedConstant2() {
         final String code = "test_exemplar.define_shared_constant(:const1, 1, _false)";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -462,7 +463,7 @@ class DefinitionReaderTest {
     void testAssignGlobal() {
         final String code = "_global g << _unset";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -477,7 +478,7 @@ class DefinitionReaderTest {
     void testParseCondition() {
         final String code = "condition.define_condition(:cond1, :information, {:data1, :data2})";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
@@ -498,7 +499,7 @@ class DefinitionReaderTest {
             + "  condition.define_condition(:cond1, :information, {:data1, :data2})\n"
             + "_endblock";
         final AstNode node = this.parseCode(code);
-        final DefinitionReader reader = new DefinitionReader();
+        final DefinitionReader reader = new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
         reader.walkAst(node);
 
         final List<Definition> definitions = reader.getDefinitions();
