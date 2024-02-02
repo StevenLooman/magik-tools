@@ -1,0 +1,15 @@
+{
+    "title": "Conditional expression does not result in true/false",
+    "type": "BUG",
+    "status": "ready",
+    "remediation": {
+      "func": "Constant\/Issue",
+      "constantCost": "15min"
+    },
+    "tags": [
+      "error"
+    ],
+    "defaultSeverity": "Major",
+    "ruleSpecification": "ConditionalExpressionIsFalse",
+    "sqKey": "conditional-expression-is-false"
+  }

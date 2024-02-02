@@ -18,6 +18,7 @@
 - Fixes to checks metadata.
 - Refactoring/renaming of typed checks.
 - Make indexing usages toggable via `magik.typing.indexUsages`.
+- Add ConditionalExpressionIsFalseTypedCheck to test if a conditional expression results in a `sw:false` type.
 - Minor fixes.
 
 0.8.3 (2024-01-05)
