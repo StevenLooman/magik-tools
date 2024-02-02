@@ -7,6 +7,7 @@ import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckFixer;
 import nl.ramsolutions.sw.magik.checks.checks.TypeDocCheck;
+import nl.ramsolutions.sw.magik.typedchecks.checks.ConditionalExpressionIsFalseTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.GlobalExistsTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.MethodArgumentCountMatchesParameterCountTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.MethodArgumentTypeMatchesParameterTypeTypedCheck;
@@ -32,6 +33,7 @@ public final class CheckList {
      */
     public static List<Class<?>> getChecks() {
         return List.of(
+            ConditionalExpressionIsFalseTypedCheck.class,
             GlobalExistsTypedCheck.class,
             MethodArgumentCountMatchesParameterCountTypedCheck.class,
             MethodArgumentTypeMatchesParameterTypeTypedCheck.class,
