@@ -1,16 +1,16 @@
 {
-    "title": "Global exists",
-    "type": "BUG",
-    "status": "ready",
-    "remediation": {
-      "func": "Constant\/Issue",
-      "constantCost": "5min"
-    },
-    "tags": [
-      "bugrisk",
-      "typing"
-    ],
-    "defaultSeverity": "Major",
-    "ruleSpecification": "GlobalExists",
-    "sqKey": "global-exists"
-  }
+  "title": "Global exists",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "GlobalExists",
+  "sqKey": "global-exists"
+}
