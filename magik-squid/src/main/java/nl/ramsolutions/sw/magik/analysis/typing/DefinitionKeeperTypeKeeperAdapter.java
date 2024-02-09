@@ -1,6 +1,9 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -255,58 +258,55 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
         searchTypeString.getGenerics().stream()
             .forEach(genTypeStr -> magikType.addGenericDefinition(null, genTypeStr));
 
-        // Add methods.
+        // Add methods from ExemplarDefinition.
         final TypeString bareDefinitionTypeString = definitionTypeString.getWithoutGenerics();
         this.definitionKeeper.getMethodDefinitions(bareDefinitionTypeString).stream()
             .forEach(methodDef -> {
-                final Method method = magikType.addMethod(
-                    methodDef.getLocation(),
-                    methodDef.getModuleName(),
-                    methodDef.getModifiers().stream()
-                        .map(DefinitionKeeperTypeKeeperAdapter.METHOD_MODIFIER_MAPPING::get)
-                        .collect(Collectors.toSet()),
-                    methodDef.getMethodName(),
-                    methodDef.getParameters().stream()
-                        .map(paramDef -> new Parameter(
-                            paramDef.getLocation(),
-                            paramDef.getName(),
-                            DefinitionKeeperTypeKeeperAdapter.PARAMETER_MODIFIER_MAPPING.get(paramDef.getModifier()),
-                            paramDef.getTypeName()))
-                        .collect(Collectors.toList()),
-                    methodDef.getAssignmentParameter() != null
-                        ? new Parameter(
-                            methodDef.getAssignmentParameter().getLocation(),
-                            methodDef.getAssignmentParameter().getName(),
-                            DefinitionKeeperTypeKeeperAdapter.PARAMETER_MODIFIER_MAPPING.get(
-                                methodDef.getAssignmentParameter().getModifier()),
-                            methodDef.getAssignmentParameter().getTypeName())
-                        : null,
-                    methodDef.getDoc(),
-                    methodDef.getReturnTypes(),
-                    methodDef.getLoopTypes());
-
-                methodDef.getUsedGlobals().forEach(globalUsage ->
-                    method.addUsedGlobal(
-                        new Method.GlobalUsage(
-                            globalUsage.getTypeName(),
-                            globalUsage.getLocation())));
-                methodDef.getUsedMethods().forEach(methodUsage ->
-                    method.addCalledMethod(
-                        new Method.MethodUsage(
-                            methodUsage.getTypeName(),
-                            methodUsage.getMethodName(),
-                            methodUsage.getLocation())));
-                methodDef.getUsedSlots().forEach(slotUsage ->
-                    method.addUsedSlot(
-                        new Method.SlotUsage(
-                            slotUsage.getSlotName(),
-                            slotUsage.getLocation())));
-                methodDef.getUsedConditions().forEach(conditionUsage ->
-                    method.addUsedCondition(
-                        new Method.ConditionUsage(
-                            conditionUsage.getConditionName(),
-                            conditionUsage.getLocation())));
+                this.addMethod(magikType, methodDef);
             });
+
+        // The upper is incomplete. In case a method is defined on `system`, but from package `user`. I.e., on
+        // `user:system`. The resolver resolve resolves use of `system` to `sw:system` and gathers the methods with that
+        // typeref, but does not "see" the methods on `user:system`.
+        // To resolve this, all descendant packages of the package where the exemplar lives should be searched
+        // and tested if there is NOT a `<package>:system`. If so, all the methods should be added as well.
+        final Deque<String> packages = new ArrayDeque<>();
+        final String startPackage = definitionTypeString.getPakkage();
+        packages.push(startPackage);
+
+        final List<PackageDefinition> seen = new ArrayList<>();
+        while (!packages.isEmpty()) {
+            // Find all packages which use the current package.
+            final String packageName = packages.pop();
+            this.definitionKeeper.getPackageDefinitions().stream()
+                .filter(pkgDef -> pkgDef.getUses().contains(packageName))
+                .filter(pkgDef -> !seen.contains(pkgDef))
+                .filter(pkgDef -> {
+                    final String pkgName = pkgDef.getName();
+                    packages.push(pkgName);
+
+                    // Test if the package does not contain an ExemplarDefinition with the specific identifier.
+                    return this.definitionKeeper.getPackageDefinitions(packageName).stream()
+                        .anyMatch(childPkgDef -> {
+                            final String childPkgName = childPkgDef.getName();
+                            final String identifier = definitionTypeString.getIdentifier();
+                            final TypeString childPkgTypeStr = TypeString.ofIdentifier(identifier, childPkgName);
+                            return this.definitionKeeper.getExemplarDefinitions(childPkgTypeStr).isEmpty();
+                        });
+                })
+                .flatMap(pkgDef -> {
+                    // Get all MethodDefinitions from the package.
+                    return this.definitionKeeper.getPackageDefinitions(packageName).stream()
+                        .flatMap(childPkgDef -> {
+                            final String childPkgName = childPkgDef.getName();
+                            final String identifier = definitionTypeString.getIdentifier();
+                            final TypeString childPkgTypeStr = TypeString.ofIdentifier(identifier, childPkgName);
+                            return this.definitionKeeper.getMethodDefinitions(childPkgTypeStr).stream();
+                        });
+                })
+                .distinct()
+                .forEach(methodDef -> this.addMethod(magikType, methodDef));
+        }
 
         return magikType;
     }
@@ -360,6 +360,57 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
             globalDefinition.getModuleName(),
             typeRef,
             aliasedTypeName);
+    }
+
+    private Method addMethod(final MagikType type, final MethodDefinition methodDefinition) {
+        final Method method = type.addMethod(
+            methodDefinition.getLocation(),
+            methodDefinition.getModuleName(),
+            methodDefinition.getModifiers().stream()
+                .map(DefinitionKeeperTypeKeeperAdapter.METHOD_MODIFIER_MAPPING::get)
+                .collect(Collectors.toSet()),
+            methodDefinition.getMethodName(),
+            methodDefinition.getParameters().stream()
+                .map(paramDef -> new Parameter(
+                    paramDef.getLocation(),
+                    paramDef.getName(),
+                    DefinitionKeeperTypeKeeperAdapter.PARAMETER_MODIFIER_MAPPING.get(paramDef.getModifier()),
+                    paramDef.getTypeName()))
+                .collect(Collectors.toList()),
+            methodDefinition.getAssignmentParameter() != null
+                ? new Parameter(
+                    methodDefinition.getAssignmentParameter().getLocation(),
+                    methodDefinition.getAssignmentParameter().getName(),
+                    DefinitionKeeperTypeKeeperAdapter.PARAMETER_MODIFIER_MAPPING.get(
+                        methodDefinition.getAssignmentParameter().getModifier()),
+                    methodDefinition.getAssignmentParameter().getTypeName())
+                : null,
+            methodDefinition.getDoc(),
+            methodDefinition.getReturnTypes(),
+            methodDefinition.getLoopTypes());
+
+        methodDefinition.getUsedGlobals().forEach(globalUsage ->
+            method.addUsedGlobal(
+                new Method.GlobalUsage(
+                    globalUsage.getTypeName(),
+                    globalUsage.getLocation())));
+        methodDefinition.getUsedMethods().forEach(methodUsage ->
+            method.addCalledMethod(
+                new Method.MethodUsage(
+                    methodUsage.getTypeName(),
+                    methodUsage.getMethodName(),
+                    methodUsage.getLocation())));
+        methodDefinition.getUsedSlots().forEach(slotUsage ->
+            method.addUsedSlot(
+                new Method.SlotUsage(
+                    slotUsage.getSlotName(),
+                    slotUsage.getLocation())));
+        methodDefinition.getUsedConditions().forEach(conditionUsage ->
+            method.addUsedCondition(
+                new Method.ConditionUsage(
+                    conditionUsage.getConditionName(),
+                    conditionUsage.getLocation())));
+        return method;
     }
 
     @Override

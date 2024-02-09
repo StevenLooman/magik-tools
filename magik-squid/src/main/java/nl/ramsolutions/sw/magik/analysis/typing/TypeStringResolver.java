@@ -36,7 +36,7 @@ public class TypeStringResolver {
         final String startPackage = typeString.getPakkage();
         packages.push(startPackage);
 
-        // Iterate through package structure and find exemplar definitions.
+        // Iterate through package structure.
         final List<PackageDefinition> seen = new ArrayList<>();
         while (!packages.isEmpty()) {
             final String packageName = packages.pop();
