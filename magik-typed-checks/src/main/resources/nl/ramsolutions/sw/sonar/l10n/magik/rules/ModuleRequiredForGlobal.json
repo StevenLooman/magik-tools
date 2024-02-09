@@ -1,0 +1,16 @@
+{
+  "title": "Module required for used global",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "ModuleRequiredForGlobal",
+  "sqKey": "module-required-for-global"
+}

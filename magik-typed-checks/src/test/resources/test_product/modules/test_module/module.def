@@ -1,0 +1,5 @@
+test_module 1
+
+requires
+    super_test_module
+end

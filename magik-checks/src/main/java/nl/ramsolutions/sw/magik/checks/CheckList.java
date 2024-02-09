@@ -60,7 +60,7 @@ public final class CheckList {
      * Get the list of {@link MagikCheck}s.
      * @return List of {@link MagikCheck}s.
      */
-    public static List<Class<?>> getChecks() {
+    public static List<Class<? extends MagikCheck>> getChecks() {
         return List.of(
             CommentedCodeCheck.class,
             DuplicateMethodInFileCheck.class,
@@ -103,7 +103,7 @@ public final class CheckList {
      * Get the {@link MagikCheck}s which have a {@link MagikCheckFixer}.
      * @return
      */
-    public static Map<Class<?>, List<Class<?>>> getFixers() {
+    public static Map<Class<? extends MagikCheck>, List<Class<? extends MagikCheckFixer>>> getFixers() {
         return Map.of();
     }
 
@@ -111,7 +111,7 @@ public final class CheckList {
      * Get {@link MagikCheck}s which are disabled by default.
      * @return List of {@link MagikCheck}s.
      */
-    public static List<Class<?>> getDisabledByDefaultChecks() {
+    public static List<Class<? extends MagikCheck>> getDisabledByDefaultChecks() {
         return getChecks().stream()
             .filter(checkClass -> checkClass.getAnnotation(DisabledByDefault.class) != null)
             .collect(Collectors.toList());

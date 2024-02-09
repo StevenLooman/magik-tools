@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
@@ -22,30 +23,42 @@ import nl.ramsolutions.sw.magik.checks.MagikCheck;
 public class MagikTypedCheck extends MagikCheck {
 
     /**
-     * Get LocalTypeReasoner.
-     * @return LocalTypeReasner.
+     * Get the {@link MagikTypedFile}.
+     * @return Magik typed file.
      */
-    protected LocalTypeReasonerState getTypeReasonerState() {
+    protected MagikTypedFile getMagikTypedFile() {
         final MagikFile magikFile = this.getMagikFile();
         if (!(magikFile instanceof MagikTypedFile)) {
             throw new IllegalStateException();
         }
 
-        final MagikTypedFile magikTypedFile = (MagikTypedFile) magikFile;
+        return (MagikTypedFile) magikFile;
+    }
+
+    /**
+     * Get {@link IDefinitionKeeper}.
+     * @return Definition keeper.
+     */
+    protected IDefinitionKeeper getDefinitionKeeper() {
+        final MagikTypedFile magikTypedFile = this.getMagikTypedFile();
+        return magikTypedFile.getDefinitionKeeper();
+    }
+
+    /**
+     * Get {@link LocalTypeReasonerState}, after reasoning.
+     * @return LocalTypeReasonerState.
+     */
+    protected LocalTypeReasonerState getTypeReasonerState() {
+        final MagikTypedFile magikTypedFile = this.getMagikTypedFile();
         return magikTypedFile.getTypeReasonerState();
     }
 
     /**
-     * Get ITypeKeeper.
+     * Get {@link ITypeKeeper}.
      * @return ITypeKeeper.
      */
     protected ITypeKeeper getTypeKeeper() {
-        final MagikFile magikFile = this.getMagikFile();
-        if (!(magikFile instanceof MagikTypedFile)) {
-            throw new IllegalStateException();
-        }
-
-        final MagikTypedFile magikTypedFile = (MagikTypedFile) magikFile;
+        final MagikTypedFile magikTypedFile = this.getMagikTypedFile();
         final ITypeKeeper typeKeeper = magikTypedFile.getTypeKeeper();
         return new ReadOnlyTypeKeeperAdapter(typeKeeper);
     }

@@ -8,11 +8,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionGrammar;
 import nl.ramsolutions.sw.definitions.parser.SwModuleDefParser;
@@ -164,10 +166,17 @@ public final class ModuleDefinitionScanner {
         final String currentVersion = currentVersionNode != null
             ? currentVersionNode.getTokenValue()
             : null;
+        final AstNode requiresNode = node.getFirstChild(SwModuleDefinitionGrammar.REQUIRES);
+        final List<String> requireds = requiresNode != null
+            ? requiresNode
+                .getDescendants(SwModuleDefinitionGrammar.MODULE_REF).stream()
+                .map(AstNode::getTokenValue)
+                .collect(Collectors.toList())
+            : Collections.emptyList();
 
         final URI uri = path.toUri();
         final Location location = new Location(uri);
-        return new ModuleDefinition(location, moduleName, baseVersion, currentVersion);
+        return new ModuleDefinition(location, moduleName, baseVersion, currentVersion, requireds);
     }
 
     /**

@@ -19,6 +19,7 @@
 - Refactoring/renaming of typed checks.
 - Make indexing usages toggable via `magik.typing.indexUsages`.
 - Add ConditionalExpressionIsFalseTypedCheck to test if a conditional expression results in a `sw:false` type.
+- Add ModuleRequiredForGlobalTypedCheck to test if the source module is required, when a global is used.
 - Minor fixes.
 
 0.8.3 (2024-01-05)
