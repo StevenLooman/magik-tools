@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
@@ -596,6 +597,143 @@ class ConditionalBodyHandlerTest {
         final ExpressionResult result0 = reasonerState.getNodeType(atomNode0);
         final AbstractType type0 = result0.get(0, null);
         assertThat(type0.getTypeString()).isEqualTo(TypeString.UNDEFINED);
+    }
+
+    @Test
+    void testHandleIfReturn() {
+        final String code = ""
+            + "_method object.method(_optional param1)\n"
+            + "  ## @param {sw:symbol} param1\n"
+            + "  _if param1 _is _unset\n"
+            + "  _then\n"
+            + "    show(param1)\n"
+            + "    _return\n"
+            + "  _endif\n"
+            + "  show(param1)\n"
+            + "_endmethod\n";
+
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+
+        final AstNode topNode = magikFile.getTopNode();
+        final List<AstNode> argumentNodes = topNode.getDescendants(MagikGrammar.ARGUMENT);
+
+        final AstNode argumentNode0 = argumentNodes.get(0);
+        final AstNode atomNode0 = argumentNode0.getFirstDescendant(MagikGrammar.ATOM);
+        final ExpressionResult result0 = reasonerState.getNodeType(atomNode0);
+        final AbstractType type0 = result0.get(0, null);
+        assertThat(type0.getTypeString()).isEqualTo(TypeString.SW_UNSET);
+
+        final AstNode argumentNode1 = argumentNodes.get(1);
+        final AstNode atomNode1 = argumentNode1.getFirstDescendant(MagikGrammar.ATOM);
+        final ExpressionResult result1 = reasonerState.getNodeType(atomNode1);
+        final AbstractType type1 = result1.get(0, null);
+        assertThat(type1.getTypeString()).isEqualTo(TypeString.SW_SYMBOL);
+    }
+
+    @Test
+    void testHandleIfRaisesError() {
+        final String code = ""
+            + "_method object.method(_optional param1)\n"
+            + "  ## @param {sw:symbol} param1\n"
+            + "  _if param1 _is _unset\n"
+            + "  _then\n"
+            + "    show(param1)\n"
+            + "    condition.raise(:error)\n"
+            + "  _endif\n"
+            + "  show(param1)\n"
+            + "_endmethod\n";
+
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        definitionKeeper.add(
+            new ConditionDefinition(
+                null,
+                null,
+                null,
+                null,
+                "error",
+                null,
+                Collections.emptyList()));
+
+        final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+
+        final AstNode topNode = magikFile.getTopNode();
+        final List<AstNode> argumentNodes = topNode.getDescendants(MagikGrammar.ARGUMENT);
+
+        final AstNode argumentNode0 = argumentNodes.get(0);
+        final AstNode atomNode0 = argumentNode0.getFirstDescendant(MagikGrammar.ATOM);
+        final ExpressionResult result0 = reasonerState.getNodeType(atomNode0);
+        final AbstractType type0 = result0.get(0, null);
+        assertThat(type0.getTypeString()).isEqualTo(TypeString.SW_UNSET);
+
+        final AstNode argumentNode2 = argumentNodes.get(2);
+        final AstNode atomNode2 = argumentNode2.getFirstDescendant(MagikGrammar.ATOM);
+        final ExpressionResult result2 = reasonerState.getNodeType(atomNode2);
+        final AbstractType type2 = result2.get(0, null);
+        assertThat(type2.getTypeString()).isEqualTo(TypeString.SW_SYMBOL);
+    }
+
+    @Test
+    void testHandleIfElseRaisesError() {
+        final String code = ""
+            + "_method object.method(_optional param1)\n"
+            + "  ## @param {sw:symbol|sw:character} param1\n"
+            + "  _if param1 _is _unset\n"
+            + "  _then\n"
+            + "    show(param1)\n"
+            + "  _else\n"
+            + "    show(param1)\n"
+            + "    condition.raise(:child_error)\n"
+            + "  _endif\n"
+            + "  show(param1)\n"
+            + "_endmethod\n";
+
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        definitionKeeper.add(
+            new ConditionDefinition(
+                null,
+                null,
+                null,
+                null,
+                "error",
+                null,
+                Collections.emptyList()));
+        definitionKeeper.add(
+            new ConditionDefinition(
+                null,
+                null,
+                null,
+                null,
+                "child_error",
+                "error",
+                Collections.emptyList()));
+
+        final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+
+        final AstNode topNode = magikFile.getTopNode();
+        final List<AstNode> argumentNodes = topNode.getDescendants(MagikGrammar.ARGUMENT);
+
+        final AstNode argumentNode0 = argumentNodes.get(0);
+        final AstNode atomNode0 = argumentNode0.getFirstDescendant(MagikGrammar.ATOM);
+        final ExpressionResult result0 = reasonerState.getNodeType(atomNode0);
+        final AbstractType type0 = result0.get(0, null);
+        assertThat(type0.getTypeString()).isEqualTo(TypeString.SW_UNSET);
+
+        final AstNode argumentNode1 = argumentNodes.get(1);
+        final AstNode atomNode1 = argumentNode1.getFirstDescendant(MagikGrammar.ATOM);
+        final ExpressionResult result1 = reasonerState.getNodeType(atomNode1);
+        final AbstractType type1 = result1.get(0, null);
+        assertThat(type1.getTypeString()).isEqualTo(
+            TypeString.ofCombination("sw", TypeString.SW_CHARACTER, TypeString.SW_SYMBOL));
+
+        final AstNode argumentNode3 = argumentNodes.get(3);
+        final AstNode atomNode3 = argumentNode3.getFirstDescendant(MagikGrammar.ATOM);
+        final ExpressionResult result3 = reasonerState.getNodeType(atomNode3);
+        final AbstractType type3 = result3.get(0, null);
+        assertThat(type3.getTypeString()).isEqualTo(TypeString.SW_UNSET);
     }
 
 }

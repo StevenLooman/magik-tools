@@ -229,28 +229,14 @@ public class MethodDefinitionParser {
             this.node.getDescendants(MagikGrammar.METHOD_INVOCATION).stream()
             .map(invocationNode -> {
                 final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(invocationNode);
-                final AstNode receiverNode = helper.getReceiverNode();
-                if (receiverNode == null
-                    || !receiverNode.is(MagikGrammar.ATOM)) {
-                    return null;
-                }
-
-                final String identifier = receiverNode.getTokenValue();
-                if (!identifier.equalsIgnoreCase(CONDITION)
-                    && !identifier.equalsIgnoreCase(SW_CONDITION)) {
-                    return null;
-                }
-
-                if (!helper.isMethodInvocationOf(NEW_CALL)
-                    && !helper.isMethodInvocationOf(RAISE_CALL)) {
+                if (!helper.isMethodInvocationOf(CONDITION, RAISE_CALL)
+                    && !helper.isMethodInvocationOf(SW_CONDITION, RAISE_CALL)
+                    && !helper.isMethodInvocationOf(CONDITION, NEW_CALL)
+                    && !helper.isMethodInvocationOf(SW_CONDITION, NEW_CALL)) {
                     return null;
                 }
 
                 final AstNode argumentsNode = invocationNode.getFirstChild(MagikGrammar.ARGUMENTS);
-                if (argumentsNode == null) {
-                    return null;
-                }
-
                 final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
                 final AstNode argumentNode = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
                 if (argumentNode == null) {
