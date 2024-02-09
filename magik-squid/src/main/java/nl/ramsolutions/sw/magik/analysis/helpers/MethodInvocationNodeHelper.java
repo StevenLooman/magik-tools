@@ -37,6 +37,31 @@ public class MethodInvocationNodeHelper {
     }
 
     /**
+     * Test if encapsulated node is a method invication with expected receiver name and method name.
+     * @param receiverIdentifier Receiver identifier.
+     * @param methodName Method name.
+     * @return True if method invocation is of given receiver name and method name, false otherwise.
+     */
+    public boolean isMethodInvocationOf(final String receiverIdentifier, final String methodName) {
+        final AstNode receiverNode = this.getReceiverNode();
+        if (receiverNode == null
+            || !receiverNode.is(MagikGrammar.ATOM)) {
+            return false;
+        }
+
+        final String identifier = receiverNode.getTokenValue();
+        if (!identifier.equalsIgnoreCase(receiverIdentifier)) {
+            return false;
+        }
+
+        if (!this.isMethodInvocationOf(methodName)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Get the node the method is being invoked on.
      * @return Receiver node.
      */
