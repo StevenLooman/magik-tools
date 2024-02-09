@@ -1,0 +1,20 @@
+#%text_encoding=utf8
+_package user
+
+_pragma(classify_level=basic, topic={tests, fixtures})
+def_slotted_exemplar(
+	:test_exemplar,
+	{
+        {:slot_1, _unset}
+	})
+$
+
+_method test_exemplar.new()
+    _return _clone.init()
+_endmethod
+$
+
+_private _method test_exemplar.init()
+    .slot_1 << sw:rope.new()
+_endmethod
+$

@@ -32,11 +32,14 @@ public class MagikChecksCodeActionProvider {
      */
     public List<CodeAction> provideCodeActions(
             final MagikTypedFile magikFile,
-            final Range range) throws ReflectiveOperationException, IOException {
+            final Range range)
+            throws ReflectiveOperationException, IOException {
         final List<CodeAction> codeActions = new ArrayList<>();
-        for (final Entry<Class<?>, List<Class<?>>> entry : CheckList.getFixers().entrySet()) {
+        for (final Entry<
+                Class<? extends MagikCheck>,
+                List<Class<? extends MagikCheckFixer>>> entry : CheckList.getFixers().entrySet()) {
             final Class<?> checkClass = entry.getKey();
-            final List<Class<?>> fixerClassses = entry.getValue();
+            final List<Class<? extends MagikCheckFixer>> fixerClassses = entry.getValue();
             for (final Class<?> fixerClass : fixerClassses) {
                 if (!this.isCheckEnabled(magikFile, checkClass)) {
                     continue;

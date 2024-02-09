@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.sonar;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.sonar.language.Magik;
 import org.sonar.api.server.rule.RulesDefinition;
@@ -26,7 +27,9 @@ public class MagikRuleRepository implements RulesDefinition {
     }
 
     private static List<Class<?>> getCheckClasses() {
-        return CheckList.getChecks();
+        return CheckList.getChecks().stream()
+            .map(clazz -> (Class<?>) clazz)
+            .collect(Collectors.toList());
     }
 
 }

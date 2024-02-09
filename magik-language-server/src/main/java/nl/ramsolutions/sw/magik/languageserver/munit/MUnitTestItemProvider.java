@@ -5,6 +5,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -157,7 +158,7 @@ public class MUnitTestItemProvider {
         if (!Files.exists(moduleDefPath)) {
             final Path parentPath = path.getParent();
             if (parentPath == null) {
-                return new ModuleDefinition(null, "<no_module>", "", "1");
+                return new ModuleDefinition(null, "<no_module>", "", "1", Collections.emptyList());
             }
 
             return this.getSwModule(parentPath);

@@ -10,6 +10,7 @@ import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import nl.ramsolutions.sw.magik.languageserver.MagikSettings;
@@ -34,9 +35,11 @@ public class MagikTypedChecksCodeActionProvider {
             final MagikTypedFile magikFile,
             final Range range) throws ReflectiveOperationException, IOException {
         final List<CodeAction> codeActions = new ArrayList<>();
-        for (final Entry<Class<?>, List<Class<?>>> entry : CheckList.getFixers().entrySet()) {
+        for (final Entry<
+                Class<? extends MagikCheck>,
+                List<Class<? extends MagikTypedCheckFixer>>> entry : CheckList.getFixers().entrySet()) {
             final Class<?> checkClass = entry.getKey();
-            final List<Class<?>> fixerClassses = entry.getValue();
+            final List<Class<? extends MagikTypedCheckFixer>> fixerClassses = entry.getValue();
             for (final Class<?> fixerClass : fixerClassses) {
                 if (!this.isCheckEnabled(magikFile, checkClass)) {
                     continue;
