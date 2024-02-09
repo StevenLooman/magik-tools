@@ -1,16 +1,16 @@
 {
-    "title": "Undefined method call result",
-    "type": "CODE_SMELL",
-    "status": "ready",
-    "remediation": {
-      "func": "Constant\/Issue",
-      "constantCost": "30min"
-    },
-    "tags": [
-      "convention",
-      "typing"
-    ],
-    "defaultSeverity": "Minor",
-    "ruleSpecification": "UndefinedMethodCallResult",
-    "sqKey": "undefined-method-call-result"
-  }
+  "title": "Undefined method call result",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "convention",
+    "typing"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "UndefinedMethodCallResult",
+  "sqKey": "undefined-method-call-result"
+}

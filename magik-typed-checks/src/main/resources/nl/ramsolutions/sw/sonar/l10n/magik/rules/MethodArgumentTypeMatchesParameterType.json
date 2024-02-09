@@ -1,16 +1,16 @@
 {
-    "title": "Argument type does not match parameter type",
-    "type": "BUG",
-    "status": "ready",
-    "remediation": {
-      "func": "Constant\/Issue",
-      "constantCost": "30min"
-    },
-    "tags": [
-      "bug",
-      "typing"
-    ],
-    "defaultSeverity": "Major",
-    "ruleSpecification": "MethodArgumentTypeMatchesParameterType",
-    "sqKey": "method-argument-type-matches-parameter-type"
-  }
+  "title": "Argument type does not match parameter type",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "MethodArgumentTypeMatchesParameterType",
+  "sqKey": "method-argument-type-matches-parameter-type"
+}

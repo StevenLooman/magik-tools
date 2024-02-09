@@ -1,16 +1,16 @@
 {
-    "title": "Slot Exists",
-    "type": "BUG",
-    "status": "ready",
-    "remediation": {
-      "func": "Constant\/Issue",
-      "constantCost": "30min"
-    },
-    "tags": [
-      "bug",
-      "typing"
-    ],
-    "defaultSeverity": "Major",
-    "ruleSpecification": "SlotExists",
-    "sqKey": "slot-exists"
-  }
+  "title": "Slot Exists",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "SlotExists",
+  "sqKey": "slot-exists"
+}

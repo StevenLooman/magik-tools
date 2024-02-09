@@ -1,16 +1,16 @@
 {
-    "title": "Method return types match doc",
-    "type": "BUG",
-    "status": "ready",
-    "remediation": {
-      "func": "Constant\/Issue",
-      "constantCost": "30min"
-    },
-    "tags": [
-      "bug",
-      "typing"
-    ],
-    "defaultSeverity": "Major",
-    "ruleSpecification": "MethodReturnTypesMatchDoc",
-    "sqKey": "method-return-types-match-doc"
-  }
+  "title": "Method return types match doc",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "MethodReturnTypesMatchDoc",
+  "sqKey": "method-return-types-match-doc"
+}

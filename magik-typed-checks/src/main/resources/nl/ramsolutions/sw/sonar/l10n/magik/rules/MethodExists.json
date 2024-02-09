@@ -1,16 +1,16 @@
 {
-    "title": "Method Exists",
-    "type": "BUG",
-    "status": "ready",
-    "remediation": {
-      "func": "Constant\/Issue",
-      "constantCost": "30min"
-    },
-    "tags": [
-      "bug",
-      "typing"
-    ],
-    "defaultSeverity": "Major",
-    "ruleSpecification": "MethodExists",
-    "sqKey": "method-exists"
-  }
+  "title": "Method Exists",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "MethodExists",
+  "sqKey": "method-exists"
+}

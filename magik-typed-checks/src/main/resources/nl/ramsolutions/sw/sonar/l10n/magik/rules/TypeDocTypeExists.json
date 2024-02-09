@@ -1,16 +1,16 @@
 {
-    "title": "Type-doc Type Exists",
-    "type": "BUG",
-    "status": "ready",
-    "remediation": {
-      "func": "Constant\/Issue",
-      "constantCost": "30min"
-    },
-    "tags": [
-      "bug",
-      "typing"
-    ],
-    "defaultSeverity": "Major",
-    "ruleSpecification": "TypeDocTypeExists",
-    "sqKey": "type-doc-type-exists"
-  }
+  "title": "Type-doc Type Exists",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "convention",
+    "typing"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "TypeDocTypeExists",
+  "sqKey": "type-doc-type-exists"
+}

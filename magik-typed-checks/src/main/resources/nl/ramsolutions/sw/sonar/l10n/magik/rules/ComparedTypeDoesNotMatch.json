@@ -1,15 +1,16 @@
 {
-    "title": "Compared types do not match",
-    "type": "BUG",
-    "status": "ready",
-    "remediation": {
-      "func": "Constant\/Issue",
-      "constantCost": "15min"
-    },
-    "tags": [
-      "error"
-    ],
-    "defaultSeverity": "Major",
-    "ruleSpecification": "ComparedTypesDoNotMatch",
-    "sqKey": "compared-types-do-not-match"
-  }
+  "title": "Compared types do not match",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "error",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "ComparedTypesDoNotMatch",
+  "sqKey": "compared-types-do-not-match"
+}
