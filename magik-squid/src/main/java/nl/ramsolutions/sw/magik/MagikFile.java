@@ -66,6 +66,15 @@ public class MagikFile {
      * @param path File to read.
      * @throws IOException -
      */
+    public MagikFile(final Path path) throws IOException {
+        this(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, path);
+    }
+
+    /**
+     * Constructor. Read file at path.
+     * @param path File to read.
+     * @throws IOException -
+     */
     public MagikFile(final MagikAnalysisConfiguration configuration, final Path path) throws IOException {
         this.configuration = configuration;
         this.uri = path.toUri();

@@ -22,14 +22,14 @@ public class MagikChecksConfiguration {
     private static final String KEY_IGNORED_PATHS = "ignore";
 
     private final MagikToolsProperties properties;
-    private final List<Class<?>> checkClasses;
+    private final List<Class<? extends MagikCheck>> checkClasses;
 
     /**
      * Constructor.
      * @param checkClasses {@link Class}es of {@link MagikCheck}s.
      * @throws IOException
      */
-    public MagikChecksConfiguration(final List<Class<?>> checkClasses) throws IOException {
+    public MagikChecksConfiguration(final List<Class<? extends MagikCheck>> checkClasses) throws IOException {
         this.checkClasses = checkClasses;
         this.properties = new MagikToolsProperties();
     }
@@ -40,7 +40,10 @@ public class MagikChecksConfiguration {
      * @param path {@link Path} to read properties from.
      * @throws IOException
      */
-    public MagikChecksConfiguration(final List<Class<?>> checkClasses, final Path path) throws IOException {
+    public MagikChecksConfiguration(
+            final List<Class<? extends MagikCheck>> checkClasses,
+            final Path path)
+            throws IOException {
         this.checkClasses = checkClasses;
         this.properties = new MagikToolsProperties(path);
     }

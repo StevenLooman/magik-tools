@@ -1,6 +1,8 @@
 package nl.ramsolutions.sw.magik;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.DefinitionKeeperTypeKeeperAdapter;
@@ -44,6 +46,17 @@ public class MagikTypedFile extends MagikFile {
             final String text,
             final IDefinitionKeeper definitionKeeper) {
         super(uri, text);
+        this.definitionKeeper = definitionKeeper;
+    }
+
+    /**
+     * Constructor.
+     * @param path Path.
+     * @param definitionKeeper {@link IDefinitionKeeper}.
+     * @throws IOException -
+     */
+    public MagikTypedFile(final Path path, final IDefinitionKeeper definitionKeeper) throws IOException {
+        super(path);
         this.definitionKeeper = definitionKeeper;
     }
 

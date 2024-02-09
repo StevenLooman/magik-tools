@@ -1,6 +1,5 @@
 package nl.ramsolutions.sw.definitions;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +16,7 @@ public class ModuleDefinition {
     private final String name;
     private final String baseVersion;
     private final @Nullable String currentVersion;
-    private final List<String> requireds = new ArrayList<>();
+    private final List<String> requireds;
 
     /**
      * Constructor.
@@ -28,11 +27,13 @@ public class ModuleDefinition {
             final @Nullable Location location,
             final String name,
             final String baseVersion,
-            final @Nullable String currentVersion) {
+            final @Nullable String currentVersion,
+            final List<String> requireds) {
         this.location = location;
         this.name = name;
         this.baseVersion = baseVersion;
         this.currentVersion = currentVersion;
+        this.requireds = List.copyOf(requireds);
     }
 
     public String getName() {
@@ -54,10 +55,6 @@ public class ModuleDefinition {
 
     public List<String> getRequireds() {
         return Collections.unmodifiableList(this.requireds);
-    }
-
-    public void addRequired(final String moduleName) {
-        this.requireds.add(moduleName);
     }
 
     @Override

@@ -60,7 +60,7 @@ public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTyped
         final TypeReader typeReader = new TypeReader(typeKeeper);
         final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
         final String methodName = helper.getMethodName();
-        final AbstractType unsetType = this.getTypeKeeper().getType(TypeString.SW_UNSET);
+        final AbstractType unsetType = typeKeeper.getType(TypeString.SW_UNSET);
         for (final Method method : calledType.getMethods(methodName)) {
             final List<Parameter> parameters = method.getParameters();
             if (parameters.isEmpty()) {
