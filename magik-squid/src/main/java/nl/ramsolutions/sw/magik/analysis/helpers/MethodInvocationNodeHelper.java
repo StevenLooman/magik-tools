@@ -54,11 +54,7 @@ public class MethodInvocationNodeHelper {
             return false;
         }
 
-        if (!this.isMethodInvocationOf(methodName)) {
-            return false;
-        }
-
-        return true;
+        return this.isMethodInvocationOf(methodName);
     }
 
     /**
