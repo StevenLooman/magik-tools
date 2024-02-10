@@ -192,7 +192,7 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
                 final String conditionName = argumentNode.getTokenValue().substring(1);
                 final IDefinitionKeeper definitionKeeper = this.state.getMagikFile().getDefinitionKeeper();
                 final ConditionResolver conditionResolver = new ConditionResolver(definitionKeeper);
-                return conditionResolver.conditionIs(conditionName, "error");
+                return conditionResolver.conditionHasAncestor(conditionName, "error");
             });
         return doesReturn
             || raisesError;

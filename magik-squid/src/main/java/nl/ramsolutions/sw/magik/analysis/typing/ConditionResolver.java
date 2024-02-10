@@ -38,6 +38,10 @@ public class ConditionResolver {
         taxonomy.add(currentConditionDefinition);
         while (currentConditionDefinition.getParent() != null) {
             final String parentConditionName = currentConditionDefinition.getParent();
+            if (parentConditionName == null) {
+                return null;
+            }
+
             final ConditionDefinition parentConditionDefinition =
                 this.definitionKeeper.getConditionDefinitions(parentConditionName).stream()
                 .findAny()
@@ -53,9 +57,20 @@ public class ConditionResolver {
         return taxonomy;
     }
 
-    public boolean conditionIs(final String conditionName, final String isConditionName) {
-        return this.getTaxonomy(conditionName).stream()
-            .anyMatch(def -> def.getName().equals(isConditionName));
+    /**
+     * Test if a condition has a a specific ancestor.
+     * @param conditionName Condition to test.
+     * @param ancestorConditionName Ancestor to test for.
+     * @return True if the condition has the ancestor, false otherwise.
+     */
+    public boolean conditionHasAncestor(final String conditionName, final String ancestorConditionName) {
+        final List<ConditionDefinition> taxonomy = this.getTaxonomy(conditionName);
+        if (taxonomy == null) {
+            return false;
+        }
+
+        return taxonomy.stream()
+            .anyMatch(def -> def.getName().equals(ancestorConditionName));
     }
 
 }

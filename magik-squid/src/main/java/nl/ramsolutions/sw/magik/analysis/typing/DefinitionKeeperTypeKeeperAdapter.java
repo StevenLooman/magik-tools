@@ -261,9 +261,7 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
         // Add methods from ExemplarDefinition.
         final TypeString bareDefinitionTypeString = definitionTypeString.getWithoutGenerics();
         this.definitionKeeper.getMethodDefinitions(bareDefinitionTypeString).stream()
-            .forEach(methodDef -> {
-                this.addMethod(magikType, methodDef);
-            });
+            .forEach(methodDef -> this.addMethod(magikType, methodDef));
 
         // The upper is incomplete. In case a method is defined on `system`, but from package `user`. I.e., on
         // `user:system`. The resolver resolve resolves use of `system` to `sw:system` and gathers the methods with that
@@ -294,16 +292,15 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
                             return this.definitionKeeper.getExemplarDefinitions(childPkgTypeStr).isEmpty();
                         });
                 })
-                .flatMap(pkgDef -> {
+                .flatMap(pkgDef ->
                     // Get all MethodDefinitions from the package.
-                    return this.definitionKeeper.getPackageDefinitions(packageName).stream()
+                    this.definitionKeeper.getPackageDefinitions(packageName).stream()
                         .flatMap(childPkgDef -> {
                             final String childPkgName = childPkgDef.getName();
                             final String identifier = definitionTypeString.getIdentifier();
                             final TypeString childPkgTypeStr = TypeString.ofIdentifier(identifier, childPkgName);
                             return this.definitionKeeper.getMethodDefinitions(childPkgTypeStr).stream();
-                        });
-                })
+                        }))
                 .distinct()
                 .forEach(methodDef -> this.addMethod(magikType, methodDef));
         }
@@ -363,6 +360,7 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
     }
 
     private Method addMethod(final MagikType type, final MethodDefinition methodDefinition) {
+        final ParameterDefinition assignmentParameter = methodDefinition.getAssignmentParameter();
         final Method method = type.addMethod(
             methodDefinition.getLocation(),
             methodDefinition.getModuleName(),
@@ -377,13 +375,12 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
                     DefinitionKeeperTypeKeeperAdapter.PARAMETER_MODIFIER_MAPPING.get(paramDef.getModifier()),
                     paramDef.getTypeName()))
                 .collect(Collectors.toList()),
-            methodDefinition.getAssignmentParameter() != null
+            assignmentParameter != null
                 ? new Parameter(
-                    methodDefinition.getAssignmentParameter().getLocation(),
-                    methodDefinition.getAssignmentParameter().getName(),
-                    DefinitionKeeperTypeKeeperAdapter.PARAMETER_MODIFIER_MAPPING.get(
-                        methodDefinition.getAssignmentParameter().getModifier()),
-                    methodDefinition.getAssignmentParameter().getTypeName())
+                    assignmentParameter.getLocation(),
+                    assignmentParameter.getName(),
+                    DefinitionKeeperTypeKeeperAdapter.PARAMETER_MODIFIER_MAPPING.get(assignmentParameter.getModifier()),
+                    assignmentParameter.getTypeName())
                 : null,
             methodDefinition.getDoc(),
             methodDefinition.getReturnTypes(),

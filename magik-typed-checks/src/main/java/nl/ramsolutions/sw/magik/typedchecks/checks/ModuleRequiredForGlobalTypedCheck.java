@@ -44,6 +44,10 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
 
         final GlobalScope globalScope = this.getMagikFile().getGlobalScope();
         final Scope scope = globalScope.getScopeForNode(node);
+        if (scope == null) {
+            return;
+        }
+
         final ScopeEntry scopeEntry = scope.getScopeEntry(node);
         if (scopeEntry == null
             || !scopeEntry.isType(ScopeEntry.Type.GLOBAL)) {
