@@ -26,17 +26,20 @@ public class Location {
 
         @Override
         public int compare(final Location location0, final Location location1) {
+            final Location validLocation0 = Location.validLocation(location0);
+            final Location validLocation1 = Location.validLocation(location1);
+
             // Compare URI.
-            final URI uri0 = location0.getUri();
-            final URI uri1 = location1.getUri();
+            final URI uri0 = validLocation0.getUri();
+            final URI uri1 = validLocation1.getUri();
             if (!uri0.equals(uri1)) {
                 return uri0.compareTo(uri1);
             }
 
             // compare start of range
-            final Range range0 = location0.getRange();
+            final Range range0 = validLocation0.getRange();
             Objects.requireNonNull(range0);
-            final Range range1 = location1.getRange();
+            final Range range1 = validLocation1.getRange();
             Objects.requireNonNull(range1);
 
             final Position position0 = range0.getStartPosition();
