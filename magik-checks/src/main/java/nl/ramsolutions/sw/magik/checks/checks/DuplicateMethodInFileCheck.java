@@ -30,9 +30,13 @@ public class DuplicateMethodInFileCheck extends MagikCheck {
             .flatMap(entry -> entry.getValue().stream())
             .forEach(definition -> {
                 final AstNode definitionNode = definition.getNode();
-                final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
-                final AstNode methodNameNode = helper.getMethodNameNode();
-                this.addIssue(methodNameNode, MESSAGE);
+                if (definition.isActualMethodDefinition()) {
+                    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
+                    final AstNode methodNameNode = helper.getMethodNameNode();
+                    this.addIssue(methodNameNode, MESSAGE);
+                } else {
+                    this.addIssue(definitionNode, MESSAGE);
+                }
             });
     }
 
