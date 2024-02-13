@@ -17,6 +17,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Comparator;
+import nl.ramsolutions.sw.definitions.ModuleDefinition;
+import nl.ramsolutions.sw.definitions.ProductDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -89,6 +91,8 @@ public final class JsonDefinitionWriter {
         final File file = path.toFile();
         try (FileWriter fileReader = new FileWriter(file, StandardCharsets.ISO_8859_1);
              BufferedWriter bufferedWriter = new BufferedWriter(fileReader)) {
+            this.writeProducts(bufferedWriter);
+            this.writeModules(bufferedWriter);
             this.writePackages(bufferedWriter);
             this.writeExemplars(bufferedWriter);
             this.writeGlobals(bufferedWriter);
@@ -123,6 +127,30 @@ public final class JsonDefinitionWriter {
         } catch (final IOException exception) {
             LOGGER.error("Caught exception writing instruction", exception);
         }
+    }
+
+    private void writeProducts(final Writer writer) {
+        final Comparator<ProductDefinition> sorter = Comparator.comparing(ProductDefinition::getName);
+        this.definitionKeeper.getProductDefinitions().stream()
+            .sorted(sorter)
+            .forEach(definition -> {
+                final Gson gson = this.buildGson();
+                final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
+                instruction.addProperty(Instruction.INSTRUCTION.getValue(), Instruction.PRODUCT.getValue());
+                this.writeInstruction(writer, instruction);
+            });
+    }
+
+    private void writeModules(final Writer writer) {
+        final Comparator<ModuleDefinition> sorter = Comparator.comparing(ModuleDefinition::getName);
+        this.definitionKeeper.getModuleDefinitions().stream()
+            .sorted(sorter)
+            .forEach(definition -> {
+                final Gson gson = this.buildGson();
+                final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
+                instruction.addProperty(Instruction.INSTRUCTION.getValue(), Instruction.MODULE.getValue());
+                this.writeInstruction(writer, instruction);
+            });
     }
 
     private void writePackages(final Writer writer) {
