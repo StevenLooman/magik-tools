@@ -7,6 +7,8 @@ package nl.ramsolutions.sw.magik.analysis.definitions.io;
 enum Instruction {
 
     INSTRUCTION("instruction"),
+    PRODUCT("product"),
+    MODULE("module"),
     PACKAGE("package"),
     TYPE("type"),
     GLOBAL("global"),

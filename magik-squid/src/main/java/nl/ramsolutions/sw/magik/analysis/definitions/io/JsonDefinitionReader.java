@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.definitions.ModuleDefinition;
+import nl.ramsolutions.sw.definitions.ProductDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -174,6 +176,14 @@ public final class JsonDefinitionReader {
         final String instructionStr = obj.get(Instruction.INSTRUCTION.getValue()).getAsString();
         final Instruction instruction = Instruction.fromValue(instructionStr);
         switch (instruction) {
+            case PRODUCT:
+                this.handleProduct(obj);
+                break;
+
+            case MODULE:
+                this.handleModule(obj);
+                break;
+
             case PACKAGE:
                 this.handlePackage(obj);
                 break;
@@ -222,6 +232,18 @@ public final class JsonDefinitionReader {
                 ParameterDefinition.Modifier.class, new LowerCaseEnumDeserializer<ParameterDefinition.Modifier>())
             .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionCreator())
             .create();
+    }
+
+    private void handleProduct(final JsonObject instruction) {
+        final Gson gson = this.buildGson();
+        final ProductDefinition definition = gson.fromJson(instruction, ProductDefinition.class);
+        this.definitionKeeper.add(definition);
+    }
+
+    private void handleModule(final JsonObject instruction) {
+        final Gson gson = this.buildGson();
+        final ModuleDefinition definition = gson.fromJson(instruction, ModuleDefinition.class);
+        this.definitionKeeper.add(definition);
     }
 
     private void handlePackage(final JsonObject instruction) {

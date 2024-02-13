@@ -399,6 +399,7 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition.equals(java.lang.Object)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader.processLine(java.lang.String)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ConditionalBodyHandler.handleConditionalExpression(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.checks.checks.FormattingCheck.handleToken()</exclude>

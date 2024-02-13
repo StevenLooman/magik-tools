@@ -193,9 +193,24 @@ _private _method type_dumper.int!run()
 	_self.write_line("// undefined type: ", _self.undefined_type)
 	_self.write_line("// undefined result: ", _self.undefined_result)
 
-	_local sorted_pkgs << sorted_collection.new_from(package.all_packages, {:method_result, :name})
+	# Write products.
+	_self.write_line("// products")
+	_local sorted_products << sorted_collection.new_from(smallworld_product.products, {:method_result, :name})
+	_for product _over sorted_products.fast_elements()
+	_loop
+		_self.write_product(product)
+	_endloop
+
+	# Write modules.
+	_self.write_line("// modules")
+	_local sorted_modules << sorted_collection.new_from(sw_module_manager.defined_modules, {:method_result, :name})
+	_for module _over sorted_modules.fast_elements()
+	_loop
+		_self.write_module(module)
+	_endloop
 
 	# Write packages.
+	_local sorted_pkgs << sorted_collection.new_from(package.all_packages, {:method_result, :name})
 	_self.write_line("// packages")
 	_for pkg _over sorted_pkgs.fast_elements()
 	_loop
@@ -292,6 +307,46 @@ _private _method type_dumper.name_from_object(obj)
 	_local global_var << metadata[:exemplar_global]
 	_local pkg << global_var.package
 	_return pkg.name + :|:| + global_var.key
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_dumper.write_product(product)
+	## Write product.
+	## @param {sw:sw_product} product
+	_local instruction << sw:property_list.new_with(:instruction, "product")
+
+	instruction[:name] << product.name
+	instruction[:version] << product.version_string
+	instruction[:version_comment] << product.version.comment
+	_local sorted_children << sorted_collection.new_from(product.children.default({}), {:method_result, :name})
+	instruction[:children] << sorted_children.as_simple_vector().map(_proc(prd) _return prd.name _endproc)
+	_local sorted_modules << sorted_collection.new_from(product.defined_modules, {:method_result, :name})
+	instruction[:modules] << sorted_modules.as_simple_vector().map(_proc(module) _return module.name _endproc)
+	instruction[:requireds] << product.prerequisites.
+		map(_proc(prereq) _return prereq[1] _endproc).
+		as_sorted_collection().
+		as_simple_vector()
+
+	_self.write_instruction(instruction)
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_dumper.write_module(module)
+	## Write product.
+	## @param {sw:sw_module} module
+	_local instruction << sw:property_list.new_with(:instruction, "module")
+
+	instruction[:name] << module.name
+	instruction[:base_version] << module.base_version
+	instruction[:current_version] << module.version
+	instruction[:requireds] << module.prerequisites.
+		map(_proc(prereq) _return prereq[1] _endproc).
+		as_sorted_collection().
+		as_simple_vector()
+
+	_self.write_instruction(instruction)
 _endmethod
 $
 
@@ -451,7 +506,6 @@ _private _method type_dumper.write_method(type_name, method)
 	_else
 		instruction[:parameters] << params
 	_endif
-
 
 	instruction[:return_types] <<
 		_if method.shared_constant?
