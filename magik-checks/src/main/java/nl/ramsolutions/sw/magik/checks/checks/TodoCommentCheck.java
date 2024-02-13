@@ -16,9 +16,9 @@ import org.sonar.check.RuleProperty;
 public class TodoCommentCheck extends MagikCheck {
 
     @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "CommentTodo";
-    private static final String MESSAGE = "Todo comment: %s.";
+    public static final String CHECK_KEY = "TodoComment";
 
+    private static final String MESSAGE = "Todo comment: %s.";
     private static final String DEFAULT_FORBIDDEN_WORDS = "TODO,FIXME,HACK,NOTE,TEMP,XXX";
 
     /**
