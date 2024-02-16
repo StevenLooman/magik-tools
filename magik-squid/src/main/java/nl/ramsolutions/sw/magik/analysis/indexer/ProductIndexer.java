@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing.indexer;
+package nl.ramsolutions.sw.magik.analysis.indexer;
 
 import com.sonar.sslr.api.RecognitionException;
 import java.io.IOException;
@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
  * Product (and module) definition indexer.
  */
 public class ProductIndexer {
+
+    // TODO: This should not be in typing.
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductIndexer.class);
 
