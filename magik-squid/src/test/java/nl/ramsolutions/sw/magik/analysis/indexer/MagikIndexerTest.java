@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing.indexer;
+package nl.ramsolutions.sw.magik.analysis.indexer;
 
 import java.nio.file.Path;
 import java.util.Collection;

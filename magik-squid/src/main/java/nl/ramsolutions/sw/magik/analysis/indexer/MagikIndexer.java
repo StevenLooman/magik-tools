@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing.indexer;
+package nl.ramsolutions.sw.magik.analysis.indexer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
  * Magik file indexer.
  */
 public class MagikIndexer {
+
+    // TODO: This should not be in typing.
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MagikIndexer.class);
     private static final long MAX_SIZE = 1024L * 1024L * 10L;  // 10 MB
