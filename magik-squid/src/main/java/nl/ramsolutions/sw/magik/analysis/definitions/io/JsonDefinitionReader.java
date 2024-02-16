@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class JsonDefinitionReader {
 
-    private static class TypeStringDeserializer implements JsonDeserializer<TypeString> {
+    private static final class TypeStringDeserializer implements JsonDeserializer<TypeString> {
 
         @Override
         public TypeString deserialize(
@@ -57,7 +57,7 @@ public final class JsonDefinitionReader {
 
     }
 
-    private static class ExpressionResultStringDeserializer implements JsonDeserializer<ExpressionResultString> {
+    private static final class ExpressionResultStringDeserializer implements JsonDeserializer<ExpressionResultString> {
 
         @Override
         public ExpressionResultString deserialize(
@@ -80,7 +80,7 @@ public final class JsonDefinitionReader {
 
     }
 
-    private static class LowerCaseEnumDeserializer<E extends Enum<?>> implements JsonDeserializer<E> {
+    private static final class LowerCaseEnumDeserializer<E extends Enum<?>> implements JsonDeserializer<E> {
 
         @SuppressWarnings("unchecked")
         @Override
@@ -106,7 +106,7 @@ public final class JsonDefinitionReader {
 
     }
 
-    private static class MethodDefinitionCreator implements InstanceCreator<MethodDefinition> {
+    private static final class MethodDefinitionCreator implements InstanceCreator<MethodDefinition> {
 
         @Override
         public MethodDefinition createInstance(final Type type) {

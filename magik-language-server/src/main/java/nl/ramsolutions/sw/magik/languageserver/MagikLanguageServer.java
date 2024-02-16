@@ -74,7 +74,7 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
         final String rootUri = params.getRootUri();
         if (rootUri != null
             && this.workspaceFolders.isEmpty()) {
-            final WorkspaceFolder rootFolder = new WorkspaceFolder(rootUri);
+            final WorkspaceFolder rootFolder = new WorkspaceFolder(rootUri, "workspace");
             this.workspaceFolders.add(rootFolder);
         }
 

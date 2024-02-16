@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class JsonDefinitionWriter {
 
-    private static class TypeStringSerializer implements JsonSerializer<TypeString> {
+    private static final class TypeStringSerializer implements JsonSerializer<TypeString> {
 
         @Override
         public JsonElement serialize(
@@ -51,7 +51,7 @@ public final class JsonDefinitionWriter {
 
     }
 
-    private static class ExpressionResultStringSerializer implements JsonSerializer<ExpressionResultString> {
+    private static final class ExpressionResultStringSerializer implements JsonSerializer<ExpressionResultString> {
 
         @Override
         public JsonElement serialize(
@@ -64,7 +64,7 @@ public final class JsonDefinitionWriter {
 
     }
 
-    private static class LowerCaseEnumSerializer<E extends Enum<?>> implements JsonSerializer<E> {
+    private static final class LowerCaseEnumSerializer<E extends Enum<?>> implements JsonSerializer<E> {
 
         @Override
         public JsonElement serialize(

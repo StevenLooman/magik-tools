@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class ProductDefinitionScanner {
 
-    private static class ProductDefFileVisitor extends SimpleFileVisitor<Path> {
+    private static final class ProductDefFileVisitor extends SimpleFileVisitor<Path> {
 
         private final Deque<ProductDefinition> stack = new ArrayDeque<>();
         private final Set<ProductDefinition> products = new HashSet<>();
