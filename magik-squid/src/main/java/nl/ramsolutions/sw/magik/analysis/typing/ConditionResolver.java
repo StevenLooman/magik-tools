@@ -1,8 +1,8 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 

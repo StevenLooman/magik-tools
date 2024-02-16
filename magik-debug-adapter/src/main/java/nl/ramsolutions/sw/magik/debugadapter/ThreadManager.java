@@ -1,12 +1,12 @@
 package nl.ramsolutions.sw.magik.debugadapter;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ErrorMessage;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;

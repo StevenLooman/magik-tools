@@ -1,13 +1,13 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 

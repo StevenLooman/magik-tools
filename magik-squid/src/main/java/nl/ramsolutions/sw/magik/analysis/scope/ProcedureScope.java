@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.scope;
 
 import com.sonar.sslr.api.AstNode;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 
 /**
  * Procedure-/method-definition scope.

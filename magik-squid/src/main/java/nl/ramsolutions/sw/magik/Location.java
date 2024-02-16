@@ -2,13 +2,13 @@ package nl.ramsolutions.sw.magik;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Objects;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 
 /**
  * Location within a file.

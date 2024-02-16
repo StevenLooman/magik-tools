@@ -1,8 +1,8 @@
 package nl.ramsolutions.sw.magik.lint;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.IOException;
 import java.nio.file.Path;
-import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.MagikToolsProperties;
 
 /**

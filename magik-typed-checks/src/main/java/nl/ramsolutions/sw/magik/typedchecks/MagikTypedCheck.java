@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.typedchecks;
 
 import com.sonar.sslr.api.AstNode;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;

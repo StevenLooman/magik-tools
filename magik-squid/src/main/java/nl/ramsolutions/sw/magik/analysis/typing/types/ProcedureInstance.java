@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 

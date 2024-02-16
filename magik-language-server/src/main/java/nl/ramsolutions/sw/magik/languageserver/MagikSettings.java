@@ -3,11 +3,11 @@ package nl.ramsolutions.sw.magik.languageserver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.CheckForNull;
 
 /**
  * Magik settings.

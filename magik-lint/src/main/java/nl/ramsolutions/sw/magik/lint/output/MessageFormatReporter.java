@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.lint.output;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
@@ -11,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikCheckMetadata;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;

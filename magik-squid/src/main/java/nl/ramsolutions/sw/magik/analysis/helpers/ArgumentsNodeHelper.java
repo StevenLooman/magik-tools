@@ -1,10 +1,10 @@
 package nl.ramsolutions.sw.magik.analysis.helpers;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
-import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
