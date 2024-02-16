@@ -50,12 +50,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <junit.version>5.9.3</junit.version>
+    <junit.version>5.10.2</junit.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
     <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
     <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
-    <checkstyle.version>10.12.0</checkstyle.version>
+    <checkstyle.version>10.13.0</checkstyle.version>
     <checkstyle-rules.version>4.9.3</checkstyle-rules.version>
     <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
@@ -71,17 +71,18 @@
     <jacoco.unit-tests.limit.class-complexity>100</jacoco.unit-tests.limit.class-complexity> <!-- Preferred/future: 20-->
     <jacoco.unit-tests.limit.method-complexity>10</jacoco.unit-tests.limit.method-complexity> <!-- Preferred/future: 5-->
 
-    <sonar.version>9.2.4.50792</sonar.version>
+    <sonar.version>9.4.0.54424</sonar.version>
+    <sonar-impl.version>10.4.0.87286</sonar-impl.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
-    <sonar-analyzer-commons.version>1.22.0.848</sonar-analyzer-commons.version>
+    <sonar-analyzer-commons.version>2.7.0.1482</sonar-analyzer-commons.version>
     <sslr-squid-bridge.version>2.7.1.392</sslr-squid-bridge.version>
     <sslr.version>1.24.0.633</sslr.version>
-    <slf4j.version>2.0.7</slf4j.version>
+    <slf4j.version>2.0.12</slf4j.version>
     <logback.version>1.0.13</logback.version>
-    <lsp4j.version>0.21.0</lsp4j.version>
-    <commons-cli.version>1.5.0</commons-cli.version>
+    <lsp4j.version>0.22.0</lsp4j.version>
+    <commons-cli.version>1.6.0</commons-cli.version>
     <gson.version>2.10.1</gson.version>
-    <assertj.version>3.24.2</assertj.version>
+    <assertj.version>3.25.3</assertj.version>
     <sonar-maven.version>3.9.1.2184</sonar-maven.version>
     <sqlite-jdbc.version>3.44.1.0</sqlite-jdbc.version>
 
@@ -120,11 +121,6 @@
         <groupId>org.sonarsource.sslr</groupId>
         <artifactId>sslr-toolkit</artifactId>
         <version>${sslr.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.github.spotbugs</groupId>
-        <artifactId>spotbugs-annotations</artifactId>
-        <version>${spotbugs.version}</version>
       </dependency>
 
       <dependency>
@@ -172,6 +168,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-annotations</artifactId>
+        <version>${spotbugs.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.sonarsource.analyzer-commons</groupId>
         <artifactId>sonar-analyzer-test-commons</artifactId>
         <version>${sonar-analyzer-commons.version}</version>
@@ -186,13 +188,13 @@
       <dependency>
         <groupId>org.sonarsource.sonarqube</groupId>
         <artifactId>sonar-testing-harness</artifactId>
-        <version>${sonar.version}</version>
+        <version>${sonar-impl.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.sonarsource.sonarqube</groupId>
         <artifactId>sonar-plugin-api-impl</artifactId>
-        <version>${sonar.version}</version>
+        <version>${sonar-impl.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
