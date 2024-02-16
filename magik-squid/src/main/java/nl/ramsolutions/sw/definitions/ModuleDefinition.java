@@ -1,10 +1,10 @@
 package nl.ramsolutions.sw.definitions;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
 
 /**

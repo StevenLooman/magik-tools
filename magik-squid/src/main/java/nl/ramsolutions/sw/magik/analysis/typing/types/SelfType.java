@@ -1,9 +1,9 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.Location;
 
 /**

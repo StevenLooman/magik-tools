@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.api;
 
 import com.sonar.sslr.api.Rule;
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import org.sonar.sslr.grammar.GrammarRuleKey;
 import org.sonar.sslr.internal.grammar.MutableParsingRule;
 import org.sonar.sslr.internal.matchers.Matcher;

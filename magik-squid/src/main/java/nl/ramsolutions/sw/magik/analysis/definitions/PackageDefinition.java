@@ -1,17 +1,15 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.Location;
 
 /**
  * Package definition.
  */
-@Immutable
 public class PackageDefinition extends Definition {
 
     private final String name;

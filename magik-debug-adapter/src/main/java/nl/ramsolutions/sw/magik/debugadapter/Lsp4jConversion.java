@@ -1,8 +1,8 @@
 package nl.ramsolutions.sw.magik.debugadapter;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.nio.file.Path;
 import java.util.List;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.debugadapter.BreakpointManager.MagikBreakpoint;
 import nl.ramsolutions.sw.magik.debugadapter.VariableManager.MagikVariable;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.BreakpointSetResponse;

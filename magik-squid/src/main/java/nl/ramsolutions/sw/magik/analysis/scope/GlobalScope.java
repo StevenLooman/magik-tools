@@ -2,10 +2,10 @@ package nl.ramsolutions.sw.magik.analysis.scope;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 

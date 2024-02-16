@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -14,7 +15,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
-import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.definitions.api.SwProductDefinitionGrammar;
 import nl.ramsolutions.sw.definitions.parser.SwProductDefParser;
 import nl.ramsolutions.sw.magik.Location;

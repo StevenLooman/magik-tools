@@ -1,14 +1,12 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 import nl.ramsolutions.sw.magik.Location;
 
 /**
  * Condition usage.
  */
-@Immutable
 public class ConditionUsage {
 
     private final String conditionName;

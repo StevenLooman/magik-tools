@@ -1,8 +1,8 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.Collection;
 import java.util.Set;
-import javax.annotation.CheckForNull;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.Package;

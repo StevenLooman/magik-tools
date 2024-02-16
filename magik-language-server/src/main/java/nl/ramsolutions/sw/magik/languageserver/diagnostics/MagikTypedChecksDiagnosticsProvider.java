@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.languageserver.diagnostics;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;

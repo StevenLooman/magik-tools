@@ -1,12 +1,12 @@
 package nl.ramsolutions.sw.magik.languageserver.munit;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import org.eclipse.lsp4j.Location;
 
 /**

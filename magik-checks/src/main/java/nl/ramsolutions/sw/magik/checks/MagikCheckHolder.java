@@ -2,14 +2,14 @@ package nl.ramsolutions.sw.magik.checks;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 import org.sonar.check.Rule;
 
 /**
