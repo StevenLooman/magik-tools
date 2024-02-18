@@ -381,12 +381,12 @@ public class Method {
    */
   public String getNameWithParameters() {
     String signature = this.getSignature();
-    final int bracketIndex = signature.indexOf("[");
+    final int bracketIndex = signature.indexOf('[');
     if (bracketIndex != -1) {
       return signature.substring(bracketIndex);
     }
 
-    final int dotIndex = signature.indexOf(".");
+    final int dotIndex = signature.indexOf('.');
     if (dotIndex != -1) {
       return signature.substring(dotIndex + 1);
     }
@@ -435,7 +435,7 @@ public class Method {
       builder.append(methodName.substring(1)); // "]<<" or "]^<<""
     } else {
       builder.append(".");
-      int bracketIndex = methodName.indexOf("(");
+      int bracketIndex = methodName.indexOf('(');
       if (bracketIndex != -1) {
         builder.append(methodName.substring(0, bracketIndex + 1));
         builder.append(parametersStr);

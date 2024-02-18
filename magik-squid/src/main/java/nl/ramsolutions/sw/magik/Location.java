@@ -28,7 +28,7 @@ public class Location {
       final URI uri0 = validLocation0.getUri();
       final URI uri1 = validLocation1.getUri();
       if (!uri0.equals(uri1)) {
-          return uri0.compareTo(uri1);
+        return uri0.compareTo(uri1);
       }
 
       // compare start of range

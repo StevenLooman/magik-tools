@@ -57,6 +57,7 @@
     <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
     <spotless.version>2.43.0</spotless.version>
     <google-java-format.version>1.19.2</google-java-format.version>
+    <cleanthat.version>2.18</cleanthat.version>
     <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
     <maven-javadoc-plugin.version>3.3.0</maven-javadoc-plugin.version>
@@ -287,6 +288,9 @@
               <include>**/src/main/java/**/*.java</include>
               <include>**/src/test/java/**/*.java</include>
             </includes>
+            <cleanthat>
+              <version>${cleanthat.version}</version>
+            </cleanthat>
             <googleJavaFormat>
               <version>${google-java-format.version}</version>
               <style>GOOGLE</style>

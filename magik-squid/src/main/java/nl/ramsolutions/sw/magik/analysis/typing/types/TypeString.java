@@ -453,7 +453,7 @@ public final class TypeString implements Comparable<TypeString> {
     }
 
     // Hash the bare type, without a package.
-    final int index = this.string.indexOf(":");
+    final int index = this.string.indexOf(':');
     final String str = index == -1 ? this.string : this.string.substring(index + 1);
     return Objects.hash(str);
   }
