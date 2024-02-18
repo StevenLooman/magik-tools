@@ -5,101 +5,97 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Reference to the type of a parameter.
- */
+/** Reference to the type of a parameter. */
 public class ParameterReferenceType extends AbstractType {
 
-    private final String parameterName;
+  private final String parameterName;
 
-    public ParameterReferenceType(final String parameterName) {
-        super(null, null);
-        this.parameterName = parameterName;
+  public ParameterReferenceType(final String parameterName) {
+    super(null, null);
+    this.parameterName = parameterName;
+  }
+
+  public String getParameterName() {
+    return this.parameterName;
+  }
+
+  @Override
+  public TypeString getTypeString() {
+    return TypeString.ofParameterRef(this.parameterName);
+  }
+
+  @Override
+  public String getFullName() {
+    return "_parameter(" + this.parameterName + ")";
+  }
+
+  @Override
+  public String getName() {
+    return "_parameter(" + this.parameterName + ")";
+  }
+
+  @Override
+  public Collection<Method> getMethods() {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public Collection<Method> getLocalMethods() {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public Collection<AbstractType> getParents() {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public Collection<Method> getSuperMethods(final String methodName) {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public Collection<Method> getSuperMethods(final String methodName, final String superName) {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public Collection<Slot> getSlots() {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(this.parameterName);
+  }
+
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
     }
 
-    public String getParameterName() {
-        return this.parameterName;
+    if (obj == null) {
+      return false;
     }
 
-    @Override
-    public TypeString getTypeString() {
-        return TypeString.ofParameterRef(this.parameterName);
+    if (this.getClass() != obj.getClass()) {
+      return false;
     }
 
-    @Override
-    public String getFullName() {
-        return "_parameter(" + this.parameterName + ")";
-    }
+    final ParameterReferenceType other = (ParameterReferenceType) obj;
+    return Objects.equals(this.parameterName, other.parameterName);
+  }
 
-    @Override
-    public String getName() {
-        return "_parameter(" + this.parameterName + ")";
-    }
+  @Override
+  public String toString() {
+    return String.format(
+        "%s@%s(%s)",
+        this.getClass().getName(), Integer.toHexString(this.hashCode()), this.getParameterName());
+  }
 
-    @Override
-    public Collection<Method> getMethods() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Collection<Method> getLocalMethods() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Collection<AbstractType> getParents() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Collection<Method> getSuperMethods(final String methodName) {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Collection<Method> getSuperMethods(final String methodName, final String superName) {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Collection<Slot> getSlots() {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.parameterName);
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj == null) {
-            return false;
-        }
-
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-
-        final ParameterReferenceType other = (ParameterReferenceType) obj;
-        return Objects.equals(this.parameterName, other.parameterName);
-    }
-
-    @Override
-    public String toString() {
-        return String.format(
-            "%s@%s(%s)",
-            this.getClass().getName(), Integer.toHexString(this.hashCode()),
-            this.getParameterName());
-    }
-
-    @Override
-    public List<GenericDefinition> getGenericDefinitions() {
-        return Collections.emptyList();
-    }
-
+  @Override
+  public List<GenericDefinition> getGenericDefinitions() {
+    return Collections.emptyList();
+  }
 }

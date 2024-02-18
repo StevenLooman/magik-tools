@@ -18,64 +18,66 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.eclipse.lsp4j.ServerCapabilities;
 
-/**
- * Implementation provider.
- */
+/** Implementation provider. */
 public class ImplementationProvider {
 
-    /**
-     * Set server capabilities.
-     * @param capabilities Server capabilities.
-     */
-    public void setCapabilities(final ServerCapabilities capabilities) {
-        capabilities.setImplementationProvider(true);
+  /**
+   * Set server capabilities.
+   *
+   * @param capabilities Server capabilities.
+   */
+  public void setCapabilities(final ServerCapabilities capabilities) {
+    capabilities.setImplementationProvider(true);
+  }
+
+  /**
+   * Provide implementations for {@code position} in {@code path}.
+   *
+   * @param magikFile Magik file.
+   * @param position Location in file.
+   * @return List of Locations for implementation.
+   */
+  public List<Location> provideImplementations(
+      final MagikTypedFile magikFile, final Position position) {
+    final AstNode node = magikFile.getTopNode();
+    final AstNode currentNode = AstQuery.nodeAt(node, position, MagikGrammar.IDENTIFIER);
+    if (currentNode == null) {
+      return Collections.emptyList();
     }
 
-    /**
-     * Provide implementations for {@code position} in {@code path}.
-     * @param magikFile Magik file.
-     * @param position Location in file.
-     * @return List of Locations for implementation.
-     */
-    public List<Location> provideImplementations(final MagikTypedFile magikFile, final Position position) {
-        final AstNode node = magikFile.getTopNode();
-        final AstNode currentNode = AstQuery.nodeAt(node, position, MagikGrammar.IDENTIFIER);
-        if (currentNode == null) {
-            return Collections.emptyList();
-        }
-
-        final AstNode wantedNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_NAME);
-        if (wantedNode == null) {
-            return Collections.emptyList();
-        }
-
-        return this.implementionsForMethod(magikFile, wantedNode);
+    final AstNode wantedNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_NAME);
+    if (wantedNode == null) {
+      return Collections.emptyList();
     }
 
-    private List<Location> implementionsForMethod(final MagikTypedFile magikFile, final AstNode wantedNode) {
-        final AstNode methodDefinitionNode = wantedNode.getParent();
-        final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefinitionNode);
-        final TypeString typeRef = helper.getTypeString();
-        final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-        final AbstractType type = typeKeeper.getType(typeRef);
-        if (type == UndefinedType.INSTANCE) {
-            return Collections.emptyList();
-        }
+    return this.implementionsForMethod(magikFile, wantedNode);
+  }
 
-        final String methodName = helper.getMethodName();
-        final boolean isAbstractMethod = type.getMethods(methodName).stream()
+  private List<Location> implementionsForMethod(
+      final MagikTypedFile magikFile, final AstNode wantedNode) {
+    final AstNode methodDefinitionNode = wantedNode.getParent();
+    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefinitionNode);
+    final TypeString typeRef = helper.getTypeString();
+    final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
+    final AbstractType type = typeKeeper.getType(typeRef);
+    if (type == UndefinedType.INSTANCE) {
+      return Collections.emptyList();
+    }
+
+    final String methodName = helper.getMethodName();
+    final boolean isAbstractMethod =
+        type.getMethods(methodName).stream()
             .anyMatch(method -> method.getModifiers().contains(Method.Modifier.ABSTRACT));
-        if (!isAbstractMethod) {
-            return Collections.emptyList();
-        }
-
-        return typeKeeper.getTypes().stream()
-            .filter(anyType -> !Objects.equals(anyType.getTypeString(), type.getTypeString()))
-            .filter(anyType -> anyType.isKindOf(type))
-            .flatMap(anyType -> anyType.getLocalMethods(methodName).stream())
-            .map(Method::getLocation)
-            .map(Location::validLocation)
-            .collect(Collectors.toList());
+    if (!isAbstractMethod) {
+      return Collections.emptyList();
     }
 
+    return typeKeeper.getTypes().stream()
+        .filter(anyType -> !Objects.equals(anyType.getTypeString(), type.getTypeString()))
+        .filter(anyType -> anyType.isKindOf(type))
+        .flatMap(anyType -> anyType.getLocalMethods(methodName).stream())
+        .map(Method::getLocation)
+        .map(Location::validLocation)
+        .collect(Collectors.toList());
+  }
 }

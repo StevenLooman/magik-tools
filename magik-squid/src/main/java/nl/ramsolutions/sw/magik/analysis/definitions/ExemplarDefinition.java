@@ -10,156 +10,149 @@ import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
-/**
- * Exemplar definition.
- */
+/** Exemplar definition. */
 public class ExemplarDefinition extends TypeStringDefinition {
 
-    /**
-     * Exemplar sort.
-     */
-    @SuppressWarnings("checkstyle:JavadocVariable")
-    public enum Sort {
-        UNDEFINED,
-        SLOTTED,
-        INDEXED,
-        INTRINSIC,
-        OBJECT;
+  /** Exemplar sort. */
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public enum Sort {
+    UNDEFINED,
+    SLOTTED,
+    INDEXED,
+    INTRINSIC,
+    OBJECT;
+  }
+
+  private final Sort sort;
+  private final TypeString typeName;
+  private final List<SlotDefinition> slots;
+  private final List<TypeString> parents;
+
+  /**
+   * Constructor.
+   *
+   * @param moduleName Name of module where this is defined.
+   * @param node Node for definition.
+   * @param sort Type of exemplar.
+   * @param typeName Name of slotted exemplar.
+   * @param slots Slots of slotted exemplar.
+   * @param parents Parents of slotted exemplar.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public ExemplarDefinition(
+      final @Nullable Location location,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final Sort sort,
+      final TypeString typeName,
+      final List<SlotDefinition> slots,
+      final List<TypeString> parents) {
+    super(location, moduleName, doc, node);
+
+    if (!typeName.isSingle()) {
+      throw new IllegalStateException();
     }
 
-    private final Sort sort;
-    private final TypeString typeName;
-    private final List<SlotDefinition> slots;
-    private final List<TypeString> parents;
+    this.sort = sort;
+    this.typeName = typeName;
+    this.slots = List.copyOf(slots);
+    this.parents = List.copyOf(parents);
+  }
 
-    /**
-     * Constructor.
-     * @param moduleName Name of module where this is defined.
-     * @param node Node for definition.
-     * @param sort Type of exemplar.
-     * @param typeName Name of slotted exemplar.
-     * @param slots Slots of slotted exemplar.
-     * @param parents Parents of slotted exemplar.
-     */
-    @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
-    public ExemplarDefinition(
-            final @Nullable Location location,
-            final @Nullable String moduleName,
-            final @Nullable String doc,
-            final @Nullable AstNode node,
-            final Sort sort,
-            final TypeString typeName,
-            final List<SlotDefinition> slots,
-            final List<TypeString> parents) {
-        super(location, moduleName, doc, node);
+  public List<SlotDefinition> getSlots() {
+    return Collections.unmodifiableList(this.slots);
+  }
 
-        if (!typeName.isSingle()) {
-            throw new IllegalStateException();
-        }
+  /**
+   * Get slot by name.
+   *
+   * @param name Name of slot.
+   * @return Slot.
+   */
+  @CheckForNull
+  public SlotDefinition getSlot(final String name) {
+    return this.slots.stream().filter(slot -> slot.getName().equals(name)).findAny().orElse(null);
+  }
 
-        this.sort = sort;
-        this.typeName = typeName;
-        this.slots = List.copyOf(slots);
-        this.parents = List.copyOf(parents);
+  public List<TypeString> getParents() {
+    return Collections.unmodifiableList(this.parents);
+  }
+
+  @Override
+  public TypeString getTypeString() {
+    return this.typeName;
+  }
+
+  public Sort getSort() {
+    return this.sort;
+  }
+
+  @Override
+  public String getName() {
+    return this.typeName.getFullString();
+  }
+
+  @Override
+  public String getPackage() {
+    return this.typeName.getPakkage();
+  }
+
+  @Override
+  public ExemplarDefinition getWithoutNode() {
+    return new ExemplarDefinition(
+        this.getLocation(),
+        this.getModuleName(),
+        this.getDoc(),
+        null,
+        this.sort,
+        this.typeName,
+        this.slots.stream().map(SlotDefinition::getWithoutNode).collect(Collectors.toList()),
+        this.parents);
+  }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "%s@%s(%s)",
+        this.getClass().getName(),
+        Integer.toHexString(this.hashCode()),
+        this.getTypeString().getFullString());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        this.getLocation(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.sort,
+        this.typeName,
+        this.slots,
+        this.parents);
+  }
+
+  @Override
+  public boolean equals(final Object obj) {
+    if (this == obj) {
+      return true;
     }
 
-    public List<SlotDefinition> getSlots() {
-        return Collections.unmodifiableList(this.slots);
+    if (obj == null) {
+      return false;
     }
 
-    /**
-     * Get slot by name.
-     * @param name Name of slot.
-     * @return Slot.
-     */
-    @CheckForNull
-    public SlotDefinition getSlot(final String name) {
-        return this.slots.stream()
-            .filter(slot -> slot.getName().equals(name))
-            .findAny()
-            .orElse(null);
+    if (this.getClass() != obj.getClass()) {
+      return false;
     }
 
-    public List<TypeString> getParents() {
-        return Collections.unmodifiableList(this.parents);
-    }
-
-    @Override
-    public TypeString getTypeString() {
-        return this.typeName;
-    }
-
-    public Sort getSort() {
-        return this.sort;
-    }
-
-    @Override
-    public String getName() {
-        return this.typeName.getFullString();
-    }
-
-    @Override
-    public String getPackage() {
-        return this.typeName.getPakkage();
-    }
-
-    @Override
-    public ExemplarDefinition getWithoutNode() {
-        return new ExemplarDefinition(
-            this.getLocation(),
-            this.getModuleName(),
-            this.getDoc(),
-            null,
-            this.sort,
-            this.typeName,
-            this.slots.stream()
-                .map(SlotDefinition::getWithoutNode)
-                .collect(Collectors.toList()),
-            this.parents);
-    }
-
-    @Override
-    public String toString() {
-        return String.format(
-            "%s@%s(%s)",
-            this.getClass().getName(), Integer.toHexString(this.hashCode()),
-            this.getTypeString().getFullString());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(
-            this.getLocation(),
-            this.getModuleName(),
-            this.getDoc(),
-            this.sort,
-            this.typeName,
-            this.slots,
-            this.parents);
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-
-        if (obj == null) {
-            return false;
-        }
-
-        if (this.getClass() != obj.getClass()) {
-            return false;
-        }
-
-        final ExemplarDefinition other = (ExemplarDefinition) obj;
-        return Objects.equals(this.getLocation(), other.getLocation())
-            && Objects.equals(this.getModuleName(), other.getModuleName())
-            && Objects.equals(this.getDoc(), other.getDoc())
-            && Objects.equals(this.sort, other.sort)
-            && Objects.equals(this.typeName, other.typeName)
-            && Objects.equals(this.slots, other.slots)
-            && Objects.equals(this.parents, other.parents);
-    }
-
+    final ExemplarDefinition other = (ExemplarDefinition) obj;
+    return Objects.equals(this.getLocation(), other.getLocation())
+        && Objects.equals(this.getModuleName(), other.getModuleName())
+        && Objects.equals(this.getDoc(), other.getDoc())
+        && Objects.equals(this.sort, other.sort)
+        && Objects.equals(this.typeName, other.typeName)
+        && Objects.equals(this.slots, other.slots)
+        && Objects.equals(this.parents, other.parents);
+  }
 }

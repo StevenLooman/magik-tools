@@ -12,63 +12,63 @@ import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
 
-/**
- * Check for hiding of variables.
- */
+/** Check for hiding of variables. */
 @Rule(key = HidesVariableCheck.CHECK_KEY)
 public class HidesVariableCheck extends MagikCheck {
 
-    @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "HidesVariable";
-    private static final String MESSAGE = "Variable definition hides another variable with the same name.";
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final String CHECK_KEY = "HidesVariable";
 
-    @Override
-    protected void walkPostVariableDefinition(final AstNode node) {
-        final MagikFile magikFile = this.getMagikFile();
-        final GlobalScope globalScope = magikFile.getGlobalScope();
-        Objects.requireNonNull(globalScope);
-        final Scope scope = globalScope.getScopeForNode(node);
-        Objects.requireNonNull(scope);
+  private static final String MESSAGE =
+      "Variable definition hides another variable with the same name.";
 
-        final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-        this.checkIdentifier(scope, identifierNode);
+  @Override
+  protected void walkPostVariableDefinition(final AstNode node) {
+    final MagikFile magikFile = this.getMagikFile();
+    final GlobalScope globalScope = magikFile.getGlobalScope();
+    Objects.requireNonNull(globalScope);
+    final Scope scope = globalScope.getScopeForNode(node);
+    Objects.requireNonNull(scope);
+
+    final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
+    this.checkIdentifier(scope, identifierNode);
+  }
+
+  @Override
+  protected void walkPostVariableDefinitionMulti(final AstNode node) {
+    final MagikFile magikFile = this.getMagikFile();
+    final GlobalScope globalScope = magikFile.getGlobalScope();
+    Objects.requireNonNull(globalScope);
+    final Scope scope = globalScope.getScopeForNode(node);
+    Objects.requireNonNull(scope);
+
+    final AstNode identifiersNode = node.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
+    for (final AstNode identifierNode : identifiersNode.getChildren(MagikGrammar.IDENTIFIER)) {
+      this.checkIdentifier(scope, identifierNode);
     }
+  }
 
-    @Override
-    protected void walkPostVariableDefinitionMulti(final AstNode node) {
-        final MagikFile magikFile = this.getMagikFile();
-        final GlobalScope globalScope = magikFile.getGlobalScope();
-        Objects.requireNonNull(globalScope);
-        final Scope scope = globalScope.getScopeForNode(node);
-        Objects.requireNonNull(scope);
-
-        final AstNode identifiersNode = node.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
-        for (final AstNode identifierNode : identifiersNode.getChildren(MagikGrammar.IDENTIFIER)) {
-            this.checkIdentifier(scope, identifierNode);
-        }
-    }
-
-    private void checkIdentifier(final Scope scope, final AstNode identifierNode) {
-        // Dont check _imports.
-        final AstNode varDefStatementNode = AstQuery.getParentFromChain(
+  private void checkIdentifier(final Scope scope, final AstNode identifierNode) {
+    // Dont check _imports.
+    final AstNode varDefStatementNode =
+        AstQuery.getParentFromChain(
             identifierNode,
-            MagikGrammar.VARIABLE_DEFINITION, MagikGrammar.VARIABLE_DEFINITION_STATEMENT);
-        if (varDefStatementNode != null) {
-            final String tokenValue = varDefStatementNode.getTokenValue();
-            if (tokenValue != null
-                && tokenValue.equalsIgnoreCase(MagikKeyword.IMPORT.getValue())) {
-                return;
-            }
-        }
-
-        for (final Scope ancestorScope : scope.getAncestorScopes()) {
-            final ScopeEntry scopeEntry = ancestorScope.getScopeEntry(identifierNode);
-            if (scopeEntry != null
-                && scopeEntry.isType(ScopeEntry.Type.LOCAL)
-                && scopeEntry.getDefinitionNode().getTokenLine() < identifierNode.getTokenLine()) {
-                this.addIssue(identifierNode, MESSAGE);
-            }
-        }
+            MagikGrammar.VARIABLE_DEFINITION,
+            MagikGrammar.VARIABLE_DEFINITION_STATEMENT);
+    if (varDefStatementNode != null) {
+      final String tokenValue = varDefStatementNode.getTokenValue();
+      if (tokenValue != null && tokenValue.equalsIgnoreCase(MagikKeyword.IMPORT.getValue())) {
+        return;
+      }
     }
 
+    for (final Scope ancestorScope : scope.getAncestorScopes()) {
+      final ScopeEntry scopeEntry = ancestorScope.getScopeEntry(identifierNode);
+      if (scopeEntry != null
+          && scopeEntry.isType(ScopeEntry.Type.LOCAL)
+          && scopeEntry.getDefinitionNode().getTokenLine() < identifierNode.getTokenLine()) {
+        this.addIssue(identifierNode, MESSAGE);
+      }
+    }
+  }
 }

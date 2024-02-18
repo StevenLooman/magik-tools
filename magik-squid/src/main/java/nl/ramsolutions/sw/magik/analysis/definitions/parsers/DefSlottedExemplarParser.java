@@ -27,147 +27,138 @@ import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 
-/**
- * {@code def_slotted_exemplar} parser.
- */
+/** {@code def_slotted_exemplar} parser. */
 public class DefSlottedExemplarParser extends BaseDefParser {
 
-    private static final String DEF_SLOTTED_EXEMPLAR = "def_slotted_exemplar";
-    private static final String SW_DEF_SLOTTED_EXEMPLAR = "sw:def_slotted_exemplar";
+  private static final String DEF_SLOTTED_EXEMPLAR = "def_slotted_exemplar";
+  private static final String SW_DEF_SLOTTED_EXEMPLAR = "sw:def_slotted_exemplar";
 
-    /**
-     * Constructor.
-     * @param node {@code def_slotted_exemplar()} node.
-     */
-    public DefSlottedExemplarParser(final AstNode node) {
-        super(node);
+  /**
+   * Constructor.
+   *
+   * @param node {@code def_slotted_exemplar()} node.
+   */
+  public DefSlottedExemplarParser(final AstNode node) {
+    super(node);
+  }
+
+  /**
+   * Test if node is a {@code def_slotted_exemplar()}.
+   *
+   * @param node Node to test
+   * @return True if node is a {@code def_slotted_exemplar()}, false otherwise.
+   */
+  public static boolean isDefSlottedExemplar(final AstNode node) {
+    if (!node.is(MagikGrammar.PROCEDURE_INVOCATION)) {
+      return false;
     }
 
-    /**
-     * Test if node is a {@code def_slotted_exemplar()}.
-     * @param node Node to test
-     * @return True if node is a {@code def_slotted_exemplar()}, false otherwise.
-     */
-    public static boolean isDefSlottedExemplar(final AstNode node) {
-        if (!node.is(MagikGrammar.PROCEDURE_INVOCATION)) {
-            return false;
-        }
-
-        final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
-        if (!helper.isProcedureInvocationOf(DEF_SLOTTED_EXEMPLAR)
-            && !helper.isProcedureInvocationOf(SW_DEF_SLOTTED_EXEMPLAR)) {
-            return false;
-        }
-
-        // Some sanity.
-        final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-        final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
-        final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
-        if (argument0Node == null) {
-            return false;
-        }
-        final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SIMPLE_VECTOR);
-        return argument1Node != null;
+    final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
+    if (!helper.isProcedureInvocationOf(DEF_SLOTTED_EXEMPLAR)
+        && !helper.isProcedureInvocationOf(SW_DEF_SLOTTED_EXEMPLAR)) {
+      return false;
     }
 
-    /**
-     * Parse defitions.
-     * @return List of parsed definitions.
-     */
-    @Override
-    public List<Definition> parseDefinitions() {
-        final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
-        final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
-        final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
-        if (argument0Node == null) {
-            throw new IllegalStateException();
-        }
-        final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SIMPLE_VECTOR);
-        if (argument1Node == null) {
-            throw new IllegalStateException();
-        }
+    // Some sanity.
+    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+    if (argument0Node == null) {
+      return false;
+    }
+    final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SIMPLE_VECTOR);
+    return argument1Node != null;
+  }
 
-        // Figure location.
-        final URI uri = this.node.getToken().getURI();
-        final Location location = new Location(uri, this.node);
+  /**
+   * Parse defitions.
+   *
+   * @return List of parsed definitions.
+   */
+  @Override
+  public List<Definition> parseDefinitions() {
+    final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
+    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+    if (argument0Node == null) {
+      throw new IllegalStateException();
+    }
+    final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SIMPLE_VECTOR);
+    if (argument1Node == null) {
+      throw new IllegalStateException();
+    }
 
-        // Figure module name.
-        final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
+    // Figure location.
+    final URI uri = this.node.getToken().getURI();
+    final Location location = new Location(uri, this.node);
 
-        // Figure statement node.
-        final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
+    // Figure module name.
+    final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
 
-        // Figure pakkage.
-        final String packageName = this.getCurrentPakkage();
+    // Figure statement node.
+    final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
 
-        // Figure name.
-        final String identifier = argument0Node.getTokenValue().substring(1);
-        final TypeString name = TypeString.ofIdentifier(identifier, packageName);
+    // Figure pakkage.
+    final String packageName = this.getCurrentPakkage();
 
-        // Figure slot types.
-        final AstNode parentNode = this.node.getParent();
-        final TypeDocParser docParser = new TypeDocParser(parentNode);
-        final Map<String, TypeString> slotTypes = docParser.getSlotTypes();
+    // Figure name.
+    final String identifier = argument0Node.getTokenValue().substring(1);
+    final TypeString name = TypeString.ofIdentifier(identifier, packageName);
 
-        // Figure slots.
-        final List<SlotDefinition> slots = new ArrayList<>();
-        final List<MethodDefinition> methodDefinitions = new ArrayList<>();
-        for (final AstNode slotDefNode : argument1Node.getChildren(MagikGrammar.EXPRESSION)) {  // NOSONAR
-            final SimpleVectorNodeHelper simpleVectorHelper = SimpleVectorNodeHelper.fromExpressionSafe(slotDefNode);
-            if (simpleVectorHelper == null) {
-                continue;
-            }
+    // Figure slot types.
+    final AstNode parentNode = this.node.getParent();
+    final TypeDocParser docParser = new TypeDocParser(parentNode);
+    final Map<String, TypeString> slotTypes = docParser.getSlotTypes();
 
-            final AstNode slotNameNode = simpleVectorHelper.getNth(0, MagikGrammar.SYMBOL);
-            if (slotNameNode == null) {
-                continue;
-            }
+    // Figure slots.
+    final List<SlotDefinition> slots = new ArrayList<>();
+    final List<MethodDefinition> methodDefinitions = new ArrayList<>();
+    for (final AstNode slotDefNode :
+        argument1Node.getChildren(MagikGrammar.EXPRESSION)) { // NOSONAR
+      final SimpleVectorNodeHelper simpleVectorHelper =
+          SimpleVectorNodeHelper.fromExpressionSafe(slotDefNode);
+      if (simpleVectorHelper == null) {
+        continue;
+      }
 
-            // Slot definitions.
-            final Location slotLocation = new Location(uri, slotDefNode);
-            final String slotNameSymbol = slotNameNode.getTokenValue();
-            final String slotName = slotNameSymbol.substring(1);
-            final TypeString slotTypeRef = Objects.requireNonNullElse(
-                slotTypes.get(slotName),
-                TypeString.UNDEFINED);
-            final SlotDefinition slot =
-                new SlotDefinition(
-                    slotLocation,
-                    moduleName,
-                    null,
-                    slotDefNode,
-                    slotName,
-                    slotTypeRef);
-            slots.add(slot);
+      final AstNode slotNameNode = simpleVectorHelper.getNth(0, MagikGrammar.SYMBOL);
+      if (slotNameNode == null) {
+        continue;
+      }
 
-            // Method definitions.
-            final AstNode flagNode = simpleVectorHelper.getNth(2, MagikGrammar.SYMBOL);
-            final AstNode flavorNode = simpleVectorHelper.getNth(3, MagikGrammar.SYMBOL);
-            if (flagNode != null
-                && flavorNode != null) {
-                final String flag = flagNode.getTokenValue();
-                final String flavor = flavorNode.getTokenValue();
-                final TypeString exemplarName = TypeString.ofIdentifier(identifier, packageName);
-                final List<MethodDefinition> slotMethodDefinitions = this.generateSlotMethods(
-                    moduleName,
-                    slotDefNode,
-                    exemplarName,
-                    slotName,
-                    flag,
-                    flavor,
-                    slotTypeRef);
-                methodDefinitions.addAll(slotMethodDefinitions);
-            }
-        }
+      // Slot definitions.
+      final Location slotLocation = new Location(uri, slotDefNode);
+      final String slotNameSymbol = slotNameNode.getTokenValue();
+      final String slotName = slotNameSymbol.substring(1);
+      final TypeString slotTypeRef =
+          Objects.requireNonNullElse(slotTypes.get(slotName), TypeString.UNDEFINED);
+      final SlotDefinition slot =
+          new SlotDefinition(slotLocation, moduleName, null, slotDefNode, slotName, slotTypeRef);
+      slots.add(slot);
 
-        // Figure parents.
-        final AstNode argument2Node = argumentsHelper.getArgument(2);
-        final List<TypeString> parents = this.extractParents(argument2Node);
+      // Method definitions.
+      final AstNode flagNode = simpleVectorHelper.getNth(2, MagikGrammar.SYMBOL);
+      final AstNode flavorNode = simpleVectorHelper.getNth(3, MagikGrammar.SYMBOL);
+      if (flagNode != null && flavorNode != null) {
+        final String flag = flagNode.getTokenValue();
+        final String flavor = flavorNode.getTokenValue();
+        final TypeString exemplarName = TypeString.ofIdentifier(identifier, packageName);
+        final List<MethodDefinition> slotMethodDefinitions =
+            this.generateSlotMethods(
+                moduleName, slotDefNode, exemplarName, slotName, flag, flavor, slotTypeRef);
+        methodDefinitions.addAll(slotMethodDefinitions);
+      }
+    }
 
-        // Figure doc.
-        final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+    // Figure parents.
+    final AstNode argument2Node = argumentsHelper.getArgument(2);
+    final List<TypeString> parents = this.extractParents(argument2Node);
 
-        final ExemplarDefinition slottedExemplarDefinition = new ExemplarDefinition(
+    // Figure doc.
+    final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+
+    final ExemplarDefinition slottedExemplarDefinition =
+        new ExemplarDefinition(
             location,
             moduleName,
             doc,
@@ -177,117 +168,118 @@ public class DefSlottedExemplarParser extends BaseDefParser {
             slots,
             parents);
 
-        final List<Definition> definitions = new ArrayList<>();
-        definitions.add(slottedExemplarDefinition);
-        definitions.addAll(methodDefinitions);
-        return definitions;
+    final List<Definition> definitions = new ArrayList<>();
+    definitions.add(slottedExemplarDefinition);
+    definitions.addAll(methodDefinitions);
+    return definitions;
+  }
+
+  private List<MethodDefinition> generateSlotMethods(
+      final @Nullable String moduleName,
+      final AstNode node,
+      final TypeString exemplarName,
+      final String slotName,
+      final String flag,
+      final String flavor,
+      final TypeString slotTypeRef) {
+    final List<MethodDefinition> methodDefinitions = new ArrayList<>();
+
+    // Figure location.
+    final URI uri = node.getToken().getURI();
+    final Location location = new Location(uri, node);
+
+    if (flag.equals(FLAG_READ) || flag.equals(FLAG_READABLE)) {
+      // get
+      final String getName = slotName;
+      final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>();
+      if (!flavor.equals(FLAVOR_PUBLIC)) {
+        getModifiers.add(MethodDefinition.Modifier.PRIVATE);
+      }
+      final List<ParameterDefinition> getParameters = Collections.emptyList();
+      final MethodDefinition getMethod =
+          new MethodDefinition(
+              location,
+              moduleName,
+              null,
+              node,
+              exemplarName,
+              getName,
+              getModifiers,
+              getParameters,
+              null,
+              new ExpressionResultString(slotTypeRef),
+              ExpressionResultString.EMPTY);
+      methodDefinitions.add(getMethod);
+    } else if (flag.equals(FLAG_WRITE) || flag.equals(FLAG_WRITABLE)) {
+      // get
+      final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>();
+      if (!flavor.equals(FLAVOR_PUBLIC) && !flavor.equals(FLAVOR_READ_ONLY)) {
+        getModifiers.add(MethodDefinition.Modifier.PRIVATE);
+      }
+      final List<ParameterDefinition> getParameters = Collections.emptyList();
+      final MethodDefinition getMethod =
+          new MethodDefinition(
+              location,
+              moduleName,
+              null,
+              node,
+              exemplarName,
+              slotName,
+              getModifiers,
+              getParameters,
+              null,
+              new ExpressionResultString(slotTypeRef),
+              ExpressionResultString.EMPTY);
+      methodDefinitions.add(getMethod);
+
+      // set
+      final String setName = slotName + MagikOperator.CHEVRON.getValue();
+      final Set<MethodDefinition.Modifier> setModifiers = new HashSet<>();
+      if (!flavor.equals(FLAVOR_PUBLIC)) {
+        setModifiers.add(MethodDefinition.Modifier.PRIVATE);
+      }
+      final List<ParameterDefinition> setParameters = Collections.emptyList();
+      final ParameterDefinition assignmentParam =
+          new ParameterDefinition(
+              location,
+              moduleName,
+              null,
+              node,
+              "val",
+              ParameterDefinition.Modifier.NONE,
+              slotTypeRef);
+      final MethodDefinition setMethod =
+          new MethodDefinition(
+              location,
+              moduleName,
+              null,
+              node,
+              exemplarName,
+              setName,
+              setModifiers,
+              setParameters,
+              assignmentParam,
+              new ExpressionResultString(TypeString.ofParameterRef("val")),
+              ExpressionResultString.EMPTY);
+      methodDefinitions.add(setMethod);
+
+      // boot
+      final String bootName = slotName + MagikOperator.BOOT_CHEVRON.getValue();
+      final MethodDefinition bootMethod =
+          new MethodDefinition(
+              location,
+              moduleName,
+              null,
+              node,
+              exemplarName,
+              bootName,
+              setModifiers,
+              setParameters,
+              assignmentParam,
+              new ExpressionResultString(slotTypeRef),
+              ExpressionResultString.EMPTY);
+      methodDefinitions.add(bootMethod);
     }
-
-    private List<MethodDefinition> generateSlotMethods(
-            final @Nullable String moduleName,
-            final AstNode node,
-            final TypeString exemplarName,
-            final String slotName,
-            final String flag,
-            final String flavor,
-            final TypeString slotTypeRef) {
-        final List<MethodDefinition> methodDefinitions = new ArrayList<>();
-
-        // Figure location.
-        final URI uri = node.getToken().getURI();
-        final Location location = new Location(uri, node);
-
-        if (flag.equals(FLAG_READ)
-            || flag.equals(FLAG_READABLE)) {
-            // get
-            final String getName = slotName;
-            final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>();
-            if (!flavor.equals(FLAVOR_PUBLIC)) {
-                getModifiers.add(MethodDefinition.Modifier.PRIVATE);
-            }
-            final List<ParameterDefinition> getParameters = Collections.emptyList();
-            final MethodDefinition getMethod = new MethodDefinition(
-                location,
-                moduleName,
-                null,
-                node,
-                exemplarName,
-                getName,
-                getModifiers,
-                getParameters,
-                null,
-                new ExpressionResultString(slotTypeRef),
-                ExpressionResultString.EMPTY);
-            methodDefinitions.add(getMethod);
-        } else if (flag.equals(FLAG_WRITE)
-                   || flag.equals(FLAG_WRITABLE)) {
-            // get
-            final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>();
-            if (!flavor.equals(FLAVOR_PUBLIC) && !flavor.equals(FLAVOR_READ_ONLY)) {
-                getModifiers.add(MethodDefinition.Modifier.PRIVATE);
-            }
-            final List<ParameterDefinition> getParameters = Collections.emptyList();
-            final MethodDefinition getMethod = new MethodDefinition(
-                location,
-                moduleName,
-                null,
-                node,
-                exemplarName,
-                slotName,
-                getModifiers,
-                getParameters,
-                null,
-                new ExpressionResultString(slotTypeRef),
-                ExpressionResultString.EMPTY);
-            methodDefinitions.add(getMethod);
-
-            // set
-            final String setName = slotName + MagikOperator.CHEVRON.getValue();
-            final Set<MethodDefinition.Modifier> setModifiers = new HashSet<>();
-            if (!flavor.equals(FLAVOR_PUBLIC)) {
-                setModifiers.add(MethodDefinition.Modifier.PRIVATE);
-            }
-            final List<ParameterDefinition> setParameters = Collections.emptyList();
-            final ParameterDefinition assignmentParam = new ParameterDefinition(
-                location,
-                moduleName,
-                null,
-                node,
-                "val",
-                ParameterDefinition.Modifier.NONE,
-                slotTypeRef);
-            final MethodDefinition setMethod = new MethodDefinition(
-                location,
-                moduleName,
-                null,
-                node,
-                exemplarName,
-                setName,
-                setModifiers,
-                setParameters,
-                assignmentParam,
-                new ExpressionResultString(
-                    TypeString.ofParameterRef("val")),
-                ExpressionResultString.EMPTY);
-            methodDefinitions.add(setMethod);
-
-            // boot
-            final String bootName = slotName + MagikOperator.BOOT_CHEVRON.getValue();
-            final MethodDefinition bootMethod = new MethodDefinition(
-                location,
-                moduleName,
-                null,
-                node,
-                exemplarName,
-                bootName,
-                setModifiers,
-                setParameters,
-                assignmentParam,
-                new ExpressionResultString(slotTypeRef),
-                ExpressionResultString.EMPTY);
-            methodDefinitions.add(bootMethod);
-        }
-        return methodDefinitions;
-    }
-
+    return methodDefinitions;
+  }
 }

@@ -1,24 +1,23 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-/**
- * Test MethodComplexityCheck.
- */
+/** Test MethodComplexityCheck. */
 @SuppressWarnings("checkstyle:MagicNumber")
 class MethodComplexityCheckTest extends MagikCheckTestBase {
 
-    @Test
-    void testTooComplex() {
-        final MethodComplexityCheck check = new MethodComplexityCheck();
-        check.maximumComplexity = 5;
+  @Test
+  void testTooComplex() {
+    final MethodComplexityCheck check = new MethodComplexityCheck();
+    check.maximumComplexity = 5;
 
-        final String code = ""
+    final String code =
+        ""
             + "_method a.b\n"
             + "    _if a\n"
             + "    _then\n"
@@ -36,21 +35,16 @@ class MethodComplexityCheckTest extends MagikCheckTestBase {
             + "        _endif\n"
             + "    _endif\n"
             + "_endmethod\n";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).hasSize(1);
-    }
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
 
-    @Test
-    void testNotTooComplex() {
-        final MagikCheck check = new MethodComplexityCheck();
-        final String code = ""
-            + "_method a.b\n"
-            + "    _if a\n"
-            + "    _then\n"
-            + "    _endif\n"
-            + "_endmethod\n";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
-
+  @Test
+  void testNotTooComplex() {
+    final MagikCheck check = new MethodComplexityCheck();
+    final String code =
+        "" + "_method a.b\n" + "    _if a\n" + "    _then\n" + "    _endif\n" + "_endmethod\n";
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 }

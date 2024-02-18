@@ -25,77 +25,79 @@ import org.eclipse.lsp4j.SignatureInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Signature help provider.
- */
+/** Signature help provider. */
 public class SignatureHelpProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SignatureHelpProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SignatureHelpProvider.class);
 
-    /**
-     * Set server capabilities.
-     * @param capabilities Server capabilities.
-     */
-    public void setCapabilities(final ServerCapabilities capabilities) {
-        final SignatureHelpOptions signatureHelpOptions = new SignatureHelpOptions();
-        signatureHelpOptions.setTriggerCharacters(List.of("."));
-        capabilities.setSignatureHelpProvider(signatureHelpOptions);
+  /**
+   * Set server capabilities.
+   *
+   * @param capabilities Server capabilities.
+   */
+  public void setCapabilities(final ServerCapabilities capabilities) {
+    final SignatureHelpOptions signatureHelpOptions = new SignatureHelpOptions();
+    signatureHelpOptions.setTriggerCharacters(List.of("."));
+    capabilities.setSignatureHelpProvider(signatureHelpOptions);
+  }
+
+  /**
+   * Provide a {@link SignatureHelp} for {@code position} in {@code path}.
+   *
+   * @param magikFile Magik file.
+   * @param position Position in file.
+   * @return {@link SignatureHelp}.
+   */
+  public SignatureHelp provideSignatureHelp(
+      final MagikTypedFile magikFile, final Position position) {
+    // Get intended method and called type.
+    final AstNode node = magikFile.getTopNode();
+    AstNode currentNode = AstQuery.nodeAt(node, Lsp4jConversion.positionFromLsp4j(position));
+    if (currentNode != null && currentNode.isNot(MagikGrammar.METHOD_INVOCATION)) {
+      currentNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_INVOCATION);
+    }
+    if (currentNode == null) {
+      return new SignatureHelp(Collections.emptyList(), null, null);
+    }
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(currentNode);
+    final String methodName = helper.getMethodName();
+    if (methodName == null) {
+      return new SignatureHelp(Collections.emptyList(), null, null);
+    }
+    final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+    final AstNode previousSiblingNode = currentNode.getPreviousSibling();
+    final ExpressionResult result = reasonerState.getNodeType(previousSiblingNode);
+    final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
+    final AbstractType unsetType = typeKeeper.getType(TypeString.UNDEFINED);
+    AbstractType type = result.get(0, unsetType);
+
+    LOGGER.debug("Provide signature for type: {}, method: {}", type.getFullName(), methodName);
+
+    final List<SignatureInformation> sigInfos;
+    if (type == UndefinedType.INSTANCE) {
+      // Provide all methods with the name.
+      sigInfos =
+          typeKeeper.getTypes().stream()
+              .flatMap(signatureType -> signatureType.getMethods().stream())
+              .filter(method -> method.getName().startsWith(methodName))
+              .map(method -> new SignatureInformation(method.getSignature(), method.getDoc(), null))
+              .collect(Collectors.toList());
+    } else {
+      if (type == SelfType.INSTANCE) {
+        final AstNode methodDefNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
+        final MethodDefinitionNodeHelper methodDefHelper =
+            new MethodDefinitionNodeHelper(methodDefNode);
+        final TypeString typeString = methodDefHelper.getTypeString();
+        type = typeKeeper.getType(typeString);
+      }
+      // Provide methods for this type with the name.
+      sigInfos =
+          type.getMethods().stream()
+              .filter(method -> method.getName().startsWith(methodName))
+              .map(method -> new SignatureInformation(method.getSignature(), method.getDoc(), null))
+              .collect(Collectors.toList());
     }
 
-    /**
-     * Provide a {@link SignatureHelp} for {@code position} in {@code path}.
-     * @param magikFile Magik file.
-     * @param position Position in file.
-     * @return {@link SignatureHelp}.
-     */
-    public SignatureHelp provideSignatureHelp(final MagikTypedFile magikFile, final Position position) {
-        // Get intended method and called type.
-        final AstNode node = magikFile.getTopNode();
-        AstNode currentNode = AstQuery.nodeAt(node, Lsp4jConversion.positionFromLsp4j(position));
-        if (currentNode != null
-            && currentNode.isNot(MagikGrammar.METHOD_INVOCATION)) {
-            currentNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_INVOCATION);
-        }
-        if (currentNode == null) {
-            return new SignatureHelp(Collections.emptyList(), null, null);
-        }
-        final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(currentNode);
-        final String methodName = helper.getMethodName();
-        if (methodName == null) {
-            return new SignatureHelp(Collections.emptyList(), null, null);
-        }
-        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-        final AstNode previousSiblingNode = currentNode.getPreviousSibling();
-        final ExpressionResult result = reasonerState.getNodeType(previousSiblingNode);
-        final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-        final AbstractType unsetType = typeKeeper.getType(TypeString.UNDEFINED);
-        AbstractType type = result.get(0, unsetType);
-
-        LOGGER.debug("Provide signature for type: {}, method: {}", type.getFullName(), methodName);
-
-        final List<SignatureInformation> sigInfos;
-        if (type == UndefinedType.INSTANCE) {
-            // Provide all methods with the name.
-            sigInfos = typeKeeper.getTypes().stream()
-                .flatMap(signatureType -> signatureType.getMethods().stream())
-                .filter(method -> method.getName().startsWith(methodName))
-                .map(method -> new SignatureInformation(method.getSignature(), method.getDoc(), null))
-                .collect(Collectors.toList());
-        } else {
-            if (type == SelfType.INSTANCE) {
-                final AstNode methodDefNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-                final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(methodDefNode);
-                final TypeString typeString = methodDefHelper.getTypeString();
-                type = typeKeeper.getType(typeString);
-            }
-            // Provide methods for this type with the name.
-            sigInfos = type.getMethods().stream()
-                .filter(method -> method.getName().startsWith(methodName))
-                .map(method -> new SignatureInformation(method.getSignature(), method.getDoc(), null))
-                .collect(Collectors.toList());
-        }
-
-        return new SignatureHelp(sigInfos, null, null);
-    }
-
+    return new SignatureHelp(sigInfos, null, null);
+  }
 }

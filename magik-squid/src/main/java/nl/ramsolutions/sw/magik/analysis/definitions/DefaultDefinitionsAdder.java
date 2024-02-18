@@ -4,24 +4,24 @@ import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
-/**
- * Default definitions adder for {@link IDefinitionKeeper}.
- */
+/** Default definitions adder for {@link IDefinitionKeeper}. */
 public final class DefaultDefinitionsAdder {
 
-    private DefaultDefinitionsAdder() {
-    }
+  private DefaultDefinitionsAdder() {}
 
-    /**
-     * Add all default definitions.
-     * @param definitionKeeper {@link IDefinitionKeeper} to add to.
-     */
-    @SuppressWarnings("checkstyle:MethodLength")
-    public static void addDefaultDefinitions(IDefinitionKeeper definitionKeeper) {
-        definitionKeeper.add(new PackageDefinition(null, null, null, null, "sw", Collections.emptyList()));
-        definitionKeeper.add(new PackageDefinition(null, null, null, null, "user", List.of("sw")));
+  /**
+   * Add all default definitions.
+   *
+   * @param definitionKeeper {@link IDefinitionKeeper} to add to.
+   */
+  @SuppressWarnings("checkstyle:MethodLength")
+  public static void addDefaultDefinitions(IDefinitionKeeper definitionKeeper) {
+    definitionKeeper.add(
+        new PackageDefinition(null, null, null, null, "sw", Collections.emptyList()));
+    definitionKeeper.add(new PackageDefinition(null, null, null, null, "user", List.of("sw")));
 
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -30,7 +30,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_OBJECT,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -39,7 +40,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_UNSET,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -48,7 +50,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_FALSE,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -57,7 +60,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_MAYBE,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -66,7 +70,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_INTEGER,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -75,7 +80,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_BIGNUM,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -84,7 +90,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_FLOAT,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -93,7 +100,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_SYMBOL,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -102,7 +110,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_CHARACTER,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -111,7 +120,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_SW_REGEXP,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -120,7 +130,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_PROCEDURE,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -129,7 +140,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_CHAR16_VECTOR,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -138,7 +150,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_SIMPLE_VECTOR,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -147,7 +160,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_HEAVY_THREAD,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -156,7 +170,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_LIGHT_THREAD,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -165,7 +180,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_CONDITION,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -174,7 +190,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_ENUMERATION_VALUE,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -183,7 +200,8 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_INDEXED_FORMAT_MIXIN,
             Collections.emptyList(),
             Collections.emptyList()));
-        definitionKeeper.add(new ExemplarDefinition(
+    definitionKeeper.add(
+        new ExemplarDefinition(
             null,
             null,
             null,
@@ -192,6 +210,5 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_SLOTTED_FORMAT_MIXIN,
             Collections.emptyList(),
             Collections.emptyList()));
-    }
-
+  }
 }
