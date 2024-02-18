@@ -153,8 +153,8 @@ class ThreadManager {
     try {
       String method = stackElement.getName();
       if (!method.equals(UNNAMED_PROC) && !method.equals(LOOPBODY)) {
-        final int indexDot = method.indexOf(".");
-        final int indexBracket = method.indexOf("[");
+        final int indexDot = method.indexOf('.');
+        final int indexBracket = method.indexOf('[');
         final int index = indexDot != -1 ? indexDot + 1 : indexBracket;
         if (!method.contains(":") && index != -1) {
           // Do some extra work to determine package.
