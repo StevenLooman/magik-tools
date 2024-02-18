@@ -25,190 +25,186 @@ import org.slf4j.LoggerFactory;
 /**
  * module.def file scanner.
  *
- * <p>
- * Scans for module.def files. Aborts scanning when a different product is found.
- * </p>
+ * <p>Scans for module.def files. Aborts scanning when a different product is found.
  */
 public final class ModuleDefinitionScanner {
 
-    private static class ModuleDefFileVisitor extends SimpleFileVisitor<Path> {
+  private static class ModuleDefFileVisitor extends SimpleFileVisitor<Path> {
 
-        private Set<ModuleDefinition> modules = new HashSet<>();
-        private final Path startPath;
+    private Set<ModuleDefinition> modules = new HashSet<>();
+    private final Path startPath;
 
-        ModuleDefFileVisitor(final Path startPath) {
-            this.startPath = startPath;
-        }
-
-        public Set<ModuleDefinition> getModules() {
-            return this.modules;
-        }
-
-        @Override
-        public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs) throws IOException {
-            final Path productDefPath = dir.resolve(SW_PRODUCT_DEF_PATH);
-            if (!dir.equals(this.startPath)
-                && Files.exists(productDefPath)) {
-                // Don't scan in child products.
-                return FileVisitResult.SKIP_SUBTREE;
-            }
-
-            final Path moduleDefPath = dir.resolve(SW_MODULE_DEF_PATH);
-            if (Files.exists(moduleDefPath)) {
-                this.addModule(moduleDefPath);
-            }
-            return FileVisitResult.CONTINUE;
-        }
-
-        private void addModule(final Path path) {
-            try {
-                ModuleDefinition swModule = ModuleDefinitionScanner.readModuleDefinition(path);
-                this.modules.add(swModule);
-            } catch (IOException exception) {
-                LOGGER.error(exception.getMessage(), exception);
-            }
-        }
-
+    ModuleDefFileVisitor(final Path startPath) {
+      this.startPath = startPath;
     }
 
-    /**
-     * Module definition filename.
-     */
-    public static final String SW_MODULE_DEF = "module.def";
-
-    private static final Map<Path, Path> CACHE = new ConcurrentHashMap<>();
-    private static final Path DOES_NOT_EXIST = Path.of("DOES_NOT_EXIST");
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ModuleDefinitionScanner.class);
-
-    private static final Path SW_MODULE_DEF_PATH = Path.of(ModuleDefinitionScanner.SW_MODULE_DEF);
-    private static final Path SW_PRODUCT_DEF_PATH = Path.of(ProductDefinitionScanner.SW_PRODUCT_DEF);
-
-    private ModuleDefinitionScanner() {
+    public Set<ModuleDefinition> getModules() {
+      return this.modules;
     }
 
-    public static void resetCache() {
-        ModuleDefinitionScanner.CACHE.clear();
+    @Override
+    public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
+        throws IOException {
+      final Path productDefPath = dir.resolve(SW_PRODUCT_DEF_PATH);
+      if (!dir.equals(this.startPath) && Files.exists(productDefPath)) {
+        // Don't scan in child products.
+        return FileVisitResult.SKIP_SUBTREE;
+      }
+
+      final Path moduleDefPath = dir.resolve(SW_MODULE_DEF_PATH);
+      if (Files.exists(moduleDefPath)) {
+        this.addModule(moduleDefPath);
+      }
+      return FileVisitResult.CONTINUE;
     }
 
-    /**
-     * Scan for `module.def` files.
-     * @param path Path to scan from.
-     * @return Set of found {@link ModuleDefinition}s.
-     * @throws IOException
-     */
-    public static Set<ModuleDefinition> scanModules(final Path path) throws IOException {
-        final ModuleDefFileVisitor fileVistor = new ModuleDefFileVisitor(path);
-        Files.walkFileTree(path, fileVistor);
-        return fileVistor.getModules();
+    private void addModule(final Path path) {
+      try {
+        ModuleDefinition swModule = ModuleDefinitionScanner.readModuleDefinition(path);
+        this.modules.add(swModule);
+      } catch (IOException exception) {
+        LOGGER.error(exception.getMessage(), exception);
+      }
     }
+  }
 
-    @CheckForNull
-    private static Path moduleDefAtPath(final Path startPath) {
-        final Path cachedPath = ModuleDefinitionScanner.CACHE.get(startPath);
-        if (cachedPath != null) {
-            if (cachedPath == ModuleDefinitionScanner.DOES_NOT_EXIST) {
-                return null;
-            }
+  /** Module definition filename. */
+  public static final String SW_MODULE_DEF = "module.def";
 
-            return cachedPath;
-        }
+  private static final Map<Path, Path> CACHE = new ConcurrentHashMap<>();
+  private static final Path DOES_NOT_EXIST = Path.of("DOES_NOT_EXIST");
 
-        Path path = startPath;
-        while (path != null) {
-            final Path moduleDefPath = path.resolve(SW_MODULE_DEF_PATH);
-            if (Files.exists(moduleDefPath)) {
-                ModuleDefinitionScanner.CACHE.put(startPath, moduleDefPath);
-                return moduleDefPath;
-            }
+  private static final Logger LOGGER = LoggerFactory.getLogger(ModuleDefinitionScanner.class);
 
-            path = path.getParent();
-        }
+  private static final Path SW_MODULE_DEF_PATH = Path.of(ModuleDefinitionScanner.SW_MODULE_DEF);
+  private static final Path SW_PRODUCT_DEF_PATH = Path.of(ProductDefinitionScanner.SW_PRODUCT_DEF);
 
+  private ModuleDefinitionScanner() {}
+
+  public static void resetCache() {
+    ModuleDefinitionScanner.CACHE.clear();
+  }
+
+  /**
+   * Scan for `module.def` files.
+   *
+   * @param path Path to scan from.
+   * @return Set of found {@link ModuleDefinition}s.
+   * @throws IOException
+   */
+  public static Set<ModuleDefinition> scanModules(final Path path) throws IOException {
+    final ModuleDefFileVisitor fileVistor = new ModuleDefFileVisitor(path);
+    Files.walkFileTree(path, fileVistor);
+    return fileVistor.getModules();
+  }
+
+  @CheckForNull
+  private static Path moduleDefAtPath(final Path startPath) {
+    final Path cachedPath = ModuleDefinitionScanner.CACHE.get(startPath);
+    if (cachedPath != null) {
+      if (cachedPath == ModuleDefinitionScanner.DOES_NOT_EXIST) {
         return null;
+      }
+
+      return cachedPath;
     }
 
-    /**
-     * Get module from a given path, iterates upwards to find module.def file.
-     * @param startPath Path to start at.
-     * @return Parsed module definition.
-     * @throws IOException -
-     */
-    @CheckForNull
-    public static ModuleDefinition swModuleForPath(final Path startPath) throws IOException {
-        final Path moduleDefPath = ModuleDefinitionScanner.moduleDefAtPath(startPath);
-        if (moduleDefPath == null) {
-            return null;
-        }
+    Path path = startPath;
+    while (path != null) {
+      final Path moduleDefPath = path.resolve(SW_MODULE_DEF_PATH);
+      if (Files.exists(moduleDefPath)) {
+        ModuleDefinitionScanner.CACHE.put(startPath, moduleDefPath);
+        return moduleDefPath;
+      }
 
-        return ModuleDefinitionScanner.readModuleDefinition(moduleDefPath);
+      path = path.getParent();
     }
 
-    /**
-     * Read module.def file.
-     * @param path Path to {@code module.def} file.
-     * @return Parsed module definition.
-     * @throws IOException -
-     */
-    public static ModuleDefinition readModuleDefinition(final Path path) throws IOException {
-        final SwModuleDefParser parser = new SwModuleDefParser();
-        final AstNode node = parser.parse(path);
+    return null;
+  }
 
-        final AstNode moduleIdentNode = node.getFirstChild(SwModuleDefinitionGrammar.MODULE_IDENTIFICATION);
-        final AstNode identfierNode = moduleIdentNode.getFirstChild(SwModuleDefinitionGrammar.IDENTIFIER);
-        final String moduleName = identfierNode.getTokenValue();
-        final List<AstNode> versionNodes = moduleIdentNode.getChildren(SwModuleDefinitionGrammar.VERSION);
-        final AstNode baseVersionNode = versionNodes.get(0);
-        final String baseVersion = baseVersionNode.getTokenValue();
-        final AstNode currentVersionNode = versionNodes.size() > 1
-            ? versionNodes.get(1)
-            : null;
-        final String currentVersion = currentVersionNode != null
-            ? currentVersionNode.getTokenValue()
-            : null;
-        final AstNode requiresNode = node.getFirstChild(SwModuleDefinitionGrammar.REQUIRES);
-        final List<String> requireds = requiresNode != null
-            ? requiresNode
-                .getDescendants(SwModuleDefinitionGrammar.MODULE_REF).stream()
+  /**
+   * Get module from a given path, iterates upwards to find module.def file.
+   *
+   * @param startPath Path to start at.
+   * @return Parsed module definition.
+   * @throws IOException -
+   */
+  @CheckForNull
+  public static ModuleDefinition swModuleForPath(final Path startPath) throws IOException {
+    final Path moduleDefPath = ModuleDefinitionScanner.moduleDefAtPath(startPath);
+    if (moduleDefPath == null) {
+      return null;
+    }
+
+    return ModuleDefinitionScanner.readModuleDefinition(moduleDefPath);
+  }
+
+  /**
+   * Read module.def file.
+   *
+   * @param path Path to {@code module.def} file.
+   * @return Parsed module definition.
+   * @throws IOException -
+   */
+  public static ModuleDefinition readModuleDefinition(final Path path) throws IOException {
+    final SwModuleDefParser parser = new SwModuleDefParser();
+    final AstNode node = parser.parse(path);
+
+    final AstNode moduleIdentNode =
+        node.getFirstChild(SwModuleDefinitionGrammar.MODULE_IDENTIFICATION);
+    final AstNode identfierNode =
+        moduleIdentNode.getFirstChild(SwModuleDefinitionGrammar.IDENTIFIER);
+    final String moduleName = identfierNode.getTokenValue();
+    final List<AstNode> versionNodes =
+        moduleIdentNode.getChildren(SwModuleDefinitionGrammar.VERSION);
+    final AstNode baseVersionNode = versionNodes.get(0);
+    final String baseVersion = baseVersionNode.getTokenValue();
+    final AstNode currentVersionNode = versionNodes.size() > 1 ? versionNodes.get(1) : null;
+    final String currentVersion =
+        currentVersionNode != null ? currentVersionNode.getTokenValue() : null;
+    final AstNode requiresNode = node.getFirstChild(SwModuleDefinitionGrammar.REQUIRES);
+    final List<String> requireds =
+        requiresNode != null
+            ? requiresNode.getDescendants(SwModuleDefinitionGrammar.MODULE_REF).stream()
                 .map(AstNode::getTokenValue)
                 .collect(Collectors.toList())
             : Collections.emptyList();
 
-        final URI uri = path.toUri();
-        final Location location = new Location(uri);
-        return new ModuleDefinition(location, moduleName, baseVersion, currentVersion, requireds);
+    final URI uri = path.toUri();
+    final Location location = new Location(uri);
+    return new ModuleDefinition(location, moduleName, baseVersion, currentVersion, requireds);
+  }
+
+  /**
+   * Get the module name from a given uri.
+   *
+   * @param uri {@link URI} to start searching from.
+   * @return SwModule name, or null if no module was found.
+   */
+  @CheckForNull
+  public static String getModuleName(final URI uri) {
+    if (!uri.getScheme().equals("file")) {
+      // For unit tests.
+      return null;
     }
 
-    /**
-     * Get the module name from a given uri.
-     * @param uri {@link URI} to start searching from.
-     * @return SwModule name, or null if no module was found.
-     */
-    @CheckForNull
-    public static String getModuleName(final URI uri) {
-        if (!uri.getScheme().equals("file")) {
-            // For unit tests.
-            return null;
-        }
+    final Path path = Path.of(uri);
+    final Path fileName = path.getFileName();
+    final Path searchPath =
+        fileName.toString().toLowerCase().endsWith(".magik") ? path.getParent() : path;
 
-        final Path path = Path.of(uri);
-        final Path fileName = path.getFileName();
-        final Path searchPath = fileName.toString().toLowerCase().endsWith(".magik")
-            ? path.getParent()
-            : path;
-
-        final ModuleDefinition swModule;
-        try {
-            swModule = ModuleDefinitionScanner.swModuleForPath(searchPath);
-        } catch (final IOException exception) {
-            throw new IllegalStateException(exception);
-        }
-
-        if (swModule == null) {
-            return null;
-        }
-
-        return swModule.getName();
+    final ModuleDefinition swModule;
+    try {
+      swModule = ModuleDefinitionScanner.swModuleForPath(searchPath);
+    } catch (final IOException exception) {
+      throw new IllegalStateException(exception);
     }
 
+    if (swModule == null) {
+      return null;
+    }
+
+    return swModule.getName();
+  }
 }

@@ -15,131 +15,122 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 
-/**
- * Condition definition parser.
- */
+/** Condition definition parser. */
 public class DefConditionParser {
 
-    private static final String DEFINE_CONDITION = "define_condition()";
-    private static final String DEFINE_TOP_CONDITION = "define_top_condition()";
-    private static final String CONDITION = "condition";
-    private static final String SW_CONDITION = "sw:condition";
+  private static final String DEFINE_CONDITION = "define_condition()";
+  private static final String DEFINE_TOP_CONDITION = "define_top_condition()";
+  private static final String CONDITION = "condition";
+  private static final String SW_CONDITION = "sw:condition";
 
-    private final AstNode node;
+  private final AstNode node;
 
-    /**
-     * Constructor.
-     * @param node Condition definition node.
-     */
-    public DefConditionParser(final AstNode node) {
-        if (node.isNot(MagikGrammar.METHOD_INVOCATION)) {
-            throw new IllegalArgumentException();
-        }
-
-        this.node = node;
+  /**
+   * Constructor.
+   *
+   * @param node Condition definition node.
+   */
+  public DefConditionParser(final AstNode node) {
+    if (node.isNot(MagikGrammar.METHOD_INVOCATION)) {
+      throw new IllegalArgumentException();
     }
 
-    /**
-     * Test if node is condition definition.
-     * @param node Node.
-     * @return True if is condition definition, false otherwise.
-     */
-    public static boolean isDefineCondition(final AstNode node) {
-        final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
-        if (!helper.isMethodInvocationOf(DEFINE_CONDITION)
-            && !helper.isMethodInvocationOf(DEFINE_TOP_CONDITION)) {
-            return false;
-        }
+    this.node = node;
+  }
 
-        // Some sanity.
-        final AstNode parentNode = node.getParent();
-        final AstNode atomNode = parentNode.getFirstChild();
-        if (atomNode.isNot(MagikGrammar.ATOM)) {
-            return false;
-        }
-        final String exemplarName = atomNode.getTokenValue();    // Assume this is an exemplar.
-        if (!exemplarName.equalsIgnoreCase(CONDITION)
-            && !exemplarName.equalsIgnoreCase(SW_CONDITION)) {
-            return false;
-        }
-
-        final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-        final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
-        final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
-        final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
-        final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SIMPLE_VECTOR);
-        return argument0Node != null
-            && argument1Node != null
-            && argument2Node != null;
+  /**
+   * Test if node is condition definition.
+   *
+   * @param node Node.
+   * @return True if is condition definition, false otherwise.
+   */
+  public static boolean isDefineCondition(final AstNode node) {
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
+    if (!helper.isMethodInvocationOf(DEFINE_CONDITION)
+        && !helper.isMethodInvocationOf(DEFINE_TOP_CONDITION)) {
+      return false;
     }
 
-    /**
-     * Parse definition.
-     * @return List of {@link ConditionDefinition}s.
-     */
-    public List<Definition> parseDefinitions() {
-        // Some sanity.
-        final AstNode parentNode = this.node.getParent();
-        final AstNode atomNode = parentNode.getFirstChild();
-        if (atomNode.isNot(MagikGrammar.ATOM)) {
-            throw new IllegalStateException();
-        }
-        final String exemplarName = atomNode.getTokenValue();
-        if (!exemplarName.equalsIgnoreCase(CONDITION)
-            && !exemplarName.equalsIgnoreCase(SW_CONDITION)) {
-            throw new IllegalStateException();
-        }
+    // Some sanity.
+    final AstNode parentNode = node.getParent();
+    final AstNode atomNode = parentNode.getFirstChild();
+    if (atomNode.isNot(MagikGrammar.ATOM)) {
+      return false;
+    }
+    final String exemplarName = atomNode.getTokenValue(); // Assume this is an exemplar.
+    if (!exemplarName.equalsIgnoreCase(CONDITION) && !exemplarName.equalsIgnoreCase(SW_CONDITION)) {
+      return false;
+    }
 
-        final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-        final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
-        final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
-        final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
-        final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SIMPLE_VECTOR);
-        if (argument0Node == null
-            || argument1Node == null
-            || argument2Node == null) {
-            throw new IllegalStateException();
-        }
+    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+    final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
+    final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SIMPLE_VECTOR);
+    return argument0Node != null && argument1Node != null && argument2Node != null;
+  }
 
-        // Figure location.
-        final URI uri = this.node.getToken().getURI();
-        final Location location = new Location(uri, this.node);
+  /**
+   * Parse definition.
+   *
+   * @return List of {@link ConditionDefinition}s.
+   */
+  public List<Definition> parseDefinitions() {
+    // Some sanity.
+    final AstNode parentNode = this.node.getParent();
+    final AstNode atomNode = parentNode.getFirstChild();
+    if (atomNode.isNot(MagikGrammar.ATOM)) {
+      throw new IllegalStateException();
+    }
+    final String exemplarName = atomNode.getTokenValue();
+    if (!exemplarName.equalsIgnoreCase(CONDITION) && !exemplarName.equalsIgnoreCase(SW_CONDITION)) {
+      throw new IllegalStateException();
+    }
 
-        // Figure module name.
-        final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
+    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+    final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
+    final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SIMPLE_VECTOR);
+    if (argument0Node == null || argument1Node == null || argument2Node == null) {
+      throw new IllegalStateException();
+    }
 
-        // Figure statement node.
-        final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
+    // Figure location.
+    final URI uri = this.node.getToken().getURI();
+    final Location location = new Location(uri, this.node);
 
-        // Figure definition.
-        final String nameSymbol = argument0Node.getTokenValue();
-        final String name = nameSymbol.substring(1);
-        final String parentSymbol = argument1Node.getTokenValue();
-        final String parent = parentSymbol.substring(1);
-        final List<String> dataNames = argument2Node.getChildren(MagikGrammar.EXPRESSION).stream()
-            .map(expressionNode -> {
-                final ExpressionNodeHelper expressionNodeHelper = new ExpressionNodeHelper(expressionNode);
-                final String dataName = expressionNodeHelper.getConstant();
-                if (dataName.startsWith(":")) {
+    // Figure module name.
+    final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
+
+    // Figure statement node.
+    final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
+
+    // Figure definition.
+    final String nameSymbol = argument0Node.getTokenValue();
+    final String name = nameSymbol.substring(1);
+    final String parentSymbol = argument1Node.getTokenValue();
+    final String parent = parentSymbol.substring(1);
+    final List<String> dataNames =
+        argument2Node.getChildren(MagikGrammar.EXPRESSION).stream()
+            .map(
+                expressionNode -> {
+                  final ExpressionNodeHelper expressionNodeHelper =
+                      new ExpressionNodeHelper(expressionNode);
+                  final String dataName = expressionNodeHelper.getConstant();
+                  if (dataName.startsWith(":")) {
                     return dataName.substring(1);
-                }
-                return dataName;
-            })
+                  }
+                  return dataName;
+                })
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
-        // Figure doc.
-        final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+    // Figure doc.
+    final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
-        final ConditionDefinition definition = new ConditionDefinition(
-            location,
-            moduleName,
-            doc,
-            statementNode,
-            name,
-            parent,
-            dataNames);
-        return List.of(definition);
-    }
-
+    final ConditionDefinition definition =
+        new ConditionDefinition(location, moduleName, doc, statementNode, name, parent, dataNames);
+    return List.of(definition);
+  }
 }

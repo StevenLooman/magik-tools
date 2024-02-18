@@ -55,8 +55,8 @@
     <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
     <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
     <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
-    <checkstyle.version>10.13.0</checkstyle.version>
-    <checkstyle-rules.version>4.9.3</checkstyle-rules.version>
+    <spotless.version>2.43.0</spotless.version>
+    <google-java-format.version>1.19.2</google-java-format.version>
     <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
     <maven-javadoc-plugin.version>3.3.0</maven-javadoc-plugin.version>
@@ -270,6 +270,31 @@
         </configuration>
       </plugin>
 
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <java>
+            <includes>
+              <include>**/src/main/java/**/*.java</include>
+              <include>**/src/test/java/**/*.java</include>
+            </includes>
+            <googleJavaFormat>
+              <version>${google-java-format.version}</version>
+              <style>GOOGLE</style>
+            </googleJavaFormat>
+          </java>
+        </configuration>
+      </plugin>
+
       <!-- Disabled for now, as it produces too many false positives.
       <plugin>
         <groupId>com.github.spotbugs</groupId>
@@ -293,40 +318,6 @@
         </dependencies>
       </plugin>
       -->
-
-      <plugin>
-        <?m2e ignore?>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${maven-checkstyle-plugin.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>com.puppycrawl.tools</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>${checkstyle.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>com.github.ngeor</groupId>
-            <artifactId>checkstyle-rules</artifactId>
-            <version>${checkstyle-rules.version}</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <configLocation>com/github/ngeor/checkstyle.xml</configLocation>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          <skip>${skipTests}</skip>
-          <excludes>**/org/sonar/sslr/internal/matchers/AstCreator.java,**/com/sonar/sslr/api/GenericTokenType.java</excludes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>checkstyle</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
