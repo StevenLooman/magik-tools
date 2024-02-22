@@ -57,4 +57,16 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
         assertThat(issues).isEmpty();
     }
 
+    @Test
+    void testMethodInvocationOnUndefined() {
+        final String code = ""
+            + "_block\n"
+            + "  undefined.m()\n"
+            + "_endblock";
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+        final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
+        final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
+        assertThat(issues).isEmpty();
+    }
+
 }
