@@ -1,0 +1,14 @@
+<p>Do not use the method `unsafe_evaluate()`.</p>
+<p>The method `unsafe_evaluate()` is unsafe to use. The evaluated string might have unintented side effects.</p>
+<h2>Noncompliant Code Examples</h2>
+<pre>
+    # Smallworld 5.2.10 and up.
+    "write('hello')".unsafe_evaluate()
+</pre>
+<pre>
+    # Pre Smallworld 5.2.10.
+    "write('hello')".evaluate()
+</pre>
+<p>The above example simpy writes "hello" to the terminal. However, one can have more malicious intent and make unexpected changes to the database or environment Smallworld runs in, for example.</p>
+<p>If you need to serialize/deserialize data, you should use the XML (See `sw:serial_xml_thing`/`sw:serial_structure_mixin`) or use the pickle mechanism (See `sw:object.pickle()` and `ro_charindex_mixin.unpickle()`).</p>
+<p>In case there is no other option than to evaluate input, the method `sandboxed_evaluate()` should be used instead.</p>

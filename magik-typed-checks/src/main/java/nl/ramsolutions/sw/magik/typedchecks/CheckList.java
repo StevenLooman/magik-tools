@@ -14,6 +14,7 @@ import nl.ramsolutions.sw.magik.typedchecks.checks.MethodExistsTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.MethodReturnTypesMatchDocTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.ModuleRequiredForGlobalTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.SlotExistsTypedCheck;
+import nl.ramsolutions.sw.magik.typedchecks.checks.SwChar16VectorEvaluateInvocationCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.TypeDocTypeExistsTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.UndefinedMethodCallResultTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.fixers.TypeDocParameterFixer;
@@ -42,6 +43,7 @@ public final class CheckList {
             ModuleRequiredForGlobalTypedCheck.class,
             TypeDocTypeExistsTypedCheck.class,
             SlotExistsTypedCheck.class,
+            SwChar16VectorEvaluateInvocationCheck.class,
             UndefinedMethodCallResultTypedCheck.class);
     }
 

@@ -20,6 +20,7 @@
 - Make indexing usages toggable via `magik.typing.indexUsages`.
 - Add ConditionalExpressionIsFalseTypedCheck to test if a conditional expression results in a `sw:false` type.
 - Add ModuleRequiredForGlobalTypedCheck to test if the source module is required, when a global is used.
+- Add UnsafeEvaluateInvocationCheck and SwChar16VectorEvaluateInvocationCheck to test for unsafe `unsafe_evaluate()`/`sw:char16_vector.evaluate()` method calls.
 - Minor fixes.
 
 0.8.3 (2024-01-05)
