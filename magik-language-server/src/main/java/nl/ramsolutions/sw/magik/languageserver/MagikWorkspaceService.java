@@ -96,10 +96,23 @@ public class MagikWorkspaceService implements WorkspaceService {
     LOGGER.debug("New settings: {}", settings);
     MagikSettings.INSTANCE.setSettings(settings);
 
+    // TODO: Move this to MagikAnalysisConfiguration or a separate method?
     // Update magik analysis settings.
-    final boolean magikIndexerIndexUsages =
-        Objects.requireNonNullElse(MagikSettings.INSTANCE.getTypingIndexUsages(), false);
-    this.analysisConfiguration.setMagikIndexerIndexUsages(magikIndexerIndexUsages);
+    final boolean magikIndexerIndexGlobalUsages =
+        Objects.requireNonNullElse(MagikSettings.INSTANCE.getTypingIndexGlobalUsages(), false);
+    this.analysisConfiguration.setMagikIndexerIndexGlobalUsages(magikIndexerIndexGlobalUsages);
+
+    final boolean magikIndexerIndexMethodUsages =
+        Objects.requireNonNullElse(MagikSettings.INSTANCE.getTypingIndexMethodUsages(), false);
+    this.analysisConfiguration.setMagikIndexerIndexGlobalUsages(magikIndexerIndexMethodUsages);
+
+    final boolean magikIndexerIndexSlotUsages =
+        Objects.requireNonNullElse(MagikSettings.INSTANCE.getTypingIndexSlotUsages(), false);
+    this.analysisConfiguration.setMagikIndexerIndexGlobalUsages(magikIndexerIndexSlotUsages);
+
+    final boolean magikIndexerIndexConditionUsages =
+        Objects.requireNonNullElse(MagikSettings.INSTANCE.getTypingIndexConditionUsages(), false);
+    this.analysisConfiguration.setMagikIndexerIndexGlobalUsages(magikIndexerIndexConditionUsages);
 
     this.runIndexersInBackground();
   }

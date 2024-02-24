@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,8 +21,8 @@ import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
-/** Usage parser. */
-public class UsageParser {
+/** Method Definition usages parser. */
+public class MethodDefinitionUsageParser {
 
   private static final String CONDITION = "condition";
   private static final String SW_CONDITION = "sw:condition";
@@ -37,7 +36,7 @@ public class UsageParser {
    *
    * @param node Method definition node.
    */
-  public UsageParser(final AstNode node) {
+  public MethodDefinitionUsageParser(final AstNode node) {
     if (node.isNot(MagikGrammar.METHOD_DEFINITION)) {
       throw new IllegalArgumentException();
     }
@@ -71,11 +70,12 @@ public class UsageParser {
               final URI uri = this.node.getToken().getURI();
               final Location location = new Location(uri, scopeEntry.getDefinitionNode());
               final Location validLocation = Location.validLocation(location);
-              // TODO: The type should be resolved here, but we don't have a type resolver yet.
-              //       Now you might "see" the ref user:char16_vector, or any other package which is
+              // TODO: The type should be resolved here, but we don't have a type resolver
+              // yet.
+              // Now you might "see" the ref user:char16_vector, or any other package which is
               // a child of `sw`.
-              //       This will most likely be indexed invalidly.
-              //       Though, we might be able to resolve it during the query itself.
+              // This will most likely be indexed invalidly.
+              // Though, we might be able to resolve it during the query itself.
               return new GlobalUsage(ref, validLocation);
             })
         .filter(Objects::nonNull)
@@ -88,8 +88,18 @@ public class UsageParser {
    * @return Used methods.
    */
   public Set<MethodUsage> getUsedMethods() {
-    // TODO: To be implemented.
-    return Collections.emptySet();
+    return this.node.getDescendants(MagikGrammar.METHOD_INVOCATION).stream()
+        .map(
+            methodInvocationNode -> {
+              final MethodInvocationNodeHelper helper =
+                  new MethodInvocationNodeHelper(methodInvocationNode);
+              final String methodName = helper.getMethodName();
+              final URI uri = this.node.getToken().getURI();
+              final Location location = new Location(uri, methodInvocationNode);
+              final Location validLocation = Location.validLocation(location);
+              return new MethodUsage(TypeString.UNDEFINED, methodName, validLocation);
+            })
+        .collect(Collectors.toUnmodifiableSet());
   }
 
   /**
