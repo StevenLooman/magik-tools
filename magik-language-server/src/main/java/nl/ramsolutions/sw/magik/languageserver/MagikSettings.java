@@ -25,7 +25,10 @@ public final class MagikSettings { // NOSONAR
   private static final String SHOW_ARGUMENT_INLAY_HINTS = "showArgumentInlayHints";
   private static final String ENABLE_CHECKS = "enableChecks";
   private static final String OVERRIDE_CONFIG_FILE = "overrideConfigFile";
-  private static final String INDEX_USAGES = "indexUsages";
+  private static final String INDEX_GLOBAL_USAGES = "indexGlobalUsages";
+  private static final String INDEX_METHOD_USAGES = "indexMethodUsages";
+  private static final String INDEX_SLOT_USAGES = "indexSlotUsages";
+  private static final String INDEX_CONDITION_USAGES = "indexConditionUsages";
 
   private JsonObject settings = new JsonObject();
 
@@ -190,12 +193,12 @@ public final class MagikSettings { // NOSONAR
   }
 
   /**
-   * Get magik.typing.indexUsages, defaults to false if no config is provided.
+   * Get magik.typing.indexGlobalUsages, defaults to false if no config is provided.
    *
-   * @return
+   * @return magik.typing.indexGlobalUsages.
    */
   @CheckForNull
-  public Boolean getTypingIndexUsages() {
+  public Boolean getTypingIndexGlobalUsages() {
     final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
     if (magik == null) {
       return false;
@@ -206,12 +209,87 @@ public final class MagikSettings { // NOSONAR
       return false;
     }
 
-    final JsonElement indexUsages = typing.get(INDEX_USAGES);
-    if (indexUsages == null) {
+    final JsonElement indexGlobalUsages = typing.get(INDEX_GLOBAL_USAGES);
+    if (indexGlobalUsages == null) {
       return false;
     }
 
-    return indexUsages.getAsBoolean();
+    return indexGlobalUsages.getAsBoolean();
+  }
+
+  /**
+   * Get magik.typing.indexMethodUsages, defaults to false if no config is provided.
+   *
+   * @return magik.typing.indexMethodUsages.
+   */
+  @CheckForNull
+  public Boolean getTypingIndexMethodUsages() {
+    final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+    if (magik == null) {
+      return false;
+    }
+
+    final JsonObject typing = magik.getAsJsonObject(TYPING);
+    if (typing == null) {
+      return false;
+    }
+
+    final JsonElement indexMethodUsages = typing.get(INDEX_METHOD_USAGES);
+    if (indexMethodUsages == null) {
+      return false;
+    }
+
+    return indexMethodUsages.getAsBoolean();
+  }
+
+  /**
+   * Get magik.typing.indexSlotUsages, defaults to false if no config is provided.
+   *
+   * @return magik.typing.indexSlotUsages.
+   */
+  @CheckForNull
+  public Boolean getTypingIndexSlotUsages() {
+    final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+    if (magik == null) {
+      return false;
+    }
+
+    final JsonObject typing = magik.getAsJsonObject(TYPING);
+    if (typing == null) {
+      return false;
+    }
+
+    final JsonElement indexSlotUsages = typing.get(INDEX_SLOT_USAGES);
+    if (indexSlotUsages == null) {
+      return false;
+    }
+
+    return indexSlotUsages.getAsBoolean();
+  }
+
+  /**
+   * Get magik.typing.indexConditionUsages, defaults to false if no config is provided.
+   *
+   * @return magik.typing.indexConditionUsages.
+   */
+  @CheckForNull
+  public Boolean getTypingIndexConditionUsages() {
+    final JsonObject magik = this.settings.getAsJsonObject(TOP_LEVEL);
+    if (magik == null) {
+      return false;
+    }
+
+    final JsonObject typing = magik.getAsJsonObject(TYPING);
+    if (typing == null) {
+      return false;
+    }
+
+    final JsonElement indexConditionUsages = typing.get(INDEX_CONDITION_USAGES);
+    if (indexConditionUsages == null) {
+      return false;
+    }
+
+    return indexConditionUsages.getAsBoolean();
   }
 
   /**

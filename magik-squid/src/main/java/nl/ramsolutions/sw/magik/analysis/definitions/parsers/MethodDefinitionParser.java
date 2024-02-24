@@ -124,21 +124,21 @@ public class MethodDefinitionParser {
             .map(String::trim)
             .collect(Collectors.joining("\n"));
 
-    final UsageParser usageParser = new UsageParser(this.node);
+    final MethodDefinitionUsageParser usageParser = new MethodDefinitionUsageParser(this.node);
     final Set<GlobalUsage> usedGlobals =
-        this.configuration.getMagikIndexerIndexUsages()
+        this.configuration.getMagikIndexerIndexGlobalUsages()
             ? usageParser.getUsedGlobals()
             : Collections.emptySet();
     final Set<MethodUsage> usedMethods =
-        this.configuration.getMagikIndexerIndexUsages()
+        this.configuration.getMagikIndexerIndexMethodUsages()
             ? usageParser.getUsedMethods()
             : Collections.emptySet();
     final Set<SlotUsage> usedSlots =
-        this.configuration.getMagikIndexerIndexUsages()
+        this.configuration.getMagikIndexerIndexSlotUsages()
             ? usageParser.getUsedSlots()
             : Collections.emptySet();
     final Set<ConditionUsage> usedConditions =
-        this.configuration.getMagikIndexerIndexUsages()
+        this.configuration.getMagikIndexerIndexConditionUsages()
             ? usageParser.getUsedConditions()
             : Collections.emptySet();
 
