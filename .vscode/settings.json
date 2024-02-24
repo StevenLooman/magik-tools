@@ -1,7 +1,7 @@
 {
     "editor.detectIndentation": false,
     "editor.renderWhitespace": "selection",
-    "editor.rulers": [120],
+    "editor.rulers": [100],
     "editor.tabSize": 4,
     "files.exclude": {
         "**/.classpath": true,
