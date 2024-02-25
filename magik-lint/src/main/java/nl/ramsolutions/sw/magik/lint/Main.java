@@ -65,6 +65,8 @@ public final class Main {
       Option.builder().longOpt("version").desc("Show version and exit").build();
   private static final Option OPTION_HELP =
       Option.builder().longOpt("help").desc("Show this help and exit").build();
+  private static final Option OPTION_APPLY_FIXES =
+      Option.builder().longOpt("apply-fixes").desc("Apply any fixes to the files").build();
 
   static {
     OPTIONS = new Options();
@@ -76,6 +78,7 @@ public final class Main {
     OPTIONS.addOption(OPTION_MAX_INFRACTIONS);
     OPTIONS.addOption(OPTION_DEBUG);
     OPTIONS.addOption(OPTION_VERSION);
+    OPTIONS.addOption(OPTION_APPLY_FIXES);
   }
 
   private static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING =
@@ -203,11 +206,19 @@ public final class Main {
       System.exit(0);
     }
 
+    // Apply fixes.
+    final String[] leftOverArgs = commandLine.getArgs();
+    final Collection<Path> paths = MagikFileScanner.getFilesFromArgs(leftOverArgs);
+    if (commandLine.hasOption(OPTION_APPLY_FIXES)) {
+      final MagikFixer fixer = new MagikFixer(config);
+      fixer.run(paths);
+
+      System.exit(0);
+    }
+
     // Actual linting.
     final Reporter reporter = Main.createReporter(config);
     final MagikLint lint = new MagikLint(config, reporter);
-    final String[] leftOverArgs = commandLine.getArgs();
-    final Collection<Path> paths = MagikFileScanner.getFilesFromArgs(leftOverArgs);
     lint.run(paths);
 
     final int exitCode =

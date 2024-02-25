@@ -100,7 +100,7 @@ public final class CheckList {
   /**
    * Get the {@link MagikCheck}s which have a {@link MagikCheckFixer}.
    *
-   * @return
+   * @return Map of {@link MagikCheck}s and their {@link MagikCheckFixer}s.
    */
   public static Map<Class<? extends MagikCheck>, List<Class<? extends MagikCheckFixer>>>
       getFixers() {
