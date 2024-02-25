@@ -11,7 +11,7 @@ public abstract class MagikTypedCheckFixer {
   /**
    * Provide automatic fixes for violations detected by the sibling check.
    *
-   * @return
+   * @return List of {@link CodeAction}s to be applied.
    */
   public abstract List<CodeAction> provideCodeActions(MagikTypedFile magikFile, Range range);
 }

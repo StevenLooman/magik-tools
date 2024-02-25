@@ -52,7 +52,7 @@ public class MagikLint {
    *
    * @param path Path to file
    * @return Visitor context for file.
-   * @throws IOException
+   * @throws IOException -
    */
   private MagikFile buildMagikFile(final Path path) {
     final Charset charset = FileCharsetDeterminer.determineCharset(path);
@@ -228,7 +228,7 @@ public class MagikLint {
                     magikIssue -> !MagikIssueDisabledChecker.issueDisabled(magikFile, magikIssue))
                 .collect(Collectors.toList());
         magikIssues.addAll(issues);
-      } catch (ReflectiveOperationException exception) {
+      } catch (final ReflectiveOperationException exception) {
         LOGGER.error(exception.getMessage(), exception);
       }
     }

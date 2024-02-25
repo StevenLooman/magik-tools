@@ -23,10 +23,11 @@ public class MagikTypedChecksCodeActionProvider {
 
   /**
    * Provide {@link CodeAction} for {@link MagikTypedCheck} checks.
-   * @param magikFile {@link MagikTypedFile{} to check on.
+   *
+   * @param magikFile {@link MagikTypedFile} to check on.
    * @param range {@link Range} to get {@link CodeAction}s for.
    * @return List of {@link CodeAction}s.
-   * @throws ReflectiveOperationException
+   * @throws ReflectiveOperationException -
    * @throws IOException -
    */
   public List<CodeAction> provideCodeActions(final MagikTypedFile magikFile, final Range range)
@@ -34,7 +35,7 @@ public class MagikTypedChecksCodeActionProvider {
     final List<CodeAction> codeActions = new ArrayList<>();
     for (final Entry<Class<? extends MagikCheck>, List<Class<? extends MagikTypedCheckFixer>>>
         entry : CheckList.getFixers().entrySet()) {
-      final Class<?> checkClass = entry.getKey();
+      final Class<? extends MagikCheck> checkClass = entry.getKey();
       final List<Class<? extends MagikTypedCheckFixer>> fixerClassses = entry.getValue();
       for (final Class<?> fixerClass : fixerClassses) {
         if (!this.isCheckEnabled(magikFile, checkClass)) {
@@ -50,8 +51,8 @@ public class MagikTypedChecksCodeActionProvider {
     return codeActions;
   }
 
-  private boolean isCheckEnabled(final MagikFile magikFile, final Class<?> checkClass)
-      throws IOException {
+  private boolean isCheckEnabled(
+      final MagikFile magikFile, final Class<? extends MagikCheck> checkClass) throws IOException {
     final Path searchPath = Path.of(magikFile.getUri()).getParent();
     final Path configPath =
         MagikSettings.INSTANCE.getChecksOverrideSettingsPath() != null
