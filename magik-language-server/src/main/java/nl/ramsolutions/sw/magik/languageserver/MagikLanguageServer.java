@@ -39,7 +39,7 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
   /**
    * Constructor.
    *
-   * @throws IOException
+   * @throws IOException -
    */
   public MagikLanguageServer() throws IOException {
     // We assume the DefinitionKeeper gets its types from a types database (.jsonl file).
@@ -57,11 +57,9 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
   public CompletableFuture<InitializeResult> initialize(final InitializeParams params) {
     LOGGER.trace("initialize");
 
-    // Log PID.
+    // Log PID and version.
     final ProcessHandle processHandle = ProcessHandle.current();
     LOGGER.info("PID: {}", processHandle.pid());
-
-    // Log server version.
     final String version = this.getClass().getPackage().getImplementationVersion();
     LOGGER.info("Version: {}", version);
 
@@ -70,7 +68,7 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
       this.workspaceFolders.addAll(folders);
     }
 
-    // For older clients.
+    // Handle older clients which do not provide a workspace folder.
     final String rootUri = params.getRootUri();
     if (rootUri != null && this.workspaceFolders.isEmpty()) {
       final WorkspaceFolder rootFolder = new WorkspaceFolder(rootUri, "workspace");
