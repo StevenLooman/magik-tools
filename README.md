@@ -54,7 +54,23 @@ A debug adapter for Smallworld 5/Magik is available in the [`magik-debug-adapter
 You can build the plugin using maven, like so:
 
 ```shell
-$ mvn clean package
+$ mvn clean verify test package
+[INFO] Scanning for projects...
+...
+```
+
+Building without running tests:
+
+```shell
+$ mvn -Dmaven.test.skip=true clean verify test package
+[INFO] Scanning for projects...
+...
+```
+
+Auto-formatting of Java sources:
+
+```shell
+$ mvn spotless:apply
 [INFO] Scanning for projects...
 ...
 ```
