@@ -1,7 +1,7 @@
 name: Publish checks to wiki
 on:
   push:
-    branches: [develop]
+    branches: [develop, patch-1]
     paths:
       - .github/workflows/publish-checks-wiki.yml
       - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules
@@ -30,4 +30,4 @@ jobs:
       - uses: Andrew-Chen-Wang/github-wiki-action@86138cbd6328b21d759e89ab6e6dd6a139b22270
         with:
           path: wiki
-        if: ${{ github.repository_owner == 'StevenLooman' }}
+        if: ${{ github.repository_owner == 'sebastiaanspeck' }}
