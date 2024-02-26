@@ -1,0 +1,33 @@
+name: Publish checks to wiki
+on:
+  push:
+    branches: [develop]
+    paths:
+      - .github/workflows/publish-checks-wiki.yml
+      - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules
+concurrency:
+  group: publish-checks-wiki
+  cancel-in-progress: true
+permissions:
+  contents: write
+jobs:
+  publish-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install html2text==2024.2.25
+      - run: |
+          mkdir -p wiki/checks
+          for f in magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules/*.html
+          do
+            name=$(basename $f .html)
+            echo Generating wiki/checks/Check-$name.md
+            html2text -b 0 $f > wiki/checks/Check-$name.md
+          done
+      - uses: Andrew-Chen-Wang/github-wiki-action@86138cbd6328b21d759e89ab6e6dd6a139b22270
+        with:
+          path: wiki
+          #dry-run: true
+        if: ${{ github.repository_owner == 'StevenLooman' }}
