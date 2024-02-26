@@ -17,7 +17,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          cache: 'pip' # caching pip dependencies
+          python-version: '3.12'
+          cache: 'pip'
       - run: python -m pip install --upgrade pip html2text==2024.2.25
       - run: |
           mkdir -p wiki/checks
