@@ -15,9 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install html2text==2024.2.25
+      - uses: actions/setup-python@v5
+        with:
+          cache: 'pip' # caching pip dependencies
+      - run: python -m pip install --upgrade pip html2text==2024.2.25
       - run: |
           mkdir -p wiki/checks
           for f in magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules/*.html
@@ -29,5 +30,4 @@ jobs:
       - uses: Andrew-Chen-Wang/github-wiki-action@86138cbd6328b21d759e89ab6e6dd6a139b22270
         with:
           path: wiki
-          #dry-run: true
         if: ${{ github.repository_owner == 'StevenLooman' }}
