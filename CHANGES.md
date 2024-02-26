@@ -1,6 +1,6 @@
 # Changes
 
-0.9.0 (unreleased)
+0.9.0 (2024-02-26)
 
 - Support configurable libs dirs.
 - Read and register in which module a definition lives.
