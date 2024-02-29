@@ -32,6 +32,7 @@ import nl.ramsolutions.sw.magik.checks.checks.TodoCommentCheck;
 import nl.ramsolutions.sw.magik.checks.checks.TrailingWhitespaceCheck;
 import nl.ramsolutions.sw.magik.checks.checks.TypeDocCheck;
 import nl.ramsolutions.sw.magik.checks.checks.UndefinedVariableCheck;
+import nl.ramsolutions.sw.magik.checks.checks.UnsafeEvaluateInvocationCheck;
 import nl.ramsolutions.sw.magik.checks.checks.UnusedVariableCheck;
 import nl.ramsolutions.sw.magik.checks.checks.UseValueCompareCheck;
 import nl.ramsolutions.sw.magik.checks.checks.VariableCountCheck;
@@ -89,6 +90,7 @@ public final class CheckList {
         TrailingWhitespaceCheck.class,
         TypeDocCheck.class,
         UndefinedVariableCheck.class,
+        UnsafeEvaluateInvocationCheck.class,
         UnusedVariableCheck.class,
         UseValueCompareCheck.class,
         VariableCountCheck.class,
