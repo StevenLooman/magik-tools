@@ -1,6 +1,6 @@
 {
   "title": "Compare strings and bignums with the equality-operators",
-  "type": "CODE_SMELL",
+  "type": "BUG",
   "status": "ready",
   "remediation": {
     "func": "Constant\/Issue",
@@ -8,9 +8,9 @@
   },
   "tags": [
     "bad-practice",
-    "potential-bug"
+    "bug"
   ],
-  "defaultSeverity": "Minor",
+  "defaultSeverity": "Major",
   "ruleSpecification": "UseValueCompare",
   "sqKey": "use-value-compare"
 }

@@ -11,6 +11,6 @@
     "convention"
   ],
   "defaultSeverity": "Minor",
-  "ruleSpecification": "CommentTodo",
-  "sqKey": "comment-todo"
+  "ruleSpecification": "TodoComment",
+  "sqKey": "todo-comment"
 }

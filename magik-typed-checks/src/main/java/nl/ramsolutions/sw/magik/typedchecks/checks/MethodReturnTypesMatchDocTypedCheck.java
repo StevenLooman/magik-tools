@@ -16,65 +16,67 @@ import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.utils.StreamUtils;
 import org.sonar.check.Rule;
 
-/**
- * Check to check if the @return types from method doc matches the reasoned return types.
- */
+/** Check to check if the @return types from method doc matches the reasoned return types. */
 @Rule(key = MethodReturnTypesMatchDocTypedCheck.CHECK_KEY)
 public class MethodReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
 
-    @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String CHECK_KEY = "MethodReturnTypesMatchDoc";
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final String CHECK_KEY = "MethodReturnTypesMatchDoc";
 
-    private static final String MESSAGE = "@return type(s) (%s) do not match method return type(s) (%s).";
+  private static final String MESSAGE =
+      "@return type(s) (%s) do not match method return type(s) (%s).";
 
-    @Override
-    protected void walkPostMethodDefinition(final AstNode node) {
-        final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
-        if (helper.isAbstractMethod()) {
-            return;
-        }
+  @Override
+  protected void walkPostMethodDefinition(final AstNode node) {
+    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
+    if (helper.isAbstractMethod()) {
+      return;
+    }
 
-        final ExpressionResultString methodResultString = this.extractReasonedResult(node);
-        final Map<AstNode, TypeString> typeDocNodes = this.extractMethodDocResult(node);
-        final ITypeKeeper typeKeeper = this.getTypeKeeper();
-        final TypeReader typeReader = new TypeReader(typeKeeper);
-        StreamUtils.zip(methodResultString.stream(), typeDocNodes.entrySet().stream())
-            .forEach(entry -> {
-                if (entry.getKey() == null
-                    || entry.getValue() == null) {
-                    // Only bother with type-doc returns.
-                    return;
-                }
+    final ExpressionResultString methodResultString = this.extractReasonedResult(node);
+    final Map<AstNode, TypeString> typeDocNodes = this.extractMethodDocResult(node);
+    final ITypeKeeper typeKeeper = this.getTypeKeeper();
+    final TypeReader typeReader = new TypeReader(typeKeeper);
+    StreamUtils.zip(methodResultString.stream(), typeDocNodes.entrySet().stream())
+        .forEach(
+            entry -> {
+              if (entry.getKey() == null || entry.getValue() == null) {
+                // Only bother with type-doc returns.
+                return;
+              }
 
-                final TypeString methodReturnTypeString = entry.getKey();
-                final AbstractType methodReturnType = typeReader.parseTypeString(methodReturnTypeString);
+              final TypeString methodReturnTypeString = entry.getKey();
+              final AbstractType methodReturnType =
+                  typeReader.parseTypeString(methodReturnTypeString);
 
-                final Map.Entry<AstNode, TypeString> typeDocEntry = entry.getValue();
-                final TypeString docReturnTypeString = typeDocEntry.getValue();
-                final AbstractType docReturnType = typeReader.parseTypeString(docReturnTypeString);
+              final Map.Entry<AstNode, TypeString> typeDocEntry = entry.getValue();
+              final TypeString docReturnTypeString = typeDocEntry.getValue();
+              final AbstractType docReturnType = typeReader.parseTypeString(docReturnTypeString);
 
-                if (!methodReturnType.equals(docReturnType)) {
-                    final String message = String.format(
+              if (!methodReturnType.equals(docReturnType)) {
+                final String message =
+                    String.format(
                         MESSAGE,
-                        docReturnTypeString.getFullString(), methodReturnTypeString.getFullString());
-                    final AstNode returnTypeNode = typeDocEntry.getKey();
-                    final AstNode typeValueNode = returnTypeNode.getFirstChild(TypeDocGrammar.TYPE_VALUE);
-                    this.addIssue(typeValueNode, message);
-                }
+                        docReturnTypeString.getFullString(),
+                        methodReturnTypeString.getFullString());
+                final AstNode returnTypeNode = typeDocEntry.getKey();
+                final AstNode typeValueNode =
+                    returnTypeNode.getFirstChild(TypeDocGrammar.TYPE_VALUE);
+                this.addIssue(typeValueNode, message);
+              }
             });
-    }
+  }
 
-    private ExpressionResultString extractReasonedResult(final AstNode node) {
-        final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
-        final ExpressionResult result = reasonerState.getNodeType(node);
-        return result.stream()
-            .map(AbstractType::getTypeString)
-            .collect(ExpressionResultString.COLLECTOR);
-    }
+  private ExpressionResultString extractReasonedResult(final AstNode node) {
+    final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
+    final ExpressionResult result = reasonerState.getNodeType(node);
+    return result.stream()
+        .map(AbstractType::getTypeString)
+        .collect(ExpressionResultString.COLLECTOR);
+  }
 
-    private Map<AstNode, TypeString> extractMethodDocResult(final AstNode node) {
-        final TypeDocParser docParser = new TypeDocParser(node);
-        return docParser.getReturnTypeNodes();
-    }
-
+  private Map<AstNode, TypeString> extractMethodDocResult(final AstNode node) {
+    final TypeDocParser docParser = new TypeDocParser(node);
+    return docParser.getReturnTypeNodes();
+  }
 }

@@ -3,7 +3,7 @@
 	"description": "Magik Language Server",
 	"author": "Steven Looman",
 	"license": "GPL-3.0-only",
-	"version": "0.9.0-SNAPSHOT",
+	"version": "0.10.0-SNAPSHOT",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/StevenLooman/magik-tools"
@@ -243,8 +243,23 @@
 					"type": "boolean",
 					"default": false
 				},
-				"magik.typing.indexUsages": {
-					"description": "Enable indexing of usages of globals/methods/slots/conditions by methods.",
+				"magik.typing.indexGlobalUsages": {
+					"description": "Enable indexing of usages of globals by methods.",
+					"type": "boolean",
+					"default": true
+				},
+				"magik.typing.indexMethodUsages": {
+					"description": "Enable indexing of usages of methods by methods.",
+					"type": "boolean",
+					"default": false
+				},
+				"magik.typing.indexSlotUsages": {
+					"description": "Enable indexing of usages of slots by methods.",
+					"type": "boolean",
+					"default": true
+				},
+				"magik.typing.indexConditionUsages": {
+					"description": "Enable indexing of usages of conditions by methods.",
 					"type": "boolean",
 					"default": true
 				}

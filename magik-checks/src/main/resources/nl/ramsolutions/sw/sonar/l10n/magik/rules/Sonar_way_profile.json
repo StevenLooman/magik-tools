@@ -7,18 +7,23 @@
     "ExemplarSlotCount",
     "FileNotInLoadList",
     "ForbiddenCall",
+    "ForbiddenGlobalUsage",
     "HidesVariable",
     "ImportMissingDefinition",
     "LhsRhsComparatorEqual",
     "LocalImportProcedure",
     "MethodComplexity",
+    "MethodLineCount",
     "NoStatementAfterBodyExit",
     "ParameterCount",
     "ScopeCount",
     "SizeZeroEmpty",
     "SyntaxError",
+    "TodoComment",
     "UnusedVariable",
     "UseValueCompare",
-    "VariableNaming"
+    "VariableCount",
+    "VariableNaming",
+    "WarnedCall"
   ]
 }

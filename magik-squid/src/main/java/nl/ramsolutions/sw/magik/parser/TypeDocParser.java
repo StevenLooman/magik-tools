@@ -26,8 +26,8 @@ import org.sonar.sslr.parser.ParserAdapter;
 /**
  * Parses magik-tools style documentation comments.
  *
- * <p>
- * For example, for a method/procedure:
+ * <p>For example, for a method/procedure:
+ *
  * <pre>
  * _method example.method(p1, p2)
  *     ## Example method.
@@ -38,10 +38,9 @@ import org.sonar.sslr.parser.ParserAdapter;
  *     _return 1, "str"
  * _endmethod
  * </pre>
- * </p>
  *
- * <p>
- * For example, for a exemplar definition:
+ * <p>For example, for a exemplar definition:
+ *
  * <pre>
  * _pragma(...)
  * ## Example exemplar.
@@ -54,73 +53,72 @@ import org.sonar.sslr.parser.ParserAdapter;
  *         {:slot2, _unset}
  *     })
  * </pre>
- * </p>
  */
 public class TypeDocParser {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TypeDocParser.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TypeDocParser.class);
 
-    private final Parser<LexerlessGrammar> parser =
-        new ParserAdapter<>(StandardCharsets.ISO_8859_1, TypeDocGrammar.create());
-    private final List<Token> tokens;
-    private final String pakkage;
-    private AstNode typeDocNode;
+  private final Parser<LexerlessGrammar> parser =
+      new ParserAdapter<>(StandardCharsets.ISO_8859_1, TypeDocGrammar.create());
+  private final List<Token> tokens;
+  private final String pakkage;
+  private AstNode typeDocNode;
 
-    /**
-     * Constructor.
-     * @param node {@link AstNode} to analyze.
-     */
-    public TypeDocParser(final AstNode node) {
-        this(TypeDocParser.getCommentTokens(node), new PackageNodeHelper(node).getCurrentPackage());
-        // No node type check, to be able to parse shared constants etc.
+  /**
+   * Constructor.
+   *
+   * @param node {@link AstNode} to analyze.
+   */
+  public TypeDocParser(final AstNode node) {
+    this(TypeDocParser.getCommentTokens(node), new PackageNodeHelper(node).getCurrentPackage());
+    // No node type check, to be able to parse shared constants etc.
+  }
+
+  public TypeDocParser(final List<Token> docTokens, final String pakkage) {
+    this.tokens = Collections.unmodifiableList(docTokens);
+    this.pakkage = pakkage;
+  }
+
+  private static List<Token> getCommentTokens(final AstNode node) {
+    final Predicate<AstNode> predicate =
+        predNode -> node == predNode || predNode.isNot(MagikGrammar.PROCEDURE_DEFINITION);
+    return AstQuery.dfs(node, predicate)
+        .map(AstNode::getToken)
+        .filter(Objects::nonNull)
+        .distinct()
+        .flatMap(token -> token.getTrivia().stream())
+        .filter(Trivia::isComment)
+        .map(Trivia::getToken)
+        .filter(token -> token.getValue().startsWith("##"))
+        .collect(Collectors.toUnmodifiableList());
+  }
+
+  @SuppressWarnings("java:S3011")
+  private AstNode parseTypeDoc() {
+    // Build comment.
+    final String comments =
+        this.tokens.stream().map(Token::getValue).collect(Collectors.joining("\n"));
+
+    // Parse TypeDoc.
+    final AstNode node = this.parser.parse(comments);
+
+    // Nothing parsed, nothing to fix.
+    if (comments.isEmpty()) {
+      return node;
     }
 
-    public TypeDocParser(final List<Token> docTokens, final String pakkage) {
-        this.tokens = Collections.unmodifiableList(docTokens);
-        this.pakkage = pakkage;
-    }
+    // Update tokens, from existing tokens.
+    node.getTokens()
+        .forEach(
+            token -> {
+              // Find original token, there is only one comment-token per line.
+              final int index = token.getLine() - 1;
+              final Token origToken = this.tokens.get(index);
 
-    private static List<Token> getCommentTokens(final AstNode node) {
-        final Predicate<AstNode> predicate =
-            predNode ->
-                node == predNode
-                || predNode.isNot(MagikGrammar.PROCEDURE_DEFINITION);
-        return AstQuery.dfs(node, predicate)
-            .map(AstNode::getToken)
-            .filter(Objects::nonNull)
-            .distinct()
-            .flatMap(token -> token.getTrivia().stream())
-            .filter(Trivia::isComment)
-            .map(Trivia::getToken)
-            .filter(token -> token.getValue().startsWith("##"))
-            .collect(Collectors.toUnmodifiableList());
-    }
+              final int newLine = origToken.getLine();
+              final int newColumn = origToken.getColumn() + token.getColumn();
 
-    @SuppressWarnings("java:S3011")
-    private AstNode parseTypeDoc() {
-        // Build comment.
-        final String comments = this.tokens.stream()
-            .map(Token::getValue)
-            .collect(Collectors.joining("\n"));
-
-        // Parse TypeDoc.
-        final AstNode node = this.parser.parse(comments);
-
-        // Nothing parsed, nothing to fix.
-        if (comments.isEmpty()) {
-            return node;
-        }
-
-        // Update tokens, from existing tokens.
-        node.getTokens().forEach(token -> {
-            // Find original token, there is only one comment-token per line.
-            final int index = token.getLine() - 1;
-            final Token origToken = this.tokens.get(index);
-
-            final int newLine = origToken.getLine();
-            final int newColumn = origToken.getColumn() + token.getColumn();
-
-            try {
+              try {
                 final Field lineField = Token.class.getDeclaredField("line");
                 lineField.setAccessible(true);
                 lineField.set(token, newLine);
@@ -128,214 +126,211 @@ public class TypeDocParser {
                 final Field columnField = Token.class.getDeclaredField("column");
                 columnField.setAccessible(true);
                 columnField.set(token, newColumn);
-            } catch (ReflectiveOperationException exception) {
+              } catch (ReflectiveOperationException exception) {
                 LOGGER.error(exception.getMessage(), exception);
-            }
-        });
+              }
+            });
 
-        return node;
+    return node;
+  }
+
+  /**
+   * Get TypeDoc AstNode.
+   *
+   * @return Parsed AstNode.
+   */
+  public AstNode getTypeDocNode() {
+    if (this.typeDocNode == null) {
+      this.typeDocNode = this.parseTypeDoc();
     }
 
-    /**
-     * Get TypeDoc AstNode.
-     * @return Parsed AstNode.
-     */
-    public AstNode getTypeDocNode() {
-        if (this.typeDocNode == null) {
-            this.typeDocNode = this.parseTypeDoc();
-        }
+    return this.typeDocNode;
+  }
 
-        return this.typeDocNode;
+  /**
+   * Get param types.
+   *
+   * @return Map with @param types, keyed on name, valued on type.
+   */
+  public Map<String, TypeString> getParameterTypes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.PARAM).stream()
+        .filter(this::noEmptyName)
+        .collect(Collectors.toMap(this::getName, this::getTypeString));
+  }
+
+  /**
+   * Get @param nodes + type strings.
+   *
+   * @return
+   */
+  public Map<AstNode, TypeString> getParameterTypeNodes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.PARAM).stream()
+        .filter(this::hasTypeNode)
+        .collect(Collectors.toMap(this::getTypeNode, this::getTypeString));
+  }
+
+  /**
+   * Get @param name node + names.
+   *
+   * @return
+   */
+  public Map<AstNode, String> getParameterNameNodes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.PARAM).stream()
+        .filter(this::noEmptyName)
+        .collect(Collectors.toMap(this::getNameNode, this::getName));
+  }
+
+  /**
+   * Get generic types.
+   *
+   * @return Map with @generic types, keyed on name, valued on type.
+   */
+  public List<TypeString> getGenericTypes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.GENERIC).stream()
+        .filter(this::noEmptyName)
+        .map(this::getTypeString)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Get @generic nodes + type strings.
+   *
+   * @return
+   */
+  public Map<AstNode, TypeString> getGenericTypeNodes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.GENERIC).stream()
+        .filter(this::hasTypeNode)
+        .collect(
+            Collectors.toMap(
+                this::getTypeNode, this::getTypeString, (a, b) -> a, LinkedHashMap::new));
+  }
+
+  /**
+   * Get @return types.
+   *
+   * @return List with @return types.
+   */
+  public List<TypeString> getReturnTypes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.RETURN).stream()
+        .map(this::getTypeString)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Get return type nodes + names, ordered via {@code LinkedHashMap}.
+   *
+   * @return Map with @return type nodes + type names.
+   */
+  public Map<AstNode, TypeString> getReturnTypeNodes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.RETURN).stream()
+        .filter(this::hasTypeNode)
+        .collect(
+            Collectors.toMap(
+                this::getTypeNode, this::getTypeString, (a, b) -> a, LinkedHashMap::new));
+  }
+
+  /**
+   * Get @loop types.
+   *
+   * @return List with @loop types.
+   */
+  public List<TypeString> getLoopTypes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.LOOP).stream()
+        .map(this::getTypeString)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Get @loop type nodes + names.
+   *
+   * @return List with @loop type nodes + type names.
+   */
+  public Map<AstNode, TypeString> getLoopTypeNodes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.LOOP).stream()
+        .filter(this::hasTypeNode)
+        .collect(Collectors.toMap(this::getTypeNode, this::getTypeString));
+  }
+
+  /**
+   * Get @slot types.
+   *
+   * @return Map with @slot types, keyed on name, valued on type.
+   */
+  public Map<String, TypeString> getSlotTypes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.SLOT).stream()
+        .filter(this::noEmptyName)
+        .collect(Collectors.toMap(this::getName, this::getTypeString));
+  }
+
+  /**
+   * Get @slot type nodes + types.
+   *
+   * @return
+   */
+  public Map<AstNode, TypeString> getSlotTypeNodes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.SLOT).stream()
+        .filter(this::hasTypeNode)
+        .collect(Collectors.toMap(this::getTypeNode, this::getTypeString));
+  }
+
+  /**
+   * Get @slot name nodes + name.
+   *
+   * @return
+   */
+  public Map<String, AstNode> getSlotNameNodes() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.SLOT).stream()
+        .filter(this::noEmptyName)
+        .collect(
+            Collectors.toMap(
+                this::getName, slotNode -> slotNode.getFirstChild(TypeDocGrammar.NAME)));
+  }
+
+  private boolean noEmptyName(final AstNode node) {
+    return !this.getName(node).isBlank();
+  }
+
+  private String getName(final AstNode node) {
+    final AstNode nameNode = node.getFirstChild(TypeDocGrammar.NAME);
+    final String tokenValue = nameNode.getTokenValue();
+    return Objects.requireNonNullElse(tokenValue, "");
+  }
+
+  private AstNode getNameNode(final AstNode node) {
+    return node.getFirstChild(TypeDocGrammar.NAME);
+  }
+
+  private boolean hasTypeNode(final AstNode node) {
+    return node.getFirstChild(TypeDocGrammar.TYPE) != null;
+  }
+
+  private TypeString getTypeString(final AstNode node) {
+    final AstNode typeNode = node.getFirstChild(TypeDocGrammar.TYPE);
+    if (typeNode == null) {
+      return TypeString.UNDEFINED;
     }
 
-    /**
-     * Get param types.
-     * @return Map with @param types, keyed on name, valued on type.
-     */
-    public Map<String, TypeString> getParameterTypes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.PARAM).stream()
-            .filter(this::noEmptyName)
-            .collect(Collectors.toMap(
-                this::getName,
-                this::getTypeString));
-    }
-
-    /**
-     * Get @param nodes + type strings.
-     * @return
-     */
-    public Map<AstNode, TypeString> getParameterTypeNodes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.PARAM).stream()
-            .filter(this::hasTypeNode)
-            .collect(Collectors.toMap(
-                this::getTypeNode,
-                this::getTypeString));
-    }
-
-    /**
-     * Get @param name node + names.
-     * @return
-     */
-    public Map<AstNode, String> getParameterNameNodes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.PARAM).stream()
-            .filter(this::noEmptyName)
-            .collect(Collectors.toMap(
-                this::getNameNode,
-                this::getName));
-    }
-
-    /**
-     * Get generic types.
-     * @return Map with @generic types, keyed on name, valued on type.
-     */
-    public List<TypeString> getGenericTypes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.GENERIC).stream()
-            .filter(this::noEmptyName)
-            .map(this::getTypeString)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Get @generic nodes + type strings.
-     * @return
-     */
-    public Map<AstNode, TypeString> getGenericTypeNodes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.GENERIC).stream()
-            .filter(this::hasTypeNode)
-            .collect(Collectors.toMap(
-                this::getTypeNode,
-                this::getTypeString,
-                (a, b) -> a,
-                LinkedHashMap::new));
-    }
-
-    /**
-     * Get @return types.
-     * @return List with @return types.
-     */
-    public List<TypeString> getReturnTypes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.RETURN).stream()
-            .map(this::getTypeString)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Get return type nodes + names, ordered via {@code LinkedHashMap}.
-     * @return Map with @return type nodes + type names.
-     */
-    public Map<AstNode, TypeString> getReturnTypeNodes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.RETURN).stream()
-            .filter(this::hasTypeNode)
-            .collect(Collectors.toMap(
-                this::getTypeNode,
-                this::getTypeString,
-                (a, b) -> a,
-                LinkedHashMap::new));
-    }
-
-    /**
-     * Get @loop types.
-     * @return List with @loop types.
-     */
-    public List<TypeString> getLoopTypes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.LOOP).stream()
-            .map(this::getTypeString)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Get @loop type nodes + names.
-     * @return List with @loop type nodes + type names.
-     */
-    public Map<AstNode, TypeString> getLoopTypeNodes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.LOOP).stream()
-            .filter(this::hasTypeNode)
-            .collect(Collectors.toMap(
-                this::getTypeNode,
-                this::getTypeString));
-    }
-
-    /**
-     * Get @slot types.
-     * @return Map with @slot types, keyed on name, valued on type.
-     */
-    public Map<String, TypeString> getSlotTypes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.SLOT).stream()
-            .filter(this::noEmptyName)
-            .collect(Collectors.toMap(
-                this::getName,
-                this::getTypeString));
-    }
-
-    /**
-     * Get @slot type nodes + types.
-     * @return
-     */
-    public Map<AstNode, TypeString> getSlotTypeNodes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.SLOT).stream()
-            .filter(this::hasTypeNode)
-            .collect(Collectors.toMap(
-                this::getTypeNode,
-                this::getTypeString));
-    }
-
-    /**
-     * Get @slot name nodes + name.
-     * @return
-     */
-    public Map<String, AstNode> getSlotNameNodes() {
-        final AstNode node = this.getTypeDocNode();
-        return node.getChildren(TypeDocGrammar.SLOT).stream()
-            .filter(this::noEmptyName)
-            .collect(Collectors.toMap(
-                this::getName,
-                slotNode -> slotNode.getFirstChild(TypeDocGrammar.NAME)));
-    }
-
-    private boolean noEmptyName(final AstNode node) {
-        return !this.getName(node).isBlank();
-    }
-
-    private String getName(final AstNode node) {
-        final AstNode nameNode = node.getFirstChild(TypeDocGrammar.NAME);
-        final String tokenValue = nameNode.getTokenValue();
-        return Objects.requireNonNullElse(tokenValue, "");
-    }
-
-    private AstNode getNameNode(final AstNode node) {
-        return node.getFirstChild(TypeDocGrammar.NAME);
-    }
-
-    private boolean hasTypeNode(final AstNode node) {
-        return node.getFirstChild(TypeDocGrammar.TYPE) != null;
-    }
-
-    private TypeString getTypeString(final AstNode node) {
-        final AstNode typeNode = node.getFirstChild(TypeDocGrammar.TYPE);
-        if (typeNode == null) {
-            return TypeString.UNDEFINED;
-        }
-
-        final String value = typeNode.getTokens().stream()
+    final String value =
+        typeNode.getTokens().stream()
             .filter(token -> !token.getValue().equals("{") && !token.getValue().equals("}"))
             .map(Token::getValue)
             .collect(Collectors.joining());
-        return TypeStringParser.parseTypeString(value, this.pakkage);
-    }
+    return TypeStringParser.parseTypeString(value, this.pakkage);
+  }
 
-    private AstNode getTypeNode(final AstNode node) {
-        return node.getFirstChild(TypeDocGrammar.TYPE);
-    }
-
+  private AstNode getTypeNode(final AstNode node) {
+    return node.getFirstChild(TypeDocGrammar.TYPE);
+  }
 }
