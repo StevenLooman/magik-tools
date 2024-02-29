@@ -66,7 +66,7 @@ public final class Main {
   private static final Option OPTION_HELP =
       Option.builder().longOpt("help").desc("Show this help and exit").build();
   private static final Option OPTION_APPLY_FIXES =
-      Option.builder().longOpt("apply-fixes").desc("Apply any fixes to the files").build();
+      Option.builder().longOpt("apply-fixes").desc("Apply fixes automatically").build();
 
   static {
     OPTIONS = new Options();
