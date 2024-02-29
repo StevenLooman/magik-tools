@@ -15,49 +15,37 @@ import org.sonar.sslr.parser.ParserAdapter;
 import org.sonar.sslr.toolkit.ConfigurationModel;
 import org.sonar.sslr.toolkit.ConfigurationProperty;
 
-/**
- * Magik configuration model.
- */
+/** Magik configuration model. */
 final class MagikConfigurationModel implements ConfigurationModel {
 
-    /**
-     * Get properties.
-     */
-    public List<ConfigurationProperty> getProperties() {
-        return Collections.emptyList();
-    }
+  /** Get properties. */
+  public List<ConfigurationProperty> getProperties() {
+    return Collections.emptyList();
+  }
 
-    /**
-     * Set update flag.
-     */
-    public void setUpdatedFlag() {
-        // do nothing
-    }
+  /** Set update flag. */
+  public void setUpdatedFlag() {
+    // do nothing
+  }
 
-    /**
-     * Get default charset.
-     */
-    public Charset getCharset() {
-        return StandardCharsets.ISO_8859_1;
-    }
+  /** Get default charset. */
+  public Charset getCharset() {
+    return StandardCharsets.ISO_8859_1;
+  }
 
-    /**
-     * Get parser.
-     */
-    public Parser<LexerlessGrammar> getParser() {
-        Charset charset = getCharset();
-        return new ParserAdapter<>(charset, MagikGrammar.create());
-    }
+  /** Get parser. */
+  public Parser<LexerlessGrammar> getParser() {
+    Charset charset = getCharset();
+    return new ParserAdapter<>(charset, MagikGrammar.create());
+  }
 
-    /**
-     * Get {@link Tokenizer}s.
-     */
-    public List<Tokenizer> getTokenizers() {
-        return List.of(
-                new StringTokenizer("<span class=\"s\">", "</span>"),  // NOSONAR
-                new MagikDocTokenizer("<span class=\"cppd\">", "</span>"),  // NOSONAR
-                new MagikCommentTokenizer("<span class=\"cd\">", "</span>"),  // NOSONAR
-                new KeywordsTokenizer("<span class=\"k\">", "</span>", MagikKeyword.keywordValues()));  // NOSONAR
-    }
-
+  /** Get {@link Tokenizer}s. */
+  public List<Tokenizer> getTokenizers() {
+    return List.of(
+        new StringTokenizer("<span class=\"s\">", "</span>"), // NOSONAR
+        new MagikDocTokenizer("<span class=\"cppd\">", "</span>"), // NOSONAR
+        new MagikCommentTokenizer("<span class=\"cd\">", "</span>"), // NOSONAR
+        new KeywordsTokenizer(
+            "<span class=\"k\">", "</span>", MagikKeyword.keywordValues())); // NOSONAR
+  }
 }

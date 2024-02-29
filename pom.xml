@@ -50,20 +50,21 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <junit.version>5.9.3</junit.version>
+    <junit.version>5.10.2</junit.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
     <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
     <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
     <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
-    <checkstyle.version>10.12.0</checkstyle.version>
-    <checkstyle-rules.version>4.9.3</checkstyle-rules.version>
+    <spotless.version>2.43.0</spotless.version>
+    <google-java-format.version>1.19.2</google-java-format.version>
+    <cleanthat.version>2.18</cleanthat.version>
     <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.8.10</jacoco-maven-plugin.version>
     <maven-javadoc-plugin.version>3.3.0</maven-javadoc-plugin.version>
     <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
     <versions-maven-plugin.version>2.8.1</versions-maven-plugin.version>
-    <spotbugs-maven-plugin.version>4.2.3</spotbugs-maven-plugin.version>
-    <spotbugs.version>4.7.3</spotbugs.version>
+    <spotbugs-maven-plugin.version>4.8.3.1</spotbugs-maven-plugin.version>
+    <spotbugs.version>4.8.3</spotbugs.version>
 
     <!-- JaCoCo thresholds. Increase gradually as you add tests. -->
     <jacoco.unit-tests.limit.instruction-ratio>0%</jacoco.unit-tests.limit.instruction-ratio>
@@ -71,17 +72,18 @@
     <jacoco.unit-tests.limit.class-complexity>100</jacoco.unit-tests.limit.class-complexity> <!-- Preferred/future: 20-->
     <jacoco.unit-tests.limit.method-complexity>10</jacoco.unit-tests.limit.method-complexity> <!-- Preferred/future: 5-->
 
-    <sonar.version>9.2.4.50792</sonar.version>
+    <sonar.version>9.4.0.54424</sonar.version>
+    <sonar-impl.version>10.4.0.87286</sonar-impl.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
-    <sonar-analyzer-commons.version>1.22.0.848</sonar-analyzer-commons.version>
+    <sonar-analyzer-commons.version>2.7.0.1482</sonar-analyzer-commons.version>
     <sslr-squid-bridge.version>2.7.1.392</sslr-squid-bridge.version>
     <sslr.version>1.24.0.633</sslr.version>
-    <slf4j.version>2.0.7</slf4j.version>
+    <slf4j.version>2.0.12</slf4j.version>
     <logback.version>1.0.13</logback.version>
-    <lsp4j.version>0.21.0</lsp4j.version>
-    <commons-cli.version>1.5.0</commons-cli.version>
+    <lsp4j.version>0.22.0</lsp4j.version>
+    <commons-cli.version>1.6.0</commons-cli.version>
     <gson.version>2.10.1</gson.version>
-    <assertj.version>3.24.2</assertj.version>
+    <assertj.version>3.25.3</assertj.version>
     <sonar-maven.version>3.9.1.2184</sonar-maven.version>
     <sqlite-jdbc.version>3.44.1.0</sqlite-jdbc.version>
 
@@ -167,6 +169,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-annotations</artifactId>
+        <version>${spotbugs.version}</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.sonarsource.analyzer-commons</groupId>
         <artifactId>sonar-analyzer-test-commons</artifactId>
         <version>${sonar-analyzer-commons.version}</version>
@@ -181,13 +189,13 @@
       <dependency>
         <groupId>org.sonarsource.sonarqube</groupId>
         <artifactId>sonar-testing-harness</artifactId>
-        <version>${sonar.version}</version>
+        <version>${sonar-impl.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.sonarsource.sonarqube</groupId>
         <artifactId>sonar-plugin-api-impl</artifactId>
-        <version>${sonar.version}</version>
+        <version>${sonar-impl.version}</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -263,6 +271,34 @@
         </configuration>
       </plugin>
 
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <java>
+            <includes>
+              <include>**/src/main/java/**/*.java</include>
+              <include>**/src/test/java/**/*.java</include>
+            </includes>
+            <cleanthat>
+              <version>${cleanthat.version}</version>
+            </cleanthat>
+            <googleJavaFormat>
+              <version>${google-java-format.version}</version>
+              <style>GOOGLE</style>
+            </googleJavaFormat>
+          </java>
+        </configuration>
+      </plugin>
+
       <!-- Disabled for now, as it produces too many false positives.
       <plugin>
         <groupId>com.github.spotbugs</groupId>
@@ -286,40 +322,6 @@
         </dependencies>
       </plugin>
       -->
-
-      <plugin>
-        <?m2e ignore?>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${maven-checkstyle-plugin.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>com.puppycrawl.tools</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>${checkstyle.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>com.github.ngeor</groupId>
-            <artifactId>checkstyle-rules</artifactId>
-            <version>${checkstyle-rules.version}</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <configLocation>com/github/ngeor/checkstyle.xml</configLocation>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          <skip>${skipTests}</skip>
-          <excludes>**/org/sonar/sslr/internal/matchers/AstCreator.java,**/com/sonar/sslr/api/GenericTokenType.java</excludes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>checkstyle</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -415,6 +417,7 @@
                     <exclude>nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider.getSymbols(java.lang.String)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.lint.ConfigurationLocator.locateConfiguration()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.parser.MagikWhitespaceTriviaAdder.createWhitespaceTokens(com.sonar.sslr.api.Token, com.sonar.sslr.api.Token)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.typedchecks.fixers.TypeDocReturnTypeFixer.lambda$6(nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition, java.util.Map.Entry)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.typedchecks.fixers.TypeDocReturnTypeFixer.lambda$extractReturnTypeCodeActions$2(nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition, java.util.Map.Entry)</exclude>
                   </excludes>
                 </rule>

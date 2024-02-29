@@ -13,208 +13,227 @@ import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
 
-/**
- * Helper for METHOD_DEFINITION nodes.
- */
+/** Helper for METHOD_DEFINITION nodes. */
 public class MethodDefinitionNodeHelper {
 
-    private final AstNode node;
+  private final AstNode node;
 
-    /**
-     * Constructor.
-     * @param node Node to encapsulate.
-     */
-    public MethodDefinitionNodeHelper(final AstNode node) {
-        if (!node.is(MagikGrammar.METHOD_DEFINITION)) {
-            throw new IllegalArgumentException();
-        }
-
-        this.node = node;
+  /**
+   * Constructor.
+   *
+   * @param node Node to encapsulate.
+   */
+  public MethodDefinitionNodeHelper(final AstNode node) {
+    if (!node.is(MagikGrammar.METHOD_DEFINITION)) {
+      throw new IllegalArgumentException();
     }
 
-    /**
-     * Get name of method.
-     * @return Method name.
-     */
-    public String getMethodName() {
-        final AstNode parametersNode = this.node.getFirstChild(MagikGrammar.PARAMETERS);
-        final List<AstNode> parameterNodes = parametersNode != null
+    this.node = node;
+  }
+
+  /**
+   * Get name of method.
+   *
+   * @return Method name.
+   */
+  public String getMethodName() {
+    final AstNode parametersNode = this.node.getFirstChild(MagikGrammar.PARAMETERS);
+    final List<AstNode> parameterNodes =
+        parametersNode != null
             ? parametersNode.getChildren(MagikGrammar.PARAMETER)
             : Collections.emptyList();
 
-        final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
-        final StringBuilder builder = new StringBuilder();
-        if (methodNameNode != null) {
-            final String tokenValue = methodNameNode.getTokenValue();
-            builder.append(tokenValue);
-        }
-        if (parametersNode != null) {
-            if (this.anyChildTokenIs(parametersNode, MagikPunctuator.SQUARE_L)) {
-                builder.append("[");
-                final int commaCount = parameterNodes.size() - 1;
-                final String repeatedCommas = ",".repeat(commaCount);
-                builder.append(repeatedCommas);
-                builder.append("]");
-            }
-            if (this.anyChildTokenIs(parametersNode, MagikPunctuator.PAREN_L)) {
-                builder.append("()");
-            }
-        }
-        if (this.anyChildTokenIs(this.node, MagikOperator.CHEVRON)) {
-            builder.append(MagikOperator.CHEVRON.getValue());
-        }
-        if (this.anyChildTokenIs(this.node, MagikOperator.BOOT_CHEVRON)) {
-            builder.append(MagikOperator.BOOT_CHEVRON.getValue());
-        }
-
-        return builder.toString();
+    final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
+    final StringBuilder builder = new StringBuilder();
+    if (methodNameNode != null) {
+      final String tokenValue = methodNameNode.getTokenValue();
+      builder.append(tokenValue);
+    }
+    if (parametersNode != null) {
+      if (this.anyChildTokenIs(parametersNode, MagikPunctuator.SQUARE_L)) {
+        builder.append("[");
+        final int commaCount = parameterNodes.size() - 1;
+        final String repeatedCommas = ",".repeat(commaCount);
+        builder.append(repeatedCommas);
+        builder.append("]");
+      }
+      if (this.anyChildTokenIs(parametersNode, MagikPunctuator.PAREN_L)) {
+        builder.append("()");
+      }
+    }
+    if (this.anyChildTokenIs(this.node, MagikOperator.CHEVRON)) {
+      builder.append(MagikOperator.CHEVRON.getValue());
+    }
+    if (this.anyChildTokenIs(this.node, MagikOperator.BOOT_CHEVRON)) {
+      builder.append(MagikOperator.BOOT_CHEVRON.getValue());
     }
 
-    /**
-     * Get exemplar + method name.
-     * @return Exemplar + method name.
-     */
-    public String getExemplarMethodName() {
-        final TypeString exemplarName = this.getTypeString();
-        final String methodName = this.getMethodName();
-        if (methodName.startsWith("[")) {
-            return exemplarName.getIdentifier() + methodName;
-        }
+    return builder.toString();
+  }
 
-        return exemplarName.getIdentifier() + "." + methodName;
+  /**
+   * Get exemplar + method name.
+   *
+   * @return Exemplar + method name.
+   */
+  public String getExemplarMethodName() {
+    final TypeString exemplarName = this.getTypeString();
+    final String methodName = this.getMethodName();
+    if (methodName.startsWith("[")) {
+      return exemplarName.getIdentifier() + methodName;
     }
 
-    /**
-     * Get global reference to type the method is defined on.
-     * @return TypeString to type.
-     */
-    public TypeString getTypeString() {
-        final PackageNodeHelper packageHelper = new PackageNodeHelper(this.node);
-        final String pakkage = packageHelper.getCurrentPackage();
-        final AstNode exemplarNameNode = this.node.getFirstChild(MagikGrammar.EXEMPLAR_NAME);
-        final String exemplarName = exemplarNameNode.getTokenValue();
-        return TypeString.ofIdentifier(exemplarName, pakkage);
-    }
+    return exemplarName.getIdentifier() + "." + methodName;
+  }
 
-    /**
-     * Get package + exemplar + method name.
-     * @return Package + exemplar + method name.
-     */
-    public String getFullExemplarMethodName() {
-        final PackageNodeHelper packageHelper = new PackageNodeHelper(this.node);
-        final String pakkageName = packageHelper.getCurrentPackage();
-        return pakkageName + ":" + this.getExemplarMethodName();
-    }
+  /**
+   * Get global reference to type the method is defined on.
+   *
+   * @return TypeString to type.
+   */
+  public TypeString getTypeString() {
+    final PackageNodeHelper packageHelper = new PackageNodeHelper(this.node);
+    final String pakkage = packageHelper.getCurrentPackage();
+    final AstNode exemplarNameNode = this.node.getFirstChild(MagikGrammar.EXEMPLAR_NAME);
+    final String exemplarName = exemplarNameNode.getTokenValue();
+    return TypeString.ofIdentifier(exemplarName, pakkage);
+  }
 
-    /**
-     * Get parameters + nodes.
-     * @return Map with parameters + PARAMETER nodes.
-     */
-    public Map<String, AstNode> getParameterNodes() {
-        return Stream.concat(
-                this.node.getChildren(MagikGrammar.PARAMETERS).stream()
-                    .flatMap(parametersNode -> parametersNode.getChildren(MagikGrammar.PARAMETER).stream()),
-                this.node.getChildren(MagikGrammar.ASSIGNMENT_PARAMETER).stream())
-            .collect(Collectors.toMap(
-                parameterNode -> parameterNode.getFirstDescendant(MagikGrammar.IDENTIFIER).getTokenValue(),
+  /**
+   * Get package + exemplar + method name.
+   *
+   * @return Package + exemplar + method name.
+   */
+  public String getFullExemplarMethodName() {
+    final PackageNodeHelper packageHelper = new PackageNodeHelper(this.node);
+    final String pakkageName = packageHelper.getCurrentPackage();
+    return pakkageName + ":" + this.getExemplarMethodName();
+  }
+
+  /**
+   * Get parameters + nodes.
+   *
+   * @return Map with parameters + PARAMETER nodes.
+   */
+  public Map<String, AstNode> getParameterNodes() {
+    return Stream.concat(
+            this.node.getChildren(MagikGrammar.PARAMETERS).stream()
+                .flatMap(
+                    parametersNode -> parametersNode.getChildren(MagikGrammar.PARAMETER).stream()),
+            this.node.getChildren(MagikGrammar.ASSIGNMENT_PARAMETER).stream())
+        .collect(
+            Collectors.toMap(
+                parameterNode ->
+                    parameterNode.getFirstDescendant(MagikGrammar.IDENTIFIER).getTokenValue(),
                 parameterNode -> parameterNode));
+  }
+
+  private Collection<AstNode> getMethodModifiers() {
+    final AstNode modifiersNode = this.node.getFirstChild(MagikGrammar.METHOD_MODIFIERS);
+    if (modifiersNode == null) {
+      return Collections.emptySet();
     }
 
-    private Collection<AstNode> getMethodModifiers() {
-        final AstNode modifiersNode = this.node.getFirstChild(MagikGrammar.METHOD_MODIFIERS);
-        if (modifiersNode == null) {
-            return Collections.emptySet();
-        }
+    return modifiersNode.getChildren();
+  }
 
-        return modifiersNode.getChildren();
-    }
+  /**
+   * Test if method is an `_abstract` method.
+   *
+   * @return
+   */
+  public boolean isAbstractMethod() {
+    final String modifier = MagikKeyword.ABSTRACT.getValue();
+    return this.getMethodModifiers().stream()
+        .anyMatch(modifierNode -> modifierNode.getTokenValue().equalsIgnoreCase(modifier));
+  }
 
-    /**
-     * Test if method is an `_abstract` method.
-     * @return
-     */
-    public boolean isAbstractMethod() {
-        final String modifier = MagikKeyword.ABSTRACT.getValue();
-        return this.getMethodModifiers().stream()
-            .anyMatch(modifierNode -> modifierNode.getTokenValue().equalsIgnoreCase(modifier));
-    }
+  /**
+   * Test if method is a `_private` method.
+   *
+   * @return
+   */
+  public boolean isPrivateMethod() {
+    final String modifier = MagikKeyword.PRIVATE.getValue();
+    return this.getMethodModifiers().stream()
+        .anyMatch(modifierNode -> modifierNode.getTokenValue().equalsIgnoreCase(modifier));
+  }
 
-    /**
-     * Test if method is a `_private` method.
-     * @return
-     */
-    public boolean isPrivateMethod() {
-        final String modifier = MagikKeyword.PRIVATE.getValue();
-        return this.getMethodModifiers().stream()
-            .anyMatch(modifierNode -> modifierNode.getTokenValue().equalsIgnoreCase(modifier));
-    }
+  /**
+   * Test if method is an `_iter` method.
+   *
+   * @return
+   */
+  public boolean isIterMethod() {
+    final String modifier = MagikKeyword.ITER.getValue();
+    return this.getMethodModifiers().stream()
+        .anyMatch(modifierNode -> modifierNode.getTokenValue().equalsIgnoreCase(modifier));
+  }
 
-    /**
-     * Test if method is an `_iter` method.
-     * @return
-     */
-    public boolean isIterMethod() {
-        final String modifier = MagikKeyword.ITER.getValue();
-        return this.getMethodModifiers().stream()
-            .anyMatch(modifierNode -> modifierNode.getTokenValue().equalsIgnoreCase(modifier));
-    }
-
-    /**
-     * Test if method returns anything.
-     * @return
-     */
-    public boolean returnsAnything() {
-        final List<AstNode> returnStatementNodes = this.node.getDescendants(MagikGrammar.RETURN_STATEMENT);
-        final boolean hasReturn = returnStatementNodes.stream()
-            .filter(statementNode -> statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == null)
+  /**
+   * Test if method returns anything.
+   *
+   * @return
+   */
+  public boolean returnsAnything() {
+    final List<AstNode> returnStatementNodes =
+        this.node.getDescendants(MagikGrammar.RETURN_STATEMENT);
+    final boolean hasReturn =
+        returnStatementNodes.stream()
+            .filter(
+                statementNode ->
+                    statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == null)
             .anyMatch(statementNode -> statementNode.hasDescendant(MagikGrammar.TUPLE));
 
-        final boolean hasEmit = this.node.getFirstChild(MagikGrammar.BODY)
-            .getChildren(MagikGrammar.STATEMENT).stream()
-            .anyMatch(statementNode -> !statementNode.getChildren(MagikGrammar.EMIT_STATEMENT).isEmpty());
+    final boolean hasEmit =
+        this.node.getFirstChild(MagikGrammar.BODY).getChildren(MagikGrammar.STATEMENT).stream()
+            .anyMatch(
+                statementNode -> !statementNode.getChildren(MagikGrammar.EMIT_STATEMENT).isEmpty());
 
-        return hasReturn || hasEmit;
+    return hasReturn || hasEmit;
+  }
+
+  /**
+   * Test if method has a loopbody statement.
+   *
+   * @return
+   */
+  public boolean hasLoopbody() {
+    return this.node.getDescendants(MagikGrammar.LOOPBODY).stream()
+        .anyMatch(
+            statementNode ->
+                statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == null);
+  }
+
+  private boolean anyChildTokenIs(final AstNode parentNode, final MagikOperator magikOperator) {
+    return parentNode.getChildren().stream()
+        .filter(childNode -> childNode.isNot(MagikGrammar.values()))
+        .map(AstNode::getTokenValue)
+        .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(magikOperator.getValue()));
+  }
+
+  private boolean anyChildTokenIs(final AstNode parentNode, final MagikPunctuator magikPunctuator) {
+    return parentNode.getChildren().stream()
+        .filter(childNode -> childNode.isNot(MagikGrammar.values()))
+        .map(AstNode::getTokenValue)
+        .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(magikPunctuator.getValue()));
+  }
+
+  /**
+   * Get the node which identifies the name of the method. This is either the {@link
+   * MagikGrammar.METHOD_NAME} node, or the {@link MagikGrammar.PARAMETERS_SQUARE} node.
+   *
+   * @return Node which identifies the method.
+   */
+  public AstNode getMethodNameNode() {
+    final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
+    if (methodNameNode == null) {
+      return this.node.getChildren().stream()
+          .filter(childNode -> childNode.isNot(MagikGrammar.values()))
+          .findFirst()
+          .orElseThrow();
     }
 
-    /**
-     * Test if method has a loopbody statement.
-     * @return
-     */
-    public boolean hasLoopbody() {
-        return this.node.getDescendants(MagikGrammar.LOOPBODY).stream()
-            .anyMatch(statementNode -> statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == null);
-    }
-
-    private boolean anyChildTokenIs(final AstNode parentNode, final MagikOperator magikOperator) {
-        return parentNode.getChildren().stream()
-            .filter(childNode -> childNode.isNot(MagikGrammar.values()))
-            .map(AstNode::getTokenValue)
-            .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(magikOperator.getValue()));
-    }
-
-    private boolean anyChildTokenIs(final AstNode parentNode, final MagikPunctuator magikPunctuator) {
-        return parentNode.getChildren().stream()
-            .filter(childNode -> childNode.isNot(MagikGrammar.values()))
-            .map(AstNode::getTokenValue)
-            .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(magikPunctuator.getValue()));
-    }
-
-    /**
-     * Get the node which identifies the name of the method.
-     * This is either the {@link MagikGrammar.METHOD_NAME} node,
-     * or the {@link MagikGrammar.PARAMETERS_SQUARE} node.
-     * @return Node which identifies the method.
-     */
-    public AstNode getMethodNameNode() {
-        final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
-        if (methodNameNode == null) {
-            return this.node.getChildren().stream()
-                .filter(childNode -> childNode.isNot(MagikGrammar.values()))
-                .findFirst()
-                .orElseThrow();
-        }
-
-        return methodNameNode;
-    }
-
+    return methodNameNode;
+  }
 }

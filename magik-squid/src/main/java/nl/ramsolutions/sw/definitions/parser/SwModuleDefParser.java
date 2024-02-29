@@ -11,23 +11,21 @@ import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionGrammar;
 import org.sonar.sslr.parser.LexerlessGrammar;
 import org.sonar.sslr.parser.ParserAdapter;
 
-/**
- * Smallworld module.def parser.
- */
+/** Smallworld module.def parser. */
 public class SwModuleDefParser {
 
-    /**
-     * Parse a file and return the AstNode.
-     *
-     * @param path Path to file
-     * @return Tree
-     * @throws IOException -
-     */
-    public AstNode parse(final Path path) throws IOException {
-        final Charset charset = FileCharsetDeterminer.determineCharset(path);
-        final Parser<LexerlessGrammar> parser = new ParserAdapter<>(charset, SwModuleDefinitionGrammar.create());
-        final File file = path.toFile();
-        return parser.parse(file);
-    }
-
+  /**
+   * Parse a file and return the AstNode.
+   *
+   * @param path Path to file
+   * @return Tree
+   * @throws IOException -
+   */
+  public AstNode parse(final Path path) throws IOException {
+    final Charset charset = FileCharsetDeterminer.determineCharset(path);
+    final Parser<LexerlessGrammar> parser =
+        new ParserAdapter<>(charset, SwModuleDefinitionGrammar.create());
+    final File file = path.toFile();
+    return parser.parse(file);
+  }
 }

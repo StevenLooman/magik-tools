@@ -39,82 +39,82 @@ import nl.ramsolutions.sw.magik.checks.checks.VariableDeclarationUsageDistanceCh
 import nl.ramsolutions.sw.magik.checks.checks.VariableNamingCheck;
 import nl.ramsolutions.sw.magik.checks.checks.WarnedCallCheck;
 
-/**
- * Check list.
- */
+/** Check list. */
 public final class CheckList {
 
-    @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String REPOSITORY_KEY = "magik";
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final String REPOSITORY_KEY = "magik";
 
-    @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String PROFILE_DIR = "nl/ramsolutions/sw/sonar/l10n/magik/rules";
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final String PROFILE_DIR = "nl/ramsolutions/sw/sonar/l10n/magik/rules";
 
-    @SuppressWarnings("checkstyle:JavadocVariable")
-    public static final String PROFILE_LOCATION = PROFILE_DIR + "/Sonar_way_profile.json";
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final String PROFILE_LOCATION = PROFILE_DIR + "/Sonar_way_profile.json";
 
-    private CheckList() {
-    }
+  private CheckList() {}
 
-    /**
-     * Get the list of {@link MagikCheck}s.
-     * @return List of {@link MagikCheck}s.
-     */
-    public static List<Class<? extends MagikCheck>> getChecks() {
-        return List.of(
-            CommentedCodeCheck.class,
-            DuplicateMethodInFileCheck.class,
-            EmptyBlockCheck.class,
-            ExemplarSlotCountCheck.class,
-            FileMethodCountCheck.class,
-            FileNotInLoadListCheck.class,
-            ForbiddenCallCheck.class,
-            ForbiddenGlobalUsageCheck.class,
-            ForbiddenInheritanceCheck.class,
-            FormattingCheck.class,
-            HidesVariableCheck.class,
-            ImportMissingDefinitionCheck.class,
-            LhsRhsComparatorEqualCheck.class,
-            LineLengthCheck.class,
-            LocalImportProcedureCheck.class,
-            MethodComplexityCheck.class,
-            MethodLineCountCheck.class,
-            NoSelfUseCheck.class,
-            NoStatementAfterBodyExitCheck.class,
-            ParameterCountCheck.class,
-            ScopeCountCheck.class,
-            SimplifyIfCheck.class,
-            SizeZeroEmptyCheck.class,
-            SwMethodDocCheck.class,
-            SyntaxErrorCheck.class,
-            TodoCommentCheck.class,
-            TrailingWhitespaceCheck.class,
-            TypeDocCheck.class,
-            UndefinedVariableCheck.class,
-            UnusedVariableCheck.class,
-            UseValueCompareCheck.class,
-            VariableCountCheck.class,
-            VariableDeclarationUsageDistanceCheck.class,
-            VariableNamingCheck.class,
-            WarnedCallCheck.class);
-    }
+  /**
+   * Get the list of {@link MagikCheck}s.
+   *
+   * @return List of {@link MagikCheck}s.
+   */
+  public static List<Class<? extends MagikCheck>> getChecks() {
+    return List.of(
+        CommentedCodeCheck.class,
+        DuplicateMethodInFileCheck.class,
+        EmptyBlockCheck.class,
+        ExemplarSlotCountCheck.class,
+        FileMethodCountCheck.class,
+        FileNotInLoadListCheck.class,
+        ForbiddenCallCheck.class,
+        ForbiddenGlobalUsageCheck.class,
+        ForbiddenInheritanceCheck.class,
+        FormattingCheck.class,
+        HidesVariableCheck.class,
+        ImportMissingDefinitionCheck.class,
+        LhsRhsComparatorEqualCheck.class,
+        LineLengthCheck.class,
+        LocalImportProcedureCheck.class,
+        MethodComplexityCheck.class,
+        MethodLineCountCheck.class,
+        NoSelfUseCheck.class,
+        NoStatementAfterBodyExitCheck.class,
+        ParameterCountCheck.class,
+        ScopeCountCheck.class,
+        SimplifyIfCheck.class,
+        SizeZeroEmptyCheck.class,
+        SwMethodDocCheck.class,
+        SyntaxErrorCheck.class,
+        TodoCommentCheck.class,
+        TrailingWhitespaceCheck.class,
+        TypeDocCheck.class,
+        UndefinedVariableCheck.class,
+        UnusedVariableCheck.class,
+        UseValueCompareCheck.class,
+        VariableCountCheck.class,
+        VariableDeclarationUsageDistanceCheck.class,
+        VariableNamingCheck.class,
+        WarnedCallCheck.class);
+  }
 
-    /**
-     * Get the {@link MagikCheck}s which have a {@link MagikCheckFixer}.
-     * @return
-     */
-    public static Map<Class<? extends MagikCheck>, List<Class<? extends MagikCheckFixer>>> getFixers() {
-        return Map.of();
-    }
+  /**
+   * Get the {@link MagikCheck}s which have a {@link MagikCheckFixer}.
+   *
+   * @return Map of {@link MagikCheck}s and their {@link MagikCheckFixer}s.
+   */
+  public static Map<Class<? extends MagikCheck>, List<Class<? extends MagikCheckFixer>>>
+      getFixers() {
+    return Map.of();
+  }
 
-    /**
-     * Get {@link MagikCheck}s which are disabled by default.
-     * @return List of {@link MagikCheck}s.
-     */
-    public static List<Class<? extends MagikCheck>> getDisabledByDefaultChecks() {
-        return getChecks().stream()
-            .filter(checkClass -> checkClass.getAnnotation(DisabledByDefault.class) != null)
-            .collect(Collectors.toList());
-    }
-
+  /**
+   * Get {@link MagikCheck}s which are disabled by default.
+   *
+   * @return List of {@link MagikCheck}s.
+   */
+  public static List<Class<? extends MagikCheck>> getDisabledByDefaultChecks() {
+    return getChecks().stream()
+        .filter(checkClass -> checkClass.getAnnotation(DisabledByDefault.class) != null)
+        .collect(Collectors.toList());
+  }
 }

@@ -20,7 +20,13 @@
 package com.sonar.sslr.api;
 
 public enum GenericTokenType implements TokenType {
-  COMMENT, IDENTIFIER, LITERAL, CONSTANT, EOF, EOL, UNKNOWN_CHAR,
+  COMMENT,
+  IDENTIFIER,
+  LITERAL,
+  CONSTANT,
+  EOF,
+  EOL,
+  UNKNOWN_CHAR,
 
   // Added:
   WHITESPACE,

@@ -1,31 +1,26 @@
 {
+    "editor.detectIndentation": false,
+    "editor.renderWhitespace": "selection",
+    "editor.rulers": [100, 120],
+    "editor.tabSize": 4,
     "files.exclude": {
         "**/.classpath": true,
         "**/.project": true,
         "**/.settings": true,
         "**/.factorypath": true
     },
-    "editor.renderWhitespace": "selection",
-    "editor.rulers": [120],
-    "editor.tabSize": 4,
-    "java.autobuild.enabled": false,
-    "java.configuration.maven.notCoveredPluginExecutionSeverity": "ignore",
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "java.completion.importOrder": [
-        "com",
-        "java",
-        "javax",
-        "nl",
-        "org"
-    ],
-    "editor.detectIndentation": false,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
+    "java.autobuild.enabled": false,
+    "java.checkstyle.version": "10.13.0",
+    "java.checkstyle.configuration": "/google_checks.xml",
     "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.maven.notCoveredPluginExecutionSeverity": "ignore",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.debug.settings.showLogicalStructure": true,
     "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable",
     "sonarlint.connectedMode.project": {
         "connectionId": "SonarCloud",
         "projectKey": "StevenLooman_magik-tools"
     },
-    "java.debug.settings.showLogicalStructure": true,
 }

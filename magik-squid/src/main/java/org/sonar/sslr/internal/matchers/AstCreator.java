@@ -25,17 +25,16 @@ import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.TokenType;
 import com.sonar.sslr.api.Trivia;
 import com.sonar.sslr.api.Trivia.TriviaKind;
-import org.sonar.sslr.internal.grammar.MutableParsingRule;
-import org.sonar.sslr.internal.vm.TokenExpression;
-import org.sonar.sslr.internal.vm.TriviaExpression;
-import org.sonar.sslr.parser.ParsingResult;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import org.sonar.sslr.internal.grammar.MutableParsingRule;
+import org.sonar.sslr.internal.vm.TokenExpression;
+import org.sonar.sslr.internal.vm.TriviaExpression;
+import org.sonar.sslr.parser.ParsingResult;
 
 public final class AstCreator {
 
@@ -115,7 +114,8 @@ public final class AstCreator {
     TextLocation location = input.getLocation(node.getStartIndex());
     if (location == null) {
       tokenBuilder.setGeneratedCode(true);
-      // Godin: line, column and uri has no value for generated code, but we should bypass checks in TokenBuilder
+      // Godin: line, column and uri has no value for generated code, but we should bypass checks in
+      // TokenBuilder
       tokenBuilder.setLine(1);
       tokenBuilder.setColumn(0);
       tokenBuilder.setURI(FAKE_URI);
@@ -171,25 +171,27 @@ public final class AstCreator {
   }
 
   // @VisibleForTesting
-  static final TokenType UNDEFINED_TOKEN_TYPE = new TokenType() {
-    @Override
-    public String getName() {
-      return "TOKEN";
-    }
+  static final TokenType UNDEFINED_TOKEN_TYPE =
+      new TokenType() {
+        @Override
+        public String getName() {
+          return "TOKEN";
+        }
 
-    @Override
-    public String getValue() {
-      return getName();
-    }
+        @Override
+        public String getValue() {
+          return getName();
+        }
 
-    @Override
-    public boolean hasToBeSkippedFromAst(AstNode node) {
-      return false;
-    }
-  };
+        @Override
+        public boolean hasToBeSkippedFromAst(AstNode node) {
+          return false;
+        }
+      };
 
   /**
    * Hack to do store skipped text as trivia.
+   *
    * @param node Parse node.
    */
   private void handleSkippedTextTrivia(ParseNode node) {
@@ -199,15 +201,14 @@ public final class AstCreator {
     final String nodeValue = getValue(node);
     final GenericTokenType tokenType;
     if (nodeValue.startsWith("\r") || nodeValue.startsWith("\n")) {
-        tokenType = GenericTokenType.EOL;
+      tokenType = GenericTokenType.EOL;
     } else if (nodeValue.equals(";")) {
-        tokenType = GenericTokenType.STATEMENT_SEPARATOR;
+      tokenType = GenericTokenType.STATEMENT_SEPARATOR;
     } else {
-        tokenType = GenericTokenType.WHITESPACE;
+      tokenType = GenericTokenType.WHITESPACE;
     }
 
     tokenBuilder.setType(tokenType);
     trivias.add(Trivia.createSkippedText(tokenBuilder.build()));
   }
-
 }
