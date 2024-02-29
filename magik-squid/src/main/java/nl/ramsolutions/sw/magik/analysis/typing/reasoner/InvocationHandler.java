@@ -65,7 +65,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
           argumentExpressionNodes.stream()
               .map(exprNode -> this.state.getNodeType(exprNode).get(0, unsetType))
               .map(AbstractType::getTypeString)
-              .collect(Collectors.toList());
+              .toList();
       for (final Method method : methods) {
         // Handle call result.
         ExpressionResultString methodCallResultStr = method.getCallResult();
@@ -118,8 +118,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     // Perform procedure call.
     ExpressionResult callResult = null;
     ExpressionResult iterResult = null;
-    if (calledType instanceof ProcedureInstance) {
-      final ProcedureInstance procedureType = (ProcedureInstance) calledType;
+    if (calledType instanceof ProcedureInstance procedureType) {
       final Collection<Method> methods = procedureType.getMethods("invoke()");
       final Method method = methods.iterator().next();
 
@@ -130,7 +129,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
           argumentExpressionNodes.stream()
               .map(exprNode -> this.state.getNodeType(exprNode).get(0, unsetType))
               .map(AbstractType::getTypeString)
-              .collect(Collectors.toList());
+              .toList();
 
       // Handle call result.
       ExpressionResultString methodCallResultStr = method.getCallResult();

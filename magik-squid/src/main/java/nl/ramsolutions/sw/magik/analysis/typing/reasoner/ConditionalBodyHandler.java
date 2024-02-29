@@ -101,7 +101,7 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
                           .map(
                               elifNode ->
                                   elifNode.getFirstChild(MagikGrammar.CONDITIONAL_EXPRESSION)))
-                  .collect(Collectors.toList());
+                  .toList();
           final Set<TypeRestriction> allInvertedRestrictions =
               conditionalExpressionNodes.stream()
                   .map(this.nodeRestrictions::get)
@@ -141,7 +141,7 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
                         .map(
                             elifNode ->
                                 elifNode.getFirstChild(MagikGrammar.CONDITIONAL_EXPRESSION))))
-            .collect(Collectors.toList());
+            .toList();
     this.returningNodeRestrictions.entrySet().stream()
         .filter(entry -> conditionalExpressionNodes.contains(entry.getKey()))
         .map(Map.Entry::getValue)
@@ -154,7 +154,7 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
               final List<AstNode> usages =
                   this.getUsageInBody(scopeEntry, upperBodyNode).stream()
                       .filter(n -> n.getFromIndex() >= nextSiblingNode.getFromIndex())
-                      .collect(Collectors.toList());
+                      .toList();
               final AbstractType restriction = entry.getValue();
               this.setNodeTypes(usages, restriction);
             });
@@ -236,7 +236,7 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
                 Stream.of(ifNode.getFirstChild(MagikGrammar.CONDITIONAL_EXPRESSION)),
                 ifNode.getChildren(MagikGrammar.ELIF).stream()
                     .map(elifNode -> elifNode.getFirstChild(MagikGrammar.CONDITIONAL_EXPRESSION)))
-            .collect(Collectors.toList());
+            .toList();
     final Set<TypeRestriction> allRestrictions =
         conditionalExpressionNodes.stream()
             .map(this.nodeRestrictions::get)

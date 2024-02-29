@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
@@ -68,7 +67,7 @@ public class MethodArgumentCountMatchesParameterCountTypedCheck extends MagikTyp
       final List<Parameter> checkedParameters =
           method.getParameters().stream()
               .filter(parameter -> parameter.is(Parameter.Modifier.NONE))
-              .collect(Collectors.toList());
+              .toList();
       if (checkedParameters.size() > argumentNodes.size()) {
         final String message = String.format(MESSAGE, methodName);
         this.addIssue(node, message);

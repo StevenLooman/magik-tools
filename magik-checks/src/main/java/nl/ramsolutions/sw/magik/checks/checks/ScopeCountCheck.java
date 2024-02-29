@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -66,7 +65,7 @@ public class ScopeCountCheck extends MagikCheck {
         procedureScope.getSelfAndDescendantScopes().stream()
             .flatMap(scope -> scope.getScopeEntriesInScope().stream())
             .filter(scopeEntry -> !scopeEntry.isType(ScopeEntry.Type.IMPORT))
-            .collect(Collectors.toList());
+            .toList();
     final int scopeCount = procedureScopeEntries.size();
     if (scopeCount > this.maxScopeCount) {
       final String message = String.format(MESSAGE, scopeCount, this.maxScopeCount);

@@ -72,7 +72,7 @@ public class MagikTypedChecksDiagnosticsProvider {
               final String diagnosticSource = String.format("mtype (%s)", checkKeyKebabCase);
               return new Diagnostic(range, message, severity, diagnosticSource);
             })
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private Collection<MagikTypedCheck> createChecks(final MagikTypedFile magikFile)

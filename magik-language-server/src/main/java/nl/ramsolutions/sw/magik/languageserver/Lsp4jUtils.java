@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.languageserver;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
@@ -49,7 +48,7 @@ public final class Lsp4jUtils {
       final String description,
       final List<nl.ramsolutions.sw.magik.TextEdit> textEdits) {
     final List<org.eclipse.lsp4j.TextEdit> lsp4jTextEdits =
-        textEdits.stream().map(Lsp4jConversion::textEditToLsp4j).collect(Collectors.toList());
+        textEdits.stream().map(Lsp4jConversion::textEditToLsp4j).toList();
     final VersionedTextDocumentIdentifier versionedTextDocumentIdentifier =
         new VersionedTextDocumentIdentifier(magikFile.getUri().toString(), TEXT_DOCUMENT_VERSION);
     final TextDocumentEdit textDocumentEdit =

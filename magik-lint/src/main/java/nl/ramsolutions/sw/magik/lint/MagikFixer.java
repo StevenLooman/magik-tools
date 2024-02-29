@@ -85,7 +85,7 @@ public class MagikFixer {
         .filter(entry -> enabledChecks.contains(entry.getKey()))
         .flatMap(entry -> entry.getValue().stream())
         .map(this::instantiateFixer)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private MagikCheckFixer instantiateFixer(final Class<? extends MagikCheckFixer> fixerClass) {
@@ -132,7 +132,7 @@ public class MagikFixer {
     return checksConfig.getAllChecks().stream()
         .filter(MagikCheckHolder::isEnabled)
         .map(MagikCheckHolder::getCheckClass)
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList()); // NOSONAR: Keep VSCode/Java plugin sane.
   }
 
   private boolean isFileIgnored(final Path path) {

@@ -20,7 +20,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.definitions.ModuleDefinition;
 import nl.ramsolutions.sw.definitions.ProductDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
@@ -67,7 +66,7 @@ public final class JsonDefinitionReader {
             json.getAsJsonArray().asList().stream()
                 .map(JsonElement::getAsString)
                 .map(TypeStringParser::parseTypeString)
-                .collect(Collectors.toList());
+                .toList();
         return new ExpressionResultString(types);
       }
 

@@ -235,7 +235,10 @@ public final class ClassInfoDefinitionReader {
       final Spliterator<String> scannerSpliterator =
           Spliterators.spliterator(
               scanner, Long.MAX_VALUE, Spliterator.ORDERED | Spliterator.NONNULL);
-      dataNames = StreamSupport.stream(scannerSpliterator, false).collect(Collectors.toList());
+      dataNames =
+          StreamSupport.stream(scannerSpliterator, false)
+              .collect(
+                  Collectors.toUnmodifiableList()); // NOSONAR: Java heap space err with .toList().
     }
 
     // Line 2
@@ -382,15 +385,14 @@ public final class ClassInfoDefinitionReader {
                   slotName ->
                       new SlotDefinition(
                           null, moduleName, null, null, slotName, TypeString.UNDEFINED))
-              .collect(Collectors.toList());
+              .collect(
+                  Collectors.toUnmodifiableList()); // NOSONAR: Java heap space err with .toList().
     }
 
     // Line 2
     final String line2 = reader.readLine();
     final List<TypeString> parents =
-        Arrays.stream(line2.split(" "))
-            .map(TypeStringParser::parseTypeString)
-            .collect(Collectors.toList());
+        Arrays.stream(line2.split(" ")).map(TypeStringParser::parseTypeString).toList();
 
     // Line 3
     final String line3 = reader.readLine();

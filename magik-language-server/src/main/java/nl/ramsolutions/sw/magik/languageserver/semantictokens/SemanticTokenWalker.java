@@ -70,9 +70,7 @@ public class SemanticTokenWalker extends AstWalker {
           MagikKeyword.UNSET.getValue());
 
   private static final List<String> MAGIK_OPERATOR_VALUES =
-      Arrays.stream(MagikOperator.values())
-          .map(MagikOperator::getValue)
-          .collect(Collectors.toUnmodifiableList());
+      Arrays.stream(MagikOperator.values()).map(MagikOperator::getValue).toList();
 
   private final MagikTypedFile magikFile;
   private final List<SemanticToken> semanticTokens = new ArrayList<>();
@@ -349,15 +347,11 @@ public class SemanticTokenWalker extends AstWalker {
         this.addSemanticToken(node, SemanticToken.Type.PARAMETER);
         break;
 
-      case DEFINITION:
-      case IMPORT:
-      case LOCAL:
-      case RECURSIVE:
+      case DEFINITION, IMPORT, LOCAL, RECURSIVE:
         this.addSemanticToken(node, SemanticToken.Type.VARIABLE);
         break;
 
-      case GLOBAL:
-      case DYNAMIC:
+      case GLOBAL, DYNAMIC:
         final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
         if (this.isKnownType(typeString)) {
           this.addSemanticToken(

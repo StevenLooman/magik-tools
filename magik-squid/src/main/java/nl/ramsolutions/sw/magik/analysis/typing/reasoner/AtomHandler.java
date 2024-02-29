@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
@@ -149,7 +148,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
         node.getChildren(MagikGrammar.EXPRESSION).stream()
             .map(this.state::getNodeType)
             .map(result -> result.get(0, UndefinedType.INSTANCE))
-            .collect(Collectors.toList());
+            .toList();
     if (!containedTypes.isEmpty()) {
       final AbstractType[] combinedTypesArr = containedTypes.toArray(AbstractType[]::new);
       final AbstractType combinedType = CombinedType.combine(combinedTypesArr);

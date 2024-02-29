@@ -250,12 +250,12 @@ public abstract class AbstractType {
   @CheckForNull
   public static AbstractType intersection(final AbstractType type1, final AbstractType type2) {
     final Set<AbstractType> type1s =
-        type1 instanceof CombinedType
-            ? Set.copyOf(((CombinedType) type1).getTypes())
+        type1 instanceof CombinedType combinedType1
+            ? Set.copyOf(combinedType1.getTypes())
             : Set.of(type1);
     final Set<AbstractType> type2s =
-        type2 instanceof CombinedType
-            ? Set.copyOf(((CombinedType) type2).getTypes())
+        type2 instanceof CombinedType combinedType2
+            ? Set.copyOf(combinedType2.getTypes())
             : Set.of(type2);
     final Set<AbstractType> intersection =
         type1s.stream().filter(type2s::contains).collect(Collectors.toSet());
@@ -272,12 +272,12 @@ public abstract class AbstractType {
   @CheckForNull
   public static AbstractType difference(final AbstractType type1, final AbstractType type2) {
     final Set<AbstractType> type1s =
-        type1 instanceof CombinedType
-            ? Set.copyOf(((CombinedType) type1).getTypes())
+        type1 instanceof CombinedType combinedType1
+            ? Set.copyOf(combinedType1.getTypes())
             : Set.of(type1);
     final Set<AbstractType> type2s =
-        type2 instanceof CombinedType
-            ? Set.copyOf(((CombinedType) type2).getTypes())
+        type2 instanceof CombinedType combinedType2
+            ? Set.copyOf(combinedType2.getTypes())
             : Set.of(type2);
     final Set<AbstractType> difference =
         type1s.stream().filter(type -> !type2s.contains(type)).collect(Collectors.toSet());

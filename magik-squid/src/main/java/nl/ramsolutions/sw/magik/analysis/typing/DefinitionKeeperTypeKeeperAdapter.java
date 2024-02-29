@@ -214,14 +214,11 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
 
     final Definition definition = this.findTypeDefinition(typeString);
     final AbstractType type;
-    if (definition instanceof ExemplarDefinition) {
-      final ExemplarDefinition exemplarDefinition = (ExemplarDefinition) definition;
+    if (definition instanceof ExemplarDefinition exemplarDefinition) {
       type = this.createType(exemplarDefinition, typeString);
-    } else if (definition instanceof ProcedureDefinition) {
-      final ProcedureDefinition procedureDefinition = (ProcedureDefinition) definition;
+    } else if (definition instanceof ProcedureDefinition procedureDefinition) {
       type = this.createType(procedureDefinition);
-    } else if (definition instanceof GlobalDefinition) {
-      final GlobalDefinition globalDefinition = (GlobalDefinition) definition;
+    } else if (definition instanceof GlobalDefinition globalDefinition) {
       type = this.createType(globalDefinition);
     } else {
       type = UndefinedType.INSTANCE;
@@ -354,7 +351,7 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
                                 paramDef.getModifier())
                             : Parameter.Modifier.NONE,
                         paramDef.getTypeName()))
-            .collect(Collectors.toList());
+            .toList();
     final ProcedureInstance instance =
         new ProcedureInstance(
             procedureDefinition.getLocation(),
@@ -410,7 +407,7 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
                             DefinitionKeeperTypeKeeperAdapter.PARAMETER_MODIFIER_MAPPING.get(
                                 paramDef.getModifier()),
                             paramDef.getTypeName()))
-                .collect(Collectors.toList()),
+                .toList(),
             assignmentParameter != null
                 ? new Parameter(
                     assignmentParameter.getLocation(),

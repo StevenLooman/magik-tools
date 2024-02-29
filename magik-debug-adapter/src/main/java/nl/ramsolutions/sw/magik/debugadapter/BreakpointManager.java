@@ -168,25 +168,23 @@ class BreakpointManager {
 
     // Add new breakpoints.
     final List<Integer> magikBreakpointLines =
-        breakpoints.stream().map(MagikBreakpoint::getMethodLine).collect(Collectors.toList());
+        breakpoints.stream().map(MagikBreakpoint::getMethodLine).toList();
     final List<SourceBreakpoint> addedBreakpoints =
         Arrays.stream(newSourceBreakpoints)
             .filter(breakpoint -> !magikBreakpointLines.contains(breakpoint.getLine()))
-            .collect(Collectors.toList());
+            .toList();
     for (final SourceBreakpoint sourceBreakpoint : addedBreakpoints) {
       this.addBreakpoint(source, sourceBreakpoint);
     }
 
     // Remove old breakpoints.
     final List<Integer> sourceBreakpointLines =
-        Arrays.stream(newSourceBreakpoints)
-            .map(SourceBreakpoint::getLine)
-            .collect(Collectors.toList());
+        Arrays.stream(newSourceBreakpoints).map(SourceBreakpoint::getLine).toList();
     final List<MagikBreakpoint> removedBreakpoints =
         breakpoints.stream()
             .filter(
                 magikBreakpoint -> !sourceBreakpointLines.contains(magikBreakpoint.getMethodLine()))
-            .collect(Collectors.toList());
+            .toList();
     for (final MagikBreakpoint magikBreakpoint : removedBreakpoints) {
       this.removeBreakpoint(source, magikBreakpoint);
     }
@@ -447,9 +445,8 @@ class BreakpointManager {
       LOGGER.trace("Created breakpoint: {}", magikBreakpoint);
     } catch (ExecutionException exception) {
       final Throwable cause = exception.getCause();
-      if (cause instanceof SlapErrorException) {
+      if (cause instanceof SlapErrorException slapErrorException) {
         // Do nothing, verified will become false, error will be shown to user.
-        final SlapErrorException slapErrorException = (SlapErrorException) cause;
         final String message = slapErrorException.getError().getErrorMessage().name();
         magikBreakpoint.setMessage(message);
 

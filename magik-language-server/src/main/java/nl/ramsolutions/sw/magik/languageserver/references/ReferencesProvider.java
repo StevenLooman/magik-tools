@@ -106,9 +106,7 @@ public class ReferencesProvider {
           ScopeEntry.Type.PARAMETER)) {
         final List<AstNode> usages = scopeEntry.getUsages();
         final URI uri = magikFile.getUri();
-        return usages.stream()
-            .map(usageNode -> new Location(uri, usageNode))
-            .collect(Collectors.toList());
+        return usages.stream().map(usageNode -> new Location(uri, usageNode)).toList();
       } else if (scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC)) {
         final String pakkage = packageHelper.getCurrentPackage();
         final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
@@ -149,7 +147,7 @@ public class ReferencesProvider {
         .filter(filterPredicate::test)
         .map(MethodUsage::getLocation)
         .map(Location::validLocation)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private List<Location> referencesToType(
@@ -184,7 +182,7 @@ public class ReferencesProvider {
         .filter(filterPredicate::test)
         .map(GlobalUsage::getLocation)
         .map(Location::validLocation)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private List<Location> referencesToCondition(
@@ -195,6 +193,6 @@ public class ReferencesProvider {
         .filter(conditionUsage -> conditionUsage.getConditionName().equals(conditionName))
         .map(ConditionUsage::getLocation)
         .map(Location::validLocation)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

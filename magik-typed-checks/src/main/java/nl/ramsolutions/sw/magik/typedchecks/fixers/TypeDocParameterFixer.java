@@ -39,7 +39,7 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
         .filter(MethodDefinition::isActualMethodDefinition)
         .filter(methodDef -> Range.fromTree(methodDef.getNode()).overlapsWith(range))
         .flatMap(methodDefinition -> this.extractParameterCodeActions(methodDefinition).stream())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private List<CodeAction> extractParameterCodeActions(final MethodDefinition methodDefinition) {
@@ -47,7 +47,7 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
     return Stream.concat(
             this.createAddParameterTextEdits(methodDefinition).stream(),
             this.createRemoveParameterTextEdits(methodDefinition).stream())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private List<CodeAction> createAddParameterTextEdits(final MethodDefinition methodDefinition) {
@@ -56,7 +56,7 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
         Stream.concat(
                 methodDefinition.getParameters().stream(),
                 Stream.ofNullable(methodDefinition.getAssignmentParameter()))
-            .collect(Collectors.toList());
+            .toList();
     final AstNode methodDefinitionNode = methodDefinition.getNode();
     Objects.requireNonNull(methodDefinitionNode);
     final TypeDocParser typeDocParser = new TypeDocParser(methodDefinitionNode);
@@ -85,7 +85,7 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
               final TextEdit edit = new TextEdit(range, typeDocLine);
               return new CodeAction(description, edit);
             })
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private List<CodeAction> createRemoveParameterTextEdits(final MethodDefinition methodDefinition) {
@@ -118,7 +118,7 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
               final TextEdit edit = new TextEdit(expandedRange, newText);
               return new CodeAction(description, edit);
             })
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private int getLastMethodDocLine(final MethodDefinition methodDefinition) {

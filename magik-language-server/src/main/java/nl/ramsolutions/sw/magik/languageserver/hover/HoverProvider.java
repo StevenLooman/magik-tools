@@ -310,16 +310,15 @@ public class HoverProvider {
       final MagikTypedFile magikFile, final AstNode node, final StringBuilder builder) {
     final AbstractType type = this.getNodeType(magikFile, node);
     final ProcedureInstance procInstance;
-    if (type instanceof AliasType) {
-      final AliasType aliasType = (AliasType) type;
+    if (type instanceof AliasType aliasType) {
       final AbstractType aliasedType = aliasType.getAliasedType();
-      if (aliasedType instanceof ProcedureInstance) {
-        procInstance = (ProcedureInstance) aliasedType;
+      if (aliasedType instanceof ProcedureInstance procedureInstance) {
+        procInstance = procedureInstance;
       } else {
         procInstance = null;
       }
-    } else if (type instanceof ProcedureInstance) {
-      procInstance = (ProcedureInstance) type;
+    } else if (type instanceof ProcedureInstance procedureInstance) {
+      procInstance = procedureInstance;
     } else {
       procInstance = null;
     }
@@ -451,8 +450,7 @@ public class HoverProvider {
     // Inheritance.
     if (!type.getParents().isEmpty()) {
       builder.append("## Inheritance\n");
-      if (type instanceof CombinedType) {
-        final CombinedType combinedType = (CombinedType) type;
+      if (type instanceof CombinedType combinedType) {
         combinedType.getTypes().stream()
             .sorted(Comparator.comparing(AbstractType::getTypeString))
             .forEach(cType -> this.buildInheritanceDoc(cType, builder, 0));

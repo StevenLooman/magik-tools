@@ -89,16 +89,15 @@ class ThreadManager {
 
         final Thread thread = Lsp4jConversion.toLsp4j(threadId, threadInfo);
         threads.add(thread);
-      } catch (ExecutionException exception) {
+      } catch (final ExecutionException exception) {
         LOGGER.trace(
             "Exception while getting thread, id: {}, exception: {}",
             threadId,
             exception.getMessage());
 
-        final Throwable cause = exception.getCause();
-        if (!(cause instanceof SlapErrorException
-            && ((SlapErrorException) cause).getError().getErrorMessage()
-                == ErrorMessage.UNKNOWN_ERROR)) {
+        // If not ErrorMessage.UNKNOWN_ERROR, then re-throw.
+        if (exception.getCause() instanceof SlapErrorException slapErrorException
+            && slapErrorException.getError().getErrorMessage() != ErrorMessage.UNKNOWN_ERROR) {
           throw exception;
         }
       }
@@ -183,10 +182,8 @@ class ThreadManager {
         return this.pathMapper.applyMapping(daPath);
       }
     } catch (final ExecutionException exception) {
-      final Throwable cause = exception.getCause();
-      if (cause instanceof SlapErrorException
-          && ((SlapErrorException) cause).getError().getErrorMessage()
-              != ErrorMessage.METHOD_NOT_FOUND) {
+      if (exception.getCause() instanceof SlapErrorException slapErrorException
+          && slapErrorException.getError().getErrorMessage() != ErrorMessage.METHOD_NOT_FOUND) {
         throw exception;
       }
     }
@@ -206,8 +203,7 @@ class ThreadManager {
     try {
       this.slapProtocol.suspendThread(threadId).get();
     } catch (ExecutionException exception) {
-      if (exception.getCause() instanceof SlapErrorException) {
-        final SlapErrorException exception2 = (SlapErrorException) exception.getCause();
+      if (exception.getCause() instanceof SlapErrorException exception2) {
         final ErrorResponse error = exception2.getError();
         final ErrorMessage errorMessage = error.getErrorMessage();
         if (errorMessage != ErrorMessage.THREAD_ALREADY_SUSPENDED) {

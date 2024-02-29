@@ -52,7 +52,7 @@ public class GenericHelper {
                   final TypeString newTypeStr = this.substituteGenerics(typeStr);
                   return new Parameter(location, name, modifier, newTypeStr);
                 })
-            .collect(Collectors.toList());
+            .toList();
 
     // Subsitute results.
     final ExpressionResultString callResult = method.getCallResult();
@@ -100,9 +100,7 @@ public class GenericHelper {
     final TypeString typeString = sourceType.getTypeString();
     final TypeString newTypeString = this.substituteGenerics(typeString);
     final MagikType.Sort sort =
-        sourceType instanceof MagikType
-            ? ((MagikType) sourceType).getSort()
-            : MagikType.Sort.UNDEFINED;
+        sourceType instanceof MagikType magikType ? magikType.getSort() : MagikType.Sort.UNDEFINED;
     final MagikType newType = new MagikType(this.typeKeeper, null, null, sort, newTypeString);
     this.type
         .getGenericDefinitions()
@@ -146,7 +144,7 @@ public class GenericHelper {
       final TypeString[] newTypeStrings =
           newTypeString.getCombinedTypes().stream()
               .map(this::substituteGenerics)
-              .collect(Collectors.toList())
+              .toList()
               .toArray(TypeString[]::new);
       return TypeString.ofCombination(newTypeString.getPakkage(), newTypeStrings);
     }
@@ -161,7 +159,7 @@ public class GenericHelper {
     final TypeString[] generics =
         typeString.getGenerics().stream()
             .map(this::substituteGenerics)
-            .collect(Collectors.toList())
+            .toList()
             .toArray(TypeString[]::new);
     return TypeString.ofIdentifier(
         newTypeString.getIdentifier(), newTypeString.getPakkage(), generics);

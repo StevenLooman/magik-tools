@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -176,6 +175,6 @@ public class MagikToolsProperties {
     }
 
     final String[] values = value.split(MagikToolsProperties.LIST_SEPARATOR);
-    return Arrays.stream(values).map(String::trim).collect(Collectors.toList());
+    return Arrays.stream(values).map(String::trim).toList();
   }
 }

@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.typedchecks;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.checks.TypeDocCheck;
@@ -64,6 +63,6 @@ public final class CheckList {
   public static List<Class<? extends MagikCheck>> getDisabledByDefaultChecks() {
     return getChecks().stream()
         .filter(checkClass -> checkClass.getAnnotation(DisabledByDefault.class) != null)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

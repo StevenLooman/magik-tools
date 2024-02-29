@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.languageserver.codeactions;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -47,7 +46,7 @@ public class CodeActionProvider {
       return Stream.concat(
               this.checksCodeActionProvider.provideCodeActions(magikFile, range).stream(),
               this.typedChecksCodeActionProvider.provideCodeActions(magikFile, range).stream())
-          .collect(Collectors.toList());
+          .toList();
     } catch (final IOException | ReflectiveOperationException exception) {
       LOGGER.error(exception.getMessage(), exception);
     }

@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionGrammar;
 import nl.ramsolutions.sw.definitions.parser.SwModuleDefParser;
 import nl.ramsolutions.sw.magik.Location;
@@ -168,7 +167,7 @@ public final class ModuleDefinitionScanner {
         requiresNode != null
             ? requiresNode.getDescendants(SwModuleDefinitionGrammar.MODULE_REF).stream()
                 .map(AstNode::getTokenValue)
-                .collect(Collectors.toList())
+                .toList()
             : Collections.emptyList();
 
     final URI uri = path.toUri();

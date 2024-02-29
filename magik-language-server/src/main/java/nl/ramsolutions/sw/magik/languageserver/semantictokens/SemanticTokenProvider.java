@@ -30,10 +30,10 @@ public class SemanticTokenProvider {
       new SemanticTokensLegend(
           Arrays.stream(SemanticToken.Type.values())
               .map(SemanticToken.Type::getSemanticTokenName)
-              .collect(Collectors.toUnmodifiableList()),
+              .toList(),
           Arrays.stream(SemanticToken.Modifier.values())
               .map(SemanticToken.Modifier::getSemanticModifierName)
-              .collect(Collectors.toUnmodifiableList()));
+              .toList());
 
   /**
    * Set server capabilities.
@@ -73,8 +73,8 @@ public class SemanticTokenProvider {
         new ArrayList<>((walkedSemanticTokens.size() - 1) * SIZE_PER_TOKEN);
     final SemanticToken startSemanticToken = this.createStartSemanticToken();
     Stream.concat(Stream.of(startSemanticToken), walkedSemanticTokens.stream())
-        .reduce(
-            (s1, s2) -> { // NOSONAR: Data is stored in `data` list.
+        .reduce( // NOSONAR: Data is stored in `data` list.
+            (s1, s2) -> {
               s2.dataToPrevious(s1).collect(Collectors.toCollection(() -> data));
               return s2;
             });

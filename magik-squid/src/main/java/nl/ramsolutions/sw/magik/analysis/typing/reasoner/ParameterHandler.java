@@ -54,8 +54,8 @@ class ParameterHandler extends LocalTypeReasonerHandler {
               TypeString.SW_SIMPLE_VECTOR.getPakkage(),
               TypeString.ofGenericDefinition("E", parameterTypeString));
       final AbstractType paramType =
-          simpleVectorType instanceof MagikType
-              ? new MagikType((MagikType) simpleVectorType, newTypeString)
+          simpleVectorType instanceof MagikType magikType
+              ? new MagikType(magikType, newTypeString)
               : simpleVectorType;
 
       result = new ExpressionResult(paramType);

@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -321,7 +320,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           LOGGER.debug("Implementations found: {}", locations.size());
 
           final List<Location> lsp4jLocations =
-              locations.stream().map(Lsp4jConversion::locationToLsp4j).collect(Collectors.toList());
+              locations.stream().map(Lsp4jConversion::locationToLsp4j).toList();
           return Either.forLeft(lsp4jLocations);
         });
   }
@@ -379,7 +378,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           LOGGER.debug("Definitions found: {}", locations.size());
 
           final List<Location> lsp4jLocations =
-              locations.stream().map(Lsp4jConversion::locationToLsp4j).collect(Collectors.toList());
+              locations.stream().map(Lsp4jConversion::locationToLsp4j).toList();
           return Either.forLeft(lsp4jLocations);
         });
   }
@@ -398,9 +397,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           final List<nl.ramsolutions.sw.magik.Location> locations =
               this.referencesProvider.provideReferences(magikFile, position);
           LOGGER.debug("References found: {}", locations.size());
-          return locations.stream()
-              .map(Lsp4jConversion::locationToLsp4j)
-              .collect(Collectors.toList());
+          return locations.stream().map(Lsp4jConversion::locationToLsp4j).toList();
         });
   }
 
@@ -507,9 +504,7 @@ public class MagikTextDocumentService implements TextDocumentService {
 
     final MagikTypedFile magikFile = this.openFiles.get(textDocument);
     final List<nl.ramsolutions.sw.magik.Position> positions =
-        params.getPositions().stream()
-            .map(Lsp4jConversion::positionFromLsp4j)
-            .collect(Collectors.toList());
+        params.getPositions().stream().map(Lsp4jConversion::positionFromLsp4j).toList();
     return CompletableFuture.supplyAsync(
         () -> this.selectionRangeProvider.provideSelectionRanges(magikFile, positions));
   }
@@ -594,7 +589,7 @@ public class MagikTextDocumentService implements TextDocumentService {
                       Lsp4jUtils.createCodeAction(
                           magikFile, codeAction.getTitle(), codeAction.getEdits()))
               .map(Either::<Command, CodeAction>forRight)
-              .collect(Collectors.toList());
+              .toList();
         });
   }
 }

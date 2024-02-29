@@ -420,7 +420,7 @@ public final class TypeString implements Comparable<TypeString> {
       final TypeString[] combinedSubstitutedArr =
           this.combinedTypes.stream()
               .map(typeString -> typeString.substituteType(from, to))
-              .collect(Collectors.toList())
+              .toList()
               .toArray(TypeString[]::new);
       return TypeString.ofCombination(this.currentPackage, combinedSubstitutedArr);
     }
@@ -438,7 +438,7 @@ public final class TypeString implements Comparable<TypeString> {
                     final TypeString subbedTypeStr = genTypeStr.substituteType(from, to);
                     return TypeString.ofGenericDefinition(identifier, subbedTypeStr);
                   })
-              .collect(Collectors.toList())
+              .toList()
               .toArray(TypeString[]::new);
       return TypeString.ofIdentifier(this.string, this.currentPackage, genericsSubstitutedArr);
     }
