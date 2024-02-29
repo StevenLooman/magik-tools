@@ -1,0 +1,15 @@
+{
+  "title": "Use of unsafe_evaluate()",
+  "type": "VULNERABILITY",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "vulnerability"
+  ],
+  "defaultSeverity": "Critical",
+  "ruleSpecification": "UnsafeEvaluateInvocation",
+  "sqKey": "unsafe-evaluate-invocation"
+}
