@@ -71,7 +71,7 @@ public class MagikChecksDiagnosticsProvider {
               final String diagnosticSource = String.format("mlint (%s)", checkKeyKebabCase);
               return new Diagnostic(range, message, severity, diagnosticSource);
             })
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private Collection<MagikCheck> createChecks(final MagikFile magikFile) throws IOException {

@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
 
@@ -130,10 +129,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
         node.getChildren(
             TypeStringGrammar.TYPE_GENERIC_DEFINITION, TypeStringGrammar.TYPE_GENERIC_REFERENCE);
     final TypeString[] genericsArr =
-        genericNodes.stream()
-            .map(this.mapping::get)
-            .collect(Collectors.toList())
-            .toArray(TypeString[]::new);
+        genericNodes.stream().map(this.mapping::get).toList().toArray(TypeString[]::new);
     final TypeString part = TypeString.ofIdentifier(str, this.currentPakkage, genericsArr);
 
     this.mapping.put(node, part);
@@ -151,10 +147,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
             TypeStringGrammar.TYPE_IDENTIFIER,
             TypeStringGrammar.SYNTAX_ERROR);
     final List<TypeString> childTypeStrings =
-        childNodes.stream()
-            .map(this.mapping::get)
-            .map(Objects::requireNonNull)
-            .collect(Collectors.toList());
+        childNodes.stream().map(this.mapping::get).map(Objects::requireNonNull).toList();
     if (childNodes.isEmpty()) {
       throw new IllegalStateException();
     }

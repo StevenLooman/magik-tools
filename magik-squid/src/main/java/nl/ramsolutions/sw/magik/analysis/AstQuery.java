@@ -123,7 +123,7 @@ public final class AstQuery {
                   final Range range = new Range(token);
                   return position.isBeforeRange(range);
                 })
-            .collect(Collectors.toList());
+            .toList();
     if (nodes.isEmpty()) {
       return null;
     }
@@ -148,7 +148,7 @@ public final class AstQuery {
                   final Range range = new Range(token);
                   return !position.isBeforeRange(range) && !position.isAfterRange(range);
                 })
-            .collect(Collectors.toList());
+            .toList();
     if (nodes.isEmpty()) {
       return null;
     }
@@ -195,7 +195,7 @@ public final class AstQuery {
                   final Range range = new Range(token);
                   return position.isAfterRange(range);
                 })
-            .collect(Collectors.toList());
+            .toList();
     if (nodes.isEmpty()) {
       return null;
     }
@@ -274,7 +274,7 @@ public final class AstQuery {
                           || position.getLine() == lastLine && position.getColumn() <= lastColumn);
                 })
             .filter(node -> nodeTypesList.contains(node.getType()))
-            .collect(Collectors.toList());
+            .toList();
     if (nodes.isEmpty()) {
       return null;
     }

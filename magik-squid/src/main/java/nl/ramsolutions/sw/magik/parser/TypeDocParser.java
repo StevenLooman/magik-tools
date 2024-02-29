@@ -90,7 +90,7 @@ public class TypeDocParser {
         .filter(Trivia::isComment)
         .map(Trivia::getToken)
         .filter(token -> token.getValue().startsWith("##"))
-        .collect(Collectors.toUnmodifiableList());
+        .toList();
   }
 
   @SuppressWarnings("java:S3011")
@@ -193,7 +193,7 @@ public class TypeDocParser {
     return node.getChildren(TypeDocGrammar.GENERIC).stream()
         .filter(this::noEmptyName)
         .map(this::getTypeString)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   /**
@@ -217,9 +217,7 @@ public class TypeDocParser {
    */
   public List<TypeString> getReturnTypes() {
     final AstNode node = this.getTypeDocNode();
-    return node.getChildren(TypeDocGrammar.RETURN).stream()
-        .map(this::getTypeString)
-        .collect(Collectors.toList());
+    return node.getChildren(TypeDocGrammar.RETURN).stream().map(this::getTypeString).toList();
   }
 
   /**
@@ -243,9 +241,7 @@ public class TypeDocParser {
    */
   public List<TypeString> getLoopTypes() {
     final AstNode node = this.getTypeDocNode();
-    return node.getChildren(TypeDocGrammar.LOOP).stream()
-        .map(this::getTypeString)
-        .collect(Collectors.toList());
+    return node.getChildren(TypeDocGrammar.LOOP).stream().map(this::getTypeString).toList();
   }
 
   /**

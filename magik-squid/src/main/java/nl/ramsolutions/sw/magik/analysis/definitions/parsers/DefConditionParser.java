@@ -4,7 +4,6 @@ import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
@@ -124,7 +123,7 @@ public class DefConditionParser {
                   return dataName;
                 })
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
 
     // Figure doc.
     final String doc = MagikCommentExtractor.extractDocComment(parentNode);

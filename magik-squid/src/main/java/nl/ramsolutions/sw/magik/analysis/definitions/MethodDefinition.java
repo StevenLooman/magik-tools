@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
@@ -226,9 +225,7 @@ public class MethodDefinition extends Definition {
         this.typeName,
         this.methodName,
         this.modifiers,
-        this.parameters.stream()
-            .map(ParameterDefinition::getWithoutNode)
-            .collect(Collectors.toList()),
+        this.parameters.stream().map(ParameterDefinition::getWithoutNode).toList(),
         this.assignmentParameter != null ? this.assignmentParameter.getWithoutNode() : null,
         this.returnTypes,
         this.loopTypes,

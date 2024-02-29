@@ -4,7 +4,6 @@ import com.sonar.sslr.api.AstNode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -78,6 +77,6 @@ public class ImplementationProvider {
         .flatMap(anyType -> anyType.getLocalMethods(methodName).stream())
         .map(Method::getLocation)
         .map(Location::validLocation)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

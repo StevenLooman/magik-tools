@@ -131,8 +131,7 @@ public class TypeStringResolver {
 
     // Resolve global first.
     TypeStringDefinition definition = definitions.iterator().next();
-    while (definition instanceof GlobalDefinition) {
-      final GlobalDefinition globalDefinition0 = (GlobalDefinition) definition;
+    while (definition instanceof GlobalDefinition globalDefinition0) {
       final TypeString aliasedTypeString = globalDefinition0.getAliasedTypeName();
       definitions = this.resolve(aliasedTypeString);
       if (definitions.isEmpty()) {
@@ -152,7 +151,7 @@ public class TypeStringResolver {
       definition = definitions.iterator().next();
     }
 
-    return definition instanceof ExemplarDefinition ? (ExemplarDefinition) definition : null;
+    return definition instanceof ExemplarDefinition exemplarDefinition ? exemplarDefinition : null;
   }
 
   /**
@@ -198,12 +197,12 @@ public class TypeStringResolver {
   }
 
   private Collection<TypeString> getParents(final Definition definition) {
-    if (definition instanceof ExemplarDefinition) {
-      return ((ExemplarDefinition) definition).getParents();
+    if (definition instanceof ExemplarDefinition exemplarDefinition) {
+      return exemplarDefinition.getParents();
     } else if (definition instanceof ProcedureDefinition) {
       return Set.of(TypeString.SW_PROCEDURE);
-    } else if (definition instanceof GlobalDefinition) {
-      final TypeString typeString = ((GlobalDefinition) definition).getAliasedTypeName();
+    } else if (definition instanceof GlobalDefinition globalDefinition) {
+      final TypeString typeString = globalDefinition.getAliasedTypeName();
       final Definition aliasedDefinition = this.resolve(typeString).stream().findAny().orElse(null);
       if (aliasedDefinition == null) {
         return Collections.emptySet();

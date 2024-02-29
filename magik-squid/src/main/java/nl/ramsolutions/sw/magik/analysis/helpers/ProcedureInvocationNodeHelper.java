@@ -4,7 +4,6 @@ import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /** Helper for PROCEDURE_INVOCATION nodes. */
@@ -65,6 +64,6 @@ public class ProcedureInvocationNodeHelper {
 
     return argumentsNode.getChildren(MagikGrammar.ARGUMENT).stream()
         .map(AstNode::getFirstChild)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

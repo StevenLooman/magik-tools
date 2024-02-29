@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
@@ -52,7 +51,7 @@ public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTyped
         argumentNodes.stream()
             .map(argumentNode -> argumentNode.getFirstChild(MagikGrammar.EXPRESSION))
             .map(reasonerState::getNodeType)
-            .collect(Collectors.toList());
+            .toList();
 
     // Get methods.
     final ITypeKeeper typeKeeper = this.getTypeKeeper();
@@ -82,7 +81,7 @@ public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTyped
 
                     return type;
                   })
-              .collect(Collectors.toList());
+              .toList();
 
       // Test parameter type against argument type.
       final int size = Math.min(parameterTypes.size(), argumentTypes.size());
@@ -92,10 +91,8 @@ public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTyped
                 final AbstractType parameterType = parameterTypes.get(index);
                 // Don't test undefined types.
                 if (parameterType == UndefinedType.INSTANCE
-                    || parameterType instanceof CombinedType
-                        && ((CombinedType) parameterType)
-                            .getTypes()
-                            .contains(UndefinedType.INSTANCE)) {
+                    || parameterType instanceof CombinedType combinedType
+                        && combinedType.getTypes().contains(UndefinedType.INSTANCE)) {
                   return;
                 }
 

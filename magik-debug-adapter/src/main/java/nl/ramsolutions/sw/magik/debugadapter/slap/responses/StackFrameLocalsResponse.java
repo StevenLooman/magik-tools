@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
@@ -182,9 +181,7 @@ public class StackFrameLocalsResponse implements ISlapResponse {
             break;
           }
 
-        case TYPE_BYTE:
-        case TYPE_SHORT:
-        case TYPE_INT:
+        case TYPE_BYTE, TYPE_SHORT, TYPE_INT:
           {
             int value = buffer.getInt(valueOffset);
             valueStr = Integer.toString(value);
@@ -241,7 +238,7 @@ public class StackFrameLocalsResponse implements ISlapResponse {
    * @param subResponses Locals.
    */
   public StackFrameLocalsResponse(final List<ISlapResponse> subResponses) {
-    this.locals = subResponses.stream().map(Local.class::cast).collect(Collectors.toList());
+    this.locals = subResponses.stream().map(Local.class::cast).toList();
   }
 
   public List<Local> getLocals() {

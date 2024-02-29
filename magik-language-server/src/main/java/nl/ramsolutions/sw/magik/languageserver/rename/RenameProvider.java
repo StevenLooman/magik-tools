@@ -4,7 +4,6 @@ import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
@@ -117,7 +116,7 @@ public class RenameProvider {
             .map(Range::new)
             .map(Lsp4jConversion::rangeToLsp4j)
             .map(range -> new TextEdit(range, newName))
-            .collect(Collectors.toList());
+            .toList();
     return new WorkspaceEdit(Map.of(uri, textEdits));
   }
 

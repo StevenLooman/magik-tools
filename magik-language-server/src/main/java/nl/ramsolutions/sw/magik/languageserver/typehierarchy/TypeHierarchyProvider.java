@@ -5,7 +5,6 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
@@ -135,7 +134,7 @@ public class TypeHierarchyProvider {
         .filter(def -> def.getParents().contains(searchedTypeString))
         .map(this::toTypeHierarchyItem)
         .sorted(byName)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   /**
@@ -160,7 +159,7 @@ public class TypeHierarchyProvider {
         .filter(Objects::nonNull)
         .map(this::toTypeHierarchyItem)
         .sorted(byName)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private TypeHierarchyItem toTypeHierarchyItem(final ExemplarDefinition definition) {

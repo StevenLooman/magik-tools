@@ -37,8 +37,8 @@ public class CombinedType extends AbstractType {
         types.stream()
             .flatMap(
                 type ->
-                    type instanceof CombinedType
-                        ? ((CombinedType) type).getTypes().stream()
+                    type instanceof CombinedType combinedType
+                        ? combinedType.getTypes().stream()
                         : Stream.of(type))
             .collect(Collectors.toUnmodifiableSet());
   }
@@ -78,8 +78,7 @@ public class CombinedType extends AbstractType {
         Stream.of(types)
             .flatMap(
                 type -> {
-                  if (type instanceof CombinedType) {
-                    final CombinedType combinedType = (CombinedType) type;
+                  if (type instanceof CombinedType combinedType) {
                     return combinedType.getTypes().stream();
                   }
 
@@ -95,9 +94,7 @@ public class CombinedType extends AbstractType {
 
   @Override
   public List<GenericDefinition> getGenericDefinitions() {
-    return this.getTypes().stream()
-        .flatMap(type -> type.getGenericDefinitions().stream())
-        .collect(Collectors.toUnmodifiableList());
+    return this.getTypes().stream().flatMap(type -> type.getGenericDefinitions().stream()).toList();
   }
 
   @Override
@@ -166,10 +163,7 @@ public class CombinedType extends AbstractType {
   @Override
   public TypeString getTypeString() {
     final TypeString[] typeStringsArr =
-        this.types.stream()
-            .map(AbstractType::getTypeString)
-            .collect(Collectors.toList())
-            .toArray(TypeString[]::new);
+        this.types.stream().map(AbstractType::getTypeString).toList().toArray(TypeString[]::new);
     return TypeString.ofCombination(TypeString.DEFAULT_PACKAGE, typeStringsArr);
   }
 

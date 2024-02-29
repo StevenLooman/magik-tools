@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.languageserver.selectionrange;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
@@ -36,7 +35,7 @@ public class SelectionRangeProvider {
     return topNode.getTokens().stream()
         .filter(token -> token.getType() != GenericTokenType.EOF)
         .map(this::createSelectionRange)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private SelectionRange createSelectionRange(final Token token) {

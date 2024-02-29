@@ -6,7 +6,6 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
 import org.junit.jupiter.api.Test;
@@ -24,8 +23,7 @@ class MagikCommentExtractorTest {
   void testComments() throws IOException {
     final String code = "" + "# first comment\n" + "print() # comment    \n" + "# final comment\n";
     final AstNode node = this.parseMagik(code);
-    final List<Token> tokens =
-        MagikCommentExtractor.extractComments(node).collect(Collectors.toList());
+    final List<Token> tokens = MagikCommentExtractor.extractComments(node).toList();
 
     assertThat(tokens).hasSize(3);
 
@@ -53,9 +51,9 @@ class MagikCommentExtractorTest {
     final AstNode node = this.parseMagik(code);
     final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final List<Token> docTokenComments =
-        MagikCommentExtractor.extractDocCommentTokens(methodDefNode).collect(Collectors.toList());
+        MagikCommentExtractor.extractDocCommentTokens(methodDefNode).toList();
     final List<String> docComments =
-        docTokenComments.stream().map(token -> token.getValue()).collect(Collectors.toList());
+        docTokenComments.stream().map(token -> token.getValue()).toList();
 
     assertThat(docComments).containsExactly("## Line 1", "## Line 2");
   }
@@ -73,9 +71,9 @@ class MagikCommentExtractorTest {
     final AstNode node = this.parseMagik(code);
     final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final List<Token> docTokenComments =
-        MagikCommentExtractor.extractDocCommentTokens(methodDefNode).collect(Collectors.toList());
+        MagikCommentExtractor.extractDocCommentTokens(methodDefNode).toList();
     final List<String> docComments =
-        docTokenComments.stream().map(token -> token.getValue()).collect(Collectors.toList());
+        docTokenComments.stream().map(token -> token.getValue()).toList();
 
     assertThat(docComments).containsExactly("## Line 1", "## Line 2");
   }
@@ -95,9 +93,9 @@ class MagikCommentExtractorTest {
     final AstNode node = this.parseMagik(code);
     final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final List<Token> docTokenComments =
-        MagikCommentExtractor.extractDocCommentTokens(methodDefNode).collect(Collectors.toList());
+        MagikCommentExtractor.extractDocCommentTokens(methodDefNode).toList();
     final List<String> docComments =
-        docTokenComments.stream().map(token -> token.getValue()).collect(Collectors.toList());
+        docTokenComments.stream().map(token -> token.getValue()).toList();
 
     assertThat(docComments).containsExactly("## Line 1", "## Line 2", "## Line 3", "## Line 4");
   }
@@ -118,9 +116,9 @@ class MagikCommentExtractorTest {
     final AstNode node = this.parseMagik(code);
     final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final List<Token> docTokenComments =
-        MagikCommentExtractor.extractDocCommentTokens(methodDefNode).collect(Collectors.toList());
+        MagikCommentExtractor.extractDocCommentTokens(methodDefNode).toList();
     final List<String> docComments =
-        docTokenComments.stream().map(token -> token.getValue()).collect(Collectors.toList());
+        docTokenComments.stream().map(token -> token.getValue()).toList();
 
     assertThat(docComments).containsExactly("## Line 1", "## Line 2", "## Line 3", "## Line 4");
   }
@@ -137,9 +135,9 @@ class MagikCommentExtractorTest {
     final AstNode node = this.parseMagik(code);
     final AstNode statementNode = node.getFirstChild(MagikGrammar.STATEMENT);
     final List<Token> docTokenComments =
-        MagikCommentExtractor.extractDocCommentTokens(statementNode).collect(Collectors.toList());
+        MagikCommentExtractor.extractDocCommentTokens(statementNode).toList();
     final List<String> docComments =
-        docTokenComments.stream().map(token -> token.getValue()).collect(Collectors.toList());
+        docTokenComments.stream().map(token -> token.getValue()).toList();
 
     assertThat(docComments).containsExactly("## Line 1", "## Line 2");
   }

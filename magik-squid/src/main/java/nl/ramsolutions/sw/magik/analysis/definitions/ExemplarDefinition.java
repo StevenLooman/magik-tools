@@ -6,7 +6,6 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
@@ -107,7 +106,7 @@ public class ExemplarDefinition extends TypeStringDefinition {
         null,
         this.sort,
         this.typeName,
-        this.slots.stream().map(SlotDefinition::getWithoutNode).collect(Collectors.toList()),
+        this.slots.stream().map(SlotDefinition::getWithoutNode).toList(),
         this.parents);
   }
 

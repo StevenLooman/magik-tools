@@ -5,7 +5,6 @@ import com.sonar.sslr.api.Token;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -44,7 +43,7 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
         .flatMap(
             methodDefinition ->
                 this.extractReturnTypeCodeActions(magikFile, methodDefinition).stream())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private List<CodeAction> extractReturnTypeCodeActions(
@@ -96,7 +95,7 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
               return null;
             })
         .filter(Objects::nonNull)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private CodeAction createUpdateReturnCodeAction(

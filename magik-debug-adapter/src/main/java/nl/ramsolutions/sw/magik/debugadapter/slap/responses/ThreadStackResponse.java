@@ -4,7 +4,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
@@ -124,8 +123,7 @@ public class ThreadStackResponse implements ISlapResponse {
    * @param subResponses Stack elements.
    */
   public ThreadStackResponse(final List<ISlapResponse> subResponses) {
-    this.stackFrames =
-        subResponses.stream().map(StackElement.class::cast).collect(Collectors.toList());
+    this.stackFrames = subResponses.stream().map(StackElement.class::cast).toList();
   }
 
   public List<StackElement> getStackFrames() {

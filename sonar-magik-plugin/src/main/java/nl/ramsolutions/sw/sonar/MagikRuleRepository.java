@@ -37,6 +37,6 @@ public class MagikRuleRepository implements RulesDefinition {
   private static List<Class<?>> getCheckClasses() {
     return CheckList.getChecks().stream()
         .map(clazz -> (Class<?>) clazz)
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList()); // NOSONAR: Keep VSCode/Java plugin sane.
   }
 }

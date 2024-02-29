@@ -114,44 +114,37 @@ public class MagikIndexer {
     final Definition definition = rawDefinition.getWithoutNode();
 
     final Path path = Path.of(magikFile.getUri());
-    if (definition instanceof PackageDefinition) {
-      final PackageDefinition packageDefinition = (PackageDefinition) definition;
+    if (definition instanceof PackageDefinition packageDefinition) {
       this.definitionKeeper.add(packageDefinition);
 
       final Set<PackageDefinition> defs =
           this.indexedPackages.computeIfAbsent(path, k -> new HashSet<>());
       defs.add(packageDefinition);
-    } else if (definition instanceof ExemplarDefinition) {
-      final ExemplarDefinition exemplarDefinition = (ExemplarDefinition) definition;
+    } else if (definition instanceof ExemplarDefinition exemplarDefinition) {
       this.definitionKeeper.add(exemplarDefinition);
 
       final Set<ExemplarDefinition> defs =
           this.indexedTypes.computeIfAbsent(path, k -> new HashSet<>());
       defs.add(exemplarDefinition);
-    } else if (definition instanceof MethodDefinition) {
-      final MethodDefinition methodDefinition = (MethodDefinition) definition;
+    } else if (definition instanceof MethodDefinition methodDefinition) {
       this.definitionKeeper.add(methodDefinition);
 
       final Set<MethodDefinition> defs =
           this.indexedMethods.computeIfAbsent(path, k -> new HashSet<>());
       defs.add(methodDefinition);
-    } else if (definition instanceof GlobalDefinition) {
-      final GlobalDefinition globalDefinition = (GlobalDefinition) definition;
+    } else if (definition instanceof GlobalDefinition globalDefinition) {
       this.definitionKeeper.add(globalDefinition);
 
       final Set<GlobalDefinition> defs =
           this.indexedGlobals.computeIfAbsent(path, k -> new HashSet<>());
       defs.add(globalDefinition);
-    } else if (definition instanceof BinaryOperatorDefinition) {
-      final BinaryOperatorDefinition binaryOperatorDefinition =
-          (BinaryOperatorDefinition) definition;
+    } else if (definition instanceof BinaryOperatorDefinition binaryOperatorDefinition) {
       this.definitionKeeper.add(binaryOperatorDefinition);
 
       final Set<BinaryOperatorDefinition> defs =
           this.indexedBinaryOperators.computeIfAbsent(path, k -> new HashSet<>());
       defs.add(binaryOperatorDefinition);
-    } else if (definition instanceof ConditionDefinition) {
-      final ConditionDefinition conditionDefinition = (ConditionDefinition) definition;
+    } else if (definition instanceof ConditionDefinition conditionDefinition) {
       this.definitionKeeper.add(conditionDefinition);
 
       final Set<ConditionDefinition> defs =

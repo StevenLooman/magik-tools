@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.magik.languageserver.inlayhint;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
@@ -38,6 +37,6 @@ public class InlayHintProvider {
             methodInvocationSupplier.getMethodInvocationInlayHints(magikFile, range),
             atomSupplier.getAtomInlayHints(magikFile, range))
         // TODO: Sort on line/column?
-        .collect(Collectors.toList());
+        .toList();
   }
 }

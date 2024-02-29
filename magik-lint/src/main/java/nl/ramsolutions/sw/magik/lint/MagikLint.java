@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.Location;
@@ -226,7 +225,7 @@ public class MagikLint {
             this.runCheckOnFile(magikFile, holder).stream()
                 .filter(
                     magikIssue -> !MagikIssueDisabledChecker.issueDisabled(magikFile, magikIssue))
-                .collect(Collectors.toList());
+                .toList();
         magikIssues.addAll(issues);
       } catch (final ReflectiveOperationException exception) {
         LOGGER.error(exception.getMessage(), exception);

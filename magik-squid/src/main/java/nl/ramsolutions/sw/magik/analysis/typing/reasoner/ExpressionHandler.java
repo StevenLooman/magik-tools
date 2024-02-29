@@ -86,13 +86,11 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
       final AbstractType rightType = rightResult.get(0, unsetType);
       final TypeString rightRef = rightType.getTypeString();
       switch (operatorStr.toLowerCase()) {
-        case "_is":
-        case "_isnt":
+        case "_is", "_isnt":
           result = new ExpressionResult(falseType);
           break;
 
-        case "_andif":
-        case "_orif":
+        case "_andif", "_orif":
           // Returns RHS if LHS is true.
           final CombinedType combinedType = new CombinedType(falseType, rightType);
           result = new ExpressionResult(combinedType);
@@ -142,13 +140,11 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     final TypeString rightRef = rightType.getTypeString();
     final ExpressionResult result;
     switch (operatorStr.toLowerCase()) {
-      case "_is":
-      case "_isnt":
+      case "_is", "_isnt":
         result = new ExpressionResult(falseType);
         break;
 
-      case "_andif":
-      case "_orif":
+      case "_andif", "_orif":
         // Returns RHS if LHS is true.
         final CombinedType combinedType = new CombinedType(falseType, rightType);
         result = new ExpressionResult(combinedType);

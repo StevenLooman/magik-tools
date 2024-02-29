@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.BreakpointEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.StepCompletedEvent;
@@ -302,7 +301,7 @@ class VariableManager {
 
     // Sort variables.
     final Comparator<MagikVariable> byName = Comparator.comparing(MagikVariable::getName);
-    return magikVariables.stream().sorted(byName).collect(Collectors.toList());
+    return magikVariables.stream().sorted(byName).toList();
   }
 
   // endregion

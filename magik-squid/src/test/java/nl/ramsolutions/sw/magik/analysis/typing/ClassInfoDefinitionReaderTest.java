@@ -15,7 +15,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import org.junit.jupiter.api.Test;
 
-/** Tests for ClassInfoDefinitionReader. */
+/** Tests for {@link ClassInfoDefinitionReader}. */
 class ClassInfoDefinitionReaderTest {
 
   @Test
