@@ -113,8 +113,8 @@ public class DefSlottedExemplarParser extends BaseDefParser {
     // Figure slots.
     final List<SlotDefinition> slots = new ArrayList<>();
     final List<MethodDefinition> methodDefinitions = new ArrayList<>();
-    for (final AstNode slotDefNode :
-        argument1Node.getChildren(MagikGrammar.EXPRESSION)) { // NOSONAR
+    for (final AstNode slotDefNode : // NOSONAR
+        argument1Node.getChildren(MagikGrammar.EXPRESSION)) {
       final SimpleVectorNodeHelper simpleVectorHelper =
           SimpleVectorNodeHelper.fromExpressionSafe(slotDefNode);
       if (simpleVectorHelper == null) {

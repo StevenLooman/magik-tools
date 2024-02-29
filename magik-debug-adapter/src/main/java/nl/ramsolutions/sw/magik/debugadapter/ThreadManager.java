@@ -226,6 +226,7 @@ class ThreadManager {
    * @throws InterruptedException -
    * @throws ExecutionException -
    */
+  @SuppressWarnings("java:S100")
   void continue_(final long threadId)
       throws IOException, InterruptedException, ExecutionException { // NOSONAR
     this.slapProtocol.resumeThread(threadId).get();
