@@ -14,86 +14,88 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 
-/**
- * {@code def_enumeration_from}/{@code def_enumeration} parser.
- */
+/** {@code def_enumeration_from}/{@code def_enumeration} parser. */
 public class DefEnumerationParser extends BaseDefParser {
 
-    private static final String DEF_ENUMERATION_FROM = "def_enumeration_from";
-    private static final String DEF_ENUMERATION = "def_enumeration";
-    private static final String SW_DEF_ENUMERATION_FROM = "sw:def_enumeration_from";
-    private static final String SW_DEF_ENUMERATION = "sw:def_enumeration";
-    private static final List<TypeString> ENUM_PARENTS = List.of(
-        TypeString.SW_ENUMERATION_VALUE);
+  private static final String DEF_ENUMERATION_FROM = "def_enumeration_from";
+  private static final String DEF_ENUMERATION = "def_enumeration";
+  private static final String SW_DEF_ENUMERATION_FROM = "sw:def_enumeration_from";
+  private static final String SW_DEF_ENUMERATION = "sw:def_enumeration";
+  private static final List<TypeString> ENUM_PARENTS = List.of(TypeString.SW_ENUMERATION_VALUE);
 
-    /**
-     * Constructor.
-     * @param node {@code def_enumeration_from}/{@code def_enumeration} node.
-     */
-    public DefEnumerationParser(final AstNode node) {
-        super(node);
+  /**
+   * Constructor.
+   *
+   * @param node {@code def_enumeration_from}/{@code def_enumeration} node.
+   */
+  public DefEnumerationParser(final AstNode node) {
+    super(node);
+  }
+
+  /**
+   * Test if node is a {@code def_enumeration_from}/{@code def_enumeration}.
+   *
+   * @param node Node to test
+   * @return True if node is a {@code def_enumeration_from}/{@code def_enumeration}, false
+   *     otherwise.
+   */
+  public static boolean isDefEnumeration(final AstNode node) {
+    if (!node.is(MagikGrammar.PROCEDURE_INVOCATION)) {
+      return false;
     }
 
-    /**
-     * Test if node is a {@code def_enumeration_from}/{@code def_enumeration}.
-     * @param node Node to test
-     * @return True if node is a {@code def_enumeration_from}/{@code def_enumeration}, false otherwise.
-     */
-    public static boolean isDefEnumeration(final AstNode node) {
-        if (!node.is(MagikGrammar.PROCEDURE_INVOCATION)) {
-            return false;
-        }
-
-        final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
-        if (!helper.isProcedureInvocationOf(DEF_ENUMERATION)
-            && !helper.isProcedureInvocationOf(DEF_ENUMERATION_FROM)
-            && !helper.isProcedureInvocationOf(SW_DEF_ENUMERATION)
-            && !helper.isProcedureInvocationOf(SW_DEF_ENUMERATION_FROM)) {
-            return false;
-        }
-
-        // Some sanity.
-        final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-        final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
-        final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
-        return argument0Node != null;
+    final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
+    if (!helper.isProcedureInvocationOf(DEF_ENUMERATION)
+        && !helper.isProcedureInvocationOf(DEF_ENUMERATION_FROM)
+        && !helper.isProcedureInvocationOf(SW_DEF_ENUMERATION)
+        && !helper.isProcedureInvocationOf(SW_DEF_ENUMERATION_FROM)) {
+      return false;
     }
 
-    /**
-     * Parse defitions.
-     * @return List of parsed definitions.
-     */
-    @Override
-    public List<Definition> parseDefinitions() {
-        final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
-        final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
-        final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
-        if (argument0Node == null) {
-            throw new IllegalStateException();
-        }
+    // Some sanity.
+    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+    return argument0Node != null;
+  }
 
-        // Figure location.
-        final URI uri = this.node.getToken().getURI();
-        final Location location = new Location(uri, this.node);
+  /**
+   * Parse defitions.
+   *
+   * @return List of parsed definitions.
+   */
+  @Override
+  public List<Definition> parseDefinitions() {
+    final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
+    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+    if (argument0Node == null) {
+      throw new IllegalStateException();
+    }
 
-        // Figure module name.
-        final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
+    // Figure location.
+    final URI uri = this.node.getToken().getURI();
+    final Location location = new Location(uri, this.node);
 
-        // Figure statement node.
-        final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
+    // Figure module name.
+    final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
 
-        // Figure pakkage.
-        final String pakkage = this.getCurrentPakkage();
+    // Figure statement node.
+    final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
 
-        // Figure name.
-        final String identifier = argument0Node.getTokenValue().substring(1);
-        final TypeString name = TypeString.ofIdentifier(identifier, pakkage);
+    // Figure pakkage.
+    final String pakkage = this.getCurrentPakkage();
 
-        // Figure doc.
-        final AstNode parentNode = this.node.getParent();
-        final String doc  = MagikCommentExtractor.extractDocComment(parentNode);
+    // Figure name.
+    final String identifier = argument0Node.getTokenValue().substring(1);
+    final TypeString name = TypeString.ofIdentifier(identifier, pakkage);
 
-        final ExemplarDefinition definition = new ExemplarDefinition(
+    // Figure doc.
+    final AstNode parentNode = this.node.getParent();
+    final String doc = MagikCommentExtractor.extractDocComment(parentNode);
+
+    final ExemplarDefinition definition =
+        new ExemplarDefinition(
             location,
             moduleName,
             doc,
@@ -102,7 +104,6 @@ public class DefEnumerationParser extends BaseDefParser {
             name,
             Collections.emptyList(),
             DefEnumerationParser.ENUM_PARENTS);
-        return List.of(definition);
-    }
-
+    return List.of(definition);
+  }
 }

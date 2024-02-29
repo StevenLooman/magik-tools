@@ -1,37 +1,37 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-/**
- * Test VariableDeclarationUsageDistanceCheck.
- */
+/** Test VariableDeclarationUsageDistanceCheck. */
 @SuppressWarnings("checkstyle:MagicNumber")
 class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
 
-    @Test
-    void testDistanceOk() {
-        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
-        check.maxDistance = 5;
-        final String code = ""
+  @Test
+  void testDistanceOk() {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 5;
+    final String code =
+        ""
             + "_method object.m\n"
             + "    _local a << 1\n"
             + "    do_something()\n"
             + "    do_something()\n"
             + "    write(a)\n"
             + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 
-    @Test
-    void testDistanceNotOk() {
-        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
-        check.maxDistance = 2;
-        final String code = ""
+  @Test
+  void testDistanceNotOk() {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 2;
+    final String code =
+        ""
             + "_method object.m\n"
             + "    _local a << 1\n"
             + "    do_something()\n"
@@ -39,15 +39,16 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
             + "    write(a)\n"
             + "    write(a)\n"
             + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).hasSize(1);
-    }
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
 
-    @Test
-    void testUpperScopeDistanceOk() {
-        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
-        check.maxDistance = 5;
-        final String code = ""
+  @Test
+  void testUpperScopeDistanceOk() {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 5;
+    final String code =
+        ""
             + "_method object.m\n"
             + "    _local a << 1\n"
             + "    do_something()\n"
@@ -57,15 +58,16 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
             + "        write(a)\n"
             + "    _endif\n"
             + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 
-    @Test
-    void testUpperScopeDistanceNotOk() {
-        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
-        check.maxDistance = 2;
-        final String code = ""
+  @Test
+  void testUpperScopeDistanceNotOk() {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 2;
+    final String code =
+        ""
             + "_method object.m\n"
             + "    _local a << 1\n"
             + "    do_something()\n"
@@ -75,15 +77,16 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
             + "        write(a)\n"
             + "    _endif\n"
             + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).hasSize(1);
-    }
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
 
-    @Test
-    void testVariableUsedInChildScope() {
-        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
-        check.maxDistance = 2;
-        final String code = ""
+  @Test
+  void testVariableUsedInChildScope() {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 2;
+    final String code =
+        ""
             + "_method object.m\n"
             + "    a << 1\n"
             + "    _if x\n"
@@ -96,15 +99,16 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
             + "    _endif\n"
             + "    >> a\n"
             + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 
-    @Test
-    void testDifferentScopesNotChecked() {
-        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
-        check.maxDistance = 2;
-        final String code = ""
+  @Test
+  void testDifferentScopesNotChecked() {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 2;
+    final String code =
+        ""
             + "_method object.m\n"
             + "    _if _true\n"
             + "    _then\n"
@@ -117,30 +121,32 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
             + "        write(a)\n"
             + "    _endif\n"
             + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 
-    @Test
-    void testDistanceOkIndexerMethod() {
-        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
-        check.maxDistance = 2;
-        final String code = ""
+  @Test
+  void testDistanceOkIndexerMethod() {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 2;
+    final String code =
+        ""
             + "_method object.m\n"
             + "    _local a << 1\n"
             + "    do_something()\n"
             + "    a[:abc] << :def\n"
             + "    a.do()\n"
             + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 
-    @Test
-    void testDistanceNotOkMethod() {
-        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
-        check.maxDistance = 2;
-        final String code = ""
+  @Test
+  void testDistanceNotOkMethod() {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 2;
+    final String code =
+        ""
             + "_method object.m\n"
             + "    _local a << 1\n"
             + "    do_something()\n"
@@ -148,16 +154,17 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
             + "    do_something()\n"
             + "    a.method1()\n"
             + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).hasSize(1);
-    }
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
 
-    @Test
-    void testIgnoreConstants() {
-        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
-        check.maxDistance = 2;
-        check.ignoreConstants = true;  // Defaults to try, but to be explicit.
-        final String code = ""
+  @Test
+  void testIgnoreConstants() {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 2;
+    check.ignoreConstants = true; // Defaults to try, but to be explicit.
+    final String code =
+        ""
             + "_method object.m\n"
             + "    _constant a << 1\n"
             + "    do_something()\n"
@@ -165,16 +172,17 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
             + "    do_something()\n"
             + "    a.method1()\n"
             + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 
-    @Test
-    void testNotIgnoreConstants() {
-        final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
-        check.maxDistance = 2;
-        check.ignoreConstants = false;
-        final String code = ""
+  @Test
+  void testNotIgnoreConstants() {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 2;
+    check.ignoreConstants = false;
+    final String code =
+        ""
             + "_method object.m\n"
             + "    _constant a << 1\n"
             + "    do_something()\n"
@@ -182,8 +190,7 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
             + "    do_something()\n"
             + "    a.method1()\n"
             + "_endmethod";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).hasSize(1);
-    }
-
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
 }

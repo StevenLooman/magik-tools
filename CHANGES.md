@@ -1,7 +1,9 @@
 # Changes
 
-0.9.1 (unreleased)
+0.10.0 (unreleased)
 
+- Move to Java 17.
+- Add base functionality to apply fixes from magik-lint.
 - Add UnsafeEvaluateInvocationCheck to test for unsafe `unsafe_evaluate()` method calls.
 - Add SwChar16VectorEvaluateInvocationCheck to test for `sw:char16_vector.evaluate()` method calls.
 

@@ -24,176 +24,183 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * MUnit {@code TestItem} provider.
- */
+/** MUnit {@code TestItem} provider. */
 public class MUnitTestItemProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MUnitTestItemProvider.class);
-    private static final TypeString MUNIT_TEST_CASE_EXEMPLAR_NAME = TypeString.ofIdentifier("test_case", "sw");
-    private static final String MUNIT_TEST_METHOD_PREFIX = "test";
+  private static final Logger LOGGER = LoggerFactory.getLogger(MUnitTestItemProvider.class);
+  private static final TypeString MUNIT_TEST_CASE_EXEMPLAR_NAME =
+      TypeString.ofIdentifier("test_case", "sw");
+  private static final String MUNIT_TEST_METHOD_PREFIX = "test";
 
-    private final IDefinitionKeeper definitionKeeper;
+  private final IDefinitionKeeper definitionKeeper;
 
-    public MUnitTestItemProvider(final IDefinitionKeeper definitionKeeper) {
-        this.definitionKeeper = definitionKeeper;
-    }
+  public MUnitTestItemProvider(final IDefinitionKeeper definitionKeeper) {
+    this.definitionKeeper = definitionKeeper;
+  }
 
-    /**
-     * Set server capabilities.
-     * @param capabilities Server capabilities.
-     */
-    public void setCapabilities(final ServerCapabilities capabilities) {
-        // No capabilities.
-    }
+  /**
+   * Set server capabilities.
+   *
+   * @param capabilities Server capabilities.
+   */
+  public void setCapabilities(final ServerCapabilities capabilities) {
+    // No capabilities.
+  }
 
-    /**
-     * Get {@Link TestItem}s.
-     *
-     * <p>
-     * A hierarchy per product is provided:
-     * - product
-     * - module
-     * - test exemplar
-     * - test method
-     * </p>
-     * @return Test items.
-     */
-    public Collection<MUnitTestItem> getTestItems() {
-        LOGGER.debug("Getting test items");
+  /**
+   * Get {@Link TestItem}s.
+   *
+   * <p>A hierarchy per product is provided: - product - module - test exemplar - test method
+   *
+   * @return Test items.
+   */
+  public Collection<MUnitTestItem> getTestItems() {
+    LOGGER.debug("Getting test items");
 
-        final Map<ProductDefinition, MUnitTestItem> swProductTestItems = new HashMap<>();
+    final Map<ProductDefinition, MUnitTestItem> swProductTestItems = new HashMap<>();
 
-        // Get all test methods of test cases, group by product,module,type
-        this.getTestMethods().forEach(definition -> {
-            try {
+    // Get all test methods of test cases, group by product,module,type
+    this.getTestMethods()
+        .forEach(
+            definition -> {
+              try {
                 this.createTestItems(definition, swProductTestItems);
-            } catch (IOException exception) {
+              } catch (IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
-            }
-        });
+              }
+            });
 
-        return swProductTestItems.values();
+    return swProductTestItems.values();
+  }
+
+  private void createTestItems(
+      final MethodDefinition methodDefinition,
+      final Map<ProductDefinition, MUnitTestItem> swProductTestItems)
+      throws IOException {
+    final Location location = methodDefinition.getLocation();
+    if (location == null) {
+      LOGGER.warn("Test method without location: {}", methodDefinition);
+      return;
     }
 
-    private void createTestItems(
-            final MethodDefinition methodDefinition,
-            final Map<ProductDefinition, MUnitTestItem> swProductTestItems)
-            throws IOException {
-        final Location location = methodDefinition.getLocation();
-        if (location == null) {
-            LOGGER.warn("Test method without location: {}", methodDefinition);
-            return;
-        }
+    final TypeString ownerRef = methodDefinition.getTypeName();
+    final ExemplarDefinition exemplar =
+        this.definitionKeeper.getExemplarDefinitions(ownerRef).stream().findAny().orElse(null);
+    if (exemplar == null) {
+      LOGGER.warn("Test method without exemplar: {}", methodDefinition);
+      return;
+    }
 
-        final TypeString ownerRef = methodDefinition.getTypeName();
-        final ExemplarDefinition exemplar = this.definitionKeeper.getExemplarDefinitions(ownerRef).stream()
+    final URI uri = location.getUri();
+    final Path path = Path.of(uri);
+
+    // Get or create product TestItem.
+    final ProductDefinition swProduct = this.getSwProduct(path);
+    final MUnitTestItem swProductTestItem =
+        swProductTestItems.computeIfAbsent(swProduct, this::createTestItem);
+
+    // Get or create module TestItem.
+    final ModuleDefinition swModule = this.getSwModule(path);
+    final MUnitTestItem newSwModuleTestItem = this.createTestItem(swModule);
+    final MUnitTestItem swModuleTestItem = swProductTestItem.addChild(newSwModuleTestItem);
+
+    // Get or create exemplar TestItem.
+    final MUnitTestItem newExemplarTestItem = this.createTestItem(exemplar);
+    final MUnitTestItem typeTestItem = swModuleTestItem.addChild(newExemplarTestItem);
+
+    // Create method TestItem.
+    final MUnitTestItem methodTestItem = this.createTestItem(methodDefinition);
+    typeTestItem.addChild(methodTestItem);
+  }
+
+  private Stream<ExemplarDefinition> getTestCaseExemplars() {
+    final ExemplarDefinition testCaseDefinition =
+        this.definitionKeeper.getExemplarDefinitions(MUNIT_TEST_CASE_EXEMPLAR_NAME).stream()
             .findAny()
             .orElse(null);
-        if (exemplar == null) {
-            LOGGER.warn("Test method without exemplar: {}", methodDefinition);
-            return;
-        }
-
-        final URI uri = location.getUri();
-        final Path path = Path.of(uri);
-
-        // Get or create product TestItem.
-        final ProductDefinition swProduct = this.getSwProduct(path);
-        final MUnitTestItem swProductTestItem = swProductTestItems.computeIfAbsent(swProduct, this::createTestItem);
-
-        // Get or create module TestItem.
-        final ModuleDefinition swModule = this.getSwModule(path);
-        final MUnitTestItem newSwModuleTestItem = this.createTestItem(swModule);
-        final MUnitTestItem swModuleTestItem = swProductTestItem.addChild(newSwModuleTestItem);
-
-        // Get or create exemplar TestItem.
-        final MUnitTestItem newExemplarTestItem = this.createTestItem(exemplar);
-        final MUnitTestItem typeTestItem = swModuleTestItem.addChild(newExemplarTestItem);
-
-        // Create method TestItem.
-        final MUnitTestItem methodTestItem = this.createTestItem(methodDefinition);
-        typeTestItem.addChild(methodTestItem);
+    if (testCaseDefinition == null) {
+      return Stream.of();
     }
 
-    private Stream<ExemplarDefinition> getTestCaseExemplars() {
-        final ExemplarDefinition testCaseDefinition =
-            this.definitionKeeper.getExemplarDefinitions(MUNIT_TEST_CASE_EXEMPLAR_NAME).stream()
-            .findAny()
-            .orElse(null);
-        if (testCaseDefinition == null) {
-            return Stream.of();
-        }
+    final TypeStringResolver resolver = new TypeStringResolver(this.definitionKeeper);
+    return this.definitionKeeper.getExemplarDefinitions().stream()
+        .filter(definition -> resolver.isKindOf(definition, testCaseDefinition));
+  }
 
-        final TypeStringResolver resolver = new TypeStringResolver(this.definitionKeeper);
-        return this.definitionKeeper.getExemplarDefinitions().stream()
-            .filter(definition -> resolver.isKindOf(definition, testCaseDefinition));
+  private Stream<MethodDefinition> getTestMethods() {
+    return this.getTestCaseExemplars()
+        .flatMap(
+            testExemplarDefinition ->
+                this.definitionKeeper
+                    .getMethodDefinitions(testExemplarDefinition.getTypeString())
+                    .stream())
+        .filter(
+            methodDefinition ->
+                methodDefinition
+                    .getMethodName()
+                    .toLowerCase()
+                    .startsWith(MUNIT_TEST_METHOD_PREFIX));
+  }
+
+  private ProductDefinition getSwProduct(final Path path) throws IOException {
+    final Path productDefPath = path.resolve(ProductDefinitionScanner.SW_PRODUCT_DEF);
+    if (!Files.exists(productDefPath)) {
+      final Path parentPath = path.getParent();
+      if (parentPath == null) {
+        return new ProductDefinition(null, "<no_product>", "", null);
+      }
+
+      return this.getSwProduct(parentPath);
     }
 
-    private Stream<MethodDefinition> getTestMethods() {
-        return this.getTestCaseExemplars()
-            .flatMap(testExemplarDefinition ->
-                this.definitionKeeper.getMethodDefinitions(testExemplarDefinition.getTypeString()).stream())
-            .filter(methodDefinition ->
-                methodDefinition.getMethodName().toLowerCase().startsWith(MUNIT_TEST_METHOD_PREFIX));
+    // Construct SwProduct.
+    return ProductDefinitionScanner.readProductDefinition(productDefPath);
+  }
+
+  private ModuleDefinition getSwModule(final Path path) throws IOException {
+    final Path moduleDefPath = path.resolve(ModuleDefinitionScanner.SW_MODULE_DEF);
+    if (!Files.exists(moduleDefPath)) {
+      final Path parentPath = path.getParent();
+      if (parentPath == null) {
+        return new ModuleDefinition(null, "<no_module>", "", "1", Collections.emptyList());
+      }
+
+      return this.getSwModule(parentPath);
     }
 
-    private ProductDefinition getSwProduct(final Path path) throws IOException {
-        final Path productDefPath = path.resolve(ProductDefinitionScanner.SW_PRODUCT_DEF);
-        if (!Files.exists(productDefPath)) {
-            final Path parentPath = path.getParent();
-            if (parentPath == null) {
-                return new ProductDefinition(null, "<no_product>", "", null);
-            }
+    // Construct SwModule.
+    return ModuleDefinitionScanner.readModuleDefinition(moduleDefPath);
+  }
 
-            return this.getSwProduct(parentPath);
-        }
+  private MUnitTestItem createTestItem(final ProductDefinition definition) {
+    final String productName = definition.getName();
+    final Location definitionLocation = definition.getLocation();
+    final Location location = Location.validLocation(definitionLocation);
+    return new MUnitTestItem(
+        "product:" + productName, productName, Lsp4jConversion.locationToLsp4j(location));
+  }
 
-        // Construct SwProduct.
-        return ProductDefinitionScanner.readProductDefinition(productDefPath);
-    }
+  private MUnitTestItem createTestItem(final ModuleDefinition definition) {
+    final String moduleName = definition.getName();
+    final Location definitionLocation = definition.getLocation();
+    final Location location = Location.validLocation(definitionLocation);
+    return new MUnitTestItem(
+        "module:" + moduleName, moduleName, Lsp4jConversion.locationToLsp4j(location));
+  }
 
-    private ModuleDefinition getSwModule(final Path path) throws IOException {
-        final Path moduleDefPath = path.resolve(ModuleDefinitionScanner.SW_MODULE_DEF);
-        if (!Files.exists(moduleDefPath)) {
-            final Path parentPath = path.getParent();
-            if (parentPath == null) {
-                return new ModuleDefinition(null, "<no_module>", "", "1", Collections.emptyList());
-            }
+  private MUnitTestItem createTestItem(final ExemplarDefinition definition) {
+    final String typeName = definition.getTypeString().getFullString();
+    final Location definitionLocation = definition.getLocation();
+    final Location location = Location.validLocation(definitionLocation);
+    return new MUnitTestItem(
+        "test_case:" + typeName, typeName, Lsp4jConversion.locationToLsp4j(location));
+  }
 
-            return this.getSwModule(parentPath);
-        }
-
-        // Construct SwModule.
-        return ModuleDefinitionScanner.readModuleDefinition(moduleDefPath);
-    }
-
-    private MUnitTestItem createTestItem(final ProductDefinition definition) {
-        final String productName = definition.getName();
-        final Location definitionLocation = definition.getLocation();
-        final Location location = Location.validLocation(definitionLocation);
-        return new MUnitTestItem("product:" + productName, productName, Lsp4jConversion.locationToLsp4j(location));
-    }
-
-    private MUnitTestItem createTestItem(final ModuleDefinition definition) {
-        final String moduleName = definition.getName();
-        final Location definitionLocation = definition.getLocation();
-        final Location location = Location.validLocation(definitionLocation);
-        return new MUnitTestItem("module:" + moduleName, moduleName, Lsp4jConversion.locationToLsp4j(location));
-    }
-
-    private MUnitTestItem createTestItem(final ExemplarDefinition definition) {
-        final String typeName = definition.getTypeString().getFullString();
-        final Location definitionLocation = definition.getLocation();
-        final Location location = Location.validLocation(definitionLocation);
-        return new MUnitTestItem("test_case:" + typeName, typeName, Lsp4jConversion.locationToLsp4j(location));
-    }
-
-    private MUnitTestItem createTestItem(final MethodDefinition definition) {
-        final String methodName = definition.getMethodName();
-        final Location definitionLocation = definition.getLocation();
-        final Location location = Location.validLocation(definitionLocation);
-        return new MUnitTestItem("method:" + methodName, methodName, Lsp4jConversion.locationToLsp4j(location));
-    }
-
+  private MUnitTestItem createTestItem(final MethodDefinition definition) {
+    final String methodName = definition.getMethodName();
+    final Location definitionLocation = definition.getLocation();
+    final Location location = Location.validLocation(definitionLocation);
+    return new MUnitTestItem(
+        "method:" + methodName, methodName, Lsp4jConversion.locationToLsp4j(location));
+  }
 }
