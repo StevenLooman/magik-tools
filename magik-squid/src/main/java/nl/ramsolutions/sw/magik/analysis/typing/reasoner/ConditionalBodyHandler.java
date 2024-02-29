@@ -125,6 +125,11 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
     // be `_unset`.
     final AstNode ifStatementNode = ifNode.getFirstAncestor(MagikGrammar.STATEMENT);
     final AstNode nextSiblingNode = ifStatementNode.getNextSibling();
+    if (nextSiblingNode == null) {
+      // No next sibling node, nothing to do.
+      return;
+    }
+
     final AstNode upperBodyNode = ifStatementNode.getFirstAncestor(MagikGrammar.BODY);
     final AstNode elseNode = ifNode.getFirstChild(MagikGrammar.ELSE);
     final List<AstNode> conditionalExpressionNodes =
