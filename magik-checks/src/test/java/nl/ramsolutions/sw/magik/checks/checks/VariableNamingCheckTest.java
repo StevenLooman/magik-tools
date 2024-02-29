@@ -1,5 +1,7 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
@@ -7,15 +9,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-/**
- * Test VariableNamingCheck.
- */
+/** Test VariableNamingCheck. */
 class VariableNamingCheckTest extends MagikCheckTestBase {
 
-    @ParameterizedTest
-    @ValueSource(strings = {
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         "_local coord",
         "coord << 10",
         "_local x",
@@ -25,32 +24,32 @@ class VariableNamingCheckTest extends MagikCheckTestBase {
         "_local (l_item, l_result) << (1, 2)",
         "result +<< 10",
         "result +<< str << _self.a",
-    })
-    void testValid(final String code) {
-        final MagikCheck check = new VariableNamingCheck();
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
+      })
+  void testValid(final String code) {
+    final MagikCheck check = new VariableNamingCheck();
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 
-    @ParameterizedTest
-    @ValueSource(strings = {
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         "_local c",
         "c << 10",
         "_method a.b(c) _endmethod",
         "_local l_c",
-    })
-    void testInvalid(final String code) {
-        final MagikCheck check = new VariableNamingCheck();
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).hasSize(1);
-    }
+      })
+  void testInvalid(final String code) {
+    final MagikCheck check = new VariableNamingCheck();
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
 
-    @Test
-    void testMultiVariableDeclarationInvalidName() {
-        final MagikCheck check = new VariableNamingCheck();
-        final String code = "_local (l_i, l_r) << (1, 2)";
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).hasSize(2);
-    }
-
+  @Test
+  void testMultiVariableDeclarationInvalidName() {
+    final MagikCheck check = new VariableNamingCheck();
+    final String code = "_local (l_i, l_r) << (1, 2)";
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(2);
+  }
 }

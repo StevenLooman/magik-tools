@@ -2,6 +2,8 @@
 
 0.9.1 (unreleased)
 
+- Add base functionality to apply fixes from magik-lint.
+
 0.9.0 (2024-02-26)
 
 - Support configurable libs dirs.

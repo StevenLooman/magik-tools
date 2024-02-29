@@ -1,20 +1,19 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-/**
- * Test HidesVariableCheck.
- */
+/** Test HidesVariableCheck. */
 class HidesVariableCheckTest extends MagikCheckTestBase {
 
-    @ParameterizedTest
-    @ValueSource(strings = {
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         ""
             + "_block\n"
             + "    _local a << 10\n"
@@ -36,15 +35,16 @@ class HidesVariableCheckTest extends MagikCheckTestBase {
             + "    _endblock\n"
             + "    _local a << 10\n"
             + "_endblock\n",
-    })
-    void testValid(final String code) {
-        final MagikCheck check = new HidesVariableCheck();
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).isEmpty();
-    }
+      })
+  void testValid(final String code) {
+    final MagikCheck check = new HidesVariableCheck();
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 
-    @ParameterizedTest
-    @ValueSource(strings = {
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         ""
             + "_block\n"
             + "    _local a << 10\n"
@@ -80,11 +80,10 @@ class HidesVariableCheckTest extends MagikCheckTestBase {
             + "        _local (b, a) << (20, 30)\n"
             + "    _endblock\n"
             + "_endblock\n",
-    })
-    void testInvalid(final String code) {
-        final MagikCheck check = new HidesVariableCheck();
-        final List<MagikIssue> issues = this.runCheck(code, check);
-        assertThat(issues).hasSize(1);
-    }
-
+      })
+  void testInvalid(final String code) {
+    final MagikCheck check = new HidesVariableCheck();
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
 }

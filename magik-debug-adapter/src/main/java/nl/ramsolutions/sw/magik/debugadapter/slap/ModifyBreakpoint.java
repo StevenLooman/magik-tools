@@ -1,38 +1,35 @@
 package nl.ramsolutions.sw.magik.debugadapter.slap;
 
-/**
- * Modify breakpoitn.
- */
+/** Modify breakpoitn. */
 @SuppressWarnings("checkstyle:JavadocVariable")
 public enum ModifyBreakpoint {
+  DELETE(0),
+  DISABLE(1),
+  ENABLE(2);
 
-    DELETE(0),
-    DISABLE(1),
-    ENABLE(2);
+  private final int val;
 
-    private final int val;
+  ModifyBreakpoint(final int val) {
+    this.val = val;
+  }
 
-    ModifyBreakpoint(final int val) {
-        this.val = val;
+  public int getVal() {
+    return this.val;
+  }
+
+  /**
+   * Get the {@link ModifyBreakpoint} from an interger value.
+   *
+   * @param value Integer value.
+   * @return ModifyBreakpoint
+   */
+  public static ModifyBreakpoint valueOf(final int value) {
+    for (final ModifyBreakpoint breakpointModifier : ModifyBreakpoint.values()) {
+      if (breakpointModifier.getVal() == value) {
+        return breakpointModifier;
+      }
     }
 
-    public int getVal() {
-        return this.val;
-    }
-
-    /**
-     * Get the {@link ModifyBreakpoint} from an interger value.
-     * @param value Integer value.
-     * @return ModifyBreakpoint
-     */
-    public static ModifyBreakpoint valueOf(final int value) {
-        for (final ModifyBreakpoint breakpointModifier : ModifyBreakpoint.values()) {
-            if (breakpointModifier.getVal() == value) {
-                return breakpointModifier;
-            }
-        }
-
-        return null;
-    }
-
+    return null;
+  }
 }
