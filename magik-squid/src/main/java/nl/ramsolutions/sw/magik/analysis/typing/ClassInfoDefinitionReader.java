@@ -20,7 +20,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
@@ -223,7 +222,7 @@ public final class ClassInfoDefinitionReader {
     // Line 1
     final String name;
     final List<String> dataNames;
-    final String parent = null; // TODO
+    final String parent = null; // Parent is not registered in class_info files.
     try (Scanner scanner = new Scanner(line)) {
       scanner.next(); // "method"
 
@@ -233,12 +232,8 @@ public final class ClassInfoDefinitionReader {
 
       // Data names.
       final Spliterator<String> scannerSpliterator =
-          Spliterators.spliterator(
-              scanner, Long.MAX_VALUE, Spliterator.ORDERED | Spliterator.NONNULL);
-      dataNames =
-          StreamSupport.stream(scannerSpliterator, false)
-              .collect(
-                  Collectors.toUnmodifiableList()); // NOSONAR: Java heap space err with .toList().
+          Spliterators.spliteratorUnknownSize(scanner, Spliterator.IMMUTABLE | Spliterator.NONNULL);
+      dataNames = StreamSupport.stream(scannerSpliterator, false).toList();
     }
 
     // Line 2
@@ -377,16 +372,14 @@ public final class ClassInfoDefinitionReader {
 
       // Slots.
       final Spliterator<String> slotsSpliterator =
-          Spliterators.spliterator(
-              scanner, Long.MAX_VALUE, Spliterator.ORDERED | Spliterator.NONNULL);
+          Spliterators.spliteratorUnknownSize(scanner, Spliterator.IMMUTABLE | Spliterator.NONNULL);
       slots =
           StreamSupport.stream(slotsSpliterator, false)
               .map(
                   slotName ->
                       new SlotDefinition(
                           null, moduleName, null, null, slotName, TypeString.UNDEFINED))
-              .collect(
-                  Collectors.toUnmodifiableList()); // NOSONAR: Java heap space err with .toList().
+              .toList();
     }
 
     // Line 2
