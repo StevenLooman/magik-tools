@@ -12,6 +12,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +42,8 @@ class ClassInfoDefinitionReaderTest {
     final Collection<ConditionDefinition> condition2s =
         definitionKeeper.getConditionDefinitions("example_condition_2");
     assertThat(condition2s).isNotNull();
+    final ConditionDefinition condition2 = condition2s.iterator().next();
+    assertThat(condition2.getDataNames()).containsExactlyInAnyOrder("data1", "data2");
 
     // Mixins.
     final TypeString exampleMixinRef = TypeString.ofIdentifier("example_mixin", "sw");
@@ -53,6 +56,17 @@ class ClassInfoDefinitionReaderTest {
     final Collection<ExemplarDefinition> exampleClassTypes =
         definitionKeeper.getExemplarDefinitions(exampleClassRef);
     assertThat(exampleClassTypes).isNotEmpty();
+    final ExemplarDefinition exampleClassType = exampleClassTypes.iterator().next();
+    assertThat(exampleClassType.getParents())
+        .containsExactlyInAnyOrder(TypeString.ofIdentifier("model", "sw"));
+    assertThat(exampleClassType.getSlots())
+        .containsExactlyInAnyOrder(
+            new SlotDefinition(
+                null, "class_definition_reader_test", null, null, "slot1", TypeString.UNDEFINED),
+            new SlotDefinition(
+                null, "class_definition_reader_test", null, null, "slot2", TypeString.UNDEFINED),
+            new SlotDefinition(
+                null, "class_definition_reader_test", null, null, "slot3", TypeString.UNDEFINED));
 
     // Methods.
     final Collection<MethodDefinition> doSomethingMethodDefs =
