@@ -30,6 +30,18 @@ jobs:
             echo "" >> $path
             echo "NOTE: This page is generated. Any changes made to this page through the wiki will be lost in the future." >> $path
           done
+      - run: |
+          path=wiki/checks/Checks-Index.md
+          echo "Checks available:" > $path
+          for f in magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules/*.html
+          do
+            name=$(basename $f .html)
+            wikipage=Check-$name
+            echo "" >> $path
+            echo "[[$name|$wikipage]]" >> $path
+          done
+          echo "" >> $path
+          echo "NOTE: This page is generated. Any changes made to this page through the wiki will be lost in the future." >> $path
       - uses: Andrew-Chen-Wang/github-wiki-action@86138cbd6328b21d759e89ab6e6dd6a139b22270
         with:
           path: wiki
