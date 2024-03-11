@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.formatting.FormattingWalker;
+import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextEdit;
@@ -33,10 +35,13 @@ public class FormattingProvider {
       final MagikFile magikFile, final FormattingOptions options) {
     final AstNode node = magikFile.getTopNode();
 
+    final nl.ramsolutions.sw.magik.formatting.FormattingOptions magikToolsFormattingOptions =
+        Lsp4jConversion.formattingOptionsFromLsp4j(options);
     try {
-      final FormattingWalker walker = new FormattingWalker(options);
+      final FormattingWalker walker = new FormattingWalker(magikToolsFormattingOptions);
       walker.walkAst(node);
-      return walker.getTextEdits();
+      final List<nl.ramsolutions.sw.magik.TextEdit> textEdits = walker.getTextEdits();
+      return textEdits.stream().map(Lsp4jConversion::textEditToLsp4j).toList();
     } catch (IOException exception) {
       LOGGER.error(exception.getMessage(), exception);
     }

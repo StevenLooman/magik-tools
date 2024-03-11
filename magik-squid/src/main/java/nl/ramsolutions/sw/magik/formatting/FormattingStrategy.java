@@ -1,13 +1,12 @@
-package nl.ramsolutions.sw.magik.languageserver.formatting;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-import org.eclipse.lsp4j.FormattingOptions;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.TextEdit;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.TextEdit;
 
 /** Abstract formatting strategy. */
 abstract class FormattingStrategy {
@@ -111,10 +110,9 @@ abstract class FormattingStrategy {
     final int startColumn = token.getColumn();
     final int endColumn = token.getColumn() + token.getOriginalValue().length();
 
-    // SSLR to Lsp4j conversion: line - 1
-    final Position start = new Position(line - 1, startColumn);
-    final Position end = new Position(line - 1, endColumn);
-    final Range range = new Range(start, end);
+    final Position startPosition = new Position(line, startColumn);
+    final Position endPosition = new Position(line, endColumn);
+    final Range range = new Range(startPosition, endPosition);
     return new TextEdit(range, text);
   }
 
@@ -129,10 +127,9 @@ abstract class FormattingStrategy {
     final int line = token.getLine();
     final int startColumn = token.getColumn();
 
-    // SSLR to Lsp4j conversion: line - 1
-    final Position start = new Position(line - 1, startColumn);
-    final Position end = new Position(line - 1, startColumn);
-    final Range range = new Range(start, end);
+    final Position startPosition = new Position(line, startColumn);
+    final Position endPosition = new Position(line, startColumn);
+    final Range range = new Range(startPosition, endPosition);
     return new TextEdit(range, text);
   }
 }

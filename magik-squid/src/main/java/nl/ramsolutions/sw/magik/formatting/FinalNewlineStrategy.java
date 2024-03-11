@@ -1,14 +1,13 @@
-package nl.ramsolutions.sw.magik.languageserver.formatting;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
-import org.eclipse.lsp4j.FormattingOptions;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.TextEdit;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.TextEdit;
 
 /** Final newline strategy. */
-public class FinalNewlineStrategy extends FormattingStrategy {
+class FinalNewlineStrategy extends FormattingStrategy {
 
   private static final String EOL_TOKEN_VALUE = "\n";
 
@@ -59,12 +58,12 @@ public class FinalNewlineStrategy extends FormattingStrategy {
    * @param token Token.
    */
   private TextEdit trimFinalNewlines(final Token token) {
-    final int startLine = this.lastTextToken.getLine();
+    final int startLine = this.lastTextToken.getLine() + 1;
     final int startColumn =
         this.lastTextToken.getColumn() + this.lastTextToken.getOriginalValue().length();
     final Position startPosition = new Position(startLine, startColumn);
 
-    final int endLine = token.getLine();
+    final int endLine = token.getLine() + 1;
     final int endColumn = token.getColumn();
     final Position endPosition = new Position(endLine, endColumn);
 

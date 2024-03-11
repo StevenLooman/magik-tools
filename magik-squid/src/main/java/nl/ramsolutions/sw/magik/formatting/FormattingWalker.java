@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.languageserver.formatting;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
@@ -8,9 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.AstWalker;
-import org.eclipse.lsp4j.FormattingOptions;
-import org.eclipse.lsp4j.TextEdit;
 
 /** Formatting AST walker which produces {@link TextEdit}s. */
 public class FormattingWalker extends AstWalker {

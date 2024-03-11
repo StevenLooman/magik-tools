@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.languageserver.formatting;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
@@ -6,11 +6,10 @@ import com.sonar.sslr.api.Token;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
-import org.eclipse.lsp4j.FormattingOptions;
-import org.eclipse.lsp4j.TextEdit;
 
 /** Standard formatting strategy. */
 class StandardFormattingStrategy extends FormattingStrategy {
