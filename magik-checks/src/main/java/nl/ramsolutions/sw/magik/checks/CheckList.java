@@ -38,6 +38,7 @@ import nl.ramsolutions.sw.magik.checks.checks.VariableCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.VariableDeclarationUsageDistanceCheck;
 import nl.ramsolutions.sw.magik.checks.checks.VariableNamingCheck;
 import nl.ramsolutions.sw.magik.checks.checks.WarnedCallCheck;
+import nl.ramsolutions.sw.magik.checks.fixers.FormattingFixer;
 
 /** Check list. */
 public final class CheckList {
@@ -105,7 +106,7 @@ public final class CheckList {
    */
   public static Map<Class<? extends MagikCheck>, List<Class<? extends MagikCheckFixer>>>
       getFixers() {
-    return Map.of();
+    return Map.of(FormattingCheck.class, List.of(FormattingFixer.class));
   }
 
   /**

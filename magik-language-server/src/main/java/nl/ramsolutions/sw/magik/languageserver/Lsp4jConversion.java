@@ -4,6 +4,7 @@ import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
+import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 
 /** Utility class for converting LSP4J <-> MagikLanguageServer. */
 public final class Lsp4jConversion {
@@ -82,5 +83,15 @@ public final class Lsp4jConversion {
     final String newText = textEdit.getNewText();
     final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
     return new org.eclipse.lsp4j.TextEdit(rangeLsp4j, newText);
+  }
+
+  public static FormattingOptions formattingOptionsFromLsp4j(
+      final org.eclipse.lsp4j.FormattingOptions options) {
+    return new FormattingOptions(
+        options.getTabSize(),
+        options.isInsertSpaces(),
+        options.isInsertFinalNewline(),
+        options.isTrimTrailingWhitespace(),
+        options.isTrimFinalNewlines());
   }
 }

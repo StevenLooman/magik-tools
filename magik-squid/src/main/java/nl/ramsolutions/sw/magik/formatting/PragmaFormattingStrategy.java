@@ -1,8 +1,7 @@
-package nl.ramsolutions.sw.magik.languageserver.formatting;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.Token;
-import org.eclipse.lsp4j.FormattingOptions;
-import org.eclipse.lsp4j.TextEdit;
+import nl.ramsolutions.sw.magik.TextEdit;
 
 /** Pragma formatting strategy. */
 class PragmaFormattingStrategy extends FormattingStrategy {
