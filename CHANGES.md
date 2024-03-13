@@ -1,6 +1,6 @@
 # Changes
 
-0.9.1 (unreleased)
+0.9.1 (2024-03-13)
 
 - Fix actually not indexing large files in magik-language-server.
 - Fix `sonar-magik-plugin` not setting property `sonar.lang.patterns.magik`.
