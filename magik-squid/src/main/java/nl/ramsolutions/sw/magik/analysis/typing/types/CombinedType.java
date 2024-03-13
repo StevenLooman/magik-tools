@@ -1,6 +1,5 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +12,7 @@ import nl.ramsolutions.sw.magik.Location;
 /**
  * Multiple magik types.
  */
-public class CombinedType extends AbstractType {
+public final class CombinedType extends AbstractType {
 
     private static final String VALUE_COMBINATOR = "|";
 
@@ -21,17 +20,12 @@ public class CombinedType extends AbstractType {
 
     /**
      * Constructor.
+     *
+     * <p>Use method {@link #combine(AbstractType...)} create a new instance of this type.
+     *
      * @param types Combined types.
      */
-    public CombinedType(final AbstractType... types) {
-        this(Arrays.asList(types));
-    }
-
-    /**
-     * Constructor.
-     * @param types Combined types.
-     */
-    public CombinedType(final Collection<AbstractType> types) {
+    private CombinedType(final Collection<AbstractType> types) {
         super(null, null);
         this.types = types.stream()
             .flatMap(type ->
@@ -176,6 +170,10 @@ public class CombinedType extends AbstractType {
             .collect(Collectors.toUnmodifiableSet());
         if (substitutedTypes.equals(this.types)) {
             return this;
+        }
+
+        if (substitutedTypes.size() == 1) {
+            return substitutedTypes.iterator().next();
         }
 
         return new CombinedType(substitutedTypes);
