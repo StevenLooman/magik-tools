@@ -2,6 +2,8 @@
 
 0.9.1 (unreleased)
 
+- Fix actually not indexing large files in magik-language-server.
+
 0.9.0 (2024-02-26)
 
 - Support configurable libs dirs.

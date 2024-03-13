@@ -165,6 +165,7 @@ public class MagikIndexer {
             final long size = Files.size(path);
             if (size > MagikIndexer.MAX_SIZE) {
                 LOGGER.warn("Ignoring file: {}, due to size: {}, max size: {}", path, size, MagikIndexer.MAX_SIZE);
+                return;
             }
 
             final MagikFile magikFile = new MagikFile(analysisConfiguration, path);
