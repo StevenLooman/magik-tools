@@ -7,6 +7,7 @@
 - Fix printing order of issues in `magik-lint`.
 - Fix `module.def` parser not parsing partial test entries.
 - Fix `sonar-magik-plugin` crashing on syntax error token during Copy/Paste Detection-phase.
+- Fix reasoning errors where types were regarded as combined, when it was actually singular.
 
 0.9.0 (2024-02-26)
 

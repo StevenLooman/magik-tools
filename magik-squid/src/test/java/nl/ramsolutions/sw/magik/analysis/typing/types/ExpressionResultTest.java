@@ -72,12 +72,12 @@ class ExpressionResultTest {
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
         final AbstractType symbolType = typeKeeper.getType(TypeString.SW_SYMBOL);
         final AbstractType integerType = typeKeeper.getType(TypeString.SW_INTEGER);
-        final CombinedType combinedType = new CombinedType(symbolType, integerType);
+        final AbstractType combinedType = CombinedType.combine(symbolType, integerType);
 
         final ExpressionResult result = new ExpressionResult(combinedType);
         final ExpressionResult newResult = result.substituteType(symbolType, integerType);
         final AbstractType newType = newResult.get(0, null);
-        final AbstractType expectedType = new CombinedType(newType);
+        final AbstractType expectedType = CombinedType.combine(newType);
         assertThat(newType).isEqualTo(expectedType);
     }
 
@@ -87,12 +87,12 @@ class ExpressionResultTest {
         final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
         final AbstractType symbolType = typeKeeper.getType(TypeString.SW_SYMBOL);
         final AbstractType parameterReferenceType = new ParameterReferenceType("p1");
-        final CombinedType combinedType = new CombinedType(symbolType, parameterReferenceType);
+        final AbstractType combinedType = CombinedType.combine(symbolType, parameterReferenceType);
 
         final ExpressionResult result = new ExpressionResult(combinedType);
         final ExpressionResult newResult = result.substituteType(parameterReferenceType, symbolType);
         final AbstractType newType = newResult.get(0, null);
-        final AbstractType expectedType = new CombinedType(symbolType);
+        final AbstractType expectedType = CombinedType.combine(symbolType);
         assertThat(newType).isEqualTo(expectedType);
     }
 

@@ -168,7 +168,7 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final AbstractType combinedType = new CombinedType(
+        final AbstractType combinedType = CombinedType.combine(
             typeKeeper.getType(TypeString.SW_INTEGER),
             typeKeeper.getType(TypeString.SW_SYMBOL));
         final AbstractType resultType = (AbstractType) result.get(0, null);
@@ -622,10 +622,10 @@ class LocalTypeReasonerTest {
         final ExpressionResult result = reasonerState.getNodeType(methodNode);
         assertThat(result.size()).isEqualTo(1);
 
-        final CombinedType expectedType = new CombinedType(
+        final AbstractType expectedType = CombinedType.combine(
             typeKeeper.getType(TypeString.SW_INTEGER),
             typeKeeper.getType(TypeString.SW_UNSET));
-        final CombinedType resultType = (CombinedType) result.get(0, null);
+        final AbstractType resultType = result.get(0, null);
         assertThat(resultType).isEqualTo(expectedType);
     }
 
@@ -1120,14 +1120,14 @@ class LocalTypeReasonerTest {
         assertThat(result).isNotNull();
 
         // First is integer + undefined.
-        final AbstractType intAndUndefinedType = new CombinedType(
+        final AbstractType intAndUndefinedType = CombinedType.combine(
             typeKeeper.getType(TypeString.SW_INTEGER),
             UndefinedType.INSTANCE);
         final AbstractType resultType0 = result.get(0, null);
         assertThat(resultType0).isEqualTo(intAndUndefinedType);
 
         // The rest is unset + undefined, as merging the two yields unset for the rest.
-        final AbstractType unsetAndUndefinedType = new CombinedType(
+        final AbstractType unsetAndUndefinedType = CombinedType.combine(
             typeKeeper.getType(TypeString.SW_UNSET),
             UndefinedType.INSTANCE);
         result.getTypes().stream()

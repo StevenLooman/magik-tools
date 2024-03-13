@@ -94,7 +94,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 case "_andif":
                 case "_orif":
                     // Returns RHS if LHS is true.
-                    final CombinedType combinedType = new CombinedType(falseType, rightType);
+                    final AbstractType combinedType = CombinedType.combine(falseType, rightType);
                     result = new ExpressionResult(combinedType);
                     break;
 
@@ -150,7 +150,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
             case "_andif":
             case "_orif":
                 // Returns RHS if LHS is true.
-                final CombinedType combinedType = new CombinedType(falseType, rightType);
+                final AbstractType combinedType = CombinedType.combine(falseType, rightType);
                 result = new ExpressionResult(combinedType);
                 break;
 
