@@ -38,7 +38,7 @@ public class TokenLocation {
      * @return End line.
      */
     public int endLine() {
-        final String tokenValue = this.token.getOriginalValue();
+        final String tokenValue = this.token.getOriginalValue().stripTrailing();
         final String[] lines = tokenValue.split("\\r\\n|\\n|\\r");
         if (lines.length != 0) {
             return this.token.getLine() + lines.length - 1;
@@ -59,8 +59,8 @@ public class TokenLocation {
         if (this.endLine() != this.token.getLine()) {
             final String[] lines = tokenValue.split("\\r\\n|\\n|\\r");
             if (lines.length > 0) {
-                final String line = lines[lines.length - 1];  // NOSONAR
-                endLineOffset = line.length() - 1;
+                final String lastLine = lines[lines.length - 1];  // NOSONAR
+                endLineOffset = lastLine.length() - 1;
             } else {
                 throw new IllegalStateException();
             }
