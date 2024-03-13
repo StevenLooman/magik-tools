@@ -15,11 +15,7 @@
   <description>Enables scanning of Magik source files</description>
 
   <properties>
-    <license.title>SonarQube Magik Plugin</license.title>
-    <sonarQubeMinVersion>6.7</sonarQubeMinVersion>
-    <sonar.pluginClass>nl.ramsolutions.sw.magik.MagikPlugin</sonar.pluginClass>
-    <sonar.pluginName>Magik</sonar.pluginName>
-    <sonar.skipDependenciesPackaging>true</sonar.skipDependenciesPackaging>
+    <pluginApiMinVersion>9.14.0.375</pluginApiMinVersion>
     <artifactsToPublish>${project.groupId}:sonar-magik-plugin:jar</artifactsToPublish>
   </properties>
 
@@ -96,15 +92,23 @@
       <plugin>
         <groupId>org.sonarsource.sonar-packaging-maven-plugin</groupId>
         <artifactId>sonar-packaging-maven-plugin</artifactId>
-        <version>1.20.0.405</version>
+        <version>${sonar-maven-packaging-plugin.version}</version>
         <extensions>true</extensions>
 
         <configuration>
-          <pluginName>SonarMagik</pluginName>
           <pluginClass>nl.ramsolutions.sw.sonar.MagikPlugin</pluginClass>
+          <pluginName>Magik Code Quality and Security</pluginName>
+          <pluginKey>magik</pluginKey>
           <skipDependenciesPackaging>true</skipDependenciesPackaging>
           <sonarLintSupported>false</sonarLintSupported>
-          <sonarQubeMinVersion>${sonarQubeMinVersion}</sonarQubeMinVersion>
+          <pluginApiMinVersion>${pluginApiMinVersion}</pluginApiMinVersion>
+          <requiredForLanguages>magik</requiredForLanguages>
+          <jreMinVersion>17</jreMinVersion>
+          <archive>
+            <manifestEntries>
+              <Implementation-Version>${project.version}</Implementation-Version>
+            </manifestEntries>
+          </archive>
         </configuration>
       </plugin>
       <plugin>

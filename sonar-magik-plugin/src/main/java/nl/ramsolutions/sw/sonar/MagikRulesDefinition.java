@@ -8,9 +8,9 @@ import org.sonar.api.server.rule.RulesDefinition;
 import org.sonarsource.analyzer.commons.RuleMetadataLoader;
 
 /**
- * Magik rule repository.
+ * Magik rules definition.
  */
-public class MagikRuleRepository implements RulesDefinition {
+public class MagikRulesDefinition implements RulesDefinition {
 
     private static final String REPOSITORY_NAME = "SonarAnalyzer";
 
@@ -18,10 +18,10 @@ public class MagikRuleRepository implements RulesDefinition {
     public void define(final Context context) {
         final NewRepository repository = context
             .createRepository(CheckList.REPOSITORY_KEY, Magik.KEY)
-            .setName(MagikRuleRepository.REPOSITORY_NAME);
+            .setName(MagikRulesDefinition.REPOSITORY_NAME);
 
         final RuleMetadataLoader loader = new RuleMetadataLoader(CheckList.PROFILE_DIR, CheckList.PROFILE_LOCATION);
-        loader.addRulesByAnnotatedClass(repository, MagikRuleRepository.getCheckClasses());
+        loader.addRulesByAnnotatedClass(repository, MagikRulesDefinition.getCheckClasses());
 
         repository.done();
     }

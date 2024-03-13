@@ -18,7 +18,6 @@ import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.rule.CheckFactory;
 import org.sonar.api.batch.rule.Checks;
 import org.sonar.api.batch.sensor.Sensor;
@@ -39,9 +38,9 @@ import org.sonar.squidbridge.ProgressReport;
 /**
  * Magik squid Sensor.
  */
-public class MagikSquidSensor implements Sensor {
+public class MagikSensor implements Sensor {
 
-    private static final Logger LOGGER = Loggers.get(MagikSquidSensor.class);
+    private static final Logger LOGGER = Loggers.get(MagikSensor.class);
     private static final long SLEEP_PERIOD = 100;
 
     private final CheckFactory checkFactory;
@@ -53,7 +52,7 @@ public class MagikSquidSensor implements Sensor {
      * @param checkFactory Factory.
      * @param fileLinesContextFactory Factory.
      */
-    public MagikSquidSensor(
+    public MagikSensor(
             final CheckFactory checkFactory,
             final FileLinesContextFactory fileLinesContextFactory,
             final NoSonarFilter noSonarFilter) {
@@ -65,9 +64,8 @@ public class MagikSquidSensor implements Sensor {
     @Override
     public void describe(final SensorDescriptor descriptor) {
         descriptor
-            .name("Magik Squid Sensor")
             .onlyOnLanguage(Magik.KEY)
-            .onlyOnFileType(Type.MAIN);
+            .name("Magik Sensor");
     }
 
     @Override
