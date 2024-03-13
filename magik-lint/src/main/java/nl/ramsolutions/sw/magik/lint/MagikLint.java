@@ -162,6 +162,7 @@ public class MagikLint {
             .map(this::runChecksOnFile)
             .flatMap(List::stream)
             .sorted((issue0, issue1) -> locationCompare.compare(issue0.location(), issue1.location()))
+            .sequential()
             .limit(maxInfractions)
             .forEach(this.reporter::reportIssue);
     }

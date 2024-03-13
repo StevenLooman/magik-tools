@@ -4,6 +4,7 @@
 
 - Fix actually not indexing large files in magik-language-server.
 - Fix `sonar-magik-plugin` not setting property `sonar.lang.patterns.magik`.
+- Fix printing order of issues in `magik-lint`.
 
 0.9.0 (2024-02-26)
 
