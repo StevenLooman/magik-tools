@@ -6,6 +6,7 @@
 - Fix `sonar-magik-plugin` not setting property `sonar.lang.patterns.magik`.
 - Fix printing order of issues in `magik-lint`.
 - Fix `module.def` parser not parsing partial test entries.
+- Fix `sonar-magik-plugin` crashing on syntax error token during Copy/Paste Detection-phase.
 
 0.9.0 (2024-02-26)
 
