@@ -44,7 +44,7 @@ public class CpdTokenSaver {
     final Comparator<TokenLocation> byColumn = Comparator.comparing(TokenLocation::column);
 
     tokens.stream()
-        .filter(token -> !token.getValue().trim().equals(""))
+        .filter(token -> !token.getValue().trim().isEmpty())
         .map(TokenLocation::new)
         .sorted(byLine.thenComparing(byColumn))
         .forEach(

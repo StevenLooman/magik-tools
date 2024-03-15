@@ -31,12 +31,11 @@ public class Location {
         return uri0.compareTo(uri1);
       }
 
-      // compare start of range
+      // Compare start position of range.
       final Range range0 = validLocation0.getRange();
-      Objects.requireNonNull(range0);
       final Range range1 = validLocation1.getRange();
+      Objects.requireNonNull(range0);
       Objects.requireNonNull(range1);
-
       final Position position0 = range0.getStartPosition();
       final Position position1 = range1.getStartPosition();
       return position0.compareTo(position1);

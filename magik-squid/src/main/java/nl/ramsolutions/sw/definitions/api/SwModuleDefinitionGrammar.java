@@ -143,14 +143,14 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
         .rule(TEST_ENTRY)
         .is(
             builder.firstOf(
-                builder.sequence("name", WHITESPACE, IDENTIFIER),
-                builder.sequence("framework", WHITESPACE, IDENTIFIER),
-                builder.sequence("topics", WHITESPACE, IDENTIFIER_LIST),
-                builder.sequence("args", WHITESPACE, REST_OF_LINE),
-                builder.sequence("description", WHITESPACE, REST_OF_LINE),
-                builder.sequence("label", WHITESPACE, IDENTIFIER),
-                builder.sequence("topic", WHITESPACE, IDENTIFIER),
-                builder.sequence("arg", WHITESPACE, IDENTIFIER)));
+                builder.sequence("name", builder.optional(WHITESPACE, IDENTIFIER)),
+                builder.sequence("framework", builder.optional(WHITESPACE, IDENTIFIER)),
+                builder.sequence("topics", builder.optional(WHITESPACE, IDENTIFIER_LIST)),
+                builder.sequence("args", builder.optional(WHITESPACE, REST_OF_LINE)),
+                builder.sequence("description", builder.optional(WHITESPACE, REST_OF_LINE)),
+                builder.sequence("label", builder.optional(WHITESPACE, IDENTIFIER)),
+                builder.sequence("topic", builder.optional(WHITESPACE, IDENTIFIER)),
+                builder.sequence("arg", builder.optional(WHITESPACE, IDENTIFIER))));
     builder.rule(FREE_LINES).is(builder.zeroOrMore(FREE_LINE));
     builder.rule(FREE_LINE).is(builder.regexp("(?!end).*[\r\n]+"));
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikVisitor;
 import nl.ramsolutions.sw.magik.checks.CheckList;
@@ -17,7 +18,6 @@ import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.FileSystem;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.InputFile.Type;
 import org.sonar.api.batch.rule.CheckFactory;
 import org.sonar.api.batch.rule.Checks;
 import org.sonar.api.batch.sensor.Sensor;
@@ -36,9 +36,9 @@ import org.sonar.api.utils.log.Loggers;
 import org.sonar.squidbridge.ProgressReport;
 
 /** Magik squid Sensor. */
-public class MagikSquidSensor implements Sensor {
+public class MagikSensor implements Sensor {
 
-  private static final Logger LOGGER = Loggers.get(MagikSquidSensor.class);
+  private static final Logger LOGGER = Loggers.get(MagikSensor.class);
   private static final long SLEEP_PERIOD = 100;
 
   private final CheckFactory checkFactory;
@@ -51,7 +51,7 @@ public class MagikSquidSensor implements Sensor {
    * @param checkFactory Factory.
    * @param fileLinesContextFactory Factory.
    */
-  public MagikSquidSensor(
+  public MagikSensor(
       final CheckFactory checkFactory,
       final FileLinesContextFactory fileLinesContextFactory,
       final NoSonarFilter noSonarFilter) {
@@ -62,7 +62,7 @@ public class MagikSquidSensor implements Sensor {
 
   @Override
   public void describe(final SensorDescriptor descriptor) {
-    descriptor.name("Magik Squid Sensor").onlyOnLanguage(Magik.KEY).onlyOnFileType(Type.MAIN);
+    descriptor.onlyOnLanguage(Magik.KEY).name("Magik Sensor");
   }
 
   @Override
@@ -78,7 +78,8 @@ public class MagikSquidSensor implements Sensor {
 
     final ProgressReport progressReport =
         new ProgressReport("Report about progress of Sonar Magik analyzer", SLEEP_PERIOD);
-    final List<String> filenames = inputFiles.stream().map(InputFile::toString).toList();
+    final List<String> filenames =
+        inputFiles.stream().map(InputFile::toString).collect(Collectors.toList());
     progressReport.start(filenames);
 
     for (final InputFile inputFile : inputFiles) {

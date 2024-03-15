@@ -134,7 +134,7 @@ class TypeMatcherTest {
     final AbstractType type1 = typeKeeper.getType(type1Ref);
     final AbstractType type2 = typeKeeper.getType(type2Ref);
 
-    final AbstractType criterium = new CombinedType(type1, type2);
+    final AbstractType criterium = CombinedType.combine(type1, type2);
     final boolean matches = TypeMatcher.typeMatches(type1, criterium);
     assertThat(matches).isTrue();
   }
@@ -181,7 +181,7 @@ class TypeMatcherTest {
     final AbstractType type2 = typeKeeper.getType(type2Ref);
     final AbstractType type3 = typeKeeper.getType(type3Ref);
 
-    final AbstractType criterium = new CombinedType(type1, type2);
+    final AbstractType criterium = CombinedType.combine(type1, type2);
     final boolean matches = TypeMatcher.typeMatches(type3, criterium);
     assertThat(matches).isFalse();
   }
@@ -228,8 +228,8 @@ class TypeMatcherTest {
     final AbstractType type2 = typeKeeper.getType(type2Ref);
     final AbstractType type3 = typeKeeper.getType(type3Ref);
 
-    final AbstractType type = new CombinedType(type1, type2);
-    final AbstractType criterium = new CombinedType(type1, type2, type3);
+    final AbstractType type = CombinedType.combine(type1, type2);
+    final AbstractType criterium = CombinedType.combine(type1, type2, type3);
     final boolean matches = TypeMatcher.typeMatches(type, criterium);
     assertThat(matches).isTrue();
   }
@@ -276,8 +276,8 @@ class TypeMatcherTest {
     final AbstractType type2 = typeKeeper.getType(type2Ref);
     final AbstractType type3 = typeKeeper.getType(type3Ref);
 
-    final AbstractType type = new CombinedType(type1, type2);
-    final AbstractType criterium = new CombinedType(type2, type3);
+    final AbstractType type = CombinedType.combine(type1, type2);
+    final AbstractType criterium = CombinedType.combine(type2, type3);
     final boolean matches = TypeMatcher.typeMatches(type, criterium);
     assertThat(matches).isFalse();
   }

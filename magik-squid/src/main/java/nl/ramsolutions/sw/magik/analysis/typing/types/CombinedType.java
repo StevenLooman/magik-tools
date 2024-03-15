@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import edu.umd.cs.findbugs.annotations.Nullable;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -20,25 +19,18 @@ public class CombinedType extends AbstractType {
   /**
    * Constructor.
    *
-   * @param types Combined types.
-   */
-  public CombinedType(final AbstractType... types) {
-    this(Arrays.asList(types));
-  }
-
-  /**
-   * Constructor.
+   * <p>Use method {@link #combine(AbstractType...)} create a new instance of this type.
    *
    * @param types Combined types.
    */
-  public CombinedType(final Collection<AbstractType> types) {
+  private CombinedType(final Collection<AbstractType> types) {
     super(null, null);
     this.types =
         types.stream()
             .flatMap(
                 type ->
-                    type instanceof CombinedType combinedType
-                        ? combinedType.getTypes().stream()
+                    type instanceof CombinedType
+                        ? ((CombinedType) type).getTypes().stream()
                         : Stream.of(type))
             .collect(Collectors.toUnmodifiableSet());
   }
@@ -175,6 +167,10 @@ public class CombinedType extends AbstractType {
             .collect(Collectors.toUnmodifiableSet());
     if (substitutedTypes.equals(this.types)) {
       return this;
+    }
+
+    if (substitutedTypes.size() == 1) {
+      return substitutedTypes.iterator().next();
     }
 
     return new CombinedType(substitutedTypes);

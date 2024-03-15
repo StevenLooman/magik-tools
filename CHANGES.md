@@ -7,6 +7,15 @@
 - Add UnsafeEvaluateInvocationCheck to test for unsafe `unsafe_evaluate()` method calls.
 - Add SwChar16VectorEvaluateInvocationCheck to test for `sw:char16_vector.evaluate()` method calls.
 
+0.9.1 (2024-03-13)
+
+- Fix actually not indexing large files in magik-language-server.
+- Fix `sonar-magik-plugin` not setting property `sonar.lang.patterns.magik`.
+- Fix printing order of issues in `magik-lint`.
+- Fix `module.def` parser not parsing partial test entries.
+- Fix `sonar-magik-plugin` crashing on syntax error token during Copy/Paste Detection-phase.
+- Fix reasoning errors where types were regarded as combined, when it was actually singular.
+
 0.9.0 (2024-02-26)
 
 - Support configurable libs dirs.

@@ -63,7 +63,7 @@ class ParameterHandler extends LocalTypeReasonerHandler {
       final AbstractType type = this.typeReader.parseTypeString(parameterTypeString);
       if (helper.isOptionalParameter()) {
         final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
-        final AbstractType optionalType = new CombinedType(type, unsetType);
+        final AbstractType optionalType = CombinedType.combine(type, unsetType);
         result = new ExpressionResult(optionalType);
       } else {
         result = new ExpressionResult(type);

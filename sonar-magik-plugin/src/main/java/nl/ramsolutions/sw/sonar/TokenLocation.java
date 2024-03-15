@@ -40,7 +40,7 @@ public class TokenLocation {
    * @return End line.
    */
   public int endLine() {
-    final String tokenValue = this.token.getOriginalValue();
+    final String tokenValue = this.token.getOriginalValue().stripTrailing();
     final String[] lines = tokenValue.split("\\r\\n|\\n|\\r");
     if (lines.length != 0) {
       return this.token.getLine() + lines.length - 1;
