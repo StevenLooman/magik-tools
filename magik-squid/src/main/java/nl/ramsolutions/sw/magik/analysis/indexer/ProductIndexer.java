@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 /** Product (and module) definition indexer. */
 public class ProductIndexer {
 
-  // TODO: This should not be in typing.
-
   private static final Logger LOGGER = LoggerFactory.getLogger(ProductIndexer.class);
 
   private final IDefinitionKeeper definitionKeeper;
