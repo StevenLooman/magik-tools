@@ -8,14 +8,14 @@ import org.sonar.api.SonarRuntime;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonarsource.analyzer.commons.RuleMetadataLoader;
 
-/** Magik rule repository. */
-public class MagikRuleRepository implements RulesDefinition {
+/** Magik rules definition. */
+public class MagikRulesDefinition implements RulesDefinition {
 
   private static final String REPOSITORY_NAME = "SonarAnalyzer";
 
   private final SonarRuntime sonarRuntime;
 
-  public MagikRuleRepository(final SonarRuntime sonarRuntime) {
+  public MagikRulesDefinition(final SonarRuntime sonarRuntime) {
     this.sonarRuntime = sonarRuntime;
   }
 
@@ -24,12 +24,11 @@ public class MagikRuleRepository implements RulesDefinition {
     final NewRepository repository =
         context
             .createRepository(CheckList.REPOSITORY_KEY, Magik.KEY)
-            .setName(MagikRuleRepository.REPOSITORY_NAME);
+            .setName(MagikRulesDefinition.REPOSITORY_NAME);
 
     final RuleMetadataLoader loader =
-        new RuleMetadataLoader(
-            CheckList.PROFILE_DIR, CheckList.PROFILE_LOCATION, this.sonarRuntime);
-    loader.addRulesByAnnotatedClass(repository, MagikRuleRepository.getCheckClasses());
+        new RuleMetadataLoader(CheckList.PROFILE_DIR, CheckList.PROFILE_LOCATION);
+    loader.addRulesByAnnotatedClass(repository, MagikRulesDefinition.getCheckClasses());
 
     repository.done();
   }

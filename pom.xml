@@ -73,10 +73,12 @@
     <jacoco.unit-tests.limit.class-complexity>100</jacoco.unit-tests.limit.class-complexity> <!-- Preferred/future: 20-->
     <jacoco.unit-tests.limit.method-complexity>10</jacoco.unit-tests.limit.method-complexity> <!-- Preferred/future: 5-->
 
-    <sonar.version>9.4.0.54424</sonar.version>
-    <sonar-impl.version>10.4.0.87286</sonar-impl.version>
+    <sonar.version>9.2.4.50792</sonar.version>
+    <sonar-analyzer-commons.version>1.22.0.848</sonar-analyzer-commons.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
-    <sonar-analyzer-commons.version>2.7.0.1482</sonar-analyzer-commons.version>
+    <sonar-impl.version>10.4.0.87286</sonar-impl.version>
+    <sonar-maven.version>3.9.1.2184</sonar-maven.version>
+    <sonar-maven-packaging-plugin.version>1.23.0.740</sonar-maven-packaging-plugin.version>
     <sslr-squid-bridge.version>2.7.1.392</sslr-squid-bridge.version>
     <sslr.version>1.24.0.633</sslr.version>
     <slf4j.version>2.0.12</slf4j.version>
@@ -84,9 +86,7 @@
     <lsp4j.version>0.22.0</lsp4j.version>
     <commons-cli.version>1.6.0</commons-cli.version>
     <gson.version>2.10.1</gson.version>
-    <assertj.version>3.25.3</assertj.version>
-    <sonar-maven.version>3.9.1.2184</sonar-maven.version>
-    <sqlite-jdbc.version>3.44.1.0</sqlite-jdbc.version>
+    <assertj.version>3.24.2</assertj.version>
 
     <sonar.organization>stevenlooman</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>

@@ -5,6 +5,8 @@ _method object.abc
     ## Test method.
     ## @return {sw:integer}
     _local x << 10
+    _local y << 20
+    _local z << 30
     _return 10
 _endmethod
 $
