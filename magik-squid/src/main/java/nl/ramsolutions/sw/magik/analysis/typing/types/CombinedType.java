@@ -29,8 +29,8 @@ public class CombinedType extends AbstractType {
         types.stream()
             .flatMap(
                 type ->
-                    type instanceof CombinedType
-                        ? ((CombinedType) type).getTypes().stream()
+                    type instanceof CombinedType combinedType
+                        ? combinedType.getTypes().stream()
                         : Stream.of(type))
             .collect(Collectors.toUnmodifiableSet());
   }

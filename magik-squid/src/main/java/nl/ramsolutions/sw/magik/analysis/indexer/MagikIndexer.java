@@ -25,8 +25,6 @@ import org.slf4j.LoggerFactory;
 /** Magik file indexer. */
 public class MagikIndexer {
 
-  // TODO: This should not be in typing.
-
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikIndexer.class);
   private static final long MAX_SIZE = 1024L * 1024L * 10L; // 10 MB
 
@@ -172,6 +170,7 @@ public class MagikIndexer {
       if (size > MagikIndexer.MAX_SIZE) {
         LOGGER.warn(
             "Ignoring file: {}, due to size: {}, max size: {}", path, size, MagikIndexer.MAX_SIZE);
+        return;
       }
 
       final MagikFile magikFile = new MagikFile(analysisConfiguration, path);
