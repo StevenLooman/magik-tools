@@ -50,6 +50,12 @@ class SwProductDefinitionGrammarTest {
   }
 
   @Test
+  void testDoNotTranslate() {
+    assertThat(g.rule(SwProductDefinitionGrammar.DO_NOT_TRANSLATE))
+        .matches("do_not_translate");
+  }
+
+  @Test
   void testRequires() {
     assertThat(g.rule(SwProductDefinitionGrammar.REQUIRES))
         .matches("requires\nend")

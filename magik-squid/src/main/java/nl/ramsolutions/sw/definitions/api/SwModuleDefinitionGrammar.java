@@ -14,6 +14,7 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
 
   CONDITION_MESSAGE_ACCESSOR,
   DESCRIPTION,
+  DO_NOT_TRANSLATE,
   HIDDEN,
   LANGUAGE,
   MESSAGES,
@@ -72,6 +73,7 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
                 builder.firstOf(
                     CONDITION_MESSAGE_ACCESSOR,
                     DESCRIPTION,
+                    DO_NOT_TRANSLATE,
                     HIDDEN,
                     INSTALL_REQUIRES,
                     LANGUAGE,
@@ -98,6 +100,9 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
         .rule(CONDITION_MESSAGE_ACCESSOR)
         .is("condition_message_accessor", WHITESPACE, IDENTIFIER);
     builder.rule(DESCRIPTION).is("description", SPACING, FREE_LINES, "end");
+    builder
+        .rule(DO_NOT_TRANSLATE)
+        .is("do_not_translate");
     builder.rule(HIDDEN).is("hidden");
     builder.rule(INSTALL_REQUIRES).is("install_requires", SPACING, MODULE_REFS, "end");
     builder.rule(LANGUAGE).is("language", WHITESPACE, IDENTIFIER);
