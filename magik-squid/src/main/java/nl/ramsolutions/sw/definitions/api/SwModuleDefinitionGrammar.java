@@ -19,6 +19,7 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
   LANGUAGE,
   MESSAGES,
   OPTIONAL,
+  REQUIRED_BY,
   REQUIRES,
   REQUIRES_DATAMODEL,
   REQUIRES_JAVA,
@@ -79,6 +80,7 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
                     LANGUAGE,
                     MESSAGES,
                     OPTIONAL,
+                    REQUIRED_BY,
                     REQUIRES,
                     REQUIRES_DATAMODEL,
                     REQUIRES_JAVA,
@@ -100,14 +102,13 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
         .rule(CONDITION_MESSAGE_ACCESSOR)
         .is("condition_message_accessor", WHITESPACE, IDENTIFIER);
     builder.rule(DESCRIPTION).is("description", SPACING, FREE_LINES, "end");
-    builder
-        .rule(DO_NOT_TRANSLATE)
-        .is("do_not_translate");
+    builder.rule(DO_NOT_TRANSLATE).is("do_not_translate");
     builder.rule(HIDDEN).is("hidden");
     builder.rule(INSTALL_REQUIRES).is("install_requires", SPACING, MODULE_REFS, "end");
     builder.rule(LANGUAGE).is("language", WHITESPACE, IDENTIFIER);
     builder.rule(MESSAGES).is("messages", WHITESPACE, IDENTIFIERS);
     builder.rule(OPTIONAL).is("optional", SPACING, MODULE_REFS, "end");
+    builder.rule(REQUIRED_BY).is("required_by", SPACING, MODULE_REFS, "end");
     builder.rule(REQUIRES).is("requires", SPACING, MODULE_REFS, "end");
     builder.rule(REQUIRES_JAVA).is("requires_java", SPACING, JAVA_MODULE_REFS, "end");
     builder
