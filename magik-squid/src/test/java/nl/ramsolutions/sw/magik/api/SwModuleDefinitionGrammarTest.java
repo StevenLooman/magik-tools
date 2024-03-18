@@ -51,8 +51,7 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testDoNotTranslate() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.DO_NOT_TRANSLATE))
-        .matches("do_not_translate");
+    assertThat(g.rule(SwModuleDefinitionGrammar.DO_NOT_TRANSLATE)).matches("do_not_translate");
   }
 
   @Test
@@ -79,6 +78,15 @@ class SwModuleDefinitionGrammarTest {
         .matches("optional\nx\nend")
         .matches("optional\nx 1\nend")
         .matches("optional\nx 1\ny 2\nend");
+  }
+
+  @Test
+  void testRequiredBy() {
+    assertThat(g.rule(SwModuleDefinitionGrammar.REQUIRED_BY))
+        .matches("required_by\nend")
+        .matches("required_by\nx\nend")
+        .matches("required_by\nx 1\nend")
+        .matches("required_by\nx 1\ny 2\nend");
   }
 
   @Test

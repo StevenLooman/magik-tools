@@ -8,6 +8,7 @@
 - Add SwChar16VectorEvaluateInvocationCheck to test for `sw:char16_vector.evaluate()` method calls.
 - Fix setting `magik.typing.index*Usages` internally in `magik-language-server`.
 - Add `do_not_translate` to SwModuleDefinitionGrammar and SwProductDefinitionGrammar.
+- Add `required_by` to SwModuleDefinitionGrammar.
 
 0.9.1 (2024-03-13)
 
