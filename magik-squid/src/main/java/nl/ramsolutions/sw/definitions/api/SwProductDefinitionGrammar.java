@@ -14,6 +14,7 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
   PRODUCT_TYPE,
 
   DESCRIPTION,
+  DO_NOT_TRANSLATE,
   REQUIRES,
   OPTIONAL,
   TITLE,
@@ -48,11 +49,21 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
             builder.optional(SPACING),
             PRODUCT_IDENTIFICATION,
             builder.zeroOrMore(
-                builder.firstOf(DESCRIPTION, REQUIRES, OPTIONAL, TITLE, VERSION, SPACING)),
+                builder.firstOf(
+                  DESCRIPTION,
+                  DO_NOT_TRANSLATE,
+                  REQUIRES,
+                  OPTIONAL,
+                  TITLE,
+                  VERSION,
+                  SPACING)),
             builder.token(GenericTokenType.EOF, builder.endOfInput()));
 
     builder.rule(PRODUCT_IDENTIFICATION).is(IDENTIFIER, WHITESPACE, PRODUCT_TYPE);
     builder.rule(DESCRIPTION).is("description", SPACING, FREE_LINES, "end");
+    builder
+        .rule(DO_NOT_TRANSLATE)
+        .is("do_not_translate");
     builder.rule(REQUIRES).is("requires", SPACING, PRODUCT_REFS, "end");
     builder.rule(OPTIONAL).is("optional", SPACING, PRODUCT_REFS, "end");
     builder.rule(TITLE).is("title", SPACING, FREE_LINES, "end");

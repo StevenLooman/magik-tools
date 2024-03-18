@@ -50,6 +50,12 @@ class SwModuleDefinitionGrammarTest {
   }
 
   @Test
+  void testDoNotTranslate() {
+    assertThat(g.rule(SwModuleDefinitionGrammar.DO_NOT_TRANSLATE))
+        .matches("do_not_translate");
+  }
+
+  @Test
   void testHidden() {
     assertThat(g.rule(SwModuleDefinitionGrammar.HIDDEN)).matches("hidden");
   }
