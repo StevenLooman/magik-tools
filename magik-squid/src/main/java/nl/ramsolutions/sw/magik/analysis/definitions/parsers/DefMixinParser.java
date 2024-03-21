@@ -4,11 +4,13 @@ import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -93,6 +95,13 @@ public class DefMixinParser extends BaseDefParser {
     final AstNode parentNode = this.node.getParent();
     final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
+    // Figure topics.
+    final AstNode pragmaNode = PragmaNodeHelper.getPragmaNode(node);
+    final Set<String> topics =
+        pragmaNode != null
+            ? new PragmaNodeHelper(pragmaNode).getAllTopics()
+            : Collections.emptySet();
+
     final ExemplarDefinition mixinDefinition =
         new ExemplarDefinition(
             location,
@@ -102,7 +111,8 @@ public class DefMixinParser extends BaseDefParser {
             ExemplarDefinition.Sort.INTRINSIC,
             name,
             Collections.emptyList(),
-            parents);
+            parents,
+            topics);
     return List.of(mixinDefinition);
   }
 }

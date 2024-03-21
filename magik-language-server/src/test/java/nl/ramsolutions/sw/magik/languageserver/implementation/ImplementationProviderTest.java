@@ -39,7 +39,8 @@ class ImplementationProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
-            Collections.emptyList()));
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
             new Location(
@@ -52,6 +53,7 @@ class ImplementationProviderTest {
             Set.of(MethodDefinition.Modifier.ABSTRACT),
             Collections.emptyList(),
             null,
+            Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
     final TypeString bRef = TypeString.ofIdentifier("b", "user");
@@ -64,7 +66,8 @@ class ImplementationProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             bRef,
             Collections.emptyList(),
-            List.of(aRef)));
+            List.of(aRef),
+            Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
             new Location(
@@ -78,6 +81,7 @@ class ImplementationProviderTest {
             Collections.emptySet(), // Concrete.
             Collections.emptyList(),
             null,
+            Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 

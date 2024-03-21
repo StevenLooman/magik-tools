@@ -13,13 +13,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstWalker;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
+import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
@@ -32,6 +37,7 @@ import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 public class SemanticTokenWalker extends AstWalker {
 
   private static final String DEFAULT_PACKAGE = "user";
+  private static final String TOPIC_DEPRECATED = "deprecated";
 
   private static final List<String> MAGIK_MODIFIER_VALUES =
       List.of(
@@ -278,7 +284,20 @@ public class SemanticTokenWalker extends AstWalker {
       return;
     }
 
-    this.addSemanticToken(identifierNode, SemanticToken.Type.METHOD);
+    // Test for deprecation.
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
+    final AstNode receiverNode = helper.getReceiverNode();
+    final LocalTypeReasonerState typeReasonerState = this.magikFile.getTypeReasonerState();
+    final ExpressionResult result = typeReasonerState.getNodeType(receiverNode);
+    final AbstractType type = result.get(0, UndefinedType.INSTANCE);
+    final String methodName = helper.getMethodName();
+    final Set<SemanticToken.Modifier> modifiers =
+        type.getMethods(methodName).stream()
+                .anyMatch(method -> method.getTopics().contains(TOPIC_DEPRECATED))
+            ? Set.of(SemanticToken.Modifier.DEPRECATED)
+            : Collections.emptySet();
+
+    this.addSemanticToken(identifierNode, SemanticToken.Type.METHOD, modifiers);
   }
 
   @Override
@@ -353,9 +372,15 @@ public class SemanticTokenWalker extends AstWalker {
 
       case GLOBAL, DYNAMIC:
         final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
-        if (this.isKnownType(typeString)) {
-          this.addSemanticToken(
-              node, SemanticToken.Type.CLASS, Set.of(SemanticToken.Modifier.VARIABLE_GLOBAL));
+        final ITypeKeeper typeKeeper = this.magikFile.getTypeKeeper();
+        final AbstractType type = typeKeeper.getType(typeString);
+        if (type instanceof MagikType) {
+          final Set<SemanticToken.Modifier> modifiers =
+              type.getTopics().contains(TOPIC_DEPRECATED)
+                  ? Set.of(
+                      SemanticToken.Modifier.VARIABLE_GLOBAL, SemanticToken.Modifier.DEPRECATED)
+                  : Set.of(SemanticToken.Modifier.VARIABLE_GLOBAL);
+          this.addSemanticToken(node, SemanticToken.Type.CLASS, modifiers);
         } else {
           this.addSemanticToken(
               node, SemanticToken.Type.VARIABLE, Set.of(SemanticToken.Modifier.VARIABLE_GLOBAL));

@@ -349,6 +349,7 @@ public final class ClassInfoDefinitionReader {
             modifiers,
             parameters,
             assignmentParameter,
+            Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.UNDEFINED);
     this.definitionKeeper.add(definition);
@@ -427,7 +428,8 @@ public final class ClassInfoDefinitionReader {
             ExemplarDefinition.Sort.UNDEFINED,
             typeString,
             slots,
-            parents);
+            parents,
+            Collections.emptySet());
     this.definitionKeeper.add(definition);
   }
 
@@ -487,7 +489,8 @@ public final class ClassInfoDefinitionReader {
             ExemplarDefinition.Sort.INTRINSIC,
             typeString,
             Collections.emptyList(),
-            Collections.emptyList());
+            Collections.emptyList(),
+            Collections.emptySet());
     this.definitionKeeper.add(definition);
   }
 

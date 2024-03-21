@@ -10,6 +10,12 @@
 - Add `do_not_translate` to SwModuleDefinitionGrammar and SwProductDefinitionGrammar.
 - Add `required_by` to SwModuleDefinitionGrammar.
 - Add FormattingFixer to `magik-lint --apply-fixes`.
+- Store exemplar and method topics at ExemplarDefinition and MethodDefinitions.
+- Parse exemplar and method topics.
+- Add DeprecatedTypeUsageTypedCheck check to mark deprecated exemplars.
+- Add DeprecatedMethodUsageTypedCheck check to mark deprecated methods.
+- Semantic tokens now mark deprecated types and methods.
+- Completion provider now marks deprecated types and methods.
 
 0.9.1 (2024-03-13)
 

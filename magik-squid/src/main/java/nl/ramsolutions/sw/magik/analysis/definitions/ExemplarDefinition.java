@@ -6,6 +6,7 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
@@ -26,6 +27,7 @@ public class ExemplarDefinition extends TypeStringDefinition {
   private final TypeString typeName;
   private final List<SlotDefinition> slots;
   private final List<TypeString> parents;
+  private final Set<String> topics;
 
   /**
    * Constructor.
@@ -36,6 +38,7 @@ public class ExemplarDefinition extends TypeStringDefinition {
    * @param typeName Name of slotted exemplar.
    * @param slots Slots of slotted exemplar.
    * @param parents Parents of slotted exemplar.
+   * @param topics Topics.
    */
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public ExemplarDefinition(
@@ -46,7 +49,8 @@ public class ExemplarDefinition extends TypeStringDefinition {
       final Sort sort,
       final TypeString typeName,
       final List<SlotDefinition> slots,
-      final List<TypeString> parents) {
+      final List<TypeString> parents,
+      final Set<String> topics) {
     super(location, moduleName, doc, node);
 
     if (!typeName.isSingle()) {
@@ -57,6 +61,7 @@ public class ExemplarDefinition extends TypeStringDefinition {
     this.typeName = typeName;
     this.slots = List.copyOf(slots);
     this.parents = List.copyOf(parents);
+    this.topics = Set.copyOf(topics);
   }
 
   public List<SlotDefinition> getSlots() {
@@ -76,6 +81,10 @@ public class ExemplarDefinition extends TypeStringDefinition {
 
   public List<TypeString> getParents() {
     return Collections.unmodifiableList(this.parents);
+  }
+
+  public Set<String> getTopics() {
+    return Collections.unmodifiableSet(this.topics);
   }
 
   @Override
@@ -107,7 +116,8 @@ public class ExemplarDefinition extends TypeStringDefinition {
         this.sort,
         this.typeName,
         this.slots.stream().map(SlotDefinition::getWithoutNode).toList(),
-        this.parents);
+        this.parents,
+        Collections.emptySet());
   }
 
   @Override

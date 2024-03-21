@@ -44,7 +44,8 @@ class DefinitionsProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
-            Collections.emptyList()));
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final String code =
         "" + "_method object.method\n" + "    _return rope.new()\n" + "_endmethod\n";

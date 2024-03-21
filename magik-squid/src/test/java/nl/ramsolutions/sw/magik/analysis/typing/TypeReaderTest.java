@@ -2,7 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
+import java.util.Collections;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -80,8 +80,9 @@ class TypeReaderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final TypeString ropeRefWithGeneric =

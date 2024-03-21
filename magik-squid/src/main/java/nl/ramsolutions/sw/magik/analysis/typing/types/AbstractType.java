@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -238,6 +239,10 @@ public abstract class AbstractType {
   @CheckForNull
   public String getModuleName() {
     return this.moduleName;
+  }
+
+  public Set<String> getTopics() {
+    return Collections.emptySet();
   }
 
   /**

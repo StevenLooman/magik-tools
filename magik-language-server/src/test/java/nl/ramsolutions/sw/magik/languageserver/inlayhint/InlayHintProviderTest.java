@@ -62,6 +62,7 @@ class InlayHintProviderTest {
                     ParameterDefinition.Modifier.NONE,
                     TypeString.UNDEFINED)),
             null,
+            Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 

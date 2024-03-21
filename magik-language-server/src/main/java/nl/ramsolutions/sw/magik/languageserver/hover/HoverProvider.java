@@ -389,6 +389,10 @@ public class HoverProvider {
     final String moduleName = Objects.requireNonNullElse(method.getModuleName(), "");
     builder.append("Module: ").append(moduleName).append(SECTION_END);
 
+    // Method topics.
+    final String topics = method.getTopics().stream().collect(Collectors.joining(", "));
+    builder.append("Topics: ").append(topics).append(SECTION_END);
+
     // Method doc.
     final String methodDoc = method.getDoc();
     if (methodDoc != null) {
@@ -406,6 +410,10 @@ public class HoverProvider {
     // Method module.
     final String moduleName = Objects.requireNonNullElse(type.getModuleName(), "");
     builder.append("Module: ").append(moduleName).append(SECTION_END);
+
+    // Topics.
+    final String topics = type.getTopics().stream().collect(Collectors.joining(", "));
+    builder.append("Topics: ").append(topics).append(SECTION_END);
 
     // Type doc.
     final String typeDoc = type.getDoc();

@@ -45,6 +45,7 @@ class HoverProviderTest {
             Collections.emptySet(),
             Collections.emptyList(),
             null,
+            Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 
@@ -73,7 +74,8 @@ class HoverProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             hoverMeTypeRef,
             Collections.emptyList(),
-            Collections.emptyList()));
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final String code = "" + "_method hover_me_type.method()\n" + "_endmethod";
     final Position position = new Position(0, 10); // On 'hover_me_type'.
@@ -101,6 +103,7 @@ class HoverProviderTest {
             Collections.emptySet(),
             Collections.emptyList(),
             null,
+            Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 

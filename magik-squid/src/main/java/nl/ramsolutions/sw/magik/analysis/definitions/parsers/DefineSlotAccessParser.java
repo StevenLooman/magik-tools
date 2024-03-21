@@ -268,6 +268,7 @@ public class DefineSlotAccessParser {
               getModifiers,
               getParameters,
               null,
+              Collections.emptySet(),
               ExpressionResultString.UNDEFINED,
               ExpressionResultString.UNDEFINED);
       methodDefinitions.add(getMethod);
@@ -289,6 +290,7 @@ public class DefineSlotAccessParser {
               getModifiers,
               getParameters,
               null,
+              Collections.emptySet(),
               ExpressionResultString.UNDEFINED,
               ExpressionResultString.UNDEFINED);
       methodDefinitions.add(getMethod);
@@ -320,6 +322,7 @@ public class DefineSlotAccessParser {
               setModifiers,
               setParameters,
               assignmentParam,
+              Collections.emptySet(),
               ExpressionResultString.UNDEFINED,
               ExpressionResultString.UNDEFINED);
       methodDefinitions.add(setMethod);
@@ -337,6 +340,7 @@ public class DefineSlotAccessParser {
               setModifiers,
               setParameters,
               assignmentParam,
+              Collections.emptySet(),
               ExpressionResultString.UNDEFINED,
               ExpressionResultString.UNDEFINED);
       methodDefinitions.add(bootMethod);

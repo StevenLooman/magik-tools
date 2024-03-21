@@ -28,6 +28,7 @@ public class MethodDefinition extends Definition {
   private final String methodName;
   private final List<ParameterDefinition> parameters;
   private final @Nullable ParameterDefinition assignmentParameter;
+  private final Set<String> topics;
   private final ExpressionResultString returnTypes;
   private final ExpressionResultString loopTypes;
   private final Set<GlobalUsage> usedGlobals;
@@ -45,6 +46,7 @@ public class MethodDefinition extends Definition {
    * @param modifiers Modifiers for method.
    * @param parameters Parameters for method.
    * @param assignmentParameter Assignment parameter.
+   * @param topics Topics.
    * @param doc Method doc.
    * @param returnTypes Return types.
    * @param loopTypes Loop types.
@@ -60,6 +62,7 @@ public class MethodDefinition extends Definition {
       final Set<Modifier> modifiers,
       final List<ParameterDefinition> parameters,
       final @Nullable ParameterDefinition assignmentParameter,
+      final Set<String> topics,
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes) {
     super(location, moduleName, doc, node);
@@ -68,6 +71,7 @@ public class MethodDefinition extends Definition {
     this.modifiers = Set.copyOf(modifiers);
     this.parameters = List.copyOf(parameters);
     this.assignmentParameter = assignmentParameter;
+    this.topics = Set.copyOf(topics);
     this.returnTypes = returnTypes;
     this.loopTypes = loopTypes;
     this.usedGlobals = Collections.emptySet();
@@ -86,6 +90,7 @@ public class MethodDefinition extends Definition {
    * @param modifiers Modifiers for method.
    * @param parameters Parameters for method.
    * @param assignmentParameter Assignment parameter.
+   * @param topics Topics.
    * @param doc Method doc.
    * @param returnTypes Return types.
    * @param loopTypes Loop types.
@@ -101,6 +106,7 @@ public class MethodDefinition extends Definition {
       final Set<Modifier> modifiers,
       final List<ParameterDefinition> parameters,
       final @Nullable ParameterDefinition assignmentParameter,
+      final Set<String> topics,
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes,
       final Set<GlobalUsage> usedGlobals,
@@ -113,6 +119,7 @@ public class MethodDefinition extends Definition {
     this.modifiers = Set.copyOf(modifiers);
     this.parameters = List.copyOf(parameters);
     this.assignmentParameter = assignmentParameter;
+    this.topics = Set.copyOf(topics);
     this.returnTypes = returnTypes;
     this.loopTypes = loopTypes;
     this.usedGlobals = Collections.unmodifiableSet(usedGlobals);
@@ -194,6 +201,15 @@ public class MethodDefinition extends Definition {
     return this.assignmentParameter;
   }
 
+  /**
+   * Get topics.
+   *
+   * @return Topics.
+   */
+  public Set<String> getTopics() {
+    return Collections.unmodifiableSet(this.topics);
+  }
+
   public Set<GlobalUsage> getUsedGlobals() {
     return Collections.unmodifiableSet(this.usedGlobals);
   }
@@ -227,6 +243,7 @@ public class MethodDefinition extends Definition {
         this.modifiers,
         this.parameters.stream().map(ParameterDefinition::getWithoutNode).toList(),
         this.assignmentParameter != null ? this.assignmentParameter.getWithoutNode() : null,
+        this.topics,
         this.returnTypes,
         this.loopTypes,
         this.usedGlobals,
@@ -256,6 +273,7 @@ public class MethodDefinition extends Definition {
         this.methodName,
         this.parameters,
         this.assignmentParameter,
+        this.topics,
         this.returnTypes,
         this.loopTypes);
   }
@@ -283,6 +301,7 @@ public class MethodDefinition extends Definition {
         && Objects.equals(this.methodName, other.methodName)
         && Objects.equals(this.parameters, other.parameters)
         && Objects.equals(this.assignmentParameter, other.assignmentParameter)
+        && Objects.equals(this.topics, other.topics)
         && Objects.equals(this.returnTypes, other.returnTypes)
         && Objects.equals(this.loopTypes, other.loopTypes);
   }
