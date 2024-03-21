@@ -146,6 +146,7 @@ public class DefineSharedConstantParser {
             modifiers,
             parameters,
             null,
+            Collections.emptySet(),
             new ExpressionResultString(typeRef),
             ExpressionResultString.EMPTY);
     return List.of(methodDefinition);

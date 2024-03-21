@@ -15,8 +15,8 @@ $
 _pragma(classify_level=restricted)
 _private _method method_finder.read_comment()
 	## Read a comment from input.
-	## @return {sw:char16_vector|sw:unset} Read comment.
-	## @return {sw:char16_vector|sw:unset} Method finder message.
+	## @return {sw:char16_vector|sw:unset} Read comment, unset on error.
+	## @return {sw:char16_vector|sw:unset} Method finder error, if any.
 	_local msg << .input.get_line()
 	_local line_count << msg.as_integer()
 	_if line_count _is _unset
@@ -35,11 +35,20 @@ _private _method method_finder.read_comment()
 _endmethod
 $
 
+_pragma(classify_level=restricted)
+_private _method method_finder.read_line()
+	## Read a single line from input.
+	## @return {sw:char16_vector|sw:unset} Read line.
+	_return .input.get_line()
+_endmethod
+$
+
 _pragma(classify_level=basic, topic=type_dumper)
 _method method_finder.get_class_comment(class)
 	## Get class comment.
 	## @param {sw:char16_vector} class Class name, e.g., "sw:rope".
-	## @return {sw:char16_vector|sw:unset} Class comment.
+	## @return {sw:char16_vector|sw:unset} Class comment, unset on error.
+	## @return {sw:char16_vector|sw:unset} Method finder error, if any.
 	_local command << write_string("get_class_info comments ", class)
 	_self.write(command, character.newline)
 	_self.flush()
@@ -48,11 +57,29 @@ _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
+_method method_finder.get_class_topics(class)
+	## Get class comment.
+	## @param {sw:char16_vector} class Class name, e.g., "sw:rope".
+	## @return {sw:simple_vector} Class topics.
+	_local command << write_string("get_class_info topics ", class)
+	_self.write(command, character.newline)
+	_self.flush()
+	_local topics << _self.read_line()
+	_if topics = "method finder: Invalid class"
+	_then
+		_return {}
+	_endif
+	_return topics.default("").trim_spaces().split_by(character.space)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
 _method method_finder.get_method_comment(method, class)
 	## Get method comment.
 	## @param {sw:char16_vector} method Method name, e.g., "as_simple_vector()".
 	## @param {sw:char16_vector} class Class name, e.g., "sw:rope".
-	## @return {sw:char16_vector|sw:unset} Method comment.
+	## @return {sw:char16_vector|sw:unset} Method comment, unset on error.
+	## @return {sw:char16_vector|sw:unset} Method finder error, if any.
 	_local command << write_string("get_method_info comments ", method, " ", class)
 	_self.write(command, character.newline)
 	_self.flush()
@@ -60,10 +87,30 @@ _method method_finder.get_method_comment(method, class)
 _endmethod
 $
 
+_pragma(classify_level=basic, topic=type_dumper)
+_method method_finder.get_method_topics(method, class)
+	## Get method comment.
+	## @param {sw:char16_vector} method Method name, e.g., "as_simple_vector()".
+	## @param {sw:char16_vector} class Class name, e.g., "sw:rope".
+	## @return {sw:simple_vector} Method topics.
+	_local command << write_string("get_method_info topics ", method, " ", class)
+	_self.write(command, character.newline)
+	_self.flush()
+	_local topics << _self.read_line()
+	_if topics = "method finder: Invalid class" _orif
+	    topics = "method finder: Invalid method" _orif
+	    topics = "method finder: No such method found"
+	_then
+		_return {}
+	_endif
+	_return topics.default("").trim_spaces().split_by(character.space)
+_endmethod
+$
+
 _if smallworld_product.product(:sw5_java_object_wrapper) _isnt _unset
 _then
-    smallworld_product.add_product(:sw5_java_object_wrapper)
-    sw_module_manager.load_module(:sw5_java_object_wrapper)
+	smallworld_product.add_product(:sw5_java_object_wrapper)
+	sw_module_manager.load_module(:sw5_java_object_wrapper)
 _endif
 $
 
@@ -409,8 +456,8 @@ _private _method type_dumper.write_type(type_name, method_table)
 	# Slots.
 	instruction[:slots] << _self.build_slots(method_table)
 
-	# Pragma.
-	instruction[:pragma] << metadata[:topic].default({})
+	# Topics.
+	instruction[:topics] << method_finder.get_class_topics(type_name)
 
 	# Module name.
 	instruction[:module_name] <<
@@ -556,9 +603,9 @@ _private _method type_dumper.write_method(type_name, method)
 			# pass
 		_endtry
 
-	instruction[:pragma] <<
+	instruction[:topics] <<
 		_try
-			>> method.compiler_info[:topic]
+			>> method_finder.get_method_topics(method.name, type_name)
 		_when error
 			>> {}
 		_endtry

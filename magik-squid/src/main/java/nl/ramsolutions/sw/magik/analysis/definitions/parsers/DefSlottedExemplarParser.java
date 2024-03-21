@@ -18,6 +18,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.SimpleVectorNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
@@ -157,6 +158,13 @@ public class DefSlottedExemplarParser extends BaseDefParser {
     // Figure doc.
     final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
+    // Figure topics.
+    final AstNode pragmaNode = PragmaNodeHelper.getPragmaNode(node);
+    final Set<String> topics =
+        pragmaNode != null
+            ? new PragmaNodeHelper(pragmaNode).getAllTopics()
+            : Collections.emptySet();
+
     final ExemplarDefinition slottedExemplarDefinition =
         new ExemplarDefinition(
             location,
@@ -166,7 +174,8 @@ public class DefSlottedExemplarParser extends BaseDefParser {
             ExemplarDefinition.Sort.SLOTTED,
             name,
             slots,
-            parents);
+            parents,
+            topics);
 
     final List<Definition> definitions = new ArrayList<>();
     definitions.add(slottedExemplarDefinition);
@@ -207,6 +216,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               getModifiers,
               getParameters,
               null,
+              Collections.emptySet(),
               new ExpressionResultString(slotTypeRef),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(getMethod);
@@ -228,6 +238,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               getModifiers,
               getParameters,
               null,
+              Collections.emptySet(),
               new ExpressionResultString(slotTypeRef),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(getMethod);
@@ -259,6 +270,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               setModifiers,
               setParameters,
               assignmentParam,
+              Collections.emptySet(),
               new ExpressionResultString(TypeString.ofParameterRef("val")),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(setMethod);
@@ -276,6 +288,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               setModifiers,
               setParameters,
               assignmentParam,
+              Collections.emptySet(),
               new ExpressionResultString(slotTypeRef),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(bootMethod);

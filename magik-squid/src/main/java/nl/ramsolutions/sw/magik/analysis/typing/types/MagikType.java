@@ -43,6 +43,7 @@ public class MagikType extends AbstractType {
   private final Set<Method> methods = ConcurrentHashMap.newKeySet();
   private final Set<TypeString> parents = ConcurrentHashMap.newKeySet();
   private final Map<String, Slot> slots = new ConcurrentHashMap<>();
+  private final Set<String> topics = new HashSet<>();
   private final Set<GenericDefinition> genericDefinitions = ConcurrentHashMap.newKeySet();
   private final ITypeKeeper typeKeeper;
   private Sort sort;
@@ -445,6 +446,15 @@ public class MagikType extends AbstractType {
    */
   public void removeMethod(final Method method) {
     this.methods.remove(method);
+  }
+
+  @Override
+  public Set<String> getTopics() {
+    return Collections.unmodifiableSet(this.topics);
+  }
+
+  public void addTopic(final String topic) {
+    this.topics.add(topic);
   }
 
   @Override

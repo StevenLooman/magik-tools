@@ -24,6 +24,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -124,6 +125,13 @@ public class MethodDefinitionParser {
             .map(String::trim)
             .collect(Collectors.joining("\n"));
 
+    // Figure topics.
+    final AstNode pragmaNode = PragmaNodeHelper.getPragmaNode(node);
+    final Set<String> topics =
+        pragmaNode != null
+            ? new PragmaNodeHelper(pragmaNode).getAllTopics()
+            : Collections.emptySet();
+
     final MethodDefinitionUsageParser usageParser = new MethodDefinitionUsageParser(this.node);
     final Set<GlobalUsage> usedGlobals =
         this.configuration.getMagikIndexerIndexGlobalUsages()
@@ -153,6 +161,7 @@ public class MethodDefinitionParser {
             modifiers,
             parameters,
             assignmentParamter,
+            topics,
             callResult,
             loopResult,
             usedGlobals,

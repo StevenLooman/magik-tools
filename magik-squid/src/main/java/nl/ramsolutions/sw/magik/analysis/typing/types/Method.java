@@ -287,6 +287,7 @@ public class Method {
   private final ExpressionResultString callResult;
   private final ExpressionResultString loopbodyResult;
   private final String name;
+  private final Set<String> topics;
   private final Set<GlobalUsage> usedGlobals;
   private final Set<MethodUsage> calledMethods;
   private final Set<SlotUsage> usedSlots;
@@ -327,6 +328,7 @@ public class Method {
     this.name = name;
     this.parameters = parameters;
     this.assignmentParameter = assignmentParameter;
+    this.topics = new HashSet<>();
     this.doc = methodDoc;
     this.callResult = callResult;
     this.loopbodyResult = loopbodyResult;
@@ -372,6 +374,14 @@ public class Method {
    */
   public String getName() {
     return this.name;
+  }
+
+  public Set<String> getTopics() {
+    return Collections.unmodifiableSet(this.topics);
+  }
+
+  public void addTopic(final String topic) {
+    this.topics.add(topic);
   }
 
   /**

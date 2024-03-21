@@ -161,6 +161,7 @@ public class DefineSharedVariableParser {
             getModifiers,
             getParameters,
             null,
+            Collections.emptySet(),
             new ExpressionResultString(typeRef),
             ExpressionResultString.EMPTY);
     methodDefinitions.add(getMethod);
@@ -192,6 +193,7 @@ public class DefineSharedVariableParser {
             setModifiers,
             setParameters,
             assignmentParam,
+            Collections.emptySet(),
             new ExpressionResultString(TypeString.ofParameterRef("val")),
             ExpressionResultString.EMPTY);
     methodDefinitions.add(setMethod);
@@ -209,6 +211,7 @@ public class DefineSharedVariableParser {
             setModifiers,
             setParameters,
             assignmentParam,
+            Collections.emptySet(),
             new ExpressionResultString(typeRef),
             ExpressionResultString.EMPTY);
     methodDefinitions.add(bootMethod);

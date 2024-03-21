@@ -98,7 +98,8 @@ class ComparedTypesDoNotMatchTest extends MagikTypedCheckTestBase {
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.ofIdentifier("parent", "user"),
             Collections.emptyList(),
-            Collections.emptyList()));
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -108,7 +109,8 @@ class ComparedTypesDoNotMatchTest extends MagikTypedCheckTestBase {
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.ofIdentifier("child", "user"),
             Collections.emptyList(),
-            List.of(TypeString.ofIdentifier("parent", "user"))));
+            List.of(TypeString.ofIdentifier("parent", "user")),
+            Collections.emptySet()));
     final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
     assertThat(checkResults).isEmpty();

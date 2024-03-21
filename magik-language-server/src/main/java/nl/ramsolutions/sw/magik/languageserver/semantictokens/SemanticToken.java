@@ -55,7 +55,8 @@ public class SemanticToken {
   public enum Modifier {
     DOCUMENTATION(0x01),
     READONLY(0x02),
-    VARIABLE_GLOBAL(0x04);
+    VARIABLE_GLOBAL(0x04),
+    DEPRECATED(0x08);
 
     private final int value;
 

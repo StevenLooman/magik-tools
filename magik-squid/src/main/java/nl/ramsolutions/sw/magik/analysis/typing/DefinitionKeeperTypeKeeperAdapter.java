@@ -248,6 +248,9 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
     final MagikType magikType =
         new MagikType(this, location, moduleName, sort, definitionTypeString);
 
+    // Add topics.
+    exemplarDefinition.getTopics().forEach(magikType::addTopic);
+
     // Add doc.
     final String doc = exemplarDefinition.getDoc();
     magikType.setDoc(doc);
@@ -419,6 +422,8 @@ public class DefinitionKeeperTypeKeeperAdapter implements ITypeKeeper {
             methodDefinition.getDoc(),
             methodDefinition.getReturnTypes(),
             methodDefinition.getLoopTypes());
+
+    methodDefinition.getTopics().forEach(method::addTopic);
 
     methodDefinition
         .getUsedGlobals()

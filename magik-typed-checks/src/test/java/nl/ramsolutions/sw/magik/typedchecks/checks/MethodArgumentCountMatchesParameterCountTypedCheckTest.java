@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
@@ -19,7 +20,10 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
 
   @Test
   void testMethodUnknown() {
-    final String code = "" + "_block\n" + "  object.m()\n" + "_endblock";
+    final String code = """
+        _block
+          object.m()
+        _endblock""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
@@ -56,10 +60,14 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
                     ParameterDefinition.Modifier.NONE,
                     TypeString.SW_OBJECT)),
             null,
+            Collections.emptySet(),
             ExpressionResultString.EMPTY,
             ExpressionResultString.EMPTY));
 
-    final String code = "" + "_block\n" + "  object.m(object, object)\n" + "_endblock";
+    final String code = """
+        _block
+          object.m(object, object)
+        _endblock""";
     final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
@@ -95,10 +103,14 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
                     ParameterDefinition.Modifier.NONE,
                     TypeString.SW_OBJECT)),
             null,
+            Collections.emptySet(),
             ExpressionResultString.EMPTY,
             ExpressionResultString.EMPTY));
 
-    final String code = "" + "_block\n" + "  object.m(object)\n" + "_endblock";
+    final String code = """
+        _block
+          object.m(object)
+        _endblock""";
     final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).hasSize(1);

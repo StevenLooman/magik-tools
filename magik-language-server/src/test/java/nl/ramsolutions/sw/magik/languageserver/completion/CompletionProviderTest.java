@@ -67,6 +67,7 @@ class CompletionProviderTest {
             Collections.emptySet(),
             Collections.emptyList(),
             null,
+            Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
     final Position position = new Position(1, 6); // On '.'.
@@ -95,7 +96,8 @@ class CompletionProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
-            Collections.emptyList()));
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
             null,
@@ -107,6 +109,7 @@ class CompletionProviderTest {
             Collections.emptySet(),
             Collections.emptyList(),
             null,
+            Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
     final Position position = new Position(1, 10); // On '.'.
@@ -134,6 +137,7 @@ class CompletionProviderTest {
             Collections.emptySet(),
             Collections.emptyList(),
             null,
+            Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
     final Position position = new Position(1, 8); // On 'i'.
@@ -196,7 +200,8 @@ class CompletionProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             List.of(new SlotDefinition(null, code, code, null, code, aRef)),
-            Collections.emptyList()));
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final Position position = new Position(1, 2); // On ''.
     final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);

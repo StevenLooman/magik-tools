@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
@@ -65,8 +66,9 @@ class JsonDefinitionWriterTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
@@ -96,6 +98,7 @@ class JsonDefinitionWriterTest {
                     ParameterDefinition.Modifier.OPTIONAL,
                     TypeString.UNDEFINED)),
             null,
+            Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 

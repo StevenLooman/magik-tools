@@ -114,8 +114,29 @@ public final class JsonDefinitionReader {
           Collections.emptySet(),
           Collections.emptyList(),
           null,
+          Collections.emptySet(),
           ExpressionResultString.UNDEFINED,
           ExpressionResultString.UNDEFINED);
+    }
+  }
+
+  private static final class ExemplarDefinitionCreator
+      implements InstanceCreator<ExemplarDefinition> {
+
+    @Override
+    public ExemplarDefinition createInstance(final Type type) {
+      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
+      // even if these were not set in the source JSON.
+      return new ExemplarDefinition(
+          null,
+          null,
+          null,
+          null,
+          ExemplarDefinition.Sort.UNDEFINED,
+          TypeString.UNDEFINED,
+          Collections.emptyList(),
+          Collections.emptyList(),
+          Collections.emptySet());
     }
   }
 
@@ -225,6 +246,7 @@ public final class JsonDefinitionReader {
             ParameterDefinition.Modifier.class,
             new LowerCaseEnumDeserializer<ParameterDefinition.Modifier>())
         .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionCreator())
+        .registerTypeAdapter(ExemplarDefinition.class, new ExemplarDefinitionCreator())
         .create();
   }
 

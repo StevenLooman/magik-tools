@@ -556,6 +556,7 @@ class ConditionalBodyHandlerTest {
             Collections.emptySet(),
             Collections.emptyList(),
             null,
+            Collections.emptySet(),
             new ExpressionResultString(TypeString.SW_UNSET),
             ExpressionResultString.EMPTY));
     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -593,6 +594,7 @@ class ConditionalBodyHandlerTest {
             Collections.emptySet(),
             Collections.emptyList(),
             null,
+            Collections.emptySet(),
             new ExpressionResultString(TypeString.SW_UNSET),
             ExpressionResultString.EMPTY));
     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);

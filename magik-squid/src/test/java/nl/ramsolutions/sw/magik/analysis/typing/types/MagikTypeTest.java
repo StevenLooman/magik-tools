@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.types;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
@@ -27,8 +28,9 @@ class MagikTypeTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             propertyListRef,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
             null,
@@ -40,6 +42,7 @@ class MagikTypeTest {
             Set.of(),
             List.of(),
             null,
+            Collections.emptySet(),
             ExpressionResultString.EMPTY,
             new ExpressionResultString(
                 TypeString.ofGenericReference("K"), TypeString.ofGenericReference("E"))));

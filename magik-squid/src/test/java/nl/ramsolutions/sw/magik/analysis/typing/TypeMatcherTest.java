@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -26,8 +27,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             typeRef,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final AbstractType type = typeKeeper.getType(typeRef);
@@ -49,8 +51,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type1Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -59,8 +62,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type2Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final AbstractType type = typeKeeper.getType(type1Ref);
@@ -83,8 +87,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             baseRef,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -93,8 +98,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             childRef,
-            List.of(),
-            List.of(baseRef)));
+            Collections.emptyList(),
+            List.of(baseRef),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final AbstractType baseType = typeKeeper.getType(baseRef);
@@ -117,8 +123,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type1Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -127,8 +134,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type2Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final AbstractType type1 = typeKeeper.getType(type1Ref);
@@ -153,8 +161,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type1Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -163,8 +172,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type2Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -173,8 +183,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type3Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final AbstractType type1 = typeKeeper.getType(type1Ref);
@@ -200,8 +211,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type1Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -210,8 +222,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type2Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -220,8 +233,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type3Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final AbstractType type1 = typeKeeper.getType(type1Ref);
@@ -248,8 +262,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type1Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -258,8 +273,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type2Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -268,8 +284,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type3Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final AbstractType type1 = typeKeeper.getType(type1Ref);
@@ -294,8 +311,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             typeRef,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final AbstractType type = typeKeeper.getType(typeRef);
@@ -318,8 +336,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type1Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -328,8 +347,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             type2Ref,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final AbstractType type = typeKeeper.getType(type1Ref);
@@ -352,8 +372,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             baseRef,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -362,8 +383,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             childRef,
-            List.of(),
-            List.of(baseRef)));
+            Collections.emptyList(),
+            List.of(baseRef),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final AbstractType childType = typeKeeper.getType(childRef);
@@ -387,8 +409,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             baseRef,
-            List.of(),
-            List.of()));
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -397,8 +420,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             child1Ref,
-            List.of(),
-            List.of(baseRef)));
+            Collections.emptyList(),
+            List.of(baseRef),
+            Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -407,8 +431,9 @@ class TypeMatcherTest {
             null,
             ExemplarDefinition.Sort.INTRINSIC,
             child2Ref,
-            List.of(),
-            List.of(child1Ref)));
+            Collections.emptyList(),
+            List.of(child1Ref),
+            Collections.emptySet()));
 
     final ITypeKeeper typeKeeper = new DefinitionKeeperTypeKeeperAdapter(definitionKeeper);
     final AbstractType baseType = typeKeeper.getType(baseRef);

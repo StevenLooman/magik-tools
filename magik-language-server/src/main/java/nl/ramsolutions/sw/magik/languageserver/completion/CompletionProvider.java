@@ -36,6 +36,7 @@ import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
+import org.eclipse.lsp4j.CompletionItemTag;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -47,6 +48,7 @@ public class CompletionProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CompletionProvider.class);
   private static final Set<Character> REMOVAL_STOP_CHARS = new HashSet<>();
+  private static final String TOPIC_DEPRECATED = "deprecated";
 
   static {
     REMOVAL_STOP_CHARS.add(' ');
@@ -232,6 +234,9 @@ public class CompletionProvider {
               item.setDetail(type.getFullName());
               item.setDocumentation(type.getDoc());
               item.setKind(CompletionItemKind.Class);
+              if (type.getTopics().contains(TOPIC_DEPRECATED)) {
+                item.setTags(List.of(CompletionItemTag.Deprecated));
+              }
               return item;
             })
         .forEach(items::add);
@@ -292,6 +297,9 @@ public class CompletionProvider {
               item.setDetail(method.getOwner().getFullName());
               item.setDocumentation(method.getDoc());
               item.setKind(CompletionItemKind.Method);
+              if (method.getTopics().contains(TOPIC_DEPRECATED)) {
+                item.setTags(List.of(CompletionItemTag.Deprecated));
+              }
               return item;
             })
         .toList();

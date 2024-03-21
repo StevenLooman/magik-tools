@@ -41,7 +41,8 @@ class TypeHierarchyProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             exemplarRef,
             Collections.emptyList(),
-            Collections.emptyList()));
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final String code = "" + "_method exemplar.method\n" + "_endmethod\n";
     final Position position = new Position(0, 10); // On 'exemplar'.
@@ -64,7 +65,8 @@ class TypeHierarchyProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
-            Collections.emptyList()));
+            Collections.emptyList(),
+            Collections.emptySet()));
 
     final String code = "" + "_method exemplar.method\n" + "  rope.new()\n" + "_endmethod\n";
     final Position position = new Position(1, 4); // On 'rope'.
@@ -87,7 +89,8 @@ class TypeHierarchyProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             exemplarRef,
             Collections.emptyList(),
-            Collections.emptyList()));
+            Collections.emptyList(),
+            Collections.emptySet()));
     final TypeString subExemplarRef = TypeString.ofIdentifier("sub_exemplar", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
@@ -98,7 +101,8 @@ class TypeHierarchyProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             subExemplarRef,
             Collections.emptyList(),
-            List.of(exemplarRef)));
+            List.of(exemplarRef),
+            Collections.emptySet()));
 
     final TypeHierarchyItem item =
         new TypeHierarchyItem(
@@ -125,7 +129,8 @@ class TypeHierarchyProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             exemplarRef,
             Collections.emptyList(),
-            List.of(TypeString.ofIdentifier("slotted_format_mixin", "sw"))));
+            List.of(TypeString.ofIdentifier("slotted_format_mixin", "sw")),
+            Collections.emptySet()));
 
     final TypeHierarchyItem item =
         new TypeHierarchyItem(

@@ -1,0 +1,16 @@
+{
+    "title": "Deprecated type usage",
+    "type": "CODE_SMELL",
+    "status": "ready",
+    "remediation": {
+      "func": "Constant\/Issue",
+      "constantCost": "15min"
+    },
+    "tags": [
+      "obsolete",
+      "typing"
+    ],
+    "defaultSeverity": "Minor",
+    "ruleSpecification": "DeprecatedTypeUsage",
+    "sqKey": "deprecated-type-usage"
+  }
