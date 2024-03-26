@@ -62,10 +62,8 @@ export class MagikLanguageClient implements vscode.Disposable {
 			documentSelector: [{ scheme: 'file', language: 'magik' }],
 			synchronize: {
 				fileEvents: [
-					vscode.workspace.createFileSystemWatcher('**/product.def'),
-					vscode.workspace.createFileSystemWatcher('**/module.def'),
-					vscode.workspace.createFileSystemWatcher('**/*.magik'),
-					vscode.workspace.createFileSystemWatcher('**/.magik-tools-ignore')
+					// Include all files (and directories) and filter in the language server itself.
+					vscode.workspace.createFileSystemWatcher('**/*')
 				],
 				configurationSection: 'magik',
 			}

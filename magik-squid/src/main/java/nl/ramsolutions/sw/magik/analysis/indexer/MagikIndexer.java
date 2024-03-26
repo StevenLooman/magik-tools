@@ -1,14 +1,19 @@
 package nl.ramsolutions.sw.magik.analysis.indexer;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.magik.FileEvent;
+import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
@@ -29,6 +34,8 @@ public class MagikIndexer {
   private static final long MAX_SIZE = 1024L * 1024L * 10L; // 10 MB
 
   private final IDefinitionKeeper definitionKeeper;
+  private final MagikAnalysisConfiguration analysisConfiguration;
+  private final IgnoreHandler ignoreHandler;
   private final Map<Path, Set<PackageDefinition>> indexedPackages = new HashMap<>();
   private final Map<Path, Set<ExemplarDefinition>> indexedTypes = new HashMap<>();
   private final Map<Path, Set<MethodDefinition>> indexedMethods = new HashMap<>();
@@ -36,23 +43,60 @@ public class MagikIndexer {
   private final Map<Path, Set<BinaryOperatorDefinition>> indexedBinaryOperators = new HashMap<>();
   private final Map<Path, Set<ConditionDefinition>> indexedConditions = new HashMap<>();
 
-  public MagikIndexer(final IDefinitionKeeper definitionKeeper) {
+  public MagikIndexer(
+      final IDefinitionKeeper definitionKeeper,
+      final MagikAnalysisConfiguration analysisConfiguration,
+      final IgnoreHandler ignoreHandler) {
     this.definitionKeeper = definitionKeeper;
+    this.analysisConfiguration = analysisConfiguration;
+    this.ignoreHandler = ignoreHandler;
   }
 
-  /**
-   * Index all magik file(s).
-   *
-   * @param analysisConfiguration Analysis configuration.
-   * @param paths Paths to index.
-   * @throws IOException -
-   */
-  public void indexPaths(
-      final MagikAnalysisConfiguration analysisConfiguration, final Stream<Path> paths)
-      throws IOException {
-    paths
-        .filter(path -> path.toString().toLowerCase().endsWith(".magik"))
-        .forEach(path -> this.indexPathCreated(analysisConfiguration, path));
+  public synchronized void handleFileEvent(final FileEvent fileEvent) throws IOException {
+    // Don't index if ignored.
+    final URI uri = fileEvent.getUri();
+    final Path path = Path.of(uri);
+    if (this.ignoreHandler.isIgnored(path)) {
+      return;
+    }
+
+    final FileChangeType fileChangeType = fileEvent.getFileChangeType();
+    final List<Path> indexableFiles =
+        fileChangeType == FileChangeType.DELETED
+            ? this.getIndexedFiles(path).toList()
+            : this.ignoreHandler
+                .getIndexableFiles(path)
+                .filter(indexablePath -> indexablePath.toString().toLowerCase().endsWith(".magik"))
+                .toList();
+    switch (fileChangeType) {
+      case DELETED:
+        indexableFiles.forEach(this::indexPathDeleted);
+        break;
+
+      case CREATED:
+        indexableFiles.forEach(this::indexPathCreated);
+        break;
+
+      case CHANGED:
+        indexableFiles.forEach(this::indexPathChanged);
+        break;
+
+      default:
+        throw new UnsupportedOperationException();
+    }
+  }
+
+  private Stream<Path> getIndexedFiles(final Path path) {
+    // Get all previously indexed files at or below path.
+    return Stream.of(
+            this.indexedPackages.entrySet().stream().map(Map.Entry::getKey),
+            this.indexedTypes.entrySet().stream().map(Map.Entry::getKey),
+            this.indexedMethods.entrySet().stream().map(Map.Entry::getKey),
+            this.indexedGlobals.entrySet().stream().map(Map.Entry::getKey),
+            this.indexedBinaryOperators.entrySet().stream().map(Map.Entry::getKey),
+            this.indexedConditions.entrySet().stream().map(Map.Entry::getKey))
+        .flatMap(stream -> stream)
+        .filter(indexedPath -> indexedPath.startsWith(path));
   }
 
   /**
@@ -61,8 +105,7 @@ public class MagikIndexer {
    * @param path Path to magik file.
    */
   @SuppressWarnings("checkstyle:IllegalCatch")
-  public void indexPathCreated(
-      final MagikAnalysisConfiguration analysisConfiguration, final Path path) {
+  public void indexPathCreated(final Path path) {
     LOGGER.debug("Scanning created file: {}", path);
 
     try {
@@ -79,8 +122,7 @@ public class MagikIndexer {
    * @param path Path to magik file.
    */
   @SuppressWarnings("checkstyle:IllegalCatch")
-  public void indexPathChanged(
-      final MagikAnalysisConfiguration analysisConfiguration, final Path path) {
+  public void indexPathChanged(final Path path) {
     LOGGER.debug("Scanning changed file: {}", path);
 
     try {

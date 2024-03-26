@@ -2,14 +2,19 @@ package nl.ramsolutions.sw.magik.analysis.indexer;
 
 import com.sonar.sslr.api.RecognitionException;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.definitions.ModuleDefinition;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.definitions.ProductDefinition;
 import nl.ramsolutions.sw.definitions.ProductDefinitionScanner;
+import nl.ramsolutions.sw.magik.FileEvent;
+import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,27 +25,57 @@ public class ProductIndexer {
   private static final Logger LOGGER = LoggerFactory.getLogger(ProductIndexer.class);
 
   private final IDefinitionKeeper definitionKeeper;
+  private final IgnoreHandler ignoreHandler;
   private final Map<Path, ProductDefinition> indexedProducts = new HashMap<>();
   private final Map<Path, ModuleDefinition> indexedModules = new HashMap<>();
 
-  public ProductIndexer(final IDefinitionKeeper definitionKeeper) {
+  public ProductIndexer(
+      final IDefinitionKeeper definitionKeeper, final IgnoreHandler ignoreHandler) {
     this.definitionKeeper = definitionKeeper;
+    this.ignoreHandler = ignoreHandler;
   }
 
-  /**
-   * Index all magik file(s).
-   *
-   * @param paths Paths to index.
-   * @throws IOException -
-   */
-  public void indexPaths(final Stream<Path> paths) throws IOException {
-    paths
-        .filter(path -> path.getFileName() != null)
-        .filter(
-            path ->
-                path.getFileName().toString().equalsIgnoreCase("product.def")
-                    || path.getFileName().toString().equalsIgnoreCase("module.def"))
-        .forEach(this::indexPathCreated);
+  public synchronized void handleFileEvent(final FileEvent fileEvent) throws IOException {
+    // Don't index if ignored.
+    final URI uri = fileEvent.getUri();
+    final Path path = Path.of(uri);
+    if (this.ignoreHandler.isIgnored(path)) {
+      return;
+    }
+
+    final FileChangeType fileChangeType = fileEvent.getFileChangeType();
+    final List<Path> indexableFiles =
+        fileChangeType == FileChangeType.DELETED
+            ? this.getIndexedFiles(path).toList()
+            : this.ignoreHandler
+                .getIndexableFiles(path)
+                .filter(indexablePath -> indexablePath.toString().toLowerCase().endsWith(".def"))
+                .toList();
+    switch (fileChangeType) {
+      case DELETED:
+        indexableFiles.forEach(this::indexPathDeleted);
+        break;
+
+      case CREATED:
+        indexableFiles.forEach(this::indexPathCreated);
+        break;
+
+      case CHANGED:
+        indexableFiles.forEach(this::indexPathChanged);
+        break;
+
+      default:
+        throw new UnsupportedOperationException();
+    }
+  }
+
+  private Stream<Path> getIndexedFiles(final Path path) {
+    // Get all previously indexed files at or below path.
+    return Stream.of(
+            this.indexedProducts.entrySet().stream().map(Map.Entry::getKey),
+            this.indexedModules.entrySet().stream().map(Map.Entry::getKey))
+        .flatMap(stream -> stream)
+        .filter(indexedPath -> indexedPath.startsWith(path));
   }
 
   /**

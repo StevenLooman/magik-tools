@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -11,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.magik.FileEvent;
+import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +31,30 @@ public final class IgnoreHandler {
 
   private final Map<Path, Set<PathMatcher>> entries = new HashMap<>();
 
+  public void handleFileEvent(final FileEvent fileEvent) throws IOException {
+    final URI uri = fileEvent.getUri();
+    final Path path = Path.of(uri);
+    final FileChangeType fileChangeType = fileEvent.getFileChangeType();
+    if (fileChangeType == FileChangeType.DELETED) {
+
+    } else {
+      this.getIndexableFiles(path)
+          .filter(indexablePath -> indexablePath.toString().toLowerCase().equals(IGNORE_FILENAME))
+          .forEach(this::addIgnoreFile);
+    }
+  }
+
+  /**
+   * Get all (indexable) files, under {@link fromPath}, which are not ignored.
+   *
+   * @param fromPath Path to walk from, most likely a directory.
+   * @return Stream of indexable files.
+   * @throws IOException -
+   */
+  public Stream<Path> getIndexableFiles(final Path fromPath) throws IOException {
+    return Files.walk(fromPath).filter(path -> !this.isIgnored(path));
+  }
+
   /**
    * Add a found .magik-tools-ignore file. Reads entries and stores these.
    *
@@ -36,7 +63,7 @@ public final class IgnoreHandler {
    *
    * @param path Path to .magik-tools-ignore to add.
    */
-  public void addIgnoreFile(final Path path) throws IOException {
+  public void addIgnoreFile(final Path path) {
     LOGGER.debug("Add ignore file: {}", path);
     if (!path.getFileSystem().getPathMatcher("glob:**/" + IGNORE_FILENAME).matches(path)) {
       throw new IllegalArgumentException();
@@ -49,7 +76,7 @@ public final class IgnoreHandler {
 
     final Path basePath = parentPath.toAbsolutePath();
     final FileSystem fileSystem = path.getFileSystem();
-    try (Stream<String> lines = Files.lines(path, StandardCharsets.ISO_8859_1)) {
+    try (Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8)) {
       final Set<PathMatcher> pathMatchers =
           lines
               .map(String::trim)
@@ -62,6 +89,8 @@ public final class IgnoreHandler {
               .map(pattern -> fileSystem.getPathMatcher("glob:" + pattern))
               .collect(Collectors.toSet());
       this.entries.put(path, pathMatchers);
+    } catch (final IOException exception) {
+      LOGGER.error("Error indexing created file: " + path, exception);
     }
   }
 
@@ -95,7 +124,7 @@ public final class IgnoreHandler {
   public boolean isIgnored(final Path path) {
     // Try defaults first.
     final Path filename = path.getFileName();
-    if (!Files.isRegularFile(path) || filename.startsWith(".") || filename.startsWith("#")) {
+    if (filename.startsWith(".") || filename.startsWith("#")) {
       return true;
     }
 

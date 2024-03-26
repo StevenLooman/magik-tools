@@ -1,13 +1,22 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
+import java.util.Map;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
+import org.eclipse.lsp4j.FileChangeType;
 
 /** Utility class for converting LSP4J <-> MagikLanguageServer. */
 public final class Lsp4jConversion {
+
+  private static final Map<FileChangeType, nl.ramsolutions.sw.magik.FileEvent.FileChangeType>
+      FILE_CHANGE_TYPE_MAPPING =
+          Map.of(
+              FileChangeType.Created, nl.ramsolutions.sw.magik.FileEvent.FileChangeType.CREATED,
+              FileChangeType.Changed, nl.ramsolutions.sw.magik.FileEvent.FileChangeType.CHANGED,
+              FileChangeType.Deleted, nl.ramsolutions.sw.magik.FileEvent.FileChangeType.DELETED);
 
   private Lsp4jConversion() {}
 
@@ -93,5 +102,10 @@ public final class Lsp4jConversion {
         options.isInsertFinalNewline(),
         options.isTrimTrailingWhitespace(),
         options.isTrimFinalNewlines());
+  }
+
+  public static nl.ramsolutions.sw.magik.FileEvent.FileChangeType fileChangeTypeFromLsp4j(
+      final FileChangeType fileChangeType) {
+    return Lsp4jConversion.FILE_CHANGE_TYPE_MAPPING.get(fileChangeType);
   }
 }

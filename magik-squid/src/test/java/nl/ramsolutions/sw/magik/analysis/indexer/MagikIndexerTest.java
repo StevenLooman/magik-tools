@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
@@ -39,8 +40,11 @@ class MagikIndexerTest {
     final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer.magik");
     final Path fixedPath = this.getPath(path).toAbsolutePath();
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
-    magikIndexer.indexPathCreated(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, fixedPath);
+    final IgnoreHandler ignoreHandler = new IgnoreHandler();
+    final MagikIndexer magikIndexer =
+        new MagikIndexer(
+            definitionKeeper, MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, ignoreHandler);
+    magikIndexer.indexPathCreated(fixedPath);
 
     // Test exemplar.
     final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
@@ -112,8 +116,11 @@ class MagikIndexerTest {
         Path.of("magik-squid/src/test/resources/test_magik_indexer_with_type_doc.magik");
     final Path fixedPath = this.getPath(path).toAbsolutePath();
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
-    magikIndexer.indexPathCreated(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, fixedPath);
+    final IgnoreHandler ignoreHandler = new IgnoreHandler();
+    final MagikIndexer magikIndexer =
+        new MagikIndexer(
+            definitionKeeper, MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, ignoreHandler);
+    magikIndexer.indexPathCreated(fixedPath);
 
     // Test exemplar.
     final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
@@ -179,11 +186,14 @@ class MagikIndexerTest {
     final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer.magik");
     final Path fixedPath = this.getPath(path).toAbsolutePath();
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
-    magikIndexer.indexPathCreated(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, fixedPath);
+    final IgnoreHandler ignoreHandler = new IgnoreHandler();
+    final MagikIndexer magikIndexer =
+        new MagikIndexer(
+            definitionKeeper, MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, ignoreHandler);
+    magikIndexer.indexPathCreated(fixedPath);
 
     // Pretend update.
-    magikIndexer.indexPathChanged(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, fixedPath);
+    magikIndexer.indexPathChanged(fixedPath);
 
     // Test type.
     final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
@@ -212,8 +222,11 @@ class MagikIndexerTest {
     final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer.magik");
     final Path fixedPath = this.getPath(path).toAbsolutePath();
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper);
-    magikIndexer.indexPathCreated(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, fixedPath);
+    final IgnoreHandler ignoreHandler = new IgnoreHandler();
+    final MagikIndexer magikIndexer =
+        new MagikIndexer(
+            definitionKeeper, MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, ignoreHandler);
+    magikIndexer.indexPathCreated(fixedPath);
 
     // Test type.
     final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
