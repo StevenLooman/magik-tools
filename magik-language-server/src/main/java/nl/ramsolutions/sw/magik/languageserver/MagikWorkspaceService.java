@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.languageserver;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -11,8 +10,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
@@ -25,9 +24,9 @@ import nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.FileChangeType;
-import org.eclipse.lsp4j.FileEvent;
 import org.eclipse.lsp4j.ProgressParams;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.WorkDoneProgressBegin;
 import org.eclipse.lsp4j.WorkDoneProgressCreateParams;
 import org.eclipse.lsp4j.WorkDoneProgressEnd;
@@ -71,8 +70,9 @@ public class MagikWorkspaceService implements WorkspaceService {
     this.definitionKeeper = definitionKeeper;
 
     this.ignoreHandler = new IgnoreHandler();
-    this.productIndexer = new ProductIndexer(this.definitionKeeper);
-    this.magikIndexer = new MagikIndexer(this.definitionKeeper);
+    this.productIndexer = new ProductIndexer(this.definitionKeeper, this.ignoreHandler);
+    this.magikIndexer =
+        new MagikIndexer(this.definitionKeeper, this.analysisConfiguration, this.ignoreHandler);
     this.symbolProvider = new SymbolProvider(this.definitionKeeper);
     this.testItemProvider = new MUnitTestItemProvider(this.definitionKeeper);
   }
@@ -118,24 +118,13 @@ public class MagikWorkspaceService implements WorkspaceService {
   }
 
   private void runIgnoreFilesIndexer() {
-    LOGGER.trace("Running IgnoreHandler indexer");
     for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
-      final String uriStr = workspaceFolder.getUri();
-      final URI uri = URI.create(uriStr);
-      final Path workspacePath = Path.of(uri);
-
-      try (Stream<Path> stream = Files.walk(workspacePath)) {
-        stream
-            .filter(Files::isRegularFile)
-            .filter(path -> path.getFileName().toString().equals(".magik-tools-ignore"))
-            .forEach(
-                path -> {
-                  try {
-                    this.ignoreHandler.addIgnoreFile(path);
-                  } catch (final IOException exception) {
-                    LOGGER.error(exception.getMessage(), exception);
-                  }
-                });
+      try {
+        LOGGER.trace("Running IgnoreHandler from: {}", workspaceFolder.getUri());
+        final String uriStr = workspaceFolder.getUri();
+        final URI uri = URI.create(uriStr);
+        final FileEvent fileEvent = new FileEvent(uri, FileEvent.FileChangeType.CREATED);
+        this.ignoreHandler.handleFileEvent(fileEvent);
       } catch (final IOException exception) {
         LOGGER.error(exception.getMessage(), exception);
       }
@@ -146,8 +135,10 @@ public class MagikWorkspaceService implements WorkspaceService {
     for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
       try {
         LOGGER.debug("Running ProductIndexer from: {}", workspaceFolder.getUri());
-        final Stream<Path> indexableFiles = this.getIndexableFiles(workspaceFolder);
-        this.productIndexer.indexPaths(indexableFiles);
+        final String uriStr = workspaceFolder.getUri();
+        final URI uri = URI.create(uriStr);
+        final FileEvent fileEvent = new FileEvent(uri, FileEvent.FileChangeType.CREATED);
+        this.productIndexer.handleFileEvent(fileEvent);
       } catch (final IOException exception) {
         LOGGER.error(exception.getMessage(), exception);
       }
@@ -158,8 +149,10 @@ public class MagikWorkspaceService implements WorkspaceService {
     for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
       try {
         LOGGER.debug("Running MagikIndexer from: {}", workspaceFolder.getUri());
-        final Stream<Path> indexableFiles = this.getIndexableFiles(workspaceFolder);
-        this.magikIndexer.indexPaths(this.analysisConfiguration, indexableFiles);
+        final String uriStr = workspaceFolder.getUri();
+        final URI uri = URI.create(uriStr);
+        final FileEvent fileEvent = new FileEvent(uri, FileEvent.FileChangeType.CREATED);
+        this.magikIndexer.handleFileEvent(fileEvent);
       } catch (final IOException exception) {
         LOGGER.error(exception.getMessage(), exception);
       }
@@ -214,75 +207,27 @@ public class MagikWorkspaceService implements WorkspaceService {
     params.getChanges().stream()
         .forEach(
             fileEvent -> {
-              final URI uri = URI.create(fileEvent.getUri());
-              final Path path = Path.of(uri);
-              final FileSystem fileSystem = path.getFileSystem();
+              LOGGER.debug("File event: {}", fileEvent);
 
-              if (fileSystem.getPathMatcher("glob:**/*.def").matches(path)) {
-                this.handleDefFileChange(fileEvent);
-              } else if (fileSystem.getPathMatcher("glob:**/*.magik").matches(path)) {
-                this.handleMagikFileChange(fileEvent);
-              } else if (fileSystem.getPathMatcher("glob:**/.magik-tools-ignore").matches(path)) {
-                this.handleIgnoreFileChange(fileEvent);
+              final URI uri = URI.create(fileEvent.getUri());
+              final FileChangeType fileChangeType = fileEvent.getType();
+              final nl.ramsolutions.sw.magik.FileEvent.FileChangeType magikFileChangeType =
+                  Lsp4jConversion.fileChangeTypeFromLsp4j(fileChangeType);
+              final nl.ramsolutions.sw.magik.FileEvent magikFileEvent =
+                  new nl.ramsolutions.sw.magik.FileEvent(uri, magikFileChangeType);
+              try {
+                this.ignoreHandler.handleFileEvent(magikFileEvent);
+                this.productIndexer.handleFileEvent(magikFileEvent);
+                this.magikIndexer.handleFileEvent(magikFileEvent);
+              } catch (final IOException exception) {
+                LOGGER.error(exception.getMessage(), exception);
               }
             });
   }
 
-  private void handleDefFileChange(final FileEvent fileEvent) {
-    final URI uri = URI.create(fileEvent.getUri());
-    final Path path = Path.of(uri);
-
-    // Don't index if ignored.
-    if (this.ignoreHandler.isIgnored(path)) {
-      return;
-    }
-
-    if (fileEvent.getType() == FileChangeType.Created) {
-      this.productIndexer.indexPathCreated(path);
-    } else if (fileEvent.getType() == FileChangeType.Changed) {
-      this.productIndexer.indexPathChanged(path);
-    } else if (fileEvent.getType() == FileChangeType.Deleted) {
-      this.productIndexer.indexPathDeleted(path);
-    }
-  }
-
-  private void handleMagikFileChange(final FileEvent fileEvent) {
-    final URI uri = URI.create(fileEvent.getUri());
-    final Path path = Path.of(uri);
-
-    // Don't index if ignored.
-    if (this.ignoreHandler.isIgnored(path)) {
-      return;
-    }
-
-    if (fileEvent.getType() == FileChangeType.Created) {
-      this.magikIndexer.indexPathCreated(this.analysisConfiguration, path);
-    } else if (fileEvent.getType() == FileChangeType.Changed) {
-      this.magikIndexer.indexPathChanged(this.analysisConfiguration, path);
-    } else if (fileEvent.getType() == FileChangeType.Deleted) {
-      this.magikIndexer.indexPathDeleted(path);
-    }
-  }
-
-  private void handleIgnoreFileChange(final FileEvent fileEvent) {
-    final URI uri = URI.create(fileEvent.getUri());
-    final Path path = Path.of(uri);
-    try {
-      if (fileEvent.getType() == FileChangeType.Created
-          || fileEvent.getType() == FileChangeType.Changed) {
-        this.ignoreHandler.addIgnoreFile(path);
-      } else if (fileEvent.getType() == FileChangeType.Deleted) {
-        this.ignoreHandler.removeIgnoreFile(path);
-      }
-    } catch (final IOException exception) {
-      LOGGER.error(exception.getMessage(), exception);
-    }
-  }
-
   @Override
   public CompletableFuture<
-          Either<
-              List<? extends org.eclipse.lsp4j.SymbolInformation>, List<? extends WorkspaceSymbol>>>
+          Either<List<? extends SymbolInformation>, List<? extends WorkspaceSymbol>>>
       symbol(WorkspaceSymbolParams params) {
     final String query = params.getQuery();
     LOGGER.trace("symbol, query: {}", query);
@@ -335,14 +280,6 @@ public class MagikWorkspaceService implements WorkspaceService {
   }
 
   // endregion
-
-  private Stream<Path> getIndexableFiles(final WorkspaceFolder workspaceFolder) throws IOException {
-    final String uriStr = workspaceFolder.getUri();
-    final URI uri = URI.create(uriStr);
-    final Path workspacePath = Path.of(uri);
-
-    return Files.walk(workspacePath).filter(path -> !this.ignoreHandler.isIgnored(path));
-  }
 
   private void runIndexers() {
     LOGGER.trace("Run indexers");

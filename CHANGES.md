@@ -16,6 +16,7 @@
 - Add DeprecatedMethodUsageTypedCheck check to mark deprecated methods.
 - Semantic tokens now mark deprecated types and methods.
 - Completion provider now marks deprecated types and methods.
+- Handle directory renames properly in `magik-language-server`.
 
 0.9.1 (2024-03-13)
 
