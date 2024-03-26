@@ -52,7 +52,7 @@
 				"filenames": [
 					"product.def"
 				],
-				"configuration": "./definition-language-configuration.json"
+				"configuration": "./product-definition-language-configuration.json"
 			},
 			{
 				"id": "module.def",
@@ -62,7 +62,7 @@
 				"filenames": [
 					"module.def"
 				],
-				"configuration": "./definition-language-configuration.json"
+				"configuration": "./method-definition-language-configuration.json"
 			}
 		],
 		"grammars": [
@@ -75,7 +75,7 @@
 		"snippets": [
 			{
 				"language": "magik",
-				"path": "./snippets/snippets.json"
+				"path": "./snippets/magik-snippets.json"
 			}
 		],
 		"breakpoints": [

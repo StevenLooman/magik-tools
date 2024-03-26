@@ -17,6 +17,7 @@
 - Semantic tokens now mark deprecated types and methods.
 - Completion provider now marks deprecated types and methods.
 - Handle directory renames properly in `magik-language-server`.
+- Improve handling of product.def/module.def in `magik-language-server` in VSCode.
 
 0.9.1 (2024-03-13)
 
