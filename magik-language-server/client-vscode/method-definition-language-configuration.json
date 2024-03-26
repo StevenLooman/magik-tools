@@ -1,0 +1,22 @@
+{
+  "comments": {
+    "lineComment": "#"
+  },
+  "autoClosingPairs": [
+    ["description", "end"],
+    ["install_requires", "end"],
+    ["optional", "end"],
+    ["required_by", "end"],
+    ["requires", "end"],
+    ["requires_java", "end"],
+    ["requires_datamodel", "end"],
+    ["templates", "end"],
+    ["test", "end"],
+    ["tests_modules", "end"],
+    ["ace_installation", "end"],
+    ["auth_installation", "end"],
+    ["case_installation", "end"],
+    ["style_installation", "end"],
+    ["system_installation", "end"]
+  ]
+}

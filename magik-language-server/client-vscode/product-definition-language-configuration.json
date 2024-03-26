@@ -1,0 +1,11 @@
+{
+  "comments": {
+    "lineComment": "#"
+  },
+  "autoClosingPairs": [
+    ["description", "end"],
+    ["requires", "end"],
+    ["optional", "end"],
+    ["title", "end"]
+  ]
+}
