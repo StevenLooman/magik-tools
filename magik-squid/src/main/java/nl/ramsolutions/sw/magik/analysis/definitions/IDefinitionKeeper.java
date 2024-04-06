@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import java.util.Collection;
 import nl.ramsolutions.sw.definitions.ModuleDefinition;
 import nl.ramsolutions.sw.definitions.ProductDefinition;
-import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
 /** Definition keeper. */
 public interface IDefinitionKeeper {

@@ -4,7 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
 /** Binary operator definition. */
 public class BinaryOperatorDefinition extends Definition {

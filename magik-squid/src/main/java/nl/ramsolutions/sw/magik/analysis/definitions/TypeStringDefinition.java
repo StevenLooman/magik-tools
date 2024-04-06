@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
 /** A resolvable type definition. */
 public abstract class TypeStringDefinition extends Definition {

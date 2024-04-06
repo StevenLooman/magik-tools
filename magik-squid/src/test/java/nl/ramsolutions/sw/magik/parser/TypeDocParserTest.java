@@ -6,7 +6,7 @@ import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.junit.jupiter.api.Test;
 

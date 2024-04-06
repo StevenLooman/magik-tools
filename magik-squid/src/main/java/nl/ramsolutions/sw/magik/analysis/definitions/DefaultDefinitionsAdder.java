@@ -2,7 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
 /** Default definitions adder for {@link IDefinitionKeeper}. */
 public final class DefaultDefinitionsAdder {
