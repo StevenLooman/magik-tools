@@ -6,14 +6,11 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.ReadOnlyTypeKeeperAdapter;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 
@@ -45,24 +42,23 @@ public class MagikTypedCheck extends MagikCheck {
   }
 
   /**
-   * Get {@link LocalTypeReasonerState}, after reasoning.
+   * Get the {@link TypeStringResolver}.
    *
-   * @return LocalTypeReasonerState.
+   * @return
    */
-  protected LocalTypeReasonerState getTypeReasonerState() {
+  public TypeStringResolver getTypeStringResolver() {
     final MagikTypedFile magikTypedFile = this.getMagikTypedFile();
-    return magikTypedFile.getTypeReasonerState();
+    return magikTypedFile.getTypeStringResolver();
   }
 
   /**
-   * Get {@link ITypeKeeper}.
+   * Get the resulting state from the {@link LocalTypeReasoner}.
    *
-   * @return ITypeKeeper.
+   * @return The {@link LocalTypeReasonerState}.
    */
-  protected ITypeKeeper getTypeKeeper() {
+  public synchronized LocalTypeReasonerState getTypeReasonerState() {
     final MagikTypedFile magikTypedFile = this.getMagikTypedFile();
-    final ITypeKeeper typeKeeper = magikTypedFile.getTypeKeeper();
-    return new ReadOnlyTypeKeeperAdapter(typeKeeper);
+    return magikTypedFile.getTypeReasonerState();
   }
 
   /**
@@ -71,21 +67,21 @@ public class MagikTypedCheck extends MagikCheck {
    * @param node METHOD_INVOCATION node.
    * @return Type method is invoked, or UNDEFINED_TYPE.
    */
-  protected AbstractType getTypeInvokedOn(final AstNode node) {
+  protected TypeString getTypeInvokedOn(final AstNode node) {
     if (node.isNot(MagikGrammar.METHOD_INVOCATION)) {
       throw new IllegalStateException();
     }
 
     final AstNode previousSibling = node.getPreviousSibling();
     final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
-    final ExpressionResult result = reasonerState.getNodeType(previousSibling);
-    final AbstractType type = result.get(0, UndefinedType.INSTANCE);
-    if (type == SelfType.INSTANCE) {
+    final ExpressionResultString result = reasonerState.getNodeType(previousSibling);
+    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
+    if (typeStr.equals(TypeString.SELF)) {
       final AstNode methodDefNode = node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
       return this.getTypeOfMethodDefinition(methodDefNode);
     }
 
-    return type;
+    return typeStr;
   }
 
   /**
@@ -94,14 +90,12 @@ public class MagikTypedCheck extends MagikCheck {
    * @param node METHOD_DEFINITION node.
    * @return
    */
-  protected AbstractType getTypeOfMethodDefinition(final @Nullable AstNode node) {
+  protected TypeString getTypeOfMethodDefinition(final @Nullable AstNode node) {
     if (node == null) {
-      return UndefinedType.INSTANCE;
+      return TypeString.UNDEFINED;
     }
 
     final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(node);
-    final TypeString typeString = methodDefHelper.getTypeString();
-    final ITypeKeeper typeKeeper = this.getTypeKeeper();
-    return typeKeeper.getType(typeString);
+    return methodDefHelper.getTypeString();
   }
 }

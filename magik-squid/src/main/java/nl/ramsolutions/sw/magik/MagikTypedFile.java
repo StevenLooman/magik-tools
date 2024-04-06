@@ -5,8 +5,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.DefinitionKeeperTypeKeeperAdapter;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 
@@ -14,7 +13,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 public class MagikTypedFile extends MagikFile {
 
   private final IDefinitionKeeper definitionKeeper;
-  private ITypeKeeper typeKeeper;
   private LocalTypeReasonerState reasonerState;
 
   /**
@@ -65,13 +63,13 @@ public class MagikTypedFile extends MagikFile {
     return this.definitionKeeper;
   }
 
-  /** Get the {@link ITypeKeeper}. */
-  public ITypeKeeper getTypeKeeper() {
-    if (this.typeKeeper == null) {
-      this.typeKeeper = new DefinitionKeeperTypeKeeperAdapter(this.definitionKeeper);
-    }
-
-    return this.typeKeeper;
+  /**
+   * Get the {@link TypeStringResolver}.
+   *
+   * @return
+   */
+  public TypeStringResolver getTypeStringResolver() {
+    return new TypeStringResolver(this.definitionKeeper);
   }
 
   /**

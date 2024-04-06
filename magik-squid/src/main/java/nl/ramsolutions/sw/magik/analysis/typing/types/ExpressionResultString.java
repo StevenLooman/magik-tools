@@ -9,7 +9,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** Container to hold resulting unresolved {@link AbstractType}s. */
+/** Container to hold resulting {@link TypeString}s. */
 public class ExpressionResultString {
 
   /** Stream collector. */
@@ -58,6 +58,34 @@ public class ExpressionResultString {
    */
   public ExpressionResultString(final List<TypeString> types) {
     this.types = Collections.unmodifiableList(types);
+  }
+
+  /** Combine constructor. */
+  public ExpressionResultString(
+      final ExpressionResultString result1, final @Nullable ExpressionResultString result2) {
+    if (result2 == null) {
+      this.types = result1.getTypes();
+    } else {
+      final int size = Math.max(result1.size(), result2.size());
+      final List<TypeString> combinedTypes = new ArrayList<>(size);
+      for (int i = 0; i < size; ++i) {
+        final TypeString type1 = result1.get(i, TypeString.SW_UNSET);
+        final TypeString type2 = result2.get(i, TypeString.SW_UNSET);
+        final TypeString combinedType = TypeString.combine(type1, type2);
+        combinedTypes.add(combinedType);
+      }
+
+      this.types = Collections.unmodifiableList(combinedTypes);
+    }
+  }
+
+  /**
+   * Test if is empty.
+   *
+   * @return True if empty, false otherwise.
+   */
+  public boolean isEmpty() {
+    return this.types.isEmpty();
   }
 
   /**

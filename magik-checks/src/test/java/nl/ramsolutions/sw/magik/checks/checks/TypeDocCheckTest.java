@@ -12,7 +12,9 @@ class TypeDocCheckTest extends MagikCheckTestBase {
 
   @Test
   void testParameterMissing() {
-    final String code = "" + "_method a.m1(p1)\n" + "_endmethod";
+    final String code = """
+        _method a.m1(p1)
+        _endmethod""";
     final MagikCheck check = new TypeDocCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
@@ -21,7 +23,10 @@ class TypeDocCheckTest extends MagikCheckTestBase {
   @Test
   void testParameterUnknown() {
     final String code =
-        "" + "_method a.m1()\n" + "  ## @param {sw:float} p1 Paramter 1.\n" + "_endmethod";
+        """
+        _method a.m1()
+          ## @param {sw:float} p1 Paramter 1.
+        _endmethod""";
     final MagikCheck check = new TypeDocCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
@@ -30,7 +35,10 @@ class TypeDocCheckTest extends MagikCheckTestBase {
   @Test
   void testParameterOk() {
     final String code =
-        "" + "_method a.m1(p1)\n" + "  ## @param {sw:float} p1 Paramter 1.\n" + "_endmethod";
+        """
+        _method a.m1(p1)
+          ## @param {sw:float} p1 Paramter 1.
+        _endmethod""";
     final MagikCheck check = new TypeDocCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
@@ -39,7 +47,10 @@ class TypeDocCheckTest extends MagikCheckTestBase {
   @Test
   void testSlotMissing() {
     final String code =
-        "" + "def_slotted_exemplar(\n" + "  :test_exemplar,\n" + "  {{:slot1, _unset}})";
+        """
+        def_slotted_exemplar(
+          :test_exemplar,
+          {{:slot1, _unset}})""";
     final MagikCheck check = new TypeDocCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
@@ -48,11 +59,11 @@ class TypeDocCheckTest extends MagikCheckTestBase {
   @Test
   void testSlotUnknown() {
     final String code =
-        ""
-            + "## @slot {sw:rope} slot1 Slot 1.\n"
-            + "def_slotted_exemplar(\n"
-            + "  :test_exemplar,\n"
-            + "  {})";
+        """
+        ## @slot {sw:rope} slot1 Slot 1.
+        def_slotted_exemplar(
+          :test_exemplar,
+          {})""";
     final MagikCheck check = new TypeDocCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
@@ -61,11 +72,11 @@ class TypeDocCheckTest extends MagikCheckTestBase {
   @Test
   void testSlotOk() {
     final String code =
-        ""
-            + "## @slot {sw:rope} slot1 Slot 1.\n"
-            + "def_slotted_exemplar(\n"
-            + "  :test_exemplar,\n"
-            + "  {{:slot1, _unset}})";
+        """
+        ## @slot {sw:rope} slot1 Slot 1.
+        def_slotted_exemplar(
+          :test_exemplar,
+          {{:slot1, _unset}})""";
     final MagikCheck check = new TypeDocCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();

@@ -1,11 +1,14 @@
 package nl.ramsolutions.sw.magik.analysis.helpers;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ProcedureInstance;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.api.MagikKeyword;
 
 /** Helper for METHOD_DEFINITION nodes. */
 public class ProcedureDefinitionNodeHelper {
@@ -49,10 +52,11 @@ public class ProcedureDefinitionNodeHelper {
    *
    * @return Name of the procedure.
    */
+  @CheckForNull
   public String getProcedureName() {
     final AstNode nameNode = node.getFirstChild(MagikGrammar.PROCEDURE_NAME);
     if (nameNode == null) {
-      return ProcedureInstance.ANONYMOUS_PROCEDURE;
+      return null;
     }
     final AstNode labelNode = nameNode.getFirstChild(MagikGrammar.LABEL);
     return labelNode.getLastChild().getTokenOriginalValue();
@@ -63,5 +67,55 @@ public class ProcedureDefinitionNodeHelper {
         .filter(childNode -> childNode.isNot(MagikGrammar.values()))
         .findFirst()
         .orElseThrow();
+  }
+
+  /**
+   * Test if procedure returns anything.
+   *
+   * @return
+   */
+  public boolean returnsAnything() {
+    final List<AstNode> returnStatementNodes =
+        this.node.getDescendants(MagikGrammar.RETURN_STATEMENT);
+    final boolean hasReturn =
+        returnStatementNodes.stream()
+            .filter(
+                statementNode ->
+                    statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == this.node)
+            .anyMatch(statementNode -> statementNode.hasDescendant(MagikGrammar.TUPLE));
+
+    final boolean hasEmit =
+        this.node.getFirstChild(MagikGrammar.BODY).getChildren(MagikGrammar.STATEMENT).stream()
+            .anyMatch(
+                statementNode -> !statementNode.getChildren(MagikGrammar.EMIT_STATEMENT).isEmpty());
+
+    return hasReturn || hasEmit;
+  }
+
+  /**
+   * Test if procedure has a loopbody statement.
+   *
+   * @return
+   */
+  public boolean hasLoopbody() {
+    return this.node.getDescendants(MagikGrammar.LOOPBODY).stream()
+        .anyMatch(
+            statementNode ->
+                statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == this.node);
+  }
+
+  private Collection<AstNode> getMethodModifiers() {
+    final AstNode modifiersNode = this.node.getFirstChild(MagikGrammar.PROCEDURE_MODIFIERS);
+    if (modifiersNode == null) {
+      return Collections.emptySet();
+    }
+
+    return modifiersNode.getChildren();
+  }
+
+  public boolean isIterProc() {
+    final String modifier = MagikKeyword.ITER.getValue();
+    return this.getMethodModifiers().stream()
+        .anyMatch(modifierNode -> modifierNode.getTokenValue().equalsIgnoreCase(modifier));
   }
 }

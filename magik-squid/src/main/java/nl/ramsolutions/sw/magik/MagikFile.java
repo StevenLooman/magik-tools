@@ -28,6 +28,8 @@ import nl.ramsolutions.sw.magik.parser.MagikParser;
 /** Magik file. */
 public class MagikFile {
 
+  // TODO: Define a default URI for in memory things.
+
   private final MagikAnalysisConfiguration configuration;
   private final URI uri;
   private final String source;

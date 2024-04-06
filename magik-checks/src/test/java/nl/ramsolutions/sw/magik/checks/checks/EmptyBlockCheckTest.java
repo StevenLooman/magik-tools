@@ -14,7 +14,10 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testBlock() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = "" + "_block\n" + "    write(a)\n" + "_endblock";
+    final String code = """
+        _block
+            write(a)
+        _endblock""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -23,7 +26,9 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testBlockEmpty() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = "" + "_block\n" + "_endblock";
+    final String code = """
+        _block
+        _endblock""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -32,7 +37,11 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testIfBlock() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = "" + "_if a\n" + "_then\n" + "    write(a)\n" + "_endif";
+    final String code = """
+        _if a
+        _then
+            write(a)
+        _endif""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -41,7 +50,10 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testIfBlockEmpty() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = "" + "_if a\n" + "_then\n" + "_endif";
+    final String code = """
+        _if a
+        _then
+        _endif""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -51,14 +63,14 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
     final MagikCheck check = new EmptyBlockCheck();
 
     final String code =
-        ""
-            + "_if a\n"
-            + "_then\n"
-            + "    write(a)\n"
-            + "_elif b\n"
-            + "_then\n"
-            + "    write(b)\n"
-            + "_endif";
+        """
+        _if a
+        _then
+            write(a)
+        _elif b
+        _then
+            write(b)
+        _endif""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -68,7 +80,13 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
     final MagikCheck check = new EmptyBlockCheck();
 
     final String code =
-        "" + "_if a\n" + "_then\n" + "    write(a)\n" + "_elif b\n" + "_then\n" + "_endif";
+        """
+        _if a
+        _then
+            write(a)
+        _elif b
+        _then
+        _endif""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -78,7 +96,13 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
     final MagikCheck check = new EmptyBlockCheck();
 
     final String code =
-        "" + "_if a\n" + "_then\n" + "    write(a)\n" + "_else\n" + "    write(b)\n" + "_endif";
+        """
+        _if a
+        _then
+            write(a)
+        _else
+            write(b)
+        _endif""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -87,7 +111,13 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testIfElseBlockEmpty() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = "" + "_if a\n" + "_then\n" + "    write(a)\n" + "_else\n" + "_endif";
+    final String code =
+        """
+        _if a
+        _then
+            write(a)
+        _else
+        _endif""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -96,7 +126,12 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testProtectEmpty() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = "" + "_protect\n" + "_protection\n" + "    write(a)\n" + "_endprotect";
+    final String code =
+        """
+        _protect
+        _protection
+            write(a)
+        _endprotect""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -105,7 +140,12 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testProtectionEmpty() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = "" + "_protect\n" + "    write(a)\n" + "_protection\n" + "_endprotect";
+    final String code =
+        """
+        _protect
+            write(a)
+        _protection
+        _endprotect""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -114,7 +154,9 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testMethodEmpty() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = "" + "_method a.b\n" + "_endmethod";
+    final String code = """
+        _method a.b
+        _endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -123,7 +165,9 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testAbstractMethodEmpty() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = "" + "_abstract _method a.b\n" + "_endmethod";
+    final String code = """
+        _abstract _method a.b
+        _endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }

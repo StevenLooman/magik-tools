@@ -3,28 +3,26 @@ package nl.ramsolutions.sw.magik.languageserver.hover;
 import com.sonar.sslr.api.AstNode;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.TypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.GenericDefinition;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Package;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ProcedureInstance;
-import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Slot;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.Hover;
@@ -108,7 +106,8 @@ public class HoverProvider {
       }
     }
 
-    final MarkupContent contents = new MarkupContent(MarkupKind.MARKDOWN, builder.toString());
+    final String content = builder.isEmpty() ? "Undefined" : builder.toString();
+    final MarkupContent contents = new MarkupContent(MarkupKind.MARKDOWN, content);
     final Range range = new Range(hoveredTokenNode);
     final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
     return new Hover(contents, rangeLsp4j);
@@ -117,40 +116,48 @@ public class HoverProvider {
   private void provideHoverPackage(
       final MagikTypedFile magikFile, final AstNode hoveredNode, final StringBuilder builder) {
     final String packageName = hoveredNode.getTokenValue();
-    final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-    final Package pakkage = typeKeeper.getPackage(packageName);
-    if (pakkage == null) {
-      return;
-    }
+    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
+    definitionKeeper.getPackageDefinitions(packageName).stream()
+        .forEach(
+            pakkageDef -> {
+              // Name.
+              builder.append("## ").append(pakkageDef.getName()).append(SECTION_END);
 
-    // Name.
-    builder.append("## ").append(pakkage.getName()).append(SECTION_END);
+              // Doc.
+              final String doc = pakkageDef.getDoc();
+              if (doc != null) {
+                final String docMd =
+                    doc.lines().map(String::trim).collect(Collectors.joining("\n\n"));
+                builder.append(docMd).append(SECTION_END);
+              }
 
-    // Doc.
-    final String doc = pakkage.getDoc();
-    if (doc != null) {
-      final String docMd = doc.lines().map(String::trim).collect(Collectors.joining("\n\n"));
-      builder.append(docMd).append(SECTION_END);
-    }
-
-    // Uses.
-    this.buildUsesDoc(pakkage, builder, 0);
+              // Uses.
+              this.addPackageHierarchy(magikFile, pakkageDef, builder, 0);
+            });
   }
 
-  private void buildUsesDoc(final Package pakkage, final StringBuilder builder, final int indent) {
+  private void addPackageHierarchy(
+      final MagikTypedFile magikFile,
+      final PackageDefinition pakkageDef,
+      final StringBuilder builder,
+      final int indent) {
     if (indent == 0) {
-      builder.append(pakkage.getName()).append("\n\n");
+      builder.append(pakkageDef.getName()).append("\n\n");
     }
 
+    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
     final String indentStr = "&nbsp;&nbsp;".repeat(indent);
-    final Comparator<Package> byName = Comparator.comparing(Package::getName);
-    pakkage.getUsesPackages().stream()
-        .sorted(byName)
+    pakkageDef.getUses().stream()
+        .sorted()
         .forEach(
-            uses -> {
-              builder.append(indentStr).append(" ↳ ").append(uses.getName()).append("\n\n");
+            use -> {
+              builder.append(indentStr).append(" ↳ ").append(use).append("\n\n");
 
-              this.buildUsesDoc(uses, builder, indent + 1);
+              definitionKeeper
+                  .getPackageDefinitions(use)
+                  .forEach(
+                      usePakkageDef ->
+                          this.addPackageHierarchy(magikFile, usePakkageDef, builder, indent + 1));
             });
 
     if (indent == 0) {
@@ -161,48 +168,66 @@ public class HoverProvider {
   private void provideHoverCondition(
       final MagikTypedFile magikFile, final AstNode hoveredNode, final StringBuilder builder) {
     final String conditionName = hoveredNode.getTokenValue();
-    final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-    final Condition condition = typeKeeper.getCondition(conditionName);
-    if (condition == null) {
-      return;
+    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
+    definitionKeeper
+        .getConditionDefinitions(conditionName)
+        .forEach(
+            conditionDef -> {
+              // Name.
+              builder.append("## ").append(conditionDef.getName()).append(SECTION_END);
+
+              // Doc.
+              final String doc = conditionDef.getDoc();
+              if (doc != null) {
+                final String docMd =
+                    doc.lines().map(String::trim).collect(Collectors.joining("\n\n"));
+                builder.append(docMd).append(SECTION_END);
+              }
+
+              // Taxonomy.
+              builder.append("## Taxonomy: \n\n");
+              this.addConditionTaxonomy(magikFile, conditionDef, builder, 0);
+              builder.append(SECTION_END);
+
+              // Data names.
+              builder.append("## Data:\n");
+              conditionDef
+                  .getDataNames()
+                  .forEach(dataName -> builder.append("* ").append(dataName).append("\n"));
+            });
+  }
+
+  private void addConditionTaxonomy(
+      final MagikTypedFile magikFile,
+      final ConditionDefinition conditionDefinition,
+      final StringBuilder builder,
+      final int indent) {
+    if (indent == 0) {
+      builder.append(conditionDefinition.getName()).append("\n\n");
     }
 
-    // Name.
-    builder.append("## ").append(condition.getName()).append(SECTION_END);
+    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
+    final String indentStr = "&nbsp;&nbsp;".repeat(indent);
+    final String parentConditionName = conditionDefinition.getParent();
+    if (parentConditionName != null) {
+      builder.append(indentStr).append(" ↳ ").append(parentConditionName).append("\n\n");
 
-    // Doc.
-    final String doc = condition.getDoc();
-    if (doc != null) {
-      final String docMd = doc.lines().map(String::trim).collect(Collectors.joining("\n\n"));
-      builder.append(docMd).append(SECTION_END);
+      definitionKeeper
+          .getConditionDefinitions(parentConditionName)
+          .forEach(
+              parentConditionDef ->
+                  this.addConditionTaxonomy(magikFile, parentConditionDef, builder, indent + 1));
     }
 
-    // Taxonomy.
-    builder.append("## Taxonomy: \n\n");
-    String parentConditionName = condition.getParent();
-    while (parentConditionName != null) {
-      final Condition parentCondition = typeKeeper.getCondition(parentConditionName);
-      if (parentCondition == null) {
-        break;
-      }
-
-      final String parentName = parentCondition.getName();
-      builder.append(parentName).append("\n");
-
-      parentConditionName = parentCondition.getParent();
+    if (indent == 0) {
+      builder.append(SECTION_END);
     }
-    builder.append(SECTION_END);
-
-    // Data names.
-    builder.append("## Data:\n");
-    condition.getDataNameList().stream()
-        .forEach(dataName -> builder.append("* ").append(dataName).append("\n"));
   }
 
   private void provideHoverExpression(
       final MagikTypedFile magikFile, final AstNode expressionNode, final StringBuilder builder) {
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-    final ExpressionResult result = reasonerState.getNodeTypeSilent(expressionNode);
+    final ExpressionResultString result = reasonerState.getNodeTypeSilent(expressionNode);
     if (result != null) {
       LOGGER.debug("Providing hover for node: {}", expressionNode.getTokenValue()); // NOSONAR
       this.buildTypeDoc(magikFile, expressionNode, builder);
@@ -219,7 +244,7 @@ public class HoverProvider {
   private void provideHoverAtom(
       final MagikTypedFile magikFile, final AstNode atomNode, final StringBuilder builder) {
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-    final ExpressionResult result = reasonerState.getNodeTypeSilent(atomNode);
+    final ExpressionResultString result = reasonerState.getNodeTypeSilent(atomNode);
     if (result != null) {
       LOGGER.debug("Providing hover for node: {}", atomNode.getTokenValue()); // NOSONAR
       this.buildTypeDoc(magikFile, atomNode, builder);
@@ -238,9 +263,9 @@ public class HoverProvider {
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
     final AstNode providingNode = hoveredNode.getParent();
     if (providingNode != null) {
-      final ExpressionResult result = reasonerState.getNodeType(providingNode);
-      final AbstractType type = result.get(0, null);
-      if (type != null) {
+      final ExpressionResultString result = reasonerState.getNodeType(providingNode);
+      final TypeString typeStr = result.get(0, null);
+      if (typeStr != null) {
         LOGGER.debug("Providing hover for node: {}", providingNode.getTokenValue()); // NOSONAR
         this.buildProcDoc(magikFile, providingNode, builder);
       }
@@ -266,9 +291,13 @@ public class HoverProvider {
           previousSiblingNode.getTokenValue(),
           methodName);
       if (methodName != null) {
-        final AbstractType type = this.getNodeType(magikFile, previousSiblingNode);
-        final Collection<Method> methods = type.getMethods(methodName);
-        methods.forEach(method -> this.buildMethodSignatureDoc(type, method, builder));
+        final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+        final ExpressionResultString result = reasonerState.getNodeType(previousSiblingNode);
+        final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
+        final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+        resolver
+            .getMethodDefinitions(typeStr)
+            .forEach(methodDef -> this.buildMethodSignatureDoc(methodDef, builder));
       }
     }
   }
@@ -284,12 +313,16 @@ public class HoverProvider {
       final MagikTypedFile magikFile, final AstNode hoveredNode, final StringBuilder builder) {
     final AstNode methodDefNode = hoveredNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
     final AstNode exemplarNameNode = methodDefNode.getFirstChild(MagikGrammar.EXEMPLAR_NAME);
-    final AbstractType type = this.getNodeType(magikFile, exemplarNameNode);
+    final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+    final ExpressionResultString result = reasonerState.getNodeType(exemplarNameNode);
+    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
+
     final MethodDefinitionNodeHelper methodDefHelper =
         new MethodDefinitionNodeHelper(methodDefNode);
     final String methodName = methodDefHelper.getMethodName();
-    final Collection<Method> localMethods = type.getLocalMethods(methodName);
-    localMethods.forEach(method -> this.buildMethodSignatureDoc(type, method, builder));
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    resolver.getMethodDefinitions(typeStr, methodName).stream()
+        .forEach(methodDef -> this.buildMethodSignatureDoc(methodDef, builder));
   }
 
   /**
@@ -301,100 +334,95 @@ public class HoverProvider {
    */
   private void buildTypeDoc(
       final MagikTypedFile magikFile, final AstNode node, final StringBuilder builder) {
-    // Get type.
-    final AbstractType type = this.getNodeType(magikFile, node);
-    this.buildTypeSignatureDoc(type, builder);
+    final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+    final ExpressionResultString result = reasonerState.getNodeType(node);
+    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
+    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
+    definitionKeeper
+        .getExemplarDefinitions(typeStr)
+        .forEach(exemplarDef -> this.buildTypeSignatureDoc(magikFile, exemplarDef, builder));
   }
 
   private void buildProcDoc(
       final MagikTypedFile magikFile, final AstNode node, final StringBuilder builder) {
-    final AbstractType type = this.getNodeType(magikFile, node);
-    final ProcedureInstance procInstance;
-    if (type instanceof AliasType aliasType) {
-      final AbstractType aliasedType = aliasType.getAliasedType();
-      if (aliasedType instanceof ProcedureInstance procedureInstance) {
-        procInstance = procedureInstance;
-      } else {
-        procInstance = null;
-      }
-    } else if (type instanceof ProcedureInstance procedureInstance) {
-      procInstance = procedureInstance;
-    } else {
-      procInstance = null;
+    final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+    final ExpressionResultString result = reasonerState.getNodeType(node);
+    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
+    final TypeStringDefinition typeStringDefinition =
+        reasonerState.getTypeStringDefinition(typeStr);
+    // TODO: Removed some resolving of aliases etc.
+    if (typeStringDefinition instanceof ProcedureDefinition procedureDefinition) {
+      this.buildProcSignatureDoc(procedureDefinition, builder);
     }
-
-    if (procInstance == null) {
-      return;
-    }
-
-    final Method invokeMethod = procInstance.getInvokeMethod();
-    this.buildMethodSignatureDoc(procInstance, invokeMethod, builder);
   }
 
-  private void buildInheritanceDoc(
-      final AbstractType type, final StringBuilder builder, final int indent) {
-    final TypeString typeStr = type.getTypeString();
+  private void addSuperDoc(
+      final MagikTypedFile magikFile,
+      final ExemplarDefinition exemplarDef,
+      final StringBuilder builder,
+      final int indent) {
+    final TypeString typeStr = exemplarDef.getTypeString();
     if (indent == 0) {
       builder.append(this.formatTypeString(typeStr)).append("\n\n");
     }
 
+    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
     final String indentStr = "&nbsp;&nbsp;".repeat(indent);
-    type.getParents()
+    exemplarDef
+        .getParents()
         .forEach(
-            parentType -> {
-              final TypeString parentTypeStr = parentType.getTypeString();
+            parentTypeStr -> {
               builder
                   .append(indentStr)
                   .append(" ↳ ")
                   .append(this.formatTypeString(parentTypeStr))
                   .append("\n\n");
 
-              this.buildInheritanceDoc(parentType, builder, indent + 1);
+              definitionKeeper
+                  .getExemplarDefinitions(parentTypeStr)
+                  .forEach(
+                      parentExemplarDef ->
+                          this.addSuperDoc(magikFile, parentExemplarDef, builder, indent + 1));
             });
   }
 
   private void buildMethodSignatureDoc(
-      final AbstractType type, final Method method, final StringBuilder builder) {
+      final MethodDefinition methodDef, final StringBuilder builder) {
     // Method signature.
-    final TypeString typeStr = type.getTypeString();
-    final AbstractType ownerType = method.getOwner();
-    final TypeString ownerTypeStr = ownerType.getTypeString();
-    final TypeString ownerTypeStrWithGenerics =
-        TypeString.ofIdentifier(
-            ownerTypeStr.getIdentifier(),
-            ownerTypeStr.getPakkage(),
-            typeStr.getGenerics().toArray(TypeString[]::new));
+    final TypeString typeStr = methodDef.getTypeName();
 
-    final String joiner = method.getName().startsWith("[") ? "" : ".";
+    // TODO: Removed something with generics.
+
+    final String joiner = methodDef.getMethodName().startsWith("[") ? "" : ".";
     builder
         .append("## ")
-        .append(this.formatTypeString(ownerTypeStrWithGenerics))
+        .append(this.formatTypeString(typeStr))
         .append(joiner)
-        .append(method.getNameWithParameters())
+        .append(methodDef.getNameWithParameters())
         .append("\n\n")
         .append(" → ");
 
-    final String callResultString = method.getCallResult().getTypeNames(", ");
+    final String callResultString = methodDef.getReturnTypes().getTypeNames(", ");
     builder.append(this.formatTypeString(callResultString));
 
-    if (method.getModifiers().contains(Method.Modifier.ITER)) {
+    if (methodDef.getModifiers().contains(MethodDefinition.Modifier.ITER)) {
       builder.append("\n\n").append(" ⟳ ");
-      final String iterResultString = method.getLoopbodyResult().getTypeNames(", ");
+      final String iterResultString = methodDef.getLoopTypes().getTypeNames(", ");
       builder.append(this.formatTypeString(iterResultString));
     }
 
     builder.append(SECTION_END);
 
     // Method module.
-    final String moduleName = Objects.requireNonNullElse(method.getModuleName(), "");
+    final String moduleName = Objects.requireNonNullElse(methodDef.getModuleName(), "");
     builder.append("Module: ").append(moduleName).append(SECTION_END);
 
     // Method topics.
-    final String topics = method.getTopics().stream().collect(Collectors.joining(", "));
+    final String topics = methodDef.getTopics().stream().collect(Collectors.joining(", "));
     builder.append("Topics: ").append(topics).append(SECTION_END);
 
     // Method doc.
-    final String methodDoc = method.getDoc();
+    final String methodDoc = methodDef.getDoc();
     if (methodDoc != null) {
       final String methodDocMd =
           methodDoc.lines().map(String::trim).collect(Collectors.joining("\n\n"));
@@ -402,36 +430,77 @@ public class HoverProvider {
     }
   }
 
-  private void buildTypeSignatureDoc(final AbstractType type, final StringBuilder builder) {
-    // Type signature.
-    final TypeString typeStr = type.getTypeString();
-    builder.append("## ").append(this.formatTypeString(typeStr)).append(SECTION_END);
+  private void buildProcSignatureDoc(
+      final ProcedureDefinition procDef, final StringBuilder builder) {
+    final TypeString typeStr = procDef.getTypeString();
 
-    // Method module.
-    final String moduleName = Objects.requireNonNullElse(type.getModuleName(), "");
+    // TODO: Removed something with generics.
+
+    final String joiner = procDef.getName().startsWith("[") ? "" : ".";
+    builder
+        .append("## ")
+        .append(this.formatTypeString(typeStr))
+        .append(joiner)
+        .append(procDef.getNameWithParameters())
+        .append("\n\n")
+        .append(" → ");
+
+    final String callResultString = procDef.getReturnTypes().getTypeNames(", ");
+    builder.append(this.formatTypeString(callResultString));
+
+    if (procDef.getModifiers().contains(ProcedureDefinition.Modifier.ITER)) {
+      builder.append("\n\n").append(" ⟳ ");
+      final String iterResultString = procDef.getLoopTypes().getTypeNames(", ");
+      builder.append(this.formatTypeString(iterResultString));
+    }
+
+    builder.append(SECTION_END);
+
+    // Procedure module.
+    final String moduleName = Objects.requireNonNullElse(procDef.getModuleName(), "");
     builder.append("Module: ").append(moduleName).append(SECTION_END);
 
-    // Topics.
-    final String topics = type.getTopics().stream().collect(Collectors.joining(", "));
+    // TODO: Procedure topics.
+    // final String topics = procDef.getTopics().stream().collect(Collectors.joining(", "));
+    // builder.append("Topics: ").append(topics).append(SECTION_END);
+
+    // Procedure doc.
+    final String methodDoc = procDef.getDoc();
+    if (methodDoc != null) {
+      final String methodDocMd =
+          methodDoc.lines().map(String::trim).collect(Collectors.joining("\n\n"));
+      builder.append(methodDocMd).append(SECTION_END);
+    }
+  }
+
+  private void buildTypeSignatureDoc(
+      final MagikTypedFile magikFile,
+      final ExemplarDefinition exemplarDef,
+      final StringBuilder builder) {
+    final TypeString typeStr = exemplarDef.getTypeString();
+    builder.append("## ").append(this.formatTypeString(typeStr)).append(SECTION_END);
+
+    final String moduleName = Objects.requireNonNullElse(exemplarDef.getModuleName(), "");
+    builder.append("Module: ").append(moduleName).append(SECTION_END);
+
+    final String topics = exemplarDef.getTopics().stream().collect(Collectors.joining(", "));
     builder.append("Topics: ").append(topics).append(SECTION_END);
 
-    // Type doc.
-    final String typeDoc = type.getDoc();
+    final String typeDoc = exemplarDef.getDoc();
     if (typeDoc != null) {
       final String typeDocMd =
           typeDoc.lines().map(String::trim).collect(Collectors.joining("\n\n"));
       builder.append(typeDocMd).append(SECTION_END);
     }
 
-    // Type slots.
-    final Collection<Slot> slots = type.getSlots();
+    final Collection<SlotDefinition> slots = exemplarDef.getSlots();
     if (!slots.isEmpty()) {
       builder.append("## Slots\n");
       slots.stream()
-          .sorted(Comparator.comparing(Slot::getName))
+          .sorted(Comparator.comparing(SlotDefinition::getName))
           .forEach(
               slot -> {
-                final TypeString slotType = slot.getType();
+                final TypeString slotType = slot.getTypeName();
                 builder
                     .append("* ")
                     .append(slot.getName())
@@ -442,55 +511,21 @@ public class HoverProvider {
       builder.append(SECTION_END);
     }
 
-    // Type generic declarations.
-    final Collection<GenericDefinition> genericDeclarations = type.getGenericDefinitions();
-    if (!genericDeclarations.isEmpty()) {
+    final List<TypeString> generics = exemplarDef.getTypeString().getGenerics();
+    if (!generics.isEmpty()) {
       builder.append("## Generic definitions\n");
-      genericDeclarations.stream()
+      generics.stream()
           .forEach(
-              generic -> {
-                final TypeString genericTypeStr = generic.getTypeString();
-                builder.append("* ").append(this.formatTypeString(genericTypeStr)).append("\n");
-              });
+              genericTypeStr ->
+                  builder.append("* ").append(this.formatTypeString(genericTypeStr)).append("\n"));
       builder.append(SECTION_END);
     }
 
-    // Inheritance.
-    if (!type.getParents().isEmpty()) {
-      builder.append("## Inheritance\n");
-      if (type instanceof CombinedType combinedType) {
-        combinedType.getTypes().stream()
-            .sorted(Comparator.comparing(AbstractType::getTypeString))
-            .forEach(cType -> this.buildInheritanceDoc(cType, builder, 0));
-      } else {
-        this.buildInheritanceDoc(type, builder, 0);
-      }
+    if (!exemplarDef.getParents().isEmpty()) {
+      builder.append("## Supers\n");
+      this.addSuperDoc(magikFile, exemplarDef, builder, 0);
       builder.append(SECTION_END);
     }
-  }
-
-  private AbstractType getNodeType(final MagikTypedFile magikFile, final AstNode node) {
-    final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-    final ExpressionResult result = reasonerState.getNodeType(node);
-    final AbstractType type = result.get(0, UndefinedType.INSTANCE);
-    if (type == SelfType.INSTANCE) {
-      final AstNode defNode =
-          node.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION, MagikGrammar.METHOD_DEFINITION);
-      if (defNode == null) {
-        return UndefinedType.INSTANCE;
-      } else if (defNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
-        final ExpressionResult defResult = reasonerState.getNodeType(defNode);
-        return defResult.get(0, UndefinedType.INSTANCE);
-      } else if (defNode.is(MagikGrammar.METHOD_DEFINITION)) {
-        final AstNode exemplaNameNode = defNode.getFirstChild(MagikGrammar.EXEMPLAR_NAME);
-        final ExpressionResult defResult = reasonerState.getNodeType(exemplaNameNode);
-        return defResult.get(0, UndefinedType.INSTANCE);
-      } else {
-        throw new IllegalStateException();
-      }
-    }
-
-    return type;
   }
 
   private String formatTypeString(final TypeString typeStr) {

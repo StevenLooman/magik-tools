@@ -140,45 +140,6 @@ class JsonDefinitionReaderTest {
     assertThat(conditionUnknownValue.getParent()).isEqualTo("error");
   }
 
-  // @Test
-  // void testReadProcedure() throws IOException {
-  //     final IDefinitionKeeper definitionKeeper = this.readTypes();
-
-  //     final TypeString quitRef = TypeString.ofIdentifier("quit", "sw");
-  //     final AbstractType quitType = definitionKeeper.getType(quitRef);
-  //     assertThat(quitType).isExactlyInstanceOf(AliasType.class);
-  //     final ProcedureInstance quitInstance = (ProcedureInstance) ((AliasType)
-  // quitType).getAliasedType();
-  //     assertThat(quitInstance).isExactlyInstanceOf(ProcedureInstance.class);
-  //     assertThat(quitInstance.getName()).isEqualTo("quit");
-  //     assertThat(quitInstance.getDoc()).isEqualTo("Quit!");
-  //     assertThat(quitInstance.getModuleName()).isEqualTo("test_module");
-  //     final Method quitMethod = quitInstance.getLocalMethods("invoke()").stream()
-  //         .findAny()
-  //         .orElseThrow();
-  //     assertThat(quitMethod.getCallResult()).isEqualTo(ExpressionResultString.UNDEFINED);
-  //     assertThat(quitMethod.getLoopbodyResult()).isEqualTo(ExpressionResultString.EMPTY);
-  //     assertThat(quitMethod.getModifiers()).isEqualTo(Collections.emptySet());
-
-  //     final TypeString rangeRef = TypeString.ofIdentifier("range", "sw");
-  //     final AbstractType rangeType = definitionKeeper.getType(rangeRef);
-  //     assertThat(rangeType).isExactlyInstanceOf(AliasType.class);
-  //     final ProcedureInstance rangeInstance = (ProcedureInstance) ((AliasType)
-  // rangeType).getAliasedType();
-  //     assertThat(rangeInstance).isExactlyInstanceOf(ProcedureInstance.class);
-  //     assertThat(rangeInstance.getName()).isEqualTo("range");
-  //     assertThat(rangeInstance.getDoc()).isEqualTo("Range iterator.");
-  //     assertThat(rangeInstance.getModuleName()).isNull();
-
-  //     final Method rangeMethod = rangeInstance.getLocalMethods("invoke()").stream()
-  //         .findAny()
-  //         .orElseThrow();
-  //     assertThat(rangeMethod.getModifiers()).isEqualTo(Set.of(Method.Modifier.ITER));
-  //     assertThat(rangeMethod.getCallResult()).isEqualTo(ExpressionResultString.EMPTY);
-  //     assertThat(rangeMethod.getLoopbodyResult()).isEqualTo(new
-  // ExpressionResultString(TypeString.SW_INTEGER));
-  // }
-
   @Test
   void testReadGlobal() throws IOException {
     final IDefinitionKeeper definitionKeeper = this.readTypes();

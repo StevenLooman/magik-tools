@@ -105,9 +105,7 @@ class MagikIndexerTest {
     assertThat(binOpDef.getLhsTypeName()).isEqualTo(TypeString.ofIdentifier("integer", "user"));
     assertThat(binOpDef.getRhsTypeName()).isEqualTo(TypeString.ofIdentifier("integer", "user"));
     assertThat(binOpDef.getResultTypeName())
-        .isEqualTo(
-            TypeString.ofCombination(
-                TypeString.DEFAULT_PACKAGE, TypeString.SW_FALSE, TypeString.SW_MAYBE));
+        .isEqualTo(TypeString.ofCombination(TypeString.SW_FALSE, TypeString.SW_MAYBE));
   }
 
   @Test
@@ -133,10 +131,10 @@ class MagikIndexerTest {
     final String doc = exemplarDef.getDoc();
     assertThat(doc)
         .isEqualTo(
-            ""
-                + "Test exemplar.\n"
-                + "@slot {sw:rope} slot_a\n"
-                + "@slot {sw:property_list<K=sw:symbol, E=sw:integer>} slot_b");
+            """
+                Test exemplar.
+                @slot {sw:rope} slot_a
+                @slot {sw:property_list<K=sw:symbol, E=sw:integer>} slot_b""");
 
     // Test slots.
     final Collection<SlotDefinition> slots = exemplarDef.getSlots();
@@ -163,7 +161,10 @@ class MagikIndexerTest {
             .collect(Collectors.toSet());
     assertThat(newMethodDefs).hasSize(1);
     final MethodDefinition newMethodDef = newMethodDefs.stream().findAny().orElseThrow();
-    assertThat(newMethodDef.getDoc()).isEqualTo("" + "Constructor.\n" + "@return {_self}");
+    assertThat(newMethodDef.getDoc())
+        .isEqualTo("""
+        Constructor.
+        @return {_self}""");
     assertThat(newMethodDef.getReturnTypes())
         .isEqualTo(new ExpressionResultString(TypeString.SELF));
     assertThat(newMethodDef.getLoopTypes()).isEqualTo(ExpressionResultString.EMPTY);
@@ -174,7 +175,10 @@ class MagikIndexerTest {
             .collect(Collectors.toSet());
     assertThat(initMethodDefs).hasSize(1);
     final MethodDefinition initMethodDef = initMethodDefs.stream().findAny().orElseThrow();
-    assertThat(initMethodDef.getDoc()).isEqualTo("" + "Initializer.\n" + "@return {_self}");
+    assertThat(initMethodDef.getDoc())
+        .isEqualTo("""
+        Initializer.
+        @return {_self}""");
     assertThat(initMethodDef.getReturnTypes())
         .isEqualTo(new ExpressionResultString(TypeString.SELF));
     assertThat(initMethodDef.getLoopTypes()).isEqualTo(ExpressionResultString.EMPTY);

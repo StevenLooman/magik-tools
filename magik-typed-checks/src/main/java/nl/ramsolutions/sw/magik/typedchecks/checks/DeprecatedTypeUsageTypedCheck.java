@@ -1,11 +1,11 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.sonar.check.Rule;
@@ -28,18 +28,23 @@ public class DeprecatedTypeUsageTypedCheck extends MagikTypedCheck {
     }
 
     final LocalTypeReasonerState state = this.getTypeReasonerState();
-    final ExpressionResult result = state.getNodeType(parent);
-    final AbstractType type = result.get(0, UndefinedType.INSTANCE);
-    if (type == UndefinedType.INSTANCE) {
+    final ExpressionResultString result = state.getNodeType(parent);
+    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
+    if (typeStr.isUndefined()) {
       return;
     }
 
-    if (!type.getTopics().contains(DeprecatedTypeUsageTypedCheck.DEPRECATED_TOPIC)) {
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    final ExemplarDefinition exemplerDef = resolver.getExemplarDefinition(typeStr);
+    if (exemplerDef == null) {
       return;
     }
 
-    final TypeString typeString = type.getTypeString();
-    final String typeStringStr = typeString.getFullString();
+    if (!exemplerDef.getTopics().contains(DeprecatedTypeUsageTypedCheck.DEPRECATED_TOPIC)) {
+      return;
+    }
+
+    final String typeStringStr = typeStr.getFullString();
     final String message = String.format(MESSAGE, typeStringStr);
     this.addIssue(node, message);
   }

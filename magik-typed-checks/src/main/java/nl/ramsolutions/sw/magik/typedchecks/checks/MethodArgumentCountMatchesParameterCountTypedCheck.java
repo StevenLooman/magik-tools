@@ -1,13 +1,14 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Collection;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
@@ -47,8 +48,8 @@ public class MethodArgumentCountMatchesParameterCountTypedCheck extends MagikTyp
     }
 
     // Get type.
-    final AbstractType calledType = this.getTypeInvokedOn(node);
-    if (calledType == UndefinedType.INSTANCE) {
+    final TypeString calledTypeStr = this.getTypeInvokedOn(node);
+    if (calledTypeStr.isUndefined()) {
       // Cannot give any useful information, so abort.
       return;
     }
@@ -56,19 +57,22 @@ public class MethodArgumentCountMatchesParameterCountTypedCheck extends MagikTyp
     // Get methods.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
-    for (final Method method : calledType.getMethods(methodName)) {
-      final List<Parameter> parameters = method.getParameters();
-      if (parameters.isEmpty()) {
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    final Collection<MethodDefinition> methodDefs =
+        resolver.getMethodDefinitions(calledTypeStr, methodName);
+    for (final MethodDefinition methodDef : methodDefs) {
+      final List<ParameterDefinition> parameterDefs = methodDef.getParameters();
+      if (parameterDefs.isEmpty()) {
         continue;
       }
 
       // Match arguments against method.parameters.
       final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT);
-      final List<Parameter> checkedParameters =
-          method.getParameters().stream()
-              .filter(parameter -> parameter.is(Parameter.Modifier.NONE))
+      final List<ParameterDefinition> checkedParameterDefs =
+          parameterDefs.stream()
+              .filter(parameter -> parameter.getModifier() == ParameterDefinition.Modifier.NONE)
               .toList();
-      if (checkedParameters.size() > argumentNodes.size()) {
+      if (checkedParameterDefs.size() > argumentNodes.size()) {
         final String message = String.format(MESSAGE, methodName);
         this.addIssue(node, message);
       }

@@ -7,8 +7,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.ContinueLeaveStatementNodeHelpe
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
@@ -42,10 +41,9 @@ class StatementHandler extends LocalTypeReasonerHandler {
         || scopeEntry.isType(ScopeEntry.Type.DEFINITION)
         || scopeEntry.isType(ScopeEntry.Type.CONSTANT)) {
       final AstNode expressionNode = node.getFirstChild(MagikGrammar.EXPRESSION);
-      final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
-      final ExpressionResult result =
+      final ExpressionResultString result =
           expressionNode == null
-              ? new ExpressionResult(unsetType)
+              ? new ExpressionResultString(TypeString.SW_UNSET)
               : this.state.getNodeType(expressionNode);
 
       final AstNode scopeEntryNode = scopeEntry.getDefinitionNode();
@@ -58,7 +56,7 @@ class StatementHandler extends LocalTypeReasonerHandler {
       final ScopeEntry importedScopeEntry = scopeEntry.getImportedEntry();
       Objects.requireNonNull(importedScopeEntry);
       final AstNode activeImportedNode = this.state.getCurrentScopeEntryNode(importedScopeEntry);
-      final ExpressionResult result = this.state.getNodeType(activeImportedNode);
+      final ExpressionResultString result = this.state.getNodeType(activeImportedNode);
       this.state.setNodeType(node, result);
     }
   }
@@ -69,11 +67,9 @@ class StatementHandler extends LocalTypeReasonerHandler {
    * @param node VARIABLE_DEFINITION_MULTI node.
    */
   void handleVariableDefinitionMulti(final AstNode node) {
-    final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
-
     // Take result for right hand.
     final AstNode rightNode = node.getFirstChild(MagikGrammar.TUPLE);
-    final ExpressionResult result = this.state.getNodeType(rightNode);
+    final ExpressionResultString result = this.state.getNodeType(rightNode);
 
     // Assign to all left hands.
     final List<AstNode> identifierNodes =
@@ -82,7 +78,8 @@ class StatementHandler extends LocalTypeReasonerHandler {
     for (int i = 0; i < identifierNodes.size(); ++i) {
       // TODO: Does this work with gather?
       final AstNode identifierNode = identifierNodes.get(i);
-      final ExpressionResult partialResult = new ExpressionResult(result.get(i, unsetType));
+      final ExpressionResultString partialResult =
+          new ExpressionResultString(result.get(i, TypeString.SW_UNSET));
       this.state.setNodeType(identifierNode, partialResult);
 
       // Store 'active' type for future reference.
@@ -104,7 +101,7 @@ class StatementHandler extends LocalTypeReasonerHandler {
   void handleEmit(final AstNode node) {
     // Get results.
     final AstNode tupleNode = node.getFirstChild(MagikGrammar.TUPLE);
-    final ExpressionResult result = this.state.getNodeType(tupleNode);
+    final ExpressionResultString result = this.state.getNodeType(tupleNode);
 
     // Find related node.
     final AstNode bodyNode = node.getFirstAncestor(MagikGrammar.BODY);
@@ -126,10 +123,10 @@ class StatementHandler extends LocalTypeReasonerHandler {
   void handleLeave(final AstNode node) {
     // Get results.
     final AstNode multiValueExprNode = node.getFirstChild(MagikGrammar.TUPLE);
-    final ExpressionResult result =
+    final ExpressionResultString result =
         multiValueExprNode != null
             ? this.state.getNodeType(multiValueExprNode)
-            : new ExpressionResult();
+            : ExpressionResultString.EMPTY;
 
     // Find related BODY/EXPRESION nodes.
     final ContinueLeaveStatementNodeHelper helper = new ContinueLeaveStatementNodeHelper(node);
@@ -146,8 +143,8 @@ class StatementHandler extends LocalTypeReasonerHandler {
   void handleReturn(final AstNode node) {
     // Get results.
     final AstNode tupleNode = node.getFirstChild(MagikGrammar.TUPLE);
-    final ExpressionResult result =
-        tupleNode != null ? this.state.getNodeType(tupleNode) : new ExpressionResult();
+    final ExpressionResultString result =
+        tupleNode != null ? this.state.getNodeType(tupleNode) : ExpressionResultString.EMPTY;
 
     // Find related node to store on.
     final AstNode definitionNode =

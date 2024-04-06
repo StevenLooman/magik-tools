@@ -156,7 +156,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
     final TypeString part =
         childNodes.size() == 1
             ? childTypeStrings.get(0)
-            : TypeString.ofCombination(this.currentPakkage, childTypeStringsArr);
+            : TypeString.ofCombination(childTypeStringsArr);
     this.mapping.put(node, part);
   }
 }

@@ -18,6 +18,8 @@ import nl.ramsolutions.sw.magik.analysis.AstWalker;
  * of the methods are called on that class directly, but always through an inherited class. On
  * declaration the inheriting classes are unknown, thus if {@code _self} is returned from a mixin,
  * we need to proxy the type.
+ *
+ * <p>Note that this class never writes to the {@link IDefinitionKeeper}.
  */
 public class LocalTypeReasoner extends AstWalker {
 
@@ -76,6 +78,7 @@ public class LocalTypeReasoner extends AstWalker {
 
   @Override
   protected void walkPostMethodDefinition(final AstNode node) {
+    // TODO: Move this to somewhere else.
     this.expressionHandler.handleMethodDefinition(node);
   }
 

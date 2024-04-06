@@ -21,13 +21,10 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
@@ -199,7 +196,8 @@ public class CompletionProvider {
     }
 
     // Slots.
-    final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
+    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     if (scopeNode != null) {
       final AstNode methodDefinitionNode =
           scopeNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
@@ -207,34 +205,41 @@ public class CompletionProvider {
         final MethodDefinitionNodeHelper helper =
             new MethodDefinitionNodeHelper(methodDefinitionNode);
         final TypeString typeString = helper.getTypeString();
-        final AbstractType type = typeKeeper.getType(typeString);
-        type.getSlots().stream()
-            .map(
-                slot -> {
-                  final String slotName = slot.getName();
-                  final String fullSlotName = type.getFullName() + "." + slot.getName();
-                  final CompletionItem item = new CompletionItem(slotName);
-                  item.setInsertText(slotName);
-                  item.setDetail(fullSlotName);
-                  item.setKind(CompletionItemKind.Property);
-                  return item;
-                })
-            .forEach(items::add);
+        definitionKeeper.getExemplarDefinitions(typeString).stream()
+            .forEach(
+                exemplarDef -> {
+                  exemplarDef.getSlots().stream()
+                      .map(
+                          slot -> {
+                            final String slotName = slot.getName();
+                            final String fullSlotName =
+                                typeString.getFullString() + "." + slot.getName();
+                            final CompletionItem item = new CompletionItem(slotName);
+                            item.setInsertText(slotName);
+                            item.setDetail(fullSlotName);
+                            item.setKind(CompletionItemKind.Property);
+                            return item;
+                          })
+                      .forEach(items::add);
+                });
       }
     }
 
     // Global types.
     final String identifierPart = tokenNode != null ? tokenNode.getTokenValue() : "";
-    typeKeeper.getTypes().stream()
-        .filter(type -> type.getFullName().indexOf(identifierPart) != -1)
+    definitionKeeper.getExemplarDefinitions().stream()
+        .filter(
+            exemplarDef ->
+                exemplarDef.getTypeString().getFullString().indexOf(identifierPart) != -1)
         .map(
-            type -> {
-              final CompletionItem item = new CompletionItem(type.getFullName());
-              item.setInsertText(type.getFullName());
-              item.setDetail(type.getFullName());
-              item.setDocumentation(type.getDoc());
+            exemplarDef -> {
+              final CompletionItem item =
+                  new CompletionItem(exemplarDef.getTypeString().getFullString());
+              item.setInsertText(exemplarDef.getTypeString().getFullString());
+              item.setDetail(exemplarDef.getTypeString().getFullString());
+              item.setDocumentation(exemplarDef.getDoc());
               item.setKind(CompletionItemKind.Class);
-              if (type.getTopics().contains(TOPIC_DEPRECATED)) {
+              if (exemplarDef.getTopics().contains(TOPIC_DEPRECATED)) {
                 item.setTags(List.of(CompletionItemTag.Deprecated));
               }
               return item;
@@ -274,30 +279,29 @@ public class CompletionProvider {
     }
 
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-    final ExpressionResult result = reasonerState.getNodeType(wantedNode);
-    AbstractType type = result.get(0, UndefinedType.INSTANCE);
-    if (type == SelfType.INSTANCE) {
+    final ExpressionResultString result = reasonerState.getNodeType(wantedNode);
+    TypeString typeStr = result.get(0, TypeString.UNDEFINED);
+    if (typeStr == TypeString.SELF) {
       final AstNode methodDefNode = tokenNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
       final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefNode);
-      final TypeString typeString = helper.getTypeString();
-      final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-      type = typeKeeper.getType(typeString);
+      typeStr = helper.getTypeString();
     }
 
     // Convert all known methods to CompletionItems.
-    LOGGER.debug("Providing method completions for type: {}", type.getFullName());
+    LOGGER.debug("Providing method completions for type: {}", typeStr.getFullString());
     final String methodNamePart = tokenValue.startsWith(".") ? tokenValue.substring(1) : tokenValue;
-    return type.getMethods().stream()
-        .filter(method -> method.getName().contains(methodNamePart))
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    return resolver.getMethodDefinitions(typeStr).stream()
+        .filter(methodDef -> methodDef.getMethodName().contains(methodNamePart))
         .map(
-            method -> {
-              final String methodName = method.getNameWithParameters();
+            methodDef -> {
+              final String methodName = methodDef.getMethodName();
               final CompletionItem item = new CompletionItem(methodName);
               item.setInsertText(methodName);
-              item.setDetail(method.getOwner().getFullName());
-              item.setDocumentation(method.getDoc());
+              item.setDetail(methodDef.getTypeName().getFullString());
+              item.setDocumentation(methodDef.getDoc());
               item.setKind(CompletionItemKind.Method);
-              if (method.getTopics().contains(TOPIC_DEPRECATED)) {
+              if (methodDef.getTopics().contains(TOPIC_DEPRECATED)) {
                 item.setTags(List.of(CompletionItemTag.Deprecated));
               }
               return item;

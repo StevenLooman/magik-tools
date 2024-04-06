@@ -6,8 +6,7 @@ import java.util.Objects;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
@@ -49,22 +48,30 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
     if (scopeEntry.isType(ScopeEntry.Type.GLOBAL) || scopeEntry.isType(ScopeEntry.Type.DYNAMIC)) {
       final String currentPackage = this.getCurrentPackage(node);
       final TypeString typeString = TypeString.ofIdentifier(identifier, currentPackage);
-      this.assignAtom(node, typeString);
+
+      // Resolve TypeString.
+      final TypeString resolvedTypeStr =
+          this.typeResolver.resolve(typeString).stream()
+              .map(typeStrDef -> typeStrDef.getTypeString())
+              .reduce(TypeString::combine)
+              .orElse(TypeString.UNDEFINED);
+
+      this.assignAtom(node, resolvedTypeStr);
     } else if (scopeEntry.isType(ScopeEntry.Type.IMPORT)) {
       final ScopeEntry parentScopeEntry = scopeEntry.getImportedEntry();
       Objects.requireNonNull(parentScopeEntry);
       final AstNode lastNodeType = this.state.getCurrentScopeEntryNode(parentScopeEntry);
-      final ExpressionResult result = this.state.getNodeType(lastNodeType);
+      final ExpressionResultString result = this.state.getNodeType(lastNodeType);
       this.assignAtom(node, result);
     } else if (scopeEntry.isType(ScopeEntry.Type.PARAMETER)) {
       // TODO: This does not handle assigning to parameter properly!
       final AstNode parameterNode = scopeEntry.getDefinitionNode();
-      final ExpressionResult result = this.state.getNodeType(parameterNode);
+      final ExpressionResultString result = this.state.getNodeType(parameterNode);
       this.assignAtom(node, result);
     } else {
       final AstNode lastNodeType = this.state.getCurrentScopeEntryNode(scopeEntry);
       if (lastNodeType != null) {
-        final ExpressionResult result = this.state.getNodeType(lastNodeType);
+        final ExpressionResultString result = this.state.getNodeType(lastNodeType);
         this.assignAtom(node, result);
       }
     }
@@ -89,8 +96,7 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
       this.state.setCurrentScopeEntryNode(scopeEntry, node);
     }
 
-    final AbstractType conditionType = this.typeKeeper.getType(TypeString.SW_CONDITION);
-    final ExpressionResult result = new ExpressionResult(conditionType);
+    final ExpressionResultString result = new ExpressionResultString(TypeString.SW_CONDITION);
     this.state.setNodeType(node, result);
   }
 
@@ -103,8 +109,7 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
     final String exemplarName = node.getTokenValue();
     final String currentPackage = this.getCurrentPackage(node);
     final TypeString typeStr = TypeString.ofIdentifier(exemplarName, currentPackage);
-    final AbstractType type = this.typeKeeper.getType(typeStr);
-    final ExpressionResult result = new ExpressionResult(type);
+    final ExpressionResultString result = new ExpressionResultString(typeStr);
     this.state.setNodeType(node, result);
   }
 }

@@ -14,10 +14,8 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.Position;
@@ -97,10 +95,9 @@ public class TypeHierarchyProvider {
     } else if (atomNode != null) {
       // Get type from node.
       final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-      final ExpressionResult expressionResult = reasonerState.getNodeType(atomNode);
-      final AbstractType type = expressionResult.get(0, null);
-      if (type != null && type != UndefinedType.INSTANCE) {
-        final TypeString typeStr = type.getTypeString();
+      final ExpressionResultString result = reasonerState.getNodeType(atomNode);
+      final TypeString typeStr = result.get(0, null);
+      if (typeStr != null && !typeStr.isUndefined()) {
         final ExemplarDefinition definition = resolver.getExemplarDefinition(typeStr);
         Objects.requireNonNull(definition);
         final TypeHierarchyItem item = this.toTypeHierarchyItem(definition);

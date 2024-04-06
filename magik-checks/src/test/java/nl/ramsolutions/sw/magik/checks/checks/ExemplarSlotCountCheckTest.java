@@ -14,11 +14,12 @@ class ExemplarSlotCountCheckTest extends MagikCheckTestBase {
     final ExemplarSlotCountCheck check = new ExemplarSlotCountCheck();
     check.maxSlotCount = 2;
     final String code =
-        ""
-            + "def_slotted_exemplar(:exemplar, {\n"
-            + "  {:slot_1, _unset},\n"
-            + "  {:slot_2, _unset},\n"
-            + "  {:slot_3, _unset}})\n";
+        """
+        def_slotted_exemplar(:exemplar, {
+          {:slot_1, _unset},
+          {:slot_2, _unset},
+          {:slot_3, _unset}})
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -27,7 +28,11 @@ class ExemplarSlotCountCheckTest extends MagikCheckTestBase {
   void testMaxSlotCountSatisfied() {
     final ExemplarSlotCountCheck check = new ExemplarSlotCountCheck();
     check.maxSlotCount = 2;
-    final String code = "" + "def_slotted_exemplar(:exemplar, {\n" + "    {:slot_1, _unset}})\n";
+    final String code =
+        """
+        def_slotted_exemplar(:exemplar, {
+            {:slot_1, _unset}})
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -37,11 +42,12 @@ class ExemplarSlotCountCheckTest extends MagikCheckTestBase {
     final ExemplarSlotCountCheck check = new ExemplarSlotCountCheck();
     check.maxSlotCount = 2;
     final String code =
-        ""
-            + "sw:def_slotted_exemplar(:exemplar, {\n"
-            + "  {:slot_1, _unset},\n"
-            + "  {:slot_2, _unset},\n"
-            + "  {:slot_3, _unset}})\n";
+        """
+        sw:def_slotted_exemplar(:exemplar, {
+          {:slot_1, _unset},
+          {:slot_2, _unset},
+          {:slot_3, _unset}})
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }

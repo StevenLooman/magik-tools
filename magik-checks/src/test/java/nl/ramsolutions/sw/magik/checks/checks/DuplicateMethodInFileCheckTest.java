@@ -14,11 +14,36 @@ class DuplicateMethodInFileCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.a\n" + "_endmethod\n" + "_method a.b\n" + "_endmethod\n",
-        "" + "_method a.a(p1)\n" + "_endmethod\n" + "_method a.a\n" + "_endmethod\n",
-        "" + "_method a.a(p1)\n" + "_endmethod\n" + "_method a.a(p1, p2) << p3\n" + "_endmethod\n",
-        "" + "_method a[p1]\n" + "_endmethod\n" + "_method a[p1, p2]\n" + "_endmethod\n",
-        "" + "_method a[p1]\n" + "_endmethod\n" + "_method a[p1] << p2\n" + "_endmethod\n",
+        """
+        _method a.a
+        _endmethod
+        _method a.b
+        _endmethod
+        """,
+        """
+        _method a.a(p1)
+        _endmethod
+        _method a.a
+        _endmethod
+        """,
+        """
+        _method a.a(p1)
+        _endmethod
+        _method a.a(p1, p2) << p3
+        _endmethod
+        """,
+        """
+        _method a[p1]
+        _endmethod
+        _method a[p1, p2]
+        _endmethod
+        """,
+        """
+        _method a[p1]
+        _endmethod
+        _method a[p1] << p2
+        _endmethod
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new DuplicateMethodInFileCheck();
@@ -29,15 +54,36 @@ class DuplicateMethodInFileCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.a\n" + "_endmethod\n" + "_method a.a\n" + "_endmethod\n",
-        "" + "_method a.a(p1)\n" + "_endmethod\n" + "_method a.a(p1, p2)\n" + "_endmethod\n",
-        ""
-            + "_method a.a(p1) << p2\n"
-            + "_endmethod\n"
-            + "_method a.a(p1) << p2\n"
-            + "_endmethod\n",
-        "" + "_method a[p1]\n" + "_endmethod\n" + "_method a[p1]\n" + "_endmethod\n",
-        "" + "_method a[p1] << p2\n" + "_endmethod\n" + "_method a[p1] << p2\n" + "_endmethod\n",
+        """
+        _method a.a
+        _endmethod
+        _method a.a
+        _endmethod
+        """,
+        """
+        _method a.a(p1)
+        _endmethod
+        _method a.a(p1, p2)
+        _endmethod
+        """,
+        """
+        _method a.a(p1) << p2
+        _endmethod
+        _method a.a(p1) << p2
+        _endmethod
+        """,
+        """
+        _method a[p1]
+        _endmethod
+        _method a[p1]
+        _endmethod
+        """,
+        """
+        _method a[p1] << p2
+        _endmethod
+        _method a[p1] << p2
+        _endmethod
+        """,
       })
   void testInvalid(final String code) {
     final MagikCheck check = new DuplicateMethodInFileCheck();

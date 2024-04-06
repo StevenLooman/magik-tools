@@ -1,13 +1,10 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.Collection;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.sonar.check.Rule;
@@ -26,26 +23,19 @@ public class UndefinedMethodCallResultTypedCheck extends MagikTypedCheck {
   protected void walkPostMethodInvocation(final AstNode node) {
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
-    final AbstractType receiverType = this.getTypeInvokedOn(node);
-    if (receiverType == UndefinedType.INSTANCE) {
+    final TypeString receiverTypeStr = this.getTypeInvokedOn(node);
+    if (receiverTypeStr.isUndefined()) {
       // Don't bother with method invocations on UNDEFINED.
       return;
     }
 
-    final ExpressionResult result = reasonerState.getNodeType(node);
-    if (result.containsUndefined()) {
+    final ExpressionResultString result = reasonerState.getNodeType(node);
+    final boolean containsUndefined = result.stream().anyMatch(typeStr -> typeStr.isUndefined());
+    if (containsUndefined) {
       final AstNode firstIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
       final AstNode issueNode = firstIdentifierNode != null ? firstIdentifierNode : node;
-
       final String methodName = helper.getMethodName();
-
-      final Collection<Method> methods = receiverType.getMethods(methodName);
-      final String receiverFullName =
-          !methods.isEmpty()
-              ? methods.iterator().next().getOwner().getFullName()
-              : receiverType.getFullName();
-      final String fullMethodName = receiverFullName + "." + methodName;
-
+      final String fullMethodName = receiverTypeStr.getFullString() + "." + methodName;
       final String message = String.format(MESSAGE, fullMethodName);
       this.addIssue(issueNode, message);
     }

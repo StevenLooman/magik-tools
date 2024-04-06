@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
 
 /**
@@ -23,12 +25,15 @@ public final class TypeString implements Comparable<TypeString> {
   public static final String SW_PACKAGE = "sw";
 
   @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final String ANONYMOUS_PACKAGE = "_anon";
+
+  @SuppressWarnings("checkstyle:JavadocVariable")
   public static final TypeString UNDEFINED =
-      TypeString.ofIdentifier(UndefinedType.SERIALIZED_NAME, DEFAULT_PACKAGE);
+      TypeString.ofIdentifier("_undefined", DEFAULT_PACKAGE); // TODO: Special package?
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final TypeString SELF =
-      TypeString.ofIdentifier(SelfType.SERIALIZED_NAME, DEFAULT_PACKAGE);
+      TypeString.ofIdentifier("_self", DEFAULT_PACKAGE); // TODO: Special package?
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", SW_PACKAGE);
@@ -109,8 +114,9 @@ public final class TypeString implements Comparable<TypeString> {
   private static final String GENERIC_DEFINITION = "_generic_def";
   private static final String GENERIC_REFERENCE = "_generic_ref";
   private static final String PARAMETER = "_parameter";
+  private static final String COMBINED = "_combined";
 
-  private final String string;
+  @Nullable private final String string;
   private final String currentPackage;
   private final List<TypeString> combinedTypes;
   private final List<TypeString> generics;
@@ -198,13 +204,18 @@ public final class TypeString implements Comparable<TypeString> {
   /**
    * Create a {@link TypeString} of a combination.
    *
-   * @param currentPakkage Current package.
    * @param combinations Types to combine.
    * @return {@link TypeString}.
    */
-  public static TypeString ofCombination(
-      final String currentPakkage, final TypeString... combinations) {
-    return new TypeString(currentPakkage, combinations);
+  public static TypeString ofCombination(final TypeString... combinations) {
+    Arrays.stream(combinations)
+        .forEach(
+            typeStr -> {
+              if (typeStr.isCombined()) {
+                throw new IllegalArgumentException();
+              }
+            });
+    return new TypeString(TypeString.COMBINED, combinations);
   }
 
   /**
@@ -310,7 +321,7 @@ public final class TypeString implements Comparable<TypeString> {
    * @return {@code true} if this type is undefined.
    */
   public boolean isUndefined() {
-    return !this.isCombined() && this.getString().equalsIgnoreCase(UndefinedType.SERIALIZED_NAME);
+    return !this.isCombined() && TypeString.UNDEFINED.getIdentifier().equalsIgnoreCase(this.string);
   }
 
   /**
@@ -327,7 +338,7 @@ public final class TypeString implements Comparable<TypeString> {
   }
 
   public boolean isSelf() {
-    return !this.isCombined() && this.getString().equalsIgnoreCase(SelfType.SERIALIZED_NAME);
+    return !this.isCombined() && TypeString.SELF.getIdentifier().equalsIgnoreCase(this.string);
   }
 
   public boolean isSingle() {
@@ -377,6 +388,19 @@ public final class TypeString implements Comparable<TypeString> {
   }
 
   /**
+   * Get the reference of the generic.
+   *
+   * @return
+   */
+  public TypeString getGenericReference() {
+    if (!this.isGenericReference() && !this.isGenericDefinition()) {
+      throw new IllegalStateException();
+    }
+
+    return TypeString.ofGenericReference(this.string);
+  }
+
+  /**
    * Get the type of the generic.
    *
    * @return Generic type.
@@ -422,7 +446,7 @@ public final class TypeString implements Comparable<TypeString> {
               .map(typeString -> typeString.substituteType(from, to))
               .toList()
               .toArray(TypeString[]::new);
-      return TypeString.ofCombination(this.currentPackage, combinedSubstitutedArr);
+      return TypeString.ofCombination(combinedSubstitutedArr);
     }
 
     if (this.hasGenerics()) {
@@ -486,5 +510,79 @@ public final class TypeString implements Comparable<TypeString> {
   @Override
   public int compareTo(final TypeString other) {
     return this.getFullString().compareTo(other.getFullString());
+  }
+
+  /**
+   * Get the intersection of two types.
+   *
+   * @param type1 Type 1.
+   * @param type2 Type 2.
+   * @return Intersection of type 1 and type 2.
+   */
+  @CheckForNull
+  public static TypeString intersection(final TypeString type1, final TypeString type2) {
+    final Set<TypeString> type1s =
+        type1.isCombined() ? Set.copyOf(type1.getCombinedTypes()) : Set.of(type1);
+    final Set<TypeString> type2s =
+        type2.isCombined() ? Set.copyOf(type2.getCombinedTypes()) : Set.of(type2);
+    final Set<TypeString> intersection =
+        type1s.stream().filter(type2s::contains).collect(Collectors.toSet());
+    if (intersection.isEmpty()) {
+      return null;
+    }
+
+    return TypeString.ofCombination(intersection.toArray(TypeString[]::new));
+  }
+
+  /**
+   * Get the difference of two types.
+   *
+   * @param type1 Type 1.
+   * @param type2 Type 2.
+   * @return Difference between type 1 and type 2.
+   */
+  @CheckForNull
+  public static TypeString difference(final TypeString type1, final TypeString type2) {
+    final Set<TypeString> type1s =
+        type1.isCombined() ? Set.copyOf(type1.getCombinedTypes()) : Set.of(type1);
+    final Set<TypeString> type2s =
+        type2.isCombined() ? Set.copyOf(type2.getCombinedTypes()) : Set.of(type2);
+    final Set<TypeString> difference =
+        type1s.stream().filter(type -> !type2s.contains(type)).collect(Collectors.toSet());
+    if (difference.isEmpty()) {
+      return null;
+    }
+
+    return TypeString.ofCombination(difference.toArray(TypeString[]::new));
+  }
+
+  /**
+   * Combine {@link TypeString}s. Any combined {@link TypeString}s will be flattened.
+   *
+   * @param typeStrs {@link TypeString}s to combine.
+   * @return {@link TypeString} representing all types.
+   */
+  @CheckForNull
+  public static TypeString combine(final TypeString... typeStrs) {
+    if (typeStrs.length == 0) {
+      return null;
+    }
+
+    final Set<TypeString> combinedTypes =
+        Stream.of(typeStrs)
+            .flatMap(
+                typeStr -> {
+                  if (typeStr.isCombined()) {
+                    return typeStr.getCombinedTypes().stream();
+                  }
+
+                  return Stream.of(typeStr);
+                })
+            .collect(Collectors.toUnmodifiableSet());
+    if (combinedTypes.size() == 1) {
+      return combinedTypes.stream().findFirst().orElseThrow();
+    }
+
+    return TypeString.ofCombination(combinedTypes.toArray(TypeString[]::new));
   }
 }

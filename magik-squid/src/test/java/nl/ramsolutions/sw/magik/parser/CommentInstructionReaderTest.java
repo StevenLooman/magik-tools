@@ -25,7 +25,10 @@ class CommentInstructionReaderTest {
   @Test
   void testReadStatementInstruction() {
     final String code =
-        "" + "_proc()\n" + "  print(10)  # mlint: disable=forbidden-call\n" + "_endproc";
+        """
+        _proc()
+          print(10)  # mlint: disable=forbidden-call
+        _endproc""";
     final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
 
     final CommentInstructionReader instructionReader =
@@ -46,15 +49,15 @@ class CommentInstructionReaderTest {
   @Test
   void testReadScopeInstruction() {
     final String code =
-        ""
-            + "# mlint: disable=file-method-count\n"
-            + "_proc()\n"
-            + "  # mlint: disable=no-self-use\n"
-            + "  print(10, 20)  # mlint: disable=forbidden-call\n"
-            + "  _block\n"
-            + "    show(:a, :b, :c)\n"
-            + "  _endblock\n"
-            + "_endproc";
+        """
+        # mlint: disable=file-method-count
+        _proc()
+          # mlint: disable=no-self-use
+          print(10, 20)  # mlint: disable=forbidden-call
+          _block
+            show(:a, :b, :c)
+          _endblock
+        _endproc""";
     final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
 
     final CommentInstructionReader instructionReader =

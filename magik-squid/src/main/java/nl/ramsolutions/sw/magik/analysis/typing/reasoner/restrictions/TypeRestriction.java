@@ -2,7 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner.restrictions;
 
 import java.util.Map;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /** Type restriction. */
 public interface TypeRestriction {
@@ -19,5 +19,5 @@ public interface TypeRestriction {
    *
    * @return Restricted scope entry with its reasoned type.
    */
-  Map.Entry<ScopeEntry, AbstractType> getRestriction();
+  Map.Entry<ScopeEntry, TypeString> getRestriction();
 }

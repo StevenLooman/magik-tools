@@ -14,10 +14,24 @@ class NoStatementAfterBodyExitCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.b\n" + "    _return 10\n" + "_endmethod",
-        "" + "_method a.b\n" + "    >> 10\n" + "_endmethod",
-        "" + "_method a.b\n" + "    _return 10\n" + "    \n" + "    # comment\n" + "_endmethod",
-        "" + "_loop\n" + "    _leave\n" + "_endloop",
+        """
+        _method a.b
+            _return 10
+        _endmethod""",
+        """
+        _method a.b
+            >> 10
+        _endmethod""",
+        """
+        _method a.b
+            _return 10
+         \s\s\s
+            # comment
+        _endmethod""",
+        """
+        _loop
+            _leave
+        _endloop""",
       })
   void testValid(final String code) {
     final MagikCheck check = new NoStatementAfterBodyExitCheck();
@@ -28,8 +42,16 @@ class NoStatementAfterBodyExitCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.b\n" + "    >> 10\n" + "    write(10)\n" + "_endmethod",
-        "" + "_loop\n" + "    _leave\n" + "    write(10)\n" + "_endloop",
+        """
+        _method a.b
+            >> 10
+            write(10)
+        _endmethod""",
+        """
+        _loop
+            _leave
+            write(10)
+        _endloop""",
       })
   void testInvalid(final String code) {
     final MagikCheck check = new NoStatementAfterBodyExitCheck();

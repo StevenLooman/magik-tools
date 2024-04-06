@@ -228,11 +228,24 @@ class DefinitionReaderTest {
     reader.walkAst(node);
 
     final List<Definition> definitions = reader.getDefinitions();
-    assertThat(definitions).hasSize(1);
+    assertThat(definitions).hasSize(2);
 
-    assertThat(definitions.get(0)).isInstanceOf(BinaryOperatorDefinition.class);
+    final ProcedureDefinition procDef =
+        definitions.stream()
+            .filter(ProcedureDefinition.class::isInstance)
+            .map(ProcedureDefinition.class::cast)
+            .findAny()
+            .orElseThrow();
+    assertThat(procDef.getName()).isEqualTo("_unnamed");
+    assertThat(procDef.getTypeString())
+        .isEqualTo(TypeString.ofIdentifier("_anon", "_proc_in_memory_0"));
+
     final BinaryOperatorDefinition operatorDefinition =
-        (BinaryOperatorDefinition) definitions.get(0);
+        definitions.stream()
+            .filter(BinaryOperatorDefinition.class::isInstance)
+            .map(BinaryOperatorDefinition.class::cast)
+            .findAny()
+            .orElseThrow();
     assertThat(operatorDefinition.getName()).isEqualTo("user:integer > user:float");
     assertThat(operatorDefinition.getOperator()).isEqualTo(">");
     assertThat(operatorDefinition.getLhsTypeName())

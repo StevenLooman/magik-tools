@@ -85,16 +85,22 @@ class TypeDocGrammarTest {
   void testTypeDoc() {
     Assertions.assertThat(g.rule(TypeDocGrammar.TYPE_DOC))
         .matches(
-            ""
-                + "## This is a method\n"
-                + "## @param {user:thing} p1 Param1 description\n"
-                + "## @return {sw:rope|sw:unset}\n")
+            """
+                ## This is a method
+                ## @param {user:thing} p1 Param1 description
+                ## @return {sw:rope|sw:unset}
+                """)
         .matches(
-            ""
-                + "## This is spread\n"
-                + "## over multiple lines with a phony @param.\n"
-                + "## @param {user:thing} p1 Param1 description\n"
-                + "## @return {sw:rope}\n")
-        .matches("" + "## @param {user:thing} p1 Param1 description\n" + "## @return {sw:rope}\n");
+            """
+                ## This is spread
+                ## over multiple lines with a phony @param.
+                ## @param {user:thing} p1 Param1 description
+                ## @return {sw:rope}
+                """)
+        .matches(
+            """
+            ## @param {user:thing} p1 Param1 description
+            ## @return {sw:rope}
+            """);
   }
 }

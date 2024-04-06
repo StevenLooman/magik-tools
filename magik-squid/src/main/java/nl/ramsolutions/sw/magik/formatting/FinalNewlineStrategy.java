@@ -42,7 +42,9 @@ class FinalNewlineStrategy extends FormattingStrategy {
 
   @Override
   TextEdit walkEofToken(final Token token) {
-    if (this.options.isInsertFinalNewline() && this.lastToken.getType() != GenericTokenType.EOL) {
+    if (this.options.isInsertFinalNewline()
+        && this.lastToken != null
+        && this.lastToken.getType() != GenericTokenType.EOL) {
       return this.insertBeforeToken(token, FinalNewlineStrategy.EOL_TOKEN_VALUE);
     } else if (this.options.isTrimFinalNewlines()
         && this.lastTextToken != null

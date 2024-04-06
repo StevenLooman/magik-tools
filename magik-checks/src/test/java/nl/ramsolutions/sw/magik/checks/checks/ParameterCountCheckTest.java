@@ -13,7 +13,10 @@ class ParameterCountCheckTest extends MagikCheckTestBase {
   void testMaxMethodParameterCountExceeded() {
     final ParameterCountCheck check = new ParameterCountCheck();
     check.maxParameterCount = 2;
-    final String code = "" + "_method object.x(p1, p2, p3)\n" + "_endmethod\n";
+    final String code = """
+        _method object.x(p1, p2, p3)
+        _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -22,7 +25,10 @@ class ParameterCountCheckTest extends MagikCheckTestBase {
   void testMaxProcedureParameterCountExceeded() {
     final ParameterCountCheck check = new ParameterCountCheck();
     check.maxParameterCount = 2;
-    final String code = "" + "_proc(p1, p2, p3)\n" + "_endproc\n";
+    final String code = """
+        _proc(p1, p2, p3)
+        _endproc
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -32,7 +38,10 @@ class ParameterCountCheckTest extends MagikCheckTestBase {
   void testMaxMethodParameterCountSatisfied() {
     final ParameterCountCheck check = new ParameterCountCheck();
     check.maxParameterCount = 3;
-    final String code = "" + "_method object.x(p1, p2, p3)\n" + "_endmethod\n";
+    final String code = """
+        _method object.x(p1, p2, p3)
+        _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -42,7 +51,10 @@ class ParameterCountCheckTest extends MagikCheckTestBase {
   void testMaxProcedureParameterCountSatisfied() {
     final ParameterCountCheck check = new ParameterCountCheck();
     check.maxParameterCount = 3;
-    final String code = "" + "_proc(p1, p2, p3)\n" + "_endproc\n";
+    final String code = """
+        _proc(p1, p2, p3)
+        _endproc
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }

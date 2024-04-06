@@ -14,13 +14,14 @@ class VariableCountCheckTest extends MagikCheckTestBase {
     final VariableCountCheck check = new VariableCountCheck();
     check.maximumVariableCount = 2;
     final String code =
-        ""
-            + "_method a.b\n"
-            + "    _local a << 10\n"
-            + "    _local b << 20\n"
-            + "    _local c << 30\n"
-            + "    show(a, b, c)\n"
-            + "_endmethod\n";
+        """
+        _method a.b
+            _local a << 10
+            _local b << 20
+            _local c << 30
+            show(a, b, c)
+        _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -30,7 +31,12 @@ class VariableCountCheckTest extends MagikCheckTestBase {
     final VariableCountCheck check = new VariableCountCheck();
     check.maximumVariableCount = 2;
     final String code =
-        "" + "_method a.b\n" + "    _local a << 10\n" + "    show(a)\n" + "_endmethod\n";
+        """
+        _method a.b
+            _local a << 10
+            show(a)
+        _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -40,13 +46,14 @@ class VariableCountCheckTest extends MagikCheckTestBase {
     final VariableCountCheck check = new VariableCountCheck();
     check.maximumVariableCount = 2;
     final String code =
-        ""
-            + "_proc()\n"
-            + "    _local a << 10\n"
-            + "    _local b << 20\n"
-            + "    _local c << 30\n"
-            + "    show(a, b, c)\n"
-            + "_endproc\n";
+        """
+        _proc()
+            _local a << 10
+            _local b << 20
+            _local c << 30
+            show(a, b, c)
+        _endproc
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -55,7 +62,13 @@ class VariableCountCheckTest extends MagikCheckTestBase {
   void testProcedureOk() {
     final VariableCountCheck check = new VariableCountCheck();
     check.maximumVariableCount = 2;
-    final String code = "" + "_proc()\n" + "    _local a << 10\n" + "    show(a)\n" + "_endproc\n";
+    final String code =
+        """
+        _proc()
+            _local a << 10
+            show(a)
+        _endproc
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -64,7 +77,10 @@ class VariableCountCheckTest extends MagikCheckTestBase {
   void testMethodSyntaxError() {
     final VariableCountCheck check = new VariableCountCheck();
     check.maximumVariableCount = 2;
-    final String code = "" + "_method a.\n" + "_endmethod\n";
+    final String code = """
+        _method a.
+        _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }

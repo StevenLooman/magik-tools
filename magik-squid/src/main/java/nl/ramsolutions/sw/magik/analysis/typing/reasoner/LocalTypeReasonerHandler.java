@@ -1,16 +1,13 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +19,8 @@ abstract class LocalTypeReasonerHandler {
   private static final Logger LOGGER = LoggerFactory.getLogger(LocalTypeReasonerHandler.class);
 
   protected final LocalTypeReasonerState state;
-  protected final ITypeKeeper typeKeeper;
-  protected final TypeReader typeReader;
+  protected final IDefinitionKeeper definitionKeeper;
+  protected final TypeStringResolver typeResolver;
 
   /**
    * Constructor.
@@ -33,34 +30,28 @@ abstract class LocalTypeReasonerHandler {
   LocalTypeReasonerHandler(final LocalTypeReasonerState state) {
     this.state = state;
 
-    this.typeKeeper = state.getMagikFile().getTypeKeeper();
-    this.typeReader = new TypeReader(this.typeKeeper);
+    this.definitionKeeper = state.getMagikFile().getDefinitionKeeper();
+    this.typeResolver = new TypeStringResolver(this.definitionKeeper);
   }
 
   /**
-   * Get the resulting {@link ExpressionResult} from a method invocation.
+   * Get the resulting {@link ExpressionResultString} from a method invocation.
    *
    * @param calledType Type method is invoked on.
    * @param methodName Name of method to invoke.
    * @return Result of invocation.
    */
-  protected ExpressionResult getMethodInvocationResult(
-      final AbstractType calledType, final String methodName) {
-    final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
-    return calledType.getMethods(methodName).stream()
-        .map(Method::getCallResult)
-        .map(this.typeReader::parseExpressionResultString)
-        .reduce((result, element) -> new ExpressionResult(result, element, unsetType))
-        .orElse(ExpressionResult.UNDEFINED);
+  protected ExpressionResultString getMethodInvocationResult(
+      final TypeString calledType, final String methodName) {
+    // return calledType.getMethods(methodName).stream()
+    return this.typeResolver.getMethodDefinitions(calledType, methodName).stream()
+        .map(methodDefinition -> methodDefinition.getReturnTypes())
+        .reduce((result, element) -> new ExpressionResultString(result, element))
+        .orElse(ExpressionResultString.UNDEFINED);
   }
 
   protected void assignAtom(final AstNode node, final TypeString typeString) {
-    final AbstractType type = this.typeReader.parseTypeString(typeString);
-    this.assignAtom(node, type);
-  }
-
-  protected void assignAtom(final AstNode node, final AbstractType type) {
-    final ExpressionResult result = new ExpressionResult(type);
+    final ExpressionResultString result = new ExpressionResultString(typeString);
     this.assignAtom(node, result);
   }
 
@@ -70,10 +61,10 @@ abstract class LocalTypeReasonerHandler {
    * @param node Node to assign result to.
    * @param result Result to assign.
    */
-  protected void assignAtom(final AstNode node, final ExpressionResult result) {
+  protected void assignAtom(final AstNode node, final ExpressionResultString result) {
     final AstNode atomNode = node.getParent();
     if (this.state.hasNodeType(atomNode)) {
-      final ExpressionResult existingResult = this.state.getNodeType(atomNode);
+      final ExpressionResultString existingResult = this.state.getNodeType(atomNode);
       LOGGER.debug(
           "Atom node {} already has type: {}, overwriting with {}",
           atomNode,
@@ -88,15 +79,14 @@ abstract class LocalTypeReasonerHandler {
    * Add a type for a {@link AstNode}. Combines type if a type is already known.
    *
    * @param node AstNode.
-   * @param result ExpressionResult.
+   * @param result ExpressionResultString.
    */
-  protected void addNodeType(final AstNode node, final ExpressionResult result) {
+  protected void addNodeType(final AstNode node, final ExpressionResultString result) {
     if (this.state.hasNodeType(node)) {
       // Combine types.
-      final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
-      final ExpressionResult existingResult = this.state.getNodeType(node);
-      final ExpressionResult combinedResult =
-          new ExpressionResult(existingResult, result, unsetType);
+      final ExpressionResultString existingResult = this.state.getNodeType(node);
+      final ExpressionResultString combinedResult =
+          new ExpressionResultString(existingResult, result);
       this.state.setNodeType(node, combinedResult);
     } else {
       this.state.setNodeType(node, result);
@@ -109,20 +99,19 @@ abstract class LocalTypeReasonerHandler {
    * @param node Node.
    * @return Method owner type.
    */
-  protected AbstractType getMethodOwnerType(final AstNode node) {
+  protected TypeString getMethodOwnerType(final AstNode node) {
     final AstNode defNode =
         node.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION, MagikGrammar.METHOD_DEFINITION);
     if (defNode == null) {
       // Lets try to be safe.
-      return UndefinedType.INSTANCE;
+      return TypeString.UNDEFINED;
     } else if (defNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
-      return this.typeReader.parseTypeString(TypeString.SW_PROCEDURE);
+      return TypeString.SW_PROCEDURE;
     }
 
     // Method definition.
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(defNode);
-    final TypeString typeString = helper.getTypeString();
-    return this.typeReader.parseTypeString(typeString);
+    return helper.getTypeString();
   }
 
   protected String getCurrentPackage(final AstNode node) {

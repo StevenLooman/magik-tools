@@ -2,13 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
-import java.util.Objects;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Slot;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /** Atom handler. */
@@ -62,7 +56,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node SELF node.
    */
   void handleSelf(final AstNode node) {
-    this.assignAtom(node, SelfType.INSTANCE);
+    this.assignAtom(node, TypeString.SELF);
   }
 
   /**
@@ -144,19 +138,20 @@ class AtomHandler extends LocalTypeReasonerHandler {
    */
   void handleSimpleVector(final AstNode node) {
     // Find all child expression types, and use that for generic <E>.
-    final List<AbstractType> containedTypes =
+    final List<TypeString> containedTypes =
         node.getChildren(MagikGrammar.EXPRESSION).stream()
             .map(this.state::getNodeType)
-            .map(result -> result.get(0, UndefinedType.INSTANCE))
+            .map(result -> result.get(0, TypeString.UNDEFINED))
             .toList();
     if (!containedTypes.isEmpty()) {
-      final AbstractType[] combinedTypesArr = containedTypes.toArray(AbstractType[]::new);
-      final AbstractType combinedType = CombinedType.combine(combinedTypesArr);
+      final TypeString combinedTypeStr =
+          TypeString.ofCombination(containedTypes.toArray(TypeString[]::new));
+
       final TypeString genericsTypeString =
           TypeString.ofIdentifier(
               TypeString.SW_SIMPLE_VECTOR.getIdentifier(),
               TypeString.SW_SIMPLE_VECTOR.getPakkage(),
-              TypeString.ofGenericDefinition("E", combinedType.getTypeString()));
+              TypeString.ofGenericDefinition("E", combinedTypeStr));
       this.assignAtom(node, genericsTypeString);
       return;
     }
@@ -179,10 +174,9 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node THISTHREAD node.
    */
   void handleThread(final AstNode node) {
-    final AbstractType heavyThreadType = this.typeKeeper.getType(TypeString.SW_HEAVY_THREAD);
-    final AbstractType lightThreadType = this.typeKeeper.getType(TypeString.SW_LIGHT_THREAD);
-    final AbstractType threadType = CombinedType.combine(lightThreadType, heavyThreadType);
-    this.assignAtom(node, threadType);
+    final TypeString threadTypeStr =
+        TypeString.ofCombination(TypeString.SW_HEAVY_THREAD, TypeString.SW_LIGHT_THREAD);
+    this.assignAtom(node, threadTypeStr);
   }
 
   /**
@@ -192,19 +186,20 @@ class AtomHandler extends LocalTypeReasonerHandler {
    */
   void handleSlot(final AstNode node) {
     // Get class type.
-    final AbstractType type = this.getMethodOwnerType(node);
-    if (type == UndefinedType.INSTANCE) {
+    final TypeString ownerTypeStr = this.getMethodOwnerType(node);
+    if (ownerTypeStr == TypeString.UNDEFINED) {
       return;
     }
 
     // Get slot type.
     final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
     final String slotName = identifierNode.getTokenValue();
-    final Slot slot = type.getSlot(slotName);
-    final TypeString slotTypeStr = slot != null ? slot.getType() : TypeString.UNDEFINED;
-    final AbstractType slotType = this.typeReader.parseTypeString(slotTypeStr);
-    Objects.requireNonNull(slotType);
-
-    this.assignAtom(node, slotType);
+    final TypeString slotTypeStr =
+        this.typeResolver.getSlotDefinitions(ownerTypeStr).stream()
+            .filter(slotDef -> slotDef.getName().equals(slotName))
+            .map(slotDef -> slotDef.getTypeName())
+            .findAny()
+            .orElse(TypeString.UNDEFINED);
+    this.assignAtom(node, slotTypeStr);
   }
 }

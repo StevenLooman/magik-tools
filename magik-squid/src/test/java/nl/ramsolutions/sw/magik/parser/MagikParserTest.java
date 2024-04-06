@@ -35,7 +35,10 @@ class MagikParserTest {
 
   @Test
   void testValidMagik1() {
-    final String code = "" + "_block\n" + "\twrite(1)\n" + "_endblock";
+    final String code = """
+        _block
+        	write(1)
+        _endblock""";
     final AstNode node = this.parseMagik(code);
 
     assertThat(node.getChildren()).hasSize(2);
@@ -55,7 +58,11 @@ class MagikParserTest {
 
   @Test
   void testInvalidMagik1() {
-    final String code = "" + "_block\n" + "_endbloc\n" + "$\n";
+    final String code = """
+        _block
+        _endbloc
+        $
+        """;
     final AstNode node = this.parseMagik(code);
 
     assertThat(node.getChildren()).hasSize(3);
@@ -79,7 +86,12 @@ class MagikParserTest {
 
   @Test
   void testInvalidMagik2() {
-    final String code = "" + "_method object.m1\n" + "\t_block\n" + "\t_endbloc\n" + "_endmethod";
+    final String code =
+        """
+        _method object.m1
+        	_block
+        	_endbloc
+        _endmethod""";
     final AstNode node = this.parseMagik(code);
 
     assertThat(node.getChildren()).hasSize(2);
@@ -100,7 +112,11 @@ class MagikParserTest {
 
   @Test
   void testInvalidMagik3() {
-    final String code = "" + "_method object.m2\n" + "\t_local a << {1 2}\n" + "_endmethod";
+    final String code =
+        """
+        _method object.m2
+        	_local a << {1 2}
+        _endmethod""";
     final AstNode node = this.parseMagik(code);
 
     assertThat(node.getChildren()).hasSize(2);
@@ -124,7 +140,11 @@ class MagikParserTest {
 
   @Test
   void testInvalidMagik4() {
-    final String code = "" + "_method object.m3\n" + "\t_local a << prc(:)\n" + "_endmethod";
+    final String code =
+        """
+        _method object.m3
+        	_local a << prc(:)
+        _endmethod""";
     final AstNode node = this.parseMagik(code);
 
     assertThat(node.getChildren()).hasSize(2);
@@ -147,7 +167,10 @@ class MagikParserTest {
   @Test
   void testInvalidMagik5() {
     final String code =
-        "" + "_pragma(classify_level=restricted)\n" + "_method a.b _block _endmethod\n" + " ";
+        """
+        _pragma(classify_level=restricted)
+        _method a.b _block _endmethod
+        """;
     final AstNode node = this.parseMagik(code);
 
     assertThat(node.getChildren()).hasSize(3);
@@ -165,7 +188,7 @@ class MagikParserTest {
     final AstNode eofNode = node.getChildren().get(2);
     final Token eofToken = eofNode.getToken();
     assertThat(eofToken.getLine()).isEqualTo(3);
-    assertThat(eofToken.getColumn()).isEqualTo(1);
+    assertThat(eofToken.getColumn()).isEqualTo(0);
   }
 
   @Test
@@ -183,7 +206,10 @@ class MagikParserTest {
 
   @Test
   void testCommentBefore() {
-    final String code = "" + "    # comment 1\n" + "    # comment 2\n" + "$";
+    final String code = """
+            # comment 1
+            # comment 2
+        $""";
     final AstNode node = this.parseMagik(code);
 
     assertThat(node.getChildren()).hasSize(2);
@@ -202,7 +228,10 @@ class MagikParserTest {
 
   @Test
   void testCommentAfter() {
-    final String code = "" + "$\n" + "# comment 1\n";
+    final String code = """
+        $
+        # comment 1
+        """;
     final AstNode node = this.parseMagik(code);
 
     assertThat(node.getChildren()).hasSize(2);
@@ -222,7 +251,13 @@ class MagikParserTest {
 
   @Test
   void testSyntaxError() {
-    final String code = "" + "_block\n" + "  _a xxx\n" + "    _b aaa bbb\n" + "_endblock\n";
+    final String code =
+        """
+        _block
+          _a xxx
+            _b aaa bbb
+        _endblock
+        """;
     final AstNode node = this.parseMagik(code);
 
     assertThat(node.getChildren()).hasSize(2);
@@ -244,7 +279,12 @@ class MagikParserTest {
 
   @Test
   void testSyntaxError2() {
-    final String code = "" + "_a\n" + "$\n" + "a()\n" + "$\n";
+    final String code = """
+        _a
+        $
+        a()
+        $
+        """;
     final AstNode node = this.parseMagik(code);
 
     assertThat(node.getChildren()).hasSize(5);
@@ -252,7 +292,13 @@ class MagikParserTest {
 
   @Test
   void testWhitespaceTrivia() {
-    final String code = "" + "_block\n" + "  # comment 1\n" + "  # comment 2\n" + "_endblock\n";
+    final String code =
+        """
+        _block
+          # comment 1
+          # comment 2
+        _endblock
+        """;
     final AstNode node = this.parseMagik(code);
     final AstNode blockNode = node.getFirstDescendant(MagikGrammar.BLOCK);
     final AstNode endblockTokenNode = blockNode.getLastChild();

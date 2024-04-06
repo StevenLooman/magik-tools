@@ -10,12 +10,16 @@ import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Tests for {@link MethodReturnTypesMatchDocTypedCheck}. */
-class MethodReturnTypesMatchDocTypedCheckTypedCheckTest extends MagikTypedCheckTestBase {
+class MethodReturnTypesMatchDocTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testTypesMatches() {
     final String code =
-        "" + "_method a.b\n" + "  ## @return {integer}\n" + "  _return 1\n" + "_endmethod";
+        """
+        _method a.b
+          ## @return {integer}
+          _return 1
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
@@ -25,7 +29,11 @@ class MethodReturnTypesMatchDocTypedCheckTypedCheckTest extends MagikTypedCheckT
   @Test
   void testTypesDiffer() {
     final String code =
-        "" + "_method a.b\n" + "  ## @return {float}\n" + "  _return 1\n" + "_endmethod";
+        """
+        _method a.b
+          ## @return {float}
+          _return 1
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
@@ -34,7 +42,11 @@ class MethodReturnTypesMatchDocTypedCheckTypedCheckTest extends MagikTypedCheckT
 
   @Test
   void testIgnoreAbstractMethod() {
-    final String code = "" + "_abstract _method a.b\n" + "  ## @return {integer}\n" + "_endmethod";
+    final String code =
+        """
+        _abstract _method a.b
+          ## @return {integer}
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);

@@ -14,13 +14,14 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
     final MethodLineCountCheck check = new MethodLineCountCheck();
     check.maximumLineCount = 2;
     final String code =
-        ""
-            + "_method a.b\n"
-            + "    _if a\n"
-            + "    _then\n"
-            + "      do()\n"
-            + "    _endif\n"
-            + "_endmethod\n";
+        """
+        _method a.b
+            _if a
+            _then
+              do()
+            _endif
+        _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -29,7 +30,11 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
   void testMethodOk() {
     final MethodLineCountCheck check = new MethodLineCountCheck();
     check.maximumLineCount = 2;
-    final String code = "" + "_method a.b\n" + "    do()\n" + "_endmethod\n";
+    final String code = """
+        _method a.b
+            do()
+        _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -39,13 +44,14 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
     final MethodLineCountCheck check = new MethodLineCountCheck();
     check.maximumLineCount = 2;
     final String code =
-        ""
-            + "_proc()\n"
-            + "    _if a\n"
-            + "    _then\n"
-            + "      do()\n"
-            + "    _endif\n"
-            + "_endproc\n";
+        """
+        _proc()
+            _if a
+            _then
+              do()
+            _endif
+        _endproc
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -54,7 +60,11 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
   void testProcedureOk() {
     final MethodLineCountCheck check = new MethodLineCountCheck();
     check.maximumLineCount = 2;
-    final String code = "" + "_proc()\n" + "    do()\n" + "_endproc\n";
+    final String code = """
+        _proc()
+            do()
+        _endproc
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -62,7 +72,10 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
   @Test
   void testSyntaxError() {
     final MethodLineCountCheck check = new MethodLineCountCheck();
-    final String code = "" + "_method a.b\n" + "    >> _self.\n" + "_endmethod";
+    final String code = """
+        _method a.b
+            >> _self.
+        _endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }

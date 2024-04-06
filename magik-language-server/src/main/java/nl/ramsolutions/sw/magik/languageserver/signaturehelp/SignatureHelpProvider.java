@@ -5,15 +5,12 @@ import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.Position;
@@ -65,35 +62,33 @@ public class SignatureHelpProvider {
     }
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
     final AstNode previousSiblingNode = currentNode.getPreviousSibling();
-    final ExpressionResult result = reasonerState.getNodeType(previousSiblingNode);
-    final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-    final AbstractType unsetType = typeKeeper.getType(TypeString.UNDEFINED);
-    AbstractType type = result.get(0, unsetType);
+    final ExpressionResultString result = reasonerState.getNodeType(previousSiblingNode);
+    final TypeString typeStr = result.get(0, TypeString.SW_UNSET);
 
-    LOGGER.debug("Provide signature for type: {}, method: {}", type.getFullName(), methodName);
+    LOGGER.debug("Provide signature for type: {}, method: {}", typeStr.getFullString(), methodName);
 
     final List<SignatureInformation> sigInfos;
-    if (type == UndefinedType.INSTANCE) {
+    if (typeStr.isUndefined()) {
+      final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
       // Provide all methods with the name.
       sigInfos =
-          typeKeeper.getTypes().stream()
-              .flatMap(signatureType -> signatureType.getMethods().stream())
-              .filter(method -> method.getName().startsWith(methodName))
-              .map(method -> new SignatureInformation(method.getSignature(), method.getDoc(), null))
+          definitionKeeper.getMethodDefinitions().stream()
+              .filter(methodDef -> methodDef.getMethodName().startsWith(methodName))
+              .map(
+                  methodDef ->
+                      new SignatureInformation(
+                          methodDef.getNameWithParameters(), methodDef.getDoc(), null))
               .toList();
     } else {
-      if (type == SelfType.INSTANCE) {
-        final AstNode methodDefNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-        final MethodDefinitionNodeHelper methodDefHelper =
-            new MethodDefinitionNodeHelper(methodDefNode);
-        final TypeString typeString = methodDefHelper.getTypeString();
-        type = typeKeeper.getType(typeString);
-      }
       // Provide methods for this type with the name.
+      final TypeStringResolver resolver = magikFile.getTypeStringResolver();
       sigInfos =
-          type.getMethods().stream()
-              .filter(method -> method.getName().startsWith(methodName))
-              .map(method -> new SignatureInformation(method.getSignature(), method.getDoc(), null))
+          resolver.getMethodDefinitions(typeStr).stream()
+              .filter(methodDef -> methodDef.getMethodName().startsWith(methodName))
+              .map(
+                  methodDef ->
+                      new SignatureInformation(
+                          methodDef.getNameWithParameters(), methodDef.getDoc(), null))
               .toList();
     }
 

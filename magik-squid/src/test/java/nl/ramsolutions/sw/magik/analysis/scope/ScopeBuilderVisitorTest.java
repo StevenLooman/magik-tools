@@ -20,7 +20,10 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testLocal() {
-    final String code = "" + "_method object.m\n" + "    _local a\n" + "_endmethod";
+    final String code = """
+        _method object.m
+            _local a
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -33,7 +36,10 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testLocalSerial() {
-    final String code = "" + "_method object.m\n" + "    _local a, b\n" + "_endmethod";
+    final String code = """
+        _method object.m
+            _local a, b
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -51,7 +57,11 @@ class ScopeBuilderVisitorTest {
   @Test
   void testDefinitionSerialAssigment() {
     final String code =
-        "" + "_method a.b()\n" + "    l_a << l_b << x.y\n" + "    show(l_a, l_b)\n" + "_endmethod";
+        """
+        _method a.b()
+            l_a << l_b << x.y
+            show(l_a, l_b)
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -68,7 +78,11 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testDefinitionMixed() {
-    final String code = "" + "_method object.m\n" + "    _local a << b << 10\n" + "_endmethod";
+    final String code =
+        """
+        _method object.m
+            _local a << b << 10
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -85,7 +99,11 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testDefinitionMultiple() {
-    final String code = "" + "_method object.m\n" + "    _local (a, b) << (1, 2)\n" + "_endmethod";
+    final String code =
+        """
+        _method object.m
+            _local (a, b) << (1, 2)
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -102,7 +120,11 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testDefinitionAssignment() {
-    final String code = "" + "_method object.m\n" + "    _local a << b << _unset\n" + "_endmethod";
+    final String code =
+        """
+        _method object.m
+            _local a << b << _unset
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -119,7 +141,10 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testAssignment() {
-    final String code = "" + "_method object.m\n" + "    a << 1\n" + "_endmethod";
+    final String code = """
+        _method object.m
+            a << 1
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -132,7 +157,10 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testAssignmentPackage() {
-    final String code = "" + "_method object.m\n" + "    sw:a << 1\n" + "_endmethod";
+    final String code = """
+        _method object.m
+            sw:a << 1
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -145,7 +173,11 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testMultipleAssignment() {
-    final String code = "" + "_method object.m\n" + "    (a, b) << (1, 2)\n" + "_endmethod";
+    final String code =
+        """
+        _method object.m
+            (a, b) << (1, 2)
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -162,7 +194,11 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testMultipleAssignmentPackage() {
-    final String code = "" + "_method object.m\n" + "    (sw:a, b) << (1, 2)\n" + "_endmethod";
+    final String code =
+        """
+        _method object.m
+            (sw:a, b) << (1, 2)
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -179,7 +215,12 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testTry() {
-    final String code = "" + "_try\n" + "    _local b\n" + "_when error\n" + "_endtry";
+    final String code =
+        """
+        _try
+            _local b
+        _when error
+        _endtry""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -195,7 +236,12 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testTryWith() {
-    final String code = "" + "_try _with a\n" + "    _local b\n" + "_when error\n" + "_endtry";
+    final String code =
+        """
+        _try _with a
+            _local b
+        _when error
+        _endtry""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -217,12 +263,12 @@ class ScopeBuilderVisitorTest {
   @Test
   void testForLoop() {
     final String code =
-        ""
-            + "_method a.b\n"
-            + "    _for i, j _over a.fast_keys_and_elements()\n"
-            + "    _loop\n"
-            + "    _endloop\n"
-            + "_endmethod";
+        """
+        _method a.b
+            _for i, j _over a.fast_keys_and_elements()
+            _loop
+            _endloop
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -249,7 +295,9 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testParameter() {
-    final String code = "" + "_method object.m(a, _optional b)\n" + "_endmethod";
+    final String code = """
+        _method object.m(a, _optional b)
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -266,7 +314,9 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testParameterIndexer() {
-    final String code = "" + "_method object[a, b]\n" + "_endmethod";
+    final String code = """
+        _method object[a, b]
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -283,7 +333,9 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testParameterAssignment() {
-    final String code = "" + "_method object.m << a\n" + "_endmethod";
+    final String code = """
+        _method object.m << a
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -297,7 +349,10 @@ class ScopeBuilderVisitorTest {
   @Test
   void testUndeclaredGlobal() {
     final String code =
-        "" + "_method a.b\n" + "    _return !current_grs! _is _unset\n" + "_endmethod";
+        """
+        _method a.b
+            _return !current_grs! _is _unset
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -310,7 +365,11 @@ class ScopeBuilderVisitorTest {
   @Test
   void testUsage() {
     final String code =
-        "" + "_method a.b\n" + "    _local a << 10\n" + "    show(a)\n" + "_endmethod";
+        """
+        _method a.b
+            _local a << 10
+            show(a)
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -325,7 +384,12 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testUsageMethodAssignment() {
-    final String code = "" + "_block\n" + "    _local a\n" + "    a.b << 10\n" + "_endblock";
+    final String code =
+        """
+        _block
+            _local a
+            a.b << 10
+        _endblock""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -345,13 +409,13 @@ class ScopeBuilderVisitorTest {
   @Test
   void testImportLocal() {
     final String code =
-        ""
-            + "_method a.b\n"
-            + "    _local a\n"
-            + "    _proc()\n"
-            + "        _import a\n"
-            + "    _endproc\n"
-            + "_endmethod";
+        """
+        _method a.b
+            _local a
+            _proc()
+                _import a
+            _endproc
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -369,13 +433,13 @@ class ScopeBuilderVisitorTest {
   @Test
   void testImportDefined() {
     final String code =
-        ""
-            + "_method a.b\n"
-            + "    a << 1\n"
-            + "    _proc()\n"
-            + "        _import a\n"
-            + "    _endproc\n"
-            + "_endmethod";
+        """
+        _method a.b
+            a << 1
+            _proc()
+                _import a
+            _endproc
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
 
     final Scope globalScope = visitor.getGlobalScope();
@@ -392,7 +456,11 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testTopLevelProcImport() {
-    final String code = "" + "_proc()\n" + "  _import !traceback_show_args?!\n" + "_endproc";
+    final String code =
+        """
+        _proc()
+          _import !traceback_show_args?!
+        _endproc""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
     final Scope globalScope = visitor.getGlobalScope();
     final Scope procScope = globalScope.getSelfAndDescendantScopes().get(1);
@@ -407,14 +475,14 @@ class ScopeBuilderVisitorTest {
   @Test
   void testHidingScopeEntryLocal() {
     final String code =
-        ""
-            + "_method a.b\n"
-            + "  _local x << 10\n"
-            + "  _block\n"
-            + "    _local x << 10\n"
-            + "    show(x)\n"
-            + "  _endblock\n"
-            + "_endmethod";
+        """
+        _method a.b
+          _local x << 10
+          _block
+            _local x << 10
+            show(x)
+          _endblock
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
     final Scope globalScope = visitor.getGlobalScope();
     final Scope bodyScope = globalScope.getSelfAndDescendantScopes().get(1);
@@ -428,14 +496,14 @@ class ScopeBuilderVisitorTest {
   @Test
   void testNotHidingScopeEntryDefinition() {
     final String code =
-        ""
-            + "_method a.b\n"
-            + "  x << 10\n"
-            + "  _block\n"
-            + "    x << 10\n"
-            + "    show(x)\n"
-            + "  _endblock\n"
-            + "_endmethod";
+        """
+        _method a.b
+          x << 10
+          _block
+            x << 10
+            show(x)
+          _endblock
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
     final Scope globalScope = visitor.getGlobalScope();
     final Scope bodyScope = globalScope.getSelfAndDescendantScopes().get(1);
@@ -449,14 +517,14 @@ class ScopeBuilderVisitorTest {
   @Test
   void testNotHidingScopeEntryDefinitionMulti() {
     final String code =
-        ""
-            + "_method a.b\n"
-            + "  (x, y) << (10, 20)\n"
-            + "  _block\n"
-            + "    x << 10\n"
-            + "    show(x)\n"
-            + "  _endblock\n"
-            + "_endmethod";
+        """
+        _method a.b
+          (x, y) << (10, 20)
+          _block
+            x << 10
+            show(x)
+          _endblock
+        _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
     final Scope globalScope = visitor.getGlobalScope();
     final Scope bodyScope = globalScope.getSelfAndDescendantScopes().get(1);

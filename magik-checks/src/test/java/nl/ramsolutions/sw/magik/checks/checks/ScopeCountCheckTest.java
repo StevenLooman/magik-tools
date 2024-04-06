@@ -14,7 +14,10 @@ class ScopeCountCheckTest extends MagikCheckTestBase {
   void testTooManyScopeEntries() {
     final ScopeCountCheck check = new ScopeCountCheck();
     check.maxScopeCount = 1;
-    final String code = "" + "_method a.b\n" + "    _local l_a, l_b\n" + "_endmethod";
+    final String code = """
+        _method a.b
+            _local l_a, l_b
+        _endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -23,7 +26,10 @@ class ScopeCountCheckTest extends MagikCheckTestBase {
   void testOk() {
     final ScopeCountCheck check = new ScopeCountCheck();
     check.maxScopeCount = 10;
-    final String code = "" + "_method a.b\n" + "    _local l_a, l_b\n" + "_endmethod";
+    final String code = """
+        _method a.b
+            _local l_a, l_b
+        _endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -32,7 +38,10 @@ class ScopeCountCheckTest extends MagikCheckTestBase {
   void testTooManyScopeEntriesGlobals() {
     final ScopeCountCheck check = new ScopeCountCheck();
     check.maxScopeCount = 1;
-    final String code = "" + "_method a.b\n" + "    _global a, b\n" + "_endmethod";
+    final String code = """
+        _method a.b
+            _global a, b
+        _endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
