@@ -49,7 +49,9 @@ class HoverProviderTest {
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 
-    final String code = "" + "_method object.hover_me_method()\n" + "_endmethod";
+    final String code = """
+        _method object.hover_me_method()
+        _endmethod""";
     final Position position = new Position(0, 18); // On 'hover_me_method'.
 
     // Hover and test.
@@ -77,7 +79,9 @@ class HoverProviderTest {
             Collections.emptyList(),
             Collections.emptySet()));
 
-    final String code = "" + "_method hover_me_type.method()\n" + "_endmethod";
+    final String code = """
+        _method hover_me_type.method()
+        _endmethod""";
     final Position position = new Position(0, 10); // On 'hover_me_type'.
 
     // Hover and test.
@@ -108,7 +112,11 @@ class HoverProviderTest {
             ExpressionResultString.EMPTY));
 
     final String code =
-        "" + "_method a.b\n" + "    _local var << 1\n" + "    var.hover_me()\n" + "_endmethod";
+        """
+        _method a.b
+            _local var << 1
+            var.hover_me()
+        _endmethod""";
     final Position position = new Position(2, 10); // On `hover_me`.
 
     // Hover and test.
@@ -124,14 +132,18 @@ class HoverProviderTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
     final String code =
-        "" + "_method a.b\n" + "    _local var << 1\n" + "    var.hover_me()\n" + "_endmethod";
+        """
+        _method a.b
+            _local var << 1
+            var.hover_me()
+        _endmethod""";
     final Position position = new Position(2, 10); // On `hover_me`.
 
     // Hover and test.
     final Hover hover = this.provideHover(code, position, definitionKeeper);
     final MarkupContent content = hover.getContents().getRight();
     assertThat(content.getKind()).isEqualTo(MarkupKind.MARKDOWN);
-    assertThat(content.getValue()).isEmpty(); // No data.
+    assertThat(content.getValue()).contains("Undefined");
   }
 
   @Test
@@ -140,11 +152,11 @@ class HoverProviderTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
     final String code =
-        ""
-            + "_method a.b\n"
-            + "    _local var << :symbol\n"
-            + "    var.hover_me()\n"
-            + "_endmethod";
+        """
+        _method a.b
+            _local var << :symbol
+            var.hover_me()
+        _endmethod""";
     final Position position = new Position(2, 4); // On `var`.
 
     // Hover and test.
@@ -160,25 +172,29 @@ class HoverProviderTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
     final String code =
-        ""
-            + "_method a.b\n"
-            + "    _local var << some_object\n"
-            + "    var.hover_me()\n"
-            + "_endmethod";
+        """
+        _method a.b
+            _local var << some_object
+            var.hover_me()
+        _endmethod""";
     final Position position = new Position(2, 4); // On `var`.
 
     // Hover and test.
     final Hover hover = this.provideHover(code, position, definitionKeeper);
     final MarkupContent content = hover.getContents().getRight();
     assertThat(content.getKind()).isEqualTo(MarkupKind.MARKDOWN);
-    assertThat(content.getValue()).contains("_undefined");
+    assertThat(content.getValue()).contains("Undefined");
   }
 
   @Test
   void testProvideHoverAssignedVariable() {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
-    final String code = "" + "_method a.b\n" + "    _local var << :symbol\n" + "_endmethod";
+    final String code =
+        """
+        _method a.b
+            _local var << :symbol
+        _endmethod""";
     final Position position = new Position(1, 11); // On `var`.
 
     // Hover and test.
@@ -202,7 +218,11 @@ class HoverProviderTest {
             TypeString.SW_INTEGER,
             TypeString.SW_INTEGER));
 
-    final String code = "" + "_method a.b\n" + "    _local var << 4 * 4\n" + "_endmethod";
+    final String code =
+        """
+        _method a.b
+            _local var << 4 * 4
+        _endmethod""";
     final Position position = new Position(1, 20); // On `*`.
 
     // Hover and test.

@@ -41,7 +41,10 @@ class CompletionProviderTest {
 
   @Test
   void testKeywordCompletion() {
-    final String code = "" + "_method a.b\n" + "    _\n" + "_endmethod";
+    final String code = """
+        _method a.b
+            _
+        _endmethod""";
     final Position position = new Position(1, 5); // On '_'.
     final List<CompletionItem> completions = this.getCompletions(code, position);
 
@@ -54,7 +57,10 @@ class CompletionProviderTest {
 
   @Test
   void testMethodCompletionBare() {
-    final String code = "" + "_method a.b\n" + "    1.\n" + "_endmethod";
+    final String code = """
+        _method a.b
+            1.
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new MethodDefinition(
@@ -84,7 +90,10 @@ class CompletionProviderTest {
 
   @Test
   void testMethodCompletionSelf() {
-    final String code = "" + "_method a.b\n" + "    _self.\n" + "_endmethod";
+    final String code = """
+        _method a.b
+            _self.
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString aRef = TypeString.ofIdentifier("a", "user");
     definitionKeeper.add(
@@ -124,7 +133,10 @@ class CompletionProviderTest {
 
   @Test
   void testMethodCompletionExisting() {
-    final String code = "" + "_method a.b\n" + "    1.fi\n" + "_endmethod";
+    final String code = """
+        _method a.b
+            1.fi
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new MethodDefinition(
@@ -154,7 +166,10 @@ class CompletionProviderTest {
 
   @Test
   void testGlobalCompletion() {
-    final String code = "" + "_method a.b\n" + "    \n" + "_endmethod";
+    final String code = """
+        _method a.b
+         \s\s\s
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Position position = new Position(1, 2); // On ''.
     final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
@@ -170,7 +185,12 @@ class CompletionProviderTest {
 
   @Test
   void testGlobalCompletionVariable() {
-    final String code = "" + "_method a.b\n" + "    _local x << 10\n" + "    \n" + "_endmethod";
+    final String code =
+        """
+        _method a.b
+            _local x << 10
+         \s\s\s
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Position position = new Position(2, 2); // On ''.
     final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
@@ -188,7 +208,10 @@ class CompletionProviderTest {
 
   @Test
   void testGlobalCompletionSlot() {
-    final String code = "" + "_method a.b\n" + "    \n" + "_endmethod";
+    final String code = """
+        _method a.b
+         \s\s\s
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString aRef = TypeString.ofIdentifier("a", "user");
     definitionKeeper.add(
@@ -219,7 +242,7 @@ class CompletionProviderTest {
 
   @Test
   void testNoCompletionInComment() {
-    final String code = "" + "abc # ";
+    final String code = "abc # ";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Position position = new Position(0, 5); // On ' ', in comment.
     final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);

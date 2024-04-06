@@ -65,6 +65,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   IDENTIFIERS_WITH_GATHER,
   METHOD_INVOCATION,
   PROCEDURE_INVOCATION,
+  PROCEDURE_MODIFIERS,
   METHOD_MODIFIERS,
   PARAMETER_MODIFIER,
   VARIABLE_DEFINITION_MODIFIER,
@@ -290,7 +291,7 @@ public enum MagikGrammar implements GrammarRuleKey {
 
     b.rule(PROCEDURE_DEFINITION)
         .is(
-            b.optional(MagikKeyword.ITER),
+            PROCEDURE_MODIFIERS,
             MagikKeyword.PROC,
             b.optional(PROCEDURE_NAME),
             b.firstOf(
@@ -724,6 +725,7 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(METHOD_DEFINITION_SYNTAX_ERROR)
         .is(SPACING, b.regexp(MagikGrammar.syntaxErrorRegexp(MagikKeyword.ENDMETHOD)));
 
+    b.rule(PROCEDURE_MODIFIERS).is(b.optional(MagikKeyword.ITER));
     b.rule(METHOD_MODIFIERS)
         .is(
             b.optional(MagikKeyword.ABSTRACT),

@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.magik.languageserver.definitions;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -9,20 +8,16 @@ import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Condition;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
@@ -70,12 +65,12 @@ public class DefinitionsProvider {
     if (wantedNode == null) {
       return Collections.emptyList();
     } else if (wantedNode.is(MagikGrammar.METHOD_INVOCATION)) {
-      return this.definitionsForMethodInvocation(magikFile, currentNode);
+      return this.locationsForMethodInvocation(magikFile, currentNode);
     } else if (wantedNode.is(MagikGrammar.ATOM)
         && wantedNode.getFirstChild().is(MagikGrammar.IDENTIFIER)) {
-      return this.definitionsForAtom(magikFile, currentNode);
+      return this.locationsForAtom(magikFile, currentNode);
     } else if (wantedNode.is(MagikGrammar.CONDITION_NAME)) {
-      return this.definitionsForCondition(magikFile, currentNode);
+      return this.locationsForCondition(magikFile, currentNode);
     }
 
     // TODO: Slot definitions.
@@ -83,20 +78,17 @@ public class DefinitionsProvider {
     return Collections.emptyList();
   }
 
-  private List<Location> definitionsForCondition(
+  private List<Location> locationsForCondition(
       final MagikTypedFile magikFile, final AstNode wantedNode) {
-    final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
+    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
     final String conditionName = wantedNode.getTokenValue();
-    final Condition condition = typeKeeper.getCondition(conditionName);
-    if (condition == null) {
-      return Collections.emptyList();
-    }
-
-    final Location conditionLocation = condition.getLocation();
-    return List.of(Location.validLocation(conditionLocation));
+    return definitionKeeper.getConditionDefinitions(conditionName).stream()
+        .map(conditionDef -> conditionDef.getLocation())
+        .map(Location::validLocation)
+        .toList();
   }
 
-  private List<Location> definitionsForAtom(
+  private List<Location> locationsForAtom(
       final MagikTypedFile magikFile, final AstNode wantedNode) {
     final Scope scope = magikFile.getGlobalScope().getScopeForNode(wantedNode);
     Objects.requireNonNull(scope);
@@ -121,18 +113,15 @@ public class DefinitionsProvider {
     final PackageNodeHelper packageHelper = new PackageNodeHelper(wantedNode);
     final String pakkage = packageHelper.getCurrentPackage();
     final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
-    final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-    final AbstractType type = typeKeeper.getType(typeString);
-    if (type == UndefinedType.INSTANCE) {
-      return Collections.emptyList();
-    }
-
-    final Location typeLocation = type.getLocation();
-    return List.of(Location.validLocation(typeLocation));
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    return resolver.resolve(typeString).stream()
+        .map(def -> def.getLocation())
+        .map(Location::validLocation)
+        .toList();
   }
 
   @SuppressWarnings("checkstyle:NestedIfDepth")
-  private List<Location> definitionsForMethodInvocation(
+  private List<Location> locationsForMethodInvocation(
       final MagikTypedFile magikFile, final AstNode wantedNode) {
     final AstNode methodInvocationNode =
         wantedNode.getFirstAncestor(MagikGrammar.METHOD_INVOCATION);
@@ -141,40 +130,13 @@ public class DefinitionsProvider {
 
     final AstNode previousSiblingNode = methodInvocationNode.getPreviousSibling();
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-    final ExpressionResult result = reasonerState.getNodeType(previousSiblingNode);
+    final ExpressionResultString result = reasonerState.getNodeType(previousSiblingNode);
+    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
 
-    final ITypeKeeper typeKeeper = magikFile.getTypeKeeper();
-    final AbstractType unsetType = typeKeeper.getType(TypeString.SW_UNSET);
-    AbstractType type = result.get(0, unsetType);
-    final List<Location> locations = new ArrayList<>();
-    if (type == UndefinedType.INSTANCE) {
-      LOGGER.debug("Finding implementations for method: {}", methodName);
-      typeKeeper.getTypes().stream()
-          .flatMap(anyType -> anyType.getMethods().stream())
-          .filter(m -> m.getName().equals(methodName))
-          .map(Method::getLocation)
-          .map(Location::validLocation)
-          .forEach(locations::add);
-    } else {
-      if (type == SelfType.INSTANCE) {
-        final AstNode methodDefNode = wantedNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-        if (methodDefNode == null) {
-          type = UndefinedType.INSTANCE;
-        } else {
-          final MethodDefinitionNodeHelper methodDefHelper =
-              new MethodDefinitionNodeHelper(methodDefNode);
-          final TypeString typeString = methodDefHelper.getTypeString();
-          type = typeKeeper.getType(typeString);
-        }
-      }
-      LOGGER.debug(
-          "Finding implementations for type:, {}, method: {}", type.getFullName(), methodName);
-      type.getMethods(methodName).stream()
-          .map(Method::getLocation)
-          .map(Location::validLocation)
-          .forEach(locations::add);
-    }
-
-    return locations;
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    return resolver.getMethodDefinitions(typeStr, methodName).stream()
+        .map(MethodDefinition::getLocation)
+        .map(Location::validLocation)
+        .toList();
   }
 }

@@ -13,7 +13,11 @@ class ForbiddenInheritanceCheckTest extends MagikCheckTestBase {
   void testParentOk() {
     final ForbiddenInheritanceCheck check = new ForbiddenInheritanceCheck();
     check.forbiddenParents = "user:rwo_record";
-    final String code = "" + "def_slotted_exemplar(\n" + "    :test_exemplar,\n" + "    {})";
+    final String code =
+        """
+        def_slotted_exemplar(
+            :test_exemplar,
+            {})""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -23,7 +27,11 @@ class ForbiddenInheritanceCheckTest extends MagikCheckTestBase {
     final ForbiddenInheritanceCheck check = new ForbiddenInheritanceCheck();
     check.forbiddenParents = "sw:rwo_record,user:rwo_record,sw:ds_record,user:ds_record";
     final String code =
-        "" + "def_slotted_exemplar(\n" + "    :test_exemplar,\n" + "    {},\n" + "    :rwo_record)";
+        """
+        def_slotted_exemplar(
+            :test_exemplar,
+            {},
+            :rwo_record)""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -33,11 +41,11 @@ class ForbiddenInheritanceCheckTest extends MagikCheckTestBase {
     final ForbiddenInheritanceCheck check = new ForbiddenInheritanceCheck();
     check.forbiddenParents = "sw:rwo_record, user:rwo_record, sw:ds_record, user:ds_record";
     final String code =
-        ""
-            + "def_slotted_exemplar(\n"
-            + "    :test_exemplar,\n"
-            + "    {},\n"
-            + "    {@sw:rwo_record})";
+        """
+        def_slotted_exemplar(
+            :test_exemplar,
+            {},
+            {@sw:rwo_record})""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }

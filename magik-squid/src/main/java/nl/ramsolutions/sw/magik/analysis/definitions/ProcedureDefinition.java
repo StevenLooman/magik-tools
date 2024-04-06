@@ -14,6 +14,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 /** Procedure definition. */
 public class ProcedureDefinition extends TypeStringDefinition {
 
+  private static final String DEFAULT_NAME = "_unnamed";
+
   /** Procedure definition modifier. */
   @SuppressWarnings("checkstyle:JavadocVariable")
   public enum Modifier {
@@ -121,6 +123,57 @@ public class ProcedureDefinition extends TypeStringDefinition {
     return this.procedureName;
   }
 
+  public String getNameWithParameters() {
+    final StringBuilder builder = new StringBuilder();
+
+    // Type name.
+    final String ownerName = this.getTypeString().getFullString();
+    builder.append(ownerName);
+
+    // Determine method name with parameters.
+    final String methodName = "invoke()";
+    final StringBuilder parametersBuilder = new StringBuilder();
+    boolean firstParameter = true;
+    ParameterDefinition.Modifier currentModifier = ParameterDefinition.Modifier.NONE;
+    for (final ParameterDefinition parameterDefinition : this.parameters) {
+      if (firstParameter) {
+        firstParameter = false;
+      } else {
+        parametersBuilder.append(", ");
+      }
+
+      final ParameterDefinition.Modifier newModifier = parameterDefinition.getModifier();
+      if (currentModifier != newModifier) {
+        if (newModifier != ParameterDefinition.Modifier.NONE) {
+          parametersBuilder.append("_" + newModifier.name().toLowerCase());
+          parametersBuilder.append(" ");
+        }
+      }
+      currentModifier = newModifier;
+
+      parametersBuilder.append(parameterDefinition.getName());
+    }
+    final String parametersStr = parametersBuilder.toString();
+
+    if (methodName.startsWith("[")) {
+      builder.append("[");
+      builder.append(parametersStr);
+      builder.append(methodName.substring(1)); // "]<<" or "]^<<""
+    } else {
+      builder.append(".");
+      int bracketIndex = methodName.indexOf('(');
+      if (bracketIndex != -1) {
+        builder.append(methodName.substring(0, bracketIndex + 1));
+        builder.append(parametersStr);
+        builder.append(methodName.substring(bracketIndex + 1));
+      } else {
+        builder.append(methodName);
+      }
+    }
+
+    return builder.toString();
+  }
+
   public List<ParameterDefinition> getParameters() {
     return this.parameters;
   }
@@ -135,7 +188,7 @@ public class ProcedureDefinition extends TypeStringDefinition {
 
   @Override
   public String getName() {
-    return this.procedureName;
+    return Objects.requireNonNullElse(this.procedureName, ProcedureDefinition.DEFAULT_NAME);
   }
 
   public Set<GlobalUsage> getUsedGlobals() {

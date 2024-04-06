@@ -19,7 +19,9 @@ class AstQueryTest {
 
   @Test
   void testNodeAtFound() {
-    String code = "" + "a << 10\n" + "b << 20";
+    String code = """
+        a << 10
+        b << 20""";
     AstNode node = this.parseCode(code);
     AstNode nodeAt = AstQuery.nodeAt(node, new Position(1, 4));
     assertThat(nodeAt).isNotNull();
@@ -32,7 +34,9 @@ class AstQueryTest {
 
   @Test
   void testNodeAtNotFound() {
-    String code = "" + "a << 10\n" + "b << 20";
+    String code = """
+        a << 10
+        b << 20""";
     AstNode node = this.parseCode(code);
     AstNode nodeAt = AstQuery.nodeAt(node, new Position(3, 4));
 

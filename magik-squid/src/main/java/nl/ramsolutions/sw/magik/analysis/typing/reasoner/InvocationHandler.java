@@ -8,17 +8,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.GenericHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AliasType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Parameter;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ProcedureInstance;
-import nl.ramsolutions.sw.magik.analysis.typing.types.SelfType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /** Invocation handler. */
@@ -39,51 +34,55 @@ class InvocationHandler extends LocalTypeReasonerHandler {
    * @param node METHOD_INVOCATION node.
    */
   void handleMethodInvocation(final AstNode node) {
-    final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
-
     // Get called type for method.
     final AstNode calledNode = node.getPreviousSibling();
-    final ExpressionResult calledResult = this.state.getNodeType(calledNode);
-    final AbstractType originalCalledType = calledResult.get(0, unsetType);
-    final AbstractType methodOwnerType = this.getMethodOwnerType(node);
-    final AbstractType calledType =
-        calledResult.substituteType(SelfType.INSTANCE, methodOwnerType).get(0, unsetType);
+    final ExpressionResultString calledResult = this.state.getNodeType(calledNode);
+    final TypeString originalCalledTypeStr = calledResult.get(0, TypeString.SW_UNSET);
+    final TypeString methodOwnerTypeStr = this.getMethodOwnerType(node);
+    final TypeString calledTypeStr =
+        calledResult
+            .substituteType(TypeString.SELF, methodOwnerTypeStr)
+            .get(0, TypeString.SW_UNSET);
 
     // Perform method call and store iterator result(s).
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
-    final Collection<Method> methods = calledType.getMethods(methodName);
-    ExpressionResult callResult = null;
-    ExpressionResult iterResult = null;
-    if (methods.isEmpty()) {
+    final Collection<MethodDefinition> methodDefs =
+        this.typeResolver.getMethodDefinitions(calledTypeStr, methodName);
+    ExpressionResultString callResult = null;
+    ExpressionResultString iterResult = null;
+    if (methodDefs.isEmpty()) {
       // Method not found, we cannot known what the results will be.
-      callResult = ExpressionResult.UNDEFINED;
-      iterResult = ExpressionResult.UNDEFINED;
+      callResult = ExpressionResultString.UNDEFINED;
+      iterResult = ExpressionResultString.UNDEFINED;
     } else {
       final List<AstNode> argumentExpressionNodes = helper.getArgumentExpressionNodes();
       final List<TypeString> argumentTypeStrs =
           argumentExpressionNodes.stream()
-              .map(exprNode -> this.state.getNodeType(exprNode).get(0, unsetType))
-              .map(AbstractType::getTypeString)
+              .map(exprNode -> this.state.getNodeType(exprNode).get(0, TypeString.SW_UNSET))
               .toList();
-      for (final Method method : methods) {
+      for (final MethodDefinition methodDef : methodDefs) {
         // Handle call result.
-        ExpressionResultString methodCallResultStr = method.getCallResult();
+        ExpressionResultString methodCallResultStr = methodDef.getReturnTypes();
         final ExpressionResultString processedMethodCallResultStr =
-            this.processExpressionResult(
-                originalCalledType, calledType, method, methodCallResultStr, argumentTypeStrs);
-        final ExpressionResult processedMethodCallResult =
-            this.typeReader.parseExpressionResultString(processedMethodCallResultStr);
-        callResult = new ExpressionResult(processedMethodCallResult, callResult, unsetType);
+            this.processExpressionResultString(
+                originalCalledTypeStr,
+                calledTypeStr,
+                methodDef,
+                methodCallResultStr,
+                argumentTypeStrs);
+        callResult = new ExpressionResultString(processedMethodCallResultStr, callResult);
 
         // Handle iter result.
-        final ExpressionResultString methodIterResultStr = method.getLoopbodyResult();
+        final ExpressionResultString methodIterResultStr = methodDef.getLoopTypes();
         final ExpressionResultString processedMethodIterResultStr =
-            this.processExpressionResult(
-                originalCalledType, calledType, method, methodIterResultStr, argumentTypeStrs);
-        final ExpressionResult processedMethodIterResult =
-            this.typeReader.parseExpressionResultString(processedMethodIterResultStr);
-        iterResult = new ExpressionResult(processedMethodIterResult, iterResult, unsetType);
+            this.processExpressionResultString(
+                originalCalledTypeStr,
+                calledTypeStr,
+                methodDef,
+                methodIterResultStr,
+                argumentTypeStrs);
+        iterResult = new ExpressionResultString(processedMethodIterResultStr, iterResult);
       }
     }
 
@@ -100,62 +99,68 @@ class InvocationHandler extends LocalTypeReasonerHandler {
    * @param node PROCEDURE_INVOCATION node.
    */
   void handleProcedureInvocation(final AstNode node) {
-    final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
-
     // TODO: Handle sw:obj/sw:prototype.
 
     // Get called type for invocation.
     final AstNode calledNode = node.getPreviousSibling();
-    final ExpressionResult calledNodeResult = this.state.getNodeType(calledNode);
-    final AbstractType originalCalledType = calledNodeResult.get(0, unsetType);
-    final AbstractType calledType =
-        originalCalledType == SelfType.INSTANCE
-            ? this.typeKeeper.getType(TypeString.SW_PROCEDURE)
-            : originalCalledType instanceof AliasType // NOSONAR
-                ? ((AliasType) originalCalledType).getAliasedType()
-                : originalCalledType;
+    final ExpressionResultString calledNodeResult = this.state.getNodeType(calledNode);
+    final TypeString originalCalledTypeStr = calledNodeResult.get(0, TypeString.SW_UNSET);
+    final TypeString calledTypeStr =
+        originalCalledTypeStr == TypeString.SELF
+            ? TypeString.SW_PROCEDURE
+            : this.typeResolver.resolve(originalCalledTypeStr).stream()
+                .map(typeStringDef -> typeStringDef.getTypeString())
+                .findAny()
+                .orElse(TypeString.UNDEFINED);
 
     // Perform procedure call.
-    ExpressionResult callResult = null;
-    ExpressionResult iterResult = null;
-    if (calledType instanceof ProcedureInstance procedureType) {
-      final Collection<Method> methods = procedureType.getMethods("invoke()");
-      final Method method = methods.iterator().next();
+    ExpressionResultString callResult = null;
+    ExpressionResultString iterResult = null;
+    if (calledTypeStr.equals(TypeString.SW_PROCEDURE)) {
+      // final TypeStringDefinition typeStringDef = this.state.getTypeStringDefinition(calledNode);
+      // // TODO: What to do?
+      final MethodDefinition invokeDef =
+          this.typeResolver.getMethodDefinitions(calledTypeStr, "invoke()").stream()
+              .findAny()
+              .orElse(null);
 
       // Figure argument types.
       final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
       final List<AstNode> argumentExpressionNodes = helper.getArgumentExpressionNodes();
       final List<TypeString> argumentTypeStrs =
           argumentExpressionNodes.stream()
-              .map(exprNode -> this.state.getNodeType(exprNode).get(0, unsetType))
-              .map(AbstractType::getTypeString)
+              .map(exprNode -> this.state.getNodeType(exprNode).get(0, TypeString.SW_UNSET))
               .toList();
 
       // Handle call result.
-      ExpressionResultString methodCallResultStr = method.getCallResult();
+      ExpressionResultString methodCallResultStr = invokeDef.getReturnTypes();
       final ExpressionResultString processedMethodCallResultStr =
-          this.processExpressionResult(
-              originalCalledType, calledType, method, methodCallResultStr, argumentTypeStrs);
-      final ExpressionResult processedMethodCallResult =
-          this.typeReader.parseExpressionResultString(processedMethodCallResultStr);
-      callResult = new ExpressionResult(processedMethodCallResult, callResult, unsetType);
+          this.processExpressionResultString(
+              originalCalledTypeStr,
+              calledTypeStr,
+              invokeDef,
+              methodCallResultStr,
+              argumentTypeStrs);
+      callResult = new ExpressionResultString(processedMethodCallResultStr, callResult);
 
       // Handle iter result.
-      final ExpressionResultString methodIterResultStr = method.getLoopbodyResult();
+      final ExpressionResultString methodIterResultStr = invokeDef.getLoopTypes();
       final ExpressionResultString processedMethodIterResultStr =
-          this.processExpressionResult(
-              originalCalledType, calledType, method, methodIterResultStr, argumentTypeStrs);
-      final ExpressionResult processedMethodIterResult =
-          this.typeReader.parseExpressionResultString(processedMethodIterResultStr);
-      iterResult = new ExpressionResult(processedMethodIterResult, iterResult, unsetType);
+          this.processExpressionResultString(
+              originalCalledTypeStr,
+              calledTypeStr,
+              invokeDef,
+              methodIterResultStr,
+              argumentTypeStrs);
+      iterResult = new ExpressionResultString(processedMethodIterResultStr, iterResult);
     }
 
     // If nothing, then undefined.
     if (callResult == null) {
-      callResult = ExpressionResult.UNDEFINED;
+      callResult = ExpressionResultString.UNDEFINED;
     }
     if (iterResult == null) {
-      iterResult = ExpressionResult.UNDEFINED;
+      iterResult = ExpressionResultString.UNDEFINED;
     }
 
     // Store it!
@@ -164,16 +169,16 @@ class InvocationHandler extends LocalTypeReasonerHandler {
   }
 
   private ExpressionResultString substituteParameterRefs(
-      final Method method,
+      final MethodDefinition methodDef,
       final List<TypeString> argumentTypes,
       final ExpressionResultString resultString) {
-    final List<Parameter> parameters = method.getParameters();
+    final List<ParameterDefinition> parameters = methodDef.getParameters();
     final Map<TypeString, TypeString> paramRefArgTypeRefMap =
         IntStream.range(0, parameters.size())
             .mapToObj(
                 i -> {
-                  final Parameter param = method.getParameters().get(i);
-                  final String paramName = param.getName();
+                  final ParameterDefinition paramDef = methodDef.getParameters().get(i);
+                  final String paramName = paramDef.getName();
                   final TypeString paramRef = TypeString.ofParameterRef(paramName);
                   final TypeString argTypeRef =
                       i < argumentTypes.size() ? argumentTypes.get(i) : TypeString.SW_UNSET;
@@ -190,28 +195,27 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     return newResultString;
   }
 
-  private ExpressionResultString processExpressionResult(
-      final AbstractType originalCalledType,
-      final AbstractType calledType,
-      final Method method,
+  private ExpressionResultString processExpressionResultString(
+      final TypeString originalCalledTypeStr,
+      final TypeString calledTypeStr,
+      final MethodDefinition methodDef,
       final ExpressionResultString expressionResultString,
       final List<TypeString> argumentTypeStrs) {
     ExpressionResultString newExpressionResultString = expressionResultString;
 
     // Substitute generics.
-    final GenericHelper genericHelper = new GenericHelper(this.typeKeeper, calledType);
+    final GenericHelper genericHelper = new GenericHelper(calledTypeStr);
     newExpressionResultString = genericHelper.substituteGenerics(newExpressionResultString);
 
     // Substitute self.
-    final TypeString calledTypeStr = calledType.getTypeString();
     newExpressionResultString =
-        originalCalledType != SelfType.INSTANCE
+        originalCalledTypeStr != TypeString.SELF
             ? newExpressionResultString.substituteType(TypeString.SELF, calledTypeStr)
             : newExpressionResultString;
 
     // Substitute parameters.
     newExpressionResultString =
-        this.substituteParameterRefs(method, argumentTypeStrs, newExpressionResultString);
+        this.substituteParameterRefs(methodDef, argumentTypeStrs, newExpressionResultString);
 
     return newExpressionResultString;
   }

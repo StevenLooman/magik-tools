@@ -18,6 +18,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefineSharedVariabl
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefineSlotAccessParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.GlobalDefinitionParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodDefinitionParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureDefinitionParser;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
@@ -100,6 +101,13 @@ public class DefinitionReader extends AstWalker {
     }
   }
 
+  @Override
+  protected void walkPostProcedureDefinition(final AstNode node) {
+    if (ProcedureDefinitionParser.isProcedureDefinition(node)) {
+      this.handleDefineProcedure(node);
+    }
+  }
+
   private void handleDefineCondition(final AstNode node) {
     final DefConditionParser parser = new DefConditionParser(node);
     final List<Definition> parsedDefinitions = parser.parseDefinitions();
@@ -156,6 +164,12 @@ public class DefinitionReader extends AstWalker {
 
   private void handleDefineSharedConstant(final AstNode node) {
     final DefineSharedConstantParser parser = new DefineSharedConstantParser(node);
+    final List<Definition> parsedDefinitions = parser.parseDefinitions();
+    this.definitions.addAll(parsedDefinitions);
+  }
+
+  private void handleDefineProcedure(final AstNode node) {
+    final ProcedureDefinitionParser parser = new ProcedureDefinitionParser(node);
     final List<Definition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }

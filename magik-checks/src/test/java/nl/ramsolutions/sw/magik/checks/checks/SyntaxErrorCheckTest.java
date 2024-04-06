@@ -13,7 +13,9 @@ class SyntaxErrorCheckTest extends MagikCheckTestBase {
   @Test
   void testSyntaxError() {
     final MagikCheck check = new SyntaxErrorCheck();
-    final String code = "" + "_block\n" + "_endbloc";
+    final String code = """
+        _block
+        _endbloc""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isNotEmpty();
   }

@@ -29,7 +29,12 @@ class TypeDocReturnTypeFixerTest {
 
   @Test
   void testAddReturn() {
-    final String code = "" + "_method obj.method()\n" + "  _return 1\n" + "_endmethod\n";
+    final String code =
+        """
+        _method obj.method()
+          _return 1
+        _endmethod
+        """;
     final Range range = new Range(new Position(0, 0), new Position(3, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
     assertThat(codeactions).hasSize(1);
@@ -46,7 +51,11 @@ class TypeDocReturnTypeFixerTest {
   @Test
   void testRemoveReturn() {
     final String code =
-        "" + "_method obj.method()\n" + "  ## @return {sw:integer} Test\n" + "_endmethod\n";
+        """
+        _method obj.method()
+          ## @return {sw:integer} Test
+        _endmethod
+        """;
     final Range range = new Range(new Position(0, 0), new Position(3, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
     assertThat(codeactions).hasSize(1);
@@ -61,11 +70,12 @@ class TypeDocReturnTypeFixerTest {
   @Test
   void testUpdateReturn() {
     final String code =
-        ""
-            + "_method obj.method()\n"
-            + "  ## @return {sw:float} Test\n"
-            + "  _return 1\n"
-            + "_endmethod\n";
+        """
+        _method obj.method()
+          ## @return {sw:float} Test
+          _return 1
+        _endmethod
+        """;
     final Range range = new Range(new Position(0, 0), new Position(4, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
     assertThat(codeactions).hasSize(1);
@@ -80,11 +90,12 @@ class TypeDocReturnTypeFixerTest {
   @Test
   void testNoChangeReturn() {
     final String code =
-        ""
-            + "_method obj.method(param1, param2)\n"
-            + "  ## @return {sw:integer}\n"
-            + "  _return 1\n"
-            + "_endmethod\n";
+        """
+        _method obj.method(param1, param2)
+          ## @return {sw:integer}
+          _return 1
+        _endmethod
+        """;
     final Range range = new Range(new Position(0, 0), new Position(4, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
     assertThat(codeactions).isEmpty();

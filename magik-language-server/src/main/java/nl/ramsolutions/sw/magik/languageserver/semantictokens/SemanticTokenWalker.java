@@ -5,6 +5,7 @@ import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,18 +14,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstWalker;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.TypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
@@ -287,12 +287,13 @@ public class SemanticTokenWalker extends AstWalker {
     // Test for deprecation.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final AstNode receiverNode = helper.getReceiverNode();
-    final LocalTypeReasonerState typeReasonerState = this.magikFile.getTypeReasonerState();
-    final ExpressionResult result = typeReasonerState.getNodeType(receiverNode);
-    final AbstractType type = result.get(0, UndefinedType.INSTANCE);
+    final LocalTypeReasonerState reasonerState = this.magikFile.getTypeReasonerState();
+    final ExpressionResultString result = reasonerState.getNodeType(receiverNode);
+    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
     final String methodName = helper.getMethodName();
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     final Set<SemanticToken.Modifier> modifiers =
-        type.getMethods(methodName).stream()
+        resolver.getMethodDefinitions(typeStr, methodName).stream()
                 .anyMatch(method -> method.getTopics().contains(TOPIC_DEPRECATED))
             ? Set.of(SemanticToken.Modifier.DEPRECATED)
             : Collections.emptySet();
@@ -372,11 +373,17 @@ public class SemanticTokenWalker extends AstWalker {
 
       case GLOBAL, DYNAMIC:
         final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
-        final ITypeKeeper typeKeeper = this.magikFile.getTypeKeeper();
-        final AbstractType type = typeKeeper.getType(typeString);
-        if (type instanceof MagikType) {
+        final TypeStringResolver resolver = this.magikFile.getTypeStringResolver();
+        final Collection<TypeStringDefinition> typeDefs = resolver.resolve(typeString);
+        final ExemplarDefinition exemplarDef =
+            typeDefs.stream()
+                .filter(ExemplarDefinition.class::isInstance)
+                .map(ExemplarDefinition.class::cast)
+                .findAny()
+                .orElse(null);
+        if (exemplarDef != null) {
           final Set<SemanticToken.Modifier> modifiers =
-              type.getTopics().contains(TOPIC_DEPRECATED)
+              exemplarDef.getTopics().contains(TOPIC_DEPRECATED)
                   ? Set.of(
                       SemanticToken.Modifier.VARIABLE_GLOBAL, SemanticToken.Modifier.DEPRECATED)
                   : Set.of(SemanticToken.Modifier.VARIABLE_GLOBAL);
@@ -418,7 +425,8 @@ public class SemanticTokenWalker extends AstWalker {
   }
 
   private boolean isKnownType(final TypeString typeString) {
-    final ITypeKeeper typeKeeper = this.magikFile.getTypeKeeper();
-    return typeKeeper.getType(typeString) instanceof MagikType;
+    final TypeStringResolver resolver = this.magikFile.getTypeStringResolver();
+    final Collection<TypeStringDefinition> typeDefs = resolver.resolve(typeString);
+    return typeDefs.stream().anyMatch(ExemplarDefinition.class::isInstance);
   }
 }

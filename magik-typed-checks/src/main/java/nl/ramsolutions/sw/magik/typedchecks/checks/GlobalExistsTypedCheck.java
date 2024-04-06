@@ -7,7 +7,7 @@ import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry.Type;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
@@ -51,10 +51,10 @@ public class GlobalExistsTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    final ITypeKeeper typeKeeper = this.getTypeKeeper();
+    final TypeStringResolver resolver = this.getTypeStringResolver();
     final String identifier = node.getTokenValue();
     final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
-    if (typeKeeper.hasType(typeString)) {
+    if (resolver.hasTypeDefinition(typeString)) {
       return;
     }
 

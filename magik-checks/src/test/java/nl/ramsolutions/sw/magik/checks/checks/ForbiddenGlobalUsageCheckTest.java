@@ -14,8 +14,15 @@ class ForbiddenGlobalUsageCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.b\n" + "_endmethod\n",
-        "" + "_method a.b\n" + "  _dynamic !current_grs! << x\n" + "_endmethod\n",
+        """
+        _method a.b
+        _endmethod
+        """,
+        """
+        _method a.b
+          _dynamic !current_grs! << x
+        _endmethod
+        """,
       })
   void testValid(final String code) {
     final ForbiddenGlobalUsageCheck check = new ForbiddenGlobalUsageCheck();
@@ -28,11 +35,31 @@ class ForbiddenGlobalUsageCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.b\n" + "  _dynamic !current_world! << x\n" + "_endmethod\n",
-        "" + "_method a.b\n" + "  !current_world! << x\n" + "_endmethod\n",
-        "" + "_method a.b\n" + "  sw:!current_world! << x\n" + "_endmethod\n",
-        "" + "_method a.b\n" + "  (sw:!current_world!, !current_grs!) << (x, y)\n" + "_endmethod\n",
-        "" + "_method a.b\n" + "  x << !current_world!\n" + "_endmethod\n",
+        """
+        _method a.b
+          _dynamic !current_world! << x
+        _endmethod
+        """,
+        """
+        _method a.b
+          !current_world! << x
+        _endmethod
+        """,
+        """
+        _method a.b
+          sw:!current_world! << x
+        _endmethod
+        """,
+        """
+        _method a.b
+          (sw:!current_world!, !current_grs!) << (x, y)
+        _endmethod
+        """,
+        """
+        _method a.b
+          x << !current_world!
+        _endmethod
+        """,
       })
   void testDynamicSet(final String code) {
     final ForbiddenGlobalUsageCheck check = new ForbiddenGlobalUsageCheck();
@@ -48,10 +75,11 @@ class ForbiddenGlobalUsageCheckTest extends MagikCheckTestBase {
     check.forbiddenGlobals = "!current_grs!,!current_world!";
 
     final String code =
-        ""
-            + "_method a.b\n"
-            + "  _dynamic (!current_grs!, !current_world!) << (x, y)\n"
-            + "_endmethod\n";
+        """
+        _method a.b
+          _dynamic (!current_grs!, !current_world!) << (x, y)
+        _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(2);
   }

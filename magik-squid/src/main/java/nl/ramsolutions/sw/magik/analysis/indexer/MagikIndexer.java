@@ -24,6 +24,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,7 @@ public class MagikIndexer {
   private final Map<Path, Set<GlobalDefinition>> indexedGlobals = new HashMap<>();
   private final Map<Path, Set<BinaryOperatorDefinition>> indexedBinaryOperators = new HashMap<>();
   private final Map<Path, Set<ConditionDefinition>> indexedConditions = new HashMap<>();
+  private final Map<Path, Set<ProcedureDefinition>> indexedProcedures = new HashMap<>();
 
   public MagikIndexer(
       final IDefinitionKeeper definitionKeeper,
@@ -94,7 +96,8 @@ public class MagikIndexer {
             this.indexedMethods.entrySet().stream().map(Map.Entry::getKey),
             this.indexedGlobals.entrySet().stream().map(Map.Entry::getKey),
             this.indexedBinaryOperators.entrySet().stream().map(Map.Entry::getKey),
-            this.indexedConditions.entrySet().stream().map(Map.Entry::getKey))
+            this.indexedConditions.entrySet().stream().map(Map.Entry::getKey),
+            this.indexedProcedures.entrySet().stream().map(Map.Entry::getKey))
         .flatMap(stream -> stream)
         .filter(indexedPath -> indexedPath.startsWith(path));
   }
@@ -190,6 +193,12 @@ public class MagikIndexer {
       final Set<ConditionDefinition> defs =
           this.indexedConditions.computeIfAbsent(path, k -> new HashSet<>());
       defs.add(conditionDefinition);
+    } else if (definition instanceof ProcedureDefinition procedureDefinition) {
+      this.definitionKeeper.add(procedureDefinition);
+
+      final Set<ProcedureDefinition> defs =
+          this.indexedProcedures.computeIfAbsent(path, k -> new HashSet<>());
+      defs.add(procedureDefinition);
     }
   }
 
@@ -206,6 +215,7 @@ public class MagikIndexer {
     this.indexedPackages.put(path, new HashSet<>());
     this.indexedTypes.put(path, new HashSet<>());
     this.indexedConditions.put(path, new HashSet<>());
+    this.indexedProcedures.put(path, new HashSet<>());
 
     try {
       final long size = Files.size(path);
@@ -257,5 +267,10 @@ public class MagikIndexer {
         .getOrDefault(path, Collections.emptySet())
         .forEach(this.definitionKeeper::remove);
     this.indexedConditions.remove(path);
+
+    this.indexedProcedures
+        .getOrDefault(path, Collections.emptySet())
+        .forEach(this.definitionKeeper::remove);
+    this.indexedProcedures.remove(path);
   }
 }

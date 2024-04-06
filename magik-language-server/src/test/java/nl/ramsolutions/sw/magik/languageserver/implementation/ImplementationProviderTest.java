@@ -86,7 +86,9 @@ class ImplementationProviderTest {
             ExpressionResultString.EMPTY));
 
     final URI uri = URI.create("tests://unittest");
-    final String code = "" + "_abstract _method a.abstract()\n" + "_endmethod";
+    final String code = """
+        _abstract _method a.abstract()
+        _endmethod""";
     final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
     final Position position = new Position(1, 26); // On `abstract()`.
 

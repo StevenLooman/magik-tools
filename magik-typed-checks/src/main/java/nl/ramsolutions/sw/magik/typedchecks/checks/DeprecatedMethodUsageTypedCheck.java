@@ -2,10 +2,10 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.Collection;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.Method;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.sonar.check.Rule;
 
@@ -22,8 +22,8 @@ public class DeprecatedMethodUsageTypedCheck extends MagikTypedCheck {
   @Override
   protected void walkPostMethodInvocation(final AstNode node) {
     // Get type.
-    final AbstractType calledType = this.getTypeInvokedOn(node);
-    if (calledType == UndefinedType.INSTANCE) {
+    final TypeString calledTypeStr = this.getTypeInvokedOn(node);
+    if (calledTypeStr.isUndefined()) {
       // Cannot give any useful information, so abort.
       return;
     }
@@ -31,15 +31,18 @@ public class DeprecatedMethodUsageTypedCheck extends MagikTypedCheck {
     // Get method.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
-    final Collection<Method> methods = calledType.getMethods(methodName);
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    final Collection<MethodDefinition> methodDefs =
+        resolver.getMethodDefinitions(calledTypeStr, methodName);
 
     // Add issue if method is deprecated.
-    methods.stream()
+    methodDefs.stream()
         .filter(
-            method -> method.getTopics().contains(DeprecatedMethodUsageTypedCheck.DEPRECATED_TOPIC))
+            methodDef ->
+                methodDef.getTopics().contains(DeprecatedMethodUsageTypedCheck.DEPRECATED_TOPIC))
         .forEach(
-            method -> {
-              final String fullName = calledType.getFullName() + "." + methodName;
+            methodDef -> {
+              final String fullName = calledTypeStr.getFullString() + "." + methodName;
               final String message = String.format(MESSAGE, fullName);
               this.addIssue(node, message);
             });

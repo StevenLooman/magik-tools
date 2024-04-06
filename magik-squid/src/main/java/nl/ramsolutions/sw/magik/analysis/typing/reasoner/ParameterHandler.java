@@ -7,10 +7,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.CombinedType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.MagikType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
@@ -44,32 +41,25 @@ class ParameterHandler extends LocalTypeReasonerHandler {
     final TypeString parameterTypeString =
         parameterTypes.getOrDefault(identifier, TypeString.UNDEFINED);
 
-    final ExpressionResult result;
+    final ExpressionResultString result;
     final ParameterNodeHelper helper = new ParameterNodeHelper(node);
     if (helper.isGatherParameter()) {
-      final AbstractType simpleVectorType = this.typeKeeper.getType(TypeString.SW_SIMPLE_VECTOR);
       final TypeString newTypeString =
           TypeString.ofIdentifier(
               TypeString.SW_SIMPLE_VECTOR.getIdentifier(),
               TypeString.SW_SIMPLE_VECTOR.getPakkage(),
               TypeString.ofGenericDefinition("E", parameterTypeString));
-      final AbstractType paramType =
-          simpleVectorType instanceof MagikType magikType
-              ? new MagikType(magikType, newTypeString)
-              : simpleVectorType;
-
-      result = new ExpressionResult(paramType);
+      result = new ExpressionResultString(newTypeString);
     } else if (!parameterTypeString.isUndefined()) {
-      final AbstractType type = this.typeReader.parseTypeString(parameterTypeString);
       if (helper.isOptionalParameter()) {
-        final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
-        final AbstractType optionalType = CombinedType.combine(type, unsetType);
-        result = new ExpressionResult(optionalType);
+        final TypeString optionalType =
+            TypeString.combine(TypeString.SW_UNSET, parameterTypeString);
+        result = new ExpressionResultString(optionalType);
       } else {
-        result = new ExpressionResult(type);
+        result = new ExpressionResultString(parameterTypeString);
       }
     } else {
-      result = ExpressionResult.UNDEFINED;
+      result = ExpressionResultString.UNDEFINED;
     }
 
     this.state.setNodeType(identifierNode, result);

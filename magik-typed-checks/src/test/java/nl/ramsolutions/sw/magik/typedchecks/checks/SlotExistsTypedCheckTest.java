@@ -18,7 +18,10 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testTypeUnknown() {
-    final String code = "" + "_method ex.m()\n" + "    .slot << 10\n" + "_endmethod";
+    final String code = """
+        _method ex.m()
+            .slot << 10
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new SlotExistsTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
@@ -27,7 +30,11 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testSlotUnknown() {
-    final String code = "" + "_method object.m()\n" + "    .slot << 10\n" + "_endmethod";
+    final String code =
+        """
+        _method object.m()
+            .slot << 10
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new SlotExistsTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
@@ -36,7 +43,10 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testSlotKnown() {
-    final String code = "" + "_method a.m()\n" + "    .slot << 10\n" + "_endmethod";
+    final String code = """
+        _method a.m()
+            .slot << 10
+        _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString aRef = TypeString.ofIdentifier("a", "sw");
     definitionKeeper.add(

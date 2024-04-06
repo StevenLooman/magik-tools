@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,8 +18,10 @@ import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.TypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
@@ -95,9 +100,19 @@ public class TypeStringResolver {
   }
 
   /**
-   * Get the {@link Definition} for the given {@link TypeString}, following package uses.
+   * Test if the {@link TypeString} is known.
    *
-   * @param typeString Identifier to look for.
+   * @param typeString Reference to look for.
+   * @return True if known, false otherwise.
+   */
+  public boolean hasTypeDefinition(final TypeString typeString) {
+    return !this.resolve(typeString).isEmpty();
+  }
+
+  /**
+   * Get the {@link TypeStringDefinition} for the given {@link TypeString}, following package uses.
+   *
+   * @param typeString Reference to look for.
    * @return A {@link ExemplarDefinition}/{@link ProcedureDefinition}/{@link GlobalDefinition}.
    */
   public Collection<TypeStringDefinition> resolve(final TypeString typeString) {
@@ -106,9 +121,9 @@ public class TypeStringResolver {
     final Collection<ProcedureDefinition> procedureDefinitions =
         this.findProcedureDefinitions(typeString);
     final Collection<GlobalDefinition> globalDefinitions = this.findGlobalDefinitions(typeString);
-    return Stream.concat(
-            exemplarDefinitions.stream(),
-            Stream.concat(procedureDefinitions.stream(), globalDefinitions.stream()))
+    return Stream.of(
+            exemplarDefinitions.stream(), procedureDefinitions.stream(), globalDefinitions.stream())
+        .flatMap(definition -> definition)
         .collect(Collectors.toSet());
   }
 
@@ -123,7 +138,6 @@ public class TypeStringResolver {
    */
   @CheckForNull
   public ExemplarDefinition getExemplarDefinition(final TypeString typeString) {
-    // TODO: Does this work ok? E.g., for show subtypes of, we jump to sw:procedure.
     Collection<TypeStringDefinition> definitions = this.resolve(typeString);
     if (definitions.isEmpty()) {
       return null;
@@ -212,5 +226,124 @@ public class TypeStringResolver {
     }
 
     throw new IllegalStateException();
+  }
+
+  /**
+   * Get the {@link MethodDefinition}s the {@link TypeString} responds to, including from its super
+   * types.
+   *
+   * @param typeString {@link TypeString} to resolve.
+   * @return {@link MethodDefinition}s the {@link TypeString} responds to.
+   */
+  public Collection<MethodDefinition> getMethodDefinitions(final TypeString typeString) {
+    // Try to resolve the typeString to an actual type.
+    Collection<TypeStringDefinition> resolvedTypes = this.resolve(typeString);
+    final TypeString actualTypeStr =
+        resolvedTypes.isEmpty() ? typeString : resolvedTypes.iterator().next().getTypeString();
+
+    final Map<String, Set<MethodDefinition>> methodDefinitions = new HashMap<>();
+    this.getMethodDefinitions(actualTypeStr, methodDefinitions);
+    return methodDefinitions.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
+  }
+
+  private void getMethodDefinitions(
+      final TypeString typeString, final Map<String, Set<MethodDefinition>> methodDefinitions) {
+    Stream.concat(Stream.of(typeString), this.getAllParents(typeString).stream())
+        .forEach(
+            typeStr -> {
+              this.definitionKeeper
+                  .getMethodDefinitions(typeString)
+                  .forEach(
+                      methodDefinition -> {
+                        final String methodName = methodDefinition.getMethodName();
+                        // TODO: If already present, then skip? Filter duplicates with the same
+                        // name, we're trying to emulate responding to specific methods.
+                        final Set<MethodDefinition> methodsForName =
+                            methodDefinitions.computeIfAbsent(methodName, key -> new HashSet<>());
+                        methodsForName.add(methodDefinition);
+                      });
+            });
+  }
+
+  public Collection<MethodDefinition> getMethodDefinitions(
+      final TypeString typeString, final String methodName) {
+    return this.getMethodDefinitions(typeString).stream()
+        .filter(methodDef -> methodDef.getMethodName().equalsIgnoreCase(methodName))
+        .toList();
+  }
+
+  /**
+   * Get all the {@link SlotDefinition}s for the given {@link TypeString}.
+   *
+   * @param typeString {@link TypeString} to resolve.
+   * @return All {@link SlotDefinition}s for the given type.
+   */
+  public Collection<SlotDefinition> getSlotDefinitions(final TypeString typeString) {
+    return this.findExemplarDefinitions(typeString).stream()
+        .flatMap(exemplarDefinition -> exemplarDefinition.getSlots().stream())
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Get the parents of a {@link TypeString}.
+   *
+   * <p>This add the implicit parents, where {@link ExemplarDefinition} only returns its explicitly
+   * defined parents.
+   *
+   * @param typeString
+   * @return
+   */
+  public Collection<TypeString> getParents(final TypeString typeString) {
+    // TODO: This can be multiple.
+    final ExemplarDefinition exemplarDefinition = this.getExemplarDefinition(typeString);
+    if (exemplarDefinition == null) {
+      return Collections.emptyList();
+    }
+
+    final List<TypeString> parents = exemplarDefinition.getParents();
+    final Set<TypeString> implicitParents = new HashSet<>();
+    if (parents.isEmpty()) {
+      if (exemplarDefinition.getSort() == ExemplarDefinition.Sort.INDEXED) {
+        implicitParents.add(TypeString.SW_INDEXED_FORMAT_MIXIN);
+      } else if (exemplarDefinition.getSort() == ExemplarDefinition.Sort.SLOTTED) {
+        implicitParents.add(TypeString.SW_SLOTTED_FORMAT_MIXIN);
+      }
+    }
+
+    final TypeString[] thisGenDefs = typeString.getGenerics().toArray(TypeString[]::new);
+    return Stream.concat(parents.stream(), implicitParents.stream())
+        .map(
+            typeStr ->
+                // Let all parents inherit generic definitions.
+                TypeString.ofIdentifier(typeStr.getIdentifier(), typeStr.getPakkage(), thisGenDefs))
+        .collect(Collectors.toUnmodifiableSet());
+  }
+
+  /**
+   * Find all parents (recursively) for a given {@link TypeString}.
+   *
+   * @param typeString {@link TypeString} to get parents from.
+   * @return All parents this the given type.
+   */
+  public Collection<TypeString> getAllParents(final TypeString typeString) {
+    final List<TypeString> parents = new ArrayList<>();
+    this.getAllParents(typeString, parents);
+    return parents;
+  }
+
+  private void getAllParents(final TypeString typeString, final List<TypeString> parents) {
+    final Collection<TypeString> typeStringParents = this.getParents(typeString);
+    parents.addAll(typeStringParents);
+
+    // Recurse.
+    // TODO: This can be multiple.
+    final ExemplarDefinition exemplarDefinition = this.getExemplarDefinition(typeString);
+    if (exemplarDefinition == null) {
+      return;
+    }
+
+    exemplarDefinition
+        .getParents()
+        .forEach(parentTypeStr -> this.getAllParents(parentTypeStr, parents));
   }
 }

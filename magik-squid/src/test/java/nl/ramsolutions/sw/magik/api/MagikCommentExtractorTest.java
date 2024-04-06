@@ -21,7 +21,12 @@ class MagikCommentExtractorTest {
 
   @Test
   void testComments() throws IOException {
-    final String code = "" + "# first comment\n" + "print() # comment    \n" + "# final comment\n";
+    final String code =
+        """
+        # first comment
+        print() # comment\s\s\s\s
+        # final comment
+        """;
     final AstNode node = this.parseMagik(code);
     final List<Token> tokens = MagikCommentExtractor.extractComments(node).toList();
 
@@ -46,7 +51,11 @@ class MagikCommentExtractorTest {
   @Test
   void testMethodDoc() throws IOException {
     final String code =
-        "" + "_method object.test\n" + "    ## Line 1\n" + "    ## Line 2\n" + "_endmethod";
+        """
+        _method object.test
+            ## Line 1
+            ## Line 2
+        _endmethod""";
 
     final AstNode node = this.parseMagik(code);
     final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
@@ -61,12 +70,12 @@ class MagikCommentExtractorTest {
   @Test
   void testMethodDocExtras() throws IOException {
     final String code =
-        ""
-            + "_method object.test\n"
-            + "    ## Line 1\n"
-            + "    ## Line 2\n"
-            + "    # Line 3\n"
-            + "_endmethod";
+        """
+        _method object.test
+            ## Line 1
+            ## Line 2
+            # Line 3
+        _endmethod""";
 
     final AstNode node = this.parseMagik(code);
     final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
@@ -81,14 +90,14 @@ class MagikCommentExtractorTest {
   @Test
   void testMethodDocPragma() throws IOException {
     final String code =
-        ""
-            + "_pragma(a=b)\n"
-            + "## Line 1\n"
-            + "## Line 2\n"
-            + "_method object.test\n"
-            + "    ## Line 3\n"
-            + "    ## Line 4\n"
-            + "_endmethod";
+        """
+        _pragma(a=b)
+        ## Line 1
+        ## Line 2
+        _method object.test
+            ## Line 3
+            ## Line 4
+        _endmethod""";
 
     final AstNode node = this.parseMagik(code);
     final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
@@ -103,15 +112,15 @@ class MagikCommentExtractorTest {
   @Test
   void testMethodDocChildProc() throws IOException {
     final String code =
-        ""
-            + "_method object.test\n"
-            + "    ## Line 1\n"
-            + "    ## Line 2\n"
-            + "    _proc()\n"
-            + "        ## Line 3\n"
-            + "        ## Line 4\n"
-            + "    _endproc\n"
-            + "_endmethod";
+        """
+        _method object.test
+            ## Line 1
+            ## Line 2
+            _proc()
+                ## Line 3
+                ## Line 4
+            _endproc
+        _endmethod""";
 
     final AstNode node = this.parseMagik(code);
     final AstNode methodDefNode = node.getFirstChild(MagikGrammar.METHOD_DEFINITION);
@@ -126,11 +135,11 @@ class MagikCommentExtractorTest {
   @Test
   void testDocStatement() throws IOException {
     final String code =
-        ""
-            + "_pragma(a=b)\n"
-            + "## Line 1\n"
-            + "## Line 2\n"
-            + "object.define_shared_constant(:a, 1, :public)";
+        """
+        _pragma(a=b)
+        ## Line 1
+        ## Line 2
+        object.define_shared_constant(:a, 1, :public)""";
 
     final AstNode node = this.parseMagik(code);
     final AstNode statementNode = node.getFirstChild(MagikGrammar.STATEMENT);

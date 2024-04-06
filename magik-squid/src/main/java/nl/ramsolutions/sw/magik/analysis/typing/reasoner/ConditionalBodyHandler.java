@@ -17,8 +17,8 @@ import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ConditionResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.restrictions.RestrictingConditionWalker;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.restrictions.TypeRestriction;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
@@ -155,8 +155,8 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
                   this.getUsageInBody(scopeEntry, upperBodyNode).stream()
                       .filter(n -> n.getFromIndex() >= nextSiblingNode.getFromIndex())
                       .toList();
-              final AbstractType restriction = entry.getValue();
-              this.setNodeTypes(usages, restriction);
+              final TypeString restrictionTypeStr = entry.getValue();
+              this.setNodeTypes(usages, restrictionTypeStr);
             });
   }
 
@@ -169,8 +169,8 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
             entry -> {
               final ScopeEntry scopeEntry = entry.getKey();
               final List<AstNode> usages = this.getUsageInBody(scopeEntry, bodyNode);
-              final AbstractType restriction = entry.getValue();
-              this.setNodeTypes(usages, restriction);
+              final TypeString restrictionTypeStr = entry.getValue();
+              this.setNodeTypes(usages, restrictionTypeStr);
             });
 
     this.nodeRestrictions.put(node, restrictions);
@@ -244,7 +244,7 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
             .collect(Collectors.toSet());
 
     // Combine and invert all previous restrictions.
-    final Map<ScopeEntry, AbstractType> restrictions =
+    final Map<ScopeEntry, TypeString> restrictions =
         this.invertAndCombineRestrictions(allRestrictions);
 
     // Apply to body.
@@ -255,7 +255,7 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
             entry -> {
               final ScopeEntry scopeEntry = entry.getKey();
               final List<AstNode> usages = this.getUsageInBody(scopeEntry, bodyNode);
-              final AbstractType restriction = entry.getValue();
+              final TypeString restriction = entry.getValue();
               this.setNodeTypes(usages, restriction);
             });
   }
@@ -274,7 +274,7 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
     return walker.getTypeRestriction();
   }
 
-  private Map<ScopeEntry, AbstractType> invertAndCombineRestrictions(
+  private Map<ScopeEntry, TypeString> invertAndCombineRestrictions(
       final Set<TypeRestriction> allRestrictions) {
     // Invert restrictions and combine grouped by scope entry.
     // Intersect all restrictions for each scope entry.
@@ -282,7 +282,7 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
         .map(TypeRestriction::not)
         .map(TypeRestriction::getRestriction)
         .collect(
-            Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, AbstractType::intersection));
+            Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, TypeString::intersection));
   }
 
   private List<AstNode> getUsageInBody(final ScopeEntry scopeEntry, final AstNode bodyNode) {
@@ -309,10 +309,11 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
     return upToAssignmentNodes;
   }
 
-  private void setNodeTypes(final List<AstNode> usageNodes, final AbstractType restrictedType) {
+  private void setNodeTypes(final List<AstNode> usageNodes, final TypeString restrictedTypeStr) {
     usageNodes.forEach(
         usageNode -> {
-          final ExpressionResult restrictedResult = new ExpressionResult(restrictedType);
+          final ExpressionResultString restrictedResult =
+              new ExpressionResultString(restrictedTypeStr);
           final AstNode assignNode = usageNode.getFirstChild();
           this.assignAtom(assignNode, restrictedResult);
         });

@@ -16,8 +16,16 @@ class ConditionalExpressionIsFalseTypedCheckTest extends MagikTypedCheckTestBase
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_if _true\n" + "_then\n" + "_endif\n",
-        "" + "_if :a _is :b\n" + "_then\n" + "_endif\n",
+        """
+        _if _true
+        _then
+        _endif
+        """,
+        """
+        _if :a _is :b
+        _then
+        _endif
+        """,
       })
   void testOk(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
@@ -29,8 +37,16 @@ class ConditionalExpressionIsFalseTypedCheckTest extends MagikTypedCheckTestBase
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_if :a\n" + "_then\n" + "_endif\n",
-        "" + "_if _maybe\n" + "_then\n" + "_endif\n",
+        """
+        _if :a
+        _then
+        _endif
+        """,
+        """
+        _if _maybe
+        _then
+        _endif
+        """,
       })
   void testFail(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();

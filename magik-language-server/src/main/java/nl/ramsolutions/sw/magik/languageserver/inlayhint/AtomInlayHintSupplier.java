@@ -6,10 +6,8 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ParameterReferenceType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import nl.ramsolutions.sw.magik.languageserver.MagikSettings;
@@ -40,13 +38,13 @@ class AtomInlayHintSupplier {
   private Stream<InlayHint> getInlayHintsForAtoms(
       final MagikTypedFile magikFile, final AstNode atomNode) {
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-    final ExpressionResult result = reasonerState.getNodeTypeSilent(atomNode);
-    if (result == null || result.containsUndefined()) {
+    final ExpressionResultString result = reasonerState.getNodeTypeSilent(atomNode);
+    if (result == null || result.stream().anyMatch(typeStr -> typeStr.isUndefined())) {
       return Stream.empty();
     }
 
-    final AbstractType result0 = result.get(0, null);
-    if (result0 == UndefinedType.INSTANCE || result0 instanceof ParameterReferenceType) {
+    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
+    if (typeStr.isUndefined() || typeStr.isParameterReference()) {
       return Stream.empty();
     }
 

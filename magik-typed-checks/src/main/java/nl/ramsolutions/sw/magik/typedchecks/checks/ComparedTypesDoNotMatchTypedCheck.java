@@ -3,11 +3,10 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.sonar.check.Rule;
 
@@ -35,18 +34,16 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
     final AstNode rightNode = children.get(2);
 
     final LocalTypeReasonerState state = this.getTypeReasonerState();
-    final AbstractType leftType = state.getNodeType(leftNode).get(0, UndefinedType.INSTANCE);
-    final AbstractType rightType = state.getNodeType(rightNode).get(0, UndefinedType.INSTANCE);
-    if (leftType == UndefinedType.INSTANCE || rightType == UndefinedType.INSTANCE) {
+    final TypeString leftTypeStr = state.getNodeType(leftNode).get(0, TypeString.UNDEFINED);
+    final TypeString rightTypeStr = state.getNodeType(rightNode).get(0, TypeString.UNDEFINED);
+    if (leftTypeStr.isUndefined() || rightTypeStr.isUndefined()) {
       return;
     }
 
-    final AbstractType intersection = AbstractType.intersection(leftType, rightType);
+    final TypeString intersection = TypeString.intersection(leftTypeStr, rightTypeStr);
     if (intersection == null) {
-      final TypeString leftTypeString = leftType.getTypeString();
-      final TypeString rightTypeString = rightType.getTypeString();
       final String message =
-          String.format(MESSAGE, leftTypeString.getFullString(), rightTypeString.getFullString());
+          String.format(MESSAGE, leftTypeStr.getFullString(), rightTypeStr.getFullString());
       this.addIssue(node, message);
     }
   }
@@ -62,37 +59,34 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
     if (isKindOf || isClassOf) {
       final LocalTypeReasonerState state = this.getTypeReasonerState();
       final AstNode receiverNode = helper.getReceiverNode();
-      final AbstractType receiverType =
-          state.getNodeType(receiverNode).get(0, UndefinedType.INSTANCE);
-      if (receiverType == UndefinedType.INSTANCE) {
+      final TypeString receiverTypeStr =
+          state.getNodeType(receiverNode).get(0, TypeString.UNDEFINED);
+      if (receiverTypeStr.isUndefined()) {
         return;
       }
 
       final List<AstNode> argumentNodes = helper.getArgumentExpressionNodes();
       final AstNode argument0Node = argumentNodes.get(0);
-      final ExpressionResult argument0Result = state.getNodeType(argument0Node);
-      final AbstractType checkedType = argument0Result.get(0, UndefinedType.INSTANCE);
-      if (checkedType == UndefinedType.INSTANCE) {
+      final ExpressionResultString argument0Result = state.getNodeType(argument0Node);
+      final TypeString checkedTypeStr = argument0Result.get(0, TypeString.UNDEFINED);
+      if (checkedTypeStr.isUndefined()) {
         return;
       }
 
       if (isClassOf) {
-        final AbstractType intersection = AbstractType.intersection(receiverType, checkedType);
+        final TypeString intersection = TypeString.intersection(receiverTypeStr, checkedTypeStr);
         if (intersection == null) {
-          final TypeString receiverTypeString = receiverType.getTypeString();
-          final TypeString checkedTypeString = checkedType.getTypeString();
           final String message =
               String.format(
-                  MESSAGE, receiverTypeString.getFullString(), checkedTypeString.getFullString());
+                  MESSAGE, receiverTypeStr.getFullString(), checkedTypeStr.getFullString());
           this.addIssue(node, message);
         }
       } else { // isKindOf.
-        if (!receiverType.isKindOf(checkedType)) {
-          final TypeString receiverTypeString = receiverType.getTypeString();
-          final TypeString checkedTypeString = checkedType.getTypeString();
+        final TypeStringResolver resolver = this.getTypeStringResolver();
+        if (!resolver.isKindOf(receiverTypeStr, checkedTypeStr)) {
           final String message =
               String.format(
-                  MESSAGE, receiverTypeString.getFullString(), checkedTypeString.getFullString());
+                  MESSAGE, receiverTypeStr.getFullString(), checkedTypeStr.getFullString());
           this.addIssue(node, message);
         }
       }

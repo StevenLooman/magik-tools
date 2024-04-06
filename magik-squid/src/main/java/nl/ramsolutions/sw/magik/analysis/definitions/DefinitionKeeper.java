@@ -115,6 +115,7 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
   @Override
   public void add(final ProcedureDefinition definition) {
+    // TODO: Should these always be aliases via a GlobalDefinition? Probably so!
     final TypeString bareTypeString = definition.getTypeString().getWithoutGenerics();
     final Set<ProcedureDefinition> definitions =
         this.procedureDefinitions.computeIfAbsent(
@@ -260,7 +261,7 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Collection<MethodDefinition> definitions =
         this.methodDefinitions.getOrDefault(bareTypeString, Collections.emptySet());
     return definitions.stream()
-        .filter(def -> def.getTypeName().equals(typeString))
+        .filter(def -> def.getTypeName().equals(bareTypeString))
         .collect(Collectors.toSet());
   }
 

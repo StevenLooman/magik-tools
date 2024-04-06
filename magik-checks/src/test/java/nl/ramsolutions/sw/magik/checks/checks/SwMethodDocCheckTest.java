@@ -16,21 +16,21 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        ""
-            + "_method a.b(param1, param2?)\n"
-            + "    ## This is an example method. PARAM1 and PARAM2? are used.\n"
-            + "    ## Some more doc.\n"
-            + "_endmethod",
-        ""
-            + "_method a.b\n"
-            + "    ## This is an example method.\n"
-            + "    ## Some more doc.\n"
-            + "_endmethod",
-        ""
-            + "_method a.b(param1, param2, param3)\n"
-            + "    ## There are PARAM1, PARAM2.\n"
-            + "    ## And PARAM3\n"
-            + "_endmethod",
+        """
+        _method a.b(param1, param2?)
+            ## This is an example method. PARAM1 and PARAM2? are used.
+            ## Some more doc.
+        _endmethod""",
+        """
+        _method a.b
+            ## This is an example method.
+            ## Some more doc.
+        _endmethod""",
+        """
+        _method a.b(param1, param2, param3)
+            ## There are PARAM1, PARAM2.
+            ## And PARAM3
+        _endmethod""",
       })
   void testValid(final String code) {
     final MagikCheck check = new SwMethodDocCheck();
@@ -42,11 +42,11 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
   void testDocMissing() {
     final MagikCheck check = new SwMethodDocCheck();
     final String code =
-        ""
-            + "_method a.b(param1, param2)\n"
-            + "    ## This is an example method.\n"
-            + "    ## Some more doc.\n"
-            + "_endmethod";
+        """
+        _method a.b(param1, param2)
+            ## This is an example method.
+            ## Some more doc.
+        _endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(2);
   }
@@ -54,8 +54,14 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.b\n" + "_endmethod",
-        "" + "_method a.b\n" + "    ##\n" + "    ##\n" + "_endmethod",
+        """
+        _method a.b
+        _endmethod""",
+        """
+        _method a.b
+            ##
+            ##
+        _endmethod""",
       })
   void testInvalid(final String code) {
     final MagikCheck check = new SwMethodDocCheck();
@@ -66,10 +72,20 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.b\n" + "_endmethod",
-        "" + "_method a.b\n" + "    a.do_something()\n" + "_endmethod",
-        "" + "_method a.b()\n" + "_endmethod",
-        "" + "_method a.b()\n" + "    a.do_something()\n" + "_endmethod",
+        """
+        _method a.b
+        _endmethod""",
+        """
+        _method a.b
+            a.do_something()
+        _endmethod""",
+        """
+        _method a.b()
+        _endmethod""",
+        """
+        _method a.b()
+            a.do_something()
+        _endmethod""",
       })
   void testNotAllowBlankMethodDoc(final String code) {
     final SwMethodDocCheck check = new SwMethodDocCheck();
@@ -81,10 +97,20 @@ class SwMethodDocCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.b\n" + "_endmethod",
-        "" + "_method a.b\n" + "    a.do_something()\n" + "_endmethod",
-        "" + "_method a.b()\n" + "_endmethod",
-        "" + "_method a.b()\n" + "    a.do_something()\n" + "_endmethod",
+        """
+        _method a.b
+        _endmethod""",
+        """
+        _method a.b
+            a.do_something()
+        _endmethod""",
+        """
+        _method a.b()
+        _endmethod""",
+        """
+        _method a.b()
+            a.do_something()
+        _endmethod""",
       })
   void testAllowBlankMethodDoc(final String code) {
     final SwMethodDocCheck check = new SwMethodDocCheck();

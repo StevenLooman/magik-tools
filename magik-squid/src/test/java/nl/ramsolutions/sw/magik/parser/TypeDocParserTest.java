@@ -21,13 +21,13 @@ class TypeDocParserTest {
   @Test
   void testParameter() throws IOException {
     final String code =
-        ""
-            + "_method a.b(param1, param2) << param3\n"
-            + "    ## @param {sw:symbol} param1 Test parameter 1.\n"
-            + "    ## @param    {integer} param2 Test parameter 2.\n"
-            + "    ## @param {integer} param3    Test parameter 3.\n"
-            + "    ## @param {integer|float} param4 Test parameter 4.\n"
-            + "_endmethod";
+        """
+        _method a.b(param1, param2) << param3
+            ## @param {sw:symbol} param1 Test parameter 1.
+            ## @param    {integer} param2 Test parameter 2.
+            ## @param {integer} param3    Test parameter 3.
+            ## @param {integer|float} param4 Test parameter 4.
+        _endmethod""";
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
@@ -40,7 +40,6 @@ class TypeDocParserTest {
             Map.entry(
                 "param4",
                 TypeString.ofCombination(
-                    TypeString.DEFAULT_PACKAGE,
                     TypeString.ofIdentifier("integer", TypeString.DEFAULT_PACKAGE),
                     TypeString.ofIdentifier("float", TypeString.DEFAULT_PACKAGE))));
   }
@@ -48,14 +47,14 @@ class TypeDocParserTest {
   @Test
   void testParameterEmpty() throws IOException {
     final String code =
-        ""
-            + "_method a.b(param1, param2) << param3\n"
-            + "    ## @param \n"
-            + "    ## @param param1\n"
-            + "    ## @param {integer} param2\n"
-            + "    ## @param {integer} param3 \n"
-            + "    ## @param {integer|float} param4\n"
-            + "_endmethod";
+        """
+        _method a.b(param1, param2) << param3
+            ## @param\s
+            ## @param param1
+            ## @param {integer} param2
+            ## @param {integer} param3\s
+            ## @param {integer|float} param4
+        _endmethod""";
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
@@ -68,7 +67,6 @@ class TypeDocParserTest {
             Map.entry(
                 "param4",
                 TypeString.ofCombination(
-                    TypeString.DEFAULT_PACKAGE,
                     TypeString.ofIdentifier("integer", TypeString.DEFAULT_PACKAGE),
                     TypeString.ofIdentifier("float", TypeString.DEFAULT_PACKAGE))));
   }
@@ -76,7 +74,10 @@ class TypeDocParserTest {
   @Test
   void testReturn() throws IOException {
     final String code =
-        "" + "_method a.b\n" + "    ## @return {sw:integer} An Integer.\n" + "_endmethod";
+        """
+        _method a.b
+            ## @return {sw:integer} An Integer.
+        _endmethod""";
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
@@ -88,13 +89,13 @@ class TypeDocParserTest {
   @Test
   void testReturnEmpty() throws IOException {
     final String code =
-        ""
-            + "_method a.b\n"
-            + "    ## @return \n"
-            + "    ## @return {sw:integer}\n"
-            + "    ## @return {sw:integer} \n"
-            + "    ## @return {sw:integer|sw:float}\n"
-            + "_endmethod";
+        """
+        _method a.b
+            ## @return\s
+            ## @return {sw:integer}
+            ## @return {sw:integer}\s
+            ## @return {sw:integer|sw:float}
+        _endmethod""";
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
@@ -105,14 +106,17 @@ class TypeDocParserTest {
             TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE),
             TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE),
             TypeString.ofCombination(
-                TypeString.DEFAULT_PACKAGE,
                 TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE),
                 TypeString.ofIdentifier("sw:float", TypeString.DEFAULT_PACKAGE)));
   }
 
   @Test
   void testReturnSelf() throws IOException {
-    final String code = "" + "_method a.b\n" + "    ## @return {_self}\n" + "_endmethod";
+    final String code =
+        """
+        _method a.b
+            ## @return {_self}
+        _endmethod""";
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
@@ -123,14 +127,14 @@ class TypeDocParserTest {
   @Test
   void testNestedProcedure() throws IOException {
     String code =
-        ""
-            + "_method a.b\n"
-            + "    ## @return {sw:integer} Top\n"
-            + "    rope.map("
-            + "        _proc(item)\n"
-            + "            ## @return {sw:float} Nested\n"
-            + "        _endproc())\n"
-            + "_endmethod";
+        """
+        _method a.b
+            ## @return {sw:integer} Top
+            rope.map(\
+                _proc(item)
+                    ## @return {sw:float} Nested
+                _endproc())
+        _endmethod""";
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser methodDocParser = new TypeDocParser(methodNode);
@@ -148,13 +152,14 @@ class TypeDocParserTest {
   @Test
   void testSlotTypes() throws IOException {
     final String code =
-        ""
-            + "## @slot slot1 Slot 1.\n"
-            + "## @slot {integer} slot2 Slot 2.\n"
-            + "def_slotted_exemplar(:example,\n"
-            + "    {\n"
-            + "        {:slot1, _unset}\n"
-            + "    })\n";
+        """
+        ## @slot slot1 Slot 1.
+        ## @slot {integer} slot2 Slot 2.
+        def_slotted_exemplar(:example,
+            {
+                {:slot1, _unset}
+            })
+        """;
     final AstNode topNode = this.parseMagik(code);
     final AstNode definitionNode = topNode.getFirstChild(MagikGrammar.STATEMENT);
     final TypeDocParser docParser = new TypeDocParser(definitionNode);
@@ -168,10 +173,10 @@ class TypeDocParserTest {
   @Test
   void testTokenLines() throws IOException {
     final String code =
-        ""
-            + "_proc@test1(param1)\n"
-            + "    ## @param {sw:symbol} param1 Test parameter 1.\n"
-            + "_endproc";
+        """
+        _proc@test1(param1)
+            ## @param {sw:symbol} param1 Test parameter 1.
+        _endproc""";
     final AstNode topNode = this.parseMagik(code);
     final AstNode definitionNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(definitionNode);
@@ -186,10 +191,10 @@ class TypeDocParserTest {
   @Test
   void testReturnParameterReference() throws IOException {
     final String code =
-        ""
-            + "_method a.b(p1)\n"
-            + "    ## @return {_parameter(p1)} First parameter.\n"
-            + "_endmethod";
+        """
+        _method a.b(p1)
+            ## @return {_parameter(p1)} First parameter.
+        _endmethod""";
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);

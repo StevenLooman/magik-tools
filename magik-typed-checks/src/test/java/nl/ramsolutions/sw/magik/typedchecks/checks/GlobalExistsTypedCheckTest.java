@@ -14,7 +14,7 @@ class GlobalExistsTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testKnownGlobal() {
-    final String code = "" + "float.m";
+    final String code = "float.m";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
     final MagikTypedCheck check = new GlobalExistsTypedCheck();
@@ -24,7 +24,7 @@ class GlobalExistsTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testUnknownGlobal() {
-    final String code = "" + "abc.m";
+    final String code = "abc.m";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
     final MagikTypedCheck check = new GlobalExistsTypedCheck();

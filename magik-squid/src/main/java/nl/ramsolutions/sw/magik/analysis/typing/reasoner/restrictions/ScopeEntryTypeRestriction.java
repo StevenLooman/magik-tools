@@ -2,16 +2,14 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner.restrictions;
 
 import java.util.Map;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 
-/** {@link ScopeEntry} {@link AbstractType} restriction. */
+/** {@link ScopeEntry} {@link TypeString} restriction. */
 public class ScopeEntryTypeRestriction implements TypeRestriction {
 
   private final ScopeEntry scopeEntry;
-  private final AbstractType unrestrictedType;
-  private final AbstractType restrictedType;
+  private final TypeString unrestrictedType;
+  private final TypeString restrictedType;
 
   /**
    * Constructor.
@@ -22,8 +20,8 @@ public class ScopeEntryTypeRestriction implements TypeRestriction {
    */
   public ScopeEntryTypeRestriction(
       final ScopeEntry scopeEntry,
-      final AbstractType unrestrictedType,
-      final AbstractType restrictedType) {
+      final TypeString unrestrictedType,
+      final TypeString restrictedType) {
     this.scopeEntry = scopeEntry;
     this.unrestrictedType = unrestrictedType;
     this.restrictedType = restrictedType;
@@ -44,20 +42,19 @@ public class ScopeEntryTypeRestriction implements TypeRestriction {
    *
    * @return Restricted scope entry with its reasoned type.
    */
-  public Map.Entry<ScopeEntry, AbstractType> getRestriction() {
-    final TypeString restrictedTypeString = this.restrictedType.getTypeString();
+  public Map.Entry<ScopeEntry, TypeString> getRestriction() {
     // Unset/Maybe: No doubt, restricted type is a very specific type.
     // Undefined: Reasoned type of scope entry is undefined, we are narrowing it now.
-    if (restrictedTypeString.equals(TypeString.SW_UNSET)
-        || restrictedTypeString.equals(TypeString.SW_MAYBE)
-        || this.unrestrictedType == UndefinedType.INSTANCE) {
+    if (this.restrictedType.equals(TypeString.SW_UNSET)
+        || this.restrictedType.equals(TypeString.SW_MAYBE)
+        || this.unrestrictedType == TypeString.UNDEFINED) {
       return Map.entry(this.scopeEntry, this.restrictedType);
     }
 
-    final AbstractType intersectionType =
-        AbstractType.intersection(this.unrestrictedType, this.restrictedType);
+    final TypeString intersectionType =
+        TypeString.intersection(this.unrestrictedType, this.restrictedType);
     if (intersectionType == null) {
-      return Map.entry(this.scopeEntry, UndefinedType.INSTANCE);
+      return Map.entry(this.scopeEntry, TypeString.UNDEFINED);
     }
 
     return Map.entry(this.scopeEntry, intersectionType);

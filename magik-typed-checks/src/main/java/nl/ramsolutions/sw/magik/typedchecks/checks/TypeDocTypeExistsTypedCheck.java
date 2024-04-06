@@ -3,11 +3,8 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 import com.sonar.sslr.api.AstNode;
 import java.util.Map;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefSlottedExemplarParser;
-import nl.ramsolutions.sw.magik.analysis.typing.ITypeKeeper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeReader;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
@@ -41,10 +38,8 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
 
   private void checkDefinitionParameters(final TypeDocParser typeDocParser) {
     // Test @param types.
-    final ITypeKeeper typeKeeper = this.getTypeKeeper();
-    final TypeReader typeParser = new TypeReader(typeKeeper);
     typeDocParser.getParameterTypeNodes().entrySet().stream()
-        .filter(entry -> typeParser.parseTypeString(entry.getValue()) == UndefinedType.INSTANCE)
+        .filter(this::unknownExemplarDefinitionEntry)
         .forEach(
             entry -> {
               final AstNode typeNode = entry.getKey();
@@ -56,10 +51,8 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
 
   private void checkDefinitionLoops(final TypeDocParser typeDocParser) {
     // Test @loop types.
-    final ITypeKeeper typeKeeper = this.getTypeKeeper();
-    final TypeReader typeParser = new TypeReader(typeKeeper);
     typeDocParser.getLoopTypeNodes().entrySet().stream()
-        .filter(entry -> typeParser.parseTypeString(entry.getValue()) == UndefinedType.INSTANCE)
+        .filter(this::unknownExemplarDefinitionEntry)
         .forEach(
             entry -> {
               final AstNode typeNode = entry.getKey();
@@ -71,10 +64,8 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
 
   private void checkDefinitionReturns(final TypeDocParser typeDocParser) {
     // Test @return types.
-    final ITypeKeeper typeKeeper = this.getTypeKeeper();
-    final TypeReader typeParser = new TypeReader(typeKeeper);
     typeDocParser.getReturnTypeNodes().entrySet().stream()
-        .filter(entry -> typeParser.parseTypeString(entry.getValue()) == UndefinedType.INSTANCE)
+        .filter(this::unknownExemplarDefinitionEntry)
         .forEach(
             entry -> {
               final AstNode typeNode = entry.getKey();
@@ -90,9 +81,6 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    final ITypeKeeper typeKeeper = this.getTypeKeeper();
-    final TypeReader typeParser = new TypeReader(typeKeeper);
-
     // Get slot defintions.
     final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
     final TypeDocParser typeDocParser = new TypeDocParser(statementNode);
@@ -100,11 +88,7 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
 
     // Test slot types.
     slotTypeNodes.entrySet().stream()
-        .filter(
-            entry -> {
-              final AbstractType type = typeParser.parseTypeString(entry.getValue());
-              return type == UndefinedType.INSTANCE;
-            })
+        .filter(this::unknownExemplarDefinitionEntry)
         .forEach(
             entry -> {
               final AstNode typeNode = entry.getKey();
@@ -112,5 +96,11 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
               final String message = String.format(MESSAGE, typeString.getFullString());
               this.addIssue(typeNode, message);
             });
+  }
+
+  public boolean unknownExemplarDefinitionEntry(final Map.Entry<AstNode, TypeString> entry) {
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    final TypeString typeStr = entry.getValue();
+    return resolver.getExemplarDefinition(typeStr) == null;
   }
 }

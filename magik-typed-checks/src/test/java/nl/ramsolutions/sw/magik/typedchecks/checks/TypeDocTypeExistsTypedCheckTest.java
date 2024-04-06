@@ -16,9 +16,18 @@ class TypeDocTypeExistsTypedCheckTest extends MagikTypedCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.b(p1)\n" + "  ## @param {user:missing_type} p1\n" + "_endmethod",
-        "" + "_method a.b()\n" + "  ## @return {user:missing_type}\n" + "_endmethod",
-        "" + "_method a.b()\n" + "  ## @return {|sw:float} p1\n" + "_endmethod",
+        """
+        _method a.b(p1)
+          ## @param {user:missing_type} p1
+        _endmethod""",
+        """
+        _method a.b()
+          ## @return {user:missing_type}
+        _endmethod""",
+        """
+        _method a.b()
+          ## @return {|sw:float} p1
+        _endmethod""",
       })
   void testInvalid(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
@@ -30,8 +39,14 @@ class TypeDocTypeExistsTypedCheckTest extends MagikTypedCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.b(p1)\n" + "  ## @param {sw:float} p1\n" + "_endmethod",
-        "" + "_method a.b()\n" + "  ## @return {sw:float}\n" + "_endmethod",
+        """
+        _method a.b(p1)
+          ## @param {sw:float} p1
+        _endmethod""",
+        """
+        _method a.b()
+          ## @return {sw:float}
+        _endmethod""",
       })
   void testValid(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();

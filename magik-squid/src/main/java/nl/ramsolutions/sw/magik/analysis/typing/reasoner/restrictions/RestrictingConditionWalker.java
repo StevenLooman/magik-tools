@@ -16,9 +16,8 @@ import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
@@ -96,10 +95,10 @@ public class RestrictingConditionWalker extends AstWalker {
                 return null;
               }
 
-              final ExpressionResult result = this.state.getNodeType(node);
-              final AbstractType unrestrictedType = result.get(0, UndefinedType.INSTANCE);
+              final ExpressionResultString result = this.state.getNodeType(node);
+              final TypeString unrestrictedType = result.get(0, TypeString.UNDEFINED);
               return new ScopeEntryTypeRestriction(
-                  scopeEntry, unrestrictedType, UndefinedType.INSTANCE);
+                  scopeEntry, unrestrictedType, TypeString.UNDEFINED);
             })
         .filter(Objects::nonNull)
         .collect(Collectors.toUnmodifiableSet());
@@ -135,7 +134,7 @@ public class RestrictingConditionWalker extends AstWalker {
     final AstNode leftIdentifierNode = leftNode.getFirstChild(MagikGrammar.IDENTIFIER);
     final ScopeEntry leftScopeEntry =
         leftIdentifierNode != null ? scope.getScopeEntry(leftIdentifierNode) : null;
-    final AbstractType leftType = this.state.getNodeType(leftNode).get(0, UndefinedType.INSTANCE);
+    final TypeString leftTypeStr = this.state.getNodeType(leftNode).get(0, TypeString.UNDEFINED);
 
     final AstNode operatorNode = children.get(1);
 
@@ -143,13 +142,13 @@ public class RestrictingConditionWalker extends AstWalker {
     final AstNode rightIdentifierNode = rightNode.getFirstChild(MagikGrammar.IDENTIFIER);
     final ScopeEntry rightScopeEntry =
         rightIdentifierNode != null ? scope.getScopeEntry(rightIdentifierNode) : null;
-    final AbstractType rightType = this.state.getNodeType(rightNode).get(0, UndefinedType.INSTANCE);
+    final TypeString rightTypeStr = this.state.getNodeType(rightNode).get(0, TypeString.UNDEFINED);
 
     final String operator = operatorNode.getTokenValue();
     final Set<TypeRestriction> restrictions =
         operator.equalsIgnoreCase(MagikKeyword.IS.getValue())
                 || operator.equalsIgnoreCase(MagikKeyword.ISNT.getValue())
-            ? this.createRestriction(leftScopeEntry, leftType, rightScopeEntry, rightType)
+            ? this.createRestriction(leftScopeEntry, leftTypeStr, rightScopeEntry, rightTypeStr)
             : Collections.emptySet();
 
     final Set<TypeRestriction> finalRestriction =
@@ -163,19 +162,19 @@ public class RestrictingConditionWalker extends AstWalker {
 
   private Set<TypeRestriction> createRestriction(
       @Nullable ScopeEntry leftScopeEntry,
-      AbstractType leftType,
+      TypeString leftTypeStr,
       @Nullable ScopeEntry rightScopeEntry,
-      AbstractType rightType) {
+      TypeString rightTypeStr) {
     final Set<TypeRestriction> restrictions = new HashSet<>();
     if (leftScopeEntry != null) {
       final TypeRestriction restriction =
-          new ScopeEntryTypeRestriction(leftScopeEntry, leftType, rightType);
+          new ScopeEntryTypeRestriction(leftScopeEntry, leftTypeStr, rightTypeStr);
       restrictions.add(restriction);
     }
 
     if (rightScopeEntry != null) {
       final TypeRestriction restriction =
-          new ScopeEntryTypeRestriction(rightScopeEntry, rightType, leftType);
+          new ScopeEntryTypeRestriction(rightScopeEntry, rightTypeStr, leftTypeStr);
       restrictions.add(restriction);
     }
 
@@ -204,17 +203,17 @@ public class RestrictingConditionWalker extends AstWalker {
 
       final Scope scope = globalScope.getScopeForNode(receiverNode);
       Objects.requireNonNull(scope);
-      final AbstractType receiverType =
-          this.state.getNodeType(receiverNode).get(0, UndefinedType.INSTANCE);
+      final TypeString receiverTypeStr =
+          this.state.getNodeType(receiverNode).get(0, TypeString.UNDEFINED);
       final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
       Objects.requireNonNull(scopeEntry);
 
       final List<AstNode> argumentNodes = helper.getArgumentExpressionNodes();
       final AstNode argument0Node = argumentNodes.get(0);
-      final ExpressionResult argument0Result = this.state.getNodeType(argument0Node);
-      final AbstractType restrictedType = argument0Result.get(0, UndefinedType.INSTANCE);
+      final ExpressionResultString argument0Result = this.state.getNodeType(argument0Node);
+      final TypeString restrictedTypeStr = argument0Result.get(0, TypeString.UNDEFINED);
       final Set<TypeRestriction> restriction =
-          this.createRestriction(scopeEntry, receiverType, null, restrictedType);
+          this.createRestriction(scopeEntry, receiverTypeStr, null, restrictedTypeStr);
 
       this.nodeTypeRestrictions.put(parentNode, restriction);
     }

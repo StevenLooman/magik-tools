@@ -4,7 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.io.Writer;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 
 /** AstNode + assigned types printer. Useful for debugging the LocalTypeReasoner. */
 public final class AstNodeTypePrinter {
@@ -42,7 +42,7 @@ public final class AstNodeTypePrinter {
     // Indent.
     this.writer.append(" ".repeat(level * 2));
 
-    final ExpressionResult result = this.reasonerState.getNodeTypeSilent(node);
+    final ExpressionResultString result = this.reasonerState.getNodeTypeSilent(node);
     this.writer.append(
         node.getName()
             + ", "

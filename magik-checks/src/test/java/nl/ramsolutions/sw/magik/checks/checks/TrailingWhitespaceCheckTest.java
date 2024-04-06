@@ -39,7 +39,12 @@ class TrailingWhitespaceCheckTest extends MagikCheckTestBase {
   @Test
   void testTrailingWhitespaceMultiline() {
     final MagikCheck check = new TrailingWhitespaceCheck();
-    final String code = "" + "a()    \n" + "         \n" + "b()    \n";
+    final String code =
+        """
+        a()\s\s\s\s
+         \s\s\s\s\s\s\s\s
+        b()\s\s\s\s
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(3);
   }

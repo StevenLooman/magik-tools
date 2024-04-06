@@ -17,24 +17,25 @@ class MethodComplexityCheckTest extends MagikCheckTestBase {
     check.maximumComplexity = 5;
 
     final String code =
-        ""
-            + "_method a.b\n"
-            + "    _if a\n"
-            + "    _then\n"
-            + "        _if b\n"
-            + "        _then\n"
-            + "            _if c\n"
-            + "            _then\n"
-            + "                _if d\n"
-            + "                _then\n"
-            + "                    _if e\n"
-            + "                    _then\n"
-            + "                    _endif\n"
-            + "                _endif\n"
-            + "            _endif\n"
-            + "        _endif\n"
-            + "    _endif\n"
-            + "_endmethod\n";
+        """
+        _method a.b
+            _if a
+            _then
+                _if b
+                _then
+                    _if c
+                    _then
+                        _if d
+                        _then
+                            _if e
+                            _then
+                            _endif
+                        _endif
+                    _endif
+                _endif
+            _endif
+        _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -43,7 +44,13 @@ class MethodComplexityCheckTest extends MagikCheckTestBase {
   void testNotTooComplex() {
     final MagikCheck check = new MethodComplexityCheck();
     final String code =
-        "" + "_method a.b\n" + "    _if a\n" + "    _then\n" + "    _endif\n" + "_endmethod\n";
+        """
+        _method a.b
+            _if a
+            _then
+            _endif
+        _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }

@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.sonar.check.Rule;
@@ -24,9 +23,8 @@ public class SwChar16VectorEvaluateInvocationCheck extends MagikTypedCheck {
 
   @Override
   protected void walkPreMethodInvocation(final AstNode node) {
-    final AbstractType receiverType = this.getTypeInvokedOn(node);
-    final TypeString receiverTypeString = receiverType.getTypeString().getWithoutGenerics();
-    if (!receiverTypeString.equals(TypeString.SW_CHAR16_VECTOR)) {
+    final TypeString receiverTypeStr = this.getTypeInvokedOn(node).getWithoutGenerics();
+    if (!receiverTypeStr.equals(TypeString.SW_CHAR16_VECTOR)) {
       return;
     }
 

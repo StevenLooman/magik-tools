@@ -15,11 +15,25 @@ class NoSelfUseCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_method a.b\n" + "    _self.m\n" + "_endmethod",
-        "" + "_method a.b\n" + "    _clone.m\n" + "_endmethod",
-        "" + "_method a.b\n" + "    _super.m\n" + "_endmethod",
-        "" + "_method a.b\n" + "    write(.slot)\n" + "_endmethod",
-        "" + "_abstract _method a.b\n" + "_endmethod"
+        """
+        _method a.b
+            _self.m
+        _endmethod""",
+        """
+        _method a.b
+            _clone.m
+        _endmethod""",
+        """
+        _method a.b
+            _super.m
+        _endmethod""",
+        """
+        _method a.b
+            write(.slot)
+        _endmethod""",
+        """
+        _abstract _method a.b
+        _endmethod""",
       })
   void testValid(final String code) {
     final MagikCheck check = new NoSelfUseCheck();
@@ -30,7 +44,10 @@ class NoSelfUseCheckTest extends MagikCheckTestBase {
   @Test
   void testInvalid() {
     final MagikCheck check = new NoSelfUseCheck();
-    final String code = "" + "_method a.b\n" + "    show(1)\n" + "_endmethod";
+    final String code = """
+        _method a.b
+            show(1)
+        _endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }

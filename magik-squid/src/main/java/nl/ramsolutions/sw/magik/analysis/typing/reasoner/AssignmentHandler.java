@@ -9,8 +9,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
@@ -34,7 +33,7 @@ class AssignmentHandler extends LocalTypeReasonerHandler {
   void handleAssignment(final AstNode node) {
     // Take result from right hand.
     final AstNode rightNode = node.getLastChild();
-    ExpressionResult result = this.state.getNodeType(rightNode);
+    ExpressionResultString result = this.state.getNodeType(rightNode);
 
     // Walking from back to front, assign result to each.
     // If left hand side is a method call, call the method and update result.
@@ -46,16 +45,17 @@ class AssignmentHandler extends LocalTypeReasonerHandler {
         // Find 2nd to last type.
         final int index = assignedNode.getChildren().size() - 2;
         final AstNode semiLastChildNode = assignedNode.getChildren().get(index);
-        final ExpressionResult invokedResult = this.state.getNodeType(semiLastChildNode);
+        final ExpressionResultString invokedResult = this.state.getNodeType(semiLastChildNode);
 
         // Get the result of the invocation.
         final AstNode lastChildNode = assignedNode.getLastChild();
         final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(lastChildNode);
         final String methodName = helper.getMethodName();
-        final AbstractType type = invokedResult.get(0, null);
+        final TypeString type = invokedResult.get(0, null);
         if (type == null || methodName == null) {
           return;
         }
+
         result = this.getMethodInvocationResult(type, methodName);
       } else if (assignedNode.is(MagikGrammar.ATOM)
           && assignedNode.getFirstChild(MagikGrammar.IDENTIFIER) != null) {
@@ -88,11 +88,9 @@ class AssignmentHandler extends LocalTypeReasonerHandler {
    * @param node MULTIPLE_ASSIGNMENT node.
    */
   void handleMultipleAssignment(final AstNode node) {
-    final AbstractType unsetType = this.typeKeeper.getType(TypeString.SW_UNSET);
-
     // Take result for right hand.
     final AstNode rightNode = node.getLastChild();
-    final ExpressionResult result = this.state.getNodeType(rightNode);
+    final ExpressionResultString result = this.state.getNodeType(rightNode);
 
     // Assign to all left hands.
     final AstNode assignablesNode =
@@ -100,7 +98,8 @@ class AssignmentHandler extends LocalTypeReasonerHandler {
     final List<AstNode> expressionNodes = assignablesNode.getChildren(MagikGrammar.EXPRESSION);
     for (int i = 0; i < expressionNodes.size(); ++i) {
       final AstNode expressionNode = expressionNodes.get(i);
-      final ExpressionResult partialResult = new ExpressionResult(result.get(i, unsetType));
+      final ExpressionResultString partialResult =
+          new ExpressionResultString(result.get(i, TypeString.SW_UNSET));
       this.state.setNodeType(expressionNode, partialResult);
 
       final AstNode identifierNode =

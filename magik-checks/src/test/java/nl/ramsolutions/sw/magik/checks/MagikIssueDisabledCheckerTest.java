@@ -46,7 +46,11 @@ class MagikIssueDisabledCheckerTest {
 
   @Test
   void testDisabledScopeInstruction() throws ReflectiveOperationException {
-    final String code = "" + "# mlint: disable=line-length,forbidden-call\n" + "show(1)\n";
+    final String code =
+        """
+        # mlint: disable=line-length,forbidden-call
+        show(1)
+        """;
     final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
 
     final MagikCheckHolder holder =
@@ -62,7 +66,12 @@ class MagikIssueDisabledCheckerTest {
   @Test
   void testDisabledParentScopeInstruction() throws ReflectiveOperationException {
     final String code =
-        "" + "# mlint: disable=forbidden-call\n" + "_block\n" + "  show(1)\n" + "_endblock\n";
+        """
+        # mlint: disable=forbidden-call
+        _block
+          show(1)
+        _endblock
+        """;
     final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
 
     final MagikCheckHolder holder =

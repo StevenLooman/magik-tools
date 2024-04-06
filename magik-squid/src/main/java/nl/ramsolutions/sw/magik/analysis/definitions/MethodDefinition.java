@@ -146,6 +146,63 @@ public class MethodDefinition extends Definition {
     return this.methodName;
   }
 
+  public String getNameWithParameters() {
+    final StringBuilder builder = new StringBuilder();
+
+    // Type name.
+    final String ownerName = this.getTypeName().getFullString();
+    builder.append(ownerName);
+
+    // Determine method name with parameters.
+    final String methodName = this.getMethodName();
+    final StringBuilder parametersBuilder = new StringBuilder();
+    boolean firstParameter = true;
+    ParameterDefinition.Modifier currentModifier = ParameterDefinition.Modifier.NONE;
+    for (final ParameterDefinition parameterDefinition : this.parameters) {
+      if (firstParameter) {
+        firstParameter = false;
+      } else {
+        parametersBuilder.append(", ");
+      }
+
+      final ParameterDefinition.Modifier newModifier = parameterDefinition.getModifier();
+      if (currentModifier != newModifier) {
+        if (newModifier != ParameterDefinition.Modifier.NONE) {
+          parametersBuilder.append("_" + newModifier.name().toLowerCase());
+          parametersBuilder.append(" ");
+        }
+      }
+      currentModifier = newModifier;
+
+      parametersBuilder.append(parameterDefinition.getName());
+    }
+    final String parametersStr = parametersBuilder.toString();
+
+    if (methodName.startsWith("[")) {
+      builder.append("[");
+      builder.append(parametersStr);
+      builder.append(methodName.substring(1)); // "]<<" or "]^<<""
+    } else {
+      builder.append(".");
+      int bracketIndex = methodName.indexOf('(');
+      if (bracketIndex != -1) {
+        builder.append(methodName.substring(0, bracketIndex + 1));
+        builder.append(parametersStr);
+        builder.append(methodName.substring(bracketIndex + 1));
+      } else {
+        builder.append(methodName);
+      }
+    }
+
+    final String assignmentParameterName =
+        this.assignmentParameter != null ? this.assignmentParameter.getName() : null;
+    if (assignmentParameterName != null) {
+      builder.append(assignmentParameterName);
+    }
+
+    return builder.toString();
+  }
+
   @Override
   public String getName() {
     return this.methodName.startsWith("[")

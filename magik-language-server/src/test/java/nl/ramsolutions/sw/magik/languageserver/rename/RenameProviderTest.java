@@ -41,7 +41,13 @@ class RenameProviderTest {
 
   @Test
   void testPrepareRenameLocal() {
-    final String code = "" + "_block\n" + "    _local var\n" + "    show(var)\n" + "_endblock\n";
+    final String code =
+        """
+        _block
+            _local var
+            show(var)
+        _endblock
+        """;
     final Position position = new Position(1, 12); // On `var`.
 
     final Either3<Range, PrepareRenameResult, PrepareRenameDefaultBehavior> either =
@@ -56,7 +62,13 @@ class RenameProviderTest {
 
   @Test
   void testRenameLocal() {
-    final String code = "" + "_block\n" + "    _local var\n" + "    show(var)\n" + "_endblock\n";
+    final String code =
+        """
+        _block
+            _local var
+            show(var)
+        _endblock
+        """;
     final Position position = new Position(1, 12); // On `var`.
 
     final WorkspaceEdit workspaceEdit = this.getRename(code, position, "new");
@@ -73,7 +85,13 @@ class RenameProviderTest {
 
   @Test
   void testRenameLocalFromUsage() {
-    final String code = "" + "_block\n" + "    _local var\n" + "    show(var)\n" + "_endblock\n";
+    final String code =
+        """
+        _block
+            _local var
+            show(var)
+        _endblock
+        """;
     final Position position = new Position(2, 12); // On `var`.
 
     final WorkspaceEdit workspaceEdit = this.getRename(code, position, "new");
@@ -91,13 +109,14 @@ class RenameProviderTest {
   @Test
   void testPrepareRenameForVariable() {
     final String code =
-        ""
-            + "_block\n"
-            + "    _for iter_var _over 1.upto(10)\n"
-            + "    _loop\n"
-            + "        show(iter_var)\n"
-            + "    _endloop\n"
-            + "_endblock\n";
+        """
+        _block
+            _for iter_var _over 1.upto(10)
+            _loop
+                show(iter_var)
+            _endloop
+        _endblock
+        """;
     final Position position = new Position(1, 10); // on `iter_var`.
 
     final Either3<Range, PrepareRenameResult, PrepareRenameDefaultBehavior> either =
@@ -113,13 +132,14 @@ class RenameProviderTest {
   @Test
   void testRenameForVariable() {
     final String code =
-        ""
-            + "_block\n"
-            + "    _for iter_var _over 1.upto(10)\n"
-            + "    _loop\n"
-            + "        show(iter_var)\n"
-            + "    _endloop\n"
-            + "_endblock\n";
+        """
+        _block
+            _for iter_var _over 1.upto(10)
+            _loop
+                show(iter_var)
+            _endloop
+        _endblock
+        """;
     final Position position = new Position(1, 12); // On `iter_var`.
 
     final WorkspaceEdit workspaceEdit = this.getRename(code, position, "new");
@@ -137,7 +157,11 @@ class RenameProviderTest {
   @Test
   void testRenameOptionalParameter() {
     final String code =
-        "" + "_method a.b(_optional param1)\n" + "    write(param1)\n" + "_endmethod\n";
+        """
+        _method a.b(_optional param1)
+            write(param1)
+        _endmethod
+        """;
     final Position position = new Position(1, 12); // On `param1`.
 
     final WorkspaceEdit workspaceEdit = this.getRename(code, position, "new");

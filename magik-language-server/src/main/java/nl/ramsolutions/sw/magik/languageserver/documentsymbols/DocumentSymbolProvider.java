@@ -47,12 +47,13 @@ public class DocumentSymbolProvider {
     final SymbolKind symbolKind = this.symbolKindForDefinition(definition);
     final AstNode definitionNode = definition.getNode();
     Objects.requireNonNull(definitionNode);
+    final Range range = new Range(definitionNode);
     final DocumentSymbol documentSymbol =
         new DocumentSymbol(
             definition.getName(),
             symbolKind,
-            Lsp4jConversion.rangeToLsp4j(new Range(definitionNode)),
-            Lsp4jConversion.rangeToLsp4j(new Range(definitionNode)));
+            Lsp4jConversion.rangeToLsp4j(range),
+            Lsp4jConversion.rangeToLsp4j(range));
     if (definition instanceof ExemplarDefinition exemplarDefinition) {
       final List<DocumentSymbol> slotSymbols =
           this.convertedSlotsFromDefinition(exemplarDefinition);

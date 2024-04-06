@@ -29,9 +29,19 @@ class FormattingCheckTest extends MagikCheckTestBase {
         ".uri         << items[2]",
         "_pragma(classify_level=restricted, topic={a,b})",
         "_method",
-        "" + "\t{\n" + "\t\t2\n" + "\t}\n",
-        "" + "{\r\n" + "\t2\r\n" + "}\r\n",
-        "" + "show(  # comment\n" + "  param1)",
+        """
+        	{
+        		2
+        	}
+        """,
+        """
+        {\r
+        	2\r
+        }\r
+        """,
+        """
+        show(  # comment
+          param1)""",
       })
   void testProper(final String code) {
     final MagikCheck check = new FormattingCheck();
@@ -110,15 +120,22 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "" + "_package user\n" + "\n" + "\n" + "def_slotted_exemplar(:a, {})\n" + "$\n",
-        ""
-            + "$\n"
-            + "\n"
-            + "\n"
-            + "\n"
-            + "_pragma(classify_level=basic)\n"
-            + "_method a.a(parameter)\n"
-            + "_endmethod\n",
+        """
+        _package user
+
+
+        def_slotted_exemplar(:a, {})
+        $
+        """,
+        """
+        $
+
+
+
+        _pragma(classify_level=basic)
+        _method a.a(parameter)
+        _endmethod
+        """,
       })
   void testMultipleWhitelines(final String code) {
     final MagikCheck check = new FormattingCheck();
@@ -130,13 +147,14 @@ class FormattingCheckTest extends MagikCheckTestBase {
   void testMultipleWhitelinesMethodDoc() {
     final MagikCheck check = new FormattingCheck();
     final String code =
-        ""
-            + "_method object.method(param)\n"
-            + "\t##\n"
-            + "\n"
-            + "\t>> param + 1\n"
-            + "_endmethod\n"
-            + "$\n";
+        """
+        _method object.method(param)
+        	##
+
+        	>> param + 1
+        _endmethod
+        $
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }

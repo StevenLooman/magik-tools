@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
-import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.net.URI;
 import java.util.ArrayList;
@@ -14,42 +13,42 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
-import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
-import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
-import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 
-/** Method definition parser. */
-public class MethodDefinitionParser {
+public class ProcedureDefinitionParser {
 
-  private final MagikAnalysisConfiguration configuration;
   private final AstNode node;
 
   /**
    * Constructor.
    *
-   * @param node Method definition node.
+   * @param node {@code define_shared_constant()} node.
    */
-  public MethodDefinitionParser(
-      final MagikAnalysisConfiguration configuration, final AstNode node) {
-    if (node.isNot(MagikGrammar.METHOD_DEFINITION)) {
+  public ProcedureDefinitionParser(final AstNode node) {
+    if (node.isNot(MagikGrammar.PROCEDURE_DEFINITION)) {
       throw new IllegalArgumentException();
     }
 
-    this.configuration = configuration;
     this.node = node;
+  }
+
+  /**
+   * Test if node is a {@code define_shared_constant()}.
+   *
+   * @param node Node to test
+   * @return True if node is a {@code define_shared_variable()}, false otherwise.
+   */
+  public static boolean isProcedureDefinition(final AstNode node) {
+    return node.is(MagikGrammar.PROCEDURE_DEFINITION);
   }
 
   /**
@@ -58,46 +57,38 @@ public class MethodDefinitionParser {
    * @return List of parsed definitions.
    */
   public List<Definition> parseDefinitions() {
-    // Don't burn ourselves on syntax errors.
     final AstNode syntaxErrorNode = this.node.getFirstChild(MagikGrammar.SYNTAX_ERROR);
     if (syntaxErrorNode != null) {
       return Collections.emptyList();
     }
 
     // Figure location.
-    final URI uri = this.node.getToken().getURI();
-    final Location location = new Location(uri, this.node);
+    final URI uri = node.getToken().getURI();
+    final Location location = new Location(uri, node);
 
     // Figure module name.
     final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
 
-    // Figure exemplar name & method name.
-    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(this.node);
-    final TypeString exemplarName = helper.getTypeString();
-    final String methodName = helper.getMethodName();
+    // Figure procedure name.
+    final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
+    final String procedureName = helper.getProcedureName();
 
-    // Figure modifers.
-    final Set<MethodDefinition.Modifier> modifiers = new HashSet<>();
-    if (helper.isPrivateMethod()) {
-      modifiers.add(MethodDefinition.Modifier.PRIVATE);
-    }
-    if (helper.isIterMethod()) {
-      modifiers.add(MethodDefinition.Modifier.ITER);
-    }
-    if (helper.isAbstractMethod()) {
-      modifiers.add(MethodDefinition.Modifier.ABSTRACT);
+    // Figure modifiers.
+    final Set<ProcedureDefinition.Modifier> modifiers = new HashSet<>();
+    if (helper.isIterProc()) {
+      modifiers.add(ProcedureDefinition.Modifier.ITER);
     }
 
     // Figure parameters.
+    final AstNode parametersNode = this.node.getFirstChild(MagikGrammar.PARAMETERS);
+    if (parametersNode == null) {
+      // Robustness, in case of a syntax error in the procedure definition.
+      return Collections.emptyList();
+    }
     final TypeDocParser typeDocParser = new TypeDocParser(this.node);
     final Map<String, TypeString> parameterTypes = typeDocParser.getParameterTypes();
-    final AstNode parametersNode = this.node.getFirstChild(MagikGrammar.PARAMETERS);
     final List<ParameterDefinition> parameters =
         this.createParameterDefinitions(moduleName, parametersNode, parameterTypes);
-    final AstNode assignmentParameterNode = node.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
-    final ParameterDefinition assignmentParamter =
-        this.createAssignmentParameterDefinition(
-            moduleName, assignmentParameterNode, parameterTypes);
 
     // Get return types from method docs.
     final List<TypeString> callResultDocs = typeDocParser.getReturnTypes();
@@ -117,7 +108,7 @@ public class MethodDefinitionParser {
             ? new ExpressionResultString(loopResultDocs)
             : ExpressionResultString.UNDEFINED;
 
-    // Method doc.
+    // Procedure doc.
     final String doc =
         MagikCommentExtractor.extractDocCommentTokens(node)
             .map(Token::getValue)
@@ -125,60 +116,25 @@ public class MethodDefinitionParser {
             .map(String::trim)
             .collect(Collectors.joining("\n"));
 
-    // Figure topics.
-    final AstNode pragmaNode = PragmaNodeHelper.getPragmaNode(node);
-    final Set<String> topics =
-        pragmaNode != null
-            ? new PragmaNodeHelper(pragmaNode).getAllTopics()
-            : Collections.emptySet();
-
-    final MethodDefinitionUsageParser usageParser = new MethodDefinitionUsageParser(this.node);
-    final Set<GlobalUsage> usedGlobals =
-        this.configuration.getMagikIndexerIndexGlobalUsages()
-            ? usageParser.getUsedGlobals()
-            : Collections.emptySet();
-    final Set<MethodUsage> usedMethods =
-        this.configuration.getMagikIndexerIndexMethodUsages()
-            ? usageParser.getUsedMethods()
-            : Collections.emptySet();
-    final Set<SlotUsage> usedSlots =
-        this.configuration.getMagikIndexerIndexSlotUsages()
-            ? usageParser.getUsedSlots()
-            : Collections.emptySet();
-    final Set<ConditionUsage> usedConditions =
-        this.configuration.getMagikIndexerIndexConditionUsages()
-            ? usageParser.getUsedConditions()
-            : Collections.emptySet();
-
-    final MethodDefinition methodDefinition =
-        new MethodDefinition(
+    final TypeString typeString = AnonymousNamer.getNameForProcedure(this.node);
+    return List.of(
+        new ProcedureDefinition(
             location,
             moduleName,
             doc,
-            this.node,
-            exemplarName,
-            methodName,
+            node,
             modifiers,
+            typeString,
+            procedureName,
             parameters,
-            assignmentParamter,
-            topics,
             callResult,
-            loopResult,
-            usedGlobals,
-            usedMethods,
-            usedSlots,
-            usedConditions);
-    return List.of(methodDefinition);
+            loopResult));
   }
 
   private List<ParameterDefinition> createParameterDefinitions(
       final @Nullable String moduleName,
-      final @Nullable AstNode parametersNode,
+      final AstNode parametersNode,
       final Map<String, TypeString> parameterTypes) {
-    if (parametersNode == null) {
-      return Collections.emptyList();
-    }
-
     final URI uri = this.node.getToken().getURI();
     final List<ParameterDefinition> parameterDefinitions = new ArrayList<>();
     for (final AstNode parameterNode : parametersNode.getChildren(MagikGrammar.PARAMETER)) {
@@ -205,29 +161,5 @@ public class MethodDefinitionParser {
     }
 
     return parameterDefinitions;
-  }
-
-  @CheckForNull
-  private ParameterDefinition createAssignmentParameterDefinition(
-      final @Nullable String moduleName,
-      final @Nullable AstNode assignmentParameterNode,
-      final Map<String, TypeString> parameterTypes) {
-    if (assignmentParameterNode == null) {
-      return null;
-    }
-
-    final AstNode parameterNode = assignmentParameterNode.getFirstChild(MagikGrammar.PARAMETER);
-    final URI uri = this.node.getToken().getURI();
-    final Location location = new Location(uri, parameterNode);
-    final String identifier = parameterNode.getTokenValue();
-    final TypeString typeRef = parameterTypes.getOrDefault(identifier, TypeString.UNDEFINED);
-    return new ParameterDefinition(
-        location,
-        moduleName,
-        null,
-        parameterNode,
-        identifier,
-        ParameterDefinition.Modifier.NONE,
-        typeRef);
   }
 }

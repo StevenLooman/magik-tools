@@ -76,17 +76,6 @@ class InlayHintProviderTest {
         .isEqualTo(
             List.of(
                 new InlayHint(new Position(0, 14), Either.forLeft("param1:")),
-                new InlayHint(new Position(0, 22), Either.forLeft("param2:")) // ,
-
-                // new InlayHint(
-                //     new Position(0, 0),
-                //     Either.forLeft("sw:object")),
-                // new InlayHint(
-                //     new Position(0, 14),
-                //     Either.forLeft("sw:unset")),
-                // new InlayHint(
-                //     new Position(0, 22),
-                //     Either.forLeft("sw:symbol"))
-                ));
+                new InlayHint(new Position(0, 22), Either.forLeft("param2:"))));
   }
 }

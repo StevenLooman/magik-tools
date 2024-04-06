@@ -13,10 +13,8 @@ import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.AbstractType;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResult;
+import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.UndefinedType;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.slf4j.Logger;
@@ -53,9 +51,9 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
     }
 
     final LocalTypeReasonerState state = this.getTypeReasonerState();
-    final ExpressionResult result = state.getNodeType(parent);
-    final AbstractType type = result.get(0, UndefinedType.INSTANCE);
-    if (type == UndefinedType.INSTANCE) {
+    final ExpressionResultString result = state.getNodeType(parent);
+    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
+    if (typeStr.isUndefined()) {
       return;
     }
 
@@ -80,14 +78,13 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
 
     // See if the target module is required.
     final String moduleName = moduleDefinition.getName();
-    final TypeString typeString = type.getTypeString();
-    definitionKeeper.getExemplarDefinitions(typeString).stream()
+    definitionKeeper.getExemplarDefinitions(typeStr).stream()
         .filter(def -> def.getModuleName() != null)
         .filter(def -> !this.isModuleRequired(moduleName, def.getModuleName()))
         .forEach(
             def -> {
               final String globalModuleName = def.getModuleName();
-              final String typeStringStr = typeString.getFullString();
+              final String typeStringStr = typeStr.getFullString();
               final String message = String.format(MESSAGE, globalModuleName, typeStringStr);
               this.addIssue(node, message);
             });
