@@ -23,7 +23,6 @@ import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.TypeStringDefinition;
-import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /** {@link TypeString} resolver tools. */
 public class TypeStringResolver {

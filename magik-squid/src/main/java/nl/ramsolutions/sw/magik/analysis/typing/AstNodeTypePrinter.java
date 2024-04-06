@@ -4,7 +4,6 @@ import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.io.Writer;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
 
 /** AstNode + assigned types printer. Useful for debugging the LocalTypeReasoner. */
 public final class AstNodeTypePrinter {

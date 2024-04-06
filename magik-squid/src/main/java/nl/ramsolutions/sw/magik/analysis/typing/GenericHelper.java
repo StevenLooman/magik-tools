@@ -2,8 +2,6 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 
 import java.util.Map;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.magik.analysis.typing.types.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
 
 /** Generic helper. */
 public class GenericHelper {

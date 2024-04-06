@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing.types;
+package nl.ramsolutions.sw.magik.analysis.typing;
 
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.ArrayList;

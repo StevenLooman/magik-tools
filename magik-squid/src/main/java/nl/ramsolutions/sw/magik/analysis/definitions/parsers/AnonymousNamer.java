@@ -5,7 +5,7 @@ import com.sonar.sslr.api.Token;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /** Creates names for anonymous constructs, such as procedures. */

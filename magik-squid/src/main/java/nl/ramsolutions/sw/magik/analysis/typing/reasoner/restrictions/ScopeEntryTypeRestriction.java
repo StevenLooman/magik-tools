@@ -2,7 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner.restrictions;
 
 import java.util.Map;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.types.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
 /** {@link ScopeEntry} {@link TypeString} restriction. */
 public class ScopeEntryTypeRestriction implements TypeRestriction {
