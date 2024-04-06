@@ -209,8 +209,15 @@ public class MagikWorkspaceService implements WorkspaceService {
             fileEvent -> {
               LOGGER.debug("File event: {}", fileEvent);
 
-              final URI uri = URI.create(fileEvent.getUri());
               final FileChangeType fileChangeType = fileEvent.getType();
+              final URI uri = URI.create(fileEvent.getUri());
+              final Path path = Path.of(uri);
+              if (fileChangeType != FileChangeType.Deleted && !Files.exists(path)) {
+                // Ensure file still exists. Files such as `.git/index.lock` are often already
+                // deleted before it reaches this method.
+                return;
+              }
+
               final nl.ramsolutions.sw.magik.FileEvent.FileChangeType magikFileChangeType =
                   Lsp4jConversion.fileChangeTypeFromLsp4j(fileChangeType);
               final nl.ramsolutions.sw.magik.FileEvent magikFileEvent =
