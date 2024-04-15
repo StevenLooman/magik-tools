@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
-# Generate the AstWalker class from the MagikGrammar.
+# Generate the MagikAstWalker class from the MagikGrammar.
 # Running:
 #   $ pwd
-#   .../magik-tools/magik-squid/src/main/java/nl/ramsolutions/sw/magik/analysis
-#   $ cat ../api/MagikGrammar.java | ./generate_ast_walker.py >! AstWalker.java
+#   .../magik-tools
+#   $ cat magik-squid/src/main/java/nl/ramsolutions/sw/magik/api/MagikGrammar.java \
+#     | python3 magik-squid/src/main/java/nl/ramsolutions/sw/generate_ast_walker.py \
+#     >! magik-squid/src/main/java/nl/ramsolutions/sw/magik/analysis/MagikAstWalker.java
 
 import fileinput
 import re
@@ -12,10 +14,10 @@ import re
 IGNORE_ELEMENTS = ['WHITESPACE', 'SPACING', 'SPACING_NO_LB', 'NEXT_NOT_LB', 'EOS']
 
 elements = [
-  line[4:-2]
+  line[2:-2]
   for line in fileinput.input()
-  if re.match(r" {4}[A-Z_]+", line) and \
-     line[4:-2] not in IGNORE_ELEMENTS
+  if re.match(r" {2}[A-Z_]+", line) and \
+     line[2:-2] not in IGNORE_ELEMENTS
 ]
 
 def to_java_name(element):

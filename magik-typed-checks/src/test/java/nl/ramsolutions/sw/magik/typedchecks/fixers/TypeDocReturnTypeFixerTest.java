@@ -17,12 +17,12 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class TypeDocReturnTypeFixerTest {
 
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
   private static final String NEWLINE = System.lineSeparator();
 
   private List<CodeAction> getCodeActions(final String code, final Range range) {
-    final URI uri = URI.create("tests://unittest");
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
+    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
     final TypeDocReturnTypeFixer fixer = new TypeDocReturnTypeFixer();
     return fixer.provideCodeActions(magikFile, range);
   }

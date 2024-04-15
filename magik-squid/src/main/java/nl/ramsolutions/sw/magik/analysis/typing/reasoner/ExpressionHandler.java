@@ -82,8 +82,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
 
         case "_andif", "_orif":
           // Returns RHS if LHS is true.
-          final TypeString combinedType =
-              TypeString.ofCombination(TypeString.SW_FALSE, rightTypeStr);
+          final TypeString combinedType = TypeString.combine(TypeString.SW_FALSE, rightTypeStr);
           result = new ExpressionResultString(combinedType);
           break;
 
@@ -134,8 +133,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
 
       case "_andif", "_orif":
         // Returns RHS if LHS is true.
-        final TypeString combinedTypeStr =
-            TypeString.ofCombination(TypeString.SW_FALSE, rightTypeStr);
+        final TypeString combinedTypeStr = TypeString.combine(TypeString.SW_FALSE, rightTypeStr);
         result = new ExpressionResultString(combinedTypeStr);
         break;
 

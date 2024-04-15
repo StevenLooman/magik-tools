@@ -1,10 +1,10 @@
 package nl.ramsolutions.sw.magik;
 
 import com.sonar.sslr.api.AstNode;
-import nl.ramsolutions.sw.magik.analysis.AstWalker;
+import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 
 /** Magik visitor. */
-public abstract class MagikVisitor extends AstWalker {
+public abstract class MagikVisitor extends MagikAstWalker {
 
   private MagikFile magikFile;
 

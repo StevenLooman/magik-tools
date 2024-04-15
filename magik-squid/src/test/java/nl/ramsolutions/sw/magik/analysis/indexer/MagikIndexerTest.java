@@ -105,7 +105,7 @@ class MagikIndexerTest {
     assertThat(binOpDef.getLhsTypeName()).isEqualTo(TypeString.ofIdentifier("integer", "user"));
     assertThat(binOpDef.getRhsTypeName()).isEqualTo(TypeString.ofIdentifier("integer", "user"));
     assertThat(binOpDef.getResultTypeName())
-        .isEqualTo(TypeString.ofCombination(TypeString.SW_FALSE, TypeString.SW_MAYBE));
+        .isEqualTo(TypeString.combine(TypeString.SW_FALSE, TypeString.SW_MAYBE));
   }
 
   @Test

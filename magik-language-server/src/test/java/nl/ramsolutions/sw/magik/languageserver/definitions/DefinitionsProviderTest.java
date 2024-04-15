@@ -20,14 +20,13 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class DefinitionsProviderTest {
 
-  private static final URI TEST_URI = URI.create("tests://unittest");
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
   private static final Location EMPTY_LOCATION =
-      new Location(
-          URI.create("tests://unittest"), new Range(new Position(0, 0), new Position(0, 0)));
+      new Location(DEFAULT_URI, new Range(new Position(0, 0), new Position(0, 0)));
 
   private List<Location> getDefinitions(
       final String code, final Position position, final IDefinitionKeeper definitionKeeper) {
-    final MagikTypedFile magikFile = new MagikTypedFile(TEST_URI, code, definitionKeeper);
+    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
     final DefinitionsProvider provider = new DefinitionsProvider();
     return provider.provideDefinitions(magikFile, position);
   }
@@ -75,7 +74,7 @@ class DefinitionsProviderTest {
     assertThat(locations).hasSize(1);
     final Location location0 = locations.get(0);
     assertThat(location0)
-        .isEqualTo(new Location(TEST_URI, new Range(new Position(1, 22), new Position(1, 28))));
+        .isEqualTo(new Location(DEFAULT_URI, new Range(new Position(1, 22), new Position(1, 28))));
   }
 
   @Test
@@ -93,7 +92,7 @@ class DefinitionsProviderTest {
     assertThat(locations).hasSize(1);
     final Location location0 = locations.get(0);
     assertThat(location0)
-        .isEqualTo(new Location(TEST_URI, new Range(new Position(2, 11), new Position(2, 17))));
+        .isEqualTo(new Location(DEFAULT_URI, new Range(new Position(2, 11), new Position(2, 17))));
   }
 
   @Test
@@ -115,6 +114,6 @@ class DefinitionsProviderTest {
     assertThat(locations).hasSize(1);
     final Location location0 = locations.get(0);
     assertThat(location0)
-        .isEqualTo(new Location(TEST_URI, new Range(new Position(0, 0), new Position(0, 0))));
+        .isEqualTo(new Location(DEFAULT_URI, new Range(new Position(0, 0), new Position(0, 0))));
   }
 }

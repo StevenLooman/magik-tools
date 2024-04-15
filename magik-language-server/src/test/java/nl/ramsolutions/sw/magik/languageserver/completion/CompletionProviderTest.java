@@ -26,10 +26,11 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class CompletionProviderTest {
 
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
+
   private List<CompletionItem> getCompletions(
       final String code, final IDefinitionKeeper definitionKeeper, final Position position) {
-    final URI uri = URI.create("tests://unittest");
-    final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
+    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
     final CompletionProvider provider = new CompletionProvider();
     return provider.provideCompletions(magikFile, position);
   }

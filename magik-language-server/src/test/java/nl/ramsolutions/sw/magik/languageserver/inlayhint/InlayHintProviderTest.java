@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 /** Tests for {@link InlayHintProvider}. */
 class InlayHintProviderTest {
 
-  private static final URI TEST_URI = URI.create("tests://unittest");
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
 
   @SuppressWarnings("checkstyle:MagicNumber")
   @Test
@@ -68,7 +68,7 @@ class InlayHintProviderTest {
 
     final String code = "object.method(_unset, :hello, var1)";
     final InlayHintProvider provider = new InlayHintProvider();
-    final MagikTypedFile magikFile = new MagikTypedFile(TEST_URI, code, definitionKeeper);
+    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
 
     final List<InlayHint> inlayHints =
         provider.provideInlayHints(magikFile, new Range(new Position(0, 0), new Position(2, 0)));

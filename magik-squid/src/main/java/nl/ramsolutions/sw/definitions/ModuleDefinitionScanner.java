@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionGrammar;
 import nl.ramsolutions.sw.definitions.parser.SwModuleDefParser;
 import nl.ramsolutions.sw.magik.Location;
@@ -152,9 +153,8 @@ public final class ModuleDefinitionScanner {
 
     final AstNode moduleIdentNode =
         node.getFirstChild(SwModuleDefinitionGrammar.MODULE_IDENTIFICATION);
-    final AstNode identfierNode =
-        moduleIdentNode.getFirstChild(SwModuleDefinitionGrammar.IDENTIFIER);
-    final String moduleName = identfierNode.getTokenValue();
+    final AstNode nameNode = moduleIdentNode.getFirstChild(SwModuleDefinitionGrammar.MODULE_NAME);
+    final String moduleName = nameNode.getTokenValue();
     final List<AstNode> versionNodes =
         moduleIdentNode.getChildren(SwModuleDefinitionGrammar.VERSION);
     final AstNode baseVersionNode = versionNodes.get(0);
@@ -170,9 +170,18 @@ public final class ModuleDefinitionScanner {
                 .toList()
             : Collections.emptyList();
 
+    final AstNode descriptionNode = node.getFirstChild(SwModuleDefinitionGrammar.DESCRIPTION);
+    final String description =
+        descriptionNode != null
+            ? descriptionNode.getChildren(SwModuleDefinitionGrammar.FREE_LINES).stream()
+                .map(n -> n.getTokenValue())
+                .collect(Collectors.joining("\n"))
+            : null;
+
     final URI uri = path.toUri();
     final Location location = new Location(uri);
-    return new ModuleDefinition(location, moduleName, baseVersion, currentVersion, requireds);
+    return new ModuleDefinition(
+        location, moduleName, baseVersion, currentVersion, description, requireds);
   }
 
   /**

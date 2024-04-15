@@ -14,6 +14,7 @@ public class ModuleDefinition {
   private final String name;
   private final String baseVersion;
   private final @Nullable String currentVersion;
+  private final @Nullable String description;
   private final List<String> requireds;
 
   /**
@@ -27,11 +28,13 @@ public class ModuleDefinition {
       final String name,
       final String baseVersion,
       final @Nullable String currentVersion,
+      final @Nullable String description,
       final List<String> requireds) {
     this.location = location;
     this.name = name;
     this.baseVersion = baseVersion;
     this.currentVersion = currentVersion;
+    this.description = description;
     this.requireds = List.copyOf(requireds);
   }
 
@@ -48,8 +51,14 @@ public class ModuleDefinition {
     return this.baseVersion;
   }
 
+  @CheckForNull
   public String getCurrentVersion() {
     return this.currentVersion;
+  }
+
+  @CheckForNull
+  public String getDescription() {
+    return this.description;
   }
 
   public List<String> getRequireds() {

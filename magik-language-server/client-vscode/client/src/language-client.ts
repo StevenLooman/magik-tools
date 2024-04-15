@@ -59,7 +59,11 @@ export class MagikLanguageClient implements vscode.Disposable {
 		};
 
 		const clientOptions: vscodeLanguageClient.LanguageClientOptions = {
-			documentSelector: [{ scheme: 'file', language: 'magik' }],
+			documentSelector: [
+				{ scheme: 'file', language: 'product.def' },
+				{ scheme: 'file', language: 'module.def' },
+				{ scheme: 'file', language: 'magik' },
+			],
 			synchronize: {
 				fileEvents: [
 					// Include all files (and directories) and filter in the language server itself.

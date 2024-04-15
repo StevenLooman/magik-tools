@@ -147,7 +147,8 @@ public class MUnitTestItemProvider {
     if (!Files.exists(productDefPath)) {
       final Path parentPath = path.getParent();
       if (parentPath == null) {
-        return new ProductDefinition(null, "<no_product>", "", null);
+        return new ProductDefinition(
+            null, "<no_product>", "", null, null, null, Collections.emptyList());
       }
 
       return this.getSwProduct(parentPath);
@@ -162,7 +163,7 @@ public class MUnitTestItemProvider {
     if (!Files.exists(moduleDefPath)) {
       final Path parentPath = path.getParent();
       if (parentPath == null) {
-        return new ModuleDefinition(null, "<no_module>", "", "1", Collections.emptyList());
+        return new ModuleDefinition(null, "<no_module>", "", "1", null, Collections.emptyList());
       }
 
       return this.getSwModule(parentPath);

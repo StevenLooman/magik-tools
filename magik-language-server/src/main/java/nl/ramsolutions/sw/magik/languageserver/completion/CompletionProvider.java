@@ -197,7 +197,6 @@ public class CompletionProvider {
 
     // Slots.
     final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
-    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     if (scopeNode != null) {
       final AstNode methodDefinitionNode =
           scopeNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);

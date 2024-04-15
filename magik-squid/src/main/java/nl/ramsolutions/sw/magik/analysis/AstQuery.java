@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionGrammar;
+import nl.ramsolutions.sw.definitions.api.SwProductDefinitionGrammar;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -116,7 +118,7 @@ public final class AstQuery {
   public static AstNode nodeBefore(final AstNode topNode, final Position position) {
     final List<AstNode> nodes =
         AstQuery.dfs(topNode)
-            .filter(node -> node.isNot(MagikGrammar.values()))
+            .filter(AstQuery::isTokenNode)
             .filter(
                 node -> {
                   final Token token = node.getToken();
@@ -141,7 +143,7 @@ public final class AstQuery {
   public static AstNode nodeAt(final AstNode topNode, final Position position) {
     final List<AstNode> nodes =
         AstQuery.dfs(topNode)
-            .filter(node -> node.isNot(MagikGrammar.values()))
+            .filter(AstQuery::isTokenNode)
             .filter(
                 node -> {
                   final Token token = node.getToken();
@@ -188,7 +190,7 @@ public final class AstQuery {
   public static AstNode nodeAfter(final AstNode topNode, final Position position) {
     final List<AstNode> nodes =
         AstQuery.dfs(topNode)
-            .filter(node -> node.isNot(MagikGrammar.values()))
+            .filter(AstQuery::isTokenNode)
             .filter(
                 node -> {
                   final Token token = node.getToken();
@@ -213,7 +215,7 @@ public final class AstQuery {
   public static AstNode nodeSurrounding(final AstNode topNode, final Position position) {
     final List<AstNode> nodes =
         AstQuery.dfs(topNode)
-            .filter(node -> node.is(MagikGrammar.values()))
+            .filter(AstQuery::isGrammarNode)
             .filter(node -> node.getToken() != null && node.getLastToken() != null)
             .filter(
                 node -> {
@@ -255,7 +257,7 @@ public final class AstQuery {
     final List<AstNodeType> nodeTypesList = List.of(nodeTypes);
     final List<AstNode> nodes =
         AstQuery.dfs(topNode)
-            .filter(node -> node.is(MagikGrammar.values()))
+            .filter(AstQuery::isGrammarNode)
             .filter(node -> node.getToken() != null && node.getLastToken() != null)
             .filter(
                 node -> {
@@ -305,5 +307,17 @@ public final class AstQuery {
     final Stream<AstNode> childStream = node.getChildren().stream().filter(predicate);
     return Stream.concat(
         parentStream, childStream.flatMap(childNode -> AstQuery.dfs(childNode, predicate)));
+  }
+
+  private static boolean isGrammarNode(final AstNode node) {
+    return node.is(SwProductDefinitionGrammar.values())
+        || node.is(SwModuleDefinitionGrammar.values())
+        || node.is(MagikGrammar.values());
+  }
+
+  private static boolean isTokenNode(final AstNode node) {
+    return node.isNot(SwProductDefinitionGrammar.values())
+        && node.isNot(SwModuleDefinitionGrammar.values())
+        && node.isNot(MagikGrammar.values());
   }
 }

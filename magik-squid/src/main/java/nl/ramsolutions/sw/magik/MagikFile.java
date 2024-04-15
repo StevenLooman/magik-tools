@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik;
 import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -15,6 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
+import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader;
@@ -26,13 +26,12 @@ import nl.ramsolutions.sw.magik.parser.CommentInstructionReader.Instruction;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
 
 /** Magik file. */
-public class MagikFile {
+public class MagikFile extends OpenedFile {
 
-  // TODO: Define a default URI for in memory things.
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
+  public static final Location DEFAULT_LOCATION = new Location(DEFAULT_URI, Range.DEFAULT_RANGE);
 
   private final MagikAnalysisConfiguration configuration;
-  private final URI uri;
-  private final String source;
   private AstNode astNode;
   private GlobalScope globalScope;
   private List<Definition> definitions;
@@ -59,9 +58,8 @@ public class MagikFile {
    */
   public MagikFile(
       final MagikAnalysisConfiguration configuration, final URI uri, final String source) {
+    super(uri, source);
     this.configuration = configuration;
-    this.uri = uri;
-    this.source = source;
   }
 
   /**
@@ -82,28 +80,13 @@ public class MagikFile {
    */
   public MagikFile(final MagikAnalysisConfiguration configuration, final Path path)
       throws IOException {
+    super(path.toUri(), Files.readString(path, FileCharsetDeterminer.determineCharset(path)));
     this.configuration = configuration;
-    this.uri = path.toUri();
-    final Charset charset = FileCharsetDeterminer.determineCharset(path);
-    this.source = Files.readString(path, charset);
   }
 
-  /**
-   * Get the URI.
-   *
-   * @return The URI.
-   */
-  public URI getUri() {
-    return this.uri;
-  }
-
-  /**
-   * Get the source text.
-   *
-   * @return Source text.
-   */
-  public String getSource() {
-    return this.source;
+  @Override
+  public String getLanguageId() {
+    return "magik";
   }
 
   /**
@@ -112,7 +95,8 @@ public class MagikFile {
    * @return Source lines.
    */
   public String[] getSourceLines() {
-    return this.source.split("\r\n|\n|\r");
+    final String source = this.getSource();
+    return source.split("\r\n|\n|\r");
   }
 
   /**
@@ -124,7 +108,8 @@ public class MagikFile {
     if (this.astNode == null) {
       final MagikParser parser = new MagikParser();
       final String magikSource = this.getSource();
-      this.astNode = parser.parseSafe(magikSource, this.uri);
+      final URI uri = this.getUri();
+      this.astNode = parser.parseSafe(magikSource, uri);
     }
 
     return this.astNode;

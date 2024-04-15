@@ -4,9 +4,15 @@ import com.sonar.sslr.api.AstNode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import nl.ramsolutions.sw.definitions.ModuleDefinition;
+import nl.ramsolutions.sw.definitions.ProductDefinition;
+import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionGrammar;
+import nl.ramsolutions.sw.definitions.api.SwProductDefinitionGrammar;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.ModuleDefFile;
 import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.ProductDefFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
@@ -40,16 +46,68 @@ public class DefinitionsProvider {
   /**
    * Provide definitions.
    *
+   * @param productDef Product.def file.
+   * @param position Position.
+   * @return Definitions.
+   */
+  public List<Location> provideDefinitions(
+      final ProductDefFile productDefFile, final Position position) {
+    final AstNode node = productDefFile.getTopNode();
+    final AstNode hoveredTokenNode = AstQuery.nodeAt(node, position);
+    if (hoveredTokenNode == null) {
+      return Collections.emptyList();
+    }
+
+    final AstNode productNameNode =
+        AstQuery.getParentFromChain(
+            hoveredTokenNode,
+            SwProductDefinitionGrammar.IDENTIFIER,
+            SwProductDefinitionGrammar.PRODUCT_NAME);
+    if (productNameNode == null) {
+      return Collections.emptyList();
+    }
+
+    return this.locationsForProductName(productDefFile, productNameNode);
+  }
+
+  /**
+   * Provide definitions.
+   *
+   * @param moduleDef Module.def file.
+   * @param position Position.
+   * @return Definitions.
+   */
+  public List<Location> provideDefinitions(
+      final ModuleDefFile moduleDefFile, final Position position) {
+    final AstNode node = moduleDefFile.getTopNode();
+    final AstNode hoveredTokenNode = AstQuery.nodeAt(node, position);
+    if (hoveredTokenNode == null) {
+      return Collections.emptyList();
+    }
+
+    final AstNode moduleNameNode =
+        AstQuery.getParentFromChain(
+            hoveredTokenNode,
+            SwModuleDefinitionGrammar.IDENTIFIER,
+            SwModuleDefinitionGrammar.MODULE_NAME);
+    if (moduleNameNode == null) {
+      return Collections.emptyList();
+    }
+
+    return this.locationsForModuleName(moduleDefFile, moduleNameNode);
+  }
+
+  /**
+   * Provide definitions.
+   *
    * @param magikFile Magik file.
    * @param position Position.
    * @return Definitions.
    */
   public List<Location> provideDefinitions(
       final MagikTypedFile magikFile, final Position position) {
-    // Parse magik.
-    final AstNode node = magikFile.getTopNode();
-
     // Should always be on an identifier.
+    final AstNode node = magikFile.getTopNode();
     final AstNode currentNode = AstQuery.nodeAt(node, position, MagikGrammar.IDENTIFIER);
     if (currentNode == null) {
       return Collections.emptyList();
@@ -137,6 +195,24 @@ public class DefinitionsProvider {
     return resolver.getMethodDefinitions(typeStr, methodName).stream()
         .map(MethodDefinition::getLocation)
         .map(Location::validLocation)
+        .toList();
+  }
+
+  private List<Location> locationsForProductName(
+      final ProductDefFile productDefFile, final AstNode productNameNode) {
+    final String productName = productNameNode.getTokenValue();
+    final IDefinitionKeeper definitionKeeper = productDefFile.getDefinitionKeeper();
+    return definitionKeeper.getProductDefinitions(productName).stream()
+        .map(ProductDefinition::getLocation)
+        .toList();
+  }
+
+  private List<Location> locationsForModuleName(
+      final ModuleDefFile moduleDefFile, final AstNode moduleNameNode) {
+    final String moduleName = moduleNameNode.getTokenValue();
+    final IDefinitionKeeper definitionKeeper = moduleDefFile.getDefinitionKeeper();
+    return definitionKeeper.getModuleDefinitions(moduleName).stream()
+        .map(ModuleDefinition::getLocation)
         .toList();
   }
 }

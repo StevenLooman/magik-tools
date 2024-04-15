@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class FileMetricsTest {
 
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
+
   @Test
   void testStatements1() {
     String code = "print(1)";
@@ -153,8 +155,7 @@ class FileMetricsTest {
   }
 
   private FileMetrics metrics(String code) {
-    URI uri = URI.create("tests://unittest");
-    MagikFile magikFile = new MagikFile(uri, code);
+    MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
     return new FileMetrics(magikFile, true);
   }
 }

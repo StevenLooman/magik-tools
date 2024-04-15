@@ -10,9 +10,10 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class ScopeBuilderVisitorTest {
 
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
+
   private ScopeBuilderVisitor buildCode(String code) {
-    final URI uri = URI.create("tests://unittest");
-    final MagikFile magikFile = new MagikFile(uri, code);
+    final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
     final ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
     visitor.scanFile(magikFile);
     return visitor;
