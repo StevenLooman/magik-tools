@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 /** Tests for TypeHierarchyProvider. */
 class TypeHierarchyProviderTest {
 
-  private static final URI TEST_URI = URI.create("tests://unittest");
+  private static final URI TEST_URI = URI.create("memory://source.magik");
 
   private List<TypeHierarchyItem> getPrepareTypeHierarchy(
       final String code, final Position position, final IDefinitionKeeper definitionKeeper) {

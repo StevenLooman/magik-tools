@@ -34,7 +34,7 @@ class TypeDocParserTest {
     final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
     assertThat(parameterTypes)
         .containsOnly(
-            Map.entry("param1", TypeString.ofIdentifier("sw:symbol", TypeString.DEFAULT_PACKAGE)),
+            Map.entry("param1", TypeString.SW_SYMBOL),
             Map.entry("param2", TypeString.ofIdentifier("integer", TypeString.DEFAULT_PACKAGE)),
             Map.entry("param3", TypeString.ofIdentifier("integer", TypeString.DEFAULT_PACKAGE)),
             Map.entry(
@@ -82,8 +82,7 @@ class TypeDocParserTest {
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
     final List<TypeString> returnTypes = docParser.getReturnTypes();
-    assertThat(returnTypes)
-        .containsExactly(TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE));
+    assertThat(returnTypes).containsExactly(TypeString.SW_INTEGER);
   }
 
   @Test
@@ -103,11 +102,9 @@ class TypeDocParserTest {
     assertThat(returnTypes)
         .containsExactly(
             TypeString.UNDEFINED,
-            TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE),
-            TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE),
-            TypeString.ofCombination(
-                TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE),
-                TypeString.ofIdentifier("sw:float", TypeString.DEFAULT_PACKAGE)));
+            TypeString.SW_INTEGER,
+            TypeString.SW_INTEGER,
+            TypeString.combine(TypeString.SW_INTEGER, TypeString.SW_FLOAT));
   }
 
   @Test
@@ -139,14 +136,12 @@ class TypeDocParserTest {
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser methodDocParser = new TypeDocParser(methodNode);
     final List<TypeString> methodReturnTypes = methodDocParser.getReturnTypes();
-    assertThat(methodReturnTypes)
-        .containsExactly(TypeString.ofIdentifier("sw:integer", TypeString.DEFAULT_PACKAGE));
+    assertThat(methodReturnTypes).containsExactly(TypeString.SW_INTEGER);
 
     final AstNode procNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
     final TypeDocParser procDocParser = new TypeDocParser(procNode);
     final List<TypeString> procReturnTypes = procDocParser.getReturnTypes();
-    assertThat(procReturnTypes)
-        .containsExactly(TypeString.ofIdentifier("sw:float", TypeString.DEFAULT_PACKAGE));
+    assertThat(procReturnTypes).containsExactly(TypeString.SW_FLOAT);
   }
 
   @Test

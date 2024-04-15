@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.magik.analysis.AstWalker;
+import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -36,7 +36,7 @@ import nl.ramsolutions.sw.magik.api.MagikOperator;
  * be custom binary operators and as such, we cannot provide any guarantees regarding the type of
  * the variable.
  */
-public class RestrictingConditionWalker extends AstWalker {
+public class RestrictingConditionWalker extends MagikAstWalker {
 
   private static final String IS_KIND_OF = "is_kind_of?()";
   private static final String IS_CLASS_OF = "is_class_of?()";

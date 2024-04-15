@@ -26,6 +26,11 @@ class ConditionalExpressionIsFalseTypedCheckTest extends MagikTypedCheckTestBase
         _then
         _endif
         """,
+        """
+        _if :a _is :b _orif :a _is :c
+        _then
+        _endif
+        """,
       })
   void testOk(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();

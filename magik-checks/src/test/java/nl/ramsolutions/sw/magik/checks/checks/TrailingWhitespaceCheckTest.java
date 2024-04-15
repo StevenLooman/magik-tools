@@ -33,7 +33,8 @@ class TrailingWhitespaceCheckTest extends MagikCheckTestBase {
     assertThat(issue0.location())
         .isEqualTo(
             new Location(
-                URI.create("tests://unittest"), new Range(new Position(1, 1), new Position(1, 5))));
+                URI.create("memory://source.magik"),
+                new Range(new Position(1, 1), new Position(1, 5))));
   }
 
   @Test

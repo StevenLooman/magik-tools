@@ -10,9 +10,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.definitions.ModuleDefinition;
+import nl.ramsolutions.sw.definitions.ProductDefinition;
+import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionGrammar;
+import nl.ramsolutions.sw.definitions.api.SwProductDefinitionGrammar;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.ModuleDefFile;
 import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.ProductDefFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -43,6 +49,66 @@ public class ReferencesProvider {
    */
   public void setCapabilities(final ServerCapabilities capabilities) {
     capabilities.setReferencesProvider(true);
+  }
+
+  /**
+   * Provide references.
+   *
+   * @param productDefFile Product.def file.
+   * @param position Position in file.
+   * @return Locations for references.
+   */
+  @SuppressWarnings("checkstyle:NestedIfDepth")
+  public List<Location> provideReferences(
+      final ProductDefFile productDefFile, final Position position) {
+    final AstNode node = productDefFile.getTopNode();
+    final AstNode hoveredTokenNode = AstQuery.nodeAt(node, position);
+    if (hoveredTokenNode == null) {
+      return Collections.emptyList();
+    }
+
+    final AstNode productNameNode =
+        AstQuery.getParentFromChain(
+            hoveredTokenNode,
+            SwProductDefinitionGrammar.IDENTIFIER,
+            SwProductDefinitionGrammar.PRODUCT_NAME);
+    if (productNameNode == null) {
+      return Collections.emptyList();
+    }
+
+    final IDefinitionKeeper definitionKeeper = productDefFile.getDefinitionKeeper();
+    final String productName = productNameNode.getTokenValue();
+    return this.referencesToProductName(definitionKeeper, productName);
+  }
+
+  /**
+   * Provide references.
+   *
+   * @param moduleDefFile Module.def file.
+   * @param position Position in file.
+   * @return Locations for references.
+   */
+  @SuppressWarnings("checkstyle:NestedIfDepth")
+  public List<Location> provideReferences(
+      final ModuleDefFile moduleDefFile, final Position position) {
+    final AstNode node = moduleDefFile.getTopNode();
+    final AstNode hoveredTokenNode = AstQuery.nodeAt(node, position);
+    if (hoveredTokenNode == null) {
+      return Collections.emptyList();
+    }
+
+    final AstNode moduleNameNode =
+        AstQuery.getParentFromChain(
+            hoveredTokenNode,
+            SwModuleDefinitionGrammar.IDENTIFIER,
+            SwModuleDefinitionGrammar.MODULE_NAME);
+    if (moduleNameNode == null) {
+      return Collections.emptyList();
+    }
+
+    final IDefinitionKeeper definitionKeeper = moduleDefFile.getDefinitionKeeper();
+    final String moduleName = moduleNameNode.getTokenValue();
+    return this.referencesToModuleName(definitionKeeper, moduleName);
   }
 
   /**
@@ -193,6 +259,24 @@ public class ReferencesProvider {
         .filter(conditionUsage -> conditionUsage.getConditionName().equals(conditionName))
         .map(ConditionUsage::getLocation)
         .map(Location::validLocation)
+        .toList();
+  }
+
+  private List<Location> referencesToProductName(
+      final IDefinitionKeeper definitionKeeper, final String productName) {
+    LOGGER.debug("Finding references to product: {}", productName);
+    return definitionKeeper.getProductDefinitions().stream()
+        .filter(productDef -> productDef.getRequireds().contains(productName))
+        .map(ProductDefinition::getLocation)
+        .toList();
+  }
+
+  private List<Location> referencesToModuleName(
+      final IDefinitionKeeper definitionKeeper, final String moduleName) {
+    LOGGER.debug("Finding references to product: {}", moduleName);
+    return definitionKeeper.getModuleDefinitions().stream()
+        .filter(moduleDef -> moduleDef.getRequireds().contains(moduleName))
+        .map(ModuleDefinition::getLocation)
         .toList();
   }
 }

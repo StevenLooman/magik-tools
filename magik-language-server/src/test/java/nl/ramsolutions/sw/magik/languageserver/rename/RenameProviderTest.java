@@ -21,20 +21,20 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class RenameProviderTest {
 
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
+
   private Either3<Range, PrepareRenameResult, PrepareRenameDefaultBehavior> getPrepareRename(
       final String code, final Position position) {
-    final URI uri = URI.create("tests://unittest");
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
+    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
     final RenameProvider provider = new RenameProvider();
     return provider.providePrepareRename(magikFile, position);
   }
 
   private WorkspaceEdit getRename(
       final String code, final Position position, final String newName) {
-    final URI uri = URI.create("tests://unittest");
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
+    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
     final RenameProvider provider = new RenameProvider();
     return provider.provideRename(magikFile, position, newName);
   }
@@ -77,7 +77,7 @@ class RenameProviderTest {
     assertThat(workspaceEdit.getChanges())
         .isEqualTo(
             Map.of(
-                "tests://unittest",
+                "memory://source.magik",
                 List.of(
                     new TextEdit(new Range(new Position(1, 11), new Position(1, 14)), "new"),
                     new TextEdit(new Range(new Position(2, 9), new Position(2, 12)), "new"))));
@@ -100,7 +100,7 @@ class RenameProviderTest {
     assertThat(workspaceEdit.getChanges())
         .isEqualTo(
             Map.of(
-                "tests://unittest",
+                "memory://source.magik",
                 List.of(
                     new TextEdit(new Range(new Position(1, 11), new Position(1, 14)), "new"),
                     new TextEdit(new Range(new Position(2, 9), new Position(2, 12)), "new"))));
@@ -148,7 +148,7 @@ class RenameProviderTest {
     assertThat(workspaceEdit.getChanges())
         .isEqualTo(
             Map.of(
-                "tests://unittest",
+                "memory://source.magik",
                 List.of(
                     new TextEdit(new Range(new Position(1, 9), new Position(1, 17)), "new"),
                     new TextEdit(new Range(new Position(3, 13), new Position(3, 21)), "new"))));
@@ -170,7 +170,7 @@ class RenameProviderTest {
     assertThat(workspaceEdit.getChanges())
         .isEqualTo(
             Map.of(
-                "tests://unittest",
+                "memory://source.magik",
                 List.of(
                     new TextEdit(new Range(new Position(0, 22), new Position(0, 28)), "new"),
                     new TextEdit(new Range(new Position(1, 10), new Position(1, 16)), "new"))));

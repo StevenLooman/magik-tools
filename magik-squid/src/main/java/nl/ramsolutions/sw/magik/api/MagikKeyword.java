@@ -1,6 +1,5 @@
 package nl.ramsolutions.sw.magik.api;
 
-import java.util.Locale;
 import org.sonar.sslr.grammar.GrammarRuleKey;
 
 /** Magik keywords. */
@@ -95,11 +94,11 @@ public enum MagikKeyword implements GrammarRuleKey {
   }
 
   /**
-   * Get value of keyword, prefixed with <code>_</code>.
+   * Get value of keyword, prefixed with `_`.
    *
    * @return Value of keyword
    */
   public String getValue() {
-    return "_" + this.toString().toLowerCase(Locale.ENGLISH);
+    return "_" + this.toString().toLowerCase();
   }
 }

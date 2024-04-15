@@ -145,7 +145,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
             .toList();
     if (!containedTypes.isEmpty()) {
       final TypeString combinedTypeStr =
-          TypeString.ofCombination(containedTypes.toArray(TypeString[]::new));
+          TypeString.combine(containedTypes.toArray(TypeString[]::new));
 
       final TypeString genericsTypeString =
           TypeString.ofIdentifier(
@@ -175,7 +175,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    */
   void handleThread(final AstNode node) {
     final TypeString threadTypeStr =
-        TypeString.ofCombination(TypeString.SW_HEAVY_THREAD, TypeString.SW_LIGHT_THREAD);
+        TypeString.combine(TypeString.SW_HEAVY_THREAD, TypeString.SW_LIGHT_THREAD);
     this.assignAtom(node, threadTypeStr);
   }
 

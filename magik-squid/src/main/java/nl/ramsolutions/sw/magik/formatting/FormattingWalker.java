@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.TextEdit;
-import nl.ramsolutions.sw.magik.analysis.AstWalker;
+import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 
 /** Formatting AST walker which produces {@link TextEdit}s. */
-public class FormattingWalker extends AstWalker {
+public class FormattingWalker extends MagikAstWalker {
 
   private final List<TextEdit> textEdits = new ArrayList<>();
   private final PragmaFormattingStrategy pragmaStrategy;

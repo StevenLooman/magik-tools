@@ -22,9 +22,9 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class ImplementationProviderTest {
 
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
   private static final Location EMPTY_LOCATION =
-      new Location(
-          URI.create("tests://unittest"), new Range(new Position(0, 0), new Position(0, 0)));
+      new Location(DEFAULT_URI, new Range(new Position(0, 0), new Position(0, 0)));
 
   @Test
   void testProvideAbstractMethodImplementation() {
@@ -43,8 +43,7 @@ class ImplementationProviderTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
-            new Location(
-                URI.create("tests://unittest"), new Range(new Position(0, 0), new Position(0, 10))),
+            new Location(DEFAULT_URI, new Range(new Position(0, 0), new Position(0, 10))),
             null,
             null,
             null,
@@ -70,9 +69,7 @@ class ImplementationProviderTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
-            new Location(
-                URI.create("tests://unittest"),
-                new Range(new Position(50, 0), new Position(50, 10))),
+            new Location(DEFAULT_URI, new Range(new Position(50, 0), new Position(50, 10))),
             null,
             null,
             null,
@@ -85,19 +82,16 @@ class ImplementationProviderTest {
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 
-    final URI uri = URI.create("tests://unittest");
     final String code = """
         _abstract _method a.abstract()
         _endmethod""";
-    final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
+    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
     final Position position = new Position(1, 26); // On `abstract()`.
 
     final ImplementationProvider provider = new ImplementationProvider();
     final List<Location> implementations = provider.provideImplementations(magikFile, position);
     assertThat(implementations)
         .containsOnly(
-            new Location(
-                URI.create("tests://unittest"),
-                new Range(new Position(50, 0), new Position(50, 10))));
+            new Location(DEFAULT_URI, new Range(new Position(50, 0), new Position(50, 10))));
   }
 }

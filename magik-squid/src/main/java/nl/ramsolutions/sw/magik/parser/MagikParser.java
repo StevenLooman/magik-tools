@@ -4,16 +4,16 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.impl.Parser;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.Map;
+import nl.ramsolutions.sw.AstNodeHelper;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ import org.sonar.sslr.parser.ParserAdapter;
 public class MagikParser {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikParser.class);
-  private static final URI DEFAULT_URI = URI.create("tests://unittest");
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
 
   private static final Map<MagikGrammar, MagikGrammar> RULE_MAPPING =
       new EnumMap<>(MagikGrammar.class);
@@ -63,7 +63,8 @@ public class MagikParser {
 
   /** Constructor with default charset. */
   public MagikParser() {
-    this.parser = new ParserAdapter<>(StandardCharsets.ISO_8859_1, MagikGrammar.create());
+    final LexerlessGrammar magikGrammar = MagikGrammar.create();
+    this.parser = new ParserAdapter<>(StandardCharsets.ISO_8859_1, magikGrammar);
   }
 
   /**
@@ -84,15 +85,9 @@ public class MagikParser {
    * @return Parsed source.
    */
   public AstNode parseSafe(final String source, final URI uri) {
-    try {
-      final AstNode node = this.parse(source);
-      this.updateUri(node, uri);
-      return node;
-    } catch (final IOException exception) {
-      LOGGER.error(exception.getMessage(), exception);
-    }
-
-    return null;
+    final AstNode node = this.parse(source);
+    AstNodeHelper.updateUri(node, uri);
+    return node;
   }
 
   /**
@@ -116,9 +111,8 @@ public class MagikParser {
    *
    * @param source Source to parse
    * @return Tree
-   * @throws IOException -
    */
-  public AstNode parse(final String source) throws IOException {
+  public AstNode parse(final String source) {
     final AstNode magikNode = this.parser.parse(source);
 
     // Update identifiers.
@@ -138,19 +132,18 @@ public class MagikParser {
    * @throws IOException -
    */
   public AstNode parse(final Path path) throws IOException {
-    final File file = path.toFile();
     final Charset charset = FileCharsetDeterminer.determineCharset(path);
-    try (FileReader reader = new FileReader(file, charset)) {
-      final AstNode magikNode = this.parser.parse(file);
+    final String source = Files.readString(path, charset);
+    final AstNode node = this.parser.parse(source);
 
-      // Update identifiers.
-      this.updateIdentifiersSymbolsCasing(magikNode);
+    final URI uri = path.toUri();
+    AstNodeHelper.updateUri(node, uri);
 
-      // Apply RULE_MAPPING.
-      this.applyRuleMapping(magikNode);
+    this.updateIdentifiersSymbolsCasing(node);
 
-      return magikNode;
-    }
+    this.applyRuleMapping(node);
+
+    return node;
   }
 
   @SuppressWarnings("checkstyle:NestedIfDepth")
@@ -175,27 +168,6 @@ public class MagikParser {
     }
 
     node.getChildren().forEach(this::applyRuleMapping);
-  }
-
-  /**
-   * Recusrively update URI for AstNode/Tokens.
-   *
-   * @param node Node to start at.
-   * @param newUri New URI to set.
-   */
-  private void updateUri(final AstNode node, final URI newUri) {
-    final Token token = node.getToken();
-    if (token != null) {
-      try {
-        final Field fieldUri = token.getClass().getDeclaredField("uri");
-        fieldUri.setAccessible(true);
-        fieldUri.set(token, newUri);
-      } catch (final ReflectiveOperationException exception) {
-        LOGGER.error(exception.getMessage(), exception);
-      }
-    }
-
-    node.getChildren().forEach(childNode -> this.updateUri(childNode, newUri));
   }
 
   /**

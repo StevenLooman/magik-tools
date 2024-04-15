@@ -55,7 +55,7 @@ public class GenericHelper {
               .map(this::substituteGenerics)
               .toList()
               .toArray(TypeString[]::new);
-      return TypeString.ofCombination(newTypeStrings);
+      return TypeString.combine(newTypeStrings);
     }
 
     if (newTypeString.isGenericDefinition()) {

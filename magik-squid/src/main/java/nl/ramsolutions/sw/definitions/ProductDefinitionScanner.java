@@ -14,7 +14,9 @@ import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.definitions.api.SwProductDefinitionGrammar;
 import nl.ramsolutions.sw.definitions.parser.SwProductDefParser;
 import nl.ramsolutions.sw.magik.Location;
@@ -136,9 +138,9 @@ public final class ProductDefinitionScanner {
 
     final AstNode productIdentNode =
         node.getFirstChild(SwProductDefinitionGrammar.PRODUCT_IDENTIFICATION);
-    final AstNode identfierNode =
-        productIdentNode.getFirstChild(SwProductDefinitionGrammar.IDENTIFIER);
-    final String productName = identfierNode.getTokenValue();
+    final AstNode nameNode =
+        productIdentNode.getFirstChild(SwProductDefinitionGrammar.PRODUCT_NAME);
+    final String productName = nameNode.getTokenValue();
 
     final AstNode versionNode = node.getFirstChild(SwProductDefinitionGrammar.VERSION);
     final String version =
@@ -152,6 +154,31 @@ public final class ProductDefinitionScanner {
     final String versionComment =
         versionCommentNode != null ? versionCommentNode.getTokenValue() : null;
 
-    return new ProductDefinition(location, productName, version, versionComment);
+    final AstNode titleNode = node.getFirstChild(SwProductDefinitionGrammar.TITLE);
+    final String title =
+        titleNode != null
+            ? titleNode.getChildren(SwProductDefinitionGrammar.FREE_LINES).stream()
+                .map(n -> n.getTokenValue())
+                .collect(Collectors.joining("\n"))
+            : null;
+
+    final AstNode descriptionNode = node.getFirstChild(SwProductDefinitionGrammar.DESCRIPTION);
+    final String description =
+        descriptionNode != null
+            ? descriptionNode.getChildren(SwProductDefinitionGrammar.FREE_LINES).stream()
+                .map(n -> n.getTokenValue())
+                .collect(Collectors.joining("\n"))
+            : null;
+
+    final AstNode requiresNode = node.getFirstChild(SwProductDefinitionGrammar.REQUIRES);
+    final List<String> requireds =
+        requiresNode != null
+            ? requiresNode.getDescendants(SwProductDefinitionGrammar.PRODUCT_REF).stream()
+                .map(AstNode::getTokenValue)
+                .toList()
+            : Collections.emptyList();
+
+    return new ProductDefinition(
+        location, productName, version, versionComment, title, description, requireds);
   }
 }

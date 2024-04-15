@@ -20,9 +20,10 @@ import org.junit.jupiter.api.Test;
 /** Tests for {@link ConditionalBodyHandler}. */
 class ConditionalBodyHandlerTest {
 
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
+
   private MagikTypedFile createMagikFile(String code, IDefinitionKeeper definitionKeeper) {
-    final URI uri = URI.create("tests://unittest");
-    return new MagikTypedFile(uri, code, definitionKeeper);
+    return new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
   }
 
   @Test
@@ -381,7 +382,7 @@ class ConditionalBodyHandlerTest {
     assertThat(result4)
         .isEqualTo(
             new ExpressionResultString(
-                TypeString.ofCombination(TypeString.SW_SYMBOL, TypeString.SW_INTEGER)));
+                TypeString.combine(TypeString.SW_SYMBOL, TypeString.SW_INTEGER)));
   }
 
   @Test
@@ -412,7 +413,7 @@ class ConditionalBodyHandlerTest {
     assertThat(result0)
         .isEqualTo(
             new ExpressionResultString(
-                TypeString.ofCombination(TypeString.SW_SYMBOL, TypeString.SW_INTEGER)));
+                TypeString.combine(TypeString.SW_SYMBOL, TypeString.SW_INTEGER)));
 
     final AstNode argumentNode1 = argumentNodes.get(1);
     final AstNode atomNode1 = argumentNode1.getFirstDescendant(MagikGrammar.ATOM);
@@ -420,7 +421,7 @@ class ConditionalBodyHandlerTest {
     assertThat(result1)
         .isEqualTo(
             new ExpressionResultString(
-                TypeString.ofCombination(TypeString.SW_SYMBOL, TypeString.SW_INTEGER)));
+                TypeString.combine(TypeString.SW_SYMBOL, TypeString.SW_INTEGER)));
   }
 
   @Test
@@ -707,7 +708,7 @@ class ConditionalBodyHandlerTest {
     assertThat(result1)
         .isEqualTo(
             new ExpressionResultString(
-                TypeString.ofCombination(TypeString.SW_CHARACTER, TypeString.SW_SYMBOL)));
+                TypeString.combine(TypeString.SW_CHARACTER, TypeString.SW_SYMBOL)));
 
     final AstNode argumentNode3 = argumentNodes.get(3);
     final AstNode atomNode3 = argumentNode3.getFirstDescendant(MagikGrammar.ATOM);

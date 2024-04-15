@@ -6,6 +6,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.sonar.check.Rule;
 
@@ -37,9 +38,10 @@ public class MethodExistsTypedCheck extends MagikTypedCheck {
 
     // Add issue if no method is found.
     if (methodDefs.isEmpty()) {
-      final String fullName = calledTypeStr + "." + methodName;
+      final String fullName = calledTypeStr.getFullString() + "." + methodName;
       final String message = String.format(MESSAGE, fullName);
-      this.addIssue(node, message);
+      final AstNode methodIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
+      this.addIssue(methodIdentifierNode, message);
     }
   }
 }

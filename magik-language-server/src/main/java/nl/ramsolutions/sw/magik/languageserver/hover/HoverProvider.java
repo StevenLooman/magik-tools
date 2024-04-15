@@ -6,7 +6,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.definitions.ModuleDefinition;
+import nl.ramsolutions.sw.definitions.ProductDefinition;
+import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionGrammar;
+import nl.ramsolutions.sw.definitions.api.SwProductDefinitionGrammar;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.ModuleDefFile;
+import nl.ramsolutions.sw.magik.ProductDefFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
@@ -47,6 +53,76 @@ public class HoverProvider {
    */
   public void setCapabilities(final ServerCapabilities capabilities) {
     capabilities.setHoverProvider(true);
+  }
+
+  /**
+   * Provide a hover at the given position.
+   *
+   * @param productDefFile Product.def file.
+   * @param position Position in file.
+   * @return Hover at position.
+   */
+  @SuppressWarnings("java:S3776")
+  public Hover provideHover(final ProductDefFile productDefFile, final Position position) {
+    final AstNode node = productDefFile.getTopNode();
+    final AstNode hoveredTokenNode =
+        AstQuery.nodeAt(node, Lsp4jConversion.positionFromLsp4j(position));
+    if (hoveredTokenNode == null) {
+      return null;
+    }
+
+    final AstNode productNameNode =
+        AstQuery.getParentFromChain(
+            hoveredTokenNode,
+            SwProductDefinitionGrammar.IDENTIFIER,
+            SwProductDefinitionGrammar.PRODUCT_NAME);
+    if (productNameNode == null) {
+      return null;
+    }
+
+    final StringBuilder builder = new StringBuilder();
+    this.provideHoverProductName(productDefFile, productNameNode, builder);
+
+    final String content = builder.isEmpty() ? "Undefined" : builder.toString();
+    final MarkupContent contents = new MarkupContent(MarkupKind.MARKDOWN, content);
+    final Range range = new Range(hoveredTokenNode);
+    final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
+    return new Hover(contents, rangeLsp4j);
+  }
+
+  /**
+   * Provide a hover at the given position.
+   *
+   * @param moduleDefFile Module.def file.
+   * @param position Position in file.
+   * @return Hover at position.
+   */
+  @SuppressWarnings("java:S3776")
+  public Hover provideHover(final ModuleDefFile moduleDefFile, final Position position) {
+    final AstNode node = moduleDefFile.getTopNode();
+    final AstNode hoveredTokenNode =
+        AstQuery.nodeAt(node, Lsp4jConversion.positionFromLsp4j(position));
+    if (hoveredTokenNode == null) {
+      return null;
+    }
+
+    final AstNode moduleNameNode =
+        AstQuery.getParentFromChain(
+            hoveredTokenNode,
+            SwModuleDefinitionGrammar.IDENTIFIER,
+            SwModuleDefinitionGrammar.MODULE_NAME);
+    if (moduleNameNode == null) {
+      return null;
+    }
+
+    final StringBuilder builder = new StringBuilder();
+    this.provideHoverModuleName(moduleDefFile, moduleNameNode, builder);
+
+    final String content = builder.isEmpty() ? "Undefined" : builder.toString();
+    final MarkupContent contents = new MarkupContent(MarkupKind.MARKDOWN, content);
+    final Range range = new Range(hoveredTokenNode);
+    final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
+    return new Hover(contents, rangeLsp4j);
   }
 
   /**
@@ -296,7 +372,7 @@ public class HoverProvider {
         final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
         final TypeStringResolver resolver = magikFile.getTypeStringResolver();
         resolver
-            .getMethodDefinitions(typeStr)
+            .getMethodDefinitions(typeStr, methodName)
             .forEach(methodDef -> this.buildMethodSignatureDoc(methodDef, builder));
       }
     }
@@ -321,7 +397,8 @@ public class HoverProvider {
         new MethodDefinitionNodeHelper(methodDefNode);
     final String methodName = methodDefHelper.getMethodName();
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-    resolver.getMethodDefinitions(typeStr, methodName).stream()
+    resolver
+        .getMethodDefinitions(typeStr, methodName)
         .forEach(methodDef -> this.buildMethodSignatureDoc(methodDef, builder));
   }
 
@@ -461,7 +538,8 @@ public class HoverProvider {
     builder.append("Module: ").append(moduleName).append(SECTION_END);
 
     // TODO: Procedure topics.
-    // final String topics = procDef.getTopics().stream().collect(Collectors.joining(", "));
+    // final String topics =
+    // procDef.getTopics().stream().collect(Collectors.joining(", "));
     // builder.append("Topics: ").append(topics).append(SECTION_END);
 
     // Procedure doc.
@@ -534,5 +612,78 @@ public class HoverProvider {
 
   private String formatTypeString(final String typeStr) {
     return typeStr.replace("<", "[").replace(">", "]");
+  }
+
+  private void provideHoverProductName(
+      final ProductDefFile productDefFile, final AstNode node, final StringBuilder builder) {
+    final IDefinitionKeeper definitionKeeper = productDefFile.getDefinitionKeeper();
+    final String productName = node.getTokenValue().toLowerCase();
+    definitionKeeper.getProductDefinitions(productName).stream()
+        .forEach(productDef -> this.buildProductDefDoc(productDefFile, productDef, builder));
+  }
+
+  private void buildProductDefDoc(
+      final ProductDefFile productDefFile,
+      final ProductDefinition productDef,
+      final StringBuilder builder) {
+    final String productName = productDef.getName();
+    builder.append("## ").append(productName);
+
+    final String title = productDef.getTitle();
+    if (title != null) {
+      final String titleMd = title.lines().map(String::trim).collect(Collectors.joining("\n\n"));
+      builder.append("\n").append(titleMd);
+    }
+    builder.append(SECTION_END);
+
+    final String version = Objects.requireNonNullElse(productDef.getVersion(), "");
+    final String versionComment = Objects.requireNonNullElse(productDef.getVersionComment(), "");
+    builder
+        .append("Version: ")
+        .append(version)
+        .append(" ")
+        .append(versionComment)
+        .append(SECTION_END);
+
+    final String description = productDef.getDescription();
+    if (description != null) {
+      builder.append("## Description").append("\n");
+      final String descriptionMd =
+          description.lines().map(String::trim).collect(Collectors.joining("\n\n"));
+      builder.append(descriptionMd).append(SECTION_END);
+    }
+  }
+
+  private void provideHoverModuleName(
+      final ModuleDefFile moduleDefFile, final AstNode node, final StringBuilder builder) {
+    final IDefinitionKeeper definitionKeeper = moduleDefFile.getDefinitionKeeper();
+    final String moduleName = node.getTokenValue().toLowerCase();
+    definitionKeeper.getModuleDefinitions(moduleName).stream()
+        .forEach(moduleDef -> this.buildModuleDefDoc(moduleDefFile, moduleDef, builder));
+  }
+
+  private void buildModuleDefDoc(
+      final ModuleDefFile moduleDefFile,
+      final ModuleDefinition moduleDef,
+      final StringBuilder builder) {
+    final String moduleName = moduleDef.getName();
+    builder.append("## ").append(moduleName).append(SECTION_END);
+
+    final String baseVersion = moduleDef.getBaseVersion();
+    final String currentVersion = Objects.requireNonNullElse(moduleDef.getCurrentVersion(), "");
+    builder
+        .append("Version: ")
+        .append(baseVersion)
+        .append(" ")
+        .append(currentVersion)
+        .append(SECTION_END);
+
+    final String description = moduleDef.getDescription();
+    if (description != null) {
+      builder.append("## Description").append("\n");
+      final String descriptionMd =
+          description.lines().map(String::trim).collect(Collectors.joining("\n\n"));
+      builder.append(descriptionMd).append(SECTION_END);
+    }
   }
 }

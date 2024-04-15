@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 /** Tests for CommentInstructionReader. */
 class CommentInstructionReaderTest {
 
-  private static final URI DEFAULT_URI = URI.create("tests://unittest");
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
 
   private static final String NAME_MLINT = "mlint";
   private static final CommentInstructionReader.Instruction MLINT_STATEMENT_INSTRUCTION =

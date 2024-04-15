@@ -40,7 +40,7 @@ public class WarnedCallCheck extends MagikCheck {
     }
 
     final String identifier = "." + identifierNode.getTokenValue();
-    if (!getWarnedCalls().contains(identifier)) {
+    if (!this.getWarnedCalls().contains(identifier)) {
       return;
     }
 
@@ -55,10 +55,11 @@ public class WarnedCallCheck extends MagikCheck {
     }
 
     final String identifier = parentNode.getTokenValue() + "()";
-    if (!getWarnedCalls().contains(identifier)) {
+    if (!this.getWarnedCalls().contains(identifier)) {
       return;
     }
 
-    this.addIssue(node, MESSAGE);
+    final AstNode procNode = node.getPreviousSibling();
+    this.addIssue(procNode, MESSAGE);
   }
 }

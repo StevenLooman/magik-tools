@@ -207,7 +207,8 @@ public class MagikWorkspaceService implements WorkspaceService {
     params.getChanges().stream()
         .forEach(
             fileEvent -> {
-              LOGGER.debug("File event: {}", fileEvent);
+              LOGGER.debug(
+                  "File event: uri: {}, type: {}", fileEvent.getUri(), fileEvent.getType());
 
               final FileChangeType fileChangeType = fileEvent.getType();
               final URI uri = URI.create(fileEvent.getUri());

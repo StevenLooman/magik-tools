@@ -16,12 +16,13 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class SelectionRangeProviderTest {
 
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
+
   private List<SelectionRange> getSelectionRanges(
       final String code, final List<nl.ramsolutions.sw.magik.Position> positions) {
     final var provider = new SelectionRangeProvider();
-    final var uri = URI.create("tests://unittest");
     final var definitionKeeper = new DefinitionKeeper();
-    final var magikFile = new MagikTypedFile(uri, code, definitionKeeper);
+    final var magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
     return provider.provideSelectionRanges(magikFile, positions);
   }
 

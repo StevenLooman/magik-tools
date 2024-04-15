@@ -4,8 +4,8 @@ import com.sonar.sslr.api.AstNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.AstWalker;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
+import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefConditionParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefEnumerationParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefIndexedExemplarParser;
@@ -27,7 +27,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  * def_indexed_exemplar - def_mixin - method definition - define_slot_access -
  * define_shared_variable - define_shared_constant - define_binary_operator_case
  */
-public class DefinitionReader extends AstWalker {
+public class DefinitionReader extends MagikAstWalker {
 
   private final MagikAnalysisConfiguration configuration;
   private final List<Definition> definitions = new ArrayList<>();

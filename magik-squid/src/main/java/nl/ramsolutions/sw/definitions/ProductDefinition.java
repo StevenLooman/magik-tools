@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
@@ -15,9 +16,11 @@ public class ProductDefinition {
   private final @Nullable Location location;
   private final @Nullable String version;
   private final @Nullable String versionComment;
+  private final @Nullable String title;
+  private final @Nullable String description;
   private final Set<String> children = new HashSet<>();
   private final Set<String> modules = new HashSet<>();
-  private final Set<String> requireds = new HashSet<>();
+  private final List<String> requireds;
 
   /**
    * Constructor.
@@ -31,11 +34,17 @@ public class ProductDefinition {
       final @Nullable Location location,
       final String name,
       final @Nullable String version,
-      final @Nullable String versionComment) {
+      final @Nullable String versionComment,
+      final @Nullable String title,
+      final @Nullable String description,
+      final List<String> requireds) {
     this.name = name;
     this.location = location;
     this.version = version;
     this.versionComment = versionComment;
+    this.title = title;
+    this.description = description;
+    this.requireds = List.copyOf(requireds);
   }
 
   /**
@@ -65,6 +74,16 @@ public class ProductDefinition {
   @CheckForNull
   public String getVersionComment() {
     return this.versionComment;
+  }
+
+  @CheckForNull
+  public String getTitle() {
+    return this.title;
+  }
+
+  @CheckForNull
+  public String getDescription() {
+    return this.description;
   }
 
   /**
@@ -108,8 +127,8 @@ public class ProductDefinition {
    *
    * @return Collection of required products for this product.
    */
-  public Set<String> getRequireds() {
-    return Collections.unmodifiableSet(this.requireds);
+  public List<String> getRequireds() {
+    return Collections.unmodifiableList(this.requireds);
   }
 
   public void addRequired(final String productName) {
@@ -145,7 +164,10 @@ public class ProductDefinition {
     return Objects.equals(otherSwProduct.getLocation(), this.getLocation())
         && Objects.equals(otherSwProduct.getName(), this.getName())
         && Objects.equals(otherSwProduct.getVersion(), this.getVersion())
-        && Objects.equals(otherSwProduct.getVersionComment(), this.getVersionComment());
+        && Objects.equals(otherSwProduct.getVersionComment(), this.getVersionComment())
+        && Objects.equals(otherSwProduct.getTitle(), this.getTitle())
+        && Objects.equals(otherSwProduct.getDescription(), this.getDescription())
+        && Objects.equals(otherSwProduct.getRequireds(), this.getRequireds());
   }
 
   @Override

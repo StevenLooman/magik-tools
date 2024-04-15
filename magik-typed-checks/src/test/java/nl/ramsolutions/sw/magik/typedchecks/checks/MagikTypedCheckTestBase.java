@@ -12,6 +12,8 @@ import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 /** Base class for MagikTypedCheck tests. */
 public class MagikTypedCheckTestBase {
 
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
+
   /**
    * Run check on code.
    *
@@ -23,8 +25,7 @@ public class MagikTypedCheckTestBase {
   protected List<MagikIssue> runCheck(
       final String code, final IDefinitionKeeper definitionKeeper, final MagikTypedCheck check)
       throws IllegalArgumentException {
-    final URI uri = URI.create("tests://unittest");
-    final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
+    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
     return check.scanFileForIssues(magikFile);
   }
 

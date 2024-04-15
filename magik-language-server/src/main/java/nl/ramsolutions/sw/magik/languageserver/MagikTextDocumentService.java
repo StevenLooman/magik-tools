@@ -9,7 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.ModuleDefFile;
+import nl.ramsolutions.sw.magik.ProductDefFile;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
@@ -79,7 +82,6 @@ import org.eclipse.lsp4j.TypeHierarchyItem;
 import org.eclipse.lsp4j.TypeHierarchyPrepareParams;
 import org.eclipse.lsp4j.TypeHierarchySubtypesParams;
 import org.eclipse.lsp4j.TypeHierarchySupertypesParams;
-import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.jsonrpc.messages.Either3;
@@ -98,9 +100,6 @@ public class MagikTextDocumentService implements TextDocumentService {
   private final MagikLanguageServer languageServer;
   private final MagikAnalysisConfiguration analysisConfiguration;
   private final IDefinitionKeeper definitionKeeper;
-
-  private final Map<TextDocumentIdentifier, MagikTypedFile> openFiles = new HashMap<>();
-
   private final HoverProvider hoverProvider;
   private final ImplementationProvider implementationProvider;
   private final SignatureHelpProvider signatureHelpProvider;
@@ -116,6 +115,7 @@ public class MagikTextDocumentService implements TextDocumentService {
   private final InlayHintProvider inlayHintProvider;
   private final CodeActionProvider codeActionProvider;
   private final SelectionRangeProvider selectionRangeProvider;
+  private final Map<TextDocumentIdentifier, OpenedFile> openedFiles = new HashMap<>();
 
   /**
    * Constructor.
@@ -183,33 +183,82 @@ public class MagikTextDocumentService implements TextDocumentService {
     final URI uri = URI.create(uriStr);
     final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uriStr);
     final String text = textDocument.getText();
-    final MagikTypedFile openFile =
-        new MagikTypedFile(this.analysisConfiguration, uri, text, this.definitionKeeper);
-    this.openFiles.put(textDocumentIdentifier, openFile);
+    final OpenedFile openedFile;
+    switch (textDocument.getLanguageId()) {
+      case "product.def":
+        {
+          openedFile = new ProductDefFile(uri, text, this.definitionKeeper);
+          break;
+        }
 
-    // Publish diagnostics to client.
-    this.publishDiagnostics(openFile);
+      case "module.def":
+        {
+          openedFile = new ModuleDefFile(uri, text, this.definitionKeeper);
+          break;
+        }
+
+      case "magik":
+        {
+          final MagikTypedFile magikFile =
+              new MagikTypedFile(this.analysisConfiguration, uri, text, this.definitionKeeper);
+          openedFile = magikFile;
+
+          // Publish diagnostics to client.
+          this.publishDiagnostics(magikFile);
+          break;
+        }
+
+      default:
+        throw new UnsupportedOperationException();
+    }
+    this.openedFiles.put(textDocumentIdentifier, openedFile);
   }
 
   @Override
   public void didChange(final DidChangeTextDocumentParams params) {
-    final VersionedTextDocumentIdentifier versionedTextDocumentIdentifier =
-        params.getTextDocument();
-    LOGGER.debug("didChange, uri: {}}", versionedTextDocumentIdentifier.getUri());
+    final TextDocumentIdentifier textDocumentIdentifier = params.getTextDocument();
+    LOGGER.debug("didChange, uri: {}}", textDocumentIdentifier.getUri());
 
-    // Store file contents.
+    // Update file contents.
     final List<TextDocumentContentChangeEvent> contentChangeEvents = params.getContentChanges();
     final TextDocumentContentChangeEvent contentChangeEvent = contentChangeEvents.get(0);
     final String text = contentChangeEvent.getText();
-    final String uriStr = versionedTextDocumentIdentifier.getUri();
+    final String uriStr = textDocumentIdentifier.getUri();
     final URI uri = URI.create(uriStr);
-    final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uriStr);
-    final MagikTypedFile openFile =
-        new MagikTypedFile(this.analysisConfiguration, uri, text, this.definitionKeeper);
-    this.openFiles.put(textDocumentIdentifier, openFile);
 
-    // Publish diagnostics to client.
-    this.publishDiagnostics(openFile);
+    // Find original TextDocumentIdentifier.
+    final TextDocumentIdentifier realTextDocumentIdentifier = new TextDocumentIdentifier(uriStr);
+    final OpenedFile existingOpenedFile = this.openedFiles.get(realTextDocumentIdentifier);
+    final String languageId = existingOpenedFile.getLanguageId();
+    final OpenedFile openedFile;
+    switch (languageId) {
+      case "product.def":
+        {
+          openedFile = new ProductDefFile(uri, text, this.definitionKeeper);
+          break;
+        }
+
+      case "module.def":
+        {
+          openedFile = new ModuleDefFile(uri, text, this.definitionKeeper);
+          break;
+        }
+
+      case "magik":
+        {
+          final MagikTypedFile magikFile =
+              new MagikTypedFile(this.analysisConfiguration, uri, text, this.definitionKeeper);
+          openedFile = magikFile;
+
+          // Publish diagnostics to client.
+          this.publishDiagnostics(magikFile);
+          break;
+        }
+
+      default:
+        throw new UnsupportedOperationException();
+    }
+    this.openedFiles.put(realTextDocumentIdentifier, openedFile);
   }
 
   @Override
@@ -217,13 +266,13 @@ public class MagikTextDocumentService implements TextDocumentService {
     final TextDocumentIdentifier textDocumentIdentifier = params.getTextDocument();
     LOGGER.debug("didClose, uri: {}", textDocumentIdentifier.getUri());
 
-    // Clear stored document.
-    this.openFiles.remove(textDocumentIdentifier);
+    this.openedFiles.remove(textDocumentIdentifier);
 
     // Clear published diagnostics.
-    final String uri = textDocumentIdentifier.getUri();
     final List<Diagnostic> diagnostics = Collections.emptyList();
-    final PublishDiagnosticsParams publishParams = new PublishDiagnosticsParams(uri, diagnostics);
+    final String uriStr = textDocumentIdentifier.getUri();
+    final PublishDiagnosticsParams publishParams =
+        new PublishDiagnosticsParams(uriStr, diagnostics);
     final LanguageClient languageClient = this.languageServer.getLanguageClient();
     languageClient.publishDiagnostics(publishParams);
   }
@@ -293,10 +342,23 @@ public class MagikTextDocumentService implements TextDocumentService {
         params.getPosition().getLine(),
         params.getPosition().getCharacter());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
     final Position position = params.getPosition();
-    return CompletableFuture.supplyAsync(
-        () -> this.hoverProvider.provideHover(magikFile, position));
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (openedFile == null) {
+      // Race condition?
+      return CompletableFuture.supplyAsync(() -> null);
+    } else if (openedFile instanceof ProductDefFile productDefFile) {
+      return CompletableFuture.supplyAsync(
+          () -> this.hoverProvider.provideHover(productDefFile, position));
+    } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
+      return CompletableFuture.supplyAsync(
+          () -> this.hoverProvider.provideHover(moduleDefFile, position));
+    } else if (openedFile instanceof MagikTypedFile magikFile) {
+      return CompletableFuture.supplyAsync(
+          () -> this.hoverProvider.provideHover(magikFile, position));
+    }
+
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -309,7 +371,12 @@ public class MagikTextDocumentService implements TextDocumentService {
         params.getPosition().getLine(),
         params.getPosition().getCharacter());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(() -> Either.forLeft(Collections.emptyList()));
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final Position lsp4jPosition = params.getPosition();
     final nl.ramsolutions.sw.magik.Position position =
         Lsp4jConversion.positionFromLsp4j(lsp4jPosition);
@@ -334,7 +401,12 @@ public class MagikTextDocumentService implements TextDocumentService {
         params.getPosition().getLine(),
         params.getPosition().getCharacter());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(() -> new SignatureHelp());
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final Position position = params.getPosition();
     return CompletableFuture.supplyAsync(
         () -> {
@@ -351,14 +423,22 @@ public class MagikTextDocumentService implements TextDocumentService {
     final TextDocumentIdentifier textDocument = params.getTextDocument();
     LOGGER.trace("foldingRange, uri: {}", textDocument.getUri());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
-    return CompletableFuture.supplyAsync(
-        () -> {
-          final List<FoldingRange> ranges =
-              this.foldingRangeProvider.provideFoldingRanges(magikFile);
-          LOGGER.debug("Folds found: {}", ranges.size());
-          return ranges;
-        });
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (openedFile == null) {
+      // Race condition?
+      return CompletableFuture.supplyAsync(() -> null);
+    } else if (openedFile instanceof ProductDefFile productDefFile) {
+      return CompletableFuture.supplyAsync(
+          () -> this.foldingRangeProvider.provideFoldingRanges(productDefFile));
+    } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
+      return CompletableFuture.supplyAsync(
+          () -> this.foldingRangeProvider.provideFoldingRanges(moduleDefFile));
+    } else if (openedFile instanceof MagikTypedFile magikFile) {
+      return CompletableFuture.supplyAsync(
+          () -> this.foldingRangeProvider.provideFoldingRanges(magikFile));
+    }
+
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -367,20 +447,40 @@ public class MagikTextDocumentService implements TextDocumentService {
     final TextDocumentIdentifier textDocument = params.getTextDocument();
     LOGGER.trace("definitions, uri: {}", textDocument.getUri());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
     final Position lsp4jPosition = params.getPosition();
     final nl.ramsolutions.sw.magik.Position position =
         Lsp4jConversion.positionFromLsp4j(lsp4jPosition);
-    return CompletableFuture.supplyAsync(
-        () -> {
-          final List<nl.ramsolutions.sw.magik.Location> locations =
-              this.definitionsProvider.provideDefinitions(magikFile, position);
-          LOGGER.debug("Definitions found: {}", locations.size());
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (openedFile == null) {
+      // Race condition?
+      return CompletableFuture.supplyAsync(() -> Either.forLeft(Collections.emptyList()));
+    } else if (openedFile instanceof ProductDefFile productDefFile) {
+      return CompletableFuture.supplyAsync(
+          () -> {
+            final List<nl.ramsolutions.sw.magik.Location> locations =
+                this.definitionsProvider.provideDefinitions(productDefFile, position);
+            return Either.forLeft(
+                locations.stream().map(Lsp4jConversion::locationToLsp4j).toList());
+          });
+    } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
+      return CompletableFuture.supplyAsync(
+          () -> {
+            final List<nl.ramsolutions.sw.magik.Location> locations =
+                this.definitionsProvider.provideDefinitions(moduleDefFile, position);
+            return Either.forLeft(
+                locations.stream().map(Lsp4jConversion::locationToLsp4j).toList());
+          });
+    } else if (openedFile instanceof MagikTypedFile magikFile) {
+      return CompletableFuture.supplyAsync(
+          () -> {
+            final List<nl.ramsolutions.sw.magik.Location> locations =
+                this.definitionsProvider.provideDefinitions(magikFile, position);
+            return Either.forLeft(
+                locations.stream().map(Lsp4jConversion::locationToLsp4j).toList());
+          });
+    }
 
-          final List<Location> lsp4jLocations =
-              locations.stream().map(Lsp4jConversion::locationToLsp4j).toList();
-          return Either.forLeft(lsp4jLocations);
-        });
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -388,17 +488,37 @@ public class MagikTextDocumentService implements TextDocumentService {
     final TextDocumentIdentifier textDocument = params.getTextDocument();
     LOGGER.trace("references, uri: {}", textDocument.getUri());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
     final Position lsp4jPosition = params.getPosition();
     final nl.ramsolutions.sw.magik.Position position =
         Lsp4jConversion.positionFromLsp4j(lsp4jPosition);
-    return CompletableFuture.supplyAsync(
-        () -> {
-          final List<nl.ramsolutions.sw.magik.Location> locations =
-              this.referencesProvider.provideReferences(magikFile, position);
-          LOGGER.debug("References found: {}", locations.size());
-          return locations.stream().map(Lsp4jConversion::locationToLsp4j).toList();
-        });
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (openedFile == null) {
+      // Race condition?
+      return CompletableFuture.supplyAsync(() -> Collections.emptyList());
+    } else if (openedFile instanceof ProductDefFile productDefFile) {
+      return CompletableFuture.supplyAsync(
+          () -> {
+            return this.referencesProvider.provideReferences(productDefFile, position).stream()
+                .map(Lsp4jConversion::locationToLsp4j)
+                .toList();
+          });
+    } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
+      return CompletableFuture.supplyAsync(
+          () -> {
+            return this.referencesProvider.provideReferences(moduleDefFile, position).stream()
+                .map(Lsp4jConversion::locationToLsp4j)
+                .toList();
+          });
+    } else if (openedFile instanceof MagikTypedFile magikFile) {
+      return CompletableFuture.supplyAsync(
+          () -> {
+            return this.referencesProvider.provideReferences(magikFile, position).stream()
+                .map(Lsp4jConversion::locationToLsp4j)
+                .toList();
+          });
+    }
+
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -411,7 +531,12 @@ public class MagikTextDocumentService implements TextDocumentService {
         params.getPosition().getLine(),
         params.getPosition().getCharacter());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(() -> Either.forLeft(Collections.emptyList()));
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final Position position = params.getPosition();
     return CompletableFuture.supplyAsync(
         () -> {
@@ -428,7 +553,12 @@ public class MagikTextDocumentService implements TextDocumentService {
     final TextDocumentIdentifier textDocument = params.getTextDocument();
     LOGGER.trace("formatting, uri: {}", textDocument.getUri());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(() -> Collections.emptyList());
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final FormattingOptions options = params.getOptions();
     return CompletableFuture.supplyAsync(
         () -> {
@@ -449,9 +579,22 @@ public class MagikTextDocumentService implements TextDocumentService {
     final TextDocumentIdentifier textDocument = params.getTextDocument();
     LOGGER.trace("semanticTokensFull, uri: {}", textDocument.getUri());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
-    return CompletableFuture.supplyAsync(
-        () -> this.semanticTokenProver.provideSemanticTokensFull(magikFile));
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (openedFile == null) {
+      // Race condition?
+      return CompletableFuture.supplyAsync(() -> null);
+    } else if (openedFile instanceof ProductDefFile productDefFile) {
+      return CompletableFuture.supplyAsync(
+          () -> this.semanticTokenProver.provideSemanticTokensFull(productDefFile));
+    } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
+      return CompletableFuture.supplyAsync(
+          () -> this.semanticTokenProver.provideSemanticTokensFull(moduleDefFile));
+    } else if (openedFile instanceof MagikTypedFile magikFile) {
+      return CompletableFuture.supplyAsync(
+          () -> this.semanticTokenProver.provideSemanticTokensFull(magikFile));
+    }
+
+    throw new UnsupportedOperationException();
   }
 
   @Override
@@ -464,7 +607,12 @@ public class MagikTextDocumentService implements TextDocumentService {
         params.getPosition().getLine(),
         params.getPosition().getCharacter());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(() -> null);
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final Position position = params.getPosition();
     return CompletableFuture.supplyAsync(
         () -> this.renameProvider.providePrepareRename(magikFile, position));
@@ -479,7 +627,12 @@ public class MagikTextDocumentService implements TextDocumentService {
         params.getPosition().getLine(),
         params.getPosition().getCharacter());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(() -> null);
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final Position position = params.getPosition();
     final String newName = params.getNewName();
     return CompletableFuture.supplyAsync(
@@ -492,7 +645,12 @@ public class MagikTextDocumentService implements TextDocumentService {
     final TextDocumentIdentifier textDocument = params.getTextDocument();
     LOGGER.trace("documentSymbol, uri: {}", textDocument.getUri());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(() -> Collections.emptyList());
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     return CompletableFuture.supplyAsync(
         () -> this.documentSymbolProvider.provideDocumentSymbol(magikFile));
   }
@@ -502,7 +660,12 @@ public class MagikTextDocumentService implements TextDocumentService {
     final TextDocumentIdentifier textDocument = params.getTextDocument();
     LOGGER.trace("selectionRange, uri: {}", textDocument.getUri());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(() -> Collections.emptyList());
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final List<nl.ramsolutions.sw.magik.Position> positions =
         params.getPositions().stream().map(Lsp4jConversion::positionFromLsp4j).toList();
     return CompletableFuture.supplyAsync(
@@ -519,7 +682,12 @@ public class MagikTextDocumentService implements TextDocumentService {
         params.getPosition().getLine(),
         params.getPosition().getCharacter());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(() -> null);
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final Position position = params.getPosition();
 
     return CompletableFuture.supplyAsync(
@@ -558,7 +726,12 @@ public class MagikTextDocumentService implements TextDocumentService {
         range.getEnd().getLine(),
         range.getEnd().getCharacter());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(() -> Collections.emptyList());
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     return CompletableFuture.supplyAsync(
         () -> this.inlayHintProvider.provideInlayHints(magikFile, range));
   }
@@ -576,7 +749,12 @@ public class MagikTextDocumentService implements TextDocumentService {
         range.getEnd().getLine(),
         range.getEnd().getCharacter());
 
-    final MagikTypedFile magikFile = this.openFiles.get(textDocument);
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(() -> Collections.emptyList());
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final nl.ramsolutions.sw.magik.Range magikRange = Lsp4jConversion.rangeFromLsp4j(range);
     final CodeActionContext context = params.getContext();
     return CompletableFuture.supplyAsync(

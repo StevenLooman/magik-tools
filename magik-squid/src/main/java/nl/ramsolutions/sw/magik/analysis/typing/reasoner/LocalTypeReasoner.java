@@ -2,7 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.AstWalker;
+import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 
 /**
  * Reason over types in Magik code.
@@ -21,7 +21,7 @@ import nl.ramsolutions.sw.magik.analysis.AstWalker;
  *
  * <p>Note that this class never writes to the {@link IDefinitionKeeper}.
  */
-public class LocalTypeReasoner extends AstWalker {
+public class LocalTypeReasoner extends MagikAstWalker {
 
   private final LocalTypeReasonerState state;
   private final AssignmentHandler assignmentHandler;

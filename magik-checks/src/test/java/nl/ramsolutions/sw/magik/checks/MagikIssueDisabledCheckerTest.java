@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 /** Tests for MagikIssueDisabledChecker. */
 class MagikIssueDisabledCheckerTest {
 
-  private static final URI DEFAULT_URI = URI.create("tests://unittest");
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
 
   @Test
   void testNotDisbled() throws ReflectiveOperationException {

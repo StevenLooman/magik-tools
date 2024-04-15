@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.AstWalker;
+import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.TypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
@@ -33,8 +33,8 @@ import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 
-/** Semantic token walker. */
-public class SemanticTokenWalker extends AstWalker {
+/** Magik semantic token walker. */
+public class MagikSemanticTokenWalker extends MagikAstWalker {
 
   private static final String DEFAULT_PACKAGE = "user";
   private static final String TOPIC_DEPRECATED = "deprecated";
@@ -87,12 +87,12 @@ public class SemanticTokenWalker extends AstWalker {
    *
    * @param magikFile {@link MagikTypedFile} to operate on.
    */
-  SemanticTokenWalker(final MagikTypedFile magikFile) {
+  MagikSemanticTokenWalker(final MagikTypedFile magikFile) {
     this.magikFile = magikFile;
   }
 
   public List<SemanticToken> getSemanticTokens() {
-    return this.semanticTokens;
+    return Collections.unmodifiableList(this.semanticTokens);
   }
 
   private void addSemanticToken(

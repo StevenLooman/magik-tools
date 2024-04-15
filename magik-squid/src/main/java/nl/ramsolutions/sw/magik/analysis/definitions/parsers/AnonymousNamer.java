@@ -11,7 +11,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 /** Creates names for anonymous constructs, such as procedures. */
 public final class AnonymousNamer {
 
-  private static final URI UNITTEST_URI = URI.create("tests://unittest");
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
 
   public static TypeString getNameForProcedure(final AstNode node) {
     if (node.isNot(MagikGrammar.PROCEDURE_DEFINITION)) {
@@ -22,7 +22,7 @@ public final class AnonymousNamer {
     final Token token = node.getToken();
     final URI uri = token.getURI();
     final String filenamePart =
-        UNITTEST_URI.equals(uri)
+        DEFAULT_URI.equals(uri)
             ? "in_memory"
             : Path.of(uri).toString().replaceAll("/", "_").replace("\\", "_");
 

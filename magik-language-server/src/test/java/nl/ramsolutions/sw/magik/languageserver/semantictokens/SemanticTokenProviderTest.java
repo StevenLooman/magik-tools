@@ -13,10 +13,11 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class SemanticTokenProviderTest {
 
+  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
+
   private SemanticTokens getSemanticTokens(final String code) {
-    final URI uri = URI.create("tests://unittest");
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
+    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
     final SemanticTokenProvider provider = new SemanticTokenProvider();
     return provider.provideSemanticTokensFull(magikFile);
   }
