@@ -34,7 +34,7 @@ jobs:
       - run: rm -f staging/original-*.jar
 
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             staging/*
