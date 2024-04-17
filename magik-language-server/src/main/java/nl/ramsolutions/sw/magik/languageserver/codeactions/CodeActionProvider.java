@@ -46,6 +46,10 @@ public class CodeActionProvider {
       return Stream.concat(
               this.checksCodeActionProvider.provideCodeActions(magikFile, range).stream(),
               this.typedChecksCodeActionProvider.provideCodeActions(magikFile, range).stream())
+          .filter(
+              codeAction ->
+                  codeAction.getEdits().stream()
+                      .anyMatch(edit -> edit.getRange().overlapsWith(range)))
           .toList();
     } catch (final IOException | ReflectiveOperationException exception) {
       LOGGER.error(exception.getMessage(), exception);

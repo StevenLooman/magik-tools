@@ -37,6 +37,7 @@ public class FormattingFixer extends MagikCheckFixer {
 
     walker.walkAst(node);
     return walker.getTextEdits().stream()
+        .filter(edit -> edit.getRange().overlapsWith(range))
         .map(textEdit -> new CodeAction("Formatting", textEdit))
         .toList();
   }
