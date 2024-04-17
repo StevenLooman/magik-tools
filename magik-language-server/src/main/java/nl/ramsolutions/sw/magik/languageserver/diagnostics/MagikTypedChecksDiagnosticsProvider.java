@@ -14,6 +14,7 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikCheckMetadata;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
+import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.checks.MagikIssueDisabledChecker;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import nl.ramsolutions.sw.magik.typedchecks.CheckList;
@@ -30,6 +31,8 @@ public class MagikTypedChecksDiagnosticsProvider {
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(MagikTypedChecksDiagnosticsProvider.class);
+  private static final Logger LOGGER_DURATION =
+      LoggerFactory.getLogger(MagikTypedChecksDiagnosticsProvider.class.getName() + "Duration");
   private static final Map<String, DiagnosticSeverity> SEVERITY_MAPPING =
       Map.of(
           "Major", DiagnosticSeverity.Error,
@@ -59,7 +62,7 @@ public class MagikTypedChecksDiagnosticsProvider {
 
     // Parse the file, determine types, and get issues.
     return this.createChecks(magikFile).stream()
-        .flatMap(check -> check.scanFileForIssues(magikFile).stream())
+        .flatMap(check -> this.runChecks(check, magikFile).stream())
         .filter(magikIssue -> !MagikIssueDisabledChecker.issueDisabled(magikFile, magikIssue))
         .map(
             issue -> {
@@ -73,6 +76,20 @@ public class MagikTypedChecksDiagnosticsProvider {
               return new Diagnostic(range, message, severity, diagnosticSource);
             })
         .toList();
+  }
+
+  private List<MagikIssue> runChecks(final MagikTypedCheck check, final MagikTypedFile magikFile) {
+    final long start = System.nanoTime();
+
+    final List<MagikIssue> issues = check.scanFileForIssues(magikFile);
+
+    LOGGER_DURATION.trace(
+        "Duration: {} check: {}, uri: {}",
+        (System.nanoTime() - start) / 1000000000.0,
+        check.getClass().getSimpleName(),
+        magikFile.getUri());
+
+    return issues;
   }
 
   private Collection<MagikTypedCheck> createChecks(final MagikTypedFile magikFile)
