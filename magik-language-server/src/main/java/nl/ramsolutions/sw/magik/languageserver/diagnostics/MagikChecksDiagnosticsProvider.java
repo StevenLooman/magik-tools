@@ -16,6 +16,7 @@ import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikCheckMetadata;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
+import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.checks.MagikIssueDisabledChecker;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.Diagnostic;
@@ -30,6 +31,8 @@ public class MagikChecksDiagnosticsProvider {
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(MagikChecksDiagnosticsProvider.class);
+  private static final Logger LOGGER_DURATION =
+      LoggerFactory.getLogger(MagikTypedChecksDiagnosticsProvider.class.getName() + "Duration");
   private static final Map<String, DiagnosticSeverity> SEVERITY_MAPPING =
       Map.of(
           "Major", DiagnosticSeverity.Error,
@@ -58,7 +61,7 @@ public class MagikChecksDiagnosticsProvider {
     ConfigurationLocator.resetCache();
 
     return this.createChecks(magikFile).stream()
-        .flatMap(check -> check.scanFileForIssues(magikFile).stream())
+        .flatMap(check -> this.runChecks(check, magikFile).stream())
         .filter(magikIssue -> !MagikIssueDisabledChecker.issueDisabled(magikFile, magikIssue))
         .map(
             issue -> {
@@ -72,6 +75,20 @@ public class MagikChecksDiagnosticsProvider {
               return new Diagnostic(range, message, severity, diagnosticSource);
             })
         .toList();
+  }
+
+  private List<MagikIssue> runChecks(final MagikCheck check, final MagikFile magikFile) {
+    final long start = System.nanoTime();
+
+    final List<MagikIssue> issues = check.scanFileForIssues(magikFile);
+
+    LOGGER_DURATION.trace(
+        "Duration: {} check: {}, uri: {}",
+        (System.nanoTime() - start) / 1000000000.0,
+        check.getClass().getSimpleName(),
+        magikFile.getUri());
+
+    return issues;
   }
 
   private Collection<MagikCheck> createChecks(final MagikFile magikFile) throws IOException {

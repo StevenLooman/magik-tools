@@ -177,6 +177,8 @@ public class MagikTextDocumentService implements TextDocumentService {
 
   @Override
   public void didOpen(final DidOpenTextDocumentParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentItem textDocument = params.getTextDocument();
     LOGGER.debug("didOpen, uri: {}", textDocument.getUri());
 
@@ -213,11 +215,19 @@ public class MagikTextDocumentService implements TextDocumentService {
       default:
         throw new UnsupportedOperationException();
     }
+
     this.openedFiles.put(textDocumentIdentifier, openedFile);
+
+    LOGGER_DURATION.trace(
+        "Duration: {} didOpen, uri: {}",
+        (System.nanoTime() - start) / 1000000000.0,
+        textDocument.getUri());
   }
 
   @Override
   public void didChange(final DidChangeTextDocumentParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocumentIdentifier = params.getTextDocument();
     LOGGER.debug("didChange, uri: {}}", textDocumentIdentifier.getUri());
 
@@ -231,6 +241,11 @@ public class MagikTextDocumentService implements TextDocumentService {
     // Find original TextDocumentIdentifier.
     final TextDocumentIdentifier realTextDocumentIdentifier = new TextDocumentIdentifier(uriStr);
     final OpenedFile existingOpenedFile = this.openedFiles.get(realTextDocumentIdentifier);
+    if (existingOpenedFile == null) {
+      // Race condition?
+      return;
+    }
+
     final String languageId = existingOpenedFile.getLanguageId();
     final OpenedFile openedFile;
     switch (languageId) {
@@ -260,11 +275,19 @@ public class MagikTextDocumentService implements TextDocumentService {
       default:
         throw new UnsupportedOperationException();
     }
+
     this.openedFiles.put(realTextDocumentIdentifier, openedFile);
+
+    LOGGER_DURATION.trace(
+        "Duration: {} didChange, uri: {}",
+        (System.nanoTime() - start) / 1000000000.0,
+        textDocumentIdentifier.getUri());
   }
 
   @Override
   public void didClose(final DidCloseTextDocumentParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocumentIdentifier = params.getTextDocument();
     LOGGER.debug("didClose, uri: {}", textDocumentIdentifier.getUri());
 
@@ -277,12 +300,24 @@ public class MagikTextDocumentService implements TextDocumentService {
         new PublishDiagnosticsParams(uriStr, diagnostics);
     final LanguageClient languageClient = this.languageServer.getLanguageClient();
     languageClient.publishDiagnostics(publishParams);
+
+    LOGGER_DURATION.trace(
+        "Duration: {} didClose, uri: {}",
+        (System.nanoTime() - start) / 1000000000.0,
+        textDocumentIdentifier.getUri());
   }
 
   @Override
   public void didSave(final DidSaveTextDocumentParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocumentIdentifier = params.getTextDocument();
     LOGGER.debug("didSave, uri: {}", textDocumentIdentifier.getUri());
+
+    LOGGER_DURATION.trace(
+        "Duration: {} didSave, uri: {}",
+        (System.nanoTime() - start) / 1000000000.0,
+        textDocumentIdentifier.getUri());
   }
 
   private void publishDiagnostics(final MagikTypedFile magikFile) {
@@ -297,8 +332,10 @@ public class MagikTextDocumentService implements TextDocumentService {
 
   @Override
   public CompletableFuture<Hover> hover(final HoverParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace(
+    LOGGER.debug(
         "hover: uri: {}, position: {},{}",
         textDocument.getUri(),
         params.getPosition().getLine(),
@@ -311,13 +348,40 @@ public class MagikTextDocumentService implements TextDocumentService {
       return CompletableFuture.supplyAsync(() -> null);
     } else if (openedFile instanceof ProductDefFile productDefFile) {
       return CompletableFuture.supplyAsync(
-          () -> this.hoverProvider.provideHover(productDefFile, position));
+          () -> {
+            final Hover hover = this.hoverProvider.provideHover(productDefFile, position);
+            LOGGER_DURATION.trace(
+                "Duration: {} hover: uri: {}, position: {},{}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri(),
+                params.getPosition().getLine(),
+                params.getPosition().getCharacter());
+            return hover;
+          });
     } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
       return CompletableFuture.supplyAsync(
-          () -> this.hoverProvider.provideHover(moduleDefFile, position));
+          () -> {
+            final Hover hover = this.hoverProvider.provideHover(moduleDefFile, position);
+            LOGGER_DURATION.trace(
+                "Duration: {} hover: uri: {}, position: {},{}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri(),
+                params.getPosition().getLine(),
+                params.getPosition().getCharacter());
+            return hover;
+          });
     } else if (openedFile instanceof MagikTypedFile magikFile) {
       return CompletableFuture.supplyAsync(
-          () -> this.hoverProvider.provideHover(magikFile, position));
+          () -> {
+            final Hover hover = this.hoverProvider.provideHover(magikFile, position);
+            LOGGER_DURATION.trace(
+                "Duration: {} hover: uri: {}, position: {},{}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri(),
+                params.getPosition().getLine(),
+                params.getPosition().getCharacter());
+            return hover;
+          });
     }
 
     throw new UnsupportedOperationException();
@@ -326,8 +390,10 @@ public class MagikTextDocumentService implements TextDocumentService {
   @Override
   public CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>>
       implementation(final ImplementationParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace(
+    LOGGER.debug(
         "implementation, uri: {}, position: {},{}",
         textDocument.getUri(),
         params.getPosition().getLine(),
@@ -346,18 +412,24 @@ public class MagikTextDocumentService implements TextDocumentService {
         () -> {
           final List<nl.ramsolutions.sw.magik.Location> locations =
               this.implementationProvider.provideImplementations(magikFile, position);
-          LOGGER.debug("Implementations found: {}", locations.size());
-
           final List<Location> lsp4jLocations =
               locations.stream().map(Lsp4jConversion::locationToLsp4j).toList();
+          LOGGER_DURATION.trace(
+              "Duration: {} implementation, uri: {}, position: {},{}",
+              (System.nanoTime() - start) / 1000000000.0,
+              textDocument.getUri(),
+              params.getPosition().getLine(),
+              params.getPosition().getCharacter());
           return Either.forLeft(lsp4jLocations);
         });
   }
 
   @Override
   public CompletableFuture<SignatureHelp> signatureHelp(final SignatureHelpParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace(
+    LOGGER.debug(
         "signatureHelp, uri: {}, position: {},{}",
         textDocument.getUri(),
         params.getPosition().getLine(),
@@ -374,7 +446,12 @@ public class MagikTextDocumentService implements TextDocumentService {
         () -> {
           final SignatureHelp signatureHelp =
               this.signatureHelpProvider.provideSignatureHelp(magikFile, position);
-          LOGGER.debug("Created signatures: {}", signatureHelp.getSignatures().size());
+          LOGGER_DURATION.trace(
+              "Duration: {} signatureHelp, uri: {}, position: {},{}",
+              (System.nanoTime() - start) / 1000000000.0,
+              textDocument.getUri(),
+              params.getPosition().getLine(),
+              params.getPosition().getCharacter());
           return signatureHelp;
         });
   }
@@ -382,8 +459,10 @@ public class MagikTextDocumentService implements TextDocumentService {
   @Override
   public CompletableFuture<List<FoldingRange>> foldingRange(
       final FoldingRangeRequestParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace("foldingRange, uri: {}", textDocument.getUri());
+    LOGGER.debug("foldingRange, uri: {}", textDocument.getUri());
 
     final OpenedFile openedFile = this.openedFiles.get(textDocument);
     if (openedFile == null) {
@@ -391,13 +470,37 @@ public class MagikTextDocumentService implements TextDocumentService {
       return CompletableFuture.supplyAsync(() -> null);
     } else if (openedFile instanceof ProductDefFile productDefFile) {
       return CompletableFuture.supplyAsync(
-          () -> this.foldingRangeProvider.provideFoldingRanges(productDefFile));
+          () -> {
+            final List<FoldingRange> foldingRanges =
+                this.foldingRangeProvider.provideFoldingRanges(productDefFile);
+            LOGGER_DURATION.trace(
+                "Duration: {} foldingRange, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return foldingRanges;
+          });
     } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
       return CompletableFuture.supplyAsync(
-          () -> this.foldingRangeProvider.provideFoldingRanges(moduleDefFile));
+          () -> {
+            final List<FoldingRange> foldingRanges =
+                this.foldingRangeProvider.provideFoldingRanges(moduleDefFile);
+            LOGGER_DURATION.trace(
+                "Duration: {} foldingRange, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return foldingRanges;
+          });
     } else if (openedFile instanceof MagikTypedFile magikFile) {
       return CompletableFuture.supplyAsync(
-          () -> this.foldingRangeProvider.provideFoldingRanges(magikFile));
+          () -> {
+            final List<FoldingRange> foldingRanges =
+                this.foldingRangeProvider.provideFoldingRanges(magikFile);
+            LOGGER_DURATION.trace(
+                "Duration: {} foldingRange, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return foldingRanges;
+          });
     }
 
     throw new UnsupportedOperationException();
@@ -406,8 +509,10 @@ public class MagikTextDocumentService implements TextDocumentService {
   @Override
   public CompletableFuture<Either<List<? extends Location>, List<? extends LocationLink>>>
       definition(final DefinitionParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace("definitions, uri: {}", textDocument.getUri());
+    LOGGER.debug("definitions, uri: {}", textDocument.getUri());
 
     final Position lsp4jPosition = params.getPosition();
     final nl.ramsolutions.sw.magik.Position position =
@@ -421,24 +526,39 @@ public class MagikTextDocumentService implements TextDocumentService {
           () -> {
             final List<nl.ramsolutions.sw.magik.Location> locations =
                 this.definitionsProvider.provideDefinitions(productDefFile, position);
-            return Either.forLeft(
-                locations.stream().map(Lsp4jConversion::locationToLsp4j).toList());
+            final Either<List<? extends Location>, List<? extends LocationLink>> forLeft =
+                Either.forLeft(locations.stream().map(Lsp4jConversion::locationToLsp4j).toList());
+            LOGGER_DURATION.trace(
+                "Duration: {} definitions, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return forLeft;
           });
     } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
       return CompletableFuture.supplyAsync(
           () -> {
             final List<nl.ramsolutions.sw.magik.Location> locations =
                 this.definitionsProvider.provideDefinitions(moduleDefFile, position);
-            return Either.forLeft(
-                locations.stream().map(Lsp4jConversion::locationToLsp4j).toList());
+            final Either<List<? extends Location>, List<? extends LocationLink>> forLeft =
+                Either.forLeft(locations.stream().map(Lsp4jConversion::locationToLsp4j).toList());
+            LOGGER_DURATION.trace(
+                "Duration: {} definitions, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return forLeft;
           });
     } else if (openedFile instanceof MagikTypedFile magikFile) {
       return CompletableFuture.supplyAsync(
           () -> {
             final List<nl.ramsolutions.sw.magik.Location> locations =
                 this.definitionsProvider.provideDefinitions(magikFile, position);
-            return Either.forLeft(
-                locations.stream().map(Lsp4jConversion::locationToLsp4j).toList());
+            final Either<List<? extends Location>, List<? extends LocationLink>> forLeft =
+                Either.forLeft(locations.stream().map(Lsp4jConversion::locationToLsp4j).toList());
+            LOGGER_DURATION.trace(
+                "Duration: {} definitions, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return forLeft;
           });
     }
 
@@ -447,8 +567,10 @@ public class MagikTextDocumentService implements TextDocumentService {
 
   @Override
   public CompletableFuture<List<? extends Location>> references(final ReferenceParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace("references, uri: {}", textDocument.getUri());
+    LOGGER.debug("references, uri: {}", textDocument.getUri());
 
     final Position lsp4jPosition = params.getPosition();
     final nl.ramsolutions.sw.magik.Position position =
@@ -460,23 +582,41 @@ public class MagikTextDocumentService implements TextDocumentService {
     } else if (openedFile instanceof ProductDefFile productDefFile) {
       return CompletableFuture.supplyAsync(
           () -> {
-            return this.referencesProvider.provideReferences(productDefFile, position).stream()
-                .map(Lsp4jConversion::locationToLsp4j)
-                .toList();
+            final List<Location> references =
+                this.referencesProvider.provideReferences(productDefFile, position).stream()
+                    .map(Lsp4jConversion::locationToLsp4j)
+                    .toList();
+            LOGGER_DURATION.trace(
+                "Duration: {} references, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return references;
           });
     } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
       return CompletableFuture.supplyAsync(
           () -> {
-            return this.referencesProvider.provideReferences(moduleDefFile, position).stream()
-                .map(Lsp4jConversion::locationToLsp4j)
-                .toList();
+            final List<Location> references =
+                this.referencesProvider.provideReferences(moduleDefFile, position).stream()
+                    .map(Lsp4jConversion::locationToLsp4j)
+                    .toList();
+            LOGGER_DURATION.trace(
+                "Duration: {} references, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return references;
           });
     } else if (openedFile instanceof MagikTypedFile magikFile) {
       return CompletableFuture.supplyAsync(
           () -> {
-            return this.referencesProvider.provideReferences(magikFile, position).stream()
-                .map(Lsp4jConversion::locationToLsp4j)
-                .toList();
+            final List<Location> references =
+                this.referencesProvider.provideReferences(magikFile, position).stream()
+                    .map(Lsp4jConversion::locationToLsp4j)
+                    .toList();
+            LOGGER_DURATION.trace(
+                "Duration: {} references, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return references;
           });
     }
 
@@ -486,8 +626,10 @@ public class MagikTextDocumentService implements TextDocumentService {
   @Override
   public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(
       final CompletionParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace(
+    LOGGER.debug(
         "completion, uri: {}, position: {},{}",
         textDocument.getUri(),
         params.getPosition().getLine(),
@@ -504,7 +646,12 @@ public class MagikTextDocumentService implements TextDocumentService {
         () -> {
           final List<CompletionItem> completions =
               this.completionProvider.provideCompletions(magikFile, position);
-          LOGGER.debug("Completions found: {}", completions.size());
+          LOGGER_DURATION.trace(
+              "Duration: {} completion, uri: {}, position: {},{}",
+              (System.nanoTime() - start) / 1000000000.0,
+              textDocument.getUri(),
+              params.getPosition().getLine(),
+              params.getPosition().getCharacter());
           return Either.forLeft(completions);
         });
   }
@@ -512,8 +659,10 @@ public class MagikTextDocumentService implements TextDocumentService {
   @Override
   public CompletableFuture<List<? extends TextEdit>> formatting(
       final DocumentFormattingParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace("formatting, uri: {}", textDocument.getUri());
+    LOGGER.debug("formatting, uri: {}", textDocument.getUri());
 
     final OpenedFile openedFile = this.openedFiles.get(textDocument);
     if (!(openedFile instanceof MagikTypedFile)) {
@@ -531,15 +680,20 @@ public class MagikTextDocumentService implements TextDocumentService {
 
           final List<TextEdit> textEdits =
               this.formattingProvider.provideFormatting(magikFile, options);
-          LOGGER.debug("Text edits created: {}", textEdits.size());
+          LOGGER_DURATION.trace(
+              "Duration: {} formatting, uri: {}",
+              (System.nanoTime() - start) / 1000000000.0,
+              textDocument.getUri());
           return textEdits;
         });
   }
 
   @Override
   public CompletableFuture<SemanticTokens> semanticTokensFull(final SemanticTokensParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace("semanticTokensFull, uri: {}", textDocument.getUri());
+    LOGGER.debug("semanticTokensFull, uri: {}", textDocument.getUri());
 
     final OpenedFile openedFile = this.openedFiles.get(textDocument);
     if (openedFile == null) {
@@ -547,13 +701,37 @@ public class MagikTextDocumentService implements TextDocumentService {
       return CompletableFuture.supplyAsync(() -> null);
     } else if (openedFile instanceof ProductDefFile productDefFile) {
       return CompletableFuture.supplyAsync(
-          () -> this.semanticTokenProver.provideSemanticTokensFull(productDefFile));
+          () -> {
+            final SemanticTokens semanticTokens =
+                this.semanticTokenProver.provideSemanticTokensFull(productDefFile);
+            LOGGER_DURATION.trace(
+                "Duration: {} semanticTokensFull, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return semanticTokens;
+          });
     } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
       return CompletableFuture.supplyAsync(
-          () -> this.semanticTokenProver.provideSemanticTokensFull(moduleDefFile));
+          () -> {
+            final SemanticTokens semanticTokens =
+                this.semanticTokenProver.provideSemanticTokensFull(moduleDefFile);
+            LOGGER_DURATION.trace(
+                "Duration: {} semanticTokensFull, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return semanticTokens;
+          });
     } else if (openedFile instanceof MagikTypedFile magikFile) {
       return CompletableFuture.supplyAsync(
-          () -> this.semanticTokenProver.provideSemanticTokensFull(magikFile));
+          () -> {
+            final SemanticTokens semanticTokens =
+                this.semanticTokenProver.provideSemanticTokensFull(magikFile);
+            LOGGER_DURATION.trace(
+                "Duration: {} semanticTokensFull, uri: {}",
+                (System.nanoTime() - start) / 1000000000.0,
+                textDocument.getUri());
+            return semanticTokens;
+          });
     }
 
     throw new UnsupportedOperationException();
@@ -562,8 +740,10 @@ public class MagikTextDocumentService implements TextDocumentService {
   @Override
   public CompletableFuture<Either3<Range, PrepareRenameResult, PrepareRenameDefaultBehavior>>
       prepareRename(PrepareRenameParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace(
+    LOGGER.debug(
         "prepareRename, uri: {}, position: {},{}",
         textDocument.getUri(),
         params.getPosition().getLine(),
@@ -577,13 +757,25 @@ public class MagikTextDocumentService implements TextDocumentService {
     final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final Position position = params.getPosition();
     return CompletableFuture.supplyAsync(
-        () -> this.renameProvider.providePrepareRename(magikFile, position));
+        () -> {
+          final Either3<Range, PrepareRenameResult, PrepareRenameDefaultBehavior> prepareRename =
+              this.renameProvider.providePrepareRename(magikFile, position);
+          LOGGER_DURATION.trace(
+              "Duration: {} prepareRename, uri: {}, position: {},{}",
+              (System.nanoTime() - start) / 1000000000.0,
+              textDocument.getUri(),
+              params.getPosition().getLine(),
+              params.getPosition().getCharacter());
+          return prepareRename;
+        });
   }
 
   @Override
   public CompletableFuture<WorkspaceEdit> rename(final RenameParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace(
+    LOGGER.debug(
         "rename, uri: {}, position: {},{}",
         textDocument.getUri(),
         params.getPosition().getLine(),
@@ -598,14 +790,26 @@ public class MagikTextDocumentService implements TextDocumentService {
     final Position position = params.getPosition();
     final String newName = params.getNewName();
     return CompletableFuture.supplyAsync(
-        () -> this.renameProvider.provideRename(magikFile, position, newName));
+        () -> {
+          final WorkspaceEdit rename =
+              this.renameProvider.provideRename(magikFile, position, newName);
+          LOGGER_DURATION.trace(
+              "Duration: {} rename, uri: {}, position: {},{}",
+              (System.nanoTime() - start) / 1000000000.0,
+              textDocument.getUri(),
+              params.getPosition().getLine(),
+              params.getPosition().getCharacter());
+          return rename;
+        });
   }
 
   @Override
   public CompletableFuture<List<Either<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>>>
       documentSymbol(final DocumentSymbolParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace("documentSymbol, uri: {}", textDocument.getUri());
+    LOGGER.debug("documentSymbol, uri: {}", textDocument.getUri());
 
     final OpenedFile openedFile = this.openedFiles.get(textDocument);
     if (!(openedFile instanceof MagikTypedFile)) {
@@ -614,13 +818,23 @@ public class MagikTextDocumentService implements TextDocumentService {
 
     final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     return CompletableFuture.supplyAsync(
-        () -> this.documentSymbolProvider.provideDocumentSymbol(magikFile));
+        () -> {
+          final List<Either<SymbolInformation, DocumentSymbol>> documentSymbols =
+              this.documentSymbolProvider.provideDocumentSymbols(magikFile);
+          LOGGER_DURATION.trace(
+              "Duration: {} documentSymbol, uri: {}",
+              (System.nanoTime() - start) / 1000000000.0,
+              textDocument.getUri());
+          return documentSymbols;
+        });
   }
 
   @Override
   public CompletableFuture<List<SelectionRange>> selectionRange(final SelectionRangeParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace("selectionRange, uri: {}", textDocument.getUri());
+    LOGGER.debug("selectionRange, uri: {}", textDocument.getUri());
 
     final OpenedFile openedFile = this.openedFiles.get(textDocument);
     if (!(openedFile instanceof MagikTypedFile)) {
@@ -631,14 +845,24 @@ public class MagikTextDocumentService implements TextDocumentService {
     final List<nl.ramsolutions.sw.magik.Position> positions =
         params.getPositions().stream().map(Lsp4jConversion::positionFromLsp4j).toList();
     return CompletableFuture.supplyAsync(
-        () -> this.selectionRangeProvider.provideSelectionRanges(magikFile, positions));
+        () -> {
+          final List<SelectionRange> selectionRanges =
+              this.selectionRangeProvider.provideSelectionRanges(magikFile, positions);
+          LOGGER_DURATION.trace(
+              "Duration: {} selectionRange, uri: {}",
+              (System.nanoTime() - start) / 1000000000.0,
+              textDocument.getUri());
+          return selectionRanges;
+        });
   }
 
   @Override
   public CompletableFuture<List<TypeHierarchyItem>> prepareTypeHierarchy(
       final TypeHierarchyPrepareParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
-    LOGGER.trace(
+    LOGGER.debug(
         "prepareTypeHierarchy, uri: {}, position: {},{}",
         textDocument.getUri(),
         params.getPosition().getLine(),
@@ -653,34 +877,66 @@ public class MagikTextDocumentService implements TextDocumentService {
     final Position position = params.getPosition();
 
     return CompletableFuture.supplyAsync(
-        () -> this.typeHierarchyProvider.prepareTypeHierarchy(magikFile, position));
+        () -> {
+          final List<TypeHierarchyItem> typeHierarchy =
+              this.typeHierarchyProvider.prepareTypeHierarchy(magikFile, position);
+          LOGGER_DURATION.trace(
+              "Duration: {} prepareTypeHierarchy, uri: {}, position: {},{}",
+              (System.nanoTime() - start) / 1000000000.0,
+              textDocument.getUri(),
+              params.getPosition().getLine(),
+              params.getPosition().getCharacter());
+          return typeHierarchy;
+        });
   }
 
   @Override
   public CompletableFuture<List<TypeHierarchyItem>> typeHierarchySubtypes(
       final TypeHierarchySubtypesParams params) {
+    final long start = System.nanoTime();
+
     final TypeHierarchyItem item = params.getItem();
-    LOGGER.trace("typeHierarchySubtypes, item: {}", item.getName());
+    LOGGER.debug("typeHierarchySubtypes, item: {}", item.getName());
 
     return CompletableFuture.supplyAsync(
-        () -> this.typeHierarchyProvider.typeHierarchySubtypes(item));
+        () -> {
+          final List<TypeHierarchyItem> subtypes =
+              this.typeHierarchyProvider.typeHierarchySubtypes(item);
+          LOGGER_DURATION.trace(
+              "Duration: {} didOpen, typeHierarchySubtypes, item: {}",
+              (System.nanoTime() - start) / 1000000000.0,
+              item.getName());
+          return subtypes;
+        });
   }
 
   @Override
   public CompletableFuture<List<TypeHierarchyItem>> typeHierarchySupertypes(
       final TypeHierarchySupertypesParams params) {
+    final long start = System.nanoTime();
+
     final TypeHierarchyItem item = params.getItem();
-    LOGGER.trace("typeHierarchySupertypes, item: {}", item.getName());
+    LOGGER.debug("typeHierarchySupertypes, item: {}", item.getName());
 
     return CompletableFuture.supplyAsync(
-        () -> this.typeHierarchyProvider.typeHierarchySupertypes(item));
+        () -> {
+          final List<TypeHierarchyItem> supertypes =
+              this.typeHierarchyProvider.typeHierarchySupertypes(item);
+          LOGGER_DURATION.trace(
+              "Duration: {} didOpen, typeHierarchySupertypes, item: {}",
+              (System.nanoTime() - start) / 1000000000.0,
+              item.getName());
+          return supertypes;
+        });
   }
 
   @Override
   public CompletableFuture<List<InlayHint>> inlayHint(final InlayHintParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
     final Range range = params.getRange();
-    LOGGER.trace(
+    LOGGER.debug(
         "inlayHint, uri: {}, range: {},{}-{},{}",
         textDocument.getUri(),
         range.getStart().getLine(),
@@ -695,15 +951,28 @@ public class MagikTextDocumentService implements TextDocumentService {
 
     final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     return CompletableFuture.supplyAsync(
-        () -> this.inlayHintProvider.provideInlayHints(magikFile, range));
+        () -> {
+          List<InlayHint> inlayHints = this.inlayHintProvider.provideInlayHints(magikFile, range);
+          LOGGER_DURATION.trace(
+              "Duration: {} inlayHint, uri: {}, range: {},{}-{},{}",
+              (System.nanoTime() - start) / 1000000000.0,
+              textDocument.getUri(),
+              range.getStart().getLine(),
+              range.getStart().getCharacter(),
+              range.getEnd().getLine(),
+              range.getEnd().getCharacter());
+          return inlayHints;
+        });
   }
 
   @Override
   public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(
       final CodeActionParams params) {
+    final long start = System.nanoTime();
+
     final TextDocumentIdentifier textDocument = params.getTextDocument();
     final Range range = params.getRange();
-    LOGGER.trace(
+    LOGGER.debug(
         "codeAction, uri: {}, range: {},{}-{},{}",
         textDocument.getUri(),
         range.getStart().getLine(),
@@ -723,13 +992,23 @@ public class MagikTextDocumentService implements TextDocumentService {
         () -> {
           final List<nl.ramsolutions.sw.magik.CodeAction> codeActions =
               this.codeActionProvider.provideCodeActions(magikFile, magikRange, context);
-          return codeActions.stream()
-              .map(
-                  codeAction ->
-                      Lsp4jUtils.createCodeAction(
-                          magikFile, codeAction.getTitle(), codeAction.getEdits()))
-              .map(Either::<Command, CodeAction>forRight)
-              .toList();
+          final List<Either<Command, CodeAction>> codeActionsLsp4j =
+              codeActions.stream()
+                  .map(
+                      codeAction ->
+                          Lsp4jUtils.createCodeAction(
+                              magikFile, codeAction.getTitle(), codeAction.getEdits()))
+                  .map(Either::<Command, CodeAction>forRight)
+                  .toList();
+          LOGGER_DURATION.trace(
+              "Duration: {} codeAction, uri: {}, range: {},{}-{},{}",
+              (System.nanoTime() - start) / 1000000000.0,
+              textDocument.getUri(),
+              range.getStart().getLine(),
+              range.getStart().getCharacter(),
+              range.getEnd().getLine(),
+              range.getEnd().getCharacter());
+          return codeActionsLsp4j;
         });
   }
 }
