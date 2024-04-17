@@ -2,10 +2,16 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.RecognitionException;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
 import nl.ramsolutions.sw.definitions.ModuleDefinition;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -32,8 +38,73 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
       LoggerFactory.getLogger(ModuleRequiredForGlobalTypedCheck.class);
   private static final String MESSAGE = "Module '%s' defining global '%s' is not required";
 
+  private ModuleDefinition moduleDefinition;
+  private Set<String> requiredModules;
+
+  @Override
+  protected void walkPreMagik(final AstNode node) {
+    this.moduleDefinition = this.readModuleDefinition();
+
+    if (this.moduleDefinition != null) {
+      this.requiredModules = this.getRequiredModules();
+    } else {
+      this.requiredModules = Collections.emptySet();
+    }
+  }
+
+  @CheckForNull
+  private ModuleDefinition readModuleDefinition() {
+    final URI uri = this.getMagikFile().getUri();
+    final Path path = Path.of(uri);
+    try {
+      // TODO: Better get this from IDefinitionKeeper.
+      return ModuleDefinitionScanner.swModuleForPath(path);
+    } catch (final RecognitionException exception) {
+      LOGGER.warn("Unable to parse module.def");
+    } catch (final IOException exception) {
+      LOGGER.warn("Caught exception", exception);
+    }
+
+    return null;
+  }
+
+  private Set<String> getRequiredModules() {
+    final Set<String> seen = new HashSet<>();
+
+    final IDefinitionKeeper definitionKeeper = this.getDefinitionKeeper();
+    final Deque<ModuleDefinition> stack = new ArrayDeque<>();
+    stack.add(this.moduleDefinition);
+    while (!stack.isEmpty()) {
+      final ModuleDefinition currentModDef = stack.pop();
+
+      final String moduleName = currentModDef.getName();
+      if (seen.contains(moduleName)) {
+        continue;
+      }
+
+      final Collection<String> requireds = currentModDef.getRequireds();
+      seen.addAll(requireds);
+      requireds.stream()
+          .map(definitionKeeper::getModuleDefinitions)
+          .flatMap(Collection::stream)
+          .forEach(stack::push);
+    }
+
+    return seen;
+  }
+
+  @Override
+  protected void walkPostMagik(final AstNode node) {
+    this.moduleDefinition = null;
+  }
+
   @Override
   protected void walkPostIdentifier(final AstNode node) {
+    // Get own module + requires.
+    if (this.moduleDefinition == null) {
+      return;
+    }
+
     final AstNode parent = node.getParent();
     if (!parent.is(MagikGrammar.ATOM)) {
       return;
@@ -57,30 +128,11 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    final IDefinitionKeeper definitionKeeper = this.getDefinitionKeeper();
-
-    // Get own module + requires.
-    final URI uri = this.getMagikFile().getUri();
-    final Path path = Path.of(uri);
-    final ModuleDefinition moduleDefinition;
-    try {
-      moduleDefinition = ModuleDefinitionScanner.swModuleForPath(path);
-    } catch (final RecognitionException exception) {
-      LOGGER.warn("Unable to parse module.def");
-      return;
-    } catch (final IOException exception) {
-      LOGGER.warn("Caught exception", exception);
-      return;
-    }
-    if (moduleDefinition == null) {
-      return;
-    }
-
     // See if the target module is required.
-    final String moduleName = moduleDefinition.getName();
+    final IDefinitionKeeper definitionKeeper = this.getDefinitionKeeper();
     definitionKeeper.getExemplarDefinitions(typeStr).stream()
         .filter(def -> def.getModuleName() != null)
-        .filter(def -> !this.isModuleRequired(moduleName, def.getModuleName()))
+        .filter(def -> !this.requiredModules.contains(def.getModuleName()))
         .forEach(
             def -> {
               final String globalModuleName = def.getModuleName();
@@ -88,25 +140,5 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
               final String message = String.format(MESSAGE, globalModuleName, typeStringStr);
               this.addIssue(node, message);
             });
-  }
-
-  private boolean isModuleRequired(final String currentModuleName, final String wantedModuleName) {
-    if (currentModuleName.equals(wantedModuleName)) {
-      return true;
-    }
-
-    // Recurse through module tree and test if the wanted module name is required.
-    final IDefinitionKeeper definitionKeeper = this.getDefinitionKeeper();
-    for (final ModuleDefinition moduleDefinition :
-        definitionKeeper.getModuleDefinitions(currentModuleName)) {
-      final List<String> requiredModuleNames = moduleDefinition.getRequireds();
-      for (final String requiredModuleName : requiredModuleNames) {
-        if (this.isModuleRequired(requiredModuleName, wantedModuleName)) {
-          return true;
-        }
-      }
-    }
-
-    return false;
   }
 }
