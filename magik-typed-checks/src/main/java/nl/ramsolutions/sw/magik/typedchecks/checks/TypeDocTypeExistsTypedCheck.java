@@ -98,9 +98,13 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
             });
   }
 
-  public boolean unknownExemplarDefinitionEntry(final Map.Entry<AstNode, TypeString> entry) {
-    final TypeStringResolver resolver = this.getTypeStringResolver();
+  private boolean unknownExemplarDefinitionEntry(final Map.Entry<AstNode, TypeString> entry) {
     final TypeString typeStr = entry.getValue();
+    if (typeStr.isSelf()) {
+      return false;
+    }
+
+    final TypeStringResolver resolver = this.getTypeStringResolver();
     return resolver.getExemplarDefinition(typeStr) == null;
   }
 }
