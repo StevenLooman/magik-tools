@@ -45,15 +45,15 @@ public class MethodComplexityCheck extends MagikCheck {
     final int complexity = visitor.getComplexity();
     if (complexity > this.maximumComplexity) {
       final String message = String.format(MESSAGE, complexity, this.maximumComplexity);
-      final AstNode markedNode;
+      final AstNode issueNode;
       if (node.is(MagikGrammar.METHOD_DEFINITION)) {
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
-        markedNode = helper.getMethodNameNode();
+        issueNode = helper.getMethodNameNode();
       } else {
         final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
-        markedNode = helper.getProcedureNode();
+        issueNode = helper.getProcedureNode();
       }
-      this.addIssue(markedNode, message);
+      this.addIssue(issueNode, message);
     }
   }
 }

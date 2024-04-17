@@ -1,9 +1,6 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
-import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,8 +15,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
 import nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider;
-import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikChecksDiagnosticsProvider;
-import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikTypedChecksDiagnosticsProvider;
+import nl.ramsolutions.sw.magik.languageserver.diagnostics.DiagnosticsProvider;
 import nl.ramsolutions.sw.magik.languageserver.documentsymbols.DocumentSymbolProvider;
 import nl.ramsolutions.sw.magik.languageserver.folding.FoldingRangeProvider;
 import nl.ramsolutions.sw.magik.languageserver.formatting.FormattingProvider;
@@ -73,6 +69,7 @@ import org.eclipse.lsp4j.SemanticTokensParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SignatureHelpParams;
+import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
@@ -96,10 +93,13 @@ public class MagikTextDocumentService implements TextDocumentService {
   // TODO: Better separation of Lsp4J and magik-tools regarding Range/Position.
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikTextDocumentService.class);
+  private static final Logger LOGGER_DURATION =
+      LoggerFactory.getLogger(MagikTextDocumentService.class.getName() + "Duration");
 
   private final MagikLanguageServer languageServer;
   private final MagikAnalysisConfiguration analysisConfiguration;
   private final IDefinitionKeeper definitionKeeper;
+  private final DiagnosticsProvider diagnosticsProvider;
   private final HoverProvider hoverProvider;
   private final ImplementationProvider implementationProvider;
   private final SignatureHelpProvider signatureHelpProvider;
@@ -131,6 +131,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.analysisConfiguration = analysisConfiguration;
     this.definitionKeeper = definitionKeeper;
 
+    this.diagnosticsProvider = new DiagnosticsProvider();
     this.hoverProvider = new HoverProvider();
     this.implementationProvider = new ImplementationProvider();
     this.signatureHelpProvider = new SignatureHelpProvider();
@@ -156,6 +157,7 @@ public class MagikTextDocumentService implements TextDocumentService {
   public void setCapabilities(final ServerCapabilities capabilities) {
     capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
 
+    this.diagnosticsProvider.setCapabilities(capabilities);
     this.hoverProvider.setCapabilities(capabilities);
     this.implementationProvider.setCapabilities(capabilities);
     this.signatureHelpProvider.setCapabilities(capabilities);
@@ -284,53 +286,13 @@ public class MagikTextDocumentService implements TextDocumentService {
   }
 
   private void publishDiagnostics(final MagikTypedFile magikFile) {
-    final List<Diagnostic> diagnostics = new ArrayList<>();
-
-    // Linter diagnostics.
-    final List<Diagnostic> diagnosticsLinter = this.getDiagnosticsLinter(magikFile);
-    diagnostics.addAll(diagnosticsLinter);
-
-    // Typing diagnostics.
-    final Boolean typingEnableChecks = MagikSettings.INSTANCE.getTypingEnableChecks();
-    if (Boolean.TRUE.equals(typingEnableChecks)) {
-      final List<Diagnostic> diagnosticsTyping = this.getDiagnosticsTyping(magikFile);
-      diagnostics.addAll(diagnosticsTyping);
-    }
+    final List<Diagnostic> diagnostics = this.diagnosticsProvider.provideDiagnostics(magikFile);
 
     // Publish to client.
     final String uri = magikFile.getUri().toString();
     final PublishDiagnosticsParams publishParams = new PublishDiagnosticsParams(uri, diagnostics);
     final LanguageClient languageClient = this.languageServer.getLanguageClient();
     languageClient.publishDiagnostics(publishParams);
-    LOGGER.debug("Published diagnostics: {}", diagnostics.size());
-  }
-
-  private List<Diagnostic> getDiagnosticsLinter(final MagikTypedFile magikFile) {
-    final Path overrideSettingsPath = MagikSettings.INSTANCE.getChecksOverrideSettingsPath();
-
-    final MagikChecksDiagnosticsProvider lintProvider =
-        new MagikChecksDiagnosticsProvider(overrideSettingsPath);
-    try {
-      return lintProvider.getDiagnostics(magikFile);
-    } catch (final IOException exception) {
-      LOGGER.error(exception.getMessage(), exception);
-    }
-
-    return Collections.emptyList();
-  }
-
-  private List<Diagnostic> getDiagnosticsTyping(final MagikTypedFile magikFile) {
-    final Path overrideSettingsPath = MagikSettings.INSTANCE.getChecksOverrideSettingsPath();
-
-    final MagikTypedChecksDiagnosticsProvider typedDiagnosticsProvider =
-        new MagikTypedChecksDiagnosticsProvider(overrideSettingsPath);
-    try {
-      return typedDiagnosticsProvider.getDiagnostics(magikFile);
-    } catch (final IOException exception) {
-      LOGGER.error(exception.getMessage(), exception);
-    }
-
-    return Collections.emptyList();
   }
 
   @Override
