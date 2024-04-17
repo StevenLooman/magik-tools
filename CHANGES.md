@@ -24,6 +24,7 @@
   - Definition.
   - References.
 - Remove old typing classes and use the new typing classes.
+- Fix providing Formatting CodeActions on all locations, instead of asked range.
 
 0.9.1 (2024-03-13)
 
