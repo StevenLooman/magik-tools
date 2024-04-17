@@ -482,19 +482,7 @@ public class HoverProvider {
 
   private void buildMethodSignatureDoc(
       final MethodDefinition methodDef, final StringBuilder builder) {
-    // Method signature.
-    final TypeString typeStr = methodDef.getTypeName();
-
-    // TODO: Removed something with generics.
-
-    final String joiner = methodDef.getMethodName().startsWith("[") ? "" : ".";
-    builder
-        .append("## ")
-        .append(this.formatTypeString(typeStr))
-        .append(joiner)
-        .append(methodDef.getNameWithParameters())
-        .append("\n\n")
-        .append(" → ");
+    builder.append("## ").append(methodDef.getNameWithParameters()).append("\n\n").append(" → ");
 
     final String callResultString = methodDef.getReturnTypes().getTypeNames(", ");
     builder.append(this.formatTypeString(callResultString));
