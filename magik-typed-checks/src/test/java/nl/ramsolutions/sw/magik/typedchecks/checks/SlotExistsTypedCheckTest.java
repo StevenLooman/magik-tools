@@ -18,7 +18,8 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testTypeUnknown() {
-    final String code = """
+    final String code =
+        """
         _method ex.m()
             .slot << 10
         _endmethod""";
@@ -43,7 +44,8 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testSlotKnown() {
-    final String code = """
+    final String code =
+        """
         _method a.m()
             .slot << 10
         _endmethod""";

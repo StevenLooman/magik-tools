@@ -121,7 +121,8 @@ class CommentedCodeCheckTest extends MagikCheckTestBase {
 
   @Test
   void testBlockWithEmptyLines() {
-    final String code = """
+    final String code =
+        """
         #
         # Add/Remove
         #

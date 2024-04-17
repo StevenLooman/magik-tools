@@ -14,7 +14,8 @@ class LineLengthCheckTest extends MagikCheckTestBase {
   @Test
   void testLineNotTooLong1() {
     final MagikCheck check = new LineLengthCheck();
-    final String code = """
+    final String code =
+        """
         # this is ok
         print(a)
         """;
@@ -25,7 +26,8 @@ class LineLengthCheckTest extends MagikCheckTestBase {
   @Test
   void testLineNotTooLong2() {
     final MagikCheck check = new LineLengthCheck();
-    final String code = """
+    final String code =
+        """
         l_23456789012345678901234567890
         print(a)
         """;
@@ -37,7 +39,8 @@ class LineLengthCheckTest extends MagikCheckTestBase {
   void testLineTooLong() {
     final LineLengthCheck check = new LineLengthCheck();
     check.maxLineLength = 30;
-    final String code = """
+    final String code =
+        """
         l_234567890123456789012345678901
         print(a)
         """;
@@ -49,7 +52,8 @@ class LineLengthCheckTest extends MagikCheckTestBase {
   void testLineTooLongComment() {
     final LineLengthCheck check = new LineLengthCheck();
     check.maxLineLength = 30;
-    final String code = """
+    final String code =
+        """
         # 234567890123456789012345678901
         print(a)
         """;

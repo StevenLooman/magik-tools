@@ -77,7 +77,8 @@ class VariableCountCheckTest extends MagikCheckTestBase {
   void testMethodSyntaxError() {
     final VariableCountCheck check = new VariableCountCheck();
     check.maximumVariableCount = 2;
-    final String code = """
+    final String code =
+        """
         _method a.
         _endmethod
         """;

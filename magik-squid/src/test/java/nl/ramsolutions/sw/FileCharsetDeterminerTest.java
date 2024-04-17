@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 
-/** Test FileCharsetDeterminer. */
+/** Test {@link FileCharsetDeterminer}. */
 class FileCharsetDeterminerTest {
 
   /**

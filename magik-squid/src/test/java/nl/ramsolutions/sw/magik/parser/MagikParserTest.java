@@ -35,7 +35,8 @@ class MagikParserTest {
 
   @Test
   void testValidMagik1() {
-    final String code = """
+    final String code =
+        """
         _block
         	write(1)
         _endblock""";
@@ -58,7 +59,8 @@ class MagikParserTest {
 
   @Test
   void testInvalidMagik1() {
-    final String code = """
+    final String code =
+        """
         _block
         _endbloc
         $
@@ -206,7 +208,8 @@ class MagikParserTest {
 
   @Test
   void testCommentBefore() {
-    final String code = """
+    final String code =
+        """
             # comment 1
             # comment 2
         $""";
@@ -228,7 +231,8 @@ class MagikParserTest {
 
   @Test
   void testCommentAfter() {
-    final String code = """
+    final String code =
+        """
         $
         # comment 1
         """;
@@ -279,7 +283,8 @@ class MagikParserTest {
 
   @Test
   void testSyntaxError2() {
-    final String code = """
+    final String code =
+        """
         _a
         $
         a()

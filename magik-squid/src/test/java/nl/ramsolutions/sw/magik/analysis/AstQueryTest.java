@@ -19,7 +19,8 @@ class AstQueryTest {
 
   @Test
   void testNodeAtFound() {
-    String code = """
+    String code =
+        """
         a << 10
         b << 20""";
     AstNode node = this.parseCode(code);
@@ -34,7 +35,8 @@ class AstQueryTest {
 
   @Test
   void testNodeAtNotFound() {
-    String code = """
+    String code =
+        """
         a << 10
         b << 20""";
     AstNode node = this.parseCode(code);

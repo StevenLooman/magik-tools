@@ -42,7 +42,8 @@ class CompletionProviderTest {
 
   @Test
   void testKeywordCompletion() {
-    final String code = """
+    final String code =
+        """
         _method a.b
             _
         _endmethod""";
@@ -58,7 +59,8 @@ class CompletionProviderTest {
 
   @Test
   void testMethodCompletionBare() {
-    final String code = """
+    final String code =
+        """
         _method a.b
             1.
         _endmethod""";
@@ -91,7 +93,8 @@ class CompletionProviderTest {
 
   @Test
   void testMethodCompletionSelf() {
-    final String code = """
+    final String code =
+        """
         _method a.b
             _self.
         _endmethod""";
@@ -134,7 +137,8 @@ class CompletionProviderTest {
 
   @Test
   void testMethodCompletionExisting() {
-    final String code = """
+    final String code =
+        """
         _method a.b
             1.fi
         _endmethod""";
@@ -167,7 +171,8 @@ class CompletionProviderTest {
 
   @Test
   void testGlobalCompletion() {
-    final String code = """
+    final String code =
+        """
         _method a.b
          \s\s\s
         _endmethod""";
@@ -209,7 +214,8 @@ class CompletionProviderTest {
 
   @Test
   void testGlobalCompletionSlot() {
-    final String code = """
+    final String code =
+        """
         _method a.b
          \s\s\s
         _endmethod""";

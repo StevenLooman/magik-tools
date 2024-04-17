@@ -14,7 +14,8 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testBlock() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = """
+    final String code =
+        """
         _block
             write(a)
         _endblock""";
@@ -26,7 +27,8 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testBlockEmpty() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = """
+    final String code =
+        """
         _block
         _endblock""";
     final List<MagikIssue> issues = this.runCheck(code, check);
@@ -37,7 +39,8 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testIfBlock() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = """
+    final String code =
+        """
         _if a
         _then
             write(a)
@@ -50,7 +53,8 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testIfBlockEmpty() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = """
+    final String code =
+        """
         _if a
         _then
         _endif""";
@@ -154,7 +158,8 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testMethodEmpty() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = """
+    final String code =
+        """
         _method a.b
         _endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
@@ -165,7 +170,8 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
   void testAbstractMethodEmpty() {
     final MagikCheck check = new EmptyBlockCheck();
 
-    final String code = """
+    final String code =
+        """
         _abstract _method a.b
         _endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);

@@ -162,7 +162,8 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
   @Test
   void testParameter() {
     final MagikCheck check = new UnusedVariableCheck(true);
-    final String code = """
+    final String code =
+        """
         _method a.b(p_param1)
         _endmethod
         """;

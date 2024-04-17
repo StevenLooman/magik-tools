@@ -40,7 +40,8 @@ public class DeprecatedMethodUsageTypedCheckTest extends MagikTypedCheckTestBase
   void testMethodDeprecated() {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     this.addMethodDefinition(definitionKeeper, "deprecated");
-    final String code = """
+    final String code =
+        """
         _block
           object.m()
         _endblock""";
@@ -53,7 +54,8 @@ public class DeprecatedMethodUsageTypedCheckTest extends MagikTypedCheckTestBase
   void testMethodNotDeprecated() {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     this.addMethodDefinition(definitionKeeper, "not_deprecated");
-    final String code = """
+    final String code =
+        """
         _block
           object.m()
         _endblock""";

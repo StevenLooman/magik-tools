@@ -21,7 +21,8 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testLocal() {
-    final String code = """
+    final String code =
+        """
         _method object.m
             _local a
         _endmethod""";
@@ -37,7 +38,8 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testLocalSerial() {
-    final String code = """
+    final String code =
+        """
         _method object.m
             _local a, b
         _endmethod""";
@@ -142,7 +144,8 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testAssignment() {
-    final String code = """
+    final String code =
+        """
         _method object.m
             a << 1
         _endmethod""";
@@ -158,7 +161,8 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testAssignmentPackage() {
-    final String code = """
+    final String code =
+        """
         _method object.m
             sw:a << 1
         _endmethod""";
@@ -296,7 +300,8 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testParameter() {
-    final String code = """
+    final String code =
+        """
         _method object.m(a, _optional b)
         _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
@@ -315,7 +320,8 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testParameterIndexer() {
-    final String code = """
+    final String code =
+        """
         _method object[a, b]
         _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
@@ -334,7 +340,8 @@ class ScopeBuilderVisitorTest {
 
   @Test
   void testParameterAssignment() {
-    final String code = """
+    final String code =
+        """
         _method object.m << a
         _endmethod""";
     final ScopeBuilderVisitor visitor = this.buildCode(code);
