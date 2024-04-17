@@ -413,10 +413,27 @@ public class HoverProvider {
       final MagikTypedFile magikFile, final AstNode node, final StringBuilder builder) {
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
     final ExpressionResultString result = reasonerState.getNodeType(node);
-    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
-    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
-    definitionKeeper
-        .getExemplarDefinitions(typeStr)
+    final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
+    final TypeString typeStr;
+    if (resultTypeStr.isSelf()) {
+      final AstNode definitionNode =
+          node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+      if (definitionNode == null) {
+        typeStr = resultTypeStr;
+      } else if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
+        final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
+        typeStr = helper.getTypeString();
+      } else {
+        typeStr = TypeString.SW_PROCEDURE;
+      }
+    } else {
+      typeStr = resultTypeStr;
+    }
+
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    resolver.resolve(typeStr).stream()
+        .filter(ExemplarDefinition.class::isInstance)
+        .map(ExemplarDefinition.class::cast)
         .forEach(exemplarDef -> this.buildTypeSignatureDoc(magikFile, exemplarDef, builder));
   }
 

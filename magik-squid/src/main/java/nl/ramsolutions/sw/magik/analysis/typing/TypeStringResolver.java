@@ -251,7 +251,7 @@ public class TypeStringResolver {
         .forEach(
             typeStr -> {
               this.definitionKeeper
-                  .getMethodDefinitions(typeString)
+                  .getMethodDefinitions(typeStr)
                   .forEach(
                       methodDefinition -> {
                         final String methodName = methodDefinition.getMethodName();
