@@ -40,8 +40,9 @@ public class MethodExistsTypedCheck extends MagikTypedCheck {
     if (methodDefs.isEmpty()) {
       final String fullName = calledTypeStr.getFullString() + "." + methodName;
       final String message = String.format(MESSAGE, fullName);
-      final AstNode methodIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-      this.addIssue(methodIdentifierNode, message);
+      final AstNode firstIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
+      final AstNode issueNode = firstIdentifierNode != null ? firstIdentifierNode : node;
+      this.addIssue(issueNode, message);
     }
   }
 }

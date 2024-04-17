@@ -68,15 +68,15 @@ public class VariableCountCheck extends MagikCheck {
             .collect(Collectors.counting());
     if (variableCount > this.maximumVariableCount) {
       final String message = String.format(MESSAGE, variableCount, this.maximumVariableCount);
-      final AstNode markedNode;
+      final AstNode issueNode;
       if (node.is(MagikGrammar.METHOD_DEFINITION)) {
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
-        markedNode = helper.getMethodNameNode();
+        issueNode = helper.getMethodNameNode();
       } else {
         final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
-        markedNode = helper.getProcedureNode();
+        issueNode = helper.getProcedureNode();
       }
-      this.addIssue(markedNode, message);
+      this.addIssue(issueNode, message);
     }
   }
 }
