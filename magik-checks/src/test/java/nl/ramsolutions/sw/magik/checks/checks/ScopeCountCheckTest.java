@@ -14,7 +14,8 @@ class ScopeCountCheckTest extends MagikCheckTestBase {
   void testTooManyScopeEntries() {
     final ScopeCountCheck check = new ScopeCountCheck();
     check.maxScopeCount = 1;
-    final String code = """
+    final String code =
+        """
         _method a.b
             _local l_a, l_b
         _endmethod""";
@@ -26,7 +27,8 @@ class ScopeCountCheckTest extends MagikCheckTestBase {
   void testOk() {
     final ScopeCountCheck check = new ScopeCountCheck();
     check.maxScopeCount = 10;
-    final String code = """
+    final String code =
+        """
         _method a.b
             _local l_a, l_b
         _endmethod""";
@@ -38,7 +40,8 @@ class ScopeCountCheckTest extends MagikCheckTestBase {
   void testTooManyScopeEntriesGlobals() {
     final ScopeCountCheck check = new ScopeCountCheck();
     check.maxScopeCount = 1;
-    final String code = """
+    final String code =
+        """
         _method a.b
             _global a, b
         _endmethod""";

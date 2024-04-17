@@ -1110,7 +1110,8 @@ class LocalTypeReasonerTest {
 
   @Test
   void testSingleSuperType() {
-    final String code = """
+    final String code =
+        """
         _method t.m
           _super.m
         _endmethod""";
@@ -1154,7 +1155,8 @@ class LocalTypeReasonerTest {
 
   @Test
   void testSingleNamedSuperType() {
-    final String code = """
+    final String code =
+        """
         _method t.m
           _super(r).m
         _endmethod""";

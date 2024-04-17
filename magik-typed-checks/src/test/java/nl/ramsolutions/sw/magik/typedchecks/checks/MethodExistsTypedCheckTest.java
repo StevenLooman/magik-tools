@@ -19,7 +19,8 @@ class MethodExistsTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testMethodUnknown() {
-    final String code = """
+    final String code =
+        """
         _block
           object.m()
         _endblock""";
@@ -31,7 +32,8 @@ class MethodExistsTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testMethodKnown() {
-    final String code = """
+    final String code =
+        """
         _block
           object.m()
         _endblock""";

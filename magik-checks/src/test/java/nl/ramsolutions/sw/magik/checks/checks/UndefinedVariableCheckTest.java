@@ -39,7 +39,8 @@ class UndefinedVariableCheckTest extends MagikCheckTestBase {
   @Test
   void testUndefinedLocalUsed() {
     final MagikCheck check = new UndefinedVariableCheck();
-    final String code = """
+    final String code =
+        """
         _method a.b
             write(l_a)
         _endmethod""";
@@ -63,7 +64,8 @@ class UndefinedVariableCheckTest extends MagikCheckTestBase {
   @Test
   void testUndefinedLocalUsedProcedure() {
     final MagikCheck check = new UndefinedVariableCheck();
-    final String code = """
+    final String code =
+        """
         _proc()
             write(l_a)
         _endproc""";
@@ -74,7 +76,8 @@ class UndefinedVariableCheckTest extends MagikCheckTestBase {
   @Test
   void testParameter() {
     final MagikCheck check = new UndefinedVariableCheck();
-    final String code = """
+    final String code =
+        """
         _method a.b(p_a)
         _endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);

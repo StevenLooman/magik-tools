@@ -37,7 +37,8 @@ class FormattingProviderTest {
   // region: Whitespace
   @Test
   void testWhitespaceMethodDefintion1() {
-    final String code = """
+    final String code =
+        """
         _method a. b(x, y, z)
         _endmethod
         """;
@@ -48,7 +49,8 @@ class FormattingProviderTest {
 
   @Test
   void testWhitespaceMethodDefintion2() {
-    final String code = """
+    final String code =
+        """
         _method a.b (x, y, z)
         _endmethod
         """;
@@ -59,7 +61,8 @@ class FormattingProviderTest {
 
   @Test
   void testWhitespaceParameters1() {
-    final String code = """
+    final String code =
+        """
         _method a.b(x,y, z)
         _endmethod
         """;
@@ -75,7 +78,8 @@ class FormattingProviderTest {
 
   @Test
   void testWhitespaceParameters2() {
-    final String code = """
+    final String code =
+        """
         _method a.b(x, y,z)
         _endmethod
         """;
@@ -91,7 +95,8 @@ class FormattingProviderTest {
 
   @Test
   void testWhitespaceParameters3() {
-    final String code = """
+    final String code =
+        """
         _method a.b(x, y , z)
         _endmethod
         """;
@@ -225,7 +230,8 @@ class FormattingProviderTest {
 
   @Test
   void testWhitespaceMethodInvocationMultiLine() {
-    final String code = """
+    final String code =
+        """
         obj.
         m()
         """;
@@ -380,7 +386,8 @@ class FormattingProviderTest {
 
   @Test
   void testIndentVariableDefinitionAssignment() {
-    final String code = """
+    final String code =
+        """
         _local a <<
         	10""";
     final List<TextEdit> edits = this.getEdits(code);
@@ -392,7 +399,8 @@ class FormattingProviderTest {
   // region: Comments
   @Test
   void testCommentsLineBefore() {
-    final String code = """
+    final String code =
+        """
          # comment 1
         a
         """;
@@ -407,7 +415,8 @@ class FormattingProviderTest {
 
   @Test
   void testCommentsLineAfter() {
-    final String code = """
+    final String code =
+        """
         a
          # comment 1
         """;
@@ -511,7 +520,8 @@ class FormattingProviderTest {
 
   @Test
   void testTrimFinalNewlinesPresent() {
-    final String code = """
+    final String code =
+        """
       1 + 1
 
       """;

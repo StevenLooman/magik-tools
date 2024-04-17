@@ -50,7 +50,8 @@ class HoverProviderTest {
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 
-    final String code = """
+    final String code =
+        """
         _method object.hover_me_method()
         _endmethod""";
     final Position position = new Position(0, 18); // On 'hover_me_method'.
@@ -80,7 +81,8 @@ class HoverProviderTest {
             Collections.emptyList(),
             Collections.emptySet()));
 
-    final String code = """
+    final String code =
+        """
         _method hover_me_type.method()
         _endmethod""";
     final Position position = new Position(0, 10); // On 'hover_me_type'.

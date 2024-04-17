@@ -12,7 +12,8 @@ class TypeDocCheckTest extends MagikCheckTestBase {
 
   @Test
   void testParameterMissing() {
-    final String code = """
+    final String code =
+        """
         _method a.m1(p1)
         _endmethod""";
     final MagikCheck check = new TypeDocCheck();

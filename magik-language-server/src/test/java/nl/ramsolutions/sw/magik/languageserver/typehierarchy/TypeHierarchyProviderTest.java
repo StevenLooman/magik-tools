@@ -44,7 +44,8 @@ class TypeHierarchyProviderTest {
             Collections.emptyList(),
             Collections.emptySet()));
 
-    final String code = """
+    final String code =
+        """
         _method exemplar.method
         _endmethod
         """;

@@ -58,7 +58,8 @@ class LocalImportProcedureCheckTest extends MagikCheckTestBase {
   @Test
   void testTry() {
     final MagikCheck check = new LocalImportProcedureCheck();
-    final String code = """
+    final String code =
+        """
         _try _with a
         _when error
         _endtry
@@ -70,7 +71,8 @@ class LocalImportProcedureCheckTest extends MagikCheckTestBase {
   @Test
   void testSyntaxError() {
     final MagikCheck check = new LocalImportProcedureCheck();
-    final String code = """
+    final String code =
+        """
         _proc()
           _error
         _endproc

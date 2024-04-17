@@ -20,7 +20,8 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
 
   @Test
   void testMethodUnknown() {
-    final String code = """
+    final String code =
+        """
         _block
           object.m()
         _endblock""";
@@ -64,7 +65,8 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
             ExpressionResultString.EMPTY,
             ExpressionResultString.EMPTY));
 
-    final String code = """
+    final String code =
+        """
         _block
           object.m(object, object)
         _endblock""";
@@ -107,7 +109,8 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
             ExpressionResultString.EMPTY,
             ExpressionResultString.EMPTY));
 
-    final String code = """
+    final String code =
+        """
         _block
           object.m(object)
         _endblock""";

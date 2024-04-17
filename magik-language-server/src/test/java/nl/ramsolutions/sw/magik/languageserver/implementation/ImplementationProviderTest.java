@@ -82,7 +82,8 @@ class ImplementationProviderTest {
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 
-    final String code = """
+    final String code =
+        """
         _abstract _method a.abstract()
         _endmethod""";
     final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);

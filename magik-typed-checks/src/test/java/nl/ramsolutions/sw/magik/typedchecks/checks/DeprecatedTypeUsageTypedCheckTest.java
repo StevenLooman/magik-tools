@@ -36,7 +36,8 @@ public class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString typeStr = TypeString.ofIdentifier("test", "user");
     this.addExemplarDefinition(definitionKeeper, typeStr, "deprecated");
-    final String code = """
+    final String code =
+        """
         _block
           user:test.m()
         _endblock""";
@@ -50,7 +51,8 @@ public class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString typeStr = TypeString.ofIdentifier("test", "user");
     this.addExemplarDefinition(definitionKeeper, typeStr, "not_deprecated");
-    final String code = """
+    final String code =
+        """
         _block
           user:test.m()
         _endblock""";

@@ -44,7 +44,8 @@ class NoSelfUseCheckTest extends MagikCheckTestBase {
   @Test
   void testInvalid() {
     final MagikCheck check = new NoSelfUseCheck();
-    final String code = """
+    final String code =
+        """
         _method a.b
             show(1)
         _endmethod""";

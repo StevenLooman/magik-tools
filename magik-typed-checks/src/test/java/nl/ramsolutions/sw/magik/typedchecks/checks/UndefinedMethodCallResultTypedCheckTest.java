@@ -19,7 +19,8 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testMethodInvocationUndefined() {
-    final String code = """
+    final String code =
+        """
         _block
           object.m()
         _endblock""";
@@ -31,7 +32,8 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testMethodInvocationDefined() {
-    final String code = """
+    final String code =
+        """
         _block
           object.m()
         _endblock""";
@@ -58,7 +60,8 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
   void testMethodInvocationOnUndefined() {
-    final String code = """
+    final String code =
+        """
         _block
           undefined.m()
         _endblock""";
