@@ -175,19 +175,27 @@ public class TypeStringResolver {
    * @return True if is kind of, false otherwise.
    */
   public boolean isKindOf(final TypeString typeString1, final TypeString typeString2) {
-    final TypeStringDefinition definition1 =
-        this.resolve(typeString1).stream().findAny().orElse(null);
-    if (definition1 == null) {
-      return false;
+    for (final TypeString typeStr1 : TypeString.combine(typeString1).getCombinedTypes()) {
+      final TypeStringDefinition definition1 =
+          this.resolve(typeStr1).stream().findAny().orElse(null);
+      if (definition1 == null) {
+        continue;
+      }
+
+      for (final TypeString typeStr2 : TypeString.combine(typeString2).getCombinedTypes()) {
+        final TypeStringDefinition definition2 =
+            this.resolve(typeStr2).stream().findAny().orElse(null);
+        if (definition2 == null) {
+          continue;
+        }
+
+        if (this.isKindOf(definition1, definition2)) {
+          return true;
+        }
+      }
     }
 
-    final TypeStringDefinition definition2 =
-        this.resolve(typeString2).stream().findAny().orElse(null);
-    if (definition2 == null) {
-      return false;
-    }
-
-    return this.isKindOf(definition1, definition2);
+    return false;
   }
 
   /**

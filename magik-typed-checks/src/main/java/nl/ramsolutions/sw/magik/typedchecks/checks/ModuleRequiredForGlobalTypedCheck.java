@@ -57,7 +57,7 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
     final URI uri = this.getMagikFile().getUri();
     final Path path = Path.of(uri);
     try {
-      // TODO: Better get this from IDefinitionKeeper.
+      // TODO: Better get this from IDefinitionKeeper, instead of reading this every for every file.
       return ModuleDefinitionScanner.swModuleForPath(path);
     } catch (final RecognitionException exception) {
       LOGGER.warn("Unable to parse module.def");
@@ -75,15 +75,15 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
     final Deque<ModuleDefinition> stack = new ArrayDeque<>();
     stack.add(this.moduleDefinition);
     while (!stack.isEmpty()) {
-      final ModuleDefinition currentModDef = stack.pop();
-
-      final String moduleName = currentModDef.getName();
+      final ModuleDefinition currentModuleDefinition = stack.pop();
+      final String moduleName = currentModuleDefinition.getName();
       if (seen.contains(moduleName)) {
         continue;
       }
 
-      final Collection<String> requireds = currentModDef.getRequireds();
-      seen.addAll(requireds);
+      seen.add(moduleName);
+
+      final Collection<String> requireds = currentModuleDefinition.getRequireds();
       requireds.stream()
           .map(definitionKeeper::getModuleDefinitions)
           .flatMap(Collection::stream)
