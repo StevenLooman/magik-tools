@@ -412,6 +412,10 @@ public final class TypeString implements Comparable<TypeString> {
 
   /** Get parts of (combined) string. */
   public List<TypeString> getCombinedTypes() {
+    if (this.combinedTypes.isEmpty()) {
+      return List.of(this);
+    }
+
     return Collections.unmodifiableList(this.combinedTypes);
   }
 
