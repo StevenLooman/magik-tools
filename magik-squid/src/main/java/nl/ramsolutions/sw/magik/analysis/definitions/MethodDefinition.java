@@ -146,12 +146,8 @@ public class MethodDefinition extends Definition {
     return this.methodName;
   }
 
-  public String getNameWithParameters() {
+  public String getMethodNameWithParameters() {
     final StringBuilder builder = new StringBuilder();
-
-    // Type name.
-    final String ownerName = this.getTypeName().getFullString();
-    builder.append(ownerName);
 
     // Determine method name with parameters.
     final String methodName = this.getMethodName();
@@ -183,8 +179,7 @@ public class MethodDefinition extends Definition {
       builder.append(parametersStr);
       builder.append(methodName.substring(1)); // "]<<" or "]^<<""
     } else {
-      builder.append(".");
-      int bracketIndex = methodName.indexOf('(');
+      final int bracketIndex = methodName.indexOf('(');
       if (bracketIndex != -1) {
         builder.append(methodName.substring(0, bracketIndex + 1));
         builder.append(parametersStr);
@@ -203,11 +198,30 @@ public class MethodDefinition extends Definition {
     return builder.toString();
   }
 
+  public String getNameWithParameters() {
+    final StringBuilder builder = new StringBuilder();
+
+    // Type name.
+    final String ownerName = this.getTypeName().getFullString();
+    builder.append(ownerName);
+
+    // Method name.
+    final String methodNameWithParameters = this.getMethodNameWithParameters();
+    if (this.methodName.startsWith("[]")) {
+      builder.append(methodNameWithParameters);
+    } else {
+      builder.append(".");
+      builder.append(methodNameWithParameters);
+    }
+
+    return builder.toString();
+  }
+
   @Override
   public String getName() {
     return this.methodName.startsWith("[")
-        ? typeName.getFullString() + methodName
-        : typeName.getFullString() + "." + methodName;
+        ? this.typeName.getFullString() + this.methodName
+        : this.typeName.getFullString() + "." + this.methodName;
   }
 
   /**
