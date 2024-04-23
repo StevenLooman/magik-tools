@@ -344,7 +344,7 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         .collect(Collectors.toSet());
   }
 
-  /** Clear any contained {@link Definition}s. */
+  /** Clear any contained {@link MagikDefinition}s. */
   @Override
   public void clear() {
     this.productDefinitions.clear();

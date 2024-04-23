@@ -7,7 +7,7 @@ import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
 /** Definition of a global. */
-public class GlobalDefinition extends TypeStringDefinition {
+public class GlobalDefinition extends MagikDefinition implements ITypeStringDefinition {
 
   private final TypeString typeName;
   private final TypeString aliasedTypeName;

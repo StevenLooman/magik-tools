@@ -33,10 +33,10 @@ public class InlayHintProvider {
     final Range range = Lsp4jConversion.rangeFromLsp4j(lsp4jrange);
     final ArgumentInlayHintSupplier methodInvocationSupplier = new ArgumentInlayHintSupplier();
     final AtomInlayHintSupplier atomSupplier = new AtomInlayHintSupplier();
-    return Stream.concat(
+    return Stream.of(
             methodInvocationSupplier.getMethodInvocationInlayHints(magikFile, range),
             atomSupplier.getAtomInlayHints(magikFile, range))
-        // TODO: Sort on line/column?
+        .flatMap(stream -> stream)
         .toList();
   }
 }

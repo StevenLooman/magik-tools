@@ -6,9 +6,9 @@ import java.util.Objects;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.DocumentSymbol;
@@ -43,7 +43,7 @@ public class DocumentSymbolProvider {
         .toList();
   }
 
-  private DocumentSymbol convertDefinition(final Definition definition) {
+  private DocumentSymbol convertDefinition(final MagikDefinition definition) {
     final SymbolKind symbolKind = this.symbolKindForDefinition(definition);
     final AstNode definitionNode = definition.getNode();
     Objects.requireNonNull(definitionNode);
@@ -62,7 +62,7 @@ public class DocumentSymbolProvider {
     return documentSymbol;
   }
 
-  private SymbolKind symbolKindForDefinition(final Definition definition) {
+  private SymbolKind symbolKindForDefinition(final MagikDefinition definition) {
     if (definition instanceof PackageDefinition) {
       return SymbolKind.Namespace;
     } else if (definition instanceof BinaryOperatorDefinition) {

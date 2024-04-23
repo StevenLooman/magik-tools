@@ -18,10 +18,10 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
@@ -152,9 +152,9 @@ public class MagikIndexer {
     }
   }
 
-  private void handleDefinition(final MagikFile magikFile, final Definition rawDefinition) {
+  private void handleDefinition(final MagikFile magikFile, final MagikDefinition rawDefinition) {
     // Strip off AstNode, we don't want to store this.
-    final Definition definition = rawDefinition.getWithoutNode();
+    final MagikDefinition definition = rawDefinition.getWithoutNode();
 
     final Path path = Path.of(magikFile.getUri());
     if (definition instanceof PackageDefinition packageDefinition) {

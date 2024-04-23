@@ -6,7 +6,7 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import nl.ramsolutions.sw.magik.Location;
 
 /** Base class for definitions. */
-public abstract class Definition {
+public abstract class MagikDefinition implements IDefinition {
 
   private final @Nullable Location location;
   private final @Nullable String moduleName;
@@ -21,7 +21,7 @@ public abstract class Definition {
    * @param doc Doc.
    * @param node Node.
    */
-  protected Definition(
+  protected MagikDefinition(
       final @Nullable Location location,
       final @Nullable String moduleName,
       final @Nullable String doc,
@@ -92,5 +92,5 @@ public abstract class Definition {
    *
    * @return Copy of self.
    */
-  public abstract Definition getWithoutNode();
+  public abstract MagikDefinition getWithoutNode();
 }

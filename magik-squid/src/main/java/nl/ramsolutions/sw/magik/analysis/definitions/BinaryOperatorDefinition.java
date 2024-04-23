@@ -7,7 +7,7 @@ import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
 /** Binary operator definition. */
-public class BinaryOperatorDefinition extends Definition {
+public class BinaryOperatorDefinition extends MagikDefinition {
 
   private final String operator;
   private final TypeString lhsTypeName;
@@ -81,7 +81,7 @@ public class BinaryOperatorDefinition extends Definition {
   }
 
   @Override
-  public Definition getWithoutNode() {
+  public MagikDefinition getWithoutNode() {
     return new BinaryOperatorDefinition(
         this.getLocation(),
         this.getModuleName(),

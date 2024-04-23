@@ -7,7 +7,7 @@ import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
 /** Slot definition. */
-public class SlotDefinition extends Definition {
+public class SlotDefinition extends MagikDefinition {
 
   private final String name;
   private final TypeString typeName;

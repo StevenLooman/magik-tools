@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
@@ -56,7 +56,7 @@ public class ProcedureDefinitionParser {
    *
    * @return List of parsed definitions.
    */
-  public List<Definition> parseDefinitions() {
+  public List<MagikDefinition> parseDefinitions() {
     final AstNode syntaxErrorNode = this.node.getFirstChild(MagikGrammar.SYNTAX_ERROR);
     if (syntaxErrorNode != null) {
       return Collections.emptyList();

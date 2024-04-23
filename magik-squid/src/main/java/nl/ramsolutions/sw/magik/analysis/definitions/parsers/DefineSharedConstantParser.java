@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
@@ -82,7 +82,7 @@ public class DefineSharedConstantParser {
    *
    * @return List of parsed definitions.
    */
-  public List<Definition> parseDefinitions() {
+  public List<MagikDefinition> parseDefinitions() {
     // Some sanity.
     final AstNode parentNode = this.node.getParent();
     final AstNode atomNode = parentNode.getFirstChild();

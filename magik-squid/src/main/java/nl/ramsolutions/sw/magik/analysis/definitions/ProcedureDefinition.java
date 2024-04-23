@@ -12,7 +12,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
 /** Procedure definition. */
-public class ProcedureDefinition extends TypeStringDefinition {
+public class ProcedureDefinition extends MagikDefinition
+    implements ITypeStringDefinition, ICallableDefinition {
 
   private static final String DEFAULT_NAME = "_unnamed";
 
@@ -174,14 +175,17 @@ public class ProcedureDefinition extends TypeStringDefinition {
     return builder.toString();
   }
 
+  @Override
   public List<ParameterDefinition> getParameters() {
     return this.parameters;
   }
 
+  @Override
   public ExpressionResultString getReturnTypes() {
     return this.returnTypes;
   }
 
+  @Override
   public ExpressionResultString getLoopTypes() {
     return this.loopTypes;
   }

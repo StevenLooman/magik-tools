@@ -2,7 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureDefinitionParser;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -27,7 +27,7 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
    */
   void handleProcedureDefinition(final AstNode node) {
     final ProcedureDefinitionParser parser = new ProcedureDefinitionParser(node);
-    final List<Definition> definitions = parser.parseDefinitions();
+    final List<MagikDefinition> definitions = parser.parseDefinitions();
     final ProcedureDefinition procDef = (ProcedureDefinition) definitions.iterator().next();
 
     // Try to determine result if none was given via type-doc.

@@ -6,9 +6,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 
 /** Smallworld module. */
-public class ModuleDefinition {
+public class ModuleDefinition implements IDefinition {
 
   private final @Nullable Location location;
   private final String name;

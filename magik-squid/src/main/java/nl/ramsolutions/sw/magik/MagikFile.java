@@ -16,8 +16,8 @@ import java.util.stream.IntStream;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
-import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeBuilderVisitor;
@@ -34,7 +34,7 @@ public class MagikFile extends OpenedFile {
   private final MagikAnalysisConfiguration configuration;
   private AstNode astNode;
   private GlobalScope globalScope;
-  private List<Definition> definitions;
+  private List<MagikDefinition> definitions;
   private final Map<CommentInstructionReader.Instruction, Map<Integer, Map<String, String>>>
       statementInstructions = new HashMap<>();
   private final Map<CommentInstructionReader.Instruction, Map<Scope, Map<String, String>>>
@@ -132,11 +132,11 @@ public class MagikFile extends OpenedFile {
   }
 
   /**
-   * Get {@link Definition}s in this file.
+   * Get {@link MagikDefinition}s in this file.
    *
-   * @return {@link Definition}s in this file.
+   * @return {@link MagikDefinition}s in this file.
    */
-  public synchronized List<Definition> getDefinitions() {
+  public synchronized List<MagikDefinition> getDefinitions() {
     if (this.definitions == null) {
       final DefinitionReader definitionReader = new DefinitionReader(this.configuration);
       final AstNode topNode = this.getTopNode();
