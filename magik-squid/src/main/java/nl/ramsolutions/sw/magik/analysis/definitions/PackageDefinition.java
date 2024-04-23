@@ -8,7 +8,7 @@ import java.util.Objects;
 import nl.ramsolutions.sw.magik.Location;
 
 /** Package definition. */
-public class PackageDefinition extends Definition {
+public class PackageDefinition extends MagikDefinition {
 
   private final String name;
   private final List<String> uses;

@@ -119,7 +119,6 @@ public class DefinitionsProvider {
             MagikGrammar.METHOD_DEFINITION,
             MagikGrammar.ATOM,
             MagikGrammar.CONDITION_NAME);
-    LOGGER.trace("Wanted node: {}", wantedNode);
     if (wantedNode == null) {
       return Collections.emptyList();
     } else if (wantedNode.is(MagikGrammar.METHOD_INVOCATION)) {

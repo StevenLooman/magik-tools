@@ -12,8 +12,8 @@ import java.util.Objects;
 import java.util.Set;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
@@ -77,7 +77,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
    * @return List of parsed definitions.
    */
   @Override
-  public List<Definition> parseDefinitions() {
+  public List<MagikDefinition> parseDefinitions() {
     final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
     final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
@@ -177,7 +177,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
             parents,
             topics);
 
-    final List<Definition> definitions = new ArrayList<>();
+    final List<MagikDefinition> definitions = new ArrayList<>();
     definitions.add(slottedExemplarDefinition);
     definitions.addAll(methodDefinitions);
     return definitions;

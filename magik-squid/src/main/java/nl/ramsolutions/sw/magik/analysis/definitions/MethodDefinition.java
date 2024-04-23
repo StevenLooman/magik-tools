@@ -13,7 +13,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /** Method definition. */
-public class MethodDefinition extends Definition {
+public class MethodDefinition extends MagikDefinition implements ICallableDefinition {
 
   /** Method definition modifier. */
   @SuppressWarnings("checkstyle:JavadocVariable")
@@ -233,19 +233,17 @@ public class MethodDefinition extends Definition {
     return Collections.unmodifiableSet(this.modifiers);
   }
 
-  /**
-   * Get parameters.
-   *
-   * @return Parameters.
-   */
+  @Override
   public List<ParameterDefinition> getParameters() {
     return Collections.unmodifiableList(this.parameters);
   }
 
+  @Override
   public ExpressionResultString getReturnTypes() {
     return this.returnTypes;
   }
 
+  @Override
   public ExpressionResultString getLoopTypes() {
     return this.loopTypes;
   }

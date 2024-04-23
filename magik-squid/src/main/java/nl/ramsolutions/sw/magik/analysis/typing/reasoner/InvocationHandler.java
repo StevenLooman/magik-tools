@@ -117,8 +117,6 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     ExpressionResultString callResult = null;
     ExpressionResultString iterResult = null;
     if (calledTypeStr.equals(TypeString.SW_PROCEDURE)) {
-      // final TypeStringDefinition typeStringDef = this.state.getTypeStringDefinition(calledNode);
-      // // TODO: What to do?
       final MethodDefinition invokeDef =
           this.typeResolver.getMethodDefinitions(calledTypeStr, "invoke()").stream()
               .findAny()

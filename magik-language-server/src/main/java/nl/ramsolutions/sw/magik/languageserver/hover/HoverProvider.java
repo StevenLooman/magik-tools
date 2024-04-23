@@ -18,11 +18,11 @@ import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.TypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -442,7 +442,7 @@ public class HoverProvider {
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
     final ExpressionResultString result = reasonerState.getNodeType(node);
     final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
-    final TypeStringDefinition typeStringDefinition =
+    final ITypeStringDefinition typeStringDefinition =
         reasonerState.getTypeStringDefinition(typeStr);
     // TODO: Removed some resolving of aliases etc.
     if (typeStringDefinition instanceof ProcedureDefinition procedureDefinition) {

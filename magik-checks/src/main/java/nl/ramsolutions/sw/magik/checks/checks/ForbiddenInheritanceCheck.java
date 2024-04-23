@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
@@ -47,7 +47,7 @@ public class ForbiddenInheritanceCheck extends MagikCheck {
         .forEach(definition -> this.addIssue(definition.getNode(), "Forbidden parent"));
   }
 
-  private boolean isForbiddenParent(final Definition definition) {
+  private boolean isForbiddenParent(final MagikDefinition definition) {
     final ExemplarDefinition exemplarDefinition = (ExemplarDefinition) definition;
     final List<TypeString> parents = exemplarDefinition.getParents();
     final Set<TypeString> theForbiddenParents = this.getForbiddenParents();

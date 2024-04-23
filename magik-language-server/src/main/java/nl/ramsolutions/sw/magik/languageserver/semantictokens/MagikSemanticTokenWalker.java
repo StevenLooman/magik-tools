@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.TypeStringDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -374,7 +374,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
       case GLOBAL, DYNAMIC:
         final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
         final TypeStringResolver resolver = this.magikFile.getTypeStringResolver();
-        final Collection<TypeStringDefinition> typeDefs = resolver.resolve(typeString);
+        final Collection<ITypeStringDefinition> typeDefs = resolver.resolve(typeString);
         final ExemplarDefinition exemplarDef =
             typeDefs.stream()
                 .filter(ExemplarDefinition.class::isInstance)
@@ -426,7 +426,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
 
   private boolean isKnownType(final TypeString typeString) {
     final TypeStringResolver resolver = this.magikFile.getTypeStringResolver();
-    final Collection<TypeStringDefinition> typeDefs = resolver.resolve(typeString);
+    final Collection<ITypeStringDefinition> typeDefs = resolver.resolve(typeString);
     return typeDefs.stream().anyMatch(ExemplarDefinition.class::isInstance);
   }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
@@ -81,7 +81,7 @@ public class DefineBinaryOperatorCaseParser {
    *
    * @return List of parsed definitions.
    */
-  public List<Definition> parseDefinitions() {
+  public List<MagikDefinition> parseDefinitions() {
     // Some sanity.
     final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
     final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);

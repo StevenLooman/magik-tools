@@ -13,9 +13,9 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.TypeStringDefinition;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SymbolKind;
@@ -110,7 +110,7 @@ public class SymbolProvider {
   }
 
   private void gatherTypes(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
-    final Predicate<TypeStringDefinition> predicate = this.buildTypePredicate(query);
+    final Predicate<ITypeStringDefinition> predicate = this.buildTypePredicate(query);
     for (final ExemplarDefinition definition : this.definitionKeeper.getExemplarDefinitions()) {
       if (predicate.test(definition)) {
         final Location typeLocation = definition.getLocation();
@@ -172,7 +172,7 @@ public class SymbolProvider {
    * @param query Query string
    * @return Predicate to match with.
    */
-  private Predicate<TypeStringDefinition> buildTypePredicate(final String query) {
+  private Predicate<ITypeStringDefinition> buildTypePredicate(final String query) {
     final int dotIndex = query.indexOf('.');
     if (dotIndex != -1) {
       return type -> false;

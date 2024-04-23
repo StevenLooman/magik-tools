@@ -9,7 +9,7 @@ import java.util.Objects;
 import nl.ramsolutions.sw.magik.Location;
 
 /** Condition definition. */
-public class ConditionDefinition extends Definition {
+public class ConditionDefinition extends MagikDefinition {
 
   private final String name;
   private final @Nullable String parent;
@@ -59,7 +59,7 @@ public class ConditionDefinition extends Definition {
   }
 
   @Override
-  public Definition getWithoutNode() {
+  public MagikDefinition getWithoutNode() {
     return new ConditionDefinition(
         this.getLocation(),
         this.getModuleName(),

@@ -4,8 +4,8 @@ import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefSlottedExemplarParser;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
@@ -87,7 +87,7 @@ public class TypeDocCheck extends MagikCheck {
     final Map<String, AstNode> docSlotNameNodes = typeDocParser.getSlotNameNodes();
 
     final DefSlottedExemplarParser parser = new DefSlottedExemplarParser(node);
-    final List<Definition> definitions = parser.parseDefinitions();
+    final List<MagikDefinition> definitions = parser.parseDefinitions();
     final ExemplarDefinition exemplarDefinition = (ExemplarDefinition) definitions.get(0);
     final List<SlotDefinition> slots = exemplarDefinition.getSlots();
     final Map<String, SlotDefinition> slotNames =

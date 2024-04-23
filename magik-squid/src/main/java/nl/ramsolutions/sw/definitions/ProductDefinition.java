@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 
 /** Smallworld product. */
-public class ProductDefinition {
+public class ProductDefinition implements IDefinition {
 
   private final String name;
   private final @Nullable Location location;

@@ -16,8 +16,8 @@ import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
-import nl.ramsolutions.sw.magik.analysis.definitions.Definition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
@@ -57,7 +57,7 @@ public class MethodDefinitionParser {
    *
    * @return List of parsed definitions.
    */
-  public List<Definition> parseDefinitions() {
+  public List<MagikDefinition> parseDefinitions() {
     // Don't burn ourselves on syntax errors.
     final AstNode syntaxErrorNode = this.node.getFirstChild(MagikGrammar.SYNTAX_ERROR);
     if (syntaxErrorNode != null) {

@@ -27,7 +27,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(PackageDefinition.class);
@@ -45,7 +45,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(PackageDefinition.class);
@@ -63,7 +63,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
@@ -81,7 +81,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
@@ -107,7 +107,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(4);
 
     assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
@@ -148,7 +148,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
@@ -168,7 +168,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
@@ -189,7 +189,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
@@ -210,7 +210,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(ExemplarDefinition.class);
@@ -227,7 +227,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(2);
 
     final ProcedureDefinition procDef =
@@ -262,7 +262,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
@@ -280,7 +280,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).isEmpty();
   }
 
@@ -292,7 +292,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
@@ -314,7 +314,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
@@ -355,7 +355,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
@@ -373,7 +373,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
@@ -391,7 +391,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
@@ -409,7 +409,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(3);
 
     assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
@@ -439,7 +439,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(3);
 
     assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
@@ -476,7 +476,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
@@ -494,7 +494,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(MethodDefinition.class);
@@ -512,7 +512,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(GlobalDefinition.class);
@@ -528,7 +528,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(ConditionDefinition.class);
@@ -550,7 +550,7 @@ class DefinitionReaderTest {
         new DefinitionReader(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION);
     reader.walkAst(node);
 
-    final List<Definition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions).hasSize(1);
 
     assertThat(definitions.get(0)).isInstanceOf(ConditionDefinition.class);
