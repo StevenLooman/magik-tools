@@ -148,7 +148,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
 
             // Inform client we're initialized.
             this.debugClient.initialized();
-          } catch (IOException | SlapException exception) {
+          } catch (final IOException | SlapException exception) {
             throw new CompletionException(exception);
           }
 
@@ -164,7 +164,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     try {
       final Map<String, Object> connect = (Map<String, Object>) args.get(CONNECT_ARG);
       return (String) connect.get(HOST_ARG);
-    } catch (ClassCastException ex) {
+    } catch (final ClassCastException exception) {
       return null;
     }
   }
@@ -180,7 +180,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
 
       final Double portDouble = (Double) portObj;
       return (int) Math.floor(portDouble);
-    } catch (ClassCastException ex) {
+    } catch (final ClassCastException exception) {
       return null;
     }
   }
@@ -205,7 +205,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
                 return Map.entry(from, to);
               })
           .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
-    } catch (ClassCastException ex) {
+    } catch (final ClassCastException exception) {
       return Collections.emptyMap();
     }
   }
@@ -216,12 +216,14 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
 
     return CompletableFuture.runAsync(
         () -> {
-          try {
-            this.slapProtocol.close();
-          } catch (IOException exception) {
-            LOGGER.error(exception.getMessage(), exception);
+          if (this.slapProtocol != null) {
+            try {
+              this.slapProtocol.close();
+            } catch (final IOException exception) {
+              LOGGER.error(exception.getMessage(), exception);
+            }
+            this.slapProtocol = null;
           }
-          this.slapProtocol = null;
 
           this.threadManager = null;
           this.variableManager = null;
@@ -244,10 +246,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
             final Thread[] threadsArr = threads.stream().toArray(Thread[]::new);
             response.setThreads(threadsArr);
             return response;
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
         });
@@ -269,10 +271,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
             final StackFrame[] stackFramesArr = stackFrames.stream().toArray(StackFrame[]::new);
             response.setStackFrames(stackFramesArr);
             return response;
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
         });
@@ -310,10 +312,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
             final Variable[] variables = Lsp4jConversion.toLsp4j(magikVariables);
             response.setVariables(variables);
             return response;
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
         });
@@ -328,10 +330,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
           final int threadId = args.getThreadId();
           try {
             this.threadManager.continue_(threadId);
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
 
@@ -355,10 +357,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
             eventArgs.setThreadId(threadId);
             eventArgs.setReason(StoppedEventArgumentsReason.PAUSE);
             this.debugClient.stopped(eventArgs);
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
         });
@@ -373,10 +375,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
           final int threadId = args.getThreadId();
           try {
             this.threadManager.stepNext(threadId);
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
         });
@@ -391,10 +393,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
           final int threadId = args.getThreadId();
           try {
             this.threadManager.stepIn(threadId);
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
         });
@@ -409,10 +411,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
           final int threadId = args.getThreadId();
           try {
             this.threadManager.stepOut(threadId);
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
         });
@@ -444,10 +446,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
             final Breakpoint[] breakpoints = Lsp4jConversion.toLsp4j(source, magikBreakpoints);
             response.setBreakpoints(breakpoints);
             return response;
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
         });
@@ -474,10 +476,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
             final Breakpoint[] breakpoints = Lsp4jConversion.toLsp4j(null, magikBreakpoints);
             response.setBreakpoints(breakpoints);
             return response;
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
         });
@@ -503,10 +505,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
               response.setBreakpoints(breakpoints);
             }
             return response;
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
         });
@@ -529,10 +531,10 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
             final EvaluateResponse response = new EvaluateResponse();
             response.setResult(result);
             return response;
-          } catch (InterruptedException exception) {
+          } catch (final InterruptedException exception) {
             java.lang.Thread.currentThread().interrupt();
             throw new CompletionException(exception.getMessage(), exception);
-          } catch (IOException | ExecutionException exception) {
+          } catch (final IOException | ExecutionException exception) {
             throw new CompletionException(exception.getMessage(), exception);
           }
         });
@@ -554,8 +556,8 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
             try {
               final String content = Files.readString(mappedPath);
               sourceResponse.setContent(content);
-            } catch (IOException ex) {
-              LOGGER.error("Error reading file: " + pathStr, ex);
+            } catch (final IOException exception) {
+              LOGGER.error("Error reading file: " + pathStr, exception);
 
               sourceResponse.setContent("Error reading file: " + pathStr);
             }
