@@ -294,7 +294,7 @@ public class CompletionProvider {
         .filter(methodDef -> methodDef.getMethodName().contains(methodNamePart))
         .map(
             methodDef -> {
-              final String methodName = methodDef.getMethodName();
+              final String methodName = methodDef.getMethodNameWithParameters();
               final CompletionItem item = new CompletionItem(methodName);
               item.setInsertText(methodName);
               item.setDetail(methodDef.getTypeName().getFullString());
