@@ -44,12 +44,7 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
   @Override
   protected void walkPreMagik(final AstNode node) {
     this.moduleDefinition = this.readModuleDefinition();
-
-    if (this.moduleDefinition != null) {
-      this.requiredModules = this.getRequiredModules();
-    } else {
-      this.requiredModules = Collections.emptySet();
-    }
+    this.requiredModules = this.getRequiredModules();
   }
 
   @CheckForNull
@@ -69,6 +64,10 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
   }
 
   private Set<String> getRequiredModules() {
+    if (this.moduleDefinition == null) {
+      return Collections.emptySet();
+    }
+
     final Set<String> seen = new HashSet<>();
 
     final IDefinitionKeeper definitionKeeper = this.getDefinitionKeeper();
