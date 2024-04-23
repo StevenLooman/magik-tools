@@ -260,9 +260,7 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final TypeString bareTypeString = typeString.getWithoutGenerics();
     final Collection<MethodDefinition> definitions =
         this.methodDefinitions.getOrDefault(bareTypeString, Collections.emptySet());
-    return definitions.stream()
-        .filter(def -> def.getTypeName().equals(bareTypeString))
-        .collect(Collectors.toSet());
+    return Collections.unmodifiableCollection(definitions);
   }
 
   @Override

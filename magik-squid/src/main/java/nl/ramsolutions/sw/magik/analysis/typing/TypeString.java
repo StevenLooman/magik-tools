@@ -116,7 +116,7 @@ public final class TypeString implements Comparable<TypeString> {
   private static final String PARAMETER = "_parameter";
   private static final String COMBINED = "_combined";
 
-  @Nullable private final String string;
+  private final @Nullable String string;
   private final String currentPackage;
   private final List<TypeString> combinedTypes;
   private final List<TypeString> generics;
@@ -476,14 +476,10 @@ public final class TypeString implements Comparable<TypeString> {
 
   @Override
   public int hashCode() {
-    if (this.isCombined()) {
-      return Objects.hash(this.combinedTypes);
-    }
-
     // Hash the bare type, without a package.
-    final int index = this.string.indexOf(':');
+    final int index = this.string != null ? this.string.indexOf(':') : -1;
     final String str = index == -1 ? this.string : this.string.substring(index + 1);
-    return Objects.hash(str);
+    return Objects.hash(this.combinedTypes, str, this.generics, this.genericType);
   }
 
   @Override
