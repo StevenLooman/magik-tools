@@ -32,7 +32,7 @@ public class MagikChecksDiagnosticsProvider {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(MagikChecksDiagnosticsProvider.class);
   private static final Logger LOGGER_DURATION =
-      LoggerFactory.getLogger(MagikTypedChecksDiagnosticsProvider.class.getName() + "Duration");
+      LoggerFactory.getLogger(MagikChecksDiagnosticsProvider.class.getName() + "Duration");
   private static final Map<String, DiagnosticSeverity> SEVERITY_MAPPING =
       Map.of(
           "Major", DiagnosticSeverity.Error,
