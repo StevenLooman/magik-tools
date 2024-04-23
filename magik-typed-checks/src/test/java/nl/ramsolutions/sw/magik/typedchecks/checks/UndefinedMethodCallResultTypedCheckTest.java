@@ -18,6 +18,19 @@ import org.junit.jupiter.api.Test;
 class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
 
   @Test
+  void testMethodInvocationOnUndefined() {
+    final String code =
+        """
+        _block
+          undefined.m()
+        _endblock""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
+    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @Test
   void testMethodInvocationUndefined() {
     final String code =
         """
@@ -27,7 +40,7 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).hasSize(1);
+    assertThat(issues).isEmpty();
   }
 
   @Test
@@ -59,15 +72,30 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
   }
 
   @Test
-  void testMethodInvocationOnUndefined() {
+  void testMethodInvocationUndefinedResults() {
     final String code =
         """
         _block
-          undefined.m()
+          object.m()
         _endblock""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "m()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            Collections.emptySet(),
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+
     final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).isEmpty();
+    assertThat(issues).hasSize(1);
   }
 }
