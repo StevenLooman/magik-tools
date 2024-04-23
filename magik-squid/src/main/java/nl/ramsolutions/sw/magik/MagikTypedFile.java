@@ -13,6 +13,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 public class MagikTypedFile extends MagikFile {
 
   private final IDefinitionKeeper definitionKeeper;
+  private final TypeStringResolver typeStringResolver;
   private LocalTypeReasonerState reasonerState;
 
   /**
@@ -30,6 +31,7 @@ public class MagikTypedFile extends MagikFile {
       final IDefinitionKeeper definitionKeeper) {
     super(configuration, uri, text);
     this.definitionKeeper = definitionKeeper;
+    this.typeStringResolver = new TypeStringResolver(definitionKeeper);
   }
 
   /**
@@ -43,6 +45,7 @@ public class MagikTypedFile extends MagikFile {
       final URI uri, final String text, final IDefinitionKeeper definitionKeeper) {
     super(uri, text);
     this.definitionKeeper = definitionKeeper;
+    this.typeStringResolver = new TypeStringResolver(definitionKeeper);
   }
 
   /**
@@ -56,6 +59,7 @@ public class MagikTypedFile extends MagikFile {
       throws IOException {
     super(path);
     this.definitionKeeper = definitionKeeper;
+    this.typeStringResolver = new TypeStringResolver(definitionKeeper);
   }
 
   /** Get the {@link IDefinitionKeeper}. */
@@ -69,7 +73,7 @@ public class MagikTypedFile extends MagikFile {
    * @return
    */
   public TypeStringResolver getTypeStringResolver() {
-    return new TypeStringResolver(this.definitionKeeper);
+    return this.typeStringResolver;
   }
 
   /**
