@@ -28,6 +28,9 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
   FREE_LINES,
   FREE_LINE,
 
+  SYNTAX_ERROR_SECTION,
+  SYNTAX_ERROR_LINE,
+
   SPACING,
   NEWLINE,
   WHITESPACE,
@@ -50,11 +53,31 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
         .rule(PRODUCT_DEFINITION)
         .is(
             builder.optional(SPACING),
-            PRODUCT_IDENTIFICATION,
+            builder.optional(PRODUCT_IDENTIFICATION),
             builder.zeroOrMore(
                 builder.firstOf(
-                    DESCRIPTION, DO_NOT_TRANSLATE, REQUIRES, OPTIONAL, TITLE, VERSION, SPACING)),
+                    DESCRIPTION,
+                    DO_NOT_TRANSLATE,
+                    REQUIRES,
+                    OPTIONAL,
+                    TITLE,
+                    VERSION,
+                    SPACING,
+                    SYNTAX_ERROR_SECTION,
+                    SYNTAX_ERROR_LINE)),
             builder.token(GenericTokenType.EOF, builder.endOfInput()));
+
+    builder
+        .rule(SYNTAX_ERROR_SECTION)
+        .is(
+            builder.regexp(
+                SwProductDefinitionGrammar.syntaxErrorRegexp(SwProductDefinitionKeyword.END)),
+            SwProductDefinitionKeyword.END);
+    builder
+        .rule(SYNTAX_ERROR_LINE)
+        .is(
+            builder.regexp("(?!" + SwProductDefinitionKeyword.END.getValue() + ").+"),
+            builder.optional(builder.regexp("[\r\n]+")));
 
     builder.rule(PRODUCT_IDENTIFICATION).is(PRODUCT_NAME, WHITESPACE, PRODUCT_TYPE);
     builder.rule(PRODUCT_NAME).is(IDENTIFIER);
@@ -132,5 +155,10 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
     for (final SwProductDefinitionKeyword keyword : SwProductDefinitionKeyword.values()) {
       builder.rule(keyword).is(builder.regexp("(?i)" + keyword.getValue() + "(?!\\w)")).skip();
     }
+  }
+
+  static String syntaxErrorRegexp(final SwProductDefinitionKeyword keyword) {
+    // Eat up anything to keyword.
+    return "(?s).+?(?=(?i)" + keyword.getValue() + ")";
   }
 }

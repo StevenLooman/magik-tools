@@ -81,6 +81,8 @@ public final class ProductDefinitionScanner {
   /** Product definition filename. */
   public static final String SW_PRODUCT_DEF = "product.def";
 
+  private static final String UNDEFINED_PRODUCT_NAME = "_undefined_product";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(ProductDefinitionScanner.class);
   private static final Path SW_PRODUCT_DEF_PATH = Path.of(ProductDefinitionScanner.SW_PRODUCT_DEF);
 
@@ -136,11 +138,16 @@ public final class ProductDefinitionScanner {
     final URI uri = path.toUri();
     final Location location = new Location(uri);
 
+    final String productName;
     final AstNode productIdentNode =
         node.getFirstChild(SwProductDefinitionGrammar.PRODUCT_IDENTIFICATION);
-    final AstNode nameNode =
-        productIdentNode.getFirstChild(SwProductDefinitionGrammar.PRODUCT_NAME);
-    final String productName = nameNode.getTokenValue();
+    if (productIdentNode != null) {
+      final AstNode nameNode =
+          productIdentNode.getFirstChild(SwProductDefinitionGrammar.PRODUCT_NAME);
+      productName = nameNode.getTokenValue();
+    } else {
+      productName = ProductDefinitionScanner.UNDEFINED_PRODUCT_NAME;
+    }
 
     final AstNode versionNode = node.getFirstChild(SwProductDefinitionGrammar.VERSION);
     final String version =
