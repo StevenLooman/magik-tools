@@ -56,6 +56,9 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
   REST_OF_LINE,
   VERSION_NUMBER,
 
+  SYNTAX_ERROR_SECTION,
+  SYNTAX_ERROR_LINE,
+
   IDENTIFIERS,
   IDENTIFIER_LIST;
 
@@ -73,7 +76,7 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
         .rule(MODULE_DEFINITION)
         .is(
             builder.optional(SPACING),
-            MODULE_IDENTIFICATION,
+            builder.optional(MODULE_IDENTIFICATION),
             builder.zeroOrMore(
                 builder.firstOf(
                     CONDITION_MESSAGE_ACCESSOR,
@@ -96,8 +99,22 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
                     CASE_INSTALLATION,
                     STYLE_INSTALLATION,
                     SYSTEM_INSTALLATION,
-                    SPACING)),
+                    SPACING,
+                    SYNTAX_ERROR_SECTION,
+                    SYNTAX_ERROR_LINE)),
             builder.token(GenericTokenType.EOF, builder.endOfInput()));
+
+    builder
+        .rule(SYNTAX_ERROR_SECTION)
+        .is(
+            builder.regexp(
+                SwModuleDefinitionGrammar.syntaxErrorRegexp(SwModuleDefinitionKeyword.END)),
+            SwModuleDefinitionKeyword.END);
+    builder
+        .rule(SYNTAX_ERROR_LINE)
+        .is(
+            builder.regexp("(?!" + SwModuleDefinitionKeyword.END.getValue() + ").+"),
+            builder.optional(builder.regexp("[\r\n]+")));
 
     builder.rule(MODULE_IDENTIFICATION).is(MODULE_NAME, WHITESPACE, VERSION);
     builder.rule(MODULE_NAME).is(IDENTIFIER);
@@ -297,5 +314,10 @@ public enum SwModuleDefinitionGrammar implements GrammarRuleKey {
     for (final SwModuleDefinitionKeyword keyword : SwModuleDefinitionKeyword.values()) {
       builder.rule(keyword).is(builder.regexp("(?i)" + keyword.getValue() + "(?!\\w)")).skip();
     }
+  }
+
+  static String syntaxErrorRegexp(final SwModuleDefinitionKeyword keyword) {
+    // Eat up anything to keyword.
+    return "(?s).+?(?=(?i)" + keyword.getValue() + ")";
   }
 }

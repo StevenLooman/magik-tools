@@ -86,4 +86,41 @@ class SwProductDefinitionGrammarTest {
     assertThat(g.rule(SwProductDefinitionGrammar.PRODUCT_DEFINITION))
         .matches("id layered_product\n#comment");
   }
+
+  @Test
+  void testSyntaxError() {
+    assertThat(g.rule(SwProductDefinitionGrammar.SYNTAX_ERROR_SECTION)).matches("abc\nend");
+  }
+
+  @Test
+  void testMethodDefinition() {
+    assertThat(g.rule(SwProductDefinitionGrammar.PRODUCT_DEFINITION))
+        .matches("")
+        .matches("test_product_a")
+        .matches("test_product_a layered_p")
+        .matches("test_product_a layered_product")
+        .matches(
+            """
+            test_product_a layered_product
+            requires
+              test_product_b
+            end
+        """)
+        .matches(
+            """
+          test_product_a layered_product
+          reqs
+            test_product_b
+          end
+        """) // Syntax error.
+        .matches(
+            """
+            test_product_a layered_product
+            some extra line""") // Syntax error.
+        .matches(
+            """
+              test_product_a layered_product
+            some extra line
+            """); // Syntax error.
+  }
 }

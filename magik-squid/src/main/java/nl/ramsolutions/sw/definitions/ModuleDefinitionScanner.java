@@ -71,6 +71,9 @@ public final class ModuleDefinitionScanner {
   /** Module definition filename. */
   public static final String SW_MODULE_DEF = "module.def";
 
+  private static final String UNDEFINED_MODULE_NAME = "_undefined_module";
+  private static final String UNDEFINED_MODULE_VERSION = "_undefined_version";
+
   private static final Map<Path, Path> CACHE = new ConcurrentHashMap<>();
   private static final Path DOES_NOT_EXIST = Path.of("DOES_NOT_EXIST");
 
@@ -151,17 +154,26 @@ public final class ModuleDefinitionScanner {
     final SwModuleDefParser parser = new SwModuleDefParser();
     final AstNode node = parser.parse(path);
 
+    final String moduleName;
+    final String baseVersion;
+    final String currentVersion;
     final AstNode moduleIdentNode =
         node.getFirstChild(SwModuleDefinitionGrammar.MODULE_IDENTIFICATION);
-    final AstNode nameNode = moduleIdentNode.getFirstChild(SwModuleDefinitionGrammar.MODULE_NAME);
-    final String moduleName = nameNode.getTokenValue();
-    final List<AstNode> versionNodes =
-        moduleIdentNode.getChildren(SwModuleDefinitionGrammar.VERSION);
-    final AstNode baseVersionNode = versionNodes.get(0);
-    final String baseVersion = baseVersionNode.getTokenValue();
-    final AstNode currentVersionNode = versionNodes.size() > 1 ? versionNodes.get(1) : null;
-    final String currentVersion =
-        currentVersionNode != null ? currentVersionNode.getTokenValue() : null;
+    if (moduleIdentNode != null) {
+      final AstNode nameNode = moduleIdentNode.getFirstChild(SwModuleDefinitionGrammar.MODULE_NAME);
+      moduleName = nameNode.getTokenValue();
+
+      final List<AstNode> versionNodes =
+          moduleIdentNode.getChildren(SwModuleDefinitionGrammar.VERSION);
+      final AstNode baseVersionNode = versionNodes.get(0);
+      baseVersion = baseVersionNode.getTokenValue();
+      final AstNode currentVersionNode = versionNodes.size() > 1 ? versionNodes.get(1) : null;
+      currentVersion = currentVersionNode != null ? currentVersionNode.getTokenValue() : null;
+    } else {
+      moduleName = ModuleDefinitionScanner.UNDEFINED_MODULE_NAME;
+      baseVersion = ModuleDefinitionScanner.UNDEFINED_MODULE_VERSION;
+      currentVersion = null;
+    }
     final AstNode requiresNode = node.getFirstChild(SwModuleDefinitionGrammar.REQUIRES);
     final List<String> requireds =
         requiresNode != null

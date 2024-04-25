@@ -23,6 +23,7 @@
   - Hovering.
   - Definition.
   - References.
+  - More robust grammar.
 - Remove old typing classes and use the new typing classes.
 - Fix providing Formatting CodeActions on all locations, instead of asked range.
 - Fix hovering over atoms.

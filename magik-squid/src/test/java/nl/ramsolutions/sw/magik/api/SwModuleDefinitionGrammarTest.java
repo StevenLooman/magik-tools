@@ -192,4 +192,42 @@ class SwModuleDefinitionGrammarTest {
         .matches("system_installation\nx\ny\nz\nend")
         .matches("system_installation\nx y z\nend");
   }
+
+  @Test
+  void testSyntaxError() {
+    assertThat(g.rule(SwModuleDefinitionGrammar.SYNTAX_ERROR_SECTION)).matches("abc\nend");
+  }
+
+  @Test
+  void testMethodDefinition() {
+    assertThat(g.rule(SwModuleDefinitionGrammar.MODULE_DEFINITION))
+        .matches("")
+        .matches("module")
+        .matches("module 1 2 3 4 5")
+        .matches("module x")
+        .matches("module 1")
+        .matches(
+            """
+        test_module_a 1
+        requires
+          test_module_b
+        end
+        """)
+        .matches(
+            """
+          test_module_a 1
+          reqs
+            test_module_b
+          end
+          """) // Syntax error.
+        .matches(
+            """
+            test_module_a 1
+            some extra line""") // Syntax error.
+        .matches(
+            """
+            test_module_a 1
+            some extra line
+            """); // Syntax error.
+  }
 }
