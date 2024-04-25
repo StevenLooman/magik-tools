@@ -10,15 +10,28 @@ public final class DefaultDefinitionsAdder {
   private DefaultDefinitionsAdder() {}
 
   /**
-   * Add all default definitions.
+   * Add base definitions, required for magik-tools itself.
+   *
+   * @param definitionKeeper
+   */
+  public static void addBaseDefinitions(IDefinitionKeeper definitionKeeper) {
+    definitionKeeper.add(
+        new PackageDefinition(
+            null, null, null, null, TypeString.ANONYMOUS_PACKAGE, Collections.emptyList()));
+  }
+
+  /**
+   * Add default definitions, required for sanity in magik land.
    *
    * @param definitionKeeper {@link IDefinitionKeeper} to add to.
    */
   @SuppressWarnings("checkstyle:MethodLength")
   public static void addDefaultDefinitions(IDefinitionKeeper definitionKeeper) {
     definitionKeeper.add(
-        new PackageDefinition(null, null, null, null, "sw", Collections.emptyList()));
-    definitionKeeper.add(new PackageDefinition(null, null, null, null, "user", List.of("sw")));
+        new PackageDefinition(
+            null, null, null, null, TypeString.SW_PACKAGE, Collections.emptyList()));
+    definitionKeeper.add(
+        new PackageDefinition(null, null, null, null, TypeString.USER_PACKAGE, List.of("sw")));
 
     definitionKeeper.add(
         new ExemplarDefinition(

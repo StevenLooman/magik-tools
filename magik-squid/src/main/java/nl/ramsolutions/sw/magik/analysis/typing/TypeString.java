@@ -25,15 +25,17 @@ public final class TypeString implements Comparable<TypeString> {
   public static final String SW_PACKAGE = "sw";
 
   @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String ANONYMOUS_PACKAGE = "_anon";
+  public static final String USER_PACKAGE = "user";
+
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final String ANONYMOUS_PACKAGE = "_anon"; // `_anon` package for anonymous types.
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final TypeString UNDEFINED =
-      TypeString.ofIdentifier("_undefined", DEFAULT_PACKAGE); // TODO: Special package?
+      TypeString.ofIdentifier("_undefined", ANONYMOUS_PACKAGE);
 
   @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final TypeString SELF =
-      TypeString.ofIdentifier("_self", DEFAULT_PACKAGE); // TODO: Special package?
+  public static final TypeString SELF = TypeString.ofIdentifier("_self", ANONYMOUS_PACKAGE);
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", SW_PACKAGE);
@@ -322,6 +324,10 @@ public final class TypeString implements Comparable<TypeString> {
    */
   public boolean isUndefined() {
     return !this.isCombined() && TypeString.UNDEFINED.getIdentifier().equalsIgnoreCase(this.string);
+  }
+
+  public boolean isAnonymous() {
+    return TypeString.ANONYMOUS_PACKAGE.equals(this.currentPackage);
   }
 
   /**

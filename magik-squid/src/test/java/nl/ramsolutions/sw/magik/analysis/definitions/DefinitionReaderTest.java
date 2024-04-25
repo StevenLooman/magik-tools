@@ -238,7 +238,7 @@ class DefinitionReaderTest {
             .orElseThrow();
     assertThat(procDef.getName()).isEqualTo("_unnamed");
     assertThat(procDef.getTypeString())
-        .isEqualTo(TypeString.ofIdentifier("_anon", "_proc_in_memory_0"));
+        .isEqualTo(TypeString.ofIdentifier("_proc_in_memory_0", TypeString.ANONYMOUS_PACKAGE));
 
     final BinaryOperatorDefinition operatorDefinition =
         definitions.stream()

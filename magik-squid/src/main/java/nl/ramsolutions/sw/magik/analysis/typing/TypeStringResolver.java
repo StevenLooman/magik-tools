@@ -131,7 +131,7 @@ public class TypeStringResolver {
                   exemplarDefinitions.stream(),
                   procedureDefinitions.stream(),
                   globalDefinitions.stream())
-              .flatMap(definition -> definition)
+              .flatMap(stream -> stream)
               .collect(Collectors.toSet());
       this.typeCache.put(typeString, typeStringDefinitions);
     }

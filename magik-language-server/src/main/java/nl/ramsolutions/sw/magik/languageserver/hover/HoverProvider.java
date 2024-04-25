@@ -442,10 +442,10 @@ public class HoverProvider {
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
     final ExpressionResultString result = reasonerState.getNodeType(node);
     final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
-    final ITypeStringDefinition typeStringDefinition =
-        reasonerState.getTypeStringDefinition(typeStr);
-    // TODO: Removed some resolving of aliases etc.
-    if (typeStringDefinition instanceof ProcedureDefinition procedureDefinition) {
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    final Collection<ITypeStringDefinition> typeDefs = resolver.resolve(typeStr);
+    final ITypeStringDefinition typeDef = typeDefs.isEmpty() ? null : typeDefs.iterator().next();
+    if (typeDef instanceof ProcedureDefinition procedureDefinition) {
       this.buildProcSignatureDoc(procedureDefinition, builder);
     }
   }
@@ -516,16 +516,9 @@ public class HoverProvider {
       final ProcedureDefinition procDef, final StringBuilder builder) {
     final TypeString typeStr = procDef.getTypeString();
 
-    // TODO: Removed something with generics.
+    final String aliasName = typeStr.isAnonymous() ? "proc" : this.formatTypeString(typeStr);
 
-    final String joiner = procDef.getName().startsWith("[") ? "" : ".";
-    builder
-        .append("## ")
-        .append(this.formatTypeString(typeStr))
-        .append(joiner)
-        .append(procDef.getNameWithParameters())
-        .append("\n\n")
-        .append(" → ");
+    builder.append("## ").append(aliasName).append("()").append("\n\n").append(" → ");
 
     final String callResultString = procDef.getReturnTypes().getTypeNames(", ");
     builder.append(this.formatTypeString(callResultString));

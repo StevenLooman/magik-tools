@@ -33,9 +33,8 @@ public final class AnonymousNamer {
     }
     final List<AstNode> procNodes = rootNode.getDescendants(MagikGrammar.PROCEDURE_DEFINITION);
     final int procCounter = procNodes.indexOf(node);
-    ;
 
     final String name = "_proc_" + filenamePart + "_" + procCounter;
-    return TypeString.ofIdentifier(TypeString.ANONYMOUS_PACKAGE, name);
+    return TypeString.ofIdentifier(name, TypeString.ANONYMOUS_PACKAGE);
   }
 }

@@ -139,19 +139,4 @@ public class LocalTypeReasonerState {
   void setCurrentScopeEntryNode(final ScopeEntry scopeEntry, final AstNode node) {
     this.currentScopeEntryNodes.put(scopeEntry, node);
   }
-
-  @CheckForNull
-  public ITypeStringDefinition getTypeStringDefinition(final TypeString typeString) {
-    // TODO: Shouldn't this return a Set<TypeStringDefinition>?
-    // TODO: Is this still needed, with the AnonymousNamer?
-    final ITypeStringDefinition def = this.typeStringDefinitions.get(typeString);
-    if (def == null) {
-      LOGGER.debug("TypeString without type: {}", typeString);
-    }
-    return def;
-  }
-
-  void setTypeStringDefinition(final TypeString typeStr, final ITypeStringDefinition definition) {
-    this.typeStringDefinitions.put(typeStr, definition);
-  }
 }
