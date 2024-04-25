@@ -50,8 +50,5 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
     final TypeString typeStr = finalProcDef.getTypeString();
     final ExpressionResultString result = new ExpressionResultString(typeStr);
     this.assignAtom(node, result);
-
-    // Store definition itself.
-    this.state.setTypeStringDefinition(typeStr, finalProcDef);
   }
 }

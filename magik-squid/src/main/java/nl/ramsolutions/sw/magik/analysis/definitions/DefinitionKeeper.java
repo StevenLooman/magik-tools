@@ -42,6 +42,7 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   public DefinitionKeeper(final boolean addDefaultTypes) {
     this.clear();
 
+    DefaultDefinitionsAdder.addBaseDefinitions(this);
     if (addDefaultTypes) {
       DefaultDefinitionsAdder.addDefaultDefinitions(this);
     }

@@ -4,8 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
@@ -13,6 +19,8 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -52,21 +60,35 @@ class MagikIndexerTest {
         definitionKeeper.getExemplarDefinitions(typeString);
     assertThat(exemplarDefs).hasSize(1);
     final ExemplarDefinition exemplarDef = exemplarDefs.stream().findAny().orElseThrow();
-
-    // Test doc.
-    final String doc = exemplarDef.getDoc();
-    assertThat(doc).isEqualTo("Test exemplar.");
-
-    // Test slots.
-    final Collection<SlotDefinition> slots = exemplarDef.getSlots();
-    assertThat(slots).hasSize(2);
-    final SlotDefinition slotA = exemplarDef.getSlot("slot_a");
-    assertThat(slotA.getName()).isEqualTo("slot_a");
-    assertThat(slotA.getTypeName()).isEqualTo(TypeString.UNDEFINED);
-
-    final SlotDefinition slotB = exemplarDef.getSlot("slot_b");
-    assertThat(slotB.getName()).isEqualTo("slot_b");
-    assertThat(slotB.getTypeName()).isEqualTo(TypeString.UNDEFINED);
+    assertThat(exemplarDef)
+        .isEqualTo(
+            new ExemplarDefinition(
+                new Location(
+                    fixedPath.toUri(), new Range(new Position(4, 20), new Position(4, 21))),
+                null,
+                "Test exemplar.",
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                typeString,
+                List.of(
+                    new SlotDefinition(
+                        new Location(
+                            fixedPath.toUri(), new Range(new Position(7, 8), new Position(7, 9))),
+                        null,
+                        null,
+                        null,
+                        "slot_a",
+                        TypeString.UNDEFINED),
+                    new SlotDefinition(
+                        new Location(
+                            fixedPath.toUri(), new Range(new Position(8, 8), new Position(8, 9))),
+                        null,
+                        null,
+                        null,
+                        "slot_b",
+                        TypeString.UNDEFINED)),
+                List.of(TypeString.ofIdentifier("sw_regexp", "sw")),
+                Collections.emptySet()));
 
     // Test methods.
     final Collection<MethodDefinition> newMethodDefs =
@@ -75,9 +97,22 @@ class MagikIndexerTest {
             .collect(Collectors.toSet());
     assertThat(newMethodDefs).hasSize(1);
     final MethodDefinition newMethodDef = newMethodDefs.stream().findAny().orElseThrow();
-    assertThat(newMethodDef.getDoc()).isEqualTo("Constructor.");
-    assertThat(newMethodDef.getReturnTypes()).isEqualTo(ExpressionResultString.UNDEFINED);
-    assertThat(newMethodDef.getLoopTypes()).isEqualTo(ExpressionResultString.EMPTY);
+    assertThat(newMethodDef)
+        .isEqualTo(
+            new MethodDefinition(
+                new Location(
+                    fixedPath.toUri(), new Range(new Position(13, 0), new Position(13, 7))),
+                null,
+                "Constructor.",
+                null,
+                typeString,
+                "new()",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                Collections.emptySet(),
+                ExpressionResultString.UNDEFINED,
+                ExpressionResultString.EMPTY));
 
     final Collection<MethodDefinition> initMethodDefs =
         definitionKeeper.getMethodDefinitions(typeString).stream()
@@ -85,27 +120,95 @@ class MagikIndexerTest {
             .collect(Collectors.toSet());
     assertThat(initMethodDefs).hasSize(1);
     final MethodDefinition initMethodDef = initMethodDefs.stream().findAny().orElseThrow();
-    assertThat(initMethodDef.getDoc()).isEqualTo("Initializer.");
-    assertThat(initMethodDef.getReturnTypes()).isEqualTo(ExpressionResultString.UNDEFINED);
-    assertThat(initMethodDef.getLoopTypes()).isEqualTo(ExpressionResultString.EMPTY);
+    assertThat(initMethodDef)
+        .isEqualTo(
+            new MethodDefinition(
+                new Location(
+                    fixedPath.toUri(), new Range(new Position(19, 0), new Position(19, 8))),
+                null,
+                "Initializer.",
+                null,
+                typeString,
+                "init()",
+                Set.of(MethodDefinition.Modifier.PRIVATE),
+                Collections.emptyList(),
+                null,
+                Collections.emptySet(),
+                ExpressionResultString.UNDEFINED,
+                ExpressionResultString.EMPTY));
 
     // Test globals.
     final Collection<GlobalDefinition> globalDefs = definitionKeeper.getGlobalDefinitions();
     assertThat(globalDefs).hasSize(1);
     final GlobalDefinition globalDef = globalDefs.stream().findAny().orElseThrow();
-    assertThat(globalDef.getTypeString())
-        .isEqualTo(TypeString.ofIdentifier("!test_global!", "user"));
-    assertThat(globalDef.getAliasedTypeName()).isEqualTo(TypeString.UNDEFINED);
+    assertThat(globalDef)
+        .isEqualTo(
+            new GlobalDefinition(
+                new Location(
+                    fixedPath.toUri(), new Range(new Position(26, 0), new Position(26, 7))),
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("!test_global!", "user"),
+                TypeString.UNDEFINED));
 
     // Test binary expressions.
     final Collection<BinaryOperatorDefinition> binOpDefs =
         definitionKeeper.getBinaryOperatorDefinitions();
     assertThat(binOpDefs).hasSize(1);
     final BinaryOperatorDefinition binOpDef = binOpDefs.stream().findAny().orElseThrow();
-    assertThat(binOpDef.getLhsTypeName()).isEqualTo(TypeString.ofIdentifier("integer", "user"));
-    assertThat(binOpDef.getRhsTypeName()).isEqualTo(TypeString.ofIdentifier("integer", "user"));
-    assertThat(binOpDef.getResultTypeName())
-        .isEqualTo(TypeString.combine(TypeString.SW_FALSE, TypeString.SW_MAYBE));
+    assertThat(binOpDef)
+        .isEqualTo(
+            new BinaryOperatorDefinition(
+                new Location(
+                    fixedPath.toUri(), new Range(new Position(29, 27), new Position(29, 28))),
+                null,
+                "@return {sw:false|sw:maybe}",
+                null,
+                "=",
+                TypeString.ofIdentifier("integer", "user"),
+                TypeString.ofIdentifier("integer", "user"),
+                TypeString.combine(TypeString.SW_FALSE, TypeString.SW_MAYBE)));
+
+    // Test procedures.
+    final Collection<ProcedureDefinition> procDefs = definitionKeeper.getProcedureDefinitions();
+    assertThat(procDefs).hasSize(1);
+    final ProcedureDefinition procDef = procDefs.stream().findAny().orElseThrow();
+    assertThat(procDef)
+        .isEqualTo(
+            new ProcedureDefinition(
+                new Location(
+                    fixedPath.toUri(), new Range(new Position(30, 4), new Position(30, 9))),
+                null,
+                "@return {sw:false|sw:maybe}",
+                null,
+                Collections.emptySet(),
+                procDef.getTypeString(), // Cheat a bit, dependent on absolute file location.
+                null,
+                List.of(
+                    new ParameterDefinition(
+                        new Location(
+                            fixedPath.toUri(),
+                            new Range(new Position(30, 10), new Position(30, 13))),
+                        null,
+                        null,
+                        null,
+                        "lhs",
+                        ParameterDefinition.Modifier.NONE,
+                        TypeString.UNDEFINED),
+                    new ParameterDefinition(
+                        new Location(
+                            fixedPath.toUri(),
+                            new Range(new Position(30, 15), new Position(30, 18))),
+                        null,
+                        null,
+                        null,
+                        "rhs",
+                        ParameterDefinition.Modifier.NONE,
+                        TypeString.UNDEFINED)),
+                new ExpressionResultString(
+                    TypeString.combine(TypeString.SW_FALSE, TypeString.SW_MAYBE)),
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -126,33 +229,39 @@ class MagikIndexerTest {
         definitionKeeper.getExemplarDefinitions(typeString);
     assertThat(exemplarDefs).hasSize(1);
     final ExemplarDefinition exemplarDef = exemplarDefs.stream().findAny().orElseThrow();
-
-    // Test doc.
-    final String doc = exemplarDef.getDoc();
-    assertThat(doc)
+    assertThat(exemplarDef)
         .isEqualTo(
-            """
-                Test exemplar.
-                @slot {sw:rope} slot_a
-                @slot {sw:property_list<K=sw:symbol, E=sw:integer>} slot_b""");
-
-    // Test slots.
-    final Collection<SlotDefinition> slots = exemplarDef.getSlots();
-    assertThat(slots).hasSize(2);
-    final SlotDefinition slotA = exemplarDef.getSlot("slot_a");
-    assertThat(slotA.getName()).isEqualTo("slot_a");
-    final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
-    assertThat(slotA.getTypeName()).isEqualTo(ropeRef);
-
-    final SlotDefinition slotB = exemplarDef.getSlot("slot_b");
-    assertThat(slotB.getName()).isEqualTo("slot_b");
-    assertThat(slotB.getTypeName())
-        .isEqualTo(
-            TypeString.ofIdentifier(
-                "sw:property_list",
-                "user",
-                TypeString.ofGenericDefinition("K", TypeString.SW_SYMBOL),
-                TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER)));
+            new ExemplarDefinition(
+                new Location(
+                    fixedPath.toUri(), new Range(new Position(6, 20), new Position(6, 21))),
+                null,
+                "Test exemplar.\n@slot {sw:rope} slot_a\n@slot {sw:property_list<K=sw:symbol, E=sw:integer>} slot_b",
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                typeString,
+                List.of(
+                    new SlotDefinition(
+                        new Location(
+                            fixedPath.toUri(), new Range(new Position(9, 8), new Position(9, 9))),
+                        null,
+                        null,
+                        null,
+                        "slot_a",
+                        TypeString.ofIdentifier("rope", "sw")),
+                    new SlotDefinition(
+                        new Location(
+                            fixedPath.toUri(), new Range(new Position(10, 8), new Position(10, 9))),
+                        null,
+                        null,
+                        null,
+                        "slot_b",
+                        TypeString.ofIdentifier(
+                            "property_list",
+                            "sw",
+                            TypeString.ofGenericDefinition("K", TypeString.SW_SYMBOL),
+                            TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER)))),
+                Collections.emptyList(),
+                Collections.emptySet()));
 
     // Test methods.
     final Collection<MethodDefinition> newMethodDefs =
@@ -161,14 +270,22 @@ class MagikIndexerTest {
             .collect(Collectors.toSet());
     assertThat(newMethodDefs).hasSize(1);
     final MethodDefinition newMethodDef = newMethodDefs.stream().findAny().orElseThrow();
-    assertThat(newMethodDef.getDoc())
+    assertThat(newMethodDef)
         .isEqualTo(
-            """
-        Constructor.
-        @return {_self}""");
-    assertThat(newMethodDef.getReturnTypes())
-        .isEqualTo(new ExpressionResultString(TypeString.SELF));
-    assertThat(newMethodDef.getLoopTypes()).isEqualTo(ExpressionResultString.EMPTY);
+            new MethodDefinition(
+                new Location(
+                    fixedPath.toUri(), new Range(new Position(14, 0), new Position(14, 7))),
+                null,
+                "Constructor.\n@return {_self}",
+                null,
+                typeString,
+                "new()",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                Collections.emptySet(),
+                new ExpressionResultString(TypeString.SELF),
+                ExpressionResultString.EMPTY));
 
     final Collection<MethodDefinition> initMethodDefs =
         definitionKeeper.getMethodDefinitions(typeString).stream()
@@ -176,14 +293,22 @@ class MagikIndexerTest {
             .collect(Collectors.toSet());
     assertThat(initMethodDefs).hasSize(1);
     final MethodDefinition initMethodDef = initMethodDefs.stream().findAny().orElseThrow();
-    assertThat(initMethodDef.getDoc())
+    assertThat(initMethodDef)
         .isEqualTo(
-            """
-        Initializer.
-        @return {_self}""");
-    assertThat(initMethodDef.getReturnTypes())
-        .isEqualTo(new ExpressionResultString(TypeString.SELF));
-    assertThat(initMethodDef.getLoopTypes()).isEqualTo(ExpressionResultString.EMPTY);
+            new MethodDefinition(
+                new Location(
+                    fixedPath.toUri(), new Range(new Position(21, 0), new Position(21, 8))),
+                null,
+                "Initializer.\n@return {_self}",
+                null,
+                typeString,
+                "init()",
+                Set.of(MethodDefinition.Modifier.PRIVATE),
+                Collections.emptyList(),
+                null,
+                Collections.emptySet(),
+                new ExpressionResultString(TypeString.SELF),
+                ExpressionResultString.EMPTY));
   }
 
   @Test

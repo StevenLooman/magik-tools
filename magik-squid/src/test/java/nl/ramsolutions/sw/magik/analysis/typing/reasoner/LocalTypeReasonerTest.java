@@ -14,10 +14,8 @@ import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -659,14 +657,7 @@ class LocalTypeReasonerTest {
     assertThat(result)
         .isEqualTo(
             new ExpressionResultString(
-                TypeString.ofIdentifier(TypeString.ANONYMOUS_PACKAGE, "_proc_in_memory_0")));
-
-    final TypeString procTypeStr = result.get(0, null);
-    final ITypeStringDefinition typeStringDefinition = state.getTypeStringDefinition(procTypeStr);
-    assertThat(typeStringDefinition).isExactlyInstanceOf(ProcedureDefinition.class);
-    final ProcedureDefinition procDef = (ProcedureDefinition) typeStringDefinition;
-    final ExpressionResultString procResult = procDef.getReturnTypes();
-    assertThat(procResult).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+                TypeString.ofIdentifier("_proc_in_memory_0", TypeString.ANONYMOUS_PACKAGE)));
   }
 
   @Test
