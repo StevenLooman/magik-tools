@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Objects;
+import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -52,7 +53,7 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
       // Resolve TypeString.
       final TypeString resolvedTypeStr =
           this.typeResolver.resolve(typeString).stream()
-              .map(typeStrDef -> typeStrDef.getTypeString())
+              .map(ITypeStringDefinition::getTypeString)
               .reduce(TypeString::combine)
               .orElse(TypeString.UNDEFINED);
 

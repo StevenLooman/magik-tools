@@ -186,7 +186,7 @@ public final class ModuleDefinitionScanner {
     final String description =
         descriptionNode != null
             ? descriptionNode.getChildren(SwModuleDefinitionGrammar.FREE_LINES).stream()
-                .map(n -> n.getTokenValue())
+                .map(AstNode::getTokenValue)
                 .collect(Collectors.joining("\n"))
             : null;
 

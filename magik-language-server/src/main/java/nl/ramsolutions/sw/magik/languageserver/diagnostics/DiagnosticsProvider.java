@@ -12,12 +12,21 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Provides diagnostics for Magik files. */
 public class DiagnosticsProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsProvider.class);
 
-  public void setCapabilities(final ServerCapabilities capabilities) {}
+  public void setCapabilities(final ServerCapabilities capabilities) {
+    // No capabilities to set.
+  }
 
+  /**
+   * Provides diagnostics for a Magik file.
+   *
+   * @param magikFile Magik file.
+   * @return Diagnostics.
+   */
   public List<Diagnostic> provideDiagnostics(final MagikTypedFile magikFile) {
     final List<Diagnostic> diagnostics = new ArrayList<>();
 

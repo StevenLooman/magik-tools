@@ -70,7 +70,7 @@ public class MagikTypedFile extends MagikFile {
   /**
    * Get the {@link TypeStringResolver}.
    *
-   * @return
+   * @return The {@link TypeStringResolver}.
    */
   public TypeStringResolver getTypeStringResolver() {
     return this.typeStringResolver;

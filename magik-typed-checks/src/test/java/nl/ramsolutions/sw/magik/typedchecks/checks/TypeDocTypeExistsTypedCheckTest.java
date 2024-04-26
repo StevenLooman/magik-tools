@@ -45,7 +45,7 @@ class TypeDocTypeExistsTypedCheckTest extends MagikTypedCheckTestBase {
         _endmethod""",
         """
         _method a.b()
-          ## @return {sw:float}
+          ## @return {sw:float|sw:integer}
         _endmethod""",
       })
   void testValid(final String code) {

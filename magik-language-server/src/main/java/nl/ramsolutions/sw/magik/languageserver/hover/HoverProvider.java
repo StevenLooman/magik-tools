@@ -44,7 +44,9 @@ public class HoverProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(HoverProvider.class);
 
+  private static final String NBSP_NBSP = "&nbsp;&nbsp;";
   private static final String SECTION_END = "\n\n---\n\n";
+  private static final String UNDEFINED = "Undefined";
 
   /**
    * Set server capabilities.
@@ -83,7 +85,7 @@ public class HoverProvider {
     final StringBuilder builder = new StringBuilder();
     this.provideHoverProductName(productDefFile, productNameNode, builder);
 
-    final String content = builder.isEmpty() ? "Undefined" : builder.toString();
+    final String content = builder.isEmpty() ? UNDEFINED : builder.toString();
     final MarkupContent contents = new MarkupContent(MarkupKind.MARKDOWN, content);
     final Range range = new Range(hoveredTokenNode);
     final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
@@ -222,7 +224,7 @@ public class HoverProvider {
     }
 
     final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
-    final String indentStr = "&nbsp;&nbsp;".repeat(indent);
+    final String indentStr = NBSP_NBSP.repeat(indent);
     pakkageDef.getUses().stream()
         .sorted()
         .forEach(
@@ -283,7 +285,7 @@ public class HoverProvider {
     }
 
     final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
-    final String indentStr = "&nbsp;&nbsp;".repeat(indent);
+    final String indentStr = NBSP_NBSP.repeat(indent);
     final String parentConditionName = conditionDefinition.getParent();
     if (parentConditionName != null) {
       builder.append(indentStr).append(" ↳ ").append(parentConditionName).append("\n\n");
@@ -461,7 +463,7 @@ public class HoverProvider {
     }
 
     final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
-    final String indentStr = "&nbsp;&nbsp;".repeat(indent);
+    final String indentStr = NBSP_NBSP.repeat(indent);
     exemplarDef
         .getParents()
         .forEach(
@@ -535,10 +537,9 @@ public class HoverProvider {
     final String moduleName = Objects.requireNonNullElse(procDef.getModuleName(), "");
     builder.append("Module: ").append(moduleName).append(SECTION_END);
 
-    // TODO: Procedure topics.
-    // final String topics =
-    // procDef.getTopics().stream().collect(Collectors.joining(", "));
-    // builder.append("Topics: ").append(topics).append(SECTION_END);
+    // Procedure topics.
+    final String topics = procDef.getTopics().stream().collect(Collectors.joining(", "));
+    builder.append("Topics: ").append(topics).append(SECTION_END);
 
     // Procedure doc.
     final String methodDoc = procDef.getDoc();

@@ -39,7 +39,7 @@ class AtomInlayHintSupplier {
       final MagikTypedFile magikFile, final AstNode atomNode) {
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
     final ExpressionResultString result = reasonerState.getNodeTypeSilent(atomNode);
-    if (result == null || result.stream().anyMatch(typeStr -> typeStr.isUndefined())) {
+    if (result == null || result.stream().anyMatch(TypeString::isUndefined)) {
       return Stream.empty();
     }
 

@@ -165,7 +165,7 @@ public final class ProductDefinitionScanner {
     final String title =
         titleNode != null
             ? titleNode.getChildren(SwProductDefinitionGrammar.FREE_LINES).stream()
-                .map(n -> n.getTokenValue())
+                .map(AstNode::getTokenValue)
                 .collect(Collectors.joining("\n"))
             : null;
 
@@ -173,7 +173,7 @@ public final class ProductDefinitionScanner {
     final String description =
         descriptionNode != null
             ? descriptionNode.getChildren(SwProductDefinitionGrammar.FREE_LINES).stream()
-                .map(n -> n.getTokenValue())
+                .map(AstNode::getTokenValue)
                 .collect(Collectors.joining("\n"))
             : null;
 

@@ -42,8 +42,7 @@ public class UndefinedMethodCallResultTypedCheck extends MagikTypedCheck {
     }
 
     final ExpressionResultString result = reasonerState.getNodeType(node);
-    final boolean containsUndefined =
-        result.stream().anyMatch(typeStr -> typeStr.containsUndefined());
+    final boolean containsUndefined = result.stream().anyMatch(TypeString::containsUndefined);
     if (containsUndefined) {
       final AstNode firstIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
       final AstNode issueNode = firstIdentifierNode != null ? firstIdentifierNode : node;

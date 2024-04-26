@@ -7,9 +7,12 @@ import java.net.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Helper for {@link AstNode}s. */
 public final class AstNodeHelper {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AstNodeHelper.class);
+
+  private AstNodeHelper() {}
 
   /**
    * Recusrively update URI for AstNode/Tokens.

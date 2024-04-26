@@ -104,7 +104,13 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
       return false;
     }
 
-    final TypeStringResolver resolver = this.getTypeStringResolver();
-    return resolver.getExemplarDefinition(typeStr) == null;
+    for (final TypeString typeString : TypeString.combine(typeStr).getCombinedTypes()) {
+      final TypeStringResolver resolver = this.getTypeStringResolver();
+      if (resolver.getExemplarDefinition(typeString) == null) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

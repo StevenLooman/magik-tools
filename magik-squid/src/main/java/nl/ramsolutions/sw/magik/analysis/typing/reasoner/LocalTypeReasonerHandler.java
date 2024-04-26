@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -45,8 +46,8 @@ abstract class LocalTypeReasonerHandler {
       final TypeString calledType, final String methodName) {
     // return calledType.getMethods(methodName).stream()
     return this.typeResolver.getMethodDefinitions(calledType, methodName).stream()
-        .map(methodDefinition -> methodDefinition.getReturnTypes())
-        .reduce((result, element) -> new ExpressionResultString(result, element))
+        .map(MethodDefinition::getReturnTypes)
+        .reduce(ExpressionResultString::new)
         .orElse(ExpressionResultString.UNDEFINED);
   }
 

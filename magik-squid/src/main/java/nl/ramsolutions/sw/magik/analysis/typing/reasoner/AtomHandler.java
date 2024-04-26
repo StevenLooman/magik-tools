@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
@@ -197,7 +198,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
     final TypeString slotTypeStr =
         this.typeResolver.getSlotDefinitions(ownerTypeStr).stream()
             .filter(slotDef -> slotDef.getName().equals(slotName))
-            .map(slotDef -> slotDef.getTypeName())
+            .map(SlotDefinition::getTypeName)
             .findAny()
             .orElse(TypeString.UNDEFINED);
     this.assignAtom(node, slotTypeStr);

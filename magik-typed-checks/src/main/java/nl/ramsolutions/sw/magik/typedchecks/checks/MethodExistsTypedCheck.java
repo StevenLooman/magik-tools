@@ -32,17 +32,19 @@ public class MethodExistsTypedCheck extends MagikTypedCheck {
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
 
-    final TypeStringResolver resolver = this.getTypeStringResolver();
-    final Collection<MethodDefinition> methodDefs =
-        resolver.getMethodDefinitions(calledTypeStr, methodName);
+    for (final TypeString typeString : TypeString.combine(calledTypeStr).getCombinedTypes()) {
+      final TypeStringResolver resolver = this.getTypeStringResolver();
+      final Collection<MethodDefinition> methodDefs =
+          resolver.getMethodDefinitions(typeString, methodName);
 
-    // Add issue if no method is found.
-    if (methodDefs.isEmpty()) {
-      final String fullName = calledTypeStr.getFullString() + "." + methodName;
-      final String message = String.format(MESSAGE, fullName);
-      final AstNode firstIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-      final AstNode issueNode = firstIdentifierNode != null ? firstIdentifierNode : node;
-      this.addIssue(issueNode, message);
+      // Add issue if no method is found.
+      if (methodDefs.isEmpty()) {
+        final String fullName = typeString.getFullString() + "." + methodName;
+        final String message = String.format(MESSAGE, fullName);
+        final AstNode firstIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
+        final AstNode issueNode = firstIdentifierNode != null ? firstIdentifierNode : node;
+        this.addIssue(issueNode, message);
+      }
     }
   }
 }

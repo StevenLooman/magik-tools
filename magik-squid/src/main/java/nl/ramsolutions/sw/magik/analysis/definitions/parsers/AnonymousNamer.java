@@ -13,6 +13,14 @@ public final class AnonymousNamer {
 
   private static final URI DEFAULT_URI = URI.create("memory://source.magik");
 
+  private AnonymousNamer() {}
+
+  /**
+   * Get a name for a PROCEDURE_DEFINITION.
+   *
+   * @param node PROCEDURE_DEFINITION node.
+   * @return Name.
+   */
   public static TypeString getNameForProcedure(final AstNode node) {
     if (node.isNot(MagikGrammar.PROCEDURE_DEFINITION)) {
       throw new IllegalArgumentException();
@@ -24,7 +32,7 @@ public final class AnonymousNamer {
     final String filenamePart =
         DEFAULT_URI.equals(uri)
             ? "in_memory"
-            : Path.of(uri).toString().replaceAll("/", "_").replace("\\", "_");
+            : Path.of(uri).toString().replace("/", "_").replace("\\", "_");
 
     // Get procedure counter.
     AstNode rootNode = node;
