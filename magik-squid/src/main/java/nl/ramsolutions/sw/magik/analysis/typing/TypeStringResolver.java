@@ -119,7 +119,7 @@ public class TypeStringResolver {
    * @param typeString Reference to look for.
    * @return A {@link ExemplarDefinition}/{@link ProcedureDefinition}/{@link GlobalDefinition}.
    */
-  public Collection<ITypeStringDefinition> resolve(final TypeString typeString) {
+  public synchronized Collection<ITypeStringDefinition> resolve(final TypeString typeString) {
     return this.typeCache.computeIfAbsent(
         typeString,
         typeStr -> {
@@ -229,7 +229,8 @@ public class TypeStringResolver {
    * @param typeString {@link TypeString} to resolve.
    * @return {@link MethodDefinition}s the {@link TypeString} responds to.
    */
-  public Collection<MethodDefinition> getMethodDefinitions(final TypeString typeString) {
+  public synchronized Collection<MethodDefinition> getMethodDefinitions(
+      final TypeString typeString) {
     final Entry<TypeString, String> cacheKey = Map.entry(typeString, ALL_METHODS);
     return this.methodsCache.computeIfAbsent(
         cacheKey,
@@ -256,7 +257,7 @@ public class TypeStringResolver {
    * @param methodName Method name to resolve.
    * @return {@link MethodDefinition}s for the given type and method name.
    */
-  public Collection<MethodDefinition> getMethodDefinitions(
+  public synchronized Collection<MethodDefinition> getMethodDefinitions(
       final TypeString typeString, final String methodName) {
     final Entry<TypeString, String> cacheKey = Map.entry(typeString, methodName);
     final Collection<MethodDefinition> methodDefinitions = this.getMethodDefinitions(typeString);
