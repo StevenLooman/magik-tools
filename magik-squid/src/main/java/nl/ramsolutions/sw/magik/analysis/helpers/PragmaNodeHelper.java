@@ -27,7 +27,7 @@ public class PragmaNodeHelper {
     // TODO: Does this work? I've seen `{` topics...
     return this.node.getDescendants(MagikGrammar.PRAGMA_VALUE).stream()
         .flatMap(valueNode -> valueNode.getDescendants(MagikGrammar.IDENTIFIER).stream())
-        .map(node -> node.getTokenOriginalValue())
+        .map(AstNode::getTokenOriginalValue)
         .collect(Collectors.toSet());
   }
 

@@ -150,7 +150,6 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     final StringBuilder builder = new StringBuilder();
 
     // Determine method name with parameters.
-    final String methodName = this.getMethodName();
     final StringBuilder parametersBuilder = new StringBuilder();
     boolean firstParameter = true;
     ParameterDefinition.Modifier currentModifier = ParameterDefinition.Modifier.NONE;
@@ -162,11 +161,9 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
       }
 
       final ParameterDefinition.Modifier newModifier = parameterDefinition.getModifier();
-      if (currentModifier != newModifier) {
-        if (newModifier != ParameterDefinition.Modifier.NONE) {
-          parametersBuilder.append("_" + newModifier.name().toLowerCase());
-          parametersBuilder.append(" ");
-        }
+      if (currentModifier != newModifier && newModifier != ParameterDefinition.Modifier.NONE) {
+        parametersBuilder.append("_" + newModifier.name().toLowerCase());
+        parametersBuilder.append(" ");
       }
       currentModifier = newModifier;
 
@@ -174,18 +171,18 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     }
     final String parametersStr = parametersBuilder.toString();
 
-    if (methodName.startsWith("[")) {
+    if (this.methodName.startsWith("[")) {
       builder.append("[");
       builder.append(parametersStr);
-      builder.append(methodName.substring(1)); // "]<<" or "]^<<""
+      builder.append(this.methodName.substring(1)); // "]<<" or "]^<<""
     } else {
-      final int bracketIndex = methodName.indexOf('(');
+      final int bracketIndex = this.methodName.indexOf('(');
       if (bracketIndex != -1) {
-        builder.append(methodName.substring(0, bracketIndex + 1));
+        builder.append(this.methodName.substring(0, bracketIndex + 1));
         builder.append(parametersStr);
-        builder.append(methodName.substring(bracketIndex + 1));
+        builder.append(this.methodName.substring(bracketIndex + 1));
       } else {
-        builder.append(methodName);
+        builder.append(this.methodName);
       }
     }
 

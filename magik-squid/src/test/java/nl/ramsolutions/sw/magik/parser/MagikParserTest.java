@@ -190,7 +190,7 @@ class MagikParserTest {
     final AstNode eofNode = node.getChildren().get(2);
     final Token eofToken = eofNode.getToken();
     assertThat(eofToken.getLine()).isEqualTo(3);
-    assertThat(eofToken.getColumn()).isEqualTo(0);
+    assertThat(eofToken.getColumn()).isZero();
   }
 
   @Test

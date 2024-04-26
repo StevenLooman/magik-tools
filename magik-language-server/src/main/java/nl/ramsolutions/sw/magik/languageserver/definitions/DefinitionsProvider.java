@@ -14,6 +14,8 @@ import nl.ramsolutions.sw.magik.ModuleDefFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.ProductDefFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
@@ -26,13 +28,9 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.eclipse.lsp4j.ServerCapabilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Definitions provider. */
 public class DefinitionsProvider {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(DefinitionsProvider.class);
 
   /**
    * Set server capabilities.
@@ -140,7 +138,7 @@ public class DefinitionsProvider {
     final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
     final String conditionName = wantedNode.getTokenValue();
     return definitionKeeper.getConditionDefinitions(conditionName).stream()
-        .map(conditionDef -> conditionDef.getLocation())
+        .map(ConditionDefinition::getLocation)
         .map(Location::validLocation)
         .toList();
   }
@@ -172,7 +170,7 @@ public class DefinitionsProvider {
     final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     return resolver.resolve(typeString).stream()
-        .map(def -> def.getLocation())
+        .map(IDefinition::getLocation)
         .map(Location::validLocation)
         .toList();
   }

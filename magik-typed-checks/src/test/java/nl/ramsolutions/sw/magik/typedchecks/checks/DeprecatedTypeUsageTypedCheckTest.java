@@ -14,7 +14,7 @@ import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Test {@link DeprecatedTypeUsageTypedCheck}. */
-public class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
+class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
 
   private void addExemplarDefinition(
       final IDefinitionKeeper definitionKeeper, final TypeString typeName, final String... topics) {

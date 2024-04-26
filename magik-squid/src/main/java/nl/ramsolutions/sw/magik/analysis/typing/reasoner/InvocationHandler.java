@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
@@ -109,7 +110,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
         originalCalledTypeStr == TypeString.SELF
             ? TypeString.SW_PROCEDURE
             : this.typeResolver.resolve(originalCalledTypeStr).stream()
-                .map(typeStringDef -> typeStringDef.getTypeString())
+                .map(ITypeStringDefinition::getTypeString)
                 .findAny()
                 .orElse(TypeString.UNDEFINED);
 
@@ -120,7 +121,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
       final MethodDefinition invokeDef =
           this.typeResolver.getMethodDefinitions(calledTypeStr, "invoke()").stream()
               .findAny()
-              .orElse(null);
+              .orElseThrow();
 
       // Figure argument types.
       final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);

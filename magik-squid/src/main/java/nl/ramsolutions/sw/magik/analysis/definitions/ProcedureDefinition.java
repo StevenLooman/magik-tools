@@ -144,11 +144,9 @@ public class ProcedureDefinition extends MagikDefinition
       }
 
       final ParameterDefinition.Modifier newModifier = parameterDefinition.getModifier();
-      if (currentModifier != newModifier) {
-        if (newModifier != ParameterDefinition.Modifier.NONE) {
-          parametersBuilder.append("_" + newModifier.name().toLowerCase());
-          parametersBuilder.append(" ");
-        }
+      if (currentModifier != newModifier && newModifier != ParameterDefinition.Modifier.NONE) {
+        parametersBuilder.append("_" + newModifier.name().toLowerCase());
+        parametersBuilder.append(" ");
       }
       currentModifier = newModifier;
 
@@ -193,6 +191,16 @@ public class ProcedureDefinition extends MagikDefinition
   @Override
   public String getName() {
     return Objects.requireNonNullElse(this.procedureName, ProcedureDefinition.DEFAULT_NAME);
+  }
+
+  /**
+   * Get topics.
+   *
+   * @return Topics.
+   */
+  public Set<String> getTopics() {
+    // TODO: Implement.
+    return Collections.emptySet();
   }
 
   public Set<GlobalUsage> getUsedGlobals() {

@@ -120,23 +120,22 @@ public class TypeStringResolver {
    * @return A {@link ExemplarDefinition}/{@link ProcedureDefinition}/{@link GlobalDefinition}.
    */
   public Collection<ITypeStringDefinition> resolve(final TypeString typeString) {
-    if (!this.typeCache.containsKey(typeString)) {
-      final Collection<ExemplarDefinition> exemplarDefinitions =
-          this.findExemplarDefinitions(typeString);
-      final Collection<ProcedureDefinition> procedureDefinitions =
-          this.findProcedureDefinitions(typeString);
-      final Collection<GlobalDefinition> globalDefinitions = this.findGlobalDefinitions(typeString);
-      final Set<ITypeStringDefinition> typeStringDefinitions =
-          Stream.of(
+    return this.typeCache.computeIfAbsent(
+        typeString,
+        typeStr -> {
+          final Collection<ExemplarDefinition> exemplarDefinitions =
+              this.findExemplarDefinitions(typeStr);
+          final Collection<ProcedureDefinition> procedureDefinitions =
+              this.findProcedureDefinitions(typeStr);
+          final Collection<GlobalDefinition> globalDefinitions =
+              this.findGlobalDefinitions(typeStr);
+          return Stream.of(
                   exemplarDefinitions.stream(),
                   procedureDefinitions.stream(),
                   globalDefinitions.stream())
               .flatMap(stream -> stream)
               .collect(Collectors.toSet());
-      this.typeCache.put(typeString, typeStringDefinitions);
-    }
-
-    return this.typeCache.get(typeString);
+        });
   }
 
   /**
@@ -230,55 +229,59 @@ public class TypeStringResolver {
    */
   public Collection<MethodDefinition> getMethodDefinitions(final TypeString typeString) {
     final Entry<TypeString, String> cacheKey = Map.entry(typeString, ALL_METHODS);
-    if (!this.methodsCache.containsKey(cacheKey)) {
-      // Try to resolve the typeString to an actual type.
-      final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeString);
-      final TypeString actualTypeStr =
-          resolvedTypes.isEmpty() ? typeString : resolvedTypes.iterator().next().getTypeString();
+    return this.methodsCache.computeIfAbsent(
+        cacheKey,
+        entry -> {
+          // Try to resolve the typeString to an actual type.
+          final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeString);
+          final TypeString actualTypeStr =
+              resolvedTypes.isEmpty()
+                  ? typeString
+                  : resolvedTypes.iterator().next().getTypeString();
 
-      final Map<String, Set<MethodDefinition>> methodDefinitionsByName = new HashMap<>();
-      this.getMethodDefinitions(actualTypeStr, methodDefinitionsByName);
-      final Collection<MethodDefinition> methodDefinitions =
-          methodDefinitionsByName.values().stream()
+          final Map<String, Set<MethodDefinition>> methodDefinitionsByName = new HashMap<>();
+          this.fillMethodDefinitions(actualTypeStr, methodDefinitionsByName);
+          return methodDefinitionsByName.values().stream()
               .flatMap(Set::stream)
               .collect(Collectors.toSet());
-      this.methodsCache.put(cacheKey, methodDefinitions);
-    }
-
-    return this.methodsCache.get(cacheKey);
+        });
   }
 
-  private void getMethodDefinitions(
-      final TypeString typeString, final Map<String, Set<MethodDefinition>> methodDefinitions) {
-    this.getSelfAndAncestors(typeString)
-        .forEach(
-            typeStr -> {
-              this.definitionKeeper
-                  .getMethodDefinitions(typeStr)
-                  .forEach(
-                      methodDefinition -> {
-                        final String methodName = methodDefinition.getMethodName();
-                        // TODO: If already present, then skip? Filter duplicates with the same
-                        // name, we're trying to emulate responding to specific methods.
-                        final Set<MethodDefinition> methodsForName =
-                            methodDefinitions.computeIfAbsent(methodName, key -> new HashSet<>());
-                        methodsForName.add(methodDefinition);
-                      });
-            });
-  }
-
+  /**
+   * Get {@link MethodDefinition}s for {@link TypeString}.{@link methodName}.
+   *
+   * @param typeString Type to resolve.
+   * @param methodName Method name to resolve.
+   * @return {@link MethodDefinition}s for the given type and method name.
+   */
   public Collection<MethodDefinition> getMethodDefinitions(
       final TypeString typeString, final String methodName) {
     final Entry<TypeString, String> cacheKey = Map.entry(typeString, methodName);
-    if (!this.methodsCache.containsKey(cacheKey)) {
-      final List<MethodDefinition> methodDefs =
-          this.getMethodDefinitions(typeString).stream()
-              .filter(methodDef -> methodDef.getMethodName().equals(methodName))
-              .toList();
-      this.methodsCache.put(cacheKey, methodDefs);
-    }
+    final Collection<MethodDefinition> methodDefinitions = this.getMethodDefinitions(typeString);
+    return this.methodsCache.computeIfAbsent(
+        cacheKey,
+        entry ->
+            methodDefinitions.stream()
+                .filter(methodDef -> methodDef.getMethodName().equals(methodName))
+                .toList());
+  }
 
-    return this.methodsCache.get(cacheKey);
+  private void fillMethodDefinitions(
+      final TypeString typeString, final Map<String, Set<MethodDefinition>> methodDefinitions) {
+    this.getSelfAndAncestors(typeString)
+        .forEach(
+            typeStr ->
+                this.definitionKeeper
+                    .getMethodDefinitions(typeStr)
+                    .forEach(
+                        methodDefinition -> {
+                          final String methodName = methodDefinition.getMethodName();
+                          // TODO: If already present, then skip? Filter duplicates with the same
+                          // name, we're trying to emulate responding to specific methods.
+                          final Set<MethodDefinition> methodsForName =
+                              methodDefinitions.computeIfAbsent(methodName, key -> new HashSet<>());
+                          methodsForName.add(methodDefinition);
+                        }));
   }
 
   /**

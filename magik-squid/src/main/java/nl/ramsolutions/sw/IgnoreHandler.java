@@ -31,15 +31,23 @@ public final class IgnoreHandler {
 
   private final Map<Path, Set<PathMatcher>> entries = new HashMap<>();
 
+  /**
+   * Constructor.
+   *
+   * @param fileEvent File event.
+   * @throws IOException -
+   */
   public void handleFileEvent(final FileEvent fileEvent) throws IOException {
     final URI uri = fileEvent.getUri();
     final Path path = Path.of(uri);
     final FileChangeType fileChangeType = fileEvent.getFileChangeType();
     if (fileChangeType == FileChangeType.DELETED) {
-
+      this.getIndexableFiles(path)
+          .filter(indexablePath -> indexablePath.toString().equalsIgnoreCase(IGNORE_FILENAME))
+          .forEach(this::removeIgnoreFile);
     } else {
       this.getIndexableFiles(path)
-          .filter(indexablePath -> indexablePath.toString().toLowerCase().equals(IGNORE_FILENAME))
+          .filter(indexablePath -> indexablePath.toString().equalsIgnoreCase(IGNORE_FILENAME))
           .forEach(this::addIgnoreFile);
     }
   }
