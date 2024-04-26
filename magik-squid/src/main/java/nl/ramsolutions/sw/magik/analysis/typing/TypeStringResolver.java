@@ -185,7 +185,9 @@ public class TypeStringResolver {
         continue;
       }
 
-      for (final TypeString typeStr2 : TypeString.combine(typeString2).getCombinedTypes()) {
+      final TypeString combinedTypeString2 = TypeString.combine(typeString2);
+      Objects.requireNonNull(combinedTypeString2);
+      for (final TypeString typeStr2 : combinedTypeString2.getCombinedTypes()) {
         final ITypeStringDefinition definition2 =
             this.resolve(typeStr2).stream().findAny().orElse(null);
         if (definition2 == null) {

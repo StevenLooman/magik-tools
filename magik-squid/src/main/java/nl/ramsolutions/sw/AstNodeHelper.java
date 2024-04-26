@@ -25,8 +25,8 @@ public final class AstNodeHelper {
     if (token != null) {
       try {
         final Field fieldUri = token.getClass().getDeclaredField("uri");
-        fieldUri.setAccessible(true);
-        fieldUri.set(token, newUri);
+        fieldUri.setAccessible(true); // NOSONAR
+        fieldUri.set(token, newUri); // NOSONAR
       } catch (final ReflectiveOperationException exception) {
         LOGGER.error(exception.getMessage(), exception);
       }
