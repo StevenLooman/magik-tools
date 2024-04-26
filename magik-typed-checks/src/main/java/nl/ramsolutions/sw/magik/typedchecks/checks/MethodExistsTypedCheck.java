@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.Collection;
+import java.util.Objects;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -32,7 +33,9 @@ public class MethodExistsTypedCheck extends MagikTypedCheck {
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
 
-    for (final TypeString typeString : TypeString.combine(calledTypeStr).getCombinedTypes()) {
+    final TypeString combinedTypeString2 = TypeString.combine(calledTypeStr);
+    Objects.requireNonNull(combinedTypeString2);
+    for (final TypeString typeString : combinedTypeString2.getCombinedTypes()) {
       final TypeStringResolver resolver = this.getTypeStringResolver();
       final Collection<MethodDefinition> methodDefs =
           resolver.getMethodDefinitions(typeString, methodName);
