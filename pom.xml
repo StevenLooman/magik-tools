@@ -417,6 +417,7 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.MagikAstWalker</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.MagikTextDocumentService</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider</exclude>
                   </excludes>
                 </rule>
                 <rule>

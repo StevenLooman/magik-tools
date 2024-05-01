@@ -18,6 +18,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -44,7 +45,7 @@ public class DefinitionsProvider {
   /**
    * Provide definitions.
    *
-   * @param productDef Product.def file.
+   * @param productDefFile Product.def file.
    * @param position Position.
    * @return Definitions.
    */
@@ -71,7 +72,7 @@ public class DefinitionsProvider {
   /**
    * Provide definitions.
    *
-   * @param moduleDef Module.def file.
+   * @param moduleDefFile Module.def file.
    * @param position Position.
    * @return Definitions.
    */
@@ -180,13 +181,31 @@ public class DefinitionsProvider {
       final MagikTypedFile magikFile, final AstNode wantedNode) {
     final AstNode methodInvocationNode =
         wantedNode.getFirstAncestor(MagikGrammar.METHOD_INVOCATION);
-    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(methodInvocationNode);
-    final String methodName = helper.getMethodName();
+    final MethodInvocationNodeHelper invocationHelper =
+        new MethodInvocationNodeHelper(methodInvocationNode);
+    final String methodName = invocationHelper.getMethodName();
 
     final AstNode previousSiblingNode = methodInvocationNode.getPreviousSibling();
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
     final ExpressionResultString result = reasonerState.getNodeType(previousSiblingNode);
-    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
+    final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
+    final TypeString typeStr;
+    if (resultTypeStr.isSelf()) {
+      final AstNode definitionNode =
+          methodInvocationNode.getFirstAncestor(
+              MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+      if (definitionNode == null) {
+        typeStr = resultTypeStr;
+      } else if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
+        final MethodDefinitionNodeHelper definitionHelper =
+            new MethodDefinitionNodeHelper(definitionNode);
+        typeStr = definitionHelper.getTypeString();
+      } else {
+        typeStr = TypeString.SW_PROCEDURE;
+      }
+    } else {
+      typeStr = resultTypeStr;
+    }
 
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     return resolver.getMethodDefinitions(typeStr, methodName).stream()
