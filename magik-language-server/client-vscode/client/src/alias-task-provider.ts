@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 export class MagikAliasTaskProvider implements vscode.TaskProvider, vscode.Disposable {
 
-	public static AliasType: string = 'run_alias';
+	public static readonly AliasType: string = 'run_alias';
 
 	private context: vscode.ExtensionContext;
 	private provider: vscode.Disposable;
@@ -35,7 +35,7 @@ export class MagikAliasTaskProvider implements vscode.TaskProvider, vscode.Dispo
 		}
 
 		// Ensure we have a promise.
-		if (!this.promise) {
+		if (this.promise == undefined) {
 			this.promise = getAliasesTasks(aliasesPath);
 		}
 
@@ -131,7 +131,7 @@ async function getAliasesTasks(aliasesPath: fs.PathLike): Promise<vscode.Task[]>
 	const tasks: vscode.Task[] = [];
 	try {
 		const contents = fs.readFileSync(aliasesPath, 'latin1');
-		const lines = contents.split(/\r{0,1}\n/);
+		const lines = contents.split(/\r?\n/);
 		for (let line of lines) {
 			if (line.length === 0) {
 				continue;

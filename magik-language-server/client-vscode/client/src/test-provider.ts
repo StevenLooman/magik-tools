@@ -350,8 +350,8 @@ $
 		const extension = dotIndex != -1 ? filename.substring(dotIndex + 1, filename.length) : undefined;
 		const basename = dotIndex != -1 ? filename.substring(0, dotIndex) : filename
 
-		var tempPath: fs.PathLike;
-		var index = 0;
+		let tempPath: fs.PathLike;
+		let index = 0;
 		do {
 			tempPath = path.join(this.workdir.toString(), `${basename}${index}.${extension}`);
 			index += 1;
