@@ -362,8 +362,9 @@ public class HoverProvider {
     final AstNode providingNode = hoveredNode.getParent();
     final AstNode previousSiblingNode = providingNode.getPreviousSibling();
     if (previousSiblingNode != null) {
-      final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(providingNode);
-      final String methodName = helper.getMethodName();
+      final MethodInvocationNodeHelper invocationHelper =
+          new MethodInvocationNodeHelper(providingNode);
+      final String methodName = invocationHelper.getMethodName();
       LOGGER.debug(
           "Providing hover for node: {}, method: {}",
           previousSiblingNode.getTokenValue(),
@@ -371,7 +372,25 @@ public class HoverProvider {
       if (methodName != null) {
         final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
         final ExpressionResultString result = reasonerState.getNodeType(previousSiblingNode);
-        final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
+        final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
+        final TypeString typeStr;
+        if (resultTypeStr.isSelf()) {
+          final AstNode definitionNode =
+              hoveredNode.getFirstAncestor(
+                  MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+          if (definitionNode == null) {
+            typeStr = resultTypeStr;
+          } else if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
+            final MethodDefinitionNodeHelper definitionHelper =
+                new MethodDefinitionNodeHelper(definitionNode);
+            typeStr = definitionHelper.getTypeString();
+          } else {
+            typeStr = TypeString.SW_PROCEDURE;
+          }
+        } else {
+          typeStr = resultTypeStr;
+        }
+
         final TypeStringResolver resolver = magikFile.getTypeStringResolver();
         resolver
             .getMethodDefinitions(typeStr, methodName)

@@ -155,8 +155,16 @@ public class TypeStringResolver {
       return null;
     }
 
+    // Prefer ExemplarDefinitions.
+    final ITypeStringDefinition exemplarDefefinition =
+        definitions.stream()
+            .filter(ExemplarDefinition.class::isInstance)
+            .findAny()
+            .orElse(null);
+    final ITypeStringDefinition definition =
+        exemplarDefefinition != null ? exemplarDefefinition : definitions.iterator().next();
+
     // Resolve global first.
-    final ITypeStringDefinition definition = definitions.iterator().next();
     if (definition instanceof GlobalDefinition globalDefinition0) {
       final TypeString aliasedTypeString = globalDefinition0.getAliasedTypeName();
       return this.getExemplarDefinition(aliasedTypeString);
@@ -361,21 +369,22 @@ public class TypeStringResolver {
    * @return All ancestors this the given type.
    */
   public Collection<TypeString> getAllAncestors(final TypeString typeString) {
-    final List<TypeString> parents = new ArrayList<>();
-    this.getAllAncestors(typeString, parents);
-    return parents;
+    final List<TypeString> ancestors = new ArrayList<>();
+    this.getAllAncestors(typeString, ancestors);
+    return ancestors;
   }
 
-  private void getAllAncestors(final TypeString typeString, final List<TypeString> parents) {
+  private void getAllAncestors(final TypeString typeString, final List<TypeString> ancestors) {
+    // TODO: Does this skip one level at a time?
     final Collection<TypeString> typeStringParents = this.getParents(typeString);
-    parents.addAll(typeStringParents);
+    ancestors.addAll(typeStringParents);
 
     // Recurse.
     this.resolve(typeString).stream()
         .filter(ExemplarDefinition.class::isInstance)
         .map(ExemplarDefinition.class::cast)
         .flatMap(def -> def.getParents().stream())
-        .forEach(parentTypeStr -> this.getAllAncestors(parentTypeStr, parents));
+        .forEach(parentTypeStr -> this.getAllAncestors(parentTypeStr, ancestors));
   }
 
   public Collection<TypeString> getSelfAndAncestors(final TypeString typeString) {
