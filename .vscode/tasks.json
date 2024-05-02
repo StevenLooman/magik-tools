@@ -1,75 +1,48 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "verify",
-            "type": "shell",
-            "command": "mvn verify",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "clean",
-            "type": "shell",
-            "command": "mvn clean",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "clean test",
-            "type": "shell",
-            "command": "mvn clean test",
-            "group": "test",
-            "problemMatcher": []
-        },
-        {
-            "label": "clean package",
-            "type": "shell",
-            "command": "mvn clean package",
-            "group": "build",
-            "problemMatcher": []
-        },
-        {
-            "label": "clean package magik-lint",
-            "type": "shell",
-            "command": "mvn clean package -pl magik-lint -am -DskipTests=true",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "clean package magik-language-server",
-            "type": "shell",
-            "command": "mvn clean package -pl magik-language-server -am -DskipTests=true",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "clean package magik-debug-adapter",
-            "type": "shell",
-            "command": "mvn clean package -pl magik-debug-adapter -am -DskipTests=true",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "clean package sslr-magik-toolkit",
-            "type": "shell",
-            "command": "mvn clean package -pl sslr-magik-toolkit -am -DskipTests=true",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": []
-        }
-    ]
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "mvn clean spotless:apply verify test package",
+      "type": "shell",
+      "command": "mvn clean spotless:apply verify test package",
+      "group": "build",
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "never"
+      }
+    },
+    {
+      "type": "npm",
+      "script": "compile",
+      "group": "build",
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "never"
+      },
+      "path": "magik-language-server/client-vscode",
+      "problemMatcher": [
+        "$tsc"
+      ]
+    },
+    {
+      "type": "npm",
+      "script": "watch",
+      "isBackground": true,
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "never"
+      },
+      "path": "magik-language-server/client-vscode",
+      "problemMatcher": [
+        "$tsc-watch"
+      ]
+    }
+  ]
 }

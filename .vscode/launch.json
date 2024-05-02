@@ -1,56 +1,67 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "java",
-            "name": "Debug (Launch) - Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-        },
-        {
-            "type": "java",
-            "name": "Debug (Launch)-MagikLint<magik-lint>",
-            "request": "launch",
-            "mainClass": "nl.ramsolutions.sw.magik.lint.Main",
-            "projectName": "magik-lint",
-            "args": [
-                "--debug",
-                "magik-lint/lint-demo.magik"
-            ]
-        },
-        {
-            "type": "java",
-            "name": "Debug (Launch)-MagikToolkit<sslr-magik-toolkit>",
-            "request": "launch",
-            "mainClass": "nl.ramsolutions.sw.magik.toolkit.MagikToolkit",
-            "projectName": "sslr-magik-toolkit"
-        },
-        {
-            "type": "java",
-            "name": "Debug (Attach)-LanguageServer<magik-language-server>",
-            "request": "attach",
-            "hostName": "localhost",
-            "port": 5005,
-            "projectName": "magik-language-server"
-        },
-        {
-            "type": "java",
-            "name": "Debug (Attach)-DebugAdapter<magik-debug-adapter>",
-            "request": "attach",
-            "hostName": "localhost",
-            "port": 5006,
-            "projectName": "magik-debug-adapter"
-        },
-        {
-            "type": "java",
-            "name": "Debug (Attach)-sonar-magik-plugin",
-            "request": "attach",
-            "hostName": "localhost",
-            "port": 5007,
-            "projectName": "sonar-magik-plugin"
-        }
-    ]
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug (Launch)-MagikLint<magik-lint>",
+      "request": "launch",
+      "mainClass": "nl.ramsolutions.sw.magik.lint.Main",
+      "projectName": "magik-lint",
+      "args": [
+        "--debug",
+        "magik-lint/lint-demo.magik"
+      ]
+    },
+    {
+      "type": "java",
+      "name": "Debug (Launch)-MagikToolkit<sslr-magik-toolkit>",
+      "request": "launch",
+      "mainClass": "nl.ramsolutions.sw.magik.toolkit.MagikToolkit",
+      "projectName": "sslr-magik-toolkit"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Attach)-LanguageServer<magik-language-server>",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5005,
+      "projectName": "magik-language-server"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Attach)-DebugAdapter<magik-debug-adapter>",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5006,
+      "projectName": "magik-debug-adapter"
+    },
+    {
+      "type": "java",
+      "name": "Debug (Attach)-sonar-magik-plugin",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5007,
+      "projectName": "sonar-magik-plugin"
+    },
+    {
+      "type": "extensionHost",
+      "request": "launch",
+      "name": "Launch VSCode Extension",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceRoot}/magik-language-server/client-vscode"
+      ],
+      "outFiles": [
+        "${workspaceRoot}/magik-language-server/client-vscode/client/out/**/*.js"
+      ],
+      "preLaunchTask": {
+        "type": "npm",
+        "script": "watch",
+        "path": "magik-language-server/client-vscode",
+      }
+    }
+  ],
 }
