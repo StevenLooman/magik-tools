@@ -84,8 +84,11 @@ public class HoverProvider {
 
     final StringBuilder builder = new StringBuilder();
     this.provideHoverProductName(productDefFile, productNameNode, builder);
+    if (builder.isEmpty()) {
+      return null;
+    }
 
-    final String content = builder.isEmpty() ? UNDEFINED : builder.toString();
+    final String content = builder.toString();
     final MarkupContent contents = new MarkupContent(MarkupKind.MARKDOWN, content);
     final Range range = new Range(hoveredTokenNode);
     final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
@@ -119,8 +122,11 @@ public class HoverProvider {
 
     final StringBuilder builder = new StringBuilder();
     this.provideHoverModuleName(moduleDefFile, moduleNameNode, builder);
+    if (builder.isEmpty()) {
+      return null;
+    }
 
-    final String content = builder.isEmpty() ? UNDEFINED : builder.toString();
+    final String content = builder.toString();
     final MarkupContent contents = new MarkupContent(MarkupKind.MARKDOWN, content);
     final Range range = new Range(hoveredTokenNode);
     final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
@@ -184,7 +190,11 @@ public class HoverProvider {
       }
     }
 
-    final String content = builder.isEmpty() ? UNDEFINED : builder.toString();
+    if (builder.isEmpty()) {
+      return null;
+    }
+
+    final String content = builder.toString();
     final MarkupContent contents = new MarkupContent(MarkupKind.MARKDOWN, content);
     final Range range = new Range(hoveredTokenNode);
     final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
