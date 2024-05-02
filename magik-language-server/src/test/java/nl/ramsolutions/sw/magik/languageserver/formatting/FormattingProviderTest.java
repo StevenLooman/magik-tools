@@ -300,7 +300,7 @@ class FormattingProviderTest {
   }
 
   @Test
-  void testIndentCommentsAfterStatement() {
+  void testIndentCommentsAfterStatement() { // NOSONAR: Don't group tests.
     final String code =
         """
         _method a.b(a, b, c)

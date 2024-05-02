@@ -46,7 +46,6 @@ public class HoverProvider {
 
   private static final String NBSP_NBSP = "&nbsp;&nbsp;";
   private static final String SECTION_END = "\n\n---\n\n";
-  private static final String UNDEFINED = "Undefined";
 
   /**
    * Set server capabilities.
