@@ -157,10 +157,7 @@ public class TypeStringResolver {
 
     // Prefer ExemplarDefinitions.
     final ITypeStringDefinition exemplarDefefinition =
-        definitions.stream()
-            .filter(ExemplarDefinition.class::isInstance)
-            .findAny()
-            .orElse(null);
+        definitions.stream().filter(ExemplarDefinition.class::isInstance).findAny().orElse(null);
     final ITypeStringDefinition definition =
         exemplarDefefinition != null ? exemplarDefefinition : definitions.iterator().next();
 
@@ -358,7 +355,7 @@ public class TypeStringResolver {
         .map(
             typeStr ->
                 // Let all parents inherit generic definitions.
-                TypeString.ofIdentifier(typeStr.getIdentifier(), typeStr.getPakkage(), thisGenDefs))
+                typeStr.withGenerics(thisGenDefs))
         .collect(Collectors.toUnmodifiableSet());
   }
 
