@@ -165,6 +165,16 @@ public final class TypeString implements Comparable<TypeString> {
   }
 
   /**
+   * Get a copy of self, but with (new) generic definitions.
+   *
+   * @param genericDefinitions Generic definitions.
+   * @return Copy of self, with generic definitions.
+   */
+  public TypeString withGenerics(final TypeString[] genericDefinitions) {
+    return TypeString.ofIdentifier(this.getIdentifier(), this.getPakkage(), genericDefinitions);
+  }
+
+  /**
    * Create a {@link TypeString} of a generic definition.
    *
    * @param identifier Name of generic.

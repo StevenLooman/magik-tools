@@ -493,8 +493,9 @@ public class HoverProvider {
 
     final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
     final String indentStr = NBSP_NBSP.repeat(indent);
-    exemplarDef
-        .getParents()
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    resolver
+        .getParents(typeStr)
         .forEach(
             parentTypeStr -> {
               builder
@@ -627,7 +628,8 @@ public class HoverProvider {
       builder.append(SECTION_END);
     }
 
-    if (!exemplarDef.getParents().isEmpty()) {
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    if (!resolver.getParents(typeStr).isEmpty()) {
       builder.append("## Supers\n");
       this.addSuperDoc(magikFile, exemplarDef, builder, 0);
       builder.append(SECTION_END);
