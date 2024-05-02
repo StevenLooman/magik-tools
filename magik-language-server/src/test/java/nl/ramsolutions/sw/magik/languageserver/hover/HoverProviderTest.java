@@ -144,9 +144,7 @@ class HoverProviderTest {
 
     // Hover and test.
     final Hover hover = this.provideHover(code, position, definitionKeeper);
-    final MarkupContent content = hover.getContents().getRight();
-    assertThat(content.getKind()).isEqualTo(MarkupKind.MARKDOWN);
-    assertThat(content.getValue()).contains("Undefined");
+    assertThat(hover).isNull();
   }
 
   @Test
@@ -184,9 +182,7 @@ class HoverProviderTest {
 
     // Hover and test.
     final Hover hover = this.provideHover(code, position, definitionKeeper);
-    final MarkupContent content = hover.getContents().getRight();
-    assertThat(content.getKind()).isEqualTo(MarkupKind.MARKDOWN);
-    assertThat(content.getValue()).contains("Undefined");
+    assertThat(hover).isNull();
   }
 
   @Test
