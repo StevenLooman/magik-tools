@@ -1,0 +1,80 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Slot definition.
+## @slot {sw:char16_vector} name
+## @slot {sw:char16_vector} type_name
+def_slotted_exemplar(
+	:slot_definition,
+	{
+		{:name, _unset, :readable, :public},
+		{:type_name, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method slot_definition.new(name, type_name)
+	## Constructor.
+	## @param {sw:char16_vector} name
+	## @param {sw:char16_vector} type_name
+	## @return {_self}
+	_return _clone.init(name, type_name)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method slot_definition.init(name, type_name)
+	## Initializer.
+	## @param {sw:char16_vector} name
+	## @param {sw:char16_vector} type_name
+	## @return {_self}
+	.name << name
+	.type_name << type_name
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method slot_definition.new_from(slot_desc)
+	## Construct self from `type_name` and `sw:method_table`.
+	## @param {sw:slot_descriptor} slot_desc
+	_return _self.new(
+		slot_desc.slot_name,
+		_self.undefined_type)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method slot_definition.equals?(other)
+	## Equals?
+	## @param {mt:slot_definition} other
+	## @return {sw:false}
+	_return _self.name = other.name _andif
+		_self.type_name = other.type_name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method slot_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:slot_definition} other
+	## @return {sw:false}
+	_return _self.name = other.name
+_endmethod
+$
+
+define_binary_operator_case(
+	:|=|, slot_definition, slot_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:slot_definition} definition_a
+		## @param {mt:slot_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+slot_definition.define_show_attributes(
+	:name)
+$

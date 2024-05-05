@@ -148,14 +148,14 @@ public class MUnitTestItemProvider {
       final Path parentPath = path.getParent();
       if (parentPath == null) {
         return new ProductDefinition(
-            null, "<no_product>", "", null, null, null, Collections.emptyList());
+            null, "<no_product>", null, "", null, null, null, Collections.emptyList());
       }
 
       return this.getSwProduct(parentPath);
     }
 
     // Construct SwProduct.
-    return ProductDefinitionScanner.readProductDefinition(productDefPath);
+    return ProductDefinitionScanner.readProductDefinition(productDefPath, null);
   }
 
   private ModuleDefinition getSwModule(final Path path) throws IOException {
@@ -163,7 +163,8 @@ public class MUnitTestItemProvider {
     if (!Files.exists(moduleDefPath)) {
       final Path parentPath = path.getParent();
       if (parentPath == null) {
-        return new ModuleDefinition(null, "<no_module>", "", "1", null, Collections.emptyList());
+        return new ModuleDefinition(
+            null, "<no_module>", null, "", "1", null, Collections.emptyList());
       }
 
       return this.getSwModule(parentPath);

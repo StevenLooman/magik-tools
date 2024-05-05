@@ -1,0 +1,104 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Binary oeprator definition.
+## @slot {sw:char16_vector} operator
+## @slot {sw:char16_vector} lhs_type_name
+## @slot {sw:char16_vector} rhs_type_name
+## @slot {sw:char16_vector} result_type_name
+def_slotted_exemplar(
+	:binary_operator_definition,
+	{
+		{:operator, _unset, :readable, :public},
+		{:lhs_type_name, _unset, :readable, :public},
+		{:rhs_type_name, _unset, :readable, :public},
+		{:result_type_name, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method binary_operator_definition.new(operator, lhs_type_name, rhs_type_name, result_type_name)
+	## Constructor.
+	## @param {sw:char16_vector} operator
+	## @param {sw:char16_vector} lhs_type_name
+	## @param {sw:char16_vector} rhs_type_name
+	## @param {sw:char16_vector} result_type_name
+	## @return {_self}
+	_return _clone.init(operator, lhs_type_name, rhs_type_name, result_type_name)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method binary_operator_definition.init(operator, lhs_type_name, rhs_type_name, result_type_name)
+	## Initializer.
+	## @param {sw:char16_vector} operator
+	## @param {sw:char16_vector} lhs_type_name
+	## @param {sw:char16_vector} rhs_type_name
+	## @param {sw:char16_vector} result_type_name
+	## @return {_self}
+	.operator << operator
+	.lhs_type_name << lhs_type_name
+	.rhs_type_name << rhs_type_name
+	.result_type_name << result_type_name
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method binary_operator_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	condition.raise(:not_implemented)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method binary_operator_definition.equals?(other)
+	## Equals?
+	## @param {mt:binary_operator_definition} other
+	## @return {sw:false}
+	_return _self.operator = other.operator _andif
+		_self.lhs_type_name = other.lhs_type_name _andif
+		_self.rhs_type_name = other.rhs_type_name _andif
+		_self.return_type_name = other.return_type_name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method binary_operator_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:binary_operator_definition} other
+	## @return {sw:false}
+	_return _self.operator = other.operator _andif
+		_self.lhs_type_name = other.lhs_type_name _andif
+		_self.rhs_type_name = other.rhs_type_name
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, binary_operator_definition, binary_operator_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:binary_operator_definition} definition_a
+		## @param {mt:binary_operator_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.sort_value _cf definition_b.sort_value
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, binary_operator_definition, binary_operator_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:binary_operator_definition} definition_a
+		## @param {mt:binary_operator_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+binary_operator_definition.define_show_attributes(
+	:operator,
+	:lhs_type_name,
+	:rhs_type_name)
+$

@@ -1,0 +1,109 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Global definition.
+## @slot {sw:char16_vector} type_name
+## @slot {sw:char16_vector} aliased_type_name
+def_slotted_exemplar(
+	:global_definition,
+	{
+		{:type_name, _unset, :readable, :public},
+		{:aliased_type_name, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method global_definition.new(type_name, aliased_type_name)
+	## Constructor.
+	## @param {sw:char16_vector} type_name
+	## @param {sw:char16_vector} aliased_type_name
+	## @return {_self}
+	_return _clone.init(type_name, aliased_type_name)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method global_definition.init(type_name, aliased_type_name)
+	## Initializer.
+	## @param {sw:char16_vector} type_name
+	## @param {sw:char16_vector} aliased_type_name
+	## @return {_self}
+	.type_name << type_name
+	.aliased_type_name << aliased_type_name
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method global_definition.new_from(package, name, method_table)
+	## Construct self from `package`, `name` and `sw:method_table`.
+	## @param {sw:package} package
+	## @param {sw:symbol} name
+	## @param {sw:method_table} method_table
+	## @return {_self}
+	_local type_name << _self.name_from_type(package, name)
+	_local metadata << method_table.metadata
+	_local global_var <<
+		_if metadata[:exemplar_global] _isnt _unset
+		_then
+			>> metadata[:exemplar_global]
+		_else
+			>> write_string("@sw:", metadata[:exemplar_name]).evaluate()
+		_endif
+	_local aliased_type_name << _self.name_from_type(global_var.package, global_var.key)
+	_return _self.new(type_name, aliased_type_name)
+_endmethod
+$
+
+_pragma(condition_definition=basic, topic=type_dumper)
+_method global_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	_return .type_name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method global_definition.equals?(other)
+	## Equals?
+	## @param {mt:global_definition} other
+	## @return {sw:false}
+	_return _self.type_name = other.type_name _andif
+		_self.aliased_type_name = other.aliased_type_name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method global_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:global_definition} other
+	## @return {sw:false}
+	_return _self.type_name = other.type_name
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, global_definition, global_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:global_definition} definition_a
+		## @param {mt:global_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.sort_value _cf definition_b.sort_value
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, global_definition, global_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:global_definition} definition_a
+		## @param {mt:global_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+global_definition.define_show_attributes(
+	:type_name)
+$

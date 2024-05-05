@@ -174,13 +174,9 @@ public final class ModuleDefinitionScanner {
       baseVersion = ModuleDefinitionScanner.UNDEFINED_MODULE_VERSION;
       currentVersion = null;
     }
-    final AstNode requiresNode = node.getFirstChild(SwModuleDefinitionGrammar.REQUIRES);
-    final List<String> requireds =
-        requiresNode != null
-            ? requiresNode.getDescendants(SwModuleDefinitionGrammar.MODULE_REF).stream()
-                .map(AstNode::getTokenValue)
-                .toList()
-            : Collections.emptyList();
+
+    final ProductDefinition productDefinition = ProductDefinitionScanner.productForPath(path);
+    final String productName = productDefinition != null ? productDefinition.getName() : null;
 
     final AstNode descriptionNode = node.getFirstChild(SwModuleDefinitionGrammar.DESCRIPTION);
     final String description =
@@ -190,10 +186,18 @@ public final class ModuleDefinitionScanner {
                 .collect(Collectors.joining("\n"))
             : null;
 
+    final AstNode requiresNode = node.getFirstChild(SwModuleDefinitionGrammar.REQUIRES);
+    final List<String> requireds =
+        requiresNode != null
+            ? requiresNode.getDescendants(SwModuleDefinitionGrammar.MODULE_REF).stream()
+                .map(AstNode::getTokenValue)
+                .toList()
+            : Collections.emptyList();
+
     final URI uri = path.toUri();
     final Location location = new Location(uri);
     return new ModuleDefinition(
-        location, moduleName, baseVersion, currentVersion, description, requireds);
+        location, moduleName, productName, baseVersion, currentVersion, description, requireds);
   }
 
   /**

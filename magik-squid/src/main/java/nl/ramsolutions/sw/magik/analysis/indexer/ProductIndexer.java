@@ -151,7 +151,11 @@ public class ProductIndexer {
   private void readProductDefinition(final Path path) throws IOException {
     final ProductDefinition definition;
     try {
-      definition = ProductDefinitionScanner.readProductDefinition(path);
+      final String separator = path.getFileSystem().getSeparator();
+      final Path parentPath = path.resolve(".." + separator + "..");
+      final ProductDefinition parentDefinition =
+          ProductDefinitionScanner.productForPath(parentPath);
+      definition = ProductDefinitionScanner.readProductDefinition(path, parentDefinition);
     } catch (final RecognitionException exception) {
       LOGGER.warn("Error parsing defintion at: {}", path);
       return;

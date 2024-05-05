@@ -1,0 +1,186 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Definition.
+def_slotted_exemplar(
+	:definition,
+	{
+	})
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:char16_vector}
+definition.define_shared_constant(
+	:undefined_result,
+	"__UNDEFINED_RESULT__",
+	:public)
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:char16_vector}
+definition.define_shared_constant(
+	:self_type,
+	"_self",
+	:public)
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:char16_vector}
+definition.define_shared_constant(
+	:undefined_type,
+	"_undefined",
+	:public)
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:character}
+definition.define_shared_constant(
+	:value_separator,
+	%,,
+	:public)
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:character}
+definition.define_shared_constant(
+	:value_combinator,
+	%|,
+	:public)
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method definition.new_from_json(instruction)
+	## Construct self from JSON.
+	## @param {sw:equality_hash_table} instruction
+	## @return {_self}
+	_return _clone.init_from_json(instruction)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method definition.init_from_json(instruction)
+	## Initialize self from JSON.
+	## @param {sw:equality_hash_table} instruction
+	## @return {_self}
+	_local fix_value <<
+		_proc(value)
+			_return value
+		_endproc
+
+	_for name _over _self.sys!all_slot_names().fast_elements()
+	_loop
+		_local fixed_name << name.write_string.split_by(%!)[2].as_symbol()
+		_local value << instruction[fixed_name]
+		_local fixed_value <<
+			_if value.is_kind_of?(sw:simple_vector) _orif
+			    value.is_kind_of?(sw:rope)
+			_then
+				>> value.map(fix_value).as_simple_vector()
+			_else
+				>> value
+			_endif
+		_self.sys!slot(fixed_name) << fixed_value
+	_endloop
+
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_abstract _method definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method definition.as_properties()
+	## Get slots as hash table.
+	## @return {sw:equality_property_list<K=sw:char16_vector, E=sw:object>}
+	_local fix_value <<
+		_proc(value)
+			_if value.is_kind_of?(mt:definition)
+			_then
+				_return value.as_properties()
+			_endif
+
+			_return value
+		_endproc
+
+	_local table << sw:equality_property_list.new()
+	_for name, value _over _self.sys!slot_names_and_values()
+	_loop
+		_local fixed_name << name.write_string.split_by(%!)[2]
+		_local fixed_value <<
+			_if value.is_kind_of?(sw:simple_vector)
+			_then
+				>> value.map(fix_value)
+			_elif value.is_kind_of?(mt:definition)
+			_then
+				>> fix_value(value)
+			_else
+				>> value
+			_endif
+		table[fixed_name] << fixed_value
+	_endloop
+	_return table
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method definition.generate_json_string()
+	## Generate a json string from self.
+	## @return {sw:char16_vector}
+	_local instruction << _self.as_properties()
+	instruction[:instruction] << _self.class_name.write_string.split_by(%_)[1]
+	_local encoder << sw:json_encoder.new()
+	_return encoder.generate_string(instruction)
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_method definition.name_from_type(pkg, key)
+	## Get name from type.
+	## @param {sw:package} pkg Package.
+	## @param {sw:symbol} key Key in package.
+	## @return {sw:symbol} Full type name.
+	_return pkg.name + :|:| + key
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_method definition.name_from_object(obj)
+	## Get type name from object.
+	## @param {sw:object} obj Object.
+	## @return {sw:symbol} Full type name.
+	_local method_table << obj.define_method_target
+	_local metadata << method_table.metadata
+	_if _not metadata.includes_key?(:exemplar_global)
+	_then
+		_local msg << write_string("Could not determine type from object: ", obj.class_name)
+		condition.raise(:warning, :string, msg)
+
+		_return _self.undefined_result
+	_endif
+	_local global_var << metadata[:exemplar_global]
+	_local pkg << global_var.package
+	_return _self.name_from_type(pkg, global_var.key)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_abstract _method definition.equals?(other)
+	## Equals?
+	## @param {mt:definition} other
+	## @return {sw:false}
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_abstract _method definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing information?
+	## @param {mt:definition} other
+	## @return {sw:false}
+_endmethod
+$

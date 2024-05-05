@@ -1,0 +1,127 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Product definition.
+## @slot {sw:char16_vector} name
+## @slot {sw:char16_vector|sw:unset} version
+## @slot {sw:char16_vector|sw:unset} version_comment
+## @slot {sw:char16_vector|sw:unset} parent
+## @slot {sw:simple_vector<E=sw:char16_vector>} requireds
+def_slotted_exemplar(
+	:product_definition,
+	{
+		{:name, _unset, :readable, :public},
+		{:version, _unset, :readable, :public},
+		{:version_comment, _unset, :readable, :public},
+		{:parent, _unset, :readable, :public},
+		{:requireds, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method product_definition.new(name, version, version_comment, parent, requireds)
+	## Constructor.
+	## @param {sw:char16_vector} name
+	## @param {sw:char16_vector|sw:unset} version
+	## @param {sw:char16_vector|sw:unset} version_comment
+	## @param {sw:char16_vector|sw:unset} parent
+	## @param {sw:simple_vector<E=sw:char16_vector>} requireds
+	_return _clone.init(name, version, version_comment, parent, requireds)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method product_definition.init(name, version, version_comment, parent, requireds)
+	## Initializer.
+	## @param {sw:char16_vector} name
+	## @param {sw:char16_vector|sw:unset} version
+	## @param {sw:char16_vector|sw:unset} version_comment
+	## @param {sw:char16_vector|sw:unset} parent
+	## @param {sw:simple_vector<E=sw:char16_vector>} requireds
+	.name << name
+	.version << version
+	.version_comment << version_comment
+	.parent << parent
+	.requireds << requireds
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method product_definition.new_from(product)
+	## Construct self from `sw:sw_product`.
+	## @param {sw:sw_product} product
+	## @return {_self}
+	_local parent <<
+		_if product.parent _isnt _unset
+		_then
+			>> product.parent.name
+		_endif
+	_local requireds << product.prerequisites.
+		map(_proc(prereq) _return prereq[1] _endproc).
+		as_sorted_collection().
+		as_simple_vector()
+	_return _self.new(
+		product.name,
+		product.version_string,
+		product.version.comment,
+		parent,
+		requireds)
+_endmethod
+$
+
+_pragma(condition_definition=basic, topic=type_dumper)
+_method product_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	_return .name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method product_definition.equals?(other)
+	## Equals?
+	## @param {mt:product_definition} other
+	## @return {sw:false}
+	_return _self.name = other.name _andif
+		_self.version = other.version _andif
+		_self.version_comment = other.version_comment _andif
+		_self.parent = other.parent _andif
+		_self.requireds.eq?(other.requireds)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method product_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:product_definition} other
+	## @return {sw:false}
+	_return _self.equals?(other)
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, product_definition, product_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:product_definition} definition_a
+		## @param {mt:product_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.sort_value _cf definition_b.sort_value
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, product_definition, product_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:product_definition} definition_a
+		## @param {mt:product_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+product_definition.define_show_attributes(
+	:name)
+$

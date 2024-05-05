@@ -1,0 +1,100 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Package definition.
+## @slot {sw:char16_vector} name
+## @slot {sw:simple_vector<E=sw:char16_vector>} uses
+def_slotted_exemplar(
+	:package_definition,
+	{
+		{:name, _unset, :readable, :public},
+		{:uses, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method package_definition.new(name, uses)
+	## Constructor.
+	## @param {sw:char16_vector} name
+	## @param {sw:simple_vector<E=sw:char16_vector>} uses
+	_return _clone.init(name, uses)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method package_definition.init(name, uses)
+	## Initializer.
+	## @param {sw:char16_vector} name
+	## @param {sw:simple_vector<E=sw:char16_vector>} uses
+	.name << name
+	.uses << uses
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method package_definition.new_from(package)
+	## Construct self from `sw:package`.
+	## @param {sw:package} package
+	## @return {_self}
+	_local uses << package.uses().
+		map(_proc(pkg_use) _return pkg_use.name _endproc).
+		as_simple_vector()
+	_return _self.new(
+		package.name,
+		uses)
+_endmethod
+$
+
+_pragma(condition_definition=basic, topic=type_dumper)
+_method package_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	_return .name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method package_definition.equals?(other)
+	## Equals?
+	## @param {mt:package_definition} other
+	## @return {sw:false}
+	_return _self.name = other.name _andif
+		_self.uses.eq?(other.uses)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method package_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:package_definition} other
+	## @return {sw:false}
+	_return _self.equals?(other)
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, package_definition, package_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:package_definition} definition_a
+		## @param {mt:package_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.sort_value _cf definition_b.sort_value
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, package_definition, package_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:package_definition} definition_a
+		## @param {mt:package_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+package_definition.define_show_attributes(
+	:name)
+$

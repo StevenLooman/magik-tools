@@ -1,0 +1,340 @@
+#% text_encoding = iso8859_1
+##
+## Script to merge two type databases (.jsonl). Useful when you have dumped types using
+## the `type_dumper.magik` script from a older Smallworld version, and want to merge it with
+## a type database from the current Smallworld version.
+##
+## This script takes all the entries from both type databases and merges the type information:
+## - exemplar slot types
+## - method/procedure return types
+## - method/procedure loop types
+## - method/procedure parameter types
+## - globals
+## - ...
+##
+## Note that the script depends on the type database being sorted.
+##
+## Usage:
+## Magik> type_merger.new(
+##          "sw_types-swaf-5.3.2.jsonl",  # Previous type database, with type information.
+##          "sw_types-swaf-5.3.3.jsonl",  # Current type database, without any type information
+##          "/tmp/sw_types_merged.jsonl").run()  # Target type database.
+##
+
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Type merger.
+## @slot {sw:external_text_input_stream} in_stream_1
+## @slot {sw:char16_vector|sw:unset} line_1
+## @slot {sw:external_text_input_stream} in_stream_2
+## @slot {sw:char16_vector|sw:unset} line_2
+## @slot {sw:external_text_output_stream} out_stream
+def_slotted_exemplar(
+	:type_merger,
+	{
+		{:in_stream_1, _unset},
+		{:line_1, _unset},
+		{:in_stream_2, _unset},
+		{:line_2, _unset},
+		{:out_stream, _unset}
+	})
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+_method type_merger.new(source_filename_1, source_filename_2, target_filename)
+	## Constructor.
+	## @param {sw:char16_vector} source_filename_1 Filename to read from.
+	## @param {sw:char16_vector} source_filename_2 Filename to read from.
+	## @param {sw:char16_vector} target_filename Filename to dump to.
+	## @return {_clone}
+	_return _clone.init(source_filename_1, source_filename_2, target_filename)
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_merger.init(source_filename_1, source_filename_2, target_filename)
+	## Initializer.
+	## @param {sw:char16_vector} source_filename_1 Filename to read from.
+	## @param {sw:char16_vector} source_filename_2 Filename to read from.
+	## @param {sw:char16_vector} target_filename Filename to dump to.
+	## @return {_self}
+	.in_stream_1 << external_text_input_stream.new(source_filename_1)
+	.line_1 << _unset
+	.in_stream_2 << external_text_input_stream.new(source_filename_2)
+	.line_2 << _unset
+	.out_stream << external_text_output_stream.new(target_filename)
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_merger.deinit()
+	## Deinitialize self, closes output stream.
+	.in_stream_1.close()
+	.in_stream_1 << _unset
+
+	.in_stream_2.close()
+	.in_stream_2 << _unset
+
+	.out_stream.close()
+	.out_stream << _unset
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_merger.write_line(_gather parts)
+	## Write line.
+	## @param {sw:char16_vector} parts Parts to write.
+	.out_stream.write(_scatter parts)
+	.out_stream.write(character.newline)
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_merger.write_definition(definition)
+	## Write instruction.
+	## @param {mt:definition} definition Definition to write.
+	_local line << definition.generate_json_string()
+	.out_stream.write(line, character.newline)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+_method type_merger.run()
+	## Run the dump.
+	_protect
+		_self.int!run()
+	_protection
+		_self.deinit()
+	_endprotect
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_merger.int!run()
+	## Run the actual merge.
+
+	_local sections << {
+		"products",
+		"modules",
+		"packages",
+		"types",
+		"globals",
+		"methods",
+		"procedures",
+		"conditions"
+		# "binary_operators"  # TODO
+	}
+
+	# Skip preambles from left, copy preambles from right.
+	_while _self.peek_line(:left).default("").trim_spaces().matches?("//*") _andif
+	       _not _self.peek_line(:left).default("").trim_spaces().matches?("// " + sections[1])
+	_loop
+		_self.read_line(:left)
+	_endloop
+	_while _self.peek_line(:right).default("").trim_spaces().matches?("//*") _andif
+	       _not _self.peek_line(:right).default("").trim_spaces().matches?("// " + sections[1])
+	_loop
+		_local line << _self.read_line(:right)
+		_self.write_line(line)
+	_endloop
+
+	_for index _over sections.fast_keys()
+	_loop
+		_local next_section_marker <<
+			_if index + 1 > sections.size
+			_then
+				>> ""  # Unset, but due to a default...
+			_else
+				>> "// " + sections[index + 1]
+			_endif
+
+		# Read/merge products.
+		_self.read_line(:left)  # Section header.
+		_self.write_line(_self.read_line(:right))  # Section header.
+		_while _not _self.peek_line(:right).default("").trim_spaces().matches?(next_section_marker)
+		_loop @over_right
+			_local right_line << _self.read_line(:right)
+			_local right_definition << _self.parse_instruction(right_line)
+
+			# Find corresponding instruction at left side.
+			_while _not _self.peek_line(:left).default("").trim_spaces().matches?(next_section_marker)
+			_loop @over_left
+				_local left_line << _self.peek_line(:left)
+				_if left_line _is _unset
+				_then
+					_leave
+				_endif
+
+				_local left_definition << _self.parse_instruction(left_line)
+				_local compare_result << left_definition _cf right_definition
+				_if compare_result _is _true
+				_then
+					# Missing in right, skip.
+					_self.read_line(:left)
+				_elif compare_result _is _maybe
+				_then
+					# Equal, merge.
+					_self.read_line(:left)
+
+					_local new_definition << _self.merge_definition(left_definition, right_definition)
+					_self.write_definition(new_definition)
+
+					_leave @over_left
+				_elif compare_result _is _false
+				_then
+					# Missing in left, copy.
+					_self.write_definition(right_definition)
+
+					_leave @over_left
+				_endif
+			_endloop
+		_endloop
+
+		# Sync to next section on left side.
+		_while _not _self.peek_line(:left).default("").trim_spaces().matches?(next_section_marker)
+		_loop
+			_self.read_line(:left)
+		_endloop
+	_endloop
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_merger.parse_instruction(line)
+	## Parse the instruction from JSON.
+	## @param {sw:char16_vector} line
+	_if line.matches?("//*")
+	_then
+		sw:condition.raise(:error)
+	_endif
+
+	_local dec << sw:json_decoder.new()
+	_local instruction << dec.parse_string(line)
+	_local instruction_instruction << instruction[:instruction]
+	_local exemplar << get_global_value("mt:" + instruction_instruction + "_definition")
+	_if exemplar _is _unset
+	_then
+		sw:condition.raise(:not_implemented)
+	_endif
+
+	_return exemplar.new_from_json(instruction)
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_merger.merge_definition(left_definition, right_definition)
+	## Merge the two instructions.
+	## @param {mt:definition} left_definition
+	## @param {mt:definition} right_definition
+	_if left_definition = right_definition
+	_then
+		_return right_definition
+	_elif left_definition.equals_disregarding_typing?(right_definition)
+	_then
+		# Take left, as this might have typing information.
+		_local out_stream << sw:internal_text_output_stream.new()
+		right_definition.show_on(out_stream)
+		_local msg << write_string("Taken from left: ", out_stream.string)
+		condition.raise(:information, :string, msg)
+		_return left_definition
+	_endif
+
+	# Must have changed, take right, and show it has changed.
+	_local out_stream << sw:internal_text_output_stream.new()
+	right_definition.show_on(out_stream)
+	_local msg << write_string("Changed: ", out_stream.string)
+	condition.raise(:information, :string, msg)
+
+	_global user:defs
+	user:defs << {left_definition, right_definition}
+	_return right_definition
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_merger.read_line(side)
+	## Read a single line from an input file. If there was a line in the buffer,
+	## that side is cleared and *no* new line is read.
+	## @param {sw:symbol} side "Side" to read from, either `:left` or `:right`.
+	## @return {sw:char16_vector|sw:unset} Read line, or unset on EOF.
+	_if side _isnt :left _andif
+	    side _isnt :right
+	_then
+		sw:condition.raise(
+			:parameter_invalid_value,
+			:name, :side,
+			:value, side)
+	_endif
+
+	# If any line in buffer, take that instead, and clear buffer.
+	_if side _is :left
+	_then
+		_if .line_1 _isnt _unset
+		_then
+			_return .line_1 ^<< _unset
+		_endif
+	_elif side _is :right
+	_then
+		_if .line_2 _isnt _unset
+		_then
+			_return .line_2 ^<< _unset
+		_endif
+	_endif
+
+	_local stream <<
+		_if side _is :left
+		_then
+			>> .in_stream_1
+		_elif side _is :right
+		_then
+			>> .in_stream_2
+		_endif
+	_local line << stream.get_line()
+	# show(:read_line, side, line)
+	_return line
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_merger.peek_line(side)
+	## Peek a single line from an input file. If three is no line in the buffer,
+	## read a new line. Otherwise read a new line and store it in the buffer.
+	## @param {sw:symbol} side "Side" to read from, either `:left` or `:right`.
+	## @return {sw:char16_vector|sw:unset} Read line, or unset on EOF.
+	_if side _isnt :left _andif
+	    side _isnt :right
+	_then
+		sw:condition.raise(
+			:parameter_invalid_value,
+			:name, :side,
+			:value, side)
+	_endif
+
+	_local string <<
+		_if side _is :left
+		_then
+			>> .line_1
+		_elif side _is :right
+		_then
+			>> .line_2
+		_endif
+	_if string _isnt _unset
+	_then
+		# Still in buffer, use it.
+		_return string
+	_endif
+
+	_local line << _self.read_line(side)
+	_if side _is :left
+	_then
+		.line_1 << line
+	_elif side _is :right
+	_then
+		.line_2 << line
+	_endif
+	# show(:peek_line, side, line)
+	_return line
+_endmethod
+$

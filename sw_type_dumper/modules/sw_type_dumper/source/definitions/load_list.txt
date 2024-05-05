@@ -1,0 +1,12 @@
+definition
+product_definition
+module_definition
+package_definition
+slot_definition
+type_definition
+parameter_definition
+method_definition
+procedure_definition
+condition_definition
+binary_operator_definition
+global_definition

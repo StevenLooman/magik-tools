@@ -1,0 +1,29 @@
+#% text_encoding = iso8859_1
+
+_block
+	_local product_dir << system.pathname_up(!source_file!, 2)
+	smallworld_product.add_product(product_dir)
+	sw_module_manager.load_module(:sw_type_dumper)
+_endblock
+$
+
+_block
+	_local ignore_vars << set.new_with(
+		:|mt:definition|,
+		:|mt:product_definition|,
+		:|mt:module_definition|,
+		:|mt:package_definition|,
+		:|mt:slot_definition|,
+		:|mt:type_definition|,
+		:|mt:parameter_definition|,
+		:|mt:method_definition|,
+		:|mt:procedure_definition|,
+		:|mt:condition_definition|,
+		:|mt:binary_operator_definition|,
+		:|mt:global_definition|,
+		:|mt:type_dumper|,
+		:|mt:type_merger|)
+	_local dumper << mt:type_dumper.new("/tmp/sw_types.jsonl", ignore_vars)
+	dumper.run()
+_endblock
+$

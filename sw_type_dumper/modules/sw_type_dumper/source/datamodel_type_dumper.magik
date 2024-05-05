@@ -1,0 +1,263 @@
+#% text_encoding = iso8859_1
+##
+## Script to dump datamodel types from a given view, to a type database (.jsonl file). This type database
+## can be read into the magik-language-server so that it has all the type/method/... definitions.
+## These definitions are used for (auto) completion, checks, etc in the magik-language-server.
+##
+
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Datamodel type dumper.
+## @slot {sw:ds_version_view} view
+## @slot {sw:external_text_output_stream} out_stream
+def_slotted_exemplar(
+	:datamodel_type_dumper,
+	{
+		{:view, _unset},
+		{:out_stream, _unset}
+	})
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+_method datamodel_type_dumper.new(view, filename)
+	## Constructor.
+	## @param {sw:ds_version_view} view
+	## @param {sw:char16_vector} filename filename to dump to
+	## @return {_clone}
+	_return _clone.init(view, filename)
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method datamodel_type_dumper.init(view, filename)
+	## Initializer.
+	## @param {sw:ds_version_view} view
+	## @param {sw:char16_vector} filename filename to dump to
+	## @return {_self}
+	.view << view
+	.out_stream << external_text_output_stream.new(filename)
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method datamodel_type_dumper.deinit()
+	## Deinitialize self, closes output stream.
+	.out_stream.close()
+	.out_stream << _unset
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method datamodel_type_dumper.write_line(_gather parts)
+	## Write line.
+	## @param {sw:char16_vector} parts Parts to write.
+	.out_stream.write(_scatter parts)
+	.out_stream.write(character.newline)
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method datamodel_type_dumper.write_definition(definition)
+	## Write definition.
+	## @param {mt:definition} definition Definition to write.
+	_local line << definition.generate_json_string()
+	_self.write_line(line)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+_method datamodel_type_dumper.run()
+	## Run the dump.
+	_protect
+		_self.int!run()
+	_protection
+		_self.deinit()
+	_endprotect
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method datamodel_type_dumper.int!run()
+	## Run the actual dump.
+	## Note that order of export is important when reading this file!
+	# Write intro.
+	_self.write_line("// Smallworld version: ", system.sw!version_string)
+	_self.write_line("// self type: ", _self.self_type)
+	_self.write_line("// undefined type: ", _self.undefined_type)
+	_self.write_line("// undefined result: ", _self.undefined_result)
+	_self.write_line("// view: ", .view.original_dataset_name)
+
+	# Keep same structure as type_dumper as the type_merger depends on this.
+	_self.write_line("// products")
+	_self.write_line("// modules")
+	_self.write_line("// packages")
+	_self.write_line("// types")
+	_self.write_line("// globals")
+
+	_local colls << rope.new_from_iter(.view, :user_tables|()|)
+	_local sorted_colls << sorted_collection.new_from(colls, {:method_result, :name})
+
+	# We don't write the record exemplars, as these should come from scanning sources/seeing record exemplars.
+
+	_self.write_line("// methods")
+	_for coll _over sorted_colls.fast_elements()
+	_loop
+		_local type_name << _self.get_type_name_for_collection(coll)
+		_local sorted_fields << sorted_collection.new_from(coll.all_fields, {:method_result, :name})
+		_for field _over sorted_fields.fast_elements()
+		_loop
+			_if _self.ignore_field?(coll)
+			_then
+				_continue
+			_endif
+
+			_local definition << method_definition.new(
+				type_name,
+				field.name,
+				{},
+				{},
+				_unset,
+				_self.field_type_name(field),
+				{},
+				_unset,
+				field.external_name,
+				_unset,
+				_unset,
+				{})
+			_self.write_definition(definition)
+		_endloop
+	_endloop
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method datamodel_type_dumper.get_record_exemplar_method_table_for_collection(coll)
+	## Get record exemplar (parent of actual exemplar) for collection.
+	## @param {sw:ds_collection} coll
+	## @return {sw:method_table}
+	_local rec_ex << coll.record_exemplar
+	_local method_table << rec_ex.define_method_target
+	_return method_table.meta_at(:behaviour_sources).an_element()
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method datamodel_type_dumper.get_type_name_for_collection(coll)
+	## Get type_name for collection.
+	## @param {sw:ds_collection} coll
+	## @return {sw:symbol}
+	_local method_table << _self.get_record_exemplar_method_table_for_collection(coll)
+	_local globl << method_table.meta_at(:exemplar_global)
+	_local pkg << globl.package
+	_local key << globl.key
+	_return defintion.name_from_type(pkg, key)
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method datamodel_type_dumper.ignore_collection?(collection)
+	## Ignore this collection?
+	## @param {sw:ds_collection} collection
+	## @return {sw:false} Ignore?
+	## @return {sw:char16_vector} Ignore reason
+	_local rec_ex << collection.record_exemplar
+	_if rec_ex.class_name _is :ds_record _orif
+	    rec_ex.class_name _is :rwo_record _orif
+	    rec_ex.class_name _is :dataless_rwo_record
+	_then
+		_return _true, "No record exemplar"
+	_endif
+
+	_return _false, ""
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method datamodel_type_dumper.ignore_field?(field)
+	## Ignore this collection?
+	## @param {sw:ds_field} field
+	## @return {sw:false} Ignore?
+	## @return {sw:char16_vector} Ignore reason
+	_local owner << field.owner
+	_local (ignore_collection?, reason_collection) << _self.ignore_collection?(owner)
+	_if ignore_collection?
+	_then
+		_return ignore_collection?, reason_collection
+	_endif
+
+	_return _false, ""
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method datamodel_type_dumper.field_type_name(field)
+	## Get the type name of a field.
+	## @param {sw:ds_field} field
+	## @return {sw:simple_vector<sw:char16_vector>|sw:char16_vector}
+	_local type_name << _self.undefined_type
+	_if field.is_physical?
+	_then
+		_local type << field.type.class.class_name
+		type_name << "sw:" + type
+	_elif field.is_join?
+	_then
+		_if field.join_type _is :db_set_join
+		_then
+			_local result_type_names << _self.join_result_type_names(field)
+			_return "sw:db_set<E=" + result_type_names + ">"
+		_elif field.join_type _is :db_rope_join
+		_then
+			_local result_type_names << _self.join_result_type_names(field)
+			_return "sw:db_rope<E=" + result_type_names + ">"
+		_elif field.join_type _is :follow
+		_then
+			_local result_type_names << _self.join_result_type_names(field)
+			type_name << result_type_names
+		_elif field.join_type _is :text
+		_then
+			type_name << "sw:char16_vector"
+		_else
+			condition.raise(:not_implemented)
+		_endif
+	_elif field.is_geometry?
+	_then
+		_local geom_ex << field.geom_exemplar
+		type_name << "sw:" + geom_ex.class_name
+	_elif field.is_derived?
+	_then
+		_local type << field.type.class.class_name
+		type_name << "sw:" + type
+	_else
+		condition.raise(:not_implemented)
+	_endif
+
+	_if type_name = _self.undefined_result
+	_then
+		_return type_name
+	_endif
+
+	_if _not field.mandatory?
+	_then
+		type_name << type_name + "|sw:unset"
+	_endif
+
+	_return type_name
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method datamodel_type_dumper.join_result_type_names(join_field)
+	## Get the type names of the `result_tables from the `join_field`.
+	## @param {sw:ds_join_field} join_field
+	## @return {sw:char16_vector}
+	_local result_type_names << sorted_collection.new()
+	_for result_table _over join_field.result_tables.fast_elements()
+	_loop
+		_local result_type_name << _self.get_type_name_for_collection(result_table)
+		result_type_names.add(result_type_name)
+	_endloop
+	_return result_type_names.join_as_strings(_self.value_combinator)
+_endmethod
+$
