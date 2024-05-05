@@ -3,10 +3,8 @@ package nl.ramsolutions.sw.definitions;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 
@@ -15,12 +13,11 @@ public class ProductDefinition implements IDefinition {
 
   private final String name;
   private final @Nullable Location location;
+  private final @Nullable String parent;
   private final @Nullable String version;
   private final @Nullable String versionComment;
   private final @Nullable String title;
   private final @Nullable String description;
-  private final Set<String> children = new HashSet<>();
-  private final Set<String> modules = new HashSet<>();
   private final List<String> requireds;
 
   /**
@@ -34,6 +31,7 @@ public class ProductDefinition implements IDefinition {
   public ProductDefinition(
       final @Nullable Location location,
       final String name,
+      final @Nullable String parent,
       final @Nullable String version,
       final @Nullable String versionComment,
       final @Nullable String title,
@@ -41,6 +39,7 @@ public class ProductDefinition implements IDefinition {
       final List<String> requireds) {
     this.name = name;
     this.location = location;
+    this.parent = parent;
     this.version = version;
     this.versionComment = versionComment;
     this.title = title;
@@ -68,6 +67,11 @@ public class ProductDefinition implements IDefinition {
   }
 
   @CheckForNull
+  public String getParent() {
+    return parent;
+  }
+
+  @CheckForNull
   public String getVersion() {
     return this.version;
   }
@@ -85,42 +89,6 @@ public class ProductDefinition implements IDefinition {
   @CheckForNull
   public String getDescription() {
     return this.description;
-  }
-
-  /**
-   * Get child product definitions of this product.
-   *
-   * @return Child product definitions of this product.
-   */
-  public Set<String> getChildren() {
-    return Collections.unmodifiableSet(this.children);
-  }
-
-  /**
-   * Add a {@link ProductDefinition} to this product.
-   *
-   * @param productName {@link ProductDefinition} to add.
-   */
-  public void addChild(final String productName) {
-    this.children.add(productName);
-  }
-
-  /**
-   * Get module names in this product.
-   *
-   * @return Collection of module names in this product.
-   */
-  public Set<String> getModules() {
-    return Collections.unmodifiableSet(this.modules);
-  }
-
-  /**
-   * Add a module name to this product.
-   *
-   * @param swModule Modulename to add.
-   */
-  public void addModule(final String swModule) {
-    this.modules.add(swModule);
   }
 
   /**

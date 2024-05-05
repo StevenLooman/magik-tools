@@ -13,6 +13,7 @@ public class ModuleDefinition implements IDefinition {
 
   private final @Nullable Location location;
   private final String name;
+  private final @Nullable String product;
   private final String baseVersion;
   private final @Nullable String currentVersion;
   private final @Nullable String description;
@@ -27,12 +28,14 @@ public class ModuleDefinition implements IDefinition {
   public ModuleDefinition(
       final @Nullable Location location,
       final String name,
+      final @Nullable String product,
       final String baseVersion,
       final @Nullable String currentVersion,
       final @Nullable String description,
       final List<String> requireds) {
     this.location = location;
     this.name = name;
+    this.product = product;
     this.baseVersion = baseVersion;
     this.currentVersion = currentVersion;
     this.description = description;
@@ -46,6 +49,11 @@ public class ModuleDefinition implements IDefinition {
   @CheckForNull
   public Location getLocation() {
     return this.location;
+  }
+
+  @CheckForNull
+  public String getProduct() {
+    return this.product;
   }
 
   public String getBaseVersion() {

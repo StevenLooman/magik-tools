@@ -1,0 +1,227 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Procedure definition.
+## @slot {sw:char16_vector} type_name
+## @slot {sw:char16_vector} procedure_name
+## @slot {sw:simple_vector<E=sw:char16_vector>} modifiers
+## @slot {sw:simple_vector<E=mt:parameter_definition>} parameters
+## @slot {sw:simple_vector<E=sw:char16_vector>} return_types
+## @slot {sw:simple_vector<E=sw:char16_vector>} loop_types
+## @slot {sw:char16_vector|sw:unset} source_file
+## @slot {sw:char16_vector|sw:unset} doc
+## @slot {sw:char16_vector|sw:unset} module_name
+def_slotted_exemplar(
+	:procedure_definition,
+	{
+		{:type_name, _unset, :readable, :public},
+		{:procedure_name, _unset, :readable, :public},
+		{:modifiers, _unset, :readable, :public},
+		{:parameters, _unset, :readable, :public},
+		{:return_types, _unset, :readable, :public},
+		{:loop_types, _unset, :readable, :public},
+		{:source_file, _unset, :readable, :public},
+		{:doc, _unset, :readable, :public},
+		{:module_name, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method procedure_definition.new(
+	type_name,
+	procedure_name,
+	modifiers,
+	parameters,
+	return_types,
+	loop_types,
+	source_file,
+	doc,
+	module_name)
+	## Constructor.
+	## @param {sw:char16_vector} type_name
+	## @param {sw:char16_vector} procedure_name
+	## @param {sw:simple_vector<E=sw:char16_vector>} modifiers
+	## @param {sw:simple_vector<E=mt:parameter_definition>} parameters
+	## @param {sw:simple_vector<E=sw:char16_vector>} return_types
+	## @param {sw:simple_vector<E=sw:char16_vector>} loop_types
+	## @param {sw:char16_vector|sw:unset} source_file
+	## @param {sw:char16_vector|sw:unset} doc
+	## @param {sw:char16_vector|sw:unset} module_name
+	## @return {_self}
+	_return _clone.init(
+		type_name,
+		procedure_name,
+		modifiers,
+		parameters,
+		return_types,
+		loop_types,
+		source_file,
+		doc,
+		module_name)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method procedure_definition.init(
+	type_name,
+	procedure_name,
+	modifiers,
+	parameters,
+	return_types,
+	loop_types,
+	source_file,
+	doc,
+	module_name)
+	## Initializer.
+	## @param {sw:char16_vector} type_name
+	## @param {sw:char16_vector} procedure_name
+	## @param {sw:simple_vector<E=sw:char16_vector>} modifiers
+	## @param {sw:simple_vector<E=mt:parameter_definition>} parameters
+	## @param {sw:simple_vector<E=sw:char16_vector>} return_types
+	## @param {sw:simple_vector<E=sw:char16_vector>} loop_types
+	## @param {sw:char16_vector|sw:unset} source_file
+	## @param {sw:char16_vector|sw:unset} doc
+	## @param {sw:char16_vector|sw:unset} module_name
+	## @return {_self}
+	.type_name << type_name
+	.procedure_name << procedure_name
+	.modifiers << modifiers
+	.parameters << parameters
+	.return_types << return_types
+	.loop_types << loop_types
+	.source_file << source_file
+	.doc << doc
+	.module_name << module_name
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method procedure_definition.init_from_json(instruction)
+	## Initialize self from JSON.
+	## @param {sw:equality_hash_table} instruction
+	## @return {_self}
+	_super.init_from_json(instruction)
+
+	# Fix parameters.
+	.parameters << .parameters.map(
+		_proc(param)
+			_return parameter_definition.sys!perform(:|init_from_json()|, param)
+		_endproc)
+
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method procedure_definition.new_from(var)
+	## Construct self from.
+	## @param {sw:global_variable} var
+	## @return {_self}
+	_local procedure << var.value
+	_local type_name << var.package.name + :|:| + var.key
+	_local procedure_name << procedure.name
+	_local modifiers << rope.new()
+	_if procedure.iter?
+	_then
+		modifiers.add_last("iter")
+	_endif
+	_local parameter_definitions << parameter_definition.new_from(:procedure, procedure)
+	_local return_types << _self.undefined_result
+	_local loop_types <<
+		_if procedure.iter?
+		_then
+			>> {_self.undefined_result}
+		_else
+			>> {}
+		_endif
+	_local source_file <<
+		_try
+			>> procedure.source_file
+		_when error
+			>> _unset
+		_endtry
+	_local doc <<
+		_if var.package.name = "sw"
+		_then
+			>> method_finder.get_method_comment(var.key, "<global>").default("")
+		_endif
+	_return _self.new(
+		type_name,
+		procedure_name,
+		modifiers,
+		parameter_definitions,
+		return_types,
+		loop_types,
+		source_file,
+		doc,
+		_unset)
+_endmethod
+$
+
+_pragma(condition_definition=basic, topic=type_dumper)
+_method procedure_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	_return .type_name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method procedure_definition.equals?(other)
+	## Equals?
+	## @param {mt:procedure_definition} other
+	## @return {sw:false}
+	_return _self.type_name = other.type_name _andif
+		_self.procedure_name = other.procedure_name _andif
+		_self.modifiers.eq?(other.modifiers) _andif
+		_self.parameters.eq?(other.parameters) _andif
+		_self.return_types.eq?(other.return_types) _andif
+		_self.loop_types.eq?(other.loop_types) _andif
+		_self.source_file = other.source_file _andif
+		_self.doc = other.doc _andif
+		_self.module_name = other.module_name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method procedure_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:procedure_definition} other
+	## @return {sw:false}
+	_return _self.type_name = other.type_name _andif
+		_self.procedure_name = other.procedure_name _andif
+		_self.modifiers.eq?(other.modifiers) _andif
+		_self.parameters.eq?(other.parameters, :|equals_disregarding_typing?()|) _andif
+		_self.source_file = other.source_file _andif
+		_self.doc = other.doc _andif
+		_self.module_name = other.module_name
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, procedure_definition, procedure_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:procedure_definition} definition_a
+		## @param {mt:procedure_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.sort_value _cf definition_b.sort_value
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, procedure_definition, procedure_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:procedure_definition} definition_a
+		## @param {mt:procedure_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+procedure_definition.define_show_attributes(
+	:type_name,
+	:procedure_name)
+$

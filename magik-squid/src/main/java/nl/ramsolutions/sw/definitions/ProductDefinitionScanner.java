@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.definitions;
 
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -61,13 +62,8 @@ public final class ProductDefinitionScanner {
 
       try {
         final ProductDefinition currentProduct =
-            ProductDefinitionScanner.readProductDefinition(path);
+            ProductDefinitionScanner.readProductDefinition(path, parentProduct);
         this.products.add(currentProduct);
-
-        if (parentProduct != null) {
-          final String currentProductName = currentProduct.getName();
-          parentProduct.addChild(currentProductName);
-        }
 
         return currentProduct;
       } catch (final IOException exception) {
@@ -104,6 +100,8 @@ public final class ProductDefinitionScanner {
   /**
    * Get product from a given path, iterates upwards to find product.def file.
    *
+   * <p>Note that this does *NOT* set the parent product.
+   *
    * @param startPath Path to start at.
    * @return Parsed product definition.
    * @throws IOException -
@@ -115,7 +113,7 @@ public final class ProductDefinitionScanner {
       final Path productDefPath = path.resolve(SW_PRODUCT_DEF_PATH);
       final File productDefFile = productDefPath.toFile();
       if (productDefFile.exists()) {
-        return ProductDefinitionScanner.readProductDefinition(productDefPath);
+        return ProductDefinitionScanner.readProductDefinition(productDefPath, null);
       }
 
       path = path.getParent();
@@ -131,7 +129,8 @@ public final class ProductDefinitionScanner {
    * @return Parsed product definition.
    * @throws IOException -
    */
-  public static ProductDefinition readProductDefinition(final Path path) throws IOException {
+  public static ProductDefinition readProductDefinition(
+      final Path path, final @Nullable ProductDefinition parentProduct) throws IOException {
     final SwProductDefParser parser = new SwProductDefParser();
     final AstNode node = parser.parse(path);
 
@@ -148,6 +147,8 @@ public final class ProductDefinitionScanner {
     } else {
       productName = ProductDefinitionScanner.UNDEFINED_PRODUCT_NAME;
     }
+
+    final String parentProductName = parentProduct != null ? parentProduct.getName() : null;
 
     final AstNode versionNode = node.getFirstChild(SwProductDefinitionGrammar.VERSION);
     final String version =
@@ -186,6 +187,13 @@ public final class ProductDefinitionScanner {
             : Collections.emptyList();
 
     return new ProductDefinition(
-        location, productName, version, versionComment, title, description, requireds);
+        location,
+        productName,
+        parentProductName,
+        version,
+        versionComment,
+        title,
+        description,
+        requireds);
   }
 }

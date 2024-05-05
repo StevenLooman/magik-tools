@@ -1,0 +1,123 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Module definition.
+## @slot {sw:char16_vector} name
+## @slot {sw:char16_vector|sw:unset} product
+## @slot {sw:char16_vector|sw:unset} base_version
+## @slot {sw:char16_vector|sw:unset} current_version
+## @slot {sw:simple_vector<E=sw:char16_vector>} requireds
+def_slotted_exemplar(
+	:module_definition,
+	{
+		{:name, _unset, :readable, :public},
+		{:product, _unset, :readable, :public},
+		{:base_version, _unset, :readable, :public},
+		{:current_version, _unset, :readable, :public},
+		{:requireds, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method module_definition.new(name, product, base_version, current_version, requireds)
+	## Constructor.
+	## @param {sw:char16_vector} name
+	## @param {sw:char16_vector|sw:unset} product
+	## @param {sw:char16_vector|sw:unset} base_version
+	## @param {sw:char16_vector|sw:unset} current_version
+	## @param {sw:simple_vector<E=sw:char16_vector>} requireds
+	_return _clone.init(name, product, base_version, current_version, requireds)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method module_definition.init(name, product, base_version, current_version, requireds)
+	## Initializer.
+	## @param {sw:char16_vector} name
+	## @param {sw:char16_vector|sw:unset} product
+	## @param {sw:char16_vector|sw:unset} base_version
+	## @param {sw:char16_vector|sw:unset} current_version
+	## @param {sw:simple_vector<E=sw:char16_vector>} requireds
+	.name << name
+	.product << product
+	.base_version << base_version
+	.current_version << current_version
+	.requireds << requireds
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method module_definition.new_from(module)
+	## Construct self from `sw:sw_module`.
+	## @param {sw:sw_module} module
+	## @return {_self}
+	_return _self.new(
+		module.name,
+		module.product.name,
+		module.base_version,
+		module.version,
+		module.prerequisites.
+			map(_proc(prereq) _return prereq[1] _endproc).
+			as_sorted_collection().
+			as_simple_vector())
+
+_endmethod
+$
+
+_pragma(condition_definition=basic, topic=type_dumper)
+_method module_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	_return .name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method module_definition.equals?(other)
+	## Equals?
+	## @param {mt:module_definition} other
+	## @return {sw:false}
+	_return _self.name = other.name _andif
+		_self.product = other.product _andif
+		_self.base_version = other.base_version _andif
+		_self.current_version = other.current_version _andif
+		_self.requireds.eq?(other.requireds)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method module_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:module_definition} other
+	## @return {sw:false}
+	_return _self.equals?(other)
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, module_definition, module_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:module_definition} definition_a
+		## @param {mt:module_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.sort_value _cf definition_b.sort_value
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, module_definition, module_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:module_definition} definition_a
+		## @param {mt:module_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+module_definition.define_show_attributes(
+	:name,
+	:product)
+$

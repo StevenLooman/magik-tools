@@ -1,0 +1,16 @@
+#% text_encoding = iso8859_1
+
+_block
+	_local product_dir << system.pathname_up(!source_file!, 2)
+	smallworld_product.add_product(product_dir)
+	sw_module_manager.load_module(:sw_type_dumper)
+_endblock
+$
+
+_block
+	mt:type_merger.new(
+		"/home/slooman/src/418-gen-sw5/sw_types-swaf-5.3.2.jsonl",
+		"/home/slooman/src/418-gen-sw5/sw_types-swaf-5.3.3.jsonl",
+		"/tmp/sw_types_merged.jsonl").run()
+_endblock
+$

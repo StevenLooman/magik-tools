@@ -1,0 +1,11 @@
+sw_type_dumper 1
+
+description
+	Type dumper for magik-tools
+end
+
+requires
+    json
+end
+
+language en_gb

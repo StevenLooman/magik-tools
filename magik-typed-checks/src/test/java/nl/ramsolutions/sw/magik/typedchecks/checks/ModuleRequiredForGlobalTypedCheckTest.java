@@ -43,7 +43,8 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
     definitionKeeper.add(moduleDefinition);
 
     definitionKeeper.add(
-        new ModuleDefinition(null, "super_test_module", null, null, null, Collections.emptyList()));
+        new ModuleDefinition(
+            null, "super_test_module", null, null, null, null, Collections.emptyList()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -71,7 +72,8 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
     definitionKeeper.add(moduleDefinition);
 
     definitionKeeper.add(
-        new ModuleDefinition(null, "another_module", null, null, null, Collections.emptyList()));
+        new ModuleDefinition(
+            null, "another_module", null, null, null, null, Collections.emptyList()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,

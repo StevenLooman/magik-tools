@@ -1,0 +1,141 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Parameter definition.
+## @slot {sw:char16_vector} name
+## @slot {sw:char16_vector} modifier
+## @slot {sw:char16_vector} type_name
+def_slotted_exemplar(
+	:parameter_definition,
+	{
+		{:name, _unset, :readable, :public},
+		{:modifier, _unset, :readable, :public},
+		{:type_name, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method parameter_definition.new(name, modifier, type_name)
+	## Constructor.
+	## @param {sw:char16_vector} name
+	## @param {sw:char16_vector} modifier
+	## @param {sw:char16_vector} type_name
+	## @return {_self}
+	_return _clone.init(name, modifier, type_name)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method parameter_definition.init(name, modifier, type_name)
+	## Initializer.
+	## @param {sw:char16_vector} name
+	## @param {sw:char16_vector} modifier
+	## @param {sw:char16_vector} type_name
+	## @return {_self}
+	.name << name
+	.modifier << modifier
+	.type_name << type_name
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method parameter_definition.new_from(name, procedure)
+	## Construct selfs (multiple!) from.
+	## @param {sw:symbol} name
+	## @param {sw:procedure} procedure
+	## @return {sw:simple_vector<E=mt:parameter_definition>} Parameters.
+	_if procedure.class_name _is :slot_access_procedure
+	_then
+		_if name.matches?(:|*<<|)
+		_then
+			_return {
+				_self.new(
+					"value",
+					"none",
+					_self.undefined_type)
+			}
+		_else
+			_return {}
+		_endif
+	_elif procedure.class_name _is :sys_slot_procedure
+	_then
+		_return {
+			_self.new(
+				"value",
+				"none",
+				_self.undefined_type),
+			_self.new(
+				"key",
+				"none",
+				_self.undefined_type)
+		}
+	_endif
+
+	_if _not procedure.responds_to?(:basic_arglist)
+	_then
+		_return {}
+	_endif
+
+	_local parameter_definitions << sw:rope.new()
+	_local param_list << procedure.basic_arglist
+	_for index, param_name _over param_list.fast_keys_and_elements()
+	_loop
+		_local modifier <<
+			_if procedure.gather_arg? _andif
+			    index = param_list.size
+			_then
+				>> "gather"
+			_elif index > procedure.num_mandatory_args
+			_then
+				>> "optional"
+			_else
+				>> "none"
+			_endif
+		_local definition << _self.new(
+			param_name,
+			modifier,
+			_self.undefined_type)
+		parameter_definitions.add_last(definition)
+	_endloop
+
+	_return parameter_definitions.as_simple_vector()
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method parameter_definition.equals?(other)
+	## Equals?
+	## @param {mt:parameter_definition} other
+	## @return {sw:false}
+	_return _self.name = other.name _andif
+		_self.modifier = other.modifier _andif
+		_self.type_name = other.type_name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method parameter_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:parameter_definition} other
+	## @return {sw:false}
+	_return _self.name = other.name _andif
+		_self.modifier = other.modifier
+_endmethod
+$
+
+define_binary_operator_case(
+	:|=|, parameter_definition, parameter_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:parameter_definition} definition_a
+		## @param {mt:parameter_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+parameter_definition.define_show_attributes(
+	:name)
+$

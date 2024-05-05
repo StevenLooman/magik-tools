@@ -1,0 +1,118 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Condition definition.
+## @slot {sw:char16_vector} name
+## @slot {sw:simple_vector<E=sw:char16_vector>} data_names
+## @slot {sw:char16_vector|sw:unset} parent
+## @slot {sw:char16_vector|sw:unset} doc
+def_slotted_exemplar(
+	:condition_definition,
+	{
+		{:name, _unset, :readable, :public},
+		{:data_names, _unset, :readable, :public},
+		{:parent, _unset, :readable, :public},
+		{:doc, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method condition_definition.new(name, data_names, parent, doc)
+	## Constructor.
+	## @param {sw:char16_vector} name
+	## @param {sw:simple_vector<E=sw:char16_vector>} data_names
+	## @param {sw:char16_vector|sw:unset} parent
+	## @param {sw:char16_vector|sw:unset} doc
+	## @return {_self}
+	_return _clone.init(name, data_names, parent, doc)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method condition_definition.init(name, data_names, parent, doc)
+	## Initializer.
+	## @param {sw:char16_vector} name
+	## @param {sw:simple_vector<E=sw:char16_vector>} data_names
+	## @param {sw:char16_vector|sw:unset} parent
+	## @param {sw:char16_vector|sw:unset} doc
+	## @return {_self}
+	.name << name
+	.data_names << data_names
+	.parent << parent
+	.doc << doc
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method condition_definition.new_from(cond)
+	## Construct self from.
+	## @param {sw:condition} cond
+	_local parent <<
+		_if cond.taxonomy.size > 1
+		_then
+			>> cond.taxonomy[cond.taxonomy.size - 1]
+		_endif
+	_local doc << method_finder.get_method_comment(cond.name, "<condition>")
+	_return _self.new(
+		cond.name,
+		cond.data_name_list,
+		parent,
+		doc)
+_endmethod
+$
+
+_pragma(condition_definition=basic, topic=type_dumper)
+_method condition_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	_return .name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method condition_definition.equals?(other)
+	## Equals?
+	## @param {mt:condition_definition} other
+	## @return {sw:false}
+	_return _self.name = other.name _andif
+		_self.data_names.eq?(other.data_names) _andif
+		_self.parent = other.parent _andif
+		_self.doc = other.doc
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method condition_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:condition_definition} other
+	## @return {sw:false}
+	_return _self.equals?(other)
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, condition_definition, condition_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:condition_definition} definition_a
+		## @param {mt:condition_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.sort_value _cf definition_b.sort_value
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, condition_definition, condition_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:condition_definition} definition_a
+		## @param {mt:condition_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+condition_definition.define_show_attributes(
+	:name)
+$
