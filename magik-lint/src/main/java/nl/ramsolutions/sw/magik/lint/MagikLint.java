@@ -191,7 +191,16 @@ public class MagikLint {
     final FileSystem fs = FileSystems.getDefault();
     final boolean isIgnored =
         checksConfig.getIgnores().stream()
-            .map(fs::getPathMatcher)
+            .map(ignorePattern -> "glob:" + ignorePattern)
+            .map(
+                globPattern -> {
+                  try {
+                    return fs.getPathMatcher(globPattern);
+                  } catch (final IllegalArgumentException exception) {
+                    LOGGER.error("Invalid ignore pattern: {}", globPattern);
+                    throw exception;
+                  }
+                })
             .anyMatch(matcher -> matcher.matches(path));
     if (isIgnored) {
       LOGGER.trace("Thread: {}, ignoring file: {}", Thread.currentThread().getName(), path);
