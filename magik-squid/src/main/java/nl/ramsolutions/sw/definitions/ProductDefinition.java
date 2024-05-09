@@ -25,12 +25,16 @@ public class ProductDefinition implements IDefinition {
   /**
    * Constructor.
    *
-   * @param location
-   * @param name
-   * @param version
-   * @param versionComment
+   * @param location Location of definition.
+   * @param name Name of product.
+   * @param parent Name of parent product.
+   * @param version Version.
+   * @param versionComment Version comment.
+   * @param title Title.
+   * @param description Description.
+   * @param requireds List of requireds products.
    */
-  public ProductDefinition(
+  public ProductDefinition( // NOSONAR
       final @Nullable Location location,
       final @Nullable Instant timestamp,
       final String name,
