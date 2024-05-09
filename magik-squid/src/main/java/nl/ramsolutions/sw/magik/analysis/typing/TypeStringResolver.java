@@ -327,11 +327,11 @@ public class TypeStringResolver {
   /**
    * Get the parents of a {@link TypeString}.
    *
-   * <p>This add the implicit parents, where {@link ExemplarDefinition} only returns its explicitly
+   * <p>This adds the implicit parents, where {@link ExemplarDefinition} only returns its explicitly
    * defined parents.
    *
-   * @param typeString
-   * @return
+   * @param typeString {@link TypeString} to get parents from.
+   * @return Parents of the given type.
    */
   public Collection<TypeString> getParents(final TypeString typeString) {
     // TODO: This can be multiple.

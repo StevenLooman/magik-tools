@@ -24,8 +24,13 @@ public class ModuleDefinition implements IDefinition {
   /**
    * Constructor.
    *
-   * @param name Name of module.
    * @param location {@link Location} of the module definition.
+   * @param name Name of module.
+   * @param product Name of product.
+   * @param baseVersion Base version.
+   * @param currentVersion Current version.
+   * @param description Description.
+   * @param requireds List of requireds modules.
    */
   public ModuleDefinition(
       final @Nullable Location location,
