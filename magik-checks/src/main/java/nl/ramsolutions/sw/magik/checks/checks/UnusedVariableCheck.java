@@ -12,6 +12,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
+import org.sonar.check.RuleProperty;
 
 /** Check for unused vairables. */
 @Rule(key = UnusedVariableCheck.CHECK_KEY)
@@ -20,17 +21,16 @@ public class UnusedVariableCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "UnusedVariable";
 
+  private static final boolean DEFAULT_CHECK_PARAMETERS = false;
   private static final String MESSAGE = "Remove the unused local variable \"%s\".";
 
-  private boolean checkParameters;
-
-  public UnusedVariableCheck() {
-    this.checkParameters = false;
-  }
-
-  public UnusedVariableCheck(final boolean checkParameters) {
-    this.checkParameters = checkParameters;
-  }
+  @RuleProperty(
+      key = "check parameters",
+      defaultValue = "" + DEFAULT_CHECK_PARAMETERS,
+      description = "Check for unused parameters",
+      type = "BOOLEAN")
+  @SuppressWarnings("checkstyle:VisibilityModifier")
+  public boolean checkParameters = DEFAULT_CHECK_PARAMETERS;
 
   private boolean isAssignedToDirectly(final AstNode identifierNode) {
     final AstNode variableDefinitionNode = identifierNode.getParent();
