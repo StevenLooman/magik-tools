@@ -247,8 +247,6 @@ _private _method type_merger.merge_definition(left_definition, right_definition)
 	_local msg << write_string("Changed: ", out_stream.string)
 	condition.raise(:information, :string, msg)
 
-	_global user:defs
-	user:defs << {left_definition, right_definition}
 	_return right_definition
 _endmethod
 $

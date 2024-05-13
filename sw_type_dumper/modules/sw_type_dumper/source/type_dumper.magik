@@ -95,9 +95,10 @@ _private _method type_dumper.int!run()
 
 	# Write intro.
 	_self.write_line("// Smallworld version: ", system.sw!version_string)
-	_self.write_line("// self type: ", definition.self_type)
-	_self.write_line("// undefined type: ", definition.undefined_type)
-	_self.write_line("// undefined result: ", definition.undefined_result)
+	_self.write_line("// Smallworld session: ", smallworld_product.magik_session().properties[:name])
+	_self.write_line("// self type: ", mt:definition.self_type)
+	_self.write_line("// undefined type: ", mt:definition.undefined_type)
+	_self.write_line("// undefined result: ", mt:definition.undefined_result)
 
 	# Write products.
 	_self.write_line("// products")
