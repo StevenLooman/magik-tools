@@ -123,6 +123,14 @@ public final class ClassInfoDefinitionReader {
             this.readSlottedClass(moduleName, line, reader);
             break;
 
+          case "indexed_class":
+            this.readIndexedClass(moduleName, line, reader);
+            break;
+
+          case "enumerated_class":
+            this.readEnumeratedClass(moduleName, line, reader);
+            break;
+
           case "mixin":
             this.readMixin(moduleName, line, reader);
             break;
@@ -355,8 +363,7 @@ public final class ClassInfoDefinitionReader {
 
   private void readSlottedClass(
       final String moduleName, final String line, final BufferedReader reader) throws IOException {
-    // 1 : "slotted_class" <class name> <slots>    <-- This also includes slots of inherited
-    // exemplars!
+    // 1 : "slotted_class" <class name> <slots>    <-- This also includes inherited slots!
     // 2 : <base classes>
     // 3 : n pragma source_file
     // 4+: <n lines of comments>
@@ -426,6 +433,136 @@ public final class ClassInfoDefinitionReader {
             ExemplarDefinition.Sort.UNDEFINED,
             typeString,
             slots,
+            parents,
+            Collections.emptySet());
+    this.definitionKeeper.add(definition);
+  }
+
+  private void readIndexedClass(
+      final String moduleName, final String line, final BufferedReader reader) throws IOException {
+    // 1 : "indexed_class" <class name>
+    // 2 : <base classes>
+    // 3 : n pragma source_file
+    // 4+: <n lines of comments>
+    // Line 1
+    final TypeString typeString;
+    try (Scanner scanner = new Scanner(line)) {
+      scanner.next(); // "indexed_class"
+
+      final String identifier = scanner.next();
+      typeString = TypeString.ofIdentifier(identifier, TypeString.DEFAULT_PACKAGE);
+    }
+
+    // Line 2
+    final String line2 = reader.readLine();
+    final List<TypeString> parents =
+        Arrays.stream(line2.split(" ")).map(TypeStringParser::parseTypeString).toList();
+
+    // Line 3
+    final String line3 = reader.readLine();
+    final List<String> pragmas;
+    final int commentLineCount;
+    final Location location;
+    try (Scanner scanner = new Scanner(line3)) {
+      commentLineCount = scanner.nextInt();
+
+      // Pragmas.
+      pragmas = new ArrayList<>();
+      while (scanner.hasNext(NEXT_NOT_SLASH_PATTERN)) {
+        final String pragma = scanner.next();
+        pragmas.add(pragma);
+      }
+
+      // Source file.
+      final String sourceFile = scanner.nextLine().trim();
+      final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
+      location = new Location(uri);
+    }
+
+    // Line 4+
+    final StringBuilder commentBuilder = new StringBuilder();
+    for (int i = 0; i < commentLineCount; ++i) {
+      final String commentLine = reader.readLine();
+      commentBuilder.append(commentLine);
+      commentBuilder.append('\n');
+    }
+    final String doc = commentBuilder.toString();
+
+    // TODO: What if type is already defined?
+    final ExemplarDefinition definition =
+        new ExemplarDefinition(
+            location,
+            moduleName,
+            doc,
+            null,
+            ExemplarDefinition.Sort.UNDEFINED,
+            typeString,
+            Collections.emptyList(),
+            parents,
+            Collections.emptySet());
+    this.definitionKeeper.add(definition);
+  }
+
+  private void readEnumeratedClass(
+      final String moduleName, final String line, final BufferedReader reader) throws IOException {
+    // 1 : "enumerated_class" <class name>
+    // 2 : <base classes>
+    // 3 : n pragma source_file
+    // 4+: <n lines of comments>
+    // Line 1
+    final TypeString typeString;
+    try (Scanner scanner = new Scanner(line)) {
+      scanner.next(); // "enumerated_class"
+
+      final String identifier = scanner.next();
+      typeString = TypeString.ofIdentifier(identifier, TypeString.DEFAULT_PACKAGE);
+    }
+
+    // Line 2
+    final String line2 = reader.readLine();
+    final List<TypeString> parents =
+        Arrays.stream(line2.split(" ")).map(TypeStringParser::parseTypeString).toList();
+
+    // Line 3
+    final String line3 = reader.readLine();
+    final List<String> pragmas;
+    final int commentLineCount;
+    final Location location;
+    try (Scanner scanner = new Scanner(line3)) {
+      commentLineCount = scanner.nextInt();
+
+      // Pragmas.
+      pragmas = new ArrayList<>();
+      while (scanner.hasNext(NEXT_NOT_SLASH_PATTERN)) {
+        final String pragma = scanner.next();
+        pragmas.add(pragma);
+      }
+
+      // Source file.
+      final String sourceFile = scanner.nextLine().trim();
+      final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
+      location = new Location(uri);
+    }
+
+    // Line 4+
+    final StringBuilder commentBuilder = new StringBuilder();
+    for (int i = 0; i < commentLineCount; ++i) {
+      final String commentLine = reader.readLine();
+      commentBuilder.append(commentLine);
+      commentBuilder.append('\n');
+    }
+    final String doc = commentBuilder.toString();
+
+    // TODO: What if type is already defined?
+    final ExemplarDefinition definition =
+        new ExemplarDefinition(
+            location,
+            moduleName,
+            doc,
+            null,
+            ExemplarDefinition.Sort.UNDEFINED,
+            typeString,
+            Collections.emptyList(),
             parents,
             Collections.emptySet());
     this.definitionKeeper.add(definition);
