@@ -152,7 +152,7 @@ _private _method datamodel_type_dumper.get_type_name_for_collection(coll)
 	_local globl << method_table.meta_at(:exemplar_global)
 	_local pkg << globl.package
 	_local key << globl.key
-	_return defintion.name_from_type(pkg, key)
+	_return definition.name_from_type(pkg, key)
 _endmethod
 $
 
