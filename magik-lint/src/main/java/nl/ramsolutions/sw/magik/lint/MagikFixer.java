@@ -8,6 +8,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationReader;
@@ -16,6 +17,7 @@ import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckFixer;
@@ -76,7 +78,12 @@ public class MagikFixer {
     final CodeActionApplier applier = new CodeActionApplier(source);
     final Range range =
         new Range(new Position(1, 0), new Position(Integer.MAX_VALUE, Integer.MAX_VALUE));
-    fixer.provideCodeActions(magikFile, range).stream().forEach(applier::applyCodeAction);
+    final Comparator<TextEdit> byEndPosition =
+        Comparator.comparing(textEdit -> textEdit.getRange().getEndPosition());
+    fixer.provideCodeActions(magikFile, range).stream()
+        .flatMap(codeAction -> codeAction.getEdits().stream())
+        .sorted(byEndPosition.reversed())
+        .forEach(applier::apply);
     return applier.getSource();
   }
 

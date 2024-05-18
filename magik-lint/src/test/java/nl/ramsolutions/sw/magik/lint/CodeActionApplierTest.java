@@ -16,7 +16,7 @@ class CodeActionApplierTest {
   void testApplyCodeAction() {
     final String source = "Hello, world!\n";
     final CodeActionApplier codeActionApplier = new CodeActionApplier(source);
-    codeActionApplier.applyCodeAction(
+    codeActionApplier.apply(
         new CodeAction(
             "test fix",
             new TextEdit(new Range(new Position(1, 0), new Position(1, 0)), "New line!\n")));
@@ -28,7 +28,7 @@ class CodeActionApplierTest {
   void testApplyCodeActionWithMultipleTextEdits1() {
     final String source = "Hello, world!\n";
     final CodeActionApplier codeActionApplier = new CodeActionApplier(source);
-    codeActionApplier.applyCodeAction(
+    codeActionApplier.apply(
         new CodeAction(
             "test fix",
             List.of(
@@ -42,7 +42,7 @@ class CodeActionApplierTest {
   void testApplyCodeActionWithMultipleTextEdits2() {
     final String source = "Hello, world!\n";
     final CodeActionApplier codeActionApplier = new CodeActionApplier(source);
-    codeActionApplier.applyCodeAction(
+    codeActionApplier.apply(
         new CodeAction(
             "test fix",
             List.of(
