@@ -28,7 +28,7 @@
 - Fix providing Formatting CodeActions on all locations, instead of asked range.
 - Fix hovering over atoms.
 - Make `unused-variable.check-parameters` configurable.
-- Support indexed_class/enumerated_class from class_info.
+- Support `indexed_class`/`enumerated_class`/`delete_class` from class_info.
 - Several fixes.
 
 0.9.1 (2024-03-13)

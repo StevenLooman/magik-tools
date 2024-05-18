@@ -131,6 +131,10 @@ public final class ClassInfoDefinitionReader {
             this.readEnumeratedClass(moduleName, line, reader);
             break;
 
+          case "delete_class":
+            this.readDeleteClass(moduleName, line, reader);
+            break;
+
           case "mixin":
             this.readMixin(moduleName, line, reader);
             break;
@@ -140,7 +144,10 @@ public final class ClassInfoDefinitionReader {
             throw new UnsupportedOperationException("Unknown token: " + token0);
         }
 
-        reader.readLine(); // NOSONAR: Skip last part of line.
+        if (!token0.equals("delete_class")) {
+          reader.readLine(); // NOSONAR: Skip last part of line.
+        }
+
         line = reader.readLine();
       }
     }
@@ -280,7 +287,7 @@ public final class ClassInfoDefinitionReader {
       throws IOException {
     // 1 : "method" <class name> <method name> <parameters>
     // 2 : n ["private"/"classconst"/"classvar"/"iter"]*
-    //       ["basic"/"restricted"/"internal"/pragma]* source_file
+    // ["basic"/"restricted"/"internal"/pragma]* source_file
     // 3+: <n lines of comments>
     // Line 1
     final String methodName;
@@ -363,7 +370,8 @@ public final class ClassInfoDefinitionReader {
 
   private void readSlottedClass(
       final String moduleName, final String line, final BufferedReader reader) throws IOException {
-    // 1 : "slotted_class" <class name> <slots>    <-- This also includes inherited slots!
+    // 1 : "slotted_class" <class name> <slots> <-- This also includes inherited
+    // slots!
     // 2 : <base classes>
     // 3 : n pragma source_file
     // 4+: <n lines of comments>
@@ -566,6 +574,13 @@ public final class ClassInfoDefinitionReader {
             parents,
             Collections.emptySet());
     this.definitionKeeper.add(definition);
+  }
+
+  private void readDeleteClass(
+      final String moduleName, final String line, final BufferedReader reader) throws IOException {
+    // 1 : "delete_class" <class name>
+    // Line 1.
+    // Ignore this.
   }
 
   private void readMixin(final String moduleName, final String line, final BufferedReader reader)
