@@ -1,13 +1,14 @@
 package nl.ramsolutions.sw.magik.analysis;
 
-import java.io.IOException;
 import nl.ramsolutions.sw.MagikToolsProperties;
 
-/** Configuration for magik analysis. */
-public class MagikAnalysisConfiguration {
-
-  @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final MagikAnalysisConfiguration DEFAULT_CONFIGURATION;
+/**
+ * Settings for magik analysis.
+ *
+ * <p>Note that settings are settings for the language server, set by the langauage client (i.e.,
+ * your IDE). Configuration is configuration read from files like `.magik-lint.properties`.
+ */
+public class MagikAnalysisSettings {
 
   private static final String KEY_MAGIK_INDEXER_INDEX_GLOBAL_USAGES =
       "magik-indexer.index-global-usages";
@@ -18,23 +19,11 @@ public class MagikAnalysisConfiguration {
   private static final String KEY_MAGIK_INDEXER_INDEX_CONDITION_USAGES =
       "magik-indexer.index-condition-usages";
 
-  static {
-    try {
-      DEFAULT_CONFIGURATION = new MagikAnalysisConfiguration();
-    } catch (final IOException e) {
-      throw new IllegalStateException();
-    }
-  }
-
   private final MagikToolsProperties properties;
 
-  /**
-   * Constructor.
-   *
-   * @throws IOException -
-   */
-  public MagikAnalysisConfiguration() throws IOException {
-    this.properties = new MagikToolsProperties();
+  /** Constructor. */
+  public MagikAnalysisSettings(final MagikToolsProperties properties) {
+    this.properties = properties;
   }
 
   /**

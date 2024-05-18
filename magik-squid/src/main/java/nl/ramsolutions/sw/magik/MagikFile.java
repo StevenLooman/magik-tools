@@ -14,8 +14,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -31,7 +31,7 @@ public class MagikFile extends OpenedFile {
   private static final URI DEFAULT_URI = URI.create("memory://source.magik");
   public static final Location DEFAULT_LOCATION = new Location(DEFAULT_URI, Range.DEFAULT_RANGE);
 
-  private final MagikAnalysisConfiguration configuration;
+  private final MagikToolsProperties properties;
   private AstNode astNode;
   private GlobalScope globalScope;
   private List<MagikDefinition> definitions;
@@ -47,19 +47,19 @@ public class MagikFile extends OpenedFile {
    * @param source Source.
    */
   public MagikFile(final URI uri, final String source) {
-    this(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, uri, source);
+    this(MagikToolsProperties.DEFAULT_PROPERTIES, uri, source);
   }
 
   /**
    * Constructor.
    *
+   * @param properties Properties.
    * @param uri URI.
    * @param source Source.
    */
-  public MagikFile(
-      final MagikAnalysisConfiguration configuration, final URI uri, final String source) {
+  public MagikFile(final MagikToolsProperties properties, final URI uri, final String source) {
     super(uri, source);
-    this.configuration = configuration;
+    this.properties = properties;
   }
 
   /**
@@ -69,24 +69,28 @@ public class MagikFile extends OpenedFile {
    * @throws IOException -
    */
   public MagikFile(final Path path) throws IOException {
-    this(MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, path);
+    this(MagikToolsProperties.DEFAULT_PROPERTIES, path);
   }
 
   /**
    * Constructor. Read file at path.
    *
+   * @param properties Properties.
    * @param path File to read.
    * @throws IOException -
    */
-  public MagikFile(final MagikAnalysisConfiguration configuration, final Path path)
-      throws IOException {
+  public MagikFile(final MagikToolsProperties properties, final Path path) throws IOException {
     super(path.toUri(), Files.readString(path, FileCharsetDeterminer.determineCharset(path)));
-    this.configuration = configuration;
+    this.properties = properties;
   }
 
   @Override
   public String getLanguageId() {
     return "magik";
+  }
+
+  public MagikToolsProperties getProperties() {
+    return this.properties;
   }
 
   /**
@@ -138,7 +142,7 @@ public class MagikFile extends OpenedFile {
    */
   public synchronized List<MagikDefinition> getDefinitions() {
     if (this.definitions == null) {
-      final DefinitionReader definitionReader = new DefinitionReader(this.configuration);
+      final DefinitionReader definitionReader = new DefinitionReader(this.properties);
       final AstNode topNode = this.getTopNode();
       definitionReader.walkAst(topNode);
       this.definitions = definitionReader.getDefinitions();

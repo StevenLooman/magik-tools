@@ -5,6 +5,7 @@ import com.sonar.sslr.api.Token;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -16,6 +17,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.TypeDocGrammar;
+import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheckFixer;
@@ -55,6 +57,9 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
     final Map<AstNode, TypeString> typeDocNodes = typeDocParser.getReturnTypeNodes();
 
     // Construct Code Actions.
+    final MagikToolsProperties properties = magikFile.getProperties();
+    final MagikFormattingSettings settings = new MagikFormattingSettings(properties);
+    final String indent = settings.getIndent();
     return StreamUtils.zip(result.stream(), typeDocNodes.entrySet().stream())
         .map(
             entry -> {
@@ -66,7 +71,7 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
 
               final Map.Entry<AstNode, TypeString> typeDocEntry = entry.getValue();
               if (methodTypeString != null && typeDocEntry == null) {
-                return this.createAddReturnCodeAction(methodDefinition, methodTypeString);
+                return this.createAddReturnCodeAction(methodDefinition, indent, methodTypeString);
               }
 
               final AstNode typeDocNode = typeDocEntry.getKey();
@@ -115,12 +120,14 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
   }
 
   private CodeAction createAddReturnCodeAction(
-      final MethodDefinition methodDefinition, final TypeString methodTypeString) {
+      final MethodDefinition methodDefinition,
+      final String indent,
+      final TypeString methodTypeString) {
     final int lastMethodDocLine = this.getLastMethodDocLine(methodDefinition);
     final Range range =
         new Range(new Position(lastMethodDocLine + 1, 0), new Position(lastMethodDocLine + 1, 0));
     final String textEdit =
-        String.format("\t## @return {%s} Description%n", methodTypeString.getFullString());
+        String.format("%s## @return {%s} Description%n", indent, methodTypeString.getFullString());
     final String description =
         String.format("Add @return type %s", methodTypeString.getFullString());
     final TextEdit edit = new TextEdit(range, textEdit);

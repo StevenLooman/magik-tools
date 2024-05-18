@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -35,7 +35,7 @@ public class MagikIndexer {
   private static final long MAX_SIZE = 1024L * 1024L * 10L; // 10 MB
 
   private final IDefinitionKeeper definitionKeeper;
-  private final MagikAnalysisConfiguration analysisConfiguration;
+  private final MagikToolsProperties properties;
   private final IgnoreHandler ignoreHandler;
   private final Map<Path, Set<PackageDefinition>> indexedPackages = new HashMap<>();
   private final Map<Path, Set<ExemplarDefinition>> indexedTypes = new HashMap<>();
@@ -47,10 +47,10 @@ public class MagikIndexer {
 
   public MagikIndexer(
       final IDefinitionKeeper definitionKeeper,
-      final MagikAnalysisConfiguration analysisConfiguration,
+      final MagikToolsProperties properties,
       final IgnoreHandler ignoreHandler) {
     this.definitionKeeper = definitionKeeper;
-    this.analysisConfiguration = analysisConfiguration;
+    this.properties = properties;
     this.ignoreHandler = ignoreHandler;
   }
 
@@ -113,7 +113,7 @@ public class MagikIndexer {
 
     try {
       this.scrubDefinitions(path);
-      this.readDefinitions(analysisConfiguration, path);
+      this.readDefinitions(path);
     } catch (final Exception exception) {
       LOGGER.error("Error indexing created file: " + path, exception);
     }
@@ -130,7 +130,7 @@ public class MagikIndexer {
 
     try {
       this.scrubDefinitions(path);
-      this.readDefinitions(analysisConfiguration, path);
+      this.readDefinitions(path);
     } catch (final Exception exception) {
       LOGGER.error("Error indexing changed file: " + path, exception);
     }
@@ -207,8 +207,7 @@ public class MagikIndexer {
    *
    * @param path Path to magik file.
    */
-  private void readDefinitions(
-      final MagikAnalysisConfiguration analysisConfiguration, final Path path) {
+  private void readDefinitions(final Path path) {
     this.indexedMethods.put(path, new HashSet<>());
     this.indexedGlobals.put(path, new HashSet<>());
     this.indexedBinaryOperators.put(path, new HashSet<>());
@@ -225,7 +224,7 @@ public class MagikIndexer {
         return;
       }
 
-      final MagikFile magikFile = new MagikFile(analysisConfiguration, path);
+      final MagikFile magikFile = new MagikFile(this.properties, path);
       magikFile
           .getDefinitions()
           .forEach(definition -> this.handleDefinition(magikFile, definition));

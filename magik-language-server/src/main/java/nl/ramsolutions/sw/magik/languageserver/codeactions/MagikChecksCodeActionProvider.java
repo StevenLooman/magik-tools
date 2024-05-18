@@ -5,7 +5,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import nl.ramsolutions.sw.ConfigurationLocator;
+import nl.ramsolutions.sw.ConfigurationReader;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -15,10 +16,15 @@ import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckFixer;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
-import nl.ramsolutions.sw.magik.languageserver.MagikSettings;
 
 /** Provide {@link CodeAction}s for {@link MagikCheck}s. */
 public class MagikChecksCodeActionProvider {
+
+  final MagikToolsProperties properties;
+
+  MagikChecksCodeActionProvider(final MagikToolsProperties properties) {
+    this.properties = properties;
+  }
 
   /**
    * Provide {@link CodeAction} for {@link MagikCheck} checks.
@@ -52,14 +58,10 @@ public class MagikChecksCodeActionProvider {
   private boolean isCheckEnabled(final MagikFile magikFile, final Class<?> checkClass)
       throws IOException {
     final Path searchPath = Path.of(magikFile.getUri()).getParent();
-    final Path configPath =
-        MagikSettings.INSTANCE.getChecksOverrideSettingsPath() != null
-            ? MagikSettings.INSTANCE.getChecksOverrideSettingsPath()
-            : ConfigurationLocator.locateConfiguration(searchPath);
+    final MagikToolsProperties actualProperties =
+        ConfigurationReader.readProperties(searchPath, this.properties);
     final MagikChecksConfiguration config =
-        configPath != null
-            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
-            : new MagikChecksConfiguration(CheckList.getChecks());
+        new MagikChecksConfiguration(CheckList.getChecks(), actualProperties);
     final List<MagikCheckHolder> allChecks = config.getAllChecks();
     for (final MagikCheckHolder checkHolder : allChecks) {
       if (checkHolder.getCheckClass().equals(checkClass)) {

@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -50,8 +50,7 @@ class MagikIndexerTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
     final MagikIndexer magikIndexer =
-        new MagikIndexer(
-            definitionKeeper, MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, ignoreHandler);
+        new MagikIndexer(definitionKeeper, MagikToolsProperties.DEFAULT_PROPERTIES, ignoreHandler);
     magikIndexer.indexPathCreated(fixedPath);
 
     // Test exemplar.
@@ -219,8 +218,7 @@ class MagikIndexerTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
     final MagikIndexer magikIndexer =
-        new MagikIndexer(
-            definitionKeeper, MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, ignoreHandler);
+        new MagikIndexer(definitionKeeper, MagikToolsProperties.DEFAULT_PROPERTIES, ignoreHandler);
     magikIndexer.indexPathCreated(fixedPath);
 
     // Test exemplar.
@@ -319,8 +317,7 @@ class MagikIndexerTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
     final MagikIndexer magikIndexer =
-        new MagikIndexer(
-            definitionKeeper, MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, ignoreHandler);
+        new MagikIndexer(definitionKeeper, MagikToolsProperties.DEFAULT_PROPERTIES, ignoreHandler);
     magikIndexer.indexPathCreated(fixedPath);
 
     // Pretend update.
@@ -355,8 +352,7 @@ class MagikIndexerTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
     final MagikIndexer magikIndexer =
-        new MagikIndexer(
-            definitionKeeper, MagikAnalysisConfiguration.DEFAULT_CONFIGURATION, ignoreHandler);
+        new MagikIndexer(definitionKeeper, MagikToolsProperties.DEFAULT_PROPERTIES, ignoreHandler);
     magikIndexer.indexPathCreated(fixedPath);
 
     // Test type.

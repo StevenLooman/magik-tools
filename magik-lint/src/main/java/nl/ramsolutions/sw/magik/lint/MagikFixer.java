@@ -10,12 +10,12 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.ConfigurationLocator;
+import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckFixer;
@@ -29,10 +29,10 @@ public class MagikFixer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikFixer.class);
 
-  private final MagikLintConfiguration config;
+  private final MagikToolsProperties properties;
 
-  public MagikFixer(final MagikLintConfiguration config) {
-    this.config = config;
+  public MagikFixer(final MagikToolsProperties properties) {
+    this.properties = properties;
   }
 
   /**
@@ -43,16 +43,16 @@ public class MagikFixer {
    */
   public void run(final Collection<Path> paths) throws IOException {
     for (final Path path : paths) {
-      if (this.isFileIgnored(path)) {
+      final MagikFile magikFile = this.buildMagikFile(path);
+      if (this.isFileIgnored(magikFile)) {
         continue;
       }
 
-      this.runOnFile(path);
+      this.runOnFile(magikFile);
     }
   }
 
-  private void runOnFile(final Path path) throws IOException {
-    final MagikFile originalMagikFile = this.buildMagikFile(path);
+  private void runOnFile(final MagikFile originalMagikFile) throws IOException {
     MagikFile magikFile = originalMagikFile;
     final URI uri = magikFile.getUri();
     for (final MagikCheckFixer fixer : this.getFixers(magikFile)) {
@@ -67,6 +67,7 @@ public class MagikFixer {
     }
 
     final Charset charset = FileCharsetDeterminer.determineCharset(newSource);
+    final Path path = Path.of(uri);
     Files.writeString(path, newSource, charset);
   }
 
@@ -103,40 +104,31 @@ public class MagikFixer {
    * @return Visitor context for file.
    * @throws IOException -
    */
-  private MagikFile buildMagikFile(final Path path) {
-    final Charset charset = FileCharsetDeterminer.determineCharset(path);
-
-    byte[] encoded = null;
-    try {
-      encoded = Files.readAllBytes(path);
-    } catch (final IOException exception) {
-      LOGGER.error(exception.getMessage(), exception);
-    }
-
+  private MagikFile buildMagikFile(final Path path) throws IOException {
+    final MagikToolsProperties fileProperties =
+        ConfigurationReader.readProperties(path, this.properties);
     final URI uri = path.toUri();
-    final String fileContents = new String(encoded, charset);
-    final MagikAnalysisConfiguration configuration;
-    try {
-      configuration = new MagikAnalysisConfiguration();
-    } catch (final IOException exception) {
-      throw new IllegalStateException(exception);
-    }
-
-    return new MagikFile(configuration, uri, fileContents);
+    final Charset charset = FileCharsetDeterminer.determineCharset(path);
+    final String fileContents = Files.readString(path, charset);
+    return new MagikFile(fileProperties, uri, fileContents);
   }
 
   private List<Class<? extends MagikCheck>> getEnabledChecks(final MagikFile magikFile) {
-    final URI uri = magikFile.getUri();
-    final Path path = Path.of(uri);
-    final MagikChecksConfiguration checksConfig = this.getChecksConfig(path);
+    final MagikToolsProperties fileProperties = magikFile.getProperties();
+    final MagikChecksConfiguration checksConfig =
+        new MagikChecksConfiguration(CheckList.getChecks(), fileProperties);
     return checksConfig.getAllChecks().stream()
         .filter(MagikCheckHolder::isEnabled)
         .map(MagikCheckHolder::getCheckClass)
         .collect(Collectors.toUnmodifiableList()); // NOSONAR: Keep VSCode/Java plugin sane.
   }
 
-  private boolean isFileIgnored(final Path path) {
-    final MagikChecksConfiguration checksConfig = this.getChecksConfig(path);
+  private boolean isFileIgnored(final MagikFile magikFile) {
+    final MagikToolsProperties fileProperties = magikFile.getProperties();
+    final MagikChecksConfiguration checksConfig =
+        new MagikChecksConfiguration(CheckList.getChecks(), fileProperties);
+    final URI uri = magikFile.getUri();
+    final Path path = Path.of(uri);
     final FileSystem fs = FileSystems.getDefault();
     final boolean isIgnored =
         checksConfig.getIgnores().stream()
@@ -146,19 +138,5 @@ public class MagikFixer {
       LOGGER.trace("Thread: {}, ignoring file: {}", Thread.currentThread().getName(), path);
     }
     return isIgnored;
-  }
-
-  private MagikChecksConfiguration getChecksConfig(final Path path) {
-    final Path configPath =
-        this.config.getPath() != null
-            ? this.config.getPath()
-            : ConfigurationLocator.locateConfiguration(path);
-    try {
-      return configPath != null
-          ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
-          : new MagikChecksConfiguration(CheckList.getChecks());
-    } catch (final IOException exception) {
-      throw new IllegalStateException(exception);
-    }
   }
 }

@@ -18,7 +18,7 @@ public final class ConfigurationLocator {
   public static final String MAGIK_LINT_RC_FILENAME = "magik-lint.properties";
 
   /** Hidden MagikLint RC Filename. */
-  public static final String HIDDEN_MAGIK_LINT_RC_FILENAME = ".magik-lint.properties";
+  public static final String HIDDEN_MAGIK_LINT_RC_FILENAME = "." + MAGIK_LINT_RC_FILENAME;
 
   /** Environment variable for MagikLint RC Filename. */
   public static final String ENV_VAR_MAGIK_LINT_RC = "MAGIKLINTRC";

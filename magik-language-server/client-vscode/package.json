@@ -220,6 +220,26 @@
 					"description": "Path to environment file.",
 					"type": "string"
 				},
+        "magik.formatting.indentChar": {
+          "description": "Indent character, 'tab' or 'space' -- ignored by language server.",
+          "type": "string"
+        },
+        "magik.formatting.indentWidth": {
+          "description": "Indent width (tab size or number of spaces) -- ignored by language server.",
+          "type": "number"
+        },
+        "magik.formatting.insertFinalNewline": {
+          "description": "Insert final newline -- ignored by language server.",
+          "type": "boolean"
+        },
+        "magik.formatting.trimTrailingWhitespace": {
+          "description": "Trim trainiling whitespace -- ignored by language server.",
+          "type": "boolean"
+        },
+        "magik.formatting.trimFinalNewlines": {
+          "description": "Trim final newlines -- ignored by language server.",
+          "type": "boolean"
+        },
 				"magik.lint.overrideConfigFile": {
 					"description": "Override path to magiklintrc.properties.",
 					"type": "string"

@@ -1,12 +1,12 @@
 package nl.ramsolutions.sw.magik.languageserver.diagnostics;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.languageserver.MagikSettings;
+import nl.ramsolutions.sw.magik.languageserver.MagikLanguageServerSettings;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
@@ -16,6 +16,12 @@ import org.slf4j.LoggerFactory;
 public class DiagnosticsProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsProvider.class);
+
+  private final MagikToolsProperties properties;
+
+  public DiagnosticsProvider(final MagikToolsProperties properties) {
+    this.properties = properties;
+  }
 
   public void setCapabilities(final ServerCapabilities capabilities) {
     // No capabilities to set.
@@ -35,7 +41,8 @@ public class DiagnosticsProvider {
     diagnostics.addAll(diagnosticsLinter);
 
     // Typing diagnostics.
-    final Boolean typingEnableChecks = MagikSettings.INSTANCE.getTypingEnableChecks();
+    final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
+    final Boolean typingEnableChecks = settings.getTypingEnableChecks();
     if (Boolean.TRUE.equals(typingEnableChecks)) {
       final List<Diagnostic> diagnosticsTyping = this.getDiagnosticsFromTyping(magikFile);
       diagnostics.addAll(diagnosticsTyping);
@@ -45,10 +52,9 @@ public class DiagnosticsProvider {
   }
 
   private List<Diagnostic> getDiagnosticsFromLinter(final MagikTypedFile magikFile) {
-    final Path overrideSettingsPath = MagikSettings.INSTANCE.getChecksOverrideSettingsPath();
-
+    final MagikToolsProperties properties = magikFile.getProperties();
     final MagikChecksDiagnosticsProvider lintProvider =
-        new MagikChecksDiagnosticsProvider(overrideSettingsPath);
+        new MagikChecksDiagnosticsProvider(properties);
     try {
       return lintProvider.getDiagnostics(magikFile);
     } catch (final IOException exception) {
@@ -59,10 +65,9 @@ public class DiagnosticsProvider {
   }
 
   private List<Diagnostic> getDiagnosticsFromTyping(final MagikTypedFile magikFile) {
-    final Path overrideSettingsPath = MagikSettings.INSTANCE.getChecksOverrideSettingsPath();
-
+    final MagikToolsProperties properties = magikFile.getProperties();
     final MagikTypedChecksDiagnosticsProvider typedDiagnosticsProvider =
-        new MagikTypedChecksDiagnosticsProvider(overrideSettingsPath);
+        new MagikTypedChecksDiagnosticsProvider(properties);
     try {
       return typedDiagnosticsProvider.getDiagnostics(magikFile);
     } catch (final IOException exception) {

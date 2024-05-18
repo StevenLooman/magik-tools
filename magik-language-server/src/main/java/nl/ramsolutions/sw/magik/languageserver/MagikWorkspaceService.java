@@ -7,12 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.FileEvent;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
@@ -46,7 +46,7 @@ public class MagikWorkspaceService implements WorkspaceService {
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikWorkspaceService.class);
 
   private final MagikLanguageServer languageServer;
-  private final MagikAnalysisConfiguration analysisConfiguration;
+  private final MagikToolsProperties languageServerProperties;
   private final IDefinitionKeeper definitionKeeper;
   private final IgnoreHandler ignoreHandler;
   private final ProductIndexer productIndexer;
@@ -63,16 +63,16 @@ public class MagikWorkspaceService implements WorkspaceService {
    */
   public MagikWorkspaceService(
       final MagikLanguageServer languageServer,
-      final MagikAnalysisConfiguration analysisConfiguration,
+      final MagikToolsProperties languageServerProperties,
       final IDefinitionKeeper definitionKeeper) {
     this.languageServer = languageServer;
-    this.analysisConfiguration = analysisConfiguration;
+    this.languageServerProperties = languageServerProperties;
     this.definitionKeeper = definitionKeeper;
 
     this.ignoreHandler = new IgnoreHandler();
     this.productIndexer = new ProductIndexer(this.definitionKeeper, this.ignoreHandler);
     this.magikIndexer =
-        new MagikIndexer(this.definitionKeeper, this.analysisConfiguration, this.ignoreHandler);
+        new MagikIndexer(this.definitionKeeper, this.languageServerProperties, this.ignoreHandler);
     this.symbolProvider = new SymbolProvider(this.definitionKeeper);
     this.testItemProvider = new MUnitTestItemProvider(this.definitionKeeper);
   }
@@ -92,27 +92,10 @@ public class MagikWorkspaceService implements WorkspaceService {
     LOGGER.trace("didChangeConfiguration");
 
     final JsonObject settings = (JsonObject) params.getSettings();
-
-    LOGGER.debug("New settings: {}", settings);
-    MagikSettings.INSTANCE.setSettings(settings);
-
-    // Update magik analysis settings.
-    final boolean magikIndexerIndexGlobalUsages =
-        Objects.requireNonNullElse(MagikSettings.INSTANCE.getTypingIndexGlobalUsages(), false);
-    this.analysisConfiguration.setMagikIndexerIndexGlobalUsages(magikIndexerIndexGlobalUsages);
-
-    final boolean magikIndexerIndexMethodUsages =
-        Objects.requireNonNullElse(MagikSettings.INSTANCE.getTypingIndexMethodUsages(), false);
-    this.analysisConfiguration.setMagikIndexerIndexMethodUsages(magikIndexerIndexMethodUsages);
-
-    final boolean magikIndexerIndexSlotUsages =
-        Objects.requireNonNullElse(MagikSettings.INSTANCE.getTypingIndexSlotUsages(), false);
-    this.analysisConfiguration.setMagikIndexerIndexSlotUsages(magikIndexerIndexSlotUsages);
-
-    final boolean magikIndexerIndexConditionUsages =
-        Objects.requireNonNullElse(MagikSettings.INSTANCE.getTypingIndexConditionUsages(), false);
-    this.analysisConfiguration.setMagikIndexerIndexConditionUsages(
-        magikIndexerIndexConditionUsages);
+    final Properties props = JsonObjectPropertiesConverter.convert(settings);
+    LOGGER.debug("New properties: {}", props);
+    this.languageServerProperties.reset();
+    this.languageServerProperties.putAll(props);
 
     this.runIndexersInBackground();
   }
@@ -293,11 +276,13 @@ public class MagikWorkspaceService implements WorkspaceService {
     LOGGER.trace("Run indexers");
 
     // Read types db.
-    final List<String> typesDbPaths = MagikSettings.INSTANCE.getTypingTypeDatabasePaths();
+    final MagikLanguageServerSettings settings =
+        new MagikLanguageServerSettings(this.languageServerProperties);
+    final List<String> typesDbPaths = settings.getTypingTypeDatabasePaths();
     this.readTypesDbs(typesDbPaths);
 
     // Read class_infos from libs/ dirs.
-    final List<String> libsDirs = MagikSettings.INSTANCE.getLibsDirs();
+    final List<String> libsDirs = settings.getLibsDirs();
     this.readLibsClassInfos(libsDirs);
 
     // Index .magik-tools-ignore files.

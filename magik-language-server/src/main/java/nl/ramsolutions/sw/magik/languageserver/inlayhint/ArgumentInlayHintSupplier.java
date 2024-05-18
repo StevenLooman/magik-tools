@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
@@ -17,12 +18,18 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
-import nl.ramsolutions.sw.magik.languageserver.MagikSettings;
+import nl.ramsolutions.sw.magik.languageserver.MagikLanguageServerSettings;
 import org.eclipse.lsp4j.InlayHint;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 /** Method invocation argument {@link InlayHint} provider. */
 class ArgumentInlayHintSupplier {
+
+  private final MagikToolsProperties properties;
+
+  ArgumentInlayHintSupplier(final MagikToolsProperties properties) {
+    this.properties = properties;
+  }
 
   /**
    * Get method invocation argument {@link InlayHint}s.
@@ -33,7 +40,8 @@ class ArgumentInlayHintSupplier {
    */
   Stream<InlayHint> getMethodInvocationInlayHints(
       final MagikTypedFile magikFile, final Range range) {
-    if (!MagikSettings.INSTANCE.getTypingShowArgumentInlayHints()) {
+    final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
+    if (!settings.getTypingShowArgumentInlayHints()) {
       return Stream.empty();
     }
 

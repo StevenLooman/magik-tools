@@ -11,11 +11,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import nl.ramsolutions.sw.ConfigurationLocator;
+import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
@@ -30,9 +30,14 @@ import org.slf4j.LoggerFactory;
 /** Magik Lint main class. */
 public class MagikLint {
 
+  public static final String KEY_MAX_INFRACTIONS = "magik.lint.max-infractions";
+  public static final String KEY_COLUMN_OFFSET = "magik.lint.column-offset";
+  public static final String KEY_MSG_TEMPLATE = "magik.lint.msg-template";
+  public static final String KEY_OVERRIDE_CONFIG = "magik.lint.overrideConfigFile";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikLint.class);
 
-  private final MagikLintConfiguration config;
+  private final MagikToolsProperties properties;
   private final Reporter reporter;
 
   /**
@@ -41,8 +46,8 @@ public class MagikLint {
    * @param configuration Configuration.
    * @param reporter Reporter.
    */
-  public MagikLint(final MagikLintConfiguration configuration, final Reporter reporter) {
-    this.config = configuration;
+  public MagikLint(final MagikToolsProperties properties, final Reporter reporter) {
+    this.properties = properties;
     this.reporter = reporter;
   }
 
@@ -54,25 +59,17 @@ public class MagikLint {
    * @throws IOException -
    */
   private MagikFile buildMagikFile(final Path path) {
-    final Charset charset = FileCharsetDeterminer.determineCharset(path);
-
-    byte[] encoded = null;
     try {
-      encoded = Files.readAllBytes(path);
+      final MagikToolsProperties fileProperties =
+          ConfigurationReader.readProperties(path, this.properties);
+      final URI uri = path.toUri();
+      final Charset charset = FileCharsetDeterminer.determineCharset(path);
+      final String fileContents = Files.readString(path, charset);
+      return new MagikFile(fileProperties, uri, fileContents);
     } catch (final IOException exception) {
-      LOGGER.error(exception.getMessage(), exception);
-    }
-
-    final URI uri = path.toUri();
-    final String fileContents = new String(encoded, charset);
-    final MagikAnalysisConfiguration configuration;
-    try {
-      configuration = new MagikAnalysisConfiguration();
-    } catch (final IOException exception) {
+      LOGGER.error("Caught exception:", exception);
       throw new IllegalStateException(exception);
     }
-
-    return new MagikFile(configuration, uri, fileContents);
   }
 
   /**
@@ -99,11 +96,13 @@ public class MagikLint {
    */
   void showChecks(final Writer writer, final boolean showDisabled)
       throws ReflectiveOperationException, IOException {
-    final Path configPath = this.config.getPath();
+    final Path overrideConfigPath = this.properties.getPropertyPath(MagikLint.KEY_OVERRIDE_CONFIG);
+    final MagikToolsProperties properties =
+        overrideConfigPath != null
+            ? new MagikToolsProperties(overrideConfigPath)
+            : MagikToolsProperties.DEFAULT_PROPERTIES;
     final MagikChecksConfiguration checksConfig =
-        configPath != null
-            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
-            : new MagikChecksConfiguration(CheckList.getChecks());
+        new MagikChecksConfiguration(CheckList.getChecks(), properties);
     final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
     for (final MagikCheckHolder holder : holders) {
       final MagikCheckMetadata metadata = holder.getMetadata();
@@ -158,12 +157,12 @@ public class MagikLint {
    * @throws ReflectiveOperationException -
    */
   public void run(final Collection<Path> paths) throws IOException, ReflectiveOperationException {
-    final long maxInfractions = this.config.getMaxInfractions();
+    final long maxInfractions = this.properties.getPropertyLong(MagikLint.KEY_MAX_INFRACTIONS);
     final Location.LocationRangeComparator locationCompare = new Location.LocationRangeComparator();
     paths.stream()
         .parallel()
-        .filter(path -> !this.isFileIgnored(path))
         .map(this::buildMagikFile)
+        .filter(magikFile -> !this.isFileIgnored(magikFile))
         .map(this::runChecksOnFile)
         .flatMap(List::stream)
         .sorted((issue0, issue1) -> locationCompare.compare(issue0.location(), issue1.location()))
@@ -172,35 +171,16 @@ public class MagikLint {
         .forEach(this.reporter::reportIssue);
   }
 
-  private MagikChecksConfiguration getChecksConfig(final Path path) {
-    final Path configPath =
-        this.config.getPath() != null
-            ? this.config.getPath()
-            : ConfigurationLocator.locateConfiguration(path);
-    try {
-      return configPath != null
-          ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
-          : new MagikChecksConfiguration(CheckList.getChecks());
-    } catch (final IOException exception) {
-      throw new IllegalStateException(exception);
-    }
-  }
-
-  private boolean isFileIgnored(final Path path) {
-    final MagikChecksConfiguration checksConfig = this.getChecksConfig(path);
+  private boolean isFileIgnored(final MagikFile magikFile) {
+    final MagikToolsProperties fileProperties = magikFile.getProperties();
+    final MagikChecksConfiguration checksConfig =
+        new MagikChecksConfiguration(CheckList.getChecks(), fileProperties);
+    final URI uri = magikFile.getUri();
+    final Path path = Path.of(uri);
     final FileSystem fs = FileSystems.getDefault();
     final boolean isIgnored =
         checksConfig.getIgnores().stream()
-            .map(ignorePattern -> "glob:" + ignorePattern)
-            .map(
-                globPattern -> {
-                  try {
-                    return fs.getPathMatcher(globPattern);
-                  } catch (final IllegalArgumentException exception) {
-                    LOGGER.error("Invalid ignore pattern: {}", globPattern);
-                    throw exception;
-                  }
-                })
+            .map(fs::getPathMatcher)
             .anyMatch(matcher -> matcher.matches(path));
     if (isIgnored) {
       LOGGER.trace("Thread: {}, ignoring file: {}", Thread.currentThread().getName(), path);
@@ -220,10 +200,10 @@ public class MagikLint {
 
     final List<MagikIssue> magikIssues = new ArrayList<>();
 
-    // run checks on files
-    final URI uri = magikFile.getUri();
-    final Path path = Path.of(uri);
-    final MagikChecksConfiguration checksConfig = this.getChecksConfig(path);
+    // Run checks on files.
+    final MagikToolsProperties fileProperties = magikFile.getProperties();
+    final MagikChecksConfiguration checksConfig =
+        new MagikChecksConfiguration(CheckList.getChecks(), fileProperties);
     final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
     for (final MagikCheckHolder holder : holders) {
       if (!holder.isEnabled()) {

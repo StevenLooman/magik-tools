@@ -29,6 +29,12 @@
 - Fix hovering over atoms.
 - Make `unused-variable.check-parameters` configurable.
 - Support `indexed_class`/`enumerated_class`/`delete_class` from class_info.
+- Make indent (tab/space) better configurable, by using configuration:
+  - `magik.formatting.indentChar`
+  - `magik.formatting.indentWidth`
+  - `magik.formatting.insertFinalNewline`
+  - `magik.formatting.trimTrailingWhitespace`
+  - `magik.formatting.trimFinalNewlines`
 - Several fixes.
 
 0.9.1 (2024-03-13)
