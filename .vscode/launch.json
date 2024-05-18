@@ -17,6 +17,18 @@
     },
     {
       "type": "java",
+      "name": "Debug (Launch)-MagikLint<magik-lint> --apply-fixes",
+      "request": "launch",
+      "mainClass": "nl.ramsolutions.sw.magik.lint.Main",
+      "projectName": "magik-lint",
+      "args": [
+        "--debug",
+        "--apply-fixes",
+        "magik-lint/lint-demo.magik"
+      ]
+    },
+    {
+      "type": "java",
       "name": "Debug (Launch)-MagikToolkit<sslr-magik-toolkit>",
       "request": "launch",
       "mainClass": "nl.ramsolutions.sw.magik.toolkit.MagikToolkit",
