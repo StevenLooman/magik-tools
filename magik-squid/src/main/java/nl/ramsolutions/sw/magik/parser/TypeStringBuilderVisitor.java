@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.AstVisitor;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,12 +48,12 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
   }
 
   @Override
-  public void visitFile(final AstNode node) {
+  public void visitFile(final @Nullable AstNode node) {
     this.topNode = node;
   }
 
   @Override
-  public void leaveFile(final AstNode node) {
+  public void leaveFile(final @Nullable AstNode node) {
     // Pass.
   }
 

@@ -12,9 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
@@ -34,7 +35,7 @@ import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 /** Method definition parser. */
 public class MethodDefinitionParser {
 
-  private final MagikAnalysisConfiguration configuration;
+  private final MagikToolsProperties properties;
   private final AstNode node;
 
   /**
@@ -42,13 +43,12 @@ public class MethodDefinitionParser {
    *
    * @param node Method definition node.
    */
-  public MethodDefinitionParser(
-      final MagikAnalysisConfiguration configuration, final AstNode node) {
+  public MethodDefinitionParser(final MagikToolsProperties properties, final AstNode node) {
     if (node.isNot(MagikGrammar.METHOD_DEFINITION)) {
       throw new IllegalArgumentException();
     }
 
-    this.configuration = configuration;
+    this.properties = properties;
     this.node = node;
   }
 
@@ -133,20 +133,21 @@ public class MethodDefinitionParser {
             : Collections.emptySet();
 
     final MethodDefinitionUsageParser usageParser = new MethodDefinitionUsageParser(this.node);
+    final MagikAnalysisSettings settings = new MagikAnalysisSettings(this.properties);
     final Set<GlobalUsage> usedGlobals =
-        this.configuration.getMagikIndexerIndexGlobalUsages()
+        settings.getMagikIndexerIndexGlobalUsages()
             ? usageParser.getUsedGlobals()
             : Collections.emptySet();
     final Set<MethodUsage> usedMethods =
-        this.configuration.getMagikIndexerIndexMethodUsages()
+        settings.getMagikIndexerIndexMethodUsages()
             ? usageParser.getUsedMethods()
             : Collections.emptySet();
     final Set<SlotUsage> usedSlots =
-        this.configuration.getMagikIndexerIndexSlotUsages()
+        settings.getMagikIndexerIndexSlotUsages()
             ? usageParser.getUsedSlots()
             : Collections.emptySet();
     final Set<ConditionUsage> usedConditions =
-        this.configuration.getMagikIndexerIndexConditionUsages()
+        settings.getMagikIndexerIndexConditionUsages()
             ? usageParser.getUsedConditions()
             : Collections.emptySet();
 

@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.magik;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
@@ -19,17 +19,17 @@ public class MagikTypedFile extends MagikFile {
   /**
    * Constructor.
    *
-   * @param configuration Magik analysis configuration.
+   * @param settings Magik analysis configuration.
    * @param uri URI.
    * @param text Text.
    * @param definitionKeeper {@link IDefinitionKeeper}.
    */
   public MagikTypedFile(
-      final MagikAnalysisConfiguration configuration,
+      final MagikToolsProperties settings,
       final URI uri,
       final String text,
       final IDefinitionKeeper definitionKeeper) {
-    super(configuration, uri, text);
+    super(settings, uri, text);
     this.definitionKeeper = definitionKeeper;
     this.typeStringResolver = new TypeStringResolver(definitionKeeper);
   }

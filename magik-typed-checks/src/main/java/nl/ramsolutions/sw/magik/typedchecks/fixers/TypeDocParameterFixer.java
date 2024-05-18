@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -17,6 +18,7 @@ import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheckFixer;
@@ -33,24 +35,30 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
    */
   @Override
   public List<CodeAction> provideCodeActions(final MagikTypedFile magikFile, final Range range) {
+    final MagikToolsProperties properties = magikFile.getProperties();
+    final MagikFormattingSettings settings = new MagikFormattingSettings(properties);
+    final String indent = settings.getIndent();
     return magikFile.getDefinitions().stream()
         .filter(MethodDefinition.class::isInstance)
         .map(MethodDefinition.class::cast)
         .filter(MethodDefinition::isActualMethodDefinition)
         .filter(methodDef -> Range.fromTree(methodDef.getNode()).overlapsWith(range))
-        .flatMap(methodDefinition -> this.extractParameterCodeActions(methodDefinition).stream())
+        .flatMap(
+            methodDefinition -> this.extractParameterCodeActions(methodDefinition, indent).stream())
         .toList();
   }
 
-  private List<CodeAction> extractParameterCodeActions(final MethodDefinition methodDefinition) {
+  private List<CodeAction> extractParameterCodeActions(
+      final MethodDefinition methodDefinition, final String indent) {
     // Compare and create TextEdits.
     return Stream.concat(
-            this.createAddParameterTextEdits(methodDefinition).stream(),
+            this.createAddParameterTextEdits(methodDefinition, indent).stream(),
             this.createRemoveParameterTextEdits(methodDefinition).stream())
         .toList();
   }
 
-  private List<CodeAction> createAddParameterTextEdits(final MethodDefinition methodDefinition) {
+  private List<CodeAction> createAddParameterTextEdits(
+      final MethodDefinition methodDefinition, final String indent) {
     // Find all method and type-doc parameters.
     final List<ParameterDefinition> methodParameters =
         Stream.concat(
@@ -79,7 +87,8 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
                       new Position(lastTypeDocParameterLine + 1, 0),
                       new Position(lastTypeDocParameterLine + 1, 0));
               final String typeDocLine =
-                  String.format("\t## @param {_undefined} %s Description%n", paramDef.getName());
+                  String.format(
+                      "%s## @param {_undefined} %s Description%n", indent, paramDef.getName());
               final String description =
                   String.format("Add type-doc for parameter %s", paramDef.getName());
               final TextEdit edit = new TextEdit(range, typeDocLine);

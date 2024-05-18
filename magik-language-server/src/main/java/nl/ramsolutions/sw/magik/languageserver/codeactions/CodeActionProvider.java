@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
@@ -15,12 +16,15 @@ import org.slf4j.LoggerFactory;
 /** Code action provider. */
 public class CodeActionProvider {
 
-  static final Logger LOGGER = LoggerFactory.getLogger(CodeActionProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CodeActionProvider.class);
 
-  private final MagikChecksCodeActionProvider checksCodeActionProvider =
-      new MagikChecksCodeActionProvider();
-  private final MagikTypedChecksCodeActionProvider typedChecksCodeActionProvider =
-      new MagikTypedChecksCodeActionProvider();
+  private final MagikChecksCodeActionProvider checksCodeActionProvider;
+  private final MagikTypedChecksCodeActionProvider typedChecksCodeActionProvider;
+
+  public CodeActionProvider(final MagikToolsProperties properties) {
+    this.checksCodeActionProvider = new MagikChecksCodeActionProvider(properties);
+    this.typedChecksCodeActionProvider = new MagikTypedChecksCodeActionProvider(properties);
+  }
 
   /**
    * Set server capabilities.

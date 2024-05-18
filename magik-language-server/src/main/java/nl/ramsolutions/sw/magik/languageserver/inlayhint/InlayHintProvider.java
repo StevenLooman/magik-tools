@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.languageserver.inlayhint;
 
 import java.util.List;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
@@ -10,6 +11,12 @@ import org.eclipse.lsp4j.ServerCapabilities;
 
 /** Provider for inlay hints. */
 public class InlayHintProvider {
+
+  private final MagikToolsProperties properties;
+
+  public InlayHintProvider(final MagikToolsProperties properties) {
+    this.properties = properties;
+  }
 
   /**
    * Set capabilities for inlay hints.
@@ -31,8 +38,9 @@ public class InlayHintProvider {
       final MagikTypedFile magikFile, final org.eclipse.lsp4j.Range lsp4jrange) {
     // Get argument hints from method invocations.
     final Range range = Lsp4jConversion.rangeFromLsp4j(lsp4jrange);
-    final ArgumentInlayHintSupplier methodInvocationSupplier = new ArgumentInlayHintSupplier();
-    final AtomInlayHintSupplier atomSupplier = new AtomInlayHintSupplier();
+    final ArgumentInlayHintSupplier methodInvocationSupplier =
+        new ArgumentInlayHintSupplier(this.properties);
+    final AtomInlayHintSupplier atomSupplier = new AtomInlayHintSupplier(this.properties);
     return Stream.of(
             methodInvocationSupplier.getMethodInvocationInlayHints(magikFile, range),
             atomSupplier.getAtomInlayHints(magikFile, range))

@@ -1,16 +1,18 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import nl.ramsolutions.sw.ConfigurationReader;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.ModuleDefFile;
 import nl.ramsolutions.sw.magik.ProductDefFile;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
@@ -97,7 +99,7 @@ public class MagikTextDocumentService implements TextDocumentService {
       LoggerFactory.getLogger(MagikTextDocumentService.class.getName() + "Duration");
 
   private final MagikLanguageServer languageServer;
-  private final MagikAnalysisConfiguration analysisConfiguration;
+  private final MagikToolsProperties properties;
   private final IDefinitionKeeper definitionKeeper;
   private final DiagnosticsProvider diagnosticsProvider;
   private final HoverProvider hoverProvider;
@@ -125,13 +127,13 @@ public class MagikTextDocumentService implements TextDocumentService {
    */
   public MagikTextDocumentService(
       final MagikLanguageServer languageServer,
-      final MagikAnalysisConfiguration analysisConfiguration,
+      final MagikToolsProperties properties,
       final IDefinitionKeeper definitionKeeper) {
     this.languageServer = languageServer;
-    this.analysisConfiguration = analysisConfiguration;
+    this.properties = properties;
     this.definitionKeeper = definitionKeeper;
 
-    this.diagnosticsProvider = new DiagnosticsProvider();
+    this.diagnosticsProvider = new DiagnosticsProvider(this.properties);
     this.hoverProvider = new HoverProvider();
     this.implementationProvider = new ImplementationProvider();
     this.signatureHelpProvider = new SignatureHelpProvider();
@@ -144,8 +146,8 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.renameProvider = new RenameProvider();
     this.documentSymbolProvider = new DocumentSymbolProvider();
     this.typeHierarchyProvider = new TypeHierarchyProvider(this.definitionKeeper);
-    this.inlayHintProvider = new InlayHintProvider();
-    this.codeActionProvider = new CodeActionProvider();
+    this.inlayHintProvider = new InlayHintProvider(this.properties);
+    this.codeActionProvider = new CodeActionProvider(this.properties);
     this.selectionRangeProvider = new SelectionRangeProvider();
   }
 
@@ -182,9 +184,17 @@ public class MagikTextDocumentService implements TextDocumentService {
     final TextDocumentItem textDocument = params.getTextDocument();
     LOGGER.debug("didOpen, uri: {}", textDocument.getUri());
 
-    // Store file contents.
+    // Read relevant properties.
     final String uriStr = textDocument.getUri();
     final URI uri = URI.create(uriStr);
+    final MagikToolsProperties fileProperties;
+    try {
+      fileProperties = ConfigurationReader.readProperties(uri, properties);
+    } catch (final IOException exception) {
+      throw new IllegalStateException(exception);
+    }
+
+    // Store file contents.
     final TextDocumentIdentifier textDocumentIdentifier = new TextDocumentIdentifier(uriStr);
     final String text = textDocument.getText();
     final OpenedFile openedFile;
@@ -204,7 +214,7 @@ public class MagikTextDocumentService implements TextDocumentService {
       case "magik":
         {
           final MagikTypedFile magikFile =
-              new MagikTypedFile(this.analysisConfiguration, uri, text, this.definitionKeeper);
+              new MagikTypedFile(fileProperties, uri, text, this.definitionKeeper);
           openedFile = magikFile;
 
           // Publish diagnostics to client.
@@ -231,12 +241,20 @@ public class MagikTextDocumentService implements TextDocumentService {
     final TextDocumentIdentifier textDocumentIdentifier = params.getTextDocument();
     LOGGER.debug("didChange, uri: {}}", textDocumentIdentifier.getUri());
 
+    // Read relevant properties.
+    final String uriStr = textDocumentIdentifier.getUri();
+    final URI uri = URI.create(uriStr);
+    final MagikToolsProperties fileProperties;
+    try {
+      fileProperties = ConfigurationReader.readProperties(uri, properties);
+    } catch (final IOException exception) {
+      throw new IllegalStateException(exception);
+    }
+
     // Update file contents.
     final List<TextDocumentContentChangeEvent> contentChangeEvents = params.getContentChanges();
     final TextDocumentContentChangeEvent contentChangeEvent = contentChangeEvents.get(0);
     final String text = contentChangeEvent.getText();
-    final String uriStr = textDocumentIdentifier.getUri();
-    final URI uri = URI.create(uriStr);
 
     // Find original TextDocumentIdentifier.
     final TextDocumentIdentifier realTextDocumentIdentifier = new TextDocumentIdentifier(uriStr);
@@ -264,7 +282,7 @@ public class MagikTextDocumentService implements TextDocumentService {
       case "magik":
         {
           final MagikTypedFile magikFile =
-              new MagikTypedFile(this.analysisConfiguration, uri, text, this.definitionKeeper);
+              new MagikTypedFile(fileProperties, uri, text, this.definitionKeeper);
           openedFile = magikFile;
 
           // Publish diagnostics to client.

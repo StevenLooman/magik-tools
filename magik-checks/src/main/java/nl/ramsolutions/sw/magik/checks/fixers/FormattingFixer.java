@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Range;
@@ -11,6 +12,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheckFixer;
 import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 import nl.ramsolutions.sw.magik.formatting.FormattingWalker;
+import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +28,15 @@ public class FormattingFixer extends MagikCheckFixer {
       return Collections.emptyList();
     }
 
-    final FormattingOptions formattingOptions = new FormattingOptions(8, false, true, true, false);
+    final MagikToolsProperties properties = magikFile.getProperties();
+    final MagikFormattingSettings settings = new MagikFormattingSettings(properties);
+    final FormattingOptions formattingOptions =
+        new FormattingOptions(
+            settings.getIndentWidth(),
+            settings.getIndentChar() == ' ',
+            settings.insertFinalNewline(),
+            settings.trimTrailingWhitespace(),
+            settings.trimFinalNewlines());
     FormattingWalker walker;
     try {
       walker = new FormattingWalker(formattingOptions);

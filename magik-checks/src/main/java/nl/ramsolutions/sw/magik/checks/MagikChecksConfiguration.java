@@ -1,7 +1,5 @@
 package nl.ramsolutions.sw.magik.checks;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +10,7 @@ import nl.ramsolutions.sw.MagikToolsProperties;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 
-/** Configuration. */
+/** {@link MagikCheck} specific configuration. */
 public class MagikChecksConfiguration {
 
   private static final String KEY_DISABLED_CHECKS = "disabled";
@@ -23,28 +21,15 @@ public class MagikChecksConfiguration {
   private final List<Class<? extends MagikCheck>> checkClasses;
 
   /**
-   * Constructor.
-   *
-   * @param checkClasses {@link Class}es of {@link MagikCheck}s.
-   * @throws IOException
-   */
-  public MagikChecksConfiguration(final List<Class<? extends MagikCheck>> checkClasses)
-      throws IOException {
-    this.checkClasses = checkClasses;
-    this.properties = new MagikToolsProperties();
-  }
-
-  /**
    * Constructor which reads properties from {@code path}.
    *
    * @param checkClasses {@link Class}es of {@link MagikCheck}s.
-   * @param path {@link Path} to read properties from.
-   * @throws IOException
+   * @param properties Properties to use.
    */
   public MagikChecksConfiguration(
-      final List<Class<? extends MagikCheck>> checkClasses, final Path path) throws IOException {
+      final List<Class<? extends MagikCheck>> checkClasses, final MagikToolsProperties properties) {
     this.checkClasses = checkClasses;
-    this.properties = new MagikToolsProperties(path);
+    this.properties = properties;
   }
 
   public List<String> getIgnores() {

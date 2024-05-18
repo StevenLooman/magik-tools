@@ -4,39 +4,65 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Magik-tools properties. */
+/**
+ * Magik-tools properties.
+ *
+ * <p>Note that this is currently used in (at least) three ways: - Settings for
+ * magik-language-server settings - Settings for magik-lint from command line - Settings for
+ * `magik-lint.properties` files for a given {@link MagikFile}
+ *
+ * <p>These are separate code-paths, but given the shared used of {@link MagikToolsProperties} the
+ * separation can be confusing.
+ *
+ * <p>The helper classes {@link ConfigurationLocator} and {@link ConfigurationReader} are used to
+ * locate and read the settings.
+ */
 public class MagikToolsProperties {
 
+  public static final MagikToolsProperties DEFAULT_PROPERTIES = new MagikToolsProperties(Map.of());
+  public static final String LIST_SEPARATOR = ",";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikToolsProperties.class);
-  private static final String DEFAULT_PROPERTIES_FILENAME = "magik-tools-defaults.properties";
-  private static final String LIST_SEPARATOR = ",";
 
   private final Properties properties = new Properties();
 
-  public MagikToolsProperties() throws IOException {
-    this(
-        MagikToolsProperties.class
-            .getClassLoader()
-            .getResourceAsStream(DEFAULT_PROPERTIES_FILENAME));
-    LOGGER.debug("Read default configuration from: {}", DEFAULT_PROPERTIES_FILENAME);
+  public MagikToolsProperties() {}
+
+  public MagikToolsProperties(final Map<String, String> properties) {
+    this.properties.putAll(properties);
   }
 
   public MagikToolsProperties(final Path path) throws IOException {
-    this(new FileInputStream(path.toFile()));
-    LOGGER.debug("Read configuration from: {}", path.toAbsolutePath());
+    LOGGER.debug("Reading configuration from: {}", path.toAbsolutePath());
+    try (final FileInputStream inputStream = new FileInputStream(path.toFile())) {
+      this.properties.load(inputStream);
+    }
   }
 
-  private MagikToolsProperties(final InputStream stream) throws IOException {
-    this.properties.load(stream);
+  public void clear() {
+    this.properties.clear();
+  }
+
+  public void reset() {
+    this.clear();
+    this.putAll(MagikToolsProperties.DEFAULT_PROPERTIES);
+  }
+
+  public void putAll(final Properties newProperties) {
+    this.properties.putAll(newProperties);
+  }
+
+  public void putAll(final MagikToolsProperties newProperties) {
+    this.properties.putAll(newProperties.properties);
   }
 
   /**
@@ -110,6 +136,17 @@ public class MagikToolsProperties {
   }
 
   /**
+   * Get property.
+   *
+   * @param key Key of property.
+   * @param defaultValue Default vaule.
+   * @return Value of property.
+   */
+  public String getPropertyString(final String key, final String defaultValue) {
+    return this.properties.getProperty(key, defaultValue);
+  }
+
+  /**
    * Get property, converted to a {@link Boolean}.
    *
    * @param key Key of property.
@@ -120,6 +157,22 @@ public class MagikToolsProperties {
     final String value = this.getPropertyString(key);
     if (value == null) {
       return null;
+    }
+
+    return Boolean.valueOf(value);
+  }
+
+  /**
+   * Get property, converted to a {@link Boolean}.
+   *
+   * @param key Key of property.
+   * @param defaultValue Default value.
+   * @return Value of property.
+   */
+  public boolean getPropertyBoolean(final String key, final boolean defaultValue) {
+    final String value = this.getPropertyString(key);
+    if (value == null) {
+      return defaultValue;
     }
 
     return Boolean.valueOf(value);
@@ -142,6 +195,21 @@ public class MagikToolsProperties {
   }
 
   /**
+   * Get property, converted to an {@link Integer}.
+   *
+   * @param key Key of property.
+   * @return Value of property.
+   */
+  public int getPropertyInteger(final String key, final int defaultValue) {
+    final String value = this.getPropertyString(key);
+    if (value == null) {
+      return defaultValue;
+    }
+
+    return Integer.valueOf(value);
+  }
+
+  /**
    * Get property, converted to a {@link Long}.
    *
    * @param key Key of property.
@@ -155,6 +223,16 @@ public class MagikToolsProperties {
     }
 
     return Long.valueOf(value);
+  }
+
+  @CheckForNull
+  public Path getPropertyPath(final String key) {
+    final String value = this.getPropertyString(key);
+    if (value == null) {
+      return null;
+    }
+
+    return Path.of(value);
   }
 
   public boolean hasProperty(final String key) {
@@ -176,5 +254,22 @@ public class MagikToolsProperties {
 
     final String[] values = value.split(MagikToolsProperties.LIST_SEPARATOR);
     return Arrays.stream(values).map(String::trim).toList();
+  }
+
+  /**
+   * Merge two sets of properties.
+   *
+   * <p>In case of duplicate keys, the values of `properties2` win.
+   *
+   * @param properties1
+   * @param properties2
+   * @return Merged properties.
+   */
+  public static MagikToolsProperties merge(
+      final MagikToolsProperties properties1, final MagikToolsProperties properties2) {
+    final MagikToolsProperties result = new MagikToolsProperties();
+    properties1.properties.forEach((key, value) -> result.properties.put(key, value));
+    properties2.properties.forEach((key, value) -> result.properties.put(key, value));
+    return result;
   }
 }

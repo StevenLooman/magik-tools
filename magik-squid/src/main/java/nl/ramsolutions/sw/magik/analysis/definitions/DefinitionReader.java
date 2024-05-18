@@ -4,7 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisConfiguration;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefConditionParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefEnumerationParser;
@@ -29,11 +29,11 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  */
 public class DefinitionReader extends MagikAstWalker {
 
-  private final MagikAnalysisConfiguration configuration;
+  private final MagikToolsProperties properties;
   private final List<MagikDefinition> definitions = new ArrayList<>();
 
-  public DefinitionReader(final MagikAnalysisConfiguration configuration) {
-    this.configuration = configuration;
+  public DefinitionReader(final MagikToolsProperties properties) {
+    this.properties = properties;
   }
 
   public List<MagikDefinition> getDefinitions() {
@@ -42,7 +42,7 @@ public class DefinitionReader extends MagikAstWalker {
 
   @Override
   protected void walkPostMethodDefinition(final AstNode node) {
-    final MethodDefinitionParser parser = new MethodDefinitionParser(this.configuration, node);
+    final MethodDefinitionParser parser = new MethodDefinitionParser(this.properties, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }

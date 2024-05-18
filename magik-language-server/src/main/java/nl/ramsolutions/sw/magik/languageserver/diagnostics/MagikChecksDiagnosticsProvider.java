@@ -1,8 +1,6 @@
 package nl.ramsolutions.sw.magik.languageserver.diagnostics;
 
-import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -10,6 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationLocator;
+import nl.ramsolutions.sw.ConfigurationReader;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
@@ -38,15 +38,15 @@ public class MagikChecksDiagnosticsProvider {
           "Major", DiagnosticSeverity.Error,
           "Minor", DiagnosticSeverity.Warning);
 
-  private final Path overrideConfigurationPath;
+  private final MagikToolsProperties properties;
 
   /**
    * Constructor.
    *
    * @param overrideConfigurationPath Path to override configuration.
    */
-  public MagikChecksDiagnosticsProvider(final @Nullable Path overrideConfigurationPath) {
-    this.overrideConfigurationPath = overrideConfigurationPath;
+  public MagikChecksDiagnosticsProvider(final MagikToolsProperties properties) {
+    this.properties = properties;
   }
 
   /**
@@ -92,17 +92,12 @@ public class MagikChecksDiagnosticsProvider {
   }
 
   private Collection<MagikCheck> createChecks(final MagikFile magikFile) throws IOException {
-    final URI uri = magikFile.getUri();
-    final Path magikFilePath = Path.of(uri);
-    final Path configPath =
-        this.overrideConfigurationPath != null
-            ? overrideConfigurationPath
-            : ConfigurationLocator.locateConfiguration(magikFilePath);
-    final MagikChecksConfiguration checksConfig =
-        configPath != null
-            ? new MagikChecksConfiguration(CheckList.getChecks(), configPath)
-            : new MagikChecksConfiguration(CheckList.getChecks());
-    final List<MagikCheckHolder> holders = checksConfig.getAllChecks();
+    final Path searchPath = Path.of(magikFile.getUri()).getParent();
+    final MagikToolsProperties actualProperties =
+        ConfigurationReader.readProperties(searchPath, this.properties);
+    final MagikChecksConfiguration config =
+        new MagikChecksConfiguration(CheckList.getChecks(), actualProperties);
+    final List<MagikCheckHolder> holders = config.getAllChecks();
     return holders.stream()
         .filter(MagikCheckHolder::isEnabled)
         .map(
