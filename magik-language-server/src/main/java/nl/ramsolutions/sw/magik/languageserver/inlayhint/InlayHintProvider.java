@@ -38,12 +38,12 @@ public class InlayHintProvider {
       final MagikTypedFile magikFile, final org.eclipse.lsp4j.Range lsp4jrange) {
     // Get argument hints from method invocations.
     final Range range = Lsp4jConversion.rangeFromLsp4j(lsp4jrange);
-    final ArgumentInlayHintSupplier methodInvocationSupplier =
-        new ArgumentInlayHintSupplier(this.properties);
-    final AtomInlayHintSupplier atomSupplier = new AtomInlayHintSupplier(this.properties);
+    final ArgumentNameInlayHintSupplier methodInvocationSupplier =
+        new ArgumentNameInlayHintSupplier(this.properties);
+    final TypingInlayHintSupplier atomSupplier = new TypingInlayHintSupplier(this.properties);
     return Stream.of(
-            methodInvocationSupplier.getMethodInvocationInlayHints(magikFile, range),
-            atomSupplier.getAtomInlayHints(magikFile, range))
+            methodInvocationSupplier.getArgumentNameInlayHints(magikFile, range),
+            atomSupplier.getTypingInlayHints(magikFile, range))
         .flatMap(stream -> stream)
         .toList();
   }

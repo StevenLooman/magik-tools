@@ -35,6 +35,8 @@
   - `magik.formatting.insertFinalNewline`
   - `magik.formatting.trimTrailingWhitespace`
   - `magik.formatting.trimFinalNewlines`
+- Typing inlay hint provide also provides inlayhints for method/procedure invocations.
+- Rename setting `magik.typing.showAtomInlayHints` to `magik.typing.showTypingInlayHints`.
 - Several fixes.
 
 0.9.1 (2024-03-13)

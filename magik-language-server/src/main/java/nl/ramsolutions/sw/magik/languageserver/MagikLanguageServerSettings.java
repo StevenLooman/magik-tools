@@ -12,7 +12,7 @@ public final class MagikLanguageServerSettings {
   private static final String LIBS_DIRS = "magik.libsDirs";
   private static final String OVERRIDE_CONFIG_FILE = "magik.lint.overrideConfigFile";
   private static final String TYPE_DATABASE_PATHS = "magik.typing.typeDatabasePaths";
-  private static final String SHOW_ATOM_INLAY_HINTS = "magik.typing.showAtomInlayHints";
+  private static final String SHOW_TYPING_INLAY_HINTS = "magik.typing.showTypingInlayHints";
   private static final String SHOW_ARGUMENT_INLAY_HINTS = "magik.typing.showArgumentInlayHints";
   private static final String ENABLE_TYPING_CHECKS = "magik.typing.enableChecks";
   // TODO: Is this used?
@@ -61,8 +61,8 @@ public final class MagikLanguageServerSettings {
    *
    * @return magik.typing.showAtomInlayHints
    */
-  public boolean getTypingShowAtomInlayHints() {
-    return this.properties.getPropertyBoolean(SHOW_ATOM_INLAY_HINTS) == Boolean.TRUE;
+  public boolean getTypingShowTypingInlayHints() {
+    return this.properties.getPropertyBoolean(SHOW_TYPING_INLAY_HINTS) == Boolean.TRUE;
   }
 
   /**
