@@ -22,12 +22,12 @@ import nl.ramsolutions.sw.magik.languageserver.MagikLanguageServerSettings;
 import org.eclipse.lsp4j.InlayHint;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
-/** Method invocation argument {@link InlayHint} provider. */
-class ArgumentInlayHintSupplier {
+/** Method invocation argument name {@link InlayHint} provider. */
+class ArgumentNameInlayHintSupplier {
 
   private final MagikToolsProperties properties;
 
-  ArgumentInlayHintSupplier(final MagikToolsProperties properties) {
+  ArgumentNameInlayHintSupplier(final MagikToolsProperties properties) {
     this.properties = properties;
   }
 
@@ -38,8 +38,7 @@ class ArgumentInlayHintSupplier {
    * @param range Range to get {@link InlayHint}s for.
    * @return {@link InlayHint}s.
    */
-  Stream<InlayHint> getMethodInvocationInlayHints(
-      final MagikTypedFile magikFile, final Range range) {
+  Stream<InlayHint> getArgumentNameInlayHints(final MagikTypedFile magikFile, final Range range) {
     final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
     if (!settings.getTypingShowArgumentInlayHints()) {
       return Stream.empty();

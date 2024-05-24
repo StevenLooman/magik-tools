@@ -248,8 +248,8 @@
 					"description": "Paths to type databases.",
 					"type": "array"
 				},
-				"magik.typing.showAtomInlayHints": {
-					"description": "Show atom type inlay hints.",
+				"magik.typing.showTypingInlayHints": {
+					"description": "Show typing inlay hints.",
 					"type": "boolean",
 					"default": false
 				},

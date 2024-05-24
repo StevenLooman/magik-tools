@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
 import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -64,26 +65,26 @@ class InvocationHandler extends LocalTypeReasonerHandler {
               .toList();
       for (final MethodDefinition methodDef : methodDefs) {
         // Handle call result.
-        ExpressionResultString methodCallResultStr = methodDef.getReturnTypes();
-        final ExpressionResultString processedMethodCallResultStr =
+        final ExpressionResultString callResultStr = methodDef.getReturnTypes();
+        final ExpressionResultString processedCallResultStr =
             this.processExpressionResultString(
                 originalCalledTypeStr,
                 calledTypeStr,
-                methodDef,
-                methodCallResultStr,
+                methodDef.getParameters(),
+                callResultStr,
                 argumentTypeStrs);
-        callResult = new ExpressionResultString(processedMethodCallResultStr, callResult);
+        callResult = new ExpressionResultString(processedCallResultStr, callResult);
 
         // Handle iter result.
-        final ExpressionResultString methodIterResultStr = methodDef.getLoopTypes();
-        final ExpressionResultString processedMethodIterResultStr =
+        final ExpressionResultString iterResultStr = methodDef.getLoopTypes();
+        final ExpressionResultString processedIterResultStr =
             this.processExpressionResultString(
                 originalCalledTypeStr,
                 calledTypeStr,
-                methodDef,
-                methodIterResultStr,
+                methodDef.getParameters(),
+                iterResultStr,
                 argumentTypeStrs);
-        iterResult = new ExpressionResultString(processedMethodIterResultStr, iterResult);
+        iterResult = new ExpressionResultString(processedIterResultStr, iterResult);
       }
     }
 
@@ -113,15 +114,17 @@ class InvocationHandler extends LocalTypeReasonerHandler {
                 .map(ITypeStringDefinition::getTypeString)
                 .findAny()
                 .orElse(TypeString.UNDEFINED);
+    final Collection<ITypeStringDefinition> typeDefs = this.typeResolver.resolve(calledTypeStr);
 
     // Perform procedure call.
     ExpressionResultString callResult = null;
     ExpressionResultString iterResult = null;
-    if (calledTypeStr.equals(TypeString.SW_PROCEDURE)) {
-      final MethodDefinition invokeDef =
-          this.typeResolver.getMethodDefinitions(calledTypeStr, "invoke()").stream()
-              .findAny()
-              .orElseThrow();
+    for (final ITypeStringDefinition typeDef : typeDefs) {
+      if (!ProcedureDefinition.class.isInstance(typeDef)) {
+        continue;
+      }
+
+      final ProcedureDefinition procDef = (ProcedureDefinition) typeDef;
 
       // Figure argument types.
       final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
@@ -132,26 +135,26 @@ class InvocationHandler extends LocalTypeReasonerHandler {
               .toList();
 
       // Handle call result.
-      ExpressionResultString methodCallResultStr = invokeDef.getReturnTypes();
-      final ExpressionResultString processedMethodCallResultStr =
+      final ExpressionResultString callResultStr = procDef.getReturnTypes();
+      final ExpressionResultString processedCallResultStr =
           this.processExpressionResultString(
               originalCalledTypeStr,
               calledTypeStr,
-              invokeDef,
-              methodCallResultStr,
+              procDef.getParameters(),
+              callResultStr,
               argumentTypeStrs);
-      callResult = new ExpressionResultString(processedMethodCallResultStr, callResult);
+      callResult = new ExpressionResultString(processedCallResultStr, callResult);
 
       // Handle iter result.
-      final ExpressionResultString methodIterResultStr = invokeDef.getLoopTypes();
-      final ExpressionResultString processedMethodIterResultStr =
+      final ExpressionResultString iterResultStr = procDef.getLoopTypes();
+      final ExpressionResultString processedIterResultStr =
           this.processExpressionResultString(
               originalCalledTypeStr,
               calledTypeStr,
-              invokeDef,
-              methodIterResultStr,
+              procDef.getParameters(),
+              iterResultStr,
               argumentTypeStrs);
-      iterResult = new ExpressionResultString(processedMethodIterResultStr, iterResult);
+      iterResult = new ExpressionResultString(processedIterResultStr, iterResult);
     }
 
     // If nothing, then undefined.
@@ -168,15 +171,14 @@ class InvocationHandler extends LocalTypeReasonerHandler {
   }
 
   private ExpressionResultString substituteParameterRefs(
-      final MethodDefinition methodDef,
+      final List<ParameterDefinition> paramDefs,
       final List<TypeString> argumentTypes,
       final ExpressionResultString resultString) {
-    final List<ParameterDefinition> parameters = methodDef.getParameters();
     final Map<TypeString, TypeString> paramRefArgTypeRefMap =
-        IntStream.range(0, parameters.size())
+        IntStream.range(0, paramDefs.size())
             .mapToObj(
                 i -> {
-                  final ParameterDefinition paramDef = methodDef.getParameters().get(i);
+                  final ParameterDefinition paramDef = paramDefs.get(i);
                   final String paramName = paramDef.getName();
                   final TypeString paramRef = TypeString.ofParameterRef(paramName);
                   final TypeString argTypeRef =
@@ -197,7 +199,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
   private ExpressionResultString processExpressionResultString(
       final TypeString originalCalledTypeStr,
       final TypeString calledTypeStr,
-      final MethodDefinition methodDef,
+      final List<ParameterDefinition> paramDefs,
       final ExpressionResultString expressionResultString,
       final List<TypeString> argumentTypeStrs) {
     ExpressionResultString newExpressionResultString = expressionResultString;
@@ -214,7 +216,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
 
     // Substitute parameters.
     newExpressionResultString =
-        this.substituteParameterRefs(methodDef, argumentTypeStrs, newExpressionResultString);
+        this.substituteParameterRefs(paramDefs, argumentTypeStrs, newExpressionResultString);
 
     return newExpressionResultString;
   }
