@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.formatting;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -237,6 +238,7 @@ class StandardFormattingStrategy extends FormattingStrategy {
         MagikGrammar.EXPONENTIAL_EXPRESSION);
   }
 
+  @CheckForNull
   private TextEdit ensureIndenting(final Token token) {
     // Indenting.
     if (this.indent == 0 && this.lastToken.getType() != GenericTokenType.WHITESPACE) {
@@ -249,6 +251,7 @@ class StandardFormattingStrategy extends FormattingStrategy {
     } else if (!this.lastToken.getOriginalValue().equals(indentText)) {
       return this.editToken(this.lastToken, indentText);
     }
+
     return null;
   }
 
