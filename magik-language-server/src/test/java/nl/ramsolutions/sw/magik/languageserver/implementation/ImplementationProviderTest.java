@@ -36,6 +36,7 @@ class ImplementationProviderTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
@@ -44,6 +45,7 @@ class ImplementationProviderTest {
     definitionKeeper.add(
         new MethodDefinition(
             new Location(DEFAULT_URI, new Range(new Position(0, 0), new Position(0, 10))),
+            null,
             null,
             null,
             null,
@@ -62,6 +64,7 @@ class ImplementationProviderTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             bRef,
             Collections.emptyList(),
@@ -70,6 +73,7 @@ class ImplementationProviderTest {
     definitionKeeper.add(
         new MethodDefinition(
             new Location(DEFAULT_URI, new Range(new Position(50, 0), new Position(50, 10))),
+            null,
             null,
             null,
             null,

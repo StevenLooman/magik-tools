@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -23,12 +24,13 @@ public class PackageDefinition extends MagikDefinition {
    */
   public PackageDefinition(
       final @Nullable Location location,
+      final @Nullable Instant timestamp,
       final @Nullable String moduleName,
       final @Nullable String doc,
       final @Nullable AstNode node,
       final String name,
       final List<String> uses) {
-    super(location, moduleName, doc, node);
+    super(location, timestamp, moduleName, doc, node);
     this.name = name;
     this.uses = List.copyOf(uses);
   }
@@ -50,7 +52,13 @@ public class PackageDefinition extends MagikDefinition {
   @Override
   public PackageDefinition getWithoutNode() {
     return new PackageDefinition(
-        this.getLocation(), this.getModuleName(), this.getDoc(), null, name, uses);
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        null,
+        name,
+        uses);
   }
 
   @Override
@@ -63,7 +71,12 @@ public class PackageDefinition extends MagikDefinition {
   @Override
   public int hashCode() {
     return Objects.hash(
-        this.getLocation(), this.getModuleName(), this.getDoc(), this.name, this.uses);
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.name,
+        this.uses);
   }
 
   @Override

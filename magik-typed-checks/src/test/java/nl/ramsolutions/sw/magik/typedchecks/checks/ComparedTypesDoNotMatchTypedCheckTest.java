@@ -102,6 +102,7 @@ class ComparedTypesDoNotMatchTypedCheckTest extends MagikTypedCheckTestBase {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.ofIdentifier("parent", "user"),
             Collections.emptyList(),
@@ -109,6 +110,7 @@ class ComparedTypesDoNotMatchTypedCheckTest extends MagikTypedCheckTestBase {
             Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,

@@ -46,7 +46,7 @@ class JsonDefinitionWriterTest {
   void testWritePackage() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
-        new PackageDefinition(null, null, null, null, "test_package", List.of("sw")));
+        new PackageDefinition(null, null, null, null, null, "test_package", List.of("sw")));
 
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
@@ -60,6 +60,7 @@ class JsonDefinitionWriterTest {
     final TypeString aRef = TypeString.ofIdentifier("user:a", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             "test_module",
             null,
@@ -83,6 +84,7 @@ class JsonDefinitionWriterTest {
         new MethodDefinition(
             null,
             null,
+            null,
             "Test method m1().",
             null,
             TypeString.SW_OBJECT,
@@ -90,6 +92,7 @@ class JsonDefinitionWriterTest {
             Set.of(MethodDefinition.Modifier.PRIVATE),
             List.of(
                 new ParameterDefinition(
+                    null,
                     null,
                     null,
                     null,
@@ -112,9 +115,10 @@ class JsonDefinitionWriterTest {
   void testWriteCondition() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
-        new ConditionDefinition(null, null, null, null, "error", null, List.of("string")));
+        new ConditionDefinition(null, null, null, null, null, "error", null, List.of("string")));
     definitionKeeper.add(
         new ConditionDefinition(
+            null,
             null,
             null,
             "Unknown value",
@@ -134,6 +138,7 @@ class JsonDefinitionWriterTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new ProcedureDefinition(
+            null,
             null,
             null,
             "Test procedure",
@@ -156,7 +161,7 @@ class JsonDefinitionWriterTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString aliasedRef = TypeString.ofIdentifier("alias", "user");
     definitionKeeper.add(
-        new GlobalDefinition(null, null, null, null, aliasedRef, TypeString.SW_INTEGER));
+        new GlobalDefinition(null, null, null, null, null, aliasedRef, TypeString.SW_INTEGER));
 
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
@@ -171,6 +176,7 @@ class JsonDefinitionWriterTest {
     definitionKeeper.add(
         new BinaryOperatorDefinition(
             location,
+            null,
             "test_module",
             null,
             null,

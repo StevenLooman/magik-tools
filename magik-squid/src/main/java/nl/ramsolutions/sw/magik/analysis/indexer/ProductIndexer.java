@@ -2,11 +2,10 @@ package nl.ramsolutions.sw.magik.analysis.indexer;
 
 import com.sonar.sslr.api.RecognitionException;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.definitions.ModuleDefinition;
@@ -15,6 +14,7 @@ import nl.ramsolutions.sw.definitions.ProductDefinition;
 import nl.ramsolutions.sw.definitions.ProductDefinitionScanner;
 import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +26,6 @@ public class ProductIndexer {
 
   private final IDefinitionKeeper definitionKeeper;
   private final IgnoreHandler ignoreHandler;
-  private final Map<Path, ProductDefinition> indexedProducts = new HashMap<>();
-  private final Map<Path, ModuleDefinition> indexedModules = new HashMap<>();
 
   public ProductIndexer(
       final IDefinitionKeeper definitionKeeper, final IgnoreHandler ignoreHandler) {
@@ -36,46 +34,49 @@ public class ProductIndexer {
   }
 
   public synchronized void handleFileEvent(final FileEvent fileEvent) throws IOException {
+    LOGGER.debug("Handling file event: {}", fileEvent);
+
     // Don't index if ignored.
-    final URI uri = fileEvent.getUri();
-    final Path path = Path.of(uri);
+    final Path path = fileEvent.getPath();
     if (this.ignoreHandler.isIgnored(path)) {
+      LOGGER.debug("Handled file event: {} (ignored)", fileEvent);
       return;
     }
 
     final FileChangeType fileChangeType = fileEvent.getFileChangeType();
-    final List<Path> indexableFiles =
-        fileChangeType == FileChangeType.DELETED
-            ? this.getIndexedFiles(path).toList()
-            : this.ignoreHandler
-                .getIndexableFiles(path)
-                .filter(indexablePath -> indexablePath.toString().toLowerCase().endsWith(".def"))
-                .toList();
-    switch (fileChangeType) {
-      case DELETED:
-        indexableFiles.forEach(this::indexPathDeleted);
-        break;
-
-      case CREATED:
-        indexableFiles.forEach(this::indexPathCreated);
-        break;
-
-      case CHANGED:
-        indexableFiles.forEach(this::indexPathChanged);
-        break;
-
-      default:
-        throw new UnsupportedOperationException();
+    if (fileChangeType == FileChangeType.CHANGED || fileChangeType == FileChangeType.DELETED) {
+      this.getIndexedDefinitions(path).forEach(this::removeDefinition);
     }
+
+    if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
+      final List<Path> indexableFiles = this.ignoreHandler.getIndexableFiles(path).toList();
+      indexableFiles.forEach(this::indexFile);
+    }
+
+    LOGGER.debug("Handled file event: {}", fileEvent);
   }
 
-  private Stream<Path> getIndexedFiles(final Path path) {
-    // Get all previously indexed files at or below path.
+  /**
+   * Get all indexed definitions from path or lower.
+   *
+   * <p>Used when a directory is deleted or renamed, since we only get the delete of the directory
+   * itself, not the individual files within the directory or sub-directories.
+   *
+   * @param path Path to search from.
+   * @return Indexed definitions.
+   */
+  private Collection<IDefinition> getIndexedDefinitions(final Path path) {
     return Stream.of(
-            this.indexedProducts.entrySet().stream().map(Map.Entry::getKey),
-            this.indexedModules.entrySet().stream().map(Map.Entry::getKey))
-        .flatMap(stream -> stream)
-        .filter(indexedPath -> indexedPath.startsWith(path));
+            this.definitionKeeper.getPackageDefinitions(),
+            this.definitionKeeper.getExemplarDefinitions(),
+            this.definitionKeeper.getMethodDefinitions(),
+            this.definitionKeeper.getGlobalDefinitions(),
+            this.definitionKeeper.getBinaryOperatorDefinitions(),
+            this.definitionKeeper.getConditionDefinitions(),
+            this.definitionKeeper.getProcedureDefinitions())
+        .flatMap(collection -> collection.stream())
+        .filter(def -> def.getLocation() != null && def.getLocation().getPath().startsWith(path))
+        .collect(Collectors.toSet());
   }
 
   /**
@@ -84,67 +85,25 @@ public class ProductIndexer {
    * @param path Path to magik file.
    */
   @SuppressWarnings("checkstyle:IllegalCatch")
-  public void indexPathCreated(final Path path) {
+  private void indexFile(final Path path) {
     LOGGER.debug("Scanning created file: {}", path);
 
     try {
-      this.scrubDefinition(path);
-      this.readDefinition(path);
+      if (path.endsWith(ProductDefinitionScanner.SW_PRODUCT_DEF)) {
+        this.readProductDefinition(path);
+      } else if (path.endsWith(ModuleDefinitionScanner.SW_MODULE_DEF)) {
+        this.readModuleDefinition(path);
+      }
     } catch (final Exception exception) {
       LOGGER.error("Error indexing created file: " + path, exception);
     }
   }
 
-  /**
-   * Index a single magik file when it is changed.
-   *
-   * @param path Path to magik file.
-   */
-  @SuppressWarnings("checkstyle:IllegalCatch")
-  public void indexPathChanged(final Path path) {
-    LOGGER.debug("Scanning changed file: {}", path);
-
-    try {
-      this.scrubDefinition(path);
-      this.readDefinition(path);
-    } catch (final Exception exception) {
-      LOGGER.error("Error indexing changed file: " + path, exception);
-    }
-  }
-
-  /**
-   * Un-index a single magik file when it is deleted.
-   *
-   * @param path Path to magik file.
-   */
-  @SuppressWarnings("checkstyle:IllegalCatch")
-  public void indexPathDeleted(final Path path) {
-    LOGGER.debug("Scanning deleted file: {}", path);
-
-    try {
-      this.scrubDefinition(path);
-    } catch (final Exception exception) {
-      LOGGER.error("Error indexing deleted file: " + path, exception);
-    }
-  }
-
-  /**
-   * Read definitions from path.
-   *
-   * @param path Path to magik file.
-   */
-  private void readDefinition(final Path path) {
-    final Path filename = path.getFileName();
-    try {
-      if (filename.toString().equalsIgnoreCase("product.def")) {
-        this.readProductDefinition(path);
-      } else if (filename.toString().equalsIgnoreCase("module.def")) {
-        this.readModuleDefinition(path);
-      } else {
-        throw new IllegalArgumentException();
-      }
-    } catch (final IOException exception) {
-      LOGGER.error(exception.getMessage(), exception);
+  private void removeDefinition(final IDefinition definition) {
+    if (definition instanceof ProductDefinition productDefinition) {
+      this.definitionKeeper.remove(productDefinition);
+    } else if (definition instanceof ModuleDefinition moduleDefinition) {
+      this.definitionKeeper.remove(moduleDefinition);
     }
   }
 
@@ -157,12 +116,11 @@ public class ProductIndexer {
           ProductDefinitionScanner.productForPath(parentPath);
       definition = ProductDefinitionScanner.readProductDefinition(path, parentDefinition);
     } catch (final RecognitionException exception) {
-      LOGGER.warn("Error parsing defintion at: {}", path);
+      LOGGER.warn("Error parsing defintion at: " + path, exception);
       return;
     }
 
     this.definitionKeeper.add(definition);
-    this.indexedProducts.put(path, definition);
   }
 
   private void readModuleDefinition(final Path path) throws IOException {
@@ -170,32 +128,10 @@ public class ProductIndexer {
     try {
       definition = ModuleDefinitionScanner.readModuleDefinition(path);
     } catch (final RecognitionException exception) {
-      LOGGER.warn("Error parsing defintion at: {}", path);
+      LOGGER.warn("Error parsing defintion at: " + path, exception);
       return;
     }
 
     this.definitionKeeper.add(definition);
-    this.indexedModules.put(path, definition);
-  }
-
-  /**
-   * Scrub definitions.
-   *
-   * @param path Path to magik file.
-   */
-  private void scrubDefinition(final Path path) {
-    if (this.indexedProducts.containsKey(path)) {
-      final ProductDefinition definition = this.indexedProducts.get(path);
-      this.definitionKeeper.remove(definition);
-
-      this.indexedProducts.remove(path);
-    }
-
-    if (this.indexedModules.containsKey(path)) {
-      final ModuleDefinition definition = this.indexedModules.get(path);
-      this.definitionKeeper.remove(definition);
-
-      this.indexedModules.remove(path);
-    }
   }
 }

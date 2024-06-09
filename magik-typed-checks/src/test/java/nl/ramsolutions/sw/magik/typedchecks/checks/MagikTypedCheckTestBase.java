@@ -2,8 +2,11 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
@@ -42,7 +45,10 @@ public class MagikTypedCheckTestBase {
   protected List<MagikIssue> runCheck(
       final Path path, final IDefinitionKeeper definitionKeeper, final MagikTypedCheck check)
       throws IllegalArgumentException, IOException {
-    final MagikTypedFile magikFile = new MagikTypedFile(path, definitionKeeper);
+    final URI uri = path.toUri();
+    final Charset charset = FileCharsetDeterminer.determineCharset(path);
+    final String source = Files.readString(path, charset);
+    final MagikTypedFile magikFile = new MagikTypedFile(uri, source, definitionKeeper);
     return check.scanFileForIssues(magikFile);
   }
 }

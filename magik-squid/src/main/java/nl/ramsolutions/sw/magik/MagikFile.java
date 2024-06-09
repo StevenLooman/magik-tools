@@ -1,10 +1,13 @@
 package nl.ramsolutions.sw.magik;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,9 +31,10 @@ import nl.ramsolutions.sw.magik.parser.MagikParser;
 /** Magik file. */
 public class MagikFile extends OpenedFile {
 
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
+  public static final URI DEFAULT_URI = URI.create("memory://source.magik");
   public static final Location DEFAULT_LOCATION = new Location(DEFAULT_URI, Range.DEFAULT_RANGE);
 
+  private final @Nullable Instant timestamp;
   private final MagikToolsProperties properties;
   private AstNode astNode;
   private GlobalScope globalScope;
@@ -59,17 +63,8 @@ public class MagikFile extends OpenedFile {
    */
   public MagikFile(final MagikToolsProperties properties, final URI uri, final String source) {
     super(uri, source);
+    this.timestamp = null;
     this.properties = properties;
-  }
-
-  /**
-   * Constructor. Read file at path.
-   *
-   * @param path File to read.
-   * @throws IOException -
-   */
-  public MagikFile(final Path path) throws IOException {
-    this(MagikToolsProperties.DEFAULT_PROPERTIES, path);
   }
 
   /**
@@ -81,12 +76,18 @@ public class MagikFile extends OpenedFile {
    */
   public MagikFile(final MagikToolsProperties properties, final Path path) throws IOException {
     super(path.toUri(), Files.readString(path, FileCharsetDeterminer.determineCharset(path)));
+    this.timestamp = Files.getLastModifiedTime(path).toInstant();
     this.properties = properties;
   }
 
   @Override
   public String getLanguageId() {
     return "magik";
+  }
+
+  @CheckForNull
+  public Instant getTimestamp() {
+    return this.timestamp;
   }
 
   public MagikToolsProperties getProperties() {
@@ -142,7 +143,7 @@ public class MagikFile extends OpenedFile {
    */
   public synchronized List<MagikDefinition> getDefinitions() {
     if (this.definitions == null) {
-      final DefinitionReader definitionReader = new DefinitionReader(this.properties);
+      final DefinitionReader definitionReader = new DefinitionReader(this);
       final AstNode topNode = this.getTopNode();
       definitionReader.walkAst(topNode);
       this.definitions = definitionReader.getDefinitions();

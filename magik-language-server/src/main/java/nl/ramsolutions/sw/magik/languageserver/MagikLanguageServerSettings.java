@@ -9,17 +9,12 @@ import nl.ramsolutions.sw.MagikToolsProperties;
 public final class MagikLanguageServerSettings {
 
   private static final String SMALLWORLD_GIS = "magik.smallworldGis";
-  private static final String LIBS_DIRS = "magik.libsDirs";
+  private static final String PRODUCT_DIRS = "magik.productDirs";
   private static final String OVERRIDE_CONFIG_FILE = "magik.lint.overrideConfigFile";
   private static final String TYPE_DATABASE_PATHS = "magik.typing.typeDatabasePaths";
   private static final String SHOW_TYPING_INLAY_HINTS = "magik.typing.showTypingInlayHints";
   private static final String SHOW_ARGUMENT_INLAY_HINTS = "magik.typing.showArgumentInlayHints";
   private static final String ENABLE_TYPING_CHECKS = "magik.typing.enableChecks";
-  // TODO: Is this used?
-  private static final String INDEX_GLOBAL_USAGES = "magik.typing.indexGlobalUsages";
-  private static final String INDEX_METHOD_USAGES = "magik.typing.indexMethodUsages";
-  private static final String INDEX_SLOT_USAGES = "magik.typing.indexSlotUsages";
-  private static final String INDEX_CONDITION_USAGES = "magik.typing.indexConditionUsages";
 
   private final MagikToolsProperties properties;
 
@@ -43,8 +38,8 @@ public final class MagikLanguageServerSettings {
    *
    * @return magik.libsDirs.
    */
-  public List<String> getLibsDirs() {
-    return this.properties.getPropertyList(LIBS_DIRS);
+  public List<String> getProductDirs() {
+    return this.properties.getPropertyList(PRODUCT_DIRS);
   }
 
   /**

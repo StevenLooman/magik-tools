@@ -30,7 +30,7 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
 
   private final MagikToolsProperties languageServerProperties;
   private final IDefinitionKeeper definitionKeeper;
-  private final List<WorkspaceFolder> workspaceFolders = new ArrayList<>();
+  private final List<MagikWorkspaceFolder> workspaceFolders = new ArrayList<>();
   private final MagikTextDocumentService magikTextDocumentService;
   private final MagikWorkspaceService magikWorkspaceService;
   private final MagikNotebookDocumentService magikNotebookDocumentService;
@@ -63,16 +63,20 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     final String version = this.getClass().getPackage().getImplementationVersion();
     LOGGER.info("Version: {}", version);
 
-    final List<WorkspaceFolder> folders = params.getWorkspaceFolders();
-    if (folders != null) {
-      this.workspaceFolders.addAll(folders);
-    }
-
-    // Handle older clients which do not provide a workspace folder.
     final String rootUri = params.getRootUri();
-    if (rootUri != null && this.workspaceFolders.isEmpty()) {
+    if (params.getWorkspaceFolders() != null) {
+      params.getWorkspaceFolders().stream()
+          .map(
+              workspaceFolder ->
+                  new MagikWorkspaceFolder(
+                      workspaceFolder, this.definitionKeeper, this.languageServerProperties))
+          .forEach(this.workspaceFolders::add);
+    } else if (rootUri != null && params.getWorkspaceFolders().isEmpty()) {
       final WorkspaceFolder rootFolder = new WorkspaceFolder(rootUri, "workspace");
-      this.workspaceFolders.add(rootFolder);
+      final MagikWorkspaceFolder rootWorkspaceFolder =
+          new MagikWorkspaceFolder(
+              rootFolder, this.definitionKeeper, this.languageServerProperties);
+      this.workspaceFolders.add(rootWorkspaceFolder);
     }
 
     // Report workspace folders.
@@ -155,11 +159,11 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
   }
 
   /**
-   * Get the {@link WorkspaceFolder}s.
+   * Get the {@link MagikWorkspaceFolder}s.
    *
-   * @return {@link WorkspaceFolder}s.
+   * @return {@link MagikWorkspaceFolder}s.
    */
-  public List<WorkspaceFolder> getWorkspaceFolders() {
+  public List<MagikWorkspaceFolder> getWorkspaceFolders() {
     return Collections.unmodifiableList(this.workspaceFolders);
   }
 }

@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import java.time.Instant;
 import java.util.Objects;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -22,12 +23,13 @@ public class SlotDefinition extends MagikDefinition {
    */
   public SlotDefinition(
       final @Nullable Location location,
+      final @Nullable Instant timestamp,
       final @Nullable String moduleName,
       final @Nullable String doc,
       final @Nullable AstNode node,
       final String name,
       final TypeString typeName) {
-    super(location, moduleName, doc, node);
+    super(location, timestamp, moduleName, doc, node);
     this.name = name;
     this.typeName = typeName;
   }
@@ -48,13 +50,24 @@ public class SlotDefinition extends MagikDefinition {
   @Override
   public SlotDefinition getWithoutNode() {
     return new SlotDefinition(
-        this.getLocation(), this.getModuleName(), this.getDoc(), null, this.name, this.typeName);
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        null,
+        this.name,
+        this.typeName);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
-        this.getLocation(), this.getModuleName(), this.getDoc(), this.name, this.typeName);
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.name,
+        this.typeName);
   }
 
   @Override

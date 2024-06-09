@@ -4,7 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefConditionParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefEnumerationParser;
@@ -29,11 +29,11 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  */
 public class DefinitionReader extends MagikAstWalker {
 
-  private final MagikToolsProperties properties;
+  private final MagikFile magikFile;
   private final List<MagikDefinition> definitions = new ArrayList<>();
 
-  public DefinitionReader(final MagikToolsProperties properties) {
-    this.properties = properties;
+  public DefinitionReader(final MagikFile magikFile) {
+    this.magikFile = magikFile;
   }
 
   public List<MagikDefinition> getDefinitions() {
@@ -42,7 +42,7 @@ public class DefinitionReader extends MagikAstWalker {
 
   @Override
   protected void walkPostMethodDefinition(final AstNode node) {
-    final MethodDefinitionParser parser = new MethodDefinitionParser(this.properties, node);
+    final MethodDefinitionParser parser = new MethodDefinitionParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
@@ -55,7 +55,7 @@ public class DefinitionReader extends MagikAstWalker {
   }
 
   private void handleGlobalDefinition(final AstNode node) {
-    final GlobalDefinitionParser parser = new GlobalDefinitionParser(node);
+    final GlobalDefinitionParser parser = new GlobalDefinitionParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
@@ -109,67 +109,68 @@ public class DefinitionReader extends MagikAstWalker {
   }
 
   private void handleDefineCondition(final AstNode node) {
-    final DefConditionParser parser = new DefConditionParser(node);
+    final DefConditionParser parser = new DefConditionParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
 
   private void handleDefPackage(final AstNode node) {
-    final DefPackageParser parser = new DefPackageParser(node);
+    final DefPackageParser parser = new DefPackageParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
 
   private void handleDefEnumeration(final AstNode node) {
-    final DefEnumerationParser parser = new DefEnumerationParser(node);
+    final DefEnumerationParser parser = new DefEnumerationParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
 
   private void handleDefSlottedExemplar(final AstNode node) {
-    final DefSlottedExemplarParser parser = new DefSlottedExemplarParser(node);
+    final DefSlottedExemplarParser parser = new DefSlottedExemplarParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
 
   private void handleDefIndexedExemplar(final AstNode node) {
-    final DefIndexedExemplarParser parser = new DefIndexedExemplarParser(node);
+    final DefIndexedExemplarParser parser = new DefIndexedExemplarParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
 
   private void handleDefMixin(final AstNode node) {
-    final DefMixinParser parser = new DefMixinParser(node);
+    final DefMixinParser parser = new DefMixinParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
 
   private void handleDefineBinaryOperatorCase(final AstNode node) {
-    final DefineBinaryOperatorCaseParser parser = new DefineBinaryOperatorCaseParser(node);
+    final DefineBinaryOperatorCaseParser parser =
+        new DefineBinaryOperatorCaseParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
 
   private void handleDefineSlotAccess(final AstNode node) {
-    final DefineSlotAccessParser parser = new DefineSlotAccessParser(node);
+    final DefineSlotAccessParser parser = new DefineSlotAccessParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
 
   private void handleDefineSharedVariable(final AstNode node) {
-    final DefineSharedVariableParser parser = new DefineSharedVariableParser(node);
+    final DefineSharedVariableParser parser = new DefineSharedVariableParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
 
   private void handleDefineSharedConstant(final AstNode node) {
-    final DefineSharedConstantParser parser = new DefineSharedConstantParser(node);
+    final DefineSharedConstantParser parser = new DefineSharedConstantParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }
 
   private void handleDefineProcedure(final AstNode node) {
-    final ProcedureDefinitionParser parser = new ProcedureDefinitionParser(node);
+    final ProcedureDefinitionParser parser = new ProcedureDefinitionParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     this.definitions.addAll(parsedDefinitions);
   }

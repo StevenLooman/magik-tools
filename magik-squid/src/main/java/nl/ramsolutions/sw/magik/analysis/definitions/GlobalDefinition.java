@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import java.time.Instant;
 import java.util.Objects;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -22,12 +23,13 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
    */
   public GlobalDefinition(
       final @Nullable Location location,
+      final @Nullable Instant timestamp,
       final @Nullable String moduleName,
       final @Nullable String doc,
       final @Nullable AstNode node,
       final TypeString typeName,
       final TypeString aliasedTypeName) {
-    super(location, moduleName, doc, node);
+    super(location, timestamp, moduleName, doc, node);
     this.typeName = typeName;
     this.aliasedTypeName = aliasedTypeName;
   }
@@ -54,6 +56,7 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
   public GlobalDefinition getWithoutNode() {
     return new GlobalDefinition(
         this.getLocation(),
+        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
         null,
@@ -75,6 +78,7 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
   public int hashCode() {
     return Objects.hash(
         this.getLocation(),
+        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
         this.typeName,

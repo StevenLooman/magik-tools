@@ -541,6 +541,7 @@ class ConditionalBodyHandlerTest {
             null,
             null,
             null,
+            null,
             TypeString.SW_OBJECT,
             "unset_result",
             Collections.emptySet(),
@@ -575,6 +576,7 @@ class ConditionalBodyHandlerTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -648,7 +650,8 @@ class ConditionalBodyHandlerTest {
 
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
-        new ConditionDefinition(null, null, null, null, "error", null, Collections.emptyList()));
+        new ConditionDefinition(
+            null, null, null, null, null, "error", null, Collections.emptyList()));
 
     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
@@ -686,10 +689,11 @@ class ConditionalBodyHandlerTest {
 
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
-        new ConditionDefinition(null, null, null, null, "error", null, Collections.emptyList()));
+        new ConditionDefinition(
+            null, null, null, null, null, "error", null, Collections.emptyList()));
     definitionKeeper.add(
         new ConditionDefinition(
-            null, null, null, null, "child_error", "error", Collections.emptyList()));
+            null, null, null, null, null, "child_error", "error", Collections.emptyList()));
 
     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();

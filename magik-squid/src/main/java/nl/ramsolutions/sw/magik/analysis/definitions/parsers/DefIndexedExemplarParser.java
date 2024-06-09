@@ -2,11 +2,13 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
@@ -27,8 +29,8 @@ public class DefIndexedExemplarParser extends BaseDefParser {
    *
    * @param node {@code def_indexed_exemplar()} node.
    */
-  public DefIndexedExemplarParser(final AstNode node) {
-    super(node);
+  public DefIndexedExemplarParser(final MagikFile magikFile, final AstNode node) {
+    super(magikFile, node);
   }
 
   /**
@@ -75,6 +77,9 @@ public class DefIndexedExemplarParser extends BaseDefParser {
     final URI uri = this.node.getToken().getURI();
     final Location location = new Location(uri, this.node);
 
+    // Figure timestamp.
+    final Instant timestamp = this.magikFile.getTimestamp();
+
     // Figure module name.
     final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
 
@@ -106,6 +111,7 @@ public class DefIndexedExemplarParser extends BaseDefParser {
     final ExemplarDefinition indexedExemplarDefinition =
         new ExemplarDefinition(
             location,
+            timestamp,
             moduleName,
             doc,
             statementNode,

@@ -26,11 +26,13 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
             null,
             null,
             null,
+            null,
             TypeString.SW_INTEGER,
             "m1()",
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             List.of(
                 new ParameterDefinition(
+                    null,
                     null,
                     null,
                     null,
@@ -48,11 +50,13 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
             null,
             null,
             null,
+            null,
             TypeString.SW_INTEGER,
             "m2()",
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             List.of(
                 new ParameterDefinition(
+                    null,
                     null,
                     null,
                     null,

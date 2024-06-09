@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import java.time.Instant;
 import java.util.Objects;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -27,6 +28,7 @@ public class BinaryOperatorDefinition extends MagikDefinition {
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public BinaryOperatorDefinition(
       final @Nullable Location location,
+      final @Nullable Instant timestamp,
       final @Nullable String moduleName,
       final @Nullable String doc,
       final @Nullable AstNode node,
@@ -34,7 +36,7 @@ public class BinaryOperatorDefinition extends MagikDefinition {
       final TypeString lhsTypeName,
       final TypeString rhsTypeName,
       final TypeString resultTypeName) {
-    super(location, moduleName, doc, node);
+    super(location, timestamp, moduleName, doc, node);
 
     if (!lhsTypeName.isSingle()) {
       throw new IllegalStateException();
@@ -84,6 +86,7 @@ public class BinaryOperatorDefinition extends MagikDefinition {
   public MagikDefinition getWithoutNode() {
     return new BinaryOperatorDefinition(
         this.getLocation(),
+        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
         null,
@@ -97,6 +100,7 @@ public class BinaryOperatorDefinition extends MagikDefinition {
   public int hashCode() {
     return Objects.hash(
         this.getLocation(),
+        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
         this.operator,

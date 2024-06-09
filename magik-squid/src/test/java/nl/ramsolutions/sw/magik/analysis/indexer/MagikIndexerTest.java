@@ -2,6 +2,8 @@ package nl.ramsolutions.sw.magik.analysis.indexer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +12,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.magik.FileEvent;
+import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
@@ -44,14 +48,15 @@ class MagikIndexerTest {
   }
 
   @Test
-  void testFileCreated() {
+  void testFileCreated() throws IOException {
     final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer.magik");
-    final Path fixedPath = this.getPath(path).toAbsolutePath();
+    final URI uri = this.getPath(path).toUri();
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
     final MagikIndexer magikIndexer =
         new MagikIndexer(definitionKeeper, MagikToolsProperties.DEFAULT_PROPERTIES, ignoreHandler);
-    magikIndexer.indexPathCreated(fixedPath);
+    final FileEvent fileEvent = new FileEvent(uri, FileChangeType.CREATED);
+    magikIndexer.handleFileEvent(fileEvent);
 
     // Test exemplar.
     final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
@@ -62,8 +67,8 @@ class MagikIndexerTest {
     assertThat(exemplarDef)
         .isEqualTo(
             new ExemplarDefinition(
-                new Location(
-                    fixedPath.toUri(), new Range(new Position(4, 20), new Position(4, 21))),
+                new Location(uri, new Range(new Position(4, 20), new Position(4, 21))),
+                null,
                 null,
                 "Test exemplar.",
                 null,
@@ -71,16 +76,16 @@ class MagikIndexerTest {
                 typeString,
                 List.of(
                     new SlotDefinition(
-                        new Location(
-                            fixedPath.toUri(), new Range(new Position(7, 8), new Position(7, 9))),
+                        new Location(uri, new Range(new Position(7, 8), new Position(7, 9))),
+                        null,
                         null,
                         null,
                         null,
                         "slot_a",
                         TypeString.UNDEFINED),
                     new SlotDefinition(
-                        new Location(
-                            fixedPath.toUri(), new Range(new Position(8, 8), new Position(8, 9))),
+                        new Location(uri, new Range(new Position(8, 8), new Position(8, 9))),
+                        null,
                         null,
                         null,
                         null,
@@ -99,8 +104,8 @@ class MagikIndexerTest {
     assertThat(newMethodDef)
         .isEqualTo(
             new MethodDefinition(
-                new Location(
-                    fixedPath.toUri(), new Range(new Position(13, 0), new Position(13, 7))),
+                new Location(uri, new Range(new Position(13, 0), new Position(13, 7))),
+                null,
                 null,
                 "Constructor.",
                 null,
@@ -122,8 +127,8 @@ class MagikIndexerTest {
     assertThat(initMethodDef)
         .isEqualTo(
             new MethodDefinition(
-                new Location(
-                    fixedPath.toUri(), new Range(new Position(19, 0), new Position(19, 8))),
+                new Location(uri, new Range(new Position(19, 0), new Position(19, 8))),
+                null,
                 null,
                 "Initializer.",
                 null,
@@ -143,8 +148,8 @@ class MagikIndexerTest {
     assertThat(globalDef)
         .isEqualTo(
             new GlobalDefinition(
-                new Location(
-                    fixedPath.toUri(), new Range(new Position(26, 0), new Position(26, 7))),
+                new Location(uri, new Range(new Position(26, 0), new Position(26, 7))),
+                null,
                 null,
                 "",
                 null,
@@ -159,8 +164,8 @@ class MagikIndexerTest {
     assertThat(binOpDef)
         .isEqualTo(
             new BinaryOperatorDefinition(
-                new Location(
-                    fixedPath.toUri(), new Range(new Position(29, 27), new Position(29, 28))),
+                new Location(uri, new Range(new Position(29, 27), new Position(29, 28))),
+                null,
                 null,
                 "@return {sw:false|sw:maybe}",
                 null,
@@ -176,8 +181,8 @@ class MagikIndexerTest {
     assertThat(procDef)
         .isEqualTo(
             new ProcedureDefinition(
-                new Location(
-                    fixedPath.toUri(), new Range(new Position(30, 4), new Position(30, 9))),
+                new Location(uri, new Range(new Position(30, 4), new Position(30, 9))),
+                null,
                 null,
                 "@return {sw:false|sw:maybe}",
                 null,
@@ -186,9 +191,8 @@ class MagikIndexerTest {
                 null,
                 List.of(
                     new ParameterDefinition(
-                        new Location(
-                            fixedPath.toUri(),
-                            new Range(new Position(30, 10), new Position(30, 13))),
+                        new Location(uri, new Range(new Position(30, 10), new Position(30, 13))),
+                        null,
                         null,
                         null,
                         null,
@@ -196,9 +200,8 @@ class MagikIndexerTest {
                         ParameterDefinition.Modifier.NONE,
                         TypeString.UNDEFINED),
                     new ParameterDefinition(
-                        new Location(
-                            fixedPath.toUri(),
-                            new Range(new Position(30, 15), new Position(30, 18))),
+                        new Location(uri, new Range(new Position(30, 15), new Position(30, 18))),
+                        null,
                         null,
                         null,
                         null,
@@ -211,15 +214,16 @@ class MagikIndexerTest {
   }
 
   @Test
-  void testFileCreatedWithTypeDoc() {
+  void testFileCreatedWithTypeDoc() throws IOException {
     final Path path =
         Path.of("magik-squid/src/test/resources/test_magik_indexer_with_type_doc.magik");
-    final Path fixedPath = this.getPath(path).toAbsolutePath();
+    final URI uri = this.getPath(path).toUri();
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
     final MagikIndexer magikIndexer =
         new MagikIndexer(definitionKeeper, MagikToolsProperties.DEFAULT_PROPERTIES, ignoreHandler);
-    magikIndexer.indexPathCreated(fixedPath);
+    final FileEvent fileEvent = new FileEvent(uri, FileChangeType.CREATED);
+    magikIndexer.handleFileEvent(fileEvent);
 
     // Test exemplar.
     final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
@@ -230,8 +234,8 @@ class MagikIndexerTest {
     assertThat(exemplarDef)
         .isEqualTo(
             new ExemplarDefinition(
-                new Location(
-                    fixedPath.toUri(), new Range(new Position(6, 20), new Position(6, 21))),
+                new Location(uri, new Range(new Position(6, 20), new Position(6, 21))),
+                null,
                 null,
                 "Test exemplar.\n@slot {sw:rope} slot_a\n@slot {sw:property_list<K=sw:symbol, E=sw:integer>} slot_b",
                 null,
@@ -239,16 +243,16 @@ class MagikIndexerTest {
                 typeString,
                 List.of(
                     new SlotDefinition(
-                        new Location(
-                            fixedPath.toUri(), new Range(new Position(9, 8), new Position(9, 9))),
+                        new Location(uri, new Range(new Position(9, 8), new Position(9, 9))),
+                        null,
                         null,
                         null,
                         null,
                         "slot_a",
                         TypeString.ofIdentifier("rope", "sw")),
                     new SlotDefinition(
-                        new Location(
-                            fixedPath.toUri(), new Range(new Position(10, 8), new Position(10, 9))),
+                        new Location(uri, new Range(new Position(10, 8), new Position(10, 9))),
+                        null,
                         null,
                         null,
                         null,
@@ -271,8 +275,8 @@ class MagikIndexerTest {
     assertThat(newMethodDef)
         .isEqualTo(
             new MethodDefinition(
-                new Location(
-                    fixedPath.toUri(), new Range(new Position(14, 0), new Position(14, 7))),
+                new Location(uri, new Range(new Position(14, 0), new Position(14, 7))),
+                null,
                 null,
                 "Constructor.\n@return {_self}",
                 null,
@@ -294,8 +298,8 @@ class MagikIndexerTest {
     assertThat(initMethodDef)
         .isEqualTo(
             new MethodDefinition(
-                new Location(
-                    fixedPath.toUri(), new Range(new Position(21, 0), new Position(21, 8))),
+                new Location(uri, new Range(new Position(21, 0), new Position(21, 8))),
+                null,
                 null,
                 "Initializer.\n@return {_self}",
                 null,
@@ -310,18 +314,20 @@ class MagikIndexerTest {
   }
 
   @Test
-  void testFileChanged() {
+  void testFileChanged() throws IOException {
     // Read first.
     final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer.magik");
-    final Path fixedPath = this.getPath(path).toAbsolutePath();
+    final URI uri = this.getPath(path).toUri();
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
     final MagikIndexer magikIndexer =
         new MagikIndexer(definitionKeeper, MagikToolsProperties.DEFAULT_PROPERTIES, ignoreHandler);
-    magikIndexer.indexPathCreated(fixedPath);
+    final FileEvent createdFileEvent = new FileEvent(uri, FileChangeType.CREATED);
+    magikIndexer.handleFileEvent(createdFileEvent);
 
     // Pretend update.
-    magikIndexer.indexPathChanged(fixedPath);
+    final FileEvent changedFileEvent = new FileEvent(uri, FileChangeType.CHANGED);
+    magikIndexer.handleFileEvent(changedFileEvent);
 
     // Test type.
     final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
@@ -345,15 +351,16 @@ class MagikIndexerTest {
   }
 
   @Test
-  void testFileDeleted() {
+  void testFileDeleted() throws IOException {
     // Read first.
     final Path path = Path.of("magik-squid/src/test/resources/test_magik_indexer.magik");
-    final Path fixedPath = this.getPath(path).toAbsolutePath();
+    final URI uri = this.getPath(path).toUri();
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
     final MagikIndexer magikIndexer =
         new MagikIndexer(definitionKeeper, MagikToolsProperties.DEFAULT_PROPERTIES, ignoreHandler);
-    magikIndexer.indexPathCreated(fixedPath);
+    final FileEvent createdFileEvent = new FileEvent(uri, FileChangeType.CREATED);
+    magikIndexer.handleFileEvent(createdFileEvent);
 
     // Test type.
     final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
@@ -364,7 +371,8 @@ class MagikIndexerTest {
     assertThat(preExemplarDef).isNotNull();
 
     // Pretend delete.
-    magikIndexer.indexPathDeleted(fixedPath);
+    final FileEvent deletedFileEvent = new FileEvent(uri, FileChangeType.DELETED);
+    magikIndexer.handleFileEvent(deletedFileEvent);
 
     // Test type.
     final Collection<ExemplarDefinition> postExemplarDefs =

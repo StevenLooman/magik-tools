@@ -57,6 +57,7 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
             null,
             null,
             null,
+            null,
             TypeString.SW_OBJECT,
             "m()",
             EnumSet.noneOf(MethodDefinition.Modifier.class),
@@ -81,6 +82,7 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,

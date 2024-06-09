@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -49,6 +50,7 @@ public class ProcedureDefinition extends MagikDefinition
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public ProcedureDefinition(
       final @Nullable Location location,
+      final @Nullable Instant timestamp,
       final @Nullable String moduleName,
       final @Nullable String doc,
       final @Nullable AstNode node,
@@ -58,7 +60,7 @@ public class ProcedureDefinition extends MagikDefinition
       final List<ParameterDefinition> parameters,
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes) {
-    super(location, moduleName, doc, node);
+    super(location, timestamp, moduleName, doc, node);
     this.modifiers = Set.copyOf(modifiers);
     this.typeName = typeName;
     this.procedureName = procedureName;
@@ -86,6 +88,7 @@ public class ProcedureDefinition extends MagikDefinition
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public ProcedureDefinition(
       final @Nullable Location location,
+      final @Nullable Instant timestamp,
       final @Nullable String moduleName,
       final @Nullable String doc,
       final @Nullable AstNode node,
@@ -98,7 +101,7 @@ public class ProcedureDefinition extends MagikDefinition
       final Set<GlobalUsage> usedGlobals,
       final Set<MethodUsage> usedMethods,
       final Set<ConditionUsage> usedConditions) {
-    super(location, moduleName, doc, node);
+    super(location, timestamp, moduleName, doc, node);
     this.modifiers = Set.copyOf(modifiers);
     this.typeName = typeName;
     this.procedureName = procedureName;
@@ -228,6 +231,7 @@ public class ProcedureDefinition extends MagikDefinition
   public ProcedureDefinition getWithoutNode() {
     return new ProcedureDefinition(
         this.getLocation(),
+        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
         null,
@@ -246,6 +250,7 @@ public class ProcedureDefinition extends MagikDefinition
   public int hashCode() {
     return Objects.hash(
         this.getLocation(),
+        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
         this.modifiers,

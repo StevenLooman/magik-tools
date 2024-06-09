@@ -4,6 +4,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -98,6 +100,23 @@ public final class JsonDefinitionReader {
     }
   }
 
+  private static final class InstantDeserializer implements JsonDeserializer<Instant> {
+
+    @Override
+    public Instant deserialize(
+        final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
+        throws JsonParseException {
+      final JsonArray array = json.getAsJsonArray();
+      if (array.size() == 2) {
+        final long seconds = array.get(0).getAsLong();
+        final long nanos = array.get(1).getAsLong();
+        return Instant.ofEpochSecond(seconds, nanos);
+      }
+
+      throw new IllegalStateException();
+    }
+  }
+
   private static final class MethodDefinitionCreator implements InstanceCreator<MethodDefinition> {
 
     @Override
@@ -105,6 +124,7 @@ public final class JsonDefinitionReader {
       // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
       // even if these were not set in the source JSON.
       return new MethodDefinition(
+          null,
           null,
           null,
           null,
@@ -128,6 +148,7 @@ public final class JsonDefinitionReader {
       // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
       // even if these were not set in the source JSON.
       return new ExemplarDefinition(
+          null,
           null,
           null,
           null,
@@ -234,6 +255,7 @@ public final class JsonDefinitionReader {
         .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
         .registerTypeAdapter(TypeString.class, new TypeStringDeserializer())
         .registerTypeAdapter(ExpressionResultString.class, new ExpressionResultStringDeserializer())
+        .registerTypeAdapter(Instant.class, new InstantDeserializer())
         .registerTypeAdapter(
             ExemplarDefinition.Sort.class, new LowerCaseEnumDeserializer<ExemplarDefinition.Sort>())
         .registerTypeAdapter(

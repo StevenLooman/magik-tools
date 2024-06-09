@@ -71,6 +71,7 @@ class CompletionProviderTest {
             null,
             null,
             null,
+            null,
             TypeString.SW_INTEGER,
             "find_me()",
             Collections.emptySet(),
@@ -106,6 +107,7 @@ class CompletionProviderTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
@@ -113,6 +115,7 @@ class CompletionProviderTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -145,6 +148,7 @@ class CompletionProviderTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -227,9 +231,10 @@ class CompletionProviderTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
-            List.of(new SlotDefinition(null, code, code, null, code, aRef)),
+            List.of(new SlotDefinition(null, null, code, code, null, code, aRef)),
             Collections.emptyList(),
             Collections.emptySet()));
 
