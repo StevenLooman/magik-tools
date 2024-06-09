@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
@@ -137,6 +138,8 @@ public final class ProductDefinitionScanner {
     final URI uri = path.toUri();
     final Location location = new Location(uri);
 
+    final Instant timestamp = Files.getLastModifiedTime(path).toInstant();
+
     final String productName;
     final AstNode productIdentNode =
         node.getFirstChild(SwProductDefinitionGrammar.PRODUCT_IDENTIFICATION);
@@ -188,6 +191,7 @@ public final class ProductDefinitionScanner {
 
     return new ProductDefinition(
         location,
+        timestamp,
         productName,
         parentProductName,
         version,

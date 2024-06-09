@@ -3,12 +3,14 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import java.time.Instant;
 import nl.ramsolutions.sw.magik.Location;
 
 /** Base class for definitions. */
 public abstract class MagikDefinition implements IDefinition {
 
   private final @Nullable Location location;
+  private final @Nullable Instant timestamp;
   private final @Nullable String moduleName;
   private final @Nullable String doc;
   private final @Nullable AstNode node;
@@ -23,10 +25,12 @@ public abstract class MagikDefinition implements IDefinition {
    */
   protected MagikDefinition(
       final @Nullable Location location,
+      final @Nullable Instant timestamp,
       final @Nullable String moduleName,
       final @Nullable String doc,
       final @Nullable AstNode node) {
     this.location = location;
+    this.timestamp = timestamp;
     this.moduleName = moduleName;
     this.doc = doc;
     this.node = node;
@@ -37,9 +41,14 @@ public abstract class MagikDefinition implements IDefinition {
    *
    * @return Location of definition.
    */
-  @CheckForNull
+  @Override
   public Location getLocation() {
     return this.location;
+  }
+
+  @Override
+  public Instant getTimestamp() {
+    return this.timestamp;
   }
 
   /**

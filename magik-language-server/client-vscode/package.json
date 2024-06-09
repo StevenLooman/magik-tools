@@ -24,7 +24,6 @@
 		"vscode": "^1.59.0"
 	},
 	"activationEvents": [
-		"onLanguage:magik",
 		"onCommand:magik.startSession",
 		"onDebug",
 		"onDebugInitialConfigurations",
@@ -208,8 +207,8 @@
 					"description": "Path to Smallworld Core.",
 					"type": "string"
 				},
-				"magik.libsDirs": {
-					"description": "Paths to libs dirs of Smallworld products",
+				"magik.productDirs": {
+					"description": "Paths to (compiled, containing a `libs/` directory) products",
 					"type": "array"
 				},
 				"magik.aliases": {
@@ -282,7 +281,12 @@
 					"description": "Enable indexing of usages of conditions by methods.",
 					"type": "boolean",
 					"default": true
-				}
+				},
+        "magik.typing.cacheIndexedDefinitions": {
+          "description": "Store and load the indexed definitions in the workspace folders",
+          "type": "boolean",
+          "default": true
+        }
 			}
 		}
 	},

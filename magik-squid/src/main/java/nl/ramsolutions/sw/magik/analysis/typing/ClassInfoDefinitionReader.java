@@ -10,6 +10,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -69,6 +70,10 @@ public final class ClassInfoDefinitionReader {
   private ClassInfoDefinitionReader(final Path path, final IDefinitionKeeper definitionKeeper) {
     this.path = path;
     this.definitionKeeper = definitionKeeper;
+  }
+
+  private Instant getTimestamp() throws IOException {
+    return Files.getLastModifiedTime(this.path).toInstant();
   }
 
   @SuppressWarnings("checkstyle:MagicNumber")
@@ -203,8 +208,10 @@ public final class ClassInfoDefinitionReader {
     }
     final String doc = docBuilder.toString();
 
+    final Instant timestamp = this.getTimestamp();
     final GlobalDefinition definition =
-        new GlobalDefinition(location, moduleName, doc, null, typeString, TypeString.UNDEFINED);
+        new GlobalDefinition(
+            location, timestamp, moduleName, doc, null, typeString, TypeString.UNDEFINED);
     this.definitionKeeper.add(definition);
   }
 
@@ -221,7 +228,7 @@ public final class ClassInfoDefinitionReader {
 
       final ParameterDefinition paramDef =
           new ParameterDefinition(
-              null, moduleName, null, null, next, paramModifier, TypeString.UNDEFINED);
+              null, null, moduleName, null, null, next, paramModifier, TypeString.UNDEFINED);
       paramDefs.add(paramDef);
     }
     return paramDefs;
@@ -278,8 +285,10 @@ public final class ClassInfoDefinitionReader {
     }
     final String doc = docBuilder.toString();
 
+    final Instant timestamp = this.getTimestamp();
     final ConditionDefinition definition =
-        new ConditionDefinition(location, moduleName, doc, null, name, parent, dataNames);
+        new ConditionDefinition(
+            location, timestamp, moduleName, doc, null, name, parent, dataNames);
     this.definitionKeeper.add(definition);
   }
 
@@ -354,6 +363,7 @@ public final class ClassInfoDefinitionReader {
     final MethodDefinition definition =
         new MethodDefinition(
             location,
+            this.getTimestamp(),
             moduleName,
             doc,
             null,
@@ -392,7 +402,7 @@ public final class ClassInfoDefinitionReader {
               .map(
                   slotName ->
                       new SlotDefinition(
-                          null, moduleName, null, null, slotName, TypeString.UNDEFINED))
+                          null, null, moduleName, null, null, slotName, TypeString.UNDEFINED))
               .toList();
     }
 
@@ -435,6 +445,7 @@ public final class ClassInfoDefinitionReader {
     final ExemplarDefinition definition =
         new ExemplarDefinition(
             location,
+            this.getTimestamp(),
             moduleName,
             doc,
             null,
@@ -500,6 +511,7 @@ public final class ClassInfoDefinitionReader {
     final ExemplarDefinition definition =
         new ExemplarDefinition(
             location,
+            this.getTimestamp(),
             moduleName,
             doc,
             null,
@@ -565,6 +577,7 @@ public final class ClassInfoDefinitionReader {
     final ExemplarDefinition definition =
         new ExemplarDefinition(
             location,
+            this.getTimestamp(),
             moduleName,
             doc,
             null,
@@ -633,6 +646,7 @@ public final class ClassInfoDefinitionReader {
     final ExemplarDefinition definition =
         new ExemplarDefinition(
             location,
+            this.getTimestamp(),
             moduleName,
             doc,
             null,
@@ -664,8 +678,9 @@ public final class ClassInfoDefinitionReader {
    * @param definitionKeeper {@link IDefinitionKeeper} to fill.
    * @throws IOException -
    */
-  public static void readLibsDirectory(
-      final Path libsPath, final IDefinitionKeeper definitionKeeper) throws IOException {
+  public static void readProductDirectory(
+      final Path productPath, final IDefinitionKeeper definitionKeeper) throws IOException {
+    final Path libsPath = productPath.resolve("libs");
     try (Stream<Path> paths = Files.list(libsPath)) {
       paths
           .filter(Files::isRegularFile)

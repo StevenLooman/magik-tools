@@ -39,6 +39,7 @@ class HoverProviderTest {
         new MethodDefinition(
             null,
             null,
+            null,
             "method_doc",
             null,
             TypeString.SW_OBJECT,
@@ -73,6 +74,7 @@ class HoverProviderTest {
         new ExemplarDefinition(
             null,
             null,
+            null,
             "type_doc",
             null,
             ExemplarDefinition.Sort.SLOTTED,
@@ -101,6 +103,7 @@ class HoverProviderTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             "method_doc",
@@ -208,6 +211,7 @@ class HoverProviderTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new BinaryOperatorDefinition(
+            null,
             null,
             null,
             null,

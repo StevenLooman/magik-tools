@@ -24,6 +24,7 @@ class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             typeName,
             Collections.emptyList(),

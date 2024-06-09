@@ -2,10 +2,12 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
@@ -22,6 +24,7 @@ public class DefConditionParser {
   private static final String CONDITION = "condition";
   private static final String SW_CONDITION = "sw:condition";
 
+  private final MagikFile magikFile;
   private final AstNode node;
 
   /**
@@ -29,11 +32,12 @@ public class DefConditionParser {
    *
    * @param node Condition definition node.
    */
-  public DefConditionParser(final AstNode node) {
+  public DefConditionParser(final MagikFile magikFile, final AstNode node) {
     if (node.isNot(MagikGrammar.METHOD_INVOCATION)) {
       throw new IllegalArgumentException();
     }
 
+    this.magikFile = magikFile;
     this.node = node;
   }
 
@@ -99,6 +103,9 @@ public class DefConditionParser {
     final URI uri = this.node.getToken().getURI();
     final Location location = new Location(uri, this.node);
 
+    // Figure timestamp.
+    final Instant timestamp = this.magikFile.getTimestamp();
+
     // Figure module name.
     final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
 
@@ -129,7 +136,8 @@ public class DefConditionParser {
     final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
     final ConditionDefinition definition =
-        new ConditionDefinition(location, moduleName, doc, statementNode, name, parent, dataNames);
+        new ConditionDefinition(
+            location, timestamp, moduleName, doc, statementNode, name, parent, dataNames);
     return List.of(definition);
   }
 }

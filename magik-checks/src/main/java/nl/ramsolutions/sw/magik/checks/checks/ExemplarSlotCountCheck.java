@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefSlottedExemplarParser;
@@ -34,7 +35,8 @@ public class ExemplarSlotCountCheck extends MagikCheck {
       return;
     }
 
-    final DefSlottedExemplarParser parser = new DefSlottedExemplarParser(node);
+    final MagikFile magikFile = this.getMagikFile();
+    final DefSlottedExemplarParser parser = new DefSlottedExemplarParser(magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
     final ExemplarDefinition definition = (ExemplarDefinition) parsedDefinitions.get(0);
     final int slotCount = definition.getSlots().size();

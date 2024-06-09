@@ -44,6 +44,7 @@ class MethodExistsTypedCheckTest extends MagikTypedCheckTestBase {
             null,
             null,
             null,
+            null,
             TypeString.SW_OBJECT,
             "m()",
             EnumSet.noneOf(MethodDefinition.Modifier.class),

@@ -75,6 +75,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
@@ -82,6 +83,7 @@ class LocalTypeReasonerTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -204,6 +206,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
@@ -211,6 +214,7 @@ class LocalTypeReasonerTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -225,6 +229,7 @@ class LocalTypeReasonerTest {
             ExpressionResultString.EMPTY));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -269,6 +274,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
@@ -276,6 +282,7 @@ class LocalTypeReasonerTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -290,6 +297,7 @@ class LocalTypeReasonerTest {
             ExpressionResultString.EMPTY));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -331,6 +339,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             TypeString.SW_FALSE,
             "not",
             EnumSet.noneOf(MethodDefinition.Modifier.class),
@@ -366,6 +375,7 @@ class LocalTypeReasonerTest {
         new BinaryOperatorDefinition(
             null,
             null,
+            null,
             code,
             null,
             "+",
@@ -399,6 +409,7 @@ class LocalTypeReasonerTest {
         new BinaryOperatorDefinition(
             null,
             null,
+            null,
             code,
             null,
             "+",
@@ -407,6 +418,7 @@ class LocalTypeReasonerTest {
             TypeString.SW_SYMBOL));
     definitionKeeper.add(
         new BinaryOperatorDefinition(
+            null,
             null,
             null,
             code,
@@ -504,6 +516,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             TypeString.SW_INTEGER,
             "upto()",
             EnumSet.noneOf(MethodDefinition.Modifier.class),
@@ -540,6 +553,7 @@ class LocalTypeReasonerTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -583,6 +597,7 @@ class LocalTypeReasonerTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -703,6 +718,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INDEXED,
             propertyListRef,
             Collections.emptyList(),
@@ -710,6 +726,7 @@ class LocalTypeReasonerTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -753,6 +770,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             TypeString.SW_OBJECT,
             "test1",
             EnumSet.noneOf(MethodDefinition.Modifier.class),
@@ -791,6 +809,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
@@ -798,6 +817,7 @@ class LocalTypeReasonerTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -916,6 +936,7 @@ class LocalTypeReasonerTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new BinaryOperatorDefinition(
+            null,
             null,
             null,
             code,
@@ -1115,6 +1136,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             sRef,
             Collections.emptyList(),
@@ -1123,6 +1145,7 @@ class LocalTypeReasonerTest {
     final TypeString tRef = TypeString.ofIdentifier("t", "sw");
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -1160,6 +1183,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             rRef,
             Collections.emptyList(),
@@ -1169,6 +1193,7 @@ class LocalTypeReasonerTest {
     final TypeString tRef = TypeString.ofIdentifier("t", "sw");
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -1295,6 +1320,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
@@ -1307,12 +1333,20 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             aRef,
             "returns_param()",
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             List.of(
                 new ParameterDefinition(
-                    null, null, null, null, "p1", ParameterDefinition.Modifier.NONE, param1Ref)),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p1",
+                    ParameterDefinition.Modifier.NONE,
+                    param1Ref)),
             null,
             Collections.emptySet(),
             new ExpressionResultString(param1Ref),
@@ -1345,6 +1379,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
@@ -1357,12 +1392,20 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             aRef,
             "returns_param()",
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             List.of(
                 new ParameterDefinition(
-                    null, null, null, null, "p1", ParameterDefinition.Modifier.NONE, param1Ref)),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p1",
+                    ParameterDefinition.Modifier.NONE,
+                    param1Ref)),
             null,
             Collections.emptySet(),
             new ExpressionResultString(param1Ref),
@@ -1373,12 +1416,20 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             aRef,
             "returns_param2()",
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             List.of(
                 new ParameterDefinition(
-                    null, null, null, null, "p1", ParameterDefinition.Modifier.NONE, param1Ref)),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p1",
+                    ParameterDefinition.Modifier.NONE,
+                    param1Ref)),
             null,
             Collections.emptySet(),
             new ExpressionResultString(param1Ref),
@@ -1411,6 +1462,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
@@ -1423,12 +1475,20 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             aRef,
             "returns_param()",
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             List.of(
                 new ParameterDefinition(
-                    null, null, null, null, "p1", ParameterDefinition.Modifier.NONE, param1Ref)),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p1",
+                    ParameterDefinition.Modifier.NONE,
+                    param1Ref)),
             null,
             Collections.emptySet(),
             new ExpressionResultString(param1Ref),
@@ -1463,6 +1523,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
@@ -1470,6 +1531,7 @@ class LocalTypeReasonerTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -1484,6 +1546,7 @@ class LocalTypeReasonerTest {
             ExpressionResultString.EMPTY));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -1528,6 +1591,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INDEXED,
             propertyListRef,
             Collections.emptyList(),
@@ -1535,6 +1599,7 @@ class LocalTypeReasonerTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -1553,6 +1618,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             propertyListRef,
             "a_key()",
             EnumSet.noneOf(MethodDefinition.Modifier.class),
@@ -1565,6 +1631,7 @@ class LocalTypeReasonerTest {
             ExpressionResultString.EMPTY));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -1610,6 +1677,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
@@ -1617,6 +1685,7 @@ class LocalTypeReasonerTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -1631,6 +1700,7 @@ class LocalTypeReasonerTest {
             ExpressionResultString.EMPTY));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -1685,6 +1755,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INDEXED,
             TypeString.ofIdentifier(
                 TypeString.SW_CHAR16_VECTOR.getIdentifier(),
@@ -1696,6 +1767,7 @@ class LocalTypeReasonerTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -1714,6 +1786,7 @@ class LocalTypeReasonerTest {
             ExpressionResultString.EMPTY));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -1772,6 +1845,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INDEXED,
             propertyListRef,
             Collections.emptyList(),
@@ -1779,6 +1853,7 @@ class LocalTypeReasonerTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -1793,6 +1868,7 @@ class LocalTypeReasonerTest {
             ExpressionResultString.EMPTY));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -1843,6 +1919,7 @@ class LocalTypeReasonerTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             stackRef,
             Collections.emptyList(),
@@ -1850,6 +1927,7 @@ class LocalTypeReasonerTest {
             Collections.emptySet()));
     definitionKeeper.add(
         new MethodDefinition(
+            null,
             null,
             null,
             null,
@@ -1870,9 +1948,10 @@ class LocalTypeReasonerTest {
         TypeString.ofIdentifier(
             "stack", "sw", TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
     final SlotDefinition slotDefinition =
-        new SlotDefinition(null, null, null, null, "stack", slotTypeRef);
+        new SlotDefinition(null, null, null, null, null, "stack", slotTypeRef);
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,

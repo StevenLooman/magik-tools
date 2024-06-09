@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions.io;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -16,6 +17,7 @@ import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Comparator;
 import nl.ramsolutions.sw.definitions.ModuleDefinition;
 import nl.ramsolutions.sw.definitions.ProductDefinition;
@@ -54,8 +56,13 @@ public final class JsonDefinitionWriter {
         final ExpressionResultString src,
         final Type typeOfSrc,
         final JsonSerializationContext context) {
-      final String fullString = src.getFullString();
-      return new JsonPrimitive(fullString);
+      if (src == ExpressionResultString.UNDEFINED) {
+        return new JsonPrimitive(ExpressionResultString.UNDEFINED_SERIALIZED_NAME);
+      }
+
+      final JsonArray result = new JsonArray();
+      src.getTypes().stream().map(TypeString::getFullString).forEach(result::add);
+      return result;
     }
   }
 
@@ -67,6 +74,20 @@ public final class JsonDefinitionWriter {
         final E src, final Type typeOfSrc, final JsonSerializationContext context) {
       final String val = src.toString().toLowerCase();
       return new JsonPrimitive(val);
+    }
+  }
+
+  private static final class InstantSerializer implements JsonSerializer<Instant> {
+
+    @Override
+    public JsonElement serialize(
+        final Instant src, final Type typeOfSrc, final JsonSerializationContext context) {
+      final long seconds = src.getEpochSecond();
+      final long nanos = src.getNano();
+      final JsonArray array = new JsonArray();
+      array.add(seconds);
+      array.add(nanos);
+      return array;
     }
   }
 
@@ -100,6 +121,8 @@ public final class JsonDefinitionWriter {
     return new GsonBuilder()
         .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
         .registerTypeAdapter(TypeString.class, new TypeStringSerializer())
+        .registerTypeAdapter(ExpressionResultString.class, new ExpressionResultStringSerializer())
+        .registerTypeAdapter(Instant.class, new InstantSerializer())
         .registerTypeAdapter(
             ExemplarDefinition.Sort.class, new LowerCaseEnumSerializer<ExemplarDefinition.Sort>())
         .registerTypeAdapter(
@@ -111,7 +134,6 @@ public final class JsonDefinitionWriter {
         .registerTypeAdapter(
             ParameterDefinition.Modifier.class,
             new LowerCaseEnumSerializer<ParameterDefinition.Modifier>())
-        .registerTypeAdapter(ExpressionResultString.class, new ExpressionResultStringSerializer())
         .create();
   }
 
@@ -246,7 +268,7 @@ public final class JsonDefinitionWriter {
               final Gson gson = this.buildGson();
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
               instruction.addProperty(
-                  Instruction.BINARY_OPERATOR.getValue(), Instruction.BINARY_OPERATOR.getValue());
+                  Instruction.INSTRUCTION.getValue(), Instruction.BINARY_OPERATOR.getValue());
               this.writeInstruction(writer, instruction);
             });
   }

@@ -41,6 +41,7 @@ class DefinitionsProviderTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
@@ -55,9 +56,7 @@ class DefinitionsProviderTest {
         """;
     final Position position = new Position(2, 14); // On `rope`.
     final List<Location> locations = this.getDefinitions(code, position, definitionKeeper);
-    assertThat(locations).hasSize(1);
-    final Location location0 = locations.get(0);
-    assertThat(location0).isEqualTo(EMPTY_LOCATION);
+    assertThat(locations).containsExactly(EMPTY_LOCATION);
   }
 
   @Test
@@ -71,10 +70,9 @@ class DefinitionsProviderTest {
         """;
     final Position position = new Position(2, 14); // On `param1`.
     final List<Location> locations = this.getDefinitions(code, position, definitionKeeper);
-    assertThat(locations).hasSize(1);
-    final Location location0 = locations.get(0);
-    assertThat(location0)
-        .isEqualTo(new Location(DEFAULT_URI, new Range(new Position(1, 22), new Position(1, 28))));
+    assertThat(locations)
+        .containsExactly(
+            new Location(DEFAULT_URI, new Range(new Position(1, 22), new Position(1, 28))));
   }
 
   @Test
@@ -89,10 +87,9 @@ class DefinitionsProviderTest {
         """;
     final Position position = new Position(3, 14); // On `local1`.
     final List<Location> locations = this.getDefinitions(code, position, definitionKeeper);
-    assertThat(locations).hasSize(1);
-    final Location location0 = locations.get(0);
-    assertThat(location0)
-        .isEqualTo(new Location(DEFAULT_URI, new Range(new Position(2, 11), new Position(2, 17))));
+    assertThat(locations)
+        .containsExactly(
+            new Location(DEFAULT_URI, new Range(new Position(2, 11), new Position(2, 17))));
   }
 
   @Test
@@ -100,7 +97,7 @@ class DefinitionsProviderTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new ConditionDefinition(
-            EMPTY_LOCATION, null, null, null, "error", null, Collections.emptyList()));
+            EMPTY_LOCATION, null, null, null, null, "error", null, Collections.emptyList()));
     final String code =
         """
         _method object.method
@@ -111,9 +108,8 @@ class DefinitionsProviderTest {
         """;
     final Position position = new Position(3, 12); // On `error`.
     final List<Location> locations = this.getDefinitions(code, position, definitionKeeper);
-    assertThat(locations).hasSize(1);
-    final Location location0 = locations.get(0);
-    assertThat(location0)
-        .isEqualTo(new Location(DEFAULT_URI, new Range(new Position(0, 0), new Position(0, 0))));
+    assertThat(locations)
+        .containsExactly(
+            new Location(DEFAULT_URI, new Range(new Position(0, 0), new Position(0, 0))));
   }
 }

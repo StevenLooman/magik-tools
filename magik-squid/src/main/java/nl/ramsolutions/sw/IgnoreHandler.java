@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -38,18 +37,21 @@ public final class IgnoreHandler {
    * @throws IOException -
    */
   public void handleFileEvent(final FileEvent fileEvent) throws IOException {
-    final URI uri = fileEvent.getUri();
-    final Path path = Path.of(uri);
+    LOGGER.debug("Handling file event: {}", fileEvent);
+
+    final Path path = fileEvent.getPath();
     final FileChangeType fileChangeType = fileEvent.getFileChangeType();
     if (fileChangeType == FileChangeType.DELETED) {
-      this.getIndexableFiles(path)
-          .filter(indexablePath -> indexablePath.toString().equalsIgnoreCase(IGNORE_FILENAME))
+      this.entries.keySet().stream()
+          .filter(ignoreFilePath -> ignoreFilePath.startsWith(path))
           .forEach(this::removeIgnoreFile);
     } else {
       this.getIndexableFiles(path)
           .filter(indexablePath -> indexablePath.toString().equalsIgnoreCase(IGNORE_FILENAME))
           .forEach(this::addIgnoreFile);
     }
+
+    LOGGER.debug("Handled file event: {}", fileEvent);
   }
 
   /**

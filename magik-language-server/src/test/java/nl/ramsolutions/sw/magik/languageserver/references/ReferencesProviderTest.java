@@ -41,6 +41,7 @@ class ReferencesProviderTest {
             null,
             null,
             null,
+            null,
             TypeString.SW_INTEGER,
             "refering",
             Collections.emptySet(),
@@ -71,6 +72,7 @@ class ReferencesProviderTest {
     definitionKeeper.add(
         new MethodDefinition(
             EMPTY_LOCATION,
+            null,
             null,
             null,
             null,
@@ -107,6 +109,7 @@ class ReferencesProviderTest {
             null,
             null,
             null,
+            null,
             TypeString.SW_INTEGER,
             "refering",
             Collections.emptySet(),
@@ -137,6 +140,7 @@ class ReferencesProviderTest {
     definitionKeeper.add(
         new MethodDefinition(
             EMPTY_LOCATION,
+            null,
             null,
             null,
             null,

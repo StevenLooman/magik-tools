@@ -17,7 +17,7 @@ public final class DefaultDefinitionsAdder {
   public static void addBaseDefinitions(IDefinitionKeeper definitionKeeper) {
     definitionKeeper.add(
         new PackageDefinition(
-            null, null, null, null, TypeString.ANONYMOUS_PACKAGE, Collections.emptyList()));
+            null, null, null, null, null, TypeString.ANONYMOUS_PACKAGE, Collections.emptyList()));
   }
 
   /**
@@ -29,12 +29,14 @@ public final class DefaultDefinitionsAdder {
   public static void addDefaultDefinitions(IDefinitionKeeper definitionKeeper) {
     definitionKeeper.add(
         new PackageDefinition(
-            null, null, null, null, TypeString.SW_PACKAGE, Collections.emptyList()));
+            null, null, null, null, null, TypeString.SW_PACKAGE, Collections.emptyList()));
     definitionKeeper.add(
-        new PackageDefinition(null, null, null, null, TypeString.USER_PACKAGE, List.of("sw")));
+        new PackageDefinition(
+            null, null, null, null, null, TypeString.USER_PACKAGE, List.of("sw")));
 
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -50,6 +52,7 @@ public final class DefaultDefinitionsAdder {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INTRINSIC,
             TypeString.SW_UNSET,
             Collections.emptyList(),
@@ -57,6 +60,7 @@ public final class DefaultDefinitionsAdder {
             Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -72,6 +76,7 @@ public final class DefaultDefinitionsAdder {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INTRINSIC,
             TypeString.SW_MAYBE,
             Collections.emptyList(),
@@ -79,6 +84,7 @@ public final class DefaultDefinitionsAdder {
             Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -94,6 +100,7 @@ public final class DefaultDefinitionsAdder {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INTRINSIC,
             TypeString.SW_BIGNUM,
             Collections.emptyList(),
@@ -101,6 +108,7 @@ public final class DefaultDefinitionsAdder {
             Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -116,6 +124,7 @@ public final class DefaultDefinitionsAdder {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INDEXED,
             TypeString.SW_SYMBOL,
             Collections.emptyList(),
@@ -123,6 +132,7 @@ public final class DefaultDefinitionsAdder {
             Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -138,6 +148,7 @@ public final class DefaultDefinitionsAdder {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INTRINSIC,
             TypeString.SW_SW_REGEXP,
             Collections.emptyList(),
@@ -145,6 +156,7 @@ public final class DefaultDefinitionsAdder {
             Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -160,6 +172,7 @@ public final class DefaultDefinitionsAdder {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INDEXED,
             TypeString.SW_CHAR16_VECTOR,
             Collections.emptyList(),
@@ -167,6 +180,7 @@ public final class DefaultDefinitionsAdder {
             Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -182,6 +196,7 @@ public final class DefaultDefinitionsAdder {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INTRINSIC,
             TypeString.SW_HEAVY_THREAD,
             Collections.emptyList(),
@@ -189,6 +204,7 @@ public final class DefaultDefinitionsAdder {
             Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -204,6 +220,7 @@ public final class DefaultDefinitionsAdder {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.SW_CONDITION,
             Collections.emptyList(),
@@ -211,6 +228,7 @@ public final class DefaultDefinitionsAdder {
             Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -226,6 +244,7 @@ public final class DefaultDefinitionsAdder {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.INTRINSIC,
             TypeString.SW_INDEXED_FORMAT_MIXIN,
             Collections.emptyList(),
@@ -233,6 +252,7 @@ public final class DefaultDefinitionsAdder {
             Collections.emptySet()));
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,

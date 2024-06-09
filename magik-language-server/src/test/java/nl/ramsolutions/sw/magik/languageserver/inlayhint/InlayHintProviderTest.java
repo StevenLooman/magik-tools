@@ -35,11 +35,13 @@ class InlayHintProviderTest {
             null,
             null,
             null,
+            null,
             TypeString.SW_OBJECT,
             "method()",
             Collections.emptySet(),
             List.of(
                 new ParameterDefinition(
+                    null,
                     null,
                     null,
                     null,
@@ -52,10 +54,12 @@ class InlayHintProviderTest {
                     null,
                     null,
                     null,
+                    null,
                     "param2",
                     ParameterDefinition.Modifier.NONE,
                     TypeString.UNDEFINED),
                 new ParameterDefinition(
+                    null,
                     null,
                     null,
                     null,

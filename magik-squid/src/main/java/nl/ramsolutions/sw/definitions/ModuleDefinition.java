@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.definitions;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -12,6 +13,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 public class ModuleDefinition implements IDefinition {
 
   private final @Nullable Location location;
+  private final @Nullable Instant timestamp;
   private final String name;
   private final @Nullable String product;
   private final String baseVersion;
@@ -27,6 +29,7 @@ public class ModuleDefinition implements IDefinition {
    */
   public ModuleDefinition(
       final @Nullable Location location,
+      final @Nullable Instant timestamp,
       final String name,
       final @Nullable String product,
       final String baseVersion,
@@ -34,6 +37,7 @@ public class ModuleDefinition implements IDefinition {
       final @Nullable String description,
       final List<String> requireds) {
     this.location = location;
+    this.timestamp = timestamp;
     this.name = name;
     this.product = product;
     this.baseVersion = baseVersion;
@@ -49,6 +53,10 @@ public class ModuleDefinition implements IDefinition {
   @CheckForNull
   public Location getLocation() {
     return this.location;
+  }
+
+  public Instant getTimestamp() {
+    return this.timestamp;
   }
 
   @CheckForNull

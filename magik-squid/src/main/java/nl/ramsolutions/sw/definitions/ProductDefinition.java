@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.definitions;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -11,8 +12,9 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 /** Smallworld product. */
 public class ProductDefinition implements IDefinition {
 
-  private final String name;
   private final @Nullable Location location;
+  private final @Nullable Instant timestamp;
+  private final String name;
   private final @Nullable String parent;
   private final @Nullable String version;
   private final @Nullable String versionComment;
@@ -30,6 +32,7 @@ public class ProductDefinition implements IDefinition {
    */
   public ProductDefinition(
       final @Nullable Location location,
+      final @Nullable Instant timestamp,
       final String name,
       final @Nullable String parent,
       final @Nullable String version,
@@ -37,8 +40,9 @@ public class ProductDefinition implements IDefinition {
       final @Nullable String title,
       final @Nullable String description,
       final List<String> requireds) {
-    this.name = name;
     this.location = location;
+    this.timestamp = timestamp;
+    this.name = name;
     this.parent = parent;
     this.version = version;
     this.versionComment = versionComment;
@@ -64,6 +68,11 @@ public class ProductDefinition implements IDefinition {
   @CheckForNull
   public Location getLocation() {
     return this.location;
+  }
+
+  @Override
+  public Instant getTimestamp() {
+    return this.timestamp;
   }
 
   @CheckForNull

@@ -37,6 +37,8 @@
   - `magik.formatting.trimFinalNewlines`
 - Typing inlay hint provide also provides inlayhints for method/procedure invocations.
 - Rename setting `magik.typing.showAtomInlayHints` to `magik.typing.showTypingInlayHints`.
+- Replace `magik.libsDirs` with `magik.productDirs`, register products instead of libs directories.
+- Dump types database (per workspace folder) on shutdown, read it on start up and re-index any changed files, for quicker initialization.
 - Several fixes.
 
 0.9.1 (2024-03-13)

@@ -40,6 +40,7 @@ class ClassInfoDefinitionReaderTest {
                 new Location(
                     URI.create(
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/globals.magik")),
+                null,
                 "class_definition_reader_test",
                 """
 
@@ -59,6 +60,7 @@ class ClassInfoDefinitionReaderTest {
                 new Location(
                     URI.create(
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/globals.magik")),
+                null,
                 "class_definition_reader_test",
                 """
             This will report. The
@@ -80,6 +82,7 @@ class ClassInfoDefinitionReaderTest {
                 new Location(
                     URI.create(
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/conditions.magik")),
+                null,
                 "class_definition_reader_test",
                 "",
                 null,
@@ -95,6 +98,7 @@ class ClassInfoDefinitionReaderTest {
                 new Location(
                     URI.create(
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/conditions.magik")),
+                null,
                 "class_definition_reader_test",
                 "Datas are to be conditioned.\n",
                 null,
@@ -112,6 +116,7 @@ class ClassInfoDefinitionReaderTest {
                 new Location(
                     URI.create(
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/example_mixin.magik")),
+                null,
                 "class_definition_reader_test",
                 """
 
@@ -135,6 +140,7 @@ class ClassInfoDefinitionReaderTest {
                 new Location(
                     URI.create(
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/example_class.magik")),
+                null,
                 "class_definition_reader_test",
                 "Example class\n",
                 null,
@@ -143,6 +149,7 @@ class ClassInfoDefinitionReaderTest {
                 List.of(
                     new SlotDefinition(
                         null,
+                        null,
                         "class_definition_reader_test",
                         null,
                         null,
@@ -150,12 +157,14 @@ class ClassInfoDefinitionReaderTest {
                         TypeString.UNDEFINED),
                     new SlotDefinition(
                         null,
+                        null,
                         "class_definition_reader_test",
                         null,
                         null,
                         "slot2",
                         TypeString.UNDEFINED),
                     new SlotDefinition(
+                        null,
                         null,
                         "class_definition_reader_test",
                         null,
@@ -175,6 +184,7 @@ class ClassInfoDefinitionReaderTest {
                 new Location(
                     URI.create(
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/example_enumeration.magik")),
+                null,
                 "class_definition_reader_test",
                 "",
                 null,
@@ -195,6 +205,7 @@ class ClassInfoDefinitionReaderTest {
                 new Location(
                     URI.create(
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/example_indexed_class.magik")),
+                null,
                 "class_definition_reader_test",
                 "Attributes that will be printed\n",
                 null,
@@ -215,6 +226,7 @@ class ClassInfoDefinitionReaderTest {
                 new Location(
                     URI.create(
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/example_mixin.magik")),
+                null,
                 "class_definition_reader_test",
                 "",
                 null,
@@ -224,6 +236,7 @@ class ClassInfoDefinitionReaderTest {
                 List.of(
                     new ParameterDefinition(
                         null,
+                        null,
                         "class_definition_reader_test",
                         null,
                         null,
@@ -231,6 +244,7 @@ class ClassInfoDefinitionReaderTest {
                         ParameterDefinition.Modifier.NONE,
                         TypeString.UNDEFINED),
                     new ParameterDefinition(
+                        null,
                         null,
                         "class_definition_reader_test",
                         null,
@@ -253,6 +267,7 @@ class ClassInfoDefinitionReaderTest {
                 new Location(
                     URI.create(
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/example_mixin.magik")),
+                null,
                 "class_definition_reader_test",
                 """
 
@@ -272,6 +287,7 @@ for examples.
                 Collections.emptySet(),
                 List.of(
                     new ParameterDefinition(
+                        null,
                         null,
                         "class_definition_reader_test",
                         null,

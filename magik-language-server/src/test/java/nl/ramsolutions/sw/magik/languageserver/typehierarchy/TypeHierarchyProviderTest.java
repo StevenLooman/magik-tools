@@ -38,6 +38,7 @@ class TypeHierarchyProviderTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             exemplarRef,
             Collections.emptyList(),
@@ -62,6 +63,7 @@ class TypeHierarchyProviderTest {
     final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -95,6 +97,7 @@ class TypeHierarchyProviderTest {
             null,
             null,
             null,
+            null,
             ExemplarDefinition.Sort.SLOTTED,
             exemplarRef,
             Collections.emptyList(),
@@ -103,6 +106,7 @@ class TypeHierarchyProviderTest {
     final TypeString subExemplarRef = TypeString.ofIdentifier("sub_exemplar", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,
@@ -131,6 +135,7 @@ class TypeHierarchyProviderTest {
     final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
+            null,
             null,
             null,
             null,

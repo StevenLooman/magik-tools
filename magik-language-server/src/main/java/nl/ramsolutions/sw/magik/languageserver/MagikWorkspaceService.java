@@ -12,7 +12,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
-import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
@@ -30,7 +29,6 @@ import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.WorkDoneProgressBegin;
 import org.eclipse.lsp4j.WorkDoneProgressCreateParams;
 import org.eclipse.lsp4j.WorkDoneProgressEnd;
-import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.WorkspaceSymbol;
 import org.eclipse.lsp4j.WorkspaceSymbolParams;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
@@ -100,61 +98,19 @@ public class MagikWorkspaceService implements WorkspaceService {
     this.runIndexersInBackground();
   }
 
-  private void runIgnoreFilesIndexer() {
-    for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
-      try {
-        LOGGER.trace("Running IgnoreHandler from: {}", workspaceFolder.getUri());
-        final String uriStr = workspaceFolder.getUri();
-        final URI uri = URI.create(uriStr);
-        final FileEvent fileEvent = new FileEvent(uri, FileEvent.FileChangeType.CREATED);
-        this.ignoreHandler.handleFileEvent(fileEvent);
-      } catch (final IOException exception) {
-        LOGGER.error(exception.getMessage(), exception);
-      }
-    }
-  }
+  private void readProductsClassInfos(final List<String> productDirs) {
+    LOGGER.trace("Reading docs from product dirs: {}", productDirs);
 
-  private void runProductIndexer() {
-    for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
-      try {
-        LOGGER.debug("Running ProductIndexer from: {}", workspaceFolder.getUri());
-        final String uriStr = workspaceFolder.getUri();
-        final URI uri = URI.create(uriStr);
-        final FileEvent fileEvent = new FileEvent(uri, FileEvent.FileChangeType.CREATED);
-        this.productIndexer.handleFileEvent(fileEvent);
-      } catch (final IOException exception) {
-        LOGGER.error(exception.getMessage(), exception);
-      }
-    }
-  }
-
-  private void runMagikIndexer() {
-    for (final WorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
-      try {
-        LOGGER.debug("Running MagikIndexer from: {}", workspaceFolder.getUri());
-        final String uriStr = workspaceFolder.getUri();
-        final URI uri = URI.create(uriStr);
-        final FileEvent fileEvent = new FileEvent(uri, FileEvent.FileChangeType.CREATED);
-        this.magikIndexer.handleFileEvent(fileEvent);
-      } catch (final IOException exception) {
-        LOGGER.error(exception.getMessage(), exception);
-      }
-    }
-  }
-
-  private void readLibsClassInfos(final List<String> libsDirs) {
-    LOGGER.trace("Reading libs docs from: {}", libsDirs);
-
-    libsDirs.forEach(
+    productDirs.forEach(
         pathStr -> {
           final Path path = Path.of(pathStr);
           if (!Files.exists(path)) {
-            LOGGER.warn("Path to libs dir does not exist: {}", pathStr);
+            LOGGER.warn("Path to product dir does not exist: {}", pathStr);
             return;
           }
 
           try {
-            ClassInfoDefinitionReader.readLibsDirectory(path, this.definitionKeeper);
+            ClassInfoDefinitionReader.readProductDirectory(path, this.definitionKeeper);
           } catch (final IOException exception) {
             LOGGER.error(exception.getMessage(), exception);
           }
@@ -275,24 +231,25 @@ public class MagikWorkspaceService implements WorkspaceService {
   private void runIndexers() {
     LOGGER.trace("Run indexers");
 
-    // Read types db.
+    // Read types dbs.
     final MagikLanguageServerSettings settings =
         new MagikLanguageServerSettings(this.languageServerProperties);
     final List<String> typesDbPaths = settings.getTypingTypeDatabasePaths();
     this.readTypesDbs(typesDbPaths);
 
-    // Read class_infos from libs/ dirs.
-    final List<String> libsDirs = settings.getLibsDirs();
-    this.readLibsClassInfos(libsDirs);
+    // Read class_infos from product dirs.
+    final List<String> productDirs = settings.getProductDirs();
+    this.readProductsClassInfos(productDirs);
 
-    // Index .magik-tools-ignore files.
-    this.runIgnoreFilesIndexer();
-
-    // Run product/module indexer.
-    this.runProductIndexer();
-
-    // Run magik indexer.
-    this.runMagikIndexer();
+    // Update workspace folders.
+    for (final MagikWorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
+      try {
+        workspaceFolder.onInit();
+      } catch (final IOException exception) {
+        LOGGER.error(
+            "Caught error when initializing workspacefolder: " + workspaceFolder, exception);
+      }
+    }
   }
 
   @SuppressWarnings("IllegalCatch")
@@ -307,7 +264,7 @@ public class MagikWorkspaceService implements WorkspaceService {
 
     CompletableFuture.runAsync(
         () -> {
-          LOGGER.trace("Start indexing workspace in background");
+          LOGGER.trace("Start indexing workspace");
           final ProgressParams progressParams = new ProgressParams();
           progressParams.setToken(token);
 
@@ -331,7 +288,13 @@ public class MagikWorkspaceService implements WorkspaceService {
   }
 
   public void shutdown() {
-    // TODO: Dump type database, and read it again when starting?
-    //       Requires timestamping of definitions/files!
+    for (final MagikWorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
+      try {
+        workspaceFolder.onShutdown();
+      } catch (final IOException exception) {
+        LOGGER.error(
+            "Caught error when shutting down workspacefolder: " + workspaceFolder, exception);
+      }
+    }
   }
 }
