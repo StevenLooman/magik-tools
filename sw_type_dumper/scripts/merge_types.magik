@@ -8,9 +8,16 @@ _endblock
 $
 
 _block
-	mt:type_merger.new(
+	_local filepath << sw:system.create_temp_file("sw_types_merged.jsonl")
+
+	sw:write_with_spaces(date_time.now(), "started writing to", filepath)
+
+	_local merger << mt:type_merger.new(
 		"/home/slooman/src/418-gen-sw5/sw_types-swaf-5.3.2.jsonl",
 		"/home/slooman/src/418-gen-sw5/sw_types-swaf-5.3.3.jsonl",
-		"/tmp/sw_types_merged.jsonl").run()
+		filepath)
+	merger.run()
+
+	sw:write_with_spaces(date_time.now(), "finished writing to", filepath)
 _endblock
 $

@@ -8,22 +8,14 @@ _endblock
 $
 
 _block
-	_local ignore_vars << set.new_with(
-		:|mt:definition|,
-		:|mt:product_definition|,
-		:|mt:module_definition|,
-		:|mt:package_definition|,
-		:|mt:slot_definition|,
-		:|mt:type_definition|,
-		:|mt:parameter_definition|,
-		:|mt:method_definition|,
-		:|mt:procedure_definition|,
-		:|mt:condition_definition|,
-		:|mt:binary_operator_definition|,
-		:|mt:global_definition|,
-		:|mt:type_dumper|,
-		:|mt:type_merger|)
-	_local dumper << mt:type_dumper.new("/tmp/sw_types.jsonl", ignore_vars)
+	_local view << sw:gis_program_manager.spatial_object_controller(:gis).dataset(:electricity)
+	_local filepath << sw:system.create_temp_file("sw_types-electricity.jsonl")
+
+	sw:write_with_spaces(date_time.now(), "started writing to", filepath)
+
+	_local dumper << mt:datamodel_type_dumper.new(view, filepath)
 	dumper.run()
+
+	sw:write_with_spaces(date_time.now(), "finished writing to", filepath)
 _endblock
 $
