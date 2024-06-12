@@ -15,6 +15,10 @@ _endif
 $
 
 _block
+	_local filepath << sw:system.create_temp_file("sw_types.jsonl")
+
+	write_with_spaces(date_time.now(), "started writing to", filepath)
+
 	_local ignore_vars << set.new_with(
 		:|mt:definition|,
 		:|mt:binary_operator_definition|,
@@ -31,7 +35,9 @@ _block
 		:|mt:type_dumper|,
 		:|mt:datamodel_type_dumper|,
 		:|mt:type_merger|)
-	_local dumper << mt:type_dumper.new("/tmp/sw_types.jsonl", ignore_vars)
+	_local dumper << mt:type_dumper.new(filepath, ignore_vars)
 	dumper.run()
+
+	write_with_spaces(date_time.now(), "finished writing to", filepath)
 _endblock
 $
