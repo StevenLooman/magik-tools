@@ -18,3 +18,12 @@ $ cp ../../magik-debug-adapter/target/magik-debug-adapter-*.jar server/
 $ docker run --rm -it -v "$(pwd)":/workspace vsce package
 ...
 ```
+
+```shell
+$ docker run --rm -it \
+    -v "$(pwd)":/workspace \
+    -v "$(pwd)/../../magik-language-server":/magik-language-server \
+    -v "$(pwd)/../../magik-debug-adapter":/magik-debug-adapter \
+    vsce package
+...
+```

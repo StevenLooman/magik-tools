@@ -674,7 +674,7 @@ public final class ClassInfoDefinitionReader {
   /**
    * Read libs directory.
    *
-   * @param libsPath Path to libs directory.
+   * @param productPath Path to libs directory.
    * @param definitionKeeper {@link IDefinitionKeeper} to fill.
    * @throws IOException -
    */

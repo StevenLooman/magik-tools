@@ -44,6 +44,16 @@
 				"configuration": "./magik-language-configuration.json"
 			},
 			{
+				"id": "load_list.txt",
+				"aliases": [
+					"Smallworld Load List"
+				],
+				"filenames": [
+					"load_list.txt"
+				],
+				"configuration": "./load-list-language-configuration.json"
+			},
+			{
 				"id": "product.def",
 				"aliases": [
 					"Smallworld Product definition"
@@ -151,12 +161,22 @@
 		"commands": [
 			{
 				"command": "magik.transmitFile",
-				"title": "Transmit a file to the active Smallworld Sessions",
+				"title": "Transmit a magik file to the active Smallworld Sessions",
 				"category": "Magik"
 			},
 			{
 				"command": "magik.transmitCurrentRegion",
-				"title": "Transmit current region to the active Smallworld Session",
+				"title": "Transmit current region of magik file to the active Smallworld Session",
+				"category": "Magik"
+			},
+			{
+				"command": "magik.transmitLoadList",
+				"title": "Transmit a load_list file to the active Smallworld Sessions",
+				"category": "Magik"
+			},
+			{
+				"command": "magik.transmitFile",
+				"title": "Transmit a magik file to the active Smallworld Sessions",
 				"category": "Magik"
 			},
 			{
@@ -175,6 +195,21 @@
 				"command": "magik.transmitCurrentRegion",
 				"key": "f4 enter",
 				"when": "editorTextFocus && editorLangId == magik"
+			},
+			{
+				"command": "magik.transmitLoadList",
+				"key": "f4 b",
+				"when": "editorTextFocus && editorLangId == load_list.txt"
+			},
+			{
+				"command": "magik.transmitProductDef",
+				"key": "f4 b",
+				"when": "editorTextFocus && editorLangId == product.def"
+			},
+			{
+				"command": "magik.transmitModuleDef",
+				"key": "f4 b",
+				"when": "editorTextFocus && editorLangId == module.def"
 			}
 		],
 		"taskDefinitions": [
