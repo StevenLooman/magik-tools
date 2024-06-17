@@ -24,9 +24,17 @@ export class MagikSessionProvider implements vscode.Disposable {
 	private registerCommands() {
 		const transmitFileCommand = vscode.commands.registerTextEditorCommand('magik.transmitFile', () => this.command_transmit_file());
 		this.context.subscriptions.push(transmitFileCommand);
-
 		const transmitMethodCommand = vscode.commands.registerTextEditorCommand('magik.transmitCurrentRegion', () => this.command_transmit_current_region());
 		this.context.subscriptions.push(transmitMethodCommand);
+
+		const transmitLoadListCommand = vscode.commands.registerTextEditorCommand('magik.transmitLoadList', () => this.command_transmit_load_list());
+		this.context.subscriptions.push(transmitLoadListCommand);
+
+		const transmitProductDefCommand = vscode.commands.registerTextEditorCommand('magik.transmitProductDef', () => this.command_transmit_product_def());
+		this.context.subscriptions.push(transmitProductDefCommand);
+
+		const transmitModuleDefCommand = vscode.commands.registerTextEditorCommand('magik.transmitModuleDef', () => this.command_transmit_module_def());
+		this.context.subscriptions.push(transmitModuleDefCommand);
 	}
 
 	private registerWindowHandlers() {
@@ -60,6 +68,33 @@ export class MagikSessionProvider implements vscode.Disposable {
 		}
 
 		this.currentSession.transmitEditorRegion(vscode.window.activeTextEditor);
+	}
+
+	private command_transmit_load_list() {
+		if (this.currentSession == null) {
+			vscode.window.showErrorMessage("No active Smallworld session.");
+			return;
+		}
+
+		this.currentSession.transmitLoadList(vscode.window.activeTextEditor);
+	}
+
+	private command_transmit_product_def() {
+		if (this.currentSession == null) {
+			vscode.window.showErrorMessage("No active Smallworld session.");
+			return;
+		}
+
+		this.currentSession.transmitProductDef(vscode.window.activeTextEditor);
+	}
+
+	private command_transmit_module_def() {
+		if (this.currentSession == null) {
+			vscode.window.showErrorMessage("No active Smallworld session.");
+			return;
+		}
+
+		this.currentSession.transmitModuleDef(vscode.window.activeTextEditor);
 	}
 
 	public sendToSession(text: string, sourcePath: fs.PathLike | undefined) {
@@ -111,13 +146,7 @@ class MagikSession implements vscode.Disposable {
 
 		// Send load_file(..) to active session.
 		const sourcePathParam = sourcePath ? `"${sourcePath}"` : "_unset";
-		const magik = ""
-			+ "_protect "
-			+ `sw:load_file("${tempPath}", _unset, ${sourcePathParam}) `
-			+ "_protection "
-			+ `sw:system.unlink("${tempPath}", _true, _true) `
-			+ "_endprotect\n"
-			+ `$`;
+		const magik = `_protect sw:load_file("${tempPath}", _unset, ${sourcePathParam}) _protection sw:system.unlink("${tempPath}", _true, _true) _endprotect\n$`;
 		this._terminal.sendText(magik);
 	}
 
@@ -167,13 +196,79 @@ class MagikSession implements vscode.Disposable {
 		this.showSession();
 	}
 
+	public transmitLoadList(editor: vscode.TextEditor) {
+		// Save file in editor.
+		if (editor.document.uri.scheme != 'untitled') {
+			editor.document.save();
+		}
+
+		// Get active file.
+		const docPath = editor.document.uri.path;
+		const dockPathParent = path.dirname(docPath);
+
+		const text = `sw:load_file_list("${dockPathParent}")\n$`;
+		this.sendToSession(text, undefined);
+
+		this.showSession();
+	}
+
+	public transmitProductDef(editor: vscode.TextEditor) {
+		// Save file in editor.
+		if (editor.document.uri.scheme != 'untitled') {
+			editor.document.save();
+		}
+
+		// Get active file.
+		const docPath = editor.document.uri.path;
+		const docPathParent = path.dirname(docPath);
+
+		// Load/reinitialise product in active session.
+		const text = `_block
+	_local product << sw:sw_product.new_from_def("${docPathParent}")
+	_local registered_product << sw:smallworld_product.product(product.name)
+	_if registered_product _isnt _unset
+	_then
+		registered_product.reinitialize()
+	_else
+		sw:smallworld_product.add_product("${docPathParent}")
+	_endif
+_endblock
+$`;
+		this.sendToSession(text, undefined);
+
+		this.showSession();
+	}
+
+	public transmitModuleDef(editor: vscode.TextEditor) {
+		// Save file in editor.
+		if (editor.document.uri.scheme != 'untitled') {
+			editor.document.save();
+		}
+
+		// Get active file.
+		const docPath = editor.document.uri.path;
+		const docPathParent = path.dirname(docPath);
+
+		// (Re)load module in active session.
+		const text = `_try
+	_local module << sw:sw_module.new_from_def("${docPath}", "${docPathParent}")
+	sw:sw_module_manager.load_module(module.name, module.version, :force_reload?, _true)
+_when sw_module_no_such_module
+	sw:sw_module_manager.load_standalone_module_definition("${docPath}")
+_endtry
+$`;
+		this.sendToSession(text, undefined);
+
+		this.showSession();
+	}
+
 	public showSession() {
 		this._terminal.show();
 	}
 
 	private getTempFile(): fs.PathLike {
-		var tempPath: fs.PathLike;
-		var index = 0;
+		let tempPath: fs.PathLike;
+		let index = 0;
 		do {
 			tempPath = path.join(this._workdir.toString(), `tmp${index}.magik`);
 			index += 1;

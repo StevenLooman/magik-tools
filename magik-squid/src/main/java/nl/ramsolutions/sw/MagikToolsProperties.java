@@ -248,7 +248,7 @@ public class MagikToolsProperties {
    */
   public List<String> getPropertyList(final String key) {
     final String value = this.getPropertyString(key);
-    if (value == null) {
+    if (value == null || value.isBlank()) {
       return Collections.emptyList();
     }
 
@@ -261,15 +261,15 @@ public class MagikToolsProperties {
    *
    * <p>In case of duplicate keys, the values of `properties2` win.
    *
-   * @param properties1
-   * @param properties2
+   * @param properties1 Properties 1.
+   * @param properties2 Properties 2.
    * @return Merged properties.
    */
   public static MagikToolsProperties merge(
       final MagikToolsProperties properties1, final MagikToolsProperties properties2) {
     final MagikToolsProperties result = new MagikToolsProperties();
-    properties1.properties.forEach((key, value) -> result.properties.put(key, value));
-    properties2.properties.forEach((key, value) -> result.properties.put(key, value));
+    properties1.properties.forEach(result.properties::put);
+    properties2.properties.forEach(result.properties::put);
     return result;
   }
 }
