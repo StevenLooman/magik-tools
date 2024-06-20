@@ -64,14 +64,14 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     LOGGER.info("Version: {}", version);
 
     final String rootUri = params.getRootUri();
-    if (params.getWorkspaceFolders() != null) {
+    if (params.getWorkspaceFolders() != null && !params.getWorkspaceFolders().isEmpty()) {
       params.getWorkspaceFolders().stream()
           .map(
               workspaceFolder ->
                   new MagikWorkspaceFolder(
                       workspaceFolder, this.definitionKeeper, this.languageServerProperties))
           .forEach(this.workspaceFolders::add);
-    } else if (rootUri != null && params.getWorkspaceFolders().isEmpty()) {
+    } else if (rootUri != null) {
       final WorkspaceFolder rootFolder = new WorkspaceFolder(rootUri, "workspace");
       final MagikWorkspaceFolder rootWorkspaceFolder =
           new MagikWorkspaceFolder(
