@@ -9,11 +9,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
 import nl.ramsolutions.sw.definitions.ModuleDefinition;
-import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
+import nl.ramsolutions.sw.definitions.ProductDefFileScanner;
 import nl.ramsolutions.sw.definitions.ProductDefinition;
-import nl.ramsolutions.sw.definitions.ProductDefinitionScanner;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.ProductDefFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
@@ -143,7 +144,7 @@ public class MUnitTestItemProvider {
   }
 
   private ProductDefinition getSwProduct(final Path path) throws IOException {
-    final Path productDefPath = path.resolve(ProductDefinitionScanner.SW_PRODUCT_DEF);
+    final Path productDefPath = path.resolve(ProductDefFileScanner.SW_PRODUCT_DEF);
     if (!Files.exists(productDefPath)) {
       final Path parentPath = path.getParent();
       if (parentPath == null) {
@@ -155,11 +156,13 @@ public class MUnitTestItemProvider {
     }
 
     // Construct SwProduct.
-    return ProductDefinitionScanner.readProductDefinition(productDefPath, null);
+    final ProductDefFile productDefFile =
+        new ProductDefFile(productDefPath, this.definitionKeeper, null);
+    return productDefFile.getProductDefinition();
   }
 
   private ModuleDefinition getSwModule(final Path path) throws IOException {
-    final Path moduleDefPath = path.resolve(ModuleDefinitionScanner.SW_MODULE_DEF);
+    final Path moduleDefPath = path.resolve(ModuleDefFileScanner.SW_MODULE_DEF);
     if (!Files.exists(moduleDefPath)) {
       final Path parentPath = path.getParent();
       if (parentPath == null) {
@@ -171,7 +174,7 @@ public class MUnitTestItemProvider {
     }
 
     // Construct SwModule.
-    return ModuleDefinitionScanner.readModuleDefinition(moduleDefPath);
+    return ModuleDefFileScanner.readModuleDefinition(moduleDefPath);
   }
 
   private MUnitTestItem createTestItem(final ProductDefinition definition) {

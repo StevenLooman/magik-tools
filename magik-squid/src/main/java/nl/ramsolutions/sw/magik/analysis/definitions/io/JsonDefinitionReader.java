@@ -117,6 +117,29 @@ public final class JsonDefinitionReader {
     }
   }
 
+  private static final class ProductDefinitionCreator
+      implements InstanceCreator<ProductDefinition> {
+
+    @Override
+    public ProductDefinition createInstance(final Type type) {
+      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
+      // even if these were not set in the source JSON.
+      return new ProductDefinition(
+          null, null, null, null, null, null, null, null, Collections.emptyList());
+    }
+  }
+
+  private static final class ModuleDefinitionCreator implements InstanceCreator<ModuleDefinition> {
+
+    @Override
+    public ModuleDefinition createInstance(final Type type) {
+      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
+      // even if these were not set in the source JSON.
+      return new ModuleDefinition(
+          null, null, null, null, null, null, null, Collections.emptyList());
+    }
+  }
+
   private static final class MethodDefinitionCreator implements InstanceCreator<MethodDefinition> {
 
     @Override
@@ -267,6 +290,8 @@ public final class JsonDefinitionReader {
         .registerTypeAdapter(
             ParameterDefinition.Modifier.class,
             new LowerCaseEnumDeserializer<ParameterDefinition.Modifier>())
+        .registerTypeAdapter(ProductDefinition.class, new ProductDefinitionCreator())
+        .registerTypeAdapter(ModuleDefinition.class, new ModuleDefinitionCreator())
         .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionCreator())
         .registerTypeAdapter(ExemplarDefinition.class, new ExemplarDefinitionCreator())
         .create();

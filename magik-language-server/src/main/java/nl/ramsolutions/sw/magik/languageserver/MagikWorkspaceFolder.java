@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
-import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
-import nl.ramsolutions.sw.definitions.ProductDefinitionScanner;
+import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
+import nl.ramsolutions.sw.definitions.ProductDefFileScanner;
 import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
@@ -115,10 +115,10 @@ public class MagikWorkspaceFolder {
         this.getProductModuleDefFiles()
             .filter(
                 path ->
-                    path.toString().toLowerCase().endsWith(ProductDefinitionScanner.SW_PRODUCT_DEF)
+                    path.toString().toLowerCase().endsWith(ProductDefFileScanner.SW_PRODUCT_DEF)
                         || path.toString()
                             .toLowerCase()
-                            .endsWith(ModuleDefinitionScanner.SW_MODULE_DEF));
+                            .endsWith(ModuleDefFileScanner.SW_MODULE_DEF));
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();
     final Collection<FileEvent> fileEvents =
@@ -258,10 +258,10 @@ public class MagikWorkspaceFolder {
         workspacePath,
         Integer.MAX_VALUE,
         (path, attributes) ->
-            path.getFileName().toString().equalsIgnoreCase(ProductDefinitionScanner.SW_PRODUCT_DEF)
+            path.getFileName().toString().equalsIgnoreCase(ProductDefFileScanner.SW_PRODUCT_DEF)
                 || path.getFileName()
                     .toString()
-                    .equalsIgnoreCase(ModuleDefinitionScanner.SW_MODULE_DEF));
+                    .equalsIgnoreCase(ModuleDefFileScanner.SW_MODULE_DEF));
   }
 
   @Override

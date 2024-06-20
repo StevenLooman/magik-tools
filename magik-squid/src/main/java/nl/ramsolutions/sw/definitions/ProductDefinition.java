@@ -20,7 +20,7 @@ public class ProductDefinition implements IDefinition {
   private final @Nullable String versionComment;
   private final @Nullable String title;
   private final @Nullable String description;
-  private final List<String> requireds;
+  private final List<ProductUsage> usages;
 
   /**
    * Constructor.
@@ -32,7 +32,7 @@ public class ProductDefinition implements IDefinition {
    * @param versionComment Version comment.
    * @param title Title.
    * @param description Description.
-   * @param requireds List of requireds products.
+   * @param usages List of used products.
    */
   public ProductDefinition( // NOSONAR
       final @Nullable Location location,
@@ -43,7 +43,7 @@ public class ProductDefinition implements IDefinition {
       final @Nullable String versionComment,
       final @Nullable String title,
       final @Nullable String description,
-      final List<String> requireds) {
+      final List<ProductUsage> usages) {
     this.location = location;
     this.timestamp = timestamp;
     this.name = name;
@@ -52,7 +52,7 @@ public class ProductDefinition implements IDefinition {
     this.versionComment = versionComment;
     this.title = title;
     this.description = description;
-    this.requireds = List.copyOf(requireds);
+    this.usages = List.copyOf(usages);
   }
 
   /**
@@ -109,12 +109,8 @@ public class ProductDefinition implements IDefinition {
    *
    * @return Collection of required products for this product.
    */
-  public List<String> getRequireds() {
-    return Collections.unmodifiableList(this.requireds);
-  }
-
-  public void addRequired(final String productName) {
-    this.requireds.add(productName);
+  public List<ProductUsage> getUsages() {
+    return Collections.unmodifiableList(this.usages);
   }
 
   @Override
@@ -149,7 +145,7 @@ public class ProductDefinition implements IDefinition {
         && Objects.equals(otherSwProduct.getVersionComment(), this.getVersionComment())
         && Objects.equals(otherSwProduct.getTitle(), this.getTitle())
         && Objects.equals(otherSwProduct.getDescription(), this.getDescription())
-        && Objects.equals(otherSwProduct.getRequireds(), this.getRequireds());
+        && Objects.equals(otherSwProduct.getUsages(), this.getUsages());
   }
 
   @Override

@@ -1,8 +1,17 @@
 package nl.ramsolutions.sw.magik;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.OpenedFile;
+import nl.ramsolutions.sw.definitions.ProductDefinition;
+import nl.ramsolutions.sw.definitions.ProductDefinitionParser;
 import nl.ramsolutions.sw.definitions.parser.SwProductDefParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 
@@ -11,7 +20,9 @@ public class ProductDefFile extends OpenedFile {
   private static final URI DEFAULT_URI = URI.create("memory://product.def");
   public static final Location DEFAULT_LOCATION = new Location(DEFAULT_URI, Range.DEFAULT_RANGE);
 
+  private final @Nullable Instant timestamp;
   private final IDefinitionKeeper definitionKeeper;
+  private final @Nullable ProductDefFile parentProductDefFile;
   private AstNode astNode;
 
   /**
@@ -19,11 +30,66 @@ public class ProductDefFile extends OpenedFile {
    *
    * @param uri URI.
    * @param source Source.
+   * @param definitionKeeper DefinitionKeeper.
    */
   public ProductDefFile(
-      final URI uri, final String source, final IDefinitionKeeper definitionKeeper) {
+      final URI uri,
+      final String source,
+      final IDefinitionKeeper definitionKeeper,
+      final @Nullable ProductDefFile parentProductDefFile) {
     super(uri, source);
+    this.timestamp = null;
     this.definitionKeeper = definitionKeeper;
+    this.parentProductDefFile = parentProductDefFile;
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param path Path.
+   * @param definitionKeeper DefinitionKeeper.
+   * @throws IOException
+   */
+  public ProductDefFile(
+      final Path path,
+      final IDefinitionKeeper definitionKeeper,
+      final @Nullable ProductDefFile parentProductDefFile)
+      throws IOException {
+    super(path.toUri(), Files.readString(path, FileCharsetDeterminer.determineCharset(path)));
+    this.timestamp = Files.getLastModifiedTime(path).toInstant();
+    this.definitionKeeper = definitionKeeper;
+    this.parentProductDefFile = parentProductDefFile;
+  }
+
+  /**
+   * Get the timestamp for this file.
+   *
+   * @return Timestamp for this file.
+   */
+  @CheckForNull
+  public Instant getTimestamp() {
+    return this.timestamp;
+  }
+
+  @CheckForNull
+  public ProductDefFile getParentProductDefFile() {
+    return this.parentProductDefFile;
+  }
+
+  /**
+   * Get the product definition defined in this file.
+   *
+   * <p>Note that this does not include the parent product!
+   *
+   * @return {@link ProductDefinition} defined in this file.
+   * @throws IOException -
+   */
+  @CheckForNull
+  public ProductDefinition getProductDefinition() {
+    final ProductDefinitionParser parser = new ProductDefinitionParser();
+    final ProductDefinition parentProductDefinition =
+        this.parentProductDefFile != null ? this.parentProductDefFile.getProductDefinition() : null;
+    return parser.parseDefinition(this, parentProductDefinition);
   }
 
   /**

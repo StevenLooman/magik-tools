@@ -19,7 +19,7 @@ public class ModuleDefinition implements IDefinition {
   private final String baseVersion;
   private final @Nullable String currentVersion;
   private final @Nullable String description;
-  private final List<String> requireds;
+  private final List<ModuleUsage> usages;
 
   /**
    * Constructor.
@@ -30,7 +30,7 @@ public class ModuleDefinition implements IDefinition {
    * @param baseVersion Base version.
    * @param currentVersion Current version.
    * @param description Description.
-   * @param requireds List of requireds modules.
+   * @param usages List of requireds modules.
    */
   public ModuleDefinition(
       final @Nullable Location location,
@@ -40,7 +40,7 @@ public class ModuleDefinition implements IDefinition {
       final String baseVersion,
       final @Nullable String currentVersion,
       final @Nullable String description,
-      final List<String> requireds) {
+      final List<ModuleUsage> usages) {
     this.location = location;
     this.timestamp = timestamp;
     this.name = name;
@@ -48,7 +48,7 @@ public class ModuleDefinition implements IDefinition {
     this.baseVersion = baseVersion;
     this.currentVersion = currentVersion;
     this.description = description;
-    this.requireds = List.copyOf(requireds);
+    this.usages = List.copyOf(usages);
   }
 
   public String getName() {
@@ -83,8 +83,8 @@ public class ModuleDefinition implements IDefinition {
     return this.description;
   }
 
-  public List<String> getRequireds() {
-    return Collections.unmodifiableList(this.requireds);
+  public List<ModuleUsage> getUsages() {
+    return Collections.unmodifiableList(this.usages);
   }
 
   @Override

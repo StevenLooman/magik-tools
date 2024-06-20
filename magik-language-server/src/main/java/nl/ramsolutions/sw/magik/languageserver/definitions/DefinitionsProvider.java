@@ -52,14 +52,14 @@ public class DefinitionsProvider {
   public List<Location> provideDefinitions(
       final ProductDefFile productDefFile, final Position position) {
     final AstNode node = productDefFile.getTopNode();
-    final AstNode hoveredTokenNode = AstQuery.nodeAt(node, position);
-    if (hoveredTokenNode == null) {
+    final AstNode positionTokenNode = AstQuery.nodeAt(node, position);
+    if (positionTokenNode == null) {
       return Collections.emptyList();
     }
 
     final AstNode productNameNode =
         AstQuery.getParentFromChain(
-            hoveredTokenNode,
+            positionTokenNode,
             SwProductDefinitionGrammar.IDENTIFIER,
             SwProductDefinitionGrammar.PRODUCT_NAME);
     if (productNameNode == null) {

@@ -20,21 +20,24 @@ _block
 	write_with_spaces(date_time.now(), "started writing to", filepath)
 
 	_local ignore_vars << set.new_with(
-		:|mt:definition|,
 		:|mt:binary_operator_definition|,
 		:|mt:condition_definition|,
+		:|mt:datamodel_type_dumper|,
+		:|mt:definition|,
 		:|mt:global_definition|,
 		:|mt:method_definition|,
 		:|mt:module_definition|,
+		:|mt:module_usage|,
 		:|mt:package_definition|,
 		:|mt:parameter_definition|,
 		:|mt:procedure_definition|,
 		:|mt:product_definition|,
+		:|mt:product_usage|,
 		:|mt:slot_definition|,
 		:|mt:type_definition|,
 		:|mt:type_dumper|,
-		:|mt:datamodel_type_dumper|,
-		:|mt:type_merger|)
+		:|mt:type_merger|,
+		:|mt:usage|)
 	_local dumper << mt:type_dumper.new(filepath, ignore_vars)
 	dumper.run()
 
