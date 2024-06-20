@@ -160,26 +160,6 @@
 		],
 		"commands": [
 			{
-				"command": "magik.transmitFile",
-				"title": "Transmit a magik file to the active Smallworld Sessions",
-				"category": "Magik"
-			},
-			{
-				"command": "magik.transmitCurrentRegion",
-				"title": "Transmit current region of magik file to the active Smallworld Session",
-				"category": "Magik"
-			},
-			{
-				"command": "magik.transmitLoadList",
-				"title": "Transmit a load_list file to the active Smallworld Sessions",
-				"category": "Magik"
-			},
-			{
-				"command": "magik.transmitFile",
-				"title": "Transmit a magik file to the active Smallworld Sessions",
-				"category": "Magik"
-			},
-			{
 				"command": "magik.custom.reIndex",
 				"title": "Reindex files",
 				"category": "Magik"
