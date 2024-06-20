@@ -6,8 +6,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
 import nl.ramsolutions.sw.definitions.ModuleDefinition;
-import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
+import nl.ramsolutions.sw.magik.ModuleDefFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -39,7 +40,8 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
     final Path path =
         this.getPath(
             "src/test/resources/test_product/modules/test_module/source/test_exemplar.magik");
-    final ModuleDefinition moduleDefinition = ModuleDefinitionScanner.swModuleForPath(path);
+    final ModuleDefFile moduleDefFile = ModuleDefFileScanner.getModuleDefFileForPath(path);
+    final ModuleDefinition moduleDefinition = moduleDefFile.getModuleDefinition();
     definitionKeeper.add(moduleDefinition);
 
     definitionKeeper.add(
@@ -69,7 +71,8 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
     final Path path =
         this.getPath(
             "src/test/resources/test_product/modules/test_module/source/test_exemplar.magik");
-    final ModuleDefinition moduleDefinition = ModuleDefinitionScanner.swModuleForPath(path);
+    final ModuleDefFile moduleDefFile = ModuleDefFileScanner.getModuleDefFileForPath(path);
+    final ModuleDefinition moduleDefinition = moduleDefFile.getModuleDefinition();
     definitionKeeper.add(moduleDefinition);
 
     definitionKeeper.add(

@@ -119,14 +119,14 @@ public class MethodInvocationNodeHelper {
         .toList();
   }
 
-  private boolean anyChildTokenIs(AstNode parentNode, MagikOperator magikOperator) {
+  private boolean anyChildTokenIs(final AstNode parentNode, final MagikOperator magikOperator) {
     return parentNode.getChildren().stream()
         .filter(childNode -> childNode.isNot(MagikGrammar.values()))
         .map(AstNode::getTokenValue)
         .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(magikOperator.getValue()));
   }
 
-  private boolean anyChildTokenIs(AstNode parentNode, MagikPunctuator magikPunctuator) {
+  private boolean anyChildTokenIs(final AstNode parentNode, final MagikPunctuator magikPunctuator) {
     return parentNode.getChildren().stream()
         .filter(childNode -> childNode.isNot(MagikGrammar.values()))
         .map(AstNode::getTokenValue)

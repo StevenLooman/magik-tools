@@ -1,0 +1,65 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Module usage.
+## @slot {sw:char16_vector} name
+def_slotted_exemplar(
+	:module_usage,
+	{
+		{:name, _unset, :readable, :public}
+	},
+	{@mt:usage})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method module_usage.new(name)
+	## Constructor.
+	## @param {sw:char16_vector} name
+	## @return {_self}
+	_return _clone.init(name)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method module_usage.init(name)
+	## Initializer.
+	## @param {sw:char16_vector} name
+	## @return {_self}
+	.name << name
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method module_usage.equals?(other)
+	## Equals?
+	## @param {mt:module_usage} other
+	## @return {sw:false}
+	_return _self.name = other.name
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, module_usage, module_usage,
+	_proc(usage_a, usage_b)
+		## @param {mt:module_usage} usage_a
+		## @param {mt:module_usage} usage_b
+		## @return {sw:false|sw:maybe}
+		_return usage_a.name _cf usage_b.name
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, module_usage, module_usage,
+	_proc(usage_a, usage_b)
+		## @param {mt:module_usage} usage_a
+		## @param {mt:module_usage} usage_b
+		## @return {sw:false|sw:maybe}
+		_return usage_a.equals?(usage_b)
+	_endproc)
+$
+
+module_usage.define_show_attributes(
+	:name)
+$

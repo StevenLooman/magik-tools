@@ -10,8 +10,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.definitions.ModuleDefinition;
-import nl.ramsolutions.sw.definitions.ProductDefinition;
+import nl.ramsolutions.sw.definitions.ModuleUsage;
+import nl.ramsolutions.sw.definitions.ProductUsage;
 import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionGrammar;
 import nl.ramsolutions.sw.definitions.api.SwProductDefinitionGrammar;
 import nl.ramsolutions.sw.magik.Location;
@@ -92,16 +92,14 @@ public class ReferencesProvider {
   public List<Location> provideReferences(
       final ModuleDefFile moduleDefFile, final Position position) {
     final AstNode node = moduleDefFile.getTopNode();
-    final AstNode hoveredTokenNode = AstQuery.nodeAt(node, position);
-    if (hoveredTokenNode == null) {
+    final AstNode tokenNode = AstQuery.nodeAt(node, position);
+    if (tokenNode == null) {
       return Collections.emptyList();
     }
 
     final AstNode moduleNameNode =
         AstQuery.getParentFromChain(
-            hoveredTokenNode,
-            SwModuleDefinitionGrammar.IDENTIFIER,
-            SwModuleDefinitionGrammar.MODULE_NAME);
+            tokenNode, SwModuleDefinitionGrammar.IDENTIFIER, SwModuleDefinitionGrammar.MODULE_NAME);
     if (moduleNameNode == null) {
       return Collections.emptyList();
     }
@@ -265,18 +263,22 @@ public class ReferencesProvider {
   private List<Location> referencesToProductName(
       final IDefinitionKeeper definitionKeeper, final String productName) {
     LOGGER.debug("Finding references to product: {}", productName);
+    final ProductUsage searchedProductUsage = new ProductUsage(productName, null);
     return definitionKeeper.getProductDefinitions().stream()
-        .filter(productDef -> productDef.getRequireds().contains(productName))
-        .map(ProductDefinition::getLocation)
+        .flatMap(def -> def.getUsages().stream())
+        .filter(productUsage -> productUsage.equals(searchedProductUsage))
+        .map(ProductUsage::getLocation)
         .toList();
   }
 
   private List<Location> referencesToModuleName(
       final IDefinitionKeeper definitionKeeper, final String moduleName) {
     LOGGER.debug("Finding references to product: {}", moduleName);
+    final ModuleUsage searchedModuleUsage = new ModuleUsage(moduleName, null);
     return definitionKeeper.getModuleDefinitions().stream()
-        .filter(moduleDef -> moduleDef.getRequireds().contains(moduleName))
-        .map(ModuleDefinition::getLocation)
+        .flatMap(def -> def.getUsages().stream())
+        .filter(moduleUsage -> moduleUsage.equals(searchedModuleUsage))
+        .map(ModuleUsage::getLocation)
         .toList();
   }
 }

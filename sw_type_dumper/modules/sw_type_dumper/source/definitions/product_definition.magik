@@ -7,7 +7,7 @@ _pragma(classify_level=basic, topic=type_dumper)
 ## @slot {sw:char16_vector|sw:unset} version
 ## @slot {sw:char16_vector|sw:unset} version_comment
 ## @slot {sw:char16_vector|sw:unset} parent
-## @slot {sw:simple_vector<E=sw:char16_vector>} requireds
+## @slot {sw:simple_vector<E=mt:product_usage>} usages
 def_slotted_exemplar(
 	:product_definition,
 	{
@@ -15,36 +15,38 @@ def_slotted_exemplar(
 		{:version, _unset, :readable, :public},
 		{:version_comment, _unset, :readable, :public},
 		{:parent, _unset, :readable, :public},
-		{:requireds, _unset, :readable, :public}
+		{:usages, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_method product_definition.new(name, version, version_comment, parent, requireds)
+_method product_definition.new(name, version, version_comment, parent, usages)
 	## Constructor.
 	## @param {sw:char16_vector} name
 	## @param {sw:char16_vector|sw:unset} version
 	## @param {sw:char16_vector|sw:unset} version_comment
 	## @param {sw:char16_vector|sw:unset} parent
-	## @param {sw:simple_vector<E=sw:char16_vector>} requireds
-	_return _clone.init(name, version, version_comment, parent, requireds)
+	## @param {sw:simple_vector<E=mt:product_usage>} usages
+	## @return {_self}
+	_return _clone.init(name, version, version_comment, parent, usages)
 _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_private _method product_definition.init(name, version, version_comment, parent, requireds)
+_private _method product_definition.init(name, version, version_comment, parent, usages)
 	## Initializer.
 	## @param {sw:char16_vector} name
 	## @param {sw:char16_vector|sw:unset} version
 	## @param {sw:char16_vector|sw:unset} version_comment
 	## @param {sw:char16_vector|sw:unset} parent
-	## @param {sw:simple_vector<E=sw:char16_vector>} requireds
+	## @param {sw:simple_vector<E=mt:product_usage>} usages
+	## @return {_self}
 	.name << name
 	.version << version
 	.version_comment << version_comment
 	.parent << parent
-	.requireds << requireds
+	.usages << usages
 	_return _self
 _endmethod
 $
@@ -59,16 +61,17 @@ _method product_definition.new_from(product)
 		_then
 			>> product.parent.name
 		_endif
-	_local requireds << product.prerequisites.
+	_local usages << product.prerequisites.
 		map(_proc(prereq) _return prereq[1] _endproc).
 		as_sorted_collection().
-		as_simple_vector()
+		as_simple_vector().
+		map(_proc(prereq) _return product_usage.new(prereq) _endproc)
 	_return _self.new(
 		product.name,
 		product.version_string,
 		product.version.comment,
 		parent,
-		requireds)
+		usages)
 _endmethod
 $
 
@@ -89,7 +92,7 @@ _method product_definition.equals?(other)
 		_self.version = other.version _andif
 		_self.version_comment = other.version_comment _andif
 		_self.parent = other.parent _andif
-		_self.requireds.eq?(other.requireds)
+		_self.usages.eq?(other.usages)
 _endmethod
 $
 

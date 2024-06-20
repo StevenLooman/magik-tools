@@ -7,7 +7,7 @@ _pragma(classify_level=basic, topic=type_dumper)
 ## @slot {sw:char16_vector|sw:unset} product
 ## @slot {sw:char16_vector|sw:unset} base_version
 ## @slot {sw:char16_vector|sw:unset} current_version
-## @slot {sw:simple_vector<E=sw:char16_vector>} requireds
+## @slot {sw:simple_vector<E=mt:module_usage>} usages
 def_slotted_exemplar(
 	:module_definition,
 	{
@@ -15,36 +15,36 @@ def_slotted_exemplar(
 		{:product, _unset, :readable, :public},
 		{:base_version, _unset, :readable, :public},
 		{:current_version, _unset, :readable, :public},
-		{:requireds, _unset, :readable, :public}
+		{:usages, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_method module_definition.new(name, product, base_version, current_version, requireds)
+_method module_definition.new(name, product, base_version, current_version, usages)
 	## Constructor.
 	## @param {sw:char16_vector} name
 	## @param {sw:char16_vector|sw:unset} product
 	## @param {sw:char16_vector|sw:unset} base_version
 	## @param {sw:char16_vector|sw:unset} current_version
-	## @param {sw:simple_vector<E=sw:char16_vector>} requireds
-	_return _clone.init(name, product, base_version, current_version, requireds)
+	## @param {sw:simple_vector<E=mt:module_usage>} usages
+	_return _clone.init(name, product, base_version, current_version, usages)
 _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_private _method module_definition.init(name, product, base_version, current_version, requireds)
+_private _method module_definition.init(name, product, base_version, current_version, usages)
 	## Initializer.
 	## @param {sw:char16_vector} name
 	## @param {sw:char16_vector|sw:unset} product
 	## @param {sw:char16_vector|sw:unset} base_version
 	## @param {sw:char16_vector|sw:unset} current_version
-	## @param {sw:simple_vector<E=sw:char16_vector>} requireds
+	## @param {sw:simple_vector<E=mt:module_usage>} usages
 	.name << name
 	.product << product
 	.base_version << base_version
 	.current_version << current_version
-	.requireds << requireds
+	.usages << usages
 	_return _self
 _endmethod
 $
@@ -62,8 +62,8 @@ _method module_definition.new_from(module)
 		module.prerequisites.
 			map(_proc(prereq) _return prereq[1] _endproc).
 			as_sorted_collection().
-			as_simple_vector())
-
+			as_simple_vector().
+			map(_proc(prereq) _return module_usage.new(prereq) _endproc))
 _endmethod
 $
 
@@ -84,7 +84,7 @@ _method module_definition.equals?(other)
 		_self.product = other.product _andif
 		_self.base_version = other.base_version _andif
 		_self.current_version = other.current_version _andif
-		_self.requireds.eq?(other.requireds)
+		_self.usages.eq?(other.usages)
 _endmethod
 $
 

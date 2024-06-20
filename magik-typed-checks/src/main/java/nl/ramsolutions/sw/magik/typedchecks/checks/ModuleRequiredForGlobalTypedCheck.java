@@ -12,8 +12,9 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
+import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
 import nl.ramsolutions.sw.definitions.ModuleDefinition;
-import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
+import nl.ramsolutions.sw.magik.ModuleDefFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -51,16 +52,23 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
   private ModuleDefinition readModuleDefinition() {
     final URI uri = this.getMagikFile().getUri();
     final Path path = Path.of(uri);
+    final ModuleDefFile moduleDefFile;
     try {
-      // TODO: Better get this from IDefinitionKeeper, instead of reading this every for every file.
-      return ModuleDefinitionScanner.swModuleForPath(path);
+      // TODO: Better get this from IDefinitionKeeper, instead of reading this for every file.
+      moduleDefFile = ModuleDefFileScanner.getModuleDefFileForPath(path);
     } catch (final RecognitionException exception) {
       LOGGER.warn("Unable to parse module.def");
+      return null;
     } catch (final IOException exception) {
       LOGGER.warn("Caught exception", exception);
+      return null;
     }
 
-    return null;
+    if (moduleDefFile == null) {
+      return null;
+    }
+
+    return moduleDefFile.getModuleDefinition();
   }
 
   private Set<String> getRequiredModules() {
@@ -82,8 +90,8 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
 
       seen.add(moduleName);
 
-      final Collection<String> requireds = currentModuleDefinition.getRequireds();
-      requireds.stream()
+      currentModuleDefinition.getUsages().stream()
+          .map(moduleUsage -> moduleUsage.getName())
           .map(definitionKeeper::getModuleDefinitions)
           .flatMap(Collection::stream)
           .forEach(stack::push);

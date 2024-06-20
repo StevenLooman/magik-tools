@@ -1,0 +1,73 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Usage.
+def_slotted_exemplar(
+	:usage,
+	{
+	})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method usage.new_from_json(instruction)
+	## Construct self from JSON.
+	## @param {sw:equality_hash_table} instruction
+	## @return {_self}
+	_return _clone.init_from_json(instruction)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method usage.init_from_json(instruction)
+	## usage self from JSON.
+	## @param {sw:equality_hash_table} instruction
+	## @return {_self}
+	_for name _over _self.sys!all_slot_names().fast_elements()
+	_loop
+		_local fixed_name << name.write_string.split_by(%!)[2].as_symbol()
+		_self.sys!slot(fixed_name) << instruction[fixed_name]
+	_endloop
+
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_abstract _method usage.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method usage.as_properties()
+	## Get slots as hash table.
+	## @return {sw:equality_property_list<K=sw:char16_vector, E=sw:object>}
+	_local table << sw:equality_property_list.new()
+	_for name, value _over _self.sys!slot_names_and_values()
+	_loop
+		_local fixed_name << name.write_string.split_by(%!)[2]
+		table[fixed_name] << value
+	_endloop
+	_return table
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method usage.generate_json_string()
+	## Generate a json string from self.
+	## @return {sw:char16_vector}
+	_local usage << _self.as_properties()
+	_local encoder << sw:json_encoder.new()
+	_return encoder.generate_string(usage)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_abstract _method usage.equals?(other)
+	## Equals?
+	## @param {mt:usage} other
+	## @return {sw:false}
+_endmethod
+$

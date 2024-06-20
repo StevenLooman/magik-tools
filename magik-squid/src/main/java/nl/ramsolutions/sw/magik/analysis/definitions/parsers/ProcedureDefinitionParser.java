@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
+import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
@@ -74,7 +74,7 @@ public class ProcedureDefinitionParser {
     final Instant timestamp = this.magikFile.getTimestamp();
 
     // Figure module name.
-    final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
+    final String moduleName = ModuleDefFileScanner.getModuleName(uri);
 
     // Figure procedure name.
     final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);

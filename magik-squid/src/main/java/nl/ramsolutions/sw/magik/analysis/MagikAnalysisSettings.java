@@ -24,7 +24,7 @@ public class MagikAnalysisSettings {
   }
 
   public boolean getTypingIndexGlobalUsages() {
-    return this.properties.getPropertyBoolean(INDEX_GLOBAL_USAGES) == Boolean.TRUE;
+    return this.properties.getPropertyBoolean(INDEX_GLOBAL_USAGES) != Boolean.FALSE;
   }
 
   public boolean getTypingIndexMethodUsages() {
@@ -32,14 +32,14 @@ public class MagikAnalysisSettings {
   }
 
   public boolean getTypingIndexSlotUsages() {
-    return this.properties.getPropertyBoolean(INDEX_SLOT_USAGES) == Boolean.TRUE;
+    return this.properties.getPropertyBoolean(INDEX_SLOT_USAGES) != Boolean.FALSE;
   }
 
   public boolean getTypingIndexConditionUsages() {
-    return this.properties.getPropertyBoolean(INDEX_CONDITION_USAGES) == Boolean.TRUE;
+    return this.properties.getPropertyBoolean(INDEX_CONDITION_USAGES) != Boolean.FALSE;
   }
 
   public boolean getTypingCacheIndexedDefinitions() {
-    return this.properties.getPropertyBoolean(CACHE_INDEXED_DEFINITIONS) == Boolean.TRUE;
+    return this.properties.getPropertyBoolean(CACHE_INDEXED_DEFINITIONS) != Boolean.FALSE;
   }
 }

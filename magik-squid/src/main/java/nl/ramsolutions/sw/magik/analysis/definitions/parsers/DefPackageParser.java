@@ -5,7 +5,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import nl.ramsolutions.sw.definitions.ModuleDefinitionScanner;
+import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
@@ -86,7 +86,7 @@ public class DefPackageParser {
     final Instant timestamp = this.magikFile.getTimestamp();
 
     // Figure module name.
-    final String moduleName = ModuleDefinitionScanner.getModuleName(uri);
+    final String moduleName = ModuleDefFileScanner.getModuleName(uri);
 
     // Figure statement node.
     final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);

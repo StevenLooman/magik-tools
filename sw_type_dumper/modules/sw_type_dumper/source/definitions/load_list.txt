@@ -1,5 +1,8 @@
+usage
 definition
+product_usage
 product_definition
+module_usage
 module_definition
 package_definition
 slot_definition
