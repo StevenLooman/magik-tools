@@ -58,7 +58,7 @@ export class MagikSessionProvider implements vscode.Disposable {
 			return;
 		}
 
-		this.currentSession.transmitEditor(vscode.window.activeTextEditor);
+		this.currentSession.transmitMagik(vscode.window.activeTextEditor);
 	}
 
 	private command_transmit_current_region() {
@@ -155,11 +155,8 @@ class MagikSession implements vscode.Disposable {
 	 * @param editor Editor to transmit.
 	 */
 	public transmitEditorRegion(editor: vscode.TextEditor) {
-		// Save file in editor.
-		editor.document.save();
-
-		// Get active editor/document.
 		const doc = editor.document;
+		doc.save();
 
 		// Get cursor position and determine range to transmit.
 		const position = editor.selection.active;
@@ -169,8 +166,9 @@ class MagikSession implements vscode.Disposable {
 		// Build prefix, with package specifications.
 		const prefix = this.buildPrefix(doc, selection.anchor);
 
+		// Transmit to session.
 		const text = prefix + doc.getText(selection);
-		const docPath = doc.uri.path;
+		const docPath = doc.uri.fsPath;
 		this.sendToSession(text, docPath);
 
 		this.showSession();
@@ -180,16 +178,16 @@ class MagikSession implements vscode.Disposable {
 	 * Transmit editor to session.
 	 * @param editor Editor to transmit.
 	 */
-	 public transmitEditor(editor: vscode.TextEditor) {
+	 public transmitMagik(editor: vscode.TextEditor) {
 		// Save file in editor.
-		if (editor.document.uri.scheme != 'untitled') {
-			editor.document.save();
+		const doc = editor.document;
+		if (doc.uri.scheme != 'untitled') {
+			doc.save();
 		}
 
 		// Get active file.
-		const doc = editor.document;
 		const text = doc.getText();
-		const docPath = doc.uri.path;
+		const docPath = doc.uri.fsPath;
 
 		this.sendToSession(text, docPath);
 
@@ -198,15 +196,16 @@ class MagikSession implements vscode.Disposable {
 
 	public transmitLoadList(editor: vscode.TextEditor) {
 		// Save file in editor.
-		if (editor.document.uri.scheme != 'untitled') {
-			editor.document.save();
+		const doc = editor.document;
+		if (doc.uri.scheme != 'untitled') {
+			doc.save();
 		}
 
 		// Get active file.
-		const docPath = editor.document.uri.path;
-		const dockPathParent = path.dirname(docPath);
+		const docPath = doc.uri.fsPath;
+		const docPathParent = path.dirname(docPath);
 
-		const text = `sw:load_file_list("${dockPathParent}")\n$`;
+		const text = `sw:load_file_list("${docPathParent}")\n$`;
 		this.sendToSession(text, undefined);
 
 		this.showSession();
@@ -214,12 +213,13 @@ class MagikSession implements vscode.Disposable {
 
 	public transmitProductDef(editor: vscode.TextEditor) {
 		// Save file in editor.
-		if (editor.document.uri.scheme != 'untitled') {
-			editor.document.save();
+		const doc = editor.document;
+		if (doc.uri.scheme != 'untitled') {
+			doc.save();
 		}
 
 		// Get active file.
-		const docPath = editor.document.uri.path;
+		const docPath = doc.uri.fsPath;
 		const docPathParent = path.dirname(docPath);
 
 		// Load/reinitialise product in active session.
@@ -241,12 +241,13 @@ $`;
 
 	public transmitModuleDef(editor: vscode.TextEditor) {
 		// Save file in editor.
-		if (editor.document.uri.scheme != 'untitled') {
-			editor.document.save();
+		const doc = editor.document;
+		if (doc.uri.scheme != 'untitled') {
+			doc.save();
 		}
 
 		// Get active file.
-		const docPath = editor.document.uri.path;
+		const docPath = doc.uri.fsPath;
 		const docPathParent = path.dirname(docPath);
 
 		// (Re)load module in active session.

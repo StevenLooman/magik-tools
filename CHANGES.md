@@ -40,6 +40,7 @@
 - Replace `magik.libsDirs` with `magik.productDirs`, register products instead of libs directories.
 - Dump types database (per workspace folder) on shutdown, read it on start up and re-index any changed files, for quicker initialization.
 - Transmit a product.def/module.def/load_list.txt with F4-b from VSCode.
+- Fix VSCode UNC path handling on Windows.
 - Several fixes.
 
 0.9.1 (2024-03-13)
