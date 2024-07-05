@@ -30,4 +30,12 @@
   "tslint.enable": true,
   "typescript.tsc.autoDetect": "off",
   "typescript.preferences.quoteStyle": "single",
+  "gitlab.duoChat.enabled": false,
+  "gitlab.aiAssistedCodeSuggestions.enabled": false,
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  },
 }
