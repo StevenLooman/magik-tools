@@ -93,11 +93,14 @@ public class MethodDefinitionUsageParser {
             methodInvocationNode -> {
               final MethodInvocationNodeHelper helper =
                   new MethodInvocationNodeHelper(methodInvocationNode);
+              // TODO: This can only get the TypeString of method invocations on globals,
+              // as this doesn't do any deep reasoning.
+              final TypeString ref = TypeString.UNDEFINED;
               final String methodName = helper.getMethodName();
               final URI uri = this.node.getToken().getURI();
               final Location location = new Location(uri, methodInvocationNode);
               final Location validLocation = Location.validLocation(location);
-              return new MethodUsage(TypeString.UNDEFINED, methodName, validLocation);
+              return new MethodUsage(ref, methodName, validLocation);
             })
         .collect(Collectors.toUnmodifiableSet());
   }

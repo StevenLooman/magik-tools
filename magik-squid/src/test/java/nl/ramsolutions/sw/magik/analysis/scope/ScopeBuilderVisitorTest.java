@@ -439,6 +439,32 @@ class ScopeBuilderVisitorTest {
   }
 
   @Test
+  void testImportLocal2() {
+    final String code =
+        """
+        _method a.b
+            _local a
+            _proc@proc_1()
+                _proc@proc_2()
+                    _import a
+                _endproc
+            _endproc
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+    final Scope proc2Scope = methodScope.getSelfAndDescendantScopes().get(2);
+
+    final ScopeEntry entryA = proc2Scope.getScopeEntry("a");
+    assertThat(entryA).isNotNull();
+    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.IMPORT);
+    assertThat(entryA.getImportedEntry()).isNotNull();
+    assertThat(entryA.getDefinitionNode().getTokenLine()).isEqualTo(5);
+    assertThat(entryA.getUsages()).isEmpty();
+  }
+
+  @Test
   void testImportDefined() {
     final String code =
         """
