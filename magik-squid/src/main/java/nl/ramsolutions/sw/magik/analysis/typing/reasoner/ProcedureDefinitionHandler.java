@@ -30,6 +30,12 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
     final MagikTypedFile magikFile = state.getMagikFile();
     final ProcedureDefinitionParser parser = new ProcedureDefinitionParser(magikFile, node);
     final List<MagikDefinition> definitions = parser.parseDefinitions();
+    if (definitions.isEmpty()) {
+      // Possibly a syntax error or incomplete MagikGrammar.
+      this.assignAtom(node, ExpressionResultString.UNDEFINED);
+      return;
+    }
+
     final ProcedureDefinition procDef = (ProcedureDefinition) definitions.iterator().next();
 
     // Try to determine result if none was given via type-doc.

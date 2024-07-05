@@ -209,6 +209,11 @@ public class RestrictingConditionWalker extends MagikAstWalker {
       Objects.requireNonNull(scopeEntry);
 
       final List<AstNode> argumentNodes = helper.getArgumentExpressionNodes();
+      if (argumentNodes.isEmpty()) {
+        // Robustness.
+        return;
+      }
+
       final AstNode argument0Node = argumentNodes.get(0);
       final ExpressionResultString argument0Result = this.state.getNodeType(argument0Node);
       final TypeString restrictedTypeStr = argument0Result.get(0, TypeString.UNDEFINED);
