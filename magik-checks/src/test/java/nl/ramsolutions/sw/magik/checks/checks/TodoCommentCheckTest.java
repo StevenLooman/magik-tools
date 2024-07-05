@@ -15,7 +15,9 @@ class TodoCommentCheckTest extends MagikCheckTestBase {
   @ValueSource(
       strings = {
         "# This should not trigger an issue",
-        "# This should trigger an issue, although it is used as a hack."
+        "# This should not trigger an issue, although it is used as a hack.",
+        "# TEMPLATE: This should not trigger an issue",
+        "# NOTES: This should not trigger an issue as well",
       })
   void testOk(final String code) {
     final MagikCheck check = new TodoCommentCheck();
@@ -25,7 +27,10 @@ class TodoCommentCheckTest extends MagikCheckTestBase {
 
   @ParameterizedTest
   @ValueSource(
-      strings = {"# TODO: This should trigger an issue", "# XXX: This should trigger an issue"})
+      strings = {
+        "# TODO: This should trigger an issue",
+        "# XXX: This should trigger an issue",
+      })
   void testForbiddenWord(final String code) {
     final MagikCheck check = new TodoCommentCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
@@ -36,7 +41,7 @@ class TodoCommentCheckTest extends MagikCheckTestBase {
   @ValueSource(
       strings = {
         "# XXX TODO: This should trigger two issues",
-        "# XXX FIXME: This should trigger two issues"
+        "# XXX FIXME: This should trigger two issues",
       })
   void testForbiddenWordTwice(final String code) {
     final MagikCheck check = new TodoCommentCheck();
