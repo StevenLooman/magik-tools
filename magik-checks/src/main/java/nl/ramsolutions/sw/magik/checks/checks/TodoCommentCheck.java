@@ -4,6 +4,8 @@ import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
@@ -45,26 +47,41 @@ public class TodoCommentCheck extends MagikCheck {
 
   private void checkComment(final Token token) {
     final String comment = token.getOriginalValue();
-    this.getForbiddenWords().stream()
-        .forEach(
-            word -> {
-              int fromIndex = 0;
-              while (fromIndex != -1) {
-                fromIndex = comment.indexOf(word, fromIndex);
-                if (fromIndex == -1) {
-                  break;
-                }
+    final String forbiddenWordsRegexp =
+        this.getForbiddenWords().stream().collect(Collectors.joining("|", "\\b(", ")\\b"));
+    final Pattern pattern = Pattern.compile(forbiddenWordsRegexp);
+    final Matcher matcher = pattern.matcher(comment);
+    while (matcher.find()) {
+      final String word = matcher.group(1);
+      final String message = String.format(MESSAGE, word);
+      this.addIssue(
+          token.getLine(),
+          token.getColumn() + matcher.start(1),
+          token.getLine(),
+          token.getColumn() + matcher.end(1),
+          message);
+    }
 
-                final String message = String.format(MESSAGE, word);
-                this.addIssue(
-                    token.getLine(),
-                    token.getColumn() + fromIndex,
-                    token.getLine(),
-                    token.getColumn() + fromIndex + word.length(),
-                    message);
+    // this.getForbiddenWords().stream()
+    //     .forEach(
+    //         word -> {
+    //           int fromIndex = 0;
+    //           while (fromIndex != -1) {
+    //             fromIndex = comment.indexOf(word, fromIndex);
+    //             if (fromIndex == -1) {
+    //               break;
+    //             }
 
-                fromIndex += word.length();
-              }
-            });
+    //             final String message = String.format(MESSAGE, word);
+    //             this.addIssue(
+    //                 token.getLine(),
+    //                 token.getColumn() + fromIndex,
+    //                 token.getLine(),
+    //                 token.getColumn() + fromIndex + word.length(),
+    //                 message);
+
+    //             fromIndex += word.length();
+    //           }
+    //         });
   }
 }
