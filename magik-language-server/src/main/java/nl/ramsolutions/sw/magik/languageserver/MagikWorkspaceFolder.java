@@ -126,6 +126,7 @@ public class MagikWorkspaceFolder {
             indexableFiles,
             filteredDefinitionKeeper.getProductDefinitions(),
             filteredDefinitionKeeper.getModuleDefinitions());
+    LOGGER.debug("Product/module file event count: {}", fileEvents.size());
     for (final FileEvent fileEvent : fileEvents) {
       this.productIndexer.handleFileEvent(fileEvent);
     }
@@ -152,7 +153,7 @@ public class MagikWorkspaceFolder {
             filteredDefinitionKeeper.getConditionDefinitions(),
             filteredDefinitionKeeper.getProcedureDefinitions());
 
-    LOGGER.debug("File event count: {}", fileEvents.size());
+    LOGGER.debug("Magik file event count: {}", fileEvents.size());
     for (final FileEvent fileEvent : fileEvents) {
       this.magikIndexer.handleFileEvent(fileEvent);
     }

@@ -82,11 +82,13 @@ public class MagikChecksDiagnosticsProvider {
 
     final List<MagikIssue> issues = check.scanFileForIssues(magikFile);
 
-    LOGGER_DURATION.trace(
-        "Duration: {} check: {}, uri: {}",
-        (System.nanoTime() - start) / 1000000000.0,
-        check.getClass().getSimpleName(),
-        magikFile.getUri());
+    if (LOGGER_DURATION.isTraceEnabled()) {
+      LOGGER_DURATION.trace(
+          "Duration: {} check: {}, uri: {}",
+          String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+          check.getClass().getSimpleName(),
+          magikFile.getUri());
+    }
 
     return issues;
   }
