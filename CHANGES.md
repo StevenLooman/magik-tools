@@ -42,6 +42,7 @@
 - Transmit a product.def/module.def/load_list.txt with F4-b from VSCode.
 - Fix VSCode UNC path handling on Windows.
 - Fix TodoComment check checking whole word.
+- Also search references in procedures.
 - Several fixes.
 
 0.9.1 (2024-03-13)
