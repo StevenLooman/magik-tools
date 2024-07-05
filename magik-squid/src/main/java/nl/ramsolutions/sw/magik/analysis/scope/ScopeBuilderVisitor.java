@@ -162,16 +162,23 @@ public class ScopeBuilderVisitor extends MagikVisitor {
               // Figure parent entry.
               ScopeEntry parentEntry = null;
               if (scopeEntryType == ScopeEntry.Type.IMPORT) {
-                final AstNode procScopeNode =
+                AstNode procScopeNode =
                     identifierNode.getFirstAncestor(
                         MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
-                if (procScopeNode != null) {
+                while (procScopeNode != null) {
                   final AstNode parentScopeNode = procScopeNode.getFirstAncestor(MagikGrammar.BODY);
                   final Scope parentScope =
                       parentScopeNode != null
                           ? this.scopeIndex.get(parentScopeNode)
                           : this.globalScope;
                   parentEntry = parentScope.getScopeEntry(identifier);
+                  if (parentEntry != null) {
+                    break;
+                  }
+
+                  procScopeNode =
+                      procScopeNode.getFirstAncestor(
+                          MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
                 }
               }
 
@@ -179,7 +186,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
                   && !parentEntry.isType(ScopeEntry.Type.LOCAL)
                   && !parentEntry.isType(ScopeEntry.Type.CONSTANT)
                   && !parentEntry.isType(ScopeEntry.Type.PARAMETER)) {
-                // But only if parent entry is _local/_constant/parameter/iterator
+                // But only if parent entry is _local/_constant/parameter.
                 parentEntry = null;
               }
 

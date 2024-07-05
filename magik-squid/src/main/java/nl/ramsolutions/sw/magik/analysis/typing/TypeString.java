@@ -595,6 +595,7 @@ public final class TypeString implements Comparable<TypeString> {
 
                   return Stream.of(typeStr);
                 })
+            .distinct()
             .collect(Collectors.toUnmodifiableSet());
     if (combinedTypes.size() == 1) {
       return combinedTypes.stream().findFirst().orElseThrow();
