@@ -39,7 +39,9 @@ export class MagikSessionProvider implements vscode.Disposable {
 
 	private registerWindowHandlers() {
 		vscode.window.onDidOpenTerminal((terminal: vscode.Terminal) => {
-			if ((terminal.creationOptions.name ?? '').startsWith(MagikAliasTaskProvider.AliasType)) {
+			if ((terminal.creationOptions.name ?? '').startsWith(MagikAliasTaskProvider.AliasType)
+				|| (terminal.creationOptions.shellArgs ?? '').includes("runalias.exe ")
+				|| (terminal.creationOptions.shellArgs ?? '').includes("runalias ")) {
 				this.currentSession = new MagikSession(terminal);
 			}
 		});
