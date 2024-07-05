@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.definitions.ModuleUsage;
 import nl.ramsolutions.sw.definitions.ProductUsage;
 import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionGrammar;
@@ -225,10 +226,9 @@ public class ReferencesProvider {
     }
 
     // TODO: We need to resolve the referenced types, as the indexed globals might not have the
-    // right
-    //       (unresolved) package. I.e., We might need to match only on identifier, as the
-    // usedGlobal might have a
-    //       different package? This is because the ref might be stored with the current package.
+    // right (unresolved) package. I.e., We might need to match only on identifier, as the
+    // usedGlobal might have a different package? This is because the ref might be stored with the
+    // current package.
     final TypeString exemplarTypeString = exemplarDefinition.getTypeString();
     final Set<TypeString> searchedTypes = Set.of(exemplarTypeString);
     final Collection<GlobalUsage> wantedGlobalUsages =
@@ -240,9 +240,12 @@ public class ReferencesProvider {
     // Find references.
     // TODO: Also parameters, return types of methods/procedures.
     // TODO: Also slots of methods.
-    // TODO: Also search in all procedures.
-    return definitionKeeper.getMethodDefinitions().stream()
-        .flatMap(def -> def.getUsedGlobals().stream())
+    return Stream.of(
+            definitionKeeper.getMethodDefinitions().stream()
+                .flatMap(def -> def.getUsedGlobals().stream()),
+            definitionKeeper.getProcedureDefinitions().stream()
+                .flatMap(def -> def.getUsedGlobals().stream()))
+        .flatMap(stream -> stream)
         .filter(filterPredicate::test)
         .map(GlobalUsage::getLocation)
         .map(Location::validLocation)
