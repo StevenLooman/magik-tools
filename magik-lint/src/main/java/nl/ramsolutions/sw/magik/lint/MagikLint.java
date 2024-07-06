@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.MagikToolsProperties;
@@ -157,18 +158,23 @@ public class MagikLint {
    * @throws ReflectiveOperationException -
    */
   public void run(final Collection<Path> paths) throws IOException, ReflectiveOperationException {
-    final long maxInfractions = this.properties.getPropertyLong(MagikLint.KEY_MAX_INFRACTIONS);
+    final Long maxInfractions = this.properties.getPropertyLong(MagikLint.KEY_MAX_INFRACTIONS);
     final Location.LocationRangeComparator locationCompare = new Location.LocationRangeComparator();
-    paths.stream()
+
+    Stream<MagikIssue> issueStream = paths.stream()
         .parallel()
         .map(this::buildMagikFile)
         .filter(magikFile -> !this.isFileIgnored(magikFile))
         .map(this::runChecksOnFile)
         .flatMap(List::stream)
         .sorted((issue0, issue1) -> locationCompare.compare(issue0.location(), issue1.location()))
-        .sequential()
-        .limit(maxInfractions)
-        .forEach(this.reporter::reportIssue);
+        .sequential();
+
+    if (maxInfractions != null) {
+        issueStream = issueStream.limit(maxInfractions);
+    }
+
+    issueStream.forEach(this.reporter::reportIssue);
   }
 
   private boolean isFileIgnored(final MagikFile magikFile) {
