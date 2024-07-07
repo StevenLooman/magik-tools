@@ -157,7 +157,8 @@ public class MagikLint {
    * @throws ReflectiveOperationException -
    */
   public void run(final Collection<Path> paths) throws IOException, ReflectiveOperationException {
-    final long maxInfractions = this.properties.getPropertyLong(MagikLint.KEY_MAX_INFRACTIONS);
+    final long maxInfractions =
+        this.properties.getPropertyLong(MagikLint.KEY_MAX_INFRACTIONS, Long.MAX_VALUE);
     final Location.LocationRangeComparator locationCompare = new Location.LocationRangeComparator();
     paths.stream()
         .parallel()

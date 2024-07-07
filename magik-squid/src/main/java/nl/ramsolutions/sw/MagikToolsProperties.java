@@ -41,6 +41,12 @@ public class MagikToolsProperties {
     this.properties.putAll(properties);
   }
 
+  /**
+   * Constructor.
+   *
+   * @param path Path to properties file.
+   * @throws IOException -
+   */
   public MagikToolsProperties(final Path path) throws IOException {
     LOGGER.debug("Reading configuration from: {}", path.toAbsolutePath());
     try (final FileInputStream inputStream = new FileInputStream(path.toFile())) {
@@ -74,6 +80,7 @@ public class MagikToolsProperties {
   public void setProperty(final String key, @Nullable final String value) {
     if (value == null) {
       this.properties.remove(key);
+      return;
     }
 
     this.properties.setProperty(key, value);
@@ -88,10 +95,11 @@ public class MagikToolsProperties {
   public void setProperty(final String key, @Nullable final Integer value) {
     if (value == null) {
       this.properties.remove(key);
-    } else {
-      final String valueStr = Integer.toString(value);
-      this.properties.setProperty(key, valueStr);
+      return;
     }
+
+    final String valueStr = Integer.toString(value);
+    this.properties.setProperty(key, valueStr);
   }
 
   /**
@@ -103,10 +111,11 @@ public class MagikToolsProperties {
   public void setProperty(final String key, @Nullable final Long value) {
     if (value == null) {
       this.properties.remove(key);
-    } else {
-      final String valueStr = Long.toString(value);
-      this.properties.setProperty(key, valueStr);
+      return;
     }
+
+    final String valueStr = Long.toString(value);
+    this.properties.setProperty(key, valueStr);
   }
 
   /**
@@ -118,14 +127,15 @@ public class MagikToolsProperties {
   public void setProperty(final String key, @Nullable final Boolean value) {
     if (value == null) {
       this.properties.remove(key);
-    } else {
-      final String valueStr = Boolean.toString(value);
-      this.properties.setProperty(key, valueStr);
+      return;
     }
+
+    final String valueStr = Boolean.toString(value);
+    this.properties.setProperty(key, valueStr);
   }
 
   /**
-   * Get property.
+   * Get property as {@link String}.
    *
    * @param key Key of property.
    * @return Value of property.
@@ -136,10 +146,10 @@ public class MagikToolsProperties {
   }
 
   /**
-   * Get property.
+   * Get property as {@link String}, or default value.
    *
    * @param key Key of property.
-   * @param defaultValue Default vaule.
+   * @param defaultValue Default value, if property does not exist.
    * @return Value of property.
    */
   public String getPropertyString(final String key, final String defaultValue) {
@@ -147,7 +157,7 @@ public class MagikToolsProperties {
   }
 
   /**
-   * Get property, converted to a {@link Boolean}.
+   * Get property as {@link Boolean}.
    *
    * @param key Key of property.
    * @return Value of property.
@@ -163,10 +173,10 @@ public class MagikToolsProperties {
   }
 
   /**
-   * Get property, converted to a {@link Boolean}.
+   * Get property as {@link Boolean}, or default value.
    *
    * @param key Key of property.
-   * @param defaultValue Default value.
+   * @param defaultValue Default value, if property does not exist.
    * @return Value of property.
    */
   public boolean getPropertyBoolean(final String key, final boolean defaultValue) {
@@ -179,10 +189,10 @@ public class MagikToolsProperties {
   }
 
   /**
-   * Get property, converted to an {@link Integer}.
+   * Get property as {@link Integer}.
    *
    * @param key Key of property.
-   * @return Value of property.
+   * @return Value of property, as Integer.
    */
   @CheckForNull
   public Integer getPropertyInteger(final String key) {
@@ -195,9 +205,10 @@ public class MagikToolsProperties {
   }
 
   /**
-   * Get property, converted to an {@link Integer}.
+   * Get property as {@link Integer}, or default value.
    *
    * @param key Key of property.
+   * @param defaultValue Default value, if property does not exist.
    * @return Value of property.
    */
   public int getPropertyInteger(final String key, final int defaultValue) {
@@ -210,10 +221,10 @@ public class MagikToolsProperties {
   }
 
   /**
-   * Get property, converted to a {@link Long}.
+   * Get property as {@link Long}.
    *
    * @param key Key of property.
-   * @return Value of property.
+   * @return Value of property, as Long.
    */
   @CheckForNull
   public Long getPropertyLong(final String key) {
@@ -225,6 +236,28 @@ public class MagikToolsProperties {
     return Long.valueOf(value);
   }
 
+  /**
+   * Get property as {@link Long}, or default value.
+   *
+   * @param key Key of property.
+   * @param defaultValue Default value, if property does not exist.
+   * @return Value of property.
+   */
+  public Long getPropertyLong(final String key, final long defaultValue) {
+    final String value = this.getPropertyString(key);
+    if (value == null) {
+      return defaultValue;
+    }
+
+    return Long.valueOf(value);
+  }
+
+  /**
+   * Get property as {@link Path}.
+   *
+   * @param key Key of property.
+   * @return Value of property, as path.
+   */
   @CheckForNull
   public Path getPropertyPath(final String key) {
     final String value = this.getPropertyString(key);
@@ -240,7 +273,7 @@ public class MagikToolsProperties {
   }
 
   /**
-   * Get a property value as a list. Items are separated by {@link
+   * Get a property value as a {@link List}. Items are separated by {@link
    * MagikToolsProperties.LIST_SEPARATOR}.
    *
    * @param key Key of the property.
