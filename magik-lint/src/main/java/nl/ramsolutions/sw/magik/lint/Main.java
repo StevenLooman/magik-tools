@@ -127,9 +127,7 @@ public final class Main {
     final String configReporterFormat = properties.getPropertyString(MagikLint.KEY_MSG_TEMPLATE);
     final String format =
         configReporterFormat != null ? configReporterFormat : MessageFormatReporter.DEFAULT_FORMAT;
-
-    final Long columnOffset = properties.getPropertyLong(MagikLint.KEY_COLUMN_OFFSET);
-
+    final long columnOffset = properties.getPropertyLong(MagikLint.KEY_COLUMN_OFFSET, 0L);
     final PrintStream outStream = Main.getOutStream();
     return new MessageFormatReporter(outStream, format, columnOffset);
   }
