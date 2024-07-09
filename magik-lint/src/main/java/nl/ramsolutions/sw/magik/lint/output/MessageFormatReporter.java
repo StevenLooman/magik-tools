@@ -1,6 +1,5 @@
 package nl.ramsolutions.sw.magik.lint.output;
 
-import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
@@ -39,14 +38,10 @@ public class MessageFormatReporter implements Reporter {
    * @param columnOffset Column offset for reported columns.
    */
   public MessageFormatReporter(
-      final PrintStream outStream, final String format, final @Nullable Long columnOffset) {
+      final PrintStream outStream, final String format, final long columnOffset) {
     this.outStream = outStream;
     this.format = format;
-    if (columnOffset != null) {
-      this.columnOffset = columnOffset;
-    } else {
-      this.columnOffset = 0L;
-    }
+    this.columnOffset = columnOffset;
     this.reportedSeverities = new HashSet<>();
   }
 
