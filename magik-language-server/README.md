@@ -17,16 +17,29 @@ A Language Server for Smallworld/Magik. This language server provides functional
 
 This language server has the following settings:
 
-- `magik.smallworldGis`: Path to your Smallworld installation
-- `magik.lint.overrideConfigFile`: Override magik-lint configuration file
-- `magik.typing.typeDatabasePaths`: Path to a database contaning type/method/... definitions
-- `magik.typing.enableChecks`: Enable/disable typing checks
+- `magik.smallworldGis`: Path to Smallworld Core.
+- `magik.productDirs`: Paths to (compiled, containing a `libs/` directory) products.
+- `magik.lint.overrideConfigFile`: Override path to magiklintrc.properties.
+- `magik.typing.typeDatabasePaths`: Paths to type databases.
+- `magik.typing.showTypingInlayHints`: Show typing inlay hints.
+- `magik.typing.showTypingArgumentInlayHints`: Show (certain) argument name inlay hints.
+- `magik.typing.enableChecks`: Enable typing checks.
+- `magik.typing.indexGlobalUsages`: Enable indexing of usages of globals by methods.
+- `magik.typing.indexMethodUsages`: Enable indexing of usages of methods by methods.
+- `magik.typing.indexSlotUsages`: Enable indexing of usages of slots by methods.
+- `magik.typing.indexConditionUsages`: Enable indexing of usages of conditions by methods.
+- `magik.typing.cacheIndexedDefinitions`: Store and load the indexed definitions in the workspace folders.
 
 ### Additional configuration for VSCode
 
-- `magik.javaHome`: Path to your Java installation
-- `magik.aliases`: Path to aliases file
-- `magik.environment`: Path to your environment file
+- `magik.javaHome`: Path to Java Runtime, Java 17 minimum.
+- `magik.aliases`: Path to gis_aliases file.
+- `magik.environment`: Path to your environment file.
+- `magik.formatting.indentChar`: Indent character, 'tab' or 'space'.
+- `magik.formatting.indentWidth`: Indent width (tab size or number of spaces).
+- `magik.formatting.insertFinalNewline`: Insert final newline.
+- `magik.formatting.trimTrailingWhitespace`: Trim trailing whitespace.
+- `magik.formatting.trimFinalNewlines`: Trim final newlines.
 
 Via the VSCode client you can start a new session, using the specified environment and aliases file. The aliases file is parsed and the entries are provided as Tasks.
 
