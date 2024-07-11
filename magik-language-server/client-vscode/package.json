@@ -223,15 +223,15 @@
 					"type": "string"
 				},
 				"magik.productDirs": {
-					"description": "Paths to (compiled, containing a `libs/` directory) products",
+					"description": "Paths to (compiled, containing a `libs/` directory) products.",
 					"type": "array"
 				},
 				"magik.aliases": {
-					"description": "Path to gis_aliases file.",
+					"description": "Path to gis_aliases file -- ignored by language server.",
 					"type": "string"
 				},
 				"magik.environment": {
-					"description": "Path to environment file.",
+					"description": "Path to environment file --ignored by language server.",
 					"type": "string"
 				},
         "magik.formatting.indentChar": {
@@ -298,7 +298,7 @@
 					"default": true
 				},
         "magik.typing.cacheIndexedDefinitions": {
-          "description": "Store and load the indexed definitions in the workspace folders",
+          "description": "Store and load the indexed definitions in the workspace folders.",
           "type": "boolean",
           "default": true
         }
