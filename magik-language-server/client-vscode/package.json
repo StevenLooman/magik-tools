@@ -247,7 +247,7 @@
           "type": "boolean"
         },
         "magik.formatting.trimTrailingWhitespace": {
-          "description": "Trim trainiling whitespace -- ignored by language server.",
+          "description": "Trim trailing whitespace -- ignored by language server.",
           "type": "boolean"
         },
         "magik.formatting.trimFinalNewlines": {
