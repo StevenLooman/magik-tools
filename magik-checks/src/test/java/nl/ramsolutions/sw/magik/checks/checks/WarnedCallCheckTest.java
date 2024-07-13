@@ -33,4 +33,44 @@ class WarnedCallCheckTest extends MagikCheckTestBase {
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isNotEmpty();
   }
+
+  @Test
+  void testProcedureSwWrite() {
+    final MagikCheck check = new WarnedCallCheck();
+    final String code = "sw:write(1)";
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isNotEmpty();
+  }
+
+  @Test
+  void testProcedureRemex() {
+    final MagikCheck check = new WarnedCallCheck();
+    final String code = "remex(:exemplar)";
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isNotEmpty();
+  }
+
+  @Test
+  void testProcedureSwRemex() {
+    final MagikCheck check = new WarnedCallCheck();
+    final String code = "sw:remex(:exemplar)";
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isNotEmpty();
+  }
+
+  @Test
+  void testProcedureRemoveExemplar() {
+    final MagikCheck check = new WarnedCallCheck();
+    final String code = "remove_exemplar(:exemplar)";
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isNotEmpty();
+  }
+
+  @Test
+  void testProcedureSwRemoveExemplar() {
+    final MagikCheck check = new WarnedCallCheck();
+    final String code = "sw:remove_exemplar(:exemplar)";
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isNotEmpty();
+  }
 }
