@@ -227,31 +227,31 @@
 					"type": "array"
 				},
 				"magik.aliases": {
-					"description": "Path to gis_aliases file -- ignored by language server.",
+					"description": "Path to gis_aliases file -- only used by the VS Code extension.",
 					"type": "string"
 				},
 				"magik.environment": {
-					"description": "Path to environment file --ignored by language server.",
+					"description": "Path to environment file -- only used by the VS Code extension.",
 					"type": "string"
 				},
         "magik.formatting.indentChar": {
-          "description": "Indent character, 'tab' or 'space' -- ignored by language server.",
+          "description": "Indent character, 'tab' or 'space' -- only used by the VS Code extension.",
           "type": "string"
         },
         "magik.formatting.indentWidth": {
-          "description": "Indent width (tab size or number of spaces) -- ignored by language server.",
+          "description": "Indent width (tab size or number of spaces) -- only used by the VS Code extension.",
           "type": "number"
         },
         "magik.formatting.insertFinalNewline": {
-          "description": "Insert final newline -- ignored by language server.",
+          "description": "Insert final newline -- only used by the VS Code extension.",
           "type": "boolean"
         },
         "magik.formatting.trimTrailingWhitespace": {
-          "description": "Trim trailing whitespace -- ignored by language server.",
+          "description": "Trim trailing whitespace -- only used by the VS Code extension.",
           "type": "boolean"
         },
         "magik.formatting.trimFinalNewlines": {
-          "description": "Trim final newlines -- ignored by language server.",
+          "description": "Trim final newlines -- only used by the VS Code extension.",
           "type": "boolean"
         },
 				"magik.lint.overrideConfigFile": {
