@@ -17,7 +17,8 @@ public class WarnedCallCheck extends MagikCheck {
   public static final String CHECK_KEY = "WarnedCall";
 
   private static final String MESSAGE = "Call is warned.";
-  private static final String DEFAULT_WARNED_CALLS = "write(),sw:write()";
+  private static final String DEFAULT_WARNED_CALLS =
+      "write(),sw:write(),remex(),sw:remex(),remove_exemplar(),sw:remove_exemplar()";
 
   /** List of Warned calls, separated by ','. */
   @RuleProperty(
