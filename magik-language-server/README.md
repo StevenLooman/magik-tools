@@ -22,7 +22,7 @@ This language server has the following settings:
 - `magik.lint.overrideConfigFile`: Override path to magiklintrc.properties.
 - `magik.typing.typeDatabasePaths`: Paths to type databases.
 - `magik.typing.showTypingInlayHints`: Show typing inlay hints.
-- `magik.typing.showTypingArgumentInlayHints`: Show (certain) argument name inlay hints.
+- `magik.typing.showArgumentInlayHints`: Show (certain) argument name inlay hints.
 - `magik.typing.enableChecks`: Enable typing checks.
 - `magik.typing.indexGlobalUsages`: Enable indexing of usages of globals by methods.
 - `magik.typing.indexMethodUsages`: Enable indexing of usages of methods by methods.
