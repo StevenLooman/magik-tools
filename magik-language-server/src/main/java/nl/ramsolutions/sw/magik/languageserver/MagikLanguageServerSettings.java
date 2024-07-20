@@ -24,16 +24,6 @@ public final class MagikLanguageServerSettings {
   }
 
   /**
-   * Get magik.smallworldGis.
-   *
-   * @return magik.smallworldGis.
-   */
-  @CheckForNull
-  public String getSmallworldGis() {
-    return this.properties.getPropertyString(SMALLWORLD_GIS);
-  }
-
-  /**
    * Get magik.libsDirs.
    *
    * @return magik.libsDirs.
