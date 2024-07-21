@@ -17,7 +17,6 @@ A Language Server for Smallworld/Magik. This language server provides functional
 
 This language server has the following settings:
 
-- `magik.smallworldGis`: Path to Smallworld Core.
 - `magik.productDirs`: Paths to (compiled, containing a `libs/` directory) products.
 - `magik.lint.overrideConfigFile`: Override path to magiklintrc.properties.
 - `magik.typing.typeDatabasePaths`: Paths to type databases.
@@ -32,6 +31,7 @@ This language server has the following settings:
 
 ### Additional configuration for VSCode
 
+- `magik.smallworldGis`: Path to Smallworld Core.
 - `magik.javaHome`: Path to Java Runtime, Java 17 minimum.
 - `magik.aliases`: Path to gis_aliases file.
 - `magik.environment`: Path to your environment file.
