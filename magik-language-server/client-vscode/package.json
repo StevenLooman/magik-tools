@@ -219,7 +219,7 @@
 					"type": "string"
 				},
 				"magik.smallworldGis": {
-					"description": "Path to Smallworld Core.",
+					"description": "Path to Smallworld Core -- only used by the VS Code extension.",
 					"type": "string"
 				},
 				"magik.productDirs": {
