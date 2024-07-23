@@ -279,6 +279,17 @@ class FormattingProviderTest {
     assertThat(edits).isEmpty();
   }
 
+  // @Test
+  // void testIndentArgumentsLineStart() {
+  //   final String code =
+  //       """
+  //       call_me_too(:test_1,
+  //       	    :test_2)
+  //       """;
+  //   final List<TextEdit> edits = this.getEdits(code);
+  //   assertThat(edits).isEmpty(); // TODO!
+  // }
+
   @Test
   void testIndentIfElif() {
     final String code =
@@ -306,6 +317,17 @@ class FormattingProviderTest {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
+
+  // @Test
+  // void testIndentVariableDefinitionAssignmentSimpleVector() {
+  //   final String code =
+  //       """
+  //       _local a << {
+  //       	10
+  //       }""";
+  //   final List<TextEdit> edits = this.getEdits(code);
+  //   assertThat(edits).isEmpty();
+  // }
 
   // endregion
 

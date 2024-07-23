@@ -85,7 +85,7 @@ public class MagikChecksDiagnosticsProvider {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} check: {}, uri: {}",
-          String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
           check.getClass().getSimpleName(),
           magikFile.getUri());
     }
