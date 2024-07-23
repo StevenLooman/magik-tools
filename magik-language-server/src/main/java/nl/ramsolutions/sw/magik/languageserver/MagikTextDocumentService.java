@@ -14,6 +14,7 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.ModuleDefFile;
 import nl.ramsolutions.sw.magik.ProductDefFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.languageserver.callhierarchy.CallHierarchyProvider;
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
 import nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider;
@@ -30,6 +31,12 @@ import nl.ramsolutions.sw.magik.languageserver.selectionrange.SelectionRangeProv
 import nl.ramsolutions.sw.magik.languageserver.semantictokens.SemanticTokenProvider;
 import nl.ramsolutions.sw.magik.languageserver.signaturehelp.SignatureHelpProvider;
 import nl.ramsolutions.sw.magik.languageserver.typehierarchy.TypeHierarchyProvider;
+import org.eclipse.lsp4j.CallHierarchyIncomingCall;
+import org.eclipse.lsp4j.CallHierarchyIncomingCallsParams;
+import org.eclipse.lsp4j.CallHierarchyItem;
+import org.eclipse.lsp4j.CallHierarchyOutgoingCall;
+import org.eclipse.lsp4j.CallHierarchyOutgoingCallsParams;
+import org.eclipse.lsp4j.CallHierarchyPrepareParams;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionParams;
@@ -117,6 +124,7 @@ public class MagikTextDocumentService implements TextDocumentService {
   private final InlayHintProvider inlayHintProvider;
   private final CodeActionProvider codeActionProvider;
   private final SelectionRangeProvider selectionRangeProvider;
+  private final CallHierarchyProvider callHierarchyProvider;
   private final Map<TextDocumentIdentifier, OpenedFile> openedFiles = new HashMap<>();
 
   /**
@@ -149,6 +157,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.inlayHintProvider = new InlayHintProvider(this.properties);
     this.codeActionProvider = new CodeActionProvider(this.properties);
     this.selectionRangeProvider = new SelectionRangeProvider();
+    this.callHierarchyProvider = new CallHierarchyProvider(this.definitionKeeper);
   }
 
   /**
@@ -175,6 +184,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.inlayHintProvider.setCapabilities(capabilities);
     this.codeActionProvider.setCapabilities(capabilities);
     this.selectionRangeProvider.setCapabilities(capabilities);
+    this.callHierarchyProvider.setCapabilities(capabilities);
   }
 
   @Override
@@ -230,7 +240,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didOpen, uri: {}",
-          String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
           textDocument.getUri());
     }
   }
@@ -299,7 +309,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didChange, uri: {}",
-          String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
           textDocumentIdentifier.getUri());
     }
   }
@@ -324,7 +334,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didClose, uri: {}",
-          String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
           textDocumentIdentifier.getUri());
     }
   }
@@ -338,7 +348,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didSave, uri: {}",
-          String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
           textDocumentIdentifier.getUri());
     }
   }
@@ -385,7 +395,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} hover: uri: {}, position: {},{}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -424,7 +434,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} implementation, uri: {}, position: {},{}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -458,7 +468,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} signatureHelp, uri: {}, position: {},{}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -494,7 +504,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} foldingRange, uri: {}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return foldingRanges;
@@ -533,7 +543,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} definitions, uri: {}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return forLeft;
@@ -578,7 +588,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} references, uri: {}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return references;
@@ -611,7 +621,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} completion, uri: {}, position: {},{}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -647,7 +657,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} formatting, uri: {}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return textEdits;
@@ -680,7 +690,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} semanticTokensFull, uri: {}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return semanticTokens;
@@ -713,7 +723,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} prepareRename, uri: {}, position: {},{}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -748,7 +758,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} rename, uri: {}, position: {},{}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -778,7 +788,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} documentSymbol, uri: {}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return documentSymbols;
@@ -807,7 +817,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} selectionRange, uri: {}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return selectionRanges;
@@ -841,7 +851,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} prepareTypeHierarchy, uri: {}, position: {},{}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -865,7 +875,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} didOpen, typeHierarchySubtypes, item: {}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 item.getName());
           }
           return subtypes;
@@ -887,7 +897,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} didOpen, typeHierarchySupertypes, item: {}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 item.getName());
           }
           return supertypes;
@@ -920,7 +930,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} inlayHint, uri: {}, range: {},{}-{},{}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 range.getStart().getLine(),
                 range.getStart().getCharacter(),
@@ -969,7 +979,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} codeAction, uri: {}, range: {},{}-{},{}",
-                String.format("%.2f", (System.nanoTime() - start) / 1000000000.0),
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 range.getStart().getLine(),
                 range.getStart().getCharacter(),
@@ -977,6 +987,85 @@ public class MagikTextDocumentService implements TextDocumentService {
                 range.getEnd().getCharacter());
           }
           return codeActionsLsp4j;
+        });
+  }
+
+  @Override
+  public CompletableFuture<List<CallHierarchyItem>> prepareCallHierarchy(
+      final CallHierarchyPrepareParams params) {
+    final long start = System.nanoTime();
+
+    final TextDocumentIdentifier textDocument = params.getTextDocument();
+    final Position position = params.getPosition();
+    LOGGER.debug(
+        "prepareCallHierarchy, uri: {}, position: {},{}",
+        textDocument.getUri(),
+        position.getLine(),
+        position.getCharacter());
+
+    final nl.ramsolutions.sw.magik.Position magikPosition =
+        Lsp4jConversion.positionFromLsp4j(position);
+
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    return CompletableFuture.supplyAsync(
+        () -> {
+          final List<CallHierarchyItem> items =
+              openedFile instanceof MagikTypedFile magikFile
+                  ? this.callHierarchyProvider.prepareCallHierarchy(magikFile, magikPosition)
+                  : null;
+          if (LOGGER_DURATION.isTraceEnabled()) {
+            LOGGER_DURATION.trace(
+                "Duration: {} prepareCallHierarchy, uri: {}, position: {},{}",
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                textDocument.getUri(),
+                position.getLine(),
+                position.getCharacter());
+          }
+          return items;
+        });
+  }
+
+  @Override
+  public CompletableFuture<List<CallHierarchyIncomingCall>> callHierarchyIncomingCalls(
+      final CallHierarchyIncomingCallsParams params) {
+    final long start = System.nanoTime();
+
+    final CallHierarchyItem item = params.getItem();
+    LOGGER.debug("callHierarchyIncomingCalls, item: {}", item.getName());
+
+    return CompletableFuture.supplyAsync(
+        () -> {
+          final List<CallHierarchyIncomingCall> items =
+              this.callHierarchyProvider.callHierarchyIncomingCalls(item);
+          if (LOGGER_DURATION.isTraceEnabled()) {
+            LOGGER_DURATION.trace(
+                "Duration: {} callHierarchyIncomingCalls, item: {}",
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                item.getName());
+          }
+          return items;
+        });
+  }
+
+  @Override
+  public CompletableFuture<List<CallHierarchyOutgoingCall>> callHierarchyOutgoingCalls(
+      final CallHierarchyOutgoingCallsParams params) {
+    final long start = System.nanoTime();
+
+    final CallHierarchyItem item = params.getItem();
+    LOGGER.debug("callHierarchyOutgoingCalls, item: {}", item.getName());
+
+    return CompletableFuture.supplyAsync(
+        () -> {
+          final List<CallHierarchyOutgoingCall> items =
+              this.callHierarchyProvider.callHierarchyOutgoingCalls(item);
+          if (LOGGER_DURATION.isTraceEnabled()) {
+            LOGGER_DURATION.trace(
+                "Duration: {} callHierarchyOutgoingCalls, item: {}",
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                item.getName());
+          }
+          return items;
         });
   }
 }
