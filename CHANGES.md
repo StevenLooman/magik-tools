@@ -44,6 +44,7 @@
 - Fix TodoComment check checking whole word.
 - Also search references in procedures.
 - Add `remex` and `remove_exemplar` to the list of default warned calls.
+- Support Call hierarchy for methods and procedures.
 - Several fixes.
 
 0.9.1 (2024-03-13)

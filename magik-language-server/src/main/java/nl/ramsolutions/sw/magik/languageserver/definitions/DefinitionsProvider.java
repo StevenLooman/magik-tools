@@ -18,12 +18,12 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
@@ -189,23 +189,7 @@ public class DefinitionsProvider {
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
     final ExpressionResultString result = reasonerState.getNodeType(previousSiblingNode);
     final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
-    final TypeString typeStr;
-    if (resultTypeStr.isSelf()) {
-      final AstNode definitionNode =
-          methodInvocationNode.getFirstAncestor(
-              MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
-      if (definitionNode == null) {
-        typeStr = resultTypeStr;
-      } else if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
-        final MethodDefinitionNodeHelper definitionHelper =
-            new MethodDefinitionNodeHelper(definitionNode);
-        typeStr = definitionHelper.getTypeString();
-      } else {
-        typeStr = TypeString.SW_PROCEDURE;
-      }
-    } else {
-      typeStr = resultTypeStr;
-    }
+    final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, methodInvocationNode);
 
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     return resolver.getMethodDefinitions(typeStr, methodName).stream()
