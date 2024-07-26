@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.definitions.analysis.ModuleDefAstWalker;
 import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionKeyword;
-import nl.ramsolutions.sw.magik.ModuleDefFile;
 
 /** SwModuleDef semantic token walker. */
 public class ModuleDefSemanticTokenWalker extends ModuleDefAstWalker {
@@ -21,12 +20,7 @@ public class ModuleDefSemanticTokenWalker extends ModuleDefAstWalker {
           .map(SwModuleDefinitionKeyword::getValue)
           .collect(Collectors.toUnmodifiableSet());
 
-  private final ModuleDefFile moduleDefFile;
   private final List<SemanticToken> semanticTokens = new ArrayList<>();
-
-  public ModuleDefSemanticTokenWalker(final ModuleDefFile moduleDefFile) {
-    this.moduleDefFile = moduleDefFile;
-  }
 
   public List<SemanticToken> getSemanticTokens() {
     return Collections.unmodifiableList(this.semanticTokens);

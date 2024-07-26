@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.definitions.analysis.ProductDefAstWalker;
 import nl.ramsolutions.sw.definitions.api.SwProductDefinitionKeyword;
-import nl.ramsolutions.sw.magik.ProductDefFile;
 
 /** SwProductDef semantic token walker. */
 public class ProductDefSemanticTokenWalker extends ProductDefAstWalker {
@@ -21,12 +20,7 @@ public class ProductDefSemanticTokenWalker extends ProductDefAstWalker {
           .map(SwProductDefinitionKeyword::getValue)
           .collect(Collectors.toUnmodifiableSet());
 
-  private final ProductDefFile productDefFile;
   private final List<SemanticToken> semanticTokens = new ArrayList<>();
-
-  public ProductDefSemanticTokenWalker(final ProductDefFile productDefFile) {
-    this.productDefFile = productDefFile;
-  }
 
   public List<SemanticToken> getSemanticTokens() {
     return Collections.unmodifiableList(this.semanticTokens);
