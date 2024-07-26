@@ -7,17 +7,11 @@ import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
-import nl.ramsolutions.sw.magik.parser.MagikParser;
 import org.junit.jupiter.api.Test;
 
 /** Test DefinitionReader. */
 @SuppressWarnings("checkstyle:MagicNumber")
 class DefinitionReaderTest {
-
-  private AstNode parseCode(String code) {
-    final MagikParser parser = new MagikParser();
-    return parser.parseSafe(code);
-  }
 
   private MagikFile createMagikFile(final String code) {
     return new MagikFile(MagikFile.DEFAULT_URI, code);

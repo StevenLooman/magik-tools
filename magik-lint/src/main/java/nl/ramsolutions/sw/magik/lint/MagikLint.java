@@ -43,7 +43,7 @@ public class MagikLint {
   /**
    * Constructor, parses command line and reads configuration.
    *
-   * @param configuration Configuration.
+   * @param properties Properites.
    * @param reporter Reporter.
    */
   public MagikLint(final MagikToolsProperties properties, final Reporter reporter) {
@@ -96,12 +96,12 @@ public class MagikLint {
   void showChecks(final Writer writer, final boolean showDisabled)
       throws ReflectiveOperationException, IOException {
     final Path overrideConfigPath = this.properties.getPropertyPath(MagikLint.KEY_OVERRIDE_CONFIG);
-    final MagikToolsProperties properties =
+    final MagikToolsProperties checksProperties =
         overrideConfigPath != null
             ? new MagikToolsProperties(overrideConfigPath)
             : MagikToolsProperties.DEFAULT_PROPERTIES;
     final MagikChecksConfiguration checksConfig =
-        new MagikChecksConfiguration(CheckList.getChecks(), properties);
+        new MagikChecksConfiguration(CheckList.getChecks(), checksProperties);
     final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
     for (final MagikCheckHolder holder : holders) {
       final MagikCheckMetadata metadata = holder.getMetadata();

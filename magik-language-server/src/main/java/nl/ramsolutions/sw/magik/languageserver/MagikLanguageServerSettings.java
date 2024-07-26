@@ -8,7 +8,6 @@ import nl.ramsolutions.sw.MagikToolsProperties;
 /** Magik settings. */
 public final class MagikLanguageServerSettings {
 
-  private static final String SMALLWORLD_GIS = "magik.smallworldGis";
   private static final String PRODUCT_DIRS = "magik.productDirs";
   private static final String OVERRIDE_CONFIG_FILE = "magik.lint.overrideConfigFile";
   private static final String TYPE_DATABASE_PATHS = "magik.typing.typeDatabasePaths";

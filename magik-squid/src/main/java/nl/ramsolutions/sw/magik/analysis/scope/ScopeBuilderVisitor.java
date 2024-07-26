@@ -127,6 +127,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
             });
   }
 
+  @SuppressWarnings("java:S3776")
   @Override
   protected void walkPreVariableDefinitionStatement(final AstNode node) {
     final String type =
@@ -136,7 +137,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
             .substring(1);
     final ScopeEntry.Type scopeEntryType = ScopeEntry.Type.valueOf(type);
 
-    Stream.concat(
+    Stream.of(
             // Definitions from VARIABLE_DEFINITION_MULTI.
             node.getChildren(MagikGrammar.VARIABLE_DEFINITION_MULTI).stream()
                 .map(
@@ -148,6 +149,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
             // Defintions from VARIABLE_DEFINITION.
             node.getChildren(MagikGrammar.VARIABLE_DEFINITION).stream()
                 .map(varDefNode -> varDefNode.getFirstChild(MagikGrammar.IDENTIFIER)))
+        .flatMap(stream -> stream)
         // Work it!
         .filter(
             identifierNode -> {
