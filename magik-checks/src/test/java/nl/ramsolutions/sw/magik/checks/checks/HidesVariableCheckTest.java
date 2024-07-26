@@ -14,27 +14,30 @@ class HidesVariableCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        ""
-            + "_block\n"
-            + "    _local a << 10\n"
-            + "    _block\n"
-            + "        _local b << 20\n"
-            + "    _endblock\n"
-            + "_endblock\n",
-        ""
-            + "_block\n"
-            + "    _local a << 10\n"
-            + "    _proc()\n"
-            + "        _import a\n"
-            + "    _endproc\n"
-            + "_endblock\n",
-        ""
-            + "_block\n"
-            + "    _block\n"
-            + "        _local a << 20\n"
-            + "    _endblock\n"
-            + "    _local a << 10\n"
-            + "_endblock\n",
+        """
+          _block
+              _local a << 10
+              _block
+                  _local b << 20
+              _endblock
+          _endblock
+          """,
+        """
+          _block
+              _local a << 10
+              _proc()
+                  _import a
+              _endproc
+          _endblock
+          """,
+        """
+          _block
+              _block
+                  _local a << 20
+              _endblock
+              _local a << 10
+          _endblock
+          """,
       })
   void testValid(final String code) {
     final MagikCheck check = new HidesVariableCheck();
@@ -45,41 +48,46 @@ class HidesVariableCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        ""
-            + "_block\n"
-            + "    _local a << 10\n"
-            + "    _block\n"
-            + "        _local a << 20\n"
-            + "    _endblock\n"
-            + "_endblock\n",
-        ""
-            + "_block\n"
-            + "    _local a << 10, b << 20\n"
-            + "    _block\n"
-            + "        _local a << 20\n"
-            + "    _endblock\n"
-            + "_endblock\n",
-        ""
-            + "_block\n"
-            + "    _local a << 10\n"
-            + "    _block\n"
-            + "        _local b << 20, a << 30\n"
-            + "    _endblock\n"
-            + "_endblock\n",
-        ""
-            + "_block\n"
-            + "    _local (a, b) << (10, 20)\n"
-            + "    _block\n"
-            + "        _local a << 20\n"
-            + "    _endblock\n"
-            + "_endblock\n",
-        ""
-            + "_block\n"
-            + "    _local a << 10\n"
-            + "    _block\n"
-            + "        _local (b, a) << (20, 30)\n"
-            + "    _endblock\n"
-            + "_endblock\n",
+        """
+          _block
+              _local a << 10
+              _block
+                  _local a << 20
+              _endblock
+          _endblock
+          """,
+        """
+          _block
+              _local a << 10, b << 20
+              _block
+                  _local a << 20
+              _endblock
+          _endblock
+          """,
+        """
+          _block
+              _local a << 10
+              _block
+                  _local b << 20, a << 30
+              _endblock
+          _endblock
+          """,
+        """
+          _block
+              _local (a, b) << (10, 20)
+              _block
+                  _local a << 20
+              _endblock
+          _endblock
+          """,
+        """
+          _block
+              _local a << 10
+              _block
+                  _local (b, a) << (20, 30)
+              _endblock
+          _endblock
+          """,
       })
   void testInvalid(final String code) {
     final MagikCheck check = new HidesVariableCheck();

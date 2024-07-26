@@ -30,6 +30,7 @@ public class ParameterDefinition extends MagikDefinition {
    * @param name Name of parameter.
    * @param modifier Modifier of parameter.
    */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public ParameterDefinition(
       final @Nullable Location location,
       final @Nullable Instant timestamp,

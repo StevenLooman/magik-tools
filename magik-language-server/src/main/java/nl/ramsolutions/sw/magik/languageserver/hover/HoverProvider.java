@@ -619,13 +619,10 @@ public class HoverProvider {
     final IDefinitionKeeper definitionKeeper = productDefFile.getDefinitionKeeper();
     final String productName = node.getTokenValue().toLowerCase();
     definitionKeeper.getProductDefinitions(productName).stream()
-        .forEach(productDef -> this.buildProductDefDoc(productDefFile, productDef, builder));
+        .forEach(productDef -> this.buildProductDefDoc(productDef, builder));
   }
 
-  private void buildProductDefDoc(
-      final ProductDefFile productDefFile,
-      final ProductDefinition productDef,
-      final StringBuilder builder) {
+  private void buildProductDefDoc(final ProductDefinition productDef, final StringBuilder builder) {
     final String productName = productDef.getName();
     builder.append("## ").append(productName);
 
@@ -659,13 +656,10 @@ public class HoverProvider {
     final IDefinitionKeeper definitionKeeper = moduleDefFile.getDefinitionKeeper();
     final String moduleName = node.getTokenValue().toLowerCase();
     definitionKeeper.getModuleDefinitions(moduleName).stream()
-        .forEach(moduleDef -> this.buildModuleDefDoc(moduleDefFile, moduleDef, builder));
+        .forEach(moduleDef -> this.buildModuleDefDoc(moduleDef, builder));
   }
 
-  private void buildModuleDefDoc(
-      final ModuleDefFile moduleDefFile,
-      final ModuleDefinition moduleDef,
-      final StringBuilder builder) {
+  private void buildModuleDefDoc(final ModuleDefinition moduleDef, final StringBuilder builder) {
     final String moduleName = moduleDef.getName();
     builder.append("## ").append(moduleName).append(SECTION_END);
 

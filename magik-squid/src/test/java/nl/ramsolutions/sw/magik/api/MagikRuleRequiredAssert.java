@@ -26,6 +26,7 @@ public class MagikRuleRequiredAssert extends MagikRuleAssert {
   }
 
   /** Test if input matches. */
+  @Override
   public MagikRuleRequiredAssert matches(final String input) {
     final ParsingResult parsingResult = this.parseInput(input);
 

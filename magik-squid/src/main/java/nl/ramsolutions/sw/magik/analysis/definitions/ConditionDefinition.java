@@ -26,6 +26,7 @@ public class ConditionDefinition extends MagikDefinition {
    * @param dataNames Data name list.
    * @param doc Doc.
    */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public ConditionDefinition(
       final @Nullable Location location,
       final @Nullable Instant timestamp,

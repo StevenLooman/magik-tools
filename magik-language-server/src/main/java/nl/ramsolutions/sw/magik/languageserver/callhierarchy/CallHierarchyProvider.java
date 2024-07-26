@@ -20,6 +20,7 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.AnonymousNamer;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
@@ -78,7 +79,7 @@ public class CallHierarchyProvider {
             : positionTokenNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
     LOGGER.trace("Wanted node: {}", wantedNode);
     if (wantedNode == null) {
-      return null;
+      return null; // NOSONAR: LSP requires null.
     }
 
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(wantedNode);
@@ -111,7 +112,7 @@ public class CallHierarchyProvider {
     return this.definitionKeeper.getMethodDefinitions().stream()
         .flatMap(methodDef -> methodDef.getUsedMethods().stream())
         .filter(methodUsage -> methodUsage.getMethodName().equals(methodName))
-        .map(methodUsage -> methodUsage.getLocation())
+        .map(MethodUsage::getLocation)
         .map(
             location -> {
               final MagikTypedFile magikFile = this.getMagikFile(location);

@@ -242,6 +242,7 @@ public class DefineSlotAccessParser {
     return List.copyOf(methodDefinitions);
   }
 
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   private List<MethodDefinition> generateSlotMethods(
       final @Nullable Instant timestamp,
       final @Nullable String moduleName,

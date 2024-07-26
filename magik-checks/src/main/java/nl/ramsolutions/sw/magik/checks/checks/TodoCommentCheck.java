@@ -61,27 +61,5 @@ public class TodoCommentCheck extends MagikCheck {
           token.getColumn() + matcher.end(1),
           message);
     }
-
-    // this.getForbiddenWords().stream()
-    //     .forEach(
-    //         word -> {
-    //           int fromIndex = 0;
-    //           while (fromIndex != -1) {
-    //             fromIndex = comment.indexOf(word, fromIndex);
-    //             if (fromIndex == -1) {
-    //               break;
-    //             }
-
-    //             final String message = String.format(MESSAGE, word);
-    //             this.addIssue(
-    //                 token.getLine(),
-    //                 token.getColumn() + fromIndex,
-    //                 token.getLine(),
-    //                 token.getColumn() + fromIndex + word.length(),
-    //                 message);
-
-    //             fromIndex += word.length();
-    //           }
-    //         });
   }
 }

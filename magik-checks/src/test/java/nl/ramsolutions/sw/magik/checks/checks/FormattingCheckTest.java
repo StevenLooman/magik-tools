@@ -137,6 +137,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
         _endmethod
         """,
       })
+  @SuppressWarnings("java:S4144")
   void testMultipleWhitelines(final String code) {
     final MagikCheck check = new FormattingCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);

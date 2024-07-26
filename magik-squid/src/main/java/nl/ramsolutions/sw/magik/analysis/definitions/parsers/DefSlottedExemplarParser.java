@@ -197,6 +197,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
     return definitions;
   }
 
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   private List<MethodDefinition> generateSlotMethods(
       final @Nullable Instant timestamp,
       final @Nullable String moduleName,

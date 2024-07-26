@@ -120,7 +120,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     ExpressionResultString callResult = null;
     ExpressionResultString iterResult = null;
     for (final ITypeStringDefinition typeDef : typeDefs) {
-      if (!ProcedureDefinition.class.isInstance(typeDef)) {
+      if (!(typeDef instanceof ProcedureDefinition)) {
         continue;
       }
 

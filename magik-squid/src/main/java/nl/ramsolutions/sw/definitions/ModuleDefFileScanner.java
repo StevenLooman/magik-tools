@@ -148,7 +148,8 @@ public final class ModuleDefFileScanner {
     final ModuleDefinitionParser parser = new ModuleDefinitionParser();
     final ModuleDefFile moduleDefFile = new ModuleDefFile(path, null, null);
     final ProductDefFile productDefFile = ProductDefFileScanner.getProductDefFileForPath(path);
-    final ProductDefinition productDefinition = productDefFile.getProductDefinition();
+    final ProductDefinition productDefinition =
+        productDefFile != null ? productDefFile.getProductDefinition() : null;
     return parser.parseDefinition(moduleDefFile, productDefinition);
   }
 

@@ -14,8 +14,6 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.ProductDefFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** product.def file scanner. */
 public final class ProductDefFileScanner {
@@ -60,7 +58,6 @@ public final class ProductDefFileScanner {
 
         return currentProductDefFile;
       } catch (final IOException exception) {
-        LOGGER.error(exception.getMessage(), exception);
         throw new IllegalStateException(exception);
       }
     }
@@ -69,7 +66,6 @@ public final class ProductDefFileScanner {
   /** Product definition filename. */
   public static final String SW_PRODUCT_DEF = "product.def";
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProductDefFileScanner.class);
   private static final Path SW_PRODUCT_DEF_PATH = Path.of(ProductDefFileScanner.SW_PRODUCT_DEF);
 
   private ProductDefFileScanner() {}

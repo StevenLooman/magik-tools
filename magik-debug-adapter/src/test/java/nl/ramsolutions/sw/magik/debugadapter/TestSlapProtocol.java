@@ -17,8 +17,6 @@ public class TestSlapProtocol implements ISlapProtocol {
   private long nextBreakpointId;
   private final List<Long> breakpoints = new ArrayList<>();
 
-  public TestSlapProtocol() {}
-
   @Override
   public void connect() throws IOException, SlapException {
     // Does nothing.
@@ -30,7 +28,9 @@ public class TestSlapProtocol implements ISlapProtocol {
   }
 
   @Override
-  public void close() throws IOException {}
+  public void close() throws IOException {
+    // Does nothing.
+  }
 
   @Override
   public boolean isConnected() {
@@ -61,6 +61,7 @@ public class TestSlapProtocol implements ISlapProtocol {
   }
 
   @Override
+  @SuppressWarnings("java:S4144")
   public CompletableFuture<ISlapResponse> disableBreakpoint(final long breakpointId) {
     final BreakpointModifyResponse response = new BreakpointModifyResponse();
     return CompletableFuture.completedFuture(response);
