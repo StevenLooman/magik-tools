@@ -5,13 +5,13 @@ import nl.ramsolutions.sw.MagikToolsProperties;
 /** Settings for magik formatting. */
 public class MagikFormattingSettings {
 
-  public final String KEY_MAGIK_FORMATTING_INDENT_CHAR = "magik.formatting.indentChar";
-  public final String KEY_MAGIK_FORMATTING_INDENT_WIDTH = "magik.formatting.indentWidth";
-  public final String KEY_MAGIK_FORMATTING_INSERT_FINAL_NEWLINE =
+  public static final String KEY_MAGIK_FORMATTING_INDENT_CHAR = "magik.formatting.indentChar";
+  public static final String KEY_MAGIK_FORMATTING_INDENT_WIDTH = "magik.formatting.indentWidth";
+  public static final String KEY_MAGIK_FORMATTING_INSERT_FINAL_NEWLINE =
       "magik.formatting.insertFinalNewline";
-  public final String KEY_MAGIK_FORMATTING_TRIM_TRAILING_WHITESPACE =
+  public static final String KEY_MAGIK_FORMATTING_TRIM_TRAILING_WHITESPACE =
       "magik.formatting.trimTrailingWhitespace";
-  public final String KEY_MAGIK_FORMATTING_TRIM_FINAL_NEWLINES =
+  public static final String KEY_MAGIK_FORMATTING_TRIM_FINAL_NEWLINES =
       "magik.formatting.trimFinalNewlines";
 
   private final MagikToolsProperties properties;

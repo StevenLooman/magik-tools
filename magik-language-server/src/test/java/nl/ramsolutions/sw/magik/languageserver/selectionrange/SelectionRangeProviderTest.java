@@ -29,11 +29,12 @@ class SelectionRangeProviderTest {
   @Test
   void testGetSelectionRanges() {
     final var code =
-        ""
-            + "_method object.int!method_name(param?)\n"
-            + "    _local var << :symbol\n"
-            + "    show(var)\n"
-            + "_endmethod\n";
+        """
+        _method object.int!method_name(param?)
+            _local var << :symbol
+            show(var)
+        _endmethod
+        """;
     final List<nl.ramsolutions.sw.magik.Position> positions = Collections.emptyList();
     final var selectionRanges = this.getSelectionRanges(code, positions);
     assertThat(selectionRanges)

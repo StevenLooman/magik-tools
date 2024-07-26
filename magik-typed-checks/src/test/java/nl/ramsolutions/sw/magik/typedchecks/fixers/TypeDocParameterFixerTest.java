@@ -30,10 +30,11 @@ class TypeDocParameterFixerTest {
   @Test
   void testAddParameter() {
     final String code =
-        ""
-            + "_method obj.method(param1, param2)\n"
-            + "  ## @param {sw:integer} param1\n"
-            + "_endmethod\n";
+        """
+        _method obj.method(param1, param2)
+          ## @param {sw:integer} param1
+        _endmethod
+        """;
     final Range range = new Range(new Position(0, 0), new Position(3, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
     assertThat(codeactions).hasSize(1);
@@ -50,11 +51,12 @@ class TypeDocParameterFixerTest {
   @Test
   void testRemoveParameter() {
     final String code =
-        ""
-            + "_method obj.method(param1)\n"
-            + "  ## @param {sw:integer} param1\n"
-            + "  ## @param {sw:integer} param3\n"
-            + "_endmethod\n";
+        """
+        _method obj.method(param1)
+          ## @param {sw:integer} param1
+          ## @param {sw:integer} param3
+        _endmethod
+        """;
     final Range range = new Range(new Position(0, 0), new Position(4, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
     assertThat(codeactions).hasSize(1);
@@ -69,11 +71,12 @@ class TypeDocParameterFixerTest {
   @Test
   void testNoChangeParameter() {
     final String code =
-        ""
-            + "_method obj.method(param1, param2)\n"
-            + "  ## @param {sw:integer} param1\n"
-            + "  ## @param {sw:integer} param2\n"
-            + "_endmethod\n";
+        """
+        _method obj.method(param1, param2)
+          ## @param {sw:integer} param1
+          ## @param {sw:integer} param2
+        _endmethod
+        """;
     final Range range = new Range(new Position(0, 0), new Position(4, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
     assertThat(codeactions).isEmpty();

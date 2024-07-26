@@ -26,7 +26,6 @@ final class JsonObjectPropertiesConverter {
       final JsonArray jsonArray = (JsonArray) jsonElement;
 
       // Ensure all values in jsonArray are primitive.
-      // final Iterable<JsonElement> iterable = () -> jsonArray.iterator();
       final boolean containsNonPrimitives =
           StreamSupport.stream(jsonArray.spliterator(), false)
               .anyMatch(childJsonEl -> !childJsonEl.isJsonPrimitive());
@@ -37,7 +36,7 @@ final class JsonObjectPropertiesConverter {
       // Convert all values.
       final String value =
           StreamSupport.stream(jsonArray.spliterator(), false)
-              .map(childJsonEl -> childJsonEl.getAsString())
+              .map(JsonElement::getAsString)
               .collect(Collectors.joining(MagikToolsProperties.LIST_SEPARATOR));
       properties.put(path, value);
     } else if (jsonElement.isJsonObject()) {

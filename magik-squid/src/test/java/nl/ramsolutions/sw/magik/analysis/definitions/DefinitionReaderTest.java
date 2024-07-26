@@ -545,10 +545,10 @@ class DefinitionReaderTest {
   @Test
   void testParseConditionInBlock() {
     final String code =
-        ""
-            + "_block\n"
-            + "  condition.define_condition(:cond1, :information, {:data1, :data2})\n"
-            + "_endblock";
+        """
+        _block
+          condition.define_condition(:cond1, :information, {:data1, :data2})
+        _endblock""";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
     final DefinitionReader reader = new DefinitionReader(magikFile);

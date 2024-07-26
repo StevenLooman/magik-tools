@@ -89,7 +89,7 @@ public class MagikIndexer {
             this.definitionKeeper.getBinaryOperatorDefinitions(),
             this.definitionKeeper.getConditionDefinitions(),
             this.definitionKeeper.getProcedureDefinitions())
-        .flatMap(collection -> collection.stream())
+        .flatMap(Collection::stream)
         .filter(def -> def.getLocation() != null && def.getLocation().getPath().startsWith(path))
         .collect(Collectors.toSet());
   }

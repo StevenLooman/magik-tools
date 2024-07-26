@@ -40,7 +40,6 @@ public final class ConfigurationReader {
    */
   public static MagikToolsProperties readProperties(
       final Path path, final MagikToolsProperties properties) throws IOException {
-    // final String overridePath = properties.getPropertyString(MagikLint.KEY_OVERRIDE_CONFIG);
     final String overrideConfigFile = properties.getPropertyString("magik.lint.overrideConfigFile");
     final Path propertiesPath = ConfigurationReader.determinePath(path, overrideConfigFile);
 

@@ -180,15 +180,15 @@ public class MagikWorkspaceFolder {
                 && def.getLocation().getUri().toString().startsWith(workspaceUriStr);
     return new FilterableDefinitionKeeperAdapter(
         this.definitionKeeper,
-        productDef -> locationPred.test(productDef),
-        moduleDef -> locationPred.test(moduleDef),
-        packageDef -> locationPred.test(packageDef),
-        exemplarDef -> locationPred.test(exemplarDef),
-        methodDef -> locationPred.test(methodDef),
-        globalDef -> locationPred.test(globalDef),
-        binaryOperatorDef -> locationPred.test(binaryOperatorDef),
-        conditionDef -> locationPred.test(conditionDef),
-        procedureDef -> locationPred.test(procedureDef));
+        locationPred::test,
+        locationPred::test,
+        locationPred::test,
+        locationPred::test,
+        locationPred::test,
+        locationPred::test,
+        locationPred::test,
+        locationPred::test,
+        locationPred::test);
   }
 
   @SafeVarargs

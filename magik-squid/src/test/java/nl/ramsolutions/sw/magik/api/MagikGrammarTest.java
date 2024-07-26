@@ -109,8 +109,6 @@ class MagikGrammarTest {
     MagikRuleForbiddenAssert.assertThat(rule, MagikGrammar.ARGUMENTS_PAREN_SYNTAX_ERROR)
         .matches("()")
         .matches("(1, 2)");
-    // MagikRuleRequiredAssert.assertThat(rule, MagikGrammar.ARGUMENTS_PAREN_SYNTAX_ERROR)
-    //     .matches("(, _self.a())");
   }
 
   @Test
@@ -435,9 +433,6 @@ class MagikGrammarTest {
     MagikRuleForbiddenAssert.assertThat(
             g.rule(MagikGrammar.STATEMENT), MagikGrammar.STATEMENT_SYNTAX_ERROR)
         .matches("a.b.c");
-    // MagikRuleRequiredAssert.assertThat(g.rule(MagikGrammar.STATEMENT),
-    // MagikGrammar.STATEMENT_SYNTAX_ERROR)
-    //     .matches("a.b.");
   }
 
   @Test

@@ -5,72 +5,37 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** Test WarnedCallCheck. */
 class WarnedCallCheckTest extends MagikCheckTestBase {
 
-  @Test
-  void testOk() {
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "do_something(1)",
+        "show(1)",
+      })
+  void testValid(final String code) {
     final MagikCheck check = new WarnedCallCheck();
-    final String code = "do_something(1)";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
 
-  @Test
-  void testProcedureShow() {
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "write(1)",
+        "sw:write(1)",
+        "remex(:exemplar)",
+        "sw:remex(:exemplar)",
+        "remove_exemplar(:exemplar)",
+        "sw:remove_exemplar(:exemplar)",
+      })
+  void testInvalid(final String code) {
     final MagikCheck check = new WarnedCallCheck();
-    final String code = "show(1)";
     final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
-  }
-
-  @Test
-  void testProcedureWrite() {
-    final MagikCheck check = new WarnedCallCheck();
-    final String code = "write(1)";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isNotEmpty();
-  }
-
-  @Test
-  void testProcedureSwWrite() {
-    final MagikCheck check = new WarnedCallCheck();
-    final String code = "sw:write(1)";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isNotEmpty();
-  }
-
-  @Test
-  void testProcedureRemex() {
-    final MagikCheck check = new WarnedCallCheck();
-    final String code = "remex(:exemplar)";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isNotEmpty();
-  }
-
-  @Test
-  void testProcedureSwRemex() {
-    final MagikCheck check = new WarnedCallCheck();
-    final String code = "sw:remex(:exemplar)";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isNotEmpty();
-  }
-
-  @Test
-  void testProcedureRemoveExemplar() {
-    final MagikCheck check = new WarnedCallCheck();
-    final String code = "remove_exemplar(:exemplar)";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isNotEmpty();
-  }
-
-  @Test
-  void testProcedureSwRemoveExemplar() {
-    final MagikCheck check = new WarnedCallCheck();
-    final String code = "sw:remove_exemplar(:exemplar)";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(issues).hasSize(1);
   }
 }

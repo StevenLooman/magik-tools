@@ -67,7 +67,6 @@ public class MagikLint {
       final String fileContents = Files.readString(path, charset);
       return new MagikFile(fileProperties, uri, fileContents);
     } catch (final IOException exception) {
-      LOGGER.error("Caught exception:", exception);
       throw new IllegalStateException(exception);
     }
   }

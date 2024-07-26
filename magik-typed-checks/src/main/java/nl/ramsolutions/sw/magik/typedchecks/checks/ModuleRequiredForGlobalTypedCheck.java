@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
 import nl.ramsolutions.sw.definitions.ModuleDefinition;
+import nl.ramsolutions.sw.definitions.ModuleUsage;
 import nl.ramsolutions.sw.magik.ModuleDefFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -91,7 +92,7 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
       seen.add(moduleName);
 
       currentModuleDefinition.getUsages().stream()
-          .map(moduleUsage -> moduleUsage.getName())
+          .map(ModuleUsage::getName)
           .map(definitionKeeper::getModuleDefinitions)
           .flatMap(Collection::stream)
           .forEach(stack::push);

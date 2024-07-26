@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
-import java.io.IOException;
 import java.util.List;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
@@ -20,7 +19,7 @@ class MagikCommentExtractorTest {
   }
 
   @Test
-  void testComments() throws IOException {
+  void testComments() {
     final String code =
         """
         # first comment
@@ -49,7 +48,7 @@ class MagikCommentExtractorTest {
   }
 
   @Test
-  void testMethodDoc() throws IOException {
+  void testMethodDoc() {
     final String code =
         """
         _method object.test
@@ -68,7 +67,7 @@ class MagikCommentExtractorTest {
   }
 
   @Test
-  void testMethodDocExtras() throws IOException {
+  void testMethodDocExtras() {
     final String code =
         """
         _method object.test
@@ -88,7 +87,7 @@ class MagikCommentExtractorTest {
   }
 
   @Test
-  void testMethodDocPragma() throws IOException {
+  void testMethodDocPragma() {
     final String code =
         """
         _pragma(a=b)
@@ -110,7 +109,7 @@ class MagikCommentExtractorTest {
   }
 
   @Test
-  void testMethodDocChildProc() throws IOException {
+  void testMethodDocChildProc() {
     final String code =
         """
         _method object.test
@@ -133,7 +132,7 @@ class MagikCommentExtractorTest {
   }
 
   @Test
-  void testDocStatement() throws IOException {
+  void testDocStatement() {
     final String code =
         """
         _pragma(a=b)

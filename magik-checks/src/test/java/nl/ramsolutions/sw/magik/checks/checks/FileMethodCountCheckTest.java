@@ -14,10 +14,11 @@ class FileMethodCountCheckTest extends MagikCheckTestBase {
     final FileMethodCountCheck check = new FileMethodCountCheck();
     check.maxMethodCount = 2;
     final String code =
-        ""
-            + "_method a.m1 _endmethod\n"
-            + "_method a.m1 _endmethod\n"
-            + "_method a.m1 _endmethod\n";
+        """
+        _method a.m1 _endmethod
+        _method a.m1 _endmethod
+        _method a.m1 _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -28,10 +29,11 @@ class FileMethodCountCheckTest extends MagikCheckTestBase {
     final FileMethodCountCheck check = new FileMethodCountCheck();
     check.maxMethodCount = 10;
     final String code =
-        ""
-            + "_method a.m1 _endmethod\n"
-            + "_method a.m1 _endmethod\n"
-            + "_method a.m1 _endmethod\n";
+        """
+        _method a.m1 _endmethod
+        _method a.m1 _endmethod
+        _method a.m1 _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }

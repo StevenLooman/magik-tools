@@ -32,6 +32,7 @@ public class ModuleDefinition implements IDefinition {
    * @param description Description.
    * @param usages List of requireds modules.
    */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public ModuleDefinition(
       final @Nullable Location location,
       final @Nullable Instant timestamp,

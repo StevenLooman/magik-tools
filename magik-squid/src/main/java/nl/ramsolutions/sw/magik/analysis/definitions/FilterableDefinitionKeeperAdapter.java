@@ -21,6 +21,7 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   final Predicate<ConditionDefinition> conditionDefinitionPredicate;
   final Predicate<ProcedureDefinition> procedureDefinitionPredicate;
 
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public FilterableDefinitionKeeperAdapter(
       final IDefinitionKeeper definitionKeeper,
       final Predicate<ProductDefinition> productDefinitionPredicate,

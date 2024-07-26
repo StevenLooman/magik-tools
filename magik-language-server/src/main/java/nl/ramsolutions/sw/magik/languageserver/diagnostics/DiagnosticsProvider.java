@@ -37,24 +37,26 @@ public class DiagnosticsProvider {
     final List<Diagnostic> diagnostics = new ArrayList<>();
 
     // Linter diagnostics.
-    final List<Diagnostic> diagnosticsLinter = this.getDiagnosticsFromLinter(magikFile);
+    final List<Diagnostic> diagnosticsLinter =
+        DiagnosticsProvider.getDiagnosticsFromLinter(magikFile);
     diagnostics.addAll(diagnosticsLinter);
 
     // Typing diagnostics.
     final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
     final Boolean typingEnableChecks = settings.getTypingEnableChecks();
     if (Boolean.TRUE.equals(typingEnableChecks)) {
-      final List<Diagnostic> diagnosticsTyping = this.getDiagnosticsFromTyping(magikFile);
+      final List<Diagnostic> diagnosticsTyping =
+          DiagnosticsProvider.getDiagnosticsFromTyping(magikFile);
       diagnostics.addAll(diagnosticsTyping);
     }
 
     return diagnostics;
   }
 
-  private List<Diagnostic> getDiagnosticsFromLinter(final MagikTypedFile magikFile) {
-    final MagikToolsProperties properties = magikFile.getProperties();
+  private static List<Diagnostic> getDiagnosticsFromLinter(final MagikTypedFile magikFile) {
+    final MagikToolsProperties magikFileProperties = magikFile.getProperties();
     final MagikChecksDiagnosticsProvider lintProvider =
-        new MagikChecksDiagnosticsProvider(properties);
+        new MagikChecksDiagnosticsProvider(magikFileProperties);
     try {
       return lintProvider.getDiagnostics(magikFile);
     } catch (final IOException exception) {
@@ -64,10 +66,10 @@ public class DiagnosticsProvider {
     return Collections.emptyList();
   }
 
-  private List<Diagnostic> getDiagnosticsFromTyping(final MagikTypedFile magikFile) {
-    final MagikToolsProperties properties = magikFile.getProperties();
+  private static List<Diagnostic> getDiagnosticsFromTyping(final MagikTypedFile magikFile) {
+    final MagikToolsProperties magikFileProperties = magikFile.getProperties();
     final MagikTypedChecksDiagnosticsProvider typedDiagnosticsProvider =
-        new MagikTypedChecksDiagnosticsProvider(properties);
+        new MagikTypedChecksDiagnosticsProvider(magikFileProperties);
     try {
       return typedDiagnosticsProvider.getDiagnostics(magikFile);
     } catch (final IOException exception) {

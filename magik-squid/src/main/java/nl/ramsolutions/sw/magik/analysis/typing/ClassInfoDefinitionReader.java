@@ -523,6 +523,7 @@ public final class ClassInfoDefinitionReader {
     this.definitionKeeper.add(definition);
   }
 
+  @SuppressWarnings("java:S4144")
   private void readEnumeratedClass(
       final String moduleName, final String line, final BufferedReader reader) throws IOException {
     // 1 : "enumerated_class" <class name>
@@ -589,8 +590,9 @@ public final class ClassInfoDefinitionReader {
     this.definitionKeeper.add(definition);
   }
 
+  @SuppressWarnings("java:S1172")
   private void readDeleteClass(
-      final String moduleName, final String line, final BufferedReader reader) throws IOException {
+      final String moduleName, final String line, final BufferedReader reader) {
     // 1 : "delete_class" <class name>
     // Line 1.
     // Ignore this.
