@@ -5,7 +5,7 @@ on:
       - "*"
 
 jobs:
-  build:
+  release:
     name: Package and create a release with assets
     runs-on: ubuntu-latest
     steps:
