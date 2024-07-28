@@ -1,5 +1,7 @@
 # Changes
 
+0.11.0 (unreleased)
+
 0.10.0 (2024-07-28)
 
 - Move to Java 17.
