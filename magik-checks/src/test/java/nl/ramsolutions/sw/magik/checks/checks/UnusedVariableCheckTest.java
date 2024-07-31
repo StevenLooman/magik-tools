@@ -107,6 +107,39 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
             _endif
         _endmethod
         """,
+        """
+        _method a.b
+            _try _with cond
+                _self.do_something()
+            _when file_does_not_exist
+                write(cond.report_contents_string)
+            _when error
+                write(:something_failed)
+            _endtry
+        _endmethod
+        """,
+        """
+        _method a.b
+            _try _with cond
+                _self.do_something()
+            _when file_does_not_exist
+                write(:something_failed)
+            _when error
+                write(cond.report_contents_string)
+            _endtry
+        _endmethod
+        """,
+        """
+        _method a.b
+            _try _with cond
+                _self.do_something()
+            _when file_does_not_exist
+                write(cond.report_contents_string)
+            _when error
+                write(cond.report_contents_string)
+            _endtry
+        _endmethod
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new UnusedVariableCheck();
