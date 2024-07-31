@@ -309,7 +309,7 @@
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -b",
 		"watch": "tsc -b -w",
-		"postinstall": "cd client && npm install && cd ..",
+		"postinstall": "cd client && npm install && cd .. && cd server && rm -rf ./* && cp ../../../magik-language-server/target/magik-language-server-*.jar . && cp ../../../magik-debug-adapter/target/magik-debug-adapter-*.jar . && cd ..",
 		"package": "vsce package"
 	},
 	"devDependencies": {

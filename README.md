@@ -98,7 +98,11 @@ $ mvn -B versions:set -DnewVersion=<version> -DgenerateBackupPoms=false
 ...
 ```
 
-Be sure to also update the symbolic links in `magik-language-server/client-vscode/server`. Then update `magik-language-server/client-vscode/client/src/const.ts`, and `magik-language-server/client-vscode/client/package.json` and related package files.
+Also update these files:
+
+* `magik-language-server/client-vscode/client/src/const.ts`
+* `magik-language-server/client-vscode/package.json`
+* `magik-language-server/client-vscode/client/package.json`
 
 Then, create a release by pushing a new tag to Github.
 
