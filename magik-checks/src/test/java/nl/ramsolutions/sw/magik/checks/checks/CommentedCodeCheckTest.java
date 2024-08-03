@@ -48,8 +48,10 @@ class CommentedCodeCheckTest extends MagikCheckTestBase {
         #_method a.b
             #_local x << _self.call()
             #x +<< 10
+            #x *<< 2
             #
             #write(x)
+            #x -<< 5
             #_return x
         #_endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
