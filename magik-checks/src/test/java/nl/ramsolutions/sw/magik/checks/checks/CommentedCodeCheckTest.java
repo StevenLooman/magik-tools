@@ -41,7 +41,7 @@ class CommentedCodeCheckTest extends MagikCheckTestBase {
   }
 
   @Test
-  void testCommentedMethodWithBlankLine() {
+  void testCommentedMethodWithIndentedBlankLine() {
     final MagikCheck check = new CommentedCodeCheck();
     final String code =
         """
@@ -55,9 +55,27 @@ class CommentedCodeCheckTest extends MagikCheckTestBase {
             #_return x
         #_endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(issues).hasSize(2);
   }
 
+  @Test
+  void testCommentedMethodWithoutIndentedBlankLine() {
+    final MagikCheck check = new CommentedCodeCheck();
+    final String code =
+        """
+        #_method a.b
+        #_local x << _self.call()
+        #x +<< 10
+        #x *<< 2
+        #
+        #write(x)
+        #x -<< 5
+        #_return x
+        #_endmethod""";
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(2);
+  }
+  
   @Test
   void testCommentedMethodWithoutBlankLine() {
     final MagikCheck check = new CommentedCodeCheck();
@@ -68,6 +86,21 @@ class CommentedCodeCheckTest extends MagikCheckTestBase {
             #x +<< 10
             #write(x)
             #_return x
+        #_endmethod""";
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
+
+    @Test
+  void testCommentedMethodWithoutIndentation() {
+    final MagikCheck check = new CommentedCodeCheck();
+    final String code =
+        """
+        #_method a.b
+        #_local x << _self.call()
+        #x +<< 10
+        #write(x)
+        #_return x
         #_endmethod""";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
