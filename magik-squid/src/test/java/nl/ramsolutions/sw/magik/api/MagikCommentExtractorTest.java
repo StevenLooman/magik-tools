@@ -149,4 +149,33 @@ class MagikCommentExtractorTest {
 
     assertThat(docComments).containsExactly("## Line 1", "## Line 2");
   }
+
+  @Test
+  void testAllLineComments() {
+    final String code =
+        """
+        #_method a.b
+        #write(10)
+        #_endmethod
+        """;
+    final AstNode node = this.parseMagik(code);
+    final List<Token> tokens = MagikCommentExtractor.extractLineComments(node).toList();
+
+    assertThat(tokens).hasSize(3);
+
+    final Token token0 = tokens.get(0);
+    assertThat(token0.getLine()).isEqualTo(1);
+    assertThat(token0.getColumn()).isZero();
+    assertThat(token0.getValue()).isEqualTo("#_method a.b");
+
+    final Token token1 = tokens.get(1);
+    assertThat(token1.getLine()).isEqualTo(2);
+    assertThat(token1.getColumn()).isZero();
+    assertThat(token1.getValue()).isEqualTo("#write(10)");
+
+    final Token token2 = tokens.get(2);
+    assertThat(token2.getLine()).isEqualTo(3);
+    assertThat(token2.getColumn()).isZero();
+    assertThat(token2.getValue()).isEqualTo("#_endmethod");
+  }
 }

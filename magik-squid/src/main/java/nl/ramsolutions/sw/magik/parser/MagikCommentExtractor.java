@@ -4,11 +4,10 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nl.ramsolutions.sw.magik.utils.StreamUtils;
 
 /**
  * Comment extractor for Magik sources. The MagikParser, or rather sslr, does not properly store
@@ -42,33 +41,39 @@ public final class MagikCommentExtractor {
         .filter(Token::hasTrivia)
         .flatMap(
             token -> {
-              final Stream<Trivia> streamA = token.getTrivia().stream();
-              final Stream<Trivia> streamB = token.getTrivia().stream().skip(1);
-              final Stream<List<Token>> streamC =
-                  StreamUtils.zip(streamA, streamB)
-                      .filter(entry -> entry.getKey() != null && entry.getValue() != null)
-                      .map(
-                          entry -> {
-                            final Trivia previousTrivia = entry.getKey();
-                            final Trivia trivia = entry.getValue();
-                            final List<Token> lineCommentTokens = new ArrayList<>();
+              final List<Trivia> trivias = token.getTrivia();
+              return trivias.stream()
+                  .map(
+                      trivia -> {
+                        if (!trivia.isComment()) {
+                          return null;
+                        }
 
-                            final List<Token> previousTriviaTokens = previousTrivia.getTokens();
-                            final Token previousTriviaLastToken =
-                                previousTriviaTokens.get(previousTriviaTokens.size() - 1);
-                            if (trivia.isComment()
-                                && (previousTrivia.isSkippedText() // Whitespace from start of line.
-                                        && previousTriviaLastToken.getColumn() == 0
-                                    || previousTrivia.isSkippedText() // EOL.
-                                        && previousTriviaLastToken.getType()
-                                            == GenericTokenType.EOL)) {
-                              final Token lineCommentToken = trivia.getToken();
-                              lineCommentTokens.add(lineCommentToken);
-                            }
+                        final int index = trivias.indexOf(trivia);
+                        final Trivia previousTrivia = index > 0 ? trivias.get(index - 1) : null;
 
-                            return lineCommentTokens;
-                          });
-              return streamC.flatMap(List::stream);
+                        if (previousTrivia == null) {
+                          // First line of source.
+                          return trivia.getToken();
+                        }
+
+                        if (!previousTrivia.isSkippedText()) {
+                          // Regular token? Not a single line comment.
+                          return null;
+                        }
+
+                        final List<Token> previousTriviaTokens = previousTrivia.getTokens();
+                        final Token previousTriviaLastToken =
+                            previousTriviaTokens.get(previousTriviaTokens.size() - 1);
+                        if (previousTriviaLastToken.getColumn()
+                                == 0 // Whitespace from start of line.
+                            || previousTriviaLastToken.getType() == GenericTokenType.EOL) {
+                          return trivia.getToken();
+                        }
+
+                        return null;
+                      })
+                  .filter(Objects::nonNull);
             });
   }
 

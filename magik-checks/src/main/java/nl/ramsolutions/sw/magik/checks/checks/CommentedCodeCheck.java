@@ -39,16 +39,23 @@ public class CommentedCodeCheck extends MagikCheck {
   protected void walkPreMagik(final AstNode node) {
     final Map<Token, List<Token>> commentBlocks = this.extractCommentBlocks(node);
     commentBlocks.entrySet().stream()
+        .map(Map.Entry::getValue)
+        .map(
+            tokens -> {
+              // Filter blank comments.
+              return tokens.stream()
+                  .filter(token -> !token.getValue().trim().equals("#"))
+                  .collect(Collectors.toList());
+            })
+        .filter(tokens -> tokens.size() >= minLines)
         .filter(
-            entry -> {
-              final List<Token> blockTokens = entry.getValue();
+            tokens -> {
               final String block =
-                  blockTokens.stream().map(Token::getValue).collect(Collectors.joining("\n"));
-              return blockTokens.size() >= minLines && this.isCommentedCode(block);
+                  tokens.stream().map(Token::getValue).collect(Collectors.joining("\n"));
+              return this.isCommentedCode(block);
             })
         .forEach(
-            entry -> {
-              final List<Token> tokens = entry.getValue();
+            tokens -> {
               final Token startToken = tokens.get(0);
               final Token endToken = tokens.get(tokens.size() - 1);
               this.addIssue(
@@ -69,8 +76,7 @@ public class CommentedCodeCheck extends MagikCheck {
     Token lastToken = null;
     List<Token> connectingTokens = new ArrayList<>();
     for (final Token token : commentTokens) {
-      if (token.getValue().startsWith("##")
-          || token.getValue().trim().equals("#")) { // Empty comment line.
+      if (token.getValue().startsWith("##")) {
         continue;
       }
 
