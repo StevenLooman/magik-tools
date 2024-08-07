@@ -107,6 +107,33 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
             _endif
         _endmethod
         """,
+        """
+        _try _with cond
+            _self.do_something()
+        _when file_does_not_exist
+            write(cond.report_contents_string)
+        _when error
+            write(:something_failed)
+        _endtry
+        """,
+        """
+        _try _with cond
+            _self.do_something()
+        _when file_does_not_exist
+            write(:something_failed)
+        _when error
+            write(cond.report_contents_string)
+        _endtry
+        """,
+        """
+        _try _with cond
+            _self.do_something()
+        _when file_does_not_exist
+            write(cond.report_contents_string)
+        _when error
+            write(cond.report_contents_string)
+        _endtry
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new UnusedVariableCheck();
@@ -137,6 +164,23 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
         """
         _method a.b
             _dynamic !notify_database_data_changes?!
+        _endmethod
+        """,
+        """
+        _try _with cond
+            _self.do_something()
+        _when file_does_not_exist
+            write(:missing_file)
+        _when error
+            write(:something_failed)
+        _endtry
+        """,
+        """
+        _method a.b
+            _local l_me << _self
+            _proc()
+                _import l_me
+            _endproc()
         _endmethod
         """,
       })

@@ -185,7 +185,7 @@ public abstract class Scope {
     }
 
     final ScopeEntry scopeEntry = new ScopeEntry(type, identifier, declarationNode, null);
-    scopeEntries.put(identifier, scopeEntry);
+    this.scopeEntries.put(identifier, scopeEntry);
     return scopeEntry;
   }
 
