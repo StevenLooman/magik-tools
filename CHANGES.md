@@ -1,5 +1,10 @@
 # Changes
 
+0.10.1 (unreleased)
+
+- Fix CommentedCodeCheck, splitting commented code on newlines.
+- Fix CommentedCodeCheck, not seeing seeing the commented line if line is top of file.
+
 0.10.0 (2024-07-28)
 
 - Move to Java 17.
