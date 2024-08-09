@@ -165,6 +165,30 @@ _method definition.name_from_object(obj)
 _endmethod
 $
 
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_method definition.normalized_source_file(source_file)
+	## Get the normalized source_file.
+	## If the source_file starts with the value of `$SMALLWORLD_GIS`,
+	## replace it with `$SMALLWORLD_GIS`.
+	## If the source_file starts with the value `/projects/hg/corerepo/sw_core`,
+	## replace it with `$SMALLWORLD_GIS/sw_core`.
+	## @param {sw:char16_vector} source_file Source file.
+	## @return {sw:char16_vector} Normalized source file.
+	_local smallworld_gis << system.getenv("SMALLWORLD_GIS")
+	_local sw_core_path << "/projects/hg/corerepo/sw_core"
+
+	_if source_file.index_of_seq(smallworld_gis) = 1
+	_then
+		_return "$SMALLWORLD_GIS" + source_file.subseq(smallworld_gis.size + 1)
+	_elif source_file.index_of_seq(sw_core_path) = 1
+	_then
+		_return "$SMALLWORLD_GIS/sw_core" + source_file.subseq(sw_core_path.size + 1)
+	_endif
+
+	_return source_file
+_endmethod
+$
+
 _pragma(classify_level=basic, topic=type_dumper)
 _abstract _method definition.equals?(other)
 	## Equals?
