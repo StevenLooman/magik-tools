@@ -5,6 +5,7 @@
 - Fix CommentedCodeCheck, splitting commented code on newlines.
 - Fix CommentedCodeCheck, not seeing seeing the commented line if line is top of file.
 - Fix UnusedVariableCheck, not handling try/when constructs properly.
+- Show path to loaded `magik-lint.properties` in (debug) logging.
 
 0.10.0 (2024-07-28)
 
