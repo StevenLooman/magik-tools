@@ -16,8 +16,7 @@ $
 
 _block
 	_local filepath << sw:system.create_temp_file("sw_types.jsonl")
-
-	write_with_spaces(date_time.now(), "started writing to", filepath)
+	write_with_spaces(date_time.now(), "Start writing to:", filepath)
 
 	_local ignore_vars << set.new_with(
 		:|mt:binary_operator_definition|,
@@ -41,6 +40,6 @@ _block
 	_local dumper << mt:type_dumper.new(filepath, ignore_vars)
 	dumper.run()
 
-	write_with_spaces(date_time.now(), "finished writing to", filepath)
+	write_with_spaces(date_time.now(), "Finished writing to:", filepath)
 _endblock
 $
