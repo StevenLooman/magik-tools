@@ -163,8 +163,11 @@ class MagikSession implements vscode.Disposable {
 	 * @param editor Editor to transmit.
 	 */
 	public transmitEditorRegion(editor: vscode.TextEditor) {
+		// Save file in editor.
 		const doc = editor.document;
-		doc.save();
+		if (doc.uri.scheme != 'untitled') {
+			doc.save();
+		}
 
 		// Get cursor position and determine range to transmit.
 		const position = editor.selection.active;
