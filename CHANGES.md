@@ -7,6 +7,7 @@
 - Fix UnusedVariableCheck, not handling try/when constructs properly.
 - Show path to loaded `magik-lint.properties` in (debug) logging.
 - Fix sw_type_dumper not handling sub-objects properly.
+- Cache `magik-tools.properties` per opened file in `magik-language-server`.
 
 0.10.0 (2024-07-28)
 
