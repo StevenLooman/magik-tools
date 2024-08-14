@@ -1,14 +1,12 @@
 package nl.ramsolutions.sw.magik.languageserver.diagnostics;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationLocator;
-import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
@@ -96,9 +94,9 @@ public class MagikTypedChecksDiagnosticsProvider {
 
   private Collection<MagikTypedCheck> createChecks(final MagikTypedFile magikFile)
       throws IOException {
-    final Path searchPath = Path.of(magikFile.getUri()).getParent();
+    final MagikToolsProperties fileProperties = magikFile.getProperties();
     final MagikToolsProperties actualProperties =
-        ConfigurationReader.readProperties(searchPath, this.properties);
+        MagikToolsProperties.merge(this.properties, fileProperties);
     final MagikChecksConfiguration config =
         new MagikChecksConfiguration(CheckList.getChecks(), actualProperties);
     final List<MagikCheckHolder> holders = config.getAllChecks();

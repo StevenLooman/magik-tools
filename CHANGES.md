@@ -2,6 +2,15 @@
 
 0.11.0 (unreleased)
 
+0.10.1 (2024-08-14)
+
+- Fix CommentedCodeCheck, splitting commented code on newlines.
+- Fix CommentedCodeCheck, not seeing seeing the commented line if line is top of file.
+- Fix UnusedVariableCheck, not handling try/when constructs properly.
+- Show path to loaded `magik-lint.properties` in (debug) logging.
+- Fix sw_type_dumper not handling sub-objects properly.
+- Cache `magik-tools.properties` per opened file in `magik-language-server`.
+
 0.10.0 (2024-07-28)
 
 - Move to Java 17.
