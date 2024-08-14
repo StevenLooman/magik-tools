@@ -108,7 +108,7 @@ _private _method procedure_definition.init_from_json(instruction)
 	# Fix parameters.
 	.parameters << .parameters.map(
 		_proc(param)
-			_return parameter_definition.sys!perform(:|init_from_json()|, param)
+			_return parameter_definition.sys!perform(:|new_from_json()|, param)
 		_endproc)
 
 	_return _self
@@ -139,7 +139,7 @@ _method procedure_definition.new_from(var)
 		_endif
 	_local source_file <<
 		_try
-			>> procedure.source_file
+			>> _self.normalized_source_file(procedure.source_file)
 		_when error
 			>> _unset
 		_endtry

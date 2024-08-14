@@ -236,7 +236,7 @@ _private _method type_merger.merge_definition(left_definition, right_definition)
 		# Take left, as this might have typing information.
 		_local out_stream << sw:internal_text_output_stream.new()
 		right_definition.show_on(out_stream)
-		_local msg << write_string("Taken from left: ", out_stream.string)
+		_local msg << write_string("Kept: ", out_stream.string)
 		condition.raise(:information, :string, msg)
 		_return left_definition
 	_endif

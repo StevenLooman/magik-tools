@@ -69,7 +69,7 @@ _private _method type_definition.init_from_json(instruction)
 	# Fix slots.
 	.slots << .slots.map(
 		_proc(slot)
-			_return slot_definition.sys!perform(:|init_from_json()|, slot)
+			_return slot_definition.sys!perform(:|new_from_json()|, slot)
 		_endproc)
 
 	_return _self

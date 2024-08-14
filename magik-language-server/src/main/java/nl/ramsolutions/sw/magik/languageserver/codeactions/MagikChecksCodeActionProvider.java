@@ -1,11 +1,9 @@
 package nl.ramsolutions.sw.magik.languageserver.codeactions;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
@@ -57,9 +55,9 @@ public class MagikChecksCodeActionProvider {
 
   private boolean isCheckEnabled(final MagikFile magikFile, final Class<?> checkClass)
       throws IOException {
-    final Path searchPath = Path.of(magikFile.getUri()).getParent();
+    final MagikToolsProperties fileProperties = magikFile.getProperties();
     final MagikToolsProperties actualProperties =
-        ConfigurationReader.readProperties(searchPath, this.properties);
+        MagikToolsProperties.merge(this.properties, fileProperties);
     final MagikChecksConfiguration config =
         new MagikChecksConfiguration(CheckList.getChecks(), actualProperties);
     final List<MagikCheckHolder> allChecks = config.getAllChecks();

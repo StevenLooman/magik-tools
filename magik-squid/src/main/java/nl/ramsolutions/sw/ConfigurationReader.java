@@ -4,9 +4,13 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Class to determine the location of the properties file to read. */
 public final class ConfigurationReader {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationReader.class);
 
   private ConfigurationReader() {}
 
@@ -42,6 +46,9 @@ public final class ConfigurationReader {
       final Path path, final MagikToolsProperties properties) throws IOException {
     final String overrideConfigFile = properties.getPropertyString("magik.lint.overrideConfigFile");
     final Path propertiesPath = ConfigurationReader.determinePath(path, overrideConfigFile);
+    if (propertiesPath != null) {
+      LOGGER.debug("Reading properties from: {}", propertiesPath);
+    }
 
     // Copy properties, but override all from propertiesPath.
     final MagikToolsProperties fileProperties =
