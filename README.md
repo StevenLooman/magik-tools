@@ -94,15 +94,15 @@ You can update versions using the [Versions Maven Plugin](https://www.mojohaus.o
 To update all projects:
 
 ```shell
-$ mvn -B versions:set -DnewVersion=<version> -DgenerateBackupPoms=false
+$ mvn -B versions:set -DgenerateBackupPoms=false -DnewVersion=<version>
 ...
 ```
 
 Also update these files:
 
-* `magik-language-server/client-vscode/client/src/const.ts`
 * `magik-language-server/client-vscode/package.json`
 * `magik-language-server/client-vscode/client/package.json`
+* `magik-language-server/client-vscode/client/src/const.ts`
 
 Then, create a release by pushing a new tag to Github.
 
