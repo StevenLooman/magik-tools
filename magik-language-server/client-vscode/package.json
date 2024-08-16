@@ -206,6 +206,10 @@
 					"args": {
 						"type": "array",
 						"description": "Additional runalias arguments"
+					},
+					"env": {
+						"type": "object",
+						"description": "Environment variables"
 					}
 				}
 			}
@@ -234,26 +238,26 @@
 					"description": "Path to environment file -- only used by the VS Code extension.",
 					"type": "string"
 				},
-        "magik.formatting.indentChar": {
-          "description": "Indent character, 'tab' or 'space' -- only used by the VS Code extension.",
-          "type": "string"
-        },
-        "magik.formatting.indentWidth": {
-          "description": "Indent width (tab size or number of spaces) -- only used by the VS Code extension.",
-          "type": "number"
-        },
-        "magik.formatting.insertFinalNewline": {
-          "description": "Insert final newline -- only used by the VS Code extension.",
-          "type": "boolean"
-        },
-        "magik.formatting.trimTrailingWhitespace": {
-          "description": "Trim trailing whitespace -- only used by the VS Code extension.",
-          "type": "boolean"
-        },
-        "magik.formatting.trimFinalNewlines": {
-          "description": "Trim final newlines -- only used by the VS Code extension.",
-          "type": "boolean"
-        },
+				"magik.formatting.indentChar": {
+					"description": "Indent character, 'tab' or 'space' -- only used by the VS Code extension.",
+					"type": "string"
+				},
+				"magik.formatting.indentWidth": {
+					"description": "Indent width (tab size or number of spaces) -- only used by the VS Code extension.",
+					"type": "number"
+				},
+				"magik.formatting.insertFinalNewline": {
+					"description": "Insert final newline -- only used by the VS Code extension.",
+					"type": "boolean"
+				},
+				"magik.formatting.trimTrailingWhitespace": {
+					"description": "Trim trailing whitespace -- only used by the VS Code extension.",
+					"type": "boolean"
+				},
+				"magik.formatting.trimFinalNewlines": {
+					"description": "Trim final newlines -- only used by the VS Code extension.",
+					"type": "boolean"
+				},
 				"magik.lint.overrideConfigFile": {
 					"description": "Override path to magiklintrc.properties.",
 					"type": "string"
@@ -297,11 +301,11 @@
 					"type": "boolean",
 					"default": true
 				},
-        "magik.typing.cacheIndexedDefinitions": {
-          "description": "Store and load the indexed definitions in the workspace folders.",
-          "type": "boolean",
-          "default": true
-        }
+				"magik.typing.cacheIndexedDefinitions": {
+					"description": "Store and load the indexed definitions in the workspace folders, in file types.jsonl.",
+					"type": "boolean",
+					"default": true
+				}
 			}
 		}
 	},

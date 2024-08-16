@@ -48,16 +48,17 @@ export class MagikAliasTaskProvider implements vscode.TaskProvider, vscode.Dispo
 			const definition: AliasTaskDefinition = <any>task.definition;
 			const runAliasPath = getRunAliasPath();
 			const aliasesPath = getAliasesPath();
-			const entryName = definition.entry;
 			const environmentFile = getEnvironmentPath();
-			const additionalArgs = definition.args;
-			const commandLine = getStartAliasCommand(runAliasPath, aliasesPath, entryName, environmentFile, additionalArgs);
+			const commandLine = getStartAliasCommand(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.args);
+			const shellExecutionOptions: vscode.ShellExecutionOptions = {
+				env: definition.env,
+			};
 			return new vscode.Task(
 				definition,
 				task.scope ?? vscode.TaskScope.Workspace,
-				entryName,
+				definition.entry,
 				MagikAliasTaskProvider.AliasType,
-				new vscode.ShellExecution(commandLine));
+				new vscode.ShellExecution(commandLine, shellExecutionOptions));
 		}
 		return undefined;
 	}
@@ -74,6 +75,11 @@ interface AliasTaskDefinition extends vscode.TaskDefinition {
 	 * Additional arguments.
 	 */
 	args?: string[];
+
+	/**
+	 * Environment variables.
+	 */
+	env?: { [key: string]: string };
 }
 
 let _channel: vscode.OutputChannel;
@@ -145,15 +151,19 @@ async function getAliasesTasks(aliasesPath: fs.PathLike): Promise<vscode.Task[]>
 					type: MagikAliasTaskProvider.AliasType,
 					entry: entryName,
 					additionalArguments: [],
+					env: {},
 				};
-				const commandLine = getStartAliasCommand(runAliasPath, aliasesPath, entryName, environmentFile);
+				const commandLine = getStartAliasCommand(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.additionalArguments);
+				const shellExecutionOptions: vscode.ShellExecutionOptions = {
+					env: definition.env,
+				};
 
 				const task = new vscode.Task(
 					definition,
 					vscode.TaskScope.Workspace,
 					entryName,
 					MagikAliasTaskProvider.AliasType,
-					new vscode.ShellExecution(commandLine));
+					new vscode.ShellExecution(commandLine, shellExecutionOptions));
 				tasks.push(task);
 			}
 		}

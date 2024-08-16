@@ -2,6 +2,8 @@
 
 0.11.0 (unreleased)
 
+- Support setting environment variables from VSCode tasks.
+
 0.10.1 (2024-08-14)
 
 - Fix CommentedCodeCheck, splitting commented code on newlines.
