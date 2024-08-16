@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   final IDefinitionKeeper definitionKeeper;
   final Predicate<ProductDefinition> productDefinitionPredicate;
   final Predicate<ModuleDefinition> moduleDefinitionPredicate;
+  final Predicate<MagikFileDefinition> magikFileDefinitionPredicate;
   final Predicate<PackageDefinition> packageDefinitionPredicate;
   final Predicate<ExemplarDefinition> exemplarDefinitionPredicate;
   final Predicate<MethodDefinition> methodDefinitionPredicate;
@@ -26,6 +28,7 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
       final IDefinitionKeeper definitionKeeper,
       final Predicate<ProductDefinition> productDefinitionPredicate,
       final Predicate<ModuleDefinition> moduleDefinitionPredicate,
+      final Predicate<MagikFileDefinition> magikFileDefinitionPredicate,
       final Predicate<PackageDefinition> packageDefinitionPredicate,
       final Predicate<ExemplarDefinition> exemplarDefinitionPredicate,
       final Predicate<MethodDefinition> methodDefinitionPredicate,
@@ -36,6 +39,7 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
     this.definitionKeeper = definitionKeeper;
     this.productDefinitionPredicate = productDefinitionPredicate;
     this.moduleDefinitionPredicate = moduleDefinitionPredicate;
+    this.magikFileDefinitionPredicate = magikFileDefinitionPredicate;
     this.packageDefinitionPredicate = packageDefinitionPredicate;
     this.exemplarDefinitionPredicate = exemplarDefinitionPredicate;
     this.methodDefinitionPredicate = methodDefinitionPredicate;
@@ -52,6 +56,11 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
 
   @Override
   public void add(final ModuleDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void add(final MagikFileDefinition definition) {
     throw new UnsupportedOperationException();
   }
 
@@ -97,6 +106,11 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
 
   @Override
   public void remove(final ModuleDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void remove(final MagikFileDefinition definition) {
     throw new UnsupportedOperationException();
   }
 
@@ -160,6 +174,20 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   public Collection<ModuleDefinition> getModuleDefinitions() {
     return this.definitionKeeper.getModuleDefinitions().stream()
         .filter(this.moduleDefinitionPredicate)
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  public Collection<MagikFileDefinition> getMagikFileDefinitions(URI uri) {
+    return this.getMagikFileDefinitions().stream()
+        .filter(magikFileDef -> magikFileDef.getUri().equals(uri))
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  public Collection<MagikFileDefinition> getMagikFileDefinitions() {
+    return this.definitionKeeper.getMagikFileDefinitions().stream()
+        .filter(this.magikFileDefinitionPredicate)
         .collect(Collectors.toSet());
   }
 

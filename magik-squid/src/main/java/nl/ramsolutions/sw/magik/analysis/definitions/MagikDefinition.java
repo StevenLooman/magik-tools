@@ -64,7 +64,7 @@ public abstract class MagikDefinition implements IDefinition {
   /**
    * Get doc.
    *
-   * @return
+   * @return Doc.
    */
   @CheckForNull
   public String getDoc() {
@@ -74,7 +74,7 @@ public abstract class MagikDefinition implements IDefinition {
   /**
    * Get parsed node.
    *
-   * @return
+   * @return Node.
    */
   @CheckForNull
   public AstNode getNode() {

@@ -35,7 +35,7 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
    */
   @Override
   public List<CodeAction> provideCodeActions(final MagikTypedFile magikFile, final Range range) {
-    return magikFile.getDefinitions().stream()
+    return magikFile.getMagikDefinitions().stream()
         .filter(MethodDefinition.class::isInstance)
         .map(MethodDefinition.class::cast)
         .filter(MethodDefinition::isActualMethodDefinition)

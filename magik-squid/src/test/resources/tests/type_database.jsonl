@@ -2,18 +2,24 @@
 // self type: _self
 // undefined type: _undefined
 // undefined result: __UNDEFINED_RESULT__
+// products
+{"instruction":"product","name":"test_product","version":"1.0.0","title":"Test product","description":"Test product"}
+// modules
+{"instruction":"module","name":"test_module","base_version":"1","current_version":"2","product_name":"test_product","description":"test_module"}
+// magik files
+{"instruction":"magik_file","location":{"uri":"file:///test.magik"}}
 // packages
 {"instruction":"package","name":"sw","uses":[]}
 {"instruction":"package","name":"user","uses":["sw"]}
 {"instruction":"package","name":"test_package","uses":["user"]}
 // types
-{"instruction":"type","type_name":"user:a","sort":"slotted","doc":"Test exemplar a","parents":["sw:object"],"slots":[{"name":"slot1","type_name":"sw:integer"},{"name":"slot2","type_name":"sw:float"}],"module_name":"test_module","generic_declarations":[{"location":null,"name":"K"},{"location":null,"name":"E"}]}
-{"instruction":"type","type_name":"user:b","sort":"indexed","doc":"Test exemplar b","parents":["sw:object"],"slots":[],"module_name":null,"generic_declarations":[]}
+{"instruction":"type","type_name":"user:a","sort":"slotted","doc":"Test exemplar a","parents":["sw:object"],"slots":[{"name":"slot1","type_name":"sw:integer"},{"name":"slot2","type_name":"sw:float"}],"module_name":"test_module"}
+{"instruction":"type","type_name":"user:b","sort":"indexed","doc":"Test exemplar b","parents":["sw:object"],"slots":[],"module_name":null}
 // globals
 {"instruction":"global","type_name":"sw:!print_float_precision!","aliased_type_name":"sw:integer"}
 {"instruction":"global","type_name":"sw:tab_char","aliased_type_name":"sw:character"}
 // methods
-{"instruction":"method","type_name":"user:b","method_name":"m1()","modifiers":[],"parameters":[{"name":"param1","modifier":"gather","type_name":"sw:symbol"},{"name":"param1","modifier":"none","type_name":"_undefined"}],"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m1()","module_name":"test_module"}
+{"instruction":"method","type_name":"user:b","method_name":"m1()","modifiers":[],"parameters":[{"name":"param1","modifier":"gather","type_name":"sw:symbol"},{"name":"param2","modifier":"none","type_name":"_undefined"}],"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m1()","module_name":"test_module"}
 {"instruction":"method","type_name":"user:b","method_name":"m2<<","modifiers":["private"],"parameters":[],"assignment_parameter":{"name":"param2","modifier":"none","type_name":"sw:symbol"},"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m2()","module_name":"test_module"}
 // procedures
 {"instruction":"procedure","type_name":"sw:quit","procedure_name":"quit","modifiers":[],"parameters":[{"name":"status","modifier":"optional","type_name":"_undefined"}],"return_types":"__UNDEFINED_RESULT__","loop_types":[],"source_file":null,"doc":"Quit!","module_name":"test_module"}

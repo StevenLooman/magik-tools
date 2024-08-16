@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
+import java.net.URI;
 import java.util.Collection;
 import nl.ramsolutions.sw.definitions.ModuleDefinition;
 import nl.ramsolutions.sw.definitions.ProductDefinition;
@@ -11,6 +12,8 @@ public interface IDefinitionKeeper {
   void add(ProductDefinition definition);
 
   void add(ModuleDefinition definition);
+
+  void add(MagikFileDefinition definition);
 
   void add(PackageDefinition definition);
 
@@ -29,6 +32,8 @@ public interface IDefinitionKeeper {
   void remove(ProductDefinition definition);
 
   void remove(ModuleDefinition definition);
+
+  void remove(MagikFileDefinition definition);
 
   void remove(PackageDefinition definition);
 
@@ -51,6 +56,10 @@ public interface IDefinitionKeeper {
   Collection<ModuleDefinition> getModuleDefinitions(String name);
 
   Collection<ModuleDefinition> getModuleDefinitions();
+
+  Collection<MagikFileDefinition> getMagikFileDefinitions(URI uri);
+
+  Collection<MagikFileDefinition> getMagikFileDefinitions();
 
   Collection<PackageDefinition> getPackageDefinitions(String name);
 

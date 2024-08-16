@@ -26,6 +26,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
@@ -107,6 +108,7 @@ public final class JsonDefinitionWriter {
         BufferedWriter bufferedWriter = new BufferedWriter(fileReader)) {
       this.writeProducts(bufferedWriter);
       this.writeModules(bufferedWriter);
+      this.writeMagikFiles(bufferedWriter);
       this.writePackages(bufferedWriter);
       this.writeExemplars(bufferedWriter);
       this.writeGlobals(bufferedWriter);
@@ -171,6 +173,21 @@ public final class JsonDefinitionWriter {
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
               instruction.addProperty(
                   Instruction.INSTRUCTION.getValue(), Instruction.MODULE.getValue());
+              this.writeInstruction(writer, instruction);
+            });
+  }
+
+  private void writeMagikFiles(final Writer writer) {
+    final Comparator<MagikFileDefinition> sorter =
+        Comparator.comparing(MagikFileDefinition::getUri);
+    this.definitionKeeper.getMagikFileDefinitions().stream()
+        .sorted(sorter)
+        .forEach(
+            definition -> {
+              final Gson gson = this.buildGson();
+              final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
+              instruction.addProperty(
+                  Instruction.INSTRUCTION.getValue(), Instruction.MAGIK_FILE.getValue());
               this.writeInstruction(writer, instruction);
             });
   }

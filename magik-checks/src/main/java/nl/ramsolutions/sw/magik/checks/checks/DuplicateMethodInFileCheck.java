@@ -19,7 +19,7 @@ public class DuplicateMethodInFileCheck extends MagikCheck {
   @Override
   protected void walkPostMagik(final AstNode node) {
     // Test for duplicates.
-    this.getMagikFile().getDefinitions().stream()
+    this.getMagikFile().getMagikDefinitions().stream()
         .filter(MethodDefinition.class::isInstance)
         .map(MethodDefinition.class::cast)
         .collect(Collectors.groupingBy(MethodDefinition::getName))

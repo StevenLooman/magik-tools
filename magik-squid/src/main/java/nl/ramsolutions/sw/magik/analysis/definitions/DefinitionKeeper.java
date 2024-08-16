@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -15,6 +16,7 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
   private final Map<String, Set<ProductDefinition>> productDefinitions = new ConcurrentHashMap<>();
   private final Map<String, Set<ModuleDefinition>> moduleDefinitions = new ConcurrentHashMap<>();
+  private final Map<URI, Set<MagikFileDefinition>> magikFileDefinitions = new ConcurrentHashMap<>();
   private final Map<String, Set<PackageDefinition>> packageDefinitions = new ConcurrentHashMap<>();
   private final Map<String, Set<BinaryOperatorDefinition>> binaryOperatorDefinitions =
       new ConcurrentHashMap<>();
@@ -61,6 +63,14 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final String name = definition.getName();
     final Set<ModuleDefinition> definitions =
         this.moduleDefinitions.computeIfAbsent(name, k -> ConcurrentHashMap.newKeySet());
+    definitions.add(definition);
+  }
+
+  @Override
+  public void add(final MagikFileDefinition definition) {
+    final URI uri = definition.getUri();
+    final Set<MagikFileDefinition> definitions =
+        this.magikFileDefinitions.computeIfAbsent(uri, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
   }
 
@@ -137,6 +147,14 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final String name = definition.getName();
     final Set<ModuleDefinition> definitions =
         this.moduleDefinitions.computeIfAbsent(name, k -> ConcurrentHashMap.newKeySet());
+    definitions.remove(definition);
+  }
+
+  @Override
+  public void remove(final MagikFileDefinition definition) {
+    final URI uri = definition.getUri();
+    final Set<MagikFileDefinition> definitions =
+        this.magikFileDefinitions.computeIfAbsent(uri, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
   }
 
@@ -222,6 +240,20 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   @Override
   public Collection<ModuleDefinition> getModuleDefinitions() {
     return this.moduleDefinitions.values().stream()
+        .flatMap(Set::stream)
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  public Collection<MagikFileDefinition> getMagikFileDefinitions(final URI uri) {
+    final Collection<MagikFileDefinition> definitions =
+        this.magikFileDefinitions.getOrDefault(uri, Collections.emptySet());
+    return Collections.unmodifiableCollection(definitions);
+  }
+
+  @Override
+  public Collection<MagikFileDefinition> getMagikFileDefinitions() {
+    return this.magikFileDefinitions.values().stream()
         .flatMap(Set::stream)
         .collect(Collectors.toSet());
   }

@@ -31,9 +31,9 @@ public final class IgnoreHandler {
   private final Map<Path, Set<PathMatcher>> entries = new HashMap<>();
 
   /**
-   * Constructor.
+   * Handle file event.
    *
-   * @param fileEvent File event.
+   * @param fileEvent {@link FileEvent} to handle.
    * @throws IOException -
    */
   public void handleFileEvent(final FileEvent fileEvent) throws IOException {

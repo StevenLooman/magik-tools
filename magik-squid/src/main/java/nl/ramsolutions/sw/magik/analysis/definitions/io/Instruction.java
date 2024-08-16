@@ -6,6 +6,7 @@ enum Instruction {
   INSTRUCTION("instruction"),
   PRODUCT("product"),
   MODULE("module"),
+  MAGIK_FILE("magik_file"),
   PACKAGE("package"),
   TYPE("type"),
   GLOBAL("global"),

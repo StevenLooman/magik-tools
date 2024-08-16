@@ -38,7 +38,7 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
     final MagikToolsProperties properties = magikFile.getProperties();
     final MagikFormattingSettings settings = new MagikFormattingSettings(properties);
     final String indent = settings.getIndent();
-    return magikFile.getDefinitions().stream()
+    return magikFile.getMagikDefinitions().stream()
         .filter(MethodDefinition.class::isInstance)
         .map(MethodDefinition.class::cast)
         .filter(MethodDefinition::isActualMethodDefinition)

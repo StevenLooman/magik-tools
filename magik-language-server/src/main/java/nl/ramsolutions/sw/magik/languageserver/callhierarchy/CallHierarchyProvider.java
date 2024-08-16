@@ -221,7 +221,7 @@ public class CallHierarchyProvider {
     final MagikTypedFile magikFile = new MagikTypedFile(uri, text, this.definitionKeeper);
     final String itemName = item.getName();
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-    return magikFile.getDefinitions().stream()
+    return magikFile.getMagikDefinitions().stream()
         .filter(MethodDefinition.class::isInstance)
         .map(MethodDefinition.class::cast)
         .filter(methodDef -> methodDef.getName().equals(itemName))

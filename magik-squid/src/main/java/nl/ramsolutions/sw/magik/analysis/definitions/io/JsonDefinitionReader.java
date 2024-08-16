@@ -29,6 +29,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
@@ -240,6 +241,10 @@ public final class JsonDefinitionReader {
         this.handleModule(obj);
         break;
 
+      case MAGIK_FILE:
+        this.handleMagikFile(obj);
+        break;
+
       case PACKAGE:
         this.handlePackage(obj);
         break;
@@ -306,6 +311,12 @@ public final class JsonDefinitionReader {
   private void handleModule(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final ModuleDefinition definition = gson.fromJson(instruction, ModuleDefinition.class);
+    this.definitionKeeper.add(definition);
+  }
+
+  private void handleMagikFile(final JsonObject instruction) {
+    final Gson gson = this.buildGson();
+    final MagikFileDefinition definition = gson.fromJson(instruction, MagikFileDefinition.class);
     this.definitionKeeper.add(definition);
   }
 

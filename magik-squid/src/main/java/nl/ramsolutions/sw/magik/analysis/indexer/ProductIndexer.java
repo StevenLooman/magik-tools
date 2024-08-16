@@ -35,6 +35,12 @@ public class ProductIndexer {
     this.ignoreHandler = ignoreHandler;
   }
 
+  /**
+   * Handle file event.
+   *
+   * @param fileEvent {@link FileEvent} to handle.
+   * @throws IOException -
+   */
   public synchronized void handleFileEvent(final FileEvent fileEvent) throws IOException {
     LOGGER.debug("Handling file event: {}", fileEvent);
 

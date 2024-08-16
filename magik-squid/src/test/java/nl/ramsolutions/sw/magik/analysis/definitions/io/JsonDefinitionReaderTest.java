@@ -3,15 +3,22 @@ package nl.ramsolutions.sw.magik.analysis.definitions.io;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import nl.ramsolutions.sw.definitions.ModuleDefinition;
+import nl.ramsolutions.sw.definitions.ProductDefinition;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
@@ -31,6 +38,64 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
+  void testReadProduct() throws IOException {
+    final IDefinitionKeeper definitionKeeper = this.readTypes();
+
+    final Collection<ProductDefinition> productDefs =
+        definitionKeeper.getProductDefinitions("test_product");
+    assertThat(productDefs).hasSize(1);
+
+    final ProductDefinition testProductDef = productDefs.stream().findAny().orElseThrow();
+    assertThat(testProductDef)
+        .isEqualTo(
+            new ProductDefinition(
+                null,
+                null,
+                "test_product",
+                null,
+                "1.0.0",
+                null,
+                "Test product",
+                "Test product",
+                Collections.emptyList()));
+  }
+
+  @Test
+  void testReadModule() throws IOException {
+    final IDefinitionKeeper definitionKeeper = this.readTypes();
+
+    final Collection<ModuleDefinition> moduleDefs =
+        definitionKeeper.getModuleDefinitions("test_module");
+    assertThat(moduleDefs).hasSize(1);
+
+    final ModuleDefinition testModuleDef = moduleDefs.stream().findAny().orElseThrow();
+    assertThat(testModuleDef)
+        .isEqualTo(
+            new ModuleDefinition(
+                null,
+                null,
+                "test_module",
+                "test_product",
+                "1",
+                "2",
+                "test_module",
+                Collections.emptyList()));
+  }
+
+  @Test
+  void testReadMagikFile() throws IOException {
+    final IDefinitionKeeper definitionKeeper = this.readTypes();
+
+    final Collection<MagikFileDefinition> magikFileDefs =
+        definitionKeeper.getMagikFileDefinitions();
+    assertThat(magikFileDefs).hasSize(1);
+
+    final MagikFileDefinition magikFileDef = magikFileDefs.stream().findAny().orElseThrow();
+    assertThat(magikFileDef)
+        .isEqualTo(new MagikFileDefinition(new Location(URI.create("file:///test.magik")), null));
+  }
+
+  @Test
   void testReadPackage() throws IOException {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 
@@ -39,8 +104,9 @@ class JsonDefinitionReaderTest {
     assertThat(testPackageDefs).hasSize(1);
 
     final PackageDefinition testPackageDef = testPackageDefs.stream().findAny().orElseThrow();
-    assertThat(testPackageDef.getName()).isEqualTo("test_package");
-    assertThat(testPackageDef.getUses()).isEqualTo(List.of("user"));
+    assertThat(testPackageDef)
+        .isEqualTo(
+            new PackageDefinition(null, null, null, null, null, "test_package", List.of("user")));
   }
 
   @Test
@@ -51,19 +117,22 @@ class JsonDefinitionReaderTest {
     final Collection<ExemplarDefinition> aDefs = definitionKeeper.getExemplarDefinitions(aRef);
     assertThat(aDefs).hasSize(1);
     final ExemplarDefinition aDef = aDefs.stream().findAny().orElseThrow();
-
-    assertThat(aDef.getTypeString()).isEqualTo(aRef);
-    assertThat(aDef.getSort()).isEqualTo(ExemplarDefinition.Sort.SLOTTED);
-    assertThat(aDef.getDoc()).isEqualTo("Test exemplar a");
-    assertThat(aDef.getModuleName()).isEqualTo("test_module");
-
-    final SlotDefinition slot1Def = aDef.getSlot("slot1");
-    assertThat(slot1Def.getName()).isEqualTo("slot1");
-    assertThat(slot1Def.getTypeName()).isEqualTo(TypeString.SW_INTEGER);
-
-    final SlotDefinition slot2Def = aDef.getSlot("slot2");
-    assertThat(slot2Def.getName()).isEqualTo("slot2");
-    assertThat(slot2Def.getTypeName()).isEqualTo(TypeString.SW_FLOAT);
+    assertThat(aDef)
+        .isEqualTo(
+            new ExemplarDefinition(
+                null,
+                null,
+                "test_module",
+                "Test exemplar a",
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                aRef,
+                List.of(
+                    new SlotDefinition(
+                        null, null, null, null, null, "slot1", TypeString.SW_INTEGER),
+                    new SlotDefinition(null, null, null, null, null, "slot2", TypeString.SW_FLOAT)),
+                List.of(TypeString.SW_OBJECT),
+                Collections.emptySet()));
   }
 
   @Test
@@ -76,41 +145,67 @@ class JsonDefinitionReaderTest {
 
     final MethodDefinition m1Def =
         mDefs.stream().filter(def -> def.getMethodName().equals("m1()")).findAny().orElseThrow();
-    assertThat(m1Def.getModuleName()).isEqualTo("test_module");
-    assertThat(m1Def.getMethodName()).isEqualTo("m1()");
-    assertThat(m1Def.getModifiers()).isEmpty();
-    assertThat(m1Def.getDoc()).isEqualTo("Test method m1()");
-
-    final List<ParameterDefinition> m1Parameters = m1Def.getParameters();
-    final ParameterDefinition m1Parameter0 = m1Parameters.get(0);
-    assertThat(m1Parameter0.getName()).isEqualTo("param1");
-    assertThat(m1Parameter0.getModifier()).isEqualTo(ParameterDefinition.Modifier.GATHER);
-    assertThat(m1Parameter0.getTypeName()).isEqualTo(TypeString.SW_SYMBOL);
-    assertThat(m1Def.getAssignmentParameter()).isNull();
-
-    final ExpressionResultString m1ReturnTypes = m1Def.getReturnTypes();
-    assertThat(m1ReturnTypes).isEqualTo(new ExpressionResultString(TypeString.SW_SYMBOL));
-    final ExpressionResultString m1LoopTypes = m1Def.getLoopTypes();
-    assertThat(m1LoopTypes).isEqualTo(ExpressionResultString.EMPTY);
+    assertThat(m1Def)
+        .isEqualTo(
+            new MethodDefinition(
+                null,
+                null,
+                "test_module",
+                "Test method m1()",
+                null,
+                bRef,
+                "m1()",
+                Collections.emptySet(),
+                List.of(
+                    new ParameterDefinition(
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "param1",
+                        ParameterDefinition.Modifier.GATHER,
+                        TypeString.SW_SYMBOL),
+                    new ParameterDefinition(
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        "param2",
+                        ParameterDefinition.Modifier.NONE,
+                        TypeString.UNDEFINED)),
+                null,
+                Collections.emptySet(),
+                new ExpressionResultString(TypeString.SW_SYMBOL),
+                ExpressionResultString.EMPTY));
 
     final MethodDefinition m2Def =
         mDefs.stream().filter(def -> def.getMethodName().equals("m2<<")).findAny().orElseThrow();
-    assertThat(m2Def.getModuleName()).isEqualTo("test_module");
-    assertThat(m2Def.getMethodName()).isEqualTo("m2<<");
-    assertThat(m2Def.getDoc()).isEqualTo("Test method m2()");
-
-    final List<ParameterDefinition> m2Parameters = m2Def.getParameters();
-    assertThat(m2Parameters).isEmpty();
-
-    final ParameterDefinition m2AssignmentParameter = m2Def.getAssignmentParameter();
-    assertThat(m2AssignmentParameter.getName()).isEqualTo("param2");
-    assertThat(m2AssignmentParameter.getModifier()).isEqualTo(ParameterDefinition.Modifier.NONE);
-    assertThat(m2AssignmentParameter.getTypeName()).isEqualTo(TypeString.SW_SYMBOL);
-
-    final ExpressionResultString m2ReturnTypes = m2Def.getReturnTypes();
-    assertThat(m2ReturnTypes).isEqualTo(new ExpressionResultString(TypeString.SW_SYMBOL));
-    final ExpressionResultString m2LoopTypes = m2Def.getLoopTypes();
-    assertThat(m2LoopTypes).isEqualTo(ExpressionResultString.EMPTY);
+    assertThat(m2Def)
+        .isEqualTo(
+            new MethodDefinition(
+                null,
+                null,
+                "test_module",
+                "Test method m2()",
+                null,
+                bRef,
+                "m2<<",
+                Set.of(MethodDefinition.Modifier.PRIVATE),
+                Collections.emptyList(),
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "param2",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.SW_SYMBOL),
+                Collections.emptySet(),
+                new ExpressionResultString(TypeString.SW_SYMBOL),
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -122,10 +217,10 @@ class JsonDefinitionReaderTest {
     assertThat(conditionsError).hasSize(1);
 
     final ConditionDefinition conditionError = conditionsError.stream().findAny().orElseThrow();
-    assertThat(conditionError.getName()).isEqualTo("error");
-    assertThat(conditionError.getDataNames()).isEqualTo(List.of("string"));
-    assertThat(conditionError.getDoc()).isNull();
-    assertThat(conditionError.getParent()).isNull();
+    assertThat(conditionError)
+        .isEqualTo(
+            new ConditionDefinition(
+                null, null, null, null, null, "error", null, List.of("string")));
 
     final Collection<ConditionDefinition> conditionsUnknownValue =
         definitionKeeper.getConditionDefinitions("unknown_value");
@@ -133,11 +228,17 @@ class JsonDefinitionReaderTest {
 
     final ConditionDefinition conditionUnknownValue =
         conditionsUnknownValue.stream().findAny().orElseThrow();
-    assertThat(conditionUnknownValue.getName()).isEqualTo("unknown_value");
-    assertThat(conditionUnknownValue.getDataNames())
-        .isEqualTo(List.of("value", "permitted_values"));
-    assertThat(conditionUnknownValue.getDoc()).isEqualTo("Unknown value");
-    assertThat(conditionUnknownValue.getParent()).isEqualTo("error");
+    assertThat(conditionUnknownValue)
+        .isEqualTo(
+            new ConditionDefinition(
+                null,
+                null,
+                null,
+                "Unknown value",
+                null,
+                "unknown_value",
+                "error",
+                List.of("value", "permitted_values")));
   }
 
   @Test
@@ -150,7 +251,10 @@ class JsonDefinitionReaderTest {
     assertThat(tabCharGlobalDefs).hasSize(1);
 
     final GlobalDefinition tabCharGlobalDef = tabCharGlobalDefs.stream().findAny().orElseThrow();
-    assertThat(tabCharGlobalDef.getAliasedTypeName()).isEqualTo(TypeString.SW_CHARACTER);
+    assertThat(tabCharGlobalDef)
+        .isEqualTo(
+            new GlobalDefinition(
+                null, null, null, null, null, tabCharRef, TypeString.SW_CHARACTER));
 
     final TypeString printFloatPrecisionRef =
         TypeString.ofIdentifier("!print_float_precision!", "sw");
@@ -160,7 +264,10 @@ class JsonDefinitionReaderTest {
 
     final GlobalDefinition printFloatPrecisionDef =
         printFloatPrecisionDefs.stream().findAny().orElseThrow();
-    assertThat(printFloatPrecisionDef.getAliasedTypeName()).isEqualTo(TypeString.SW_INTEGER);
+    assertThat(printFloatPrecisionDef)
+        .isEqualTo(
+            new GlobalDefinition(
+                null, null, null, null, null, printFloatPrecisionRef, TypeString.SW_INTEGER));
   }
 
   @Test
@@ -173,9 +280,17 @@ class JsonDefinitionReaderTest {
     assertThat(binOps).hasSize(1);
 
     final BinaryOperatorDefinition binOp = binOps.stream().findAny().orElseThrow();
-    assertThat(binOp.getModuleName()).isEqualTo("test_module");
-    assertThat(binOp.getLhsTypeName()).isEqualTo(TypeString.SW_CHAR16_VECTOR);
-    assertThat(binOp.getRhsTypeName()).isEqualTo(TypeString.SW_SYMBOL);
-    assertThat(binOp.getResultTypeName()).isEqualTo(TypeString.SW_CHAR16_VECTOR);
+    assertThat(binOp)
+        .isEqualTo(
+            new BinaryOperatorDefinition(
+                null,
+                null,
+                "test_module",
+                null,
+                null,
+                "=",
+                TypeString.SW_CHAR16_VECTOR,
+                TypeString.SW_SYMBOL,
+                TypeString.SW_CHAR16_VECTOR));
   }
 }
