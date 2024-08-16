@@ -8,6 +8,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,11 +17,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
-import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinitionReader;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeBuilderVisitor;
@@ -137,13 +141,47 @@ public class MagikFile extends OpenedFile {
   }
 
   /**
+   * Get the {@link MagikFileDefinition} for this file.
+   *
+   * @return {@link MagikFileDefinition} for this file.
+   */
+  @CheckForNull
+  public MagikFileDefinition getMagikFileDefinition() {
+    final URI uri = this.getUri();
+    if (!uri.getScheme().equals("file")) {
+      return null;
+    }
+
+    final Location location = new Location(uri);
+    return new MagikFileDefinition(location, this.timestamp);
+  }
+
+  /**
+   * Get the {@link IDefinition}s for this file, including the {@link MagikFileDefinition} for this
+   * file.
+   *
+   * @return {@link IDefinition}s for this file.
+   */
+  public Collection<IDefinition> getDefinitions() {
+    final MagikFileDefinition magikFileDefinition = this.getMagikFileDefinition();
+    if (magikFileDefinition == null) {
+      return this.getMagikDefinitions().stream().map(IDefinition.class::cast).toList();
+    }
+
+    return Stream.concat(
+            Stream.of(magikFileDefinition),
+            this.getMagikDefinitions().stream().map(IDefinition.class::cast))
+        .toList();
+  }
+
+  /**
    * Get {@link MagikDefinition}s in this file.
    *
    * @return {@link MagikDefinition}s in this file.
    */
-  public synchronized List<MagikDefinition> getDefinitions() {
+  public synchronized List<MagikDefinition> getMagikDefinitions() {
     if (this.definitions == null) {
-      final DefinitionReader definitionReader = new DefinitionReader(this);
+      final MagikDefinitionReader definitionReader = new MagikDefinitionReader(this);
       final AstNode topNode = this.getTopNode();
       definitionReader.walkAst(topNode);
       this.definitions = definitionReader.getDefinitions();

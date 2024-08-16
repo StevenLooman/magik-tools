@@ -52,6 +52,13 @@ public class MagikWorkspaceFolder {
   private final ProductIndexer productIndexer;
   private final MagikIndexer magikIndexer;
 
+  /**
+   * Constructor.
+   *
+   * @param workspaceFolder Workspace folder.
+   * @param definitionKeeper Definition keeper.
+   * @param languageServerProperties Language server properties.
+   */
   public MagikWorkspaceFolder(
       final WorkspaceFolder workspaceFolder,
       final IDefinitionKeeper definitionKeeper,
@@ -66,6 +73,11 @@ public class MagikWorkspaceFolder {
         new MagikIndexer(this.definitionKeeper, this.languageServerProperties, this.ignoreHandler);
   }
 
+  /**
+   * Init handler.
+   *
+   * @throws IOException If an error occurs.
+   */
   public void onInit() throws IOException {
     LOGGER.debug("On init: {}", this);
 
@@ -81,6 +93,11 @@ public class MagikWorkspaceFolder {
     LOGGER.debug("Done on init: {}", this);
   }
 
+  /**
+   * Shutdown handler.
+   *
+   * @throws IOException If an error occurs.
+   */
   public void onShutdown() throws IOException {
     LOGGER.debug("On shutdown: {}", this);
 
@@ -144,14 +161,7 @@ public class MagikWorkspaceFolder {
         this.getWorkspaceFilteredDefinitionKeeper();
     final Collection<FileEvent> fileEvents =
         this.buildFileEventsForDifferences(
-            indexableFiles,
-            filteredDefinitionKeeper.getPackageDefinitions(),
-            filteredDefinitionKeeper.getExemplarDefinitions(),
-            filteredDefinitionKeeper.getMethodDefinitions(),
-            filteredDefinitionKeeper.getGlobalDefinitions(),
-            filteredDefinitionKeeper.getBinaryOperatorDefinitions(),
-            filteredDefinitionKeeper.getConditionDefinitions(),
-            filteredDefinitionKeeper.getProcedureDefinitions());
+            indexableFiles, filteredDefinitionKeeper.getMagikFileDefinitions());
 
     LOGGER.debug("Magik file event count: {}", fileEvents.size());
     for (final FileEvent fileEvent : fileEvents) {
@@ -180,6 +190,7 @@ public class MagikWorkspaceFolder {
                 && def.getLocation().getUri().toString().startsWith(workspaceUriStr);
     return new FilterableDefinitionKeeperAdapter(
         this.definitionKeeper,
+        locationPred::test,
         locationPred::test,
         locationPred::test,
         locationPred::test,

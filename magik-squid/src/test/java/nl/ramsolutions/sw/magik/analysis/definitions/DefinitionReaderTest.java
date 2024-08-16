@@ -22,7 +22,7 @@ class DefinitionReaderTest {
     final String code = "def_package(:test)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -40,7 +40,7 @@ class DefinitionReaderTest {
     final String code = "def_package(:test, :uses, {:p1, :p2})";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -58,7 +58,7 @@ class DefinitionReaderTest {
     final String code = "sw:def_enumeration(:test_enum, _false, :a)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -76,7 +76,7 @@ class DefinitionReaderTest {
         "def_slotted_exemplar(:test_exemplar, {{:slot1, _unset}, {:slot2, _unset}})";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -102,7 +102,7 @@ class DefinitionReaderTest {
         "def_slotted_exemplar(:test_exemplar, {{:slot1, _unset, :writable, :read_only}})";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -143,7 +143,7 @@ class DefinitionReaderTest {
     final String code = "def_slotted_exemplar(:test_exemplar, {}, @sw:rope)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -163,7 +163,7 @@ class DefinitionReaderTest {
     final String code = "def_slotted_exemplar(:test_exemplar, {}, {:mixin1, :rope})";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -184,7 +184,7 @@ class DefinitionReaderTest {
     final String code = "def_indexed_exemplar(:test_exemplar, _unset, {:mixin1, :integer})";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -205,7 +205,7 @@ class DefinitionReaderTest {
     final String code = "def_mixin(:test_mixin, :mixin1)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -222,7 +222,7 @@ class DefinitionReaderTest {
     final String code = "define_binary_operator_case(:|>|, integer, float, _proc(a, b) _endproc)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -257,7 +257,7 @@ class DefinitionReaderTest {
     final String code = "_method a.b _endmethod";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -275,7 +275,7 @@ class DefinitionReaderTest {
     final String code = "_method a.b _a _endmethod";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -287,7 +287,7 @@ class DefinitionReaderTest {
     final String code = "_abstract _private _iter _method a.b() _endmethod";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -309,7 +309,7 @@ class DefinitionReaderTest {
     final String code = "_method a.b(a, _optional b, c, _gather d) << z _endmethod";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -350,7 +350,7 @@ class DefinitionReaderTest {
     final String code = "test_exemplar.define_slot_access(:slot1, :readable, :public)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -368,7 +368,7 @@ class DefinitionReaderTest {
     final String code = "test_exemplar.define_slot_externally_readable(:slot1)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -386,7 +386,7 @@ class DefinitionReaderTest {
     final String code = "test_exemplar.define_slot_externally_readable(:slot1, :public)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -404,7 +404,7 @@ class DefinitionReaderTest {
     final String code = "test_exemplar.define_slot_externally_writable(:slot1, :public)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -434,7 +434,7 @@ class DefinitionReaderTest {
     final String code = "test_exemplar.define_shared_variable(:var1, 1, :readonly)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -471,7 +471,7 @@ class DefinitionReaderTest {
     final String code = "test_exemplar.define_shared_constant(:const1, 1, :private)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -489,7 +489,7 @@ class DefinitionReaderTest {
     final String code = "test_exemplar.define_shared_constant(:const1, 1, _false)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -507,7 +507,7 @@ class DefinitionReaderTest {
     final String code = "_global g << _unset";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -523,7 +523,7 @@ class DefinitionReaderTest {
     final String code = "condition.define_condition(:cond1, :information, {:data1, :data2})";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
@@ -545,7 +545,7 @@ class DefinitionReaderTest {
         _endblock""";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
-    final DefinitionReader reader = new DefinitionReader(magikFile);
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();

@@ -18,7 +18,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
@@ -35,6 +35,13 @@ public class MagikIndexer {
   private final MagikToolsProperties properties;
   private final IgnoreHandler ignoreHandler;
 
+  /**
+   * Constructor.
+   *
+   * @param definitionKeeper {@link DefinitionKeeper} to write to.
+   * @param properties {@link MagikToolsProperties} to use.
+   * @param ignoreHandler {@link IgnoreHandler} to check if files are ignored.
+   */
   public MagikIndexer(
       final IDefinitionKeeper definitionKeeper,
       final MagikToolsProperties properties,
@@ -44,6 +51,12 @@ public class MagikIndexer {
     this.ignoreHandler = ignoreHandler;
   }
 
+  /**
+   * Handle file event.
+   *
+   * @param fileEvent {@link FileEvent} to handle.
+   * @throws IOException If an error occurs.
+   */
   public synchronized void handleFileEvent(final FileEvent fileEvent) throws IOException {
     LOGGER.debug("Handling file event: {}", fileEvent);
 
@@ -82,6 +95,7 @@ public class MagikIndexer {
    */
   private Collection<IDefinition> getIndexedDefinitions(final Path path) {
     return Stream.of(
+            this.definitionKeeper.getMagikFileDefinitions(),
             this.definitionKeeper.getPackageDefinitions(),
             this.definitionKeeper.getExemplarDefinitions(),
             this.definitionKeeper.getMethodDefinitions(),
@@ -110,29 +124,38 @@ public class MagikIndexer {
     }
   }
 
-  private void addDefinition(final MagikDefinition rawDefinition) {
-    // Strip off AstNode, we don't want to store this.
-    final MagikDefinition definition = rawDefinition.getWithoutNode();
-
-    if (definition instanceof PackageDefinition packageDefinition) {
-      this.definitionKeeper.add(packageDefinition);
+  private void addDefinition(final IDefinition definition) {
+    if (definition instanceof MagikFileDefinition magikFileDefinition) {
+      this.definitionKeeper.add(magikFileDefinition);
+    } else if (definition instanceof PackageDefinition packageDefinition) {
+      final PackageDefinition nodelessPackageDefinition = packageDefinition.getWithoutNode();
+      this.definitionKeeper.add(nodelessPackageDefinition);
     } else if (definition instanceof ExemplarDefinition exemplarDefinition) {
-      this.definitionKeeper.add(exemplarDefinition);
+      final ExemplarDefinition nodelessExemplarDefinition = exemplarDefinition.getWithoutNode();
+      this.definitionKeeper.add(nodelessExemplarDefinition);
     } else if (definition instanceof MethodDefinition methodDefinition) {
-      this.definitionKeeper.add(methodDefinition);
+      final MethodDefinition nodelessMethodDefinition = methodDefinition.getWithoutNode();
+      this.definitionKeeper.add(nodelessMethodDefinition);
     } else if (definition instanceof GlobalDefinition globalDefinition) {
-      this.definitionKeeper.add(globalDefinition);
+      final GlobalDefinition nodelessGlobalDefinition = globalDefinition.getWithoutNode();
+      this.definitionKeeper.add(nodelessGlobalDefinition);
     } else if (definition instanceof BinaryOperatorDefinition binaryOperatorDefinition) {
-      this.definitionKeeper.add(binaryOperatorDefinition);
+      final BinaryOperatorDefinition nodelessBinaryOperatorDefinition =
+          binaryOperatorDefinition.getWithoutNode();
+      this.definitionKeeper.add(nodelessBinaryOperatorDefinition);
     } else if (definition instanceof ConditionDefinition conditionDefinition) {
-      this.definitionKeeper.add(conditionDefinition);
+      final ConditionDefinition nodelessConditionDefinition = conditionDefinition.getWithoutNode();
+      this.definitionKeeper.add(nodelessConditionDefinition);
     } else if (definition instanceof ProcedureDefinition procedureDefinition) {
-      this.definitionKeeper.add(procedureDefinition);
+      final ProcedureDefinition nodelessProcedureDefinition = procedureDefinition.getWithoutNode();
+      this.definitionKeeper.add(nodelessProcedureDefinition);
     }
   }
 
   private void removeDefinition(final IDefinition definition) {
-    if (definition instanceof PackageDefinition packageDefinition) {
+    if (definition instanceof MagikFileDefinition magikFileDefinition) {
+      this.definitionKeeper.remove(magikFileDefinition);
+    } else if (definition instanceof PackageDefinition packageDefinition) {
       this.definitionKeeper.remove(packageDefinition);
     } else if (definition instanceof ExemplarDefinition exemplarDefinition) {
       this.definitionKeeper.remove(exemplarDefinition);

@@ -37,7 +37,7 @@ public class DocumentSymbolProvider {
   public List<Either<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>> provideDocumentSymbols(
       final MagikTypedFile magikFile) {
     // Convert definitions to DocumentSymbols.
-    return magikFile.getDefinitions().stream()
+    return magikFile.getMagikDefinitions().stream()
         .map(this::convertDefinition)
         .map(Either::<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>forRight)
         .toList();

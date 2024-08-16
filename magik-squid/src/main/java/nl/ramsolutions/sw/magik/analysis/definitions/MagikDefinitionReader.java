@@ -22,17 +22,27 @@ import nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureDefinition
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
- * Class to easily read/parse AST for. Supported constructs: - def_package (only takes symbols for
- * name) - def_enumeration - def_slotted_exemplar (only takes symbols for name + slot names) -
- * def_indexed_exemplar - def_mixin - method definition - define_slot_access -
- * define_shared_variable - define_shared_constant - define_binary_operator_case
+ * Class to easily read/parse AST for. Supported constructs:
+ *
+ * <ul>
+ *   <li>def_package (only takes symbols for name)
+ *   <li>def_enumeration
+ *   <li>def_slotted_exemplar (only takes symbols for name + slot names)
+ *   <li>def_indexed_exemplar
+ *   <li>def_mixin
+ *   <li>method definition
+ *   <li>define_slot_access
+ *   <li>define_shared_variable
+ *   <li>define_shared_constant
+ *   <li>define_binary_operator_case
+ * </ul>
  */
-public class DefinitionReader extends MagikAstWalker {
+public class MagikDefinitionReader extends MagikAstWalker {
 
   private final MagikFile magikFile;
   private final List<MagikDefinition> definitions = new ArrayList<>();
 
-  public DefinitionReader(final MagikFile magikFile) {
+  public MagikDefinitionReader(final MagikFile magikFile) {
     this.magikFile = magikFile;
   }
 

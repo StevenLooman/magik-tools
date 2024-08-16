@@ -57,7 +57,7 @@ public class MagikWorkspaceService implements WorkspaceService {
    *
    * @param languageServer Owner language server.
    * @param definitionKeeper {@link IDefinitionKeeper} used for definition storage.
-   * @throws IOException
+   * @throws IOException If an error occurs.
    */
   public MagikWorkspaceService(
       final MagikLanguageServer languageServer,
@@ -287,6 +287,7 @@ public class MagikWorkspaceService implements WorkspaceService {
         });
   }
 
+  /** Handle shutdown. */
   public void shutdown() {
     for (final MagikWorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
       try {
