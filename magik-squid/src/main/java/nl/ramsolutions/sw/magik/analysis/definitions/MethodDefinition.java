@@ -296,11 +296,6 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
   }
 
   @Override
-  public String getPackage() {
-    return this.typeName.getPakkage();
-  }
-
-  @Override
   public MethodDefinition getWithoutNode() {
     return new MethodDefinition(
         this.getLocation(),
