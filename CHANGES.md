@@ -2,6 +2,8 @@
 
 0.11.0 (unreleased)
 
+- Fix error when parsing `def_slotted_exemplar()`/`def_indexed_exemplar()`/`define_condition()` with unknown children/data names.
+
 0.10.1 (2024-08-14)
 
 - Fix CommentedCodeCheck, splitting commented code on newlines.

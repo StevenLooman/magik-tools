@@ -5,7 +5,6 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
@@ -76,9 +75,10 @@ abstract class BaseDefParser {
       for (final AstNode parentNode : multiParentNode.getChildren(MagikGrammar.EXPRESSION)) {
         final ExpressionNodeHelper parentExpressionHelper = new ExpressionNodeHelper(parentNode);
         final String parentStr = parentExpressionHelper.getConstant();
-        Objects.requireNonNull(parentStr);
-        final TypeString parent = this.getFullParent(parentStr);
-        parents.add(parent);
+        if (parentStr != null) {
+          final TypeString parent = this.getFullParent(parentStr);
+          parents.add(parent);
+        }
       }
     }
     return parents;
