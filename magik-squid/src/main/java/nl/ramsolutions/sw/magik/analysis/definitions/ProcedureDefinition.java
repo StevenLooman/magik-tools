@@ -219,15 +219,6 @@ public class ProcedureDefinition extends MagikDefinition
   }
 
   @Override
-  public String getPackage() {
-    if (this.typeName != null) {
-      return this.typeName.getPakkage();
-    }
-
-    return TypeString.UNDEFINED.getPakkage();
-  }
-
-  @Override
   public ProcedureDefinition getWithoutNode() {
     return new ProcedureDefinition(
         this.getLocation(),

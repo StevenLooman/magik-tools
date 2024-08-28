@@ -60,11 +60,6 @@ public class ParameterDefinition extends MagikDefinition {
   }
 
   @Override
-  public String getPackage() {
-    return null;
-  }
-
-  @Override
   public ParameterDefinition getWithoutNode() {
     return new ParameterDefinition(
         this.getLocation(),

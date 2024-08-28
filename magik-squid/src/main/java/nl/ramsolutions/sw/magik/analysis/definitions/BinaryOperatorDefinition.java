@@ -78,11 +78,6 @@ public class BinaryOperatorDefinition extends MagikDefinition {
   }
 
   @Override
-  public String getPackage() {
-    return null;
-  }
-
-  @Override
   public MagikDefinition getWithoutNode() {
     return new BinaryOperatorDefinition(
         this.getLocation(),

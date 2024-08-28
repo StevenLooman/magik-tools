@@ -89,14 +89,6 @@ public abstract class MagikDefinition implements IDefinition {
   public abstract String getName();
 
   /**
-   * Get name of package this definition lives in.
-   *
-   * @return Package name.
-   */
-  @CheckForNull
-  public abstract String getPackage();
-
-  /**
    * Get a(n equal) copy of self, without the {@link AstNode}.
    *
    * @return Copy of self.
