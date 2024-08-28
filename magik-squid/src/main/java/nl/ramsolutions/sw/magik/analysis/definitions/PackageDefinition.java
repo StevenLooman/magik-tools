@@ -45,11 +45,6 @@ public class PackageDefinition extends MagikDefinition {
   }
 
   @Override
-  public String getPackage() {
-    return this.name;
-  }
-
-  @Override
   public PackageDefinition getWithoutNode() {
     return new PackageDefinition(
         this.getLocation(),

@@ -48,11 +48,6 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
   }
 
   @Override
-  public String getPackage() {
-    return this.typeName.getPakkage();
-  }
-
-  @Override
   public GlobalDefinition getWithoutNode() {
     return new GlobalDefinition(
         this.getLocation(),

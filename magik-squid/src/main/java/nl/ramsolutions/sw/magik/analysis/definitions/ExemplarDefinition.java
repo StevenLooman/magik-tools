@@ -104,11 +104,6 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
   }
 
   @Override
-  public String getPackage() {
-    return this.typeName.getPakkage();
-  }
-
-  @Override
   public ExemplarDefinition getWithoutNode() {
     return new ExemplarDefinition(
         this.getLocation(),
