@@ -22,7 +22,7 @@ public class VariableCountCheck extends MagikCheck {
 
   private static final int DEFAULT_MAXIMUM_VARIABLE_COUNT = 8;
   private static final String MESSAGE =
-      "Method contains more variables than than permitted (%s/%s).";
+      "Method/procedure contains more variables than than permitted (%s/%s).";
 
   /** Maximum length of method in lines, without whitelines and comment lines. */
   @RuleProperty(
