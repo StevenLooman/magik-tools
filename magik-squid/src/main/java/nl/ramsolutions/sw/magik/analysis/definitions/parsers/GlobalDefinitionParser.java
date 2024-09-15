@@ -4,7 +4,6 @@ import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
-import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
@@ -15,6 +14,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 
 /** {@code _global} parser. */
 public class GlobalDefinitionParser {
@@ -64,7 +64,7 @@ public class GlobalDefinitionParser {
     final Instant timestamp = this.magikFile.getTimestamp();
 
     // Figure module name.
-    final String moduleName = ModuleDefFileScanner.getModuleName(uri);
+    final String moduleName = ModuleDefFile.getModuleNameForUri(uri);
 
     // Figure name.
     final String packageName = this.getCurrentPakkage();

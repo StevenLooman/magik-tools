@@ -13,20 +13,22 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
-import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
-import nl.ramsolutions.sw.definitions.ProductDefFileScanner;
 import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
+import nl.ramsolutions.sw.magik.MagikFileScanner;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
 import nl.ramsolutions.sw.magik.analysis.definitions.FilterableDefinitionKeeperAdapter;
-import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionWriter;
 import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
+import nl.ramsolutions.sw.magik.analysis.indexer.ModuleIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ProductIndexer;
+import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
+import nl.ramsolutions.sw.productdef.ProductDefFileScanner;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,7 @@ public class MagikWorkspaceFolder {
   private final MagikToolsProperties languageServerProperties;
   private final IgnoreHandler ignoreHandler;
   private final ProductIndexer productIndexer;
+  private final ModuleIndexer moduleIndexer;
   private final MagikIndexer magikIndexer;
 
   /**
@@ -69,6 +72,7 @@ public class MagikWorkspaceFolder {
 
     this.ignoreHandler = new IgnoreHandler();
     this.productIndexer = new ProductIndexer(this.definitionKeeper, this.ignoreHandler);
+    this.moduleIndexer = new ModuleIndexer(this.definitionKeeper, this.ignoreHandler);
     this.magikIndexer =
         new MagikIndexer(this.definitionKeeper, this.languageServerProperties, this.ignoreHandler);
   }
@@ -86,8 +90,8 @@ public class MagikWorkspaceFolder {
       this.readExistingTypesDatabase();
     }
 
-    this.runIgnoreHandler();
     this.runProductIndexer();
+    this.runModuleIndexer();
     this.runMagikIndexer();
 
     LOGGER.debug("Done on init: {}", this);
@@ -118,34 +122,43 @@ public class MagikWorkspaceFolder {
     }
   }
 
-  private void runIgnoreHandler() throws IOException {
-    final URI uri = this.getWorkspaceUri();
-    final FileEvent fileEvent = new FileEvent(uri, FileEvent.FileChangeType.CREATED);
-    LOGGER.trace("Running IgnoreHandler for: {}", this);
-    this.ignoreHandler.handleFileEvent(fileEvent);
-  }
-
   private void runProductIndexer() throws IOException {
     LOGGER.debug("Running ProductIndexer for: {}", this);
 
+    final ProductDefFileScanner scanner = new ProductDefFileScanner(this.ignoreHandler);
+    final Path workspacePath = this.getWorkspacePath();
+    final ProductDefFileScanner.Tree productDefTree = scanner.getProductTree(workspacePath);
+    if (productDefTree == null) {
+      return;
+    }
+
     final Stream<Path> indexableFiles =
-        this.getProductModuleDefFiles()
-            .filter(
-                path ->
-                    path.toString().toLowerCase().endsWith(ProductDefFileScanner.SW_PRODUCT_DEF)
-                        || path.toString()
-                            .toLowerCase()
-                            .endsWith(ModuleDefFileScanner.SW_MODULE_DEF));
+        productDefTree.stream().map(ProductDefFileScanner.Tree::getPath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();
     final Collection<FileEvent> fileEvents =
         this.buildFileEventsForDifferences(
-            indexableFiles,
-            filteredDefinitionKeeper.getProductDefinitions(),
-            filteredDefinitionKeeper.getModuleDefinitions());
+            indexableFiles, filteredDefinitionKeeper.getProductDefinitions());
     LOGGER.debug("Product/module file event count: {}", fileEvents.size());
     for (final FileEvent fileEvent : fileEvents) {
       this.productIndexer.handleFileEvent(fileEvent);
+    }
+  }
+
+  private void runModuleIndexer() throws IOException {
+    LOGGER.debug("Running ProductIndexer for: {}", this);
+
+    final ModuleDefFileScanner scanner = new ModuleDefFileScanner(this.ignoreHandler);
+    final Path workspacePath = this.getWorkspacePath();
+    final Stream<Path> indexableFiles = scanner.getModules(workspacePath).stream();
+    final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
+        this.getWorkspaceFilteredDefinitionKeeper();
+    final Collection<FileEvent> fileEvents =
+        this.buildFileEventsForDifferences(
+            indexableFiles, filteredDefinitionKeeper.getModuleDefinitions());
+    LOGGER.debug("Product/module file event count: {}", fileEvents.size());
+    for (final FileEvent fileEvent : fileEvents) {
+      this.moduleIndexer.handleFileEvent(fileEvent);
     }
   }
 
@@ -153,10 +166,8 @@ public class MagikWorkspaceFolder {
     LOGGER.debug("Running MagikIndexer for: {}", this);
 
     final Path workspaceFolderPath = this.getWorkspacePath();
-    final Stream<Path> indexableFiles =
-        this.ignoreHandler
-            .getIndexableFiles(workspaceFolderPath)
-            .filter(path -> path.toString().toLowerCase().endsWith(".magik"));
+    final MagikFileScanner magikFileScanner = new MagikFileScanner(this.ignoreHandler);
+    final Stream<Path> indexableFiles = magikFileScanner.getFiles(workspaceFolderPath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();
     final Collection<FileEvent> fileEvents =
@@ -225,8 +236,6 @@ public class MagikWorkspaceFolder {
                       return new FileEvent(uri, FileChangeType.DELETED);
                     }
 
-                    // As the JsonDefinitionReader/JsonDefinitionWriter store in millis, trunate
-                    // first.
                     final FileTime fileTime = Files.getLastModifiedTime(path);
                     final Instant fileTimeInstant = fileTime.toInstant();
                     if (!fileTimeInstant.equals(defTime)) {
@@ -262,18 +271,6 @@ public class MagikWorkspaceFolder {
   private Path getWorkspacePath() {
     final URI uri = this.getWorkspaceUri();
     return Path.of(uri);
-  }
-
-  private Stream<Path> getProductModuleDefFiles() throws IOException {
-    final Path workspacePath = this.getWorkspacePath();
-    return Files.find(
-        workspacePath,
-        Integer.MAX_VALUE,
-        (path, attributes) ->
-            path.getFileName().toString().equalsIgnoreCase(ProductDefFileScanner.SW_PRODUCT_DEF)
-                || path.getFileName()
-                    .toString()
-                    .equalsIgnoreCase(ModuleDefFileScanner.SW_MODULE_DEF));
   }
 
   @Override

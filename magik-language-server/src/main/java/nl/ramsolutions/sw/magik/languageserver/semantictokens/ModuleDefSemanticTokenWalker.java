@@ -9,8 +9,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.definitions.analysis.ModuleDefAstWalker;
-import nl.ramsolutions.sw.definitions.api.SwModuleDefinitionKeyword;
+import nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker;
+import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionKeyword;
 
 /** SwModuleDef semantic token walker. */
 public class ModuleDefSemanticTokenWalker extends ModuleDefAstWalker {

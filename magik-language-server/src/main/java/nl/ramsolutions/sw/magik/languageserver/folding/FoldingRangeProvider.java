@@ -3,9 +3,9 @@ package nl.ramsolutions.sw.magik.languageserver.folding;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.ModuleDefFile;
-import nl.ramsolutions.sw.magik.ProductDefFile;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
+import nl.ramsolutions.sw.productdef.ProductDefFile;
 import org.eclipse.lsp4j.FoldingRange;
 import org.eclipse.lsp4j.ServerCapabilities;
 

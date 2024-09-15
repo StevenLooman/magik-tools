@@ -12,7 +12,7 @@ import java.nio.file.Path;
 /**
  * File charset determiner.
  *
- * <p>Reads the top line: #% text_encoding = <encoding>
+ * <p>Reads the top line: #% text_encoding = &lt;encoding&gt;
  */
 public final class FileCharsetDeterminer {
 

@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nl.ramsolutions.sw.magik.FileEvent;
-import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,44 +23,12 @@ import org.slf4j.LoggerFactory;
 public final class IgnoreHandler {
 
   private static final String IGNORE_FILENAME = ".magik-tools-ignore";
-
   private static final Logger LOGGER = LoggerFactory.getLogger(IgnoreHandler.class);
 
-  private final Map<Path, Set<PathMatcher>> entries = new HashMap<>();
+  private final Map<Path, Set<PathMatcher>> cache = new HashMap<>();
 
-  /**
-   * Handle file event.
-   *
-   * @param fileEvent {@link FileEvent} to handle.
-   * @throws IOException -
-   */
-  public void handleFileEvent(final FileEvent fileEvent) throws IOException {
-    LOGGER.debug("Handling file event: {}", fileEvent);
-
-    final Path path = fileEvent.getPath();
-    final FileChangeType fileChangeType = fileEvent.getFileChangeType();
-    if (fileChangeType == FileChangeType.DELETED) {
-      this.entries.keySet().stream()
-          .filter(ignoreFilePath -> ignoreFilePath.startsWith(path))
-          .forEach(this::removeIgnoreFile);
-    } else {
-      this.getIndexableFiles(path)
-          .filter(indexablePath -> indexablePath.toString().equalsIgnoreCase(IGNORE_FILENAME))
-          .forEach(this::addIgnoreFile);
-    }
-
-    LOGGER.debug("Handled file event: {}", fileEvent);
-  }
-
-  /**
-   * Get all (indexable) files, under {@link fromPath}, which are not ignored.
-   *
-   * @param fromPath Path to walk from, most likely a directory.
-   * @return Stream of indexable files.
-   * @throws IOException -
-   */
-  public Stream<Path> getIndexableFiles(final Path fromPath) throws IOException {
-    return Files.walk(fromPath).filter(path -> !this.isIgnored(path));
+  public void reset() {
+    this.cache.clear();
   }
 
   /**
@@ -73,9 +39,10 @@ public final class IgnoreHandler {
    *
    * @param path Path to .magik-tools-ignore to add.
    */
-  public void addIgnoreFile(final Path path) {
+  private Set<PathMatcher> readIgnoreFile(final Path path) {
     LOGGER.debug("Add ignore file: {}", path);
-    if (!path.getFileSystem().getPathMatcher("glob:**/" + IGNORE_FILENAME).matches(path)) {
+    final FileSystem fileSystem = path.getFileSystem();
+    if (!fileSystem.getPathMatcher("glob:**/" + IGNORE_FILENAME).matches(path)) {
       throw new IllegalArgumentException();
     }
 
@@ -85,62 +52,52 @@ public final class IgnoreHandler {
     }
 
     final Path basePath = parentPath.toAbsolutePath();
-    final FileSystem fileSystem = path.getFileSystem();
     try (Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8)) {
-      final Set<PathMatcher> pathMatchers =
-          lines
-              .map(String::trim)
-              .filter(line -> !line.isBlank())
-              .filter(line -> !line.startsWith("#")) // Comments.
-              .map(
-                  line ->
-                      (basePath.toString() + fileSystem.getSeparator() + line)
-                          .replace("\\", "\\\\"))
-              .map(pattern -> fileSystem.getPathMatcher("glob:" + pattern))
-              .collect(Collectors.toSet());
-      this.entries.put(path, pathMatchers);
+      return lines
+          .map(String::trim)
+          .filter(line -> !line.isBlank())
+          .filter(line -> !line.startsWith("#")) // Comments.
+          .map(
+              line ->
+                  (basePath.toString() + fileSystem.getSeparator() + line).replace("\\", "\\\\"))
+          .map(pattern -> fileSystem.getPathMatcher("glob:" + pattern))
+          .collect(Collectors.toSet());
     } catch (final IOException exception) {
-      LOGGER.error("Error indexing created file: " + path, exception);
+      throw new IllegalStateException(exception);
     }
   }
 
-  /**
-   * Remove .magik-tools-ignore file.
-   *
-   * <p>Will raise an IllegalArgumentException exception when any file with a name other than
-   * {@literal .magik-tools-ignore} is removed.
-   *
-   * @param path Path to removed {@literal .magik-tools-ignore} file.
-   */
-  public void removeIgnoreFile(final Path path) {
-    LOGGER.debug("Remove ignore file: {}", path);
-    if (!path.getFileSystem().getPathMatcher("glob:**/.magik-tools-ignore").matches(path)) {
-      throw new IllegalArgumentException();
+  private Set<PathMatcher> getMatchers(final Path path) {
+    // In cache, return it.
+    if (this.cache.containsKey(path)) {
+      return this.cache.get(path);
     }
 
-    this.entries.remove(path);
+    // Find ignore file.
+    final Path ignorePath = path.resolve(IGNORE_FILENAME);
+    if (Files.exists(ignorePath)) {
+      final Set<PathMatcher> matchers = this.readIgnoreFile(ignorePath);
+      this.cache.put(path, matchers);
+      return matchers;
+    }
+
+    // Iterate upwards to find ignore file.
+    final Path parentPath = path.getParent();
+    if (parentPath == null) {
+      return Set.of();
+    }
+
+    return this.getMatchers(parentPath);
   }
 
   /**
-   * Test if {@code path} is ignored.
-   *
-   * <p>A file is either ignored when: - It is a non-regular file - Starts with {@literal .} -
-   * Starts with {@literal #} - Is not a {@literal .magik} file - It is matched through a {@literal
-   * .magik-tools-ignore} file
+   * Test if {@code path} is ignored via a {@literal .magik-tools-ignore} file.
    *
    * @param path Path to check.
    * @return true if ignored, false otherwise.
    */
   public boolean isIgnored(final Path path) {
-    // Try defaults first.
-    final Path filename = path.getFileName();
-    if (filename.startsWith(".") || filename.startsWith("#")) {
-      return true;
-    }
-
-    // Consult all ignore files and check for a match.
-    return this.entries.entrySet().stream()
-        .flatMap(entry -> entry.getValue().stream())
-        .anyMatch(pathMatcher -> pathMatcher.matches(path));
+    final Set<PathMatcher> matchers = this.getMatchers(path);
+    return matchers.stream().anyMatch(pathMatcher -> pathMatcher.matches(path));
   }
 }

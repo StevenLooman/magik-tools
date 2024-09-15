@@ -42,6 +42,11 @@ public class CodeActionApplier {
         .forEach(this::apply);
   }
 
+  /**
+   * Apply a {@link TextEdit} to the current source.
+   *
+   * @param textEdit TextEdit to apply.
+   */
   public void apply(final TextEdit textEdit) {
     final Range range = textEdit.getRange();
     final Position startPosition = range.getStartPosition();

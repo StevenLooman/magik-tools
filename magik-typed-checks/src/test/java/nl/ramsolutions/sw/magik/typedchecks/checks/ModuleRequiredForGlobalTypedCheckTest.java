@@ -6,15 +6,15 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
-import nl.ramsolutions.sw.definitions.ModuleDefinition;
-import nl.ramsolutions.sw.magik.ModuleDefFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
+import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
+import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import org.junit.jupiter.api.Test;
 
 /** Tests for {@link ModuleRequiredForGlobalTypedCheck}. */
@@ -40,7 +40,8 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
     final Path path =
         this.getPath(
             "src/test/resources/test_product/modules/test_module/source/test_exemplar.magik");
-    final ModuleDefFile moduleDefFile = ModuleDefFileScanner.getModuleDefFileForPath(path);
+    final Path moduleDefPath = ModuleDefFileScanner.getModuleDefFileForPath(path);
+    final ModuleDefFile moduleDefFile = new ModuleDefFile(moduleDefPath, definitionKeeper, null);
     final ModuleDefinition moduleDefinition = moduleDefFile.getModuleDefinition();
     definitionKeeper.add(moduleDefinition);
 
@@ -71,7 +72,8 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
     final Path path =
         this.getPath(
             "src/test/resources/test_product/modules/test_module/source/test_exemplar.magik");
-    final ModuleDefFile moduleDefFile = ModuleDefFileScanner.getModuleDefFileForPath(path);
+    final Path moduleDefPath = ModuleDefFileScanner.getModuleDefFileForPath(path);
+    final ModuleDefFile moduleDefFile = new ModuleDefFile(moduleDefPath, definitionKeeper, null);
     final ModuleDefinition moduleDefinition = moduleDefFile.getModuleDefinition();
     definitionKeeper.add(moduleDefinition);
 

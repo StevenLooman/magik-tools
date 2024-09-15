@@ -15,6 +15,7 @@ import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
+import nl.ramsolutions.sw.magik.analysis.indexer.ModuleIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ProductIndexer;
 import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItem;
@@ -48,6 +49,7 @@ public class MagikWorkspaceService implements WorkspaceService {
   private final IDefinitionKeeper definitionKeeper;
   private final IgnoreHandler ignoreHandler;
   private final ProductIndexer productIndexer;
+  private final ModuleIndexer moduleIndexer;
   private final MagikIndexer magikIndexer;
   private final SymbolProvider symbolProvider;
   private final MUnitTestItemProvider testItemProvider;
@@ -69,6 +71,7 @@ public class MagikWorkspaceService implements WorkspaceService {
 
     this.ignoreHandler = new IgnoreHandler();
     this.productIndexer = new ProductIndexer(this.definitionKeeper, this.ignoreHandler);
+    this.moduleIndexer = new ModuleIndexer(this.definitionKeeper, this.ignoreHandler);
     this.magikIndexer =
         new MagikIndexer(this.definitionKeeper, this.languageServerProperties, this.ignoreHandler);
     this.symbolProvider = new SymbolProvider(this.definitionKeeper);
@@ -163,8 +166,8 @@ public class MagikWorkspaceService implements WorkspaceService {
               final nl.ramsolutions.sw.magik.FileEvent magikFileEvent =
                   new nl.ramsolutions.sw.magik.FileEvent(uri, magikFileChangeType);
               try {
-                this.ignoreHandler.handleFileEvent(magikFileEvent);
                 this.productIndexer.handleFileEvent(magikFileEvent);
+                this.moduleIndexer.handleFileEvent(magikFileEvent);
                 this.magikIndexer.handleFileEvent(magikFileEvent);
               } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);

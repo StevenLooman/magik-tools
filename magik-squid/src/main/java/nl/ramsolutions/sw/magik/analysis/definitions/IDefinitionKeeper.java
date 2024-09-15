@@ -2,9 +2,9 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import java.net.URI;
 import java.util.Collection;
-import nl.ramsolutions.sw.definitions.ModuleDefinition;
-import nl.ramsolutions.sw.definitions.ProductDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.moduledef.ModuleDefinition;
+import nl.ramsolutions.sw.productdef.ProductDefinition;
 
 /** Definition keeper. */
 public interface IDefinitionKeeper {

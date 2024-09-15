@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.magik.api;
 import static org.sonar.sslr.tests.Assertions.assertThat;
 
 import com.sonar.sslr.api.Grammar;
-import nl.ramsolutions.sw.definitions.api.SwProductDefinitionGrammar;
+import nl.ramsolutions.sw.productdef.api.SwProductDefinitionGrammar;
 import org.junit.jupiter.api.Test;
 
 /** Tests for SwProductDefinitionGrammar. */
