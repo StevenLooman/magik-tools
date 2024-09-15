@@ -412,8 +412,8 @@
                     </limit>
                   </limits>
                   <excludes>
-                    <exclude>nl.ramsolutions.sw.definitions.analysis.ModuleDefAstWalker</exclude>
-                    <exclude>nl.ramsolutions.sw.definitions.analysis.ProductDefAstWalker</exclude>
+                    <exclude>nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker</exclude>
+                    <exclude>nl.ramsolutions.sw.productdef.analysis.ProductDefAstWalker</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.MagikAstWalker</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.MagikTextDocumentService</exclude>
@@ -430,9 +430,9 @@
                     </limit>
                   </limits>
                   <excludes>
-                    <exclude>nl.ramsolutions.sw.definitions.ProductDefinition.equals(java.lang.Object)</exclude>
-                    <exclude>nl.ramsolutions.sw.definitions.analysis.ModuleDefAstWalker.*</exclude>
-                    <exclude>nl.ramsolutions.sw.definitions.analysis.ProductDefAstWalker.*</exclude>
+                    <exclude>nl.ramsolutions.sw.productdef.ProductDefinition.equals(java.lang.Object)</exclude>
+                    <exclude>nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker.*</exclude>
+                    <exclude>nl.ramsolutions.sw.productdef.analysis.ProductDefAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.MagikAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.equals(java.lang.Object)</exclude>

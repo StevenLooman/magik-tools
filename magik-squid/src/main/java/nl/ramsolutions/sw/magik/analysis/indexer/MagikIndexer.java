@@ -1,22 +1,21 @@
 package nl.ramsolutions.sw.magik.analysis.indexer;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.MagikFileScanner;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
@@ -29,7 +28,6 @@ import org.slf4j.LoggerFactory;
 public class MagikIndexer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikIndexer.class);
-  private static final long MAX_SIZE = 1024L * 1024L * 10L; // 10 MB
 
   private final IDefinitionKeeper definitionKeeper;
   private final MagikToolsProperties properties;
@@ -60,25 +58,15 @@ public class MagikIndexer {
   public synchronized void handleFileEvent(final FileEvent fileEvent) throws IOException {
     LOGGER.debug("Handling file event: {}", fileEvent);
 
-    // Don't index if ignored.
     final Path path = fileEvent.getPath();
-    if (this.ignoreHandler.isIgnored(path)) {
-      LOGGER.debug("Handled file event: {} (ignored)", fileEvent);
-      return;
-    }
-
     final FileChangeType fileChangeType = fileEvent.getFileChangeType();
     if (fileChangeType == FileChangeType.CHANGED || fileChangeType == FileChangeType.DELETED) {
       this.getIndexedDefinitions(path).forEach(this::removeDefinition);
     }
 
     if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
-      final List<Path> indexableFiles =
-          this.ignoreHandler
-              .getIndexableFiles(path)
-              .filter(indexablePath -> indexablePath.toString().toLowerCase().endsWith(".magik"))
-              .toList();
-      indexableFiles.forEach(this::indexFile);
+      final MagikFileScanner scanner = new MagikFileScanner(this.ignoreHandler);
+      scanner.getFiles(path).forEach(this::indexFile);
     }
 
     LOGGER.debug("Handled file event: {}", fileEvent);
@@ -115,7 +103,7 @@ public class MagikIndexer {
    */
   @SuppressWarnings("checkstyle:IllegalCatch")
   private void indexFile(final Path path) {
-    LOGGER.debug("Scanning created file: {}", path);
+    LOGGER.debug("Indexing created/updated file: {}", path);
 
     try {
       this.readDefinitions(path);
@@ -179,13 +167,6 @@ public class MagikIndexer {
    */
   private void readDefinitions(final Path path) {
     try {
-      final long size = Files.size(path);
-      if (size > MagikIndexer.MAX_SIZE) {
-        LOGGER.warn(
-            "Ignoring file: {}, due to size: {}, max size: {}", path, size, MagikIndexer.MAX_SIZE);
-        return;
-      }
-
       final MagikFile magikFile = new MagikFile(this.properties, path);
       magikFile.getDefinitions().forEach(this::addDefinition);
     } catch (final IOException exception) {

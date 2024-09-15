@@ -8,11 +8,15 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.LogManager;
 import nl.ramsolutions.sw.ConfigurationLocator;
+import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.magik.MagikFileScanner;
 import nl.ramsolutions.sw.magik.lint.output.MessageFormatReporter;
 import nl.ramsolutions.sw.magik.lint.output.NullReporter;
 import nl.ramsolutions.sw.magik.lint.output.Reporter;
@@ -132,6 +136,20 @@ public final class Main {
     return new MessageFormatReporter(outStream, format, columnOffset);
   }
 
+  private static Collection<Path> getFilesFromArgs(final String[] args) throws IOException {
+    final Collection<Path> paths = new ArrayList<>();
+
+    final IgnoreHandler ignoreHandler = new IgnoreHandler();
+    final MagikFileScanner scanner = new MagikFileScanner(ignoreHandler);
+    for (final String arg : args) {
+      final Path path = Path.of(arg);
+      final List<Path> argPaths = scanner.getFiles(path).toList();
+      paths.addAll(argPaths);
+    }
+
+    return paths;
+  }
+
   /**
    * Main entry point.
    *
@@ -208,7 +226,7 @@ public final class Main {
 
     // Apply fixes.
     final String[] leftOverArgs = commandLine.getArgs();
-    final Collection<Path> paths = MagikFileScanner.getFilesFromArgs(leftOverArgs);
+    final Collection<Path> paths = Main.getFilesFromArgs(leftOverArgs);
     if (commandLine.hasOption(OPTION_APPLY_FIXES)) {
       final MagikFixer fixer = new MagikFixer(properties);
       fixer.run(paths);

@@ -11,8 +11,6 @@ import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.ModuleDefFile;
-import nl.ramsolutions.sw.magik.ProductDefFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.languageserver.callhierarchy.CallHierarchyProvider;
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
@@ -31,6 +29,8 @@ import nl.ramsolutions.sw.magik.languageserver.selectionrange.SelectionRangeProv
 import nl.ramsolutions.sw.magik.languageserver.semantictokens.SemanticTokenProvider;
 import nl.ramsolutions.sw.magik.languageserver.signaturehelp.SignatureHelpProvider;
 import nl.ramsolutions.sw.magik.languageserver.typehierarchy.TypeHierarchyProvider;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
+import nl.ramsolutions.sw.productdef.ProductDefFile;
 import org.eclipse.lsp4j.CallHierarchyIncomingCall;
 import org.eclipse.lsp4j.CallHierarchyIncomingCallsParams;
 import org.eclipse.lsp4j.CallHierarchyItem;

@@ -4,24 +4,20 @@ import com.sonar.sslr.api.RecognitionException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
-import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
-import nl.ramsolutions.sw.definitions.ModuleDefinition;
-import nl.ramsolutions.sw.definitions.ProductDefFileScanner;
-import nl.ramsolutions.sw.definitions.ProductDefinition;
 import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
-import nl.ramsolutions.sw.magik.ModuleDefFile;
-import nl.ramsolutions.sw.magik.ProductDefFile;
-import nl.ramsolutions.sw.magik.analysis.definitions.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
+import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.productdef.ProductDefFileScanner;
+import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Product (and module) definition indexer. */
+/** Product definition indexer. */
 public class ProductIndexer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProductIndexer.class);
@@ -44,21 +40,19 @@ public class ProductIndexer {
   public synchronized void handleFileEvent(final FileEvent fileEvent) throws IOException {
     LOGGER.debug("Handling file event: {}", fileEvent);
 
-    // Don't index if ignored.
-    final Path path = fileEvent.getPath();
-    if (this.ignoreHandler.isIgnored(path)) {
-      LOGGER.debug("Handled file event: {} (ignored)", fileEvent);
-      return;
-    }
-
     final FileChangeType fileChangeType = fileEvent.getFileChangeType();
+    final Path path = fileEvent.getPath();
     if (fileChangeType == FileChangeType.CHANGED || fileChangeType == FileChangeType.DELETED) {
       this.getIndexedDefinitions(path).forEach(this::removeDefinition);
     }
 
     if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
-      final List<Path> indexableFiles = this.ignoreHandler.getIndexableFiles(path).toList();
-      indexableFiles.forEach(this::indexFile);
+      final ProductDefFileScanner productDefFileScanner =
+          new ProductDefFileScanner(this.ignoreHandler);
+      final ProductDefFileScanner.Tree productDefTree = productDefFileScanner.getProductTree(path);
+      if (productDefTree != null) {
+        productDefTree.stream().forEach(this::indexFile);
+      }
     }
 
     LOGGER.debug("Handled file event: {}", fileEvent);
@@ -74,10 +68,8 @@ public class ProductIndexer {
    * @return Indexed definitions.
    */
   private Collection<IDefinition> getIndexedDefinitions(final Path path) {
-    return Stream.of(
-            this.definitionKeeper.getProductDefinitions(),
-            this.definitionKeeper.getModuleDefinitions())
-        .flatMap(Collection::stream)
+    // TODO: ProductDefFileDefinitions, like MagikFileDefinition?
+    return this.definitionKeeper.getProductDefinitions().stream()
         .filter(def -> def.getLocation() != null && def.getLocation().getPath().startsWith(path))
         .collect(Collectors.toSet());
   }
@@ -88,15 +80,12 @@ public class ProductIndexer {
    * @param path Path to magik file.
    */
   @SuppressWarnings("checkstyle:IllegalCatch")
-  private void indexFile(final Path path) {
+  private void indexFile(final ProductDefFileScanner.Tree productDefTree) {
+    final Path path = productDefTree.getPath();
     LOGGER.debug("Scanning created file: {}", path);
 
     try {
-      if (path.endsWith(ProductDefFileScanner.SW_PRODUCT_DEF)) {
-        this.readProductDefinition(path);
-      } else if (path.endsWith(ModuleDefFileScanner.SW_MODULE_DEF)) {
-        this.readModuleDefinition(path);
-      }
+      this.readProductDefinition(path);
     } catch (final Exception exception) {
       LOGGER.error("Error indexing created file: " + path, exception);
     }
@@ -105,36 +94,25 @@ public class ProductIndexer {
   private void removeDefinition(final IDefinition definition) {
     if (definition instanceof ProductDefinition productDefinition) {
       this.definitionKeeper.remove(productDefinition);
-    } else if (definition instanceof ModuleDefinition moduleDefinition) {
-      this.definitionKeeper.remove(moduleDefinition);
+    } else {
+      throw new IllegalStateException("Unknown type");
     }
   }
 
   private void readProductDefinition(final Path path) throws IOException {
     final ProductDefinition definition;
-    try {
-      final Path parentPath = path.resolve("..").resolve("..");
-
-      final ProductDefFile parentDefinition =
-          ProductDefFileScanner.getProductDefFileForPath(parentPath);
-      final ProductDefFile productDefFile =
-          new ProductDefFile(path, this.definitionKeeper, parentDefinition);
-      definition = productDefFile.getProductDefinition();
-    } catch (final RecognitionException exception) {
-      LOGGER.warn("Error parsing defintion at: " + path, exception);
-      return;
+    final Path parentPath = path.resolve("..").resolve("..");
+    final Path productDefPath = ModuleDefFileScanner.getProductDefFileForPath(parentPath);
+    final ProductDefFile parentProductDefFile;
+    if (productDefPath != null) {
+      parentProductDefFile = new ProductDefFile(productDefPath, this.definitionKeeper, null);
+    } else {
+      parentProductDefFile = null;
     }
-
-    this.definitionKeeper.add(definition);
-  }
-
-  private void readModuleDefinition(final Path path) throws IOException {
-    final ModuleDefinition definition;
     try {
-      final ProductDefFile productDefFile = ProductDefFileScanner.getProductDefFileForPath(path);
-      final ModuleDefFile moduleDefFile =
-          new ModuleDefFile(path, this.definitionKeeper, productDefFile);
-      definition = moduleDefFile.getModuleDefinition();
+      final ProductDefFile productDefFile =
+          new ProductDefFile(path, this.definitionKeeper, parentProductDefFile);
+      definition = productDefFile.getProductDefinition();
     } catch (final RecognitionException exception) {
       LOGGER.warn("Error parsing defintion at: " + path, exception);
       return;

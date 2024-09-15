@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Instant;
+import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.magik.Location;
 
 /** Base class for definitions. */

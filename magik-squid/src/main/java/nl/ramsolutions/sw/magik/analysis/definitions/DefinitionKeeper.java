@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.definitions.ModuleDefinition;
-import nl.ramsolutions.sw.definitions.ProductDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.moduledef.ModuleDefinition;
+import nl.ramsolutions.sw.productdef.ProductDefinition;
 
 /** In memory Definition keeper. */
 public class DefinitionKeeper implements IDefinitionKeeper {

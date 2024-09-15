@@ -22,8 +22,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.definitions.ModuleDefinition;
-import nl.ramsolutions.sw.definitions.ProductDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -37,6 +35,8 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
+import nl.ramsolutions.sw.moduledef.ModuleDefinition;
+import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

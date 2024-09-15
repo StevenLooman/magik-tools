@@ -4,9 +4,9 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.definitions.ModuleDefinition;
-import nl.ramsolutions.sw.definitions.ProductDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.moduledef.ModuleDefinition;
+import nl.ramsolutions.sw.productdef.ProductDefinition;
 
 /** DefinitionKeeper which can filter definitions using predicates. */
 public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
@@ -23,6 +23,22 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   final Predicate<ConditionDefinition> conditionDefinitionPredicate;
   final Predicate<ProcedureDefinition> procedureDefinitionPredicate;
 
+  /**
+   * Constructor.
+   *
+   * @param definitionKeeper {@link IDefinitionKeeper} to wrap.
+   * @param productDefinitionPredicate {@link Predicate} to filter {@link ProductDefinition}s.
+   * @param moduleDefinitionPredicate {@link Predicate} to filter {@link ModuleDefinition}s.
+   * @param magikFileDefinitionPredicate {@link Predicate} to filter {@link MagikFileDefinition}s.
+   * @param packageDefinitionPredicate {@link Predicate} to filter {@link PackageDefinition}s.
+   * @param exemplarDefinitionPredicate {@link Predicate} to filter {@link ExemplarDefinition}s.
+   * @param methodDefinitionPredicate {@link Predicate} to filter {@link MethodDefinition}s.
+   * @param globalDefinitionPredicate {@link Predicate} to filter {@link GlobalDefinition}s.
+   * @param binaryOperatorDefinitionPredicate {@link Predicate} to filter {@link
+   *     BinaryOperatorDefinition}s.
+   * @param conditionDefinitionPredicate {@link Predicate} to filter {@link ConditionDefinition}s.
+   * @param procedureDefinitionPredicate {@link Predicate} to filter {@link ProcedureDefinition}s.
+   */
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public FilterableDefinitionKeeperAdapter(
       final IDefinitionKeeper definitionKeeper,

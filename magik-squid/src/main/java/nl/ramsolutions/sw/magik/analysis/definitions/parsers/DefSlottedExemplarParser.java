@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -29,6 +28,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 
 /** {@code def_slotted_exemplar} parser. */
 public class DefSlottedExemplarParser extends BaseDefParser {
@@ -99,7 +99,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
     final Instant timestamp = this.magikFile.getTimestamp();
 
     // Figure module name.
-    final String moduleName = ModuleDefFileScanner.getModuleName(uri);
+    final String moduleName = ModuleDefFile.getModuleNameForUri(uri);
 
     // Figure statement node.
     final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);

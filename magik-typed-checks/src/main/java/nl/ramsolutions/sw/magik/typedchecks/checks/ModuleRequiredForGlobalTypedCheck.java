@@ -12,10 +12,6 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
-import nl.ramsolutions.sw.definitions.ModuleDefFileScanner;
-import nl.ramsolutions.sw.definitions.ModuleDefinition;
-import nl.ramsolutions.sw.definitions.ModuleUsage;
-import nl.ramsolutions.sw.magik.ModuleDefFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -25,6 +21,10 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
+import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
+import nl.ramsolutions.sw.moduledef.ModuleDefinition;
+import nl.ramsolutions.sw.moduledef.ModuleUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.check.Rule;
@@ -53,19 +53,17 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
   private ModuleDefinition readModuleDefinition() {
     final URI uri = this.getMagikFile().getUri();
     final Path path = Path.of(uri);
+    final Path moduleDefPath = ModuleDefFileScanner.getModuleDefFileForPath(path);
     final ModuleDefFile moduleDefFile;
+    final IDefinitionKeeper definitionKeeper = this.getDefinitionKeeper();
     try {
       // TODO: Better get this from IDefinitionKeeper, instead of reading this for every file.
-      moduleDefFile = ModuleDefFileScanner.getModuleDefFileForPath(path);
+      moduleDefFile = new ModuleDefFile(moduleDefPath, definitionKeeper, null);
     } catch (final RecognitionException exception) {
       LOGGER.warn("Unable to parse module.def");
       return null;
     } catch (final IOException exception) {
       LOGGER.warn("Caught exception", exception);
-      return null;
-    }
-
-    if (moduleDefFile == null) {
       return null;
     }
 

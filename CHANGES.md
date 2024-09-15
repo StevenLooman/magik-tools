@@ -4,6 +4,7 @@
 
 - Support setting environment variables from VSCode tasks.
 - Index MagikFileDefinitions, to prevent needing to re-index files without MagikDefinitions.
+- Refactor `MagikFileScanner` & friends to be shared.
 
 0.10.1 (2024-08-14)
 
