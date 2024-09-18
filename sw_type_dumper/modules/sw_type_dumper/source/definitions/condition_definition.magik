@@ -50,6 +50,7 @@ _pragma(classify_level=basic, topic=type_dumper)
 _method condition_definition.new_from(cond)
 	## Construct self from.
 	## @param {sw:condition} cond
+	## @return {_self}
 	_local parent <<
 		_if cond.taxonomy.size > 1
 		_then

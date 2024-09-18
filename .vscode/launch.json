@@ -29,6 +29,17 @@
     },
     {
       "type": "java",
+      "name": "Debug (Launch)-MagikTypedLint<magik-typed-lint>",
+      "request": "launch",
+      "mainClass": "nl.ramsolutions.sw.magik.typedlint.Main",
+      "projectName": "magik-typed-lint",
+      "args": [
+        "--debug",
+        "sw_type_dumper"
+      ]
+    },
+    {
+      "type": "java",
       "name": "Debug (Launch)-MagikToolkit<sslr-magik-toolkit>",
       "request": "launch",
       "mainClass": "nl.ramsolutions.sw.magik.toolkit.MagikToolkit",
