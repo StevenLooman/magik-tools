@@ -279,8 +279,8 @@ public class DefineSlotAccessParser {
               getParameters,
               null,
               Collections.emptySet(),
-              ExpressionResultString.UNDEFINED,
-              ExpressionResultString.UNDEFINED);
+              new ExpressionResultString(TypeString.UNDEFINED),
+              ExpressionResultString.EMPTY);
       methodDefinitions.add(getMethod);
     } else if (flag.equals(FLAG_WRITE) || flag.equals(FLAG_WRITABLE)) {
       // get
@@ -302,8 +302,8 @@ public class DefineSlotAccessParser {
               getParameters,
               null,
               Collections.emptySet(),
-              ExpressionResultString.UNDEFINED,
-              ExpressionResultString.UNDEFINED);
+              new ExpressionResultString(TypeString.UNDEFINED),
+              ExpressionResultString.EMPTY);
       methodDefinitions.add(getMethod);
 
       // set
@@ -336,8 +336,8 @@ public class DefineSlotAccessParser {
               setParameters,
               assignmentParam,
               Collections.emptySet(),
-              ExpressionResultString.UNDEFINED,
-              ExpressionResultString.UNDEFINED);
+              new ExpressionResultString(TypeString.ofParameterRef("val")),
+              ExpressionResultString.EMPTY);
       methodDefinitions.add(setMethod);
 
       // boot
@@ -355,8 +355,8 @@ public class DefineSlotAccessParser {
               setParameters,
               assignmentParam,
               Collections.emptySet(),
-              ExpressionResultString.UNDEFINED,
-              ExpressionResultString.UNDEFINED);
+              new ExpressionResultString(TypeString.UNDEFINED),
+              ExpressionResultString.EMPTY);
       methodDefinitions.add(bootMethod);
     }
     return methodDefinitions;

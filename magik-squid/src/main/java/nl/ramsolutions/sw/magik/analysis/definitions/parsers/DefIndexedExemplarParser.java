@@ -54,7 +54,11 @@ public class DefIndexedExemplarParser extends BaseDefParser {
     final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
     final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
-    return argument0Node != null;
+    if (argument0Node == null) {
+      return false;
+    }
+
+    return true;
   }
 
   /**

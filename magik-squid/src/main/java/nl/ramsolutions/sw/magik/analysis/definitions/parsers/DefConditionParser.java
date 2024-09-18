@@ -68,9 +68,21 @@ public class DefConditionParser {
     final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
     final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+    if (argument0Node == null) {
+      return false;
+    }
+
     final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
+    if (argument1Node == null) {
+      return false;
+    }
+
     final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SIMPLE_VECTOR);
-    return argument0Node != null && argument1Node != null && argument2Node != null;
+    if (argument2Node == null) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -124,9 +136,14 @@ public class DefConditionParser {
                   final ExpressionNodeHelper expressionNodeHelper =
                       new ExpressionNodeHelper(expressionNode);
                   final String dataName = expressionNodeHelper.getConstant();
+                  if (dataName == null) {
+                    return null;
+                  }
+
                   if (dataName.startsWith(":")) {
                     return dataName.substring(1);
                   }
+
                   return dataName;
                 })
             .filter(Objects::nonNull)
