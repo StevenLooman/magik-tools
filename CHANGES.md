@@ -5,7 +5,7 @@
 - Fix error when parsing `def_slotted_exemplar()`/`def_indexed_exemplar()`/`define_condition()` with unknown children/data names.
 - Fix VariableCountCheck, improve message.
 - Support setting environment variables from VSCode tasks.
-- Index MagikFileDefinitions, to prevent needing to re-index files without MagikDefinitions.
+- Index `MagikFileDefinitions`, to prevent needing to re-index magik files without `MagikDefinitions`.
 - Refactor `MagikFileScanner` & friends to be shared.
 - Add `magik-typed-lint` to check magik typing from CLI/during CI.
 
