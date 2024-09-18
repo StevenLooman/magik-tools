@@ -54,6 +54,10 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
     final URI uri = this.getMagikFile().getUri();
     final Path path = Path.of(uri);
     final Path moduleDefPath = ModuleDefFileScanner.getModuleDefFileForPath(path);
+    if (moduleDefPath == null) {
+      return null;
+    }
+
     final ModuleDefFile moduleDefFile;
     final IDefinitionKeeper definitionKeeper = this.getDefinitionKeeper();
     try {

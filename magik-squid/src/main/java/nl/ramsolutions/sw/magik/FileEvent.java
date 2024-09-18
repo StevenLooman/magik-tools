@@ -7,6 +7,7 @@ import java.util.Objects;
 /** File event. Records a change to a file or directory. */
 public class FileEvent {
 
+  /** File change type. */
   public enum FileChangeType {
     CREATED,
     CHANGED,

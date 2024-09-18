@@ -11,12 +11,13 @@
   <description>Collection of tools for Magik development</description>
 
   <modules>
-    <module>magik-squid</module>
     <module>magik-checks</module>
-    <module>magik-typed-checks</module>
-    <module>magik-lint</module>
-    <module>magik-language-server</module>
     <module>magik-debug-adapter</module>
+    <module>magik-language-server</module>
+    <module>magik-lint</module>
+    <module>magik-squid</module>
+    <module>magik-typed-checks</module>
+    <module>magik-typed-lint</module>
     <module>sonar-magik-plugin</module>
     <module>sslr-magik-toolkit</module>
   </modules>

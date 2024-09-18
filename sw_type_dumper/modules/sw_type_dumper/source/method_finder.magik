@@ -57,6 +57,7 @@ _method method_finder.get_class_topics(class)
 	_then
 		_return {}
 	_endif
+
 	_return topics.default("").trim_spaces().split_by(character.space)
 _endmethod
 $
@@ -91,6 +92,7 @@ _method method_finder.get_method_topics(method, class)
 	_then
 		_return {}
 	_endif
+
 	_return topics.default("").trim_spaces().split_by(character.space)
 _endmethod
 $

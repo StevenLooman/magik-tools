@@ -272,8 +272,6 @@ _method method_definition.equals_disregarding_typing?(other)
 	## Equals disregarding typing?
 	## @param {mt:method_definition} other
 	## @return {sw:false}
-	_global user:d
-	user:d << _self
 	_return _self.type_name = other.type_name _andif
 		_self.method_name = other.method_name _andif
 		_self.modifiers.eq?(other.modifiers) _andif

@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.lint;
+package nl.ramsolutions.sw.magik.typedlint;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -16,10 +17,15 @@ import java.util.logging.LogManager;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.MagikFileScanner;
-import nl.ramsolutions.sw.magik.lint.output.MessageFormatReporter;
-import nl.ramsolutions.sw.magik.lint.output.NullReporter;
-import nl.ramsolutions.sw.magik.lint.output.Reporter;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
+import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
+import nl.ramsolutions.sw.magik.typedlint.output.MessageFormatReporter;
+import nl.ramsolutions.sw.magik.typedlint.output.NullReporter;
+import nl.ramsolutions.sw.magik.typedlint.output.Reporter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -64,14 +70,26 @@ public final class Main {
           .hasArg()
           .type(PatternOptionBuilder.NUMBER_VALUE)
           .build();
+  private static final Option OPTION_TYPE_DATABASE =
+      Option.builder()
+          .longOpt("types-db")
+          .desc("Path to types database (can be multiple)")
+          .hasArg()
+          .type(PatternOptionBuilder.FILE_VALUE)
+          .build();
+  private static final Option OPTION_PRE_INDEX_DIR =
+      Option.builder()
+          .longOpt("pre-index-dir")
+          .desc("Pre index directory before checking (can be multiple)")
+          .hasArg()
+          .type(PatternOptionBuilder.FILE_VALUE)
+          .build();
   private static final Option OPTION_DEBUG =
       Option.builder().longOpt("debug").desc("Enable showing of debug information").build();
   private static final Option OPTION_VERSION =
       Option.builder().longOpt("version").desc("Show version and exit").build();
   private static final Option OPTION_HELP =
       Option.builder().longOpt("help").desc("Show this help and exit").build();
-  private static final Option OPTION_APPLY_FIXES =
-      Option.builder().longOpt("apply-fixes").desc("Apply fixes automatically").build();
 
   static {
     OPTIONS = new Options();
@@ -81,9 +99,10 @@ public final class Main {
     OPTIONS.addOption(OPTION_SHOW_CHECKS);
     OPTIONS.addOption(OPTION_COLUMN_OFFSET);
     OPTIONS.addOption(OPTION_MAX_INFRACTIONS);
+    OPTIONS.addOption(OPTION_TYPE_DATABASE);
+    OPTIONS.addOption(OPTION_PRE_INDEX_DIR);
     OPTIONS.addOption(OPTION_DEBUG);
     OPTIONS.addOption(OPTION_VERSION);
-    OPTIONS.addOption(OPTION_APPLY_FIXES);
   }
 
   private static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING =
@@ -128,10 +147,11 @@ public final class Main {
    * @return Reporter.
    */
   private static Reporter createReporter(final MagikToolsProperties properties) {
-    final String configReporterFormat = properties.getPropertyString(MagikLint.KEY_MSG_TEMPLATE);
+    final String configReporterFormat =
+        properties.getPropertyString(MagikTypedLint.KEY_MSG_TEMPLATE);
     final String format =
         configReporterFormat != null ? configReporterFormat : MessageFormatReporter.DEFAULT_FORMAT;
-    final long columnOffset = properties.getPropertyLong(MagikLint.KEY_COLUMN_OFFSET, 0L);
+    final long columnOffset = properties.getPropertyLong(MagikTypedLint.KEY_COLUMN_OFFSET, 0L);
     final PrintStream outStream = Main.getOutStream();
     return new MessageFormatReporter(outStream, format, columnOffset);
   }
@@ -148,6 +168,30 @@ public final class Main {
     }
 
     return paths;
+  }
+
+  private static void readTypeDatabases(
+      final String[] typeDatabasePaths, final IDefinitionKeeper definitionKeeper)
+      throws IOException {
+    for (final String typeDatabasePath : typeDatabasePaths) {
+      final Path path = Path.of(typeDatabasePath);
+      JsonDefinitionReader.readTypes(path, definitionKeeper);
+    }
+  }
+
+  private static void indexPaths(
+      final String[] indexDirs,
+      final MagikToolsProperties properties,
+      final IDefinitionKeeper definitionKeeper)
+      throws IOException {
+    final IgnoreHandler ignoreHandler = new IgnoreHandler();
+    final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper, properties, ignoreHandler);
+    for (final String indexDir : indexDirs) {
+      final Path path = Path.of(indexDir).toAbsolutePath();
+      final URI uri = path.toUri();
+      final FileEvent fileEvent = new FileEvent(uri, FileEvent.FileChangeType.CREATED);
+      magikIndexer.handleFileEvent(fileEvent);
+    }
   }
 
   /**
@@ -205,9 +249,10 @@ public final class Main {
     Main.copyOptionsToConfig(commandLine, properties);
 
     // Show checks.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     if (commandLine.hasOption(OPTION_SHOW_CHECKS)) {
       final Reporter reporter = new NullReporter();
-      final MagikLint lint = new MagikLint(properties, reporter);
+      final MagikTypedLint lint = new MagikTypedLint(definitionKeeper, properties, reporter);
       final PrintStream outStream = Main.getOutStream();
       final Writer writer = new PrintWriter(outStream);
       lint.showEnabledChecks(writer);
@@ -224,19 +269,26 @@ public final class Main {
       System.exit(0);
     }
 
-    // Apply fixes.
-    final String[] leftOverArgs = commandLine.getArgs();
-    final Collection<Path> paths = Main.getFilesFromArgs(leftOverArgs);
-    if (commandLine.hasOption(OPTION_APPLY_FIXES)) {
-      final MagikFixer fixer = new MagikFixer(properties);
-      fixer.run(paths);
-
-      System.exit(0);
+    // Read type database(s).
+    if (commandLine.hasOption(OPTION_TYPE_DATABASE)) {
+      final String[] typeDatabasePaths = commandLine.getOptionValues(OPTION_TYPE_DATABASE);
+      Main.readTypeDatabases(typeDatabasePaths, definitionKeeper);
     }
 
-    // Actual linting.
+    // Pre-index directory/directories.
+    if (commandLine.hasOption(OPTION_PRE_INDEX_DIR)) {
+      final String[] indexDirs = commandLine.getOptionValues(OPTION_PRE_INDEX_DIR);
+      Main.indexPaths(indexDirs, properties, definitionKeeper);
+    }
+
+    // Index files from command line.
+    final String[] leftOverArgs = commandLine.getArgs();
+    Main.indexPaths(leftOverArgs, properties, definitionKeeper);
+
+    // Lint files from command line.
+    final Collection<Path> paths = Main.getFilesFromArgs(leftOverArgs);
     final Reporter reporter = Main.createReporter(properties);
-    final MagikLint lint = new MagikLint(properties, reporter);
+    final MagikTypedLint lint = new MagikTypedLint(definitionKeeper, properties, reporter);
     lint.run(paths);
 
     final int exitCode =
@@ -251,23 +303,23 @@ public final class Main {
     if (commandLine.hasOption(OPTION_MAX_INFRACTIONS)) {
       final String value = commandLine.getOptionValue(OPTION_MAX_INFRACTIONS);
       final Long maxInfractions = Long.parseLong(value);
-      properties.setProperty(MagikLint.KEY_MAX_INFRACTIONS, maxInfractions);
+      properties.setProperty(MagikTypedLint.KEY_MAX_INFRACTIONS, maxInfractions);
     }
 
     if (commandLine.hasOption(OPTION_COLUMN_OFFSET)) {
       final String value = commandLine.getOptionValue(OPTION_COLUMN_OFFSET);
       final Long maxInfractions = Long.parseLong(value);
-      properties.setProperty(MagikLint.KEY_COLUMN_OFFSET, maxInfractions);
+      properties.setProperty(MagikTypedLint.KEY_COLUMN_OFFSET, maxInfractions);
     }
 
     if (commandLine.hasOption(OPTION_MSG_TEMPLATE)) {
       final String value = commandLine.getOptionValue(OPTION_MSG_TEMPLATE);
-      properties.setProperty(MagikLint.KEY_MSG_TEMPLATE, value);
+      properties.setProperty(MagikTypedLint.KEY_MSG_TEMPLATE, value);
     }
 
     if (commandLine.hasOption(OPTION_RCFILE)) {
       final String value = commandLine.getOptionValue(OPTION_RCFILE);
-      properties.setProperty(MagikLint.KEY_OVERRIDE_CONFIG, value);
+      properties.setProperty(MagikTypedLint.KEY_OVERRIDE_CONFIG, value);
     }
   }
 }

@@ -44,7 +44,7 @@ public class MagikTypedCheck extends MagikCheck {
   /**
    * Get the {@link TypeStringResolver}.
    *
-   * @return
+   * @return The {@link TypeStringResolver}.
    */
   public TypeStringResolver getTypeStringResolver() {
     final MagikTypedFile magikTypedFile = this.getMagikTypedFile();
@@ -88,7 +88,7 @@ public class MagikTypedCheck extends MagikCheck {
    * Get type of method definition.
    *
    * @param node METHOD_DEFINITION node.
-   * @return
+   * @return The type of the method definition.
    */
   protected TypeString getTypeOfMethodDefinition(final @Nullable AstNode node) {
     if (node == null) {

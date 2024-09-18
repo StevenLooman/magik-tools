@@ -5,6 +5,7 @@
 - Support setting environment variables from VSCode tasks.
 - Index MagikFileDefinitions, to prevent needing to re-index files without MagikDefinitions.
 - Refactor `MagikFileScanner` & friends to be shared.
+- Add `magik-typed-lint` to check magik typing from CLI/during CI.
 
 0.10.1 (2024-08-14)
 

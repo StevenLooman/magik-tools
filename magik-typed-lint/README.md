@@ -1,12 +1,11 @@
-# Magik-Lint
+# Magik-typed-Lint
 
-A command line linter to use in your workflow. Mostly built after [Pylint](https://www.pylint.org/).
+A command line type linter to use in your workflow. Mostly built after [MyPy](https://www.mypy-lang.org/).
 
 ## Usage
 
-Magik-lint takes the following command line options:
+Magik-typed-lint takes the following command line options:
 
-- `--apply-fixes`: Automatically apply fixes, when possible.
 - `--column-offset`: Column offset, in case your editor uses a different column numbering scheme.
 - `--debug`: Enable debug logging.
 - `--help`: Show help.
@@ -14,41 +13,16 @@ Magik-lint takes the following command line options:
 - `--msg-template`: Template for output, defaults to: `${path}:${line}:${column}: ${msg} (${symbol})`
 - `--rcfile`: Path to configuration file
 - `--show-checks`: Show a list of all checks and whether it is disabled
+- `--types-db`: Types database to read before checking (can be multiple)
+- `--pre-index-dir`: Index directory before checking (can be multiple)
 - `--version`: Show version and quit.
 - A file or directory to check (can be multiple).
   - If a file is given, only this file is checked.
   - If a directory is given, all files in this directory and any sub-directories, are checked.
 
-## Integration
-
-The [emacs magik-mode](https://github.com/roadrunner1776/magik) readily supports integration of magik-tools through [flycheck](https://www.flycheck.org/).
-
-VSCode integration is achieved by adding a task with a `problemMatcher`, for example:
-
-```json
-        {
-            "label": "magik-lint",
-            "type": "shell",
-            "command": "java -jar /path/to/magik-lint-LATEST.jar --msg-template \"\\${path}:\\${line}:\\${column}:\\${severity}:\\${symbol}:\\${msg}\" --watch .",
-            "problemMatcher": {
-                "owner": "magik",
-                "fileLocation": "relative",
-                "pattern": {
-                    "regexp": "^(.*):(\\d+):(\\d+):(.*):(.*):(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "column": 3,
-                    "severity": 4,
-                    "code": 5,
-                    "message": 6
-                }
-            }
-        }
-```
-
 ## Configuration
 
-Magik-lint can use a configuration file.
+Magik-typed-lint can use a configuration file.
 
 The configuration file is located as follows, in order:
 
@@ -68,10 +42,10 @@ The following options are avaiable in the configuration file:
 - disabled = \<comma separated list of check-names or `all`\>
 - \<check_name\>.\<check_attribute\> = \<value\>
 
-I.e., you can disable checks `method-complexity` and `line-length` by setting:
+I.e., you can disable checks `-char16-vector-evaluate-invocation` and `slot-exists` by setting:
 
 ```text
-disabled = method-complexity, line-length
+disabled = sw-char16-vector-evaluate-invocation, slot-exists
 ```
 
 You can configure the `line-length` check to allow up to 120 characters per line by settings:
