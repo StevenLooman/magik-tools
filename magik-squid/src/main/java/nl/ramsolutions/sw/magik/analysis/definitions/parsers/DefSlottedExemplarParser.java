@@ -69,8 +69,13 @@ public class DefSlottedExemplarParser extends BaseDefParser {
     if (argument0Node == null) {
       return false;
     }
+
     final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SIMPLE_VECTOR);
-    return argument1Node != null;
+    if (argument1Node == null) {
+      return false;
+    }
+
+    return true;
   }
 
   /**

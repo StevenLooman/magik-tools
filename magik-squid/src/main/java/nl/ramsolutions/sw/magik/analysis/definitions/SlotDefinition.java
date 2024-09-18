@@ -43,11 +43,6 @@ public class SlotDefinition extends MagikDefinition {
   }
 
   @Override
-  public String getPackage() {
-    return null;
-  }
-
-  @Override
   public SlotDefinition getWithoutNode() {
     return new SlotDefinition(
         this.getLocation(),

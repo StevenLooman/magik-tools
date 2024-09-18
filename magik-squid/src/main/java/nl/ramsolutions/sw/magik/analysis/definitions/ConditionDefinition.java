@@ -57,11 +57,6 @@ public class ConditionDefinition extends MagikDefinition {
   }
 
   @Override
-  public String getPackage() {
-    return null;
-  }
-
-  @Override
   public ConditionDefinition getWithoutNode() {
     return new ConditionDefinition(
         this.getLocation(),
