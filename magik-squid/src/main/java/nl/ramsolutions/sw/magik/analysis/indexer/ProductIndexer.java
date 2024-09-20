@@ -49,10 +49,7 @@ public class ProductIndexer {
     if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
       final ProductDefFileScanner productDefFileScanner =
           new ProductDefFileScanner(this.ignoreHandler);
-      final ProductDefFileScanner.Tree productDefTree = productDefFileScanner.getProductTree(path);
-      if (productDefTree != null) {
-        productDefTree.stream().forEach(this::indexFile);
-      }
+      productDefFileScanner.getProductTrees(path).forEach(this::indexFile);
     }
 
     LOGGER.debug("Handled file event: {}", fileEvent);
