@@ -88,15 +88,15 @@ public final class ProductDefFileScanner {
 
     private final Deque<Tree> stack = new ArrayDeque<>();
     private final IgnoreHandler ignoreHandler;
-    private Tree root = null;
+    private final Set<Tree> roots = new HashSet<>();
 
     public ProductDefFileVisitor(final IgnoreHandler ignoreHandler) {
       this.ignoreHandler = ignoreHandler;
     }
 
     @CheckForNull
-    public Tree getProductDefTree() {
-      return this.root;
+    public Set<Tree> getProductDefRoots() {
+      return this.roots;
     }
 
     @Override
@@ -114,13 +114,22 @@ public final class ProductDefFileScanner {
       final Tree currentProductDefTree;
       if (Files.exists(productDefPath)) {
         final Tree newProductDefTree = new Tree(parentProductDefTree, productDefPath);
-        parentProductDefTree.addChild(newProductDefTree);
+        if (parentProductDefTree != null) {
+          parentProductDefTree.addChild(newProductDefTree);
+        }
+
         currentProductDefTree = newProductDefTree;
       } else {
         currentProductDefTree = parentProductDefTree;
       }
 
-      this.stack.push(currentProductDefTree);
+      if (currentProductDefTree != null) {
+        if (this.stack.isEmpty()) {
+          this.roots.add(currentProductDefTree);
+        }
+
+        this.stack.push(currentProductDefTree);
+      }
 
       return FileVisitResult.CONTINUE;
     }
@@ -128,7 +137,9 @@ public final class ProductDefFileScanner {
     @Override
     public FileVisitResult postVisitDirectory(final Path dir, final IOException exc)
         throws IOException {
-      this.stack.pop();
+      if (!this.stack.isEmpty()) {
+        this.stack.pop();
+      }
 
       return FileVisitResult.CONTINUE;
     }
@@ -144,17 +155,16 @@ public final class ProductDefFileScanner {
   }
 
   /**
-   * Get the magik files from the given path.
+   * Get the upper most product trees from the given path.
    *
    * @param fromPath Path to walk from, most likely a directory.
-   * @return Stream of paths to magik files.
+   * @return Set of top level products.
    * @throws IOException -
    */
-  @CheckForNull
-  public Tree getProductTree(final Path fromPath) throws IOException {
+  public Set<Tree> getProductTrees(final Path fromPath) throws IOException {
     final ProductDefFileVisitor visitor = new ProductDefFileVisitor(this.ignoreHandler);
     Files.walkFileTree(fromPath, visitor);
-    return visitor.getProductDefTree();
+    return visitor.getProductDefRoots();
   }
 
   /**

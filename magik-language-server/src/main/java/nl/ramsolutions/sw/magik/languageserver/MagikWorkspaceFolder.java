@@ -127,13 +127,10 @@ public class MagikWorkspaceFolder {
 
     final ProductDefFileScanner scanner = new ProductDefFileScanner(this.ignoreHandler);
     final Path workspacePath = this.getWorkspacePath();
-    final ProductDefFileScanner.Tree productDefTree = scanner.getProductTree(workspacePath);
-    if (productDefTree == null) {
-      return;
-    }
-
     final Stream<Path> indexableFiles =
-        productDefTree.stream().map(ProductDefFileScanner.Tree::getPath);
+        scanner.getProductTrees(workspacePath).stream()
+            .flatMap(ProductDefFileScanner.Tree::stream)
+            .map(ProductDefFileScanner.Tree::getPath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();
     final Collection<FileEvent> fileEvents =
