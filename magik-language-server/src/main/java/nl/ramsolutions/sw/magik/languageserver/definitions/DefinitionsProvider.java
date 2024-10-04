@@ -213,6 +213,7 @@ public class DefinitionsProvider {
     final IDefinitionKeeper definitionKeeper = moduleDefFile.getDefinitionKeeper();
     return definitionKeeper.getModuleDefinitions(moduleName).stream()
         .map(ModuleDefinition::getLocation)
+        .filter(Objects::nonNull)
         .toList();
   }
 }
