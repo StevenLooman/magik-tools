@@ -22,13 +22,16 @@ import nl.ramsolutions.sw.magik.MagikFileScanner;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
 import nl.ramsolutions.sw.magik.analysis.definitions.FilterableDefinitionKeeperAdapter;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionWriter;
 import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ModuleIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ProductIndexer;
 import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
+import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefFileScanner;
+import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,27 +136,29 @@ public class MagikWorkspaceFolder {
             .map(ProductDefFileScanner.Tree::getPath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();
+    final Collection<ProductDefinition> indexedProductDefinitions =
+        filteredDefinitionKeeper.getProductDefinitions();
     final Collection<FileEvent> fileEvents =
-        this.buildFileEventsForDifferences(
-            indexableFiles, filteredDefinitionKeeper.getProductDefinitions());
-    LOGGER.debug("Product/module file event count: {}", fileEvents.size());
+        this.buildFileEventsForDifferences(indexableFiles, indexedProductDefinitions);
+    LOGGER.debug("Product file event count: {}", fileEvents.size());
     for (final FileEvent fileEvent : fileEvents) {
       this.productIndexer.handleFileEvent(fileEvent);
     }
   }
 
   private void runModuleIndexer() throws IOException {
-    LOGGER.debug("Running ProductIndexer for: {}", this);
+    LOGGER.debug("Running ModuleIndexer for: {}", this);
 
     final ModuleDefFileScanner scanner = new ModuleDefFileScanner(this.ignoreHandler);
     final Path workspacePath = this.getWorkspacePath();
-    final Stream<Path> indexableFiles = scanner.getModules(workspacePath).stream();
+    final Stream<Path> indexableFiles = scanner.getModuleDefFiles(workspacePath).stream();
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();
+    final Collection<ModuleDefinition> indexedModuleDefinitions =
+        filteredDefinitionKeeper.getModuleDefinitions();
     final Collection<FileEvent> fileEvents =
-        this.buildFileEventsForDifferences(
-            indexableFiles, filteredDefinitionKeeper.getModuleDefinitions());
-    LOGGER.debug("Product/module file event count: {}", fileEvents.size());
+        this.buildFileEventsForDifferences(indexableFiles, indexedModuleDefinitions);
+    LOGGER.debug("Module file event count: {}", fileEvents.size());
     for (final FileEvent fileEvent : fileEvents) {
       this.moduleIndexer.handleFileEvent(fileEvent);
     }
@@ -167,9 +172,10 @@ public class MagikWorkspaceFolder {
     final Stream<Path> indexableFiles = magikFileScanner.getFiles(workspaceFolderPath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();
+    final Collection<MagikFileDefinition> indexedMagikFileDefinitions =
+        filteredDefinitionKeeper.getMagikFileDefinitions();
     final Collection<FileEvent> fileEvents =
-        this.buildFileEventsForDifferences(
-            indexableFiles, filteredDefinitionKeeper.getMagikFileDefinitions());
+        this.buildFileEventsForDifferences(indexableFiles, indexedMagikFileDefinitions);
 
     LOGGER.debug("Magik file event count: {}", fileEvents.size());
     for (final FileEvent fileEvent : fileEvents) {
