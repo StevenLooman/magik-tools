@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -26,6 +25,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.MethodUsageLocator;
 import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
@@ -108,47 +108,33 @@ public class CallHierarchyProvider {
     final JsonObject object = element.getAsJsonObject();
     final String methodName = object.getAsJsonPrimitive(DATA_METHOD_NAME).getAsString();
     final String typeStringStr = object.getAsJsonPrimitive(DATA_TYPE_STRING).getAsString();
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStringStr);
 
-    return this.definitionKeeper.getMethodDefinitions().stream()
-        .flatMap(methodDef -> methodDef.getUsedMethods().stream())
-        .filter(methodUsage -> methodUsage.getMethodName().equals(methodName))
-        .map(MethodUsage::getLocation)
+    final MethodUsageLocator methodUsageLocator = new MethodUsageLocator(this.definitionKeeper);
+    final MethodUsage searchedMethodUsage = new MethodUsage(typeString, methodName);
+    return methodUsageLocator.getMethodUsages(searchedMethodUsage).stream()
         .map(
-            location -> {
-              final MagikTypedFile magikFile = this.getMagikFile(location);
+            entry -> {
+              final MethodUsage usage = entry.getKey();
 
-              // Determine/reason the type the method is called on.
-              final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-              final AstNode node = magikFile.getTopNode();
-              final Position calledMethodPosition = location.getRange().getStartPosition();
-              final AstNode calledNode = AstQuery.nodeAt(node, calledMethodPosition);
-              final AstNode parentCalledNode = calledNode.getFirstAncestor(MagikGrammar.ATOM);
-              final ExpressionResultString result = reasonerState.getNodeType(parentCalledNode);
-              final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
-              final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, parentCalledNode);
-              if (typeStr.isUndefined()) {
-                return null;
-              }
-
-              final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-              final TypeString itemTypeStr = TypeStringParser.parseTypeString(typeStringStr);
-              if (!resolver.isKindOf(itemTypeStr, typeStr)) {
-                return null;
-              }
+              final Location location = usage.getLocation();
+              Objects.requireNonNull(location);
+              final AstNode usageNode = usage.getNode();
+              Objects.requireNonNull(usageNode);
 
               // Construct the CallHierarchyItem/CallHierarchyIncomingCall for
               // method/procedure definition.
               final URI calledMethodUri = location.getUri();
               final String uriStr = calledMethodUri.toString();
               final AstNode definitionNode =
-                  calledNode.getFirstAncestor(
+                  usageNode.getFirstAncestor(
                       MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
               if (definitionNode == null) {
                 return null;
               } else if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
-                return this.createIncomingCallForMethod(calledNode, uriStr, definitionNode);
+                return this.createIncomingCallForMethod(usageNode, uriStr, definitionNode);
               } else if (definitionNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
-                return this.createIncomingCallForProcedure(calledNode, uriStr, definitionNode);
+                return this.createIncomingCallForProcedure(usageNode, uriStr, definitionNode);
               }
 
               throw new IllegalStateException("Unknown thing");
@@ -240,7 +226,8 @@ public class CallHierarchyProvider {
                 return null;
               }
 
-              // Construct the CallHierarchyItem/CallHierarchyOutgoingCall for method definition.
+              // Construct the CallHierarchyItem/CallHierarchyOutgoingCall for method
+              // definition.
               final String calledMethodName = helper.getMethodName();
               final TypeStringResolver resolver = magikFile.getTypeStringResolver();
               return resolver.getMethodDefinitions(typeStr, calledMethodName).stream()
@@ -252,7 +239,7 @@ public class CallHierarchyProvider {
   }
 
   private CallHierarchyOutgoingCall createOutgoingCall(
-      AstNode methodInvocationNode, MethodDefinition calledMethodDef) {
+        final AstNode methodInvocationNode, final MethodDefinition calledMethodDef) {
     final Location calledMethodLocation = calledMethodDef.getLocation();
     final Location validCalledMethodLocation = Location.validLocation(calledMethodLocation);
     final Range calledMethodRange = validCalledMethodLocation.getRange();
@@ -274,18 +261,5 @@ public class CallHierarchyProvider {
     toItem.setData(data);
     final Range fromRange = new Range(methodInvocationNode);
     return new CallHierarchyOutgoingCall(toItem, List.of(Lsp4jConversion.rangeToLsp4j(fromRange)));
-  }
-
-  private MagikTypedFile getMagikFile(final Location location) {
-    final URI calledMethodUri = location.getUri();
-    final Path calledMethodPath = Path.of(calledMethodUri);
-    final Charset charset = FileCharsetDeterminer.determineCharset(calledMethodPath);
-    final String text;
-    try {
-      text = Files.readString(calledMethodPath, charset);
-    } catch (final IOException exception) {
-      throw new IllegalStateException(exception);
-    }
-    return new MagikTypedFile(calledMethodUri, text, this.definitionKeeper);
   }
 }

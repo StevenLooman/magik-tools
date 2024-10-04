@@ -233,7 +233,7 @@ public class ReferencesProvider {
     final Set<TypeString> searchedTypes = Set.of(exemplarTypeString);
     final Collection<GlobalUsage> wantedGlobalUsages =
         searchedTypes.stream()
-            .map(wantedTypeRef -> new GlobalUsage(wantedTypeRef, null))
+            .map(wantedTypeRef -> new GlobalUsage(wantedTypeRef, null, null))
             .collect(Collectors.toSet());
     final Predicate<GlobalUsage> filterPredicate = wantedGlobalUsages::contains;
 

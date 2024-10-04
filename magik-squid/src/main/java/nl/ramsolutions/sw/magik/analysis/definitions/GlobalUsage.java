@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
+import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
@@ -10,7 +11,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 public class GlobalUsage {
 
   private final TypeString typeName;
-  private final Location location;
+  private final @Nullable Location location;
+  private final @Nullable AstNode node;
 
   /**
    * Constructor.
@@ -18,9 +20,11 @@ public class GlobalUsage {
    * @param typeName Type name.
    * @param location Location of use.
    */
-  public GlobalUsage(final TypeString typeName, final @Nullable Location location) {
+  public GlobalUsage(
+      final TypeString typeName, final @Nullable Location location, final @Nullable AstNode node) {
     this.typeName = typeName;
     this.location = location;
+    this.node = node;
   }
 
   public TypeString getTypeName() {
@@ -30,6 +34,15 @@ public class GlobalUsage {
   @CheckForNull
   public Location getLocation() {
     return this.location;
+  }
+
+  @CheckForNull
+  public AstNode getNode() {
+    return this.node;
+  }
+
+  public GlobalUsage getWithoutNode() {
+    return new GlobalUsage(this.typeName, this.location, null);
   }
 
   @Override

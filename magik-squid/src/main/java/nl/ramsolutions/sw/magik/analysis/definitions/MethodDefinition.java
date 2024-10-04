@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -311,10 +312,12 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
         this.topics,
         this.returnTypes,
         this.loopTypes,
-        this.usedGlobals,
-        this.usedMethods,
-        this.usedSlots,
-        this.usedConditions);
+        this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).collect(Collectors.toSet()),
+        this.usedMethods.stream().map(MethodUsage::getWithoutNode).collect(Collectors.toSet()),
+        this.usedSlots.stream().map(SlotUsage::getWithoutNode).collect(Collectors.toSet()),
+        this.usedConditions.stream()
+            .map(ConditionUsage::getWithoutNode)
+            .collect(Collectors.toSet()));
   }
 
   @Override

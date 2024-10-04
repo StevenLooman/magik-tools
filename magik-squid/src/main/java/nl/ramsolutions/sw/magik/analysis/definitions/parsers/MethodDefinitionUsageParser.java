@@ -70,13 +70,12 @@ public class MethodDefinitionUsageParser {
               final URI uri = this.node.getToken().getURI();
               final Location location = new Location(uri, scopeEntry.getDefinitionNode());
               final Location validLocation = Location.validLocation(location);
-              // TODO: The type should be resolved here, but we don't have a type resolver
-              // yet.
-              // Now you might "see" the ref user:char16_vector, or any other package which is
-              // a child of `sw`.
+              // Now you might "see" the reference `user:char16_vector`,
+              // or (from) any other package which is a child of `sw`.
               // This will most likely be indexed invalidly.
               // Though, we might be able to resolve it during the query itself.
-              return new GlobalUsage(ref, validLocation);
+              // TODO: Shouldn't this be multiple? I.e., one per `scopeEntry.getUsages()`.
+              return new GlobalUsage(ref, validLocation, null);
             })
         .filter(Objects::nonNull)
         .collect(Collectors.toUnmodifiableSet());
@@ -100,7 +99,7 @@ public class MethodDefinitionUsageParser {
               final URI uri = this.node.getToken().getURI();
               final Location location = new Location(uri, methodInvocationNode);
               final Location validLocation = Location.validLocation(location);
-              return new MethodUsage(ref, methodName, validLocation);
+              return new MethodUsage(ref, methodName, validLocation, methodInvocationNode);
             })
         .collect(Collectors.toUnmodifiableSet());
   }
@@ -119,7 +118,7 @@ public class MethodDefinitionUsageParser {
               final URI uri = this.node.getToken().getURI();
               final Location location = new Location(uri, slotNode);
               final Location validLocation = Location.validLocation(location);
-              return new SlotUsage(slotName, validLocation);
+              return new SlotUsage(slotName, validLocation, slotNode);
             })
         .collect(Collectors.toUnmodifiableSet());
   }
@@ -138,7 +137,7 @@ public class MethodDefinitionUsageParser {
                   final String conditionName = conditionNameNode.getTokenValue();
                   final Location location = new Location(uri, conditionNameNode);
                   final Location validLocation = Location.validLocation(location);
-                  return new ConditionUsage(conditionName, validLocation);
+                  return new ConditionUsage(conditionName, validLocation, conditionNameNode);
                 });
     final Stream<ConditionUsage> raisedConditions =
         this.node.getDescendants(MagikGrammar.METHOD_INVOCATION).stream()
@@ -165,7 +164,7 @@ public class MethodDefinitionUsageParser {
                   final String conditionName = argumentNode.getTokenValue().substring(1);
                   final Location location = new Location(uri, argumentsNode);
                   final Location validLocation = Location.validLocation(location);
-                  return new ConditionUsage(conditionName, validLocation);
+                  return new ConditionUsage(conditionName, validLocation, invocationNode);
                 })
             .filter(Objects::nonNull);
     return Stream.concat(handledConditions, raisedConditions)

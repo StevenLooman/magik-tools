@@ -1,5 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
+import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
 import nl.ramsolutions.sw.magik.Location;
@@ -8,7 +10,8 @@ import nl.ramsolutions.sw.magik.Location;
 public class ConditionUsage {
 
   private final String conditionName;
-  private final Location location;
+  private final @Nullable Location location;
+  private final @Nullable AstNode node;
 
   /**
    * Constructor.
@@ -16,9 +19,11 @@ public class ConditionUsage {
    * @param conditionName Name of condition.
    * @param location Location of use.
    */
-  public ConditionUsage(final String conditionName, final @Nullable Location location) {
+  public ConditionUsage(
+      final String conditionName, final @Nullable Location location, final @Nullable AstNode node) {
     this.conditionName = conditionName;
     this.location = location;
+    this.node = node;
   }
 
   /**
@@ -27,15 +32,25 @@ public class ConditionUsage {
    * @param conditionName Name of condition.
    */
   public ConditionUsage(final String conditionName) {
-    this(conditionName, null);
+    this(conditionName, null, null);
   }
 
   public String getConditionName() {
     return this.conditionName;
   }
 
+  @CheckForNull
   public Location getLocation() {
     return this.location;
+  }
+
+  @CheckForNull
+  public AstNode getNode() {
+    return this.node;
+  }
+
+  public ConditionUsage getWithoutNode() {
+    return new ConditionUsage(this.conditionName, this.location, null);
   }
 
   @Override

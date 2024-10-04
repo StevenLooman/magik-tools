@@ -51,7 +51,7 @@ class ReferencesProviderTest {
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY,
             Collections.emptySet(),
-            Set.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION)),
+            Set.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION, null)),
             Collections.emptySet(),
             Collections.emptySet()));
 
@@ -85,7 +85,7 @@ class ReferencesProviderTest {
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY,
             Collections.emptySet(),
-            Set.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION)),
+            Set.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION, null)),
             Collections.emptySet(),
             Collections.emptySet()));
 
@@ -118,7 +118,7 @@ class ReferencesProviderTest {
             Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY,
-            Set.of(new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION)),
+            Set.of(new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION, null)),
             Collections.emptySet(),
             Collections.emptySet(),
             Collections.emptySet()));
@@ -152,7 +152,7 @@ class ReferencesProviderTest {
             Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY,
-            Set.of(new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION)),
+            Set.of(new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION, null)),
             Collections.emptySet(),
             Collections.emptySet(),
             Collections.emptySet()));
