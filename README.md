@@ -5,6 +5,7 @@
 * Language server
 * Debug adapter
 * Linter
+* Typing linter
 * SonarQube plugin
 
 By no means is this product fully tested and production-ready. Use at your own risk, your mileage may vary.
@@ -38,6 +39,10 @@ sonar.coverageReportPaths=coverage.xml
 ### Magik Linter
 
 A linter for Magik is available in the [`magik-lint`](magik-lint) directory. See [`magik-lint/README.md`](magik-lint/README.md) for more information.
+
+### Magik Typed Linter
+
+A typing checker/linter for Magik is available in the [`magik-typed-lint`](magik-typed-lint) directory. See [`magik-typed-lint/README.md`](magik-typed-lint/README.md) for more information.
 
 ### Language server
 
