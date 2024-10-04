@@ -22,18 +22,18 @@ public final class ModuleDefFileScanner {
   }
 
   /**
-   * Get the magik files from the given path.
+   * Get the `module.def` files from the given path.
    *
    * @param fromPath Path to walk from, most likely a directory.
-   * @return Stream of paths to magik files.
+   * @return Stream of {@link Path}s to `module.def` files.
    * @throws IOException -
    */
   @CheckForNull
-  public Set<Path> getModules(final Path fromPath) throws IOException {
+  public Set<Path> getModuleDefFiles(final Path fromPath) throws IOException {
     return Files.walk(fromPath)
-        .filter(Files::isDirectory)
-        .filter(this::notIgnored)
+        .filter(Files::isRegularFile)
         .filter(this::isModuleDefFile)
+        .filter(this::notIgnored)
         .collect(Collectors.toSet());
   }
 
