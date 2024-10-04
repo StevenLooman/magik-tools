@@ -49,7 +49,7 @@ public class ModuleIndexer {
     if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
       final ModuleDefFileScanner moduleDefFileScanner =
           new ModuleDefFileScanner(this.ignoreHandler);
-      moduleDefFileScanner.getModules(path).stream().forEach(this::indexFile);
+      moduleDefFileScanner.getModuleDefFiles(path).stream().forEach(this::indexFile);
     }
 
     LOGGER.debug("Handled file event: {}", fileEvent);
