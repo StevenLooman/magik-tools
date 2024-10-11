@@ -239,7 +239,7 @@ public class CallHierarchyProvider {
   }
 
   private CallHierarchyOutgoingCall createOutgoingCall(
-        final AstNode methodInvocationNode, final MethodDefinition calledMethodDef) {
+      final AstNode methodInvocationNode, final MethodDefinition calledMethodDef) {
     final Location calledMethodLocation = calledMethodDef.getLocation();
     final Location validCalledMethodLocation = Location.validLocation(calledMethodLocation);
     final Range calledMethodRange = validCalledMethodLocation.getRange();
