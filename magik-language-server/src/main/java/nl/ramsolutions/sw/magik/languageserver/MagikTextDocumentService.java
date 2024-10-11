@@ -306,6 +306,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     }
 
     this.openedFiles.put(realTextDocumentIdentifier, openedFile);
+
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didChange, uri: {}",
@@ -394,7 +395,7 @@ public class MagikTextDocumentService implements TextDocumentService {
 
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
-                "Duration: {} hover: uri: {}, position: {},{}",
+                "Duration: {} hover, uri: {}, position: {},{}",
                 String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
@@ -874,7 +875,7 @@ public class MagikTextDocumentService implements TextDocumentService {
               this.typeHierarchyProvider.typeHierarchySubtypes(item);
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
-                "Duration: {} didOpen, typeHierarchySubtypes, item: {}",
+                "Duration: {} typeHierarchySubtypes, item: {}",
                 String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 item.getName());
           }
@@ -896,7 +897,7 @@ public class MagikTextDocumentService implements TextDocumentService {
               this.typeHierarchyProvider.typeHierarchySupertypes(item);
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
-                "Duration: {} didOpen, typeHierarchySupertypes, item: {}",
+                "Duration: {} typeHierarchySupertypes, item: {}",
                 String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 item.getName());
           }
