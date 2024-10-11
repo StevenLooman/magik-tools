@@ -7,8 +7,8 @@ import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.sonar.check.Rule;
 
 /** Test if `sw:char16_vector.evaluate()` is used. */
-@Rule(key = SwChar16VectorEvaluateInvocationCheck.CHECK_KEY)
-public class SwChar16VectorEvaluateInvocationCheck extends MagikTypedCheck {
+@Rule(key = SwChar16VectorEvaluateInvocationTypedCheck.CHECK_KEY)
+public class SwChar16VectorEvaluateInvocationTypedCheck extends MagikTypedCheck {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "SwChar16VectorEvaluateInvocation";
