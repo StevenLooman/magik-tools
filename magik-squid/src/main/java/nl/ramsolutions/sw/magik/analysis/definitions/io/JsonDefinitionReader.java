@@ -185,6 +185,28 @@ public final class JsonDefinitionReader {
     }
   }
 
+  private static final class ProcedureDefinitionCreator
+      implements InstanceCreator<ProcedureDefinition> {
+
+    @Override
+    public ProcedureDefinition createInstance(final Type type) {
+      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
+      // even if these were not set in the source JSON.
+      return new ProcedureDefinition(
+          null,
+          null,
+          null,
+          null,
+          null,
+          Collections.emptySet(),
+          TypeString.UNDEFINED,
+          null,
+          Collections.emptyList(),
+          ExpressionResultString.UNDEFINED,
+          ExpressionResultString.UNDEFINED);
+    }
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger(JsonDefinitionReader.class);
 
   private final IDefinitionKeeper definitionKeeper;
@@ -298,6 +320,7 @@ public final class JsonDefinitionReader {
         .registerTypeAdapter(ProductDefinition.class, new ProductDefinitionCreator())
         .registerTypeAdapter(ModuleDefinition.class, new ModuleDefinitionCreator())
         .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionCreator())
+        .registerTypeAdapter(ProcedureDefinition.class, new ProcedureDefinitionCreator())
         .registerTypeAdapter(ExemplarDefinition.class, new ExemplarDefinitionCreator())
         .create();
   }
