@@ -12,7 +12,7 @@
     "brain-overload",
     "complexity"
   ],
-  "defaultSeverity": "Major",
+  "defaultSeverity": "Minor",
   "ruleSpecification": "NestingLevel",
   "sqKey": "nesting-level"
 }
