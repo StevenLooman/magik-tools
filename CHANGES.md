@@ -10,6 +10,7 @@
 - Add `magik-typed-lint` to check magik typing from CLI/during CI.
 - Fix not indexing `module.def` files.
 - Rename SwChar16VectorEvaluateInvocationCheck to SwChar16VectorEvaluateInvocationTypedCheck.
+- Add NestingLevelCheck to test if a node does not exceed the maximum nesting level.
 - Several fixes.
 
 0.10.1 (2024-08-14)

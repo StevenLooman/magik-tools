@@ -19,6 +19,7 @@ import nl.ramsolutions.sw.magik.checks.checks.LineLengthCheck;
 import nl.ramsolutions.sw.magik.checks.checks.LocalImportProcedureCheck;
 import nl.ramsolutions.sw.magik.checks.checks.MethodComplexityCheck;
 import nl.ramsolutions.sw.magik.checks.checks.MethodLineCountCheck;
+import nl.ramsolutions.sw.magik.checks.checks.NestingLevelCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoSelfUseCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoStatementAfterBodyExitCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ParameterCountCheck;
@@ -78,6 +79,7 @@ public final class CheckList {
         LocalImportProcedureCheck.class,
         MethodComplexityCheck.class,
         MethodLineCountCheck.class,
+        NestingLevelCheck.class,
         NoSelfUseCheck.class,
         NoStatementAfterBodyExitCheck.class,
         ParameterCountCheck.class,
