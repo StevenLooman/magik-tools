@@ -41,12 +41,10 @@ public class CommentedCodeCheck extends MagikCheck {
     commentBlocks.entrySet().stream()
         .map(Map.Entry::getValue)
         .map(
-            tokens -> {
-              // Filter blank comments.
-              return tokens.stream()
-                  .filter(token -> !token.getValue().trim().equals("#"))
-                  .collect(Collectors.toList());
-            })
+            tokens ->
+                tokens.stream()
+                    .filter(token -> !token.getValue().trim().equals("#"))
+                    .collect(Collectors.toList()))
         .filter(tokens -> tokens.size() >= minLines)
         .filter(
             tokens -> {
