@@ -36,7 +36,6 @@ class NestingLevelCheckTest extends MagikCheckTestBase {
         _endmethod
         """;
     final List<MagikIssue> issues = this.runCheck(code, check);
-    // Should be 1 since we did not close the first `_if`-statement yet.
     assertThat(issues).hasSize(1);
   }
 
@@ -54,12 +53,11 @@ class NestingLevelCheckTest extends MagikCheckTestBase {
                     _if b
                     _then
                     _endif
-                _endif
+                _endloop
             _endif
         _endmethod
         """;
     final List<MagikIssue> issues = this.runCheck(code, check);
-    // Should be empty since the `_loop` is at the same level as the `_for`.
     assertThat(issues).isEmpty();
   }
 

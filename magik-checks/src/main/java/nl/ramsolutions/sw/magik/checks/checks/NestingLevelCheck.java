@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.metrics.NestingLevelVisitor;
 import org.sonar.check.Rule;
@@ -50,9 +51,31 @@ public class NestingLevelCheck extends MagikCheck {
     visitor.walkAst(node);
 
     final int currentNestingLevel = visitor.getNestingLevel();
-    if (currentNestingLevel > this.maximumNestingLevel && visitor.isStartNode(node)) {
+    if (currentNestingLevel > this.maximumNestingLevel && visitor.isStartNode(node) && !hasParentExceedingNestingLevel(node)) {
       final String message = String.format(MESSAGE, currentNestingLevel, this.maximumNestingLevel);
       this.addIssue(node, message);
     }
+  }
+
+  private boolean hasParentExceedingNestingLevel(AstNode node) {
+    AstNode parent = node.getParent();
+    while (parent != null) {
+      if (isNestingNode(parent)) {
+        final NestingLevelVisitor visitor = new NestingLevelVisitor(parent);
+        visitor.walkAst(parent);
+        if (visitor.getNestingLevel() > this.maximumNestingLevel) {
+          return true;
+        }
+      }
+      parent = parent.getParent();
+    }
+    return false;
+  }
+
+  private boolean isNestingNode(AstNode node) {
+    return node.is(MagikGrammar.IF) ||
+           node.is(MagikGrammar.FOR) ||
+           node.is(MagikGrammar.WHILE) ||
+           node.is(MagikGrammar.LOOP);
   }
 }
