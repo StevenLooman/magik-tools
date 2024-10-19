@@ -51,7 +51,9 @@ public class NestingLevelCheck extends MagikCheck {
     visitor.walkAst(node);
 
     final int currentNestingLevel = visitor.getNestingLevel();
-    if (currentNestingLevel > this.maximumNestingLevel && visitor.isStartNode(node) && !hasParentExceedingNestingLevel(node)) {
+    if (currentNestingLevel > this.maximumNestingLevel
+        && visitor.isStartNode(node)
+        && !hasParentExceedingNestingLevel(node)) {
       final String message = String.format(MESSAGE, currentNestingLevel, this.maximumNestingLevel);
       this.addIssue(node, message);
     }
@@ -73,9 +75,9 @@ public class NestingLevelCheck extends MagikCheck {
   }
 
   private boolean isNestingNode(AstNode node) {
-    return node.is(MagikGrammar.IF) ||
-           node.is(MagikGrammar.FOR) ||
-           node.is(MagikGrammar.WHILE) ||
-           node.is(MagikGrammar.LOOP);
+    return node.is(MagikGrammar.IF)
+        || node.is(MagikGrammar.FOR)
+        || node.is(MagikGrammar.WHILE)
+        || node.is(MagikGrammar.LOOP);
   }
 }
