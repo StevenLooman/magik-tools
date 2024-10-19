@@ -27,7 +27,7 @@
     "connectionId": "SonarCloud",
     "projectKey": "StevenLooman_magik-tools"
   },
-  "tslint.enable": true,
+  "eslint.enable": true,
   "typescript.tsc.autoDetect": "off",
   "typescript.preferences.quoteStyle": "single",
 }
