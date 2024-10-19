@@ -40,6 +40,30 @@ class NestingLevelCheckTest extends MagikCheckTestBase {
   }
 
   @Test
+  void testLoopAfterIfDoesCountAsExtraNestingLevel() {
+    final NestingLevelCheck check = new NestingLevelCheck();
+
+    final String code =
+        """
+        _method a.b
+            _if a
+            _then
+                _loop
+                    _if b
+                    _then
+                        _if c
+                        _then
+                        _endif
+                    _endif
+                _endloop
+            _endif
+        _endmethod
+        """;
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
+
+  @Test
   void testLoopAfterForDoesNotCountAsExtraNestingLevel() {
     final NestingLevelCheck check = new NestingLevelCheck();
 
