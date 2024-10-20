@@ -32,16 +32,6 @@ public class NestingLevelCheck extends MagikCheck {
   }
 
   @Override
-  protected void walkPreFor(final AstNode node) {
-    this.checkDefinition(node);
-  }
-
-  @Override
-  protected void walkPreWhile(final AstNode node) {
-    this.checkDefinition(node);
-  }
-
-  @Override
   protected void walkPreLoop(final AstNode node) {
     this.checkDefinition(node);
   }
@@ -75,9 +65,6 @@ public class NestingLevelCheck extends MagikCheck {
   }
 
   private boolean isNestingNode(AstNode node) {
-    return node.is(MagikGrammar.IF)
-        || node.is(MagikGrammar.FOR)
-        || node.is(MagikGrammar.WHILE)
-        || node.is(MagikGrammar.LOOP);
+    return node.is(MagikGrammar.IF) || node.is(MagikGrammar.LOOP);
   }
 }
