@@ -99,4 +99,24 @@ class NestingLevelCheckTest extends MagikCheckTestBase {
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
+
+  @Test
+  void testNotExceedingMaximumNestingLevelWithEarlyReturns() {
+    final MagikCheck check = new NestingLevelCheck();
+    final String code =
+        """
+        _method a.b
+            _loop
+                _if a _then _leave _endif
+                _loop
+                    _if b _then _leave _endif
+
+                    _return c
+                _endloop
+            _endloop
+        _endmethod
+        """;
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 }
