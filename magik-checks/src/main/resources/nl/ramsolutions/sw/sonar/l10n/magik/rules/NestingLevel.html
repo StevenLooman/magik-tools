@@ -1,1 +1,34 @@
 <p>The nesting level of nodes should not exceed a defined threshold. Complex code may perform poorly and can be difficult to test thoroughly.</p>
+<h2>Noncompliant Code Example</h2>
+<pre>
+_if a _isnt _unset
+_then
+  _for x _over a.fast_elements()
+  _loop
+    _if x _isnt _unset
+    _then
+        _for child _over x.fast_elements()
+        _loop
+            _return child
+        _endloop
+    _endif
+  _endloop
+_else
+  _return b
+_endif
+</pre>
+<h2>Compliant Solution</h2>
+<pre>
+_if a _is _unset _then _return b _endif
+
+_for x _over a.fast_elements()
+_loop
+_if x _isnt _unset
+_then
+    _for child _over x.fast_elements()
+    _loop
+        _return child
+    _endloop
+_endif
+_endloop
+</pre>
