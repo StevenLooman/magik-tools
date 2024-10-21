@@ -48,3 +48,10 @@ jobs:
       - uses: DavidAnson/markdownlint-cli2-action@v17
         with:
           globs: '**/*.md'
+
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cd magik-language-server/client-vscode && npm install --ignore-scripts . && npm run eslint
