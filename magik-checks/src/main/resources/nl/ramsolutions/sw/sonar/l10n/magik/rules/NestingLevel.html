@@ -7,10 +7,10 @@ _then
   _loop
     _if x _isnt _unset
     _then
-        _for child _over x.fast_elements()
-        _loop
-            _return child
-        _endloop
+      _for child _over x.fast_elements()
+      _loop
+        _return child
+      _endloop
     _endif
   _endloop
 _else
@@ -23,12 +23,12 @@ _if a _is _unset _then _return b _endif
 
 _for x _over a.fast_elements()
 _loop
-_if x _isnt _unset
-_then
+  _if x _isnt _unset
+  _then
     _for child _over x.fast_elements()
     _loop
-        _return child
+      _return child
     _endloop
-_endif
+  _endif
 _endloop
 </pre>
