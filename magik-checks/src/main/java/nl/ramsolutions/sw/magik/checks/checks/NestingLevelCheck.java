@@ -1,9 +1,9 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
-import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.metrics.NestingLevelVisitor;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 
@@ -15,7 +15,7 @@ public class NestingLevelCheck extends MagikCheck {
   public static final String CHECK_KEY = "NestingLevel";
 
   private static final int DEFAULT_MAXIMUM_NESTING_LEVEL = 3;
-  private static final String MESSAGE = "Nesting level greater than permitted (%s/%s).";
+  private static final String MESSAGE = "Nesting level greater than permitted (%s).";
 
   /** Maximum nesting level of node. */
   @RuleProperty(
@@ -26,9 +26,16 @@ public class NestingLevelCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:VisibilityModifier")
   public int maximumNestingLevel = DEFAULT_MAXIMUM_NESTING_LEVEL;
 
+  private Deque<AstNode> depthNodes = new ArrayDeque<>();
+
   @Override
   protected void walkPreIf(final AstNode node) {
     this.checkDefinition(node);
+  }
+
+  @Override
+  protected void walkPostIf(final AstNode node) {
+    depthNodes.pop();
   }
 
   @Override
@@ -36,35 +43,27 @@ public class NestingLevelCheck extends MagikCheck {
     this.checkDefinition(node);
   }
 
+  @Override
+  protected void walkPostLoop(final AstNode node) {
+    depthNodes.pop();
+  }
+
+  @Override
+  protected void walkPreTry(final AstNode node) {
+    this.checkDefinition(node);
+  }
+
+  @Override
+  protected void walkPostTry(final AstNode node) {
+    depthNodes.pop();
+  }
+
   private void checkDefinition(final AstNode node) {
-    final NestingLevelVisitor visitor = new NestingLevelVisitor(node);
-    visitor.walkAst(node);
+    depthNodes.push(node);
 
-    final int currentNestingLevel = visitor.getNestingLevel();
-    if (currentNestingLevel > this.maximumNestingLevel
-        && visitor.isStartNode(node)
-        && !hasParentExceedingNestingLevel(node)) {
-      final String message = String.format(MESSAGE, currentNestingLevel, this.maximumNestingLevel);
-      this.addIssue(node, message);
+    if (depthNodes.size() == DEFAULT_MAXIMUM_NESTING_LEVEL + 1) {
+      AstNode lastNode = depthNodes.peek();
+      this.addIssue(lastNode, String.format(MESSAGE, DEFAULT_MAXIMUM_NESTING_LEVEL));
     }
-  }
-
-  private boolean hasParentExceedingNestingLevel(AstNode node) {
-    AstNode parent = node.getParent();
-    while (parent != null) {
-      if (isNestingNode(parent)) {
-        final NestingLevelVisitor visitor = new NestingLevelVisitor(parent);
-        visitor.walkAst(parent);
-        if (visitor.getNestingLevel() > this.maximumNestingLevel) {
-          return true;
-        }
-      }
-      parent = parent.getParent();
-    }
-    return false;
-  }
-
-  private boolean isNestingNode(AstNode node) {
-    return node.is(MagikGrammar.IF) || node.is(MagikGrammar.LOOP);
   }
 }
