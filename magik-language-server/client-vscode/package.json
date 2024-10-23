@@ -321,7 +321,7 @@
 		"@eslint/js": "^9.13.0",
 		"@types/eslint__js": "^8.42.3",
 		"@types/mocha": "^10.0.9",
-		"@types/node": "^12.20.41",
+		"@types/node": "^22.7.9",
 		"@typescript-eslint/parser": "^8.11.0",
 		"@vscode/vsce": "^2.21.0",
 		"eslint": "^9.13.0",
