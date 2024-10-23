@@ -29,7 +29,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn --batch-mode --update-snapshots package
       - run: mkdir staging && cp **/target/*.jar staging
-      - run: cd magik-language-server/client-vscode && npm install . && npm run package
+      - run: npm install . && npm run package
+        working-directory: magik-language-server/client-vscode
       - run: cp magik-language-server/client-vscode/magik-language-server-*.vsix staging
       - run: rm -f staging/original-*.jar
 

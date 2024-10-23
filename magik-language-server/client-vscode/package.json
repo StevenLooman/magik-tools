@@ -310,6 +310,7 @@
 		}
 	},
 	"scripts": {
+		"eslint": "eslint .",
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -b",
 		"watch": "tsc -b -w",
@@ -317,11 +318,14 @@
 		"package": "vsce package"
 	},
 	"devDependencies": {
-		"@types/mocha": "^8.2.3",
+		"@eslint/js": "^9.13.0",
+		"@types/eslint__js": "^8.42.3",
+		"@types/mocha": "^10.0.9",
 		"@types/node": "^12.20.41",
-		"@typescript-eslint/parser": "^2.3.0",
-		"eslint": "^6.4.0",
-		"typescript": "^4.5.4",
-		"@vscode/vsce": "^2.21.0"
+		"@typescript-eslint/parser": "^8.11.0",
+		"@vscode/vsce": "^2.21.0",
+		"eslint": "^9.13.0",
+		"typescript": "^5.6.3",
+		"typescript-eslint": "^8.11.0"
 	}
 }
