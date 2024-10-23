@@ -34,7 +34,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn --batch-mode --update-snapshots package
       - run: mkdir staging && cp **/target/*.jar staging
-      - run: cd magik-language-server/client-vscode && npm install . && npm run package
+      - run: npm install . && npm run package
+        working-directory: magik-language-server/client-vscode
       - run: cp magik-language-server/client-vscode/magik-language-server-*.vsix staging
       - uses: actions/upload-artifact@v4
         with:
@@ -54,4 +55,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: cd magik-language-server/client-vscode && npm install --ignore-scripts . && npm run eslint
+      - run: npm install --ignore-scripts . && npm run eslint
+        working-directory: magik-language-server/client-vscode
