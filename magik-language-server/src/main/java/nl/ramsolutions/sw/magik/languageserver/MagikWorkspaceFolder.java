@@ -246,7 +246,7 @@ public class MagikWorkspaceFolder {
                     }
                   } catch (final IOException exception) {
                     LOGGER.debug("Error checking file: " + uri, exception);
-                    exception.printStackTrace();
+                    exception.printStackTrace(); // NOSONAR: Debug tooling only.
                   }
 
                   return null;
