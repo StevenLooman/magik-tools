@@ -42,7 +42,7 @@ export class MagikSessionProvider implements vscode.Disposable {
 			const creationOptions = terminal.creationOptions;
 
 			// Check if creationOptions has shellArgs and handle it appropriately
-			const shellArgs = (creationOptions as any).shellArgs;
+			const shellArgs = (creationOptions as vscode.TerminalOptions).shellArgs;
 
 			if ((creationOptions.name ?? '').startsWith(MagikAliasTaskProvider.AliasType) ||
 				(Array.isArray(shellArgs) && shellArgs.some(arg => arg.includes("runalias.exe "))) ||
@@ -296,7 +296,7 @@ $`;
 		let prefix = "";
 		if (!prefixRange.isEmpty) {
 			const prefixText = doc.getText(prefixRange);
-			for (let line of prefixText.split(/\r?\n/)) {
+			for (const line of prefixText.split(/\r?\n/)) {
 				if (line.match(/^\s*_package\s+\w+\s*/)) {
 					prefix += line + "\n";
 				} else {
