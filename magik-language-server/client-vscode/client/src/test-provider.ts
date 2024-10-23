@@ -27,13 +27,13 @@ interface MUnitTestItem {
 
 class TestItemCollection implements vscode.TestItemCollection {
 
-	private _items = new Map<string, vscode.TestItem>();
+	private readonly _items = new Map<string, vscode.TestItem>();
 
 	constructor(...items: vscode.TestItem[]) {
 		items.forEach(this.add, this);
 	}
 
-	[Symbol.iterator](): Iterator<[id: string, testItem: vscode.TestItem], any, undefined> {
+	[Symbol.iterator](): Iterator<[id: string, testItem: vscode.TestItem], undefined, undefined> {
 		return this._items.entries();
 	}
 
@@ -41,7 +41,7 @@ class TestItemCollection implements vscode.TestItemCollection {
 		return this._items.size;
 	}
 
-	replace(items: readonly vscode.TestItem[]): void {
+	replace(_items: readonly vscode.TestItem[]): void {
 		throw new Error('Method not implemented.');
 	}
 
@@ -76,11 +76,31 @@ function getOutputChannel(): vscode.OutputChannel {
 }
 
 
+interface Xml2JsObject {
+	$: Record<string, string>;
+	_?: string;
+}
+
+interface MUnitRootNode extends Xml2JsObject {
+	testsuite: MUnitTestSuite;
+}
+
+interface MUnitTestSuite extends Xml2JsObject {
+	testsuite: [MUnitTestSuite];
+	testcase: [MUnitTestCase];
+}
+
+interface MUnitTestCase extends Xml2JsObject {
+	error: [Xml2JsObject];
+	failure: [Xml2JsObject];
+}
+
+
 export class MagikTestProvider implements vscode.Disposable {
 
-	private context: vscode.ExtensionContext;
-	private controller: vscode.TestController;
-	private client: MagikLanguageClient;
+	private readonly context: vscode.ExtensionContext;
+	private readonly controller: vscode.TestController;
+	private readonly client: MagikLanguageClient;
 	private workdir: fs.PathLike;
 	private currentRun: vscode.TestRun | undefined;
 
@@ -171,7 +191,7 @@ export class MagikTestProvider implements vscode.Disposable {
 		return testItem;
 	}
 
-	private runHandler(request: vscode.TestRunRequest, token: vscode.CancellationToken) {
+	private runHandler(request: vscode.TestRunRequest, _token: vscode.CancellationToken) {
 		if (this.currentRun != null) {
 			this.currentRun.end();
 		}
@@ -192,7 +212,7 @@ export class MagikTestProvider implements vscode.Disposable {
 
 		// Wait for file to appear.
 		const options = {interval: 250};
-		fs.watchFile(outputPath, options, (curr, prev) => {
+		fs.watchFile(outputPath, options, (_curr, _prev) => {
 			if (!fs.existsSync(outputPath)) {
 				return;
 			}
@@ -302,20 +322,21 @@ $
 		const testRunnerResults = fs.readFileSync(outputPath);
 
 		// Log XML.
-		let channel = getOutputChannel();
+		const channel = getOutputChannel();
 		channel.appendLine("");
 		channel.appendLine("XML Test runner output:");
 		channel.append(testRunnerResults.toString("utf8"));
 		channel.appendLine("");
 
-		xml2js.parseString(testRunnerResults, (err: Error, result: any) => {
+		xml2js.parseString(testRunnerResults, (_err: Error, munitRootNode: MUnitRootNode) => {
 			// Parse test suites.
-			this.parseTestRunnerSuites(request, run, result.testsuite);
+			this.parseTestRunnerSuites(request, run, munitRootNode.testsuite);
 		});
 	}
 
-	private parseTestRunnerSuites(request: vscode.TestRunRequest, run: vscode.TestRun, resultTestSuite: any, testItem?: vscode.TestItem) {
-		(resultTestSuite.testsuite || []).forEach(testsuite => {
+	private parseTestRunnerSuites(request: vscode.TestRunRequest, run: vscode.TestRun, munitTestSuite: MUnitTestSuite, testItem?: vscode.TestItem) {
+		const testsuites = (munitTestSuite.testsuite || []) as [MUnitTestSuite];
+		testsuites.forEach(testsuite => {
 			const id = testsuite.$.name;
 			const matchedTestItem = testItem
 				? testItem.children.get(id)
@@ -324,7 +345,8 @@ $
 		});
 
 		// Parse test cases.
-		(resultTestSuite.testcase || []).forEach(testcase => {
+		const testcases = (munitTestSuite.testcase || []) as [MUnitTestCase];
+		testcases.forEach(testcase => {
 			const id = `method:${testcase.$.name}`;
 			const matchedTestItem = testItem
 				? testItem.children.get(id)
