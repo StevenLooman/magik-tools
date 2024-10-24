@@ -7,30 +7,30 @@ import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 
-/** Check nesting level of nodes. */
-@Rule(key = NestingLevelCheck.CHECK_KEY)
-public class NestingLevelCheck extends MagikCheck {
+/** Check nesting depth of nodes. */
+@Rule(key = NestingDepthCheck.CHECK_KEY)
+public class NestingDepthCheck extends MagikCheck {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String CHECK_KEY = "NestingLevel";
+  public static final String CHECK_KEY = "NestingDepth";
 
-  private static final int DEFAULT_MAXIMUM_NESTING_LEVEL = 3;
-  private static final String MESSAGE = "Nesting level greater than permitted (%s).";
+  private static final int DEFAULT_MAXIMUM_NESTING_DEPTH = 3;
+  private static final String MESSAGE = "Nesting Depth greater than permitted (%s).";
 
-  /** Maximum nesting level of node. */
+  /** Maximum nesting depth of node. */
   @RuleProperty(
-      key = "maximum nesting level",
-      defaultValue = "" + DEFAULT_MAXIMUM_NESTING_LEVEL,
-      description = "Maximum nesting level",
+      key = "maximum nesting depth",
+      defaultValue = "" + DEFAULT_MAXIMUM_NESTING_DEPTH,
+      description = "Maximum nesting depth",
       type = "INTEGER")
   @SuppressWarnings("checkstyle:VisibilityModifier")
-  public int maximumNestingLevel = DEFAULT_MAXIMUM_NESTING_LEVEL;
+  public int maximumNestingDepth = DEFAULT_MAXIMUM_NESTING_DEPTH;
 
   private Deque<AstNode> depthNodes = new ArrayDeque<>();
 
   @Override
   protected void walkPreIf(final AstNode node) {
-    this.checkDefinition(node);
+    this.checkNestingDepth(node);
   }
 
   @Override
@@ -40,7 +40,7 @@ public class NestingLevelCheck extends MagikCheck {
 
   @Override
   protected void walkPreLoop(final AstNode node) {
-    this.checkDefinition(node);
+    this.checkNestingDepth(node);
   }
 
   @Override
@@ -50,7 +50,7 @@ public class NestingLevelCheck extends MagikCheck {
 
   @Override
   protected void walkPreTry(final AstNode node) {
-    this.checkDefinition(node);
+    this.checkNestingDepth(node);
   }
 
   @Override
@@ -58,12 +58,12 @@ public class NestingLevelCheck extends MagikCheck {
     depthNodes.pop();
   }
 
-  private void checkDefinition(final AstNode node) {
+  private void checkNestingDepth(final AstNode node) {
     depthNodes.push(node);
 
-    if (depthNodes.size() == DEFAULT_MAXIMUM_NESTING_LEVEL + 1) {
+    if (depthNodes.size() == DEFAULT_MAXIMUM_NESTING_DEPTH + 1) {
       AstNode lastNode = depthNodes.peek();
-      this.addIssue(lastNode, String.format(MESSAGE, DEFAULT_MAXIMUM_NESTING_LEVEL));
+      this.addIssue(lastNode, String.format(MESSAGE, DEFAULT_MAXIMUM_NESTING_DEPTH));
     }
   }
 }

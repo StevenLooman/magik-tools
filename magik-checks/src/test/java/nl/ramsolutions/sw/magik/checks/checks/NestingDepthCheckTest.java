@@ -7,13 +7,13 @@ import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
-/** Test NestingLevelCheck. */
+/** Test NestingDepthCheck. */
 @SuppressWarnings("checkstyle:MagicNumber")
-class NestingLevelCheckTest extends MagikCheckTestBase {
+class NestingDepthCheckTest extends MagikCheckTestBase {
 
   @Test
-  void testExceedingMaximumNestingLevel() {
-    final NestingLevelCheck check = new NestingLevelCheck();
+  void testMethodExceedingMaximumNestingDepth() {
+    final NestingDepthCheck check = new NestingDepthCheck();
 
     final String code =
         """
@@ -40,8 +40,8 @@ class NestingLevelCheckTest extends MagikCheckTestBase {
   }
 
   @Test
-  void testLoopAfterIfDoesCountAsExtraNestingLevel() {
-    final NestingLevelCheck check = new NestingLevelCheck();
+  void testLoopAfterIfDoesCountAsExtraNestingDepth() {
+    final NestingDepthCheck check = new NestingDepthCheck();
 
     final String code =
         """
@@ -64,8 +64,8 @@ class NestingLevelCheckTest extends MagikCheckTestBase {
   }
 
   @Test
-  void testLoopAfterForDoesNotCountAsExtraNestingLevel() {
-    final NestingLevelCheck check = new NestingLevelCheck();
+  void testLoopAfterForDoesNotCountAsExtraNestingDepth() {
+    final NestingDepthCheck check = new NestingDepthCheck();
 
     final String code =
         """
@@ -86,8 +86,8 @@ class NestingLevelCheckTest extends MagikCheckTestBase {
   }
 
   @Test
-  void testNotExceedingMaximumNestingLevel() {
-    final MagikCheck check = new NestingLevelCheck();
+  void testNotExceedingMaximumNestingDepth() {
+    final MagikCheck check = new NestingDepthCheck();
     final String code =
         """
         _method a.b
@@ -101,8 +101,8 @@ class NestingLevelCheckTest extends MagikCheckTestBase {
   }
 
   @Test
-  void testNotExceedingMaximumNestingLevelWithEarlyReturns() {
-    final MagikCheck check = new NestingLevelCheck();
+  void testNotExceedingMaximumNestingDepthWithEarlyReturns() {
+    final MagikCheck check = new NestingDepthCheck();
     final String code =
         """
         _method a.b

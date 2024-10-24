@@ -14,7 +14,7 @@
     "LocalImportProcedure",
     "MethodComplexity",
     "MethodLineCount",
-    "NestingLevel",
+    "NestingDepth",
     "NoStatementAfterBodyExit",
     "ParameterCount",
     "ScopeCount",

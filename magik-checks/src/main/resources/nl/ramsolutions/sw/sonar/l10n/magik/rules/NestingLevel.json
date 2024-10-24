@@ -1,10 +1,10 @@
 {
-  "title": "Nodes should not have too many nesting levels",
+  "title": "Methods/procedures/if-statements/loop-statements should not exceed the maximum nesting depth",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
     "func": "Linear with offset",
-    "linearDesc": "per nesting level above the threshold",
+    "linearDesc": "per nesting depth above the threshold",
     "linearOffset": "10min",
     "linearFactor": "1min"
   },
@@ -13,6 +13,6 @@
     "complexity"
   ],
   "defaultSeverity": "Minor",
-  "ruleSpecification": "NestingLevel",
-  "sqKey": "nesting-level"
+  "ruleSpecification": "NestingDepth",
+  "sqKey": "nesting-depth"
 }
