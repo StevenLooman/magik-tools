@@ -1,0 +1,18 @@
+{
+  "title": "Methods/procedures/if-statements/loop-statements should not exceed the maximum nesting depth",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Linear with offset",
+    "linearDesc": "per nesting depth above the threshold",
+    "linearOffset": "10min",
+    "linearFactor": "1min"
+  },
+  "tags": [
+    "brain-overload",
+    "complexity"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "NestingDepth",
+  "sqKey": "nesting-depth"
+}
