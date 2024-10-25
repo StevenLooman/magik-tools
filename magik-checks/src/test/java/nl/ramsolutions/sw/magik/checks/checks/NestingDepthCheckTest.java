@@ -12,6 +12,54 @@ import org.junit.jupiter.api.Test;
 class NestingDepthCheckTest extends MagikCheckTestBase {
 
   @Test
+  void testBlockExceedingMaximumNestingDepth() {
+    final NestingDepthCheck check = new NestingDepthCheck();
+
+    final String code =
+        """
+        _block
+            _if a
+            _then
+                _loop
+                    _if b
+                    _then
+                        _if c
+                        _then
+                        _endif
+                    _endif
+                _endloop
+            _endif
+        _endblock
+        """;
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
+
+  @Test
+  void testProcExceedingMaximumNestingDepth() {
+    final NestingDepthCheck check = new NestingDepthCheck();
+
+    final String code =
+        """
+        _proc()
+            _if a
+            _then
+                _loop
+                    _if b
+                    _then
+                        _if c
+                        _then
+                        _endif
+                    _endif
+                _endloop
+            _endif
+        _endproc
+        """;
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
+
+  @Test
   void testMethodExceedingMaximumNestingDepth() {
     final NestingDepthCheck check = new NestingDepthCheck();
 
