@@ -15,7 +15,7 @@ public class NestingDepthCheck extends MagikCheck {
   public static final String CHECK_KEY = "NestingDepth";
 
   private static final int DEFAULT_MAXIMUM_NESTING_DEPTH = 3;
-  private static final String MESSAGE = "Nesting Depth greater than permitted (%s).";
+  private static final String MESSAGE = "The nesting depth is greater than permitted (%s).";
 
   /** Maximum nesting depth of node. */
   @RuleProperty(
