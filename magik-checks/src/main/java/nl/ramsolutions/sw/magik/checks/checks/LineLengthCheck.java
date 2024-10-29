@@ -54,8 +54,8 @@ public class LineLengthCheck extends MagikCheck {
       for (int i = 0; i < line.length(); ++i) {
         final char chr = line.charAt(i);
         if (chr == '\t') {
-          final int mod = columnNo % tabWidth;
-          columnNo += tabWidth - mod;
+          final int mod = columnNo % this.tabWidth;
+          columnNo += this.tabWidth - mod;
         } else {
           ++columnNo;
         }
