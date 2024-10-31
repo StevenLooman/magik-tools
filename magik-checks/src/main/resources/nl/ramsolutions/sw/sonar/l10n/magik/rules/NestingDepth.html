@@ -23,12 +23,14 @@ _if a _is _unset _then _return b _endif
 
 _for x _over a.fast_elements()
 _loop
-  _if x _isnt _unset
+  _if x _is _unset
   _then
-    _for child _over x.fast_elements()
-    _loop
-      _return child
-    _endloop
+    _continue
   _endif
+
+  _for child _over x.fast_elements()
+  _loop
+    _return child
+  _endloop
 _endloop
 </pre>

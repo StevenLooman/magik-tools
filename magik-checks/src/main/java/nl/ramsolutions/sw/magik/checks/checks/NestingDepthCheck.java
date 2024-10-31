@@ -26,7 +26,7 @@ public class NestingDepthCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:VisibilityModifier")
   public int maximumNestingDepth = DEFAULT_MAXIMUM_NESTING_DEPTH;
 
-  private Deque<AstNode> depthNodes = new ArrayDeque<>();
+  private final Deque<AstNode> depthNodes = new ArrayDeque<>();
 
   @Override
   protected void walkPreIf(final AstNode node) {
