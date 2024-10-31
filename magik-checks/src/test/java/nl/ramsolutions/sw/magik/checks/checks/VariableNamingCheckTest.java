@@ -45,6 +45,20 @@ class VariableNamingCheckTest extends MagikCheckTestBase {
     assertThat(issues).hasSize(1);
   }
 
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "_local this_is_the_very_long_variable_name",
+        "this_is_the_very_long_variable_name << 10",
+        "_method a.b(this_is_the_very_long_variable_name) _endmethod",
+        "_local l_this_is_the_very_long_variable_name",
+      })
+  void testTooLongVariableName(final String code) {
+    final MagikCheck check = new VariableNamingCheck();
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
+
   @Test
   void testMultiVariableDeclarationInvalidName() {
     final MagikCheck check = new VariableNamingCheck();
