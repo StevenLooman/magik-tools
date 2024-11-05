@@ -1,8 +1,6 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
@@ -26,44 +24,34 @@ public class NestingDepthCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:VisibilityModifier")
   public int maximumNestingDepth = DEFAULT_MAXIMUM_NESTING_DEPTH;
 
-  private final Deque<AstNode> depthNodes = new ArrayDeque<>();
+  private int currentNestingDepth = 0;
 
   @Override
-  protected void walkPreIf(final AstNode node) {
-    this.checkNestingDepth(node);
+  protected void walkPreBody(final AstNode node) {
+    if (node != null && node.getToken() != null) {
+      this.currentNestingDepth++;
+    }
+
+    super.walkPreBody(node);
   }
 
   @Override
-  protected void walkPostIf(final AstNode node) {
-    depthNodes.pop();
+  protected void walkPostBody(final AstNode node) {
+    if (node != null && node.getToken() != null) {
+      this.checkNestingDepth(node);
+      this.currentNestingDepth--;
+    }
+
+    super.walkPostBody(node);
   }
 
-  @Override
-  protected void walkPreLoop(final AstNode node) {
-    this.checkNestingDepth(node);
-  }
-
-  @Override
-  protected void walkPostLoop(final AstNode node) {
-    depthNodes.pop();
-  }
-
-  @Override
-  protected void walkPreTry(final AstNode node) {
-    this.checkNestingDepth(node);
-  }
-
-  @Override
-  protected void walkPostTry(final AstNode node) {
-    depthNodes.pop();
+  private int getCurrentDepth() {
+    return this.currentNestingDepth - 1;
   }
 
   private void checkNestingDepth(final AstNode node) {
-    depthNodes.push(node);
-
-    if (depthNodes.size() == DEFAULT_MAXIMUM_NESTING_DEPTH + 1) {
-      AstNode lastNode = depthNodes.peek();
-      this.addIssue(lastNode, String.format(MESSAGE, DEFAULT_MAXIMUM_NESTING_DEPTH));
+    if (getCurrentDepth() == this.maximumNestingDepth) {
+      this.addIssue(node, String.format(MESSAGE, this.maximumNestingDepth));
     }
   }
 }
