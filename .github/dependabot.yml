@@ -11,4 +11,4 @@ updates:
   - package-ecosystem: "npm"
     directory: "magik-language-server/client-vscode"
     schedule:
-      interval: weekly
+      interval: monthly
