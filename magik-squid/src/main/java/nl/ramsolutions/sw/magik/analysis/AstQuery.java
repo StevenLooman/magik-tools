@@ -122,22 +122,23 @@ public final class AstQuery {
             .filter(
                 node -> {
                   final Token token = node.getToken();
-                  final Range range = new Range(token);
-                  return position.isBeforeRange(range);
+                  final Position endPosition = Position.fromTokenEnd(token);
+                  return endPosition.isBefore(position) || endPosition.equals(position);
                 })
             .toList();
     if (nodes.isEmpty()) {
       return null;
     }
+
     return nodes.get(nodes.size() - 1);
   }
 
   /**
-   * Get the node in {@code topNode} at {@code position}.
+   * Get the token node in {@code topNode} at {@code position}.
    *
    * @param topNode Top node.
    * @param position Position for node.
-   * @return Token-Node at position.
+   * @return Token node at position.
    */
   @CheckForNull
   public static AstNode nodeAt(final AstNode topNode, final Position position) {
@@ -148,12 +149,16 @@ public final class AstQuery {
                 node -> {
                   final Token token = node.getToken();
                   final Range range = new Range(token);
-                  return !position.isBeforeRange(range) && !position.isAfterRange(range);
+                  final Position rangeEndPosition = range.getEndPosition();
+                  return !position.isBeforeRange(range)
+                      && !position.isAfterRange(range)
+                      && !position.equals(rangeEndPosition);
                 })
             .toList();
     if (nodes.isEmpty()) {
       return null;
     }
+
     return nodes.get(0);
   }
 
@@ -172,10 +177,12 @@ public final class AstQuery {
     if (node == null) {
       return null;
     }
+
     final AstNode parentNode = node.getParent();
     if (parentNode.isNot(nodeTypes)) {
       return null;
     }
+
     return node;
   }
 
@@ -194,13 +201,15 @@ public final class AstQuery {
             .filter(
                 node -> {
                   final Token token = node.getToken();
-                  final Range range = new Range(token);
-                  return position.isAfterRange(range);
+                  final Position startPosition = Position.fromTokenStart(token);
+                  final Position endPosition = Position.fromTokenEnd(token);
+                  return position.equals(startPosition) || position.isBefore(endPosition);
                 })
             .toList();
     if (nodes.isEmpty()) {
       return null;
     }
+
     return nodes.get(0);
   }
 
@@ -237,9 +246,11 @@ public final class AstQuery {
     if (nodes.isEmpty()) {
       return null;
     }
+
     if (nodes.size() > 1 && nodes.get(0).is(MagikGrammar.MAGIK)) {
       nodes.remove(0);
     }
+
     return nodes.get(0);
   }
 
@@ -280,6 +291,7 @@ public final class AstQuery {
     if (nodes.isEmpty()) {
       return null;
     }
+
     return nodes.get(0);
   }
 

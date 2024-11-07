@@ -37,7 +37,7 @@ class DefinitionReaderTest {
             List.of(
                 new PackageDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 11), new Position(1, 12))),
                     null,
                     null,
@@ -61,7 +61,7 @@ class DefinitionReaderTest {
             List.of(
                 new PackageDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 11), new Position(1, 12))),
                     null,
                     null,
@@ -85,8 +85,8 @@ class DefinitionReaderTest {
             List.of(
                 new ExemplarDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 18), new Position(1, 19))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 19), new Position(1, 29))),
                     null,
                     null,
                     "",
@@ -113,8 +113,8 @@ class DefinitionReaderTest {
             List.of(
                 new ExemplarDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 20), new Position(1, 21))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 21), new Position(1, 35))),
                     null,
                     null,
                     "",
@@ -124,7 +124,7 @@ class DefinitionReaderTest {
                     List.of(
                         new SlotDefinition(
                             new Location(
-                                URI.create("memory://source.magik"),
+                                URI.create("memory:///source.magik"),
                                 new Range(new Position(1, 38), new Position(1, 39))),
                             null,
                             null,
@@ -134,7 +134,7 @@ class DefinitionReaderTest {
                             TypeString.UNDEFINED),
                         new SlotDefinition(
                             new Location(
-                                URI.create("memory://source.magik"),
+                                URI.create("memory:///source.magik"),
                                 new Range(new Position(1, 56), new Position(1, 57))),
                             null,
                             null,
@@ -161,8 +161,8 @@ class DefinitionReaderTest {
             List.of(
                 new ExemplarDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 20), new Position(1, 21))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 21), new Position(1, 35))),
                     null,
                     null,
                     "",
@@ -172,7 +172,7 @@ class DefinitionReaderTest {
                     List.of(
                         new SlotDefinition(
                             new Location(
-                                URI.create("memory://source.magik"),
+                                URI.create("memory:///source.magik"),
                                 new Range(new Position(1, 38), new Position(1, 39))),
                             null,
                             null,
@@ -184,7 +184,7 @@ class DefinitionReaderTest {
                     Collections.emptySet()),
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 38), new Position(1, 39))),
                     null,
                     null,
@@ -200,7 +200,7 @@ class DefinitionReaderTest {
                     ExpressionResultString.EMPTY),
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 38), new Position(1, 39))),
                     null,
                     null,
@@ -211,9 +211,7 @@ class DefinitionReaderTest {
                     Set.of(MethodDefinition.Modifier.PRIVATE),
                     Collections.emptyList(),
                     new ParameterDefinition(
-                        new Location(
-                            URI.create("memory://source.magik"),
-                            new Range(new Position(1, 38), new Position(1, 39))),
+                        null,
                         null,
                         null,
                         null,
@@ -226,7 +224,7 @@ class DefinitionReaderTest {
                     ExpressionResultString.EMPTY),
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 38), new Position(1, 39))),
                     null,
                     null,
@@ -237,9 +235,7 @@ class DefinitionReaderTest {
                     Set.of(MethodDefinition.Modifier.PRIVATE),
                     Collections.emptyList(),
                     new ParameterDefinition(
-                        new Location(
-                            URI.create("memory://source.magik"),
-                            new Range(new Position(1, 38), new Position(1, 39))),
+                        null,
                         null,
                         null,
                         null,
@@ -266,8 +262,8 @@ class DefinitionReaderTest {
             List.of(
                 new ExemplarDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 20), new Position(1, 21))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 21), new Position(1, 35))),
                     null,
                     null,
                     "",
@@ -293,8 +289,8 @@ class DefinitionReaderTest {
             List.of(
                 new ExemplarDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 20), new Position(1, 21))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 21), new Position(1, 35))),
                     null,
                     null,
                     "",
@@ -322,8 +318,8 @@ class DefinitionReaderTest {
             List.of(
                 new ExemplarDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 20), new Position(1, 21))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 21), new Position(1, 35))),
                     null,
                     null,
                     "",
@@ -351,8 +347,8 @@ class DefinitionReaderTest {
             List.of(
                 new ExemplarDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 20), new Position(1, 21))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 21), new Position(1, 35))),
                     null,
                     null,
                     "",
@@ -378,8 +374,8 @@ class DefinitionReaderTest {
             List.of(
                 new ExemplarDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 9), new Position(1, 10))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 10), new Position(1, 21))),
                     null,
                     null,
                     "",
@@ -405,7 +401,7 @@ class DefinitionReaderTest {
             List.of(
                 new ProcedureDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 50), new Position(1, 55))),
                     null,
                     null,
@@ -417,7 +413,7 @@ class DefinitionReaderTest {
                     List.of(
                         new ParameterDefinition(
                             new Location(
-                                URI.create("memory://source.magik"),
+                                URI.create("memory:///source.magik"),
                                 new Range(new Position(1, 56), new Position(1, 57))),
                             null,
                             null,
@@ -428,7 +424,7 @@ class DefinitionReaderTest {
                             TypeString.UNDEFINED),
                         new ParameterDefinition(
                             new Location(
-                                URI.create("memory://source.magik"),
+                                URI.create("memory:///source.magik"),
                                 new Range(new Position(1, 59), new Position(1, 60))),
                             null,
                             null,
@@ -441,7 +437,7 @@ class DefinitionReaderTest {
                     ExpressionResultString.EMPTY),
                 new BinaryOperatorDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 27), new Position(1, 28))),
                     null,
                     null,
@@ -467,8 +463,8 @@ class DefinitionReaderTest {
             List.of(
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 0), new Position(1, 7))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 10), new Position(1, 11))),
                     null,
                     null,
                     "",
@@ -509,8 +505,8 @@ class DefinitionReaderTest {
             List.of(
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 0), new Position(1, 9))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 35), new Position(1, 36))),
                     null,
                     null,
                     "",
@@ -542,8 +538,8 @@ class DefinitionReaderTest {
             List.of(
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 0), new Position(1, 7))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 10), new Position(1, 11))),
                     null,
                     null,
                     "",
@@ -554,7 +550,7 @@ class DefinitionReaderTest {
                     List.of(
                         new ParameterDefinition(
                             new Location(
-                                URI.create("memory://source.magik"),
+                                URI.create("memory:///source.magik"),
                                 new Range(new Position(1, 12), new Position(1, 13))),
                             null,
                             null,
@@ -565,7 +561,7 @@ class DefinitionReaderTest {
                             TypeString.UNDEFINED),
                         new ParameterDefinition(
                             new Location(
-                                URI.create("memory://source.magik"),
+                                URI.create("memory:///source.magik"),
                                 new Range(new Position(1, 15), new Position(1, 24))),
                             null,
                             null,
@@ -576,7 +572,7 @@ class DefinitionReaderTest {
                             TypeString.UNDEFINED),
                         new ParameterDefinition(
                             new Location(
-                                URI.create("memory://source.magik"),
+                                URI.create("memory:///source.magik"),
                                 new Range(new Position(1, 28), new Position(1, 29))),
                             null,
                             null,
@@ -587,7 +583,7 @@ class DefinitionReaderTest {
                             TypeString.UNDEFINED),
                         new ParameterDefinition(
                             new Location(
-                                URI.create("memory://source.magik"),
+                                URI.create("memory:///source.magik"),
                                 new Range(new Position(1, 31), new Position(1, 38))),
                             null,
                             null,
@@ -598,7 +594,7 @@ class DefinitionReaderTest {
                             TypeString.UNDEFINED)),
                     new ParameterDefinition(
                         new Location(
-                            URI.create("memory://source.magik"),
+                            URI.create("memory:///source.magik"),
                             new Range(new Position(1, 45), new Position(1, 46))),
                         null,
                         null,
@@ -626,7 +622,7 @@ class DefinitionReaderTest {
             List.of(
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 0), new Position(1, 13))),
                     null,
                     null,
@@ -656,7 +652,7 @@ class DefinitionReaderTest {
             List.of(
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 0), new Position(1, 13))),
                     null,
                     null,
@@ -686,7 +682,7 @@ class DefinitionReaderTest {
             List.of(
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 0), new Position(1, 13))),
                     null,
                     null,
@@ -716,7 +712,7 @@ class DefinitionReaderTest {
             List.of(
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 0), new Position(1, 13))),
                     null,
                     null,
@@ -732,7 +728,7 @@ class DefinitionReaderTest {
                     ExpressionResultString.EMPTY),
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 0), new Position(1, 13))),
                     null,
                     null,
@@ -743,9 +739,7 @@ class DefinitionReaderTest {
                     Collections.emptySet(),
                     Collections.emptyList(),
                     new ParameterDefinition(
-                        new Location(
-                            URI.create("memory://source.magik"),
-                            new Range(new Position(1, 0), new Position(1, 13))),
+                        null,
                         null,
                         null,
                         null,
@@ -758,7 +752,7 @@ class DefinitionReaderTest {
                     ExpressionResultString.EMPTY),
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 0), new Position(1, 13))),
                     null,
                     null,
@@ -769,9 +763,7 @@ class DefinitionReaderTest {
                     Collections.emptySet(),
                     Collections.emptyList(),
                     new ParameterDefinition(
-                        new Location(
-                            URI.create("memory://source.magik"),
-                            new Range(new Position(1, 0), new Position(1, 13))),
+                        null,
                         null,
                         null,
                         null,
@@ -798,8 +790,8 @@ class DefinitionReaderTest {
             List.of(
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 13), new Position(1, 14))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 37), new Position(1, 42))),
                     null,
                     null,
                     "",
@@ -814,8 +806,8 @@ class DefinitionReaderTest {
                     ExpressionResultString.EMPTY),
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 13), new Position(1, 14))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 37), new Position(1, 42))),
                     null,
                     null,
                     "",
@@ -825,9 +817,7 @@ class DefinitionReaderTest {
                     Set.of(MethodDefinition.Modifier.PRIVATE),
                     Collections.emptyList(),
                     new ParameterDefinition(
-                        new Location(
-                            URI.create("memory://source.magik"),
-                            new Range(new Position(1, 13), new Position(1, 14))),
+                        null,
                         null,
                         null,
                         null,
@@ -840,8 +830,8 @@ class DefinitionReaderTest {
                     ExpressionResultString.EMPTY),
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 13), new Position(1, 14))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 37), new Position(1, 42))),
                     null,
                     null,
                     "",
@@ -851,9 +841,7 @@ class DefinitionReaderTest {
                     Set.of(MethodDefinition.Modifier.PRIVATE),
                     Collections.emptyList(),
                     new ParameterDefinition(
-                        new Location(
-                            URI.create("memory://source.magik"),
-                            new Range(new Position(1, 13), new Position(1, 14))),
+                        null,
                         null,
                         null,
                         null,
@@ -880,8 +868,8 @@ class DefinitionReaderTest {
             List.of(
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 13), new Position(1, 14))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 37), new Position(1, 44))),
                     null,
                     null,
                     "",
@@ -910,8 +898,8 @@ class DefinitionReaderTest {
             List.of(
                 new MethodDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
-                        new Range(new Position(1, 13), new Position(1, 14))),
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 37), new Position(1, 44))),
                     null,
                     null,
                     "",
@@ -940,7 +928,7 @@ class DefinitionReaderTest {
             List.of(
                 new GlobalDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 0), new Position(1, 7))),
                     null,
                     null,
@@ -964,7 +952,7 @@ class DefinitionReaderTest {
             List.of(
                 new ConditionDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(1, 9), new Position(1, 10))),
                     null,
                     null,
@@ -993,7 +981,7 @@ class DefinitionReaderTest {
             List.of(
                 new ConditionDefinition(
                     new Location(
-                        URI.create("memory://source.magik"),
+                        URI.create("memory:///source.magik"),
                         new Range(new Position(2, 11), new Position(2, 12))),
                     null,
                     null,

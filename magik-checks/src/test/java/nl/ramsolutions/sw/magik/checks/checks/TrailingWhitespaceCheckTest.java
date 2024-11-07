@@ -2,9 +2,9 @@ package nl.ramsolutions.sw.magik.checks.checks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.List;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
@@ -32,9 +32,7 @@ class TrailingWhitespaceCheckTest extends MagikCheckTestBase {
     final MagikIssue issue0 = issues.get(0);
     assertThat(issue0.location())
         .isEqualTo(
-            new Location(
-                URI.create("memory://source.magik"),
-                new Range(new Position(1, 1), new Position(1, 5))));
+            new Location(MagikFile.DEFAULT_URI, new Range(new Position(1, 1), new Position(1, 5))));
   }
 
   @Test

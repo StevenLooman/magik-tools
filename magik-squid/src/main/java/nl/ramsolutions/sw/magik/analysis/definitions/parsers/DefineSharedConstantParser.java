@@ -109,7 +109,7 @@ public class DefineSharedConstantParser {
 
     // Figure location.
     final URI uri = this.node.getToken().getURI();
-    final Location location = new Location(uri, this.node);
+    final Location location = new Location(uri, argument0Node);
 
     // Figure timestamp.
     final Instant timestamp = this.magikFile.getTimestamp();

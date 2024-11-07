@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -28,6 +29,7 @@ import nl.ramsolutions.sw.moduledef.ModuleUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.check.Rule;
+import org.sonar.check.RuleProperty;
 
 /** Check to test if the module is required for a used global. */
 @Rule(key = ModuleRequiredForGlobalTypedCheck.CHECK_KEY)
@@ -39,6 +41,51 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(ModuleRequiredForGlobalTypedCheck.class);
   private static final String MESSAGE = "Module '%s' defining global '%s' is not required";
+  // Create from base session:
+  // ```
+  // _for mod _over sw_module_manager.loaded_modules.fast_elements()
+  // _loop
+  //   !terminal!.write(mod.name, %,)
+  // _endloop
+  // ```
+  private static final String DEFAULT_ALWAYS_LOADED_MODULES =
+      "ace_core,acpt,acpt_geometry,actions,application,authorisation,base_dialogs,bookmark_manager,"
+          + "browser,browser_sub_dialogs,cached_record_collection,collection_export_engine,"
+          + "command_design_pattern,component_framework,connection_service,construction_pack_common,"
+          + "core_resources,dataset_controller_core,datastore_base,datastore_geometry_raster,"
+          + "datastore_geometry_raster_acps,datastore_geometry_spatial_predicate,datastore_geometry_tin,"
+          + "datastore_geometry_topology_engine,datastore_geometry_transforms,datastore_geometry_vector,"
+          + "debugger_core,dialogs,display_grid,document_list_views,document_manager,documents,drafting,"
+          + "ds_src,dxf_exemplars,dynamic_transform_manager,extdb,formats,formatted_document,"
+          + "geometry_raster,geometry_raster_streams,geometry_set_factory,geometry_tin,"
+          + "geometry_transforms,geometry_vector,history_manager,infraction_checker,interaction_handler,"
+          + "layout_engine,layout_gui,lazy_record_collection,legacy_widget_emulation,licence_manager,"
+          + "magik_gui_components,magikscript,map_plugin,map_projections_catalogue,map_rendering,"
+          + "map_support,map_trail,memento,messages_base,mgr_src,model,module_management,"
+          + "module_management_magik_gui,multiple_deletion_dialog,network_analysis_plugin,"
+          + "network_follower,oledb_provider_component,oledb_reader,options_plugin,outlook_bar_plugin,"
+          + "pdf_generator,pdf_generator_application,plotting,predicates,printer_setup_wizard,profiler,"
+          + "progress_manager,query_designers,query_dialog,rotate_view_dialog,rwo_actions_plugin,"
+          + "rwo_core,rwo_sets,scrapbook,secure_storage,selection_set_lister,session_management,"
+          + "short_transaction_manager_base,short_transaction_manager_client,"
+          + "short_transaction_manager_server,simple_xml,sockets,style_core,style_properties,"
+          + "style_symbol_magik_gui,style_widgets,super_dd,sw_automation,sw_automation_client,"
+          + "sw_core_magik_sessions,sw_job_engine,swift_address_callouts,swift_base,swift_find,"
+          + "swift_google,swift_layout_series,swift_map,swift_plugins,swift_sketch,"
+          + "swift_view_application,sys_acps,sys_misc,sys_src,threading_tools,tics,transient_urwo_som,"
+          + "tree,tree_item,undo_manager,units_configuration,units_core,units_definitions,"
+          + "universal_extdb_rwo,universal_rwo,urn_manager,value_managers,wcm_credential_dialog,widgets,"
+          + "xml_output";
+
+  /** List of comment words, separated by ','. */
+  @RuleProperty(
+      key = "always loaded modules",
+      defaultValue = "" + DEFAULT_ALWAYS_LOADED_MODULES,
+      description =
+          "List of modules which are always loaded, separated by ',', such as the modules from the base session",
+      type = "STRING")
+  @SuppressWarnings("checkstyle:VisibilityModifier")
+  public String alwaysLoadedModules = DEFAULT_ALWAYS_LOADED_MODULES;
 
   private ModuleDefinition moduleDefinition;
   private Set<String> requiredModules;
@@ -99,6 +146,12 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
           .flatMap(Collection::stream)
           .forEach(stack::push);
     }
+
+    // Also add all modules from this this.alwaysLoadedModules.
+    Stream.of(this.alwaysLoadedModules.split(","))
+        .map(String::strip)
+        .filter(mod -> !mod.isEmpty())
+        .forEach(seen::add);
 
     return seen;
   }

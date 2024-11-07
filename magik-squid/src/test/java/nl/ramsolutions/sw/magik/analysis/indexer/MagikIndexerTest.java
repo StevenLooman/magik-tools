@@ -67,7 +67,7 @@ class MagikIndexerTest {
     assertThat(exemplarDef)
         .isEqualTo(
             new ExemplarDefinition(
-                new Location(uri, new Range(new Position(4, 20), new Position(4, 21))),
+                new Location(uri, new Range(new Position(5, 4), new Position(5, 18))),
                 null,
                 null,
                 "Test exemplar.",
@@ -104,7 +104,7 @@ class MagikIndexerTest {
     assertThat(newMethodDef)
         .isEqualTo(
             new MethodDefinition(
-                new Location(uri, new Range(new Position(13, 0), new Position(13, 7))),
+                new Location(uri, new Range(new Position(13, 22), new Position(13, 25))),
                 null,
                 null,
                 "Constructor.",
@@ -127,7 +127,7 @@ class MagikIndexerTest {
     assertThat(initMethodDef)
         .isEqualTo(
             new MethodDefinition(
-                new Location(uri, new Range(new Position(19, 0), new Position(19, 8))),
+                new Location(uri, new Range(new Position(19, 31), new Position(19, 35))),
                 null,
                 null,
                 "Initializer.",
@@ -234,7 +234,7 @@ class MagikIndexerTest {
     assertThat(exemplarDef)
         .isEqualTo(
             new ExemplarDefinition(
-                new Location(uri, new Range(new Position(6, 20), new Position(6, 21))),
+                new Location(uri, new Range(new Position(7, 4), new Position(7, 18))),
                 null,
                 null,
                 "Test exemplar.\n@slot {sw:rope} slot_a\n@slot {sw:property_list<K=sw:symbol, E=sw:integer>} slot_b",
@@ -275,7 +275,7 @@ class MagikIndexerTest {
     assertThat(newMethodDef)
         .isEqualTo(
             new MethodDefinition(
-                new Location(uri, new Range(new Position(14, 0), new Position(14, 7))),
+                new Location(uri, new Range(new Position(14, 22), new Position(14, 25))),
                 null,
                 null,
                 "Constructor.\n@return {_self}",
@@ -298,7 +298,7 @@ class MagikIndexerTest {
     assertThat(initMethodDef)
         .isEqualTo(
             new MethodDefinition(
-                new Location(uri, new Range(new Position(21, 0), new Position(21, 8))),
+                new Location(uri, new Range(new Position(21, 31), new Position(21, 35))),
                 null,
                 null,
                 "Initializer.\n@return {_self}",

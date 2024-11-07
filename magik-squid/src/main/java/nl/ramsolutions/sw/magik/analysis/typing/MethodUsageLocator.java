@@ -16,6 +16,7 @@ import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
@@ -47,12 +48,16 @@ public class MethodUsageLocator {
               // Determine/reason the type the method is called on.
               final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
               final AstNode node = magikFile.getTopNode();
-              final Position calledMethodPosition = location.getRange().getStartPosition();
-              final AstNode calledNode = AstQuery.nodeAt(node, calledMethodPosition);
-              final AstNode parentCalledNode = calledNode.getFirstAncestor(MagikGrammar.ATOM);
-              final ExpressionResultString result = reasonerState.getNodeType(parentCalledNode);
+              final Position invocationPosition = location.getRange().getStartPosition();
+              final AstNode invocationTokenNode = AstQuery.nodeAt(node, invocationPosition);
+              final AstNode invocationNode =
+                  invocationTokenNode.getFirstAncestor(MagikGrammar.METHOD_INVOCATION);
+              final MethodInvocationNodeHelper helper =
+                  new MethodInvocationNodeHelper(invocationNode);
+              final AstNode receiverNode = helper.getReceiverNode();
+              final ExpressionResultString result = reasonerState.getNodeType(receiverNode);
               final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
-              final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, parentCalledNode);
+              final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, invocationNode);
               if (typeStr.isUndefined()) {
                 return null;
               }
@@ -64,7 +69,7 @@ public class MethodUsageLocator {
               }
 
               final MethodUsage methodUsageWithNode =
-                  new MethodUsage(wantedMethodUsageTypeStr, methodName, location, calledNode);
+                  new MethodUsage(wantedMethodUsageTypeStr, methodName, location, invocationNode);
               return Map.entry(methodUsageWithNode, magikFile);
             })
         .filter(Objects::nonNull)

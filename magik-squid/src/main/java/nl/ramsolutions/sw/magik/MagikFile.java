@@ -35,7 +35,7 @@ import nl.ramsolutions.sw.magik.parser.MagikParser;
 /** Magik file. */
 public class MagikFile extends OpenedFile {
 
-  public static final URI DEFAULT_URI = URI.create("memory://source.magik");
+  public static final URI DEFAULT_URI = URI.create("memory:///source.magik");
   public static final Location DEFAULT_LOCATION = new Location(DEFAULT_URI, Range.DEFAULT_RANGE);
 
   private final @Nullable Instant timestamp;
