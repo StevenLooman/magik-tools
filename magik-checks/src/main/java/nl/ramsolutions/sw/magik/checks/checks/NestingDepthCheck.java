@@ -28,30 +28,28 @@ public class NestingDepthCheck extends MagikCheck {
 
   @Override
   protected void walkPreBody(final AstNode node) {
-    if (node != null && node.getToken() != null) {
-      this.currentNestingDepth++;
-    }
-
-    super.walkPreBody(node);
+    this.currentNestingDepth++;
   }
 
   @Override
   protected void walkPostBody(final AstNode node) {
-    if (node != null && node.getToken() != null) {
+    if (node.hasChildren()) {
+      // Skip empty bodies, addIssue() cannot handle nodes without tokens.
       this.checkNestingDepth(node);
-      this.currentNestingDepth--;
     }
 
-    super.walkPostBody(node);
+    this.currentNestingDepth--;
   }
 
   private int getCurrentDepth() {
+    // Subtract one to ignore the first body. This is most likely the method body itself.
     return this.currentNestingDepth - 1;
   }
 
   private void checkNestingDepth(final AstNode node) {
-    if (getCurrentDepth() == this.maximumNestingDepth) {
-      this.addIssue(node, String.format(MESSAGE, this.maximumNestingDepth));
+    if (this.getCurrentDepth() == this.maximumNestingDepth) {
+      final String message = String.format(MESSAGE, this.maximumNestingDepth);
+      this.addIssue(node, message);
     }
   }
 }

@@ -3,19 +3,17 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** Test NestingDepthCheck. */
 @SuppressWarnings("checkstyle:MagicNumber")
 class NestingDepthCheckTest extends MagikCheckTestBase {
 
-  @Test
-  void testBlockExceedingMaximumNestingDepth() {
-    final NestingDepthCheck check = new NestingDepthCheck();
-
-    final String code =
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         """
         _block
             _if a
@@ -25,21 +23,13 @@ class NestingDepthCheckTest extends MagikCheckTestBase {
                     _then
                         _if c
                         _then
+                            write("Too deep!")
                         _endif
                     _endif
                 _endloop
             _endif
         _endblock
-        """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
-  }
-
-  @Test
-  void testProcExceedingMaximumNestingDepth() {
-    final NestingDepthCheck check = new NestingDepthCheck();
-
-    final String code =
+        """,
         """
         _proc()
             _if a
@@ -49,21 +39,13 @@ class NestingDepthCheckTest extends MagikCheckTestBase {
                     _then
                         _if c
                         _then
+                            write("Too deep!")
                         _endif
                     _endif
                 _endloop
             _endif
         _endproc
-        """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
-  }
-
-  @Test
-  void testMethodExceedingMaximumNestingDepth() {
-    final NestingDepthCheck check = new NestingDepthCheck();
-
-    final String code =
+        """,
         """
         _method a.b
             _if a
@@ -76,22 +58,14 @@ class NestingDepthCheckTest extends MagikCheckTestBase {
                         _then
                             _if e
                             _then
+                                write("Too deep!")
                             _endif
                         _endif
                     _endif
                 _endif
             _endif
         _endmethod
-        """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
-  }
-
-  @Test
-  void testLoopAfterIfDoesCountAsExtraNestingDepth() {
-    final NestingDepthCheck check = new NestingDepthCheck();
-
-    final String code =
+        """,
         """
         _method a.b
             _if a
@@ -101,61 +75,48 @@ class NestingDepthCheckTest extends MagikCheckTestBase {
                     _then
                         _if c
                         _then
+                            write("Too deep!")
                         _endif
                     _endif
                 _endloop
             _endif
         _endmethod
-        """;
+        """,
+      })
+  void testInvalid(final String code) {
+    final NestingDepthCheck check = new NestingDepthCheck();
+
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
 
-  @Test
-  void testLoopAfterForDoesNotCountAsExtraNestingDepth() {
-    final NestingDepthCheck check = new NestingDepthCheck();
-
-    final String code =
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         """
         _method a.b
             _if a
             _then
                 _for i _over 1.upto(5)
                 _loop
-                    _if b
-                    _then
-                    _endif
+                    write("Okay!")
                 _endloop
             _endif
         _endmethod
-        """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
-  }
-
-  @Test
-  void testNotExceedingMaximumNestingDepth() {
-    final MagikCheck check = new NestingDepthCheck();
-    final String code =
+        """,
         """
         _method a.b
             _if a
             _then
+                write("Okay!")
             _endif
         _endmethod
-        """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
-  }
-
-  @Test
-  void testNotExceedingMaximumNestingDepthWithEarlyReturns() {
-    final MagikCheck check = new NestingDepthCheck();
-    final String code =
+        """,
         """
         _method a.b
             _loop
                 _if a _then _leave _endif
+
                 _loop
                     _if b _then _leave _endif
 
@@ -163,7 +124,11 @@ class NestingDepthCheckTest extends MagikCheckTestBase {
                 _endloop
             _endloop
         _endmethod
-        """;
+        """,
+      })
+  void testValid(final String code) {
+    final NestingDepthCheck check = new NestingDepthCheck();
+
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
