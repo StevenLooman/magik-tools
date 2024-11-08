@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.languageserver.definitions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.Location;
@@ -20,13 +19,13 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class DefinitionsProviderTest {
 
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
   private static final Location EMPTY_LOCATION =
-      new Location(DEFAULT_URI, new Range(new Position(0, 0), new Position(0, 0)));
+      new Location(MagikTypedFile.DEFAULT_URI, new Range(new Position(0, 0), new Position(0, 0)));
 
   private List<Location> getDefinitions(
       final String code, final Position position, final IDefinitionKeeper definitionKeeper) {
-    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
     final DefinitionsProvider provider = new DefinitionsProvider();
     return provider.provideDefinitions(magikFile, position);
   }
@@ -72,7 +71,8 @@ class DefinitionsProviderTest {
     final List<Location> locations = this.getDefinitions(code, position, definitionKeeper);
     assertThat(locations)
         .containsExactly(
-            new Location(DEFAULT_URI, new Range(new Position(1, 22), new Position(1, 28))));
+            new Location(
+                MagikTypedFile.DEFAULT_URI, new Range(new Position(1, 22), new Position(1, 28))));
   }
 
   @Test
@@ -89,7 +89,8 @@ class DefinitionsProviderTest {
     final List<Location> locations = this.getDefinitions(code, position, definitionKeeper);
     assertThat(locations)
         .containsExactly(
-            new Location(DEFAULT_URI, new Range(new Position(2, 11), new Position(2, 17))));
+            new Location(
+                MagikTypedFile.DEFAULT_URI, new Range(new Position(2, 11), new Position(2, 17))));
   }
 
   @Test
@@ -110,6 +111,7 @@ class DefinitionsProviderTest {
     final List<Location> locations = this.getDefinitions(code, position, definitionKeeper);
     assertThat(locations)
         .containsExactly(
-            new Location(DEFAULT_URI, new Range(new Position(0, 0), new Position(0, 0))));
+            new Location(
+                MagikTypedFile.DEFAULT_URI, new Range(new Position(0, 0), new Position(0, 0))));
   }
 }

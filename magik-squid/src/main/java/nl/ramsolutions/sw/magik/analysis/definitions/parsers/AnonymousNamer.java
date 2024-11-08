@@ -5,13 +5,14 @@ import com.sonar.sslr.api.Token;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /** Creates names for anonymous constructs, such as procedures. */
 public final class AnonymousNamer {
 
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
+  private static final URI DEFAULT_URI = MagikFile.DEFAULT_URI;
 
   private AnonymousNamer() {}
 

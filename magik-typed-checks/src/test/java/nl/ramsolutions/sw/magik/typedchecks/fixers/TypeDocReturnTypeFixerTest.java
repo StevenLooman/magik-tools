@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.typedchecks.fixers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.List;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -17,12 +16,12 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class TypeDocReturnTypeFixerTest {
 
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
   private static final String NEWLINE = System.lineSeparator();
 
   private List<CodeAction> getCodeActions(final String code, final Range range) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
     final TypeDocReturnTypeFixer fixer = new TypeDocReturnTypeFixer();
     return fixer.provideCodeActions(magikFile, range);
   }

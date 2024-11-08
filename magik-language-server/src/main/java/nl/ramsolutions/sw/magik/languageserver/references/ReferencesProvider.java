@@ -140,16 +140,19 @@ public class ReferencesProvider {
     final PackageNodeHelper packageHelper = new PackageNodeHelper(wantedNode);
     if (wantedNode == null) {
       return Collections.emptyList();
-    } else if (wantedNode.is(MagikGrammar.METHOD_INVOCATION)) {
-      final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(wantedNode);
-      final String methodName = helper.getMethodName();
-      return this.referencesToMethod(definitionKeeper, TypeString.UNDEFINED, methodName);
     } else if (wantedNode.is(MagikGrammar.METHOD_NAME)) {
-      final AstNode methodDefinitionNode = wantedNode.getParent();
-      final MethodDefinitionNodeHelper helper =
-          new MethodDefinitionNodeHelper(methodDefinitionNode);
-      final String methodName = helper.getMethodName();
-      return this.referencesToMethod(definitionKeeper, TypeString.UNDEFINED, methodName);
+      final AstNode parentNode = wantedNode.getParent();
+      if (parentNode.is(MagikGrammar.METHOD_DEFINITION)) {
+        final AstNode methodDefinitionNode = wantedNode.getParent();
+        final MethodDefinitionNodeHelper helper =
+            new MethodDefinitionNodeHelper(methodDefinitionNode);
+        final String methodName = helper.getMethodName();
+        return this.referencesToMethod(definitionKeeper, TypeString.UNDEFINED, methodName);
+      } else if (parentNode.is(MagikGrammar.METHOD_INVOCATION)) {
+        final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(parentNode);
+        final String methodName = helper.getMethodName();
+        return this.referencesToMethod(definitionKeeper, TypeString.UNDEFINED, methodName);
+      }
     } else if (wantedNode.is(MagikGrammar.EXEMPLAR_NAME)) {
       final String identifier = currentNode.getTokenValue();
       final String pakkage = packageHelper.getCurrentPackage();

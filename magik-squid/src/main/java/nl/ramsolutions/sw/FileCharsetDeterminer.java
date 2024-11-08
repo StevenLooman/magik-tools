@@ -1,12 +1,11 @@
 package nl.ramsolutions.sw;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -29,9 +28,8 @@ public final class FileCharsetDeterminer {
    * @return Charset for file or <code>defaultCharset</code> if undetermined
    */
   public static Charset determineCharset(final Path path) {
-    final File file = path.toFile();
-    try (FileReader fileReader = new FileReader(file, StandardCharsets.ISO_8859_1);
-        BufferedReader bufferedReader = new BufferedReader(fileReader)) {
+    try (BufferedReader bufferedReader =
+        Files.newBufferedReader(path, StandardCharsets.ISO_8859_1)) {
       final String line = bufferedReader.readLine();
       return FileCharsetDeterminer.readCharsetFromLine(line);
     } catch (IllegalArgumentException | IOException exception) {

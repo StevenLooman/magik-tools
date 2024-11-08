@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.languageserver.completion;
 
 import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.Token;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.net.URI;
@@ -22,6 +23,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
@@ -92,11 +94,20 @@ public class CompletionProvider {
     final Map.Entry<MagikTypedFile, String> usables = this.getUsableMagikFile(magikFile, position);
     final MagikTypedFile newMagikFile = usables.getKey();
     final String removedPart = usables.getValue();
-    final Position newPosition =
+    final Position newPositionLsp4j =
         new Position(position.getLine(), position.getCharacter() - removedPart.length());
     final AstNode node = newMagikFile.getTopNode();
-    final AstNode tokenNode = AstQuery.nodeAt(node, Lsp4jConversion.positionFromLsp4j(newPosition));
-    LOGGER.trace("Current token: {}", removedPart);
+    final nl.ramsolutions.sw.magik.Position newPosition =
+        Lsp4jConversion.positionFromLsp4j(newPositionLsp4j);
+    final AstNode tokenNodeAt = AstQuery.nodeAt(node, newPosition);
+    final AstNode tokenNodeBefore = AstQuery.nodeBefore(node, newPosition); // TODO: Check for null.
+    final Token tokenBefore = tokenNodeBefore.getToken();
+    final nl.ramsolutions.sw.magik.Position tokenBeforePosition =
+        nl.ramsolutions.sw.magik.Position.fromTokenStart(tokenBefore);
+    final AstNode tokenNode =
+        tokenNodeAt != null
+            ? tokenNodeAt
+            : tokenBeforePosition.getLine() == newPosition.getLine() ? tokenNodeBefore : null;
 
     // Ensure not in comment.
     if (this.inComment(node, position)) {
@@ -113,7 +124,10 @@ public class CompletionProvider {
     if (tokenNode != null) {
       final AstNode methodInvocationNode =
           AstQuery.getParentFromChain(
-              tokenNode, MagikGrammar.IDENTIFIER, MagikGrammar.METHOD_INVOCATION);
+              tokenNode,
+              MagikGrammar.IDENTIFIER,
+              MagikGrammar.METHOD_NAME,
+              MagikGrammar.METHOD_INVOCATION);
       if (removedPart.startsWith(".") || methodInvocationNode != null) {
         return this.provideMethodInvocationCompletion(newMagikFile, tokenNode, removedPart);
       }
@@ -263,27 +277,24 @@ public class CompletionProvider {
     // - parent: IDENTIFIER --> parent: METHOD_INVOCATION --> previous sibling: METHOD_INVOCATION
     final AstNode node = tokenNode.getParent();
     final AstNode parentNode = node.getParent();
+    final AstNode parentParentNode = parentNode.getParent();
     final AstNode wantedNode;
     if (parentNode != null && parentNode.is(MagikGrammar.ATOM)) {
       // Asking the ATOM node.
       wantedNode = parentNode;
-    } else if (parentNode != null
-        && (parentNode.is(MagikGrammar.METHOD_INVOCATION)
-            || parentNode.is(MagikGrammar.PROCEDURE_INVOCATION))) {
+    } else if (parentParentNode != null
+        && (parentParentNode.is(MagikGrammar.METHOD_INVOCATION)
+            || parentParentNode.is(MagikGrammar.PROCEDURE_INVOCATION))) {
       // Asking the previous invocation.
-      wantedNode = parentNode.getPreviousSibling();
+      wantedNode = parentParentNode.getPreviousSibling();
     } else {
       return Collections.emptyList();
     }
 
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
     final ExpressionResultString result = reasonerState.getNodeType(wantedNode);
-    TypeString typeStr = result.get(0, TypeString.UNDEFINED);
-    if (typeStr == TypeString.SELF) {
-      final AstNode methodDefNode = tokenNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-      final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefNode);
-      typeStr = helper.getTypeString();
-    }
+    final TypeString typeStrSelf = result.get(0, TypeString.UNDEFINED);
+    final TypeString typeStr = SelfHelper.substituteSelf(typeStrSelf, wantedNode);
 
     // Convert all known methods to CompletionItems.
     LOGGER.debug("Providing method completions for type: {}", typeStr.getFullString());

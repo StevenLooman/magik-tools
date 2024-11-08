@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.analysis.scope;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import nl.ramsolutions.sw.magik.MagikFile;
 import org.junit.jupiter.api.Test;
 
@@ -10,10 +9,8 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class ScopeBuilderVisitorTest {
 
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
-
   private ScopeBuilderVisitor buildCode(String code) {
-    final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
     final ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
     visitor.scanFile(magikFile);
     return visitor;

@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.languageserver.semantictokens;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -13,11 +12,10 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class SemanticTokenProviderTest {
 
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
-
   private SemanticTokens getSemanticTokens(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
     final SemanticTokenProvider provider = new SemanticTokenProvider();
     return provider.provideSemanticTokensFull(magikFile);
   }

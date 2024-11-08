@@ -13,6 +13,7 @@
 - Make tab width configurable for LineLengthCheck.
 - Extend VariableNamingCheck to also check for a maximum of chars and make minLength/maxLength configurable.
 - Add NestingDepthCheck to test if a method/procedure/if-statement/loop-statement does not exceed the maximum nesting depth.
+- Support renaming of methods, in case the type of the object the method is called on can be determined.
 - Several fixes.
 
 0.10.1 (2024-08-14)

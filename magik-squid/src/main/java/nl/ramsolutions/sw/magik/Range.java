@@ -4,7 +4,12 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
 import java.util.Objects;
 
-/** Range containing a start position and an end position. */
+/**
+ * Range containing a start position and an end position.
+ *
+ * <p>The end position is inclusive of the last column. I.e., when the token `:` is placed on column
+ * 10, the startPosition-column is 10 and the endPosition-column is 11.
+ */
 public class Range {
 
   /** Default range, to be used in case Location.range is null. */

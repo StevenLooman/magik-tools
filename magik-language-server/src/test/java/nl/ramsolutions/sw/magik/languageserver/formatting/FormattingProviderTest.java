@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.languageserver.formatting;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
@@ -19,8 +18,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 @SuppressWarnings("checkstyle:MagicNumber")
 class FormattingProviderTest {
 
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
-
   private List<TextEdit> getEdits(final String code) {
     final FormattingOptions options = new FormattingOptions();
     return this.getEdits(code, options);
@@ -28,7 +25,8 @@ class FormattingProviderTest {
 
   private List<TextEdit> getEdits(final String code, final FormattingOptions options) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
 
     final FormattingProvider provider = new FormattingProvider();
     return provider.provideFormatting(magikFile, options);

@@ -68,7 +68,9 @@ public class MethodDefinitionParser {
 
     // Figure location.
     final URI uri = this.node.getToken().getURI();
-    final Location location = new Location(uri, this.node);
+    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(this.node);
+    final AstNode methodNameNode = helper.getMethodNameNode();
+    final Location location = new Location(uri, methodNameNode);
 
     // Figure timestamp.
     final Instant timestamp = this.magikFile.getTimestamp();
@@ -77,7 +79,6 @@ public class MethodDefinitionParser {
     final String moduleName = ModuleDefFile.getModuleNameForUri(uri);
 
     // Figure exemplar name & method name.
-    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(this.node);
     final TypeString exemplarName = helper.getTypeString();
     final String methodName = helper.getMethodName();
 
@@ -140,20 +141,20 @@ public class MethodDefinitionParser {
     final MethodDefinitionUsageParser usageParser = new MethodDefinitionUsageParser(this.node);
     final MagikToolsProperties properties = this.magikFile.getProperties();
     final MagikAnalysisSettings settings = new MagikAnalysisSettings(properties);
-    final Set<GlobalUsage> usedGlobals =
+    final List<GlobalUsage> usedGlobals =
         settings.getTypingIndexGlobalUsages()
             ? usageParser.getUsedGlobals()
-            : Collections.emptySet();
-    final Set<MethodUsage> usedMethods =
+            : Collections.emptyList();
+    final List<MethodUsage> usedMethods =
         settings.getTypingIndexMethodUsages()
             ? usageParser.getUsedMethods()
-            : Collections.emptySet();
-    final Set<SlotUsage> usedSlots =
-        settings.getTypingIndexSlotUsages() ? usageParser.getUsedSlots() : Collections.emptySet();
-    final Set<ConditionUsage> usedConditions =
+            : Collections.emptyList();
+    final List<SlotUsage> usedSlots =
+        settings.getTypingIndexSlotUsages() ? usageParser.getUsedSlots() : Collections.emptyList();
+    final List<ConditionUsage> usedConditions =
         settings.getTypingIndexConditionUsages()
             ? usageParser.getUsedConditions()
-            : Collections.emptySet();
+            : Collections.emptyList();
 
     final MethodDefinition methodDefinition =
         new MethodDefinition(
