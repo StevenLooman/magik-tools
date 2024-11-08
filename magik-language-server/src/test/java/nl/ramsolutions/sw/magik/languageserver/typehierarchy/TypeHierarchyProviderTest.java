@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.languageserver.typehierarchy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -19,11 +18,10 @@ import org.junit.jupiter.api.Test;
 /** Tests for TypeHierarchyProvider. */
 class TypeHierarchyProviderTest {
 
-  private static final URI TEST_URI = URI.create("memory://source.magik");
-
   private List<TypeHierarchyItem> getPrepareTypeHierarchy(
       final String code, final Position position, final IDefinitionKeeper definitionKeeper) {
-    final MagikTypedFile magikFile = new MagikTypedFile(TEST_URI, code, definitionKeeper);
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
     final TypeHierarchyProvider provider = new TypeHierarchyProvider(definitionKeeper);
     return provider.prepareTypeHierarchy(magikFile, position);
   }
@@ -119,14 +117,18 @@ class TypeHierarchyProviderTest {
 
     final TypeHierarchyItem item =
         new TypeHierarchyItem(
-            "user:exemplar", SymbolKind.Class, TEST_URI.toString(), new Range(), new Range());
+            "user:exemplar",
+            SymbolKind.Class,
+            MagikTypedFile.DEFAULT_URI.toString(),
+            new Range(),
+            new Range());
     final TypeHierarchyProvider provider = new TypeHierarchyProvider(definitionKeeper);
     final List<TypeHierarchyItem> subTypes = provider.typeHierarchySubtypes(item);
     assertThat(subTypes).isNotNull().hasSize(1);
     final TypeHierarchyItem subType = subTypes.get(0);
     assertThat(subType.getName()).isEqualTo("user:sub_exemplar");
     assertThat(subType.getKind()).isEqualTo(SymbolKind.Class);
-    assertThat(subType.getUri()).isEqualTo(TEST_URI.toString());
+    assertThat(subType.getUri()).isEqualTo(MagikTypedFile.DEFAULT_URI.toString());
   }
 
   @Test
@@ -148,7 +150,11 @@ class TypeHierarchyProviderTest {
 
     final TypeHierarchyItem item =
         new TypeHierarchyItem(
-            "user:exemplar", SymbolKind.Class, TEST_URI.toString(), new Range(), new Range());
+            "user:exemplar",
+            SymbolKind.Class,
+            MagikTypedFile.DEFAULT_URI.toString(),
+            new Range(),
+            new Range());
 
     final TypeHierarchyProvider provider = new TypeHierarchyProvider(definitionKeeper);
     final List<TypeHierarchyItem> superTypes = provider.typeHierarchySupertypes(item);
@@ -156,6 +162,6 @@ class TypeHierarchyProviderTest {
     final TypeHierarchyItem superType = superTypes.get(0);
     assertThat(superType.getName()).isEqualTo("sw:slotted_format_mixin");
     assertThat(superType.getKind()).isEqualTo(SymbolKind.Class);
-    assertThat(superType.getUri()).isEqualTo(TEST_URI.toString());
+    assertThat(superType.getUri()).isEqualTo(MagikTypedFile.DEFAULT_URI.toString());
   }
 }

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -25,11 +24,9 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class LocalTypeReasonerTest {
 
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
-
   private MagikTypedFile createMagikFile(
       final String code, final IDefinitionKeeper definitionKeeper) {
-    return new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
+    return new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
   }
 
   @Test

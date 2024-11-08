@@ -2,9 +2,8 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
@@ -49,7 +48,7 @@ public class MethodDefinitionUsageParser {
    *
    * @return Used globals.
    */
-  public Set<GlobalUsage> getUsedGlobals() {
+  public List<GlobalUsage> getUsedGlobals() {
     final ScopeBuilderVisitor scopeBuilderVisitor = new ScopeBuilderVisitor();
     scopeBuilderVisitor.createGlobalScope(this.node);
     scopeBuilderVisitor.walkAst(this.node);
@@ -68,17 +67,18 @@ public class MethodDefinitionUsageParser {
               final String identifier = scopeEntry.getIdentifier();
               final TypeString ref = TypeString.ofIdentifier(identifier, currentPakkage);
               final URI uri = this.node.getToken().getURI();
-              final Location location = new Location(uri, scopeEntry.getDefinitionNode());
+              final AstNode definitionNode = scopeEntry.getDefinitionNode();
+              final Location location = new Location(uri, definitionNode);
               final Location validLocation = Location.validLocation(location);
               // Now you might "see" the reference `user:char16_vector`,
               // or (from) any other package which is a child of `sw`.
               // This will most likely be indexed invalidly.
               // Though, we might be able to resolve it during the query itself.
               // TODO: Shouldn't this be multiple? I.e., one per `scopeEntry.getUsages()`.
-              return new GlobalUsage(ref, validLocation, null);
+              return new GlobalUsage(ref, validLocation, definitionNode);
             })
         .filter(Objects::nonNull)
-        .collect(Collectors.toUnmodifiableSet());
+        .toList();
   }
 
   /**
@@ -86,7 +86,7 @@ public class MethodDefinitionUsageParser {
    *
    * @return Used methods.
    */
-  public Set<MethodUsage> getUsedMethods() {
+  public List<MethodUsage> getUsedMethods() {
     return this.node.getDescendants(MagikGrammar.METHOD_INVOCATION).stream()
         .map(
             methodInvocationNode -> {
@@ -99,9 +99,11 @@ public class MethodDefinitionUsageParser {
               final URI uri = this.node.getToken().getURI();
               final Location location = new Location(uri, methodInvocationNode);
               final Location validLocation = Location.validLocation(location);
-              return new MethodUsage(ref, methodName, validLocation, methodInvocationNode);
+              final MethodUsage methodUsage =
+                  new MethodUsage(ref, methodName, validLocation, methodInvocationNode);
+              return methodUsage;
             })
-        .collect(Collectors.toUnmodifiableSet());
+        .toList();
   }
 
   /**
@@ -109,7 +111,7 @@ public class MethodDefinitionUsageParser {
    *
    * @return Used slots.
    */
-  public Set<SlotUsage> getUsedSlots() {
+  public List<SlotUsage> getUsedSlots() {
     return this.node.getDescendants(MagikGrammar.SLOT).stream()
         .map(
             slotNode -> {
@@ -120,7 +122,7 @@ public class MethodDefinitionUsageParser {
               final Location validLocation = Location.validLocation(location);
               return new SlotUsage(slotName, validLocation, slotNode);
             })
-        .collect(Collectors.toUnmodifiableSet());
+        .toList();
   }
 
   /**
@@ -128,7 +130,7 @@ public class MethodDefinitionUsageParser {
    *
    * @return Used conditions.
    */
-  public Set<ConditionUsage> getUsedConditions() {
+  public List<ConditionUsage> getUsedConditions() {
     final URI uri = this.node.getToken().getURI();
     final Stream<ConditionUsage> handledConditions =
         this.node.getDescendants(MagikGrammar.CONDITION_NAME).stream()
@@ -164,10 +166,10 @@ public class MethodDefinitionUsageParser {
                   final String conditionName = argumentNode.getTokenValue().substring(1);
                   final Location location = new Location(uri, argumentsNode);
                   final Location validLocation = Location.validLocation(location);
+                  // TODO: Set location to identifier node.
                   return new ConditionUsage(conditionName, validLocation, invocationNode);
                 })
             .filter(Objects::nonNull);
-    return Stream.concat(handledConditions, raisedConditions)
-        .collect(Collectors.toUnmodifiableSet());
+    return Stream.concat(handledConditions, raisedConditions).toList();
   }
 }

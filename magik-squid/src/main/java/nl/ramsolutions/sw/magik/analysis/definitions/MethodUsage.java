@@ -10,8 +10,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 /** Method usage. */
 public class MethodUsage {
 
-  // TODO: Shouldn't this have an (optional) AstNode, like the Definitions?
-
   private final TypeString typeName;
   private final String methodName;
   private final @Nullable Location location;

@@ -17,6 +17,7 @@
     "NoStatementAfterBodyExit",
     "ParameterCount",
     "ScopeCount",
+    "SimplifyIf",
     "SizeZeroEmpty",
     "SyntaxError",
     "TodoComment",

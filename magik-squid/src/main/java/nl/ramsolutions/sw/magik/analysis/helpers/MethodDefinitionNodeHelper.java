@@ -72,6 +72,16 @@ public class MethodDefinitionNodeHelper {
   }
 
   /**
+   * Get the method name, without the parentheses and assignment operator.
+   *
+   * @return
+   */
+  public String getMethodNameIdentifier() {
+    final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
+    return methodNameNode.getTokenValue();
+  }
+
+  /**
    * Get exemplar + method name.
    *
    * @return Exemplar + method name.

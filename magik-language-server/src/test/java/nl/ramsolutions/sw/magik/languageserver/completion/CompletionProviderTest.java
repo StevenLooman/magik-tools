@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.languageserver.completion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -26,11 +25,10 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class CompletionProviderTest {
 
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
-
   private List<CompletionItem> getCompletions(
       final String code, final IDefinitionKeeper definitionKeeper, final Position position) {
-    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
     final CompletionProvider provider = new CompletionProvider();
     return provider.provideCompletions(magikFile, position);
   }
@@ -47,14 +45,15 @@ class CompletionProviderTest {
         _method a.b
             _
         _endmethod""";
-    final Position position = new Position(1, 5); // On '_'.
+    final Position position = new Position(1, 5); // After '_'.
     final List<CompletionItem> completions = this.getCompletions(code, position);
 
     assertThat(completions).hasSize(MagikKeyword.keywordValues().length);
-
-    final CompletionItem item = completions.get(0);
-    assertThat(item.getKind()).isEqualTo(CompletionItemKind.Keyword);
-    assertThat(item.getLabel()).startsWith("_");
+    completions.forEach(
+        item -> {
+          assertThat(item.getKind()).isEqualTo(CompletionItemKind.Keyword);
+          assertThat(item.getLabel()).startsWith("_");
+        });
   }
 
   @Test
@@ -80,7 +79,7 @@ class CompletionProviderTest {
             Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
-    final Position position = new Position(1, 6); // On '.'.
+    final Position position = new Position(1, 6); // After '.'.
     final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
 
     assertThat(completions).hasSize(1);
@@ -128,7 +127,7 @@ class CompletionProviderTest {
             Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
-    final Position position = new Position(1, 10); // On '.'.
+    final Position position = new Position(1, 9); // On '.'.
     final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
     assertThat(completions).hasSize(1);
     final CompletionItem item = completions.get(0);
@@ -161,7 +160,7 @@ class CompletionProviderTest {
             Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
-    final Position position = new Position(1, 8); // On 'i'.
+    final Position position = new Position(1, 7); // On 'i'.
     final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
 
     assertThat(completions).hasSize(1);
@@ -178,7 +177,7 @@ class CompletionProviderTest {
     final String code =
         """
         _method a.b
-         \s\s\s
+          \s
         _endmethod""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Position position = new Position(1, 2); // On ''.

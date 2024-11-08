@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -50,10 +49,10 @@ class ReferencesProviderTest {
             Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY,
-            Collections.emptySet(),
-            Set.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION, null)),
-            Collections.emptySet(),
-            Collections.emptySet()));
+            Collections.emptyList(),
+            List.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION, null)),
+            Collections.emptyList(),
+            Collections.emptyList()));
 
     final String code =
         """
@@ -84,10 +83,10 @@ class ReferencesProviderTest {
             Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY,
-            Collections.emptySet(),
-            Set.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION, null)),
-            Collections.emptySet(),
-            Collections.emptySet()));
+            Collections.emptyList(),
+            List.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION, null)),
+            Collections.emptyList(),
+            Collections.emptyList()));
 
     final String code =
         """
@@ -118,10 +117,10 @@ class ReferencesProviderTest {
             Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY,
-            Set.of(new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION, null)),
-            Collections.emptySet(),
-            Collections.emptySet(),
-            Collections.emptySet()));
+            List.of(new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION, null)),
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptyList()));
 
     final String code =
         """
@@ -152,10 +151,10 @@ class ReferencesProviderTest {
             Collections.emptySet(),
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY,
-            Set.of(new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION, null)),
-            Collections.emptySet(),
-            Collections.emptySet(),
-            Collections.emptySet()));
+            List.of(new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION, null)),
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptyList()));
 
     final String code =
         """

@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.parser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -11,8 +10,6 @@ import org.junit.jupiter.api.Test;
 
 /** Tests for CommentInstructionReader. */
 class CommentInstructionReaderTest {
-
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
 
   private static final String NAME_MLINT = "mlint";
   private static final CommentInstructionReader.Instruction MLINT_STATEMENT_INSTRUCTION =
@@ -29,7 +26,7 @@ class CommentInstructionReaderTest {
         _proc()
           print(10)  # mlint: disable=forbidden-call
         _endproc""";
-    final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
 
     final CommentInstructionReader instructionReader =
         new CommentInstructionReader(magikFile, Set.of(MLINT_STATEMENT_INSTRUCTION));
@@ -58,7 +55,7 @@ class CommentInstructionReaderTest {
             show(:a, :b, :c)
           _endblock
         _endproc""";
-    final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
 
     final CommentInstructionReader instructionReader =
         new CommentInstructionReader(magikFile, Set.of(MLINT_SCOPE_INSTRUCTION));

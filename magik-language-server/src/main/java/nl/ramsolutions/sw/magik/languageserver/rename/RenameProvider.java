@@ -2,15 +2,12 @@ package nl.ramsolutions.sw.magik.languageserver.rename;
 
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
-import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
-import nl.ramsolutions.sw.magik.analysis.scope.Scope;
-import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.Position;
@@ -56,20 +53,16 @@ public class RenameProvider {
       return null;
     }
 
-    // Set up scope.
-    final AstNode identifierNode = node.getParent();
-    final ScopeEntry scopeEntry = this.findScopeEntry(magikFile, identifierNode);
-    if (scopeEntry == null
-        || scopeEntry.isType(ScopeEntry.Type.GLOBAL)
-        || scopeEntry.isType(ScopeEntry.Type.DYNAMIC)
-        || scopeEntry.isType(ScopeEntry.Type.IMPORT)) {
+    final Renamer renamer = this.getRenamerForNode(magikFile, node);
+    if (renamer == null) {
       return null;
     }
 
-    final Range range = new Range(node);
-    final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
-    final String identifier = node.getTokenOriginalValue();
-    final PrepareRenameResult result = new PrepareRenameResult(rangeLsp4j, identifier);
+    final PrepareRenameResult result = renamer.prepareRename();
+    if (result == null) {
+      return null;
+    }
+
     return Either3.forSecond(result);
   }
 
@@ -94,40 +87,34 @@ public class RenameProvider {
       return null;
     }
 
-    // Set up scope.
-    final AstNode identifierNode = node.getParent();
-    final ScopeEntry scopeEntry = this.findScopeEntry(magikFile, identifierNode);
-    if (scopeEntry == null
-        || scopeEntry.isType(
-            ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC, ScopeEntry.Type.IMPORT)) {
+    final Renamer renamer = this.getRenamerForNode(magikFile, node);
+    if (renamer == null) {
       return null;
     }
 
-    // Provide edits.
-    final String uri = magikFile.getUri().toString();
-    final AstNode definitionNode = scopeEntry.getDefinitionNode();
-    final List<TextEdit> textEdits =
-        Stream.concat(Stream.of(definitionNode), scopeEntry.getUsages().stream())
+    final Map<URI, List<nl.ramsolutions.sw.magik.TextEdit>> uriEdits =
+        renamer.provideRename(newName);
+    final Map<String, List<TextEdit>> uriEditsLsp4j =
+        uriEdits.entrySet().stream()
             .map(
-                renameNode ->
-                    renameNode.isNot(MagikGrammar.IDENTIFIER)
-                        ? renameNode.getFirstChild(MagikGrammar.IDENTIFIER)
-                        : renameNode)
-            .map(Range::new)
-            .map(Lsp4jConversion::rangeToLsp4j)
-            .map(range -> new TextEdit(range, newName))
-            .toList();
-    return new WorkspaceEdit(Map.of(uri, textEdits));
+                entry -> {
+                  final String uriStr = entry.getKey().toString();
+                  final List<TextEdit> editsLsp4j =
+                      entry.getValue().stream().map(Lsp4jConversion::textEditToLsp4j).toList();
+                  return Map.entry(uriStr, editsLsp4j);
+                })
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    return new WorkspaceEdit(uriEditsLsp4j);
   }
 
   @CheckForNull
-  private ScopeEntry findScopeEntry(final MagikTypedFile magikFile, final AstNode node) {
-    final GlobalScope globalScope = magikFile.getGlobalScope();
-    final Scope scope = globalScope.getScopeForNode(node);
-    if (scope == null) {
-      return null;
+  private Renamer getRenamerForNode(final MagikTypedFile magikFile, final AstNode node) {
+    if (VariableRenamer.canHandleRename(magikFile, node)) {
+      return new VariableRenamer(magikFile, node);
+    } else if (MethodRenamer.canHandleRename(magikFile, node)) {
+      return new MethodRenamer(magikFile, node);
     }
 
-    return scope.getScopeEntry(node);
+    return null;
   }
 }

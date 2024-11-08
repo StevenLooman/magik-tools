@@ -10,6 +10,10 @@
 - Add `magik-typed-lint` to check magik typing from CLI/during CI.
 - Fix not indexing `module.def` files.
 - Rename SwChar16VectorEvaluateInvocationCheck to SwChar16VectorEvaluateInvocationTypedCheck.
+- Make tab width configurable for LineLengthCheck.
+- Extend VariableNamingCheck to also check for a maximum of chars and make minLength/maxLength configurable.
+- Support renaming of methods, in case the type of the object the method is called on can be determined.
+- Add SimplifyIf check to Sonar way profile.
 - Several fixes.
 
 0.10.1 (2024-08-14)

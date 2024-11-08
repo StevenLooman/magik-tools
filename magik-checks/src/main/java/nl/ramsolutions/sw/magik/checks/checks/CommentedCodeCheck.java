@@ -23,7 +23,6 @@ public class CommentedCodeCheck extends MagikCheck {
   public static final String CHECK_KEY = "CommentedCode";
 
   private static final String MESSAGE = "Remove commented code.";
-
   private static final int DEFAULT_MIN_LINES = 3;
 
   /** Minimum number of lines before flagging. */

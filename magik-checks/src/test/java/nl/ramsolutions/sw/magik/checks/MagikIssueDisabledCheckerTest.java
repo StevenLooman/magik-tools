@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.checks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
@@ -12,12 +11,10 @@ import org.junit.jupiter.api.Test;
 /** Tests for MagikIssueDisabledChecker. */
 class MagikIssueDisabledCheckerTest {
 
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
-
   @Test
   void testNotDisbled() throws ReflectiveOperationException {
     final String code = "show(1)\n";
-    final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
 
     final MagikCheckHolder holder =
         new MagikCheckHolder(ForbiddenCallCheck.class, Collections.emptySet(), true);
@@ -32,7 +29,7 @@ class MagikIssueDisabledCheckerTest {
   @Test
   void testDisabledStatementInstruction() throws ReflectiveOperationException {
     final String code = "show(1)  # mlint: disable=forbidden-call\n";
-    final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
 
     final MagikCheckHolder holder =
         new MagikCheckHolder(ForbiddenCallCheck.class, Collections.emptySet(), true);
@@ -51,7 +48,7 @@ class MagikIssueDisabledCheckerTest {
         # mlint: disable=line-length,forbidden-call
         show(1)
         """;
-    final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
 
     final MagikCheckHolder holder =
         new MagikCheckHolder(ForbiddenCallCheck.class, Collections.emptySet(), true);
@@ -72,7 +69,7 @@ class MagikIssueDisabledCheckerTest {
           show(1)
         _endblock
         """;
-    final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
 
     final MagikCheckHolder holder =
         new MagikCheckHolder(ForbiddenCallCheck.class, Collections.emptySet(), true);

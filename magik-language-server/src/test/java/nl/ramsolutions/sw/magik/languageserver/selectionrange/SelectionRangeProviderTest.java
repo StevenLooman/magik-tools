@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.languageserver.selectionrange;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -16,13 +15,11 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class SelectionRangeProviderTest {
 
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
-
   private List<SelectionRange> getSelectionRanges(
       final String code, final List<nl.ramsolutions.sw.magik.Position> positions) {
     final var provider = new SelectionRangeProvider();
     final var definitionKeeper = new DefinitionKeeper();
-    final var magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
+    final var magikFile = new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
     return provider.provideSelectionRanges(magikFile, positions);
   }
 

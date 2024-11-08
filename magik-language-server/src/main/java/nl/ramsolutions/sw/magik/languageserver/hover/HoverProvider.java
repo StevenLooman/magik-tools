@@ -164,14 +164,15 @@ public class HoverProvider {
       if (parentNode.is(MagikGrammar.EXEMPLAR_NAME)) {
         this.provideHoverAtom(magikFile, parentNode, builder);
       } else if (parentNode.is(MagikGrammar.METHOD_NAME)) {
-        this.provideHoverMethodDefinition(magikFile, hoveredNode, builder);
+        if (parentNode.getParent().is(MagikGrammar.METHOD_DEFINITION)) {
+          this.provideHoverMethodDefinition(magikFile, hoveredNode, builder);
+        } else if (parentNode.getParent().is(MagikGrammar.METHOD_INVOCATION)) {
+          this.provideHoverMethodInvocation(magikFile, hoveredNode, builder);
+        }
       } else if (hoveredNode.is(MagikGrammar.IDENTIFIER)
           && parentNextSibling != null
           && parentNextSibling.is(MagikGrammar.PROCEDURE_INVOCATION)) {
         this.provideHoverProcedureInvocation(magikFile, hoveredNode, builder);
-      } else if (hoveredNode.is(MagikGrammar.IDENTIFIER)
-          && parentNode.is(MagikGrammar.METHOD_INVOCATION)) {
-        this.provideHoverMethodInvocation(magikFile, hoveredNode, builder);
       } else if (parentNode.is(MagikGrammar.ATOM) || parentNode.is(MagikGrammar.SLOT)) {
         final AstNode atomNode = hoveredNode.getFirstAncestor(MagikGrammar.ATOM);
         this.provideHoverAtom(magikFile, atomNode, builder);
@@ -369,7 +370,7 @@ public class HoverProvider {
    */
   private void provideHoverMethodInvocation(
       final MagikTypedFile magikFile, final AstNode hoveredNode, final StringBuilder builder) {
-    final AstNode providingNode = hoveredNode.getParent();
+    final AstNode providingNode = hoveredNode.getParent().getParent();
     final AstNode previousSiblingNode = providingNode.getPreviousSibling();
     if (previousSiblingNode != null) {
       final MethodInvocationNodeHelper invocationHelper =

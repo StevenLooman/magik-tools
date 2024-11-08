@@ -80,7 +80,9 @@ public class MethodInvocationNodeHelper {
 
     // Construct name.
     String methodName = "";
-    final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
+    final AstNode methodNameNode = node.getFirstChild(MagikGrammar.METHOD_NAME);
+    final AstNode identifierNode =
+        methodNameNode != null ? methodNameNode.getFirstChild(MagikGrammar.IDENTIFIER) : null;
     methodName += identifierNode != null ? identifierNode.getTokenValue() : "";
     if (argumentsNode != null) {
       if (this.anyChildTokenIs(argumentsNode, MagikPunctuator.SQUARE_L)) {
@@ -101,6 +103,16 @@ public class MethodInvocationNodeHelper {
     }
 
     return methodName;
+  }
+
+  /**
+   * Get the method name, without the parentheses and assignment operator.
+   *
+   * @return
+   */
+  public String getMethodNameIdentifier() {
+    final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
+    return methodNameNode.getTokenValue();
   }
 
   /**

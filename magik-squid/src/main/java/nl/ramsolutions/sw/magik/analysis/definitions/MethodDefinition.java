@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -33,10 +32,10 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
   private final Set<String> topics;
   private final ExpressionResultString returnTypes;
   private final ExpressionResultString loopTypes;
-  private final Set<GlobalUsage> usedGlobals;
-  private final Set<MethodUsage> usedMethods;
-  private final Set<SlotUsage> usedSlots;
-  private final Set<ConditionUsage> usedConditions;
+  private final List<GlobalUsage> usedGlobals;
+  private final List<MethodUsage> usedMethods;
+  private final List<SlotUsage> usedSlots;
+  private final List<ConditionUsage> usedConditions;
 
   /**
    * Constructor.
@@ -77,10 +76,10 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     this.topics = Set.copyOf(topics);
     this.returnTypes = returnTypes;
     this.loopTypes = loopTypes;
-    this.usedGlobals = Collections.emptySet();
-    this.usedMethods = Collections.emptySet();
-    this.usedSlots = Collections.emptySet();
-    this.usedConditions = Collections.emptySet();
+    this.usedGlobals = Collections.emptyList();
+    this.usedMethods = Collections.emptyList();
+    this.usedSlots = Collections.emptyList();
+    this.usedConditions = Collections.emptyList();
   }
 
   /**
@@ -113,10 +112,10 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
       final Set<String> topics,
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes,
-      final Set<GlobalUsage> usedGlobals,
-      final Set<MethodUsage> usedMethods,
-      final Set<SlotUsage> usedSlots,
-      final Set<ConditionUsage> usedConditions) {
+      final List<GlobalUsage> usedGlobals,
+      final List<MethodUsage> usedMethods,
+      final List<SlotUsage> usedSlots,
+      final List<ConditionUsage> usedConditions) {
     super(location, timestamp, moduleName, doc, node);
     this.typeName = typeName;
     this.methodName = methodName;
@@ -126,10 +125,10 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     this.topics = Set.copyOf(topics);
     this.returnTypes = returnTypes;
     this.loopTypes = loopTypes;
-    this.usedGlobals = Collections.unmodifiableSet(usedGlobals);
-    this.usedMethods = Collections.unmodifiableSet(usedMethods);
-    this.usedSlots = Collections.unmodifiableSet(usedSlots);
-    this.usedConditions = Collections.unmodifiableSet(usedConditions);
+    this.usedGlobals = Collections.unmodifiableList(usedGlobals);
+    this.usedMethods = Collections.unmodifiableList(usedMethods);
+    this.usedSlots = Collections.unmodifiableList(usedSlots);
+    this.usedConditions = Collections.unmodifiableList(usedConditions);
   }
 
   /**
@@ -280,20 +279,20 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     return Collections.unmodifiableSet(this.topics);
   }
 
-  public Set<GlobalUsage> getUsedGlobals() {
-    return Collections.unmodifiableSet(this.usedGlobals);
+  public List<GlobalUsage> getUsedGlobals() {
+    return Collections.unmodifiableList(this.usedGlobals);
   }
 
-  public Set<MethodUsage> getUsedMethods() {
-    return Collections.unmodifiableSet(this.usedMethods);
+  public List<MethodUsage> getUsedMethods() {
+    return Collections.unmodifiableList(this.usedMethods);
   }
 
-  public Set<SlotUsage> getUsedSlots() {
-    return Collections.unmodifiableSet(this.usedSlots);
+  public List<SlotUsage> getUsedSlots() {
+    return Collections.unmodifiableList(this.usedSlots);
   }
 
-  public Set<ConditionUsage> getUsedConditions() {
-    return Collections.unmodifiableSet(this.usedConditions);
+  public List<ConditionUsage> getUsedConditions() {
+    return Collections.unmodifiableList(this.usedConditions);
   }
 
   @Override
@@ -312,12 +311,10 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
         this.topics,
         this.returnTypes,
         this.loopTypes,
-        this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).collect(Collectors.toSet()),
-        this.usedMethods.stream().map(MethodUsage::getWithoutNode).collect(Collectors.toSet()),
-        this.usedSlots.stream().map(SlotUsage::getWithoutNode).collect(Collectors.toSet()),
-        this.usedConditions.stream()
-            .map(ConditionUsage::getWithoutNode)
-            .collect(Collectors.toSet()));
+        this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).toList(),
+        this.usedMethods.stream().map(MethodUsage::getWithoutNode).toList(),
+        this.usedSlots.stream().map(SlotUsage::getWithoutNode).toList(),
+        this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList());
   }
 
   @Override

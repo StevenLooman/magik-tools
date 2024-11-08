@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.MagikFile;
 import org.junit.jupiter.api.Test;
@@ -10,8 +9,6 @@ import org.junit.jupiter.api.Test;
 /** Test FileMetrics. */
 @SuppressWarnings("checkstyle:MagicNumber")
 class FileMetricsTest {
-
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
 
   @Test
   void testStatements1() {
@@ -159,7 +156,7 @@ class FileMetricsTest {
   }
 
   private FileMetrics metrics(String code) {
-    final MagikFile magikFile = new MagikFile(DEFAULT_URI, code);
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
     return new FileMetrics(magikFile, true);
   }
 }

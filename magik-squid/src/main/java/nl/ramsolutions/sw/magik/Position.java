@@ -80,6 +80,7 @@ public class Position implements Comparable<Position> {
     if (lastChar != null && (lastChar == '\n' || lastChar == '\r')) {
       return new Position(line + 1, 0);
     }
+
     return new Position(line, column);
   }
 
@@ -101,12 +102,20 @@ public class Position implements Comparable<Position> {
     return this.column;
   }
 
+  public boolean isBefore(final Position position) {
+    return this.compareTo(position) < 0;
+  }
+
+  public boolean isAfter(final Position position) {
+    return this.compareTo(position) > 0;
+  }
+
   public boolean isBeforeRange(final Range range) {
-    return this.compareTo(range.getStartPosition()) < 0;
+    return this.isBefore(range.getStartPosition());
   }
 
   public boolean isAfterRange(final Range range) {
-    return this.compareTo(range.getEndPosition()) > 0;
+    return this.isAfter(range.getEndPosition());
   }
 
   @Override

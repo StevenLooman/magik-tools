@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.languageserver.inlayhint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +21,6 @@ import org.junit.jupiter.api.Test;
 
 /** Tests for {@link InlayHintProvider}. */
 class InlayHintProviderTest {
-
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
 
   @SuppressWarnings("checkstyle:MagicNumber")
   @Test
@@ -76,7 +73,8 @@ class InlayHintProviderTest {
     final MagikToolsProperties properties =
         new MagikToolsProperties(Map.of("magik.typing.showArgumentInlayHints", "true"));
     final InlayHintProvider provider = new InlayHintProvider(properties);
-    final MagikTypedFile magikFile = new MagikTypedFile(DEFAULT_URI, code, definitionKeeper);
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
 
     final List<InlayHint> inlayHints =
         provider.provideInlayHints(magikFile, new Range(new Position(0, 0), new Position(2, 0)));

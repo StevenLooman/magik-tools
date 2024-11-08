@@ -468,7 +468,7 @@ public enum MagikGrammar implements GrammarRuleKey {
                 b.sequence(
                     SPACING_NO_LB_2,
                     MagikPunctuator.DOT,
-                    IDENTIFIER,
+                    METHOD_NAME,
                     b.optional(SPACING_NO_LB_2, ARGUMENTS_PAREN)),
                 b.sequence(SPACING_NO_LB_2, ARGUMENTS_SQUARE)),
             b.optional(

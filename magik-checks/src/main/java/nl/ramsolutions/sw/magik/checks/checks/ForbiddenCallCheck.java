@@ -37,7 +37,12 @@ public class ForbiddenCallCheck extends MagikCheck {
 
   @Override
   protected void walkPreMethodInvocation(final AstNode node) {
-    final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
+    final AstNode methodNameNode = node.getFirstChild(MagikGrammar.METHOD_NAME);
+    if (methodNameNode == null) {
+      return;
+    }
+
+    final AstNode identifierNode = methodNameNode.getFirstChild(MagikGrammar.IDENTIFIER);
     if (identifierNode == null) {
       return;
     }

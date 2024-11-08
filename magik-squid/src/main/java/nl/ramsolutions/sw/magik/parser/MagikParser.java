@@ -15,6 +15,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import nl.ramsolutions.sw.AstNodeHelper;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
+import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,6 @@ import org.sonar.sslr.parser.ParserAdapter;
 public class MagikParser {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikParser.class);
-  private static final URI DEFAULT_URI = URI.create("memory://source.magik");
 
   private static final Map<MagikGrammar, MagikGrammar> RULE_MAPPING =
       new EnumMap<>(MagikGrammar.class);
@@ -74,7 +74,7 @@ public class MagikParser {
    * @return Parsed source.
    */
   public AstNode parseSafe(final String source) {
-    return this.parseSafe(source, MagikParser.DEFAULT_URI);
+    return this.parseSafe(source, MagikTypedFile.DEFAULT_URI);
   }
 
   /**

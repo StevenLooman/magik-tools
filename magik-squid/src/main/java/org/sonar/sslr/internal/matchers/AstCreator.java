@@ -25,19 +25,17 @@ import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.TokenType;
 import com.sonar.sslr.api.Trivia;
 import com.sonar.sslr.api.Trivia.TriviaKind;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import nl.ramsolutions.sw.magik.MagikTypedFile;
 import org.sonar.sslr.internal.grammar.MutableParsingRule;
 import org.sonar.sslr.internal.vm.TokenExpression;
 import org.sonar.sslr.internal.vm.TriviaExpression;
 import org.sonar.sslr.parser.ParsingResult;
 
 public final class AstCreator {
-
-  private static final URI FAKE_URI = URI.create("memory://source.magik");
 
   private final LocatedText input;
   private final Token.Builder tokenBuilder = Token.builder();
@@ -107,12 +105,13 @@ public final class AstCreator {
       // TokenBuilder
       tokenBuilder.setLine(1);
       tokenBuilder.setColumn(0);
-      tokenBuilder.setURI(FAKE_URI);
+      tokenBuilder.setURI(MagikTypedFile.DEFAULT_URI);
     } else {
       tokenBuilder.setGeneratedCode(false);
       tokenBuilder.setLine(location.getLine());
       tokenBuilder.setColumn(location.getColumn() - 1);
-      tokenBuilder.setURI(location.getFileURI() == null ? FAKE_URI : location.getFileURI());
+      tokenBuilder.setURI(
+          location.getFileURI() == null ? MagikTypedFile.DEFAULT_URI : location.getFileURI());
       tokenBuilder.notCopyBook();
     }
 

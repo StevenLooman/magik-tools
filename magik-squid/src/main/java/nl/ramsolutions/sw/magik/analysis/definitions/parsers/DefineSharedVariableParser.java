@@ -106,7 +106,7 @@ public class DefineSharedVariableParser {
 
     // Figure location.
     final URI uri = this.node.getToken().getURI();
-    final Location location = new Location(uri, this.node);
+    final Location location = new Location(uri, argument0Node);
 
     // Figure timestamp.
     final Instant timestamp = this.magikFile.getTimestamp();
@@ -192,7 +192,7 @@ public class DefineSharedVariableParser {
     final List<ParameterDefinition> setParameters = Collections.emptyList();
     final ParameterDefinition assignmentParam =
         new ParameterDefinition(
-            location,
+            null,
             timestamp,
             moduleName,
             null,

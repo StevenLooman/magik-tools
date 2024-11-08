@@ -15,8 +15,6 @@ import nl.ramsolutions.sw.magik.checks.MagikIssue;
 /** Base class for MagikCheck tests. */
 class MagikCheckTestBase {
 
-  protected static final URI DEFAULT_URI = URI.create("memory://source.magik");
-
   /**
    * VSCode runs from module directory, mvn runs from project directory.
    *
@@ -59,7 +57,7 @@ class MagikCheckTestBase {
    */
   protected List<MagikIssue> runCheck(final String code, final MagikCheck check)
       throws IllegalArgumentException {
-    final MagikFile magikFile = new MagikFile(MagikCheckTestBase.DEFAULT_URI, code);
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
     return check.scanFileForIssues(magikFile);
   }
 
