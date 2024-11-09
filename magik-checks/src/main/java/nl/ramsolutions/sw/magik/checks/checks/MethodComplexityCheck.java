@@ -16,17 +16,17 @@ public class MethodComplexityCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "MethodComplexity";
 
-  private static final int DEFAULT_MAXIMUM_COMPLEXITY = 10;
+  private static final int DEFAULT_MAX_COMPLEXITY = 10;
   private static final String MESSAGE = "Method has a complexity greater than permitted (%s/%s).";
 
   /** Maximum complexity of method by the McCabe definition. */
   @RuleProperty(
-      key = "maximum complexity",
-      defaultValue = "" + DEFAULT_MAXIMUM_COMPLEXITY,
+      key = "max complexity",
+      defaultValue = "" + DEFAULT_MAX_COMPLEXITY,
       description = "Maximum complexity of method by the McCabe definition",
       type = "INTEGER")
   @SuppressWarnings("checkstyle:VisibilityModifier")
-  public int maximumComplexity = DEFAULT_MAXIMUM_COMPLEXITY;
+  public int maxComplexity = DEFAULT_MAX_COMPLEXITY;
 
   @Override
   protected void walkPostMethodDefinition(final AstNode node) {
@@ -43,8 +43,8 @@ public class MethodComplexityCheck extends MagikCheck {
     visitor.walkAst(node);
 
     final int complexity = visitor.getComplexity();
-    if (complexity > this.maximumComplexity) {
-      final String message = String.format(MESSAGE, complexity, this.maximumComplexity);
+    if (complexity > this.maxComplexity) {
+      final String message = String.format(MESSAGE, complexity, this.maxComplexity);
       final AstNode issueNode;
       if (node.is(MagikGrammar.METHOD_DEFINITION)) {
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);

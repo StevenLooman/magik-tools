@@ -20,7 +20,7 @@ public class ParameterCountCheck extends MagikCheck {
 
   /** Maximum number of slots for an exemplar. */
   @RuleProperty(
-      key = "parameter count",
+      key = "max parameter count",
       defaultValue = "" + DEFAULT_MAX_PARAMETER_COUNT,
       description = "Maximum number of parameters for a method or procedure",
       type = "INTEGER")

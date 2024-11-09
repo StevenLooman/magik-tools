@@ -20,7 +20,7 @@ public class FileMethodCountCheck extends MagikCheck {
 
   /** Maximum number of methods in a file. */
   @RuleProperty(
-      key = "method count",
+      key = "max method count",
       defaultValue = "" + DEFAULT_MAX_METHOD_COUNT,
       description = "Maximum number of methods in file",
       type = "INTEGER")
