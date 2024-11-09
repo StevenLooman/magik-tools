@@ -38,7 +38,7 @@ public class NestingDepthCheck extends MagikCheck {
       this.checkNestingDepth(node);
     }
 
-    this.currentNestingDepth--;
+    this.currentNestingDepth = Math.max(0, this.currentNestingDepth - 1);
   }
 
   private int getCurrentDepth() {
