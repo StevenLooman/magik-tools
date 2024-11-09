@@ -12,17 +12,17 @@ public class NestingDepthCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "NestingDepth";
 
-  private static final int DEFAULT_MAXIMUM_NESTING_DEPTH = 3;
+  private static final int DEFAULT_MAX_NESTING_DEPTH = 3;
   private static final String MESSAGE = "The nesting depth is greater than permitted (%s).";
 
   /** Maximum nesting depth of node. */
   @RuleProperty(
-      key = "maximum nesting depth",
-      defaultValue = "" + DEFAULT_MAXIMUM_NESTING_DEPTH,
+      key = "max nesting depth",
+      defaultValue = "" + DEFAULT_MAX_NESTING_DEPTH,
       description = "Maximum nesting depth",
       type = "INTEGER")
   @SuppressWarnings("checkstyle:VisibilityModifier")
-  public int maximumNestingDepth = DEFAULT_MAXIMUM_NESTING_DEPTH;
+  public int maxNestingDepth = DEFAULT_MAX_NESTING_DEPTH;
 
   private int currentNestingDepth = 0;
 
@@ -47,8 +47,8 @@ public class NestingDepthCheck extends MagikCheck {
   }
 
   private void checkNestingDepth(final AstNode node) {
-    if (this.getCurrentDepth() == this.maximumNestingDepth) {
-      final String message = String.format(MESSAGE, this.maximumNestingDepth);
+    if (this.getCurrentDepth() == this.maxNestingDepth) {
+      final String message = String.format(MESSAGE, this.maxNestingDepth);
       this.addIssue(node, message);
     }
   }
