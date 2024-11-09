@@ -32,7 +32,7 @@ class VariableCountCheckTest extends MagikCheckTestBase {
       })
   void testInvalid(final String code) {
     final VariableCountCheck check = new VariableCountCheck();
-    check.maximumVariableCount = 2;
+    check.maxVariableCount = 2;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -59,7 +59,7 @@ class VariableCountCheckTest extends MagikCheckTestBase {
       })
   void testValid(final String code) {
     final VariableCountCheck check = new VariableCountCheck();
-    check.maximumVariableCount = 2;
+    check.maxVariableCount = 2;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
