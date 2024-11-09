@@ -12,6 +12,7 @@
 - Rename SwChar16VectorEvaluateInvocationCheck to SwChar16VectorEvaluateInvocationTypedCheck.
 - Make tab width configurable for LineLengthCheck.
 - Extend VariableNamingCheck to also check for a maximum of chars and make minLength/maxLength configurable.
+- Add NestingDepthCheck to test if a method/procedure/if-statement/loop-statement does not exceed the maximum nesting depth.
 - Support renaming of methods, in case the type of the object the method is called on can be determined.
 - Add SimplifyIf check to Sonar way profile.
 - Several fixes.
