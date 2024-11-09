@@ -112,22 +112,43 @@ class NestingDepthCheckTest extends MagikCheckTestBase {
             _endif
         _endmethod
         """,
+      })
+  void testValid(final String code) {
+    final NestingDepthCheck check = new NestingDepthCheck();
+
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         """
         _method a.b
             _loop
-                _if a _then _leave _endif
+                _if a _then _return b _endif
 
                 _loop
-                    _if b _then _leave _endif
+                    _if c _then _return d _endif
+                _endloop
+            _endloop
+        _endmethod
+        """,
+        """
+        _method a.b
+            _loop
+                _return b
 
-                    _return c
+                _loop
+                    _if c _then _return d _endif
                 _endloop
             _endloop
         _endmethod
         """,
       })
-  void testValid(final String code) {
+  void testValidWithEarlyReturnsNotAddingToNestingDepth(final String code) {
     final NestingDepthCheck check = new NestingDepthCheck();
+    check.countEarlyReturnAsNestingDepth = false;
 
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
