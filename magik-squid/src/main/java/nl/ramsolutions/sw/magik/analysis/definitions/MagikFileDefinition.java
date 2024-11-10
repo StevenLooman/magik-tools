@@ -27,6 +27,11 @@ public class MagikFileDefinition implements IDefinition {
     return this.timestamp;
   }
 
+  @Override
+  public IDefinition getBareDefinition() {
+    return this;
+  }
+
   public URI getUri() {
     return this.location.getUri();
   }

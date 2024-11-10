@@ -296,7 +296,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
   }
 
   @Override
-  public MethodDefinition getWithoutNode() {
+  public MethodDefinition getBareDefinition() {
     return new MethodDefinition(
         this.getLocation(),
         this.getTimestamp(),
@@ -306,8 +306,8 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
         this.typeName,
         this.methodName,
         this.modifiers,
-        this.parameters.stream().map(ParameterDefinition::getWithoutNode).toList(),
-        this.assignmentParameter != null ? this.assignmentParameter.getWithoutNode() : null,
+        this.parameters.stream().map(ParameterDefinition::getBareDefinition).toList(),
+        this.assignmentParameter != null ? this.assignmentParameter.getBareDefinition() : null,
         this.topics,
         this.returnTypes,
         this.loopTypes,

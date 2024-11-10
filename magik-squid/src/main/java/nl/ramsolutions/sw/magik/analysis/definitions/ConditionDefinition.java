@@ -57,7 +57,7 @@ public class ConditionDefinition extends MagikDefinition {
   }
 
   @Override
-  public ConditionDefinition getWithoutNode() {
+  public ConditionDefinition getBareDefinition() {
     return new ConditionDefinition(
         this.getLocation(),
         this.getTimestamp(),

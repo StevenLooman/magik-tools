@@ -60,7 +60,7 @@ public class ParameterDefinition extends MagikDefinition {
   }
 
   @Override
-  public ParameterDefinition getWithoutNode() {
+  public ParameterDefinition getBareDefinition() {
     return new ParameterDefinition(
         this.getLocation(),
         this.getTimestamp(),

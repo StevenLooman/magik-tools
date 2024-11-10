@@ -16,6 +16,7 @@
 - Support renaming of methods, in case the type of the object the method is called on can be determined.
 - Add SimplifyIf check to Sonar way profile.
 - Add UnsafeEvaluateInvocation check to Sonar way profile.
+- Speed up looking for definitions based on path.
 - Several fixes.
 
 0.10.1 (2024-08-14)

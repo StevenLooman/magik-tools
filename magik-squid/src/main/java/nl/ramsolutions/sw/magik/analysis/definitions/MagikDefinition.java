@@ -88,11 +88,4 @@ public abstract class MagikDefinition implements IDefinition {
    * @return Name of definition.
    */
   public abstract String getName();
-
-  /**
-   * Get a(n equal) copy of self, without the {@link AstNode}.
-   *
-   * @return Copy of self.
-   */
-  public abstract MagikDefinition getWithoutNode();
 }

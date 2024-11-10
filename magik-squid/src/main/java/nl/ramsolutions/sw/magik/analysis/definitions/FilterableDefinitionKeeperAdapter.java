@@ -1,9 +1,11 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
@@ -116,6 +118,11 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   }
 
   @Override
+  public void add(final IDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public void remove(final ProductDefinition definition) {
     throw new UnsupportedOperationException();
   }
@@ -162,6 +169,11 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
 
   @Override
   public void remove(final ProcedureDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void remove(final IDefinition definition) {
     throw new UnsupportedOperationException();
   }
 
@@ -308,6 +320,11 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
     return this.definitionKeeper.getProcedureDefinitions().stream()
         .filter(this.procedureDefinitionPredicate)
         .collect(Collectors.toSet());
+  }
+
+  @Override
+  public Collection<IDefinition> getDefinitionsByPath(final Path path) {
+    return this.definitionKeeper.getDefinitionsByPath(path);
   }
 
   @Override

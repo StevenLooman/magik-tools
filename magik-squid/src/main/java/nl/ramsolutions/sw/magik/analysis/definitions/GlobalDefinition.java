@@ -48,7 +48,7 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
   }
 
   @Override
-  public GlobalDefinition getWithoutNode() {
+  public GlobalDefinition getBareDefinition() {
     return new GlobalDefinition(
         this.getLocation(),
         this.getTimestamp(),

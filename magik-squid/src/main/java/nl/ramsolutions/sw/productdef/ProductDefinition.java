@@ -79,6 +79,11 @@ public class ProductDefinition implements IDefinition {
     return this.timestamp;
   }
 
+  @Override
+  public IDefinition getBareDefinition() {
+    return this;
+  }
+
   @CheckForNull
   public String getParent() {
     return parent;
