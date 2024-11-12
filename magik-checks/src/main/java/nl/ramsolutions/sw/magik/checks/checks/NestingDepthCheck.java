@@ -74,11 +74,6 @@ public class NestingDepthCheck extends MagikCheck {
     }
 
     AstNode statement = node.getFirstChild();
-
-    if (!statement.hasChildren()) {
-      return false;
-    }
-
     return statement.getFirstChild(
             MagikGrammar.LEAVE_STATEMENT,
             MagikGrammar.CONTINUE_STATEMENT,
