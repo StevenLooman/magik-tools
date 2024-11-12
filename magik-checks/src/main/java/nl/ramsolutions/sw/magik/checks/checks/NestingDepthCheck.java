@@ -69,6 +69,10 @@ public class NestingDepthCheck extends MagikCheck {
   }
 
   private boolean isEarlyReturn(final AstNode node) {
+    if (!node.hasChildren()) {
+      return false;
+    }
+
     AstNode statement = node.getFirstChild();
     return statement.getFirstChild(
             MagikGrammar.LEAVE_STATEMENT,
