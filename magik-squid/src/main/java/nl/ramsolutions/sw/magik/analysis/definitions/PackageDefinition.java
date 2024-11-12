@@ -45,7 +45,7 @@ public class PackageDefinition extends MagikDefinition {
   }
 
   @Override
-  public PackageDefinition getWithoutNode() {
+  public PackageDefinition getBareDefinition() {
     return new PackageDefinition(
         this.getLocation(),
         this.getTimestamp(),

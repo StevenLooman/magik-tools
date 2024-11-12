@@ -3,8 +3,6 @@ package nl.ramsolutions.sw.magik.analysis.indexer;
 import com.sonar.sslr.api.RecognitionException;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.magik.FileEvent;
@@ -43,7 +41,7 @@ public class ModuleIndexer {
     final FileChangeType fileChangeType = fileEvent.getFileChangeType();
     final Path path = fileEvent.getPath();
     if (fileChangeType == FileChangeType.CHANGED || fileChangeType == FileChangeType.DELETED) {
-      this.getIndexedDefinitions(path).forEach(this::removeDefinition);
+      this.definitionKeeper.getDefinitionsByPath(path).forEach(this.definitionKeeper::remove);
     }
 
     if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
@@ -56,22 +54,6 @@ public class ModuleIndexer {
   }
 
   /**
-   * Get all indexed definitions from path or lower.
-   *
-   * <p>Used when a directory is deleted or renamed, since we only get the delete of the directory
-   * itself, not the individual files within the directory or sub-directories.
-   *
-   * @param path Path to search from.
-   * @return Indexed definitions.
-   */
-  private Collection<IDefinition> getIndexedDefinitions(final Path path) {
-    // TODO: ModuleDefFileDefinitions, like MagikFileDefinition?
-    return this.definitionKeeper.getModuleDefinitions().stream()
-        .filter(def -> def.getLocation() != null && def.getLocation().getPath().startsWith(path))
-        .collect(Collectors.toSet());
-  }
-
-  /**
    * Index a single magik file when it is created (or first read).
    *
    * @param path Path to magik file.
@@ -81,22 +63,13 @@ public class ModuleIndexer {
     LOGGER.debug("Scanning created file: {}", path);
 
     try {
-      this.readModuleDefinition(path);
+      this.readDefinitions(path);
     } catch (final Exception exception) {
       LOGGER.error("Error indexing created file: " + path, exception);
     }
   }
 
-  private void removeDefinition(final IDefinition definition) {
-    if (definition instanceof ModuleDefinition moduleDefinition) {
-      this.definitionKeeper.remove(moduleDefinition);
-    } else {
-      throw new IllegalStateException("Unknown type");
-    }
-  }
-
-  private void readModuleDefinition(final Path path) throws IOException {
-    final ModuleDefinition definition;
+  private void readDefinitions(final Path path) throws IOException {
     final Path productDefPath = ModuleDefFileScanner.getProductDefFileForPath(path);
     final ProductDefFile productDefFile;
     if (productDefPath != null) {
@@ -108,12 +81,11 @@ public class ModuleIndexer {
     try {
       final ModuleDefFile moduleDefFile =
           new ModuleDefFile(path, this.definitionKeeper, productDefFile);
-      definition = moduleDefFile.getModuleDefinition();
+      final ModuleDefinition definition = moduleDefFile.getModuleDefinition();
+      final IDefinition bareDefinition = definition.getBareDefinition();
+      this.definitionKeeper.add(bareDefinition);
     } catch (final RecognitionException exception) {
       LOGGER.warn("Error parsing defintion at: " + path, exception);
-      return;
     }
-
-    this.definitionKeeper.add(definition);
   }
 }

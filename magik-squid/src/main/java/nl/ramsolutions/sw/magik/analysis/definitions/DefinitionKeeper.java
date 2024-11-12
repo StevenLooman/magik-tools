@@ -1,12 +1,18 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.IDefinition;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
@@ -30,6 +36,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
       new ConcurrentHashMap<>();
   private final Map<TypeString, Set<ProcedureDefinition>> procedureDefinitions =
       new ConcurrentHashMap<>();
+  private final SortedMap<URI, Set<IDefinition>> uriDefinitions =
+      Collections.synchronizedSortedMap(new TreeMap<>());
 
   /** Constructor. */
   public DefinitionKeeper() {
@@ -56,6 +64,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<ProductDefinition> definitions =
         this.productDefinitions.computeIfAbsent(name, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
+
+    this.addToPathIndex(definition);
   }
 
   @Override
@@ -64,6 +74,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<ModuleDefinition> definitions =
         this.moduleDefinitions.computeIfAbsent(name, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
+
+    this.addToPathIndex(definition);
   }
 
   @Override
@@ -72,6 +84,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<MagikFileDefinition> definitions =
         this.magikFileDefinitions.computeIfAbsent(uri, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
+
+    this.addToPathIndex(definition);
   }
 
   @Override
@@ -80,6 +94,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<PackageDefinition> definitions =
         this.packageDefinitions.computeIfAbsent(name, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
+
+    this.addToPathIndex(definition);
   }
 
   @Override
@@ -90,6 +106,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         this.exemplarDefinitions.computeIfAbsent(
             bareTypeString, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
+
+    this.addToPathIndex(definition);
   }
 
   @Override
@@ -98,6 +116,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<MethodDefinition> definitions =
         this.methodDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
+
+    this.addToPathIndex(definition);
   }
 
   @Override
@@ -106,14 +126,20 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<GlobalDefinition> definitions =
         this.globalDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
+
+    this.addToPathIndex(definition);
   }
 
   @Override
   public void add(final BinaryOperatorDefinition definition) {
-    final String key = this.getKey(definition);
+    final String key =
+        this.getKey(
+            definition.getOperator(), definition.getLhsTypeName(), definition.getRhsTypeName());
     final Set<BinaryOperatorDefinition> definitions =
         this.binaryOperatorDefinitions.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
+
+    this.addToPathIndex(definition);
   }
 
   @Override
@@ -122,6 +148,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<ConditionDefinition> definitions =
         this.conditionDefinitions.computeIfAbsent(name, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
+
+    this.addToPathIndex(definition);
   }
 
   @Override
@@ -132,6 +160,35 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         this.procedureDefinitions.computeIfAbsent(
             bareTypeString, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
+
+    this.addToPathIndex(definition);
+  }
+
+  @Override
+  public void add(final IDefinition definition) {
+    if (definition instanceof final ProductDefinition productDefinition) {
+      this.add(productDefinition);
+    } else if (definition instanceof final ModuleDefinition moduleDefinition) {
+      this.add(moduleDefinition);
+    } else if (definition instanceof final MagikFileDefinition magikFileDefinition) {
+      this.add(magikFileDefinition);
+    } else if (definition instanceof final PackageDefinition packageDefinition) {
+      this.add(packageDefinition);
+    } else if (definition instanceof final ExemplarDefinition exemplarDefinition) {
+      this.add(exemplarDefinition);
+    } else if (definition instanceof final MethodDefinition methodDefinition) {
+      this.add(methodDefinition);
+    } else if (definition instanceof final GlobalDefinition globalDefinition) {
+      this.add(globalDefinition);
+    } else if (definition instanceof final BinaryOperatorDefinition binaryOperatorDefinition) {
+      this.add(binaryOperatorDefinition);
+    } else if (definition instanceof final ConditionDefinition conditionDefinition) {
+      this.add(conditionDefinition);
+    } else if (definition instanceof final ProcedureDefinition procedureDefinition) {
+      this.add(procedureDefinition);
+    } else {
+      throw new UnsupportedOperationException();
+    }
   }
 
   @Override
@@ -140,6 +197,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<ProductDefinition> definitions =
         this.productDefinitions.computeIfAbsent(name, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
   }
 
   @Override
@@ -148,6 +207,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<ModuleDefinition> definitions =
         this.moduleDefinitions.computeIfAbsent(name, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
   }
 
   @Override
@@ -156,6 +217,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<MagikFileDefinition> definitions =
         this.magikFileDefinitions.computeIfAbsent(uri, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
   }
 
   @Override
@@ -164,6 +227,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<PackageDefinition> definitions =
         this.packageDefinitions.computeIfAbsent(name, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
   }
 
   @Override
@@ -173,6 +238,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         this.exemplarDefinitions.computeIfAbsent(
             bareTypeString, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
   }
 
   @Override
@@ -181,6 +248,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<MethodDefinition> definitions =
         this.methodDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
   }
 
   @Override
@@ -189,14 +258,20 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<GlobalDefinition> definitions =
         this.globalDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
   }
 
   @Override
   public void remove(final BinaryOperatorDefinition definition) {
-    final String key = this.getKey(definition);
+    final String key =
+        this.getKey(
+            definition.getOperator(), definition.getLhsTypeName(), definition.getRhsTypeName());
     final Set<BinaryOperatorDefinition> definitions =
         this.binaryOperatorDefinitions.computeIfAbsent(key, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
   }
 
   @Override
@@ -205,6 +280,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     final Set<ConditionDefinition> definitions =
         this.conditionDefinitions.computeIfAbsent(name, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
   }
 
   @Override
@@ -214,6 +291,35 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         this.procedureDefinitions.computeIfAbsent(
             bareTypeString, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
+  }
+
+  @Override
+  public void remove(final IDefinition definition) {
+    if (definition instanceof final ProductDefinition productDefinition) {
+      this.remove(productDefinition);
+    } else if (definition instanceof final ModuleDefinition moduleDefinition) {
+      this.remove(moduleDefinition);
+    } else if (definition instanceof final MagikFileDefinition magikFileDefinition) {
+      this.remove(magikFileDefinition);
+    } else if (definition instanceof final PackageDefinition packageDefinition) {
+      this.remove(packageDefinition);
+    } else if (definition instanceof final ExemplarDefinition exemplarDefinition) {
+      this.remove(exemplarDefinition);
+    } else if (definition instanceof final MethodDefinition methodDefinition) {
+      this.remove(methodDefinition);
+    } else if (definition instanceof final GlobalDefinition globalDefinition) {
+      this.remove(globalDefinition);
+    } else if (definition instanceof final BinaryOperatorDefinition binaryOperatorDefinition) {
+      this.remove(binaryOperatorDefinition);
+    } else if (definition instanceof final ConditionDefinition conditionDefinition) {
+      this.remove(conditionDefinition);
+    } else if (definition instanceof final ProcedureDefinition procedureDefinition) {
+      this.remove(procedureDefinition);
+    } else {
+      throw new UnsupportedOperationException();
+    }
   }
 
   @Override
@@ -317,23 +423,18 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         .collect(Collectors.toSet());
   }
 
-  private String getKey(final BinaryOperatorDefinition definition) {
-    return definition.getOperator()
+  private String getKey(final String operator, final TypeString lhs, final TypeString rhs) {
+    return operator
         + "_"
-        + definition.getLhsTypeName().getWithoutGenerics().getFullString()
+        + lhs.getWithoutGenerics().getFullString()
         + "_"
-        + definition.getRhsTypeName().getWithoutGenerics().getFullString();
+        + rhs.getWithoutGenerics().getFullString();
   }
 
   @Override
   public Collection<BinaryOperatorDefinition> getBinaryOperatorDefinitions(
       final String operator, final TypeString lhs, final TypeString rhs) {
-    final String key =
-        operator
-            + "_"
-            + lhs.getWithoutGenerics().getFullString()
-            + "_"
-            + rhs.getWithoutGenerics().getFullString();
+    final String key = this.getKey(operator, lhs, rhs);
     final Collection<BinaryOperatorDefinition> definitions =
         this.binaryOperatorDefinitions.getOrDefault(key, Collections.emptySet());
     return Collections.unmodifiableCollection(definitions);
@@ -373,6 +474,55 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     return this.procedureDefinitions.values().stream()
         .flatMap(Set::stream)
         .collect(Collectors.toSet());
+  }
+
+  @Override
+  public Collection<IDefinition> getDefinitionsByPath(final Path path) {
+    final URI uri = path.toUri();
+    final String uriStr = uri.toString();
+    final Set<IDefinition> allDefinitions = new HashSet<>();
+    for (final Map.Entry<URI, Set<IDefinition>> entry :
+        this.uriDefinitions.tailMap(uri).entrySet()) {
+      final URI entryUri = entry.getKey();
+      if (!entryUri.toString().startsWith(uriStr)) {
+        break;
+      }
+
+      final Set<IDefinition> entryDefinitions = entry.getValue();
+      allDefinitions.addAll(entryDefinitions);
+    }
+    return Collections.unmodifiableCollection(allDefinitions);
+  }
+
+  private void addToPathIndex(final IDefinition definition) {
+    final Location location = definition.getLocation();
+    if (location == null) {
+      return;
+    }
+
+    final URI uri = location.getUri();
+    final Set<IDefinition> definitions =
+        this.uriDefinitions.computeIfAbsent(uri, k -> new HashSet<>());
+    definitions.add(definition);
+  }
+
+  private void removeFromPathIndex(final IDefinition definition) {
+    final Location location = definition.getLocation();
+    if (location == null) {
+      return;
+    }
+
+    final URI uri = location.getUri();
+    if (!this.uriDefinitions.containsKey(uri)) {
+      return;
+    }
+
+    final Set<IDefinition> definitions = this.uriDefinitions.get(uri);
+    definitions.remove(definition);
+
+    if (definitions.isEmpty()) {
+      this.uriDefinitions.remove(uri);
+    }
   }
 
   /** Clear any contained {@link MagikDefinition}s. */

@@ -104,7 +104,7 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
   }
 
   @Override
-  public ExemplarDefinition getWithoutNode() {
+  public ExemplarDefinition getBareDefinition() {
     return new ExemplarDefinition(
         this.getLocation(),
         this.getTimestamp(),
@@ -113,7 +113,7 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
         null,
         this.sort,
         this.typeName,
-        this.slots.stream().map(SlotDefinition::getWithoutNode).toList(),
+        this.slots.stream().map(SlotDefinition::getBareDefinition).toList(),
         this.parents,
         Collections.emptySet());
   }

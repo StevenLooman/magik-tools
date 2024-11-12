@@ -65,6 +65,11 @@ public class ModuleDefinition implements IDefinition {
     return this.timestamp;
   }
 
+  @Override
+  public IDefinition getBareDefinition() {
+    return this;
+  }
+
   @CheckForNull
   public String getProduct() {
     return this.product;

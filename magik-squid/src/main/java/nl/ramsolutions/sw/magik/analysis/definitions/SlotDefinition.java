@@ -43,7 +43,7 @@ public class SlotDefinition extends MagikDefinition {
   }
 
   @Override
-  public SlotDefinition getWithoutNode() {
+  public SlotDefinition getBareDefinition() {
     return new SlotDefinition(
         this.getLocation(),
         this.getTimestamp(),

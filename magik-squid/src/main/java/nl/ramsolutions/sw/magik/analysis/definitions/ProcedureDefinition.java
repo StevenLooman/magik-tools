@@ -219,7 +219,7 @@ public class ProcedureDefinition extends MagikDefinition
   }
 
   @Override
-  public ProcedureDefinition getWithoutNode() {
+  public ProcedureDefinition getBareDefinition() {
     return new ProcedureDefinition(
         this.getLocation(),
         this.getTimestamp(),
@@ -229,7 +229,7 @@ public class ProcedureDefinition extends MagikDefinition
         this.modifiers,
         this.typeName,
         this.procedureName,
-        this.parameters.stream().map(ParameterDefinition::getWithoutNode).toList(),
+        this.parameters.stream().map(ParameterDefinition::getBareDefinition).toList(),
         this.returnTypes,
         this.loopTypes,
         this.usedGlobals,

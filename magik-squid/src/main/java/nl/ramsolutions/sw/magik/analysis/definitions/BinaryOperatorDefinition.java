@@ -78,7 +78,7 @@ public class BinaryOperatorDefinition extends MagikDefinition {
   }
 
   @Override
-  public BinaryOperatorDefinition getWithoutNode() {
+  public BinaryOperatorDefinition getBareDefinition() {
     return new BinaryOperatorDefinition(
         this.getLocation(),
         this.getTimestamp(),

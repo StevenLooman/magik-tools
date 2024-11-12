@@ -100,10 +100,10 @@ public class CompletionProvider {
     final nl.ramsolutions.sw.magik.Position newPosition =
         Lsp4jConversion.positionFromLsp4j(newPositionLsp4j);
     final AstNode tokenNodeAt = AstQuery.nodeAt(node, newPosition);
-    final AstNode tokenNodeBefore = AstQuery.nodeBefore(node, newPosition); // TODO: Check for null.
-    final Token tokenBefore = tokenNodeBefore.getToken();
+    final AstNode tokenNodeBefore = AstQuery.nodeBefore(node, newPosition);
+    final Token tokenBefore = tokenNodeBefore != null ? tokenNodeBefore.getToken() : null;
     final nl.ramsolutions.sw.magik.Position tokenBeforePosition =
-        nl.ramsolutions.sw.magik.Position.fromTokenStart(tokenBefore);
+        tokenBefore != null ? nl.ramsolutions.sw.magik.Position.fromTokenStart(tokenBefore) : null;
     final AstNode tokenNode =
         tokenNodeAt != null
             ? tokenNodeAt
