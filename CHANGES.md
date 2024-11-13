@@ -17,6 +17,7 @@
 - Add SimplifyIf check to Sonar way profile.
 - Add UnsafeEvaluateInvocation check to Sonar way profile.
 - Speed up looking for definitions based on path.
+- Fix UseValueCompare check to handle other notations for numbers + handle floats.
 - Several fixes.
 
 0.10.1 (2024-08-14)
