@@ -195,7 +195,7 @@ public final class Main {
       }
       properties = new MagikToolsProperties(path);
     } else {
-      final Path currentWorkingPath = Path.of("");
+      final Path currentWorkingPath = Path.of(".");
       final Path path = ConfigurationLocator.locateConfiguration(currentWorkingPath);
       properties =
           path != null ? new MagikToolsProperties(path) : MagikToolsProperties.DEFAULT_PROPERTIES;
