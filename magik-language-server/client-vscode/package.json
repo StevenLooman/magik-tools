@@ -1,331 +1,341 @@
 {
-	"name": "magik-language-server",
-	"description": "Magik Language Server",
-	"author": "Steven Looman",
-	"license": "GPL-3.0-only",
-	"version": "0.11.0-SNAPSHOT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/StevenLooman/magik-tools"
-	},
-	"publisher": "StevenLooman",
-	"categories": [
-		"Programming Languages",
-		"Debuggers",
-		"Testing",
-		"Linters",
-		"Formatters",
-		"Snippets"
-	],
-	"keywords": [
-		"magik"
-	],
-	"engines": {
-		"vscode": "^1.59.0"
-	},
-	"activationEvents": [
-		"onCommand:magik.startSession",
-		"onDebug",
-		"onDebugInitialConfigurations",
-		"onDebugResolve:magik",
-		"workspaceContains:**/product.def"
-	],
-	"main": "./client/out/extension",
-	"contributes": {
-		"languages": [
-			{
-				"id": "magik",
-				"aliases": [
-					"Magik"
-				],
-				"extensions": [
-					".magik"
-				],
-				"configuration": "./magik-language-configuration.json"
-			},
-			{
-				"id": "load_list.txt",
-				"aliases": [
-					"Smallworld Load List"
-				],
-				"filenames": [
-					"load_list.txt"
-				],
-				"configuration": "./load-list-language-configuration.json"
-			},
-			{
-				"id": "product.def",
-				"aliases": [
-					"Smallworld Product definition"
-				],
-				"filenames": [
-					"product.def"
-				],
-				"configuration": "./product-definition-language-configuration.json"
-			},
-			{
-				"id": "module.def",
-				"aliases": [
-					"Smallworld Module definition"
-				],
-				"filenames": [
-					"module.def"
-				],
-				"configuration": "./method-definition-language-configuration.json"
-			}
-		],
-		"grammars": [
-			{
-				"language": "magik",
-				"scopeName": "source.magik",
-				"path": "./syntaxes/magik.tmGrammar.json"
-			}
-		],
-		"snippets": [
-			{
-				"language": "magik",
-				"path": "./snippets/magik-snippets.json"
-			}
-		],
-		"breakpoints": [
-			{
-				"language": "magik"
-			}
-		],
-		"debuggers": [
-			{
-				"type": "magik",
-				"label": "Magik",
-				"languages": [
-					"magik"
-				],
-				"variables": {},
-				"configurationSnippets": [],
-				"configurationAttributes": {
-					"attach": {
-						"properties": {
-							"connect": {
-								"label": "Attach by connecting to the MDA interface",
-								"type": "object",
-								"description": "The connection properties used to connect to the MDA interface over a TCP socket.",
-								"properties": {
-									"port": {
-										"label": "Port",
-										"type": "number",
-										"description": "Port to connect to.",
-										"default": 32000
-									},
-									"host": {
-										"label": "Host",
-										"type": "string",
-										"description": "Hostname or IP address to connect to.",
-										"default": "127.0.0.1"
-									},
-									"path_mapping": {
-										"default": [],
-										"label": "Path mapping",
-										"description": "Path mapping",
-										"type": "array",
-										"items": {
-											"label": "Path substitution",
-											"type": "object",
-											"properties": {
-												"from": {
-													"label": "From path",
-													"type": "string"
-												},
-												"to": {
-													"label": "To path",
-													"type": "string"
-												}
-											}
-										}
-									}
-								}
-							}
-						},
-						"required": [
-							"connect"
-						]
-					}
-				},
-				"initialConfigurations": [
-					{
-						"type": "magik",
-						"name": "Attach magik debugger",
-						"request": "attach"
-					}
-				]
-			}
-		],
-		"commands": [
-			{
-				"command": "magik.custom.reIndex",
-				"title": "Reindex files",
-				"category": "Magik"
-			}
-		],
-		"keybindings": [
-			{
-				"command": "magik.transmitFile",
-				"key": "f4 b",
-				"when": "editorTextFocus && editorLangId == magik"
-			},
-			{
-				"command": "magik.transmitCurrentRegion",
-				"key": "f4 enter",
-				"when": "editorTextFocus && editorLangId == magik"
-			},
-			{
-				"command": "magik.transmitLoadList",
-				"key": "f4 b",
-				"when": "editorTextFocus && editorLangId == load_list.txt"
-			},
-			{
-				"command": "magik.transmitProductDef",
-				"key": "f4 b",
-				"when": "editorTextFocus && editorLangId == product.def"
-			},
-			{
-				"command": "magik.transmitModuleDef",
-				"key": "f4 b",
-				"when": "editorTextFocus && editorLangId == module.def"
-			}
-		],
-		"taskDefinitions": [
-			{
-				"type": "run_alias",
-				"required": [
-					"entry"
-				],
-				"properties": {
-					"entry": {
-						"type": "string",
-						"description": "Name of entry in aliases file"
-					},
-					"args": {
-						"type": "array",
-						"description": "Additional runalias arguments"
-					},
-					"env": {
-						"type": "object",
-						"description": "Environment variables"
-					}
-				}
-			}
-		],
-		"configuration": {
-			"type": "object",
-			"title": "Smallworld/Magik",
-			"properties": {
-				"magik.javaHome": {
-					"description": "Path to Java Runtime, Java 17 minimum.",
-					"type": "string"
-				},
-				"magik.smallworldGis": {
-					"description": "Path to Smallworld Core -- only used by the VS Code extension.",
-					"type": "string"
-				},
-				"magik.productDirs": {
-					"description": "Paths to (compiled, containing a `libs/` directory) products.",
-					"type": "array"
-				},
-				"magik.aliases": {
-					"description": "Path to gis_aliases file -- only used by the VS Code extension.",
-					"type": "string"
-				},
-				"magik.environment": {
-					"description": "Path to environment file -- only used by the VS Code extension.",
-					"type": "string"
-				},
-				"magik.formatting.indentChar": {
-					"description": "Indent character, 'tab' or 'space' -- only used by the VS Code extension.",
-					"type": "string"
-				},
-				"magik.formatting.indentWidth": {
-					"description": "Indent width (tab size or number of spaces) -- only used by the VS Code extension.",
-					"type": "number"
-				},
-				"magik.formatting.insertFinalNewline": {
-					"description": "Insert final newline -- only used by the VS Code extension.",
-					"type": "boolean"
-				},
-				"magik.formatting.trimTrailingWhitespace": {
-					"description": "Trim trailing whitespace -- only used by the VS Code extension.",
-					"type": "boolean"
-				},
-				"magik.formatting.trimFinalNewlines": {
-					"description": "Trim final newlines -- only used by the VS Code extension.",
-					"type": "boolean"
-				},
-				"magik.lint.overrideConfigFile": {
-					"description": "Override path to magiklintrc.properties.",
-					"type": "string"
-				},
-				"magik.typing.typeDatabasePaths": {
-					"description": "Paths to type databases.",
-					"type": "array"
-				},
-				"magik.typing.showTypingInlayHints": {
-					"description": "Show typing inlay hints.",
-					"type": "boolean",
-					"default": false
-				},
-				"magik.typing.showArgumentInlayHints": {
-					"description": "Show (certain) argument name inlay hints.",
-					"type": "boolean",
-					"default": false
-				},
-				"magik.typing.enableChecks": {
-					"description": "Enable typing checks.",
-					"type": "boolean",
-					"default": false
-				},
-				"magik.typing.indexGlobalUsages": {
-					"description": "Enable indexing of usages of globals by methods.",
-					"type": "boolean",
-					"default": true
-				},
-				"magik.typing.indexMethodUsages": {
-					"description": "Enable indexing of usages of methods by methods.",
-					"type": "boolean",
-					"default": false
-				},
-				"magik.typing.indexSlotUsages": {
-					"description": "Enable indexing of usages of slots by methods.",
-					"type": "boolean",
-					"default": true
-				},
-				"magik.typing.indexConditionUsages": {
-					"description": "Enable indexing of usages of conditions by methods.",
-					"type": "boolean",
-					"default": true
-				},
-				"magik.typing.cacheIndexedDefinitions": {
-					"description": "Store and load the indexed definitions in the workspace folders, in file types.jsonl.",
-					"type": "boolean",
-					"default": true
-				}
-			}
-		}
-	},
-	"scripts": {
-		"eslint": "eslint .",
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -b",
-		"watch": "tsc -b -w",
-		"postinstall": "cd client && npm install && cd .. && cd server && rm -rf ./* && cp ../../../magik-language-server/target/magik-language-server-*.jar . && cp ../../../magik-debug-adapter/target/magik-debug-adapter-*.jar . && cd ..",
-		"package": "vsce package"
-	},
-	"devDependencies": {
-		"@eslint/js": "^9.14.0",
-		"@types/eslint__js": "^8.42.3",
-		"@types/mocha": "^10.0.9",
-		"@types/node": "^22.9.0",
-		"@typescript-eslint/parser": "^8.11.0",
-		"@vscode/vsce": "^3.2.1",
-		"eslint": "^9.14.0",
-		"typescript": "^5.6.3",
-		"typescript-eslint": "^8.13.0"
-	}
+  "name": "magik-language-server",
+  "description": "Magik Language Server",
+  "author": "Steven Looman",
+  "license": "GPL-3.0-only",
+  "version": "0.11.0-SNAPSHOT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/StevenLooman/magik-tools"
+  },
+  "publisher": "StevenLooman",
+  "categories": [
+    "Programming Languages",
+    "Debuggers",
+    "Testing",
+    "Linters",
+    "Formatters",
+    "Snippets"
+  ],
+  "keywords": [
+    "magik"
+  ],
+  "engines": {
+    "vscode": "^1.59.0"
+  },
+  "activationEvents": [
+    "onCommand:magik.startSession",
+    "onDebug",
+    "onDebugInitialConfigurations",
+    "onDebugResolve:magik",
+    "workspaceContains:**/product.def"
+  ],
+  "main": "./client/out/extension",
+  "contributes": {
+    "languages": [
+      {
+        "id": "magik",
+        "aliases": [
+          "Magik"
+        ],
+        "extensions": [
+          ".magik"
+        ],
+        "configuration": "./languages/magik-language-configuration.json"
+      },
+      {
+        "id": "load_list.txt",
+        "aliases": [
+          "Smallworld Load List"
+        ],
+        "filenames": [
+          "load_list.txt"
+        ],
+        "configuration": "./languages/load-list-language-configuration.json"
+      },
+      {
+        "id": "product.def",
+        "aliases": [
+          "Smallworld Product definition"
+        ],
+        "filenames": [
+          "product.def"
+        ],
+        "configuration": "./languages/product-definition-language-configuration.json"
+      },
+      {
+        "id": "module.def",
+        "aliases": [
+          "Smallworld Module definition"
+        ],
+        "filenames": [
+          "module.def"
+        ],
+        "configuration": "./languages/module-definition-language-configuration.json"
+      },
+      {
+        "id": "message",
+        "aliases": [
+          "Message"
+        ],
+        "extensions": [
+          ".msg"
+        ],
+        "configuration": "./languages/message-language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "magik",
+        "scopeName": "source.magik",
+        "path": "./syntaxes/magik.tmGrammar.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "magik",
+        "path": "./snippets/magik-snippets.json"
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "magik"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "magik",
+        "label": "Magik",
+        "languages": [
+          "magik"
+        ],
+        "variables": {},
+        "configurationSnippets": [],
+        "configurationAttributes": {
+          "attach": {
+            "properties": {
+              "connect": {
+                "label": "Attach by connecting to the MDA interface",
+                "type": "object",
+                "description": "The connection properties used to connect to the MDA interface over a TCP socket.",
+                "properties": {
+                  "port": {
+                    "label": "Port",
+                    "type": "number",
+                    "description": "Port to connect to.",
+                    "default": 32000
+                  },
+                  "host": {
+                    "label": "Host",
+                    "type": "string",
+                    "description": "Hostname or IP address to connect to.",
+                    "default": "127.0.0.1"
+                  },
+                  "path_mapping": {
+                    "default": [],
+                    "label": "Path mapping",
+                    "description": "Path mapping",
+                    "type": "array",
+                    "items": {
+                      "label": "Path substitution",
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "label": "From path",
+                          "type": "string"
+                        },
+                        "to": {
+                          "label": "To path",
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "required": [
+              "connect"
+            ]
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "magik",
+            "name": "Attach magik debugger",
+            "request": "attach"
+          }
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "magik.custom.reIndex",
+        "title": "Reindex files",
+        "category": "Magik"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "magik.transmitFile",
+        "key": "f4 b",
+        "when": "editorTextFocus && editorLangId == magik"
+      },
+      {
+        "command": "magik.transmitCurrentRegion",
+        "key": "f4 enter",
+        "when": "editorTextFocus && editorLangId == magik"
+      },
+      {
+        "command": "magik.transmitLoadList",
+        "key": "f4 b",
+        "when": "editorTextFocus && editorLangId == load_list.txt"
+      },
+      {
+        "command": "magik.transmitProductDef",
+        "key": "f4 b",
+        "when": "editorTextFocus && editorLangId == product.def"
+      },
+      {
+        "command": "magik.transmitModuleDef",
+        "key": "f4 b",
+        "when": "editorTextFocus && editorLangId == module.def"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "run_alias",
+        "required": [
+          "entry"
+        ],
+        "properties": {
+          "entry": {
+            "type": "string",
+            "description": "Name of entry in aliases file"
+          },
+          "args": {
+            "type": "array",
+            "description": "Additional runalias arguments"
+          },
+          "env": {
+            "type": "object",
+            "description": "Environment variables"
+          }
+        }
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Smallworld/Magik",
+      "properties": {
+        "magik.javaHome": {
+          "description": "Path to Java Runtime, Java 17 minimum.",
+          "type": "string"
+        },
+        "magik.smallworldGis": {
+          "description": "Path to Smallworld Core -- only used by the VS Code extension.",
+          "type": "string"
+        },
+        "magik.productDirs": {
+          "description": "Paths to (compiled, containing a `libs/` directory) products.",
+          "type": "array"
+        },
+        "magik.aliases": {
+          "description": "Path to gis_aliases file -- only used by the VS Code extension.",
+          "type": "string"
+        },
+        "magik.environment": {
+          "description": "Path to environment file -- only used by the VS Code extension.",
+          "type": "string"
+        },
+        "magik.formatting.indentChar": {
+          "description": "Indent character, 'tab' or 'space' -- only used by the VS Code extension.",
+          "type": "string"
+        },
+        "magik.formatting.indentWidth": {
+          "description": "Indent width (tab size or number of spaces) -- only used by the VS Code extension.",
+          "type": "number"
+        },
+        "magik.formatting.insertFinalNewline": {
+          "description": "Insert final newline -- only used by the VS Code extension.",
+          "type": "boolean"
+        },
+        "magik.formatting.trimTrailingWhitespace": {
+          "description": "Trim trailing whitespace -- only used by the VS Code extension.",
+          "type": "boolean"
+        },
+        "magik.formatting.trimFinalNewlines": {
+          "description": "Trim final newlines -- only used by the VS Code extension.",
+          "type": "boolean"
+        },
+        "magik.lint.overrideConfigFile": {
+          "description": "Override path to magiklintrc.properties.",
+          "type": "string"
+        },
+        "magik.typing.typeDatabasePaths": {
+          "description": "Paths to type databases.",
+          "type": "array"
+        },
+        "magik.typing.showTypingInlayHints": {
+          "description": "Show typing inlay hints.",
+          "type": "boolean",
+          "default": false
+        },
+        "magik.typing.showArgumentInlayHints": {
+          "description": "Show (certain) argument name inlay hints.",
+          "type": "boolean",
+          "default": false
+        },
+        "magik.typing.enableChecks": {
+          "description": "Enable typing checks.",
+          "type": "boolean",
+          "default": false
+        },
+        "magik.typing.indexGlobalUsages": {
+          "description": "Enable indexing of usages of globals by methods.",
+          "type": "boolean",
+          "default": true
+        },
+        "magik.typing.indexMethodUsages": {
+          "description": "Enable indexing of usages of methods by methods.",
+          "type": "boolean",
+          "default": false
+        },
+        "magik.typing.indexSlotUsages": {
+          "description": "Enable indexing of usages of slots by methods.",
+          "type": "boolean",
+          "default": true
+        },
+        "magik.typing.indexConditionUsages": {
+          "description": "Enable indexing of usages of conditions by methods.",
+          "type": "boolean",
+          "default": true
+        },
+        "magik.typing.cacheIndexedDefinitions": {
+          "description": "Store and load the indexed definitions in the workspace folders, in file types.jsonl.",
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
+  },
+  "scripts": {
+    "eslint": "eslint .",
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "postinstall": "cd client && npm install && cd .. && cd server && rm -rf ./* && cp ../../../magik-language-server/target/magik-language-server-*.jar . && cp ../../../magik-debug-adapter/target/magik-debug-adapter-*.jar . && cd ..",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/mocha": "^10.0.9",
+    "@types/node": "^22.9.0",
+    "@typescript-eslint/parser": "^8.11.0",
+    "@vscode/vsce": "^3.2.1",
+    "eslint": "^9.14.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.13.0"
+  }
 }
