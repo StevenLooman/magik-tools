@@ -17,17 +17,17 @@ public class MethodLineCountCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "MethodLineCount";
 
-  private static final int DEFAULT_MAXIMUM_LENGTH = 35;
+  private static final int DEFAULT_MAX_LENGTH = 35;
   private static final String MESSAGE = "Method is longer than permitted (%s/%s).";
 
   /** Maximum length of method in lines, without whitelines and comment lines. */
   @RuleProperty(
-      key = "maximum length",
-      defaultValue = "" + DEFAULT_MAXIMUM_LENGTH,
+      key = "max length",
+      defaultValue = "" + DEFAULT_MAX_LENGTH,
       description = "Maximum length of method in lines without white lines and comment lines",
       type = "INTEGER")
   @SuppressWarnings("checkstyle:VisibilityModifier")
-  public int maximumLineCount = DEFAULT_MAXIMUM_LENGTH;
+  public int maxLineCount = DEFAULT_MAX_LENGTH;
 
   @Override
   protected void walkPreMethodDefinition(final AstNode node) {
@@ -48,8 +48,8 @@ public class MethodLineCountCheck extends MagikCheck {
 
     final long lineCount =
         bodyNode.getTokens().stream().map(Token::getLine).distinct().collect(Collectors.counting());
-    if (lineCount > this.maximumLineCount) {
-      final String message = String.format(MESSAGE, lineCount, this.maximumLineCount);
+    if (lineCount > this.maxLineCount) {
+      final String message = String.format(MESSAGE, lineCount, this.maxLineCount);
       final AstNode issueNode;
       if (node.is(MagikGrammar.METHOD_DEFINITION)) {
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);

@@ -77,7 +77,7 @@ disabled = method-complexity, line-length
 You can configure the `line-length` check to allow up to 120 characters per line by settings:
 
 ```text
-line-length.line-length=120
+line-length.max-line-length=120
 ```
 
 ## Exit codes
