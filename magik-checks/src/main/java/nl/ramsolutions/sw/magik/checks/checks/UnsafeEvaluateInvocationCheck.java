@@ -23,6 +23,6 @@ public class UnsafeEvaluateInvocationCheck extends MagikCheck {
       return;
     }
 
-    this.addIssue(node, MESSAGE);
+    this.addIssue(node.getFirstChild(MagikGrammar.METHOD_NAME), MESSAGE);
   }
 }
