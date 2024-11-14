@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.helpers;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -113,6 +114,11 @@ public class MethodInvocationNodeHelper {
   public String getMethodNameIdentifier() {
     final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
     return methodNameNode.getTokenValue();
+  }
+
+  @CheckForNull
+  public AstNode getMethodNameNode() {
+    return this.node.getFirstChild(MagikGrammar.METHOD_NAME);
   }
 
   /**

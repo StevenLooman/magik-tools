@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
@@ -18,7 +19,7 @@ public class ForbiddenCallCheck extends MagikCheck {
 
   private static final String MESSAGE = "Call '%s' is forbidden.";
   private static final String DEFAULT_FORBIDDEN_CALLS =
-      "show(), sw:show(), print(), sw:print(), debug_print(), sw:debug_print()";
+      "show(), sw:show(), print(), sw:print(), debug_print(), sw:debug_print(), .sys!perform(), .sys!slot()";
 
   /** List of forbidden calls, separated by ','. */
   @RuleProperty(
@@ -37,23 +38,15 @@ public class ForbiddenCallCheck extends MagikCheck {
 
   @Override
   protected void walkPreMethodInvocation(final AstNode node) {
-    final AstNode methodNameNode = node.getFirstChild(MagikGrammar.METHOD_NAME);
-    if (methodNameNode == null) {
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
+    final String methodName = helper.getMethodName();
+    if (!this.getForbiddenCalls().contains("." + methodName)) {
       return;
     }
 
-    final AstNode identifierNode = methodNameNode.getFirstChild(MagikGrammar.IDENTIFIER);
-    if (identifierNode == null) {
-      return;
-    }
-
-    final String identifier = "." + identifierNode.getTokenValue();
-    if (!this.getForbiddenCalls().contains(identifier)) {
-      return;
-    }
-
-    final String message = String.format(MESSAGE, identifier);
-    this.addIssue(identifierNode, message);
+    final AstNode methodNameNode = helper.getMethodNameNode();
+    final String message = String.format(MESSAGE, methodName);
+    this.addIssue(methodNameNode, message);
   }
 
   @Override
