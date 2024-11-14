@@ -17,6 +17,8 @@
 - Add SimplifyIf check to Sonar way profile.
 - Add UnsafeEvaluateInvocation check to Sonar way profile.
 - Speed up looking for definitions based on path.
+- Fix UseValueCompare check to handle other notations for numbers + handle floats.
+- Fix magik-lint/magik-typed-lint not using located configuration file when showing checks.
 - Make check properties more descriptive by adding `max-` if needed.
 - Several fixes.
 

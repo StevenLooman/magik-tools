@@ -451,7 +451,11 @@ class MagikGrammarTest {
 
   @Test
   void testNumber() {
-    Assertions.assertThat(g.rule(MagikGrammar.NUMBER)).matches("1").matches("10").matches("1.0");
+    Assertions.assertThat(g.rule(MagikGrammar.NUMBER))
+        .matches("1")
+        .matches("10")
+        .matches("1.0")
+        .matches("16r10");
   }
 
   @Test

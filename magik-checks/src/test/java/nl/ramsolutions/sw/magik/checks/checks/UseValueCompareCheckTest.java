@@ -29,8 +29,9 @@ class UseValueCompareCheckTest extends MagikCheckTestBase {
       strings = {
         "\"a\" _is b",
         "a _is \"b\"",
-        "\"a\" _is 536870912",
-        "\"a\" _is 0.0",
+        "a _is 0.0",
+        "536870913 _is a",
+        "a _is 16rffffffffffff",
       })
   void testInvalid(final String code) {
     final MagikCheck check = new UseValueCompareCheck();
