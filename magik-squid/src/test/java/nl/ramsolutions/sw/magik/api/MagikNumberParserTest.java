@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -43,6 +44,7 @@ class MagikNumberParserTest {
     final String numberStr = argumentsAccessor.getString(0);
     final Number expected = argumentsAccessor.getDouble(1);
     final Number number = MagikNumberParser.parseMagikNumber(numberStr);
-    assertThat(number).isEqualTo(expected);
+    // Due to floating point precision across platforms.
+    assertThat((Double) number).isCloseTo((Double) expected, within(0.0000001));
   }
 }
