@@ -5,6 +5,7 @@ import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.api.MagikNumberParser;
 
 /** Atom handler. */
 class AtomHandler extends LocalTypeReasonerHandler {
@@ -28,26 +29,17 @@ class AtomHandler extends LocalTypeReasonerHandler {
    */
   void handleNumber(final AstNode node) {
     final String tokenValue = node.getTokenValue();
-
-    // Parsable by Long?
-    try {
-      Long value = Long.parseLong(tokenValue);
-      if (value > BIGNUM_START) {
-        this.assignAtom(node, TypeString.SW_BIGNUM);
-      } else {
+    final Number number = MagikNumberParser.parseMagikNumberSafe(tokenValue);
+    if (number instanceof final Integer numberInt) {
+      if (numberInt < AtomHandler.BIGNUM_START) {
         this.assignAtom(node, TypeString.SW_INTEGER);
+      } else {
+        this.assignAtom(node, TypeString.SW_BIGNUM);
       }
-      return;
-    } catch (NumberFormatException ex) {
-      // pass
-    }
-
-    // Parsable by Float?
-    try {
-      Float.parseFloat(tokenValue);
+    } else if (number instanceof Long) {
+      this.assignAtom(node, TypeString.SW_BIGNUM);
+    } else if (number instanceof Double) {
       this.assignAtom(node, TypeString.SW_FLOAT);
-    } catch (NumberFormatException ex) {
-      // pass
     }
   }
 

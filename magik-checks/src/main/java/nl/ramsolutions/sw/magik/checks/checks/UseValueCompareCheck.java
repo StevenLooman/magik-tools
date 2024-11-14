@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.api.MagikNumberParser;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
 
@@ -14,10 +15,12 @@ public class UseValueCompareCheck extends MagikCheck {
   public static final String CHECK_KEY = "UseValueCompare";
 
   private static final String MESSAGE = "Type '%s' should not be compare with _is.";
+  // Note that SW4 uses bignum from 1<<29. SW5 uses bignum from 1<<31.
+  private static final int BIGNUM_LIMIT = 1 << 29;
 
   @Override
   protected void walkPreEqualityExpression(final AstNode node) {
-    if (isInstanceCompare(node) && (hasStringLiteral(node) || hasBigNumLiteral(node))) {
+    if (this.isInstanceCompare(node) && (this.hasStringLiteral(node) || this.hasNumLiteral(node))) {
       final String message = String.format(MESSAGE, "string");
       this.addIssue(node, message);
     }
@@ -36,18 +39,33 @@ public class UseValueCompareCheck extends MagikCheck {
         || right.is(MagikGrammar.ATOM) && right.getFirstChild(MagikGrammar.STRING) != null;
   }
 
-  @SuppressWarnings("checkstyle:MagicNumber")
-  private boolean hasBigNumLiteral(final AstNode node) {
+  private boolean hasNumLiteral(final AstNode node) {
     final List<AstNode> children = node.getChildren();
     final AstNode left = children.get(0);
     final AstNode right = children.get(2);
-    return left.is(MagikGrammar.ATOM)
-            && left.getFirstChild(MagikGrammar.NUMBER) != null
-            && !left.getFirstChild().getTokenValue().contains(".")
-            && Long.parseLong(left.getFirstChild().getTokenValue()) > 1 << 29
-        || right.is(MagikGrammar.ATOM)
-            && right.getFirstChild().is(MagikGrammar.NUMBER)
-            && !right.getFirstChild().getTokenValue().contains(".")
-            && Long.parseLong(right.getFirstChild().getTokenValue()) > 1 << 29;
+    return this.sideHasNumLiteral(left) || this.sideHasNumLiteral(right);
+  }
+
+  private boolean sideHasNumLiteral(final AstNode node) {
+    if (node.isNot(MagikGrammar.ATOM)) {
+      return false;
+    }
+
+    final AstNode numberNode = node.getFirstChild(MagikGrammar.NUMBER);
+    if (numberNode == null) {
+      return false;
+    }
+
+    final String tokenValue = numberNode.getTokenValue();
+    final Number number = MagikNumberParser.parseMagikNumberSafe(tokenValue);
+    if (number instanceof final Integer numberInt) {
+      return numberInt > BIGNUM_LIMIT;
+    } else if (number instanceof final Long numberLong) {
+      return numberLong > BIGNUM_LIMIT;
+    } else if (number instanceof Double) {
+      return true;
+    }
+
+    return false;
   }
 }
