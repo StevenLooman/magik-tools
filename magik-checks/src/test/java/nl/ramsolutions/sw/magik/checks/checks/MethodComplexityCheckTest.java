@@ -14,7 +14,7 @@ class MethodComplexityCheckTest extends MagikCheckTestBase {
   @Test
   void testTooComplex() {
     final MethodComplexityCheck check = new MethodComplexityCheck();
-    check.maximumComplexity = 5;
+    check.maxComplexity = 5;
 
     final String code =
         """

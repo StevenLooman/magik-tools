@@ -23,7 +23,7 @@ public class LineLengthCheck extends MagikCheck {
 
   /** Maximum number of characters on a single line. */
   @RuleProperty(
-      key = "line length",
+      key = "max line length",
       defaultValue = "" + DEFAULT_MAX_LINE_LENGTH,
       description = "Maximum number of characters on a single line",
       type = "INTEGER")

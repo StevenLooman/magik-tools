@@ -12,7 +12,7 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
   @Test
   void testMethodTooLong() {
     final MethodLineCountCheck check = new MethodLineCountCheck();
-    check.maximumLineCount = 2;
+    check.maxLineCount = 2;
     final String code =
         """
         _method a.b
@@ -29,7 +29,7 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
   @Test
   void testMethodOk() {
     final MethodLineCountCheck check = new MethodLineCountCheck();
-    check.maximumLineCount = 2;
+    check.maxLineCount = 2;
     final String code =
         """
         _method a.b
@@ -43,7 +43,7 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
   @Test
   void testProcedureTooLong() {
     final MethodLineCountCheck check = new MethodLineCountCheck();
-    check.maximumLineCount = 2;
+    check.maxLineCount = 2;
     final String code =
         """
         _proc()
@@ -60,7 +60,7 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
   @Test
   void testProcedureOk() {
     final MethodLineCountCheck check = new MethodLineCountCheck();
-    check.maximumLineCount = 2;
+    check.maxLineCount = 2;
     final String code =
         """
         _proc()

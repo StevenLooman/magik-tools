@@ -22,7 +22,7 @@ public class ExemplarSlotCountCheck extends MagikCheck {
 
   /** Maximum number of slots for an exemplar. */
   @RuleProperty(
-      key = "slot count",
+      key = "max slot count",
       defaultValue = "" + DEFAULT_MAX_SLOT_COUNT,
       description = "Maximum number of slots for an exemplar",
       type = "INTEGER")

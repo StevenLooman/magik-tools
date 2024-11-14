@@ -20,18 +20,18 @@ public class VariableCountCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "VariableCount";
 
-  private static final int DEFAULT_MAXIMUM_VARIABLE_COUNT = 8;
+  private static final int DEFAULT_MAX_VARIABLE_COUNT = 8;
   private static final String MESSAGE =
       "Method/procedure contains more variables than than permitted (%s/%s).";
 
   /** Maximum length of method in lines, without whitelines and comment lines. */
   @RuleProperty(
-      key = "maximum variable count",
-      defaultValue = "" + DEFAULT_MAXIMUM_VARIABLE_COUNT,
+      key = "max variable count",
+      defaultValue = "" + DEFAULT_MAX_VARIABLE_COUNT,
       description = "Maximum number of variables in method",
       type = "INTEGER")
   @SuppressWarnings("checkstyle:VisibilityModifier")
-  public int maximumVariableCount = DEFAULT_MAXIMUM_VARIABLE_COUNT;
+  public int maxVariableCount = DEFAULT_MAX_VARIABLE_COUNT;
 
   @Override
   protected void walkPreMethodDefinition(final AstNode node) {
@@ -66,8 +66,8 @@ public class VariableCountCheck extends MagikCheck {
                         ScopeEntry.Type.DEFINITION,
                         ScopeEntry.Type.LOCAL))
             .collect(Collectors.counting());
-    if (variableCount > this.maximumVariableCount) {
-      final String message = String.format(MESSAGE, variableCount, this.maximumVariableCount);
+    if (variableCount > this.maxVariableCount) {
+      final String message = String.format(MESSAGE, variableCount, this.maxVariableCount);
       final AstNode issueNode;
       if (node.is(MagikGrammar.METHOD_DEFINITION)) {
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
