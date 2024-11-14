@@ -15,6 +15,7 @@ public class UseValueCompareCheck extends MagikCheck {
   public static final String CHECK_KEY = "UseValueCompare";
 
   private static final String MESSAGE = "Type '%s' should not be compare with _is.";
+  // Note that SW4 uses bignum from 1<<29. SW5 uses bignum from 1<<31.
   private static final int BIGNUM_LIMIT = 1 << 29;
 
   @Override
@@ -58,9 +59,9 @@ public class UseValueCompareCheck extends MagikCheck {
     final String tokenValue = numberNode.getTokenValue();
     final Number number = MagikNumberParser.parseMagikNumberSafe(tokenValue);
     if (number instanceof final Integer numberInt) {
-      return numberInt > 1 << 29;
+      return numberInt > BIGNUM_LIMIT;
     } else if (number instanceof final Long numberLong) {
-      return numberLong > 1 << 29;
+      return numberLong > BIGNUM_LIMIT;
     } else if (number instanceof Double) {
       return true;
     }

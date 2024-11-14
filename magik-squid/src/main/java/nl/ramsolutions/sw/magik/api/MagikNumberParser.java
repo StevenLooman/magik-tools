@@ -16,9 +16,9 @@ public final class MagikNumberParser {
    */
   public static Number parseMagikNumber(final String numberStr) {
     final Number number;
-    if (numberStr.contains("r")) {
+    if (numberStr.contains("r") || numberStr.contains("R")) {
       try (final Scanner scanner = new Scanner(numberStr)) {
-        scanner.useDelimiter("r");
+        scanner.useDelimiter("r|R");
         final int base = scanner.nextInt();
         number = scanner.nextLong(base);
       }
