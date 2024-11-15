@@ -4,7 +4,7 @@ on:
     branches: [develop]
     paths:
       - .github/workflows/publish-checks-wiki.yml
-      - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules
+      - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules/*.html
 concurrency:
   group: publish-checks-wiki
   cancel-in-progress: true

@@ -17,7 +17,7 @@ public class WarnedCallCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "WarnedCall";
 
-  private static final String MESSAGE = "Call is warned.";
+  private static final String MESSAGE = "Call '%s' is warned.";
   private static final String DEFAULT_WARNED_CALLS =
       "write(),sw:write(),remex(),sw:remex(),remove_exemplar(),sw:remove_exemplar()";
 
@@ -59,7 +59,7 @@ public class WarnedCallCheck extends MagikCheck {
       return;
     }
 
-    final AstNode procNode = node.getPreviousSibling();
-    this.addIssue(procNode, MESSAGE);
+    final String message = String.format(MESSAGE, identifier);
+    this.addIssue(parentNode, message);
   }
 }
