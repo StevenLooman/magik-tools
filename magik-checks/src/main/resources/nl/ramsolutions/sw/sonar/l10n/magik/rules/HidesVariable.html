@@ -1,10 +1,10 @@
 <p>Variable definition hides another variable with the same name.</p>
 <h2>Noncompliant Code Example</h2>
-<code>
+<pre>
 _local x << 10
 _for i _over 1.upto(10)
 _loop
   _local x << 20
   show(x)
 _endloop
-</code>
+</pre>

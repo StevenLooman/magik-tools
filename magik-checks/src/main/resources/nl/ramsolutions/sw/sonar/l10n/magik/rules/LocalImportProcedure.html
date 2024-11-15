@@ -1,6 +1,6 @@
 <p>Possibly meant _import instead of _local.</p>
 <h2>Noncompliant Code Example</h2>
-<code>
+<pre>
 _method a.m()
   _local log_stream << !terminal!
   _proc@do_something()
@@ -8,9 +8,9 @@ _method a.m()
     log_stream.write("hello from do_something")
   _endproc
 _endmethod
-</code>
+</pre>
 <h2>Compliant Solution</h2>
-<code>
+<pre>
 _method a.m()
   _local log_stream << !terminal!
   _proc@do_something()
@@ -18,4 +18,4 @@ _method a.m()
     log_stream.write("hello from do_something")
   _endproc
 _endmethod
-</code>
+</pre>
