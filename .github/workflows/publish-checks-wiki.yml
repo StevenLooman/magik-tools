@@ -1,4 +1,4 @@
-name: Publish checks to wiki
+name: Publish checks to my wiki
 on:
   workflow_dispatch:
   push:
