@@ -1,6 +1,6 @@
 name: Publish checks to wiki
 on:
-  workflow-dispatch:
+  workflow_dispatch:
   push:
     branches: [develop, wiki-formatting]
     paths:
