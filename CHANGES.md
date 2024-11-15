@@ -26,7 +26,7 @@
 - Fix sslr-magik-toolkit's "Evaluate XPath"-button.
 - Several fixes.
 
-## Breaking changes (reiterated from above):
+## Breaking changes (reiterated from above)
 
 - Make check properties more descriptive by adding `max-` if needed. `magik-lint.properties` likely needs to be updated.
 - Add `.sys!perform()` and `.sys!slot()` to ForbiddenCallCheck. This might result in more issues.
