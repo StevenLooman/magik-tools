@@ -3,14 +3,14 @@
 <h2>Noncompliant Code Example</h2>
 <pre>
 _method exemplar.hello(name):
-    _local message << "Hello " + name  # Unused variable
-    print("Hello " + name)
+  _local message << "Hello " + name  # Unused variable
+  print("Hello " + name)
 _endmethod
 </pre>
 <h2>Compliant Solution</h2>
 <pre>
 _method exemplar.hello(name):
-    _local message = "Hello " + name
-    print(message)
+  _local message = "Hello " + name
+  print(message)
 _endmethod
 </pre>
