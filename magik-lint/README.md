@@ -26,24 +26,24 @@ The [emacs magik-mode](https://github.com/roadrunner1776/magik) readily supports
 VSCode integration is achieved by adding a task with a `problemMatcher`, for example:
 
 ```json
-        {
-            "label": "magik-lint",
-            "type": "shell",
-            "command": "java -jar /path/to/magik-lint-LATEST.jar --msg-template \"\\${path}:\\${line}:\\${column}:\\${severity}:\\${symbol}:\\${msg}\" --watch .",
-            "problemMatcher": {
-                "owner": "magik",
-                "fileLocation": "relative",
-                "pattern": {
-                    "regexp": "^(.*):(\\d+):(\\d+):(.*):(.*):(.*)$",
-                    "file": 1,
-                    "line": 2,
-                    "column": 3,
-                    "severity": 4,
-                    "code": 5,
-                    "message": 6
-                }
-            }
+{
+    "label": "magik-lint",
+    "type": "shell",
+    "command": "java -jar /path/to/magik-lint-LATEST.jar --msg-template \"\\${path}:\\${line}:\\${column}:\\${severity}:\\${symbol}:\\${msg}\" --watch .",
+    "problemMatcher": {
+        "owner": "magik",
+        "fileLocation": "relative",
+        "pattern": {
+            "regexp": "^(.*):(\\d+):(\\d+):(.*):(.*):(.*)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "code": 5,
+            "message": 6
         }
+    }
+}
 ```
 
 ## Configuration
@@ -62,23 +62,53 @@ The configuration file is located as follows, in order:
 
 If no configuration file is found, defaults are assumed.
 
-The following options are avaiable in the configuration file:
+The following options are available in the configuration file:
 
-- enabled = \<comma separated list of check-names\>
-- disabled = \<comma separated list of check-names or `all`\>
-- \<check_name\>.\<check_attribute\> = \<value\>
+- enabled=\<comma separated list of check-names\>
+- disabled=\<comma separated list of check-names or `all`\>
+- \<check_name\>.\<check_attribute\>=\<value\>
 
 I.e., you can disable checks `method-complexity` and `line-length` by setting:
 
 ```text
-disabled = method-complexity, line-length
+disabled=method-complexity,line-length
 ```
 
-You can configure the `line-length` check to allow up to 120 characters per line by settings:
+You can configure the `line-length` check to allow up to 120 characters per line by setting:
 
 ```text
 line-length.max-line-length=120
 ```
+
+### Settings per check
+
+| Check name | Setting name | Default value |
+|------------|--------------|---------------|
+| commented-code | min-lines | 3 |
+| exemplar-slot-count | max-slot-count | 10 |
+| file-method-count | max-method-count | 10 |
+| forbidden-call | forbidden-calls | show(),sw:show(),print(),sw:print(),debug_print(),sw:debug_print(),.sys!perform(),.sys!slot() |
+| forbidden-global-usage | forbidden-globals | !current_grs!,sw:!current_grs! |
+| fobidden-inheritance | forbidden-parents |  |
+| formatting | indent-character | tab |
+| formatting | tab-width | 8 |
+| line-length | max-line-length | 120 |
+| line-length | tab-width | 8 |
+| method-complexity | max-complexity | 10 |
+| nesting-depth | max-nesting-depth | 3 |
+| nesting-depth | count-early-return-as-nesting-depth | true |
+| parameter-count | max-parameter-count | 6 |
+| scope-count | max-scope-count | 25 |
+| sw-method-doc | allow-blank-method-doc | false |
+| todo-comment | forbidden-comment-words | TODO,FIXME,HACK,NOTE,TEMP,XXX |
+| unused-variable | check-parameters | false |
+| variable-count | max-variable-count | 8 |
+| variable-declaration-usage-distance | max-distance | 5 |
+| variable-declaration-usage-distance | ignore-constants | true |
+| variable-naming | min-length | 3 |
+| variable-naming | max-length | 32 |
+| variable-naming | whitelist | x,y,z |
+| warned-call | warned-calls | write(),sw:write(),remex(),sw:remex(),remove_exemplar(),sw:remove_exemplar() |
 
 ## Exit codes
 

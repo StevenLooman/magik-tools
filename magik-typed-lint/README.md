@@ -36,23 +36,29 @@ The configuration file is located as follows, in order:
 
 If no configuration file is found, defaults are assumed.
 
-The following options are avaiable in the configuration file:
+The following options are available in the configuration file:
 
-- enabled = \<comma separated list of check-names\>
-- disabled = \<comma separated list of check-names or `all`\>
-- \<check_name\>.\<check_attribute\> = \<value\>
+- enabled=\<comma separated list of check-names\>
+- disabled=\<comma separated list of check-names or `all`\>
+- \<check_name\>.\<check_attribute\>=\<value\>
 
-I.e., you can disable checks `-char16-vector-evaluate-invocation` and `slot-exists` by setting:
-
-```text
-disabled = sw-char16-vector-evaluate-invocation, slot-exists
-```
-
-You can configure the `line-length` check to allow up to 120 characters per line by settings:
+I.e., you can disable checks `sw-char16-vector-evaluate-invocation` and `slot-exists` by setting:
 
 ```text
-line-length.line-length=120
+disabled=sw-char16-vector-evaluate-invocation,slot-exists
 ```
+
+You can configure the `module-required-for-global` check to test if the module is required for a used global by setting:
+
+```text
+module-required-for-global.always-loaded-modules=ace_core,rwo_core,super_dd,sw_core_magik_sessions
+```
+
+### Settings per check
+
+| Check name | Setting name | Default value |
+|------------|--------------|---------------|
+| module-required-for-global | always-loaded-modules | See [ModuleRequiredForGlobalTypedCheck](https://github.com/StevenLooman/magik-tools/blob/main/magik-typed-checks/src/main/java/nl/ramsolutions/sw/magik/typedchecks/checks/ModuleRequiredForGlobalTypedCheck.java#L51) |
 
 ## Exit codes
 
