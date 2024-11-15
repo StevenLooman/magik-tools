@@ -1,8 +1,7 @@
-name: Publish checks to my wiki
+name: Publish checks to wiki
 on:
-  workflow_dispatch:
   push:
-    branches: [develop, wiki-formatting]
+    branches: [develop]
     paths:
       - .github/workflows/publish-checks-wiki.yml
       - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules/*.html
@@ -46,3 +45,5 @@ jobs:
       - uses: Andrew-Chen-Wang/github-wiki-action@86138cbd6328b21d759e89ab6e6dd6a139b22270
         with:
           path: wiki
+          #dry-run: true
+        if: ${{ github.repository_owner == 'StevenLooman' }}
