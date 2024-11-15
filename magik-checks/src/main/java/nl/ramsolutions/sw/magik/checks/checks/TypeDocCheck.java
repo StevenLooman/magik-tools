@@ -15,6 +15,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import org.sonar.check.Rule;
+import org.sonar.check.RuleProperty;
 
 /** Check TypeDoc. */
 @Rule(key = TypeDocCheck.CHECK_KEY)
@@ -23,10 +24,20 @@ public class TypeDocCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "TypeDoc";
 
+  private static final boolean DEFAULT_CHECK_PROCEDURES = true;
+
   private static final String MESSAGE_PARAM_MISSING = "Missing parameter: %s.";
   private static final String MESSAGE_PARAM_UNKNOWN = "Unknown parameter: %s.";
   private static final String MESSAGE_SLOT_MISSING = "Missing slot: %s.";
   private static final String MESSAGE_SLOT_UNKNOWN = "Unknown slot: %s.";
+
+  @RuleProperty(
+      key = "check procedures",
+      defaultValue = "" + DEFAULT_CHECK_PROCEDURES,
+      description = "Check procedures for TypeDoc",
+      type = "BOOLEAN")
+  @SuppressWarnings("checkstyle:VisibilityModifier")
+  public boolean checkProcedures = DEFAULT_CHECK_PROCEDURES;
 
   @Override
   protected void walkPostMethodDefinition(final AstNode node) {
@@ -35,6 +46,10 @@ public class TypeDocCheck extends MagikCheck {
 
   @Override
   protected void walkPostProcedureDefinition(final AstNode node) {
+    if (!this.checkProcedures) {
+      return;
+    }
+
     this.checkDefinitionParameters(node);
   }
 
