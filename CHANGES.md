@@ -21,6 +21,7 @@
 - Fix magik-lint/magik-typed-lint not using located configuration file when showing checks.
 - Make check properties more descriptive by adding `max-` if needed.
 - Fix WarnedCallCheck and ForbiddenCallCheck to handle method invocations.
+- Do not check abstract method parameters in UnusedVariableCheck if `check-parameters`.
 - Several fixes.
 
 0.10.1 (2024-08-14)
