@@ -12,7 +12,6 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
-import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Test {@link DeprecatedMethodUsageTypedCheck}. */
@@ -46,7 +45,7 @@ class DeprecatedMethodUsageTypedCheckTest extends MagikTypedCheckTestBase {
         _block
           object.m()
         _endblock""";
-    final MagikTypedCheck check = new DeprecatedMethodUsageTypedCheck();
+    final DeprecatedMethodUsageTypedCheck check = new DeprecatedMethodUsageTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).hasSize(1);
   }
@@ -60,7 +59,7 @@ class DeprecatedMethodUsageTypedCheckTest extends MagikTypedCheckTestBase {
         _block
           object.m()
         _endblock""";
-    final MagikTypedCheck check = new DeprecatedMethodUsageTypedCheck();
+    final DeprecatedMethodUsageTypedCheck check = new DeprecatedMethodUsageTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }

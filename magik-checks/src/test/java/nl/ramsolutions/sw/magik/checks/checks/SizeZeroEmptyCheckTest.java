@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,14 +21,14 @@ class SizeZeroEmptyCheckTest extends MagikCheckTestBase {
         "0 = a.size",
       })
   void testInvalid(final String code) {
-    final MagikCheck check = new SizeZeroEmptyCheck();
+    final SizeZeroEmptyCheck check = new SizeZeroEmptyCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isNotEmpty();
   }
 
   @Test
   void testValid() {
-    final MagikCheck check = new SizeZeroEmptyCheck();
+    final SizeZeroEmptyCheck check = new SizeZeroEmptyCheck();
     final String code = "a.empty?\n";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();

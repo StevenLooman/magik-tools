@@ -9,7 +9,6 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
-import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -43,7 +42,7 @@ class ComparedTypesDoNotMatchTypedCheckTest extends MagikTypedCheckTestBase {
       })
   void testDoesNotCheckUndefined(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
+    final ComparedTypesDoNotMatchTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
     assertThat(checkResults).isEmpty();
   }
@@ -120,7 +119,7 @@ class ComparedTypesDoNotMatchTypedCheckTest extends MagikTypedCheckTestBase {
             Collections.emptyList(),
             List.of(TypeString.ofIdentifier("parent", "user")),
             Collections.emptySet()));
-    final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
+    final ComparedTypesDoNotMatchTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
     assertThat(checkResults).isEmpty();
   }
@@ -164,7 +163,7 @@ class ComparedTypesDoNotMatchTypedCheckTest extends MagikTypedCheckTestBase {
       })
   void testTypeNotMatchable(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
+    final ComparedTypesDoNotMatchTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
     assertThat(checkResults).hasSize(1);
   }

@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,7 +25,7 @@ class VariableNamingCheckTest extends MagikCheckTestBase {
         "result +<< str << _self.a",
       })
   void testValid(final String code) {
-    final MagikCheck check = new VariableNamingCheck();
+    final VariableNamingCheck check = new VariableNamingCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -40,7 +39,7 @@ class VariableNamingCheckTest extends MagikCheckTestBase {
         "_local l_c",
       })
   void testInvalid(final String code) {
-    final MagikCheck check = new VariableNamingCheck();
+    final VariableNamingCheck check = new VariableNamingCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -54,14 +53,14 @@ class VariableNamingCheckTest extends MagikCheckTestBase {
         "_local l_this_is_the_very_long_variable_name",
       })
   void testTooLongVariableName(final String code) {
-    final MagikCheck check = new VariableNamingCheck();
+    final VariableNamingCheck check = new VariableNamingCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
 
   @Test
   void testMultiVariableDeclarationInvalidName() {
-    final MagikCheck check = new VariableNamingCheck();
+    final VariableNamingCheck check = new VariableNamingCheck();
     final String code = "_local (l_i, l_r) << (1, 2)";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(2);

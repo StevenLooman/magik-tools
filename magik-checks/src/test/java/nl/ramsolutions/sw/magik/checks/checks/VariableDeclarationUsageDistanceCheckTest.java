@@ -15,22 +15,24 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
   @ValueSource(
       strings = {
         """
-          _method object.m
-              _local a << 1
-              do_something()
-              do_something()
-              write(a)
-          _endmethod""",
+        _method object.m
+          _local a << 1
+          do_something()
+          do_something()
+          write(a)
+        _endmethod
+        """,
         """
-          _method object.m
-              _local a << 1
-              do_something()
-              do_something()
-              _if _true
-              _then
-                  write(a)
-              _endif
-          _endmethod""",
+        _method object.m
+          _local a << 1
+          do_something()
+          do_something()
+          _if _true
+          _then
+            write(a)
+          _endif
+        _endmethod
+        """,
       })
   void testValid(final String code) {
     final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
@@ -44,45 +46,49 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
       strings = {
         """
         _method object.m
-            a << 1
-            _if x
-            _then
-                a.method1()
-            _endif
-            _if y
-            _then
-                a.method2()
-            _endif
-            >> a
-        _endmethod""",
-        """
-        _method object.m
-            _if _true
-            _then
-                a << 1
-            _endif
-            do_something()
-            do_something()
-            _if _true
-            _then
-                write(a)
-            _endif
-        _endmethod""",
-        """
-        _method object.m
-            _local a << 1
-            do_something()
-            a[:abc] << :def
-            a.do()
-        _endmethod""",
-        """
-        _method object.m
-            _constant a << 1
-            do_something()
-            do_something()
-            do_something()
+          a << 1
+          _if x
+          _then
             a.method1()
-        _endmethod""",
+          _endif
+          _if y
+          _then
+            a.method2()
+          _endif
+          >> a
+        _endmethod
+        """,
+        """
+        _method object.m
+          _if _true
+          _then
+            a << 1
+          _endif
+          do_something()
+          do_something()
+          _if _true
+          _then
+            write(a)
+          _endif
+        _endmethod
+        """,
+        """
+        _method object.m
+          _local a << 1
+          do_something()
+          a[:abc] << :def
+          a.do()
+        _endmethod
+        """,
+        """
+        _method object.m
+          _constant a << 1
+          do_something()
+          do_something()
+          do_something()
+          a.method1()
+        _endmethod
+        """,
       })
   void testValid2(final String code) {
     final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
@@ -96,31 +102,34 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
   @ValueSource(
       strings = {
         """
-          _method object.m
-              _local a << 1
-              do_something()
-              do_something()
-              write(a)
-              write(a)
-          _endmethod""",
-        """
-          _method object.m
-              _local a << 1
-              do_something()
-              do_something()
-              _if _true
-              _then
-                  write(a)
-              _endif
-          _endmethod""",
+        _method object.m
+          _local a << 1
+          do_something()
+          do_something()
+          write(a)
+          write(a)
+        _endmethod
+        """,
         """
         _method object.m
-            _local a << 1
-            do_something()
-            do_something()
-            do_something()
-            a.method1()
-        _endmethod""",
+          _local a << 1
+          do_something()
+          do_something()
+          _if _true
+          _then
+            write(a)
+          _endif
+        _endmethod
+        """,
+        """
+        _method object.m
+          _local a << 1
+          do_something()
+          do_something()
+          do_something()
+          a.method1()
+        _endmethod
+        """,
       })
   void testInvalid(final String code) {
     final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();

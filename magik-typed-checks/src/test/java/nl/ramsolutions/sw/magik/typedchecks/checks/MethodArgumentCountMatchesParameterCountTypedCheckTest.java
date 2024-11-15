@@ -12,7 +12,6 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
-import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Test {@link MethodArgumentCountMatchesParameterCountTypedCheck}. */
@@ -26,7 +25,8 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
           object.m()
         _endblock""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
+    final MethodArgumentCountMatchesParameterCountTypedCheck check =
+        new MethodArgumentCountMatchesParameterCountTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }
@@ -73,7 +73,8 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
         _block
           object.m(object, object)
         _endblock""";
-    final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
+    final MethodArgumentCountMatchesParameterCountTypedCheck check =
+        new MethodArgumentCountMatchesParameterCountTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }
@@ -120,7 +121,8 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
         _block
           object.m(object)
         _endblock""";
-    final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
+    final MethodArgumentCountMatchesParameterCountTypedCheck check =
+        new MethodArgumentCountMatchesParameterCountTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).hasSize(1);
   }

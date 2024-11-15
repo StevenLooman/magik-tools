@@ -16,10 +16,10 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
     final String code =
         """
         _method a.b
-            _if a
-            _then
-              do()
-            _endif
+          _if a
+          _then
+            do()
+          _endif
         _endmethod
         """;
     final List<MagikIssue> issues = this.runCheck(code, check);
@@ -33,7 +33,7 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
     final String code =
         """
         _method a.b
-            do()
+          do()
         _endmethod
         """;
     final List<MagikIssue> issues = this.runCheck(code, check);
@@ -47,10 +47,10 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
     final String code =
         """
         _proc()
-            _if a
-            _then
-              do()
-            _endif
+          _if a
+          _then
+            do()
+          _endif
         _endproc
         """;
     final List<MagikIssue> issues = this.runCheck(code, check);
@@ -64,7 +64,7 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
     final String code =
         """
         _proc()
-            do()
+          do()
         _endproc
         """;
     final List<MagikIssue> issues = this.runCheck(code, check);
@@ -77,8 +77,9 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
     final String code =
         """
         _method a.b
-            >> _self.
-        _endmethod""";
+          >> _self.
+        _endmethod
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }

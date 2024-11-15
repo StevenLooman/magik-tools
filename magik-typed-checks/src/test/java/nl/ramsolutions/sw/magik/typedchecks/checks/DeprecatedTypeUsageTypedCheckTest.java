@@ -10,7 +10,6 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
-import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Test {@link DeprecatedTypeUsageTypedCheck}. */
@@ -42,7 +41,7 @@ class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
         _block
           user:test.m()
         _endblock""";
-    final MagikTypedCheck check = new DeprecatedTypeUsageTypedCheck();
+    final DeprecatedTypeUsageTypedCheck check = new DeprecatedTypeUsageTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).hasSize(1);
   }
@@ -57,7 +56,7 @@ class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
         _block
           user:test.m()
         _endblock""";
-    final MagikTypedCheck check = new DeprecatedTypeUsageTypedCheck();
+    final DeprecatedTypeUsageTypedCheck check = new DeprecatedTypeUsageTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }
