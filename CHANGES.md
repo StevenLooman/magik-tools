@@ -22,6 +22,7 @@
 - Make check properties more descriptive by adding `max-` if needed.
 - Fix WarnedCallCheck and ForbiddenCallCheck to handle method invocations.
 - Do not check abstract method parameters in UnusedVariableCheck if `check-parameters`.
+- Fix sslr-magik-toolkit's "Evaluate XPath"-button.
 - Several fixes.
 
 0.10.1 (2024-08-14)
