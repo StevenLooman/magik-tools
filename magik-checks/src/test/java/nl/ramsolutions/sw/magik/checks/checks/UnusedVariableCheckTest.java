@@ -215,4 +215,17 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
+
+  @Test
+  void testParameterInAbstractMethod() {
+    final UnusedVariableCheck check = new UnusedVariableCheck();
+    check.checkParameters = true;
+    final String code =
+        """
+        _abstract _method a.b(p_param1)
+        _endmethod
+        """;
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 }

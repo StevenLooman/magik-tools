@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -130,6 +131,22 @@ public class UnusedVariableCheck extends MagikCheck {
             });
   }
 
+  private boolean isAbstractMethodParameter(AstNode scopeEntryNode) {
+    final AstNode parentNode =
+        AstQuery.getParentFromChain(
+            scopeEntryNode,
+            MagikGrammar.PARAMETER,
+            MagikGrammar.PARAMETERS,
+            MagikGrammar.METHOD_DEFINITION);
+
+    if (parentNode == null || parentNode.isNot(MagikGrammar.METHOD_DEFINITION)) {
+      return false;
+    }
+
+    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(parentNode);
+    return helper.isAbstractMethod();
+  }
+
   private List<ScopeEntry> getCheckableScopeEntries() {
     final List<ScopeEntry> scopeEntries = new ArrayList<>();
     final GlobalScope globalScope = this.getMagikFile().getGlobalScope();
@@ -145,6 +162,13 @@ public class UnusedVariableCheck extends MagikCheck {
 
         // No parameters, unless forced to
         if (!this.checkParameters && scopeEntry.isType(ScopeEntry.Type.PARAMETER)) {
+          continue;
+        }
+
+        // No abstract method parameters
+        if (this.checkParameters
+            && scopeEntry.isType(ScopeEntry.Type.PARAMETER)
+            && this.isAbstractMethodParameter(scopeEntryNode)) {
           continue;
         }
 
