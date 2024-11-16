@@ -50,6 +50,11 @@ public final class Main {
           .build();
   private static final Option OPTION_SHOW_CHECKS =
       Option.builder().longOpt("show-checks").desc("Show checks and exit").build();
+  private static final Option OPTION_WITH_DEFAULT_VALUES =
+      Option.builder()
+          .longOpt("with-default-values")
+          .desc("Show default values when showing checks")
+          .build();
   private static final Option OPTION_COLUMN_OFFSET =
       Option.builder()
           .longOpt("column-offset")
@@ -64,14 +69,15 @@ public final class Main {
           .hasArg()
           .type(PatternOptionBuilder.NUMBER_VALUE)
           .build();
+  private static final Option OPTION_APPLY_FIXES =
+      Option.builder().longOpt("apply-fixes").desc("Apply fixes automatically").build();
+
   private static final Option OPTION_DEBUG =
       Option.builder().longOpt("debug").desc("Enable showing of debug information").build();
   private static final Option OPTION_VERSION =
       Option.builder().longOpt("version").desc("Show version and exit").build();
   private static final Option OPTION_HELP =
       Option.builder().longOpt("help").desc("Show this help and exit").build();
-  private static final Option OPTION_APPLY_FIXES =
-      Option.builder().longOpt("apply-fixes").desc("Apply fixes automatically").build();
 
   static {
     OPTIONS = new Options();
@@ -79,11 +85,12 @@ public final class Main {
     OPTIONS.addOption(OPTION_MSG_TEMPLATE);
     OPTIONS.addOption(OPTION_RCFILE);
     OPTIONS.addOption(OPTION_SHOW_CHECKS);
+    OPTIONS.addOption(OPTION_WITH_DEFAULT_VALUES);
     OPTIONS.addOption(OPTION_COLUMN_OFFSET);
     OPTIONS.addOption(OPTION_MAX_INFRACTIONS);
+    OPTIONS.addOption(OPTION_APPLY_FIXES);
     OPTIONS.addOption(OPTION_DEBUG);
     OPTIONS.addOption(OPTION_VERSION);
-    OPTIONS.addOption(OPTION_APPLY_FIXES);
   }
 
   private static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING =
@@ -175,6 +182,13 @@ public final class Main {
       Main.initDebugLogger();
     }
 
+    if (commandLine.hasOption(OPTION_WITH_DEFAULT_VALUES)
+        && !commandLine.hasOption(OPTION_SHOW_CHECKS)) {
+      final PrintStream errStream = Main.getErrStream();
+      errStream.println("--with-default-values can only be used with --show-checks");
+      System.exit(1);
+    }
+
     if (commandLine.hasOption(OPTION_VERSION)) {
       final String version = Main.class.getPackage().getImplementationVersion();
       final PrintStream errStream = Main.getErrStream();
@@ -183,24 +197,7 @@ public final class Main {
     }
 
     // Read configuration.
-    final MagikToolsProperties properties;
-    if (commandLine.hasOption(OPTION_RCFILE)) {
-      final File rcfile = (File) commandLine.getParsedOptionValue(OPTION_RCFILE);
-      final Path path = rcfile.toPath();
-      if (!Files.exists(path)) {
-        final PrintStream errStream = Main.getErrStream();
-        errStream.println("RC File does not exist: " + path);
-
-        System.exit(1);
-      }
-      properties = new MagikToolsProperties(path);
-    } else {
-      final Path currentWorkingPath = Path.of(".");
-      final Path path = ConfigurationLocator.locateConfiguration(currentWorkingPath);
-      properties =
-          path != null ? new MagikToolsProperties(path) : MagikToolsProperties.DEFAULT_PROPERTIES;
-    }
-
+    final MagikToolsProperties properties = Main.loadProperties(commandLine);
     // Copy configuration from command line.
     Main.copyOptionsToConfig(commandLine, properties);
 
@@ -210,8 +207,9 @@ public final class Main {
       final MagikLint lint = new MagikLint(properties, reporter);
       final PrintStream outStream = Main.getOutStream();
       final Writer writer = new PrintWriter(outStream);
-      lint.showEnabledChecks(writer);
-      lint.showDisabledChecks(writer);
+      final boolean showDefaultValues = commandLine.hasOption(OPTION_WITH_DEFAULT_VALUES);
+      lint.showEnabledChecks(writer, showDefaultValues);
+      lint.showDisabledChecks(writer, showDefaultValues);
       writer.flush();
       System.exit(0);
     }
@@ -244,6 +242,27 @@ public final class Main {
             .map(Main.SEVERITY_EXIT_CODE_MAPPING::get)
             .reduce(0, (partial, sum) -> sum | partial);
     System.exit(exitCode);
+  }
+
+  private static MagikToolsProperties loadProperties(final CommandLine commandLine)
+      throws ParseException, IOException {
+    if (commandLine.hasOption(OPTION_RCFILE)) {
+      final File rcfile = (File) commandLine.getParsedOptionValue(OPTION_RCFILE);
+      final Path path = rcfile.toPath();
+      if (!Files.exists(path)) {
+        final PrintStream errStream = Main.getErrStream();
+        errStream.println("RC File does not exist: " + path);
+
+        System.exit(1);
+      }
+      return new MagikToolsProperties(path);
+    } else {
+      final Path currentWorkingPath = Path.of(".");
+      final Path path = ConfigurationLocator.locateConfiguration(currentWorkingPath);
+      return path != null
+          ? new MagikToolsProperties(path)
+          : MagikToolsProperties.DEFAULT_PROPERTIES;
+    }
   }
 
   private static void copyOptionsToConfig(

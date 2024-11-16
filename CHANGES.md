@@ -24,6 +24,7 @@
 - Add `.sys!perform()` and `.sys!slot()` to ForbiddenCallCheck.
 - Do not check abstract method parameters in UnusedVariableCheck if `check-parameters`.
 - Fix sslr-magik-toolkit's "Evaluate XPath"-button.
+- Add `--with-default-values` option to `magik-lint`/`magik-typed-lint` to show the default values for parameters.
 - Several fixes.
 
 ## Breaking changes (reiterated from above)

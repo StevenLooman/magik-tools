@@ -86,14 +86,15 @@ public class MagikLint {
   }
 
   /**
-   * Show checks active and inactive checks.
+   * Show enabled and disabled checks.
    *
    * @param writer Writer Write to write output to.
    * @param showDisabled boolean Boolean to show disabled checks or not.
+   * @param showDefaultValues boolean Boolean to show default values for parameters or not.
    * @throws ReflectiveOperationException -
    * @throws IOException -
    */
-  void showChecks(final Writer writer, final boolean showDisabled)
+  void showChecks(final Writer writer, final boolean showDisabled, boolean showDefaultValues)
       throws ReflectiveOperationException, IOException {
     final MagikChecksConfiguration checksConfig =
         new MagikChecksConfiguration(CheckList.getChecks(), this.properties);
@@ -106,14 +107,51 @@ public class MagikLint {
         continue;
       }
 
-      for (final MagikCheckHolder.Parameter parameter : holder.getParameters()) {
+      showParameters(writer, holder, showDefaultValues);
+    }
+  }
+
+  /**
+   * Show parameters for a check.
+   *
+   * @param writer Writer Write to write output to.
+   * @param showDefaultValues boolean Boolean to show default values for parameters or not.
+   * @throws ReflectiveOperationException -
+   * @throws IOException -
+   */
+  private void showParameters(
+      final Writer writer, final MagikCheckHolder holder, final boolean showDefaultValues)
+      throws ReflectiveOperationException, IOException {
+    for (final MagikCheckHolder.Parameter parameter : holder.getParameters()) {
+      if (!parameter.isExplicitlySet() && !showDefaultValues) {
+        continue;
+      }
+      final String defaultIndicator = !parameter.isExplicitlySet() ? " (default)" : "";
+      // Handle comma-separated list parameters differently
+      if (parameter.getValue() != null && parameter.getValue().toString().contains(",")) {
         writer.write(
-            "\t"
-                + parameter.getName()
-                + ":\t"
-                + parameter.getValue()
+            " ".repeat(2)
+                + "*"
+                + defaultIndicator
                 + " "
-                + "("
+                + parameter.getNameWithoutCheckName()
+                + " ("
+                + parameter.getDescription()
+                + "):\n");
+        String[] values = parameter.getValue().toString().split(",");
+        for (String value : values) {
+          writer.write(" ".repeat(4) + "- " + value.trim() + "\n");
+        }
+      } else {
+        writer.write(
+            " ".repeat(2)
+                + "*"
+                + defaultIndicator
+                + " "
+                + parameter.getNameWithoutCheckName()
+                + ": "
+                + parameter.getValue()
+                + " ("
                 + parameter.getDescription()
                 + ")\n");
       }
@@ -124,24 +162,28 @@ public class MagikLint {
    * Show enabled checks.
    *
    * @param writer Writer Write to write output to.
+   * @param showDefaultValues boolean Boolean to show default values for parameters or not.
    * @throws ReflectiveOperationException -
    * @throws IOException -
    */
-  void showEnabledChecks(final Writer writer) throws ReflectiveOperationException, IOException {
+  void showEnabledChecks(final Writer writer, final Boolean showDefaultValues)
+      throws ReflectiveOperationException, IOException {
     writer.write("Enabled checks:\n");
-    this.showChecks(writer, false);
+    this.showChecks(writer, false, showDefaultValues);
   }
 
   /**
    * Show disabled checks.
    *
    * @param writer Writer Write to write output to.
+   * @param showDefaultValues boolean Boolean to show default values for parameters or not.
    * @throws ReflectiveOperationException -
    * @throws IOException -
    */
-  void showDisabledChecks(final Writer writer) throws ReflectiveOperationException, IOException {
+  void showDisabledChecks(final Writer writer, final boolean showDefaultValues)
+      throws ReflectiveOperationException, IOException {
     writer.write("Disabled checks:\n");
-    this.showChecks(writer, true);
+    this.showChecks(writer, true, showDefaultValues);
   }
 
   /**

@@ -21,6 +21,7 @@ public class MagikCheckHolder {
     private final String name;
     private final String description;
     private final Object value;
+    private final Object defaultValue;
 
     /**
      * Constructor.
@@ -28,15 +29,25 @@ public class MagikCheckHolder {
      * @param name Name of parameter.
      * @param description Description of parameter.
      * @param value Value of parameter.
+     * @param defaultValue Default value of parameter.
      */
-    public Parameter(final String name, final String description, final @Nullable Object value) {
+    public Parameter(
+        final String name,
+        final String description,
+        final @Nullable Object value,
+        final @Nullable Object defaultValue) {
       this.name = name;
       this.description = description;
       this.value = value;
+      this.defaultValue = defaultValue;
     }
 
     public String getName() {
       return this.name;
+    }
+
+    public String getNameWithoutCheckName() {
+      return this.name.split("\\.")[1];
     }
 
     public String getDescription() {
@@ -45,7 +56,16 @@ public class MagikCheckHolder {
 
     @CheckForNull
     public Object getValue() {
-      return this.value;
+      return this.value != null ? this.value : this.defaultValue;
+    }
+
+    @CheckForNull
+    public Object getDefaultValue() {
+      return this.defaultValue;
+    }
+
+    public boolean isExplicitlySet() {
+      return this.value != null;
     }
   }
 
