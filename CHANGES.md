@@ -24,6 +24,7 @@
 - Add `.sys!perform()` and `.sys!slot()` to ForbiddenCallCheck.
 - Do not check abstract method parameters in UnusedVariableCheck if `check-parameters`.
 - Fix sslr-magik-toolkit's "Evaluate XPath"-button.
+- Add UndefinedVariable check to Sonar way profile.
 - Several fixes.
 
 ## Breaking changes (reiterated from above)
@@ -32,6 +33,7 @@
 - Add `.sys!perform()` and `.sys!slot()` to ForbiddenCallCheck. This might result in more issues.
 - Add SimplifyIf check to Sonar way profile. This might result in more issues.
 - Add UnsafeEvaluateInvocation check to Sonar way profile. This might result in more issues.
+- Add UndefinedVariable check to Sonar way profile. This might result in more issues.
 
 0.10.1 (2024-08-14)
 
