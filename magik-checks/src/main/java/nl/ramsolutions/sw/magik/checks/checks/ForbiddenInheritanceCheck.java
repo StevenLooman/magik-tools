@@ -25,11 +25,11 @@ public class ForbiddenInheritanceCheck extends MagikCheck {
 
   private static final String DEFAULT_FORBIDDEN_PARENTS = "";
 
-  /** Forbidden parents to inhertit from, separated by ','. */
+  /** Forbidden parents to inherit from, separated by ','. */
   @RuleProperty(
       key = "forbidden parents",
       defaultValue = "" + DEFAULT_FORBIDDEN_PARENTS,
-      description = "Forbidden parents to inhertit from, separated by ','",
+      description = "Forbidden parents to inherit from, separated by ','",
       type = "STRING")
   @SuppressWarnings("checkstyle:VisibilityModifier")
   public String forbiddenParents = DEFAULT_FORBIDDEN_PARENTS;
