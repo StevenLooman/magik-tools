@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.sonar.check.Rule;
 
 /** MagicCheck holder/factory. */
@@ -91,6 +92,10 @@ public class MagikCheckHolder {
     this.metadata = null;
   }
 
+  private Set<Parameter> explicitlySetParameters() {
+    return this.parameters.stream().filter(Parameter::isExplicitlySet).collect(Collectors.toSet());
+  }
+
   /**
    * Get the wrapped check.
    *
@@ -101,7 +106,8 @@ public class MagikCheckHolder {
     final MagikCheck check = this.checkClass.getDeclaredConstructor().newInstance();
     check.setHolder(this);
 
-    for (final Parameter parameter : this.parameters) {
+    final Set<Parameter> explicitlySetParameters = this.explicitlySetParameters();
+    for (final Parameter parameter : explicitlySetParameters) {
       final String name = parameter.getName();
       final Object value = parameter.getValue();
       check.setParameter(name, value);
