@@ -114,9 +114,10 @@ line-length.max-line-length=120
 
 The exit code from Magik-lint is determined by the infractions of checks. The severity of a check will set a flag in the return code:
 
-| Severity | Exit code |
-|----------|-----------|
-| Major    | 2         |
-| Minor    | 4         |
+| Severity    | Exit code |
+|-------------|-----------|
+| Critical    | 2         |
+| Major       | 4         |
+| Minor       | 8         |
 
 When using Git, checking flags in the return code allows you to allow minor infractions being committed, but prevent a commit of a major infraction, using Git hooks.
