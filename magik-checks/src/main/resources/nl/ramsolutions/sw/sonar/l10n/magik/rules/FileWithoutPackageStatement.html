@@ -1,1 +1,15 @@
-<p>File should have at least one <pre>_package</pre>-statement. This ensures the code is loaded into the correct package.</p>
+<p>File should have at least one <code>_package</code>-statement. This ensures the code is loaded into the correct package.</p>
+<h2>Noncompliant Code Example</h2>
+<pre>
+_block
+  write(a)
+_endblock
+</pre>
+<h2>Compliant Solution</h2>
+<pre>
+_package user
+
+_block
+  write(a)
+_endblock
+</pre>
