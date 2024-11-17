@@ -1,6 +1,6 @@
 # Changes
 
-0.11.0 (unreleased)
+## 0.11.0 (unreleased)
 
 - Fix error when parsing `def_slotted_exemplar()`/`def_indexed_exemplar()`/`define_condition()` with unknown children/data names.
 - Fix VariableCountCheck, improve message.
@@ -27,7 +27,7 @@
 - Add UndefinedVariable check to Sonar way profile.
 - Several fixes.
 
-## Breaking changes (reiterated from above)
+### Breaking changes (reiterated from above)
 
 - Make check properties more descriptive by adding `max-` if needed. `magik-lint.properties` likely needs to be updated.
 - Add `.sys!perform()` and `.sys!slot()` to ForbiddenCallCheck. This might result in more issues.
@@ -35,7 +35,7 @@
 - Add UnsafeEvaluateInvocation check to Sonar way profile. This might result in more issues.
 - Add UndefinedVariable check to Sonar way profile. This might result in more issues.
 
-0.10.1 (2024-08-14)
+## 0.10.1 (2024-08-14)
 
 - Fix CommentedCodeCheck, splitting commented code on newlines.
 - Fix CommentedCodeCheck, not seeing seeing the commented line if line is top of file.
@@ -44,7 +44,7 @@
 - Fix sw_type_dumper not handling sub-objects properly.
 - Cache `magik-tools.properties` per opened file in `magik-language-server`.
 
-0.10.0 (2024-07-28)
+## 0.10.0 (2024-07-28)
 
 - Move to Java 17.
 - Add base functionality to apply fixes from magik-lint.
@@ -91,7 +91,7 @@
 - Support Call hierarchy for methods and procedures.
 - Several fixes.
 
-0.9.1 (2024-03-13)
+## 0.9.1 (2024-03-13)
 
 - Fix actually not indexing large files in magik-language-server.
 - Fix `sonar-magik-plugin` not setting property `sonar.lang.patterns.magik`.
@@ -100,7 +100,7 @@
 - Fix `sonar-magik-plugin` crashing on syntax error token during Copy/Paste Detection-phase.
 - Fix reasoning errors where types were regarded as combined, when it was actually singular.
 
-0.9.0 (2024-02-26)
+## 0.9.0 (2024-02-26)
 
 - Support configurable libs dirs.
 - Read and register in which module a definition lives.
@@ -122,12 +122,12 @@
 - Add ModuleRequiredForGlobalTypedCheck to test if the source module is required, when a global is used.
 - Minor fixes.
 
-0.8.3 (2024-01-05)
+## 0.8.3 (2024-01-05)
 
 - Fix error finding start/end line/column for Scopes, when encountering an empty block.
 - Fix error when determining issue is disabled via MagikIssueDisabledChecker in certain cases.
 
-0.8.2 (2023-11-14)
+## 0.8.2 (2023-11-14)
 
 - Fix not finding appropriate node to register issue on when method contains a syntax error.
 - `magik-lint.properties` is searched for from path of current file in magik-lint, unless `--rcfile` is used.
@@ -136,7 +136,7 @@
 - Fix reading mlint-instructions in scope.
 - Fix WarnedCallCheck default warned calls not seeing the `sw:`-prefixed versions.
 
-0.8.1 (2023-10-15)
+## 0.8.1 (2023-10-15)
 
 - Better handle syntax errors in Copy/Paste Detection step in sonar-magik-plugin.
 - Fix sslr-magik-toolkit pointing to wrong Main class.
@@ -149,7 +149,7 @@
 - Fix to allow comments after tokens in FormattingCheck.
 - Fix default/example to also include package-prefix global in ForbiddenGlobalUsageCheck.
 
-0.8.0 (2023-09-27)
+## 0.8.0 (2023-09-27)
 
 - Fix SwMethodDocCheck not properly matching uppercased parameter in method doc when it is followed by a non-whitespace character.
 - Fix UnusedVariableCheck not properly handling variables of a for loop.
@@ -180,14 +180,14 @@
 - Drop `--untabify` option from magik-lint.
 - Various small fixes.
 
-0.7.1 (2023-02-21)
+## 0.7.1 (2023-02-21)
 
 - Fix VariableDeclarationUsageDistance not seeing method invocations as usage
 - Fix TypeDoc ruleSpecification/sqKey having old name (NewDoc)
 - Fix bug during re-reading the types database using JsonTypeKeeperReader, where a duplicate type would cause an error
 - Report version and settings, if applicable
 
-0.7.0 (2023-02-09)
+## 0.7.0 (2023-02-09)
 
 - Fix SwMethodDocCheck accepting `##` as a comment.
 - Fix SimplifyIfCheck to not report invalid reduction.
@@ -202,7 +202,7 @@
 - Add generics to the type system, which allows collections to be parameterized.
 - Fix SimplifyIfCheck better handling syntax errors
 
-0.6.0 (2022-09-12)
+## 0.6.0 (2022-09-12)
 
 - Drop UnaryOperator, replaced by the proper method calls
 - Minor refactoring of CLI options
@@ -220,17 +220,17 @@
 - Various bug fixes
 - Various new features
 
-0.5.4 (2022-11-07)
+## 0.5.4 (2022-11-07)
 
 - Remove MethodDoc check
 - Add ParameterCount check
 - Update Sonar way profile
 
-0.5.3 (2022-11-04)
+## 0.5.3 (2022-11-04)
 
 - Fix bug in sonar plugin where all issues were applied to every file
 
-0.5.2 (2022-05-26)
+## 0.5.2 (2022-05-26)
 
 - Fix bug in ScopeBuilderVisitor where import in top level procedure caused a NPE
 - Fix bug in magik-lint --rcfile, where java.io.File is expected but was java.io.FileInputStream
@@ -240,7 +240,7 @@
 - Add setting `magik.lint.overrideConfigFile` to override properties file for linter from Language Server
 - Fix bug in HoverProvider where no hover was provided for assigned variable
 
-0.5.1 (2022-01-17)
+## 0.5.1 (2022-01-17)
 
 - More robustness for other LSP clients other than VScode
 - Fix binary operator handling not recognizing magik keywords
@@ -249,7 +249,7 @@
 - Fix bug in JSON type database reader: lines with // are now regarded as comment-lines
 - Fix bug causing magik-lint.jar --show-checks to not work
 
-0.5.0 (2022-01-07)
+## 0.5.0 (2022-01-07)
 
 - MessagePatchGrammar no longer needs a $ at the end of the message patch
 - Strip org.sonarsource.sonarqube:sonar-plugin-api from magik-lint, shaving size
@@ -279,7 +279,7 @@
 - Remove --watch option from magik-lint
 - Add check HidesVariable
 
-0.4.0 (2020-01-29)
+## 0.4.0 (2020-01-29)
 
 - Make MagikGrammar more consistent
 - Add check EmptyBlock
@@ -304,18 +304,18 @@
 - Add setting FormattingCheck.indent\_character (tab/space)
 - Use annotation to mark MagikCheck as templated check
 
-0.3.2 (2019-10-29)
+## 0.3.2 (2019-10-29)
 
 - Add check ScopeCount
 - Add check UndefinedVariable
 - Fix LocalImportProcedureCheck not properly handling non-locals/definitions
 
-0.3.1 (2019-09-22)
+## 0.3.1 (2019-09-22)
 
 - Prevent CPD errors when SYNTAX\_ERROR token is too long
 - Fix several Magik Grammar bugs
 
-0.3.0 (2019-09-22)
+## 0.3.0 (2019-09-22)
 
 - Add WarnedCallCheck
 - Fix ScopeBuilderVisitor for \_try \_with identifier scoping
@@ -330,7 +330,7 @@
 - Move MLint-specific instruction handling to magik-lint + support mlint instructions per scope
 - Unify file contents/line splitting
 
-0.2.0 (2019-08-31)
+## 0.2.0 (2019-08-31)
 
 - Add --watch option to magik-lint
 - Add --help option to magik-lint
@@ -348,7 +348,7 @@
 - Narrow Magik grammar to be more like SW43
 - Fixes for Sonar
 
-0.1.4 (2019-07-26)
+## 0.1.4 (2019-07-26)
 
 - Fixes after reducing size of magik-lint jar
 - Rename ParserErrorCheck to SyntaxErrorCheck
@@ -362,22 +362,22 @@
 - Fix bug where rc-file options weren't properly read
 - Fix bug in UnusedVariableCheck where assignment to import is improperly flagged
 
-0.1.3 (2019-07-07)
+## 0.1.3 (2019-07-07)
 
 - Fix output of Windows paths in magik-lint
 
-0.1.2 (2019-07-06)
+## 0.1.2 (2019-07-06)
 
 - Report parser errors through checks
 - Enforce strict keyword matching in parser
 - Fix ScopeBuilder not properly handling optional parameters
 - Reduce size of magik-lint jar by removing dependencies
 
-0.1.1 (2019-06-30)
+## 0.1.1 (2019-06-30)
 
 - Add --untabify \<n\> option to magik-lint
 - Add support for \_class keyword
 
-0.1.0 (2019-06-19)
+## 0.1.0 (2019-06-19)
 
 - Initial release
