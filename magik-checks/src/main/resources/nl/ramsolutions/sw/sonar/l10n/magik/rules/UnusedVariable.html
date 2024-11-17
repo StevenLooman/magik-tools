@@ -1,14 +1,14 @@
 <p>If a local variable is declared but not used, it is dead code and should be removed. Doing so will improve maintainability as developers will
     not wonder what the variable is used for.</p>
 <h2>Noncompliant Code Example</h2>
-<pre>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method exemplar.hello(name):
   _local message << "Hello " + name  # Unused variable
   print("Hello " + name)
 _endmethod
 </pre>
 <h2>Compliant Solution</h2>
-<pre>
+<pre data-diff-id="1" data-diff-type="compliant">
 _method exemplar.hello(name):
   _local message = "Hello " + name
   print(message)
