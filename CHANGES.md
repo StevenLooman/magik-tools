@@ -21,7 +21,7 @@
 - Fix magik-lint/magik-typed-lint not using located configuration file when showing checks.
 - Make check properties more descriptive by adding `max-` if needed.
 - Fix WarnedCallCheck and ForbiddenCallCheck to handle method invocations.
-- Add `.sys!perform()` and `.sys!slot()` to ForbiddenCallCheck.
+- Add `.sys!perform()`, `.sys!perform_iter()`, `.sys!slot()`, `.sys!slot()<<` and `.sys!slot()^<<` to ForbiddenCallCheck.
 - Do not check abstract method parameters in UnusedVariableCheck if `check-parameters`.
 - Fix sslr-magik-toolkit's "Evaluate XPath"-button.
 - Add UndefinedVariable check to Sonar way profile.
@@ -30,7 +30,7 @@
 ### Breaking changes (reiterated from above)
 
 - Make check properties more descriptive by adding `max-` if needed. `magik-lint.properties` likely needs to be updated.
-- Add `.sys!perform()` and `.sys!slot()` to ForbiddenCallCheck. This might result in more issues.
+- Add `.sys!perform()`, `.sys!perform_iter()`, `.sys!slot()`, `.sys!slot()<<` and `.sys!slot()^<<` to ForbiddenCallCheck. This might result in more issues.
 - Add SimplifyIf check to Sonar way profile. This might result in more issues.
 - Add UnsafeEvaluateInvocation check to Sonar way profile. This might result in more issues.
 - Add UndefinedVariable check to Sonar way profile. This might result in more issues.
