@@ -1,0 +1,16 @@
+{
+  "title": "File has no package-statement",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bad-practice",
+    "confusing"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "FileWithoutPackageStatement",
+  "sqKey": "file-without-package-statement"
+}

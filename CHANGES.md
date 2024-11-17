@@ -24,6 +24,7 @@
 - Add `.sys!perform()` and `.sys!slot()` to ForbiddenCallCheck.
 - Do not check abstract method parameters in UnusedVariableCheck if `check-parameters`.
 - Fix sslr-magik-toolkit's "Evaluate XPath"-button.
+- Add FileWithoutPackageStatement check to test if a file has a package statement.
 - Several fixes.
 
 ## Breaking changes (reiterated from above)
@@ -32,6 +33,7 @@
 - Add `.sys!perform()` and `.sys!slot()` to ForbiddenCallCheck. This might result in more issues.
 - Add SimplifyIf check to Sonar way profile. This might result in more issues.
 - Add UnsafeEvaluateInvocation check to Sonar way profile. This might result in more issues.
+- Add FileWithoutPackageStatement check to test if a file has a package statement. This might result in more issues.
 
 0.10.1 (2024-08-14)
 

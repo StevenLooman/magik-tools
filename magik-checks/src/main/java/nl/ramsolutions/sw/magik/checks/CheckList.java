@@ -8,6 +8,7 @@ import nl.ramsolutions.sw.magik.checks.checks.EmptyBlockCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ExemplarSlotCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.FileMethodCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.FileNotInLoadListCheck;
+import nl.ramsolutions.sw.magik.checks.checks.FileWithoutPackageStatementCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenCallCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenGlobalUsageCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenInheritanceCheck;
@@ -68,6 +69,7 @@ public final class CheckList {
         ExemplarSlotCountCheck.class,
         FileMethodCountCheck.class,
         FileNotInLoadListCheck.class,
+        FileWithoutPackageStatementCheck.class,
         ForbiddenCallCheck.class,
         ForbiddenGlobalUsageCheck.class,
         ForbiddenInheritanceCheck.class,
