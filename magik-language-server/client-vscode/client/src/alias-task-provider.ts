@@ -6,8 +6,8 @@ export class MagikAliasTaskProvider implements vscode.TaskProvider, vscode.Dispo
 
 	public static readonly AliasType: string = 'run_alias';
 
-	private context: vscode.ExtensionContext;
-	private provider: vscode.Disposable;
+	private readonly context: vscode.ExtensionContext;
+	private readonly provider: vscode.Disposable;
 	private promise: Thenable<vscode.Task[]> | undefined = undefined;
 	private fileWatcher: vscode.FileSystemWatcher = undefined;
 
@@ -47,8 +47,8 @@ export class MagikAliasTaskProvider implements vscode.TaskProvider, vscode.Dispo
 		if (entry) {
 			const definition: AliasTaskDefinition = task.definition as AliasTaskDefinition;
 			const runAliasPath = getRunAliasPath();
-			const aliasesPath = getAliasesPath();
-			const environmentFile = getEnvironmentPath();
+			const aliasesPath = getAliasesPath(definition.aliasesPath);
+			const environmentFile = getEnvironmentPath(definition.environmentPath);
 			const commandLine = getStartAliasCommand(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.args);
 			const shellExecutionOptions: vscode.ShellExecutionOptions = {
 				env: definition.env,
@@ -80,6 +80,16 @@ interface AliasTaskDefinition extends vscode.TaskDefinition {
 	 * Environment variables.
 	 */
 	env?: Record<string, string>;
+
+	/**
+	 * Override aliases path.
+	 */
+	aliasesPath?: fs.PathLike;
+
+	/**
+	 * Override environment path.
+	 */
+	environmentPath?: fs.PathLike;
 }
 
 let _channel: vscode.OutputChannel;
@@ -100,11 +110,19 @@ function getRunAliasPath(): fs.PathLike {
 	return path.join(smallworldGisPath.toString(), 'bin', 'share', 'runalias');
 }
 
-function getEnvironmentPath(): fs.PathLike {
+function getEnvironmentPath(environmentPath?: fs.PathLike): fs.PathLike {
+	if (environmentPath) {
+		return environmentPath;
+	}
+
 	return vscode.workspace.getConfiguration().get('magik.environment');
 }
 
-function getAliasesPath(): fs.PathLike {
+function getAliasesPath(aliasesPath?: fs.PathLike): fs.PathLike {
+	if (aliasesPath) {
+		return aliasesPath;
+	}
+
 	return vscode.workspace.getConfiguration().get('magik.aliases');
 }
 
