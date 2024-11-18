@@ -19,7 +19,8 @@ public class ForbiddenCallCheck extends MagikCheck {
 
   private static final String MESSAGE = "Call '%s' is forbidden.";
   private static final String DEFAULT_FORBIDDEN_CALLS =
-      "show(),sw:show(),print(),sw:print(),debug_print(),sw:debug_print(),.sys!perform(),.sys!slot()";
+      "show(),sw:show(),print(),sw:print(),debug_print(),sw:debug_print(),"
+          + ".sys!perform(),.sys!perform_iter(),.sys!slot(),.sys!slot()<<,.sys!slot()^<<";
 
   /** List of forbidden calls, separated by ','. */
   @RuleProperty(
