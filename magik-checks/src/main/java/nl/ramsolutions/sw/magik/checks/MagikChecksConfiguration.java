@@ -49,9 +49,15 @@ public class MagikChecksConfiguration {
 
     for (final Class<?> checkClass : this.checkClasses) {
       final String checkKey = MagikChecksConfiguration.checkKey(checkClass);
-      final boolean checkEnabled =
-          enableds.contains(checkKey)
-              || !disableds.contains(checkKey) && !disableds.contains("all");
+      final boolean checkEnabled;
+      if (enableds.contains(checkKey)) {
+        checkEnabled = true;
+      } else if (disableds.contains(checkKey) || disableds.contains("all")) {
+        checkEnabled = false;
+      } else {
+        // No explicit configuration, use default state
+        checkEnabled = checkClass.getAnnotation(DisabledByDefault.class) == null;
+      }
 
       // Gather parameters from MagikCheck, value from config.
       final Set<MagikCheckHolder.Parameter> parameters =
