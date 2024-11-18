@@ -26,7 +26,7 @@
 - Fix sslr-magik-toolkit's "Evaluate XPath"-button.
 - Add UndefinedVariable check to Sonar way profile.
 - Add ability to override aliases path and environment path in tasks in VSCode extension.
-- Add FileWithoutPackageStatement check to test if a file has a package statement.
+- Add FileWithoutPackageStatement check to test if a file starts with a `_package`-statement.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
@@ -36,7 +36,7 @@
 - Add SimplifyIf check to Sonar way profile. This might result in more issues.
 - Add UnsafeEvaluateInvocation check to Sonar way profile. This might result in more issues.
 - Add UndefinedVariable check to Sonar way profile. This might result in more issues.
-- Add FileWithoutPackageStatement check to test if a file has a package statement. This might result in more issues.
+- Add FileWithoutPackageStatement check to test if a file starts with a `_package`-statement. This might result in more issues.
 
 ## 0.10.1 (2024-08-14)
 
