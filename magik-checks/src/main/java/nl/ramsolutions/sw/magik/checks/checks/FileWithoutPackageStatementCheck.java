@@ -1,11 +1,12 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.List;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
 
-/** Check if file contains a _package-statement. */
+/** Check if file starts with a _package-statement. */
 @Rule(key = FileWithoutPackageStatementCheck.CHECK_KEY)
 public class FileWithoutPackageStatementCheck extends MagikCheck {
 
@@ -22,6 +23,11 @@ public class FileWithoutPackageStatementCheck extends MagikCheck {
   }
 
   private boolean hasPackageStatement(final AstNode node) {
-    return node.getChildren(MagikGrammar.PACKAGE_SPECIFICATION).stream().findAny().isPresent();
+    final List<AstNode> children = node.getChildren();
+    if (children.isEmpty()) {
+      return false;
+    }
+
+    return children.get(0).is(MagikGrammar.PACKAGE_SPECIFICATION);
   }
 }
