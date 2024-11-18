@@ -7,6 +7,7 @@ import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ class TrailingWhitespaceCheckTest extends MagikCheckTestBase {
 
   @Test
   void testNoTrailingWhitespace() {
-    final TrailingWhitespaceCheck check = new TrailingWhitespaceCheck();
+    final MagikCheck check = new TrailingWhitespaceCheck();
     final String code = "a";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
@@ -24,7 +25,7 @@ class TrailingWhitespaceCheckTest extends MagikCheckTestBase {
 
   @Test
   void testTrailingWhitespace() {
-    final TrailingWhitespaceCheck check = new TrailingWhitespaceCheck();
+    final MagikCheck check = new TrailingWhitespaceCheck();
     final String code = "a    ";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
@@ -36,7 +37,7 @@ class TrailingWhitespaceCheckTest extends MagikCheckTestBase {
 
   @Test
   void testTrailingWhitespaceMultiline() {
-    final TrailingWhitespaceCheck check = new TrailingWhitespaceCheck();
+    final MagikCheck check = new TrailingWhitespaceCheck();
     final String code =
         """
         a()\s\s\s\s

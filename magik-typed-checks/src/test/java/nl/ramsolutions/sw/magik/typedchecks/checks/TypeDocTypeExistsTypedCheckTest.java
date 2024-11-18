@@ -6,6 +6,7 @@ import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
+import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -33,7 +34,7 @@ class TypeDocTypeExistsTypedCheckTest extends MagikTypedCheckTestBase {
       })
   void testInvalid(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final TypeDocTypeExistsTypedCheck check = new TypeDocTypeExistsTypedCheck();
+    final MagikTypedCheck check = new TypeDocTypeExistsTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).hasSize(1);
   }
@@ -54,7 +55,7 @@ class TypeDocTypeExistsTypedCheckTest extends MagikTypedCheckTestBase {
       })
   void testValid(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final TypeDocTypeExistsTypedCheck check = new TypeDocTypeExistsTypedCheck();
+    final MagikTypedCheck check = new TypeDocTypeExistsTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }

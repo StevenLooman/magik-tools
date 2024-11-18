@@ -11,6 +11,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
+import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Test {@link UndefinedMethodCallResultTypedCheck}. */
@@ -25,7 +26,7 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
         _endblock
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final UndefinedMethodCallResultTypedCheck check = new UndefinedMethodCallResultTypedCheck();
+    final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }
@@ -39,7 +40,7 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
         _endblock
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final UndefinedMethodCallResultTypedCheck check = new UndefinedMethodCallResultTypedCheck();
+    final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }
@@ -69,7 +70,7 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
             new ExpressionResultString(TypeString.SW_OBJECT),
             ExpressionResultString.EMPTY));
 
-    final UndefinedMethodCallResultTypedCheck check = new UndefinedMethodCallResultTypedCheck();
+    final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }
@@ -99,7 +100,7 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 
-    final UndefinedMethodCallResultTypedCheck check = new UndefinedMethodCallResultTypedCheck();
+    final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).hasSize(1);
   }

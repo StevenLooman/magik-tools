@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -19,7 +20,7 @@ class TodoCommentCheckTest extends MagikCheckTestBase {
         "# NOTES: This should not trigger an issue as well",
       })
   void testOk(final String code) {
-    final TodoCommentCheck check = new TodoCommentCheck();
+    final MagikCheck check = new TodoCommentCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -31,7 +32,7 @@ class TodoCommentCheckTest extends MagikCheckTestBase {
         "# XXX: This should trigger an issue",
       })
   void testForbiddenWord(final String code) {
-    final TodoCommentCheck check = new TodoCommentCheck();
+    final MagikCheck check = new TodoCommentCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -43,7 +44,7 @@ class TodoCommentCheckTest extends MagikCheckTestBase {
         "# XXX FIXME: This should trigger two issues",
       })
   void testForbiddenWordTwice(final String code) {
-    final TodoCommentCheck check = new TodoCommentCheck();
+    final MagikCheck check = new TodoCommentCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(2);
   }

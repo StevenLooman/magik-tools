@@ -10,6 +10,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
+import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Test {@link SlotExistsTypedCheck}. */
@@ -24,7 +25,7 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
         _endmethod
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final SlotExistsTypedCheck check = new SlotExistsTypedCheck();
+    final MagikTypedCheck check = new SlotExistsTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }
@@ -38,7 +39,7 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
         _endmethod
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final SlotExistsTypedCheck check = new SlotExistsTypedCheck();
+    final MagikTypedCheck check = new SlotExistsTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).hasSize(1);
   }
@@ -65,7 +66,7 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
             List.of(new SlotDefinition(null, null, null, null, null, "slot", TypeString.UNDEFINED)),
             Collections.emptyList(),
             Collections.emptySet()));
-    final SlotExistsTypedCheck check = new SlotExistsTypedCheck();
+    final MagikTypedCheck check = new SlotExistsTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,7 +45,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
         """,
       })
   void testProper(final String code) {
-    final FormattingCheck check = new FormattingCheck();
+    final MagikCheck check = new FormattingCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -62,14 +63,14 @@ class FormattingCheckTest extends MagikCheckTestBase {
         "$\n$",
       })
   void testImproper(final String code) {
-    final FormattingCheck check = new FormattingCheck();
+    final MagikCheck check = new FormattingCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
 
   @Test
   void testFile() throws IllegalArgumentException, IOException {
-    final FormattingCheck check = new FormattingCheck();
+    final MagikCheck check = new FormattingCheck();
     final Path path =
         Path.of(
             "magik-checks/src/test/resources/test_product/test_module/source/in_load_list.magik");
@@ -139,14 +140,14 @@ class FormattingCheckTest extends MagikCheckTestBase {
       })
   @SuppressWarnings("java:S4144")
   void testMultipleWhitelines(final String code) {
-    final FormattingCheck check = new FormattingCheck();
+    final MagikCheck check = new FormattingCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
 
   @Test
   void testMultipleWhitelinesMethodDoc() {
-    final FormattingCheck check = new FormattingCheck();
+    final MagikCheck check = new FormattingCheck();
     final String code =
         """
         _method object.method(param)

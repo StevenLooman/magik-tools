@@ -11,6 +11,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
+import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
@@ -60,7 +61,7 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
             Collections.emptyList(),
             Collections.emptySet()));
 
-    final ModuleRequiredForGlobalTypedCheck check = new ModuleRequiredForGlobalTypedCheck();
+    final MagikTypedCheck check = new ModuleRequiredForGlobalTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(path, definitionKeeper, check);
     assertThat(checkResults).isEmpty();
   }
@@ -92,7 +93,7 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
             Collections.emptyList(),
             Collections.emptySet()));
 
-    final ModuleRequiredForGlobalTypedCheck check = new ModuleRequiredForGlobalTypedCheck();
+    final MagikTypedCheck check = new ModuleRequiredForGlobalTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(path, definitionKeeper, check);
     assertThat(checkResults).hasSize(1);
   }

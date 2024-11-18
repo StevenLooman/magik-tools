@@ -6,6 +6,7 @@ import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
+import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Tests for {@link MethodReturnTypesMatchDocTypedCheck}. */
@@ -21,7 +22,7 @@ class MethodReturnTypesMatchDocTypedCheckTest extends MagikTypedCheckTestBase {
         _endmethod
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MethodReturnTypesMatchDocTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
+    final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }
@@ -36,7 +37,7 @@ class MethodReturnTypesMatchDocTypedCheckTest extends MagikTypedCheckTestBase {
         _endmethod
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MethodReturnTypesMatchDocTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
+    final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).hasSize(1);
   }
@@ -50,7 +51,7 @@ class MethodReturnTypesMatchDocTypedCheckTest extends MagikTypedCheckTestBase {
         _endmethod
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MethodReturnTypesMatchDocTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
+    final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }

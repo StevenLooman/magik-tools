@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -39,7 +40,7 @@ class HidesVariableCheckTest extends MagikCheckTestBase {
         """,
       })
   void testValid(final String code) {
-    final HidesVariableCheck check = new HidesVariableCheck();
+    final MagikCheck check = new HidesVariableCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -89,7 +90,7 @@ class HidesVariableCheckTest extends MagikCheckTestBase {
         """,
       })
   void testInvalid(final String code) {
-    final HidesVariableCheck check = new HidesVariableCheck();
+    final MagikCheck check = new HidesVariableCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }

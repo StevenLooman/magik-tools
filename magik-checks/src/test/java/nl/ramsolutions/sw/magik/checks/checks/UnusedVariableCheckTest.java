@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -135,7 +136,7 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
         """,
       })
   void testValid(final String code) {
-    final UnusedVariableCheck check = new UnusedVariableCheck();
+    final MagikCheck check = new UnusedVariableCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -184,14 +185,14 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
         """,
       })
   void testVariableNotUsed(final String code) {
-    final UnusedVariableCheck check = new UnusedVariableCheck();
+    final MagikCheck check = new UnusedVariableCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
 
   @Test
   void testVariableNotUsedMultiAssignment() {
-    final UnusedVariableCheck check = new UnusedVariableCheck();
+    final MagikCheck check = new UnusedVariableCheck();
     final String code =
         """
         _method a.b

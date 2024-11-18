@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +13,7 @@ class LineLengthCheckTest extends MagikCheckTestBase {
 
   @Test
   void testLineNotTooLong1() {
-    final LineLengthCheck check = new LineLengthCheck();
+    final MagikCheck check = new LineLengthCheck();
     final String code =
         """
         # this is ok
@@ -24,7 +25,7 @@ class LineLengthCheckTest extends MagikCheckTestBase {
 
   @Test
   void testLineNotTooLong2() {
-    final LineLengthCheck check = new LineLengthCheck();
+    final MagikCheck check = new LineLengthCheck();
     final String code =
         """
         l_23456789012345678901234567890

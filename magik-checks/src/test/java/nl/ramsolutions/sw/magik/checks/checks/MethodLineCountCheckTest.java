@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
@@ -73,7 +74,7 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
 
   @Test
   void testSyntaxError() {
-    final MethodLineCountCheck check = new MethodLineCountCheck();
+    final MagikCheck check = new MethodLineCountCheck();
     final String code =
         """
         _method a.b

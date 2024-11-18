@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,7 @@ class SyntaxErrorCheckTest extends MagikCheckTestBase {
 
   @Test
   void testSyntaxError() {
-    final SyntaxErrorCheck check = new SyntaxErrorCheck();
+    final MagikCheck check = new SyntaxErrorCheck();
     final String code =
         """
         _block
@@ -22,7 +23,7 @@ class SyntaxErrorCheckTest extends MagikCheckTestBase {
 
   @Test
   void testSytnaxError2() {
-    final SyntaxErrorCheck check = new SyntaxErrorCheck();
+    final MagikCheck check = new SyntaxErrorCheck();
     final String code = "_method";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isNotEmpty();

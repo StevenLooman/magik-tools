@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +42,7 @@ class MethodComplexityCheckTest extends MagikCheckTestBase {
 
   @Test
   void testNotTooComplex() {
-    final MethodComplexityCheck check = new MethodComplexityCheck();
+    final MagikCheck check = new MethodComplexityCheck();
     final String code =
         """
         _method a.b

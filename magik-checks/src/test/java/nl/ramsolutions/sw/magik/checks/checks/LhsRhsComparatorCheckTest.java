@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -20,7 +21,7 @@ class LhsRhsComparatorCheckTest extends MagikCheckTestBase {
         "a >= b",
       })
   void testValid(final String code) {
-    final LhsRhsComparatorEqualCheck check = new LhsRhsComparatorEqualCheck();
+    final MagikCheck check = new LhsRhsComparatorEqualCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -35,7 +36,7 @@ class LhsRhsComparatorCheckTest extends MagikCheckTestBase {
         "a >= a",
       })
   void testInvalid(final String code) {
-    final LhsRhsComparatorEqualCheck check = new LhsRhsComparatorEqualCheck();
+    final MagikCheck check = new LhsRhsComparatorEqualCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
