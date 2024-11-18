@@ -134,7 +134,7 @@ public class MagikLint {
                 + "*"
                 + defaultIndicator
                 + " "
-                + parameter.getNameWithoutCheckName()
+                + parameter.getName()
                 + " ("
                 + parameter.getDescription()
                 + "):\n");
@@ -148,7 +148,7 @@ public class MagikLint {
                 + "*"
                 + defaultIndicator
                 + " "
-                + parameter.getNameWithoutCheckName()
+                + parameter.getName()
                 + ": "
                 + parameter.getValue()
                 + " ("

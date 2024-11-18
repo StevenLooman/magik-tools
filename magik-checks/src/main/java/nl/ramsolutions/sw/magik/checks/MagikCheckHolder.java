@@ -47,10 +47,6 @@ public class MagikCheckHolder {
       return this.name;
     }
 
-    public String getNameWithoutCheckName() {
-      return this.name.split("\\.")[1];
-    }
-
     public String getDescription() {
       return this.description;
     }

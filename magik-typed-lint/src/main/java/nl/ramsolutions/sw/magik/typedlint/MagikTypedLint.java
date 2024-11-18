@@ -116,7 +116,7 @@ public class MagikTypedLint {
         continue;
       }
 
-      showParameters(writer, holder, showDefaultValues);
+      this.showParameters(writer, holder, showDefaultValues);
     }
   }
 
@@ -143,7 +143,7 @@ public class MagikTypedLint {
                 + "*"
                 + defaultIndicator
                 + " "
-                + parameter.getNameWithoutCheckName()
+                + parameter.getName()
                 + " ("
                 + parameter.getDescription()
                 + "):\n");
@@ -157,7 +157,7 @@ public class MagikTypedLint {
                 + "*"
                 + defaultIndicator
                 + " "
-                + parameter.getNameWithoutCheckName()
+                + parameter.getName()
                 + ": "
                 + parameter.getValue()
                 + " ("
