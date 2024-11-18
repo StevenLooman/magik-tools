@@ -25,8 +25,7 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
           object.m()
         _endblock""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MethodArgumentCountMatchesParameterCountTypedCheck check =
-        new MethodArgumentCountMatchesParameterCountTypedCheck();
+    final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }
@@ -73,8 +72,7 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
         _block
           object.m(object, object)
         _endblock""";
-    final MethodArgumentCountMatchesParameterCountTypedCheck check =
-        new MethodArgumentCountMatchesParameterCountTypedCheck();
+    final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).isEmpty();
   }
@@ -121,8 +119,7 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
         _block
           object.m(object)
         _endblock""";
-    final MethodArgumentCountMatchesParameterCountTypedCheck check =
-        new MethodArgumentCountMatchesParameterCountTypedCheck();
+    final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
     assertThat(issues).hasSize(1);
   }

@@ -14,8 +14,7 @@ class SwChar16VectorEvaluateInvocationTypedCheckTest extends MagikTypedCheckTest
   void testUseOfSwChar16VectorEvaluate() {
     final String code = "'abc'.evaluate()";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final SwChar16VectorEvaluateInvocationTypedCheck check =
-        new SwChar16VectorEvaluateInvocationTypedCheck();
+    final MagikTypedCheck check = new SwChar16VectorEvaluateInvocationTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
     assertThat(checkResults).hasSize(1);
   }
@@ -24,8 +23,7 @@ class SwChar16VectorEvaluateInvocationTypedCheckTest extends MagikTypedCheckTest
   void testUseOfOtherEvaluate() {
     final String code = "100.evaluate()";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final SwChar16VectorEvaluateInvocationTypedCheck check =
-        new SwChar16VectorEvaluateInvocationTypedCheck();
+    final MagikTypedCheck check = new SwChar16VectorEvaluateInvocationTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
     assertThat(checkResults).isEmpty();
   }

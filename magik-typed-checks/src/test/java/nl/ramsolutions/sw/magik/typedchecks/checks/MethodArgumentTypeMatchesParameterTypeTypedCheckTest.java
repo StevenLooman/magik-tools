@@ -81,8 +81,7 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     this.addTestMethods(definitionKeeper);
 
-    final MethodArgumentTypeMatchesParameterTypeTypedCheck check =
-        new MethodArgumentTypeMatchesParameterTypeTypedCheck();
+    final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
     assertThat(checkResults).isEmpty();
   }
@@ -97,8 +96,7 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     this.addTestMethods(definitionKeeper);
 
-    final MethodArgumentTypeMatchesParameterTypeTypedCheck check =
-        new MethodArgumentTypeMatchesParameterTypeTypedCheck();
+    final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
     assertThat(checkResults).hasSize(1);
   }
