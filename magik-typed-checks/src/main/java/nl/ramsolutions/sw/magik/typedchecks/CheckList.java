@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.typedchecks;
 
 import java.util.List;
 import java.util.Map;
-import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.checks.TypeDocCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.ConditionalExpressionIsFalseTypedCheck;
