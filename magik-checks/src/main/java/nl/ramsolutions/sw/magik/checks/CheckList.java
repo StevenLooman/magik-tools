@@ -110,15 +110,4 @@ public final class CheckList {
       getFixers() {
     return Map.of(FormattingCheck.class, List.of(FormattingFixer.class));
   }
-
-  /**
-   * Get {@link MagikCheck}s which are disabled by default.
-   *
-   * @return List of {@link MagikCheck}s.
-   */
-  public static List<Class<? extends MagikCheck>> getDisabledByDefaultChecks() {
-    return getChecks().stream()
-        .filter(checkClass -> checkClass.getAnnotation(DisabledByDefault.class) != null)
-        .toList();
-  }
 }
