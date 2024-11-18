@@ -48,4 +48,13 @@ class WarnedCallCheckTest extends MagikCheckTestBase {
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
+
+  @Test
+  void testOverridingWarnedCallsClearsDefaultCalls() {
+    final String code = "write(1)";
+    final WarnedCallCheck check = new WarnedCallCheck();
+    check.warnedCalls = ".warned_method()";
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
 }
