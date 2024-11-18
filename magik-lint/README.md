@@ -80,36 +80,6 @@ You can configure the `line-length` check to allow up to 120 characters per line
 line-length.max-line-length=120
 ```
 
-### Settings per check
-
-| Check name | Setting name | Default value |
-|------------|--------------|---------------|
-| commented-code | min-lines | 3 |
-| exemplar-slot-count | max-slot-count | 10 |
-| file-method-count | max-method-count | 10 |
-| forbidden-call | forbidden-calls | show(),sw:show(),print(),sw:print(),debug_print(),sw:debug_print(),.sys!perform(),.sys!slot() |
-| forbidden-global-usage | forbidden-globals | !current_grs!,sw:!current_grs! |
-| fobidden-inheritance | forbidden-parents |  |
-| formatting | indent-character | tab |
-| formatting | tab-width | 8 |
-| line-length | max-line-length | 120 |
-| line-length | tab-width | 8 |
-| method-complexity | max-complexity | 10 |
-| nesting-depth | max-nesting-depth | 3 |
-| nesting-depth | count-early-return-as-nesting-depth | true |
-| parameter-count | max-parameter-count | 6 |
-| scope-count | max-scope-count | 25 |
-| sw-method-doc | allow-blank-method-doc | false |
-| todo-comment | forbidden-comment-words | TODO,FIXME,HACK,NOTE,TEMP,XXX |
-| unused-variable | check-parameters | false |
-| variable-count | max-variable-count | 8 |
-| variable-declaration-usage-distance | max-distance | 5 |
-| variable-declaration-usage-distance | ignore-constants | true |
-| variable-naming | min-length | 3 |
-| variable-naming | max-length | 32 |
-| variable-naming | whitelist | x,y,z |
-| warned-call | warned-calls | write(),sw:write(),remex(),sw:remex(),remove_exemplar(),sw:remove_exemplar() |
-
 ## Exit codes
 
 The exit code from Magik-lint is determined by the infractions of checks. The severity of a check will set a flag in the return code:

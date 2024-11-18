@@ -54,12 +54,6 @@ You can configure the `module-required-for-global` check to test if the module i
 module-required-for-global.always-loaded-modules=ace_core,rwo_core,super_dd,sw_core_magik_sessions
 ```
 
-### Settings per check
-
-| Check name | Setting name | Default value |
-|------------|--------------|---------------|
-| module-required-for-global | always-loaded-modules | See [ModuleRequiredForGlobalTypedCheck](https://github.com/StevenLooman/magik-tools/blob/main/magik-typed-checks/src/main/java/nl/ramsolutions/sw/magik/typedchecks/checks/ModuleRequiredForGlobalTypedCheck.java#L51) |
-
 ## Exit codes
 
 The exit code from Magik-lint is determined by the infractions of checks. The severity of a check will set a flag in the return code:
