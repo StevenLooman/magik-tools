@@ -46,7 +46,7 @@ jobs:
     name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: DavidAnson/markdownlint-cli2-action@v17
+      - uses: DavidAnson/markdownlint-cli2-action@v18
         with:
           globs: '**/*.md'
 
