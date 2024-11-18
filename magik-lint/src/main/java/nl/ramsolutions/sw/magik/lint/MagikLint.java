@@ -107,7 +107,7 @@ public class MagikLint {
         continue;
       }
 
-      showParameters(writer, holder, showDefaultValues);
+      this.showParameters(writer, holder, showDefaultValues);
     }
   }
 
