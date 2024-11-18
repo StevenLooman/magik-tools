@@ -127,34 +127,19 @@ public class MagikLint {
         continue;
       }
       final String defaultIndicator = !parameter.isExplicitlySet() ? " (default)" : "";
-      // Handle comma-separated list parameters differently
-      if (parameter.getValue() != null && parameter.getValue().toString().contains(",")) {
-        writer.write(
-            " ".repeat(2)
-                + "*"
-                + defaultIndicator
-                + " "
-                + parameter.getName()
-                + " ("
-                + parameter.getDescription()
-                + "):\n");
-        String[] values = parameter.getValue().toString().split(",");
-        for (String value : values) {
-          writer.write(" ".repeat(4) + "- " + value.trim() + "\n");
-        }
-      } else {
-        writer.write(
-            " ".repeat(2)
-                + "*"
-                + defaultIndicator
-                + " "
-                + parameter.getName()
-                + ": "
-                + parameter.getValue()
-                + " ("
-                + parameter.getDescription()
-                + ")\n");
-      }
+      writer.write(
+          " ".repeat(2)
+              + "*"
+              + defaultIndicator
+              + " "
+              + parameter.getName()
+              + ":"
+              + " "
+              + parameter.getValue()
+              + " "
+              + "("
+              + parameter.getDescription()
+              + ")\n");
     }
   }
 
