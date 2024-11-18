@@ -58,15 +58,4 @@ public final class CheckList {
     return Map.of(
         TypeDocCheck.class, List.of(TypeDocParameterFixer.class, TypeDocReturnTypeFixer.class));
   }
-
-  /**
-   * Get {@link MagikCheck}s which are disabled by default.
-   *
-   * @return List of {@link MagikCheck}s.
-   */
-  public static List<Class<? extends MagikCheck>> getDisabledByDefaultChecks() {
-    return getChecks().stream()
-        .filter(checkClass -> checkClass.getAnnotation(DisabledByDefault.class) != null)
-        .toList();
-  }
 }
