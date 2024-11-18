@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.typedchecks;
 
 import java.util.List;
 import java.util.Map;
-import nl.ramsolutions.sw.magik.checks.DisabledByDefault;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.checks.TypeDocCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.ConditionalExpressionIsFalseTypedCheck;
@@ -57,16 +56,5 @@ public final class CheckList {
       getFixers() {
     return Map.of(
         TypeDocCheck.class, List.of(TypeDocParameterFixer.class, TypeDocReturnTypeFixer.class));
-  }
-
-  /**
-   * Get {@link MagikCheck}s which are disabled by default.
-   *
-   * @return List of {@link MagikCheck}s.
-   */
-  public static List<Class<? extends MagikCheck>> getDisabledByDefaultChecks() {
-    return getChecks().stream()
-        .filter(checkClass -> checkClass.getAnnotation(DisabledByDefault.class) != null)
-        .toList();
   }
 }
