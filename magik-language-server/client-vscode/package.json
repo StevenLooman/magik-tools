@@ -220,6 +220,14 @@
           "env": {
             "type": "object",
             "description": "Environment variables"
+          },
+          "aliasesPath": {
+            "type": "path",
+            "description": "Override aliases path"
+          },
+          "environmentPath": {
+            "type": "path",
+            "description": "Override environment path"
           }
         }
       }

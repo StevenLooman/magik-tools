@@ -23,6 +23,7 @@
     "SizeZeroEmpty",
     "SyntaxError",
     "TodoComment",
+    "UndefinedVariable",
     "UnsafeEvaluateInvocation",
     "UnusedVariable",
     "UseValueCompare",
