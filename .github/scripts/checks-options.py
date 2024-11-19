@@ -61,6 +61,8 @@ with open("wiki/checks/Checks-Options.md", "w") as f:
             "magik-checks/src/main/java/nl/ramsolutions/sw/magik/checks/checks/*Check.java"
         )
     ):
+        class_name = os.path.basename(java_file).replace(".java", "")
+        print(f"Generating properties for {class_name}")
         options = extract_rule_options(java_file)
         if options:
             f.write("\n".join(options) + "\n")
