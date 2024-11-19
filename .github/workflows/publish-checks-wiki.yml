@@ -29,4 +29,4 @@ jobs:
         with:
           path: wiki
           #dry-run: true
-        if: ${{ github.repository_owner == 'sebastiaanspeck' }}
+        if: ${{ github.repository_owner == 'StevenLooman' }}
