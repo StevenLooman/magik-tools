@@ -40,10 +40,11 @@ public class VariableNamingCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:VisibilityModifier")
   public int maxLength = DEFAULT_MAX_LENGTH;
 
-  /** Whitelist (comma separated) of variable names to allow/ignore. */
+  /** Whitelist of variable names to allow/ignore, separated by ','. */
   @RuleProperty(
       key = "whitelist",
-      description = "Whitelist (comma separated) of variable names to allow/ignore.",
+      defaultValue = "" + DEFAULT_WHITELIST,
+      description = "Whitelist of variable names to allow/ignore, separated by ','",
       type = "STRING")
   @SuppressWarnings("checkstyle:VisibilityModifier")
   public String whitelist = DEFAULT_WHITELIST;
