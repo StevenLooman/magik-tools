@@ -17,7 +17,7 @@ public class FileWithoutPackageStatementCheck extends MagikCheck {
 
   @Override
   protected void walkPostMagik(final AstNode node) {
-    if (!hasPackageStatement(node)) {
+    if (!this.hasPackageStatement(node)) {
       this.addFileIssue(MESSAGE);
     }
   }
