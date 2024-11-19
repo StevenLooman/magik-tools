@@ -1,5 +1,6 @@
 name: Publish checks to wiki
 on:
+  pull_request:
   push:
     branches: [develop]
     paths:
@@ -28,4 +29,4 @@ jobs:
         with:
           path: wiki
           #dry-run: true
-        if: ${{ github.repository_owner == 'StevenLooman' }}
+        if: ${{ github.repository_owner == 'sebastiaanspeck' }}
