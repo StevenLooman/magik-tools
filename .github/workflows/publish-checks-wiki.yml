@@ -1,6 +1,5 @@
 name: Publish checks to wiki
 on:
-  pull_request:
   push:
     branches: [develop]
     paths:
@@ -28,5 +27,5 @@ jobs:
       - uses: Andrew-Chen-Wang/github-wiki-action@86138cbd6328b21d759e89ab6e6dd6a139b22270
         with:
           path: wiki
-          dry-run: true
+          #dry-run: true
         if: ${{ github.repository_owner == 'StevenLooman' }}
