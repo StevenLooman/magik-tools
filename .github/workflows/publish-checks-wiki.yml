@@ -23,7 +23,7 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install html2text==2024.2.26
           mkdir -p wiki/checks
-          .github/scripts/check-pages.sh
+          .github/scripts/checks-pages.sh
           python3 .github/scripts/checks-options.py
       - uses: Andrew-Chen-Wang/github-wiki-action@86138cbd6328b21d759e89ab6e6dd6a139b22270
         with:
