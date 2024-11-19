@@ -19,7 +19,8 @@ class MethodReturnTypesMatchDocTypedCheckTest extends MagikTypedCheckTestBase {
         _method a.b
           ## @return {integer}
           _return 1
-        _endmethod""";
+        _endmethod
+        """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
@@ -33,7 +34,8 @@ class MethodReturnTypesMatchDocTypedCheckTest extends MagikTypedCheckTestBase {
         _method a.b
           ## @return {float}
           _return 1
-        _endmethod""";
+        _endmethod
+        """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
@@ -46,7 +48,8 @@ class MethodReturnTypesMatchDocTypedCheckTest extends MagikTypedCheckTestBase {
         """
         _abstract _method a.b
           ## @return {integer}
-        _endmethod""";
+        _endmethod
+        """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);

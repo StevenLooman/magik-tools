@@ -16,21 +16,24 @@ class NoStatementAfterBodyExitCheckTest extends MagikCheckTestBase {
       strings = {
         """
         _method a.b
-            _return 10
-        _endmethod""",
+          _return 10
+        _endmethod
+        """,
         """
         _method a.b
-            >> 10
-        _endmethod""",
+          >> 10
+        _endmethod
+        """,
         """
         _method a.b
-            _return 10
+          _return 10
          \s\s\s
-            # comment
-        _endmethod""",
+          # comment
+        _endmethod
+        """,
         """
         _loop
-            _leave
+          _leave
         _endloop""",
       })
   void testValid(final String code) {
@@ -44,13 +47,14 @@ class NoStatementAfterBodyExitCheckTest extends MagikCheckTestBase {
       strings = {
         """
         _method a.b
-            >> 10
-            write(10)
-        _endmethod""",
+          >> 10
+          write(10)
+        _endmethod
+        """,
         """
         _loop
-            _leave
-            write(10)
+          _leave
+          write(10)
         _endloop""",
       })
   void testInvalid(final String code) {

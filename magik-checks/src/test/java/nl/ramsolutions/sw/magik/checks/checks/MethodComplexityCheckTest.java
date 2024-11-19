@@ -19,21 +19,21 @@ class MethodComplexityCheckTest extends MagikCheckTestBase {
     final String code =
         """
         _method a.b
-            _if a
+          _if a
+          _then
+            _if b
             _then
-                _if b
-                _then
-                    _if c
+              _if c
+              _then
+                _if d
+                  _then
+                    _if e
                     _then
-                        _if d
-                        _then
-                            _if e
-                            _then
-                            _endif
-                        _endif
                     _endif
+                  _endif
                 _endif
-            _endif
+              _endif
+          _endif
         _endmethod
         """;
     final List<MagikIssue> issues = this.runCheck(code, check);
@@ -46,9 +46,9 @@ class MethodComplexityCheckTest extends MagikCheckTestBase {
     final String code =
         """
         _method a.b
-            _if a
-            _then
-            _endif
+          _if a
+          _then
+          _endif
         _endmethod
         """;
     final List<MagikIssue> issues = this.runCheck(code, check);
