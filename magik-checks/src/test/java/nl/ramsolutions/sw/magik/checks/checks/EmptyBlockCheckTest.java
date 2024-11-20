@@ -16,32 +16,32 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
       strings = {
         """
         _block
-            write(a)
+          write(a)
         _endblock
         """,
         """
         _if a
         _then
-            write(a)
+          write(a)
         _endif
         """,
         """
         _if a
         _then
-            write(a)
+          write(a)
         _elif b
         _then
-            write(b)
+          write(b)
         _endif
         """,
         """
-          _if a
-          _then
-              write(a)
-          _else
-              write(b)
-          _endif
-          """,
+        _if a
+        _then
+          write(a)
+        _else
+          write(b)
+        _endif
+        """,
         """
         _abstract _method a.b
         _endmethod
@@ -68,7 +68,7 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
         """
         _if a
         _then
-            write(a)
+          write(a)
         _elif b
         _then
         _endif
@@ -76,19 +76,19 @@ class EmptyBlockCheckTest extends MagikCheckTestBase {
         """
         _if a
         _then
-            write(a)
+          write(a)
         _else
         _endif
         """,
         """
         _protect
         _protection
-            write(a)
+          write(a)
         _endprotect
         """,
         """
         _protect
-            write(a)
+          write(a)
         _protection
         _endprotect
         """,

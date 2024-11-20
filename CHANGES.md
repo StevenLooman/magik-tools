@@ -30,6 +30,8 @@
 
 ### Breaking changes (reiterated from above)
 
+- Extend VariableNamingCheck to also check for a maximum of chars and make minLength/maxLength configurable. This might result in more issues.
+- Add NestingDepthCheck to test if a method/procedure/if-statement/loop-statement does not exceed the maximum nesting depth. This might result in more issues.
 - Make check properties more descriptive by adding `max-` if needed. `magik-lint.properties` likely needs to be updated.
 - Add `.sys!perform()`, `.sys!perform_iter()`, `.sys!slot()`, `.sys!slot()<<`, and `.sys!slot()^<<` to ForbiddenCallCheck. This might result in more issues.
 - Add SimplifyIf check to Sonar way profile. This might result in more issues.

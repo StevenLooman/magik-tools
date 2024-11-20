@@ -73,7 +73,8 @@ public class MethodArgumentCountMatchesParameterCountTypedCheck extends MagikTyp
               .filter(parameter -> parameter.getModifier() == ParameterDefinition.Modifier.NONE)
               .toList();
       if (checkedParameterDefs.size() > argumentNodes.size()) {
-        final String message = String.format(MESSAGE, methodName);
+        final String message =
+            String.format(MESSAGE, calledTypeStr.getFullString() + "." + methodName);
         this.addIssue(node, message);
       }
     }

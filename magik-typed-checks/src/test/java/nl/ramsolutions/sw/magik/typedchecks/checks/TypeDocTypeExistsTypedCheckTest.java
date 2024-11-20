@@ -19,15 +19,18 @@ class TypeDocTypeExistsTypedCheckTest extends MagikTypedCheckTestBase {
         """
         _method a.b(p1)
           ## @param {user:missing_type} p1
-        _endmethod""",
+        _endmethod
+        """,
         """
         _method a.b()
           ## @return {user:missing_type}
-        _endmethod""",
+        _endmethod
+        """,
         """
         _method a.b()
           ## @return {|sw:float} p1
-        _endmethod""",
+        _endmethod
+        """,
       })
   void testInvalid(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
@@ -42,11 +45,13 @@ class TypeDocTypeExistsTypedCheckTest extends MagikTypedCheckTestBase {
         """
         _method a.b(p1)
           ## @param {sw:float} p1
-        _endmethod""",
+        _endmethod
+        """,
         """
         _method a.b()
           ## @return {sw:float|sw:integer}
-        _endmethod""",
+        _endmethod
+        """,
       })
   void testValid(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();

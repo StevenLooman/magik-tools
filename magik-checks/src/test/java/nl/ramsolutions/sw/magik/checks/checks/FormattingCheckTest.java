@@ -41,7 +41,8 @@ class FormattingCheckTest extends MagikCheckTestBase {
         """,
         """
         show(  # comment
-          param1)""",
+          param1)
+        """,
       })
   void testProper(final String code) {
     final MagikCheck check = new FormattingCheck();

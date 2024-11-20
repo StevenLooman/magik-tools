@@ -31,7 +31,7 @@ class ExemplarSlotCountCheckTest extends MagikCheckTestBase {
     final String code =
         """
         def_slotted_exemplar(:exemplar, {
-            {:slot_1, _unset}})
+          {:slot_1, _unset}})
         """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
