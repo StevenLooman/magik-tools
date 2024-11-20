@@ -16,17 +16,17 @@ class LocalImportProcedureCheckTest extends MagikCheckTestBase {
       strings = {
         """
         _method a.a
-            _local x
-            _proc()
-                _import x
-                x.do()
-            _endproc
+          _local x
+          _proc()
+            _import x
+            x.do()
+          _endproc
         _endmethod
         """,
         """
         _method a.a(p_a)
-            _proc(p_a)
-            _endproc
+          _proc(p_a)
+          _endproc
         _endmethod
         """,
         """
@@ -51,11 +51,11 @@ class LocalImportProcedureCheckTest extends MagikCheckTestBase {
       strings = {
         """
         _method a.a
+          _local x
+          _proc()
             _local x
-            _proc()
-                _local x
-                x.do()
-            _endproc
+            x.do()
+          _endproc
         _endmethod
         """,
       })

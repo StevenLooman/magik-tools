@@ -15,33 +15,33 @@ class UndefinedVariableCheckTest extends MagikCheckTestBase {
   @ValueSource(
       strings = {
         """
-    _method a.b
-        _local l_a << 10
-        write(l_a)
-    _endmethod
-    """,
+        _method a.b
+          _local l_a << 10
+          write(l_a)
+        _endmethod
+        """,
         """
-    _method a.b
-        l_a << 10
-        write(l_a)
-    _endmethod
-    """,
+        _method a.b
+          l_a << 10
+          write(l_a)
+        _endmethod
+        """,
         """
-    _proc()
-        _local l_a
-        write(l_a)
-    _endproc
-    """,
+        _proc()
+          _local l_a
+          write(l_a)
+        _endproc
+        """,
         """
-    _method a.b(p_a)
-    _endmethod
-    """,
+        _method a.b(p_a)
+        _endmethod
+        """,
         """
-    _method a.b()
-        l_a << l_b << 10
-        show(l_a, l_b)
-    _endmethod
-    """,
+        _method a.b()
+          l_a << l_b << 10
+          show(l_a, l_b)
+        _endmethod
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new UndefinedVariableCheck();
@@ -53,15 +53,15 @@ class UndefinedVariableCheckTest extends MagikCheckTestBase {
   @ValueSource(
       strings = {
         """
-    _method a.b
-        write(l_a)
-    _endmethod
-    """,
+        _method a.b
+          write(l_a)
+        _endmethod
+        """,
         """
-    _proc()
-        write(l_a)
-    _endproc
-    """,
+        _proc()
+          write(l_a)
+        _endproc
+        """,
       })
   void testInvalid(final String code) {
     final MagikCheck check = new UndefinedVariableCheck();
