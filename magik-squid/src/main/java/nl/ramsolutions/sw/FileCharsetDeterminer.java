@@ -25,7 +25,7 @@ public final class FileCharsetDeterminer {
    * the encoding: #% text_encoding = iso8859_1
    *
    * @param path Path to file to check
-   * @return Charset for file or `defaultCharset` if undetermined
+   * @return Charset for file or <code>defaultCharset</code> if undetermined
    */
   public static Charset determineCharset(final Path path) {
     try (BufferedReader bufferedReader =
@@ -44,7 +44,7 @@ public final class FileCharsetDeterminer {
    * the encoding: #% text_encoding = iso8859_1
    *
    * @param source Source to raed text_encoding from.
-   * @return Charset for file or `defaultCharset` if undetermined
+   * @return Charset for file or <code>defaultCharset</code> if undetermined
    */
   public static Charset determineCharset(final String source) {
     final StringReader stringReader = new StringReader(source);
