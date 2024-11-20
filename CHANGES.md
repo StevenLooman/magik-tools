@@ -26,6 +26,7 @@
 - Fix sslr-magik-toolkit's "Evaluate XPath"-button.
 - Add UndefinedVariable check to Sonar way profile.
 - Add ability to override aliases path and environment path in tasks in VSCode extension.
+- Set default value for `whitelist` in VariableNamingCheck.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
