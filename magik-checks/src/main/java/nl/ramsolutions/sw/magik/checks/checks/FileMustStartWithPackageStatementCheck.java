@@ -7,13 +7,13 @@ import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
 
 /** Check if file starts with a _package-statement. */
-@Rule(key = FileWithoutPackageStatementCheck.CHECK_KEY)
-public class FileWithoutPackageStatementCheck extends MagikCheck {
+@Rule(key = FileMustStartWithPackageStatementCheck.CHECK_KEY)
+public class FileMustStartWithPackageStatementCheck extends MagikCheck {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String CHECK_KEY = "FileWithoutPackageStatement";
+  public static final String CHECK_KEY = "FileMustStartWithPackageStatement";
 
-  private static final String MESSAGE = "File has no package-statement.";
+  private static final String MESSAGE = "File must start with _package-statement.";
 
   @Override
   protected void walkPostMagik(final AstNode node) {

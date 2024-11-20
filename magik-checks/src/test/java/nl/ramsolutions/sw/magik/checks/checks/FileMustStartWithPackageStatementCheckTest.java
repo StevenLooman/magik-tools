@@ -3,12 +3,13 @@ package nl.ramsolutions.sw.magik.checks.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** Test FileWithoutPackageStatementCheck. */
-class FileWithoutPackageStatementCheckTest extends MagikCheckTestBase {
+class FileMustStartWithPackageStatementCheckTest extends MagikCheckTestBase {
 
   @ParameterizedTest
   @ValueSource(
@@ -26,7 +27,7 @@ class FileWithoutPackageStatementCheckTest extends MagikCheckTestBase {
         """,
       })
   void testValid(final String code) {
-    final FileWithoutPackageStatementCheck check = new FileWithoutPackageStatementCheck();
+    final MagikCheck check = new FileMustStartWithPackageStatementCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -46,7 +47,7 @@ class FileWithoutPackageStatementCheckTest extends MagikCheckTestBase {
         """,
       })
   void testInvalid(final String code) {
-    final FileWithoutPackageStatementCheck check = new FileWithoutPackageStatementCheck();
+    final MagikCheck check = new FileMustStartWithPackageStatementCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }

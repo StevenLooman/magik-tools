@@ -1,0 +1,16 @@
+{
+  "title": "File must start with a package-statement",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bad-practice",
+    "confusing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "FileMustStartWithPackageStatement",
+  "sqKey": "file-must-start-with-package-statement"
+}
