@@ -65,7 +65,7 @@ public enum TypeDocGrammar implements GrammarRuleKey {
     }
 
     /**
-     * Get value of keyword, prefixed with <code>_</code>.
+     * Get value of keyword, prefixed with `_`.
      *
      * @return Value of keyword
      */
