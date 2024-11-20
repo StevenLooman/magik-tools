@@ -117,9 +117,12 @@ public class MagikTypedLint {
 
       for (final MagikCheckHolder.Parameter parameter : holder.getParameters()) {
         writer.write(
-            "\t"
+            " ".repeat(2)
+                + "*"
+                + " "
                 + parameter.getName()
-                + ":\t"
+                + ":"
+                + " "
                 + parameter.getValue()
                 + " "
                 + "("

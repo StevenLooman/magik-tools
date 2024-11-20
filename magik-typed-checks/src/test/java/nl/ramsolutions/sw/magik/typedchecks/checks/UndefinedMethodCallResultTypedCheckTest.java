@@ -23,7 +23,8 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
         """
         _block
           undefined.m()
-        _endblock""";
+        _endblock
+        """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
@@ -36,7 +37,8 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
         """
         _block
           object.m()
-        _endblock""";
+        _endblock
+        """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
     final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
@@ -49,7 +51,8 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
         """
         _block
           object.m()
-        _endblock""";
+        _endblock
+        """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new MethodDefinition(
@@ -78,7 +81,8 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
         """
         _block
           object.m()
-        _endblock""";
+        _endblock
+        """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new MethodDefinition(

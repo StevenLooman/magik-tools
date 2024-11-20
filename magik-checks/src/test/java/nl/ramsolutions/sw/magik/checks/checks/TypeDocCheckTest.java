@@ -15,16 +15,16 @@ class TypeDocCheckTest extends MagikCheckTestBase {
   @ValueSource(
       strings = {
         """
-    _method a.m1(p1)
-      ## @param {sw:float} p1 Paramter 1.
-    _endmethod
-    """,
+        _method a.m1(p1)
+          ## @param {sw:float} p1 Paramter 1.
+        _endmethod
+        """,
         """
-    ## @slot {sw:rope} slot1 Slot 1.
-    def_slotted_exemplar(
-      :test_exemplar,
-      {{:slot1, _unset}})
-    """,
+        ## @slot {sw:rope} slot1 Slot 1.
+        def_slotted_exemplar(
+          :test_exemplar,
+          {{:slot1, _unset}})
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new TypeDocCheck();
@@ -36,25 +36,25 @@ class TypeDocCheckTest extends MagikCheckTestBase {
   @ValueSource(
       strings = {
         """
-    _method a.m1(p1)
-    _endmethod
-    """,
+        _method a.m1(p1)
+        _endmethod
+        """,
         """
-    _method a.m1()
-      ## @param {sw:float} p1 Paramter 1.
-    _endmethod
-    """,
+        _method a.m1()
+          ## @param {sw:float} p1 Paramter 1.
+        _endmethod
+        """,
         """
-    def_slotted_exemplar(
-      :test_exemplar,
-      {{:slot1, _unset}})
-    """,
+        def_slotted_exemplar(
+          :test_exemplar,
+          {{:slot1, _unset}})
+        """,
         """
-    ## @slot {sw:rope} slot1 Slot 1.
-    def_slotted_exemplar(
-      :test_exemplar,
-      {})
-    """,
+        ## @slot {sw:rope} slot1 Slot 1.
+        def_slotted_exemplar(
+          :test_exemplar,
+          {})
+        """,
       })
   void testInvalid(final String code) {
     final MagikCheck check = new TypeDocCheck();
