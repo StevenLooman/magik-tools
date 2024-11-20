@@ -2,7 +2,7 @@
 <p>Forbidden to in herit from specific exemplars.</p>
 <p>Software can be structured in such a way that product A provides the base software for the datamodel, product B provides all the GUI related software, and product C provides the headless (job server) tasks. In this case, you want all your record exemplars in product A, as these are used by product B and C.</p>
 <p>Please do note that it might be required to add both the <code>sw</code> and <code>user</code> packages, as the actual reference will be resolved at compile time. The check cannot determine the current state of the session. To be exact, it is recommended that you specify the parent through the global reference, i.e., <code>@sw:rwo_record</code></p>
-<h2>Noncompliant Code Example</h2>
+<h2>Non-compliant Code Example</h2>
 <p>A non-compliant code exemplar can be as follows, when it is forbidden to inherit from <code>sw:rwo_record</code>.</p>
 <pre>
 def_slotted_exemplar(
