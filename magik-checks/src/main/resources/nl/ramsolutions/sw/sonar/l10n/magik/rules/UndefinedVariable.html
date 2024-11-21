@@ -1,12 +1,12 @@
 <p>The prefixed variable indicates it should have been declared in the local scope, but was used as a global.</p>
-<h2>Noncompliant Code Example</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method object.do_something()
   write(l_a)
 _endmethod
 </pre>
-<h2>Compliant Solution</h2>
-<pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
 _method object.do_something()
   _local l_a << 10
   write(l_a)

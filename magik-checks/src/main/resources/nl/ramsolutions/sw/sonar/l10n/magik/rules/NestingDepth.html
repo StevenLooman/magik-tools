@@ -1,6 +1,7 @@
-<p>The nesting depth of methods/procedures/if-statements/loop-statements should not exceed the defined maximum nesting depth threshold. Deeply nested code may perform poorly, is difficult to understand and can be difficult to test thoroughly.</p>
-<h2>Noncompliant Code Example</h2>
-<pre>
+<p>The nesting depth of methods/procedures/if-statements/loop-statements should not exceed the defined maximum nesting depth threshold.</p>
+<p>Deeply nested code may perform poorly, is difficult to understand and can be difficult to test thoroughly.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _if a _isnt _unset
 _then
   _for x _over a.fast_elements()
@@ -17,8 +18,8 @@ _else
   _return b
 _endif
 </pre>
-<h2>Compliant Solution</h2>
-<pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
 _if a _is _unset _then _return b _endif
 
 _for x _over a.fast_elements()

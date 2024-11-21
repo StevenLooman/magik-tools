@@ -1,6 +1,6 @@
-<p>Possibly meant _import instead of _local.</p>
-<h2>Noncompliant Code Example</h2>
-<pre>
+<p>Possibly meant <code>_import</code> instead of <code>_local</code>.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method a.m()
   _local log_stream << !terminal!
   _proc@do_something()
@@ -9,8 +9,8 @@ _method a.m()
   _endproc
 _endmethod
 </pre>
-<h2>Compliant Solution</h2>
-<pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
 _method a.m()
   _local log_stream << !terminal!
   _proc@do_something()

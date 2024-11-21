@@ -1,15 +1,28 @@
-<p>If a local variable is declared but not used, it is dead code and should be removed. Doing so will improve maintainability as developers will
-    not wonder what the variable is used for.</p>
-<h2>Noncompliant Code Example</h2>
-<pre>
-_method exemplar.hello(name):
-  _local message << "Hello " + name  # Unused variable
+<p>If a local variable is declared but not used, it is dead code and should be removed. Doing so will improve maintainability as developers will not wonder what the variable is used for.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_method exemplar.hello(name)
+  _local message << "Hello " + name  # message is an unused variable
   print("Hello " + name)
 _endmethod
 </pre>
-<h2>Compliant Solution</h2>
-<pre>
-_method exemplar.hello(name):
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method exemplar.hello(name)
+  _local message << "Hello " + name
+  print(message)
+_endmethod
+</pre>
+<p>If you have enabled checking the parameters as well, you should use all parameters as well.</p>
+<pre data-diff-id="2" data-diff-type="noncompliant">
+_method exemplar.hello(name) # name is an unused parameter
+  _local message << "Hello World!"
+  print(message)
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="compliant">
+_method exemplar.hello(name)
   _local message << "Hello " + name
   print(message)
 _endmethod

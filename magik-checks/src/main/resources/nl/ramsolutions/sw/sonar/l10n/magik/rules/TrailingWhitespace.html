@@ -1,1 +1,17 @@
-<p>Remove trailing whitespaces.</p>
+<p>Trailing whitespace brings no information, they may generate noise when comparing different versions of the same file.</p>
+<p>They should be systematically removed.</p>
+<p>An automated code formatter allows to completely avoid this family of issues and should be used wherever possible.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_if a   
+_then
+  _return b
+_endif
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_if a
+_then
+  _return b
+_endif
+</pre>
