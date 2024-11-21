@@ -1,14 +1,23 @@
-<p>Do not use the method `unsafe_evaluate()`.</p>
-<p>The method `unsafe_evaluate()` is unsafe to use. The evaluated string might have unintented side effects.</p>
-<h2>Noncompliant Code Examples</h2>
-<pre>
+<p>Do not use the method <code>unsafe_evaluate()</code>.</p>
+<p>The method <code>unsafe_evaluate()</code> is unsafe to use. The evaluated string might have unintented side effects.</p>
+<h2>Non-compliant Code Examples</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 # Smallworld 5.2.10 and up.
 "write('hello')".unsafe_evaluate()
+write_string(%{, "'hello'", %}).unsafe_evaluate()
 </pre>
-<pre>
+<pre data-diff-id="2" data-diff-type="noncompliant">
 # Pre Smallworld 5.2.10.
 "write('hello')".evaluate()
+write_string(%{, "hello", %}).evaluate()
 </pre>
-<p>The above example simpy writes "hello" to the terminal. However, one can have more malicious intent and make unexpected changes to the database or environment Smallworld runs in, for example.</p>
-<p>If you need to serialize/deserialize data, you should use the XML (See `sw:serial_xml_thing`/`sw:serial_structure_mixin`) or use the pickle mechanism (See `sw:object.pickle()` and `ro_charindex_mixin.unpickle()`).</p>
-<p>In case there is no other option than to evaluate input, the method `sandboxed_evaluate()` should be used instead.</p>
+<p>The above example simpy writes <code>"hello"</code> to the terminal and creates a simple vector containing <code>"hello"</code>. However, one can have more malicious intent and make unexpected changes to the database or environment Smallworld runs in, for example.</p>
+<p>If you need to serialize/deserialize data, you should use the XML (See <code>sw:serial_xml_thing</code>/<code>sw:serial_structure_mixin</code>) or use the pickle mechanism (See <code>sw:object.pickle()</code> and <code>ro_charindex_mixin.unpickle()</code>).</p>
+<p>In case there is no other option than to evaluate input, the method <code>sandboxed_evaluate()</code> should be used instead, which is available since Smallworld 5.2.10.</p>
+<p>This evaluates the expression within a sandbox that does not allow access to global values. This eliminates the possibility of accessing session state or variables.</p>
+<h2>Compliant Code Examples</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+# Smallworld 5.2.10 and up.
+"write('hello')".pickle()
+write_string(%{, "'hello'", %}).sandboxed_evaluate()
+</pre>

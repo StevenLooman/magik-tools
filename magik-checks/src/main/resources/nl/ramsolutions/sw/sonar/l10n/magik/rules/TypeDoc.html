@@ -1,10 +1,36 @@
 <p>Method/procedure/slotted exemplar is missing documentation.</p>
-<h2>Compliant Solution</h2>
-<pre>
+<p>For more information on how to write good TypeDoc, view the <a href="https://github.com/stevenlooman/magik-tools/wiki/Magik-typing">Wiki</a>.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method object.do_something(param1)
-  ## This method does something
+  ## This method does something.
+  ## Then it returns _true.
+  return _true
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method object.do_something(param1)
+  ## This method does something.
   ## @param {sw:char16_vector} param1 This parameter is used to do domething.
-  ## @return {sw:true|sw:false} True if successful false if not.
+  ## @return {sw:true|sw:false} True if successful, false if not.
   _return _true
 _endmethod
+</pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="noncompliant">
+def_slotted_exemplar(
+  :test_exemplar,
+  {
+    {:slot1, _unset}
+  })
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="noncompliant">
+## @slot {sw:rope} slot1 Slot 1.
+def_slotted_exemplar(
+  :test_exemplar,
+  {
+    {:slot1, _unset}
+  })
 </pre>
