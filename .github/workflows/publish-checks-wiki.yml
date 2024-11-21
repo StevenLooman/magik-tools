@@ -4,8 +4,7 @@ on:
     branches: [develop]
     paths:
       - .github/workflows/publish-checks-wiki.yml
-      - .github/scripts/checks-pages.sh
-      - .github/scripts/checks-options.py
+      - .github/scripts/generate-checks-pages.py
       - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules/*.html
       - magik-checks/src/main/java/nl/ramsolutions/sw/magik/checks/checks/*Check.java
 concurrency:
@@ -21,9 +20,7 @@ jobs:
       - run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install html2text==2024.2.26
-          mkdir -p wiki/checks
-          .github/scripts/checks-pages.sh
-          python3 .github/scripts/checks-options.py
+          python3 .github/scripts/generate-checks-pages.py
       - uses: Andrew-Chen-Wang/github-wiki-action@86138cbd6328b21d759e89ab6e6dd6a139b22270
         with:
           path: wiki
