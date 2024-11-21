@@ -6,6 +6,7 @@
     "EmptyBlock",
     "ExemplarSlotCount",
     "FileNotInLoadList",
+    "FileWithoutPackageStatement",
     "ForbiddenCall",
     "ForbiddenGlobalUsage",
     "HidesVariable",
