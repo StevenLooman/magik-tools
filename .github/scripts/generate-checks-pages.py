@@ -70,7 +70,7 @@ class JavaToMarkdown:
     DESCRIPTION_PATTERN = r'description\s*=\s*"([^"]*)"'
     KEBAB_CASE_PATTERN = r"(?<!^)(?=[A-Z])"
 
-    TABLE_HEADER = "\n| Option | Default value | Description |\n|--------|---------------|-------------|"
+    TABLE_HEADER = "## Options\n\n| Option | Default value | Description |\n|--------|---------------|-------------|"
 
 
     def __init__(self, file_path: Path):
