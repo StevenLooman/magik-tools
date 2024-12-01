@@ -30,6 +30,7 @@
 - Add FileMustStartWithPackageStatement check to test if a file starts with a `_package`-statement.
 - Use responding methods, instead of all methods on exemplar.
 - Only supply argument inlay hints when all methods have the same parameters.
+- Fix MethodArgumentTypeMatchesParameterTypeTypedCheck not handling generics.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)

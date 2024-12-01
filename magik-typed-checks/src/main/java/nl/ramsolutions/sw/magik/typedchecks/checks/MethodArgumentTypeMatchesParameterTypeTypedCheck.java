@@ -9,6 +9,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.GenericHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
@@ -84,14 +85,18 @@ public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTyped
       IntStream.range(0, size)
           .forEach(
               index -> {
+                // Don't test undefined parameters.
                 final TypeString parameterTypeStr = parameterTypes.get(index);
-                // Don't test undefined types.
-                if (parameterTypeStr.isUndefined()
-                    || parameterTypeStr.isCombined()
-                        && parameterTypeStr.getCombinedTypes().contains(TypeString.UNDEFINED)) {
+                if (parameterTypeStr.containsUndefined()) {
                   return;
                 }
 
+                // Substitute generics.
+                final GenericHelper genericHelper = new GenericHelper(typeStrInvokedOn);
+                final TypeString substitutedParameterTypeStr =
+                    genericHelper.substituteGenerics(parameterTypeStr);
+
+                // Don't test undefined arguments.
                 final TypeString argumentTypeStr =
                     argumentTypes.get(index).get(0, TypeString.UNDEFINED);
                 if (argumentTypeStr.isUndefined()) {
@@ -99,13 +104,14 @@ public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTyped
                   return;
                 }
 
-                if (!resolver.isKindOf(argumentTypeStr, parameterTypeStr)) {
+                // Test if argument type matches parameter type.
+                if (!resolver.isKindOf(argumentTypeStr, substitutedParameterTypeStr)) {
                   final AstNode argumentNode = argumentNodes.get(index);
                   final String message =
                       String.format(
                           MESSAGE,
                           argumentTypeStr.getFullString(),
-                          parameterTypeStr.getFullString());
+                          substitutedParameterTypeStr.getFullString());
                   this.addIssue(argumentNode, message);
                 }
               });

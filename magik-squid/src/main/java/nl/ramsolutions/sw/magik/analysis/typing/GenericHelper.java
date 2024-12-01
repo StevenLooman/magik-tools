@@ -11,7 +11,6 @@ public class GenericHelper {
   /**
    * Constructor.
    *
-   * @param typeKeeper TypeKeeper to use.
    * @param typeStr Type to use.
    */
   public GenericHelper(final TypeString typeStr) {
@@ -43,7 +42,7 @@ public class GenericHelper {
    * @return {@link TypeString} with generics substituted.
    */
   public TypeString substituteGenerics(final TypeString typeString) {
-    if (typeString == TypeString.UNDEFINED) {
+    if (typeString.isUndefined()) {
       return TypeString.UNDEFINED;
     }
 

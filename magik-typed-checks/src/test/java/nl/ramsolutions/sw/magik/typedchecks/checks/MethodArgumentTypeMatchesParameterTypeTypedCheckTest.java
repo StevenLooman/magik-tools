@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
@@ -13,6 +14,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -100,5 +102,58 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
     final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
     assertThat(checkResults).hasSize(1);
+  }
+
+  @Test
+  void testGenericSubstitution() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            TypeString.ofIdentifier(
+                "rope", "sw", TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER)),
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptySet()));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.ofIdentifier("rope", "sw"),
+            "add()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "thing",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.ofGenericReference("E"))),
+            null,
+            Collections.emptySet(),
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+
+    final String code =
+        """
+        _block
+          _local ints << rope  # type sw:rope<E=sw:integer>
+          ints.add(10)
+        _endblock
+        """;
+    final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
+    final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
+    assertThat(checkResults).isEmpty();
   }
 }
