@@ -149,6 +149,11 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     return this.methodName;
   }
 
+  /**
+   * Get method name with parameters.
+   *
+   * @return Method name with parameters.
+   */
   public String getMethodNameWithParameters() {
     final StringBuilder builder = new StringBuilder();
 
@@ -198,6 +203,11 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     return builder.toString();
   }
 
+  /**
+   * Get name with parameters.
+   *
+   * @return Name with parameters.
+   */
   public String getNameWithParameters() {
     final StringBuilder builder = new StringBuilder();
 

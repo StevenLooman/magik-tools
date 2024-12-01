@@ -25,8 +25,8 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  * Conditional body handler.
  *
  * <p>Sets tested types for variables in the body after a conditional expression, such as an: -
- * `_is`/`_isnt` `_unset`/`_maybe` (singleton types) - `_is`/`_isnt` <value> -
- * `kind_of?()`/`class_of?()` - `_not` <above>
+ * `_is`/`_isnt` `_unset`/`_maybe` (singleton types) - `_is`/`_isnt` &lt;value&gt; -
+ * `kind_of?()`/`class_of?()` - `_not` &lt;above&gt;.
  *
  * <p>Note that combinations (`_and`/`_or` etc) aren't supported, as reasoning/determining about the
  * types of variables in the body after a conditional expression with combinations of these is often

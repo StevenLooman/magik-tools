@@ -270,7 +270,7 @@ public final class TypeString implements Comparable<TypeString> {
   /**
    * Get full string.
    *
-   * @return
+   * @return Full string.
    */
   public String getFullString() {
     if (this.isCombined()) {
@@ -406,7 +406,7 @@ public final class TypeString implements Comparable<TypeString> {
   /**
    * Get the reference of the generic.
    *
-   * @return
+   * @return Generic reference.
    */
   public TypeString getGenericReference() {
     if (!this.isGenericReference() && !this.isGenericDefinition()) {

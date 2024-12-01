@@ -39,7 +39,7 @@ public class MagikTypedCheckTestBase {
    * @param check Check to run.
    * @return List with issues.
    * @throws IllegalArgumentException -
-   * @throws IOException
+   * @throws IOException -
    */
   protected List<MagikIssue> runCheck(
       final Path path, final IDefinitionKeeper definitionKeeper, final MagikTypedCheck check)
