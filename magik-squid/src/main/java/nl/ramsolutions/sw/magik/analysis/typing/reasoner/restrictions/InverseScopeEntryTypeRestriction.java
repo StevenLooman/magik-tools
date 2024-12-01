@@ -30,7 +30,7 @@ public class InverseScopeEntryTypeRestriction implements TypeRestriction {
   /**
    * Get the inverse of ourselves.
    *
-   * @return
+   * @return The inverse of ourselves.
    */
   @Override
   public TypeRestriction not() {

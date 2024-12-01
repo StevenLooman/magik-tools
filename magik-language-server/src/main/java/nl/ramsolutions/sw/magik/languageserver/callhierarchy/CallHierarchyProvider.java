@@ -230,7 +230,7 @@ public class CallHierarchyProvider {
               // definition.
               final String calledMethodName = helper.getMethodName();
               final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-              return resolver.getMethodDefinitions(typeStr, calledMethodName).stream()
+              return resolver.getRespondingMethodDefinitions(typeStr, calledMethodName).stream()
                   .map(
                       calledMethodDef ->
                           this.createOutgoingCall(methodInvocationNode, calledMethodDef));

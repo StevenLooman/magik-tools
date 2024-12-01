@@ -192,7 +192,7 @@ public class DefinitionsProvider {
     final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, methodInvocationNode);
 
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-    return resolver.getMethodDefinitions(typeStr, methodName).stream()
+    return resolver.getRespondingMethodDefinitions(typeStr, methodName).stream()
         .map(MethodDefinition::getLocation)
         .map(Location::validLocation)
         .toList();

@@ -59,7 +59,7 @@ public class MethodArgumentCountMatchesParameterCountTypedCheck extends MagikTyp
     final String methodName = helper.getMethodName();
     final TypeStringResolver resolver = this.getTypeStringResolver();
     final Collection<MethodDefinition> methodDefs =
-        resolver.getMethodDefinitions(calledTypeStr, methodName);
+        resolver.getRespondingMethodDefinitions(calledTypeStr, methodName);
     for (final MethodDefinition methodDef : methodDefs) {
       final List<ParameterDefinition> parameterDefs = methodDef.getParameters();
       if (parameterDefs.isEmpty()) {

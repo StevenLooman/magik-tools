@@ -548,7 +548,7 @@ public final class TypeString implements Comparable<TypeString> {
       return null;
     }
 
-    return TypeString.ofCombination(intersection.toArray(TypeString[]::new));
+    return TypeString.combine(intersection.toArray(TypeString[]::new));
   }
 
   /**
@@ -570,7 +570,7 @@ public final class TypeString implements Comparable<TypeString> {
       return null;
     }
 
-    return TypeString.ofCombination(difference.toArray(TypeString[]::new));
+    return TypeString.combine(difference.toArray(TypeString[]::new));
   }
 
   /**

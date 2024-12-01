@@ -57,7 +57,7 @@ public class ImplementationProvider {
     final TypeString typeStr = helper.getTypeString();
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     final boolean isAbstractMethod =
-        resolver.getMethodDefinitions(typeStr).stream()
+        resolver.getRespondingMethodDefinitions(typeStr).stream()
             .anyMatch(
                 methodDef -> methodDef.getModifiers().contains(MethodDefinition.Modifier.ABSTRACT));
     if (!isAbstractMethod) {

@@ -234,8 +234,12 @@ public class TypeStringResolver {
    * @param typeString {@link TypeString} to resolve.
    * @return {@link MethodDefinition}s the {@link TypeString} responds to.
    */
-  public synchronized Collection<MethodDefinition> getMethodDefinitions(
+  public synchronized Collection<MethodDefinition> getRespondingMethodDefinitions(
       final TypeString typeString) {
+    if (!typeString.isSingle()) {
+      throw new IllegalArgumentException("TypeString must be a single type");
+    }
+
     final Entry<TypeString, String> cacheKey = Map.entry(typeString, ALL_METHODS);
     return this.methodsCache.computeIfAbsent(
         cacheKey,
@@ -247,35 +251,55 @@ public class TypeStringResolver {
                   ? typeString
                   : resolvedTypes.iterator().next().getTypeString();
 
-          final Map<String, Set<MethodDefinition>> methodDefinitionsByName = new HashMap<>();
-          this.fillMethodDefinitions(actualTypeStr, methodDefinitionsByName);
-          return methodDefinitionsByName.values().stream()
-              .flatMap(Set::stream)
-              .collect(Collectors.toSet());
+          final Map<String, MethodDefinition> methodDefinitionsByName = new HashMap<>();
+          this.fillRespondingMethodDefinitions(actualTypeStr, methodDefinitionsByName);
+          return methodDefinitionsByName.values().stream().collect(Collectors.toSet());
         });
   }
 
   /**
-   * Get {@link MethodDefinition}s for {@link TypeString}.{@link methodName}.
+   * Get the {@link MethodDefinition} that responds to the given {@link TypeString} and {@link
+   * methodName}.
    *
-   * @param typeString Type to resolve.
+   * @param typeString Type(s) to resolve.
    * @param methodName Method name to resolve.
-   * @return {@link MethodDefinition}s for the given type and method name.
+   * @return {@link MethodDefinition} that are responding to the given type and method name.
    */
-  public synchronized Collection<MethodDefinition> getMethodDefinitions(
+  public synchronized Collection<MethodDefinition> getRespondingMethodDefinitions(
       final TypeString typeString, final String methodName) {
-    final Entry<TypeString, String> cacheKey = Map.entry(typeString, methodName);
-    final Collection<MethodDefinition> methodDefinitions = this.getMethodDefinitions(typeString);
-    return this.methodsCache.computeIfAbsent(
-        cacheKey,
-        entry ->
-            methodDefinitions.stream()
-                .filter(methodDef -> methodDef.getMethodName().equals(methodName))
-                .toList());
+    if (!typeString.isSingle()) {
+      throw new IllegalArgumentException("TypeString must be a single type");
+    }
+
+    // Resolve typeString.
+    final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeString);
+    final TypeString actualTypeStr =
+        resolvedTypes.isEmpty() ? typeString : resolvedTypes.iterator().next().getTypeString();
+
+    // Find first method to respond.
+    final Collection<MethodDefinition> methodDefinitions =
+        this.definitionKeeper.getMethodDefinitions(actualTypeStr).stream()
+            .filter(def -> def.getMethodName().equals(methodName))
+            .toList();
+    if (!methodDefinitions.isEmpty()) {
+      return methodDefinitions;
+    }
+
+    // Iterate through parents, breadth first search.
+    for (final TypeString parentTypeString : this.getParents(typeString)) {
+      final Collection<MethodDefinition> parentDefinitions =
+          this.getRespondingMethodDefinitions(parentTypeString, methodName);
+      if (!parentDefinitions.isEmpty()) {
+        return parentDefinitions;
+      }
+    }
+
+    return Collections.emptyList();
   }
 
-  private void fillMethodDefinitions(
-      final TypeString typeString, final Map<String, Set<MethodDefinition>> methodDefinitions) {
+  private void fillRespondingMethodDefinitions(
+      final TypeString typeString, final Map<String, MethodDefinition> methodDefinitions) {
+    // TODO: This doesn't handle any conflicts.
     this.getSelfAndAncestors(typeString)
         .forEach(
             typeStr ->
@@ -284,11 +308,12 @@ public class TypeStringResolver {
                     .forEach(
                         methodDefinition -> {
                           final String methodName = methodDefinition.getMethodName();
-                          // TODO: If already present, then skip? Filter duplicates with the same
-                          // name, we're trying to emulate responding to specific methods.
-                          final Set<MethodDefinition> methodsForName =
-                              methodDefinitions.computeIfAbsent(methodName, key -> new HashSet<>());
-                          methodsForName.add(methodDefinition);
+                          if (methodDefinitions.containsKey(methodName)) {
+                            // Don't overwrite.
+                            return;
+                          }
+
+                          methodDefinitions.put(methodName, methodDefinition);
                         }));
   }
 

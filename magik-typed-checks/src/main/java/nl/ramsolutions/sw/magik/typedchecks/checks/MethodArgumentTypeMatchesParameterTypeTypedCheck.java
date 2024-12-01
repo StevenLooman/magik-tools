@@ -56,7 +56,7 @@ public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTyped
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
     final Collection<MethodDefinition> methodDefs =
-        resolver.getMethodDefinitions(typeStrInvokedOn, methodName);
+        resolver.getRespondingMethodDefinitions(typeStrInvokedOn, methodName);
     for (final MethodDefinition method : methodDefs) {
       final List<ParameterDefinition> parameterDefs = method.getParameters();
       if (parameterDefs.isEmpty()) {

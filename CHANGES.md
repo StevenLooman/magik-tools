@@ -28,6 +28,7 @@
 - Add ability to override aliases path and environment path in tasks in VSCode extension.
 - Set default value for `whitelist` in VariableNamingCheck.
 - Add FileMustStartWithPackageStatement check to test if a file starts with a `_package`-statement.
+- Use responding methods, instead of all methods on exemplar.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)

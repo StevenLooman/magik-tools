@@ -388,7 +388,7 @@ public class HoverProvider {
 
         final TypeStringResolver resolver = magikFile.getTypeStringResolver();
         resolver
-            .getMethodDefinitions(typeStr, methodName)
+            .getRespondingMethodDefinitions(typeStr, methodName)
             .forEach(methodDef -> this.buildMethodSignatureDoc(methodDef, builder));
       }
     }
@@ -414,7 +414,7 @@ public class HoverProvider {
     final String methodName = methodDefHelper.getMethodName();
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     resolver
-        .getMethodDefinitions(typeStr, methodName)
+        .getRespondingMethodDefinitions(typeStr, methodName)
         .forEach(methodDef -> this.buildMethodSignatureDoc(methodDef, builder));
   }
 

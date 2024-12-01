@@ -45,7 +45,7 @@ abstract class LocalTypeReasonerHandler {
   protected ExpressionResultString getMethodInvocationResult(
       final TypeString calledType, final String methodName) {
     // return calledType.getMethods(methodName).stream()
-    return this.typeResolver.getMethodDefinitions(calledType, methodName).stream()
+    return this.typeResolver.getRespondingMethodDefinitions(calledType, methodName).stream()
         .map(MethodDefinition::getReturnTypes)
         .reduce(ExpressionResultString::new)
         .orElse(ExpressionResultString.UNDEFINED);

@@ -300,7 +300,7 @@ public class CompletionProvider {
     LOGGER.debug("Providing method completions for type: {}", typeStr.getFullString());
     final String methodNamePart = tokenValue.startsWith(".") ? tokenValue.substring(1) : tokenValue;
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-    return resolver.getMethodDefinitions(typeStr).stream()
+    return resolver.getRespondingMethodDefinitions(typeStr).stream()
         .filter(methodDef -> methodDef.getMethodName().contains(methodNamePart))
         .map(
             methodDef -> {

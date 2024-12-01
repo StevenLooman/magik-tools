@@ -33,7 +33,7 @@ public class DeprecatedMethodUsageTypedCheck extends MagikTypedCheck {
     final String methodName = helper.getMethodName();
     final TypeStringResolver resolver = this.getTypeStringResolver();
     final Collection<MethodDefinition> methodDefs =
-        resolver.getMethodDefinitions(calledTypeStr, methodName);
+        resolver.getRespondingMethodDefinitions(calledTypeStr, methodName);
 
     // Add issue if method is deprecated.
     methodDefs.stream()

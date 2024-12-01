@@ -46,11 +46,16 @@ class InvocationHandler extends LocalTypeReasonerHandler {
             .substituteType(TypeString.SELF, methodOwnerTypeStr)
             .get(0, TypeString.SW_UNSET);
 
-    // Perform method call and store iterator result(s).
+    // Store the method definition(s) on the node.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
     final Collection<MethodDefinition> methodDefs =
-        this.typeResolver.getMethodDefinitions(calledTypeStr, methodName);
+        calledTypeStr.getCombinedTypes().stream()
+            .map(typeStr -> this.typeResolver.getRespondingMethodDefinitions(typeStr, methodName))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
+
+    // Perform method call and store iterator result(s).
     ExpressionResultString callResult = null;
     ExpressionResultString iterResult = null;
     if (methodDefs.isEmpty()) {
