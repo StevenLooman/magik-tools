@@ -67,19 +67,30 @@ class ArgumentNameInlayHintSupplier {
       return Stream.of();
     }
 
-    // Only supply for single TypeStrings.
-    if (!typeString.isSingle()) {
-      return Stream.of();
-    }
-
     // Get invoked method.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(methodInvocationNode);
     final String methodName = helper.getMethodName();
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-    final Collection<MethodDefinition> methodDefinitions = typeString.getCombinedTypes().stream()
-        .map(typeStr -> resolver.getRespondingMethodDefinitions(typeStr, methodName))
-        .flatMap(Collection::stream)
-        .collect(Collectors.toSet());
+    final Collection<MethodDefinition> methodDefinitions =
+        typeString.getCombinedTypes().stream()
+            .map(typeStr -> resolver.getRespondingMethodDefinitions(typeStr, methodName))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+
+    // Test if all MethodDefinitions have the same parameters.
+    final long methodDefinitionParameterCount =
+        methodDefinitions.stream()
+            .map(
+                methodDef ->
+                    methodDef.getParameters().stream()
+                        .map(ParameterDefinition::getName)
+                        .collect(Collectors.toSet()))
+            .distinct()
+            .count();
+    if (methodDefinitionParameterCount != 1) {
+      return Stream.of();
+    }
+
     final MethodDefinition methodDefinition = methodDefinitions.stream().findAny().orElse(null);
     if (methodDefinition == null) {
       return Stream.of();
