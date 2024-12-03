@@ -236,65 +236,71 @@ public class TypeStringResolver {
    */
   public synchronized Collection<MethodDefinition> getRespondingMethodDefinitions(
       final TypeString typeString) {
-    if (!typeString.isSingle()) {
-      throw new IllegalArgumentException("TypeString must be a single type");
-    }
+    return typeString.getCombinedTypes().stream()
+        .map(
+            typeStr -> {
+              final Entry<TypeString, String> cacheKey = Map.entry(typeStr, ALL_METHODS);
+              return this.methodsCache.computeIfAbsent(
+                  cacheKey,
+                  entry -> {
+                    // Try to resolve the typeString to an actual type.
+                    final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeStr);
+                    final TypeString actualTypeStr =
+                        resolvedTypes.isEmpty()
+                            ? typeStr
+                            : resolvedTypes.iterator().next().getTypeString();
 
-    final Entry<TypeString, String> cacheKey = Map.entry(typeString, ALL_METHODS);
-    return this.methodsCache.computeIfAbsent(
-        cacheKey,
-        entry -> {
-          // Try to resolve the typeString to an actual type.
-          final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeString);
-          final TypeString actualTypeStr =
-              resolvedTypes.isEmpty()
-                  ? typeString
-                  : resolvedTypes.iterator().next().getTypeString();
-
-          final Map<String, MethodDefinition> methodDefinitionsByName = new HashMap<>();
-          this.fillRespondingMethodDefinitions(actualTypeStr, methodDefinitionsByName);
-          return methodDefinitionsByName.values().stream().collect(Collectors.toSet());
-        });
+                    final Map<String, MethodDefinition> methodDefinitionsByName = new HashMap<>();
+                    this.fillRespondingMethodDefinitions(actualTypeStr, methodDefinitionsByName);
+                    return methodDefinitionsByName.values().stream().collect(Collectors.toSet());
+                  });
+            })
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
   }
 
   /**
    * Get the {@link MethodDefinition} that responds to the given {@link TypeString} and {@link
    * methodName}.
    *
-   * @param typeString Type(s) to resolve.
+   * @param typeString {@link TypeString}(s) to resolve.
    * @param methodName Method name to resolve.
    * @return {@link MethodDefinition} that are responding to the given type and method name.
    */
   public synchronized Collection<MethodDefinition> getRespondingMethodDefinitions(
       final TypeString typeString, final String methodName) {
-    if (!typeString.isSingle()) {
-      throw new IllegalArgumentException("TypeString must be a single type");
-    }
+    return typeString.getCombinedTypes().stream()
+        .map(
+            typeStr -> {
+              // Resolve typeString.
+              final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeStr);
+              final TypeString actualTypeStr =
+                  resolvedTypes.isEmpty()
+                      ? typeStr
+                      : resolvedTypes.iterator().next().getTypeString();
 
-    // Resolve typeString.
-    final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeString);
-    final TypeString actualTypeStr =
-        resolvedTypes.isEmpty() ? typeString : resolvedTypes.iterator().next().getTypeString();
+              // Find first method to respond.
+              final Collection<MethodDefinition> methodDefinitions =
+                  this.definitionKeeper.getMethodDefinitions(actualTypeStr).stream()
+                      .filter(def -> def.getMethodName().equals(methodName))
+                      .collect(Collectors.toSet());
+              if (!methodDefinitions.isEmpty()) {
+                return methodDefinitions;
+              }
 
-    // Find first method to respond.
-    final Collection<MethodDefinition> methodDefinitions =
-        this.definitionKeeper.getMethodDefinitions(actualTypeStr).stream()
-            .filter(def -> def.getMethodName().equals(methodName))
-            .toList();
-    if (!methodDefinitions.isEmpty()) {
-      return methodDefinitions;
-    }
+              // Iterate through parents, breadth first search.
+              for (final TypeString parentTypeString : this.getParents(typeStr)) {
+                final Collection<MethodDefinition> parentDefinitions =
+                    this.getRespondingMethodDefinitions(parentTypeString, methodName);
+                if (!parentDefinitions.isEmpty()) {
+                  return parentDefinitions;
+                }
+              }
 
-    // Iterate through parents, breadth first search.
-    for (final TypeString parentTypeString : this.getParents(typeString)) {
-      final Collection<MethodDefinition> parentDefinitions =
-          this.getRespondingMethodDefinitions(parentTypeString, methodName);
-      if (!parentDefinitions.isEmpty()) {
-        return parentDefinitions;
-      }
-    }
-
-    return Collections.emptyList();
+              return methodDefinitions;
+            })
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
   }
 
   private void fillRespondingMethodDefinitions(
