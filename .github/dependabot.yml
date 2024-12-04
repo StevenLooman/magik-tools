@@ -11,7 +11,7 @@ updates:
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
-      interval: weekly  
+      interval: monthly
   - package-ecosystem: "npm"
     directory: "magik-language-server/client-vscode"
     schedule:
