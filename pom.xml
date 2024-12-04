@@ -84,7 +84,7 @@
     <sonar-maven-packaging-plugin.version>1.23.0.740</sonar-maven-packaging-plugin.version>
     <sslr-squid-bridge.version>2.7.1.392</sslr-squid-bridge.version>
     <sslr.version>1.24.0.633</sslr.version>
-    <slf4j.version>2.0.12</slf4j.version>
+    <slf4j.version>2.0.16</slf4j.version>
     <logback.version>1.0.13</logback.version>
     <lsp4j.version>0.23.1</lsp4j.version>
     <commons-cli.version>1.6.0</commons-cli.version>
