@@ -54,7 +54,7 @@
 
     <junit.version>5.11.3</junit.version>
     <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-    <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
+    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
     <maven-checkstyle-plugin.version>3.3.1</maven-checkstyle-plugin.version>
     <checkstyle.version>10.15.0</checkstyle.version>
     <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
