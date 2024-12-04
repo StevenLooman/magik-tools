@@ -111,6 +111,17 @@ Also update these files:
 
 Then, create a release by pushing a new tag to Github.
 
+### Updating (maven)
+
+[Dependabot](https://docs.github.com/en/code-security/dependabot) is used to keep versions up to date.
+
+In case versions have to be updated manually, run the following to check if there are any new versions of maven-dependencies available:
+
+```shell
+$ mvn versions:display-dependency-updates
+...
+```
+
 ### SonarCloud
 
 This project can found at [SonarCloud](https://sonarcloud.io/project/overview?id=StevenLooman_magik-tools).
