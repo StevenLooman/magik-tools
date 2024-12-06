@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ForNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -75,29 +76,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
       // Evaluate binary operator.
       final TypeString leftTypeStr = result.get(0, TypeString.SW_UNSET);
       final TypeString rightTypeStr = rightResult.get(0, TypeString.SW_UNSET);
-      switch (operatorStr.toLowerCase()) {
-        case "_is", "_isnt":
-          result = new ExpressionResultString(TypeString.SW_FALSE);
-          break;
-
-        case "_andif", "_orif":
-          // Returns RHS if LHS is true.
-          final TypeString combinedType = TypeString.combine(TypeString.SW_FALSE, rightTypeStr);
-          result = new ExpressionResultString(combinedType);
-          break;
-
-        default:
-          final BinaryOperatorDefinition binOpDef =
-              this.definitionKeeper
-                  .getBinaryOperatorDefinitions(operatorStr, leftTypeStr, rightTypeStr)
-                  .stream()
-                  .findAny()
-                  .orElse(null);
-          final TypeString resultingTypeRef =
-              binOpDef != null ? binOpDef.getResultTypeName() : TypeString.UNDEFINED;
-          result = new ExpressionResultString(resultingTypeRef);
-          break;
-      }
+      result = this.getBinaryOperatorDefinition(operatorStr, leftTypeStr, rightTypeStr);
     }
 
     // Apply operator to operands and store result.
@@ -125,30 +104,8 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     // Evaluate binary operator.
     final TypeString leftTypeStr = leftResult.get(0, TypeString.SW_UNSET);
     final TypeString rightTypeStr = rightResult.get(0, TypeString.SW_UNSET);
-    final ExpressionResultString result;
-    switch (operatorStr.toLowerCase()) {
-      case "_is", "_isnt":
-        result = new ExpressionResultString(TypeString.SW_FALSE);
-        break;
-
-      case "_andif", "_orif":
-        // Returns RHS if LHS is true.
-        final TypeString combinedTypeStr = TypeString.combine(TypeString.SW_FALSE, rightTypeStr);
-        result = new ExpressionResultString(combinedTypeStr);
-        break;
-
-      default:
-        final BinaryOperatorDefinition binOpDef =
-            this.definitionKeeper
-                .getBinaryOperatorDefinitions(operatorStr, leftTypeStr, rightTypeStr)
-                .stream()
-                .findAny()
-                .orElse(null);
-        final TypeString resultingTypeRef =
-            binOpDef != null ? binOpDef.getResultTypeName() : TypeString.UNDEFINED;
-        result = new ExpressionResultString(resultingTypeRef);
-        break;
-    }
+    final ExpressionResultString result =
+        this.getBinaryOperatorDefinition(operatorStr, leftTypeStr, rightTypeStr);
 
     // Store result of expression.
     this.state.setNodeType(node, result);
@@ -168,6 +125,62 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         this.state.setCurrentScopeEntryNode(scopeEntry, assignedNode);
       }
     }
+  }
+
+  private ExpressionResultString getBinaryOperatorDefinition(
+      final String operatorStr, final TypeString lhsTypeStr, final TypeString rhsTypeStr) {
+    final ExpressionResultString result;
+    switch (operatorStr.toLowerCase()) {
+      case "_is", "_isnt":
+        result = new ExpressionResultString(TypeString.SW_FALSE);
+        break;
+
+      case "_andif", "_orif":
+        // Returns RHS if LHS is true.
+        final TypeString combinedTypeStr = TypeString.combine(TypeString.SW_FALSE, rhsTypeStr);
+        result = new ExpressionResultString(combinedTypeStr);
+        break;
+
+      default:
+        // This tries to find the actual applied type via the species method.
+        // The species method on an object returns a method_table for a given exemplar.
+        // We assume - in our type database - the species method return type has a
+        // generic E with the exemplar.
+        final TypeString exemplarRef = TypeString.ofGenericReference("E");
+        final TypeString lhsMethodTableTypeStr =
+            this.typeResolver.getRespondingMethodDefinitions(lhsTypeStr, "species").stream()
+                .map(MethodDefinition::getReturnTypes)
+                .map(resultStr -> resultStr.get(0, lhsTypeStr))
+                .reduce(TypeString::combine)
+                .orElse(TypeString.UNDEFINED);
+        final TypeString resolvedLhsTypeStr =
+            lhsMethodTableTypeStr.getGenericDefinition(exemplarRef) != null
+                ? lhsMethodTableTypeStr.getGenericDefinition(exemplarRef).getGenericType()
+                : lhsTypeStr;
+        final TypeString rhsMethodTableTypeStr =
+            this.typeResolver.getRespondingMethodDefinitions(rhsTypeStr, "species").stream()
+                .map(MethodDefinition::getReturnTypes)
+                .map(resultStr -> resultStr.get(0, rhsTypeStr))
+                .reduce(TypeString::combine)
+                .orElse(TypeString.UNDEFINED);
+        final TypeString resolvedRhsTypeStr =
+            rhsMethodTableTypeStr.getGenericDefinition(exemplarRef) != null
+                ? rhsMethodTableTypeStr.getGenericDefinition(exemplarRef).getGenericType()
+                : rhsTypeStr;
+
+        final BinaryOperatorDefinition binOpDef =
+            this.definitionKeeper
+                .getBinaryOperatorDefinitions(operatorStr, resolvedLhsTypeStr, resolvedRhsTypeStr)
+                .stream()
+                .findAny()
+                .orElse(null);
+        final TypeString resultingTypeRef =
+            binOpDef != null ? binOpDef.getResultTypeName() : TypeString.UNDEFINED;
+        result = new ExpressionResultString(resultingTypeRef);
+        break;
+    }
+
+    return result;
   }
 
   /**
@@ -398,7 +411,8 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
    * @param node METHOD_DEFINITION node.
    */
   void handleMethodDefinition(final AstNode node) {
-    // Technically, a method definition is not an expression... but this has to live somewhere.
+    // Technically, a method definition is not an expression... but this has to live
+    // somewhere.
     if (!this.state.hasNodeType(node)) {
       // Nothing was assigned to this node, so it must be empty.
       this.state.setNodeType(node, ExpressionResultString.EMPTY);

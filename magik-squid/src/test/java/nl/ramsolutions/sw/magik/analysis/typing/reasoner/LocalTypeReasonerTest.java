@@ -437,6 +437,59 @@ class LocalTypeReasonerTest {
   }
 
   @Test
+  void testBinaryOperatorSpecies() {
+    final String code =
+        """
+        _method object.test
+            _return :a + "b"
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_SYMBOL,
+            "species",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            Collections.emptySet(),
+            new ExpressionResultString(
+                TypeString.ofIdentifier(
+                    "method_table",
+                    "sw",
+                    TypeString.ofGenericDefinition("E", TypeString.SW_CHAR16_VECTOR))),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new BinaryOperatorDefinition(
+            null,
+            null,
+            null,
+            code,
+            null,
+            "+",
+            TypeString.SW_CHAR16_VECTOR,
+            TypeString.SW_CHAR16_VECTOR,
+            TypeString.SW_CHAR16_VECTOR));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert user:object.test type determined.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_CHAR16_VECTOR));
+  }
+
+  @Test
   void testEmitStatement() {
     final String code =
         """

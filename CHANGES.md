@@ -31,6 +31,7 @@
 - Use responding methods, instead of all methods on exemplar.
 - Only supply argument inlay hints when all methods have the same parameters.
 - Fix MethodArgumentTypeMatchesParameterTypeTypedCheck not handling generics.
+- Fix binary operator reasoning not using `species` method.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)

@@ -400,7 +400,21 @@ public final class TypeString implements Comparable<TypeString> {
    * @return Generic definitions.
    */
   public List<TypeString> getGenerics() {
-    return this.generics;
+    return Collections.unmodifiableList(this.generics);
+  }
+
+  /**
+   * Get the generic for the given generic reference.
+   *
+   * @param genericReference The generic reference to search for.
+   * @return The found generic if found, null otherwise.
+   */
+  @CheckForNull
+  public TypeString getGenericDefinition(final TypeString genericReference) {
+    return this.generics.stream()
+        .filter(generic -> generic.getGenericReference().equals(genericReference))
+        .findAny()
+        .orElse(null);
   }
 
   /**
