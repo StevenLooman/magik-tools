@@ -456,6 +456,7 @@
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.slap.SlapProtocol.handleReplyMessage(java.nio.ByteBuffer)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.formatting.MagikFormattingStrategy.requireNoWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.MagikFormattingStrategy.requireWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.formatting.StandardFormattingStrategy.requireNoWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.formatting.StandardFormattingStrategy.requireWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider.provideDefinitions(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>

@@ -255,6 +255,17 @@ class FormattingWalkerTest {
     assertThat(edits).isEmpty();
   }
 
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "_proc@b(x, y, z) _endproc",
+        "_proc(x, y, z) _endproc",
+      })
+  void testProcDefinitionParameters(final String code) {
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
   // endregion
 
   // region: Indenting.

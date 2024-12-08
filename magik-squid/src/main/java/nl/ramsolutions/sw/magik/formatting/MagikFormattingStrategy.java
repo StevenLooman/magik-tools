@@ -185,7 +185,8 @@ class MagikFormattingStrategy extends FormattingStrategy {
                 lastTextTokenValue) // But no whitespace before augmented assignment.
             && (this.tokenIs(token, "<<", "^<<")))
         && !this.tokenIs(token, ".", ",", ")", "}", "]")
-        && !this.tokenIs(this.lastToken, "(", "{", "[");
+        && !this.tokenIs(this.lastToken, "(", "{", "[")
+        && !this.tokenIs(this.lastTextToken, "_proc"); // Except for _proc.
   }
 
   private boolean requireNoWhitespaceBefore(final Token token) {
@@ -193,8 +194,8 @@ class MagikFormattingStrategy extends FormattingStrategy {
         this.lastTextToken != null ? this.lastTextToken.getOriginalValue().toLowerCase() : null;
     return !this.tokenIs(token, GenericTokenType.COMMENT)
         && (this.tokenIs(token, ")", "}", "]", ",")
+            || this.tokenIs(this.lastTextToken, "@", "(", "{", "[", "_proc")
             || this.nodeIsSlot()
-            || this.tokenIs(this.lastTextToken, "@", "(", "{", "[")
             || this.currentNode.is(MagikGrammar.ARGUMENTS)
             || this.currentNode.is(MagikGrammar.PARAMETERS)
             || this.nodeIsMethodDefinition()
