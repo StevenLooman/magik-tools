@@ -9,6 +9,15 @@ public class FormattingOptions {
   private final boolean trimTrailingWhitespace;
   private final boolean trimFinalNewlines;
 
+  /**
+   * Constructor.
+   *
+   * @param tabSize Tab size.
+   * @param insertSpaces Insert spaces.
+   * @param insertFinalNewline Insert final newline.
+   * @param trimTrailingWhitespace Trim trailing whitespace.
+   * @param trimFinalNewlines Trim final newlines.
+   */
   public FormattingOptions(
       final int tabSize,
       final boolean insertSpaces,
