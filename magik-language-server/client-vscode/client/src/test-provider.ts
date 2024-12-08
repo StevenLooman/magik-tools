@@ -229,7 +229,7 @@ export class MagikTestProvider implements vscode.Disposable {
 		});
 	}
 
-	private runTests(testItems: TestItemCollection, outputPath: fs.PathLike) {
+	private runTests(testItems: vscode.TestItemCollection, outputPath: fs.PathLike) {
 		// Gather required products.
 		const products = this.getSelfAndAncestors(testItems, 'product');
 		const productsStr = products
@@ -237,7 +237,7 @@ export class MagikTestProvider implements vscode.Disposable {
 			.join(",");
 
 		// Get modules to be loaded.
-		const modules = [
+		const modules: vscode.TestItem[] = [
 			...this.getSelfAndAncestors(testItems, 'module'),
 			...this.getSelfAndDescendants(testItems, 'module')
 		];
@@ -281,7 +281,7 @@ _protect
 
 		# Add all test_cases.`;
 
-		testItems.forEach(testItem => {
+		testItems.forEach((testItem: vscode.TestItem) => {
 			script += this.generateTestCase(testItem, "top_suite");
 		});
 
