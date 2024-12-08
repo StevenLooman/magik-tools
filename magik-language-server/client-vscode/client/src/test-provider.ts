@@ -229,11 +229,11 @@ export class MagikTestProvider implements vscode.Disposable {
 		});
 	}
 
-	private runTests(testItems: TestItemCollection|vscode.TestItemCollection, outputPath: fs.PathLike) {
+	private runTests(testItems: TestItemCollection, outputPath: fs.PathLike) {
 		// Gather required products.
 		const products = this.getSelfAndAncestors(testItems, 'product');
 		const productsStr = products
-			.map(testItem => ":" + testItem.id.substring('product:'.length))
+			.map(testItem => ":|" + testItem.id.substring('product:'.length) + "|")
 			.join(",");
 
 		// Get modules to be loaded.
@@ -242,7 +242,7 @@ export class MagikTestProvider implements vscode.Disposable {
 			...this.getSelfAndDescendants(testItems, 'module')
 		];
 		const modulesStr = modules
-			.map(testItem => ":" + testItem.id.substring('module:'.length))
+			.map(testItem => ":|" + testItem.id.substring('module:'.length) + "|")
 			.join(",");
 
 		// Build test runner script.
