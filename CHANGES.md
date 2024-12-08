@@ -47,6 +47,7 @@
 - Add UnsafeEvaluateInvocation check to Sonar way profile. This might result in more issues.
 - Add UndefinedVariable check to Sonar way profile. This might result in more issues.
 - Add FileMustStartWithPackageStatement check to test if a file starts with a `_package`-statement. This might result in more issues.
+- FormattingCheck now uses formatting code to detect issues. This might result in more or different issues.
 
 ## 0.10.1 (2024-08-14)
 
