@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.magik.checks.fixers;
 
 import com.sonar.sslr.api.AstNode;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.MagikToolsProperties;
@@ -37,13 +36,7 @@ public class FormattingFixer extends MagikCheckFixer {
             settings.insertFinalNewline(),
             settings.trimTrailingWhitespace(),
             settings.trimFinalNewlines());
-    FormattingWalker walker;
-    try {
-      walker = new FormattingWalker(formattingOptions);
-    } catch (final IOException exception) {
-      LOGGER.error("Error creating formatter", exception);
-      return Collections.emptyList();
-    }
+    final FormattingWalker walker = new FormattingWalker(formattingOptions);
 
     walker.walkAst(node);
     return walker.getTextEdits().stream()

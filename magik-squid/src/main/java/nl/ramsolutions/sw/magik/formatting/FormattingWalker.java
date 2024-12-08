@@ -7,6 +7,7 @@ import com.sonar.sslr.api.Trivia;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
@@ -16,7 +17,7 @@ public class FormattingWalker extends MagikAstWalker {
 
   private final List<TextEdit> textEdits = new ArrayList<>();
   private final PragmaFormattingStrategy pragmaStrategy;
-  private final StandardFormattingStrategy standardStrategy;
+  private final MagikFormattingStrategy magikStrategy;
   private final FinalNewlineStrategy finalNewlineStrategy;
   private FormattingStrategy activeStrategy;
 
@@ -26,11 +27,11 @@ public class FormattingWalker extends MagikAstWalker {
    * @param options Formatting options.
    * @throws IOException -
    */
-  public FormattingWalker(final FormattingOptions options) throws IOException {
+  public FormattingWalker(final FormattingOptions options) {
     this.pragmaStrategy = new PragmaFormattingStrategy(options);
-    this.standardStrategy = new StandardFormattingStrategy(options);
+    this.magikStrategy = new MagikFormattingStrategy(options);
     this.finalNewlineStrategy = new FinalNewlineStrategy(options);
-    this.activeStrategy = this.standardStrategy;
+    this.activeStrategy = this.magikStrategy;
   }
 
   /**
@@ -43,11 +44,10 @@ public class FormattingWalker extends MagikAstWalker {
   }
 
   private Stream<FormattingStrategy> getStrategies() {
-    return Stream.of(this.pragmaStrategy, this.standardStrategy, this.finalNewlineStrategy);
+    return Stream.of(this.pragmaStrategy, this.magikStrategy, this.finalNewlineStrategy);
   }
 
-  // region: Walker methods.
-  // region: AST.
+  // region: AST walker methods.
   @Override
   protected void walkPrePragma(final AstNode node) {
     this.activeStrategy = this.pragmaStrategy;
@@ -55,7 +55,7 @@ public class FormattingWalker extends MagikAstWalker {
 
   @Override
   protected void walkPostPragma(final AstNode node) {
-    this.activeStrategy = this.standardStrategy;
+    this.activeStrategy = this.magikStrategy;
   }
 
   @Override
@@ -70,7 +70,7 @@ public class FormattingWalker extends MagikAstWalker {
 
   // endregion
 
-  // region: Tokens/Trivia.
+  // region: Tokens/Trivia walker methods.
   @Override
   protected void walkTrivia(final Trivia trivia) {
     for (final Token token : trivia.getTokens()) {
@@ -95,10 +95,11 @@ public class FormattingWalker extends MagikAstWalker {
     this.getStrategies()
         .forEach(
             strategy -> {
-              final TextEdit textEdit = strategy.walkWhitespaceToken(token);
-              if (textEdit != null && strategy == this.activeStrategy) {
-                this.textEdits.add(textEdit);
+              final List<TextEdit> strategyTextEdits = strategy.walkWhitespaceToken(token);
+              if (strategy == this.activeStrategy) {
+                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
               }
+
               strategy.setLastToken(token);
             });
   }
@@ -128,9 +129,9 @@ public class FormattingWalker extends MagikAstWalker {
     this.getStrategies()
         .forEach(
             strategy -> {
-              final TextEdit textEdit = strategy.walkCommentToken(token);
-              if (textEdit != null && strategy == this.activeStrategy) {
-                this.textEdits.add(textEdit);
+              final List<TextEdit> strategyTextEdits = strategy.walkCommentToken(token);
+              if (strategy == this.activeStrategy) {
+                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
               }
 
               strategy.setLastToken(token);
@@ -141,9 +142,9 @@ public class FormattingWalker extends MagikAstWalker {
     this.getStrategies()
         .forEach(
             strategy -> {
-              final TextEdit textEdit = strategy.walkEolToken(token);
-              if (textEdit != null && strategy == this.activeStrategy) {
-                this.textEdits.add(textEdit);
+              final List<TextEdit> strategyTextEdits = strategy.walkEolToken(token);
+              if (strategy == this.activeStrategy) {
+                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
               }
 
               strategy.setLastToken(token);
@@ -161,9 +162,9 @@ public class FormattingWalker extends MagikAstWalker {
     this.getStrategies()
         .forEach(
             strategy -> {
-              final TextEdit textEdit = strategy.walkEofToken(token);
-              if (textEdit != null && strategy == this.activeStrategy) {
-                this.textEdits.add(textEdit);
+              final List<TextEdit> strategyTextEdits = strategy.walkEofToken(token);
+              if (strategy == this.activeStrategy) {
+                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
               }
 
               strategy.setLastToken(token);
@@ -180,15 +181,14 @@ public class FormattingWalker extends MagikAstWalker {
     this.getStrategies()
         .forEach(
             strategy -> {
-              final TextEdit textEdit = strategy.walkToken(token);
-              if (textEdit != null && strategy == this.activeStrategy) {
-                this.textEdits.add(textEdit);
+              final List<TextEdit> strategyTextEdits = strategy.walkToken(token);
+              if (strategy == this.activeStrategy) {
+                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
               }
 
               strategy.setLastToken(token);
             });
   }
-  // endregion
   // endregion
 
 }

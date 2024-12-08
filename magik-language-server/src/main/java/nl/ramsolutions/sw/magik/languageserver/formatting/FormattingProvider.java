@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.languageserver.formatting;
 
 import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -37,16 +36,10 @@ public class FormattingProvider {
 
     final nl.ramsolutions.sw.magik.formatting.FormattingOptions magikToolsFormattingOptions =
         Lsp4jConversion.formattingOptionsFromLsp4j(options);
-    try {
-      final FormattingWalker walker = new FormattingWalker(magikToolsFormattingOptions);
-      walker.walkAst(node);
-      final List<nl.ramsolutions.sw.magik.TextEdit> textEdits = walker.getTextEdits();
-      return textEdits.stream().map(Lsp4jConversion::textEditToLsp4j).toList();
-    } catch (IOException exception) {
-      LOGGER.error(exception.getMessage(), exception);
-    }
-
-    return Collections.emptyList();
+    final FormattingWalker walker = new FormattingWalker(magikToolsFormattingOptions);
+    walker.walkAst(node);
+    final List<nl.ramsolutions.sw.magik.TextEdit> textEdits = walker.getTextEdits();
+    return textEdits.stream().map(Lsp4jConversion::textEditToLsp4j).toList();
   }
 
   /**

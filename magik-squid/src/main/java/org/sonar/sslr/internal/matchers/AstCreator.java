@@ -190,6 +190,8 @@ public final class AstCreator {
     final GenericTokenType tokenType;
     if (nodeValue.startsWith("\r") || nodeValue.startsWith("\n")) {
       tokenType = GenericTokenType.EOL;
+
+      // TODO: Do we also want to insert a GenericTokenType.SOL token?
     } else if (nodeValue.equals(";")) {
       tokenType = GenericTokenType.STATEMENT_SEPARATOR;
     } else {

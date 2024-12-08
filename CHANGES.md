@@ -32,6 +32,9 @@
 - Only supply argument inlay hints when all methods have the same parameters.
 - Fix MethodArgumentTypeMatchesParameterTypeTypedCheck not handling generics.
 - Fix binary operator reasoning not using `species` method.
+- Improve auto formatting.
+- Fix auto formatting bug where `_pragma` caused lines to be removed.
+- FormattingCheck now uses formatting code to detect issues.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)

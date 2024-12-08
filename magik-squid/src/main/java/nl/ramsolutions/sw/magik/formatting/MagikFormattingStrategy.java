@@ -4,24 +4,28 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
+import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
 
 /** Standard formatting strategy. */
-class StandardFormattingStrategy extends FormattingStrategy {
+class MagikFormattingStrategy extends FormattingStrategy {
 
   private static final List<String> KEYWORDS =
       Collections.unmodifiableList(List.of(MagikKeyword.keywordValues()));
 
-  // We cannot base indenting purely on AstNodes (BODY/PARAMETERS/ARGUMENTS/SIMPLE_VECTOR/...),
+  // We cannot base indenting purely on AstNodes
+  // (BODY/PARAMETERS/ARGUMENTS/SIMPLE_VECTOR/...),
   // as bodies and tokens don't play that well together.
-  // Tokens surround the AstNodes, e.g.: '(', pre PARAMETERS, post PARAMETERS, ')', or
-  // '_method', '...', pre BODY, ..., post BODY, '# comment', '_endmethod'.
+  // Tokens surround the AstNodes, e.g.: '(', pre PARAMETERS, post PARAMETERS,
+  // ')', or '_method', '...', pre BODY, ..., post BODY, '# comment',
+  // '_endmethod'.
   private static final Set<String> INDENT_INCREASE =
       Collections.unmodifiableSet(
           Set.of(
@@ -63,107 +67,141 @@ class StandardFormattingStrategy extends FormattingStrategy {
               MagikKeyword.ENDLOOP.getValue(),
               MagikKeyword.FINALLY.getValue()));
 
+  private static final Set<String> AUGMENTED_ASSIGNMENT_TOKENS =
+      Collections.unmodifiableSet(
+          Set.of(
+              MagikKeyword.IS.getValue(),
+              MagikKeyword.ISNT.getValue(),
+              MagikKeyword.ANDIF.getValue(),
+              MagikKeyword.AND.getValue(),
+              MagikKeyword.ORIF.getValue(),
+              MagikKeyword.OR.getValue(),
+              MagikKeyword.XOR.getValue(),
+              MagikKeyword.DIV.getValue(),
+              MagikKeyword.MOD.getValue(),
+              MagikKeyword.CF.getValue(),
+              MagikOperator.PLUS.getValue(),
+              MagikOperator.MINUS.getValue(),
+              MagikOperator.STAR.getValue(),
+              MagikOperator.DIV.getValue(),
+              MagikOperator.EXP.getValue(),
+              MagikOperator.EQ.getValue(),
+              MagikOperator.NEQ.getValue()));
+
   private int indent;
   private AstNode currentNode;
 
-  StandardFormattingStrategy(final FormattingOptions options) {
+  MagikFormattingStrategy(final FormattingOptions options) {
     super(options);
   }
 
   @Override
-  TextEdit walkCommentToken(final Token token) {
+  List<TextEdit> walkCommentToken(final Token token) {
     return this.walkToken(token);
   }
 
   @Override
-  public TextEdit walkEolToken(final Token token) {
+  List<TextEdit> walkEolToken(final Token token) {
     // Don't touch syntax errors.
     if (this.currentNode.is(MagikGrammar.SYNTAX_ERROR)) {
-      return null;
+      return Collections.emptyList();
     }
 
-    TextEdit textEdit = null;
-    if (this.options.isTrimTrailingWhitespace()
-        && this.lastToken != null
-        && this.lastToken.getType() == GenericTokenType.WHITESPACE) {
-      textEdit = this.editToken(this.lastToken, "");
+    // Test distance to lastTextToken, only single empty line allowed.
+    final int emptyLineCount =
+        this.lastTextToken != null ? token.getLine() - this.lastTextToken.getLine() : 0;
+    if (emptyLineCount > 1) {
+      // Add edit to remove empty line.
+      final TextEdit textEdit = this.editNoNewline(token);
+      return List.of(textEdit);
+    } else if (this.options.isTrimTrailingWhitespace()
+        && this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
+      final TextEdit textEdit = this.editToken(this.lastToken, "", "no whitespace after allowed");
+      return List.of(textEdit);
     }
-    return textEdit;
+
+    return Collections.emptyList();
   }
 
   @Override
-  TextEdit walkToken(final Token token) {
+  List<TextEdit> walkToken(final Token token) {
     this.trackIndentPre(token);
 
-    TextEdit textEdit = null;
-    if (this.lastTextToken != null) {
-      final boolean isOnNewline = this.lastTextToken.getLine() != token.getLine();
-      if (isOnNewline) {
-        textEdit = this.ensureIndenting(token);
-      } else {
-        textEdit = this.validateWhitespacingBefore(token);
-      }
-    } else {
+    final boolean isFirstTextToken = this.lastTextToken == null;
+    final List<TextEdit> textEdits = new ArrayList<>();
+    if (isFirstTextToken) {
       // First token, should not contain any pre-whitespace/indenting.
-      textEdit = this.editNoWhitespaceBefore(token);
+      final TextEdit textEdit = this.editNoWhitespaceBefore(token);
+      textEdits.add(textEdit);
+    } else {
+      final boolean isOnNewline = !token.isOnSameLineThan(this.lastTextToken);
+      if (isOnNewline) {
+        if (this.requireNewlineBefore(token)) {
+          if (this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
+            final TextEdit textEdit = this.editNewlineBefore(this.lastToken);
+            textEdits.add(textEdit);
+          } else {
+            final TextEdit textEdit = this.editNewlineBefore(token);
+            textEdits.add(textEdit);
+          }
+        }
+
+        final TextEdit textEdit = this.ensureIndenting(token);
+        textEdits.add(textEdit);
+      } else {
+        final TextEdit textEdit = this.validateWhitespacingBefore(token);
+        textEdits.add(textEdit);
+      }
     }
 
     this.trackIndentPost(token);
-    return textEdit;
+    return textEdits;
   }
 
   private TextEdit validateWhitespacingBefore(final Token token) {
-    TextEdit textEdit = null;
-
     if (this.requireWhitespaceBefore(token)) {
-      textEdit = this.editWhitespaceBefore(token);
+      return this.editWhitespaceBefore(token);
     } else if (this.requireNoWhitespaceBefore(token)) {
-      textEdit = this.editNoWhitespaceBefore(token);
-    } else {
-      textEdit = this.editWhitespaceBefore(token);
+      return this.editNoWhitespaceBefore(token);
     }
 
-    return textEdit;
+    return this.editWhitespaceBefore(token);
+  }
+
+  private boolean requireNewlineBefore(final Token token) {
+    return this.tokenIs(this.lastTextToken, "$")
+        && this.lastTextToken.getLine() + 1 == token.getLine();
   }
 
   private boolean requireWhitespaceBefore(final Token token) {
     final String tokenValue = token.getOriginalValue().toLowerCase();
-    return this.lastTextToken != null // Don't string keywords: _if _not, _method obj, obj _andif..
-        && this.lastTextToken.getLine() == token.getLine()
-        && (KEYWORDS.contains(this.lastTextToken.getOriginalValue().toLowerCase())
-            || KEYWORDS.contains(tokenValue)
-            || "<<".equals(tokenValue) // Not really part of stringing keywords.
-            || "^<<".equals(tokenValue))
-        && !".".equals(tokenValue)
-        && !",".equals(tokenValue)
-        && !")".equals(tokenValue)
-        && !"}".equals(tokenValue)
-        && !"]".equals(tokenValue)
-        && !"(".equals(this.lastToken.getValue())
-        && !"{".equals(this.lastToken.getValue())
-        && !"[".equals(this.lastToken.getValue());
+    final String lastTextTokenValue =
+        this.lastTextToken != null ? this.lastTextToken.getOriginalValue().toLowerCase() : null;
+    return token.isOnSameLineThan(this.lastTextToken)
+        && (KEYWORDS.contains(lastTextTokenValue) // Always whitespace after a keyword.
+            || KEYWORDS.contains(tokenValue) // Always whitespace before a keyword.
+            || this.tokenIs(token, "<<", "^<<"))
+        && !(AUGMENTED_ASSIGNMENT_TOKENS.contains(
+                lastTextTokenValue) // But no whitespace before augmented assignment.
+            && (this.tokenIs(token, "<<", "^<<")))
+        && !this.tokenIs(token, ".", ",", ")", "}", "]")
+        && !this.tokenIs(this.lastToken, "(", "{", "[");
   }
 
   private boolean requireNoWhitespaceBefore(final Token token) {
-    final String tokenValue = token.getOriginalValue();
-    return token.getType() != GenericTokenType.COMMENT
-        && (")".equals(tokenValue)
-            || "}".equals(tokenValue)
-            || "]".equals(tokenValue)
-            || ",".equals(tokenValue)
+    final String lastTextTokenValue =
+        this.lastTextToken != null ? this.lastTextToken.getOriginalValue().toLowerCase() : null;
+    return !this.tokenIs(token, GenericTokenType.COMMENT)
+        && (this.tokenIs(token, ")", "}", "]", ",")
             || this.nodeIsSlot()
-            || this.lastTokenIs("@", "(", "{", "[")
+            || this.tokenIs(this.lastTextToken, "@", "(", "{", "[")
             || this.currentNode.is(MagikGrammar.ARGUMENTS)
             || this.currentNode.is(MagikGrammar.PARAMETERS)
             || this.nodeIsMethodDefinition()
             || this.nodeIsInvocation()
-            || this.nodeIsUnaryExpression());
-  }
-
-  private boolean lastTokenIs(final String... values) {
-    final Set<String> valuesSet = Set.of(values);
-    final String lastTokenValue = this.lastTextToken.getOriginalValue();
-    return valuesSet.contains(lastTokenValue);
+            || this.nodeIsUnaryExpression()
+            || AUGMENTED_ASSIGNMENT_TOKENS.contains(lastTextTokenValue)
+                && this.tokenIs(token, "<<", "^<<"));
   }
 
   private boolean nodeIsUnaryExpression() {
@@ -195,7 +233,7 @@ class StandardFormattingStrategy extends FormattingStrategy {
   }
 
   @Override
-  public void walkPreNode(final AstNode node) {
+  void walkPreNode(final AstNode node) {
     this.currentNode = node;
 
     if (node.is(MagikGrammar.TRANSMIT)) {
@@ -211,7 +249,7 @@ class StandardFormattingStrategy extends FormattingStrategy {
   }
 
   @Override
-  public void walkPostNode(final AstNode node) {
+  void walkPostNode(final AstNode node) {
     if (this.isBinaryExpression(node)
         || node.is(
             MagikGrammar.VARIABLE_DEFINITION,
@@ -240,16 +278,16 @@ class StandardFormattingStrategy extends FormattingStrategy {
 
   @CheckForNull
   private TextEdit ensureIndenting(final Token token) {
-    // Indenting.
-    if (this.indent == 0 && this.lastToken.getType() != GenericTokenType.WHITESPACE) {
+    if (this.indent == 0 && !this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
       return null;
     }
 
     final String indentText = this.indentText();
-    if (this.lastToken.getType() != GenericTokenType.WHITESPACE) {
-      return this.insertBeforeToken(token, indentText);
+    final String reason = "improper indenting";
+    if (!this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
+      return this.insertBeforeToken(token, indentText, reason);
     } else if (!this.lastToken.getOriginalValue().equals(indentText)) {
-      return this.editToken(this.lastToken, indentText);
+      return this.editToken(this.lastToken, indentText, reason);
     }
 
     return null;
@@ -263,7 +301,7 @@ class StandardFormattingStrategy extends FormattingStrategy {
   }
 
   private void trackIndentPre(final Token token) {
-    if (token.getType() != GenericTokenType.COMMENT
+    if (!this.tokenIs(token, GenericTokenType.COMMENT)
         && this.isBinaryExpression(this.currentNode)
         && this.currentNode.getChildren().get(1).getToken() == token) { // Only indent first.
       this.indent += 1;

@@ -2,6 +2,8 @@ package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
+import java.util.Collections;
+import java.util.List;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
@@ -16,42 +18,46 @@ class FinalNewlineStrategy extends FormattingStrategy {
   }
 
   @Override
-  TextEdit walkWhitespaceToken(final Token token) {
+  List<TextEdit> walkWhitespaceToken(final Token token) {
     // We're activated after last magik-related token.
     // What is left is:
     // - whitespace
     // - comments
     // - EOLs
-    // - EOFs
+    // - EOF
     // Any whitespace can be trimmed.
-    TextEdit textEdit = null;
     if (this.options.isTrimTrailingWhitespace() && this.lastToken != null) {
-      textEdit = this.editToken(token, "");
+      final TextEdit textEdit = this.editToken(token, "", "no whitespace after allowed");
+      return List.of(textEdit);
     }
-    return textEdit;
+
+    return Collections.emptyList();
   }
 
   @Override
-  TextEdit walkCommentToken(final Token token) {
-    TextEdit textEdit = null;
-    if (this.lastToken != null && this.lastToken.getType() == GenericTokenType.WHITESPACE) {
-      textEdit = this.editToken(this.lastToken, "");
+  List<TextEdit> walkCommentToken(final Token token) {
+    if (this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
+      final TextEdit textEdit = this.editToken(this.lastToken, "", "no whitespace after allowed");
+      return List.of(textEdit);
     }
-    return textEdit;
+
+    return Collections.emptyList();
   }
 
   @Override
-  TextEdit walkEofToken(final Token token) {
+  List<TextEdit> walkEofToken(final Token token) {
     if (this.options.isInsertFinalNewline()
-        && this.lastToken != null
-        && this.lastToken.getType() != GenericTokenType.EOL) {
-      return this.insertBeforeToken(token, FinalNewlineStrategy.EOL_TOKEN_VALUE);
-    } else if (this.options.isTrimFinalNewlines()
-        && this.lastTextToken != null
-        && this.lastTextToken.getLine() != token.getLine()) {
-      return this.trimFinalNewlines(token);
+        && !this.tokenIs(this.lastToken, GenericTokenType.EOL)) {
+      final TextEdit textEdit =
+          this.insertBeforeToken(
+              token, FinalNewlineStrategy.EOL_TOKEN_VALUE, "final newline required");
+      return List.of(textEdit);
+    } else if (this.options.isTrimFinalNewlines() && !token.isOnSameLineThan(this.lastTextToken)) {
+      final TextEdit textEdit = this.trimFinalNewlines(token);
+      return List.of(textEdit);
     }
-    return null;
+
+    return Collections.emptyList();
   }
 
   /**
@@ -70,6 +76,6 @@ class FinalNewlineStrategy extends FormattingStrategy {
     final Position endPosition = new Position(endLine, endColumn);
 
     final Range range = new Range(startPosition, endPosition);
-    return new TextEdit(range, "");
+    return new TextEdit(range, "", "no final newline allowed");
   }
 }

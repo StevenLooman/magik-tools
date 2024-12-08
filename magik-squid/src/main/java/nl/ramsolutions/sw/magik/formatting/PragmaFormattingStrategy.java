@@ -1,42 +1,75 @@
 package nl.ramsolutions.sw.magik.formatting;
 
+import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
+import java.util.Collections;
+import java.util.List;
 import nl.ramsolutions.sw.magik.TextEdit;
 
 /** Pragma formatting strategy. */
 class PragmaFormattingStrategy extends FormattingStrategy {
+
+  boolean pragmaTokenSeen = false;
 
   PragmaFormattingStrategy(final FormattingOptions options) {
     super(options);
   }
 
   @Override
-  public TextEdit walkWhitespaceToken(final Token token) {
-    TextEdit textEdit = null;
-    if (this.lastTextToken != null && this.lastTextToken.getOriginalValue().equals(",")) {
-      if (!token.getOriginalValue().equals(" ")) {
-        // Require whitespace after ",".
-        textEdit = this.editToken(token, " ");
+  List<TextEdit> walkWhitespaceToken(final Token token) {
+    if (this.pragmaTokenSeen) {
+      if (this.tokenIs(this.lastTextToken, ",")) {
+        if (!this.tokenIs(token, " ")) {
+          // Require whitespace after ",".
+          final TextEdit textEdit = this.editToken(token, " ", "whitespace after required");
+          return List.of(textEdit);
+        }
+      } else {
+        // Pragma's don't have whitespace otherwise.
+        final TextEdit textEdit = this.editToken(token, "", "no whitespace after allowed");
+        return List.of(textEdit);
       }
-    } else {
-      // Pragma's don't have whitespace otherwise.
-      textEdit = this.editToken(token, "");
     }
-    return textEdit;
+
+    return Collections.emptyList();
   }
 
   @Override
-  TextEdit walkEolToken(final Token token) {
-    // Pragma's don't have newlines.
-    return this.editToken(token, "");
+  List<TextEdit> walkEolToken(final Token token) {
+    if (this.pragmaTokenSeen) {
+      // Pragma's don't have newlines.
+      final TextEdit textEdit = this.editToken(token, "", "no newline after allowed");
+      return List.of(textEdit);
+    }
+
+    // `_pragma` not seen yet.
+    final int emptyLineCount =
+        this.lastTextToken != null ? token.getLine() - this.lastTextToken.getLine() : 0;
+    if (emptyLineCount > 1) {
+      // Add edit to remove empty line.
+      final TextEdit textEdit = this.editNoNewline(token);
+      return List.of(textEdit);
+    }
+
+    return Collections.emptyList();
   }
 
   @Override
-  TextEdit walkToken(final Token token) {
-    TextEdit textEdit = null;
-    if (this.lastToken != null && this.lastToken.getOriginalValue().equals(",")) {
-      textEdit = this.insertBeforeToken(token, " ");
+  List<TextEdit> walkToken(final Token token) {
+    if (this.tokenIs(token, "_pragma")) {
+      this.pragmaTokenSeen = true;
     }
-    return textEdit;
+
+    if (this.tokenIs(this.lastToken, ",")) {
+      final TextEdit textEdit = this.insertBeforeToken(token, " ", "whitespace before required");
+      return List.of(textEdit);
+    }
+
+    return Collections.emptyList();
+  }
+
+  @Override
+  void walkPreNode(final AstNode node) {
+    this.pragmaTokenSeen = false;
   }
 }

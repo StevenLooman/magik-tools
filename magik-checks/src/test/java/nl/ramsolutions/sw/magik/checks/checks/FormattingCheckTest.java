@@ -27,21 +27,21 @@ class FormattingCheckTest extends MagikCheckTestBase {
         "show(a, b)",
         "show(% )",
         ".uri         << items[2]",
-        "_pragma(classify_level=restricted, topic={a,b})",
+        "_pragma(classify_level=restricted, topic={a, b})",
         "_method",
         """
-        	{
-        		2
-        	}
+        {
+        	2
+        }
         """,
         """
         {\r
-        	2\r
+        	3\r
         }\r
         """,
         """
         show(  # comment
-          param1)
+        	param1)
         """,
       })
   void testProper(final String code) {
@@ -55,7 +55,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
       strings = {
         "{1,2}",
         "{1 , 2}",
-        "{1 ,\n 2}",
+        "{1 ,\n\t2}",
         "a* b",
         "a *b",
         "show(a, b )",
@@ -82,7 +82,12 @@ class FormattingCheckTest extends MagikCheckTestBase {
   void testTabIndentLineStartWithTabs() {
     final FormattingCheck check = new FormattingCheck();
     check.indentCharacter = "tab";
-    final String code = "\tprint(a)";
+    final String code =
+        """
+      _block
+      	print(a)
+      _endblock
+      """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -90,8 +95,14 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "                print(a)",
-        " \tprint(a)",
+        """
+                        print(a)
+        """,
+        """
+        _block
+         \tprint(a)
+        _endblock
+        """,
       })
   void testTabIndentLineStartWithSpaces(final String code) {
     final FormattingCheck check = new FormattingCheck();
@@ -113,7 +124,13 @@ class FormattingCheckTest extends MagikCheckTestBase {
   void testSpaceIndentLineStrtWithSpaces() {
     final FormattingCheck check = new FormattingCheck();
     check.indentCharacter = "space";
-    final String code = "                print(a)";
+    check.tabWidth = 4;
+    final String code =
+        """
+      _block
+          print(a)
+      _endblock
+      """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -130,7 +147,6 @@ class FormattingCheckTest extends MagikCheckTestBase {
         """,
         """
         $
-
 
 
         _pragma(classify_level=basic)
