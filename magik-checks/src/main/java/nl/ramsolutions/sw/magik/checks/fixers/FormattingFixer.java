@@ -15,9 +15,7 @@ import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Fixer for formatting issues.
- */
+/** Fixer for formatting issues. */
 public class FormattingFixer extends MagikCheckFixer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FormattingFixer.class);
