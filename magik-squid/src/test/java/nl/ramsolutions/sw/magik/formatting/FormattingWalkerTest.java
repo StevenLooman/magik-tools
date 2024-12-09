@@ -266,6 +266,13 @@ class FormattingWalkerTest {
     assertThat(edits).isEmpty();
   }
 
+  @Test
+  void testLoopbdoyDefinitionParameters() {
+    final String code = "_loopbody(x, y, z)";
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
   // endregion
 
   // region: Indenting.
