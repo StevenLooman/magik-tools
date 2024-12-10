@@ -36,7 +36,8 @@ public class FormattingFixer extends MagikCheckFixer {
             settings.getIndentChar() == ' ',
             settings.insertFinalNewline(),
             settings.trimTrailingWhitespace(),
-            settings.trimFinalNewlines());
+            settings.trimFinalNewlines(),
+            settings.checkIndentation());
     final FormattingWalker walker = new FormattingWalker(formattingOptions);
 
     walker.walkAst(node);
