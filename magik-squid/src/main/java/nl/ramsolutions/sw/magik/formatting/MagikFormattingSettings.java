@@ -13,6 +13,8 @@ public class MagikFormattingSettings {
       "magik.formatting.trimTrailingWhitespace";
   public static final String KEY_MAGIK_FORMATTING_TRIM_FINAL_NEWLINES =
       "magik.formatting.trimFinalNewlines";
+  public static final String KEY_MAGIK_FORMATTING_CHECK_INDENTATION =
+      "magik.formatting.checkIndentation";
 
   private final MagikToolsProperties properties;
 
@@ -52,6 +54,10 @@ public class MagikFormattingSettings {
   public boolean trimFinalNewlines() {
     return this.properties.getPropertyBoolean(KEY_MAGIK_FORMATTING_TRIM_FINAL_NEWLINES, true);
   }
+
+  public boolean checkIndentation() {
+    return this.properties.getPropertyBoolean(KEY_MAGIK_FORMATTING_CHECK_INDENTATION, true);
+  } 
 
   public String getIndent() {
     final char indentChar = this.getIndentChar();
