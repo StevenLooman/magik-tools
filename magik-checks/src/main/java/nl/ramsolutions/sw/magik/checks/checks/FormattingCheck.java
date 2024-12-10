@@ -20,6 +20,7 @@ public class FormattingCheck extends MagikCheck {
   private static final String MESSAGE = "Improper formatting: %s.";
   private static final String DEFAULT_INDENT_CHARACTER = "tab";
   private static final int DEFAULT_TAB_WIDTH = 8;
+  private static final boolean DEFAULT_CHECK_INDENTATION = true;
 
   /** The character used for indentation (tab/space). */
   @RuleProperty(
@@ -39,11 +40,20 @@ public class FormattingCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:VisibilityModifier")
   public int tabWidth = DEFAULT_TAB_WIDTH;
 
+  /** Check indentation. */
+  @RuleProperty(
+      key = "check indentation",
+      defaultValue = "" + DEFAULT_CHECK_INDENTATION,
+      description = "Check indentation",
+      type = "BOOLEAN")
+  @SuppressWarnings("checkstyle:VisibilityModifier")
+  public boolean checkIndentation = DEFAULT_CHECK_INDENTATION;
+
   @Override
   protected void walkPostMagik(final AstNode node) {
     final boolean insertSpaces = this.indentCharacter.equalsIgnoreCase("space");
     final FormattingOptions formattingOptions =
-        new FormattingOptions(this.tabWidth, insertSpaces, false, false, false);
+        new FormattingOptions(this.tabWidth, insertSpaces, false, false, false, this.checkIndentation);
     final FormattingWalker walker = new FormattingWalker(formattingOptions);
     final AstNode topNode = this.getMagikFile().getTopNode();
     walker.walkAst(topNode);
