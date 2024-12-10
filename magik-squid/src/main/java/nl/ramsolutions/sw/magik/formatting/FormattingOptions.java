@@ -8,6 +8,7 @@ public class FormattingOptions {
   private final boolean insertFinalNewline;
   private final boolean trimTrailingWhitespace;
   private final boolean trimFinalNewlines;
+  private final boolean checkIndentation;
 
   /**
    * Constructor.
@@ -17,18 +18,21 @@ public class FormattingOptions {
    * @param insertFinalNewline Insert final newline.
    * @param trimTrailingWhitespace Trim trailing whitespace.
    * @param trimFinalNewlines Trim final newlines.
+   * @param checkIndentation Check indentation.
    */
   public FormattingOptions(
       final int tabSize,
       final boolean insertSpaces,
       final boolean insertFinalNewline,
       final boolean trimTrailingWhitespace,
-      final boolean trimFinalNewlines) {
+      final boolean trimFinalNewlines,
+      final boolean checkIndentation) {
     this.tabSize = tabSize;
     this.insertSpaces = insertSpaces;
     this.trimTrailingWhitespace = trimTrailingWhitespace;
     this.insertFinalNewline = insertFinalNewline;
     this.trimFinalNewlines = trimFinalNewlines;
+    this.checkIndentation = checkIndentation;
   }
 
   public int getTabSize() {
@@ -49,5 +53,9 @@ public class FormattingOptions {
 
   public boolean isTrimFinalNewlines() {
     return this.trimFinalNewlines;
+  }
+
+  public boolean isCheckIndentation() {
+    return this.checkIndentation;
   }
 }
