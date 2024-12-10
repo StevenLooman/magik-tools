@@ -17,7 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class FormattingWalkerTest {
 
   private List<TextEdit> getEdits(final String code) {
-    final FormattingOptions options = new FormattingOptions(8, false, false, true, false);
+    final FormattingOptions options = new FormattingOptions(8, false, false, true, false, true);
     return this.getEdits(code, options);
   }
 
@@ -441,7 +441,7 @@ class FormattingWalkerTest {
   @Test
   void testNoTrimTrailingWhitespaceStatement() {
     final String code = "a    \n";
-    final FormattingOptions options = new FormattingOptions(8, false, false, false, false);
+    final FormattingOptions options = new FormattingOptions(8, false, false, false, false, true);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits).isEmpty();
   }
@@ -449,7 +449,7 @@ class FormattingWalkerTest {
   @Test
   void testTrimTrailingWhitespaceStatement() {
     final String code = "a  \n";
-    final FormattingOptions options = new FormattingOptions(8, false, false, true, false);
+    final FormattingOptions options = new FormattingOptions(8, false, false, true, false, true);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits)
         .containsExactly(
@@ -462,7 +462,7 @@ class FormattingWalkerTest {
   @Test
   void testNoTrimTrailingWhitespaceComment() {
     final String code = "# comment  \n";
-    final FormattingOptions options = new FormattingOptions(8, false, false, false, false);
+    final FormattingOptions options = new FormattingOptions(8, false, false, false, false, true);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits).isEmpty();
   }
@@ -470,7 +470,7 @@ class FormattingWalkerTest {
   @Test
   void testTrimTrailingWhitespaceComment() {
     final String code = "# comment  \n";
-    final FormattingOptions options = new FormattingOptions(8, false, false, true, false);
+    final FormattingOptions options = new FormattingOptions(8, false, false, true, false, true);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits)
         .containsExactly(
@@ -600,7 +600,7 @@ class FormattingWalkerTest {
   @Test
   void testInsertFinalNewlinePresent() {
     final String code = "1 + 1\n";
-    final FormattingOptions options = new FormattingOptions(8, false, true, false, false);
+    final FormattingOptions options = new FormattingOptions(8, false, true, false, false, true);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits).isEmpty();
   }
@@ -608,7 +608,7 @@ class FormattingWalkerTest {
   @Test
   void testInsertFinalNewlineAbsent() {
     final String code = "1 + 1";
-    final FormattingOptions options = new FormattingOptions(8, false, true, false, false);
+    final FormattingOptions options = new FormattingOptions(8, false, true, false, false, true);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits)
         .containsExactly(
@@ -619,7 +619,7 @@ class FormattingWalkerTest {
   @Test
   void testTrimFinalNewlinesAbsent() {
     final String code = "1 + 1";
-    final FormattingOptions options = new FormattingOptions(8, false, false, false, true);
+    final FormattingOptions options = new FormattingOptions(8, false, false, false, true, true);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits).isEmpty();
   }
@@ -631,7 +631,7 @@ class FormattingWalkerTest {
       1 + 1
 
       """;
-    final FormattingOptions options = new FormattingOptions(8, false, false, false, true);
+    final FormattingOptions options = new FormattingOptions(8, false, false, false, true, true);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits)
         .containsExactly(
@@ -650,7 +650,7 @@ class FormattingWalkerTest {
         a.do()\r
         _endblock\r
         """;
-    final FormattingOptions options = new FormattingOptions(8, false, false, true, false);
+    final FormattingOptions options = new FormattingOptions(8, false, false, true, false, true);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits)
         .containsExactly(

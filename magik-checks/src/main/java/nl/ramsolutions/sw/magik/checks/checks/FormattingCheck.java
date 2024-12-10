@@ -53,7 +53,8 @@ public class FormattingCheck extends MagikCheck {
   protected void walkPostMagik(final AstNode node) {
     final boolean insertSpaces = this.indentCharacter.equalsIgnoreCase("space");
     final FormattingOptions formattingOptions =
-        new FormattingOptions(this.tabWidth, insertSpaces, false, false, false, this.checkIndentation);
+        new FormattingOptions(
+            this.tabWidth, insertSpaces, false, false, false, this.checkIndentation);
     final FormattingWalker walker = new FormattingWalker(formattingOptions);
     final AstNode topNode = this.getMagikFile().getTopNode();
     walker.walkAst(topNode);

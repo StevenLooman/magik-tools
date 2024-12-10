@@ -57,7 +57,7 @@ public class MagikFormattingSettings {
 
   public boolean checkIndentation() {
     return this.properties.getPropertyBoolean(KEY_MAGIK_FORMATTING_CHECK_INDENTATION, true);
-  } 
+  }
 
   public String getIndent() {
     final char indentChar = this.getIndentChar();
