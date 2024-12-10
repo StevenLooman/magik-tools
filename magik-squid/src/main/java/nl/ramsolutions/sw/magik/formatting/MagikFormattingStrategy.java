@@ -281,7 +281,7 @@ class MagikFormattingStrategy extends FormattingStrategy {
   private TextEdit ensureIndenting(final Token token) {
     if (this.indent == 0
         && !this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)
-        && !this.options.isCheckIndentation()) {
+        || !this.options.isCheckIndentation()) {
       return null;
     }
 
