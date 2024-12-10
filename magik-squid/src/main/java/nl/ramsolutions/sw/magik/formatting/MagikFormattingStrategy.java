@@ -279,7 +279,7 @@ class MagikFormattingStrategy extends FormattingStrategy {
 
   @CheckForNull
   private TextEdit ensureIndenting(final Token token) {
-    if (this.indent == 0 && !this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
+    if (this.indent == 0 && !this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE) && !this.options.isCheckIndentation()) {
       return null;
     }
 
