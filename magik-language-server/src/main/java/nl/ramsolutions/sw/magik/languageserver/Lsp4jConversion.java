@@ -101,7 +101,8 @@ public final class Lsp4jConversion {
         options.isInsertSpaces(),
         options.isInsertFinalNewline(),
         options.isTrimTrailingWhitespace(),
-        options.isTrimFinalNewlines());
+        options.isTrimFinalNewlines(),
+        options.isCheckIndentation());
   }
 
   public static nl.ramsolutions.sw.magik.FileEvent.FileChangeType fileChangeTypeFromLsp4j(
