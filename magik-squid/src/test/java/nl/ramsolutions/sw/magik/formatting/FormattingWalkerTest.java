@@ -267,8 +267,15 @@ class FormattingWalkerTest {
   }
 
   @Test
-  void testLoopbdoyDefinitionParameters() {
+  void testLoopbodyDefinitionParameters() {
     final String code = "_loopbody(x, y, z)";
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testSuperDefinitionParameters() {
+    final String code = "_super(mysuper)";
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }

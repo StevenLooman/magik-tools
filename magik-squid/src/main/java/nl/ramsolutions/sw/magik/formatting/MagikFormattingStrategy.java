@@ -186,7 +186,11 @@ class MagikFormattingStrategy extends FormattingStrategy {
             && (this.tokenIs(token, "<<", "^<<")))
         && !this.tokenIs(token, ".", ",", ")", "}", "]")
         && !this.tokenIs(this.lastToken, "(", "{", "[")
-        && !this.tokenIs(this.lastTextToken, "_proc", "_loopbody"); // Except for _proc/_loopbody.
+        && !this.tokenIs(
+            this.lastTextToken,
+            "_proc",
+            "_loopbody",
+            "_super"); // Except for _proc/_loopbody/_super.
   }
 
   private boolean requireNoWhitespaceBefore(final Token token) {
@@ -194,7 +198,7 @@ class MagikFormattingStrategy extends FormattingStrategy {
         this.lastTextToken != null ? this.lastTextToken.getOriginalValue().toLowerCase() : null;
     return !this.tokenIs(token, GenericTokenType.COMMENT)
         && (this.tokenIs(token, ")", "}", "]", ",")
-            || this.tokenIs(this.lastTextToken, "@", "(", "{", "[", "_proc", "_loopbody")
+            || this.tokenIs(this.lastTextToken, "@", "(", "{", "[", "_proc", "_loopbody", "_super")
             || this.nodeIsSlot()
             || this.currentNode.is(MagikGrammar.ARGUMENTS)
             || this.currentNode.is(MagikGrammar.PARAMETERS)
