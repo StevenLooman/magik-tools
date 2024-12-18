@@ -3,15 +3,23 @@ _package mt
 
 _pragma(classify_level=basic, topic=type_dumper)
 ## Global definition.
-## @slot {sw:char16_vector} type_name
-## @slot {sw:char16_vector} aliased_type_name
+## @slot {sw:char16_vector} type_n
+## @slot {sw:char16_vector} alias_type_n
 def_slotted_exemplar(
 	:global_definition,
 	{
-		{:type_name, _unset, :readable, :public},
-		{:aliased_type_name, _unset, :readable, :public}
+		{:type_n, _unset, :readable, :public},
+		{:alias_type_n, _unset, :readable, :public}
 	},
 	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:integer}
+global_definition.define_shared_constant(
+	:instruction_type,
+	5,
+	:public)
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
@@ -30,8 +38,8 @@ _private _method global_definition.init(type_name, aliased_type_name)
 	## @param {sw:char16_vector} type_name
 	## @param {sw:char16_vector} aliased_type_name
 	## @return {_self}
-	.type_name << type_name
-	.aliased_type_name << aliased_type_name
+	.type_n << type_name
+	.alias_type_n << aliased_type_name
 	_return _self
 _endmethod
 $
@@ -61,7 +69,7 @@ _pragma(condition_definition=basic, topic=type_dumper)
 _method global_definition.sort_value
 	## Sort value.
 	## @return {sw:char16_vector}
-	_return .type_name
+	_return .type_n
 _endmethod
 $
 
@@ -70,8 +78,8 @@ _method global_definition.equals?(other)
 	## Equals?
 	## @param {mt:global_definition} other
 	## @return {sw:false}
-	_return _self.type_name = other.type_name _andif
-		_self.aliased_type_name = other.aliased_type_name
+	_return _self.type_n = other.type_n _andif
+		_self.alias_type_n = other.alias_type_n
 _endmethod
 $
 
@@ -80,7 +88,7 @@ _method global_definition.equals_disregarding_typing?(other)
 	## Equals disregarding typing?
 	## @param {mt:global_definition} other
 	## @return {sw:false}
-	_return _self.type_name = other.type_name
+	_return _self.type_n = other.type_n
 _endmethod
 $
 
@@ -105,5 +113,5 @@ define_binary_operator_case(
 $
 
 global_definition.define_show_attributes(
-	:type_name)
+	:type_n)
 $

@@ -4,14 +4,14 @@ _package mt
 _pragma(classify_level=basic, topic=type_dumper)
 ## Parameter definition.
 ## @slot {sw:char16_vector} name
-## @slot {sw:char16_vector} modifier
-## @slot {sw:char16_vector} type_name
+## @slot {sw:char16_vector} mod
+## @slot {sw:char16_vector} type_n
 def_slotted_exemplar(
 	:parameter_definition,
 	{
 		{:name, _unset, :readable, :public},
-		{:modifier, _unset, :readable, :public},
-		{:type_name, _unset, :readable, :public}
+		{:mod, _unset, :readable, :public},
+		{:type_n, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
@@ -35,8 +35,8 @@ _private _method parameter_definition.init(name, modifier, type_name)
 	## @param {sw:char16_vector} type_name
 	## @return {_self}
 	.name << name
-	.modifier << modifier
-	.type_name << type_name
+	.mod << modifier
+	.type_n << type_name
 	_return _self
 _endmethod
 $
@@ -80,12 +80,25 @@ _method parameter_definition.new_from(name, procedure)
 	_endif
 
 	_local parameter_definitions << sw:rope.new()
-	_local param_list << procedure.basic_arglist
+	_local param_list <<
+		_if procedure.responds_to?(:basic_arglist)
+		_then
+			_local arglist << {}
+			_try
+				arglist << procedure.basic_arglist
+			_when error
+				arglist << {}
+			_endtry
+			>> arglist
+		_else
+			>> {}
+		_endif
+
 	_for index, param_name _over param_list.fast_keys_and_elements()
 	_loop
 		_local modifier <<
 			_if procedure.gather_arg? _andif
-			    index = param_list.size
+				index = param_list.size
 			_then
 				>> "gather"
 			_elif index > procedure.num_mandatory_args
@@ -95,9 +108,9 @@ _method parameter_definition.new_from(name, procedure)
 				>> "none"
 			_endif
 		_local definition << _self.new(
-			param_name,
-			modifier,
-			_self.undefined_type)
+				param_name,
+				modifier,
+				_self.undefined_type)
 		parameter_definitions.add_last(definition)
 	_endloop
 
@@ -111,8 +124,8 @@ _method parameter_definition.equals?(other)
 	## @param {mt:parameter_definition} other
 	## @return {sw:false}
 	_return _self.name = other.name _andif
-		_self.modifier = other.modifier _andif
-		_self.type_name = other.type_name
+		_self.mod = other.mod _andif
+		_self.type_n = other.type_n
 _endmethod
 $
 
@@ -122,13 +135,13 @@ _method parameter_definition.equals_disregarding_typing?(other)
 	## @param {mt:parameter_definition} other
 	## @return {sw:false}
 	_return _self.name = other.name _andif
-		_self.modifier = other.modifier
+		_self.mod = other.mod
 _endmethod
 $
 
 define_binary_operator_case(
 	:|=|, parameter_definition, parameter_definition,
-	_proc(definition_a, definition_b)
+	_proc (definition_a, definition_b)
 		## @param {mt:parameter_definition} definition_a
 		## @param {mt:parameter_definition} definition_b
 		## @return {sw:false|sw:maybe}

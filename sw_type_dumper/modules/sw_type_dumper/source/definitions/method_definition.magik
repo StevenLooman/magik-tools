@@ -3,35 +3,43 @@ _package mt
 
 _pragma(classify_level=basic, topic=type_dumper)
 ## Method definition.
-## @slot {sw:char16_vector} type_name
-## @slot {sw:char16_vector} method_name
-## @slot {sw:simple_vector<E=sw:char16_vector>} modifiers
-## @slot {sw:simple_vector<E=mt:parameter_definition>} parameters
-## @slot {mt:parameter_definition|sw:unset} assignment_parameter
-## @slot {sw:simple_vector<E=sw:char16_vector>} return_types
-## @slot {sw:simple_vector<E=sw:char16_vector>} loop_types
-## @slot {sw:char16_vector|sw:unset} source_file
+## @slot {sw:char16_vector} type_n
+## @slot {sw:char16_vector} m_name
+## @slot {sw:simple_vector<E=sw:char16_vector>} mods
+## @slot {sw:simple_vector<E=mt:parameter_definition>} params
+## @slot {mt:parameter_definition|sw:unset} a_param
+## @slot {sw:simple_vector<E=sw:char16_vector>} ret
+## @slot {sw:simple_vector<E=sw:char16_vector>} loop
+## @slot {sw:char16_vector|sw:unset} src
 ## @slot {sw:char16_vector|sw:unset} doc
 ## @slot {sw:char16_vector|sw:unset} hash
-## @slot {sw:char16_vector|sw:unset} module_name
-## @slot {sw:simple_vector<E=sw:char16_vector>} topics
+## @slot {sw:char16_vector|sw:unset} mod_n
+## @slot {sw:simple_vector<E=sw:char16_vector>} top
 def_slotted_exemplar(
 	:method_definition,
 	{
-		{:type_name, _unset, :readable, :public},
-		{:method_name, _unset, :readable, :public},
-		{:modifiers, _unset, :readable, :public},
-		{:parameters, _unset, :readable, :public},
-		{:assignment_parameter, _unset, :readable, :public},
-		{:return_types, _unset, :readable, :public},
-		{:loop_types, _unset, :readable, :public},
-		{:source_file, _unset, :readable, :public},
+		{:type_n, _unset, :readable, :public},
+		{:m_name, _unset, :readable, :public},
+		{:mods, _unset, :readable, :public},
+		{:params, _unset, :readable, :public},
+		{:a_param, _unset, :readable, :public},
+		{:ret, _unset, :readable, :public},
+		{:loop, _unset, :readable, :public},
+		{:src, _unset, :readable, :public},
 		{:doc, _unset, :readable, :public},
 		{:hash, _unset, :readable, :public},
-		{:module_name, _unset, :readable, :public},
-		{:topics, _unset, :readable, :public}
+		{:mod_n, _unset, :readable, :public},
+		{:top, _unset, :readable, :public}
 	},
 	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:integer}
+method_definition.define_shared_constant(
+	:instruction_type,
+	6,
+	:public)
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
@@ -106,18 +114,18 @@ _private _method method_definition.init(
 	## @param {sw:char16_vector|sw:unset} module_name
 	## @param {sw:simple_vector<E=sw:char16_vector>} topics
 	## @return {_self}
-	.type_name << type_name
-	.method_name << method_name
-	.modifiers << modifiers
-	.parameters << parameters
-	.assignment_parameter << assignment_parameter
-	.return_types << return_types
-	.loop_types << loop_types
-	.source_file << source_file
+	.type_n << type_name
+	.m_name << method_name
+	.mods << modifiers
+	.params << parameters
+	.a_param << assignment_parameter
+	.ret << return_types
+	.loop << loop_types
+	.src << source_file
 	.doc << doc
 	.hash << hash
-	.module_name << module_name
-	.topics << topics
+	.mod_n << module_name
+	.top << topics
 	_return _self
 _endmethod
 $
@@ -130,15 +138,15 @@ _private _method method_definition.init_from_json(instruction)
 	_super.init_from_json(instruction)
 
 	# Fix parameters.
-	.parameters << .parameters.map(
+	.params << .params.map(
 		_proc(param)
 			_return parameter_definition.sys!perform(:|new_from_json()|, param)
 		_endproc)
 
 	# Fix assignment_parameter.
-	_if .assignment_parameter _isnt _unset
+	_if .a_param _isnt _unset
 	_then
-		.assignment_parameter << parameter_definition.sys!perform(:|new_from_json()|, .assignment_parameter)
+		.a_param << parameter_definition.sys!perform(:|new_from_json()|, .a_param)
 	_endif
 
 	_return _self
@@ -215,7 +223,7 @@ _method method_definition.new_from(package, name, method)
 		_try
 			>> method.source_module.name
 		_when error
-			# pass
+			>> _unset
 		_endtry
 	_local topics <<
 		_try
@@ -243,7 +251,7 @@ _pragma(condition_definition=basic, topic=type_dumper)
 _method method_definition.sort_value
 	## Sort value.
 	## @return {sw:char16_vector}
-	_return .type_name + "." + .method_name
+	_return .type_n + "." + .m_name
 _endmethod
 $
 
@@ -252,18 +260,18 @@ _method method_definition.equals?(other)
 	## Equals?
 	## @param {mt:method_definition} other
 	## @return {sw:false}
-	_return _self.type_name = other.type_name _andif
-		_self.method_name = other.method_name _andif
-		_self.modifiers.eq?(other.modifiers) _andif
-		_self.parameters.eq?(other.parameters) _andif
-		_self.assignment_parameter = other.assignment_parameter _andif
-		_self.return_types.eq?(other.return_types) _andif
-		_self.loop_types.eq?(other.loop_types) _andif
-		_self.source_file = other.source_file _andif
+	_return _self.type_n = other.type_n _andif
+		_self.m_name = other.m_name _andif
+		_self.mods.eq?(other.mods) _andif
+		_self.params.eq?(other.params) _andif
+		_self.a_param = other.a_param _andif
+		_self.ret.eq?(other.ret) _andif
+		_self.loop.eq?(other.loop) _andif
+		_self.src = other.src _andif
 		_self.doc = other.doc _andif
 		_self.hash = other.hash _andif
-		_self.module_name = other.module_name _andif
-		_self.topics.eq?(other.topics)
+		_self.mod_n = other.mod_n _andif
+		_self.top.eq?(other.top)
 _endmethod
 $
 
@@ -272,17 +280,17 @@ _method method_definition.equals_disregarding_typing?(other)
 	## Equals disregarding typing?
 	## @param {mt:method_definition} other
 	## @return {sw:false}
-	_return _self.type_name = other.type_name _andif
-		_self.method_name = other.method_name _andif
-		_self.modifiers.eq?(other.modifiers) _andif
-		_self.parameters.eq?(other.parameters, :|equals_disregarding_typing?()|) _andif (
-			_self.assignment_parameter _is _unset _andif other.assignment_parameter _is _unset _orif
-			_self.assignment_parameter.equals_disregarding_typing?(other.assignment_parameter)) _andif
-		_self.source_file = other.source_file _andif
+	_return _self.type_n = other.type_n _andif
+		_self.m_name = other.m_name _andif
+		_self.mods.eq?(other.mods) _andif
+		_self.params.eq?(other.params, :|equals_disregarding_typing?()|) _andif (
+			_self.a_param _is _unset _andif other.a_param _is _unset _orif
+			_self.a_param.equals_disregarding_typing?(other.a_param)) _andif
+		_self.src = other.src _andif
 		_self.doc = other.doc _andif
 		_self.hash = other.hash _andif
-		_self.module_name = other.module_name _andif
-		_self.topics.eq?(other.topics)
+		_self.mod_n = other.mod_n _andif
+		_self.top.eq?(other.top)
 _endmethod
 $
 
@@ -307,6 +315,6 @@ define_binary_operator_case(
 $
 
 method_definition.define_show_attributes(
-	:type_name,
-	:method_name)
+	:type_n,
+	:m_name)
 $

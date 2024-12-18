@@ -19,11 +19,15 @@ _pragma(classify_level=basic, topic=type_dumper)
 ## Type dumper.
 ## @slot {sw:set} ignore_vars
 ## @slot {sw:external_text_output_stream} out_stream
+## @slot {sw:char16_vector} filename
+## @slot {sw:true|sw:false} write_done
 def_slotted_exemplar(
 	:type_dumper,
 	{
 		{:ignore_vars, _unset},
-		{:out_stream, _unset}
+		{:out_stream, _unset},
+		{:filename, _unset},
+		{:write_done, _false, :writable, :public}
 	})
 $
 
@@ -46,6 +50,7 @@ _private _method type_dumper.init(filename, _optional ignore_vars)
 	.ignore_vars << set.new_from(ignore_vars.default({}))
 	.ignore_vars.add(:|user:| + _self.class_name)
 	.out_stream << external_text_output_stream.new(filename)
+	.filename << filename
 	_return _self
 _endmethod
 $
@@ -77,10 +82,33 @@ _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper, usage=external)
-_method type_dumper.run()
+_method type_dumper.run(_optional debug?)
 	## Run the dump.
+	## @param {sw:false} debug? turn on debug output
+	##
+
+	debug? << debug?.default(_false)
 	_protect
+	_if debug?
+		_then
+			write("Starting type dumper: ", date_time.now());
+		_endif
+
 		_self.int!run()
+
+		_if debug?
+		_then
+			write("Type dumper finished: ", date_time.now());
+		_endif
+
+		_if .write_done _isnt _false
+		_then
+			_local done_stream <<
+				external_text_output_stream.new(write_string(.filename, ".done"))
+
+			done_stream.write("done")
+			done_stream.close()
+		_endif
 	_protection
 		_self.deinit()
 	_endprotect
@@ -105,6 +133,11 @@ _private _method type_dumper.int!run()
 	_local sorted_products << sorted_collection.new_from(smallworld_product.products, {:method_result, :name})
 	_for product _over sorted_products.fast_elements()
 	_loop
+		_if .ignore_vars.includes?(product.name)
+		_then
+			_continue
+		_endif
+
 		_local def << product_definition.new_from(product)
 		_self.write_definition(def)
 	_endloop
@@ -114,6 +147,11 @@ _private _method type_dumper.int!run()
 	_local sorted_modules << sorted_collection.new_from(sw_module_manager.defined_modules, {:method_result, :name})
 	_for module _over sorted_modules.fast_elements()
 	_loop
+		_if .ignore_vars.includes?(module.name)
+		_then
+			_continue
+		_endif
+
 		_local def << module_definition.new_from(module)
 		_self.write_definition(def)
 	_endloop
@@ -123,6 +161,11 @@ _private _method type_dumper.int!run()
 	_local sorted_pkgs << sorted_collection.new_from(package.all_packages, {:method_result, :name})
 	_for pkg _over sorted_pkgs.fast_elements()
 	_loop
+		_if .ignore_vars.includes?(pkg.name)
+		_then
+			_continue
+		_endif
+
 		_local def << package_definition.new_from(pkg)
 		_self.write_definition(def)
 	_endloop

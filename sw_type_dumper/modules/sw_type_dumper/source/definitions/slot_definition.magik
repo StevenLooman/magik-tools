@@ -4,12 +4,12 @@ _package mt
 _pragma(classify_level=basic, topic=type_dumper)
 ## Slot definition.
 ## @slot {sw:char16_vector} name
-## @slot {sw:char16_vector} type_name
+## @slot {sw:char16_vector} type_n
 def_slotted_exemplar(
 	:slot_definition,
 	{
 		{:name, _unset, :readable, :public},
-		{:type_name, _unset, :readable, :public}
+		{:type_n, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
@@ -31,7 +31,7 @@ _private _method slot_definition.init(name, type_name)
 	## @param {sw:char16_vector} type_name
 	## @return {_self}
 	.name << name
-	.type_name << type_name
+	.type_n << type_name
 	_return _self
 _endmethod
 $
@@ -52,7 +52,7 @@ _method slot_definition.equals?(other)
 	## @param {mt:slot_definition} other
 	## @return {sw:false}
 	_return _self.name = other.name _andif
-		_self.type_name = other.type_name
+		_self.type_n = other.type_n
 _endmethod
 $
 

@@ -3,19 +3,27 @@ _package mt
 
 _pragma(classify_level=basic, topic=type_dumper)
 ## Binary oeprator definition.
-## @slot {sw:char16_vector} operator
-## @slot {sw:char16_vector} lhs_type_name
-## @slot {sw:char16_vector} rhs_type_name
-## @slot {sw:char16_vector} result_type_name
+## @slot {sw:char16_vector} op
+## @slot {sw:char16_vector} lhs_type_n
+## @slot {sw:char16_vector} rhs_type_n
+## @slot {sw:char16_vector} res_type_n
 def_slotted_exemplar(
 	:binary_operator_definition,
 	{
-		{:operator, _unset, :readable, :public},
-		{:lhs_type_name, _unset, :readable, :public},
-		{:rhs_type_name, _unset, :readable, :public},
-		{:result_type_name, _unset, :readable, :public}
+		{:op, _unset, :readable, :public},
+		{:lhs_type_n, _unset, :readable, :public},
+		{:rhs_type_n, _unset, :readable, :public},
+		{:res_type_n, _unset, :readable, :public}
 	},
 	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:integer}
+binary_operator_definition.define_shared_constant(
+	:instruction_type,
+	9,
+	:public)
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
@@ -38,10 +46,10 @@ _private _method binary_operator_definition.init(operator, lhs_type_name, rhs_ty
 	## @param {sw:char16_vector} rhs_type_name
 	## @param {sw:char16_vector} result_type_name
 	## @return {_self}
-	.operator << operator
-	.lhs_type_name << lhs_type_name
-	.rhs_type_name << rhs_type_name
-	.result_type_name << result_type_name
+	.op << operator
+	.lhs_type_n << lhs_type_name
+	.rhs_type_n << rhs_type_name
+	.res_type_n << result_type_name
 	_return _self
 _endmethod
 $
@@ -59,9 +67,9 @@ _method binary_operator_definition.equals?(other)
 	## Equals?
 	## @param {mt:binary_operator_definition} other
 	## @return {sw:false}
-	_return _self.operator = other.operator _andif
-		_self.lhs_type_name = other.lhs_type_name _andif
-		_self.rhs_type_name = other.rhs_type_name _andif
+	_return _self.op = other.op _andif
+		_self.lhs_type_n = other.lhs_type_n _andif
+		_self.rhs_type_n = other.rhs_type_n _andif
 		_self.return_type_name = other.return_type_name
 _endmethod
 $
@@ -71,9 +79,9 @@ _method binary_operator_definition.equals_disregarding_typing?(other)
 	## Equals disregarding typing?
 	## @param {mt:binary_operator_definition} other
 	## @return {sw:false}
-	_return _self.operator = other.operator _andif
-		_self.lhs_type_name = other.lhs_type_name _andif
-		_self.rhs_type_name = other.rhs_type_name
+	_return _self.op = other.op _andif
+		_self.lhs_type_n = other.lhs_type_n _andif
+		_self.rhs_type_n = other.rhs_type_n
 _endmethod
 $
 
@@ -92,13 +100,13 @@ define_binary_operator_case(
 	_proc(definition_a, definition_b)
 		## @param {mt:binary_operator_definition} definition_a
 		## @param {mt:binary_operator_definition} definition_b
-		## @return {sw:false}
+		## @return {sw:false|sw:maybe}
 		_return definition_a.equals?(definition_b)
 	_endproc)
 $
 
 binary_operator_definition.define_show_attributes(
-	:operator,
-	:lhs_type_name,
-	:rhs_type_name)
+	:op,
+	:lhs_type_n,
+	:rhs_type_n)
 $

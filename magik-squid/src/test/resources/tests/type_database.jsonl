@@ -3,29 +3,29 @@
 // undefined type: _undefined
 // undefined result: __UNDEFINED_RESULT__
 // products
-{"instruction":"product","name":"test_product","version":"1.0.0","title":"Test product","description":"Test product"}
+{"i": 1,"name":"test_product","ver":"1.0.0","title":"Test product","desc":"Test product"}
 // modules
-{"instruction":"module","name":"test_module","base_version":"1","current_version":"2","product_name":"test_product","description":"test_module"}
+{"i":2,"name":"test_module","base_ver":"1","cur_ver":"2","p_name":"test_product","desc":"test_module"}
 // magik files
-{"instruction":"magik_file","location":{"uri":"file:///test.magik"}}
+{"i":10, "src":{"uri":"file:///test.magik"}}
 // packages
-{"instruction":"package","name":"sw","uses":[]}
-{"instruction":"package","name":"user","uses":["sw"]}
-{"instruction":"package","name":"test_package","uses":["user"]}
+{"i": 3,"name":"sw","uses":[]}
+{"i":3,"name":"user","uses":["sw"]}
+{"i":3,"name":"test_package","uses":["user"]}
 // types
-{"instruction":"type","type_name":"user:a","sort":"slotted","doc":"Test exemplar a","parents":["sw:object"],"slots":[{"name":"slot1","type_name":"sw:integer"},{"name":"slot2","type_name":"sw:float"}],"module_name":"test_module"}
-{"instruction":"type","type_name":"user:b","sort":"indexed","doc":"Test exemplar b","parents":["sw:object"],"slots":[],"module_name":null}
+{"i":4,"type_n":"user:a","sort":"slotted","doc":"Test exemplar a","par":["sw:object"],"slots":[{"name":"slot1","type_n":"sw:integer"},{"name":"slot2","type_n":"sw:float"}],"mod_n":"test_module"}
+{"i":4,"type_n":"user:b","sort":"indexed","doc":"Test exemplar b","par":["sw:object"],"slots":[],"mod_n":null}
 // globals
-{"instruction":"global","type_name":"sw:!print_float_precision!","aliased_type_name":"sw:integer"}
-{"instruction":"global","type_name":"sw:tab_char","aliased_type_name":"sw:character"}
+{"i":5,"type_n":"sw:!print_float_precision!","alias_type_n":"sw:integer"}
+{"i":5,"type_n":"sw:tab_char","alias_type_n":"sw:character"}
 // methods
-{"instruction":"method","type_name":"user:b","method_name":"m1()","modifiers":[],"parameters":[{"name":"param1","modifier":"gather","type_name":"sw:symbol"},{"name":"param2","modifier":"none","type_name":"_undefined"}],"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m1()","module_name":"test_module"}
-{"instruction":"method","type_name":"user:b","method_name":"m2<<","modifiers":["private"],"parameters":[],"assignment_parameter":{"name":"param2","modifier":"none","type_name":"sw:symbol"},"return_types":["sw:symbol"],"loop_types":[],"source_file":null,"doc":"Test method m2()","module_name":"test_module"}
+{"i":6,"type_n":"user:b","m_name":"m1()","mods":[],"params":[{"name":"param1","mod":"gather","type_n":"sw:symbol"},{"name":"param2","mod":"none","type_n":"_undefined"}],"ret":["sw:symbol"],"loop":[],"src":null,"doc":"Test method m1()","mod_n":"test_module"}
+{"i":6,"type_n":"user:b","m_name":"m2<<","mods":["private"],"params":[],"a_param":{"name":"param2","mod":"none","type_n":"sw:symbol"},"ret":["sw:symbol"],"loop":[],"src":null,"doc":"Test method m2()","mod_n":"test_module"}
 // procedures
-{"instruction":"procedure","type_name":"sw:quit","procedure_name":"quit","modifiers":[],"parameters":[{"name":"status","modifier":"optional","type_name":"_undefined"}],"return_types":"__UNDEFINED_RESULT__","loop_types":[],"source_file":null,"doc":"Quit!","module_name":"test_module"}
-{"instruction":"procedure","type_name":"sw:range","procedure_name":"range","modifiers":["iter"],"parameters":[{"name":"start","modifier":"none","type_name":"_undefined"},{"name":"end","modifier":"none","type_name":"_undefined"},{"name":"step","modifier":"optional","type_name":"_undefined"}],"return_types":[],"loop_types":["sw:integer"],"source_file":null,"doc":"Range iterator."}
+{"i":7,"type_n":"sw:quit","proc_name":"quit","mods":[],"params":[{"name":"status","mod":"optional","type_n":"_undefined"}],"ret":"__UNDEFINED_RESULT__","loop":[],"src":null,"doc":"Quit!","mod_n":"test_module"}
+{"i":7,"type_n":"sw:range","proc_name":"range","mods":["iter"],"params":[{"name":"start","mod":"none","type_n":"_undefined"},{"name":"end","mod":"none","type_n":"_undefined"},{"name":"step","mod":"optional","type_n":"_undefined"}],"ret":[],"loop":["sw:integer"],"src":null,"doc":"Range iterator."}
 // conditions
-{"instruction":"condition","name":"error","data_names":["string"],"parent":null,"doc":null}
-{"instruction":"condition","name":"unknown_value","data_names":["value","permitted_values"],"parent":"error","doc":"Unknown value"}
+{"i":8,"name":"error","d_names":["string"],"par":null,"doc":null}
+{"i":8,"name":"unknown_value","d_names":["value","permitted_values"],"par":"error","doc":"Unknown value"}
 // binary operators
-{"instruction":"binary_operator","operator":"=","lhs_type_name":"sw:char16_vector","rhs_type_name":"sw:symbol","result_type_name":"sw:char16_vector","module_name":"test_module"}
+{"i":9,"op":"=","lhs_type_n":"sw:char16_vector","rhs_type_n":"sw:symbol","res_type_n":"sw:char16_vector","mod_n":"test_module"}

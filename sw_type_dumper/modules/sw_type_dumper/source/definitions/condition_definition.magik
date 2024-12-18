@@ -4,44 +4,57 @@ _package mt
 _pragma(classify_level=basic, topic=type_dumper)
 ## Condition definition.
 ## @slot {sw:char16_vector} name
-## @slot {sw:simple_vector<E=sw:char16_vector>} data_names
-## @slot {sw:char16_vector|sw:unset} parent
+## @slot {sw:simple_vector<E=sw:char16_vector>} data_n
+## @slot {sw:char16_vector|sw:unset} par
 ## @slot {sw:char16_vector|sw:unset} doc
+## @slot {sw:char16_vector|sw:unset} src
 def_slotted_exemplar(
 	:condition_definition,
 	{
 		{:name, _unset, :readable, :public},
-		{:data_names, _unset, :readable, :public},
-		{:parent, _unset, :readable, :public},
-		{:doc, _unset, :readable, :public}
+		{:data_n, _unset, :readable, :public},
+		{:par, _unset, :readable, :public},
+		{:doc, _unset, :readable, :public},
+		{:src, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
 
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:integer}
+condition_definition.define_shared_constant(
+	:instruction_type,
+	8,
+	:public)
+$
+
 _pragma(classify_level=basic, topic=type_dumper)
-_method condition_definition.new(name, data_names, parent, doc)
+_method condition_definition.new(name, data_names, parent, doc, source_file)
 	## Constructor.
 	## @param {sw:char16_vector} name
 	## @param {sw:simple_vector<E=sw:char16_vector>} data_names
 	## @param {sw:char16_vector|sw:unset} parent
 	## @param {sw:char16_vector|sw:unset} doc
+	## @param {sw:char16_vector|sw:unset} source_file
 	## @return {_self}
-	_return _clone.init(name, data_names, parent, doc)
+	_return _clone.init(name, data_names, parent, doc, source_file)
 _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_private _method condition_definition.init(name, data_names, parent, doc)
+_private _method condition_definition.init(name, data_names, parent, doc, source_file)
 	## Initializer.
 	## @param {sw:char16_vector} name
 	## @param {sw:simple_vector<E=sw:char16_vector>} data_names
 	## @param {sw:char16_vector|sw:unset} parent
 	## @param {sw:char16_vector|sw:unset} doc
+	## @param {sw:char16_vector|sw:unset} source_file
 	## @return {_self}
 	.name << name
-	.data_names << data_names
-	.parent << parent
+	.data_n << data_names
+	.par << parent
 	.doc << doc
+	.src << source_file
 	_return _self
 _endmethod
 $
@@ -57,11 +70,18 @@ _method condition_definition.new_from(cond)
 			>> cond.taxonomy[cond.taxonomy.size - 1]
 		_endif
 	_local doc << method_finder.get_method_comment(cond.name, "<condition>")
+	_local source_file <<
+		_try
+			>> cond.source_file
+		_when error
+			>> _unset
+		_endtry
 	_return _self.new(
 		cond.name,
 		cond.data_name_list,
 		parent,
-		doc)
+		doc,
+		source_file)
 _endmethod
 $
 
@@ -79,8 +99,8 @@ _method condition_definition.equals?(other)
 	## @param {mt:condition_definition} other
 	## @return {sw:false}
 	_return _self.name = other.name _andif
-		_self.data_names.eq?(other.data_names) _andif
-		_self.parent = other.parent _andif
+		_self.data_n.eq?(other.data_n) _andif
+		_self.par = other.par _andif
 		_self.doc = other.doc
 _endmethod
 $

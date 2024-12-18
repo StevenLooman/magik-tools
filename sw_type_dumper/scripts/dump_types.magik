@@ -3,7 +3,7 @@
 _block
 	_local product_dir << system.pathname_up(!source_file!, 2)
 	smallworld_product.add_product(product_dir)
-	sw_module_manager.load_module(:sw_type_dumper)
+	sw_module_manager.load_module(:sw_type_dumper, _unset, :force_reload?, _true)
 _endblock
 $
 
@@ -19,6 +19,7 @@ _block
 	write_with_spaces(date_time.now(), "Start writing to:", filepath)
 
 	_local ignore_vars << set.new_with(
+		:|mt|,
 		:|mt:binary_operator_definition|,
 		:|mt:condition_definition|,
 		:|mt:datamodel_type_dumper|,
@@ -36,7 +37,8 @@ _block
 		:|mt:type_definition|,
 		:|mt:type_dumper|,
 		:|mt:type_merger|,
-		:|mt:usage|)
+		:|mt:usage|,
+		:|sw_type_dumper|)
 	_local dumper << mt:type_dumper.new(filepath, ignore_vars)
 	dumper.run()
 

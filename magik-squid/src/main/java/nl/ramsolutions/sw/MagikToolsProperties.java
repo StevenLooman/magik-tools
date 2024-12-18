@@ -1,15 +1,14 @@
 package nl.ramsolutions.sw;
 
+import com.google.gson.*;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.stream.Stream;
+import nl.ramsolutions.sw.magik.analysis.definitions.io.deserializer.PathDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +17,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Note that this is currently used in (at least) three ways: - Settings for
  * magik-language-server settings - Settings for magik-lint from command line - Settings for
- * `magik-lint.properties` files for a given {@link MagikFile}
+ * `magik-lint.properties` files for a given {@link nl.ramsolutions.sw.magik.MagikFile}
  *
  * <p>These are separate code-paths, but given the shared used of {@link MagikToolsProperties} the
  * separation can be confusing.
@@ -30,6 +29,12 @@ public class MagikToolsProperties {
 
   public static final MagikToolsProperties DEFAULT_PROPERTIES = new MagikToolsProperties(Map.of());
   public static final String LIST_SEPARATOR = ",";
+
+  /**
+   * this is used for when an array of objects is separated into a property list `\u001b`
+   * corresponds to the ESCAPE key
+   */
+  public static final String LIST_SEPARATOR_OBJ = "\u001b";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikToolsProperties.class);
 
@@ -274,7 +279,7 @@ public class MagikToolsProperties {
 
   /**
    * Get a property value as a {@link List}. Items are separated by {@link
-   * MagikToolsProperties.LIST_SEPARATOR}.
+   * MagikToolsProperties#LIST_SEPARATOR}.
    *
    * @param key Key of the property.
    * @return List of values.
@@ -287,6 +292,78 @@ public class MagikToolsProperties {
 
     final String[] values = value.split(MagikToolsProperties.LIST_SEPARATOR);
     return Arrays.stream(values).map(String::trim).toList();
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> List<T> getPropertyList(
+      final String key, @Nullable String separator, final Class<T> type) {
+    final String value = this.getPropertyString(key);
+    if (value == null || value.isBlank()) {
+      return Collections.emptyList();
+    }
+
+    if (separator == null) {
+      if (type.isPrimitive()) {
+        separator = LIST_SEPARATOR;
+      } else {
+        separator = LIST_SEPARATOR_OBJ;
+      }
+    }
+
+    Stream<String> valuesStream = Arrays.stream(value.split(separator)).map(String::trim);
+
+    List<?> values;
+    String typeName = type.getSimpleName();
+    switch (typeName) {
+      case "Integer":
+        values = valuesStream.map(Integer::valueOf).toList();
+        break;
+      case "Long":
+        values = valuesStream.map(Long::valueOf).toList();
+        break;
+      case "Double":
+        values = valuesStream.map(Double::valueOf).toList();
+        break;
+      case "Float":
+        values = valuesStream.map(Float::valueOf).toList();
+        break;
+      case "Boolean":
+        values = valuesStream.map(Boolean::valueOf).toList();
+        break;
+      case "Byte":
+        values = valuesStream.map(Byte::valueOf).toList();
+        break;
+      case "Short":
+        values = valuesStream.map(Short::valueOf).toList();
+        break;
+      case "Character":
+        values = valuesStream.filter(str -> !str.isBlank()).map(str -> str.charAt(0)).toList();
+        break;
+      case "String":
+        values = valuesStream.toList();
+        break;
+      default:
+        Gson gson =
+            new GsonBuilder()
+                .registerTypeAdapter(Path.class, new PathDeserializer(Collections.emptyList()))
+                .create();
+        values =
+            valuesStream
+                .map(
+                    v -> {
+                      try {
+                        final JsonElement el = JsonParser.parseString(v);
+                        return gson.fromJson(el, type);
+                      } catch (JsonSyntaxException e) {
+                        LOGGER.error("Could not read value {} with type {}", v, type, e);
+                        return null;
+                      }
+                    })
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    return (List<T>) values;
   }
 
   /**

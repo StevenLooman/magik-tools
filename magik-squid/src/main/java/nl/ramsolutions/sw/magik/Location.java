@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 /** Location within a file. */
@@ -153,8 +154,26 @@ public class Location {
    * @return Location.
    */
   public static Location validLocation(final @Nullable Location location) {
+    return validLocation(location, null);
+  }
+
+  /**
+   * Ensure a complete location, with a range.
+   *
+   * @param location Range to derive from.
+   * @param mappings the path mappings to use
+   * @return Location.
+   */
+  public static Location validLocation(
+      @Nullable Location location, final @Nullable List<PathMapping> mappings) {
     if (location == null) {
       return MagikFile.DEFAULT_LOCATION;
+    }
+
+    if (mappings != null) {
+      for (PathMapping mapping : mappings) {
+        location = mapping.mapLocation(location);
+      }
     }
 
     final Range range = location.getRange();

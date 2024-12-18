@@ -1,71 +1,25 @@
 package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import com.google.gson.*;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Comparator;
-import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.*;
+import nl.ramsolutions.sw.magik.analysis.definitions.io.serializer.*;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
+import nl.ramsolutions.sw.moduledef.ModuleUsage;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
+import nl.ramsolutions.sw.productdef.ProductUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** JSON-line TypeKeeper writer. */
 public final class JsonDefinitionWriter {
-
-  private static final class TypeStringSerializer implements JsonSerializer<TypeString> {
-
-    @Override
-    public JsonElement serialize(
-        final TypeString src, final Type typeOfSrc, final JsonSerializationContext context) {
-      final String fullString = src.getFullString();
-      return new JsonPrimitive(fullString);
-    }
-  }
-
-  private static final class ExpressionResultStringSerializer
-      implements JsonSerializer<ExpressionResultString> {
-
-    @Override
-    public JsonElement serialize(
-        final ExpressionResultString src,
-        final Type typeOfSrc,
-        final JsonSerializationContext context) {
-      if (src == ExpressionResultString.UNDEFINED) {
-        return new JsonPrimitive(ExpressionResultString.UNDEFINED_SERIALIZED_NAME);
-      }
-
-      final JsonArray result = new JsonArray();
-      src.getTypes().stream().map(TypeString::getFullString).forEach(result::add);
-      return result;
-    }
-  }
 
   private static final class LowerCaseEnumSerializer<E extends Enum<?>>
       implements JsonSerializer<E> {
@@ -121,8 +75,6 @@ public final class JsonDefinitionWriter {
 
   private Gson buildGson() {
     return new GsonBuilder()
-        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-        .registerTypeAdapter(TypeString.class, new TypeStringSerializer())
         .registerTypeAdapter(ExpressionResultString.class, new ExpressionResultStringSerializer())
         .registerTypeAdapter(Instant.class, new InstantSerializer())
         .registerTypeAdapter(
@@ -136,6 +88,23 @@ public final class JsonDefinitionWriter {
         .registerTypeAdapter(
             ParameterDefinition.Modifier.class,
             new LowerCaseEnumSerializer<ParameterDefinition.Modifier>())
+        .registerTypeAdapter(
+            BinaryOperatorDefinition.class, new BinaryOperatorDefinitionSerializer())
+        .registerTypeAdapter(ConditionDefinition.class, new ConditionDefinitionSerializer())
+        .registerTypeAdapter(ExemplarDefinition.class, new ExemplarDefinitionSerializer())
+        .registerTypeAdapter(ExpressionResultString.class, new ExpressionResultStringSerializer())
+        .registerTypeAdapter(GlobalDefinition.class, new GlobalDefinitionSerializer())
+        .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionSerializer())
+        .registerTypeAdapter(ModuleUsage.class, new ModuleUsageSerializer())
+        .registerTypeAdapter(PackageDefinition.class, new PackageDefinitionSerializer())
+        .registerTypeAdapter(ParameterDefinition.class, new ParameterDefinitionSerializer())
+        .registerTypeAdapter(ProcedureDefinition.class, new ProcedureDefinitionSerializer())
+        .registerTypeAdapter(ProductDefinition.class, new ProductDefinitionSerializer())
+        .registerTypeAdapter(ProductUsage.class, new ProductUsageSerializer())
+        .registerTypeAdapter(SlotDefinition.class, new SlotDefinitionSerializer())
+        .registerTypeAdapter(TypeString.class, new TypeStringSerializer())
+        .registerTypeAdapter(ModuleDefinition.class, new ModuleDefinitionSerializer())
+        .registerTypeAdapter(MagikFileDefinition.class, new MagikFileDefinitionSerializer())
         .create();
   }
 
@@ -157,8 +126,7 @@ public final class JsonDefinitionWriter {
             definition -> {
               final Gson gson = this.buildGson();
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
-              instruction.addProperty(
-                  Instruction.INSTRUCTION.getValue(), Instruction.PRODUCT.getValue());
+              instruction.addProperty(Instruction.FIELD_NAME, Instruction.PRODUCT.getValue());
               this.writeInstruction(writer, instruction);
             });
   }
@@ -171,8 +139,7 @@ public final class JsonDefinitionWriter {
             definition -> {
               final Gson gson = this.buildGson();
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
-              instruction.addProperty(
-                  Instruction.INSTRUCTION.getValue(), Instruction.MODULE.getValue());
+              instruction.addProperty(Instruction.FIELD_NAME, Instruction.MODULE.getValue());
               this.writeInstruction(writer, instruction);
             });
   }
@@ -186,8 +153,7 @@ public final class JsonDefinitionWriter {
             definition -> {
               final Gson gson = this.buildGson();
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
-              instruction.addProperty(
-                  Instruction.INSTRUCTION.getValue(), Instruction.MAGIK_FILE.getValue());
+              instruction.addProperty(Instruction.FIELD_NAME, Instruction.MAGIK_FILE.getValue());
               this.writeInstruction(writer, instruction);
             });
   }
@@ -200,8 +166,7 @@ public final class JsonDefinitionWriter {
             definition -> {
               final Gson gson = this.buildGson();
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
-              instruction.addProperty(
-                  Instruction.INSTRUCTION.getValue(), Instruction.PACKAGE.getValue());
+              instruction.addProperty(Instruction.FIELD_NAME, Instruction.PACKAGE.getValue());
               this.writeInstruction(writer, instruction);
             });
   }
@@ -215,8 +180,7 @@ public final class JsonDefinitionWriter {
             definition -> {
               final Gson gson = this.buildGson();
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
-              instruction.addProperty(
-                  Instruction.INSTRUCTION.getValue(), Instruction.TYPE.getValue());
+              instruction.addProperty(Instruction.FIELD_NAME, Instruction.TYPE.getValue());
               this.writeInstruction(writer, instruction);
             });
   }
@@ -233,8 +197,7 @@ public final class JsonDefinitionWriter {
             definition -> {
               final Gson gson = this.buildGson();
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
-              instruction.addProperty(
-                  Instruction.INSTRUCTION.getValue(), Instruction.METHOD.getValue());
+              instruction.addProperty(Instruction.FIELD_NAME, Instruction.METHOD.getValue());
               this.writeInstruction(writer, instruction);
             });
   }
@@ -248,8 +211,7 @@ public final class JsonDefinitionWriter {
             definition -> {
               final Gson gson = this.buildGson();
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
-              instruction.addProperty(
-                  Instruction.INSTRUCTION.getValue(), Instruction.METHOD.getValue());
+              instruction.addProperty(Instruction.FIELD_NAME, Instruction.METHOD.getValue());
               this.writeInstruction(writer, instruction);
             });
   }
@@ -263,8 +225,7 @@ public final class JsonDefinitionWriter {
             definition -> {
               final Gson gson = this.buildGson();
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
-              instruction.addProperty(
-                  Instruction.INSTRUCTION.getValue(), Instruction.CONDITION.getValue());
+              instruction.addProperty(Instruction.FIELD_NAME, Instruction.CONDITION.getValue());
               this.writeInstruction(writer, instruction);
             });
   }
@@ -285,7 +246,7 @@ public final class JsonDefinitionWriter {
               final Gson gson = this.buildGson();
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
               instruction.addProperty(
-                  Instruction.INSTRUCTION.getValue(), Instruction.BINARY_OPERATOR.getValue());
+                  Instruction.FIELD_NAME, Instruction.BINARY_OPERATOR.getValue());
               this.writeInstruction(writer, instruction);
             });
   }
@@ -299,8 +260,7 @@ public final class JsonDefinitionWriter {
             definition -> {
               final Gson gson = this.buildGson();
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
-              instruction.addProperty(
-                  Instruction.INSTRUCTION.getValue(), Instruction.GLOBAL.getValue());
+              instruction.addProperty(Instruction.FIELD_NAME, Instruction.GLOBAL.getValue());
               this.writeInstruction(writer, instruction);
             });
   }

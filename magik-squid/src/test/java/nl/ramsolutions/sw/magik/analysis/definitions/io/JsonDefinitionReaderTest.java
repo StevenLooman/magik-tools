@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -10,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
@@ -30,7 +31,7 @@ import org.junit.jupiter.api.Test;
 /** Tests for JsonDefinitionReader. */
 class JsonDefinitionReaderTest {
 
-  private IDefinitionKeeper readTypes() throws IOException {
+  private IDefinitionKeeper readTypes() {
     final Path path = Path.of("src/test/resources/tests/type_database.jsonl");
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     JsonDefinitionReader.readTypes(path, definitionKeeper);
@@ -38,7 +39,7 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
-  void testReadProduct() throws IOException {
+  void testReadProduct() {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 
     final Collection<ProductDefinition> productDefs =
@@ -61,7 +62,7 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
-  void testReadModule() throws IOException {
+  void testReadModule() {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 
     final Collection<ModuleDefinition> moduleDefs =
@@ -83,7 +84,7 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
-  void testReadMagikFile() throws IOException {
+  void testReadMagikFile() {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 
     final Collection<MagikFileDefinition> magikFileDefs =
@@ -92,11 +93,16 @@ class JsonDefinitionReaderTest {
 
     final MagikFileDefinition magikFileDef = magikFileDefs.stream().findAny().orElseThrow();
     assertThat(magikFileDef)
-        .isEqualTo(new MagikFileDefinition(new Location(URI.create("file:///test.magik")), null));
+        .isEqualTo(
+            new MagikFileDefinition(
+                new Location(
+                    URI.create("file:///test.magik"),
+                    new Range(new Position(1, 0), new Position(1, 0))),
+                null));
   }
 
   @Test
-  void testReadPackage() throws IOException {
+  void testReadPackage() {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 
     final Collection<PackageDefinition> testPackageDefs =
@@ -110,7 +116,7 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
-  void testReadType() throws IOException {
+  void testReadType() {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 
     final TypeString aRef = TypeString.ofIdentifier("a", "user");
@@ -136,7 +142,7 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
-  void testReadMethod() throws IOException {
+  void testReadMethod() {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 
     final TypeString bRef = TypeString.ofIdentifier("user:b", "user");
@@ -209,7 +215,7 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
-  void testReadCondition() throws IOException {
+  void testReadCondition() {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 
     final Collection<ConditionDefinition> conditionsError =
@@ -242,7 +248,7 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
-  void testReadGlobal() throws IOException {
+  void testReadGlobal() {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 
     final TypeString tabCharRef = TypeString.ofIdentifier("tab_char", "sw");
@@ -271,7 +277,7 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
-  void testReadBinaryOperator() throws IOException {
+  void testReadBinaryOperator() {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 
     final Collection<BinaryOperatorDefinition> binOps =

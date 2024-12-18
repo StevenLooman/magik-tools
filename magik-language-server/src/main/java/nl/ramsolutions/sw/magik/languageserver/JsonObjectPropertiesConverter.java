@@ -29,15 +29,26 @@ final class JsonObjectPropertiesConverter {
       final boolean containsNonPrimitives =
           StreamSupport.stream(jsonArray.spliterator(), false)
               .anyMatch(childJsonEl -> !childJsonEl.isJsonPrimitive());
-      if (containsNonPrimitives) {
-        throw new IllegalStateException("Cannot convert JsonArray with non-JsonPrimitives!");
-      }
+      final JsonArray primitiveJsonArray = new JsonArray();
+      StreamSupport.stream(jsonArray.spliterator(), false)
+          .forEach(
+              childJsonEl -> {
+                if (childJsonEl.isJsonPrimitive()) {
+                  primitiveJsonArray.add(childJsonEl);
+                } else {
+                  primitiveJsonArray.add(childJsonEl.toString());
+                }
+              });
 
       // Convert all values.
       final String value =
-          StreamSupport.stream(jsonArray.spliterator(), false)
+          StreamSupport.stream(primitiveJsonArray.spliterator(), false)
               .map(JsonElement::getAsString)
-              .collect(Collectors.joining(MagikToolsProperties.LIST_SEPARATOR));
+              .collect(
+                  Collectors.joining(
+                      containsNonPrimitives
+                          ? MagikToolsProperties.LIST_SEPARATOR_OBJ
+                          : MagikToolsProperties.LIST_SEPARATOR));
       properties.put(path, value);
     } else if (jsonElement.isJsonObject()) {
       final JsonObject jsonObject = (JsonObject) jsonElement;

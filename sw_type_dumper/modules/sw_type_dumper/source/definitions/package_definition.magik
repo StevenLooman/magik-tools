@@ -14,6 +14,14 @@ def_slotted_exemplar(
 	{@mt:definition})
 $
 
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:integer}
+package_definition.define_shared_constant(
+	:instruction_type,
+	3,
+	:public)
+$
+
 _pragma(classify_level=basic, topic=type_dumper)
 _method package_definition.new(name, uses)
 	## Constructor.

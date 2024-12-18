@@ -3,29 +3,37 @@ _package mt
 
 _pragma(classify_level=basic, topic=type_dumper)
 ## Procedure definition.
-## @slot {sw:char16_vector} type_name
-## @slot {sw:char16_vector} procedure_name
-## @slot {sw:simple_vector<E=sw:char16_vector>} modifiers
-## @slot {sw:simple_vector<E=mt:parameter_definition>} parameters
-## @slot {sw:simple_vector<E=sw:char16_vector>} return_types
-## @slot {sw:simple_vector<E=sw:char16_vector>} loop_types
-## @slot {sw:char16_vector|sw:unset} source_file
+## @slot {sw:char16_vector} type_n
+## @slot {sw:char16_vector} proc_name
+## @slot {sw:simple_vector<E=sw:char16_vector>} mods
+## @slot {sw:simple_vector<E=mt:parameter_definition>} params
+## @slot {sw:simple_vector<E=sw:char16_vector>} ret
+## @slot {sw:simple_vector<E=sw:char16_vector>} loop
+## @slot {sw:char16_vector|sw:unset} src
 ## @slot {sw:char16_vector|sw:unset} doc
-## @slot {sw:char16_vector|sw:unset} module_name
+## @slot {sw:char16_vector|sw:unset} mod_n
 def_slotted_exemplar(
 	:procedure_definition,
 	{
-		{:type_name, _unset, :readable, :public},
-		{:procedure_name, _unset, :readable, :public},
-		{:modifiers, _unset, :readable, :public},
-		{:parameters, _unset, :readable, :public},
-		{:return_types, _unset, :readable, :public},
-		{:loop_types, _unset, :readable, :public},
-		{:source_file, _unset, :readable, :public},
+		{:type_n, _unset, :readable, :public},
+		{:proc_name, _unset, :readable, :public},
+		{:mods, _unset, :readable, :public},
+		{:params, _unset, :readable, :public},
+		{:ret, _unset, :readable, :public},
+		{:loop, _unset, :readable, :public},
+		{:src, _unset, :readable, :public},
 		{:doc, _unset, :readable, :public},
-		{:module_name, _unset, :readable, :public}
+		{:mod_n, _unset, :readable, :public}
 	},
 	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:integer}
+procedure_definition.define_shared_constant(
+	:instruction_type,
+	7,
+	:public)
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
@@ -85,15 +93,15 @@ _private _method procedure_definition.init(
 	## @param {sw:char16_vector|sw:unset} doc
 	## @param {sw:char16_vector|sw:unset} module_name
 	## @return {_self}
-	.type_name << type_name
-	.procedure_name << procedure_name
-	.modifiers << modifiers
-	.parameters << parameters
-	.return_types << return_types
-	.loop_types << loop_types
-	.source_file << source_file
+	.type_n << type_name
+	.proc_name << procedure_name
+	.mods << modifiers
+	.params << parameters
+	.ret << return_types
+	.loop << loop_types
+	.src << source_file
 	.doc << doc
-	.module_name << module_name
+	.mod_n << module_name
 	_return _self
 _endmethod
 $
@@ -106,7 +114,7 @@ _private _method procedure_definition.init_from_json(instruction)
 	_super.init_from_json(instruction)
 
 	# Fix parameters.
-	.parameters << .parameters.map(
+	.params << .params.map(
 		_proc(param)
 			_return parameter_definition.sys!perform(:|new_from_json()|, param)
 		_endproc)
@@ -165,7 +173,7 @@ _pragma(condition_definition=basic, topic=type_dumper)
 _method procedure_definition.sort_value
 	## Sort value.
 	## @return {sw:char16_vector}
-	_return .type_name
+	_return .type_n
 _endmethod
 $
 
@@ -174,15 +182,15 @@ _method procedure_definition.equals?(other)
 	## Equals?
 	## @param {mt:procedure_definition} other
 	## @return {sw:false}
-	_return _self.type_name = other.type_name _andif
-		_self.procedure_name = other.procedure_name _andif
-		_self.modifiers.eq?(other.modifiers) _andif
-		_self.parameters.eq?(other.parameters) _andif
-		_self.return_types.eq?(other.return_types) _andif
-		_self.loop_types.eq?(other.loop_types) _andif
-		_self.source_file = other.source_file _andif
+	_return _self.type_n = other.type_n _andif
+		_self.proc_name = other.proc_name _andif
+		_self.mods.eq?(other.mods) _andif
+		_self.params.eq?(other.params) _andif
+		_self.ret.eq?(other.ret) _andif
+		_self.loop.eq?(other.loop) _andif
+		_self.src = other.src _andif
 		_self.doc = other.doc _andif
-		_self.module_name = other.module_name
+		_self.mod_n = other.mod_n
 _endmethod
 $
 
@@ -191,13 +199,13 @@ _method procedure_definition.equals_disregarding_typing?(other)
 	## Equals disregarding typing?
 	## @param {mt:procedure_definition} other
 	## @return {sw:false}
-	_return _self.type_name = other.type_name _andif
-		_self.procedure_name = other.procedure_name _andif
-		_self.modifiers.eq?(other.modifiers) _andif
-		_self.parameters.eq?(other.parameters, :|equals_disregarding_typing?()|) _andif
-		_self.source_file = other.source_file _andif
+	_return _self.type_n = other.type_n _andif
+		_self.proc_name = other.proc_name _andif
+		_self.mods.eq?(other.mods) _andif
+		_self.params.eq?(other.params, :|equals_disregarding_typing?()|) _andif
+		_self.src = other.src _andif
 		_self.doc = other.doc _andif
-		_self.module_name = other.module_name
+		_self.mod_n = other.mod_n
 _endmethod
 $
 
@@ -222,6 +230,6 @@ define_binary_operator_case(
 $
 
 procedure_definition.define_show_attributes(
-	:type_name,
-	:procedure_name)
+	:type_n,
+	:proc_name)
 $

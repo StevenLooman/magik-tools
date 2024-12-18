@@ -3,29 +3,39 @@ _package mt
 
 _pragma(classify_level=basic, topic=type_dumper)
 ## Type definition.
-## @slot {sw:char16_vector} type_name
+## @slot {sw:char16_vector} type_n
 ## @slot {sw:char16_vector} sort
 ## @slot {sw:char16_vector|sw:unset} doc
-## @slot {sw:simple_vector<E=sw:char16_vector>} parents
+## @slot {sw:simple_vector<E=sw:char16_vector>} par
 ## @slot {sw:simple_vector<E=mt:slot_definition>} slots
-## @slot {sw:simple_vector<E=sw:char16_vector>} topics
-## @slot {sw:char16_vector|sw:unset} module_name
+## @slot {sw:simple_vector<E=sw:char16_vector>} top
+## @slot {sw:char16_vector|sw:unset} mod_n
+## @slot {sw:char16_vector|sw:unset} src
 def_slotted_exemplar(
 	:type_definition,
 	{
-		{:type_name, _unset, :readable, :public},
+		{:type_n, _unset, :readable, :public},
 		{:sort, _unset, :readable, :public},
 		{:doc, _unset, :readable, :public},
-		{:parents, _unset, :readable, :public},
+		{:par, _unset, :readable, :public},
 		{:slots, _unset, :readable, :public},
-		{:topics, _unset, :readable, :public},
-		{:module_name, _unset, :readable, :public}
+		{:top, _unset, :readable, :public},
+		{:mod_n, _unset, :readable, :public},
+		{:src, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
 
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:integer}
+type_definition.define_shared_constant(
+	:instruction_type,
+	4,
+	:public)
+$
+
 _pragma(classify_level=basic, topic=type_dumper)
-_method type_definition.new(type_name, sort, doc, parents, slots, topics, module_name)
+_method type_definition.new(type_name, sort, doc, parents, slots, topics, module_name, src)
 	## Constructor.
 	## @param {sw:char16_vector} type_name
 	## @param {sw:char16_vector} sort
@@ -34,12 +44,13 @@ _method type_definition.new(type_name, sort, doc, parents, slots, topics, module
 	## @param {sw:simple_vector<E=mt:slot_definition>} slots
 	## @param {sw:simple_vector<E=sw:char16_vector>} topics
 	## @param {sw:char16_vector|sw:unset} module_name
-	_return _clone.init(type_name, sort, doc, parents, slots, topics, module_name)
+	## @param {sw:char16_vector|sw:unset} src
+	_return _clone.init(type_name, sort, doc, parents, slots, topics, module_name, src)
 _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_private _method type_definition.init(type_name, sort, doc, parents, slots, topics, module_name)
+_private _method type_definition.init(type_name, sort, doc, parents, slots, topics, module_name, src)
 	## Initializer.
 	## @param {sw:char16_vector} type_name
 	## @param {sw:char16_vector} sort
@@ -48,13 +59,15 @@ _private _method type_definition.init(type_name, sort, doc, parents, slots, topi
 	## @param {sw:simple_vector<E=mt:slot_definition>} slots
 	## @param {sw:simple_vector<E=sw:char16_vector>} topics
 	## @param {sw:char16_vector|sw:unset} module_name
-	.type_name << type_name
+	## @param {sw:char16_vector|sw:unset} src
+	.type_n << type_name
 	.sort << sort
 	.doc << doc
-	.parents << parents
+	.par << parents
 	.slots << slots
-	.topics << topics
-	.module_name << module_name
+	.top << topics
+	.mod_n << module_name
+	.src << src
 	_return _self
 _endmethod
 $
@@ -68,9 +81,9 @@ _private _method type_definition.init_from_json(instruction)
 
 	# Fix slots.
 	.slots << .slots.map(
-		_proc(slot)
-			_return slot_definition.sys!perform(:|new_from_json()|, slot)
-		_endproc)
+			_proc (slot)
+				_return slot_definition.sys!perform(:|new_from_json()|, slot)
+			_endproc)
 
 	_return _self
 _endmethod
@@ -109,6 +122,21 @@ _method type_definition.new_from(package, name, method_table)
 		_local source_type_name << _self.name_from_type(source_global_var.package, source_global_var.key)
 		parents.add_last(source_type_name)
 	_endloop
+	_local module_name << _if metadata[:exemplar] _isnt _unset
+		_then
+			>> _try
+				>> metadata[:exemplar].module_name
+			_when error
+				>> _unset
+			_endtry
+		_endif
+	_local src <<
+		_try
+			>> method_table.source_file
+		_when error
+			>> _unset
+		_endtry
+
 	_return _self.new(
 		type_name,
 		sort,
@@ -116,10 +144,8 @@ _method type_definition.new_from(package, name, method_table)
 		parents,
 		_self.build_slot_definitions(method_table),
 		method_finder.get_class_topics(type_name),
-		_if metadata[:exemplar] _isnt _unset
-		_then
-			>> metadata[:exemplar].module_name
-		_endif)
+		module_name,
+		src)
 _endmethod
 $
 
@@ -151,7 +177,7 @@ _pragma(condition_definition=basic, topic=type_dumper)
 _method type_definition.sort_value
 	## Sort value.
 	## @return {sw:char16_vector}
-	_return .type_name
+	_return .type_n
 _endmethod
 $
 
@@ -160,13 +186,13 @@ _method type_definition.equals?(other)
 	## Equals?
 	## @param {mt:type_definition} other
 	## @return {sw:false}
-	_return _self.type_name = other.type_name _andif
+	_return _self.type_n = other.type_n _andif
 		_self.sort = other.sort _andif
 		_self.doc = other.doc _andif
-		_self.parents.eq?(other.parents) _andif
+		_self.par.eq?(other.par) _andif
 		_self.slots.eq?(other.slots) _andif
-		_self.topics.eq?(other.topics) _andif
-		_self.module_name = other.module_name
+		_self.top.eq?(other.top) _andif
+		_self.mod_n = other.mod_n
 _endmethod
 $
 
@@ -175,19 +201,19 @@ _method type_definition.equals_disregarding_typing?(other)
 	## Equals disregarding typing?
 	## @param {mt:type_definition} other
 	## @return {sw:false}
-	_return _self.type_name = other.type_name _andif
+	_return _self.type_n = other.type_n _andif
 		_self.sort = other.sort _andif
 		_self.doc = other.doc _andif
-		_self.parents.eq?(other.parents) _andif
+		_self.par.eq?(other.par) _andif
 		_self.slots.eq?(other.slots, :|equals_disregarding_typing?()|) _andif
-		_self.topics.eq?(other.topics) _andif
-		_self.module_name = other.module_name
+		_self.top.eq?(other.top) _andif
+		_self.mod_n = other.mod_n
 _endmethod
 $
 
 define_binary_operator_case(
 	:|cf|, type_definition, type_definition,
-	_proc(definition_a, definition_b)
+	_proc (definition_a, definition_b)
 		## @param {mt:type_definition} definition_a
 		## @param {mt:type_definition} definition_b
 		## @return {sw:false|sw:maybe}
@@ -197,7 +223,7 @@ $
 
 define_binary_operator_case(
 	:|=|, type_definition, type_definition,
-	_proc(definition_a, definition_b)
+	_proc (definition_a, definition_b)
 		## @param {mt:type_definition} definition_a
 		## @param {mt:type_definition} definition_b
 		## @return {sw:false|sw:maybe}
@@ -206,5 +232,5 @@ define_binary_operator_case(
 $
 
 type_definition.define_show_attributes(
-	:type_name)
+	:type_n)
 $

@@ -1,15 +1,14 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
 import com.google.gson.JsonObject;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -128,20 +127,47 @@ public class MagikWorkspaceService implements WorkspaceService {
   public void readTypesDbs(final List<String> typeDbPaths) {
     LOGGER.trace("Reading type databases from: {}", typeDbPaths);
 
-    typeDbPaths.forEach(
-        pathStr -> {
-          final Path path = Path.of(pathStr);
-          if (!Files.exists(path)) {
-            LOGGER.warn("Path to types database does not exist: {}", pathStr);
-            return;
-          }
+    final MagikLanguageServerSettings lspSettings =
+        new MagikLanguageServerSettings(this.languageServerProperties);
+    final String smallworldGis = lspSettings.getSmallworldGis();
 
-          try {
-            JsonDefinitionReader.readTypes(path, this.definitionKeeper);
-          } catch (final IOException exception) {
-            LOGGER.error(exception.getMessage(), exception);
-          }
-        });
+    typeDbPaths.stream()
+        .map(
+            pathStr -> {
+              Path path = JsonDefinitionReader.parseTypeDBPath(smallworldGis, pathStr);
+              if (path == null) {
+                LOGGER.warn("Path to types database does not exist: {}", pathStr);
+                return null;
+              }
+              return path;
+            })
+        .filter(Objects::nonNull)
+        .flatMap(
+            path -> {
+              if (Files.isDirectory(path)) {
+                File dir = path.toFile();
+                File[] files =
+                    dir.listFiles((dir1, name) -> name.endsWith(JsonDefinitionReader.TYPE_DB_EXT));
+                if (files != null) {
+                  return Arrays.stream(files).map(File::toPath);
+                }
+                return Stream.empty();
+              }
+              return Stream.of(path);
+            })
+        .forEach(
+            path -> {
+              try {
+                JsonDefinitionReader.readTypes(
+                    path, this.definitionKeeper, lspSettings.getPathMappings());
+              } catch (final Exception exception) {
+                LOGGER.error(
+                    "error reading type db '{}', error: {}",
+                    path,
+                    exception.getMessage(),
+                    exception);
+              }
+            });
   }
 
   @Override

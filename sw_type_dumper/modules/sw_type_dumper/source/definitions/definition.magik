@@ -49,6 +49,14 @@ definition.define_shared_constant(
 	:public)
 $
 
+_pragma(classify_level=basic, topic=type_dumper, usage=subclassable)
+## @return {sw:integer}
+definition.define_shared_constant(
+	:instruction_type,
+	-1,
+	:public)
+$
+
 _pragma(classify_level=basic, topic=type_dumper)
 _method definition.new_from_json(instruction)
 	## Construct self from JSON.
@@ -69,7 +77,7 @@ _private _method definition.init_from_json(instruction)
 		_local value << instruction[fixed_name]
 		_local fixed_value <<
 			_if value.is_kind_of?(sw:simple_vector) _orif
-			    value.is_kind_of?(sw:rope)
+				value.is_kind_of?(sw:rope)
 			_then
 				>> value.as_simple_vector()
 			_else
@@ -94,9 +102,9 @@ _method definition.as_properties()
 	## Get slots as hash table.
 	## @return {sw:equality_property_list<K=sw:char16_vector, E=sw:object>}
 	_local fix_value <<
-		_proc(value)
+		_proc (value)
 			_if value.is_kind_of?(mt:definition) _orif
-			    value.is_kind_of?(mt:usage)
+				value.is_kind_of?(mt:usage)
 			_then
 				_return value.as_properties()
 			_endif
@@ -118,6 +126,13 @@ _method definition.as_properties()
 			_else
 				>> value
 			_endif
+
+		# for smaller file sizes = faster parsing
+		_if value _is _unset
+		_then
+			_continue
+		_endif
+
 		table[fixed_name] << fixed_value
 	_endloop
 	_return table
@@ -128,8 +143,12 @@ _pragma(classify_level=basic, topic=type_dumper)
 _method definition.generate_json_string()
 	## Generate a json string from self.
 	## @return {sw:char16_vector}
-	_local instruction << _self.as_properties()
-	instruction[:instruction] << _self.class_name.write_string.split_by(%_)[1]
+	_local properties << _self.as_properties()
+
+	# so that .i is at the front
+	_local instruction << sw:equality_property_list.new_with(:i, _self.instruction_type)
+	instruction.add_all(properties)
+
 	_local encoder << sw:json_encoder.new()
 	_return encoder.generate_string(instruction)
 _endmethod

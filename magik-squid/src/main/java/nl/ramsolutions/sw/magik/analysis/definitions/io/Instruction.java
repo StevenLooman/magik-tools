@@ -2,26 +2,27 @@ package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
 /** Json TypeKeeper Reader/Writer instructions. */
 @SuppressWarnings("checkstyle:JavadocVariable")
-enum Instruction {
-  INSTRUCTION("instruction"),
-  PRODUCT("product"),
-  MODULE("module"),
-  MAGIK_FILE("magik_file"),
-  PACKAGE("package"),
-  TYPE("type"),
-  GLOBAL("global"),
-  METHOD("method"),
-  PROCEDURE("procedure"),
-  CONDITION("condition"),
-  BINARY_OPERATOR("binary_operator");
+public enum Instruction {
+  PRODUCT(1),
+  MODULE(2),
+  PACKAGE(3),
+  TYPE(4),
+  GLOBAL(5),
+  METHOD(6),
+  PROCEDURE(7),
+  CONDITION(8),
+  BINARY_OPERATOR(9),
+  MAGIK_FILE(10);
 
-  private final String value;
+  public static final String FIELD_NAME = "i";
 
-  Instruction(final String value) {
+  private final Integer value;
+
+  Instruction(final Integer value) {
     this.value = value;
   }
 
-  public String getValue() {
+  public Integer getValue() {
     return this.value;
   }
 
@@ -31,7 +32,7 @@ enum Instruction {
    * @param value Value to get enum from.
    * @return Enum.
    */
-  public static Instruction fromValue(final String value) {
+  public static Instruction fromValue(final Integer value) {
     for (final Instruction instruction : Instruction.values()) {
       if (instruction.getValue().equals(value)) {
         return instruction;

@@ -1,222 +1,170 @@
 package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.InstanceCreator;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.util.Arrays;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import nl.ramsolutions.sw.magik.PathMapping;
+import nl.ramsolutions.sw.magik.analysis.definitions.*;
+import nl.ramsolutions.sw.magik.analysis.definitions.io.deserializer.*;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
-import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
+import nl.ramsolutions.sw.moduledef.ModuleUsage;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
+import nl.ramsolutions.sw.productdef.ProductUsage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** JSON-line TypeKeeper reader. */
 public final class JsonDefinitionReader {
 
-  private static final class TypeStringDeserializer implements JsonDeserializer<TypeString> {
-
-    @Override
-    public TypeString deserialize(
-        final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
-        throws JsonParseException {
-      final String identifier = json.getAsString();
-      return TypeStringParser.parseTypeString(identifier);
-    }
-  }
-
-  private static final class ExpressionResultStringDeserializer
-      implements JsonDeserializer<ExpressionResultString> {
-
-    @Override
-    public ExpressionResultString deserialize(
-        final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
-        throws JsonParseException {
-      if (json.isJsonPrimitive()
-          && json.getAsString().equals(ExpressionResultString.UNDEFINED_SERIALIZED_NAME)) {
-        return ExpressionResultString.UNDEFINED;
-      } else if (json.isJsonArray()) {
-        final List<TypeString> types =
-            json.getAsJsonArray().asList().stream()
-                .map(JsonElement::getAsString)
-                .map(TypeStringParser::parseTypeString)
-                .toList();
-        return new ExpressionResultString(types);
-      }
-
-      throw new IllegalStateException();
-    }
-  }
-
-  private static final class LowerCaseEnumDeserializer<E extends Enum<?>>
-      implements JsonDeserializer<E> {
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public E deserialize(
-        final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
-        throws JsonParseException {
-      final String value = json.getAsString().toUpperCase();
-      if (typeOfT instanceof Class) {
-        final Class<?> clazz = (Class<?>) typeOfT;
-        if (clazz.isEnum()) {
-          return Arrays.stream(clazz.getEnumConstants())
-              .filter(enumValue -> enumValue.toString().equals(value))
-              .map(enumValue -> (E) enumValue)
-              .findFirst()
-              .orElseThrow();
-        }
-      }
-
-      throw new IllegalStateException("Value '" + value + "' is not a known Enum value");
-    }
-  }
-
-  private static final class InstantDeserializer implements JsonDeserializer<Instant> {
-
-    @Override
-    public Instant deserialize(
-        final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
-        throws JsonParseException {
-      final JsonArray array = json.getAsJsonArray();
-      if (array.size() == 2) {
-        final long seconds = array.get(0).getAsLong();
-        final long nanos = array.get(1).getAsLong();
-        return Instant.ofEpochSecond(seconds, nanos);
-      }
-
-      throw new IllegalStateException();
-    }
-  }
-
-  private static final class ProductDefinitionCreator
-      implements InstanceCreator<ProductDefinition> {
-
-    @Override
-    public ProductDefinition createInstance(final Type type) {
-      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
-      // even if these were not set in the source JSON.
-      return new ProductDefinition(
-          null, null, null, null, null, null, null, null, Collections.emptyList());
-    }
-  }
-
-  private static final class ModuleDefinitionCreator implements InstanceCreator<ModuleDefinition> {
-
-    @Override
-    public ModuleDefinition createInstance(final Type type) {
-      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
-      // even if these were not set in the source JSON.
-      return new ModuleDefinition(
-          null, null, null, null, null, null, null, Collections.emptyList());
-    }
-  }
-
-  private static final class MethodDefinitionCreator implements InstanceCreator<MethodDefinition> {
-
-    @Override
-    public MethodDefinition createInstance(final Type type) {
-      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
-      // even if these were not set in the source JSON.
-      return new MethodDefinition(
-          null,
-          null,
-          null,
-          null,
-          null,
-          TypeString.UNDEFINED,
-          "dummy_method",
-          Collections.emptySet(),
-          Collections.emptyList(),
-          null,
-          Collections.emptySet(),
-          ExpressionResultString.UNDEFINED,
-          ExpressionResultString.UNDEFINED);
-    }
-  }
-
-  private static final class ExemplarDefinitionCreator
-      implements InstanceCreator<ExemplarDefinition> {
-
-    @Override
-    public ExemplarDefinition createInstance(final Type type) {
-      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
-      // even if these were not set in the source JSON.
-      return new ExemplarDefinition(
-          null,
-          null,
-          null,
-          null,
-          null,
-          ExemplarDefinition.Sort.UNDEFINED,
-          TypeString.UNDEFINED,
-          Collections.emptyList(),
-          Collections.emptyList(),
-          Collections.emptySet());
-    }
-  }
-
-  private static final class ProcedureDefinitionCreator
-      implements InstanceCreator<ProcedureDefinition> {
-
-    @Override
-    public ProcedureDefinition createInstance(final Type type) {
-      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
-      // even if these were not set in the source JSON.
-      return new ProcedureDefinition(
-          null,
-          null,
-          null,
-          null,
-          null,
-          Collections.emptySet(),
-          TypeString.UNDEFINED,
-          null,
-          Collections.emptyList(),
-          ExpressionResultString.UNDEFINED,
-          ExpressionResultString.UNDEFINED);
-    }
-  }
-
   private static final Logger LOGGER = LoggerFactory.getLogger(JsonDefinitionReader.class);
+  private static final Logger LOGGER_DURATION =
+      LoggerFactory.getLogger(JsonDefinitionReader.class.getName() + "Duration");
+
+  public static final String TYPE_DB_DEFAULT_ALIAS = "$default";
+  private static final String TYPE_DB_DEFAULT_PATH =
+      "../../type_dbs"; // relative to smallworldGis path
+  public static final Integer TYPE_DB_VERSION = 2;
+  public static final String TYPE_DB_EXT = ".v" + TYPE_DB_VERSION + ".jsonl";
 
   private final IDefinitionKeeper definitionKeeper;
+  private final List<PathMapping> mappings;
+  private final Gson gson;
+  private final ExecutorService threadPool;
 
-  private JsonDefinitionReader(final IDefinitionKeeper definitionKeeper) {
+  private JsonDefinitionReader(
+      final IDefinitionKeeper definitionKeeper, final @Nullable List<PathMapping> mappings) {
     this.definitionKeeper = definitionKeeper;
+    this.mappings = mappings;
+
+    final int processors = Runtime.getRuntime().availableProcessors();
+    final int threadsToRun = Math.max(processors / 2, 6);
+    this.threadPool = Executors.newFixedThreadPool(threadsToRun);
+
+    this.gson = this.createGson();
   }
 
-  private void run(final Path path) throws IOException {
-    LOGGER.debug("Reading type database from path: {}", path);
+  private Gson createGson() {
+    final GsonBuilder builder = new GsonBuilder();
+    return builder
+        .registerTypeAdapter(TypeString.class, new TypeStringDeserializer(mappings))
+        .registerTypeAdapter(
+            ExpressionResultString.class, new ExpressionResultStringDeserializer(mappings))
+        .registerTypeAdapter(
+            ExemplarDefinition.Sort.class,
+            new LowerCaseEnumDeserializer<>(mappings, ExemplarDefinition.Sort.class))
+        .registerTypeAdapter(
+            MethodDefinition.Modifier.class,
+            new LowerCaseEnumDeserializer<>(mappings, MethodDefinition.Modifier.class))
+        .registerTypeAdapter(
+            ProcedureDefinition.Modifier.class,
+            new LowerCaseEnumDeserializer<>(mappings, ProcedureDefinition.Modifier.class))
+        .registerTypeAdapter(
+            ParameterDefinition.Modifier.class,
+            new LowerCaseEnumDeserializer<>(mappings, ParameterDefinition.Modifier.class))
+        .registerTypeAdapter(SlotDefinition.class, new SlotDefinitionDeserializer(mappings))
+        .registerTypeAdapter(
+            ParameterDefinition.class, new ParameterDefinitionDeserializer(mappings))
+        .registerTypeAdapter(ProductDefinition.class, new ProductDefinitionDeserializer(mappings))
+        .registerTypeAdapter(ModuleDefinition.class, new ModuleDefinitionDeserializer(mappings))
+        .registerTypeAdapter(PackageDefinition.class, new PackageDefinitionDeserializer(mappings))
+        .registerTypeAdapter(ExemplarDefinition.class, new ExemplarDefinitionDeserializer(mappings))
+        .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionDeserializer(mappings))
+        .registerTypeAdapter(
+            ConditionDefinition.class, new ConditionDefinitionDeserializer(mappings))
+        .registerTypeAdapter(
+            BinaryOperatorDefinition.class, new BinaryOperatorDefinitionDeserializer(mappings))
+        .registerTypeAdapter(
+            ProcedureDefinition.class, new ProcedureDefinitionDeserializer(mappings))
+        .registerTypeAdapter(GlobalDefinition.class, new GlobalDefinitionDeserializer(mappings))
+        .registerTypeAdapter(ProductUsage.class, new ProductUsageDeserializer(mappings))
+        .registerTypeAdapter(ModuleUsage.class, new ModuleUsageDeserializer(mappings))
+        .registerTypeAdapter(
+            MagikFileDefinition.class, new MagikFileDefinitionDeserializer(mappings))
+        .create();
+  }
+
+  /**
+   * Read types from a JSON-line file.
+   *
+   * @param path Path to JSON-line file.
+   * @param definitionKeeper {@link IDefinitionKeeper} to fill.
+   */
+  public static void readTypes(final Path path, final IDefinitionKeeper definitionKeeper) {
+    readTypes(path, definitionKeeper, Collections.emptyList());
+  }
+
+  /**
+   * Read types from a JSON-line file.
+   *
+   * @param path Path to JSON-line file.
+   * @param definitionKeeper {@link IDefinitionKeeper} to fill.
+   * @param mappings the path mappings to use for locations
+   */
+  public static void readTypes(
+      final Path path,
+      final IDefinitionKeeper definitionKeeper,
+      final @Nullable List<PathMapping> mappings) {
+    BaseDeserializer.clearParsedFiles();
+
+    final JsonDefinitionReader reader = new JsonDefinitionReader(definitionKeeper, mappings);
+    final long start = System.nanoTime();
+    reader.run(path);
+    LOGGER_DURATION.trace(
+        "Duration: {} readTypes, type db: {}", (System.nanoTime() - start) / 1000000000.0, path);
+  }
+
+  /**
+   * parses a path for a type db and will replace {@value
+   * JsonDefinitionReader#TYPE_DB_DEFAULT_ALIAS} with the default type db path
+   *
+   * @param gisPath the gisPath if the default alias gets replaced
+   * @param pathStr the path that should get parsed
+   * @return the parsed Path or null if the file can't be found
+   */
+  @Nullable
+  public static Path parseTypeDBPath(@Nullable String gisPath, String pathStr) {
+    Path path = Path.of(pathStr);
+    if (pathStr.equals(TYPE_DB_DEFAULT_ALIAS) && gisPath != null) {
+      path = generateDefaultTypeDBPath(gisPath);
+    }
+
+    if (!Files.exists(path)) {
+      return null;
+    }
+
+    return path;
+  }
+
+  /**
+   * Generate the default type db path
+   *
+   * @param gisPath the Smallworld GIS path to use as the basis
+   * @return the path
+   */
+  public static Path generateDefaultTypeDBPath(String gisPath) {
+    return Paths.get(gisPath, TYPE_DB_DEFAULT_PATH);
+  }
+
+  public void run(final Path path) {
+    LOGGER.info("Reading type database from path: {}", path);
+
+    List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>();
 
     final File file = path.toFile();
     int lineNo = 1;
@@ -224,36 +172,60 @@ public final class JsonDefinitionReader {
         BufferedReader bufferedReader = new BufferedReader(fileReader)) {
       String line = bufferedReader.readLine();
       while (line != null) {
-        this.processLineSafe(lineNo, line);
+        completableFutures.add(this.processLineSafe(lineNo, line, path));
 
         ++lineNo;
         line = bufferedReader.readLine();
       }
-    } catch (final JsonParseException exception) {
-      LOGGER.error("JSON Error reading line no: {}", lineNo);
+    } catch (final IOException exception) {
+      LOGGER.error("IO Error reading line no: {}", lineNo, exception);
       throw new IllegalStateException(exception);
+    }
+
+    CompletableFuture<Void> allFutures =
+        CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0]));
+    try {
+      allFutures.get();
+      LOGGER.info("Finished reading type database from: {}", path);
+    } catch (InterruptedException | ExecutionException e) {
+      LOGGER.error("Error while reading type database from: {}", path, e);
     }
   }
 
   @SuppressWarnings("checkstyle:IllegalCatch")
-  private void processLineSafe(final int lineNo, final String line) {
-    try {
-      this.processLine(line);
-    } catch (final RuntimeException exception) {
-      LOGGER.error("Error parsing line {}, line data: {}", lineNo, line);
-      LOGGER.error(exception.getMessage(), exception);
-    }
+  private CompletableFuture<Boolean> processLineSafe(
+      final int lineNo, final String line, final Path path) {
+    CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+
+    threadPool.submit(
+        () -> {
+          try {
+            if (lineNo % 10000 == 0 && LOGGER.isDebugEnabled()) {
+              LOGGER.debug("On line {} of {}", lineNo, path);
+            }
+            this.processLine(line);
+            completableFuture.complete(true);
+          } catch (final Exception exception) {
+            LOGGER.error("Error parsing line {}, line data: {}", lineNo, line);
+            LOGGER.error(exception.getMessage(), exception);
+            completableFuture.complete(false);
+          }
+        });
+
+    return completableFuture;
   }
 
-  private void processLine(final String line) {
+  private void processLine(String line) {
     if (line.trim().startsWith("//")) {
       // Ignore comments.
       return;
     }
 
-    final JsonObject obj = JsonParser.parseString(line).getAsJsonObject();
-    final String instructionStr = obj.get(Instruction.INSTRUCTION.getValue()).getAsString();
-    final Instruction instruction = Instruction.fromValue(instructionStr);
+    final JsonElement jsonTree = JsonParser.parseString(line);
+    final JsonObject obj = jsonTree.getAsJsonObject();
+    final JsonElement instructionObj = obj.get(Instruction.FIELD_NAME);
+    final Instruction instruction = Instruction.fromValue(instructionObj.getAsInt());
+
     switch (instruction) {
       case PRODUCT:
         this.handleProduct(obj);
@@ -296,62 +268,33 @@ public final class JsonDefinitionReader {
         break;
 
       default:
-        break;
+        throw new IllegalStateException(
+            "Unexpected instruction: " + instruction + "\nline: " + line);
     }
   }
 
-  private Gson buildGson() {
-    return new GsonBuilder()
-        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-        .registerTypeAdapter(TypeString.class, new TypeStringDeserializer())
-        .registerTypeAdapter(ExpressionResultString.class, new ExpressionResultStringDeserializer())
-        .registerTypeAdapter(Instant.class, new InstantDeserializer())
-        .registerTypeAdapter(
-            ExemplarDefinition.Sort.class, new LowerCaseEnumDeserializer<ExemplarDefinition.Sort>())
-        .registerTypeAdapter(
-            MethodDefinition.Modifier.class,
-            new LowerCaseEnumDeserializer<MethodDefinition.Modifier>())
-        .registerTypeAdapter(
-            ProcedureDefinition.Modifier.class,
-            new LowerCaseEnumDeserializer<ProcedureDefinition.Modifier>())
-        .registerTypeAdapter(
-            ParameterDefinition.Modifier.class,
-            new LowerCaseEnumDeserializer<ParameterDefinition.Modifier>())
-        .registerTypeAdapter(ProductDefinition.class, new ProductDefinitionCreator())
-        .registerTypeAdapter(ModuleDefinition.class, new ModuleDefinitionCreator())
-        .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionCreator())
-        .registerTypeAdapter(ProcedureDefinition.class, new ProcedureDefinitionCreator())
-        .registerTypeAdapter(ExemplarDefinition.class, new ExemplarDefinitionCreator())
-        .create();
-  }
-
-  private void handleProduct(final JsonObject instruction) {
-    final Gson gson = this.buildGson();
-    final ProductDefinition definition = gson.fromJson(instruction, ProductDefinition.class);
+  private void handleProduct(final JsonObject obj) {
+    ProductDefinition definition = gson.fromJson(obj, ProductDefinition.class);
     this.definitionKeeper.add(definition);
   }
 
-  private void handleModule(final JsonObject instruction) {
-    final Gson gson = this.buildGson();
-    final ModuleDefinition definition = gson.fromJson(instruction, ModuleDefinition.class);
+  private void handleModule(final JsonObject obj) {
+    ModuleDefinition definition = gson.fromJson(obj, ModuleDefinition.class);
     this.definitionKeeper.add(definition);
   }
 
-  private void handleMagikFile(final JsonObject instruction) {
-    final Gson gson = this.buildGson();
-    final MagikFileDefinition definition = gson.fromJson(instruction, MagikFileDefinition.class);
+  private void handleMagikFile(final JsonObject obj) {
+    final MagikFileDefinition definition = gson.fromJson(obj, MagikFileDefinition.class);
     this.definitionKeeper.add(definition);
   }
 
-  private void handlePackage(final JsonObject instruction) {
-    final Gson gson = this.buildGson();
-    final PackageDefinition definition = gson.fromJson(instruction, PackageDefinition.class);
+  private void handlePackage(final JsonObject obj) {
+    PackageDefinition definition = gson.fromJson(obj, PackageDefinition.class);
     this.definitionKeeper.add(definition);
   }
 
-  private void handleType(final JsonObject instruction) {
-    final Gson gson = this.buildGson();
-    final ExemplarDefinition definition = gson.fromJson(instruction, ExemplarDefinition.class);
+  private void handleType(final JsonObject obj) {
+    ExemplarDefinition definition = gson.fromJson(obj, ExemplarDefinition.class);
 
     // We are allowed to overwrite definitions which have no location, as these will most likely
     // be the default definitions from DefaultDefinitionsAdder.
@@ -363,47 +306,28 @@ public final class JsonDefinitionReader {
     this.definitionKeeper.add(definition);
   }
 
-  private void handleMethod(final JsonObject instruction) {
-    final Gson gson = this.buildGson();
-    final MethodDefinition definition = gson.fromJson(instruction, MethodDefinition.class);
+  private void handleMethod(final JsonObject obj) {
+    MethodDefinition definition = gson.fromJson(obj, MethodDefinition.class);
     this.definitionKeeper.add(definition);
   }
 
-  private void handleCondition(final JsonObject instruction) {
-    final Gson gson = this.buildGson();
-    final ConditionDefinition definition = gson.fromJson(instruction, ConditionDefinition.class);
+  private void handleCondition(final JsonObject obj) {
+    ConditionDefinition definition = gson.fromJson(obj, ConditionDefinition.class);
     this.definitionKeeper.add(definition);
   }
 
-  private void handleBinaryOperator(final JsonObject instruction) {
-    final Gson gson = this.buildGson();
-    final BinaryOperatorDefinition definition =
-        gson.fromJson(instruction, BinaryOperatorDefinition.class);
+  private void handleBinaryOperator(final JsonObject obj) {
+    BinaryOperatorDefinition definition = gson.fromJson(obj, BinaryOperatorDefinition.class);
     this.definitionKeeper.add(definition);
   }
 
-  private void handleProcedure(final JsonObject instruction) {
-    final Gson gson = this.buildGson();
-    final ProcedureDefinition definition = gson.fromJson(instruction, ProcedureDefinition.class);
+  private void handleProcedure(final JsonObject obj) {
+    ProcedureDefinition definition = gson.fromJson(obj, ProcedureDefinition.class);
     this.definitionKeeper.add(definition);
   }
 
-  private void handleGlobal(final JsonObject instruction) {
-    final Gson gson = this.buildGson();
-    final GlobalDefinition definition = gson.fromJson(instruction, GlobalDefinition.class);
+  private void handleGlobal(final JsonObject obj) {
+    GlobalDefinition definition = gson.fromJson(obj, GlobalDefinition.class);
     this.definitionKeeper.add(definition);
-  }
-
-  /**
-   * Read types from a JSON-line file.
-   *
-   * @param path Path to JSON-line file.
-   * @param definitionKeeper {@link IDefinitionKeeper} to fill.
-   * @throws IOException -
-   */
-  public static void readTypes(final Path path, final IDefinitionKeeper definitionKeeper)
-      throws IOException {
-    final JsonDefinitionReader reader = new JsonDefinitionReader(definitionKeeper);
-    reader.run(path);
   }
 }

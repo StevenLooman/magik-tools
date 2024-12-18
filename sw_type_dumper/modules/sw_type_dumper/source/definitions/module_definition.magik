@@ -4,47 +4,60 @@ _package mt
 _pragma(classify_level=basic, topic=type_dumper)
 ## Module definition.
 ## @slot {sw:char16_vector} name
-## @slot {sw:char16_vector|sw:unset} product
-## @slot {sw:char16_vector|sw:unset} base_version
-## @slot {sw:char16_vector|sw:unset} current_version
-## @slot {sw:simple_vector<E=mt:module_usage>} usages
+## @slot {sw:char16_vector|sw:unset} prod
+## @slot {sw:char16_vector|sw:unset} base_ver
+## @slot {sw:char16_vector|sw:unset} cur_ver
+## @slot {sw:simple_vector<E=mt:module_usage>} usgs
+## @slot {sw:char16_vector|sw:unset} src
 def_slotted_exemplar(
 	:module_definition,
 	{
 		{:name, _unset, :readable, :public},
-		{:product, _unset, :readable, :public},
-		{:base_version, _unset, :readable, :public},
-		{:current_version, _unset, :readable, :public},
-		{:usages, _unset, :readable, :public}
+		{:prod, _unset, :readable, :public},
+		{:base_ver, _unset, :readable, :public},
+		{:cur_ver, _unset, :readable, :public},
+		{:usgs, _unset, :readable, :public},
+		{:src, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
 
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:integer}
+module_definition.define_shared_constant(
+	:instruction_type,
+	2,
+	:public)
+$
+
 _pragma(classify_level=basic, topic=type_dumper)
-_method module_definition.new(name, product, base_version, current_version, usages)
+_method module_definition.new(name, product, base_version, current_version, usages, source_module_def)
 	## Constructor.
 	## @param {sw:char16_vector} name
 	## @param {sw:char16_vector|sw:unset} product
 	## @param {sw:char16_vector|sw:unset} base_version
 	## @param {sw:char16_vector|sw:unset} current_version
 	## @param {sw:simple_vector<E=mt:module_usage>} usages
-	_return _clone.init(name, product, base_version, current_version, usages)
+	## @param {sw:char16_vector|sw:unset} source_module_def
+	_return _clone.init(name, product, base_version, current_version, usages, source_module_def)
 _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_private _method module_definition.init(name, product, base_version, current_version, usages)
+_private _method module_definition.init(name, product, base_version, current_version, usages, source_module_def)
 	## Initializer.
 	## @param {sw:char16_vector} name
 	## @param {sw:char16_vector|sw:unset} product
 	## @param {sw:char16_vector|sw:unset} base_version
 	## @param {sw:char16_vector|sw:unset} current_version
 	## @param {sw:simple_vector<E=mt:module_usage>} usages
+	## @param {sw:char16_vector|sw:unset} source_module_def
 	.name << name
-	.product << product
-	.base_version << base_version
-	.current_version << current_version
-	.usages << usages
+	.prod << product
+	.base_ver << base_version
+	.cur_ver << current_version
+	.usgs << usages
+	.src << source_module_def
 	_return _self
 _endmethod
 $
@@ -54,6 +67,13 @@ _method module_definition.new_from(module)
 	## Construct self from `sw:sw_module`.
 	## @param {sw:sw_module} module
 	## @return {_self}
+	_local source_module_def <<
+		_try
+			>> system.pathname_down(module.full_directory, "module.def")
+		_when error
+			>> _unset
+		_endtry
+
 	_return _self.new(
 		module.name,
 		module.product.name,
@@ -63,7 +83,8 @@ _method module_definition.new_from(module)
 			map(_proc(prereq) _return prereq[1] _endproc).
 			as_sorted_collection().
 			as_simple_vector().
-			map(_proc(prereq) _return module_usage.new(prereq) _endproc))
+			map(_proc(prereq) _return module_usage.new(prereq) _endproc),
+		source_module_def)
 _endmethod
 $
 
@@ -81,10 +102,10 @@ _method module_definition.equals?(other)
 	## @param {mt:module_definition} other
 	## @return {sw:false}
 	_return _self.name = other.name _andif
-		_self.product = other.product _andif
-		_self.base_version = other.base_version _andif
-		_self.current_version = other.current_version _andif
-		_self.usages.eq?(other.usages)
+		_self.prod = other.prod _andif
+		_self.base_ver = other.base_ver _andif
+		_self.cur_ver = other.cur_ver _andif
+		_self.usgs.eq?(other.usgs)
 _endmethod
 $
 
@@ -119,5 +140,5 @@ $
 
 module_definition.define_show_attributes(
 	:name,
-	:product)
+	:prod)
 $
