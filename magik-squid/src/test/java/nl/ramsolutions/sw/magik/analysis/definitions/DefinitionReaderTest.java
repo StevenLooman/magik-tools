@@ -192,7 +192,7 @@ class DefinitionReaderTest {
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
                     "slot1",
-                    Collections.emptySet(),
+                    Set.of(MethodDefinition.Modifier.SLOT),
                     Collections.emptyList(),
                     null,
                     Collections.emptySet(),
@@ -207,8 +207,8 @@ class DefinitionReaderTest {
                     null,
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1<<",
-                    Set.of(MethodDefinition.Modifier.PRIVATE),
+                    "slot1 <<",
+                    Set.of(MethodDefinition.Modifier.PRIVATE, MethodDefinition.Modifier.SLOT),
                     Collections.emptyList(),
                     new ParameterDefinition(
                         null,
@@ -220,7 +220,7 @@ class DefinitionReaderTest {
                         ParameterDefinition.Modifier.NONE,
                         TypeString.UNDEFINED),
                     Collections.emptySet(),
-                    new ExpressionResultString(TypeString.ofParameterRef("val")),
+                    new ExpressionResultString(TypeString.UNDEFINED),
                     ExpressionResultString.EMPTY),
                 new MethodDefinition(
                     new Location(
@@ -231,8 +231,8 @@ class DefinitionReaderTest {
                     null,
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1^<<",
-                    Set.of(MethodDefinition.Modifier.PRIVATE),
+                    "slot1 ^<<",
+                    Set.of(MethodDefinition.Modifier.PRIVATE, MethodDefinition.Modifier.SLOT),
                     Collections.emptyList(),
                     new ParameterDefinition(
                         null,
@@ -554,7 +554,7 @@ class DefinitionReaderTest {
                                 new Range(new Position(1, 12), new Position(1, 13))),
                             null,
                             null,
-                            null,
+                            "",
                             null,
                             "a",
                             ParameterDefinition.Modifier.NONE,
@@ -565,7 +565,7 @@ class DefinitionReaderTest {
                                 new Range(new Position(1, 15), new Position(1, 24))),
                             null,
                             null,
-                            null,
+                            "",
                             null,
                             "b",
                             ParameterDefinition.Modifier.OPTIONAL,
@@ -576,7 +576,7 @@ class DefinitionReaderTest {
                                 new Range(new Position(1, 28), new Position(1, 29))),
                             null,
                             null,
-                            null,
+                            "",
                             null,
                             "c",
                             ParameterDefinition.Modifier.OPTIONAL,
@@ -587,7 +587,7 @@ class DefinitionReaderTest {
                                 new Range(new Position(1, 31), new Position(1, 38))),
                             null,
                             null,
-                            null,
+                            "",
                             null,
                             "d",
                             ParameterDefinition.Modifier.GATHER,
@@ -630,7 +630,7 @@ class DefinitionReaderTest {
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
                     "slot1",
-                    Collections.emptySet(),
+                    Set.of(MethodDefinition.Modifier.SLOT),
                     Collections.emptyList(),
                     null,
                     Collections.emptySet(),
@@ -660,7 +660,7 @@ class DefinitionReaderTest {
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
                     "slot1",
-                    Collections.emptySet(),
+                    Set.of(MethodDefinition.Modifier.SLOT),
                     Collections.emptyList(),
                     null,
                     Collections.emptySet(),
@@ -690,7 +690,7 @@ class DefinitionReaderTest {
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
                     "slot1",
-                    Collections.emptySet(),
+                    Set.of(MethodDefinition.Modifier.SLOT),
                     Collections.emptyList(),
                     null,
                     Collections.emptySet(),
@@ -720,7 +720,7 @@ class DefinitionReaderTest {
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
                     "slot1",
-                    Collections.emptySet(),
+                    Set.of(MethodDefinition.Modifier.SLOT),
                     Collections.emptyList(),
                     null,
                     Collections.emptySet(),
@@ -735,8 +735,8 @@ class DefinitionReaderTest {
                     "",
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1<<",
-                    Collections.emptySet(),
+                    "slot1 <<",
+                    Set.of(MethodDefinition.Modifier.SLOT),
                     Collections.emptyList(),
                     new ParameterDefinition(
                         null,
@@ -748,7 +748,7 @@ class DefinitionReaderTest {
                         ParameterDefinition.Modifier.NONE,
                         TypeString.UNDEFINED),
                     Collections.emptySet(),
-                    new ExpressionResultString(TypeString.ofParameterRef("val")),
+                    new ExpressionResultString(TypeString.UNDEFINED),
                     ExpressionResultString.EMPTY),
                 new MethodDefinition(
                     new Location(
@@ -759,8 +759,8 @@ class DefinitionReaderTest {
                     "",
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1^<<",
-                    Collections.emptySet(),
+                    "slot1 ^<<",
+                    Set.of(MethodDefinition.Modifier.SLOT),
                     Collections.emptyList(),
                     new ParameterDefinition(
                         null,
@@ -798,11 +798,11 @@ class DefinitionReaderTest {
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
                     "var1",
-                    Collections.emptySet(),
+                    Set.of(MethodDefinition.Modifier.SHARED_VARIABLE),
                     Collections.emptyList(),
                     null,
                     Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
+                    new ExpressionResultString(TypeString.SW_INTEGER),
                     ExpressionResultString.EMPTY),
                 new MethodDefinition(
                     new Location(
@@ -813,8 +813,10 @@ class DefinitionReaderTest {
                     "",
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
-                    "var1<<",
-                    Set.of(MethodDefinition.Modifier.PRIVATE),
+                    "var1 <<",
+                    Set.of(
+                        MethodDefinition.Modifier.PRIVATE,
+                        MethodDefinition.Modifier.SHARED_VARIABLE),
                     Collections.emptyList(),
                     new ParameterDefinition(
                         null,
@@ -824,9 +826,9 @@ class DefinitionReaderTest {
                         null,
                         "val",
                         ParameterDefinition.Modifier.NONE,
-                        TypeString.UNDEFINED),
+                        TypeString.SW_INTEGER),
                     Collections.emptySet(),
-                    new ExpressionResultString(TypeString.ofParameterRef("val")),
+                    new ExpressionResultString(TypeString.SW_INTEGER),
                     ExpressionResultString.EMPTY),
                 new MethodDefinition(
                     new Location(
@@ -837,8 +839,10 @@ class DefinitionReaderTest {
                     "",
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
-                    "var1^<<",
-                    Set.of(MethodDefinition.Modifier.PRIVATE),
+                    "var1 ^<<",
+                    Set.of(
+                        MethodDefinition.Modifier.PRIVATE,
+                        MethodDefinition.Modifier.SHARED_VARIABLE),
                     Collections.emptyList(),
                     new ParameterDefinition(
                         null,
@@ -848,9 +852,9 @@ class DefinitionReaderTest {
                         null,
                         "val",
                         ParameterDefinition.Modifier.NONE,
-                        TypeString.UNDEFINED),
+                        TypeString.SW_INTEGER),
                     Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
+                    new ExpressionResultString(TypeString.SW_INTEGER),
                     ExpressionResultString.EMPTY)));
   }
 
@@ -876,11 +880,13 @@ class DefinitionReaderTest {
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
                     "const1",
-                    Set.of(MethodDefinition.Modifier.PRIVATE),
+                    Set.of(
+                        MethodDefinition.Modifier.PRIVATE,
+                        MethodDefinition.Modifier.SHARED_CONSTANT),
                     Collections.emptyList(),
                     null,
                     Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
+                    new ExpressionResultString(TypeString.SW_INTEGER),
                     ExpressionResultString.EMPTY)));
   }
 
@@ -906,11 +912,11 @@ class DefinitionReaderTest {
                     null,
                     TypeString.ofIdentifier("test_exemplar", "user"),
                     "const1",
-                    Collections.emptySet(),
+                    Set.of(MethodDefinition.Modifier.SHARED_CONSTANT),
                     Collections.emptyList(),
                     null,
                     Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
+                    new ExpressionResultString(TypeString.SW_INTEGER),
                     ExpressionResultString.EMPTY)));
   }
 

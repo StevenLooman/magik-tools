@@ -134,7 +134,10 @@ public class MethodDefinitionNodeHelper {
         .collect(
             Collectors.toMap(
                 parameterNode ->
-                    parameterNode.getFirstDescendant(MagikGrammar.IDENTIFIER).getTokenValue(),
+                    parameterNode
+                        .getFirstDescendant(MagikGrammar.IDENTIFIER)
+                        .getTokenValue()
+                        .toLowerCase(),
                 parameterNode -> parameterNode));
   }
 
@@ -231,7 +234,7 @@ public class MethodDefinitionNodeHelper {
 
   /**
    * Get the node which identifies the name of the method. This is either the {@link
-   * MagikGrammar.METHOD_NAME} node, or the {@link MagikGrammar.PARAMETERS_SQUARE} node.
+   * MagikGrammar#METHOD_NAME} node, or the {@link MagikGrammar#PARAMETERS_SQUARE} node.
    *
    * @return Node which identifies the method.
    */

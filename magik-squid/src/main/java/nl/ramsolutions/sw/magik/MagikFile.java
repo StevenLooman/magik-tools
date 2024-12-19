@@ -8,13 +8,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -22,12 +16,12 @@ import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
-import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinitionReader;
-import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.*;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeBuilderVisitor;
+import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader.Instruction;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
@@ -184,7 +178,64 @@ public class MagikFile extends OpenedFile {
       final MagikDefinitionReader definitionReader = new MagikDefinitionReader(this);
       final AstNode topNode = this.getTopNode();
       definitionReader.walkAst(topNode);
-      this.definitions = definitionReader.getDefinitions();
+
+      // replace slot method definitions if there is a type string defined for them
+      List<MagikDefinition> definitions =
+          definitionReader.getDefinitions().stream()
+              .filter(Objects::nonNull)
+              .collect(Collectors.toCollection(ArrayList::new));
+      List<ExemplarDefinition> exemplarDefinitions =
+          definitions.stream()
+              .filter(ExemplarDefinition.class::isInstance)
+              .map(ExemplarDefinition.class::cast)
+              .toList();
+
+      for (int i = 0; i < definitions.size(); i++) {
+        if (!(definitions.get(i) instanceof MethodDefinition methodDef
+            && !methodDef.getReturnTypes().equals(ExpressionResultString.UNDEFINED))) {
+          continue;
+        }
+
+        Set<MethodDefinition.Modifier> modifiers = methodDef.getModifiers();
+        if (modifiers.contains(MethodDefinition.Modifier.SLOT)) {
+          Optional<ExemplarDefinition> exemplarDefinitionOpt =
+              exemplarDefinitions.stream()
+                  .filter(
+                      exemplarDef -> exemplarDef.getTypeString().equals(methodDef.getTypeName()))
+                  .findFirst();
+          if (exemplarDefinitionOpt.isEmpty()) {
+            continue;
+          }
+
+          final ExemplarDefinition exemplarDefinition = exemplarDefinitionOpt.get();
+          SlotDefinition slot =
+              exemplarDefinition.getSlot(methodDef.getMethodNameWithoutParentheses());
+          if (slot != null && !slot.getTypeName().equals(TypeString.UNDEFINED)) {
+            definitions.set(
+                i,
+                new MethodDefinition(
+                    methodDef.getLocation(),
+                    methodDef.getTimestamp(),
+                    methodDef.getModuleName(),
+                    methodDef.getDoc(),
+                    methodDef.getNode(),
+                    methodDef.getTypeName(),
+                    methodDef.getMethodName(),
+                    modifiers,
+                    methodDef.getParameters(),
+                    methodDef.getAssignmentParameter(),
+                    methodDef.getTopics(),
+                    new ExpressionResultString(slot.getTypeName()),
+                    methodDef.getLoopTypes(),
+                    methodDef.getUsedGlobals(),
+                    methodDef.getUsedMethods(),
+                    methodDef.getUsedSlots(),
+                    methodDef.getUsedConditions()));
+          }
+        }
+      }
+
+      this.definitions = definitions;
     }
 
     return Collections.unmodifiableList(this.definitions);

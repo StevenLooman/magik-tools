@@ -156,13 +156,14 @@ public class TypeDocParser {
     final AstNode node = this.getTypeDocNode();
     return node.getChildren(TypeDocGrammar.PARAM).stream()
         .filter(this::noEmptyName)
-        .collect(Collectors.toMap(this::getName, this::getTypeString));
+        .collect(
+            Collectors.toMap(astNode -> this.getName(astNode).toLowerCase(), this::getTypeString));
   }
 
   /**
    * Get @param nodes + type strings.
    *
-   * @return
+   * @return get parameter type nodes (list of parameter types)
    */
   public Map<AstNode, TypeString> getParameterTypeNodes() {
     final AstNode node = this.getTypeDocNode();
@@ -174,19 +175,20 @@ public class TypeDocParser {
   /**
    * Get @param name node + names.
    *
-   * @return
+   * @return get parameter name nodes (list of parameter nodes)
    */
   public Map<AstNode, String> getParameterNameNodes() {
     final AstNode node = this.getTypeDocNode();
     return node.getChildren(TypeDocGrammar.PARAM).stream()
         .filter(this::noEmptyName)
-        .collect(Collectors.toMap(this::getNameNode, this::getName));
+        .collect(
+            Collectors.toMap(this::getNameNode, astNode -> this.getName(astNode).toLowerCase()));
   }
 
   /**
    * Get generic types.
    *
-   * @return Map with @generic types, keyed on name, valued on type.
+   * @return generic types
    */
   public List<TypeString> getGenericTypes() {
     final AstNode node = this.getTypeDocNode();
@@ -199,7 +201,7 @@ public class TypeDocParser {
   /**
    * Get @generic nodes + type strings.
    *
-   * @return
+   * @return generic type nodes
    */
   public Map<AstNode, TypeString> getGenericTypeNodes() {
     final AstNode node = this.getTypeDocNode();
@@ -247,7 +249,7 @@ public class TypeDocParser {
   /**
    * Get @loop type nodes + names.
    *
-   * @return List with @loop type nodes + type names.
+   * @return Map with @loop type nodes + type names.
    */
   public Map<AstNode, TypeString> getLoopTypeNodes() {
     final AstNode node = this.getTypeDocNode();
@@ -271,7 +273,7 @@ public class TypeDocParser {
   /**
    * Get @slot type nodes + types.
    *
-   * @return
+   * @return get slot type nodes (the slots with their respective type)
    */
   public Map<AstNode, TypeString> getSlotTypeNodes() {
     final AstNode node = this.getTypeDocNode();
@@ -283,15 +285,43 @@ public class TypeDocParser {
   /**
    * Get @slot name nodes + name.
    *
-   * @return
+   * @return the slot name nodes (the names of the slots and their corresponding node)
    */
-  public Map<String, AstNode> getSlotNameNodes() {
+  public Map<AstNode, String> getSlotNameNodes() {
     final AstNode node = this.getTypeDocNode();
     return node.getChildren(TypeDocGrammar.SLOT).stream()
         .filter(this::noEmptyName)
         .collect(
             Collectors.toMap(
-                this::getName, slotNode -> slotNode.getFirstChild(TypeDocGrammar.NAME)));
+                slotNode -> slotNode.getFirstChild(TypeDocGrammar.NAME), this::getName));
+  }
+
+  /**
+   * Get documentations of the parameters
+   *
+   * @return a map for the documentation for every parameter
+   */
+  public Map<String, String> getDocumentationForParameters() {
+    return getDocumentationForCommentNodes(this.getParameterNameNodes());
+  }
+
+  public Map<String, String> getDocumentationForSlots() {
+    return getDocumentationForCommentNodes(this.getSlotNameNodes());
+  }
+
+  private Map<String, String> getDocumentationForCommentNodes(final Map<AstNode, String> nodes) {
+    return nodes.entrySet().stream()
+        .collect(
+            Collectors.toMap(
+                Map.Entry::getValue,
+                entry ->
+                    entry.getKey().getParent().getChildren(TypeDocGrammar.DESCRIPTION).stream()
+                        .flatMap(
+                            node ->
+                                node.getChildren().stream()
+                                    .filter(token -> token.isNot(TypeDocGrammar.DOC_START))
+                                    .map(AstNode::getTokenValue))
+                        .collect(Collectors.joining(" "))));
   }
 
   private boolean noEmptyName(final AstNode node) {

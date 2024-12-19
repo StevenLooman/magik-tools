@@ -18,10 +18,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
-import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.SimpleVectorNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.*;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -79,7 +76,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
   }
 
   /**
-   * Parse defitions.
+   * Parse definitions.
    *
    * @return List of parsed definitions.
    */
@@ -120,6 +117,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
     final AstNode parentNode = this.node.getParent();
     final TypeDocParser docParser = new TypeDocParser(parentNode);
     final Map<String, TypeString> slotTypes = docParser.getSlotTypes();
+    final Map<String, String> documentation = docParser.getDocumentationForSlots();
 
     // Figure slots.
     final List<SlotDefinition> slots = new ArrayList<>();
@@ -141,11 +139,24 @@ public class DefSlottedExemplarParser extends BaseDefParser {
       final Location slotLocation = new Location(uri, slotDefNode);
       final String slotNameSymbol = slotNameNode.getTokenValue();
       final String slotName = slotNameSymbol.substring(1);
-      final TypeString slotTypeRef =
+
+      TypeString slotTypeRef =
           Objects.requireNonNullElse(slotTypes.get(slotName), TypeString.UNDEFINED);
+      if (slotTypeRef.equals(TypeString.UNDEFINED)) {
+        final AstNode initialValueNode =
+            simpleVectorHelper.getNth(1, AtomTypeStringHelper.ATOM_TYPES);
+        if (initialValueNode != null) {
+          TypeString initialValueType = AtomTypeStringHelper.handleNode(initialValueNode);
+          if (initialValueType != null && !initialValueType.equals(TypeString.SW_UNSET)) {
+            slotTypeRef = initialValueType;
+          }
+        }
+      }
+
+      final String doc = documentation.get(slotName);
       final SlotDefinition slot =
           new SlotDefinition(
-              slotLocation, timestamp, moduleName, null, slotDefNode, slotName, slotTypeRef);
+              slotLocation, timestamp, moduleName, doc, slotDefNode, slotName, slotTypeRef);
       slots.add(slot);
 
       // Method definitions.
@@ -218,36 +229,15 @@ public class DefSlottedExemplarParser extends BaseDefParser {
     final URI uri = node.getToken().getURI();
     final Location location = new Location(uri, node);
 
-    if (flag.equals(FLAG_READ) || flag.equals(FLAG_READABLE)) {
+    final Set<MethodDefinition.Modifier> defaultModifiers =
+        new HashSet<>(Set.of(MethodDefinition.Modifier.SLOT));
+    if (FlagFlavor.isPrivate(flavor)) {
+      defaultModifiers.add(MethodDefinition.Modifier.PRIVATE);
+    }
+
+    if (FlagFlavor.isReadable(flag) || FlagFlavor.isWritable(flag)) {
       // get
-      final String getName = slotName;
-      final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>();
-      if (!flavor.equals(FLAVOR_PUBLIC)) {
-        getModifiers.add(MethodDefinition.Modifier.PRIVATE);
-      }
-      final List<ParameterDefinition> getParameters = Collections.emptyList();
-      final MethodDefinition getMethod =
-          new MethodDefinition(
-              location,
-              timestamp,
-              moduleName,
-              null,
-              node,
-              exemplarName,
-              getName,
-              getModifiers,
-              getParameters,
-              null,
-              Collections.emptySet(),
-              new ExpressionResultString(slotTypeRef),
-              ExpressionResultString.EMPTY);
-      methodDefinitions.add(getMethod);
-    } else if (flag.equals(FLAG_WRITE) || flag.equals(FLAG_WRITABLE)) {
-      // get
-      final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>();
-      if (!flavor.equals(FLAVOR_PUBLIC) && !flavor.equals(FLAVOR_READ_ONLY)) {
-        getModifiers.add(MethodDefinition.Modifier.PRIVATE);
-      }
+      final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>(defaultModifiers);
       final List<ParameterDefinition> getParameters = Collections.emptyList();
       final MethodDefinition getMethod =
           new MethodDefinition(
@@ -265,11 +255,13 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               new ExpressionResultString(slotTypeRef),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(getMethod);
+    }
 
+    if (FlagFlavor.isWritable(flag)) {
       // set
-      final String setName = slotName + MagikOperator.CHEVRON.getValue();
-      final Set<MethodDefinition.Modifier> setModifiers = new HashSet<>();
-      if (!flavor.equals(FLAVOR_PUBLIC)) {
+      final String setName = slotName + " " + MagikOperator.CHEVRON.getValue();
+      final Set<MethodDefinition.Modifier> setModifiers = new HashSet<>(defaultModifiers);
+      if (FlagFlavor.isReadOnly(flavor)) {
         setModifiers.add(MethodDefinition.Modifier.PRIVATE);
       }
       final List<ParameterDefinition> setParameters = Collections.emptyList();
@@ -296,12 +288,12 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               setParameters,
               assignmentParam,
               Collections.emptySet(),
-              new ExpressionResultString(TypeString.ofParameterRef("val")),
+              new ExpressionResultString(slotTypeRef),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(setMethod);
 
       // boot
-      final String bootName = slotName + MagikOperator.BOOT_CHEVRON.getValue();
+      final String bootName = slotName + " " + MagikOperator.BOOT_CHEVRON.getValue();
       final MethodDefinition bootMethod =
           new MethodDefinition(
               location,
@@ -319,6 +311,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               ExpressionResultString.EMPTY);
       methodDefinitions.add(bootMethod);
     }
+
     return methodDefinitions;
   }
 }

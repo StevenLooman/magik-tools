@@ -69,7 +69,7 @@ public class MethodDefinitionUsageParser {
               final URI uri = this.node.getToken().getURI();
               final AstNode definitionNode = scopeEntry.getDefinitionNode();
               final Location location = new Location(uri, definitionNode);
-              final Location validLocation = Location.validLocation(location);
+              final Location validLocation = Location.validLocation(location, null);
               // Now you might "see" the reference `user:char16_vector`,
               // or (from) any other package which is a child of `sw`.
               // This will most likely be indexed invalidly.
@@ -77,7 +77,6 @@ public class MethodDefinitionUsageParser {
               // TODO: Shouldn't this be multiple? I.e., one per `scopeEntry.getUsages()`.
               return new GlobalUsage(ref, validLocation, definitionNode);
             })
-        .filter(Objects::nonNull)
         .toList();
   }
 
@@ -98,10 +97,8 @@ public class MethodDefinitionUsageParser {
               final String methodName = helper.getMethodName();
               final URI uri = this.node.getToken().getURI();
               final Location location = new Location(uri, methodInvocationNode);
-              final Location validLocation = Location.validLocation(location);
-              final MethodUsage methodUsage =
-                  new MethodUsage(ref, methodName, validLocation, methodInvocationNode);
-              return methodUsage;
+              final Location validLocation = Location.validLocation(location, null);
+              return new MethodUsage(ref, methodName, validLocation, methodInvocationNode);
             })
         .toList();
   }
@@ -119,7 +116,7 @@ public class MethodDefinitionUsageParser {
                   slotNode.getFirstChild(MagikGrammar.IDENTIFIER).getTokenValue();
               final URI uri = this.node.getToken().getURI();
               final Location location = new Location(uri, slotNode);
-              final Location validLocation = Location.validLocation(location);
+              final Location validLocation = Location.validLocation(location, null);
               return new SlotUsage(slotName, validLocation, slotNode);
             })
         .toList();
@@ -138,7 +135,7 @@ public class MethodDefinitionUsageParser {
                 conditionNameNode -> {
                   final String conditionName = conditionNameNode.getTokenValue();
                   final Location location = new Location(uri, conditionNameNode);
-                  final Location validLocation = Location.validLocation(location);
+                  final Location validLocation = Location.validLocation(location, null);
                   return new ConditionUsage(conditionName, validLocation, conditionNameNode);
                 });
     final Stream<ConditionUsage> raisedConditions =
@@ -165,7 +162,7 @@ public class MethodDefinitionUsageParser {
 
                   final String conditionName = argumentNode.getTokenValue().substring(1);
                   final Location location = new Location(uri, argumentsNode);
-                  final Location validLocation = Location.validLocation(location);
+                  final Location validLocation = Location.validLocation(location, null);
                   // TODO: Set location to identifier node.
                   return new ConditionUsage(conditionName, validLocation, invocationNode);
                 })

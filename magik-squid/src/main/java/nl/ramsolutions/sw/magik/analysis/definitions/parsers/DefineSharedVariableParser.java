@@ -11,26 +11,24 @@ import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
-import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.*;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
+import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 
 /** {@code define_shared_variable()} parser. */
 public class DefineSharedVariableParser {
 
   private static final String DEFINE_SHARED_VARIABLE = "define_shared_variable()";
-  private static final String FLAVOR_PUBLIC = ":public";
-  private static final String FLAVOR_READONLY = ":readonly";
 
   private final MagikFile magikFile;
   private final AstNode node;
@@ -125,9 +123,40 @@ public class DefineSharedVariableParser {
 
     // Figure type doc.
     final TypeDocParser docParser = new TypeDocParser(parentNode);
-    final List<TypeString> returnTypeRefs = docParser.getReturnTypes();
-    final TypeString typeRef =
-        returnTypeRefs.isEmpty() ? TypeString.UNDEFINED : returnTypeRefs.get(0);
+    final List<TypeString> returnTypeRefs = new ArrayList<>(docParser.getReturnTypes());
+    TypeString typeRef = returnTypeRefs.isEmpty() ? TypeString.UNDEFINED : returnTypeRefs.get(0);
+
+    final AstNode argument1Node = argumentsHelper.getArgument(1, AtomTypeStringHelper.ATOM_TYPES);
+    final AstNode actualArgument1Node = argumentsNode.getChildren(MagikGrammar.ARGUMENT).get(1);
+
+    if (typeRef.equals(TypeString.UNDEFINED)) {
+      if (argument1Node != null) {
+        TypeString arg1TypeString = AtomTypeStringHelper.handleNode(argument1Node);
+        if (arg1TypeString != null) {
+          typeRef = arg1TypeString;
+        }
+      } else if (actualArgument1Node != null) {
+        // guess type from invocation of .new on an exemplar
+        AstNode methodIdentifier =
+            AstQuery.getFirstChildFromChain(
+                actualArgument1Node,
+                MagikGrammar.EXPRESSION,
+                MagikGrammar.POSTFIX_EXPRESSION,
+                MagikGrammar.METHOD_INVOCATION,
+                MagikGrammar.METHOD_NAME);
+
+        if (methodIdentifier != null) {
+          String exemplarName = methodIdentifier.getParent().getParent().getTokenValue();
+          String methodName = methodIdentifier.getTokenValue();
+          if (methodName != null && methodName.startsWith("new")) {
+            try {
+              typeRef = TypeStringParser.parseTypeString(exemplarName, getCurrentPakkage());
+            } catch (Exception ignored) {
+            }
+          }
+        }
+      }
+    }
 
     final String variableNameSymbol = argument0Node.getTokenValue();
     final String variableName = variableNameSymbol.substring(1);
@@ -160,11 +189,14 @@ public class DefineSharedVariableParser {
       final TypeString typeRef) {
     final List<MethodDefinition> methodDefinitions = new ArrayList<>();
 
-    // get
-    final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>();
-    if (!flavor.equals(FLAVOR_READONLY) && !flavor.equals(FLAVOR_PUBLIC)) {
-      getModifiers.add(MethodDefinition.Modifier.PRIVATE);
+    final Set<MethodDefinition.Modifier> defaultModifiers =
+        new HashSet<>(Set.of(MethodDefinition.Modifier.SHARED_VARIABLE));
+    if (FlagFlavor.isPrivate(flavor)) {
+      defaultModifiers.add(MethodDefinition.Modifier.PRIVATE);
     }
+
+    // get
+    final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>(defaultModifiers);
     final List<ParameterDefinition> getParameters = Collections.emptyList();
     final MethodDefinition getMethod =
         new MethodDefinition(
@@ -184,11 +216,12 @@ public class DefineSharedVariableParser {
     methodDefinitions.add(getMethod);
 
     // set
-    final String setName = variableName + MagikOperator.CHEVRON.getValue();
-    final Set<MethodDefinition.Modifier> setModifiers = new HashSet<>();
-    if (!flavor.equals(FLAVOR_PUBLIC)) {
+    final String setName = variableName + " " + MagikOperator.CHEVRON.getValue();
+    final Set<MethodDefinition.Modifier> setModifiers = new HashSet<>(defaultModifiers);
+    if (FlagFlavor.isSharedReadOnly(flavor)) {
       setModifiers.add(MethodDefinition.Modifier.PRIVATE);
     }
+
     final List<ParameterDefinition> setParameters = Collections.emptyList();
     final ParameterDefinition assignmentParam =
         new ParameterDefinition(
@@ -213,12 +246,12 @@ public class DefineSharedVariableParser {
             setParameters,
             assignmentParam,
             Collections.emptySet(),
-            new ExpressionResultString(TypeString.ofParameterRef("val")),
+            new ExpressionResultString(typeRef),
             ExpressionResultString.EMPTY);
     methodDefinitions.add(setMethod);
 
     // boot
-    final String bootName = variableName + MagikOperator.BOOT_CHEVRON.getValue();
+    final String bootName = variableName + " " + MagikOperator.BOOT_CHEVRON.getValue();
     final MethodDefinition bootMethod =
         new MethodDefinition(
             location,

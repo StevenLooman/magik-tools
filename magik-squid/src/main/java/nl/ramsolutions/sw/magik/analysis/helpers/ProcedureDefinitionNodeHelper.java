@@ -43,7 +43,10 @@ public class ProcedureDefinitionNodeHelper {
         .collect(
             Collectors.toMap(
                 parameterNode ->
-                    parameterNode.getFirstChild(MagikGrammar.IDENTIFIER).getTokenValue(),
+                    parameterNode
+                        .getFirstChild(MagikGrammar.IDENTIFIER)
+                        .getTokenValue()
+                        .toLowerCase(),
                 parameterNode -> parameterNode));
   }
 
@@ -72,7 +75,7 @@ public class ProcedureDefinitionNodeHelper {
   /**
    * Test if procedure returns anything.
    *
-   * @return
+   * @return true if the procedure returns anything
    */
   public boolean returnsAnything() {
     final List<AstNode> returnStatementNodes =
@@ -95,7 +98,7 @@ public class ProcedureDefinitionNodeHelper {
   /**
    * Test if procedure has a loopbody statement.
    *
-   * @return
+   * @return true if the procedure has a loopbody statement
    */
   public boolean hasLoopbody() {
     return this.node.getDescendants(MagikGrammar.LOOPBODY).stream()

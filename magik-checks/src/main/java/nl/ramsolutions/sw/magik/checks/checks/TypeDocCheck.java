@@ -85,7 +85,7 @@ public class TypeDocCheck extends MagikCheck {
     // Get slot defintions.
     final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
     final TypeDocParser typeDocParser = new TypeDocParser(statementNode);
-    final Map<String, AstNode> docSlotNameNodes = typeDocParser.getSlotNameNodes();
+    final Map<AstNode, String> docSlotNameNodes = typeDocParser.getSlotNameNodes();
 
     final MagikFile magikFile = this.getMagikFile();
     final DefSlottedExemplarParser parser = new DefSlottedExemplarParser(magikFile, node);
@@ -97,17 +97,17 @@ public class TypeDocCheck extends MagikCheck {
 
     // Compare parameters.
     docSlotNameNodes.entrySet().stream()
-        .filter(entry -> !slotNames.containsKey(entry.getKey()))
+        .filter(entry -> !slotNames.containsKey(entry.getValue()))
         .forEach(
             entry -> {
-              final String docName = entry.getKey();
-              final AstNode docNode = entry.getValue();
+              final AstNode docNode = entry.getKey();
+              final String docName = entry.getValue();
               final String message = String.format(MESSAGE_SLOT_UNKNOWN, docName);
               this.addIssue(docNode, message);
             });
 
     slotNames.entrySet().stream()
-        .filter(entry -> !docSlotNameNodes.containsKey(entry.getKey()))
+        .filter(entry -> !docSlotNameNodes.containsValue(entry.getKey()))
         .forEach(
             entry -> {
               final String docName = entry.getKey();

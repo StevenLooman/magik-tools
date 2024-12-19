@@ -360,6 +360,12 @@ public final class ClassInfoDefinitionReader {
     }
     final String doc = docBuilder.toString();
 
+    // check for new* or init* -> assume the method returns an object of the same exemplar
+    ExpressionResultString returnType =
+        methodName.startsWith("new") || methodName.startsWith("init")
+            ? new ExpressionResultString(typeString)
+            : ExpressionResultString.UNDEFINED;
+
     final MethodDefinition definition =
         new MethodDefinition(
             location,
@@ -373,7 +379,7 @@ public final class ClassInfoDefinitionReader {
             parameters,
             assignmentParameter,
             Collections.emptySet(),
-            ExpressionResultString.UNDEFINED,
+            returnType,
             ExpressionResultString.UNDEFINED);
     this.definitionKeeper.add(definition);
   }

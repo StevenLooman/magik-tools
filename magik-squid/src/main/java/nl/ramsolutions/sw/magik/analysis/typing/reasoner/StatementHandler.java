@@ -1,8 +1,11 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
+import static nl.ramsolutions.sw.magik.analysis.typing.reasoner.ExpressionHandler.TYPE_INSTRUCTION;
+
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.helpers.ContinueLeaveStatementNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -10,9 +13,15 @@ import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
+import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 
 /** Statement handler. */
 class StatementHandler extends LocalTypeReasonerHandler {
+
+  private final CommentInstructionReader instructionReader;
+  private static final ExpressionResultString UNSET_RESULT_STRING =
+      new ExpressionResultString(TypeString.SW_UNSET);
 
   /**
    * Constructor.
@@ -21,6 +30,8 @@ class StatementHandler extends LocalTypeReasonerHandler {
    */
   StatementHandler(final LocalTypeReasonerState state) {
     super(state);
+    this.instructionReader =
+        new CommentInstructionReader(this.state.getMagikFile(), Set.of(TYPE_INSTRUCTION));
   }
 
   /**
@@ -41,10 +52,17 @@ class StatementHandler extends LocalTypeReasonerHandler {
         || scopeEntry.isType(ScopeEntry.Type.DEFINITION)
         || scopeEntry.isType(ScopeEntry.Type.CONSTANT)) {
       final AstNode expressionNode = node.getFirstChild(MagikGrammar.EXPRESSION);
-      final ExpressionResultString result =
-          expressionNode == null
-              ? new ExpressionResultString(TypeString.SW_UNSET)
-              : this.state.getNodeType(expressionNode);
+      ExpressionResultString result =
+          expressionNode == null ? UNSET_RESULT_STRING : this.state.getNodeType(expressionNode);
+
+      if (result.equals(UNSET_RESULT_STRING) || result.equals(ExpressionResultString.UNDEFINED)) {
+        final String typeAnnotation =
+            this.instructionReader.getInstructionForNode(node, TYPE_INSTRUCTION);
+        if (typeAnnotation != null) {
+          final String currentPackage = this.getCurrentPackage(node);
+          result = TypeStringParser.parseExpressionResultString(typeAnnotation, currentPackage);
+        }
+      }
 
       final AstNode scopeEntryNode = scopeEntry.getDefinitionNode();
       this.state.setNodeType(scopeEntryNode, result);

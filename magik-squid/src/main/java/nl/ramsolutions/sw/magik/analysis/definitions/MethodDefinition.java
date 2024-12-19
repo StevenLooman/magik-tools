@@ -4,10 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -22,6 +19,10 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     PRIVATE,
     ABSTRACT,
     ITER,
+    SLOT,
+    SHARED_VARIABLE,
+    SHARED_CONSTANT,
+    DB_TYPE
   }
 
   private final Set<Modifier> modifiers;
@@ -149,6 +150,29 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     return this.methodName;
   }
 
+  public String getMethodNameWithoutParentheses() {
+    return this.methodName.replaceAll("\\(\\)", "");
+  }
+
+  public List<ParameterDefinition> filteredParameters(
+      boolean includeOptional, boolean includeGather) {
+    return this.parameters.stream()
+        .filter(
+            def -> {
+              boolean isOk = true;
+              if (!includeOptional) {
+                isOk = !def.getModifier().equals(ParameterDefinition.Modifier.OPTIONAL);
+              }
+
+              if (!includeGather) {
+                isOk = isOk && !def.getModifier().equals(ParameterDefinition.Modifier.GATHER);
+              }
+
+              return isOk;
+            })
+        .toList();
+  }
+
   /**
    * Get method name with parameters.
    *
@@ -197,7 +221,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     final String assignmentParameterName =
         this.assignmentParameter != null ? this.assignmentParameter.getName() : null;
     if (assignmentParameterName != null) {
-      builder.append(assignmentParameterName);
+      builder.append(" ").append(assignmentParameterName);
     }
 
     return builder.toString();

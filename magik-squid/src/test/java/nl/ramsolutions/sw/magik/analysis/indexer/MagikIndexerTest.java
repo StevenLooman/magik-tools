@@ -115,7 +115,7 @@ class MagikIndexerTest {
                 Collections.emptyList(),
                 null,
                 Collections.emptySet(),
-                ExpressionResultString.UNDEFINED,
+                new ExpressionResultString(typeString),
                 ExpressionResultString.EMPTY));
 
     final Collection<MethodDefinition> initMethodDefs =
@@ -138,7 +138,7 @@ class MagikIndexerTest {
                 Collections.emptyList(),
                 null,
                 Collections.emptySet(),
-                ExpressionResultString.UNDEFINED,
+                new ExpressionResultString(typeString),
                 ExpressionResultString.EMPTY));
 
     // Test globals.
@@ -246,7 +246,7 @@ class MagikIndexerTest {
                         new Location(uri, new Range(new Position(9, 8), new Position(9, 9))),
                         null,
                         null,
-                        null,
+                        "",
                         null,
                         "slot_a",
                         TypeString.ofIdentifier("rope", "sw")),
@@ -254,7 +254,7 @@ class MagikIndexerTest {
                         new Location(uri, new Range(new Position(10, 8), new Position(10, 9))),
                         null,
                         null,
-                        null,
+                        "",
                         null,
                         "slot_b",
                         TypeString.ofIdentifier(

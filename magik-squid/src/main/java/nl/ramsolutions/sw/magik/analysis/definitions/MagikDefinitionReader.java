@@ -41,6 +41,7 @@ public class MagikDefinitionReader extends MagikAstWalker {
 
   private final MagikFile magikFile;
   private final List<MagikDefinition> definitions = new ArrayList<>();
+  private final List<MethodDefinition> fromSlots = new ArrayList<>();
 
   public MagikDefinitionReader(final MagikFile magikFile) {
     this.magikFile = magikFile;
@@ -54,6 +55,31 @@ public class MagikDefinitionReader extends MagikAstWalker {
   protected void walkPostMethodDefinition(final AstNode node) {
     final MethodDefinitionParser parser = new MethodDefinitionParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
+
+    // remove any write/get methods from writeable slots if they would create duplicates
+    parsedDefinitions.stream()
+        .filter(MethodDefinition.class::isInstance)
+        .map(MethodDefinition.class::cast)
+        .forEach(
+            md -> {
+              List<MethodDefinition> removed =
+                  this.fromSlots.stream()
+                      .filter(
+                          toRemove ->
+                              toRemove.getName().equals(md.getName())
+                                  && toRemove.getLocation() != null
+                                  && toRemove.getLocation().getUri() != null
+                                  && md.getLocation() != null
+                                  && toRemove
+                                      .getLocation()
+                                      .getUri()
+                                      .equals(md.getLocation().getUri()))
+                      .toList();
+
+              this.fromSlots.removeAll(removed);
+              this.definitions.removeAll(removed);
+            });
+
     this.definitions.addAll(parsedDefinitions);
   }
 
@@ -164,6 +190,11 @@ public class MagikDefinitionReader extends MagikAstWalker {
   private void handleDefineSlotAccess(final AstNode node) {
     final DefineSlotAccessParser parser = new DefineSlotAccessParser(this.magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
+    this.fromSlots.addAll(
+        parsedDefinitions.stream()
+            .filter(MethodDefinition.class::isInstance)
+            .map(MethodDefinition.class::cast)
+            .toList());
     this.definitions.addAll(parsedDefinitions);
   }
 

@@ -19,7 +19,8 @@ import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
  * declaration the inheriting classes are unknown, thus if {@code _self} is returned from a mixin,
  * we need to proxy the type.
  *
- * <p>Note that this class never writes to the {@link IDefinitionKeeper}.
+ * <p>Note that this class never writes to the {@link
+ * nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper}.
  */
 public class LocalTypeReasoner extends MagikAstWalker {
 

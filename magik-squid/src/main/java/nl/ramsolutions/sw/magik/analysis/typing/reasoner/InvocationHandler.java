@@ -1,11 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
@@ -49,6 +45,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     // Store the method definition(s) on the node.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
+
     final Collection<MethodDefinition> methodDefs =
         calledTypeStr.getCombinedTypes().stream()
             .map(typeStr -> this.typeResolver.getRespondingMethodDefinitions(typeStr, methodName))
@@ -61,6 +58,10 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     if (methodDefs.isEmpty()) {
       // Method not found, we cannot known what the results will be.
       callResult = ExpressionResultString.UNDEFINED;
+      iterResult = ExpressionResultString.UNDEFINED;
+    } else if (methodName.startsWith("new") || methodName.startsWith("init")) {
+      // assume new* and init* invocations return the called exemplar
+      callResult = new ExpressionResultString(calledTypeStr);
       iterResult = ExpressionResultString.UNDEFINED;
     } else {
       final List<AstNode> argumentExpressionNodes = helper.getArgumentExpressionNodes();

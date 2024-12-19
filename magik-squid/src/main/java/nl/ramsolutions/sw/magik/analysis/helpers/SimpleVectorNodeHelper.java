@@ -47,17 +47,17 @@ public class SimpleVectorNodeHelper {
    * Get nth item from simple vector, with expecting type.
    *
    * @param nth Nth item from simple vector.
-   * @param type Expected (required) type.
+   * @param types Expected (required) type(s).
    * @return Node of given type.
    */
   @CheckForNull
-  public AstNode getNth(final int nth, final MagikGrammar type) {
+  public AstNode getNth(final int nth, final MagikGrammar... types) {
     final List<AstNode> expressionNodes = this.node.getChildren(MagikGrammar.EXPRESSION);
     if (nth >= expressionNodes.size()) {
       return null;
     }
     final AstNode expressionNode = expressionNodes.get(nth);
     final AstNode atomNode = expressionNode.getFirstChild(MagikGrammar.ATOM);
-    return atomNode.getFirstChild(type);
+    return atomNode.getFirstChild(types);
   }
 }

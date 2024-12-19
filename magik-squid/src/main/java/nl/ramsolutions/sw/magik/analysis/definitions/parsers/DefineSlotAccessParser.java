@@ -4,17 +4,12 @@ import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.net.URI;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.*;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.FlagFlavor;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -22,6 +17,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +30,6 @@ public class DefineSlotAccessParser {
   private static final String DEFINE_SLOT_ACCESS = "define_slot_access()";
   private static final String DEFINE_SLOT_EXTERNALLY_READABLE = "define_slot_externally_readable()";
   private static final String DEFINE_SLOT_EXTERNALLY_WRITABLE = "define_slot_externally_writable()";
-  private static final String FLAG_READ = ":read";
-  private static final String FLAG_READABLE = ":readable";
-  private static final String FLAG_WRITE = ":write";
-  private static final String FLAG_WRITABLE = ":writable";
-  private static final String FLAVOR_PUBLIC = ":public";
-  private static final String FLAVOR_READ_ONLY = ":read_only";
 
   private final MagikFile magikFile;
   private final AstNode node;
@@ -190,7 +180,8 @@ public class DefineSlotAccessParser {
 
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
-    final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SYMBOL);
+    final AstNode argument2Node =
+        argumentsHelper.getArgument(2, MagikGrammar.SYMBOL, MagikGrammar.TRUE, MagikGrammar.FALSE);
     if (argument0Node == null) {
       return Collections.emptyList();
     }
@@ -223,22 +214,37 @@ public class DefineSlotAccessParser {
     final String slotNameSymbol = argument0Node.getTokenValue();
     final String slotName = slotNameSymbol.substring(1);
     final String flavor =
-        argument2Node != null ? argument2Node.getTokenValue() : FLAVOR_PUBLIC; // Default is public.
+        argument2Node != null
+            ? argument2Node.getTokenValue()
+            : FlagFlavor.FLAVOR_PUBLIC; // Default is public.
+
     final String flag;
     if (helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_EXTERNALLY_READABLE)) {
-      flag = DefineSlotAccessParser.FLAG_READABLE;
+      flag = FlagFlavor.FLAG_READABLE;
     } else if (helper.isMethodInvocationOf(
         DefineSlotAccessParser.DEFINE_SLOT_EXTERNALLY_WRITABLE)) {
-      flag = DefineSlotAccessParser.FLAG_WRITABLE;
+      flag = FlagFlavor.FLAG_WRITABLE;
     } else if (helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_ACCESS)) {
       flag = argument1Node.getTokenValue(); // NOSONAR: argument1Node cannot be null in this case.
     } else {
       throw new IllegalStateException();
     }
+
     final TypeString exemplarName = TypeString.ofIdentifier(identifier, pakkage);
+    final TypeDocParser typeDocParser = new TypeDocParser(parentNode);
+    final TypeString slotType = typeDocParser.getReturnTypes().stream().findFirst().orElse(null);
+
     final List<MethodDefinition> methodDefinitions =
         this.generateSlotMethods(
-            timestamp, moduleName, statementNode, exemplarName, slotName, flag, flavor, doc);
+            timestamp,
+            moduleName,
+            statementNode,
+            exemplarName,
+            slotName,
+            flag,
+            flavor,
+            doc,
+            slotType);
     return List.copyOf(methodDefinitions);
   }
 
@@ -251,44 +257,27 @@ public class DefineSlotAccessParser {
       final String slotName,
       final String flag,
       final String flavor,
-      final String doc) {
+      final String doc,
+      @Nullable TypeString slotType) {
     final List<MethodDefinition> methodDefinitions = new ArrayList<>();
+
+    if (slotType == null) {
+      slotType = TypeString.UNDEFINED;
+    }
 
     // Figure location.
     final URI uri = definitionNode.getToken().getURI();
     final Location location = new Location(uri, definitionNode);
 
-    if (flag.equals(FLAG_READ) || flag.equals(FLAG_READABLE)) {
+    final Set<MethodDefinition.Modifier> defaultModifiers =
+        new HashSet<>(Set.of(MethodDefinition.Modifier.SLOT));
+    if (FlagFlavor.isPrivate(flavor)) {
+      defaultModifiers.add(MethodDefinition.Modifier.PRIVATE);
+    }
+
+    if (FlagFlavor.isReadable(flag) || FlagFlavor.isWritable(flag)) {
       // get
-      final String getName = slotName;
-      final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>();
-      if (!flavor.equals(FLAVOR_PUBLIC)) {
-        getModifiers.add(MethodDefinition.Modifier.PRIVATE);
-      }
-      final List<ParameterDefinition> getParameters = Collections.emptyList();
-      final MethodDefinition getMethod =
-          new MethodDefinition(
-              location,
-              timestamp,
-              moduleName,
-              doc,
-              definitionNode,
-              exemplarName,
-              getName,
-              getModifiers,
-              getParameters,
-              null,
-              Collections.emptySet(),
-              new ExpressionResultString(TypeString.UNDEFINED),
-              ExpressionResultString.EMPTY);
-      methodDefinitions.add(getMethod);
-    } else if (flag.equals(FLAG_WRITE) || flag.equals(FLAG_WRITABLE)) {
-      // get
-      final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>();
-      if (!flavor.equals(FLAVOR_PUBLIC) && !flavor.equals(FLAVOR_READ_ONLY)) {
-        getModifiers.add(MethodDefinition.Modifier.PRIVATE);
-      }
-      final List<ParameterDefinition> getParameters = Collections.emptyList();
+      final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>(defaultModifiers);
       final MethodDefinition getMethod =
           new MethodDefinition(
               location,
@@ -299,20 +288,22 @@ public class DefineSlotAccessParser {
               exemplarName,
               slotName,
               getModifiers,
-              getParameters,
+              Collections.emptyList(),
               null,
               Collections.emptySet(),
-              new ExpressionResultString(TypeString.UNDEFINED),
+              new ExpressionResultString(slotType),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(getMethod);
+    }
 
+    if (FlagFlavor.isWritable(flag)) {
       // set
-      final String setName = slotName + MagikOperator.CHEVRON.getValue();
-      final Set<MethodDefinition.Modifier> setModifiers = new HashSet<>();
-      if (!flavor.equals(FLAVOR_PUBLIC)) {
+      final String setName = slotName + " " + MagikOperator.CHEVRON.getValue();
+      final Set<MethodDefinition.Modifier> setModifiers = new HashSet<>(defaultModifiers);
+      if (FlagFlavor.isReadOnly(flavor)) {
         setModifiers.add(MethodDefinition.Modifier.PRIVATE);
       }
-      final List<ParameterDefinition> setParameters = Collections.emptyList();
+
       final ParameterDefinition assignmentParam =
           new ParameterDefinition(
               null,
@@ -322,7 +313,7 @@ public class DefineSlotAccessParser {
               definitionNode,
               "val",
               ParameterDefinition.Modifier.NONE,
-              TypeString.UNDEFINED);
+              slotType);
       final MethodDefinition setMethod =
           new MethodDefinition(
               location,
@@ -333,15 +324,15 @@ public class DefineSlotAccessParser {
               exemplarName,
               setName,
               setModifiers,
-              setParameters,
+              Collections.emptyList(),
               assignmentParam,
               Collections.emptySet(),
-              new ExpressionResultString(TypeString.ofParameterRef("val")),
+              new ExpressionResultString(slotType),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(setMethod);
 
       // boot
-      final String bootName = slotName + MagikOperator.BOOT_CHEVRON.getValue();
+      final String bootName = slotName + " " + MagikOperator.BOOT_CHEVRON.getValue();
       final MethodDefinition bootMethod =
           new MethodDefinition(
               location,
@@ -352,10 +343,10 @@ public class DefineSlotAccessParser {
               exemplarName,
               bootName,
               setModifiers,
-              setParameters,
+              Collections.emptyList(),
               assignmentParam,
               Collections.emptySet(),
-              new ExpressionResultString(TypeString.UNDEFINED),
+              new ExpressionResultString(slotType),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(bootMethod);
     }

@@ -13,16 +13,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.*;
 
 /** {@link TypeString} resolver tools. */
 public class TypeStringResolver {
@@ -30,9 +24,9 @@ public class TypeStringResolver {
   private static final String ALL_METHODS = "_all_methods";
 
   private final IDefinitionKeeper definitionKeeper;
-  private final Map<TypeString, Set<ITypeStringDefinition>> typeCache = new HashMap<>();
+  private final Map<TypeString, Set<ITypeStringDefinition>> typeCache = new ConcurrentHashMap<>();
   private final Map<Map.Entry<TypeString, String>, Collection<MethodDefinition>> methodsCache =
-      new HashMap<>();
+      new ConcurrentHashMap<>();
 
   public TypeStringResolver(final IDefinitionKeeper definitionKeeper) {
     this.definitionKeeper = definitionKeeper;
@@ -116,26 +110,38 @@ public class TypeStringResolver {
   /**
    * Get the {@link ITypeStringDefinition} for the given {@link TypeString}, following package uses.
    *
-   * @param typeString Reference to look for.
+   * @param fullTypeString Reference to look for.
    * @return A {@link ExemplarDefinition}/{@link ProcedureDefinition}/{@link GlobalDefinition}.
    */
-  public synchronized Collection<ITypeStringDefinition> resolve(final TypeString typeString) {
-    return this.typeCache.computeIfAbsent(
-        typeString,
-        typeStr -> {
-          final Collection<ExemplarDefinition> exemplarDefinitions =
-              this.findExemplarDefinitions(typeStr);
-          final Collection<ProcedureDefinition> procedureDefinitions =
-              this.findProcedureDefinitions(typeStr);
-          final Collection<GlobalDefinition> globalDefinitions =
-              this.findGlobalDefinitions(typeStr);
-          return Stream.of(
-                  exemplarDefinitions.stream(),
-                  procedureDefinitions.stream(),
-                  globalDefinitions.stream())
-              .flatMap(stream -> stream)
-              .collect(Collectors.toSet());
-        });
+  public synchronized Collection<ITypeStringDefinition> resolve(final TypeString fullTypeString) {
+    // take care of combined type strings
+    Stream<TypeString> typeStrings = Stream.of(fullTypeString);
+    if (fullTypeString.isCombined()) {
+      typeStrings = fullTypeString.getCombinedTypes().stream();
+    }
+
+    return typeStrings
+        .flatMap(
+            typeStr ->
+                this.typeCache
+                    .computeIfAbsent(
+                        typeStr,
+                        actualTypeStr -> {
+                          final Collection<ExemplarDefinition> exemplarDefinitions =
+                              this.findExemplarDefinitions(actualTypeStr);
+                          final Collection<ProcedureDefinition> procedureDefinitions =
+                              this.findProcedureDefinitions(actualTypeStr);
+                          final Collection<GlobalDefinition> globalDefinitions =
+                              this.findGlobalDefinitions(actualTypeStr);
+                          return Stream.of(
+                                  exemplarDefinitions.stream(),
+                                  procedureDefinitions.stream(),
+                                  globalDefinitions.stream())
+                              .flatMap(stream -> stream)
+                              .collect(Collectors.toSet());
+                        })
+                    .stream())
+        .collect(Collectors.toSet());
   }
 
   /**
@@ -416,7 +422,8 @@ public class TypeStringResolver {
   }
 
   public Collection<TypeString> getSelfAndAncestors(final TypeString typeString) {
-    return Stream.concat(Stream.of(typeString), this.getAllAncestors(typeString).stream())
+    return Stream.concat(
+            typeString.getCombinedTypes().stream(), this.getAllAncestors(typeString).stream())
         .collect(Collectors.toUnmodifiableSet());
   }
 }

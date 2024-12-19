@@ -3,15 +3,12 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.helpers.AtomTypeStringHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
-import nl.ramsolutions.sw.magik.api.MagikNumberParser;
 
 /** Atom handler. */
 class AtomHandler extends LocalTypeReasonerHandler {
-
-  @SuppressWarnings("checkstyle:MagicNumber")
-  private static final long BIGNUM_START = 1 << 29;
 
   /**
    * Constructor.
@@ -28,18 +25,9 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node NUMBER node.
    */
   void handleNumber(final AstNode node) {
-    final String tokenValue = node.getTokenValue();
-    final Number number = MagikNumberParser.parseMagikNumberSafe(tokenValue);
-    if (number instanceof final Integer numberInt) {
-      if (numberInt < AtomHandler.BIGNUM_START) {
-        this.assignAtom(node, TypeString.SW_INTEGER);
-      } else {
-        this.assignAtom(node, TypeString.SW_BIGNUM);
-      }
-    } else if (number instanceof Long) {
-      this.assignAtom(node, TypeString.SW_BIGNUM);
-    } else if (number instanceof Double) {
-      this.assignAtom(node, TypeString.SW_FLOAT);
+    TypeString typeString = AtomTypeStringHelper.tNumber(node);
+    if (typeString != null) {
+      this.assignAtom(node, typeString);
     }
   }
 
@@ -49,7 +37,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node SELF node.
    */
   void handleSelf(final AstNode node) {
-    this.assignAtom(node, TypeString.SELF);
+    this.assignAtom(node, AtomTypeStringHelper.tSelf(node));
   }
 
   /**
@@ -58,7 +46,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node CLONE node.
    */
   void handleClone(final AstNode node) {
-    this.handleSelf(node);
+    this.assignAtom(node, AtomTypeStringHelper.tClone(node));
   }
 
   /**
@@ -67,7 +55,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node TRUE/FALSE node.
    */
   void handleFalse(final AstNode node) {
-    this.assignAtom(node, TypeString.SW_FALSE);
+    this.assignAtom(node, AtomTypeStringHelper.tFalse(node));
   }
 
   /**
@@ -76,7 +64,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node MAYBE node.
    */
   void handleMaybe(final AstNode node) {
-    this.assignAtom(node, TypeString.SW_MAYBE);
+    this.assignAtom(node, AtomTypeStringHelper.tMaybe(node));
   }
 
   /**
@@ -85,7 +73,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node UNSET node.
    */
   void handleUnset(final AstNode node) {
-    this.assignAtom(node, TypeString.SW_UNSET);
+    this.assignAtom(node, AtomTypeStringHelper.tUnset(node));
   }
 
   /**
@@ -94,7 +82,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node CHARACTER node.
    */
   void handleCharacter(final AstNode node) {
-    this.assignAtom(node, TypeString.SW_CHARACTER);
+    this.assignAtom(node, AtomTypeStringHelper.tCharacter(node));
   }
 
   /**
@@ -103,7 +91,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node SW_REGEXP node.
    */
   void handleRegexp(final AstNode node) {
-    this.assignAtom(node, TypeString.SW_SW_REGEXP);
+    this.assignAtom(node, AtomTypeStringHelper.tRegexp(node));
   }
 
   /**
@@ -112,7 +100,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node STRING node.
    */
   void handleString(final AstNode node) {
-    this.assignAtom(node, TypeString.SW_CHAR16_VECTOR_WITH_GENERICS);
+    this.assignAtom(node, AtomTypeStringHelper.tString(node));
   }
 
   /**
@@ -121,7 +109,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node SYMBOL node.
    */
   void handleSymbol(final AstNode node) {
-    this.assignAtom(node, TypeString.SW_SYMBOL);
+    this.assignAtom(node, AtomTypeStringHelper.tSymbol(node));
   }
 
   /**
@@ -158,7 +146,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node GLOBAL_REF node.
    */
   void handleGlobalRef(final AstNode node) {
-    this.assignAtom(node, TypeString.SW_GLOBAL_VARIABLE);
+    this.assignAtom(node, AtomTypeStringHelper.tGlobalRef(node));
   }
 
   /**
@@ -167,9 +155,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    * @param node THISTHREAD node.
    */
   void handleThread(final AstNode node) {
-    final TypeString threadTypeStr =
-        TypeString.combine(TypeString.SW_HEAVY_THREAD, TypeString.SW_LIGHT_THREAD);
-    this.assignAtom(node, threadTypeStr);
+    this.assignAtom(node, AtomTypeStringHelper.tThread(node));
   }
 
   /**

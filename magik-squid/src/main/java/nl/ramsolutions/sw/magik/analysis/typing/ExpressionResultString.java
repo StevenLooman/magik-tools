@@ -33,7 +33,7 @@ public class ExpressionResultString {
   public static final ExpressionResultString UNDEFINED =
       new ExpressionResultString(Collections.nCopies(MAX_ITEMS, TypeString.UNDEFINED));
 
-  /** Serialized name of {@link ExpressionResultString.UNDEFINED}. */
+  /** Serialized name of {@link ExpressionResultString#UNDEFINED}. */
   public static final String UNDEFINED_SERIALIZED_NAME = "__UNDEFINED_RESULT__";
 
   /** Instance of an empty {@link ExpressionResultString}. */
@@ -54,7 +54,7 @@ public class ExpressionResultString {
   /**
    * List constructor.
    *
-   * @param types Types this {@link ExpressionResult} represents.
+   * @param types Types this {@link ExpressionResultString} represents.
    */
   public ExpressionResultString(final List<TypeString> types) {
     this.types = Collections.unmodifiableList(types);
@@ -135,7 +135,7 @@ public class ExpressionResultString {
    */
   public String getTypeNames(final String separator) {
     if (this == ExpressionResultString.UNDEFINED) {
-      return "UNDEFINED...";
+      return "unknown";
     }
 
     // Determine first index of trailing homogenous sequence.
@@ -173,7 +173,7 @@ public class ExpressionResultString {
   }
 
   /**
-   * Get stream of types contained by this {@link ExpressionResult}.
+   * Get stream of types contained by this {@link ExpressionResultString}.
    *
    * @return Stream of types.
    */

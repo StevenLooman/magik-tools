@@ -3,31 +3,26 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
-import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.*;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
+import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 
 /** {@code define_shared_constant()} parser. */
 public class DefineSharedConstantParser {
 
   private static final String DEFINE_SHARED_CONSTANT = "define_shared_constant()";
-  private static final String FLAVOR_PRIVATE = ":private";
-  private static final String TRUE = "_true";
 
   private final MagikFile magikFile;
   private final AstNode node;
@@ -128,16 +123,55 @@ public class DefineSharedConstantParser {
 
     // Figure type doc.
     final TypeDocParser docParser = new TypeDocParser(parentNode);
-    final List<TypeString> returnTypeRefs = docParser.getReturnTypes();
-    final TypeString typeRef =
-        returnTypeRefs.isEmpty() ? TypeString.UNDEFINED : returnTypeRefs.get(0);
+    final List<TypeString> returnTypeRefs = new ArrayList<>(docParser.getReturnTypes());
+    if (returnTypeRefs.isEmpty()) {
+      returnTypeRefs.add(TypeString.UNDEFINED);
+    }
+
+    ExpressionResultString resultStr = new ExpressionResultString(returnTypeRefs);
+
+    final AstNode argument1Node = argumentsHelper.getArgument(1, AtomTypeStringHelper.ATOM_TYPES);
+    final AstNode actualArgument1Node = argumentsNode.getChildren(MagikGrammar.ARGUMENT).get(1);
+
+    if (returnTypeRefs.size() == 1 && returnTypeRefs.get(0).equals(TypeString.UNDEFINED)) {
+      if (argument1Node != null) {
+        // guess type from kind of atom node (number, simple vector, ...)
+        TypeString arg1TypeString = AtomTypeStringHelper.handleNode(argument1Node);
+        if (arg1TypeString != null) {
+          resultStr = new ExpressionResultString(arg1TypeString);
+        }
+      } else if (actualArgument1Node != null) {
+        // guess type from invocation of .new on an exemplar
+        AstNode methodIdentifier =
+            AstQuery.getFirstChildFromChain(
+                actualArgument1Node,
+                MagikGrammar.EXPRESSION,
+                MagikGrammar.POSTFIX_EXPRESSION,
+                MagikGrammar.METHOD_INVOCATION,
+                MagikGrammar.METHOD_NAME);
+
+        if (methodIdentifier != null) {
+          String exemplarName = methodIdentifier.getParent().getParent().getTokenValue();
+          String methodName = methodIdentifier.getTokenValue();
+          if (methodName != null && methodName.startsWith("new")) {
+            try {
+              resultStr =
+                  new ExpressionResultString(
+                      TypeStringParser.parseTypeString(exemplarName, getCurrentPakkage()));
+            } catch (Exception ignored) {
+            }
+          }
+        }
+      }
+    }
 
     final String constantNameSymbol = argument0Node.getTokenValue();
     final String constantName = constantNameSymbol.substring(1);
 
     final Set<MethodDefinition.Modifier> modifiers = new HashSet<>();
+    modifiers.add(MethodDefinition.Modifier.SHARED_CONSTANT);
     final String isPrivate = argument2Node.getTokenValue();
-    if (isPrivate.equals(FLAVOR_PRIVATE) || isPrivate.equals(TRUE)) {
+    if (FlagFlavor.isPrivate(isPrivate)) {
       modifiers.add(MethodDefinition.Modifier.PRIVATE);
     }
     final List<ParameterDefinition> parameters = Collections.emptyList();
@@ -155,7 +189,7 @@ public class DefineSharedConstantParser {
             parameters,
             null,
             Collections.emptySet(),
-            new ExpressionResultString(typeRef),
+            resultStr,
             ExpressionResultString.EMPTY);
     return List.of(methodDefinition);
   }
