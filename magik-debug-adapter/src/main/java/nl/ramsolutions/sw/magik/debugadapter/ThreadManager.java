@@ -164,7 +164,10 @@ class ThreadManager {
           LOGGER.debug("Eval expression: '{}'", expr);
           final EvalResponse eval =
               (EvalResponse) this.slapProtocol.evaluate(threadId, level, expr).get();
-          method = eval.getResult() + ":" + method;
+          final String result = eval.getResult();
+          if (!result.contains("does_not_understand")) {
+            method = eval.getResult() + ":" + method;
+          }
 
           // Bonus: update exemplar name with package.
           stackElement.setName(method);

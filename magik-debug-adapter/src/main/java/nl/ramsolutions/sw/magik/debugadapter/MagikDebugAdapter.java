@@ -228,6 +228,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
           this.threadManager = null;
           this.variableManager = null;
           this.breakpointManager = null;
+          System.exit(1);
         });
   }
 
