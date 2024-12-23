@@ -237,16 +237,12 @@
       "title": "Smallworld/Magik",
       "properties": {
         "magik.javaHome": {
-          "description": "Path to Java Runtime, Java 17 minimum.",
+          "description": "Path to Java Runtime, Java 17 minimum -- only used by the VS Code extension.",
           "type": "string"
         },
         "magik.smallworldGis": {
           "description": "Path to Smallworld Core -- only used by the VS Code extension.",
           "type": "string"
-        },
-        "magik.productDirs": {
-          "description": "Paths to (compiled, containing a `libs/` directory) products.",
-          "type": "array"
         },
         "magik.aliases": {
           "description": "Path to gis_aliases file -- only used by the VS Code extension.",
@@ -275,6 +271,10 @@
         "magik.formatting.trimFinalNewlines": {
           "description": "Trim final newlines -- only used by the VS Code extension.",
           "type": "boolean"
+        },
+        "magik.productDirs": {
+          "description": "Paths to (compiled, containing a `libs/` directory) products.",
+          "type": "array"
         },
         "magik.lint.overrideConfigFile": {
           "description": "Override path to magiklintrc.properties.",
