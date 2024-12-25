@@ -682,6 +682,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final FormattingOptions options = params.getOptions();
     final Range range = params.getRange();
+    final nl.ramsolutions.sw.magik.Range magikRange = Lsp4jConversion.rangeFromLsp4j(range);
     return CompletableFuture.supplyAsync(
         () -> {
           if (!this.formattingProvider.canFormat(magikFile)) {
@@ -690,7 +691,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           }
 
           final List<TextEdit> textEdits =
-              this.formattingProvider.provideRangeFormatting(magikFile, options, range);
+              this.formattingProvider.provideRangeFormatting(magikFile, options, magikRange);
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} rangeFormatting, uri: {}",

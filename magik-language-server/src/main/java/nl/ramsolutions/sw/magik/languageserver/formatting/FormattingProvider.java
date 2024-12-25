@@ -4,12 +4,12 @@ import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.formatting.FormattingWalker;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.FormattingOptions;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextEdit;
 
@@ -64,24 +64,10 @@ public class FormattingProvider {
    * @return true if the text edit's range intersects with the specified range, false otherwise
    */
   private boolean isEditInRange(TextEdit edit, Range range) {
-    return isPositionInRange(edit.getRange().getStart(), range)
-        || isPositionInRange(edit.getRange().getEnd(), range);
-  }
+    Position editStart = Lsp4jConversion.positionFromLsp4j(edit.getRange().getStart());
+    Position editEnd = Lsp4jConversion.positionFromLsp4j(edit.getRange().getEnd());
 
-  /**
-   * Test if a given position is within the specified range.
-   *
-   * @param position the position to check
-   * @param range the range to check against
-   * @return true if the position is within the specified range, false otherwise
-   */
-  private boolean isPositionInRange(Position position, Range range) {
-    return (position.getLine() > range.getStart().getLine()
-            || (position.getLine() == range.getStart().getLine()
-                && position.getCharacter() >= range.getStart().getCharacter()))
-        && (position.getLine() < range.getEnd().getLine()
-            || (position.getLine() == range.getEnd().getLine()
-                && position.getCharacter() <= range.getEnd().getCharacter()));
+    return !editEnd.isBeforeRange(range) && !editStart.isAfterRange(range);
   }
 
   /**
