@@ -150,8 +150,8 @@ public final class AstQuery {
                   final Token token = node.getToken();
                   final Range range = new Range(token);
                   final Position rangeEndPosition = range.getEndPosition();
-                  return !position.isBeforeRange(range)
-                      && !position.isAfterRange(range)
+                  return !range.positionIsBeforeSelf(position)
+                      && !range.positionIsAfterSelf(position)
                       && !position.equals(rangeEndPosition);
                 })
             .toList();

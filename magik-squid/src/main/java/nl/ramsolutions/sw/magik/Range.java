@@ -60,6 +60,26 @@ public class Range {
   }
 
   /**
+   * Test if {@link Position} is before self.
+   *
+   * @param position Position to test.
+   * @return True if before, false otherwise.
+   */
+  public boolean positionIsBeforeSelf(final Position position) {
+    return position.isBefore(this.getStartPosition());
+  }
+
+  /**
+   * Test if {@link Position} is after self.
+   *
+   * @param position Position to test.
+   * @return True if before, false otherwise.
+   */
+  public boolean positionIsAfterSelf(final Position position) {
+    return position.isAfter(this.getEndPosition());
+  }
+
+  /**
    * Extract range from full tree, i.e., all tokens.
    *
    * @param node Node to extract {@link Range} from.

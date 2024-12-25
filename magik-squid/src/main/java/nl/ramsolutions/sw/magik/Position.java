@@ -110,14 +110,6 @@ public class Position implements Comparable<Position> {
     return this.compareTo(position) > 0;
   }
 
-  public boolean isBeforeRange(final Range range) {
-    return this.isBefore(range.getStartPosition());
-  }
-
-  public boolean isAfterRange(final Range range) {
-    return this.isAfter(range.getEndPosition());
-  }
-
   @Override
   public int hashCode() {
     return Objects.hash(this.line, this.column);

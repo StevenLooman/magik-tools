@@ -195,7 +195,9 @@ public class CompletionProvider {
                 scopeEntry -> {
                   final AstNode definingNode = scopeEntry.getDefinitionNode();
                   final Range range = new Range(definingNode);
-                  return Lsp4jConversion.positionFromLsp4j(position).isAfterRange(range);
+                  final nl.ramsolutions.sw.magik.Position magikPosition =
+                      Lsp4jConversion.positionFromLsp4j(position);
+                  return range.positionIsAfterSelf(magikPosition);
                 })
             .map(
                 scopeEntry -> {
