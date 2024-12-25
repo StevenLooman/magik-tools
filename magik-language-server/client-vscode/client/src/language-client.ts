@@ -10,7 +10,7 @@ import { MagikSessionProvider } from './magik-session';
 
 export class MagikLanguageClient implements vscode.Disposable {
 
-	private _context: vscode.ExtensionContext;
+	private readonly _context: vscode.ExtensionContext;
 	private _client: vscodeLanguageClient.LanguageClient;
 	private _magikSessionProvider: MagikSessionProvider | undefined;
 

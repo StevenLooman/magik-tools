@@ -7,7 +7,7 @@ import { MagikAliasTaskProvider } from './alias-task-provider';
 
 export class MagikSessionProvider implements vscode.Disposable {
 
-	private context: vscode.ExtensionContext;
+	private readonly context: vscode.ExtensionContext;
 	private currentSession: MagikSession | undefined;
 
 	constructor(context: vscode.ExtensionContext) {
@@ -120,7 +120,7 @@ export class MagikSessionProvider implements vscode.Disposable {
 class MagikSession implements vscode.Disposable {
 
 	private _workdir: fs.PathLike;
-	private _terminal: vscode.Terminal;
+	private readonly _terminal: vscode.Terminal;
 
 	constructor(terminal: vscode.Terminal) {
 		const dir = path.join(os.tmpdir(), "vscode-magik-");

@@ -7,7 +7,7 @@ import { MAGIK_TOOLS_VERSION } from './const';
 
 export class MagikDebugProvider implements vscode.Disposable {
 
-	private context: vscode.ExtensionContext;
+	private readonly context: vscode.ExtensionContext;
 
 	constructor(context: vscode.ExtensionContext) {
 		this.context = context;
