@@ -35,6 +35,7 @@
 - Improve auto formatting.
 - Fix auto formatting bug where `_pragma` caused lines to be removed.
 - FormattingCheck now uses formatting code to detect issues.
+- Formatter now supports ranged formatting.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
