@@ -4,7 +4,6 @@ import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.formatting.FormattingWalker;
@@ -53,21 +52,21 @@ public class FormattingProvider {
   public List<TextEdit> provideRangeFormatting(
       final MagikFile magikFile, final FormattingOptions options, final Range range) {
     final List<org.eclipse.lsp4j.TextEdit> textEdits = this.provideFormatting(magikFile, options);
-    return textEdits.stream().filter(edit -> isEditInRange(edit, range)).toList();
+    return textEdits.stream().filter(edit -> this.isEditInRange(edit, range)).toList();
   }
 
   /**
-   * Test if a given text edit's range intersects with the specified range.
+   * Test if a given text edit's range overlaps with the specified range.
    *
    * @param edit the text edit to check
    * @param range the range to check against
-   * @return true if the text edit's range intersects with the specified range, false otherwise
+   * @return true if the text edit's range overlaps with the specified range, false otherwise
    */
   private boolean isEditInRange(TextEdit edit, Range range) {
-    Position editStart = Lsp4jConversion.positionFromLsp4j(edit.getRange().getStart());
-    Position editEnd = Lsp4jConversion.positionFromLsp4j(edit.getRange().getEnd());
+    final org.eclipse.lsp4j.Range editRange = edit.getRange();
+    final Range editMagikRange = Lsp4jConversion.rangeFromLsp4j(editRange);
 
-    return !editEnd.isBeforeRange(range) && !editStart.isAfterRange(range);
+    return range.overlapsWith(editMagikRange);
   }
 
   /**
