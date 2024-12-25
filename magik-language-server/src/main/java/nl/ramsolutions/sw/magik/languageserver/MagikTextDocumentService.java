@@ -51,6 +51,7 @@ import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.DocumentFormattingParams;
+import org.eclipse.lsp4j.DocumentRangeFormattingParams;
 import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.FoldingRange;
@@ -658,6 +659,42 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} formatting, uri: {}",
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                textDocument.getUri());
+          }
+          return textEdits;
+        });
+  }
+
+  @Override
+  public CompletableFuture<List<? extends TextEdit>> rangeFormatting(
+      DocumentRangeFormattingParams params) {
+    final long start = System.nanoTime();
+
+    final TextDocumentIdentifier textDocument = params.getTextDocument();
+    LOGGER.debug("rangeFormatting, uri: {}", textDocument.getUri());
+
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(Collections::emptyList);
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
+    final FormattingOptions options = params.getOptions();
+    final Range range = params.getRange();
+    final nl.ramsolutions.sw.magik.Range magikRange = Lsp4jConversion.rangeFromLsp4j(range);
+    return CompletableFuture.supplyAsync(
+        () -> {
+          if (!this.formattingProvider.canFormat(magikFile)) {
+            LOGGER.warn("Cannot format due to syntax error");
+            return Collections.emptyList();
+          }
+
+          final List<TextEdit> textEdits =
+              this.formattingProvider.provideRangeFormatting(magikFile, options, magikRange);
+          if (LOGGER_DURATION.isTraceEnabled()) {
+            LOGGER_DURATION.trace(
+                "Duration: {} rangeFormatting, uri: {}",
                 String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }

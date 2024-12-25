@@ -4,22 +4,20 @@ import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.formatting.FormattingWalker;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextEdit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Formatting provider. */
 public class FormattingProvider {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(FormattingProvider.class);
-
   public void setCapabilities(final ServerCapabilities capabilities) {
     capabilities.setDocumentFormattingProvider(true);
+    capabilities.setDocumentRangeFormattingProvider(true);
   }
 
   /**
@@ -40,6 +38,35 @@ public class FormattingProvider {
     walker.walkAst(node);
     final List<nl.ramsolutions.sw.magik.TextEdit> textEdits = walker.getTextEdits();
     return textEdits.stream().map(Lsp4jConversion::textEditToLsp4j).toList();
+  }
+
+  /**
+   * Provide formatting for text in range.
+   *
+   * @param magikFile Magik file.
+   * @param options Formatting options.
+   * @param range Range.
+   * @return {@link TextEdit}s.
+   * @throws IOException -
+   */
+  public List<TextEdit> provideRangeFormatting(
+      final MagikFile magikFile, final FormattingOptions options, final Range range) {
+    final List<org.eclipse.lsp4j.TextEdit> textEdits = this.provideFormatting(magikFile, options);
+    return textEdits.stream().filter(edit -> this.isEditInRange(edit, range)).toList();
+  }
+
+  /**
+   * Test if a given text edit's range overlaps with the specified range.
+   *
+   * @param edit the text edit to check
+   * @param range the range to check against
+   * @return true if the text edit's range overlaps with the specified range, false otherwise
+   */
+  private boolean isEditInRange(TextEdit edit, Range range) {
+    final org.eclipse.lsp4j.Range editRange = edit.getRange();
+    final Range editMagikRange = Lsp4jConversion.rangeFromLsp4j(editRange);
+
+    return range.overlapsWith(editMagikRange);
   }
 
   /**
