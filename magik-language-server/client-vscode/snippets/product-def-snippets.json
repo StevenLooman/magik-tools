@@ -1,0 +1,46 @@
+{
+  "Description": {
+    "prefix": "description",
+    "body": [
+      "description",
+      "\t${1:description}",
+      "end"
+    ],
+    "description": "Description"
+  },
+  "Requires": {
+    "prefix": "requires",
+    "body": [
+      "requires",
+      "\t${1:product} ${2:version}",
+      "end"
+    ],
+    "description": "Requires"
+  },
+  "Optional": {
+    "prefix": "optional",
+    "body": [
+      "optional",
+      "\t${1:product} ${2:version}",
+      "end"
+    ],
+    "description": "Optional"
+  },
+  "Title": {
+    "prefix": "title",
+    "body": [
+      "title",
+      "\t${1:title}",
+      "end"
+    ],
+    "description": "Title"
+  },
+  "Version": {
+    "prefix": "version",
+    "body": [
+      "version ${1:version}"
+    ],
+    "description": "Version"
+  }
+
+}

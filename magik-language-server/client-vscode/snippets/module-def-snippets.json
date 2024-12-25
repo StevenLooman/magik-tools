@@ -1,0 +1,174 @@
+{
+  "Condition message accessor": {
+    "prefix": "condition_message_accessor",
+    "body": [
+      "condition_message_accessor ${1:condition_message_accessor}"
+    ],
+    "description": "Condition message accessor"
+  },
+  "Description": {
+    "prefix": "description",
+    "body": [
+      "description",
+      "\t${1:description}",
+      "end"
+    ],
+    "description": "Description"
+  },
+  "Do not translate": {
+    "prefix": "do_not_translate",
+    "body": [
+      "do_not_translate"
+    ],
+    "description": "Do not translate"
+  },
+  "Hidden": {
+    "prefix": "hidden",
+    "body": [
+      "hidden"
+    ],
+    "description": "Hidden"
+  },
+  "Install requires": {
+    "prefix": "install_requires",
+    "body": [
+      "install_requires",
+      "\t${1:module} ${2:version}",
+      "end"
+    ],
+    "description": "Install requires"
+  },
+  "Language": {
+    "prefix": "language",
+    "body": [
+      "language ${1:language}"
+    ],
+    "description": "Language"
+  },
+  "Messages": {
+    "prefix": "messages",
+    "body": [
+      "messages ${1:messages}"
+    ],
+    "description": "Messages"
+  },
+  "Optional": {
+    "prefix": "optional",
+    "body": [
+      "optional",
+      "\t${1:module} ${2:version}",
+      "end"
+    ],
+    "description": "Optional"
+  },
+  "Required by": {
+    "prefix": "required_by",
+    "body": [
+      "required_by",
+      "\t${1:module} ${2:version}",
+      "end"
+    ],
+    "description": "Required by"
+  },
+  "Requires": {
+    "prefix": "requires",
+    "body": [
+      "requires",
+      "\t${1:module} ${2:version}",
+      "end"
+    ],
+    "description": "Requires"
+  },
+  "Requires Java": {
+    "prefix": "requires_java",
+    "body": [
+      "requires_java",
+      "\t${1:java} ${2:version}",
+      "end"
+    ],
+    "description": "Requires Java"
+  },
+  "Requires datamodel": {
+    "prefix": "requires_datamodel",
+    "body": [
+      "requires_datamodel",
+      "\t${1:datamodel} ${2:datamodel} ${3:datamodel}",
+      "end"
+    ],
+    "description": "Requires datamodel"
+  },
+  "Templates": {
+    "prefix": "templates",
+    "body": [
+      "templates",
+      "\t${1:templates}",
+      "end"
+    ],
+    "description": "Templates"
+  },
+  "Test": {
+    "prefix": "test",
+    "body": [
+      "test",
+      "\t${1:name} ${2:framework} ${3:topics} ${4:args}",
+      "\t${5:description}",
+      "\t${6:label} ${7:topic} ${8:arg}",
+      "end"
+    ],
+    "description": "Test"
+  },
+  "Tests modules": {
+    "prefix": "tests_modules",
+    "body": [
+      "tests_modules",
+      "\t${1:module} ${2:version}",
+      "end"
+    ],
+    "description": "Tests modules"
+  },
+  "ACE installation": {
+    "prefix": "ace_installation",
+    "body": [
+      "ace_installation",
+      "\t${1:ace_installation}",
+      "end"
+    ],
+    "description": "ACE installation"
+  },
+  "Auth installation": {
+    "prefix": "auth_installation",
+    "body": [
+      "auth_installation",
+      "\t${1:auth_installation}",
+      "end"
+    ],
+    "description": "Auth installation"
+  },
+  "Case installation": {
+    "prefix": "case_installation",
+    "body": [
+      "case_installation",
+      "\t${1:case_installation}",
+      "end"
+    ],
+    "description": "Case installation"
+  },
+  "Style installation": {
+    "prefix": "style_installation",
+    "body": [
+      "style_installation",
+      "\t${1:style_installation}",
+      "end"
+    ],
+    "description": "Style installation"
+  },
+  "System installation": {
+    "prefix": "system_installation",
+    "body": [
+      "system_installation",
+      "\t${1:system_installation}",
+      "end"
+    ],
+    "description": "System installation"
+  },
+}

@@ -1,0 +1,9 @@
+{
+  "Message": {
+    "prefix": "message",
+    "body": [
+      ":${1:name}\t${2:translation}"
+    ],
+    "description": "Message"
+  }
+}

@@ -95,6 +95,22 @@
       {
         "language": "magik",
         "path": "./snippets/magik-snippets.json"
+      },
+      {
+        "language": "load_list.txt",
+        "path": "./snippets/load-list-snippets.json"
+      },
+      {
+        "language": "product.def",
+        "path": "./snippets/product-def-snippets.json"
+      },
+      {
+        "language": "module.def",
+        "path": "./snippets/module-def-snippets.json"
+      },
+      {
+        "language": "message",
+        "path": "./snippets/message-snippets.json"
       }
     ],
     "breakpoints": [
