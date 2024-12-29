@@ -40,6 +40,17 @@
     },
     {
       "type": "java",
+      "name": "Debug (Launch)-MagikSessionWrapper<magik-session-wrapper>",
+      "request": "launch",
+      "mainClass": "nl.ramsolutions.sw.magik.sessionwrapper.Main",
+      "projectName": "magik-session-wrapper",
+      "args": [
+        "-Dorg.jline.terminal.provider=jna",
+        "--debug"
+      ]
+    },
+    {
+      "type": "java",
       "name": "Debug (Launch)-MagikToolkit<sslr-magik-toolkit>",
       "request": "launch",
       "mainClass": "nl.ramsolutions.sw.magik.toolkit.MagikToolkit",
