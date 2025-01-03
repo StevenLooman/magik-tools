@@ -2,6 +2,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import { getJavaExec } from './common';
+import { MAGIK_TOOLS_VERSION } from './const';
+
 export class MagikAliasTaskProvider implements vscode.TaskProvider, vscode.Disposable {
 
 	public static readonly AliasType: string = 'run_alias';
@@ -49,7 +52,7 @@ export class MagikAliasTaskProvider implements vscode.TaskProvider, vscode.Dispo
 			const runAliasPath = getRunAliasPath();
 			const aliasesPath = getAliasesPath(definition.aliasesPath);
 			const environmentFile = getEnvironmentPath(definition.environmentPath);
-			const commandLine = getStartAliasCommand(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.args);
+			const commandLine = getCommandLine(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.args);
 			const shellExecutionOptions: vscode.ShellExecutionOptions = {
 				env: definition.env,
 			};
@@ -126,8 +129,11 @@ function getAliasesPath(aliasesPath?: fs.PathLike): fs.PathLike {
 	return vscode.workspace.getConfiguration().get('magik.aliases');
 }
 
-function getStartAliasCommand(runAliasPath: fs.PathLike, aliasesPath: fs.PathLike, entryName: string, environmentFile?: fs.PathLike, additionalArgs?: string[]): string {
-	let commandLine = `${runAliasPath} -a ${aliasesPath}`;
+function getCommandLine(runAliasPath: fs.PathLike, aliasesPath: fs.PathLike, entryName: string, environmentFile?: fs.PathLike, additionalArgs?: string[]): string {
+	let commandLine = `${runAliasPath}`;
+	if (aliasesPath != null) {
+		commandLine =  `${commandLine} -a ${aliasesPath}`;
+	}
 	if (environmentFile != null) {
 		commandLine = `${commandLine} -e ${environmentFile}`;
 	}
@@ -135,6 +141,20 @@ function getStartAliasCommand(runAliasPath: fs.PathLike, aliasesPath: fs.PathLik
 		commandLine = `${commandLine} ${additionalArgs.join(' ')}`;
 	}
 	commandLine = `${commandLine} ${entryName}`;
+
+	const useWrapper = vscode.workspace.getConfiguration().get('magik.useSessionWrapper', true);
+	if (useWrapper) {
+		const javaExec = getJavaExec();
+		if (javaExec == null) {
+			const errorMessage = 'Could locate java executable, either set Java Home setting ("magik.javaHome") or JAVA_HOME environment variable.'
+			vscode.window.showWarningMessage(errorMessage);
+			throw new Error(errorMessage);
+		}
+
+		const jar = path.join(__dirname, '..', '..', 'server', 'magik-session-wrapper-' + MAGIK_TOOLS_VERSION + '.jar');
+		commandLine = `${javaExec} -jar ${jar} --debug -Dorg.jline.terminal.provider=jni -- ${commandLine}`;
+	}
+
 	return commandLine;
 }
 
@@ -171,7 +191,7 @@ async function getAliasesTasks(aliasesPath: fs.PathLike): Promise<vscode.Task[]>
 					additionalArguments: [],
 					env: {},
 				};
-				const commandLine = getStartAliasCommand(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.additionalArguments);
+				const commandLine = getCommandLine(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.additionalArguments);
 				const shellExecutionOptions: vscode.ShellExecutionOptions = {
 					env: definition.env,
 				};

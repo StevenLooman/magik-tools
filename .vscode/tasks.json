@@ -21,7 +21,8 @@
         "cd magik-language-server/client-vscode/server && ",
         "rm -f ./* ; ",
         "ln -s ../../../magik-language-server/target/magik-language-server-*.jar && ",
-        "ln -s ../../../magik-debug-adapter/target/magik-debug-adapter-*.jar",
+        "ln -s ../../../magik-debug-adapter/target/magik-debug-adapter-*.jar && ",
+        "ln -s ../../../magik-session-wrapper/target/magik-session-wrapper-*.jar",
       ],
       "group": "build",
       "presentation": {

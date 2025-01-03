@@ -45,8 +45,11 @@
       "mainClass": "nl.ramsolutions.sw.magik.sessionwrapper.Main",
       "projectName": "magik-session-wrapper",
       "args": [
-        "-Dorg.jline.terminal.provider=jna",
-        "--debug"
+        "--debug",
+        "--",
+        "/opt/Smallworld5.3.0.0/core/bin/share/runalias",
+        "-j", "-Djava.awt.headless=true",
+        "base"
       ]
     },
     {
