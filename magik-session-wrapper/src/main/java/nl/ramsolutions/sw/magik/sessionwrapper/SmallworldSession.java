@@ -16,6 +16,9 @@ import org.slf4j.LoggerFactory;
 /** Running Smallworld session. */
 class SmallworldSession {
 
+  private static final String SESSION_OUTPUT_THREAD_NAME = "SessionOutputThread";
+  private static final Pattern GLOBAL_DOES_NOT_EXIST_PATTERN =
+      Pattern.compile("Global .* does not exist: create it\\? \\(Y\\) ");
   static final Pattern DEFAULT_PROMPT_PATTERN = Pattern.compile("^(Magik|MagikSF)> $");
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SmallworldSession.class);
@@ -38,11 +41,16 @@ class SmallworldSession {
     this.process = process;
     this.promptPattern = promptPattern;
 
-    this.ioThread = new Thread(() -> this.threadRunner(outputWriter));
+    this.ioThread =
+        new Thread(() -> this.sessionOutputThread(outputWriter), SESSION_OUTPUT_THREAD_NAME);
     this.ioThread.start();
+
+    this.process
+        .onExit()
+        .thenAccept(p -> LOGGER.debug("Smallworld session exited with code: {}", p));
   }
 
-  private void threadRunner(final PrintWriter outputWriter) {
+  private void sessionOutputThread(final PrintWriter outputWriter) {
     this.promptSeen = new Object();
 
     final BufferedReader sessionReader = this.getSessionReader();
@@ -63,13 +71,7 @@ class SmallworldSession {
       }
     }
 
-    if (!this.process.isAlive()) {
-      LOGGER.debug(
-          "Session reader thread stopped, process exited, exit value: {}",
-          this.process.exitValue());
-    } else {
-      LOGGER.debug("Session reader thread stopped, process still alive");
-    }
+    LOGGER.debug("Session output reader thread ended");
   }
 
   private void processSessionOutput(final PrintWriter outputWriter, final String str) {
@@ -80,9 +82,22 @@ class SmallworldSession {
       return;
     }
 
+    // Work around `Global ... does not exist: create it?` questions on prompt,
+    // not ending with newline.
+    // NOTE: This is a hack, and only works in the case of undefined globals, but not for:
+    // - terminal.prompt_for_input()
+    // - terminal.prompt_y_or_n()
+    // - terminal.prompt_brief_choice()
+    // - terminal.prompt_long_choice()
+    final String strFixed = this.matchesSessionQuestion(str) ? str + "\n" : str;
+
     // Write session output to output writer.
-    outputWriter.print(str);
+    outputWriter.print(strFixed);
     outputWriter.flush();
+  }
+
+  private boolean matchesSessionQuestion(final String str) {
+    return GLOBAL_DOES_NOT_EXIST_PATTERN.matcher(str).matches();
   }
 
   BufferedReader getSessionReader() {
