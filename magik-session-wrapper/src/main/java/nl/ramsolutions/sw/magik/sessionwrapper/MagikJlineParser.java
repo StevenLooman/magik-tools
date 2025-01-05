@@ -44,8 +44,16 @@ class MagikJlineParser implements Parser {
   }
 
   private ParsedLine parseAcceptLine(final String line, final int cursor, final AstNode topNode) {
-    if (topNode.hasDescendant(MagikGrammar.SYNTAX_ERROR)) {
-      throw new EOFError(-1, -1, "Syntax error", "xxx");
+    if (line.endsWith("\n$")) {
+      // If ends with single $ on line, then force sending it to our session.
+      return new MagikJlineParsedLine(line, cursor, topNode);
+    }
+
+    final AstNode syntaxErrorNode = topNode.getFirstDescendant(MagikGrammar.SYNTAX_ERROR);
+    if (syntaxErrorNode != null) {
+      final int tokenLine = syntaxErrorNode.getToken().getLine();
+      final int tokenColumn = syntaxErrorNode.getToken().getColumn();
+      throw new EOFError(tokenLine, tokenColumn, "Syntax error");
     }
 
     return new MagikJlineParsedLine(line, cursor, topNode);
