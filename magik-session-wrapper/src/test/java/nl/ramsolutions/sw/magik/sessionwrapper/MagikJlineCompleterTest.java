@@ -36,4 +36,18 @@ class MagikJlineCompleterTest {
 
     assertThat(candidates).containsOnly(new Candidate("_handling"));
   }
+
+  @Test
+  void testCompleteElectricMagik() {
+    final String code = "if";
+    final MagikJlineParser parser = new MagikJlineParser();
+    final ParsedLine parsedLine = parser.parse(code, 2);
+
+    final MagikJlineCompleter completer = new MagikJlineCompleter();
+    final List<Candidate> candidates = new ArrayList<>();
+    completer.complete(null, parsedLine, candidates);
+
+    assertThat(candidates)
+        .containsOnly(new Candidate("_if \n_then\n\n_endif"), new Candidate("_if"));
+  }
 }
