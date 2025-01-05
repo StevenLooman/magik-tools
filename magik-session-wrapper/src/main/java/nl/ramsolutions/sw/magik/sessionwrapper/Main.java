@@ -129,7 +129,7 @@ public class Main {
 
     // Prompt pattern.
     final Pattern promptPattern;
-    if (commandLine.hasOption(OPTION_DO_NOT_WAIT_FOR_PROMPT)) {
+    if (commandLine.hasOption(OPTION_PROMPT_PATTERN)) {
       final String promptPatternStr = commandLine.getOptionValue(OPTION_PROMPT_PATTERN);
       promptPattern = Pattern.compile(promptPatternStr);
     } else {

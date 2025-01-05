@@ -46,8 +46,9 @@
       "projectName": "magik-session-wrapper",
       "args": [
         "--debug",
+        "--do-not-wait-for-prompt",
         "--",
-        "/opt/Smallworld5.3.0.0/core/bin/share/runalias",
+        "${env:SMALLWORLD_GIS}/bin/share/runalias",
         "-j", "-Djava.awt.headless=true",
         "base"
       ]
