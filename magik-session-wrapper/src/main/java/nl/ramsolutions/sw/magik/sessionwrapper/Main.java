@@ -13,6 +13,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PatternOptionBuilder;
 import org.jline.reader.Completer;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.Highlighter;
@@ -35,10 +36,32 @@ public class Main {
   private static final Options OPTIONS;
   private static final Option OPTION_DEBUG =
       Option.builder().longOpt("debug").desc("Show debug messages").build();
+  private static final Option OPTION_HISTORY_FILE =
+      Option.builder()
+          .longOpt("history-file")
+          .desc("Path to history file")
+          .hasArg()
+          .type(PatternOptionBuilder.FILE_VALUE)
+          .build();
+  private static final Option OPTION_DO_NOT_WAIT_FOR_PROMPT =
+      Option.builder()
+          .longOpt("do-not-wait-for-prompt")
+          .desc("Do not wait for Magik prompt")
+          .build();
+  private static final Option OPTION_PROMPT_PATTERN =
+      Option.builder()
+          .longOpt("prompt-pattern")
+          .desc("Prompt pattern (regex)")
+          .hasArg()
+          .type(PatternOptionBuilder.STRING_VALUE)
+          .build();
 
   static {
     OPTIONS = new Options();
     OPTIONS.addOption(OPTION_DEBUG);
+    OPTIONS.addOption(OPTION_HISTORY_FILE);
+    OPTIONS.addOption(OPTION_DO_NOT_WAIT_FOR_PROMPT);
+    OPTIONS.addOption(OPTION_PROMPT_PATTERN);
   }
 
   private Main() {}
@@ -92,12 +115,26 @@ public class Main {
       Main.initLogger();
     }
 
-    // TODO: Make configurable.
-    final Path historyFile = Path.of(System.getProperty("user.home"), ".magik_history");
-    // TODO: Make configurable.
-    final boolean waitForPrompt = false;
-    // TODO: Make configurable.
-    final Pattern promptPattern = SmallworldSession.DEFAULT_PROMPT_PATTERN;
+    // History file.
+    final String historyFilePath;
+    if (commandLine.hasOption(OPTION_HISTORY_FILE)) {
+      historyFilePath = commandLine.getOptionValue(OPTION_HISTORY_FILE);
+    } else {
+      historyFilePath = Path.of(System.getProperty("user.home"), ".magik_history").toString();
+    }
+    System.setProperty("jline.history", historyFilePath);
+
+    // History file.
+    final boolean waitForPrompt = !commandLine.hasOption(OPTION_DO_NOT_WAIT_FOR_PROMPT);
+
+    // Prompt pattern.
+    final Pattern promptPattern;
+    if (commandLine.hasOption(OPTION_DO_NOT_WAIT_FOR_PROMPT)) {
+      final String promptPatternStr = commandLine.getOptionValue(OPTION_PROMPT_PATTERN);
+      promptPattern = Pattern.compile(promptPatternStr);
+    } else {
+      promptPattern = SmallworldSession.DEFAULT_PROMPT_PATTERN;
+    }
 
     final Terminal terminal = TerminalBuilder.builder().system(true).build();
     final DefaultHistory history = new DefaultHistory();
@@ -113,7 +150,7 @@ public class Main {
             .highlighter(highlighter)
             .variable(LineReader.SECONDARY_PROMPT_PATTERN, "%M%P > ")
             .variable(LineReader.INDENTATION, 2)
-            .variable(LineReader.HISTORY_FILE, historyFile)
+            .variable(LineReader.HISTORY_FILE, historyFilePath)
             .build();
 
     final PrintAboveWriter printAboveWriter = new PrintAboveWriter(lineReader);
