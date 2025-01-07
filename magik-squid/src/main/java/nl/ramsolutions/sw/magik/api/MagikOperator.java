@@ -23,6 +23,21 @@ public enum MagikOperator implements GrammarRuleKey {
 
   private final String value;
 
+  /**
+   * Get all operator values.
+   *
+   * @return Operator values
+   */
+  public static String[] operatorValues() {
+    final String[] operatorValues = new String[MagikOperator.values().length];
+    int idx = 0;
+    for (final MagikOperator punctuator : MagikOperator.values()) {
+      operatorValues[idx] = punctuator.getValue();
+      idx++;
+    }
+    return operatorValues;
+  }
+
   MagikOperator(final String value) {
     this.value = value;
   }

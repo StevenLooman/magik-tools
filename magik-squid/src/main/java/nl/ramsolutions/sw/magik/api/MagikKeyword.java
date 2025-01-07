@@ -84,13 +84,13 @@ public enum MagikKeyword implements GrammarRuleKey {
    * @return Keyword values
    */
   public static String[] keywordValues() {
-    final String[] keywordsValue = new String[MagikKeyword.values().length];
+    final String[] keywordsValues = new String[MagikKeyword.values().length];
     int idx = 0;
     for (final MagikKeyword keyword : MagikKeyword.values()) {
-      keywordsValue[idx] = keyword.getValue();
+      keywordsValues[idx] = keyword.getValue();
       idx++;
     }
-    return keywordsValue;
+    return keywordsValues;
   }
 
   /**
