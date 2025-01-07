@@ -34,7 +34,7 @@ Then, you can use it like your normal Magik prompt, with added functionality. Fo
 
 Or in case of a syntax error, due to a missing `)` at the `show` invocation:
 
-![Prompt with syntax error](../.github/assets/magik-session-wrapper/screenshot-prompt-with-error.png "Prompt with syntax error")
+![Prompt with syntax error](../.github/assets/magik-session-wrapper/screenshot-prompt-with-syntax-error.png "Prompt with syntax error")
 
 In case you need to force transmit the prompt to the session, write a single `$`-symbol on the last line:
 
