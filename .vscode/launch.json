@@ -40,6 +40,21 @@
     },
     {
       "type": "java",
+      "name": "Debug (Launch)-MagikSessionWrapper<magik-session-wrapper>",
+      "request": "launch",
+      "mainClass": "nl.ramsolutions.sw.magik.sessionwrapper.Main",
+      "projectName": "magik-session-wrapper",
+      "args": [
+        "--debug",
+        "--do-not-wait-for-prompt",
+        "--",
+        "${env:SMALLWORLD_GIS}/bin/share/runalias",
+        "-j", "-Djava.awt.headless=true",
+        "base"
+      ]
+    },
+    {
+      "type": "java",
       "name": "Debug (Launch)-MagikToolkit<sslr-magik-toolkit>",
       "request": "launch",
       "mainClass": "nl.ramsolutions.sw.magik.toolkit.MagikToolkit",
