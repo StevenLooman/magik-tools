@@ -152,7 +152,7 @@ function getCommandLine(runAliasPath: fs.PathLike, aliasesPath: fs.PathLike, ent
 		}
 
 		const jar = path.join(__dirname, '..', '..', 'server', 'magik-session-wrapper-' + MAGIK_TOOLS_VERSION + '.jar');
-		commandLine = `${javaExec} -Dorg.jline.terminal.provider=jni -jar ${jar} --debug -- ${commandLine}`;
+		commandLine = `${javaExec} -jar ${jar} --debug -- ${commandLine}`;
 	}
 
 	return commandLine;
