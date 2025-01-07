@@ -4,6 +4,23 @@ A wrapper around `runalias` which provides a better prompt than the standard Mag
 
 The standard Magik/CLI prompt is a bit bare bones. On Windows there is a bit of additional functionality such as previous/next command, but on Linux the prompt is minimal. As a result, the prompt is barely usable. This wrapper provides a better experience by providing functionality which is standard in regular REPL prompts.
 
+## Usage
+
+Run the wrapper with the command as you would normally run the `runalias`/`runalias.exe` command as arguments after a `--`. For example:
+
+```shell
+$ java -jar magik-session-wrapper-<version>.jar --debug --do-not-wait-for-prompt -- /opt/Smallworld/core/bin/share/runalias -j -Djava.awt.headless=true base
+Sourcing .../core/config/environment
+
+
+
+---- Magik version 5.3.0.0-490 ----
+---- Running on Java version 17.0.13 ----
+
+Starting
+...
+```
+
 ## Supported functionality
 
 * Parsing of Magik
