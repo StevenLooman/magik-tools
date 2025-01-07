@@ -89,7 +89,14 @@ class SmallworldSession {
     // - terminal.prompt_y_or_n()
     // - terminal.prompt_brief_choice()
     // - terminal.prompt_long_choice()
-    final String strFixed = this.matchesSessionQuestion(str) ? str + "\n" : str;
+    final String strFixed;
+    if (this.matchesSessionQuestion(str)) {
+      strFixed = str + "\n";
+
+      this.signalPromptSeen();
+    } else {
+      strFixed = str;
+    }
 
     // Write session output to output writer.
     outputWriter.print(strFixed);
