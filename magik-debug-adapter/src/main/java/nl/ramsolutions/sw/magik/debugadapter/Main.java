@@ -9,7 +9,12 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.Channels;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.LogManager;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.eclipse.lsp4j.debug.launch.DSPLauncher;
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
@@ -25,7 +30,11 @@ public final class Main {
   private static final Option OPTION_NET =
       Option.builder()
           .longOpt("net")
-          .desc("Open the debug adapter on port 5008 instead of STDIN")
+          .desc("Open the LSP on a port instead of using STDIN for commands (default: 5008)")
+          .hasArg()
+          .optionalArg(true)
+          .type(Integer.class)
+          .argName("PORT")
           .build();
 
   static {
@@ -91,7 +100,8 @@ public final class Main {
     final MagikDebugAdapter server = new MagikDebugAdapter();
     Launcher<IDebugProtocolClient> launcher;
     if (commandLine.hasOption(OPTION_NET)) {
-      launcher = createSocketLauncher(server, new InetSocketAddress("localhost", 5008));
+      int port = commandLine.getParsedOptionValue(OPTION_NET, 5008);
+      launcher = createSocketLauncher(server, new InetSocketAddress("localhost", port));
     } else {
       launcher = DSPLauncher.createServerLauncher(server, System.in, System.out); // NOSONAR
     }

@@ -12,7 +12,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.logging.LogManager;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.jsonrpc.MessageConsumer;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -29,7 +34,11 @@ public final class Main {
   private static final Option OPTION_NET =
       Option.builder()
           .longOpt("net")
-          .desc("Open the LSP on port 5007 instead of using STDIN for commands")
+          .desc("Open the LSP on a port instead of using STDIN for commands (default: 5007)")
+          .hasArg()
+          .optionalArg(true)
+          .type(Integer.class)
+          .argName("PORT")
           .build();
 
   static {
@@ -94,10 +103,12 @@ public final class Main {
     Launcher<MagikLanguageClient> launcher;
     Function<MessageConsumer, MessageConsumer> wrapper = consumer -> (MessageConsumer) consumer;
     if (commandLine.hasOption(OPTION_NET)) {
+      int port = commandLine.getParsedOptionValue(OPTION_NET, 5007);
+      System.out.println("Launching LSP on port " + port);
       launcher =
           createSocketLauncher(
               server,
-              new InetSocketAddress("localhost", 5007),
+              new InetSocketAddress("localhost", port),
               Executors.newCachedThreadPool(),
               wrapper);
     } else {
