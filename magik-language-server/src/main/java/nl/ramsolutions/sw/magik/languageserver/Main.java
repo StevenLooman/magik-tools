@@ -7,6 +7,7 @@ import java.net.SocketAddress;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.Channels;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -122,7 +123,7 @@ public final class Main {
               wrapper);
     }
 
-    assert launcher != null;
+    Objects.requireNonNull(launcher, "Could not create LSP launcher");
     final LanguageClient remoteProxy = launcher.getRemoteProxy();
     server.connect(remoteProxy);
 

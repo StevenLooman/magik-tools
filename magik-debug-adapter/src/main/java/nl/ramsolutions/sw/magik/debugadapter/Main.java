@@ -7,6 +7,7 @@ import java.net.SocketAddress;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.Channels;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.LogManager;
 import org.apache.commons.cli.CommandLine;
@@ -106,7 +107,7 @@ public final class Main {
       launcher = DSPLauncher.createServerLauncher(server, System.in, System.out); // NOSONAR
     }
 
-    assert launcher != null;
+    Objects.requireNonNull(launcher, "Could not create debug adapter launcher");
     final IDebugProtocolClient remoteProxy = launcher.getRemoteProxy();
     server.connect(remoteProxy);
 
