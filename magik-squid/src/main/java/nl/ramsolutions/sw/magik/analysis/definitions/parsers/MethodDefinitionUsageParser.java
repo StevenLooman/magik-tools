@@ -11,6 +11,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -112,6 +113,8 @@ public class MethodDefinitionUsageParser {
    * @return Used slots.
    */
   public List<SlotUsage> getUsedSlots() {
+    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(this.node);
+    final TypeString typeName = helper.getTypeString();
     return this.node.getDescendants(MagikGrammar.SLOT).stream()
         .map(
             slotNode -> {
@@ -120,7 +123,7 @@ public class MethodDefinitionUsageParser {
               final URI uri = this.node.getToken().getURI();
               final Location location = new Location(uri, slotNode);
               final Location validLocation = Location.validLocation(location);
-              return new SlotUsage(slotName, validLocation, slotNode);
+              return new SlotUsage(typeName, slotName, validLocation, slotNode);
             })
         .toList();
   }
