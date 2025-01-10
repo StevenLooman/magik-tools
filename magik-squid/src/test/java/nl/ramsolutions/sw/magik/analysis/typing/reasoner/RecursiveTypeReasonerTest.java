@@ -40,7 +40,7 @@ class RecursiveTypeReasonerTest {
   }
 
   @Test
-  void testRecursiveReasoningDepth1() throws IOException {
+  void testRecursiveMethodReasoning() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Path path = Path.of("magik-squid/src/test/resources/test_recursive_type_reasoner.magik");
     final Path fixedPath = this.getPath(path);
@@ -72,7 +72,7 @@ class RecursiveTypeReasonerTest {
   }
 
   @Test
-  void testRecursiveReasoningOverMaxDepth() throws IOException {
+  void testRecursiveMethodReasoningOverMaxDepth() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Path path = Path.of("magik-squid/src/test/resources/test_recursive_type_reasoner.magik");
     final Path fixedPath = this.getPath(path);
@@ -101,5 +101,37 @@ class RecursiveTypeReasonerTest {
             .orElseThrow();
     final ExpressionResultString updatedResultStr = updatedMethodDefinition.getReturnTypes();
     assertThat(updatedResultStr).isEqualTo(ExpressionResultString.UNDEFINED);
+  }
+
+  @Test
+  void testRecursiveIterMethodReasoning() throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final Path path = Path.of("magik-squid/src/test/resources/test_recursive_type_reasoner.magik");
+    final Path fixedPath = this.getPath(path);
+    this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
+
+    // Ensure typing isn't known currently.
+    final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");
+    final MethodDefinition methodDefinition =
+        definitionKeeper.getMethodDefinitions(typeStr).stream()
+            .filter(methodDef -> methodDef.getMethodName().equals("iter_depth3()"))
+            .findFirst()
+            .orElseThrow();
+    final ExpressionResultString resultStr = methodDefinition.getReturnTypes();
+    assertThat(resultStr).isEqualTo(ExpressionResultString.UNDEFINED);
+
+    // Recusively reason the method definition.
+    final RecursiveTypeReasoner recursiveTypeReasoner =
+        new RecursiveTypeReasoner(definitionKeeper, 3);
+    recursiveTypeReasoner.reason(methodDefinition);
+
+    // Test if the method definition now has a return type.
+    final MethodDefinition updatedMethodDefinition =
+        definitionKeeper.getMethodDefinitions(typeStr).stream()
+            .filter(methodDef -> methodDef.getMethodName().equals("iter_depth3()"))
+            .findFirst()
+            .orElseThrow();
+    final ExpressionResultString updatedResultStr = updatedMethodDefinition.getReturnTypes();
+    assertThat(updatedResultStr).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
   }
 }

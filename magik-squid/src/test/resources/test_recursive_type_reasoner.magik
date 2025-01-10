@@ -30,3 +30,36 @@ _method test_exemplar.depth0()
     _return 0
 _endmethod
 $
+
+_iter _method test_exemplar.iter_depth3()
+    ## Iter depth 3.
+    _for i _over _self.iter_depth2()
+    _loop
+        _return i
+    _endloop
+_endmethod
+$
+
+_iter _method test_exemplar.iter_depth2()
+    ## Iter depth 2.
+    _for i _over _self.iter_depth1()
+    _loop
+        _loopbody(i)
+    _endloop
+_endmethod
+$
+
+_iter _method test_exemplar.iter_depth1()
+    ## Iter depth 1.
+    _for i _over _self.iter_depth0()
+    _loop
+        _loopbody(i)
+    _endloop
+_endmethod
+$
+
+_iter _method test_exemplar.iter_depth0()
+    ## Iter depth 1.
+    _loopbody(0)
+_endmethod
+$

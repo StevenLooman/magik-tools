@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
  */
 public class RecursiveTypeReasoner {
 
-  // TODO: Slot reasoning.
   // TODO: define_shared_contant reasoning.
+  // TODO: Slot reasoning.
   // TODO: define_shared_variable reasoning.
 
   private static final MagikToolsProperties MAGIK_FILE_PROPERTIES =
@@ -166,10 +166,12 @@ public class RecursiveTypeReasoner {
     return node.getDescendants(MagikGrammar.METHOD_INVOCATION).stream()
         .map(
             methodInvocationNode -> {
-              // TODO: Iterator methods?
               final ExpressionResultString invocationResult =
                   reasonerState.getNodeType(methodInvocationNode);
-              if (invocationResult != ExpressionResultString.UNDEFINED) {
+              final ExpressionResultString iterInvocationResult =
+                  reasonerState.getNodeIterType(methodInvocationNode);
+              if (invocationResult != ExpressionResultString.UNDEFINED
+                  && iterInvocationResult != ExpressionResultString.UNDEFINED) {
                 // Already known, no need to recurse.
                 return null;
               }
@@ -217,7 +219,11 @@ public class RecursiveTypeReasoner {
             fileMethodDefinition.getAssignmentParameter(),
             fileMethodDefinition.getTopics(),
             nodeType,
-            nodeIterType);
+            nodeIterType,
+            fileMethodDefinition.getUsedGlobals(),
+            fileMethodDefinition.getUsedMethods(),
+            fileMethodDefinition.getUsedSlots(),
+            fileMethodDefinition.getUsedConditions());
 
     // Save the new MethodDefinition.
     this.definitionKeeper.remove(methodDefinition);
