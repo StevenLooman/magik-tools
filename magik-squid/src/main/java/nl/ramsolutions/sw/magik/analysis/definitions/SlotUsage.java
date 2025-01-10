@@ -18,6 +18,7 @@ public class SlotUsage {
    *
    * @param slotName Name of slot.
    * @param location Location of use.
+   * @param node Node of use.
    */
   public SlotUsage(
       final String slotName, final @Nullable Location location, final @Nullable AstNode node) {

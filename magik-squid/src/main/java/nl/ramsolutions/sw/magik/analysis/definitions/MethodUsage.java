@@ -21,6 +21,7 @@ public class MethodUsage {
    * @param typeName Type name.
    * @param methodName Name of method.
    * @param location Location of use.
+   * @param node Node of use.
    */
   public MethodUsage(
       final TypeString typeName,

@@ -23,7 +23,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 /**
  * Method usage locator.
  *
- * <p>Uses typing to determine if any {@link MethodUsage} is is for this specific type.
+ * <p>Uses typing to determine if any {@link MethodUsage} is is for a given type.
  */
 public class MethodUsageLocator {
 
@@ -33,6 +33,13 @@ public class MethodUsageLocator {
     this.definitionKeeper = definitionKeeper;
   }
 
+  /**
+   * Get the method usages for the wanted method usage.
+   *
+   * @param wantedMethodUsage The wanted {@link MethodUsage}.
+   * @return The {@link MethodUsage}s for the wanted method usage in all indexed {@link
+   *     MethodDefinition}s.
+   */
   public List<Map.Entry<MethodUsage, MagikTypedFile>> getMethodUsages(
       final MethodUsage wantedMethodUsage) {
     final String methodName = wantedMethodUsage.getMethodName();
