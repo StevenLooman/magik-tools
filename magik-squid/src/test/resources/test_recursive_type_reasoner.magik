@@ -1,0 +1,32 @@
+_package user
+
+## Test exemplar.
+def_slotted_exemplar(
+    :test_exemplar,
+    {
+    })
+$
+
+_method test_exemplar.depth4()
+    ## Depth 4.
+    _return _self.depth3()
+_endmethod
+$
+
+_method test_exemplar.depth3()
+    ## Depth 3.
+    _return _self.depth2()
+_endmethod
+$
+
+_method test_exemplar.depth2()
+    ## Depth 2.
+    _return _self.depth1()
+_endmethod
+$
+
+_method test_exemplar.depth1()
+    ## Depth 1.
+    _return _self
+_endmethod
+$
