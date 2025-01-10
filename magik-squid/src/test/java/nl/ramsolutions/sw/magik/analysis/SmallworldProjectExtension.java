@@ -25,10 +25,10 @@ public class SmallworldProjectExtension implements BeforeEachCallback, AfterEach
   private static final MagikToolsProperties PROPERTIES =
       new MagikToolsProperties(
           Map.of(
-              "magik.typing.indexGlobalUsages", "true",
-              "magik.typing.indexMethodUsages", "true",
-              "magik.typing.indexSlotUsages", "true",
-              "magik.typing.indexConditionUsages", "true"));
+              MagikAnalysisSettings.INDEX_GLOBAL_USAGES, "true",
+              MagikAnalysisSettings.INDEX_METHOD_USAGES, "true",
+              MagikAnalysisSettings.INDEX_SLOT_USAGES, "true",
+              MagikAnalysisSettings.INDEX_CONDITION_USAGES, "true"));
 
   private FileSystem fileSystem;
   private IDefinitionKeeper definitionKeeper;

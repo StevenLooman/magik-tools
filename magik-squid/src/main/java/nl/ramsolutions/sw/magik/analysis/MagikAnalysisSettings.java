@@ -10,11 +10,11 @@ import nl.ramsolutions.sw.MagikToolsProperties;
  */
 public class MagikAnalysisSettings {
 
-  private static final String INDEX_GLOBAL_USAGES = "magik.typing.indexGlobalUsages";
-  private static final String INDEX_METHOD_USAGES = "magik.typing.indexMethodUsages";
-  private static final String INDEX_SLOT_USAGES = "magik.typing.indexSlotUsages";
-  private static final String INDEX_CONDITION_USAGES = "magik.typing.indexConditionUsages";
-  private static final String CACHE_INDEXED_DEFINITIONS = "magik.typing.cacheIndexedDefinitions";
+  public static final String INDEX_GLOBAL_USAGES = "magik.typing.indexGlobalUsages";
+  public static final String INDEX_METHOD_USAGES = "magik.typing.indexMethodUsages";
+  public static final String INDEX_SLOT_USAGES = "magik.typing.indexSlotUsages";
+  public static final String INDEX_CONDITION_USAGES = "magik.typing.indexConditionUsages";
+  public static final String CACHE_INDEXED_DEFINITIONS = "magik.typing.cacheIndexedDefinitions";
 
   private final MagikToolsProperties properties;
 
