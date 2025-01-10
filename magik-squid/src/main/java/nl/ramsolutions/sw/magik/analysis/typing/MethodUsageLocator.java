@@ -84,15 +84,15 @@ public class MethodUsageLocator {
   }
 
   private MagikTypedFile getMagikFile(final Location location) {
-    final URI calledMethodUri = location.getUri();
-    final Path calledMethodPath = Path.of(calledMethodUri);
-    final Charset charset = FileCharsetDeterminer.determineCharset(calledMethodPath);
+    final URI uri = location.getUri();
+    final Path path = Path.of(uri);
+    final Charset charset = FileCharsetDeterminer.determineCharset(path);
     final String text;
     try {
-      text = Files.readString(calledMethodPath, charset);
+      text = Files.readString(path, charset);
     } catch (final IOException exception) {
       throw new IllegalStateException(exception);
     }
-    return new MagikTypedFile(calledMethodUri, text, this.definitionKeeper);
+    return new MagikTypedFile(uri, text, this.definitionKeeper);
   }
 }
