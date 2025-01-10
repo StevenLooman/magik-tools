@@ -404,18 +404,4 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     final ExpressionResultString iterCallResult = this.state.getNodeIterType(rightNode);
     this.state.setNodeIterType(node, iterCallResult);
   }
-
-  /**
-   * Handle method definition.
-   *
-   * @param node METHOD_DEFINITION node.
-   */
-  void handleMethodDefinition(final AstNode node) {
-    // Technically, a method definition is not an expression... but this has to live
-    // somewhere.
-    if (!this.state.hasNodeType(node)) {
-      // Nothing was assigned to this node, so it must be empty.
-      this.state.setNodeType(node, ExpressionResultString.EMPTY);
-    }
-  }
 }

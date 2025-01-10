@@ -9,15 +9,15 @@ import nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureDefinition
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
-/** Procedure definition handler. */
-class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
+/** Procedure/method definition handler. */
+class DefinitionHandler extends LocalTypeReasonerHandler {
 
   /**
    * Constructor.
    *
    * @param state Reasoner state.
    */
-  ProcedureDefinitionHandler(final LocalTypeReasonerState state) {
+  DefinitionHandler(final LocalTypeReasonerState state) {
     super(state);
   }
 
@@ -59,5 +59,24 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
     final TypeString typeStr = finalProcDef.getTypeString();
     final ExpressionResultString result = new ExpressionResultString(typeStr);
     this.assignAtom(node, result);
+  }
+
+  /**
+   * Handle method definition.
+   *
+   * @param node METHOD_DEFINITION node.
+   */
+  void handleMethodDefinition(final AstNode node) {
+    // Technically, a method definition is not an expression... but this has to live
+    // somewhere.
+    if (!this.state.hasNodeType(node)) {
+      // Nothing was assigned to this node, so it must be empty.
+      this.state.setNodeType(node, ExpressionResultString.EMPTY);
+    }
+
+    if (!this.state.hasNodeIterType(node)) {
+      // Nothing was assigned to this node, so it must be empty.
+      this.state.setNodeIterType(node, ExpressionResultString.EMPTY);
+    }
   }
 }

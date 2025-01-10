@@ -31,7 +31,7 @@ public class LocalTypeReasoner extends MagikAstWalker {
   private final IdentifierHandler identifierHandler;
   private final InvocationHandler invocationHandler;
   private final ParameterHandler parameterHandler;
-  private final ProcedureDefinitionHandler procedureDefinitionHandler;
+  private final DefinitionHandler definitionHandler;
   private final StatementHandler statementHandler;
   private final SuperHandler superHandler;
 
@@ -50,7 +50,7 @@ public class LocalTypeReasoner extends MagikAstWalker {
     this.identifierHandler = new IdentifierHandler(this.state);
     this.invocationHandler = new InvocationHandler(this.state);
     this.parameterHandler = new ParameterHandler(this.state);
-    this.procedureDefinitionHandler = new ProcedureDefinitionHandler(this.state);
+    this.definitionHandler = new DefinitionHandler(this.state);
     this.statementHandler = new StatementHandler(this.state);
     this.superHandler = new SuperHandler(this.state);
   }
@@ -78,8 +78,7 @@ public class LocalTypeReasoner extends MagikAstWalker {
 
   @Override
   protected void walkPostMethodDefinition(final AstNode node) {
-    // TODO: Move this to somewhere else.
-    this.expressionHandler.handleMethodDefinition(node);
+    this.definitionHandler.handleMethodDefinition(node);
   }
 
   @Override
@@ -228,7 +227,7 @@ public class LocalTypeReasoner extends MagikAstWalker {
 
   @Override
   protected void walkPostProcedureDefinition(final AstNode node) {
-    this.procedureDefinitionHandler.handleProcedureDefinition(node);
+    this.definitionHandler.handleProcedureDefinition(node);
   }
 
   @Override
