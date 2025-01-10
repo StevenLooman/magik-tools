@@ -299,7 +299,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
       // Combine types.
       final ExpressionResultString existingResult = this.state.getNodeType(procMethodDefNode);
       final ExpressionResultString combinedResult =
-          new ExpressionResultString(existingResult, result);
+          ExpressionResultString.combined(existingResult, result);
       this.state.setNodeIterType(procMethodDefNode, combinedResult);
     } else {
       this.state.setNodeIterType(procMethodDefNode, result);
@@ -339,7 +339,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     if (resultingNode == null) {
       // Result can also be an unset, as no resulting statement was found.
       // TODO: but... "_block _block _return 1 _endblock _endblock"
-      result = new ExpressionResultString(result, ExpressionResultString.EMPTY);
+      result = ExpressionResultString.combined(result, ExpressionResultString.EMPTY);
     }
 
     // Set parent EXPRESSION result.

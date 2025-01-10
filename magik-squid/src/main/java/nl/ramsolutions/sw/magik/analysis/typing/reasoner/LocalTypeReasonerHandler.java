@@ -47,7 +47,7 @@ abstract class LocalTypeReasonerHandler {
     // return calledType.getMethods(methodName).stream()
     return this.typeResolver.getRespondingMethodDefinitions(calledType, methodName).stream()
         .map(MethodDefinition::getReturnTypes)
-        .reduce(ExpressionResultString::new)
+        .reduce(ExpressionResultString::combined)
         .orElse(ExpressionResultString.UNDEFINED);
   }
 
@@ -87,7 +87,7 @@ abstract class LocalTypeReasonerHandler {
       // Combine types.
       final ExpressionResultString existingResult = this.state.getNodeType(node);
       final ExpressionResultString combinedResult =
-          new ExpressionResultString(existingResult, result);
+          ExpressionResultString.combined(existingResult, result);
       this.state.setNodeType(node, combinedResult);
     } else {
       this.state.setNodeType(node, result);

@@ -78,7 +78,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
                 methodDef.getParameters(),
                 callResultStr,
                 argumentTypeStrs);
-        callResult = new ExpressionResultString(processedCallResultStr, callResult);
+        callResult = ExpressionResultString.combined(processedCallResultStr, callResult);
 
         // Handle iter result.
         final ExpressionResultString iterResultStr = methodDef.getLoopTypes();
@@ -89,7 +89,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
                 methodDef.getParameters(),
                 iterResultStr,
                 argumentTypeStrs);
-        iterResult = new ExpressionResultString(processedIterResultStr, iterResult);
+        iterResult = ExpressionResultString.combined(processedIterResultStr, iterResult);
       }
     }
 
@@ -148,7 +148,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
               procDef.getParameters(),
               callResultStr,
               argumentTypeStrs);
-      callResult = new ExpressionResultString(processedCallResultStr, callResult);
+      callResult = ExpressionResultString.combined(processedCallResultStr, callResult);
 
       // Handle iter result.
       final ExpressionResultString iterResultStr = procDef.getLoopTypes();
@@ -159,7 +159,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
               procDef.getParameters(),
               iterResultStr,
               argumentTypeStrs);
-      iterResult = new ExpressionResultString(processedIterResultStr, iterResult);
+      iterResult = ExpressionResultString.combined(processedIterResultStr, iterResult);
     }
 
     // If nothing, then undefined.

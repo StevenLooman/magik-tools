@@ -60,11 +60,17 @@ public class ExpressionResultString {
     this.types = Collections.unmodifiableList(types);
   }
 
-  /** Combine constructor. */
-  public ExpressionResultString(
+  /**
+   * Combine two {@link ExpressionResultString}s.
+   *
+   * @param result1 {@link ExpressionResultString} 1 to combine.
+   * @param result2 {@link ExpressionResultString} 2 to combine, can be null.
+   * @return Combined {@link ExpressionResultString}.
+   */
+  public static ExpressionResultString combined(
       final ExpressionResultString result1, final @Nullable ExpressionResultString result2) {
     if (result2 == null) {
-      this.types = result1.getTypes();
+      return result1;
     } else {
       final int size = Math.max(result1.size(), result2.size());
       final List<TypeString> combinedTypes = new ArrayList<>(size);
@@ -75,7 +81,7 @@ public class ExpressionResultString {
         combinedTypes.add(combinedType);
       }
 
-      this.types = Collections.unmodifiableList(combinedTypes);
+      return new ExpressionResultString(combinedTypes);
     }
   }
 

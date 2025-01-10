@@ -1164,7 +1164,7 @@ class LocalTypeReasonerTest {
     final ExpressionResultString result = state.getNodeType(methodDefNode);
     assertThat(result)
         .isEqualTo(
-            new ExpressionResultString(
+            ExpressionResultString.combined(
                 new ExpressionResultString(TypeString.SW_INTEGER),
                 ExpressionResultString.UNDEFINED));
   }
