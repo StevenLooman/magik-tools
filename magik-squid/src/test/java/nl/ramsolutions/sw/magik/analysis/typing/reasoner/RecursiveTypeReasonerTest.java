@@ -50,7 +50,7 @@ class RecursiveTypeReasonerTest {
     final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");
     final MethodDefinition methodDefinition =
         definitionKeeper.getMethodDefinitions(typeStr).stream()
-            .filter(methodDef -> methodDef.getMethodName().equals("depth2()"))
+            .filter(methodDef -> methodDef.getMethodName().equals("depth3()"))
             .findFirst()
             .orElseThrow();
     final ExpressionResultString resultStr = methodDefinition.getReturnTypes();
@@ -58,17 +58,17 @@ class RecursiveTypeReasonerTest {
 
     // Recusively reason the method definition.
     final RecursiveTypeReasoner recursiveTypeReasoner =
-        new RecursiveTypeReasoner(definitionKeeper, 1);
+        new RecursiveTypeReasoner(definitionKeeper, 3);
     recursiveTypeReasoner.reason(methodDefinition);
 
     // Test if the method definition now has a return type.
     final MethodDefinition updatedMethodDefinition =
         definitionKeeper.getMethodDefinitions(typeStr).stream()
-            .filter(methodDef -> methodDef.getMethodName().equals("depth2()"))
+            .filter(methodDef -> methodDef.getMethodName().equals("depth3()"))
             .findFirst()
             .orElseThrow();
     final ExpressionResultString updatedResultStr = updatedMethodDefinition.getReturnTypes();
-    assertThat(updatedResultStr).isEqualTo(new ExpressionResultString(TypeString.SELF));
+    assertThat(updatedResultStr).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
   }
 
   @Test
@@ -82,7 +82,7 @@ class RecursiveTypeReasonerTest {
     final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");
     final MethodDefinition methodDefinition =
         definitionKeeper.getMethodDefinitions(typeStr).stream()
-            .filter(methodDef -> methodDef.getMethodName().equals("depth4()"))
+            .filter(methodDef -> methodDef.getMethodName().equals("depth3()"))
             .findFirst()
             .orElseThrow();
     final ExpressionResultString resultStr = methodDefinition.getReturnTypes();
@@ -90,13 +90,13 @@ class RecursiveTypeReasonerTest {
 
     // Recusively reason the method definition.
     final RecursiveTypeReasoner recursiveTypeReasoner =
-        new RecursiveTypeReasoner(definitionKeeper, 2);
+        new RecursiveTypeReasoner(definitionKeeper, 1);
     recursiveTypeReasoner.reason(methodDefinition);
 
     // Test if the method definition is not reasoned, as it surpasses max depth.
     final MethodDefinition updatedMethodDefinition =
         definitionKeeper.getMethodDefinitions(typeStr).stream()
-            .filter(methodDef -> methodDef.getMethodName().equals("depth4()"))
+            .filter(methodDef -> methodDef.getMethodName().equals("depth3()"))
             .findFirst()
             .orElseThrow();
     final ExpressionResultString updatedResultStr = updatedMethodDefinition.getReturnTypes();

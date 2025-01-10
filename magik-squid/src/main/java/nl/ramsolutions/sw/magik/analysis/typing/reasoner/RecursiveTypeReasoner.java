@@ -34,6 +34,18 @@ import org.slf4j.LoggerFactory;
  */
 public class RecursiveTypeReasoner {
 
+  // TODO: Slot reasoning.
+  // TODO: define_shared_contant reasoning.
+  // TODO: define_shared_variable reasoning.
+
+  private static final MagikToolsProperties MAGIK_FILE_PROPERTIES =
+      new MagikToolsProperties(
+          Map.of(
+              MagikAnalysisSettings.INDEX_GLOBAL_USAGES, "true",
+              MagikAnalysisSettings.INDEX_METHOD_USAGES, "true",
+              MagikAnalysisSettings.INDEX_SLOT_USAGES, "true",
+              MagikAnalysisSettings.INDEX_CONDITION_USAGES, "true"));
+
   private static final Logger LOGGER = LoggerFactory.getLogger(RecursiveTypeReasoner.class);
 
   private final IDefinitionKeeper definitionKeeper;
@@ -83,7 +95,8 @@ public class RecursiveTypeReasoner {
       return;
     }
 
-    if (methodDefinition.getReturnTypes() != ExpressionResultString.UNDEFINED) {
+    if (methodDefinition.getReturnTypes() != ExpressionResultString.UNDEFINED
+        && methodDefinition.getLoopTypes() != ExpressionResultString.UNDEFINED) {
       // Already reasoned this method definition, or from TypeDoc.
       return;
     }
@@ -99,22 +112,9 @@ public class RecursiveTypeReasoner {
     final MethodDefinition fileMethodDefinition1 =
         this.getMethodDefinitionFromFile(methodDefinition, magikFile1);
 
-    // Reason method and test if the returned type is not UNDEFINED now.
-    final LocalTypeReasonerState reasonerState1 = magikFile1.getTypeReasonerState();
-    final AstNode node1 = fileMethodDefinition1.getNode();
-    final ExpressionResultString nodeType1 = reasonerState1.getNodeType(node1);
-    final ExpressionResultString nodeIterType1 = reasonerState1.getNodeIterType(node1);
-    if (nodeType1 != ExpressionResultString.UNDEFINED
-        && nodeIterType1 != ExpressionResultString.UNDEFINED) {
-      // Update the MethodDefinition with the known return type.
-      this.updateMethodDefinitionTypes(
-          methodDefinition, fileMethodDefinition1, nodeType1, nodeIterType1);
-
-      return;
-    }
-
     // If returned type is UNDEFINED, recurse from the METHOD_INVOCATION nodes.
-    // This might make the return type known.
+    // Keep on iterating until we are no longer getting any improvements.
+    final AstNode node1 = fileMethodDefinition1.getNode();
     Collection<MethodUsage> previousUndefinedMethodUsages = Collections.emptySet();
     Collection<MethodUsage> undefinedMethodUsages =
         this.extractUndefinedMethodUsages(magikFile1, node1);
@@ -128,7 +128,7 @@ public class RecursiveTypeReasoner {
       undefinedMethodUsages = this.extractUndefinedMethodUsages(magikFile1, node1);
     }
 
-    // After recusing, we need to re-try this method again.
+    // After recusing, re-try this method.
     // Find method definition in the file.
     final MagikTypedFile magikFile2 = this.getMagikFile(location);
     final MethodDefinition fileMethodDefinition2 =
@@ -225,13 +225,6 @@ public class RecursiveTypeReasoner {
   }
 
   private MagikTypedFile getMagikFile(final Location location) {
-    final MagikToolsProperties properties =
-        new MagikToolsProperties(
-            Map.of(
-                MagikAnalysisSettings.INDEX_GLOBAL_USAGES, "true",
-                MagikAnalysisSettings.INDEX_METHOD_USAGES, "true",
-                MagikAnalysisSettings.INDEX_SLOT_USAGES, "true",
-                MagikAnalysisSettings.INDEX_CONDITION_USAGES, "true"));
     final URI uri = location.getUri();
     final Path path = Path.of(uri);
     final Charset charset = FileCharsetDeterminer.determineCharset(path);
@@ -241,7 +234,8 @@ public class RecursiveTypeReasoner {
     } catch (final IOException exception) {
       throw new IllegalStateException(exception);
     }
-    return new MagikTypedFile(properties, uri, text, this.definitionKeeper);
+    return new MagikTypedFile(
+        RecursiveTypeReasoner.MAGIK_FILE_PROPERTIES, uri, text, this.definitionKeeper);
   }
 
   private Collection<MethodDefinition> getMethodDefinitions(

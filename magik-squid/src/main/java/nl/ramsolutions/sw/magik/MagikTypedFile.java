@@ -17,17 +17,17 @@ public class MagikTypedFile extends MagikFile {
   /**
    * Constructor.
    *
-   * @param settings Magik analysis configuration.
+   * @param properties Magik analysis configuration.
    * @param uri URI.
    * @param text Text.
    * @param definitionKeeper {@link IDefinitionKeeper}.
    */
   public MagikTypedFile(
-      final MagikToolsProperties settings,
+      final MagikToolsProperties properties,
       final URI uri,
       final String text,
       final IDefinitionKeeper definitionKeeper) {
-    super(settings, uri, text);
+    super(properties, uri, text);
     this.definitionKeeper = definitionKeeper;
     this.typeStringResolver = new TypeStringResolver(definitionKeeper);
   }

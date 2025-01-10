@@ -7,12 +7,6 @@ def_slotted_exemplar(
     })
 $
 
-_method test_exemplar.depth4()
-    ## Depth 4.
-    _return _self.depth3()
-_endmethod
-$
-
 _method test_exemplar.depth3()
     ## Depth 3.
     _return _self.depth2()
@@ -27,6 +21,12 @@ $
 
 _method test_exemplar.depth1()
     ## Depth 1.
-    _return _self
+    _return _self.depth0()
+_endmethod
+$
+
+_method test_exemplar.depth0()
+    ## Depth 0.
+    _return 0
 _endmethod
 $
