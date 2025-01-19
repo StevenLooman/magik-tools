@@ -1998,7 +1998,7 @@ class LocalTypeReasonerTest {
         TypeString.ofIdentifier(
             "stack", "sw", TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
     final SlotDefinition slotDefinition =
-        new SlotDefinition(null, null, null, null, null, "stack", slotTypeRef);
+        new SlotDefinition(null, null, null, null, null, exemplarRef, "stack", slotTypeRef);
     definitionKeeper.add(
         new ExemplarDefinition(
             null,

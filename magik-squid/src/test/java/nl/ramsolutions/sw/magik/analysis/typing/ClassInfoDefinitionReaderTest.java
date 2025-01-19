@@ -153,6 +153,7 @@ class ClassInfoDefinitionReaderTest {
                         "class_definition_reader_test",
                         null,
                         null,
+                        exampleClassRef,
                         "slot1",
                         TypeString.UNDEFINED),
                     new SlotDefinition(
@@ -161,6 +162,7 @@ class ClassInfoDefinitionReaderTest {
                         "class_definition_reader_test",
                         null,
                         null,
+                        exampleClassRef,
                         "slot2",
                         TypeString.UNDEFINED),
                     new SlotDefinition(
@@ -169,6 +171,7 @@ class ClassInfoDefinitionReaderTest {
                         "class_definition_reader_test",
                         null,
                         null,
+                        exampleClassRef,
                         "slot3",
                         TypeString.UNDEFINED)),
                 List.of(TypeString.ofIdentifier("model", "sw")),

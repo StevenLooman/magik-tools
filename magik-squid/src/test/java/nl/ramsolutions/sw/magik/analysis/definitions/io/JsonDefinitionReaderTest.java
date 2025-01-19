@@ -129,8 +129,9 @@ class JsonDefinitionReaderTest {
                 aRef,
                 List.of(
                     new SlotDefinition(
-                        null, null, null, null, null, "slot1", TypeString.SW_INTEGER),
-                    new SlotDefinition(null, null, null, null, null, "slot2", TypeString.SW_FLOAT)),
+                        null, null, null, null, null, aRef, "slot1", TypeString.SW_INTEGER),
+                    new SlotDefinition(
+                        null, null, null, null, null, aRef, "slot2", TypeString.SW_FLOAT)),
                 List.of(TypeString.SW_OBJECT),
                 Collections.emptySet()));
   }

@@ -81,6 +81,7 @@ class MagikIndexerTest {
                         null,
                         null,
                         null,
+                        typeString,
                         "slot_a",
                         TypeString.UNDEFINED),
                     new SlotDefinition(
@@ -89,6 +90,7 @@ class MagikIndexerTest {
                         null,
                         null,
                         null,
+                        typeString,
                         "slot_b",
                         TypeString.UNDEFINED)),
                 List.of(TypeString.ofIdentifier("sw_regexp", "sw")),
@@ -248,6 +250,7 @@ class MagikIndexerTest {
                         null,
                         null,
                         null,
+                        typeString,
                         "slot_a",
                         TypeString.ofIdentifier("rope", "sw")),
                     new SlotDefinition(
@@ -256,6 +259,7 @@ class MagikIndexerTest {
                         null,
                         null,
                         null,
+                        typeString,
                         "slot_b",
                         TypeString.ofIdentifier(
                             "property_list",

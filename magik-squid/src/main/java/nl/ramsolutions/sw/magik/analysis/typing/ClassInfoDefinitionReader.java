@@ -402,7 +402,14 @@ public final class ClassInfoDefinitionReader {
               .map(
                   slotName ->
                       new SlotDefinition(
-                          null, null, moduleName, null, null, slotName, TypeString.UNDEFINED))
+                          null,
+                          null,
+                          moduleName,
+                          null,
+                          null,
+                          typeString,
+                          slotName,
+                          TypeString.UNDEFINED))
               .toList();
     }
 

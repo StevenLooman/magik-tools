@@ -108,6 +108,7 @@ class DefinitionReaderTest {
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
+    final TypeString testExemplarRef = TypeString.ofIdentifier("test_exemplar", "user");
     assertThat(definitions)
         .isEqualTo(
             List.of(
@@ -120,7 +121,7 @@ class DefinitionReaderTest {
                     "",
                     null,
                     ExemplarDefinition.Sort.SLOTTED,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
+                    testExemplarRef,
                     List.of(
                         new SlotDefinition(
                             new Location(
@@ -130,6 +131,7 @@ class DefinitionReaderTest {
                             null,
                             null,
                             null,
+                            testExemplarRef,
                             "slot1",
                             TypeString.UNDEFINED),
                         new SlotDefinition(
@@ -140,6 +142,7 @@ class DefinitionReaderTest {
                             null,
                             null,
                             null,
+                            testExemplarRef,
                             "slot2",
                             TypeString.UNDEFINED)),
                     Collections.emptyList(),
@@ -156,6 +159,7 @@ class DefinitionReaderTest {
     reader.walkAst(node);
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
+    final TypeString testExemplarRef = TypeString.ofIdentifier("test_exemplar", "user");
     assertThat(definitions)
         .isEqualTo(
             List.of(
@@ -168,7 +172,7 @@ class DefinitionReaderTest {
                     "",
                     null,
                     ExemplarDefinition.Sort.SLOTTED,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
+                    testExemplarRef,
                     List.of(
                         new SlotDefinition(
                             new Location(
@@ -178,6 +182,7 @@ class DefinitionReaderTest {
                             null,
                             null,
                             null,
+                            testExemplarRef,
                             "slot1",
                             TypeString.UNDEFINED)),
                     Collections.emptyList(),
@@ -190,7 +195,7 @@ class DefinitionReaderTest {
                     null,
                     null,
                     null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
+                    testExemplarRef,
                     "slot1",
                     Collections.emptySet(),
                     Collections.emptyList(),
@@ -206,7 +211,7 @@ class DefinitionReaderTest {
                     null,
                     null,
                     null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
+                    testExemplarRef,
                     "slot1<<",
                     Set.of(MethodDefinition.Modifier.PRIVATE),
                     Collections.emptyList(),
@@ -230,7 +235,7 @@ class DefinitionReaderTest {
                     null,
                     null,
                     null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
+                    testExemplarRef,
                     "slot1^<<",
                     Set.of(MethodDefinition.Modifier.PRIVATE),
                     Collections.emptyList(),

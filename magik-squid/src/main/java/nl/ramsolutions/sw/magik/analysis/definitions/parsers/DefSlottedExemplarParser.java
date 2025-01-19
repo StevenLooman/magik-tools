@@ -114,7 +114,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
 
     // Figure name.
     final String identifier = argument0Node.getTokenValue().substring(1);
-    final TypeString name = TypeString.ofIdentifier(identifier, packageName);
+    final TypeString exemplarName = TypeString.ofIdentifier(identifier, packageName);
 
     // Figure slot types.
     final AstNode parentNode = this.node.getParent();
@@ -145,7 +145,14 @@ public class DefSlottedExemplarParser extends BaseDefParser {
           Objects.requireNonNullElse(slotTypes.get(slotName), TypeString.UNDEFINED);
       final SlotDefinition slot =
           new SlotDefinition(
-              slotLocation, timestamp, moduleName, null, slotDefNode, slotName, slotTypeRef);
+              slotLocation,
+              timestamp,
+              moduleName,
+              null,
+              slotDefNode,
+              exemplarName,
+              slotName,
+              slotTypeRef);
       slots.add(slot);
 
       // Method definitions.
@@ -154,7 +161,6 @@ public class DefSlottedExemplarParser extends BaseDefParser {
       if (flagNode != null && flavorNode != null) {
         final String flag = flagNode.getTokenValue();
         final String flavor = flavorNode.getTokenValue();
-        final TypeString exemplarName = TypeString.ofIdentifier(identifier, packageName);
         final List<MethodDefinition> slotMethodDefinitions =
             this.generateSlotMethods(
                 timestamp,
@@ -191,7 +197,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
             doc,
             statementNode,
             ExemplarDefinition.Sort.SLOTTED,
-            name,
+            exemplarName,
             slots,
             parents,
             topics);

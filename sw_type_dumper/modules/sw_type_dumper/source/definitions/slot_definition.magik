@@ -3,11 +3,13 @@ _package mt
 
 _pragma(classify_level=basic, topic=type_dumper)
 ## Slot definition.
+## @slot {sw:char16_vector} owner_type_name
 ## @slot {sw:char16_vector} name
 ## @slot {sw:char16_vector} type_name
 def_slotted_exemplar(
 	:slot_definition,
 	{
+		{:owner_type_name, _unset, :readable, :public}
 		{:name, _unset, :readable, :public},
 		{:type_name, _unset, :readable, :public}
 	},
@@ -15,21 +17,24 @@ def_slotted_exemplar(
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_method slot_definition.new(name, type_name)
+_method slot_definition.new(owner_type_name, name, type_name)
 	## Constructor.
+	## @param {sw:char16_vector} owner_type_name
 	## @param {sw:char16_vector} name
 	## @param {sw:char16_vector} type_name
 	## @return {_self}
-	_return _clone.init(name, type_name)
+	_return _clone.init(owner_type_name, name, type_name)
 _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_private _method slot_definition.init(name, type_name)
+_private _method slot_definition.init(owner_type_name, name, type_name)
 	## Initializer.
+	## @param {sw:char16_vector} owner_type_name
 	## @param {sw:char16_vector} name
 	## @param {sw:char16_vector} type_name
 	## @return {_self}
+	.owner_type_name << owner_type_name
 	.name << name
 	.type_name << type_name
 	_return _self
@@ -40,7 +45,16 @@ _pragma(classify_level=basic, topic=type_dumper)
 _method slot_definition.new_from(slot_desc)
 	## Construct self from `type_name` and `sw:method_table`.
 	## @param {sw:slot_descriptor} slot_desc
+	_local owner_source_global_var <<
+		_if source_metadata[:exemplar_global] _isnt _unset
+		_then
+			>> source_metadata[:exemplar_global]
+		_else
+			>> write_string("@sw:", source_metadata[:exemplar_name]).evaluate()
+		_endif
+	_local owner_type_name << _self.name_from_type(owner_source_global_var.package, owner_source_global_var.key)
 	_return _self.new(
+		owner_type_name,
 		slot_desc.slot_name,
 		_self.undefined_type)
 _endmethod
@@ -51,7 +65,8 @@ _method slot_definition.equals?(other)
 	## Equals?
 	## @param {mt:slot_definition} other
 	## @return {sw:false}
-	_return _self.name = other.name _andif
+	_return _self.owner_type_name = other.owner_type_name _andif
+		_self.name = other.name _andif
 		_self.type_name = other.type_name
 _endmethod
 $
@@ -61,7 +76,8 @@ _method slot_definition.equals_disregarding_typing?(other)
 	## Equals disregarding typing?
 	## @param {mt:slot_definition} other
 	## @return {sw:false}
-	_return _self.name = other.name
+	_return _self.owner_type_name = other.owner_type_name _andif
+		_self.name = other.name
 _endmethod
 $
 
@@ -76,5 +92,5 @@ define_binary_operator_case(
 $
 
 slot_definition.define_show_attributes(
-	:name)
+	:owner_type_name, :name)
 $
