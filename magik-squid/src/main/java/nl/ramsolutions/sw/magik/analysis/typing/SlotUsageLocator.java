@@ -33,8 +33,7 @@ public class SlotUsageLocator {
    * @return The {@link SlotUsage}s for the wanted slot usage in all indexed {@link
    *     MethodDefinition}s.
    */
-  public List<Map.Entry<SlotUsage, MagikTypedFile>> getMethodUsages(
-      final SlotUsage wantedSlotUsage) {
+  public List<Map.Entry<SlotUsage, MagikTypedFile>> getSlotUsages(final SlotUsage wantedSlotUsage) {
     return this.definitionKeeper.getMethodDefinitions().stream()
         .flatMap(methodDef -> methodDef.getUsedSlots().stream())
         .filter(usage -> usage.equals(wantedSlotUsage))

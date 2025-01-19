@@ -4,6 +4,8 @@ _package user
 def_slotted_exemplar(
     :test_exemplar,
     {
+	{:slot1, _unset},
+	{:slot2, 1}
     })
 $
 
@@ -61,5 +63,11 @@ $
 _iter _method test_exemplar.iter_depth0()
     ## Iter depth 1.
     _loopbody(0)
+_endmethod
+$
+
+_method test_exemplar.slot1_assign_depth3()
+    ## Depth 3.
+    .slot1 << _self.depth3()
 _endmethod
 $

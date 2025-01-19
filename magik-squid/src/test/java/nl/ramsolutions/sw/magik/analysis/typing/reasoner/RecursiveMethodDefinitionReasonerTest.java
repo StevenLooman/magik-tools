@@ -15,14 +15,14 @@ import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.junit.jupiter.api.Test;
 
-class RecursiveTypeReasonerTest {
+class RecursiveMethodDefinitionReasonerTest {
 
   /**
    * VSCode runs from module directory, mvn runs from project directory.
    *
    * @return Proper {@link Path} to file.
    */
-  protected Path getPath(final Path relativePath) {
+  private Path getPath(final Path relativePath) {
     final Path path = Path.of(".").toAbsolutePath().getParent();
     if (path.endsWith("magik-squid")) {
       return Path.of("..").resolve(relativePath);
@@ -31,8 +31,8 @@ class RecursiveTypeReasonerTest {
     return Path.of(".").resolve(relativePath);
   }
 
-  protected void addFileToDefinitionKeeper(
-      final IDefinitionKeeper definitionKeeper, final Path path) throws IOException {
+  private void addFileToDefinitionKeeper(final IDefinitionKeeper definitionKeeper, final Path path)
+      throws IOException {
     final URI uri = path.toUri();
     final String content = Files.readString(path, Charset.defaultCharset());
     final MagikTypedFile magikTypedFile = new MagikTypedFile(uri, content, definitionKeeper);
@@ -42,7 +42,7 @@ class RecursiveTypeReasonerTest {
   @Test
   void testRecursiveMethodReasoning() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final Path path = Path.of("magik-squid/src/test/resources/test_recursive_type_reasoner.magik");
+    final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
     final Path fixedPath = this.getPath(path);
     this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
 
@@ -57,9 +57,9 @@ class RecursiveTypeReasonerTest {
     assertThat(resultStr).isEqualTo(ExpressionResultString.UNDEFINED);
 
     // Recusively reason the method definition.
-    final RecursiveTypeReasoner recursiveTypeReasoner =
-        new RecursiveTypeReasoner(definitionKeeper, 3);
-    recursiveTypeReasoner.reason(methodDefinition);
+    final RecursiveMethodDefinitionReasoner recursiveReasoner =
+        new RecursiveMethodDefinitionReasoner(definitionKeeper, 3);
+    recursiveReasoner.reason(methodDefinition);
 
     // Test if the method definition now has a return type.
     final MethodDefinition updatedMethodDefinition =
@@ -74,7 +74,7 @@ class RecursiveTypeReasonerTest {
   @Test
   void testRecursiveMethodReasoningOverMaxDepth() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final Path path = Path.of("magik-squid/src/test/resources/test_recursive_type_reasoner.magik");
+    final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
     final Path fixedPath = this.getPath(path);
     this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
 
@@ -89,9 +89,9 @@ class RecursiveTypeReasonerTest {
     assertThat(resultStr).isEqualTo(ExpressionResultString.UNDEFINED);
 
     // Recusively reason the method definition.
-    final RecursiveTypeReasoner recursiveTypeReasoner =
-        new RecursiveTypeReasoner(definitionKeeper, 1);
-    recursiveTypeReasoner.reason(methodDefinition);
+    final RecursiveMethodDefinitionReasoner recursiveReasoner =
+        new RecursiveMethodDefinitionReasoner(definitionKeeper, 1);
+    recursiveReasoner.reason(methodDefinition);
 
     // Test if the method definition is not reasoned, as it surpasses max depth.
     final MethodDefinition updatedMethodDefinition =
@@ -106,7 +106,7 @@ class RecursiveTypeReasonerTest {
   @Test
   void testRecursiveIterMethodReasoning() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final Path path = Path.of("magik-squid/src/test/resources/test_recursive_type_reasoner.magik");
+    final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
     final Path fixedPath = this.getPath(path);
     this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
 
@@ -121,9 +121,9 @@ class RecursiveTypeReasonerTest {
     assertThat(resultStr).isEqualTo(ExpressionResultString.UNDEFINED);
 
     // Recusively reason the method definition.
-    final RecursiveTypeReasoner recursiveTypeReasoner =
-        new RecursiveTypeReasoner(definitionKeeper, 3);
-    recursiveTypeReasoner.reason(methodDefinition);
+    final RecursiveMethodDefinitionReasoner recursiveReasoner =
+        new RecursiveMethodDefinitionReasoner(definitionKeeper, 3);
+    recursiveReasoner.reason(methodDefinition);
 
     // Test if the method definition now has a return type.
     final MethodDefinition updatedMethodDefinition =

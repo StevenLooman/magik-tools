@@ -28,14 +28,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Recursive type reasoner.
- *
- * <p>Reasons about definitions, recursively following any used methods.
+ * Recursive {@link MethodDefinition} return/iter type reasoner, recursively following any used
+ * methods.
  */
-public class RecursiveTypeReasoner {
+public class RecursiveMethodDefinitionReasoner {
 
   // TODO: define_shared_contant reasoning.
-  // TODO: Slot reasoning.
   // TODO: define_shared_variable reasoning.
 
   private static final MagikToolsProperties MAGIK_FILE_PROPERTIES =
@@ -46,7 +44,8 @@ public class RecursiveTypeReasoner {
               MagikAnalysisSettings.INDEX_SLOT_USAGES, "true",
               MagikAnalysisSettings.INDEX_CONDITION_USAGES, "true"));
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(RecursiveTypeReasoner.class);
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(RecursiveMethodDefinitionReasoner.class);
 
   private final IDefinitionKeeper definitionKeeper;
   private final int maxDepth;
@@ -56,21 +55,23 @@ public class RecursiveTypeReasoner {
    *
    * @param maxDepth the maximum depth to reason.
    */
-  public RecursiveTypeReasoner(final IDefinitionKeeper definitionKeeper, final int maxDepth) {
+  public RecursiveMethodDefinitionReasoner(
+      final IDefinitionKeeper definitionKeeper, final int maxDepth) {
     this.definitionKeeper = definitionKeeper;
     this.maxDepth = maxDepth;
   }
 
   /**
-   * Reason the method definition to found the return type, recursively following any used methods,
-   * up to {@link maxDepth} depth.
+   * Reason the {@link MethodDefinition} to find the return and iter types, recursively following
+   * any used methods, up to {@link maxDepth} depth.
    *
    * <p>The {@link MethodDefinition}s in the {@link IDefinitionKeeper} will be replaced in case the
    * {@link MethodDefinition} return types were not UNDEFINED and could be reasoned from the current
    * code.
    *
    * @param methodDefinition The {@link MethodDefinition} to reason.
-   * @return True if the method definition return type could be reasoned, false otherwise.
+   * @return True if the {@link MethodDefinition} return type and iter type are not undefined, false
+   *     otherwise.
    */
   public boolean reason(final MethodDefinition methodDefinition) {
     this.reason(methodDefinition, 0);
@@ -84,7 +85,8 @@ public class RecursiveTypeReasoner {
             .filter(methodDef -> methodDef.getLocation().equals(methodDefinition.getLocation()))
             .findAny()
             .orElseThrow();
-    return updatedMethodDefinition.getReturnTypes() != ExpressionResultString.UNDEFINED;
+    return updatedMethodDefinition.getReturnTypes() != ExpressionResultString.UNDEFINED
+        && updatedMethodDefinition.getLoopTypes() != ExpressionResultString.UNDEFINED;
   }
 
   private void reason(final MethodDefinition methodDefinition, final int depth) {
@@ -241,7 +243,7 @@ public class RecursiveTypeReasoner {
       throw new IllegalStateException(exception);
     }
     return new MagikTypedFile(
-        RecursiveTypeReasoner.MAGIK_FILE_PROPERTIES, uri, text, this.definitionKeeper);
+        RecursiveMethodDefinitionReasoner.MAGIK_FILE_PROPERTIES, uri, text, this.definitionKeeper);
   }
 
   private Collection<MethodDefinition> getMethodDefinitions(
