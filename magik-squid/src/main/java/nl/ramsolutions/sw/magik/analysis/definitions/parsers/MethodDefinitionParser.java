@@ -69,8 +69,7 @@ public class MethodDefinitionParser {
     // Figure location.
     final URI uri = this.node.getToken().getURI();
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(this.node);
-    final AstNode methodNameNode = helper.getMethodNameNode();
-    final Location location = new Location(uri, methodNameNode);
+    final Location location = helper.getLocation();
 
     // Figure timestamp.
     final Instant timestamp = this.magikFile.getTimestamp();

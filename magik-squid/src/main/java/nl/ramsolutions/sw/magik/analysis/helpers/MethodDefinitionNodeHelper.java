@@ -1,12 +1,15 @@
 package nl.ramsolutions.sw.magik.analysis.helpers;
 
 import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.Token;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
@@ -72,9 +75,9 @@ public class MethodDefinitionNodeHelper {
   }
 
   /**
-   * Get the method name, without the parentheses and assignment operator.
+   * Get the method name, without the parentheses and/or assignment operator.
    *
-   * @return
+   * @return Method name, without the parentheses and/or assignment operator.
    */
   public String getMethodNameIdentifier() {
     final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
@@ -150,7 +153,7 @@ public class MethodDefinitionNodeHelper {
   /**
    * Test if method is an `_abstract` method.
    *
-   * @return
+   * @return True if method is an `_abstract` method.
    */
   public boolean isAbstractMethod() {
     final String modifier = MagikKeyword.ABSTRACT.getValue();
@@ -161,7 +164,7 @@ public class MethodDefinitionNodeHelper {
   /**
    * Test if method is a `_private` method.
    *
-   * @return
+   * @return True if method is a `_private` method.
    */
   public boolean isPrivateMethod() {
     final String modifier = MagikKeyword.PRIVATE.getValue();
@@ -172,7 +175,7 @@ public class MethodDefinitionNodeHelper {
   /**
    * Test if method is an `_iter` method.
    *
-   * @return
+   * @return True if method is an `_iter` method.
    */
   public boolean isIterMethod() {
     final String modifier = MagikKeyword.ITER.getValue();
@@ -183,7 +186,7 @@ public class MethodDefinitionNodeHelper {
   /**
    * Test if method returns anything.
    *
-   * @return
+   * @return True if method returns anything.
    */
   public boolean returnsAnything() {
     final List<AstNode> returnStatementNodes =
@@ -206,7 +209,7 @@ public class MethodDefinitionNodeHelper {
   /**
    * Test if method has a loopbody statement.
    *
-   * @return
+   * @return True if method has a loopbody statement.
    */
   public boolean hasLoopbody() {
     return this.node.getDescendants(MagikGrammar.LOOPBODY).stream()
@@ -245,5 +248,17 @@ public class MethodDefinitionNodeHelper {
     }
 
     return methodNameNode;
+  }
+
+  /**
+   * Get the location of the method definition.
+   *
+   * @return Location of the method definition.
+   */
+  public Location getLocation() {
+    final AstNode locationNode = this.getMethodNameNode();
+    final Token token = locationNode.getToken();
+    final URI uri = token.getURI();
+    return new Location(uri, token);
   }
 }
