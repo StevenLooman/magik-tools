@@ -4,9 +4,11 @@ import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
@@ -15,7 +17,10 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.SlotUsageLocator;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Reasoner for reasoning the type of a {@link SlotDefinition} by recursively reasoning the assigned
@@ -24,6 +29,9 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 public class RecursiveSlotDefinitionReasoner {
 
   // TODO: Reason with slot methods.
+
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(RecursiveSlotDefinitionReasoner.class);
 
   private final IDefinitionKeeper definitionKeeper;
   private final int maxDepth;
@@ -50,6 +58,8 @@ public class RecursiveSlotDefinitionReasoner {
    * @return True if the {@link SlotDefinition} type could be fully reasoned, false otherwise.
    */
   public boolean reason(final SlotDefinition slotDefinition) {
+    LOGGER.debug("Reasoning slot definition: {}", slotDefinition);
+
     // TODO: Also get slot type from def_slotted_exemplar.
 
     if (!slotDefinition.getTypeName().containsUndefined()) {
@@ -71,7 +81,7 @@ public class RecursiveSlotDefinitionReasoner {
     // Get MethodDefinitions from the SlotUsages, and resason all those methods.
     this.getMethodDefinitionsFromSlotUsages(slotUsagesPre).forEach(this::reasonMethodDefinition);
 
-    // TODO: Extract the assigned types to the slot.
+    // Extract the assigned types to the slot.
     final List<Map.Entry<SlotUsage, MagikTypedFile>> slotUsagesPost =
         this.getSlotUsages(slotDefinition);
     final TypeString updatedSlotTypeStr = this.extractAssginedTypes(slotUsagesPost);
@@ -92,6 +102,7 @@ public class RecursiveSlotDefinitionReasoner {
               final SlotUsage slotUsage = entry.getKey();
               final AstNode slotUsageNode = slotUsage.getNode();
               Objects.requireNonNull(slotUsageNode);
+              final AstNode atomSlotUsageNode = slotUsageNode.getParent();
 
               // Get METHOD_DEFINITION nodes.
               final AstNode methodDefinitionNode =
@@ -110,29 +121,31 @@ public class RecursiveSlotDefinitionReasoner {
                   .stream()
                   .map(
                       assignmentNode -> {
-                        // Test if the slot node is being assigned.
-                        final AstNode rightNode = assignmentNode.getLastChild();
-                        final List<AstNode> assignedNodes =
+                        // Test if the slot node is actually being assigned, not used.
+                        // TODO: Move this to AssignmentExpressionNodeHelper.
+                        final AstNode rhsNode = assignmentNode.getLastChild();
+                        final List<AstNode> lhsNodes =
                             assignmentNode.getChildren(MagikGrammar.values());
-                        assignedNodes.remove(rightNode);
-                        if (assignedNodes.contains(slotUsageNode)) {
+                        lhsNodes.remove(rhsNode);
+                        if (!lhsNodes.contains(atomSlotUsageNode)) {
                           return null;
                         }
 
-                        // Only need to get the LHS of the assignment,
-                        // as the reasoner has stored the type at the node.
+                        // Get the ASSIGNMENT_EXPRESSION node,
+                        // as the reasoner has stored the type at this node.
+                        // TODO: Is this ASSIGNMENT_EXPRESSION node for the same file?
                         final ExpressionResultString result =
-                            reasonerState.getNodeType(slotUsageNode);
+                            reasonerState.getNodeType(assignmentNode);
                         return result.get(0, TypeString.UNDEFINED);
                       })
                   .filter(Objects::nonNull);
             })
-        .flatMap(s -> s)
+        .flatMap(Function.identity())
         .reduce(TypeString::combine)
         .orElse(TypeString.UNDEFINED);
   }
 
-  private void reasonMethodDefinition(MethodDefinition methodDef) {
+  private void reasonMethodDefinition(final MethodDefinition methodDef) {
     final RecursiveMethodDefinitionReasoner recursiveReasoner =
         new RecursiveMethodDefinitionReasoner(this.definitionKeeper, this.maxDepth);
     recursiveReasoner.reason(methodDef);
@@ -167,27 +180,56 @@ public class RecursiveSlotDefinitionReasoner {
   private List<Map.Entry<SlotUsage, MagikTypedFile>> getSlotUsages(
       final SlotDefinition slotDefinition) {
     final SlotUsageLocator slotUsageLocator = new SlotUsageLocator(this.definitionKeeper);
-    final TypeString slotTypeStr = slotDefinition.getTypeName();
+    final TypeString slotTypeStr = slotDefinition.getOwnerTypeName();
     final String slotName = slotDefinition.getName();
     final SlotUsage wantedSlotUsage = new SlotUsage(slotTypeStr, slotName);
     return slotUsageLocator.getSlotUsages(wantedSlotUsage);
   }
 
   private void updateSlotDefinitionType(
-      final SlotDefinition slotDefinition, final TypeString typeStr) {
+      final SlotDefinition slotDefinition, final TypeString newSlotTypeStr) {
+    // Find ExemplarDefinition for the slot.
+    final TypeStringResolver resolver = new TypeStringResolver(this.definitionKeeper);
+    final TypeString ownerTypeStr = slotDefinition.getOwnerTypeName();
+    final ExemplarDefinition exemplarDefinition = resolver.getExemplarDefinition(ownerTypeStr);
+    Objects.requireNonNull(exemplarDefinition);
+
+    // Create a copy of the ExemplarDefinition, with our updated SlotDefinition.
     final SlotDefinition updatedSlotDefinition =
         new SlotDefinition(
             slotDefinition.getLocation(),
             slotDefinition.getTimestamp(),
             slotDefinition.getModuleName(),
             slotDefinition.getDoc(),
-            null,
+            slotDefinition.getNode(),
             slotDefinition.getOwnerTypeName(),
             slotDefinition.getName(),
-            typeStr);
+            newSlotTypeStr);
+    final List<SlotDefinition> updatedSlots =
+        exemplarDefinition.getSlots().stream()
+            .map(
+                slotDef -> {
+                  if (slotDef.equals(slotDefinition)) {
+                    return updatedSlotDefinition;
+                  }
+                  return slotDef;
+                })
+            .toList();
+    final ExemplarDefinition updatedExemplarDefinition =
+        new ExemplarDefinition(
+            exemplarDefinition.getLocation(),
+            exemplarDefinition.getTimestamp(),
+            exemplarDefinition.getModuleName(),
+            exemplarDefinition.getDoc(),
+            exemplarDefinition.getNode(),
+            exemplarDefinition.getSort(),
+            exemplarDefinition.getTypeString(),
+            updatedSlots,
+            exemplarDefinition.getParents(),
+            exemplarDefinition.getTopics());
 
-    // Save the new SlotDefinition.
-    this.definitionKeeper.remove(slotDefinition);
-    this.definitionKeeper.add(updatedSlotDefinition);
+    // Save the new ExemplarDefinition.
+    this.definitionKeeper.remove(exemplarDefinition);
+    this.definitionKeeper.add(updatedExemplarDefinition);
   }
 }

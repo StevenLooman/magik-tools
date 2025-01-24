@@ -335,6 +335,21 @@ public class TypeStringResolver {
         .collect(Collectors.toSet());
   }
 
+  /**
+   * Get all the {@link SlotDefinition}s with the given name for the given {@link TypeString}.
+   *
+   * @param typeString {@link TypeString} to resolve.
+   * @param slotName Slot name to resolve.
+   * @return All {@link SlotDefinition}s for the given type.
+   */
+  public Collection<SlotDefinition> getSlotDefinitions(
+      final TypeString typeString, final String slotName) {
+    return this.findExemplarDefinitions(typeString).stream()
+        .flatMap(exemplarDefinition -> exemplarDefinition.getSlots().stream())
+        .filter(slotDef -> slotDef.getName().equals(slotName))
+        .collect(Collectors.toSet());
+  }
+
   private Collection<TypeString> getParents(final ITypeStringDefinition definition) {
     if (definition instanceof ExemplarDefinition exemplarDefinition) {
       return exemplarDefinition.getParents();

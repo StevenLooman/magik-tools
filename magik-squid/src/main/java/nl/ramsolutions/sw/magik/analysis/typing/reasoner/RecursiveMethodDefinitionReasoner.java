@@ -97,11 +97,14 @@ public class RecursiveMethodDefinitionReasoner {
       return;
     }
 
-    if (methodDefinition.getReturnTypes() != ExpressionResultString.UNDEFINED
-        && methodDefinition.getLoopTypes() != ExpressionResultString.UNDEFINED) {
-      // Already reasoned this method definition, or from TypeDoc.
-      return;
-    }
+    // // TODO: Sometimes we do need to reason with the method definition itself, even if it
+    // // doesn't return/iterate anything.
+    // if (methodDefinition.getReturnTypes() != ExpressionResultString.UNDEFINED
+    //     && methodDefinition.getLoopTypes() != ExpressionResultString.UNDEFINED) {
+    //   // Already reasoned this method definition, or from TypeDoc,
+    //   // or it just doesn't return/iterate anything.
+    //   return;
+    // }
 
     final Location location = methodDefinition.getLocation();
     if (location == null) {

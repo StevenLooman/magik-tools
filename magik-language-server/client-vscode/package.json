@@ -328,7 +328,7 @@
         "magik.typing.indexMethodUsages": {
           "description": "Enable indexing of usages of methods by methods.",
           "type": "boolean",
-          "default": false
+          "default": true
         },
         "magik.typing.indexSlotUsages": {
           "description": "Enable indexing of usages of slots by methods.",

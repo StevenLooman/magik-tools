@@ -188,8 +188,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
     final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
     final String slotName = identifierNode.getTokenValue();
     final TypeString slotTypeStr =
-        this.typeResolver.getSlotDefinitions(ownerTypeStr).stream()
-            .filter(slotDef -> slotDef.getName().equals(slotName))
+        this.typeResolver.getSlotDefinitions(ownerTypeStr, slotName).stream()
             .map(SlotDefinition::getTypeName)
             .findAny()
             .orElse(TypeString.UNDEFINED);

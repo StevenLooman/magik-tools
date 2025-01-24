@@ -68,6 +68,6 @@ $
 
 _method test_exemplar.slot1_assign_depth3()
     ## Depth 3.
-    .slot1 << _self.depth3()
+    .slot1 << _self.depth2()
 _endmethod
 $
