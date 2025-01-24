@@ -78,7 +78,7 @@ public class MethodDefinitionParser {
     final String moduleName = ModuleDefFile.getModuleNameForUri(uri);
 
     // Figure exemplar name & method name.
-    final TypeString exemplarName = helper.getTypeString();
+    final TypeString exemplarName = helper.getExemplarTypeString();
     final String methodName = helper.getMethodName();
 
     // Figure modifers.

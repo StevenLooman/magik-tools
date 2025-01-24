@@ -84,7 +84,7 @@ public class TypeHierarchyProvider {
     if (methodDefinitionNode != null) {
       final MethodDefinitionNodeHelper methodDefinitionNodeHelper =
           new MethodDefinitionNodeHelper(methodDefinitionNode);
-      final TypeString typeStr = methodDefinitionNodeHelper.getTypeString();
+      final TypeString typeStr = methodDefinitionNodeHelper.getExemplarTypeString();
       final ExemplarDefinition definition = resolver.getExemplarDefinition(typeStr);
       if (definition == null) {
         return null; // NOSONAR: LSP requires null.

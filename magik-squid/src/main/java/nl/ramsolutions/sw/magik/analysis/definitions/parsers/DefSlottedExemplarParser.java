@@ -122,7 +122,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
     final Map<String, TypeString> slotTypes = docParser.getSlotTypes();
 
     // Figure slots.
-    final List<SlotDefinition> slots = new ArrayList<>();
+    final List<SlotDefinition> slotDefinitions = new ArrayList<>();
     final List<MethodDefinition> methodDefinitions = new ArrayList<>();
     for (final AstNode slotDefNode : // NOSONAR
         argument1Node.getChildren(MagikGrammar.EXPRESSION)) {
@@ -143,7 +143,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
       final String slotName = slotNameSymbol.substring(1);
       final TypeString slotTypeRef =
           Objects.requireNonNullElse(slotTypes.get(slotName), TypeString.UNDEFINED);
-      final SlotDefinition slot =
+      final SlotDefinition slotDefinition =
           new SlotDefinition(
               slotLocation,
               timestamp,
@@ -153,7 +153,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               exemplarName,
               slotName,
               slotTypeRef);
-      slots.add(slot);
+      slotDefinitions.add(slotDefinition);
 
       // Method definitions.
       final AstNode flagNode = simpleVectorHelper.getNth(2, MagikGrammar.SYMBOL);
@@ -198,7 +198,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
             statementNode,
             ExemplarDefinition.Sort.SLOTTED,
             exemplarName,
-            slots,
+            slotDefinitions,
             parents,
             topics);
 

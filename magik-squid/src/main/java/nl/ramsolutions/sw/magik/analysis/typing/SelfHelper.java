@@ -26,7 +26,7 @@ public final class SelfHelper {
       } else if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
         final MethodDefinitionNodeHelper definitionHelper =
             new MethodDefinitionNodeHelper(definitionNode);
-        return definitionHelper.getTypeString();
+        return definitionHelper.getExemplarTypeString();
       } else {
         return TypeString.SW_PROCEDURE;
       }

@@ -114,7 +114,7 @@ public class MethodDefinitionUsageParser {
    */
   public List<SlotUsage> getUsedSlots() {
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(this.node);
-    final TypeString typeName = helper.getTypeString();
+    final TypeString typeName = helper.getExemplarTypeString();
     return this.node.getDescendants(MagikGrammar.SLOT).stream()
         .map(
             slotNode -> {

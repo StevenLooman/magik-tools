@@ -71,7 +71,7 @@ class AssignmentHandler extends LocalTypeReasonerHandler {
         this.state.setNodeType(assignedNode, result);
       } else if (assignedNode.is(MagikGrammar.ATOM)
           && assignedNode.getFirstChild(MagikGrammar.SLOT) != null) {
-        // Store slot.
+        // Store slot type.
         this.state.setNodeType(assignedNode, result);
       } else {
         throw new IllegalStateException();

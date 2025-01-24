@@ -90,7 +90,7 @@ public class MethodDefinitionNodeHelper {
    * @return Exemplar + method name.
    */
   public String getExemplarMethodName() {
-    final TypeString exemplarName = this.getTypeString();
+    final TypeString exemplarName = this.getExemplarTypeString();
     final String methodName = this.getMethodName();
     if (methodName.startsWith("[")) {
       return exemplarName.getIdentifier() + methodName;
@@ -100,11 +100,11 @@ public class MethodDefinitionNodeHelper {
   }
 
   /**
-   * Get global reference to type the method is defined on.
+   * Get {@link TypeString} of the exemplar the method is defined on.
    *
-   * @return TypeString to type.
+   * @return {@link TypeString} to exemplar.
    */
-  public TypeString getTypeString() {
+  public TypeString getExemplarTypeString() {
     final PackageNodeHelper packageHelper = new PackageNodeHelper(this.node);
     final String pakkage = packageHelper.getCurrentPackage();
     final AstNode exemplarNameNode = this.node.getFirstChild(MagikGrammar.EXEMPLAR_NAME);

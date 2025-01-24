@@ -219,7 +219,7 @@ public class CompletionProvider {
       if (methodDefinitionNode != null) {
         final MethodDefinitionNodeHelper helper =
             new MethodDefinitionNodeHelper(methodDefinitionNode);
-        final TypeString typeString = helper.getTypeString();
+        final TypeString typeString = helper.getExemplarTypeString();
         definitionKeeper.getExemplarDefinitions(typeString).stream()
             .forEach(
                 exemplarDef ->
