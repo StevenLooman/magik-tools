@@ -1,20 +1,11 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
-import nl.ramsolutions.sw.FileCharsetDeterminer;
-import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
@@ -31,34 +22,23 @@ import org.slf4j.LoggerFactory;
  * Recursive {@link MethodDefinition} return/iter type reasoner, recursively following any used
  * methods.
  */
-public class RecursiveMethodDefinitionReasoner {
+public class RecursiveMethodDefinitionReasoner extends AbstractRecursiveReasoner {
 
   // TODO: define_shared_contant reasoning.
   // TODO: define_shared_variable reasoning.
 
-  private static final MagikToolsProperties MAGIK_FILE_PROPERTIES =
-      new MagikToolsProperties(
-          Map.of(
-              MagikAnalysisSettings.INDEX_GLOBAL_USAGES, "true",
-              MagikAnalysisSettings.INDEX_METHOD_USAGES, "true",
-              MagikAnalysisSettings.INDEX_SLOT_USAGES, "true",
-              MagikAnalysisSettings.INDEX_CONDITION_USAGES, "true"));
-
   private static final Logger LOGGER =
       LoggerFactory.getLogger(RecursiveMethodDefinitionReasoner.class);
-
-  private final IDefinitionKeeper definitionKeeper;
-  private final int maxDepth;
 
   /**
    * Constructor.
    *
-   * @param maxDepth the maximum depth to reason.
+   * @param definitionKeeper The definition keeper to use.
+   * @param maxDepth The maximum depth to reason.
    */
   public RecursiveMethodDefinitionReasoner(
       final IDefinitionKeeper definitionKeeper, final int maxDepth) {
-    this.definitionKeeper = definitionKeeper;
-    this.maxDepth = maxDepth;
+    super(definitionKeeper, maxDepth);
   }
 
   /**
@@ -97,8 +77,8 @@ public class RecursiveMethodDefinitionReasoner {
       return;
     }
 
-    // // TODO: Sometimes we do need to reason with the method definition itself, even if it
-    // // doesn't return/iterate anything.
+    // // TODO: Sometimes we do need to reason with the method definition itself,
+    // even if it doesn't return/iterate anything.
     // if (methodDefinition.getReturnTypes() != ExpressionResultString.UNDEFINED
     //     && methodDefinition.getLoopTypes() != ExpressionResultString.UNDEFINED) {
     //   // Already reasoned this method definition, or from TypeDoc,
@@ -233,20 +213,6 @@ public class RecursiveMethodDefinitionReasoner {
     // Save the new MethodDefinition.
     this.definitionKeeper.remove(methodDefinition);
     this.definitionKeeper.add(updatedMethodDefinition);
-  }
-
-  private MagikTypedFile getMagikFile(final Location location) {
-    final URI uri = location.getUri();
-    final Path path = Path.of(uri);
-    final Charset charset = FileCharsetDeterminer.determineCharset(path);
-    final String text;
-    try {
-      text = Files.readString(path, charset);
-    } catch (final IOException exception) {
-      throw new IllegalStateException(exception);
-    }
-    return new MagikTypedFile(
-        RecursiveMethodDefinitionReasoner.MAGIK_FILE_PROPERTIES, uri, text, this.definitionKeeper);
   }
 
   private Collection<MethodDefinition> getMethodDefinitions(

@@ -1,6 +1,8 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -8,12 +10,15 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.SimpleVectorNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.SlotUsageLocator;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -26,25 +31,23 @@ import org.slf4j.LoggerFactory;
  * Reasoner for reasoning the type of a {@link SlotDefinition} by recursively reasoning the assigned
  * types.
  */
-public class RecursiveSlotDefinitionReasoner {
+public class RecursiveSlotDefinitionReasoner extends AbstractRecursiveReasoner {
 
-  // TODO: Reason with slot methods.
+  // TODO: Reason with slot methods? Use the ParameterRecursiveReasoner to get the assigned types.
+  //       Or a more generic RecursiveNodeReasoner? Do we also need a dispatcher for this?
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(RecursiveSlotDefinitionReasoner.class);
 
-  private final IDefinitionKeeper definitionKeeper;
-  private final int maxDepth;
-
   /**
    * Constructor.
    *
-   * @param maxDepth the maximum depth to reason.
+   * @param definitionKeeper The definition keeper to use.
+   * @param maxDepth The maximum depth to reason.
    */
   public RecursiveSlotDefinitionReasoner(
       final IDefinitionKeeper definitionKeeper, final int maxDepth) {
-    this.definitionKeeper = definitionKeeper;
-    this.maxDepth = maxDepth;
+    super(definitionKeeper, maxDepth);
   }
 
   /**
@@ -73,6 +76,9 @@ public class RecursiveSlotDefinitionReasoner {
       return false;
     }
 
+    // Get slot type from def_slotted_exemplar.
+    final TypeString defSlotTypeStr = this.reasonDefaultSlotValueType(slotDefinition);
+
     // Find all SlotUsages in all files.
     // TODO: We only need the methods where the slot is assigned.
     final List<Map.Entry<SlotUsage, MagikTypedFile>> slotUsagesPre =
@@ -84,7 +90,14 @@ public class RecursiveSlotDefinitionReasoner {
     // Extract the assigned types to the slot.
     final List<Map.Entry<SlotUsage, MagikTypedFile>> slotUsagesPost =
         this.getSlotUsages(slotDefinition);
-    final TypeString updatedSlotTypeStr = this.extractAssginedTypes(slotUsagesPost);
+    final TypeString updatedSlotTypeStr;
+    if (!slotUsagesPost.isEmpty()) {
+      final TypeString assignedSlotTypeStr = this.extractAssginedTypes(slotUsagesPost);
+      updatedSlotTypeStr = TypeString.combine(defSlotTypeStr, assignedSlotTypeStr);
+    } else {
+      updatedSlotTypeStr = defSlotTypeStr;
+    }
+
     // A bit of UNDEFINED is allowed.
     if (!updatedSlotTypeStr.isUndefined()) {
       this.updateSlotDefinitionType(slotDefinition, updatedSlotTypeStr);
@@ -94,6 +107,39 @@ public class RecursiveSlotDefinitionReasoner {
     return false;
   }
 
+  private TypeString reasonDefaultSlotValueType(final SlotDefinition slotDefinition) {
+    // Get second part of the slot type.
+    final AstNode slotDefNode = slotDefinition.getNode();
+    final SimpleVectorNodeHelper simpleVectorHelper =
+        SimpleVectorNodeHelper.fromExpressionSafe(slotDefNode);
+    if (simpleVectorHelper == null) {
+      return TypeString.UNDEFINED;
+    }
+
+    final AstNode secondPartNode = simpleVectorHelper.getNth(1, MagikGrammar.values());
+    if (secondPartNode == null) {
+      // Safety first.
+      return TypeString.UNDEFINED;
+    }
+
+    // Get type from (newly) reasoned file.
+    final URI uri = secondPartNode.getToken().getURI();
+    final Location location = new Location(uri, secondPartNode);
+    final MagikTypedFile magikFile = this.getMagikFile(location);
+    final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
+    final AstNode magikFileNode = magikFile.getTopNode();
+    final Position position = location.getRange().getStartPosition();
+    final AstNode magikFileWantedTokenNode = AstQuery.nodeAt(magikFileNode, position);
+    final AstNode magikFileAtomNode = magikFileWantedTokenNode.getFirstAncestor(MagikGrammar.ATOM);
+    final ExpressionResultString result = reasonerState.getNodeTypeSilent(magikFileAtomNode);
+    if (result == null || result == ExpressionResultString.UNDEFINED) {
+      return TypeString.UNDEFINED;
+    }
+
+    return result.get(0, TypeString.UNDEFINED);
+  }
+
+  @CheckForNull
   private TypeString extractAssginedTypes(
       final List<Map.Entry<SlotUsage, MagikTypedFile>> slotUsages) {
     return slotUsages.stream()
@@ -142,7 +188,7 @@ public class RecursiveSlotDefinitionReasoner {
             })
         .flatMap(Function.identity())
         .reduce(TypeString::combine)
-        .orElse(TypeString.UNDEFINED);
+        .orElse(null);
   }
 
   private void reasonMethodDefinition(final MethodDefinition methodDef) {

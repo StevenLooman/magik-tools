@@ -107,6 +107,17 @@ public class LocalTypeReasonerState {
   }
 
   /**
+   * Get the loopbody type for a {@link AstNode}.
+   *
+   * @param node AstNode.
+   * @return Resulting type.
+   */
+  @CheckForNull
+  public ExpressionResultString getNodeIterTypeSilent(final AstNode node) {
+    return this.nodeIterTypes.get(node);
+  }
+
+  /**
    * Set a loopbody type for a {@link AstNode}.
    *
    * @param node AstNode.
