@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
+package nl.ramsolutions.sw.magik.analysis.typing.reasoner.recursive;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.Collection;
@@ -14,6 +14,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

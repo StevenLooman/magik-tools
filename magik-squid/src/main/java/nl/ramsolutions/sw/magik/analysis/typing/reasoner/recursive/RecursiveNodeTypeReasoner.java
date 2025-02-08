@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
+package nl.ramsolutions.sw.magik.analysis.typing.reasoner.recursive;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
@@ -7,6 +7,7 @@ import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 
 /** Recursive reasoner for a specific node. */
 public class RecursiveNodeTypeReasoner extends AbstractRecursiveReasoner {

@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
+package nl.ramsolutions.sw.magik.analysis.typing.reasoner.recursive;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
