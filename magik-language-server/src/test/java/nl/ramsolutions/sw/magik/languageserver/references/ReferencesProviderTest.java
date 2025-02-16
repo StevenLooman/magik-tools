@@ -52,6 +52,7 @@ class ReferencesProviderTest {
             Collections.emptyList(),
             List.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION, null)),
             Collections.emptyList(),
+            Collections.emptyList(),
             Collections.emptyList()));
 
     final String code =
@@ -85,6 +86,7 @@ class ReferencesProviderTest {
             ExpressionResultString.EMPTY,
             Collections.emptyList(),
             List.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION, null)),
+            Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList()));
 
@@ -120,6 +122,7 @@ class ReferencesProviderTest {
             List.of(new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION, null)),
             Collections.emptyList(),
             Collections.emptyList(),
+            Collections.emptyList(),
             Collections.emptyList()));
 
     final String code =
@@ -152,6 +155,7 @@ class ReferencesProviderTest {
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY,
             List.of(new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION, null)),
+            Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList(),
             Collections.emptyList()));

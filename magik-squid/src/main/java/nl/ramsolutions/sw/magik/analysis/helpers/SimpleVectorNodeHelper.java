@@ -58,6 +58,10 @@ public class SimpleVectorNodeHelper {
     }
 
     final AstNode expressionNode = expressionNodes.get(nth);
+    if (types.length == 0) {
+      return expressionNode;
+    }
+
     final AstNode atomNode = expressionNode.getFirstChild(MagikGrammar.ATOM);
     return atomNode.getFirstChild(types);
   }

@@ -13,10 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
+import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
@@ -154,6 +156,16 @@ public class MethodDefinitionParser {
         settings.getTypingIndexConditionUsages()
             ? usageParser.getUsedConditions()
             : Collections.emptyList();
+    final List<MethodUsage> usedUnaryOperators = // TODO
+        settings.getTypingIndexUnaryOperatorUsages()
+            ? usageParser.getUsedUnaryOperators()
+            : Collections.emptyList();
+    final List<BinaryOperatorUsage> usedBinaryOperators =
+        settings.getTypingIndexBinaryOperatorUsages()
+            ? usageParser.getUsedBinaryOperators()
+            : Collections.emptyList();
+    final List<MethodUsage> allUsedMethods =
+        Stream.concat(usedMethods.stream(), usedUnaryOperators.stream()).toList();
 
     final MethodDefinition methodDefinition =
         new MethodDefinition(
@@ -171,9 +183,10 @@ public class MethodDefinitionParser {
             callResult,
             loopResult,
             usedGlobals,
-            usedMethods,
+            allUsedMethods,
             usedSlots,
-            usedConditions);
+            usedConditions,
+            usedBinaryOperators);
     return List.of(methodDefinition);
   }
 

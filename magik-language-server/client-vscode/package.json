@@ -340,6 +340,16 @@
           "type": "boolean",
           "default": true
         },
+        "magik.typing.indexUnaryOperatorUsages": {
+          "description": "Enable indexing of usages of unary operators by methods.",
+          "type": "boolean",
+          "default": true
+        },
+        "magik.typing.indexBinaryOperatorUsages": {
+          "description": "Enable indexing of usages of binary operators by methods.",
+          "type": "boolean",
+          "default": true
+        },
         "magik.typing.cacheIndexedDefinitions": {
           "description": "Store and load the indexed definitions in the workspace folders, in file types.jsonl.",
           "type": "boolean",

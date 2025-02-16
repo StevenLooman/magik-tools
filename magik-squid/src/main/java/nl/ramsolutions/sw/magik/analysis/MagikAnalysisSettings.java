@@ -14,6 +14,9 @@ public class MagikAnalysisSettings {
   public static final String INDEX_METHOD_USAGES = "magik.typing.indexMethodUsages";
   public static final String INDEX_SLOT_USAGES = "magik.typing.indexSlotUsages";
   public static final String INDEX_CONDITION_USAGES = "magik.typing.indexConditionUsages";
+  public static final String INDEX_UNARY_OPERATOR_USAGES = "magik.typing.indexUnaryOperatorUsages";
+  public static final String INDEX_BINARY_OPERATOR_USAGES =
+      "magik.typing.indexBinaryOperatorUsages";
   public static final String CACHE_INDEXED_DEFINITIONS = "magik.typing.cacheIndexedDefinitions";
 
   private final MagikToolsProperties properties;
@@ -37,6 +40,14 @@ public class MagikAnalysisSettings {
 
   public boolean getTypingIndexConditionUsages() {
     return this.properties.getPropertyBoolean(INDEX_CONDITION_USAGES) != Boolean.FALSE;
+  }
+
+  public boolean getTypingIndexUnaryOperatorUsages() {
+    return this.properties.getPropertyBoolean(INDEX_UNARY_OPERATOR_USAGES) != Boolean.FALSE;
+  }
+
+  public boolean getTypingIndexBinaryOperatorUsages() {
+    return this.properties.getPropertyBoolean(INDEX_BINARY_OPERATOR_USAGES) != Boolean.FALSE;
   }
 
   public boolean getTypingCacheIndexedDefinitions() {

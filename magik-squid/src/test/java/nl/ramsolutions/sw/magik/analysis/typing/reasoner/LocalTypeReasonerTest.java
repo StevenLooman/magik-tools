@@ -412,7 +412,7 @@ class LocalTypeReasonerTest {
             "+",
             TypeString.SW_INTEGER,
             TypeString.SW_SYMBOL,
-            TypeString.SW_SYMBOL));
+            TypeString.SW_FALSE));
     definitionKeeper.add(
         new BinaryOperatorDefinition(
             null,
@@ -421,9 +421,9 @@ class LocalTypeReasonerTest {
             code,
             null,
             "+",
-            TypeString.SW_SYMBOL,
+            TypeString.SW_FALSE,
             TypeString.SW_CHAR16_VECTOR,
-            TypeString.SW_CHAR16_VECTOR));
+            TypeString.SW_FLOAT));
 
     // Do analysis.
     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -433,7 +433,7 @@ class LocalTypeReasonerTest {
     final AstNode topNode = magikFile.getTopNode();
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final ExpressionResultString result = state.getNodeType(methodNode);
-    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_CHAR16_VECTOR));
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_FLOAT));
   }
 
   @Test

@@ -60,6 +60,7 @@ public class Location {
    * @param node {@link AstNode} to create {@link Location} from.
    */
   public Location(final URI uri, final AstNode node) {
+    // TODO: Usages can probably be replaced by Location(final AstNode node)
     this.uri = uri;
     this.range = new Range(node);
   }
@@ -83,6 +84,16 @@ public class Location {
   public Location(final URI uri) {
     this.uri = uri;
     this.range = null;
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param node {@link AstNode} to create {@link Location} from.
+   */
+  public Location(final AstNode node) {
+    this.uri = node.getToken().getURI();
+    this.range = new Range(node);
   }
 
   /**

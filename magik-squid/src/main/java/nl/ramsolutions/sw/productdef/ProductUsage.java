@@ -5,11 +5,18 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
 import nl.ramsolutions.sw.magik.Location;
 
+/** Product usage. */
 public class ProductUsage {
 
   private final String name;
   private final Location location;
 
+  /**
+   * Constructor.
+   *
+   * @param name Name of product.
+   * @param location Location of use.
+   */
   public ProductUsage(final String name, final @Nullable Location location) {
     this.name = name;
     this.location = location;

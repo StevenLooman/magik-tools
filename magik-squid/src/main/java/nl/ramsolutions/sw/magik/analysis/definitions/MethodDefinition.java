@@ -36,6 +36,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
   private final List<MethodUsage> usedMethods;
   private final List<SlotUsage> usedSlots;
   private final List<ConditionUsage> usedConditions;
+  private final List<BinaryOperatorUsage> usedBinaryOperators;
 
   /**
    * Constructor.
@@ -80,6 +81,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     this.usedMethods = Collections.emptyList();
     this.usedSlots = Collections.emptyList();
     this.usedConditions = Collections.emptyList();
+    this.usedBinaryOperators = Collections.emptyList();
   }
 
   /**
@@ -115,7 +117,8 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
       final List<GlobalUsage> usedGlobals,
       final List<MethodUsage> usedMethods,
       final List<SlotUsage> usedSlots,
-      final List<ConditionUsage> usedConditions) {
+      final List<ConditionUsage> usedConditions,
+      final List<BinaryOperatorUsage> usedBinaryOperators) {
     super(location, timestamp, moduleName, doc, node);
     this.typeName = typeName;
     this.methodName = methodName;
@@ -129,6 +132,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     this.usedMethods = Collections.unmodifiableList(usedMethods);
     this.usedSlots = Collections.unmodifiableList(usedSlots);
     this.usedConditions = Collections.unmodifiableList(usedConditions);
+    this.usedBinaryOperators = Collections.unmodifiableList(usedBinaryOperators);
   }
 
   /**
@@ -305,6 +309,10 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     return Collections.unmodifiableList(this.usedConditions);
   }
 
+  public List<BinaryOperatorUsage> getUsedBinaryOperators() {
+    return Collections.unmodifiableList(this.usedBinaryOperators);
+  }
+
   @Override
   public MethodDefinition getBareDefinition() {
     return new MethodDefinition(
@@ -324,7 +332,8 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
         this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).toList(),
         this.usedMethods.stream().map(MethodUsage::getWithoutNode).toList(),
         this.usedSlots.stream().map(SlotUsage::getWithoutNode).toList(),
-        this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList());
+        this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList(),
+        this.usedBinaryOperators.stream().map(BinaryOperatorUsage::getWithoutNode).toList());
   }
 
   @Override

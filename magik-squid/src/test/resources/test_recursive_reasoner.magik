@@ -9,6 +9,19 @@ def_slotted_exemplar(
     })
 $
 
+_method test_exemplar.new()
+    ## Constructor.
+    _return _clone.init()
+_endmethod
+$
+
+_private _method test_exemplar.init()
+    ## Initializer.
+    .slot1 << 10
+    _return _self
+_endmethod
+$
+
 _method test_exemplar.depth3()
     ## Depth 3.
     _return _self.depth2()
@@ -66,8 +79,8 @@ _iter _method test_exemplar.iter_depth0()
 _endmethod
 $
 
-_method test_exemplar.slot1_assign_depth3()
-    ## Depth 3.
-    .slot1 << _self.depth2()
+_method test_exemplar.slot1_assign_depth2()
+    ## Depth 2.
+    .slot1 << _self.depth1()
 _endmethod
 $

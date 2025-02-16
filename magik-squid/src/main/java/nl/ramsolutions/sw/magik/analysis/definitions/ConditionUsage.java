@@ -4,10 +4,11 @@ import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
+import nl.ramsolutions.sw.Usage;
 import nl.ramsolutions.sw.magik.Location;
 
 /** Condition usage. */
-public class ConditionUsage {
+public class ConditionUsage implements Usage {
 
   private final String conditionName;
   private final @Nullable Location location;

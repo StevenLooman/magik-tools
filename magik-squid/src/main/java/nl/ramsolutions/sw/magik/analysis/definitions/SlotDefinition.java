@@ -67,6 +67,16 @@ public class SlotDefinition extends MagikDefinition {
   }
 
   @Override
+  public String toString() {
+    return String.format(
+        "%s@%s(%s, %s)",
+        this.getClass().getName(),
+        Integer.toHexString(this.hashCode()),
+        this.getOwnerTypeName().getFullString(),
+        this.getName());
+  }
+
+  @Override
   public int hashCode() {
     return Objects.hash(
         this.getLocation(),

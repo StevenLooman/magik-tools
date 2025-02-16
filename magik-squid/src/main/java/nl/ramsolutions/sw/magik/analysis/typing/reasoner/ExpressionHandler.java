@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -9,7 +8,9 @@ import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.helpers.BinaryExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ForNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.UnaryExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -20,6 +21,7 @@ import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
+import nl.ramsolutions.sw.magik.utils.Triple;
 
 /** Expression handler. */
 class ExpressionHandler extends LocalTypeReasonerHandler {
@@ -58,25 +60,28 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
    * @param node BINARY_EXPRESSION node.
    */
   void handleBinaryExpression(final AstNode node) {
+    final BinaryExpressionNodeHelper helper = new BinaryExpressionNodeHelper(node);
+
     // Take left hand side as current.
-    final AstNode currentNode = node.getFirstChild();
-    ExpressionResultString result = this.state.getNodeType(currentNode);
+    final AstNode startNode = helper.getLhsNode();
+    ExpressionResultString result = this.state.getNodeType(startNode);
 
-    final List<AstNode> chainNodes = new ArrayList<>(node.getChildren());
-    chainNodes.remove(0);
-    for (int i = 0; i < chainNodes.size() - 1; i += 2) {
-      // Get operator.
-      final AstNode operatorNode = chainNodes.get(i);
+    for (final Triple<AstNode, AstNode, AstNode> triplet : helper.getTriplets()) {
+      final AstNode operatorNode = triplet.getMiddle();
       final String operatorStr = operatorNode.getTokenValue().toLowerCase();
-
-      // Get right hand side.
-      final AstNode rightNode = chainNodes.get(i + 1);
-      final ExpressionResultString rightResult = this.state.getNodeType(rightNode);
+      final AstNode rightNode = triplet.getRight();
 
       // Evaluate binary operator.
-      final TypeString leftTypeStr = result.get(0, TypeString.SW_UNSET);
-      final TypeString rightTypeStr = rightResult.get(0, TypeString.SW_UNSET);
+      final TypeString leftTypeStr = result.get(0, TypeString.UNDEFINED);
+      final ExpressionResultString rightResult = this.state.getNodeType(rightNode);
+      final TypeString rightTypeStr = rightResult.get(0, TypeString.UNDEFINED);
       result = this.getBinaryOperatorDefinition(operatorStr, leftTypeStr, rightTypeStr);
+
+      // Store the intermediate results.
+      this.state.setNodeType(operatorNode, result);
+
+      // TODO: Can't we assign the result of each applied operator to the operator node?
+      // TODO: Or can we change the grammar to always generate a tree instead of a list.
     }
 
     // Apply operator to operands and store result.
@@ -102,8 +107,8 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     final String operatorStr = operatorNode.getTokenValue();
 
     // Evaluate binary operator.
-    final TypeString leftTypeStr = leftResult.get(0, TypeString.SW_UNSET);
-    final TypeString rightTypeStr = rightResult.get(0, TypeString.SW_UNSET);
+    final TypeString leftTypeStr = leftResult.get(0, TypeString.UNDEFINED);
+    final TypeString rightTypeStr = rightResult.get(0, TypeString.UNDEFINED);
     final ExpressionResultString result =
         this.getBinaryOperatorDefinition(operatorStr, leftTypeStr, rightTypeStr);
 
@@ -136,7 +141,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         break;
 
       case "_andif", "_orif":
-        // Returns RHS if LHS is true.
+        // Returns RHS if LHS is true, false otherwise.
         final TypeString combinedTypeStr = TypeString.combine(TypeString.SW_FALSE, rhsTypeStr);
         result = new ExpressionResultString(combinedTypeStr);
         break;
@@ -194,14 +199,16 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
       return;
     }
 
+    final UnaryExpressionNodeHelper helper = new UnaryExpressionNodeHelper(node);
+
     // Get operand.
-    final AstNode operatedNode = node.getLastChild();
-    final ExpressionResultString operatedResult = this.state.getNodeType(operatedNode);
-    final TypeString typeStr = operatedResult.get(0, TypeString.SW_UNSET);
+    final AstNode receiverNode = helper.getReceiverNode();
+    final ExpressionResultString operatedResult = this.state.getNodeType(receiverNode);
+    final TypeString typeStr = operatedResult.get(0, TypeString.UNDEFINED);
 
     // Get operator.
-    final String operatorStr = node.getTokenValue().toLowerCase();
-    final String operatorMethod = UNARY_OPERATOR_METHODS.get(operatorStr);
+    final String operatorStr = helper.getOperator();
+    final String operatorMethod = ExpressionHandler.UNARY_OPERATOR_METHODS.get(operatorStr);
 
     // Apply opertor to operand and store result.
     final ExpressionResultString result =

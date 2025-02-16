@@ -3,26 +3,40 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.BinaryExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.UnaryExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeBuilderVisitor;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.api.MagikKeyword;
+import nl.ramsolutions.sw.magik.api.MagikOperator;
 
 /** Method Definition usages parser. */
 public class MethodDefinitionUsageParser {
+
+  private static final Map<String, String> UNARY_OPERATOR_METHODS =
+      Map.of(
+          MagikOperator.NOT.getValue(), "not",
+          MagikKeyword.NOT.getValue(), "not",
+          MagikOperator.MINUS.getValue(), "negated",
+          MagikOperator.PLUS.getValue(), "unary_plus",
+          MagikKeyword.SCATTER.getValue(), "for_scatter()");
 
   private static final String CONDITION = "condition";
   private static final String SW_CONDITION = "sw:condition";
@@ -95,14 +109,12 @@ public class MethodDefinitionUsageParser {
                   new MethodInvocationNodeHelper(methodInvocationNode);
               // TODO: This can only get the TypeString of method invocations on globals,
               // as this doesn't do any deep reasoning.
-              final TypeString ref = TypeString.UNDEFINED;
               final String methodName = helper.getMethodName();
               final URI uri = this.node.getToken().getURI();
               final Location location = new Location(uri, methodInvocationNode);
               final Location validLocation = Location.validLocation(location);
-              final MethodUsage methodUsage =
-                  new MethodUsage(ref, methodName, validLocation, methodInvocationNode);
-              return methodUsage;
+              return new MethodUsage(
+                  TypeString.UNDEFINED, methodName, validLocation, methodInvocationNode);
             })
         .toList();
   }
@@ -174,5 +186,70 @@ public class MethodDefinitionUsageParser {
                 })
             .filter(Objects::nonNull);
     return Stream.concat(handledConditions, raisedConditions).toList();
+  }
+
+  /**
+   * Get the used unary operators.
+   *
+   * @return Used unary operators.
+   */
+  public List<MethodUsage> getUsedUnaryOperators() {
+    return this.node.getDescendants(MagikGrammar.UNARY_EXPRESSION).stream()
+        .filter(
+            unaryExpressionNode -> !unaryExpressionNode.hasDirectChildren(MagikKeyword.ALLRESULTS))
+        .map(
+            unaryExpressionNode -> {
+              final UnaryExpressionNodeHelper helper =
+                  new UnaryExpressionNodeHelper(unaryExpressionNode);
+              final String operator = helper.getOperator();
+              final String methodName =
+                  MethodDefinitionUsageParser.UNARY_OPERATOR_METHODS.get(operator);
+              final Location location = new Location(unaryExpressionNode);
+              final Location validLocation = Location.validLocation(location);
+              return new MethodUsage(
+                  TypeString.UNDEFINED, methodName, validLocation, unaryExpressionNode);
+            })
+        .toList();
+  }
+
+  /**
+   * Get the used binary operators.
+   *
+   * @return Used binary operators.
+   */
+  public List<BinaryOperatorUsage> getUsedBinaryOperators() {
+    return this.node
+        .getDescendants(
+            // TODO: Combined assignments.
+            MagikGrammar.OR_EXPRESSION,
+            MagikGrammar.XOR_EXPRESSION,
+            MagikGrammar.AND_EXPRESSION,
+            MagikGrammar.EQUALITY_EXPRESSION,
+            MagikGrammar.RELATIONAL_EXPRESSION,
+            MagikGrammar.ADDITIVE_EXPRESSION,
+            MagikGrammar.MULTIPLICATIVE_EXPRESSION,
+            MagikGrammar.EXPONENTIAL_EXPRESSION)
+        .stream()
+        .map(
+            binaryExpressionNode -> {
+              final BinaryExpressionNodeHelper helper =
+                  new BinaryExpressionNodeHelper(binaryExpressionNode);
+              return helper.getTriplets().stream()
+                  .map(
+                      triplet -> {
+                        final AstNode operatorNode = triplet.getMiddle();
+                        final String operator = operatorNode.getTokenValue().toLowerCase();
+                        final Location location = new Location(binaryExpressionNode);
+                        final Location validLocation = Location.validLocation(location);
+                        return new BinaryOperatorUsage(
+                            TypeString.UNDEFINED,
+                            TypeString.UNDEFINED,
+                            operator,
+                            validLocation,
+                            binaryExpressionNode);
+                      });
+            })
+        .flatMap(stream -> stream)
+        .toList();
   }
 }

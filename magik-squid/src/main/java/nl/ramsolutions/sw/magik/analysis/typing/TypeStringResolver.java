@@ -19,6 +19,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
@@ -433,5 +434,44 @@ public class TypeStringResolver {
   public Collection<TypeString> getSelfAndAncestors(final TypeString typeString) {
     return Stream.concat(Stream.of(typeString), this.getAllAncestors(typeString).stream())
         .collect(Collectors.toUnmodifiableSet());
+  }
+
+  public Collection<MagikDefinition> getBinaryOperatorDefinitions(
+      final TypeString lhsTypeStr, final String operator, final TypeString rhsTypeStr) {
+    final TypeStringResolver resolver = new TypeStringResolver(this.definitionKeeper);
+
+    // This tries to find the actual applied type via the species method.
+    // The species method on an object returns a method_table for a given exemplar.
+    // We assume - in our type database - the species method return type has a
+    // generic E with the exemplar.
+    final TypeString exemplarRef = TypeString.ofGenericReference("E");
+    final TypeString lhsMethodTableTypeStr =
+        resolver.getRespondingMethodDefinitions(lhsTypeStr, "species").stream()
+            .map(MethodDefinition::getReturnTypes)
+            .map(resultStr -> resultStr.get(0, lhsTypeStr))
+            .reduce(TypeString::combine)
+            .orElse(TypeString.UNDEFINED);
+    final TypeString resolvedLhsTypeStr =
+        lhsMethodTableTypeStr.getGenericDefinition(exemplarRef) != null
+            ? lhsMethodTableTypeStr.getGenericDefinition(exemplarRef).getGenericType()
+            : lhsTypeStr;
+
+    final TypeString rhsMethodTableTypeStr =
+        resolver.getRespondingMethodDefinitions(rhsTypeStr, "species").stream()
+            .map(MethodDefinition::getReturnTypes)
+            .map(resultStr -> resultStr.get(0, rhsTypeStr))
+            .reduce(TypeString::combine)
+            .orElse(TypeString.UNDEFINED);
+    final TypeString resolvedRhsTypeStr =
+        rhsMethodTableTypeStr.getGenericDefinition(exemplarRef) != null
+            ? rhsMethodTableTypeStr.getGenericDefinition(exemplarRef).getGenericType()
+            : rhsTypeStr;
+
+    // Get operator.
+    return this.definitionKeeper
+        .getBinaryOperatorDefinitions(operator, resolvedLhsTypeStr, resolvedRhsTypeStr)
+        .stream()
+        .map(MagikDefinition.class::cast)
+        .collect(Collectors.toSet());
   }
 }

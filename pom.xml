@@ -56,8 +56,8 @@
     <junit.version>5.11.4</junit.version>
     <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
     <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
-    <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
-    <checkstyle.version>10.20.2</checkstyle.version>
+    <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version> <!-- TODO: Delete it -->
+    <checkstyle.version>10.20.2</checkstyle.version> <!-- TODO: Delete it -->
     <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
     <spotless.version>2.43.0</spotless.version>
     <google-java-format.version>1.22.0</google-java-format.version>
