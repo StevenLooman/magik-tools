@@ -43,6 +43,8 @@ import org.slf4j.LoggerFactory;
 public class MagikWorkspaceService implements WorkspaceService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikWorkspaceService.class);
+  private static final Logger LOGGER_DURATION =
+      LoggerFactory.getLogger(MagikWorkspaceService.class.getName() + "Duration");
 
   private final MagikLanguageServer languageServer;
   private final MagikToolsProperties languageServerProperties;
@@ -178,7 +180,9 @@ public class MagikWorkspaceService implements WorkspaceService {
   @Override
   public CompletableFuture<
           Either<List<? extends SymbolInformation>, List<? extends WorkspaceSymbol>>>
-      symbol(WorkspaceSymbolParams params) {
+      symbol(final WorkspaceSymbolParams params) {
+    final long start = System.nanoTime();
+
     final String query = params.getQuery();
     LOGGER.trace("symbol, query: {}", query);
 
@@ -186,6 +190,14 @@ public class MagikWorkspaceService implements WorkspaceService {
         () -> {
           final List<WorkspaceSymbol> queryResults = this.symbolProvider.getSymbols(query);
           LOGGER.debug("Symbols found for: '{}', count: {}", query, queryResults.size());
+
+          if (LOGGER_DURATION.isTraceEnabled()) {
+            LOGGER_DURATION.trace(
+                "Duration: {} symbol, query: {}",
+                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                query);
+          }
+
           return Either.forRight(queryResults);
         });
   }
