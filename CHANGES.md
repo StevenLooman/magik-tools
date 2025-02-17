@@ -37,6 +37,7 @@
 - FormattingCheck now uses formatting code to detect issues.
 - Formatter now supports ranged formatting.
 - Add `magik-session-wrapper` to wrap a Magik running image/session, providing a better CLI experience.
+- Add MethodIsPublicTypedCheck.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)

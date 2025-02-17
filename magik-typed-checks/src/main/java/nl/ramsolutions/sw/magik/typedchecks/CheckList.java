@@ -11,6 +11,7 @@ import nl.ramsolutions.sw.magik.typedchecks.checks.GlobalExistsTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.MethodArgumentCountMatchesParameterCountTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.MethodArgumentTypeMatchesParameterTypeTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.MethodExistsTypedCheck;
+import nl.ramsolutions.sw.magik.typedchecks.checks.MethodIsPublicTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.MethodReturnTypesMatchDocTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.ModuleRequiredForGlobalTypedCheck;
 import nl.ramsolutions.sw.magik.typedchecks.checks.SlotExistsTypedCheck;
@@ -39,11 +40,12 @@ public final class CheckList {
         MethodArgumentCountMatchesParameterCountTypedCheck.class,
         MethodArgumentTypeMatchesParameterTypeTypedCheck.class,
         MethodExistsTypedCheck.class,
+        MethodIsPublicTypedCheck.class,
         MethodReturnTypesMatchDocTypedCheck.class,
         ModuleRequiredForGlobalTypedCheck.class,
-        TypeDocTypeExistsTypedCheck.class,
         SlotExistsTypedCheck.class,
         SwChar16VectorEvaluateInvocationTypedCheck.class,
+        TypeDocTypeExistsTypedCheck.class,
         UndefinedMethodCallResultTypedCheck.class);
   }
 
