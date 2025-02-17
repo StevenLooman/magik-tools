@@ -1,0 +1,16 @@
+{
+  "title": "Method Is Public",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "MethodIsPublic",
+  "sqKey": "method-is-public"
+}

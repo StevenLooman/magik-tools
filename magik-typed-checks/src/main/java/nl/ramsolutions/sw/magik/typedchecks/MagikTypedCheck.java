@@ -85,6 +85,23 @@ public class MagikTypedCheck extends MagikCheck {
   }
 
   /**
+   * Get type method invoked on, without resolving self.
+   *
+   * @param node METHOD_INVOCATION node.
+   * @return Type method is invoked, or UNDEFINED_TYPE.
+   */
+  protected TypeString getTypeInvokedOnWithSelf(final AstNode node) {
+    if (node.isNot(MagikGrammar.METHOD_INVOCATION)) {
+      throw new IllegalStateException();
+    }
+
+    final AstNode previousSibling = node.getPreviousSibling();
+    final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
+    final ExpressionResultString result = reasonerState.getNodeType(previousSibling);
+    return result.get(0, TypeString.UNDEFINED);
+  }
+
+  /**
    * Get type of method definition.
    *
    * @param node METHOD_DEFINITION node.
