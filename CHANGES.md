@@ -38,6 +38,7 @@
 - Formatter now supports ranged formatting.
 - Add `magik-session-wrapper` to wrap a Magik running image/session, providing a better CLI experience.
 - Add MethodIsPublicTypedCheck.
+- Fix method completions by removing `_gather` and `_optional` keywords.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
