@@ -2,13 +2,13 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.Collection;
+import java.util.Objects;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
-import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.sonar.check.Rule;
 
@@ -44,8 +44,8 @@ public class UndefinedMethodCallResultTypedCheck extends MagikTypedCheck {
     final ExpressionResultString result = reasonerState.getNodeType(node);
     final boolean containsUndefined = result.stream().anyMatch(TypeString::containsUndefined);
     if (containsUndefined) {
-      final AstNode firstIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-      final AstNode issueNode = firstIdentifierNode != null ? firstIdentifierNode : node;
+      final AstNode methodNameNode = helper.getMethodNameNode();
+      final AstNode issueNode = Objects.requireNonNullElse(methodNameNode, node);
       final String fullMethodName = receiverTypeStr.getFullString() + "." + methodName;
       final String message = String.format(MESSAGE, fullMethodName);
       this.addIssue(issueNode, message);
