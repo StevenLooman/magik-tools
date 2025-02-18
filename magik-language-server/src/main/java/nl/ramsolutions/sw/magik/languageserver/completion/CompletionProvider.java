@@ -306,9 +306,14 @@ public class CompletionProvider {
         .filter(methodDef -> methodDef.getMethodName().contains(methodNamePart))
         .map(
             methodDef -> {
-              final String methodName = methodDef.getMethodNameWithParameters();
-              final CompletionItem item = new CompletionItem(methodName);
-              item.setInsertText(methodName);
+              final String label = methodDef.getMethodNameWithParameters();
+              final String insertText =
+                  methodDef
+                      .getMethodNameWithParameters()
+                      .replaceAll("\\b_optional \\b", "")
+                      .replaceAll("\\b_gather \\b", "");
+              final CompletionItem item = new CompletionItem(label);
+              item.setInsertText(insertText);
               item.setDetail(methodDef.getTypeName().getFullString());
               item.setDocumentation(methodDef.getDoc());
               item.setKind(CompletionItemKind.Method);
