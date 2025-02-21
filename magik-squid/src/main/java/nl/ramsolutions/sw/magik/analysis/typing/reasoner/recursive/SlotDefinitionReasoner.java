@@ -40,7 +40,7 @@ class SlotDefinitionReasoner extends AbstractDefinitionReasoner {
   }
 
   @Override
-  Collection<MagikDefinition> process() {
+  Collection<MagikDefinition> getUsedDefinitions() {
     LOGGER.debug("Processing slot definition: {}", this.originalDefinition);
 
     // Get used definitions for the default value in the def_slotted_exemplar().
@@ -69,7 +69,7 @@ class SlotDefinitionReasoner extends AbstractDefinitionReasoner {
 
     final TypeString newTypeStr =
         assignedSlotEntry.getValue().isEmpty()
-            ? defaultType // Never assigned, so only default value type.
+            ? defaultType // Never assigned, so use only default value type.
             : TypeString.combine(defaultType, assignedType);
     final SlotDefinition slotDefinition = (SlotDefinition) this.originalDefinition;
     return new SlotDefinition(
@@ -84,9 +84,9 @@ class SlotDefinitionReasoner extends AbstractDefinitionReasoner {
   }
 
   @Override
-  void updateDefinition(final MagikDefinition updatedMethodDefinition) {
-    if (!(updatedMethodDefinition instanceof SlotDefinition)) {
-      throw new IllegalArgumentException("Definition is not a MethodDefinition.");
+  void updateDefinition(final MagikDefinition updatedDefinition) {
+    if (!(updatedDefinition instanceof SlotDefinition)) {
+      throw new IllegalArgumentException("Definition is not a SlotDefinition.");
     }
 
     // Find ExemplarDefinition for the slot.
@@ -96,7 +96,7 @@ class SlotDefinitionReasoner extends AbstractDefinitionReasoner {
     final ExemplarDefinition exemplarDefinition = resolver.getExemplarDefinition(ownerTypeStr);
     Objects.requireNonNull(exemplarDefinition);
 
-    // Ensure this is the correct ExemplarDefinition.
+    // Ensure this is the correct ExemplarDefinition and the slot is known.
     final String slotName = slotDefinition.getName();
     final Location location = slotDefinition.getLocation();
     exemplarDefinition.getSlots().stream()
@@ -141,7 +141,7 @@ class SlotDefinitionReasoner extends AbstractDefinitionReasoner {
       return slotDefinition.getTypeName() == TypeString.UNDEFINED;
     } else if (testedDefinition instanceof final MethodDefinition methodDefinition) {
       // TODO: How about the assigned types?
-      // Test if there is a (assignment) SlotUsage in the MethodDefinition.
+      // Test if there is a (TODO: assignment) SlotUsage in the MethodDefinition.
       final SlotDefinition slotDefinition = (SlotDefinition) this.originalDefinition;
       final TypeString typeStr = slotDefinition.getOwnerTypeName();
       final String slotName = slotDefinition.getName();

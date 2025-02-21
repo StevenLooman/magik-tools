@@ -28,7 +28,7 @@ class MethodDefinitionReasoner extends AbstractDefinitionReasoner {
   }
 
   @Override
-  Collection<MagikDefinition> process() {
+  Collection<MagikDefinition> getUsedDefinitions() {
     LOGGER.debug("Processing method definition: {}", this.originalDefinition);
 
     final Location location = this.originalDefinition.getLocation();
@@ -113,8 +113,8 @@ class MethodDefinitionReasoner extends AbstractDefinitionReasoner {
   }
 
   @Override
-  void updateDefinition(final MagikDefinition updatedMethodDefinition) {
-    if (!(updatedMethodDefinition instanceof MethodDefinition)) {
+  void updateDefinition(final MagikDefinition updatedDefinition) {
+    if (!(updatedDefinition instanceof MethodDefinition)) {
       throw new IllegalArgumentException("Definition is not a MethodDefinition.");
     }
 
@@ -123,6 +123,6 @@ class MethodDefinitionReasoner extends AbstractDefinitionReasoner {
     this.definitionKeeper.remove(methodDefinition);
 
     // Save the new MethodDefinition.
-    this.definitionKeeper.add(updatedMethodDefinition);
+    this.definitionKeeper.add(updatedDefinition);
   }
 }

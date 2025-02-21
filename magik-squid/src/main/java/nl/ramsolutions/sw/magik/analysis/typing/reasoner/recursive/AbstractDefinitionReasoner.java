@@ -65,7 +65,7 @@ public abstract class AbstractDefinitionReasoner {
    *
    * @return The definitions that are required to completely reason the definition.
    */
-  abstract Collection<MagikDefinition> process();
+  abstract Collection<MagikDefinition> getUsedDefinitions();
 
   /**
    * Get the updated definition, after processing of self and any required definitions return by
@@ -85,9 +85,9 @@ public abstract class AbstractDefinitionReasoner {
   /**
    * Update the existing definition, replacing the original definition.
    *
-   * @param definition The definition to store.
+   * @param updatedDefinition The definition to store.
    */
-  abstract void updateDefinition(final MagikDefinition definition);
+  abstract void updateDefinition(final MagikDefinition updatedDefinition);
 
   protected MagikTypedFile getMagikFile() {
     final Location location = this.originalDefinition.getLocation();

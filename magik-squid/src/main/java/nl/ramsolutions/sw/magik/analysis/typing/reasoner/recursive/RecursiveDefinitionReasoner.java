@@ -13,9 +13,6 @@ import org.slf4j.LoggerFactory;
 /** Recursive reasoner for a specific node. */
 public class RecursiveDefinitionReasoner {
 
-  // TODO: We need a class which reasons about the type of a node,
-  // and its iter type if applicable.
-  // Then, it should return the things that it is missing to determine the type.
   // TODO: How do we know what to reason?
   // A MethodDefinition is about recursing any methods/slots.
   // - And define_shared_constant(),
@@ -69,10 +66,10 @@ public class RecursiveDefinitionReasoner {
   private Collection<MagikDefinition> reason(
       final AbstractDefinitionReasoner reasoner, final int depth) {
     final MagikDefinition definition = reasoner.getOriginalDefinition();
-    LOGGER.warn("Reasoning definition: {}, depth: {}", definition, depth);
+    LOGGER.debug("{}Reasoning definition: {}, depth: {}", "  ".repeat(depth), definition, depth);
 
     if (depth > this.maxDepth) {
-      LOGGER.warn("Max depth reached for definition: {}, depth: {}", definition, depth);
+      LOGGER.debug("{}Max depth reached for definition: {}, depth: {}", "  ".repeat(depth), definition, depth);
       return Collections.emptySet();
     }
 
@@ -86,7 +83,7 @@ public class RecursiveDefinitionReasoner {
     while (!lastRequiredDefinitions.equals(requiredDefinitions)) {
       lastRequiredDefinitions = requiredDefinitions;
 
-      final Collection<MagikDefinition> usedDefinitions = reasoner.process();
+      final Collection<MagikDefinition> usedDefinitions = reasoner.getUsedDefinitions();
       requiredDefinitions =
           usedDefinitions.stream()
               .filter(reasoner::needsFurtherReasoning)
@@ -103,7 +100,7 @@ public class RecursiveDefinitionReasoner {
     final MagikDefinition updatedDefinition = reasoner.getUpdatedDefinition();
     if (!reasoner.needsFurtherReasoning(updatedDefinition)) {
       // Update the definition.
-      LOGGER.debug("Reasoned definition: {}", updatedDefinition);
+      LOGGER.debug("{}Reasoned definition: {}, depth: {}", "  ".repeat(depth), updatedDefinition, depth);
       reasoner.updateDefinition(updatedDefinition);
 
       return Collections.emptySet();
@@ -123,16 +120,7 @@ public class RecursiveDefinitionReasoner {
   }
 
   private void recurse(final MagikDefinition definition, final int depth) {
-    if (definition instanceof final MethodDefinition methodDefinition) {
-      final MethodDefinitionReasoner reasoner =
-          new MethodDefinitionReasoner(this.definitionKeeper, methodDefinition);
-      this.reason(reasoner, depth + 1);
-    } else if (definition instanceof final SlotDefinition slotDefinition) {
-      final SlotDefinitionReasoner reasoner =
-          new SlotDefinitionReasoner(this.definitionKeeper, slotDefinition);
-      this.reason(reasoner, depth + 1);
-    } else {
-      throw new IllegalStateException();
-    }
+    final AbstractDefinitionReasoner reasoner = this.getReasoner(definition);
+    this.reason(reasoner, depth + 1);
   }
 }
