@@ -112,7 +112,7 @@ class SlotDefinitionReasoner extends AbstractDefinitionReasoner {
             .map(
                 slotDef -> {
                   if (slotDef.getName().equals(slotDefinition.getName())
-                    && slotDef.getLocation().equals(slotDefinition.getLocation())) {
+                      && slotDef.getLocation().equals(slotDefinition.getLocation())) {
                     return updatedSlotDefinition;
                   }
 

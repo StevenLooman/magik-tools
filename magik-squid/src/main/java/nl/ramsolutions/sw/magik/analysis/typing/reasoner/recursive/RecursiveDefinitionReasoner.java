@@ -69,7 +69,11 @@ public class RecursiveDefinitionReasoner {
     LOGGER.debug("{}Reasoning definition: {}, depth: {}", "  ".repeat(depth), definition, depth);
 
     if (depth > this.maxDepth) {
-      LOGGER.debug("{}Max depth reached for definition: {}, depth: {}", "  ".repeat(depth), definition, depth);
+      LOGGER.debug(
+          "{}Max depth reached for definition: {}, depth: {}",
+          "  ".repeat(depth),
+          definition,
+          depth);
       return Collections.emptySet();
     }
 
@@ -100,7 +104,8 @@ public class RecursiveDefinitionReasoner {
     final MagikDefinition updatedDefinition = reasoner.getUpdatedDefinition();
     if (!reasoner.needsFurtherReasoning(updatedDefinition)) {
       // Update the definition.
-      LOGGER.debug("{}Reasoned definition: {}, depth: {}", "  ".repeat(depth), updatedDefinition, depth);
+      LOGGER.debug(
+          "{}Reasoned definition: {}, depth: {}", "  ".repeat(depth), updatedDefinition, depth);
       reasoner.updateDefinition(updatedDefinition);
 
       return Collections.emptySet();
