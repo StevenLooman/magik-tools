@@ -23,7 +23,7 @@ public class SlotDefinition extends MagikDefinition {
    * @param doc Documentation.
    * @param node Node.
    * @param ownerTypeName Owner TypeString.
-   * @param name Name.
+   * @param name Slot name.
    * @param typeName Type name.
    */
   public SlotDefinition(

@@ -46,6 +46,8 @@ public class RecursiveDefinitionReasoner {
    * @return True if the {@link MagikDefinition} was succesfully reasoned.
    */
   public boolean reason(final MagikDefinition definition) {
+    // TODO: Do we want a fresh definition, with a node?
+
     final AbstractDefinitionReasoner reasoner = this.getReasoner(definition);
     if (!reasoner.isReasonable()) {
       return false;
@@ -85,8 +87,6 @@ public class RecursiveDefinitionReasoner {
     //       So... update only after completing this loop?
     // Reason as long as we're seeing no more improvements.
     while (!lastRequiredDefinitions.equals(requiredDefinitions)) {
-      lastRequiredDefinitions = requiredDefinitions;
-
       final Collection<MagikDefinition> usedDefinitions = reasoner.getUsedDefinitions();
       requiredDefinitions =
           usedDefinitions.stream()
@@ -95,6 +95,8 @@ public class RecursiveDefinitionReasoner {
 
       // Recurse over the required definitions.
       requiredDefinitions.forEach(requiredDefinition -> this.recurse(requiredDefinition, depth));
+
+      lastRequiredDefinitions = requiredDefinitions;
     }
 
     // Let the reasoner determine if the definition is reasoned sufficiently.

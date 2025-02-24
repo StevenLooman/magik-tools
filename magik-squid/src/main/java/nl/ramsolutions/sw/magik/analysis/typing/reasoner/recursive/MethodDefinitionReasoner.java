@@ -9,9 +9,10 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.helpers.AssignmentExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +105,26 @@ class MethodDefinitionReasoner extends AbstractDefinitionReasoner {
       return methodDefinition.getReturnTypes() == ExpressionResultString.UNDEFINED
           || methodDefinition.getLoopTypes() == ExpressionResultString.UNDEFINED;
     } else if (testedDefinition instanceof final SlotDefinition slotDefinition) {
-      return slotDefinition.getTypeName() == TypeString.UNDEFINED;
+      if (!slotDefinition.getTypeName().containsUndefined()) {
+        // Type is known, no need to reason further.
+        return false;
+      }
+
+      // In the original definition, test if this slot is used or assigned to.
+      final MethodDefinition methodDefinition = (MethodDefinition) this.originalDefinition;
+      final String slotName = slotDefinition.getName();
+      return methodDefinition.getUsedSlots().stream()
+          .filter(slotUsage -> slotUsage.getSlotName().equals(slotName))
+          .anyMatch(
+              slotUsage -> {
+                final AstNode slotUsageNode = slotUsage.getNode();
+                final AstNode atomNode = slotUsageNode.getParent();
+                final AstNode assignmentExpressionNode =
+                    atomNode.getFirstAncestor(MagikGrammar.ASSIGNMENT_EXPRESSION);
+                final AssignmentExpressionNodeHelper helper =
+                    new AssignmentExpressionNodeHelper(assignmentExpressionNode);
+                return !helper.isAssignedTo(atomNode);
+              });
     } else if (testedDefinition instanceof ExemplarDefinition) {
       return false;
     }

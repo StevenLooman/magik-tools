@@ -19,6 +19,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
+import nl.ramsolutions.sw.magik.analysis.helpers.AssignmentExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.SimpleVectorNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -143,7 +144,7 @@ class SlotDefinitionReasoner extends AbstractDefinitionReasoner {
       return slotDefinition.getTypeName() == TypeString.UNDEFINED;
     } else if (testedDefinition instanceof final MethodDefinition methodDefinition) {
       // TODO: How about the assigned types?
-      // Test if there is a (TODO: assignment) SlotUsage in the MethodDefinition.
+      // Test if there is a (TODO: assignment only) SlotUsage in the MethodDefinition.
       final SlotDefinition slotDefinition = (SlotDefinition) this.originalDefinition;
       final TypeString typeStr = slotDefinition.getOwnerTypeName();
       final String slotName = slotDefinition.getName();
@@ -250,13 +251,9 @@ class SlotDefinitionReasoner extends AbstractDefinitionReasoner {
                   .stream()
                   .map(
                       assignmentNode -> {
-                        // Test if the slot node is actually being assigned, not used.
-                        // TODO: Move this to AssignmentExpressionNodeHelper.
-                        final AstNode rhsNode = assignmentNode.getLastChild();
-                        final List<AstNode> lhsNodes =
-                            assignmentNode.getChildren(MagikGrammar.values());
-                        lhsNodes.remove(rhsNode);
-                        if (!lhsNodes.contains(atomSlotUsageNode)) {
+                        final AssignmentExpressionNodeHelper helper =
+                            new AssignmentExpressionNodeHelper(assignmentNode);
+                        if (!helper.isAssignedTo(atomSlotUsageNode)) {
                           return null;
                         }
 
