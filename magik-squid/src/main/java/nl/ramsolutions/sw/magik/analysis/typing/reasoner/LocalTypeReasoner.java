@@ -13,11 +13,11 @@ import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
  *
  * <p>If a type cannot be determined, the {@code UndefinedType} is used instead.
  *
- * <p>If {@code _self}, {@code _clone} or {@code _private} is returned in a method, the {@code SelfType} is used.
- * It is up to the user to determine the real type. I.e., in case of {@code sw:date_time_mixin}, none
- * of the methods are called on that class directly, but always through an inherited class. On
- * declaration the inheriting classes are unknown, thus if {@code _self} is returned from a mixin,
- * we need to proxy the type.
+ * <p>If {@code _self}, {@code _clone} or {@code _private} is returned in a method, the {@code
+ * SelfType} is used. It is up to the user to determine the real type. I.e., in case of {@code
+ * sw:date_time_mixin}, none of the methods are called on that class directly, but always through an
+ * inherited class. On declaration the inheriting classes are unknown, thus if {@code _self} is
+ * returned from a mixin, we need to proxy the type.
  *
  * <p>Note that this class never writes to the {@link IDefinitionKeeper}.
  */
@@ -127,6 +127,7 @@ public class LocalTypeReasoner extends MagikAstWalker {
   protected void walkPostClone(final AstNode node) {
     this.atomHandler.handleClone(node);
   }
+
   @Override
   protected void walkPostPrivate(final AstNode node) {
     this.atomHandler.handlePrivate(node);

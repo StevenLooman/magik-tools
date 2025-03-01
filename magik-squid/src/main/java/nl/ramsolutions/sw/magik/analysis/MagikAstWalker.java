@@ -1743,6 +1743,7 @@ public abstract class MagikAstWalker {
   protected void walkPostClone(final AstNode node) {
     this.walkPostDefault(node);
   }
+
   protected void walkPrePrivate(final AstNode node) {
     this.walkPreDefault(node);
   }

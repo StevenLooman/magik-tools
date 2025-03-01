@@ -226,7 +226,10 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
           typeTypeNode -> {
             final String identifier = typeTypeNode.getTokenValue();
             final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
-            if (typeTypeNode.is(TypeStringGrammar.TYPE_CLONE, TypeStringGrammar.TYPE_SELF, TypeStringGrammar.TYPE_PRIVATE)) {
+            if (typeTypeNode.is(
+                TypeStringGrammar.TYPE_CLONE,
+                TypeStringGrammar.TYPE_SELF,
+                TypeStringGrammar.TYPE_PRIVATE)) {
               this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, constModifier);
             } else if (typeTypeNode.is(TypeStringGrammar.TYPE_PARAMETER_REFERENCE)) {
               this.addSemanticToken(typeTypeNode, SemanticToken.Type.KEYWORD, docModifier);
