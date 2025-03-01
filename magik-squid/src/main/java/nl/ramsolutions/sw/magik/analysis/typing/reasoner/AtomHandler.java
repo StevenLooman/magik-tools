@@ -62,6 +62,15 @@ class AtomHandler extends LocalTypeReasonerHandler {
   }
 
   /**
+   * Handle private.
+   *
+   * @param node PRIVATE node.
+   */
+  void handlePrivate(final AstNode node) {
+    this.handleSelf(node);
+  }
+
+  /**
    * Handle true/false.
    *
    * @param node TRUE/FALSE node.

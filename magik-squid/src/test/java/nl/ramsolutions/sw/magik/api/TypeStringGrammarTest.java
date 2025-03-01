@@ -19,6 +19,7 @@ class TypeStringGrammarTest {
         .matches(" sw:integer")
         .matches("_self")
         .matches(" _clone")
+      .matches("_private")
         .matches("_undefined")
         .matches("_self|sw:unset")
         .matches("integer|float")

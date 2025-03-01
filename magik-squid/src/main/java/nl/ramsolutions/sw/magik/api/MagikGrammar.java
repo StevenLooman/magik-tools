@@ -151,6 +151,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   PROCEDURE_DEFINITION_SYNTAX_ERROR,
   SELF,
   CLONE,
+  PRIVATE,
   UNSET,
   TRUE,
   FALSE,
@@ -444,6 +445,7 @@ public enum MagikGrammar implements GrammarRuleKey {
                 LOCK,
                 SELF,
                 CLONE,
+                PRIVATE,
                 UNSET,
                 TRUE,
                 FALSE,
@@ -452,6 +454,7 @@ public enum MagikGrammar implements GrammarRuleKey {
                 SUPER));
     b.rule(SELF).is(MagikKeyword.SELF);
     b.rule(CLONE).is(MagikKeyword.CLONE);
+    b.rule(PRIVATE).is(MagikKeyword.PRIVATE);
     b.rule(UNSET).is(MagikKeyword.UNSET);
     b.rule(TRUE).is(MagikKeyword.TRUE);
     b.rule(FALSE).is(MagikKeyword.FALSE);

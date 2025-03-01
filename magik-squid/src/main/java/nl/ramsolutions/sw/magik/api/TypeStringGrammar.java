@@ -24,6 +24,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
   TYPE_UNDEFINED,
   TYPE_SELF,
   TYPE_CLONE,
+  TYPE_PRIVATE,
   TYPE_PARAMETER_REFERENCE,
   TYPE_IDENTIFIER,
 
@@ -66,6 +67,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
     TYPE_STRING_GENERIC("_generic"),
     TYPE_STRING_SELF("_self"),
     TYPE_STRING_CLONE("_clone"),
+    TYPE_STRING_PRIVATE("_private"),
     EXPRESSION_RESULT_UNDEFINED("__undefined_result__");
 
     private final String value;
@@ -107,6 +109,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
     b.rule(TYPE_UNDEFINED).is(Keyword.TYPE_STRING_UNDEFINED);
     b.rule(TYPE_SELF).is(Keyword.TYPE_STRING_SELF);
     b.rule(TYPE_CLONE).is(Keyword.TYPE_STRING_CLONE);
+    b.rule(TYPE_PRIVATE).is(Keyword.TYPE_STRING_PRIVATE);
 
     b.rule(TYPE_PARAMETER_REFERENCE)
         .is(
@@ -146,6 +149,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
                         TYPE_UNDEFINED,
                         TYPE_SELF,
                         TYPE_CLONE,
+                        TYPE_PRIVATE,
                         TYPE_GENERIC_DEFINITION_SINGLE,
                         TYPE_GENERIC_REFERENCE_SINGLE,
                         TYPE_PARAMETER_REFERENCE,
@@ -156,6 +160,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
                             TYPE_UNDEFINED,
                             TYPE_SELF,
                             TYPE_CLONE,
+                            TYPE_PRIVATE,
                             TYPE_GENERIC_DEFINITION_SINGLE,
                             TYPE_GENERIC_REFERENCE_SINGLE,
                             TYPE_PARAMETER_REFERENCE,

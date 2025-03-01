@@ -25,7 +25,7 @@
 				},
 				{
 					"name": "variable.language.magik",
-					"match": "(?i)\\b(_self|_clone|_super|_thisthread)\\b"
+					"match": "(?i)\\b(_self|_clone|_super|_private|_thisthread)\\b"
 				},
 				{
 					"name": "constant.language.magik",

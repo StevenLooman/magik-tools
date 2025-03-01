@@ -32,6 +32,11 @@ class NoSelfUseCheckTest extends MagikCheckTestBase {
         """,
         """
         _method a.b
+          _private.m
+        _endmethod
+        """,
+        """
+        _method a.b
           write(.slot)
         _endmethod
         """,

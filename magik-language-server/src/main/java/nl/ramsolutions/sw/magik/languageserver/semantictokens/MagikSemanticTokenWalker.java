@@ -58,6 +58,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
                   keyword != MagikKeyword.SELF
                       && keyword != MagikKeyword.CLONE
                       && keyword != MagikKeyword.SUPER
+                      && keyword != MagikKeyword.PRIVATE
                       && keyword != MagikKeyword.TRUE
                       && keyword != MagikKeyword.FALSE
                       && keyword != MagikKeyword.MAYBE
@@ -70,6 +71,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
           MagikKeyword.SELF.getValue(),
           MagikKeyword.CLONE.getValue(),
           MagikKeyword.SUPER.getValue(),
+          MagikKeyword.PRIVATE.getValue(),
           MagikKeyword.TRUE.getValue(),
           MagikKeyword.FALSE.getValue(),
           MagikKeyword.MAYBE.getValue(),
@@ -216,6 +218,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
               TypeStringGrammar.TYPE_IDENTIFIER,
               TypeStringGrammar.TYPE_CLONE,
               TypeStringGrammar.TYPE_SELF,
+              TypeStringGrammar.TYPE_PRIVATE,
               TypeStringGrammar.TYPE_PARAMETER_REFERENCE,
               TypeStringGrammar.TYPE_GENERIC_DEFINITION,
               TypeStringGrammar.TYPE_GENERIC_REFERENCE);
@@ -223,7 +226,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
           typeTypeNode -> {
             final String identifier = typeTypeNode.getTokenValue();
             final TypeString typeString = TypeString.ofIdentifier(identifier, this.currentPakkage);
-            if (typeTypeNode.is(TypeStringGrammar.TYPE_CLONE, TypeStringGrammar.TYPE_SELF)) {
+            if (typeTypeNode.is(TypeStringGrammar.TYPE_CLONE, TypeStringGrammar.TYPE_SELF, TypeStringGrammar.TYPE_PRIVATE)) {
               this.addSemanticToken(typeTypeNode, SemanticToken.Type.CLASS, constModifier);
             } else if (typeTypeNode.is(TypeStringGrammar.TYPE_PARAMETER_REFERENCE)) {
               this.addSemanticToken(typeTypeNode, SemanticToken.Type.KEYWORD, docModifier);

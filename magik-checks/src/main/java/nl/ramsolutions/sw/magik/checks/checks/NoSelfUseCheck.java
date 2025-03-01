@@ -23,10 +23,10 @@ public class NoSelfUseCheck extends MagikCheck {
       return;
     }
 
-    // _self/_clone/_super/slot
+    // _self/_clone/_super/_private/slot
     final boolean anyDescendants =
         !node.getDescendants(
-                MagikGrammar.SELF, MagikGrammar.CLONE, MagikGrammar.SUPER, MagikGrammar.SLOT)
+                             MagikGrammar.SELF, MagikGrammar.CLONE, MagikGrammar.SUPER, MagikGrammar.PRIVATE, MagikGrammar.SLOT)
             .isEmpty();
     if (anyDescendants) {
       return;

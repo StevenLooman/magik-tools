@@ -39,6 +39,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
         TypeStringGrammar.TYPE_UNDEFINED,
         TypeStringGrammar.TYPE_CLONE,
         TypeStringGrammar.TYPE_SELF,
+        TypeStringGrammar.TYPE_PRIVATE,
         TypeStringGrammar.TYPE_PARAMETER_REFERENCE,
         TypeStringGrammar.TYPE_GENERIC_DEFINITION,
         TypeStringGrammar.TYPE_GENERIC_REFERENCE,
@@ -66,7 +67,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
   public void leaveNode(final AstNode node) {
     if (node.is(TypeStringGrammar.TYPE_UNDEFINED)) {
       this.buildUndefined(node);
-    } else if (node.is(TypeStringGrammar.TYPE_CLONE, TypeStringGrammar.TYPE_SELF)) {
+    } else if (node.is(TypeStringGrammar.TYPE_CLONE, TypeStringGrammar.TYPE_SELF, TypeStringGrammar.TYPE_PRIVATE)) {
       this.buildSelf(node);
     } else if (node.is(TypeStringGrammar.TYPE_PARAMETER_REFERENCE)) {
       this.buildParameterRef(node);
@@ -142,6 +143,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
             TypeStringGrammar.TYPE_UNDEFINED,
             TypeStringGrammar.TYPE_CLONE,
             TypeStringGrammar.TYPE_SELF,
+            TypeStringGrammar.TYPE_PRIVATE,
             TypeStringGrammar.TYPE_PARAMETER_REFERENCE,
             TypeStringGrammar.TYPE_GENERIC_DEFINITION,
             TypeStringGrammar.TYPE_GENERIC_REFERENCE,
