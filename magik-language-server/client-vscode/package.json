@@ -363,7 +363,7 @@
     "@types/node": "^22.13.7",
     "@typescript-eslint/parser": "^8.22.0",
     "@vscode/vsce": "^3.2.2",
-    "eslint": "^9.19.0",
+    "eslint": "^9.21.0",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.25.0"
   }
