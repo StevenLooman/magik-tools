@@ -137,6 +137,72 @@ class RecursiveDefinitionReasonerTest {
     assertThat(updatedResultStr).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
   }
 
+  @Test
+  void testSharedConstantReasoning() throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
+    final Path fixedPath = this.getPath(path);
+    this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
+
+    // Ensure typing isn't known currently.
+    final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");
+    final MethodDefinition methodDefinition =
+        definitionKeeper.getMethodDefinitions(typeStr).stream()
+            .filter(methodDef -> methodDef.getMethodName().equals("shared_constant"))
+            .findFirst()
+            .orElseThrow();
+    final ExpressionResultString resultStr = methodDefinition.getReturnTypes();
+    assertThat(resultStr).isEqualTo(
+      new ExpressionResultString(TypeString.UNDEFINED));
+
+    // Recusively reason the method definition.
+    final RecursiveDefinitionReasoner recursiveReasoner =
+        new RecursiveDefinitionReasoner(definitionKeeper, 3);
+    recursiveReasoner.reason(methodDefinition);
+
+    // Test if the method definition now has a return type.
+    final MethodDefinition updatedMethodDefinition =
+        definitionKeeper.getMethodDefinitions(typeStr).stream()
+            .filter(methodDef -> methodDef.getMethodName().equals("shared_constant"))
+            .findFirst()
+            .orElseThrow();
+    final ExpressionResultString updatedResultStr = updatedMethodDefinition.getReturnTypes();
+    assertThat(updatedResultStr).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+  }
+
+  @Test
+  void testSharedConstantBlockReasoning() throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
+    final Path fixedPath = this.getPath(path);
+    this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
+
+    // Ensure typing isn't known currently.
+    final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");
+    final MethodDefinition methodDefinition =
+        definitionKeeper.getMethodDefinitions(typeStr).stream()
+            .filter(methodDef -> methodDef.getMethodName().equals("shared_constant_block"))
+            .findFirst()
+            .orElseThrow();
+    final ExpressionResultString resultStr = methodDefinition.getReturnTypes();
+    assertThat(resultStr).isEqualTo(
+      new ExpressionResultString(TypeString.UNDEFINED));
+
+    // Recusively reason the method definition.
+    final RecursiveDefinitionReasoner recursiveReasoner =
+        new RecursiveDefinitionReasoner(definitionKeeper, 3);
+    recursiveReasoner.reason(methodDefinition);
+
+    // Test if the method definition now has a return type.
+    final MethodDefinition updatedMethodDefinition =
+        definitionKeeper.getMethodDefinitions(typeStr).stream()
+            .filter(methodDef -> methodDef.getMethodName().equals("shared_constant_block"))
+            .findFirst()
+            .orElseThrow();
+    final ExpressionResultString updatedResultStr = updatedMethodDefinition.getReturnTypes();
+    assertThat(updatedResultStr).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+  }
+
   // endregion
 
   // region: Slot reasoning.

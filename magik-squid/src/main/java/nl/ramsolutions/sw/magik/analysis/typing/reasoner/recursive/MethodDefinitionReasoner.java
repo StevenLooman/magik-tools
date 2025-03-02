@@ -49,6 +49,9 @@ class MethodDefinitionReasoner extends AbstractDefinitionReasoner {
     // Reason over the file and get all used MagikDefinitions.
     final UsedDefinitionExtractor extractor = new UsedDefinitionExtractor(this.definitionKeeper);
     final AstNode methodDefinitionNode1 = fileMethodDefinition.getNode();
+
+    // TODO: Handle define_shared_constant()
+
     final Collection<MagikDefinition> usedDefinitions =
         extractor.extractUsedDefinitions(magikFile, methodDefinitionNode1);
 
@@ -71,6 +74,8 @@ class MethodDefinitionReasoner extends AbstractDefinitionReasoner {
             .findFirst()
             .orElseThrow();
     final AstNode definitionNode = fileMethodDefinition.getNode();
+
+    // TODO: Handle define_shared_constant()
 
     // Reason over the file and get all used MagikDefinitions.
     final LocalTypeReasonerState state = magikFile.getTypeReasonerState();

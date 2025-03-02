@@ -9,6 +9,20 @@ def_slotted_exemplar(
     })
 $
 
+test_exemplar.define_shared_constant(
+    :shared_constant,
+    1,
+    :public)
+$
+
+test_exemplar.define_shared_constant(
+    :shared_constant_block,
+    _block
+	>> 1
+    _endblock,
+    :public)
+$
+
 _method test_exemplar.new()
     ## Constructor.
     _return _clone.init()
