@@ -89,7 +89,7 @@
     <logback.version>1.0.13</logback.version>
     <lsp4j.version>0.23.1</lsp4j.version>
     <commons-cli.version>1.9.0</commons-cli.version>
-    <gson.version>2.11.0</gson.version>
+    <gson.version>2.12.1</gson.version>
     <jline.version>3.28.0</jline.version>
 
     <assertj-core.version>3.26.3</assertj-core.version>
