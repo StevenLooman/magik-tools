@@ -289,7 +289,7 @@ public class TypeStringResolver {
                 return methodDefinitions;
               }
 
-              // Iterate through parents, breadth first search.
+              // Recurse through parents.
               for (final TypeString parentTypeString : this.getParents(typeStr)) {
                 final Collection<MethodDefinition> parentDefinitions =
                     this.getRespondingMethodDefinitions(parentTypeString, methodName);

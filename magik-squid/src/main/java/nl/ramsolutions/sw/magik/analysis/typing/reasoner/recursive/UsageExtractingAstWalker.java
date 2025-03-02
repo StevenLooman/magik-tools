@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import nl.ramsolutions.sw.Usage;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -202,11 +203,95 @@ final class UsageExtractingAstWalker extends MagikAstWalker {
             });
   }
 
-  @Override
-  protected void walkPostUnset(AstNode node) {
+  private void handleAtomNode(final AstNode node) {
+    final LocalTypeReasonerState state = this.magikFile.getTypeReasonerState();
+    final AstNode atomNode = node.getFirstAncestor(MagikGrammar.ATOM);
+    Objects.requireNonNull(atomNode);
+    final ExpressionResultString result = state.getNodeType(atomNode);
+    final TypeString ref = result.get(0, TypeString.UNDEFINED);
     final Location location = new Location(node);
-    final GlobalUsage usage = new GlobalUsage(TypeString.SW_UNSET, location, node);
+    final GlobalUsage usage = new GlobalUsage(ref, location, node);
     this.usages.add(usage);
+  }
+
+  @Override
+  protected void walkPostNumber(final AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  @Override
+  protected void walkPostFalse(AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  @Override
+  protected void walkPostTrue(AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  @Override
+  protected void walkPostMaybe(final AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  @Override
+  protected void walkPostUnset(final AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  @Override
+  protected void walkPostCharacter(AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  @Override
+  protected void walkPostRegexp(AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  @Override
+  protected void walkPostString(AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  @Override
+  protected void walkPostSymbol(AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  @Override
+  protected void walkPostSimpleVector(AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  // TODO: gather
+
+  @Override
+  protected void walkPostGlobalRef(AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  @Override
+  protected void walkPostThisthread(AstNode node) {
+    this.handleAtomNode(node);
+  }
+
+  @Override
+  protected void walkPostSelf(AstNode node) {
+    // TODO Auto-generated method stub
+    super.walkPostSelf(node);
+  }
+
+  @Override
+  protected void walkPostClone(AstNode node) {
+    // TODO Auto-generated method stub
+    super.walkPostClone(node);
+  }
+
+  @Override
+  protected void walkPostSuper(AstNode node) {
+    // TODO Auto-generated method stub
+    super.walkPostSuper(node);
   }
 
   // TODO: Other types...

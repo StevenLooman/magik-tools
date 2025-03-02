@@ -7,10 +7,13 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -34,10 +37,57 @@ class RecursiveDefinitionReasonerTest {
 
   private void addFileToDefinitionKeeper(final IDefinitionKeeper definitionKeeper, final Path path)
       throws IOException {
-    final URI uri = path.toUri();
-    final String content = Files.readString(path, Charset.defaultCharset());
+    final Path fixedPath = this.getPath(path);
+    final URI uri = fixedPath.toUri();
+    final String content = Files.readString(fixedPath, Charset.defaultCharset());
     final MagikTypedFile magikTypedFile = new MagikTypedFile(uri, content, definitionKeeper);
     magikTypedFile.getDefinitions().forEach(definitionKeeper::add);
+  }
+
+  private void addDefineSharedConstantDefinition(
+      final IDefinitionKeeper definitionKeeper, final TypeString typeStr) {
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            typeStr,
+            "define_shared_constant()",
+            Collections.emptySet(),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "nameSymbol",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED),
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "value",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED),
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "privat",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED)),
+            null,
+            Collections.emptySet(),
+            new ExpressionResultString(TypeString.ofParameterRef("value")),
+            ExpressionResultString.EMPTY));
   }
 
   // region: Method reasoning.
@@ -45,8 +95,7 @@ class RecursiveDefinitionReasonerTest {
   void testRecursiveMethodReasoning() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
-    final Path fixedPath = this.getPath(path);
-    this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
+    this.addFileToDefinitionKeeper(definitionKeeper, path);
 
     // Ensure typing isn't known currently.
     final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");
@@ -77,8 +126,7 @@ class RecursiveDefinitionReasonerTest {
   void testRecursiveMethodReasoningOverMaxDepth() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
-    final Path fixedPath = this.getPath(path);
-    this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
+    this.addFileToDefinitionKeeper(definitionKeeper, path);
 
     // Ensure typing isn't known currently.
     final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");
@@ -109,8 +157,7 @@ class RecursiveDefinitionReasonerTest {
   void testRecursiveIterMethodReasoning() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
-    final Path fixedPath = this.getPath(path);
-    this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
+    this.addFileToDefinitionKeeper(definitionKeeper, path);
 
     // Ensure typing isn't known currently.
     final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");
@@ -141,8 +188,7 @@ class RecursiveDefinitionReasonerTest {
   void testSharedConstantReasoning() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
-    final Path fixedPath = this.getPath(path);
-    this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
+    this.addFileToDefinitionKeeper(definitionKeeper, path);
 
     // Ensure typing isn't known currently.
     final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");
@@ -152,8 +198,12 @@ class RecursiveDefinitionReasonerTest {
             .findFirst()
             .orElseThrow();
     final ExpressionResultString resultStr = methodDefinition.getReturnTypes();
-    assertThat(resultStr).isEqualTo(
-      new ExpressionResultString(TypeString.UNDEFINED));
+    assertThat(resultStr).isEqualTo(new ExpressionResultString(TypeString.UNDEFINED));
+
+    // Add define_shared_constant() definition, which returns its second argument.
+    // Normally this method is defined on sw:object, and the hierarchy would be set via the
+    // exported definitions from a session.
+    this.addDefineSharedConstantDefinition(definitionKeeper, typeStr);
 
     // Recusively reason the method definition.
     final RecursiveDefinitionReasoner recursiveReasoner =
@@ -174,8 +224,7 @@ class RecursiveDefinitionReasonerTest {
   void testSharedConstantBlockReasoning() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
-    final Path fixedPath = this.getPath(path);
-    this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
+    this.addFileToDefinitionKeeper(definitionKeeper, path);
 
     // Ensure typing isn't known currently.
     final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");
@@ -185,8 +234,11 @@ class RecursiveDefinitionReasonerTest {
             .findFirst()
             .orElseThrow();
     final ExpressionResultString resultStr = methodDefinition.getReturnTypes();
-    assertThat(resultStr).isEqualTo(
-      new ExpressionResultString(TypeString.UNDEFINED));
+    assertThat(resultStr).isEqualTo(new ExpressionResultString(TypeString.UNDEFINED));
+
+    // Normally this method is defined on sw:object, and the hierarchy would be set via the
+    // exported definitions from a session.
+    this.addDefineSharedConstantDefinition(definitionKeeper, typeStr);
 
     // Recusively reason the method definition.
     final RecursiveDefinitionReasoner recursiveReasoner =
@@ -210,8 +262,7 @@ class RecursiveDefinitionReasonerTest {
   void testRecursiveSlotReasoningSlot1() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
-    final Path fixedPath = this.getPath(path);
-    this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
+    this.addFileToDefinitionKeeper(definitionKeeper, path);
 
     // Ensure typing isn't known currently.
     final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");
@@ -245,8 +296,7 @@ class RecursiveDefinitionReasonerTest {
   void testRecursiveSlotReasoningSlot2() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final Path path = Path.of("magik-squid/src/test/resources/test_recursive_reasoner.magik");
-    final Path fixedPath = this.getPath(path);
-    this.addFileToDefinitionKeeper(definitionKeeper, fixedPath);
+    this.addFileToDefinitionKeeper(definitionKeeper, path);
 
     // Ensure typing isn't known currently.
     final TypeString typeStr = TypeString.ofIdentifier("test_exemplar", "user");

@@ -10,6 +10,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.AssignmentExpressionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -19,6 +20,7 @@ import org.slf4j.LoggerFactory;
 class MethodDefinitionReasoner extends AbstractDefinitionReasoner {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MethodDefinitionReasoner.class);
+  private static final String DEFINE_SHARED_CONSTANT = "define_shared_constant()";
 
   ExpressionResultString nodeReturnTypes;
   ExpressionResultString nodeIterTypes;
@@ -48,12 +50,10 @@ class MethodDefinitionReasoner extends AbstractDefinitionReasoner {
 
     // Reason over the file and get all used MagikDefinitions.
     final UsedDefinitionExtractor extractor = new UsedDefinitionExtractor(this.definitionKeeper);
-    final AstNode methodDefinitionNode1 = fileMethodDefinition.getNode();
-
-    // TODO: Handle define_shared_constant()
-
+    final AstNode methodDefinitionNode = fileMethodDefinition.getNode();
+    final AstNode rootNode = this.findRootNode(methodDefinitionNode);
     final Collection<MagikDefinition> usedDefinitions =
-        extractor.extractUsedDefinitions(magikFile, methodDefinitionNode1);
+        extractor.extractUsedDefinitions(magikFile, rootNode);
 
     return usedDefinitions;
   }
@@ -74,13 +74,12 @@ class MethodDefinitionReasoner extends AbstractDefinitionReasoner {
             .findFirst()
             .orElseThrow();
     final AstNode definitionNode = fileMethodDefinition.getNode();
-
-    // TODO: Handle define_shared_constant()
+    final AstNode rootNode = this.findRootNode(definitionNode);
 
     // Reason over the file and get all used MagikDefinitions.
     final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
-    final ExpressionResultString result = state.getNodeType(definitionNode);
-    final ExpressionResultString iterResult = state.getNodeIterType(definitionNode);
+    final ExpressionResultString result = state.getNodeType(rootNode);
+    final ExpressionResultString iterResult = state.getNodeIterType(rootNode);
 
     final MethodDefinition methodDefinition = (MethodDefinition) this.originalDefinition;
     return new MethodDefinition(
@@ -149,5 +148,29 @@ class MethodDefinitionReasoner extends AbstractDefinitionReasoner {
 
     // Save the new MethodDefinition.
     this.definitionKeeper.add(updatedDefinition);
+  }
+
+  private AstNode findRootNode(final AstNode node) {
+    if (node.is(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION)) {
+      return node;
+    }
+
+    // Try EXPRESSION.
+    final AstNode expressionNode = node.getFirstAncestor(MagikGrammar.EXPRESSION);
+    if (expressionNode != null) {
+      return expressionNode;
+    }
+
+    // Try define_shared_constant().
+    final AstNode methodInvocationNode = node.getFirstDescendant(MagikGrammar.METHOD_INVOCATION);
+    if (node.is(MagikGrammar.STATEMENT) && methodInvocationNode != null) {
+      final MethodInvocationNodeHelper helper =
+          new MethodInvocationNodeHelper(methodInvocationNode);
+      if (helper.isMethodInvocationOf(DEFINE_SHARED_CONSTANT)) {
+        return node.getFirstDescendant(MagikGrammar.EXPRESSION);
+      }
+    }
+
+    throw new IllegalStateException();
   }
 }

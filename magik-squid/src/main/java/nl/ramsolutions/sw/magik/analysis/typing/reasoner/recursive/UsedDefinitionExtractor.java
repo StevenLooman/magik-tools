@@ -13,7 +13,6 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
-import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
  * A class which reasons about the (iter) type of a node, then returns the definition it need to
@@ -35,47 +34,15 @@ public class UsedDefinitionExtractor {
   /** Reason about the type of a node. */
   public Collection<MagikDefinition> extractUsedDefinitions(
       final MagikTypedFile magikFile, final AstNode node) {
-    // TODO: We already get the MagikTypedFile here. Do we need to store the IDefinitionKeeper
-    //       in the constructor?
-    // Find root node to get all used definitions from.
-    final AstNode rootNode = this.findRootNode(node);
-
     // Get usages.
     final UsageExtractingAstWalker walker = new UsageExtractingAstWalker(magikFile);
-    final Collection<Usage> usages = walker.getUsedDefinitions(rootNode);
+    final Collection<Usage> usages = walker.getUsedDefinitions(node);
 
     // Convert usages to definitions.
     return usages.stream()
-        .map(usage -> this.getDefinitions(usage))
+        .map(this::getDefinitions)
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
-  }
-
-  private AstNode findRootNode(final AstNode node) {
-    if (node.is(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION)) {
-      return node;
-    }
-
-    // Try METHOD_DEFINITION or PROCEDURE_DEFINITION.
-    final AstNode methodOrProcDefNode =
-        node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
-    if (methodOrProcDefNode != null) {
-      return methodOrProcDefNode;
-    }
-
-    // Try BODY.
-    final AstNode bodyNode = node.getFirstAncestor(MagikGrammar.BODY);
-    if (bodyNode != null) {
-      return bodyNode.getParent();
-    }
-
-    // Try EXPRESSION.
-    final AstNode expressionNode = node.getFirstAncestor(MagikGrammar.EXPRESSION);
-    if (expressionNode != null) {
-      return expressionNode;
-    }
-
-    throw new IllegalStateException();
   }
 
   private Collection<MagikDefinition> getDefinitions(final Usage usage) {
