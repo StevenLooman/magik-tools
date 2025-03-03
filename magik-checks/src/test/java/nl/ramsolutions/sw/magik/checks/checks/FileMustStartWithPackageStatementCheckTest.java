@@ -8,7 +8,7 @@ import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Test FileWithoutPackageStatementCheck. */
+/** Test FileMustStartWithPackageStatementCheckTest. */
 class FileMustStartWithPackageStatementCheckTest extends MagikCheckTestBase {
 
   @ParameterizedTest
