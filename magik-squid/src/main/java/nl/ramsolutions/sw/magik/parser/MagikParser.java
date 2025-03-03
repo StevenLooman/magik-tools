@@ -103,6 +103,7 @@ public class MagikParser {
     } catch (final IOException exception) {
       LOGGER.error(exception.getMessage(), exception);
     }
+
     return null;
   }
 
