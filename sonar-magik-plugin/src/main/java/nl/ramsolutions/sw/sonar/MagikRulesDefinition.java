@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.sonar.language.Magik;
+import org.sonar.api.SonarRuntime;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonarsource.analyzer.commons.RuleMetadataLoader;
 
@@ -11,6 +12,12 @@ import org.sonarsource.analyzer.commons.RuleMetadataLoader;
 public class MagikRulesDefinition implements RulesDefinition {
 
   private static final String REPOSITORY_NAME = "SonarAnalyzer";
+
+  private final SonarRuntime runtime;
+
+  public MagikRulesDefinition(final SonarRuntime runtime) {
+    this.runtime = runtime;
+  }
 
   @Override
   public void define(final Context context) {
@@ -20,7 +27,7 @@ public class MagikRulesDefinition implements RulesDefinition {
             .setName(MagikRulesDefinition.REPOSITORY_NAME);
 
     final RuleMetadataLoader loader =
-        new RuleMetadataLoader(CheckList.PROFILE_DIR, CheckList.PROFILE_LOCATION);
+        new RuleMetadataLoader(CheckList.PROFILE_DIR, CheckList.PROFILE_LOCATION, this.runtime);
     loader.addRulesByAnnotatedClass(repository, MagikRulesDefinition.getCheckClasses());
 
     repository.done();
