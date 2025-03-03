@@ -2,7 +2,8 @@
 
 A wrapper around `runalias` which provides a better prompt than the standard Magik prompt.
 
-The standard Magik/CLI prompt is a bit bare bones. On Windows there is a bit of additional functionality such as previous/next command, but on Linux the prompt is minimal. As a result, the prompt is barely usable. This wrapper provides a better experience by providing functionality which is standard in regular REPL prompts.
+The standard Magik/CLI prompt is a bit bare bones. On Windows there is a bit of additional functionality such as previous/next command, but on Linux the prompt is minimal. As a result, the prompt is barely usable.
+This wrapper provides a better experience by providing functionality which is standard in regular REPL prompts.
 
 ## Usage
 
@@ -67,4 +68,5 @@ In case you need to force transmit the prompt to the session, write a single `$`
 
 ## Shortcomings
 
-Currently, the wrapper only shows lines from the session after a newline (`\n`) has been seen. Thus, the `.` showing at the start of the session will only be shown when the session prints a newline character. Furthermore, when the prompt is asking for user input, this is usually in the form of `Global ... does not exist: create it? (Y)`, without the newline. The wrapper forces a newline here to show the question, but other questions might not be shown.
+Currently, the wrapper only shows lines from the session after a newline (`\n`) has been seen. Thus, the `.` showing at the start of the session will only be shown when the session prints a newline character.
+Furthermore, when the prompt is asking for user input, this is usually in the form of `Global ... does not exist: create it? (Y)`, without the newline. The wrapper forces a newline here to show the question, but other questions might not be shown.

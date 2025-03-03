@@ -45,7 +45,8 @@ Via the VSCode client you can start a new session, using the specified environme
 
 ## Typed Magik
 
-The language server provides extensive reasoning/inferencing abilities about the types of variables. For this to work, the methods/procedures need to be annotated with type information. For example, the type(s) the method returns or the expected types of parameters. Using this information, functionality such as auto-complete, checking whether a called method exists, etc can be provided.
+The language server provides extensive reasoning/inferencing abilities about the types of variables. For this to work, the methods/procedures need to be annotated with type information.
+For example, the type(s) the method returns or the expected types of parameters. Using this information, functionality such as auto-complete, checking whether a called method exists, etc can be provided.
 
 An example of a method definition, with type annotations, is as follows:
 
@@ -73,6 +74,7 @@ The standard Smallworld type data (types, methods, ...) can be exported using th
 - Condition definitions
 - Binary operator definitions
 
-Given that Smallworld itself does not use type annotations, the resulting data has to be manually improved to provide proper information for the language server. I.e., return types for methods are undefined by default, but can be manually added to the type database. When this is done, the language server can reason about the method call and provide things such as (auto) completion and validation.
+Given that Smallworld itself does not use type annotations, the resulting data has to be manually improved to provide proper information for the language server.
+I.e., return types for methods are undefined by default, but can be manually added to the type database. When this is done, the language server can reason about the method call and provide things such as (auto) completion and validation.
 
 Note that the type information is only used by this language server. The Smallworld session itself does not do anything with this information. I.e., no checking of parameter types is done at runtime.
