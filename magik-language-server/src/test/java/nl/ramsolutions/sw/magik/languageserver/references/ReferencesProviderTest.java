@@ -42,7 +42,7 @@ class ReferencesProviderTest {
             null,
             null,
             TypeString.SW_INTEGER,
-            "refering",
+            "referring",
             Collections.emptySet(),
             Collections.emptyList(),
             null,
@@ -50,17 +50,17 @@ class ReferencesProviderTest {
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY,
             Collections.emptyList(),
-            List.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION, null)),
+            List.of(new MethodUsage(TypeString.UNDEFINED, "referring", EMPTY_LOCATION, null)),
             Collections.emptyList(),
             Collections.emptyList()));
 
     final String code =
         """
-        _method integer.refering
-            _self.refering
+        _method integer.referring
+            _self.referring
         _endmethod
         """;
-    final Position position = new Position(2, 12); // On `refering`.
+    final Position position = new Position(2, 12); // On `referring`.
     final List<Location> references = this.getReferences(code, position, definitionKeeper);
     assertThat(references).hasSize(1);
   }
@@ -76,7 +76,7 @@ class ReferencesProviderTest {
             null,
             null,
             TypeString.SW_INTEGER,
-            "refering",
+            "referring",
             Collections.emptySet(),
             Collections.emptyList(),
             null,
@@ -84,17 +84,17 @@ class ReferencesProviderTest {
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY,
             Collections.emptyList(),
-            List.of(new MethodUsage(TypeString.UNDEFINED, "refering", EMPTY_LOCATION, null)),
+            List.of(new MethodUsage(TypeString.UNDEFINED, "referring", EMPTY_LOCATION, null)),
             Collections.emptyList(),
             Collections.emptyList()));
 
     final String code =
         """
-        _method integer.refering
-            _self.refering
+        _method integer.referring
+            _self.referring
         _endmethod
         """;
-    final Position position = new Position(1, 20); // On `refering`.
+    final Position position = new Position(1, 20); // On `referring`.
     final List<Location> references = this.getReferences(code, position, definitionKeeper);
     assertThat(references).hasSize(1);
   }
@@ -110,7 +110,7 @@ class ReferencesProviderTest {
             null,
             null,
             TypeString.SW_INTEGER,
-            "refering",
+            "referring",
             Collections.emptySet(),
             Collections.emptyList(),
             null,
@@ -124,7 +124,7 @@ class ReferencesProviderTest {
 
     final String code =
         """
-        _method integer.refering
+        _method integer.referring
             integer
         _endmethod
         """;
@@ -144,7 +144,7 @@ class ReferencesProviderTest {
             null,
             null,
             TypeString.SW_INTEGER,
-            "refering",
+            "referring",
             Collections.emptySet(),
             Collections.emptyList(),
             null,
@@ -158,7 +158,7 @@ class ReferencesProviderTest {
 
     final String code =
         """
-        _method integer.refering
+        _method integer.referring
             print(integer)
         _endmethod
         """;

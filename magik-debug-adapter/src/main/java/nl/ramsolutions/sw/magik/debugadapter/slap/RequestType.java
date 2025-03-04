@@ -15,7 +15,7 @@ public enum RequestType {
   SOURCE_FILE(9),
   STEP(10),
 
-  UNKOWN(255);
+  UNKNOWN(255);
 
   private final int val;
 
