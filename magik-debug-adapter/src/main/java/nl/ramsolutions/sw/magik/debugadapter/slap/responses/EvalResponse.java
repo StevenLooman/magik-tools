@@ -9,7 +9,7 @@ import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
 @SuppressWarnings("JavadocVariable")
 public class EvalResponse implements ISlapResponse {
 
-  // Named EvalResponse to prevent collission with Lsp4j.debug.EvaluateResponse
+  // Named EvalResponse to prevent collision with Lsp4j.debug.EvaluateResponse
 
   // Response layout:
   //  0- 4: uint32, message length

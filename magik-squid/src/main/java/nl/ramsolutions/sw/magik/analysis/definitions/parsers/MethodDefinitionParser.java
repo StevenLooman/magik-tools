@@ -82,7 +82,7 @@ public class MethodDefinitionParser {
     final TypeString exemplarName = helper.getTypeString();
     final String methodName = helper.getMethodName();
 
-    // Figure modifers.
+    // Figure modifiers.
     final Set<MethodDefinition.Modifier> modifiers = new HashSet<>();
     if (helper.isPrivateMethod()) {
       modifiers.add(MethodDefinition.Modifier.PRIVATE);
