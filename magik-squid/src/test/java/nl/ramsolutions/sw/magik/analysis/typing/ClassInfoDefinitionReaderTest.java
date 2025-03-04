@@ -100,7 +100,7 @@ class ClassInfoDefinitionReaderTest {
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/conditions.magik")),
                 null,
                 "class_definition_reader_test",
-                "Data's are to be conditioned.\n",
+                "Datas are to be conditioned.\n",
                 null,
                 "example_condition_2",
                 null,
