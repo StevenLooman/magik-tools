@@ -43,7 +43,7 @@ public class MagikLint {
   /**
    * Constructor, parses command line and reads configuration.
    *
-   * @param properties Properites.
+   * @param properties Properties.
    * @param reporter Reporter.
    */
   public MagikLint(final MagikToolsProperties properties, final Reporter reporter) {

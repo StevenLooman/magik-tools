@@ -55,7 +55,7 @@ public class MethodDefinitionParser {
   }
 
   /**
-   * Parse defitions.
+   * Parse definitions.
    *
    * @return List of parsed definitions.
    */
@@ -82,7 +82,7 @@ public class MethodDefinitionParser {
     final TypeString exemplarName = helper.getTypeString();
     final String methodName = helper.getMethodName();
 
-    // Figure modifers.
+    // Figure modifiers.
     final Set<MethodDefinition.Modifier> modifiers = new HashSet<>();
     if (helper.isPrivateMethod()) {
       modifiers.add(MethodDefinition.Modifier.PRIVATE);
@@ -101,7 +101,7 @@ public class MethodDefinitionParser {
     final List<ParameterDefinition> parameters =
         this.createParameterDefinitions(timestamp, moduleName, parametersNode, parameterTypes);
     final AstNode assignmentParameterNode = node.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
-    final ParameterDefinition assignmentParamter =
+    final ParameterDefinition assignmentParameter =
         this.createAssignmentParameterDefinition(
             timestamp, moduleName, assignmentParameterNode, parameterTypes);
 
@@ -167,7 +167,7 @@ public class MethodDefinitionParser {
             methodName,
             modifiers,
             parameters,
-            assignmentParamter,
+            assignmentParameter,
             topics,
             callResult,
             loopResult,

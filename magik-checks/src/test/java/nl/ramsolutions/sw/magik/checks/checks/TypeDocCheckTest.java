@@ -16,7 +16,7 @@ class TypeDocCheckTest extends MagikCheckTestBase {
       strings = {
         """
         _method a.m1(p1)
-          ## @param {sw:float} p1 Paramter 1.
+          ## @param {sw:float} p1 Parameter 1.
         _endmethod
         """,
         """
@@ -41,7 +41,7 @@ class TypeDocCheckTest extends MagikCheckTestBase {
         """,
         """
         _method a.m1()
-          ## @param {sw:float} p1 Paramter 1.
+          ## @param {sw:float} p1 Parameter 1.
         _endmethod
         """,
         """

@@ -45,7 +45,7 @@ public class GlobalDefinitionParser {
   }
 
   /**
-   * Parse defitions.
+   * Parse definitions.
    *
    * @return List of parsed definitions.
    */

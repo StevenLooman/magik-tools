@@ -30,7 +30,7 @@ public class ModuleDefinition implements IDefinition {
    * @param baseVersion Base version.
    * @param currentVersion Current version.
    * @param description Description.
-   * @param usages List of requireds modules.
+   * @param usages List of required modules.
    */
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public ModuleDefinition(

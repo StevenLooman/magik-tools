@@ -4,7 +4,7 @@ A Language Server for Smallworld/Magik. This language server provides functional
 
 - semantic token highlighting
 - hover
-- defintion lookup
+- definition lookup
 - references lookup
 - refactoring
   - variable renaming
@@ -57,7 +57,7 @@ _method object.method1(param1, param2, _optional param3)
     ## @param {sw:rope<sw:symbol>} param2 Description for parameter 2.
     ## @param {sw:rwo_record} param3 Description for parameter 3.
     ## @return {sw:property_list<sw:symbol, sw:rope>} Description for the first returned object.
-    ## @return {sw:false|sw:unset} Descriptoin for the second returned object.
+    ## @return {sw:false|sw:unset} Description for the second returned object.
     ...
 _endmethod
 ```

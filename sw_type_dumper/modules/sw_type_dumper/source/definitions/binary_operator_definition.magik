@@ -2,7 +2,7 @@
 _package mt
 
 _pragma(classify_level=basic, topic=type_dumper)
-## Binary oeprator definition.
+## Binary operator definition.
 ## @slot {sw:char16_vector} operator
 ## @slot {sw:char16_vector} lhs_type_name
 ## @slot {sw:char16_vector} rhs_type_name

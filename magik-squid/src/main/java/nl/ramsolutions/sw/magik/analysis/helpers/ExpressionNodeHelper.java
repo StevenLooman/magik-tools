@@ -25,7 +25,7 @@ public class ExpressionNodeHelper {
   }
 
   /**
-   * Get a constant (literal) from the encapsulated expresion.
+   * Get a constant (literal) from the encapsulated expression.
    *
    * @return Constant (literal) value, if found.
    */

@@ -27,7 +27,7 @@ public enum ErrorMessage {
   }
 
   /**
-   * Get the {@link ErrorMessage} from an interger value.
+   * Get the {@link ErrorMessage} from an integer value.
    *
    * @param value Integer value.
    * @return ErrorMessage

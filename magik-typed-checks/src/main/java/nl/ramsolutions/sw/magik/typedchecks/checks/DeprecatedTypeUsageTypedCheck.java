@@ -35,12 +35,12 @@ public class DeprecatedTypeUsageTypedCheck extends MagikTypedCheck {
     }
 
     final TypeStringResolver resolver = this.getTypeStringResolver();
-    final ExemplarDefinition exemplerDef = resolver.getExemplarDefinition(typeStr);
-    if (exemplerDef == null) {
+    final ExemplarDefinition exemplarDef = resolver.getExemplarDefinition(typeStr);
+    if (exemplarDef == null) {
       return;
     }
 
-    if (!exemplerDef.getTopics().contains(DeprecatedTypeUsageTypedCheck.DEPRECATED_TOPIC)) {
+    if (!exemplarDef.getTopics().contains(DeprecatedTypeUsageTypedCheck.DEPRECATED_TOPIC)) {
       return;
     }
 

@@ -24,7 +24,7 @@ class DefinitionReaderTest {
   }
 
   @Test
-  void testPackageDefintion() {
+  void testPackageDefinition() {
     final String code = "def_package(:test)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
@@ -48,7 +48,7 @@ class DefinitionReaderTest {
   }
 
   @Test
-  void testPackageDefintionUses() {
+  void testPackageDefinitionUses() {
     final String code = "def_package(:test, :uses, {:p1, :p2})";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
@@ -72,7 +72,7 @@ class DefinitionReaderTest {
   }
 
   @Test
-  void testEnumeratorDefintion() {
+  void testEnumeratorDefinition() {
     final String code = "sw:def_enumeration(:test_enum, _false, :a)";
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();

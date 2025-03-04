@@ -15,7 +15,7 @@ public final class AstNodeHelper {
   private AstNodeHelper() {}
 
   /**
-   * Recusrively update URI for AstNode/Tokens.
+   * Recursively update URI for AstNode/Tokens.
    *
    * @param node Node to start at.
    * @param newUri New URI to set.

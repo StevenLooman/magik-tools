@@ -18,7 +18,7 @@ public enum ResponseType {
   }
 
   /**
-   * Get the {@link ResponseType} from an interger value.
+   * Get the {@link ResponseType} from an integer value.
    *
    * @param value Integer value.
    * @return ResponseType

@@ -39,7 +39,7 @@ public final class AstCreator {
 
   private final LocatedText input;
   private final Token.Builder tokenBuilder = Token.builder();
-  private final List<Trivia> trivias = new ArrayList<>();
+  private final List<Trivia> trivia = new ArrayList<>();
 
   public static AstNode create(ParsingResult parsingResult, LocatedText input) {
     AstNode astNode = new AstCreator(input).visit(parsingResult.getParseTreeRoot());
@@ -71,7 +71,7 @@ public final class AstCreator {
         updateTokenPositionAndValue(node);
         tokenBuilder.setTrivia(Collections.<Trivia>emptyList());
         tokenBuilder.setType(GenericTokenType.COMMENT);
-        trivias.add(Trivia.createComment(tokenBuilder.build()));
+        trivia.add(Trivia.createComment(tokenBuilder.build()));
         return null;
       } else {
         throw new IllegalStateException("Unexpected trivia kind: " + ruleMatcher.getTriviaKind());
@@ -82,15 +82,15 @@ public final class AstCreator {
       tokenBuilder.setType(ruleMatcher.getTokenType());
       if (ruleMatcher.getTokenType() == GenericTokenType.COMMENT) {
         tokenBuilder.setTrivia(Collections.<Trivia>emptyList());
-        trivias.add(Trivia.createComment(tokenBuilder.build()));
+        trivia.add(Trivia.createComment(tokenBuilder.build()));
         return null;
       }
     } else {
       updateTokenPositionAndValue(node);
       tokenBuilder.setType(UNDEFINED_TOKEN_TYPE);
     }
-    Token token = tokenBuilder.setTrivia(trivias).build();
-    trivias.clear();
+    Token token = tokenBuilder.setTrivia(trivia).build();
+    trivia.clear();
     AstNode astNode = new AstNode(token);
     astNode.setFromIndex(node.getStartIndex());
     astNode.setToIndex(node.getEndIndex());
@@ -199,6 +199,6 @@ public final class AstCreator {
     }
 
     tokenBuilder.setType(tokenType);
-    trivias.add(Trivia.createSkippedText(tokenBuilder.build()));
+    trivia.add(Trivia.createSkippedText(tokenBuilder.build()));
   }
 }

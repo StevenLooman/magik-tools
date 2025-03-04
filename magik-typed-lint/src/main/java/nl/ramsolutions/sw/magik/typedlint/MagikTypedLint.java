@@ -47,7 +47,7 @@ public class MagikTypedLint {
    * Constructor, parses command line and reads configuration.
    *
    * @param definitionKeeper {@link IDefinitionKeeper} to use.
-   * @param properties Properites.
+   * @param properties Properties.
    * @param reporter Reporter.
    */
   public MagikTypedLint(

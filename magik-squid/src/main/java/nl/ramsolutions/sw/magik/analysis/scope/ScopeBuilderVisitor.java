@@ -161,7 +161,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
                 .flatMap(
                     identifiersNode ->
                         identifiersNode.getChildren(MagikGrammar.IDENTIFIER).stream()),
-            // Defintions from VARIABLE_DEFINITION.
+            // Definitions from VARIABLE_DEFINITION.
             node.getChildren(MagikGrammar.VARIABLE_DEFINITION).stream()
                 .map(varDefNode -> varDefNode.getFirstChild(MagikGrammar.IDENTIFIER)))
         .flatMap(stream -> stream)

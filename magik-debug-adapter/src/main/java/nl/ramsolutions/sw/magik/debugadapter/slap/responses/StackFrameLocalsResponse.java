@@ -56,7 +56,7 @@ public class StackFrameLocalsResponse implements ISlapResponse {
     }
 
     /**
-     * Get the {@link LocalType} from an interger value.
+     * Get the {@link LocalType} from an integer value.
      *
      * @param value Integer value.
      * @return LocalType
@@ -91,7 +91,7 @@ public class StackFrameLocalsResponse implements ISlapResponse {
     }
 
     /**
-     * Get the {@link VariableType}s from an interger value.
+     * Get the {@link VariableType}s from an integer value.
      *
      * @param flags Integer value.
      * @return VariableTypes
@@ -107,7 +107,7 @@ public class StackFrameLocalsResponse implements ISlapResponse {
     }
   }
 
-  /** Local varaible. */
+  /** Local variable. */
   public static class Local implements ISlapResponse {
 
     private LocalType type;

@@ -1,6 +1,6 @@
 #% text_encoding = iso8859_1
 ##
-## Script to dump types from the current sesssion, to a type database (.jsonl file). This type database
+## Script to dump types from the current session, to a type database (.jsonl file). This type database
 ## can be read into the magik-language-server so that it has all the type/method/... definitions.
 ## These definitions are used for (auto) completion, checks, etc in the magik-language-server.
 ##

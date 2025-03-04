@@ -19,7 +19,7 @@ public enum StepType {
   }
 
   /**
-   * Get the {@link StepType} from an interger value.
+   * Get the {@link StepType} from an integer value.
    *
    * @param value Integer value.
    * @return StepType

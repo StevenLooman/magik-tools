@@ -753,7 +753,7 @@ public class SlapProtocol implements ISlapProtocol {
   }
 
   /**
-   * Evaluate {@code expresion}.
+   * Evaluate {@code expression}.
    *
    * @param threadId Thread to evaluate in.
    * @param level Stack level to evaluate in.

@@ -691,7 +691,7 @@ class LocalTypeReasonerTest {
     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
     final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
 
-    // Assert user:object.test type determined.resul
+    // Assert user:object.test type determined.result
     final AstNode topNode = magikFile.getTopNode();
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final ExpressionResultString result = state.getNodeType(methodNode);
