@@ -189,7 +189,7 @@
 - HidesVariableCheck now allows for variable definition in ancestor scope, when defined at lower line.
 - Add ForbiddenInheritanceCheck.
 - TrailingWhitespaceCheck now marks the actual whitespace.
-- Add defintion functionality to magik-language-server.
+- Add definition functionality to magik-language-server.
 - Move functionality from implementation provider to definition provider in magik-language-server.
 - Implementation provider now provides impementations of abstract methods.
 - Add SelectionRangeProvider to magik-language-server.

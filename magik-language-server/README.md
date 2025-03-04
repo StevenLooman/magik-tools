@@ -4,7 +4,7 @@ A Language Server for Smallworld/Magik. This language server provides functional
 
 - semantic token highlighting
 - hover
-- defintion lookup
+- definition lookup
 - references lookup
 - refactoring
   - variable renaming

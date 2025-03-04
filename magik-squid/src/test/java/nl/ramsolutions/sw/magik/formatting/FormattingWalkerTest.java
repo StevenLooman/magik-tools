@@ -33,7 +33,7 @@ class FormattingWalkerTest {
 
   // region: Whitespace
   @Test
-  void testWhitespaceMethodDefintion1() {
+  void testWhitespaceMethodDefinition1() {
     final String code =
         """
         _method a. b(x, y, z)
@@ -49,7 +49,7 @@ class FormattingWalkerTest {
   }
 
   @Test
-  void testWhitespaceMethodDefintion2() {
+  void testWhitespaceMethodDefinition2() {
     final String code =
         """
         _method a.b (x, y, z)

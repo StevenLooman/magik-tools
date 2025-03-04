@@ -66,7 +66,7 @@ class ReferencesProviderTest {
   }
 
   @Test
-  void testProvideMethodReferenceFromMethodDefintion() {
+  void testProvideMethodReferenceFromMethodDefinition() {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new MethodDefinition(
