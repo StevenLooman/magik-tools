@@ -18,7 +18,7 @@ public enum ModifyBreakpoint {
   }
 
   /**
-   * Get the {@link ModifyBreakpoint} from an interger value.
+   * Get the {@link ModifyBreakpoint} from an integer value.
    *
    * @param value Integer value.
    * @return ModifyBreakpoint

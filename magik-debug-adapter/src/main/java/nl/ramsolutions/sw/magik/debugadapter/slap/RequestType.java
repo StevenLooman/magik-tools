@@ -28,7 +28,7 @@ public enum RequestType {
   }
 
   /**
-   * Get the {@link RequestType} from an interger value.
+   * Get the {@link RequestType} from an integer value.
    *
    * @param value Integer value.
    * @return RequestType

@@ -81,7 +81,7 @@ public class DefineBinaryOperatorCaseParser {
   }
 
   /**
-   * Parse defitions.
+   * Parse definitions.
    *
    * @return List of parsed definitions.
    */

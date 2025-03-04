@@ -79,7 +79,7 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
   }
 
   /**
-   * Handle try variable ndoe.
+   * Handle try variable node.
    *
    * @param node TRY_VARIABLE node.
    */

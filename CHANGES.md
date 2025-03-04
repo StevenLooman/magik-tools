@@ -191,7 +191,7 @@
 - TrailingWhitespaceCheck now marks the actual whitespace.
 - Add definition functionality to magik-language-server.
 - Move functionality from implementation provider to definition provider in magik-language-server.
-- Implementation provider now provides impementations of abstract methods.
+- Implementation provider now provides implementations of abstract methods.
 - Add SelectionRangeProvider to magik-language-server.
 - Drop templated check support, including checks CommentRegularExpressionCheck and XPathCheck.
 - Fix CommentedCodeCheck matching too many things as Magik code.
@@ -310,7 +310,7 @@
 - Fix ScopeCountCheck, UndefinedVariableCheck always using global scope
 - Add check UseValueCompare
 - ScopeBuilderVisitor now also tracks usage
-- Fix ScopeBuilderVisitor uncorrectly marking ScopeEntry as GLOBAL
+- Fix ScopeBuilderVisitor incorrectly marking ScopeEntry as GLOBAL
 - Fix locating magik-lint.properties in products
 - Make parsing/checking files parallel in magik-lint
 - Check Formatting now requires empty line after TRANSMIT

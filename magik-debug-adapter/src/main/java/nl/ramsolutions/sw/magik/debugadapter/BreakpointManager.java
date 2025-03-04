@@ -51,7 +51,7 @@ class BreakpointManager {
     private String message;
 
     /**
-     * Contructor.
+     * Constructor.
      *
      * @param methodName Name of method.
      * @param methodLine Line in method.
@@ -65,7 +65,7 @@ class BreakpointManager {
     }
 
     /**
-     * Contructor.
+     * Constructor.
      *
      * @param methodName Name of method.
      * @param methodLine Line in method.

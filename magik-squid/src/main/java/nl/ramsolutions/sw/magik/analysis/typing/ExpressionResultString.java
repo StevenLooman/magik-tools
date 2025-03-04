@@ -116,7 +116,7 @@ public class ExpressionResultString {
   }
 
   /**
-   * Substitue {@code from} by {@code to} in a copy of self.
+   * Substitute {@code from} by {@code to} in a copy of self.
    *
    * @param from From type.
    * @param to To type.
@@ -138,7 +138,7 @@ public class ExpressionResultString {
       return "UNDEFINED...";
     }
 
-    // Determine first index of trailing homogenous sequence.
+    // Determine first index of trailing homogeneous sequence.
     int firstRepeatingIndex = MAX_ITEMS;
     TypeString lastType = null;
     if (this.types.size() == MAX_ITEMS) {

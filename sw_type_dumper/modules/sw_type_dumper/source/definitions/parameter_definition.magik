@@ -43,7 +43,7 @@ $
 
 _pragma(classify_level=basic, topic=type_dumper)
 _method parameter_definition.new_from(name, procedure)
-	## Construct selfs (multiple!) from.
+	## Construct self's (multiple!) from.
 	## @param {sw:symbol} name
 	## @param {sw:procedure} procedure
 	## @return {sw:simple_vector<E=mt:parameter_definition>} Parameters.

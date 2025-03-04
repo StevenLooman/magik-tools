@@ -65,7 +65,7 @@ public class DefPackageParser {
   }
 
   /**
-   * Parse defitions.
+   * Parse definitions.
    *
    * @return List of parsed definitions.
    */

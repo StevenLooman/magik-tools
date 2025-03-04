@@ -41,34 +41,34 @@ public final class MagikCommentExtractor {
         .filter(Token::hasTrivia)
         .flatMap(
             token -> {
-              final List<Trivia> trivias = token.getTrivia();
-              return trivias.stream()
+              final List<Trivia> trivia = token.getTrivia();
+              return trivia.stream()
                   .map(
-                      trivia -> {
-                        if (!trivia.isComment()) {
+                      trivium -> {
+                        if (!trivium.isComment()) {
                           return null;
                         }
 
-                        final int index = trivias.indexOf(trivia);
-                        final Trivia previousTrivia = index > 0 ? trivias.get(index - 1) : null;
+                        final int index = trivia.indexOf(trivium);
+                        final Trivia previousTrivium = index > 0 ? trivia.get(index - 1) : null;
 
-                        if (previousTrivia == null) {
+                        if (previousTrivium == null) {
                           // First line of source.
-                          return trivia.getToken();
+                          return trivium.getToken();
                         }
 
-                        if (!previousTrivia.isSkippedText()) {
+                        if (!previousTrivium.isSkippedText()) {
                           // Regular token? Not a single line comment.
                           return null;
                         }
 
-                        final List<Token> previousTriviaTokens = previousTrivia.getTokens();
-                        final Token previousTriviaLastToken =
-                            previousTriviaTokens.get(previousTriviaTokens.size() - 1);
-                        if (previousTriviaLastToken.getColumn()
+                        final List<Token> previousTriviumTokens = previousTrivium.getTokens();
+                        final Token previousTriviumLastToken =
+                            previousTriviumTokens.get(previousTriviumTokens.size() - 1);
+                        if (previousTriviumLastToken.getColumn()
                                 == 0 // Whitespace from start of line.
-                            || previousTriviaLastToken.getType() == GenericTokenType.EOL) {
-                          return trivia.getToken();
+                            || previousTriviumLastToken.getType() == GenericTokenType.EOL) {
+                          return trivium.getToken();
                         }
 
                         return null;

@@ -5,7 +5,7 @@ import nl.ramsolutions.sw.MagikToolsProperties;
 /**
  * Settings for magik analysis.
  *
- * <p>Note that settings are settings for the language server, set by the langauage client (i.e.,
+ * <p>Note that settings are settings for the language server, set by the language client (i.e.,
  * your IDE). Configuration is configuration read from files like `.magik-lint.properties`.
  */
 public class MagikAnalysisSettings {

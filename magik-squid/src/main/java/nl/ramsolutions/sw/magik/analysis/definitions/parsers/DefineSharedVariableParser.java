@@ -80,7 +80,7 @@ public class DefineSharedVariableParser {
   }
 
   /**
-   * Parse defitions.
+   * Parse definitions.
    *
    * @return List of parsed definitions.
    */

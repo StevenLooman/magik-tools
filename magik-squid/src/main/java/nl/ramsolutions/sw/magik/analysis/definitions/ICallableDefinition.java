@@ -4,7 +4,7 @@ import java.util.List;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 
-/** Callable/invokable definition. */
+/** Callable/invocable definition. */
 public interface ICallableDefinition extends IDefinition {
 
   /**

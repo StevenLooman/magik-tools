@@ -44,7 +44,7 @@ class FileCharsetDeterminerTest {
 
   @Test
   void testMissingFile() {
-    final Path path = Path.of("non-existant.magik");
+    final Path path = Path.of("non-existent.magik");
     final Charset result = FileCharsetDeterminer.determineCharset(path);
 
     assertThat(result).isEqualTo(StandardCharsets.ISO_8859_1);

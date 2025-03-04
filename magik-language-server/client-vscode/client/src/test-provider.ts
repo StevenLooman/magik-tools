@@ -395,7 +395,7 @@ $
 				items.push(testItem);
 			}
 
-			// Recurse all parents of selfs.
+			// Recurse all parents of self.
 			if (testItem.parent) {
 				this.getSelfAndAncestors(new TestItemCollection(testItem.parent), filterType).forEach(parentTestItem => {
 					items.push(parentTestItem);
