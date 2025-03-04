@@ -15,7 +15,7 @@ public enum RequestType {
   SOURCE_FILE(9),
   STEP(10),
 
-  UNKOWN(255);
+  UNKNOWN(255);
 
   private final int val;
 
@@ -28,7 +28,7 @@ public enum RequestType {
   }
 
   /**
-   * Get the {@link RequestType} from an interger value.
+   * Get the {@link RequestType} from an integer value.
    *
    * @param value Integer value.
    * @return RequestType

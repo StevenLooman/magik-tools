@@ -62,7 +62,7 @@ public class DefIndexedExemplarParser extends BaseDefParser {
   }
 
   /**
-   * Parse defitions.
+   * Parse definitions.
    *
    * @return List of parsed definitions.
    */

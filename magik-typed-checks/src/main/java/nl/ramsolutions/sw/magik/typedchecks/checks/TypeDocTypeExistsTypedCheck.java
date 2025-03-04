@@ -82,7 +82,7 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    // Get slot defintions.
+    // Get slot definitions.
     final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
     final TypeDocParser typeDocParser = new TypeDocParser(statementNode);
     final Map<AstNode, TypeString> slotTypeNodes = typeDocParser.getSlotTypeNodes();

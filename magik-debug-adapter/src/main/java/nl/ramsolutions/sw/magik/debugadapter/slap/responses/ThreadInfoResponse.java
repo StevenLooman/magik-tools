@@ -53,7 +53,7 @@ public class ThreadInfoResponse implements ISlapResponse {
     }
 
     /**
-     * Get the {@link ThreadState} from an interger value.
+     * Get the {@link ThreadState} from an integer value.
      *
      * @param value Integer value.
      * @return ThreadState
@@ -87,7 +87,7 @@ public class ThreadInfoResponse implements ISlapResponse {
     }
 
     /**
-     * Get the {@link ThreadFlag} from an interger value.
+     * Get the {@link ThreadFlag} from an integer value.
      *
      * @param value Integer value.
      * @return ThreadFlag
@@ -103,7 +103,7 @@ public class ThreadInfoResponse implements ISlapResponse {
     }
 
     /**
-     * Get the {@link ThreadFlag}s from an interger value.
+     * Get the {@link ThreadFlag}s from an integer value.
      *
      * @param flags Integer value.
      * @return ThreadFlags

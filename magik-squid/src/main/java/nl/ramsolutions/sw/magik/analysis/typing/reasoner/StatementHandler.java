@@ -128,7 +128,7 @@ class StatementHandler extends LocalTypeReasonerHandler {
             ? this.state.getNodeType(multiValueExprNode)
             : ExpressionResultString.EMPTY;
 
-    // Find related BODY/EXPRESION nodes.
+    // Find related BODY/EXPRESSION nodes.
     final ContinueLeaveStatementNodeHelper helper = new ContinueLeaveStatementNodeHelper(node);
     final AstNode bodyNode = helper.getRelatedBodyNode();
     final AstNode expressionNode = bodyNode.getFirstAncestor(MagikGrammar.EXPRESSION);

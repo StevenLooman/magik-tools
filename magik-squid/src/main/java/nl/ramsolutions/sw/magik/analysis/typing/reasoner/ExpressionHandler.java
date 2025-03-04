@@ -203,7 +203,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     final String operatorStr = node.getTokenValue().toLowerCase();
     final String operatorMethod = UNARY_OPERATOR_METHODS.get(operatorStr);
 
-    // Apply opertor to operand and store result.
+    // Apply operator to operand and store result.
     final ExpressionResultString result =
         this.getMethodInvocationResult(typeStr, operatorMethod)
             .substituteType(TypeString.SELF, typeStr);

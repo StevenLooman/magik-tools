@@ -43,7 +43,7 @@ public final class FileCharsetDeterminer {
    * Try to determine the charset used in this file. Magik files usually contain a line specifying
    * the encoding: #% text_encoding = iso8859_1
    *
-   * @param source Source to raed text_encoding from.
+   * @param source Source to read text_encoding from.
    * @return Charset for file or <code>defaultCharset</code> if undetermined
    */
   public static Charset determineCharset(final String source) {

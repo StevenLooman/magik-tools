@@ -10,6 +10,6 @@
     "bug"
   ],
   "defaultSeverity": "Major",
-  "ruleSpecification": "ImportMissingDefintion",
+  "ruleSpecification": "ImportMissingDefinition",
   "sqKey": "import-missing-definition"
 }

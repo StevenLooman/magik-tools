@@ -39,7 +39,7 @@ public class TypeDocCheck extends MagikCheck {
   }
 
   private void checkDefinitionParameters(final AstNode node) {
-    // Get parameter defintions.
+    // Get parameter definitions.
     final TypeDocParser typeDocParser = new TypeDocParser(node);
     final Map<AstNode, String> docParameterNameNodes = typeDocParser.getParameterNameNodes();
     final Map<String, AstNode> parameterNodes = this.getParameterNodes(node);
@@ -82,7 +82,7 @@ public class TypeDocCheck extends MagikCheck {
       return;
     }
 
-    // Get slot defintions.
+    // Get slot definitions.
     final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
     final TypeDocParser typeDocParser = new TypeDocParser(statementNode);
     final Map<String, AstNode> docSlotNameNodes = typeDocParser.getSlotNameNodes();

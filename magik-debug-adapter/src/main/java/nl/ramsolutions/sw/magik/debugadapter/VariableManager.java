@@ -40,7 +40,7 @@ class VariableManager {
      * @param frameId Frame ID.
      * @param name Name of variable.
      * @param value Value of variable.
-     * @param expression Expression for varaible.
+     * @param expression Expression for variable.
      */
     MagikVariable(
         final int id,
@@ -91,7 +91,7 @@ class VariableManager {
   /**
    * Constructor.
    *
-   * @param slapProtocol Slap procotol.
+   * @param slapProtocol Slap protocol.
    */
   VariableManager(final ISlapProtocol slapProtocol) {
     this.slapProtocol = slapProtocol;

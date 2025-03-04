@@ -269,7 +269,7 @@ class ThreadManager {
    *
    * @param frameId Stack frame.
    * @param expression Expression to evaluate.
-   * @return Result of evalutate.
+   * @return Result of evaluate.
    * @throws IOException -
    * @throws InterruptedException -
    * @throws ExecutionException -

@@ -87,7 +87,7 @@ public class ProductIndexer {
       final IDefinition bareDefinition = definition.getBareDefinition();
       this.definitionKeeper.add(bareDefinition);
     } catch (final RecognitionException exception) {
-      LOGGER.warn("Error parsing defintion at: " + path, exception);
+      LOGGER.warn("Error parsing definition at: " + path, exception);
     }
   }
 }

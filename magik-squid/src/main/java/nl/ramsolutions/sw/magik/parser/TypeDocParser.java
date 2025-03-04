@@ -47,7 +47,7 @@ import org.sonar.sslr.parser.ParserAdapter;
  * ## @slot {sw:integer} slot1 First slot description.
  * ## @slot {sw:char16_vector} slot2 Second slot description.
  * def_slotted_exemplar(
- *     :exemple,
+ *     :example,
  *     {
  *         {:slot1, _unset},
  *         {:slot2, _unset}
