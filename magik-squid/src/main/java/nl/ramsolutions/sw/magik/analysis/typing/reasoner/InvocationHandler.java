@@ -44,6 +44,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     final TypeString calledTypeStr =
         calledResult
             .substituteType(TypeString.SELF, methodOwnerTypeStr)
+            .substituteType(TypeString.PRIVATE, methodOwnerTypeStr)
             .get(0, TypeString.SW_UNSET);
 
     // Store the method definition(s) on the node.
@@ -216,7 +217,9 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     // Substitute self.
     newExpressionResultString =
         originalCalledTypeStr != TypeString.SELF
-            ? newExpressionResultString.substituteType(TypeString.SELF, calledTypeStr)
+            ? newExpressionResultString
+                .substituteType(TypeString.SELF, calledTypeStr)
+                .substituteType(TypeString.PRIVATE, calledTypeStr)
             : newExpressionResultString;
 
     // Substitute parameters.

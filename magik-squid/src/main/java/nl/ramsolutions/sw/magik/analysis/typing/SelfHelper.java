@@ -18,7 +18,7 @@ public final class SelfHelper {
    * @return Resolved {@link TypeString}.
    */
   public static TypeString substituteSelf(final TypeString typeStr, final AstNode node) {
-    if (typeStr.isSelf()) {
+    if (typeStr.isSelf() || typeStr.isPrivate()) {
       final AstNode definitionNode =
           node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
       if (definitionNode == null) {

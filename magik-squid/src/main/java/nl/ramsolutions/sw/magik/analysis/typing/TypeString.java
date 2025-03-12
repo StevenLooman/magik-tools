@@ -38,6 +38,9 @@ public final class TypeString implements Comparable<TypeString> {
   public static final TypeString SELF = TypeString.ofIdentifier("_self", ANONYMOUS_PACKAGE);
 
   @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final TypeString PRIVATE = TypeString.ofIdentifier("_private", ANONYMOUS_PACKAGE);
+
+  @SuppressWarnings("checkstyle:JavadocVariable")
   public static final TypeString SW_UNSET = TypeString.ofIdentifier("unset", SW_PACKAGE);
 
   @SuppressWarnings("checkstyle:JavadocVariable")
@@ -357,6 +360,10 @@ public final class TypeString implements Comparable<TypeString> {
     return !this.isCombined() && TypeString.SELF.getIdentifier().equalsIgnoreCase(this.string);
   }
 
+  public boolean isPrivate() {
+    return !this.isCombined() && TypeString.PRIVATE.getIdentifier().equalsIgnoreCase(this.string);
+  }
+
   public boolean isSingle() {
     return this.combinedTypes.isEmpty();
   }
@@ -447,19 +454,6 @@ public final class TypeString implements Comparable<TypeString> {
     }
 
     return Collections.unmodifiableList(this.combinedTypes);
-  }
-
-  /**
-   * Get reference parameter.
-   *
-   * @return Referenced parameter.
-   */
-  public String getReferencedParameter() {
-    if (!this.isParameterReference()) {
-      throw new IllegalStateException();
-    }
-
-    return this.string;
   }
 
   /**
