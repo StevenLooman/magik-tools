@@ -894,6 +894,48 @@ class LocalTypeReasonerTest {
 
   // endregion
 
+  // region: private
+  @Test
+  void testPrivate() {
+    final String code =
+        """
+        _package sw
+        _method object.test
+            _return _private.test1
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "test1",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            Collections.emptySet(),
+            new ExpressionResultString(TypeString.SW_INTEGER),
+            ExpressionResultString.EMPTY));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert user:object.test type determined.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+  }
+
+  // endregion
+
   @Test
   void testExpressionTypeAnnotation() throws IOException {
     final String code =

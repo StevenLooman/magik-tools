@@ -150,6 +150,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   PROCEDURE_NAME,
   PROCEDURE_DEFINITION_SYNTAX_ERROR,
   SELF,
+  PRIVATE,
   CLONE,
   UNSET,
   TRUE,
@@ -412,7 +413,19 @@ public enum MagikGrammar implements GrammarRuleKey {
                 POSTFIX_EXPRESSION))
         .skipIfOneChild();
     b.rule(POSTFIX_EXPRESSION)
-        .is(ATOM, b.zeroOrMore(SPACING_NO_LB_2, b.firstOf(METHOD_INVOCATION, PROCEDURE_INVOCATION)))
+        .is(
+            b.firstOf(
+                b.sequence(
+                    PRIVATE,
+                    SPACING_NO_LB_2,
+                    METHOD_INVOCATION,
+                    b.zeroOrMore(
+                        SPACING_NO_LB_2, b.firstOf(METHOD_INVOCATION, PROCEDURE_INVOCATION))),
+                b.sequence(
+                    ATOM,
+                    b.oneOrMore(
+                        SPACING_NO_LB_2, b.firstOf(METHOD_INVOCATION, PROCEDURE_INVOCATION))),
+                ATOM))
         .skipIfOneChild();
 
     b.rule(ATOM)
@@ -451,6 +464,7 @@ public enum MagikGrammar implements GrammarRuleKey {
                 THISTHREAD,
                 SUPER));
     b.rule(SELF).is(MagikKeyword.SELF);
+    b.rule(PRIVATE).is(MagikKeyword.PRIVATE);
     b.rule(CLONE).is(MagikKeyword.CLONE);
     b.rule(UNSET).is(MagikKeyword.UNSET);
     b.rule(TRUE).is(MagikKeyword.TRUE);

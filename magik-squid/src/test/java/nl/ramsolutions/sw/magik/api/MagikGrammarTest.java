@@ -312,6 +312,10 @@ class MagikGrammarTest {
     final Rule rule = g.rule(MagikGrammar.EXPRESSION);
     Assertions.assertThat(rule)
         .matches("a()")
+        .matches("a()()")
+        .matches("a.invoke()")
+        .matches("_private.invoke()")
+        .matches("a.invoke()()")
         .matches("expr()")
         .matches("a _is b")
         .matches("a _isnt b")
@@ -375,7 +379,8 @@ class MagikGrammarTest {
         .matches("_abstract _method a.b _endmethod");
     MagikRuleRequiredAssert.assertThat(rule, MagikGrammar.METHOD_DEFINITION_SYNTAX_ERROR)
         .matches("_method a.b _x _endmethod")
-        .matches("_method a.b\n_x\n_endmethod");
+        .matches("_method a.b\n_x\n_endmethod")
+        .matches("_method a.b _return _private _endmethod");
     MagikRuleRequiredAssert.assertThat(rule, MagikGrammar.PARAMETERS_PAREN_SYNTAX_ERROR)
         .matches("_method a.b(p1 p2) _endmethod")
         .matches("_method a.b(_x) _endmethod");

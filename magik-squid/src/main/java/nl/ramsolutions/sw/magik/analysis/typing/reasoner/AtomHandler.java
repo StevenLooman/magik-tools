@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikNumberParser;
@@ -50,6 +51,16 @@ class AtomHandler extends LocalTypeReasonerHandler {
    */
   void handleSelf(final AstNode node) {
     this.assignAtom(node, TypeString.SELF);
+  }
+
+  /**
+   * Handle private.
+   *
+   * @param node PRIVATE node.
+   */
+  void handlePrivate(final AstNode node) {
+    final ExpressionResultString resultStr = new ExpressionResultString(TypeString.PRIVATE);
+    this.state.setNodeType(node, resultStr);
   }
 
   /**

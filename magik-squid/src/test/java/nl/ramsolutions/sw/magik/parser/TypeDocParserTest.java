@@ -127,7 +127,7 @@ class TypeDocParserTest {
         """
         _method a.b
             ## @return {sw:integer} Top
-            rope.map(\
+            rope.map(
                 _proc(item)
                     ## @return {sw:float} Nested
                 _endproc())

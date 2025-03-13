@@ -39,12 +39,6 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
   private static final String DEFAULT_PACKAGE = "user";
   private static final String TOPIC_DEPRECATED = "deprecated";
 
-  private static final List<String> MAGIK_MODIFIER_VALUES =
-      List.of(
-          MagikKeyword.PRIVATE.getValue(),
-          MagikKeyword.ABSTRACT.getValue(),
-          MagikKeyword.ITER.getValue());
-
   private static final Map<TypeDocGrammar, SemanticToken.Type> TYPE_DOC_ELEMENT_TYPE_MAPPING =
       Map.of(
           TypeDocGrammar.PARAM, SemanticToken.Type.PARAMETER,
@@ -55,7 +49,9 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
       Arrays.stream(MagikKeyword.values())
           .filter(
               keyword ->
+                  // There are marked as constant variables.
                   keyword != MagikKeyword.SELF
+                      && keyword != MagikKeyword.PRIVATE
                       && keyword != MagikKeyword.CLONE
                       && keyword != MagikKeyword.SUPER
                       && keyword != MagikKeyword.TRUE
@@ -64,16 +60,6 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
                       && keyword != MagikKeyword.UNSET)
           .map(MagikKeyword::getValue)
           .collect(Collectors.toUnmodifiableSet());
-
-  private static final Set<String> MAGIK_KEYWORD_VALUES_CONSTANTS =
-      Set.of(
-          MagikKeyword.SELF.getValue(),
-          MagikKeyword.CLONE.getValue(),
-          MagikKeyword.SUPER.getValue(),
-          MagikKeyword.TRUE.getValue(),
-          MagikKeyword.FALSE.getValue(),
-          MagikKeyword.MAYBE.getValue(),
-          MagikKeyword.UNSET.getValue());
 
   private static final List<String> MAGIK_OPERATOR_VALUES =
       Arrays.stream(MagikOperator.values()).map(MagikOperator::getValue).toList();
@@ -124,15 +110,10 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
   @Override
   protected void walkToken(final Token token) {
     final String value = token.getOriginalValue().toLowerCase();
-    if (MAGIK_MODIFIER_VALUES.contains(value)) {
-      this.addSemanticToken(token, SemanticToken.Type.MODIFIER);
-    } else if (MAGIK_KEYWORD_VALUES.contains(value)) {
+    if (MAGIK_KEYWORD_VALUES.contains(value)) {
       this.addSemanticToken(token, SemanticToken.Type.KEYWORD);
     } else if (MAGIK_OPERATOR_VALUES.contains(value)) {
       this.addSemanticToken(token, SemanticToken.Type.OPERATOR);
-    } else if (MAGIK_KEYWORD_VALUES_CONSTANTS.contains(value)) {
-      final Set<SemanticToken.Modifier> modifier = Set.of(SemanticToken.Modifier.READONLY);
-      this.addSemanticToken(token, SemanticToken.Type.VARIABLE, modifier);
     }
   }
 
@@ -245,6 +226,57 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
             }
           });
     }
+  }
+
+  @Override
+  protected void walkPostMethodModifiers(final AstNode node) {
+    node.getTokens().forEach(token -> this.addSemanticToken(token, SemanticToken.Type.MODIFIER));
+  }
+
+  @Override
+  protected void walkPostSelf(final AstNode node) {
+    this.walkPostKeywordContstant(node);
+  }
+
+  @Override
+  protected void walkPostPrivate(final AstNode node) {
+    this.walkPostKeywordContstant(node);
+  }
+
+  @Override
+  protected void walkPostClone(final AstNode node) {
+    this.walkPostKeywordContstant(node);
+  }
+
+  @Override
+  protected void walkPostSuper(final AstNode node) {
+    this.walkPostKeywordContstant(node);
+  }
+
+  @Override
+  protected void walkPostTrue(final AstNode node) {
+    this.walkPostKeywordContstant(node);
+  }
+
+  @Override
+  protected void walkPostFalse(final AstNode node) {
+    this.walkPostKeywordContstant(node);
+  }
+
+  @Override
+  protected void walkPostMaybe(final AstNode node) {
+    this.walkPostKeywordContstant(node);
+  }
+
+  @Override
+  protected void walkPostUnset(final AstNode node) {
+    this.walkPostKeywordContstant(node);
+  }
+
+  private void walkPostKeywordContstant(final AstNode node) {
+    final Token token = node.getToken();
+    final Set<SemanticToken.Modifier> modifier = Set.of(SemanticToken.Modifier.READONLY);
+    this.addSemanticToken(token, SemanticToken.Type.VARIABLE, modifier);
   }
 
   @Override

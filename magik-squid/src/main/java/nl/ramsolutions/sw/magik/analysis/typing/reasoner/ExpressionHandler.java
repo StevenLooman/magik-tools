@@ -206,7 +206,8 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     // Apply operator to operand and store result.
     final ExpressionResultString result =
         this.getMethodInvocationResult(typeStr, operatorMethod)
-            .substituteType(TypeString.SELF, typeStr);
+            .substituteType(TypeString.SELF, typeStr)
+            .substituteType(TypeString.PRIVATE, typeStr);
 
     this.state.setNodeType(node, result);
   }
