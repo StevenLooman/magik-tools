@@ -101,7 +101,7 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
 
   private boolean unknownExemplarDefinitionEntry(final Map.Entry<AstNode, TypeString> entry) {
     final TypeString typeStr = entry.getValue();
-    if (typeStr.isSelf()) {
+    if (typeStr.isSelf() || typeStr.isPrivate()) {
       return false;
     }
 

@@ -744,6 +744,12 @@ public abstract class MagikAstWalker {
         this.walkPostSelf(node);
         break;
 
+      case PRIVATE:
+        this.walkPrePrivate(node);
+        this.walkChildren(node);
+        this.walkPostPrivate(node);
+        break;
+
       case CLONE:
         this.walkPreClone(node);
         this.walkChildren(node);
@@ -1727,6 +1733,14 @@ public abstract class MagikAstWalker {
   }
 
   protected void walkPostSelf(final AstNode node) {
+    this.walkPostDefault(node);
+  }
+
+  protected void walkPrePrivate(final AstNode node) {
+    this.walkPreDefault(node);
+  }
+
+  protected void walkPostPrivate(final AstNode node) {
     this.walkPostDefault(node);
   }
 

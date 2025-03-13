@@ -124,6 +124,11 @@ public class LocalTypeReasoner extends MagikAstWalker {
   }
 
   @Override
+  protected void walkPostPrivate(final AstNode node) {
+    this.atomHandler.handlePrivate(node);
+  }
+
+  @Override
   protected void walkPostClone(final AstNode node) {
     this.atomHandler.handleClone(node);
   }

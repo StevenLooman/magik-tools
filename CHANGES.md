@@ -39,6 +39,7 @@
 - Add `magik-session-wrapper` to wrap a Magik running image/session, providing a better CLI experience.
 - Add MethodIsPublicTypedCheck.
 - Fix method completions by removing `_gather` and `_optional` keywords.
+- Support `_private` keyword as method invocation receiver.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
