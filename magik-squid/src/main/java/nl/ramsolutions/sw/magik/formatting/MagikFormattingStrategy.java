@@ -178,19 +178,36 @@ class MagikFormattingStrategy extends FormattingStrategy {
     final String lastTextTokenValue =
         this.lastTextToken != null ? this.lastTextToken.getOriginalValue().toLowerCase() : null;
     return token.isOnSameLineThan(this.lastTextToken)
-        && (KEYWORDS.contains(lastTextTokenValue) // Always whitespace after a keyword.
-            || KEYWORDS.contains(tokenValue) // Always whitespace before a keyword.
-            || this.tokenIs(token, "<<", "^<<"))
-        && !(AUGMENTED_ASSIGNMENT_TOKENS.contains(
-                lastTextTokenValue) // But no whitespace before augmented assignment.
-            && (this.tokenIs(token, "<<", "^<<")))
-        && !this.tokenIs(token, ".", ",", ")", "}", "]")
-        && !this.tokenIs(this.lastToken, "(", "{", "[")
-        && !this.tokenIs(
-            this.lastTextToken,
-            "_proc",
-            "_loopbody",
-            "_super"); // Except for _proc/_loopbody/_super.
+            && (KEYWORDS.contains(lastTextTokenValue) // Always whitespace after a keyword.
+                || KEYWORDS.contains(tokenValue) // Always whitespace before a keyword.
+                || this.tokenIs(token, "<<", "^<<"))
+            && !(AUGMENTED_ASSIGNMENT_TOKENS.contains(
+                    lastTextTokenValue) // But no whitespace before augmented assignment.
+                && (this.tokenIs(token, "<<", "^<<")))
+            && !this.tokenIs(token, ".", ",", ")", "}", "]")
+            && !this.tokenIs(this.lastToken, "(", "{", "[")
+            && !this.tokenIs(
+                this.lastTextToken,
+                // Parameters of a nameless procedure definition.
+                "_proc",
+                // All end keywords, followed by `(`, `[`.
+                "_endblock",
+                "_endcatch",
+                "_endif",
+                "_endlock",
+                "_endloop",
+                "_endproc",
+                "_endprotect",
+                "_endtry",
+                // Self, super, private.
+                // TODO: Is invalid `_private()`, but `_private[]` is valid.
+                "_self",
+                "_super",
+                "_private",
+                // Loopbody.
+                "_loopbody")
+        || (this.tokenIs(this.lastTextToken, "_private", "_iter", "_abstract")
+            && this.tokenIs(token, "_method"));
   }
 
   private boolean requireNoWhitespaceBefore(final Token token) {

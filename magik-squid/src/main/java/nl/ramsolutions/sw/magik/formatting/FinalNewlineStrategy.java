@@ -27,8 +27,7 @@ class FinalNewlineStrategy extends FormattingStrategy {
     // - EOF
     // Any whitespace can be trimmed.
     if (this.options.isTrimTrailingWhitespace() && this.lastToken != null) {
-      final TextEdit textEdit = this.editToken(token, "", "no whitespace after allowed");
-      return List.of(textEdit);
+      return List.of(this.editToken(token, "", "no whitespace after allowed"));
     }
 
     return Collections.emptyList();

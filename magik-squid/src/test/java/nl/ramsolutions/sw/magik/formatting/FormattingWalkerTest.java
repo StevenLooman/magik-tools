@@ -65,6 +65,17 @@ class FormattingWalkerTest {
   }
 
   @Test
+  void testWhitespaceMethodDefinition3() {
+    final String code =
+        """
+        _private _method a.b()
+        _endmethod
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
   void testWhitespaceParameters1() {
     final String code =
         """
@@ -276,6 +287,18 @@ class FormattingWalkerTest {
   @Test
   void testSuperDefinitionParameters() {
     final String code = "_super(mysuper)";
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testProcSelfInvocation() {
+    final String code =
+        """
+      _proc()
+      	_self()
+      _endproc
+      """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }

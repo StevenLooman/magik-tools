@@ -92,12 +92,10 @@ abstract class FormattingStrategy {
   @CheckForNull
   protected TextEdit editNoNewline(final Token token) {
     if (this.tokenIs(token, GenericTokenType.EOL)) {
-      final TextEdit textEdit =
-          new TextEdit(
-              new Range(new Position(token.getLine() - 1, 0), new Position(token.getLine(), 0)),
-              "",
-              "no empty line allowed");
-      return textEdit;
+      return new TextEdit(
+          new Range(new Position(token.getLine() - 1, 0), new Position(token.getLine(), 0)),
+          "",
+          "no empty line allowed");
     }
 
     return null;
