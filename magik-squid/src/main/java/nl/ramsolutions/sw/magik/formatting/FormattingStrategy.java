@@ -174,7 +174,7 @@ abstract class FormattingStrategy {
     }
 
     final Set<String> valuesSet = Set.of(values);
-    final String tokenValue = token.getOriginalValue();
+    final String tokenValue = token.getOriginalValue(); // TODO: toLowerCase()?
     return valuesSet.contains(tokenValue);
   }
 

@@ -12,60 +12,12 @@ import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
-import nl.ramsolutions.sw.magik.api.MagikPunctuator;
 
 /** Standard formatting strategy. */
 class MagikFormattingStrategy extends FormattingStrategy {
 
   private static final List<String> KEYWORDS =
       Collections.unmodifiableList(List.of(MagikKeyword.keywordValues()));
-
-  // We cannot base indenting purely on AstNodes
-  // (BODY/PARAMETERS/ARGUMENTS/SIMPLE_VECTOR/...),
-  // as bodies and tokens don't play that well together.
-  // Tokens surround the AstNodes, e.g.: '(', pre PARAMETERS, post PARAMETERS,
-  // ')', or '_method', '...', pre BODY, ..., post BODY, '# comment',
-  // '_endmethod'.
-  private static final Set<String> INDENT_INCREASE =
-      Collections.unmodifiableSet(
-          Set.of(
-              // MagikPunctuator.PAREN_L.getValue(),
-              MagikPunctuator.BRACE_L.getValue(),
-              MagikPunctuator.SQUARE_L.getValue(),
-              MagikKeyword.PROC.getValue(),
-              MagikKeyword.METHOD.getValue(),
-              MagikKeyword.BLOCK.getValue(),
-              MagikKeyword.TRY.getValue(),
-              MagikKeyword.WHEN.getValue(),
-              MagikKeyword.PROTECT.getValue(),
-              MagikKeyword.PROTECTION.getValue(),
-              MagikKeyword.CATCH.getValue(),
-              MagikKeyword.LOCK.getValue(),
-              MagikKeyword.THEN.getValue(),
-              MagikKeyword.ELSE.getValue(),
-              MagikKeyword.LOOP.getValue(),
-              MagikKeyword.FINALLY.getValue()));
-
-  private static final Set<String> INDENT_DECREASE =
-      Collections.unmodifiableSet(
-          Set.of(
-              // MagikPunctuator.PAREN_R.getValue(),
-              MagikPunctuator.BRACE_R.getValue(),
-              MagikPunctuator.SQUARE_R.getValue(),
-              MagikKeyword.ENDPROC.getValue(),
-              MagikKeyword.ENDMETHOD.getValue(),
-              MagikKeyword.ENDBLOCK.getValue(),
-              MagikKeyword.ENDTRY.getValue(),
-              MagikKeyword.WHEN.getValue(),
-              MagikKeyword.PROTECTION.getValue(),
-              MagikKeyword.ENDPROTECT.getValue(),
-              MagikKeyword.ENDCATCH.getValue(),
-              MagikKeyword.ENDLOCK.getValue(),
-              MagikKeyword.ELSE.getValue(),
-              MagikKeyword.ELIF.getValue(),
-              MagikKeyword.ENDIF.getValue(),
-              MagikKeyword.ENDLOOP.getValue(),
-              MagikKeyword.FINALLY.getValue()));
 
   private static final Set<String> AUGMENTED_ASSIGNMENT_TOKENS =
       Collections.unmodifiableSet(
@@ -88,11 +40,12 @@ class MagikFormattingStrategy extends FormattingStrategy {
               MagikOperator.EQ.getValue(),
               MagikOperator.NEQ.getValue()));
 
-  private int indent;
+  private final FormattingIndentStrategy indentStrategy;
   private AstNode currentNode;
 
   MagikFormattingStrategy(final FormattingOptions options) {
     super(options);
+    this.indentStrategy = new DefaultIndentStrategy(options);
   }
 
   @Override
@@ -125,11 +78,11 @@ class MagikFormattingStrategy extends FormattingStrategy {
 
   @Override
   List<TextEdit> walkToken(final Token token) {
-    this.trackIndentPre(token);
-
+    // this.trackIndentPre(token);
     final boolean isFirstTextToken = this.lastTextToken == null;
     final List<TextEdit> textEdits = new ArrayList<>();
     if (isFirstTextToken) {
+      // TODO: Can't we merge this with the else body?
       // First token, should not contain any pre-whitespace/indenting.
       final TextEdit textEdit = this.editNoWhitespaceBefore(token);
       textEdits.add(textEdit);
@@ -154,7 +107,7 @@ class MagikFormattingStrategy extends FormattingStrategy {
       }
     }
 
-    this.trackIndentPost(token);
+    // this.trackIndentPost(token);
     return textEdits;
   }
 
@@ -257,57 +210,21 @@ class MagikFormattingStrategy extends FormattingStrategy {
   @Override
   void walkPreNode(final AstNode node) {
     this.currentNode = node;
-
-    if (node.is(MagikGrammar.TRANSMIT)) {
-      // Reset indenting.
-      this.indent = 0;
-    } else if (node.is(
-        MagikGrammar.VARIABLE_DEFINITION,
-        MagikGrammar.VARIABLE_DEFINITION_MULTI,
-        MagikGrammar.PROCEDURE_INVOCATION,
-        MagikGrammar.METHOD_INVOCATION)) {
-      this.indent += 1;
-    }
   }
 
   @Override
   void walkPostNode(final AstNode node) {
-    if (this.isBinaryExpression(node)
-        || node.is(
-            MagikGrammar.VARIABLE_DEFINITION,
-            MagikGrammar.VARIABLE_DEFINITION_MULTI,
-            MagikGrammar.PROCEDURE_INVOCATION,
-            MagikGrammar.METHOD_INVOCATION)) {
-      this.indent -= 1;
-    }
-
     this.currentNode = this.currentNode.getParent();
-  }
-
-  private boolean isBinaryExpression(final AstNode node) {
-    return node.is(
-        MagikGrammar.ASSIGNMENT_EXPRESSION,
-        MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION,
-        MagikGrammar.OR_EXPRESSION,
-        MagikGrammar.XOR_EXPRESSION,
-        MagikGrammar.AND_EXPRESSION,
-        MagikGrammar.EQUALITY_EXPRESSION,
-        MagikGrammar.RELATIONAL_EXPRESSION,
-        MagikGrammar.ADDITIVE_EXPRESSION,
-        MagikGrammar.MULTIPLICATIVE_EXPRESSION,
-        MagikGrammar.EXPONENTIAL_EXPRESSION);
   }
 
   @CheckForNull
   private TextEdit ensureIndenting(final Token token) {
-    if (this.indent == 0 && !this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
-      return null;
-    }
-
-    final String indentText = this.indentText();
+    final String indentText = this.indentStrategy.indentFor(token, this.currentNode);
     final String reason = "improper indenting";
     if (!this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
-      return this.insertBeforeToken(token, indentText, reason);
+      if (!indentText.isEmpty()) {
+        return this.insertBeforeToken(token, indentText, reason);
+      }
     } else if (!this.lastToken.getOriginalValue().equals(indentText)) {
       return this.editToken(this.lastToken, indentText, reason);
     }
@@ -315,30 +232,9 @@ class MagikFormattingStrategy extends FormattingStrategy {
     return null;
   }
 
-  private String indentText() {
-    final int tabSize = this.options.getTabSize();
-    final String indentText = this.options.isInsertSpaces() ? " ".repeat(tabSize) : "\t";
-
-    return indentText.repeat(this.indent);
-  }
-
-  private void trackIndentPre(final Token token) {
-    if (!this.tokenIs(token, GenericTokenType.COMMENT)
-        && this.isBinaryExpression(this.currentNode)
-        && this.currentNode.getChildren().get(1).getToken() == token) { // Only indent first.
-      this.indent += 1;
-    }
-
-    final String tokenValue = token.getOriginalValue().toLowerCase();
-    if (INDENT_DECREASE.contains(tokenValue)) {
-      this.indent -= 1;
-    }
-  }
-
-  private void trackIndentPost(final Token token) {
-    final String tokenValue = token.getOriginalValue().toLowerCase();
-    if (INDENT_INCREASE.contains(tokenValue)) {
-      this.indent += 1;
-    }
+  @Override
+  void setLastToken(final Token token) {
+    this.indentStrategy.setLastToken(token);
+    super.setLastToken(token);
   }
 }

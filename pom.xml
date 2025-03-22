@@ -435,6 +435,7 @@
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.stackTrace(long)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.slap.SlapProtocol.handleReplyMessage(java.nio.ByteBuffer)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.DefaultIndentStrategy.indentFor(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.formatting.MagikFormattingStrategy.requireNoWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.formatting.MagikFormattingStrategy.requireWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.formatting.StandardFormattingStrategy.requireNoWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>

@@ -320,11 +320,6 @@ class FormattingWalkerTest {
         _endblock
         """,
         """
-        _if a() _andif
-        b()
-        _then _endif
-        """,
-        """
         _block
         a << 2
         _endblock
@@ -336,6 +331,25 @@ class FormattingWalkerTest {
         .containsExactly(
             new TextEdit(
                 new Range(new Position(2, 0), new Position(2, 0)), "\t", "improper indenting"));
+  }
+
+  @Test
+  void testIndentingAndifExpression() {
+    final String code =
+        """
+        _if a() _andif
+        b()
+        _then
+        c()
+        _endif
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits)
+        .containsExactly(
+            new TextEdit(
+                new Range(new Position(2, 0), new Position(2, 0)), "\t", "improper indenting"),
+            new TextEdit(
+                new Range(new Position(4, 0), new Position(4, 0)), "\t", "improper indenting"));
   }
 
   @Test
