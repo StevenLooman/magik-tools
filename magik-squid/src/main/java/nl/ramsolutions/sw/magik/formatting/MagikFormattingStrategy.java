@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.formatting;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
-import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +13,7 @@ import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 
 /** Standard formatting strategy. */
-class MagikFormattingStrategy extends FormattingStrategy {
+class MagikFormattingStrategy extends AbstractFormattingStrategy {
 
   private static final List<String> KEYWORDS =
       Collections.unmodifiableList(List.of(MagikKeyword.keywordValues()));
@@ -40,12 +39,12 @@ class MagikFormattingStrategy extends FormattingStrategy {
               MagikOperator.EQ.getValue(),
               MagikOperator.NEQ.getValue()));
 
-  private final FormattingIndentStrategy indentStrategy;
+  private final IndentStrategy indentStrategy;
   private AstNode currentNode;
 
   MagikFormattingStrategy(final FormattingOptions options) {
     super(options);
-    this.indentStrategy = new DefaultIndentStrategy(options);
+    this.indentStrategy = new TabbedIndentStrategy(options);
   }
 
   @Override
@@ -78,17 +77,13 @@ class MagikFormattingStrategy extends FormattingStrategy {
 
   @Override
   List<TextEdit> walkToken(final Token token) {
-    // this.trackIndentPre(token);
-    final boolean isFirstTextToken = this.lastTextToken == null;
     final List<TextEdit> textEdits = new ArrayList<>();
-    if (isFirstTextToken) {
-      // TODO: Can't we merge this with the else body?
+    if (this.lastTextToken == null) {
       // First token, should not contain any pre-whitespace/indenting.
       final TextEdit textEdit = this.editNoWhitespaceBefore(token);
       textEdits.add(textEdit);
     } else {
-      final boolean isOnNewline = !token.isOnSameLineThan(this.lastTextToken);
-      if (isOnNewline) {
+      if (!token.isOnSameLineThan(this.lastTextToken)) {
         if (this.requireNewlineBefore(token)) {
           if (this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
             final TextEdit textEdit = this.editNewlineBefore(this.lastToken);
@@ -99,7 +94,7 @@ class MagikFormattingStrategy extends FormattingStrategy {
           }
         }
 
-        final TextEdit textEdit = this.ensureIndenting(token);
+        final TextEdit textEdit = this.indentStrategy.ensureIndenting(token, this.currentNode);
         textEdits.add(textEdit);
       } else {
         final TextEdit textEdit = this.validateWhitespacingBefore(token);
@@ -107,7 +102,6 @@ class MagikFormattingStrategy extends FormattingStrategy {
       }
     }
 
-    // this.trackIndentPost(token);
     return textEdits;
   }
 
@@ -215,21 +209,6 @@ class MagikFormattingStrategy extends FormattingStrategy {
   @Override
   void walkPostNode(final AstNode node) {
     this.currentNode = this.currentNode.getParent();
-  }
-
-  @CheckForNull
-  private TextEdit ensureIndenting(final Token token) {
-    final String indentText = this.indentStrategy.indentFor(token, this.currentNode);
-    final String reason = "improper indenting";
-    if (!this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
-      if (!indentText.isEmpty()) {
-        return this.insertBeforeToken(token, indentText, reason);
-      }
-    } else if (!this.lastToken.getOriginalValue().equals(indentText)) {
-      return this.editToken(this.lastToken, indentText, reason);
-    }
-
-    return null;
   }
 
   @Override

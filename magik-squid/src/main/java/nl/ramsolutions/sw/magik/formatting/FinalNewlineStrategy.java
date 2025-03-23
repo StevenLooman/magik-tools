@@ -9,7 +9,7 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
 
 /** Final newline strategy. */
-class FinalNewlineStrategy extends FormattingStrategy {
+class FinalNewlineStrategy extends AbstractFormattingStrategy {
 
   private static final String EOL_TOKEN_VALUE = "\n";
 

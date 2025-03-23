@@ -1,21 +1,18 @@
 package nl.ramsolutions.sw.magik.formatting;
 
-import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.TokenType;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
 
-/** Abstract formatting strategy. */
-abstract class FormattingStrategy {
+/** Indenting strategy. */
+abstract class FormattingStategy {
 
   @SuppressWarnings("checkstyle:VisibilityModifier")
   protected Token lastToken;
@@ -26,46 +23,13 @@ abstract class FormattingStrategy {
   @SuppressWarnings("checkstyle:VisibilityModifier")
   protected FormattingOptions options;
 
-  FormattingStrategy(final FormattingOptions options) {
-    this.options = options;
-  }
-
-  List<TextEdit> walkWhitespaceToken(final Token token) {
-    return Collections.emptyList();
-  }
-
-  List<TextEdit> walkCommentToken(final Token token) {
-    return Collections.emptyList();
-  }
-
-  List<TextEdit> walkEolToken(final Token token) {
-    return Collections.emptyList();
-  }
-
-  List<TextEdit> walkEofToken(final Token token) {
-    return Collections.emptyList();
-  }
-
-  List<TextEdit> walkToken(final Token token) {
-    return Collections.emptyList();
-  }
-
-  void walkPreNode(final AstNode node) {}
-
-  void walkPostNode(final AstNode node) {}
-
   /**
-   * Set last token.
+   * Constructor.
    *
-   * @param token Token to set.
+   * @param options Options.
    */
-  void setLastToken(final Token token) {
-    if (!this.tokenIs(
-        token, GenericTokenType.WHITESPACE, GenericTokenType.EOL, GenericTokenType.EOF)) {
-      this.lastTextToken = token;
-    }
-
-    this.lastToken = token;
+  FormattingStategy(final FormattingOptions options) {
+    this.options = options;
   }
 
   /**
@@ -184,5 +148,19 @@ abstract class FormattingStrategy {
     }
 
     return Stream.of(types).anyMatch(type -> token.getType() == type);
+  }
+
+  /**
+   * Set last token.
+   *
+   * @param token Token to set.
+   */
+  void setLastToken(final Token token) {
+    if (!this.tokenIs(
+        token, GenericTokenType.WHITESPACE, GenericTokenType.EOL, GenericTokenType.EOF)) {
+      this.lastTextToken = token;
+    }
+
+    this.lastToken = token;
   }
 }

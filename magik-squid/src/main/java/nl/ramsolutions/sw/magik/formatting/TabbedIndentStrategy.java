@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
-/** Default formatting indent strategy. */
-class DefaultIndentStrategy extends FormattingIndentStrategy {
+/** Tabbed formatting indent strategy. */
+class TabbedIndentStrategy extends IndentStrategy {
 
-  DefaultIndentStrategy(final FormattingOptions options) {
+  TabbedIndentStrategy(final FormattingOptions options) {
     super(options);
   }
 

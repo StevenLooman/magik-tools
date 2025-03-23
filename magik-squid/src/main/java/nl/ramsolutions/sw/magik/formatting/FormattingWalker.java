@@ -19,7 +19,7 @@ public class FormattingWalker extends MagikAstWalker {
   private final PragmaFormattingStrategy pragmaStrategy;
   private final MagikFormattingStrategy magikStrategy;
   private final FinalNewlineStrategy finalNewlineStrategy;
-  private FormattingStrategy activeStrategy;
+  private AbstractFormattingStrategy activeStrategy;
 
   /**
    * Constructor.
@@ -43,7 +43,7 @@ public class FormattingWalker extends MagikAstWalker {
     return this.textEdits;
   }
 
-  private Stream<FormattingStrategy> getStrategies() {
+  private Stream<AbstractFormattingStrategy> getStrategies() {
     return Stream.of(this.pragmaStrategy, this.magikStrategy, this.finalNewlineStrategy);
   }
 

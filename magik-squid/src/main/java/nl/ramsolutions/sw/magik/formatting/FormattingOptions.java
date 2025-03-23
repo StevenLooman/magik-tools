@@ -1,6 +1,6 @@
 package nl.ramsolutions.sw.magik.formatting;
 
-/** Formatting options for {@link FormattingStrategy}. */
+/** Formatting options for {@link AbstractFormattingStrategy}. */
 public class FormattingOptions {
 
   private final int tabSize;

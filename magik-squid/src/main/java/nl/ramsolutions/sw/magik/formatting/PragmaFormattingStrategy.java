@@ -7,7 +7,7 @@ import java.util.List;
 import nl.ramsolutions.sw.magik.TextEdit;
 
 /** Pragma formatting strategy. */
-class PragmaFormattingStrategy extends FormattingStrategy {
+class PragmaFormattingStrategy extends AbstractFormattingStrategy {
 
   boolean pragmaTokenSeen = false;
 
