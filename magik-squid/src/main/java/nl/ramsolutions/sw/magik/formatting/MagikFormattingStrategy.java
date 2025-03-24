@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.TextEdit;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
@@ -39,12 +40,10 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
               MagikOperator.EQ.getValue(),
               MagikOperator.NEQ.getValue()));
 
-  private final IndentStrategy indentStrategy;
   private AstNode currentNode;
 
   MagikFormattingStrategy(final FormattingOptions options) {
     super(options);
-    this.indentStrategy = new TabbedIndentStrategy(options);
   }
 
   @Override
@@ -67,7 +66,7 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
       final TextEdit textEdit = this.editNoNewline(token);
       return List.of(textEdit);
     } else if (this.options.isTrimTrailingWhitespace()
-        && this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
+        && AstQuery.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
       final TextEdit textEdit = this.editToken(this.lastToken, "", "no whitespace after allowed");
       return List.of(textEdit);
     }
@@ -85,7 +84,7 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
     } else {
       if (!token.isOnSameLineThan(this.lastTextToken)) {
         if (this.requireNewlineBefore(token)) {
-          if (this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
+          if (AstQuery.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
             final TextEdit textEdit = this.editNewlineBefore(this.lastToken);
             textEdits.add(textEdit);
           } else {
@@ -93,9 +92,6 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
             textEdits.add(textEdit);
           }
         }
-
-        final TextEdit textEdit = this.indentStrategy.ensureIndenting(token, this.currentNode);
-        textEdits.add(textEdit);
       } else {
         final TextEdit textEdit = this.validateWhitespacingBefore(token);
         textEdits.add(textEdit);
@@ -116,7 +112,7 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
   }
 
   private boolean requireNewlineBefore(final Token token) {
-    return this.tokenIs(this.lastTextToken, "$")
+    return AstQuery.tokenIs(this.lastTextToken, "$")
         && this.lastTextToken.getLine() + 1 == token.getLine();
   }
 
@@ -127,13 +123,13 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
     return token.isOnSameLineThan(this.lastTextToken)
             && (KEYWORDS.contains(lastTextTokenValue) // Always whitespace after a keyword.
                 || KEYWORDS.contains(tokenValue) // Always whitespace before a keyword.
-                || this.tokenIs(token, "<<", "^<<"))
+                || AstQuery.tokenIs(token, "<<", "^<<"))
             && !(AUGMENTED_ASSIGNMENT_TOKENS.contains(
                     lastTextTokenValue) // But no whitespace before augmented assignment.
-                && (this.tokenIs(token, "<<", "^<<")))
-            && !this.tokenIs(token, ".", ",", ")", "}", "]")
-            && !this.tokenIs(this.lastToken, "(", "{", "[")
-            && !this.tokenIs(
+                && (AstQuery.tokenIs(token, "<<", "^<<")))
+            && !AstQuery.tokenIs(token, ".", ",", ")", "}", "]")
+            && !AstQuery.tokenIs(this.lastToken, "(", "{", "[")
+            && !AstQuery.tokenIs(
                 this.lastTextToken,
                 // Parameters of a nameless procedure definition.
                 "_proc",
@@ -153,16 +149,17 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
                 "_private",
                 // Loopbody.
                 "_loopbody")
-        || (this.tokenIs(this.lastTextToken, "_private", "_iter", "_abstract")
-            && this.tokenIs(token, "_method"));
+        || (AstQuery.tokenIs(this.lastTextToken, "_private", "_iter", "_abstract")
+            && AstQuery.tokenIs(token, "_method"));
   }
 
   private boolean requireNoWhitespaceBefore(final Token token) {
     final String lastTextTokenValue =
         this.lastTextToken != null ? this.lastTextToken.getOriginalValue().toLowerCase() : null;
-    return !this.tokenIs(token, GenericTokenType.COMMENT)
-        && (this.tokenIs(token, ")", "}", "]", ",")
-            || this.tokenIs(this.lastTextToken, "@", "(", "{", "[", "_proc", "_loopbody", "_super")
+    return !AstQuery.tokenIs(token, GenericTokenType.COMMENT)
+        && (AstQuery.tokenIs(token, ")", "}", "]", ",")
+            || AstQuery.tokenIs(
+                this.lastTextToken, "@", "(", "{", "[", "_proc", "_loopbody", "_super")
             || this.nodeIsSlot()
             || this.currentNode.is(MagikGrammar.ARGUMENTS)
             || this.currentNode.is(MagikGrammar.PARAMETERS)
@@ -170,7 +167,7 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
             || this.nodeIsInvocation()
             || this.nodeIsUnaryExpression()
             || AUGMENTED_ASSIGNMENT_TOKENS.contains(lastTextTokenValue)
-                && this.tokenIs(token, "<<", "^<<"));
+                && AstQuery.tokenIs(token, "<<", "^<<"));
   }
 
   private boolean nodeIsUnaryExpression() {
@@ -209,11 +206,5 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
   @Override
   void walkPostNode(final AstNode node) {
     this.currentNode = this.currentNode.getParent();
-  }
-
-  @Override
-  void setLastToken(final Token token) {
-    this.indentStrategy.setLastToken(token);
-    super.setLastToken(token);
   }
 }

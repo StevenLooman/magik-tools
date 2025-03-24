@@ -2,87 +2,18 @@ package nl.ramsolutions.sw.magik.formatting;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.GenericTokenType;
-import com.sonar.sslr.api.Token;
-import com.sonar.sslr.api.TokenType;
-import com.sonar.sslr.api.Trivia;
-import edu.umd.cs.findbugs.annotations.Nullable;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
-import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
-import nl.ramsolutions.sw.magik.parser.MagikParser;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-class TabbedIndentStrategyTest {
-
-  static boolean tokenIs(final @Nullable Token token, final TokenType... types) {
-    if (token == null) {
-      return false;
-    }
-
-    return Stream.of(types).anyMatch(type -> token.getType() == type);
-  }
-
-  private List<TextEdit> getEdits(final String code, final FormattingOptions options) {
-    final List<TextEdit> edits = new ArrayList<>();
-    final IndentStrategy strategy = new TabbedIndentStrategy(options);
-    final MagikParser parser = new MagikParser();
-    final AstNode topNode = parser.parse(code);
-    final MagikAstWalker walker =
-        new MagikAstWalker() {
-
-          private AstNode currentNode;
-          private Token lastTextToken;
-
-          @Override
-          protected void walkPreDefault(final AstNode node) {
-            this.currentNode = node;
-          }
-
-          @Override
-          protected void walkPostDefault(AstNode node) {
-            this.currentNode = this.currentNode.getParent();
-          }
-
-          @Override
-          protected void walkTrivia(Trivia trivia) {
-            for (final Token token : trivia.getTokens()) {
-              strategy.setLastToken(token);
-              if (!tokenIs(
-                  token, GenericTokenType.WHITESPACE, GenericTokenType.EOL, GenericTokenType.EOF)) {
-                this.lastTextToken = token;
-              }
-            }
-          }
-
-          @Override
-          protected void walkToken(final Token token) {
-            // Mimic MagikFormattingStrategy, calling only indentFor() on new lines.
-            if (this.lastTextToken != null && !token.isOnSameLineThan(this.lastTextToken)) {
-              final TextEdit edit = strategy.ensureIndenting(token, this.currentNode);
-              if (edit != null) {
-                edits.add(edit);
-              }
-            }
-
-            strategy.setLastToken(token);
-            if (!tokenIs(
-                token, GenericTokenType.WHITESPACE, GenericTokenType.EOL, GenericTokenType.EOF)) {
-              this.lastTextToken = token;
-            }
-          }
-        };
-    walker.walkAst(topNode);
-
-    return edits;
-  }
+class TabbedIndentStrategyTest extends IndentStrategyTest {
 
   @Test
-  void test1() {
-    final FormattingOptions options = new FormattingOptions(8, false, false, false, false);
+  void testOk() {
     final String code =
         """
         _proc()
@@ -90,7 +21,169 @@ class TabbedIndentStrategyTest {
         _endproc
         """;
 
-    final List<TextEdit> edits = this.getEdits(code, options);
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _block
+        print(1)
+        _endblock
+        """,
+        """
+        _block
+        # comment
+        _endblock
+        """,
+        """
+        _block
+        a << 2
+        _endblock
+        """,
+      })
+  void testIndentBlockStatement(final String code) {
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits)
+        .containsExactly(
+            new TextEdit(
+                new Range(new Position(2, 0), new Position(2, 0)), "\t", "improper indenting"));
+  }
+
+  @Test
+  void testIndentingAndifExpression() {
+    final String code =
+        """
+        _if a() _andif
+        b()
+        _then
+        c()
+        _endif
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits)
+        .containsExactly(
+            new TextEdit(
+                new Range(new Position(2, 0), new Position(2, 0)), "\t", "improper indenting"),
+            new TextEdit(
+                new Range(new Position(4, 0), new Position(4, 0)), "\t", "improper indenting"));
+  }
+
+  @Test
+  void testIndentCommentsAfterStatement() { // NOSONAR: Don't group tests.
+    final String code =
+        """
+        _method a.b(a, b, c)
+        	print(1) # test method
+        _endmethod
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testIndentAssignmentExpression2() {
+    final String code =
+        """
+        a << _if x?
+        _then
+          >> 1
+        _else
+          >> 2
+        _endif""";
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits)
+        .containsExactly(
+            new TextEdit(
+                new Range(new Position(2, 0), new Position(2, 0)), "\t", "improper indenting"),
+            new TextEdit(
+                new Range(new Position(3, 0), new Position(3, 2)), "\t\t", "improper indenting"),
+            new TextEdit(
+                new Range(new Position(4, 0), new Position(4, 0)), "\t", "improper indenting"),
+            new TextEdit(
+                new Range(new Position(5, 0), new Position(5, 2)), "\t\t", "improper indenting"),
+            new TextEdit(
+                new Range(new Position(6, 0), new Position(6, 0)), "\t", "improper indenting"));
+  }
+
+  @Test
+  void testIndentArguments() {
+    final String code =
+        """
+        def_slotted_exemplar(
+        	:test_ex,
+        	{
+        		{:slot1, _unset}
+        	})
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  // @Test
+  // void testIndentArgumentsLineStart() {
+  //   final String code =
+  //       """
+  //       call_me_too(:test_1,
+  //       	    :test_2)
+  //       """;
+  //   final List<TextEdit> edits = this.getEdits(code);
+  //   assertThat(edits).isEmpty(); // TODO!
+  // }
+
+  @Test
+  void testIndentIfElif() {
+    final String code =
+        """
+        _if a
+        _then
+        	show(:a)
+        _elif b
+        _then
+        	show(:b)
+        _else
+        	show(:c)
+        _endif
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testIndentVariableDefinitionAssignment() {
+    final String code =
+        """
+        _local a <<
+        	10""";
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  // @Test
+  // void testIndentVariableDefinitionAssignmentSimpleVector() {
+  //   final String code =
+  //       """
+  //       _local a << {
+  //       	10
+  //       }""";
+  //   final List<TextEdit> edits = this.getEdits(code);
+  //   assertThat(edits).isEmpty();
+  // }
+
+  @Test
+  void testBinaryExpressionMultiple() {
+    final String code =
+        """
+        _if a? _andif
+        	b? _andif
+        	c?
+        _then
+        	do()
+        _endif
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
 }

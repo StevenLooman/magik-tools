@@ -10,16 +10,21 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.TextEdit;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 
 /** Formatting AST walker which produces {@link TextEdit}s. */
 public class FormattingWalker extends MagikAstWalker {
 
   private final List<TextEdit> textEdits = new ArrayList<>();
+  private final IndentStrategy indentStrategy;
   private final PragmaFormattingStrategy pragmaStrategy;
   private final MagikFormattingStrategy magikStrategy;
   private final FinalNewlineStrategy finalNewlineStrategy;
   private AbstractFormattingStrategy activeStrategy;
+  private AstNode currentNode;
+  private Token lastToken;
+  private Token lastTextToken;
 
   /**
    * Constructor.
@@ -28,6 +33,7 @@ public class FormattingWalker extends MagikAstWalker {
    * @throws IOException -
    */
   public FormattingWalker(final FormattingOptions options) {
+    this.indentStrategy = new TabbedIndentStrategy(options);
     this.pragmaStrategy = new PragmaFormattingStrategy(options);
     this.magikStrategy = new MagikFormattingStrategy(options);
     this.finalNewlineStrategy = new FinalNewlineStrategy(options);
@@ -60,11 +66,15 @@ public class FormattingWalker extends MagikAstWalker {
 
   @Override
   protected void walkPreDefault(final AstNode node) {
+    this.currentNode = node;
+
     this.getStrategies().forEach(strategy -> strategy.walkPreNode(node));
   }
 
   @Override
   protected void walkPostDefault(final AstNode node) {
+    this.currentNode = this.currentNode.getParent();
+
     this.getStrategies().forEach(strategy -> strategy.walkPostNode(node));
   }
 
@@ -99,14 +109,14 @@ public class FormattingWalker extends MagikAstWalker {
               if (strategy == this.activeStrategy) {
                 strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
               }
-
-              strategy.setLastToken(token);
             });
+
+    this.setLastToken(token);
   }
 
   private void walkCommentToken(final Token token) {
-    // Fixer upper: If comment token contains trailing whitespace, split the token and process
-    // separately.
+    // Fixer upper: If comment token contains trailing whitespace,
+    // split the token and process separately.
     final String comment = token.getOriginalValue();
     final String trimmedComment = comment.stripTrailing();
     if (comment.length() != trimmedComment.length()) {
@@ -133,12 +143,16 @@ public class FormattingWalker extends MagikAstWalker {
               if (strategy == this.activeStrategy) {
                 strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
               }
-
-              strategy.setLastToken(token);
             });
+
+    this.handleIndenting(token);
+
+    this.setLastToken(token);
   }
 
   private void walkEolToken(final Token token) {
+    this.handleTrailingWhitespace(token);
+
     this.getStrategies()
         .forEach(
             strategy -> {
@@ -146,9 +160,9 @@ public class FormattingWalker extends MagikAstWalker {
               if (strategy == this.activeStrategy) {
                 strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
               }
-
-              strategy.setLastToken(token);
             });
+
+    this.setLastToken(token);
   }
 
   /**
@@ -157,8 +171,9 @@ public class FormattingWalker extends MagikAstWalker {
    * @param token EOF token.
    */
   protected void walkEofToken(final Token token) {
-    this.activeStrategy = this.finalNewlineStrategy;
+    this.handleTrailingWhitespace(token);
 
+    this.activeStrategy = this.finalNewlineStrategy;
     this.getStrategies()
         .forEach(
             strategy -> {
@@ -166,9 +181,9 @@ public class FormattingWalker extends MagikAstWalker {
               if (strategy == this.activeStrategy) {
                 strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
               }
-
-              strategy.setLastToken(token);
             });
+
+    this.setLastToken(token);
   }
 
   @Override
@@ -185,10 +200,42 @@ public class FormattingWalker extends MagikAstWalker {
               if (strategy == this.activeStrategy) {
                 strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
               }
-
-              strategy.setLastToken(token);
             });
+
+    this.handleIndenting(token);
+
+    this.setLastToken(token);
   }
+
   // endregion
 
+  void handleIndenting(final Token token) {
+    if (this.lastTextToken == null || token.isOnSameLineThan(this.lastTextToken)) {
+      return;
+    }
+
+    final TextEdit textEdit = this.indentStrategy.ensureIndenting(token, this.currentNode);
+    if (textEdit != null) {
+      this.textEdits.add(textEdit);
+    }
+  }
+
+  void handleTrailingWhitespace(final Token token) {}
+
+  /**
+   * Set last token.
+   *
+   * @param token Token to set.
+   */
+  void setLastToken(final Token token) {
+    this.indentStrategy.setLastToken(token);
+    this.getStrategies().forEach(strategy -> strategy.setLastToken(token));
+
+    if (!AstQuery.tokenIs(
+        token, GenericTokenType.WHITESPACE, GenericTokenType.EOL, GenericTokenType.EOF)) {
+      this.lastTextToken = token;
+    }
+
+    this.lastToken = token;
+  }
 }

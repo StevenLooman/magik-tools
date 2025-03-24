@@ -3,9 +3,12 @@ package nl.ramsolutions.sw.magik.analysis;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.Token;
+import com.sonar.sslr.api.TokenType;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,6 +22,38 @@ import nl.ramsolutions.sw.productdef.api.SwProductDefinitionGrammar;
 public final class AstQuery {
 
   private AstQuery() {}
+
+  /**
+   * Test if {@link Token} value is one of the given values.
+   *
+   * @param token Token to test.
+   * @param values Values to test against.
+   * @return True if token has value, otherwise false.
+   */
+  public static boolean tokenIs(final @Nullable Token token, final String... values) {
+    if (token == null) {
+      return false;
+    }
+
+    final Set<String> valuesSet = Set.of(values);
+    final String tokenValue = token.getOriginalValue().toLowerCase();
+    return valuesSet.contains(tokenValue);
+  }
+
+  /**
+   * Test if {@link Token} is of one of the given types.
+   *
+   * @param token Token to test.
+   * @param types Types to test against.
+   * @returnTrue if token is of type, otherwise false.
+   */
+  public static boolean tokenIs(final @Nullable Token token, final TokenType... types) {
+    if (token == null) {
+      return false;
+    }
+
+    return Stream.of(types).anyMatch(type -> token.getType() == type);
+  }
 
   /**
    * Get the AstNodes which match a chain of {@link AstNodeType}s.

@@ -7,6 +7,7 @@ import java.util.List;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 
 /** Final newline strategy. */
 class FinalNewlineStrategy extends AbstractFormattingStrategy {
@@ -35,7 +36,7 @@ class FinalNewlineStrategy extends AbstractFormattingStrategy {
 
   @Override
   List<TextEdit> walkCommentToken(final Token token) {
-    if (this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
+    if (AstQuery.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
       final TextEdit textEdit = this.editToken(this.lastToken, "", "no whitespace after allowed");
       return List.of(textEdit);
     }
@@ -46,7 +47,7 @@ class FinalNewlineStrategy extends AbstractFormattingStrategy {
   @Override
   List<TextEdit> walkEofToken(final Token token) {
     if (this.options.isInsertFinalNewline()
-        && !this.tokenIs(this.lastToken, GenericTokenType.EOL)) {
+        && !AstQuery.tokenIs(this.lastToken, GenericTokenType.EOL)) {
       final TextEdit textEdit =
           this.insertBeforeToken(
               token, FinalNewlineStrategy.EOL_TOKEN_VALUE, "final newline required");

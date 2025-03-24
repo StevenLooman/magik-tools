@@ -5,6 +5,7 @@ import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import nl.ramsolutions.sw.magik.TextEdit;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 
 abstract class IndentStrategy extends FormattingStategy {
 
@@ -21,7 +22,7 @@ abstract class IndentStrategy extends FormattingStategy {
   TextEdit ensureIndenting(final Token token, final AstNode currentNode) {
     final String indentText = this.indentFor(token, currentNode);
     final String reason = "improper indenting";
-    if (!this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
+    if (!AstQuery.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
       if (!indentText.isEmpty()) {
         return this.insertBeforeToken(token, indentText, reason);
       }

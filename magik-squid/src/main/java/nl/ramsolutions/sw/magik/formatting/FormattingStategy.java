@@ -2,14 +2,11 @@ package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
-import com.sonar.sslr.api.TokenType;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-import edu.umd.cs.findbugs.annotations.Nullable;
-import java.util.Set;
-import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 
 /** Indenting strategy. */
 abstract class FormattingStategy {
@@ -40,7 +37,7 @@ abstract class FormattingStategy {
    */
   @CheckForNull
   protected TextEdit editNewlineBefore(final Token token) {
-    if (!this.tokenIs(token, GenericTokenType.EOL)) {
+    if (!AstQuery.tokenIs(token, GenericTokenType.EOL)) {
       return this.insertBeforeToken(token, "\n", "empty line before is required");
     }
 
@@ -55,7 +52,7 @@ abstract class FormattingStategy {
    */
   @CheckForNull
   protected TextEdit editNoNewline(final Token token) {
-    if (this.tokenIs(token, GenericTokenType.EOL)) {
+    if (AstQuery.tokenIs(token, GenericTokenType.EOL)) {
       return new TextEdit(
           new Range(new Position(token.getLine() - 1, 0), new Position(token.getLine(), 0)),
           "",
@@ -74,7 +71,7 @@ abstract class FormattingStategy {
   @CheckForNull
   protected TextEdit editWhitespaceBefore(final Token token) {
     // Ensure " " before token.
-    if (this.lastToken == null || !this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
+    if (this.lastToken == null || !AstQuery.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
       return this.insertBeforeToken(token, " ", "whitespace before required");
     }
 
@@ -90,7 +87,7 @@ abstract class FormattingStategy {
   @CheckForNull
   protected TextEdit editNoWhitespaceBefore(final Token token) {
     // Ensure no whitespace before token.
-    if (this.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
+    if (AstQuery.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
       return this.editToken(this.lastToken, "", "no whitespace before allowed");
     }
 
@@ -132,31 +129,13 @@ abstract class FormattingStategy {
     return new TextEdit(range, text, reason);
   }
 
-  protected boolean tokenIs(final @Nullable Token token, final String... values) {
-    if (token == null) {
-      return false;
-    }
-
-    final Set<String> valuesSet = Set.of(values);
-    final String tokenValue = token.getOriginalValue(); // TODO: toLowerCase()?
-    return valuesSet.contains(tokenValue);
-  }
-
-  protected boolean tokenIs(final @Nullable Token token, final TokenType... types) {
-    if (token == null) {
-      return false;
-    }
-
-    return Stream.of(types).anyMatch(type -> token.getType() == type);
-  }
-
   /**
    * Set last token.
    *
    * @param token Token to set.
    */
-  void setLastToken(final Token token) {
-    if (!this.tokenIs(
+  protected void setLastToken(final Token token) {
+    if (!AstQuery.tokenIs(
         token, GenericTokenType.WHITESPACE, GenericTokenType.EOL, GenericTokenType.EOF)) {
       this.lastTextToken = token;
     }

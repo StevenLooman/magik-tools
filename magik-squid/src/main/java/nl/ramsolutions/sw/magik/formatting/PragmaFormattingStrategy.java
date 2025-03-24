@@ -5,6 +5,7 @@ import com.sonar.sslr.api.Token;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.TextEdit;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 
 /** Pragma formatting strategy. */
 class PragmaFormattingStrategy extends AbstractFormattingStrategy {
@@ -18,8 +19,8 @@ class PragmaFormattingStrategy extends AbstractFormattingStrategy {
   @Override
   List<TextEdit> walkWhitespaceToken(final Token token) {
     if (this.pragmaTokenSeen) {
-      if (this.tokenIs(this.lastTextToken, ",")) {
-        if (!this.tokenIs(token, " ")) {
+      if (AstQuery.tokenIs(this.lastTextToken, ",")) {
+        if (!AstQuery.tokenIs(token, " ")) {
           // Require whitespace after ",".
           final TextEdit textEdit = this.editToken(token, " ", "whitespace after required");
           return List.of(textEdit);
@@ -56,11 +57,11 @@ class PragmaFormattingStrategy extends AbstractFormattingStrategy {
 
   @Override
   List<TextEdit> walkToken(final Token token) {
-    if (this.tokenIs(token, "_pragma")) {
+    if (AstQuery.tokenIs(token, "_pragma")) {
       this.pragmaTokenSeen = true;
     }
 
-    if (this.tokenIs(this.lastToken, ",")) {
+    if (AstQuery.tokenIs(this.lastToken, ",")) {
       final TextEdit textEdit = this.insertBeforeToken(token, " ", "whitespace before required");
       return List.of(textEdit);
     }
