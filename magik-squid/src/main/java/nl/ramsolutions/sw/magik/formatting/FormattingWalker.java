@@ -18,6 +18,7 @@ public class FormattingWalker extends MagikAstWalker {
 
   private final List<TextEdit> textEdits = new ArrayList<>();
   private final IndentStrategy indentStrategy;
+  private final TrailingWhitespaceStrategy trailingWhitespaceStrategy;
   private final PragmaFormattingStrategy pragmaStrategy;
   private final MagikFormattingStrategy magikStrategy;
   private final FinalNewlineStrategy finalNewlineStrategy;
@@ -34,6 +35,7 @@ public class FormattingWalker extends MagikAstWalker {
    */
   public FormattingWalker(final FormattingOptions options) {
     this.indentStrategy = new TabbedIndentStrategy(options);
+    this.trailingWhitespaceStrategy = new TrailingWhitespaceStrategy(options);
     this.pragmaStrategy = new PragmaFormattingStrategy(options);
     this.magikStrategy = new MagikFormattingStrategy(options);
     this.finalNewlineStrategy = new FinalNewlineStrategy(options);
@@ -209,6 +211,10 @@ public class FormattingWalker extends MagikAstWalker {
 
   // endregion
 
+  /**
+   * Handle indenting.
+   * @param token A {@link GenericTokenType.COMMENT} or text-token.
+   */
   void handleIndenting(final Token token) {
     if (this.lastTextToken == null || token.isOnSameLineThan(this.lastTextToken)) {
       return;
@@ -220,7 +226,16 @@ public class FormattingWalker extends MagikAstWalker {
     }
   }
 
-  void handleTrailingWhitespace(final Token token) {}
+  /**
+   * Handle trailing whitespace, if any.
+   * @param token A {@link GenericTokenType.EOL} of {@link GenericTokenType.EOF} token.
+   */
+  void handleTrailingWhitespace(final Token token) {
+    final TextEdit textEdit = this.trailingWhitespaceStrategy.walkToken(token);
+    if (textEdit != null) {
+      this.textEdits.add(textEdit);
+    }
+  }
 
   /**
    * Set last token.
@@ -229,6 +244,7 @@ public class FormattingWalker extends MagikAstWalker {
    */
   void setLastToken(final Token token) {
     this.indentStrategy.setLastToken(token);
+    this.trailingWhitespaceStrategy.setLastToken(token);
     this.getStrategies().forEach(strategy -> strategy.setLastToken(token));
 
     if (!AstQuery.tokenIs(

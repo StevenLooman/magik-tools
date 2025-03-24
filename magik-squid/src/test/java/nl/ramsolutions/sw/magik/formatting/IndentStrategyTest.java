@@ -11,6 +11,9 @@ import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
 
+/**
+ * Base test class for {@link IndentStrategy}s.
+ */
 class IndentStrategyTest {
 
   protected List<TextEdit> getEdits(final String code) {

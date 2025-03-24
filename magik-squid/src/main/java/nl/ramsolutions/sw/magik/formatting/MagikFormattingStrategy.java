@@ -65,10 +65,6 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
       // Add edit to remove empty line.
       final TextEdit textEdit = this.editNoNewline(token);
       return List.of(textEdit);
-    } else if (this.options.isTrimTrailingWhitespace()
-        && AstQuery.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
-      final TextEdit textEdit = this.editToken(this.lastToken, "", "no whitespace after allowed");
-      return List.of(textEdit);
     }
 
     return Collections.emptyList();
