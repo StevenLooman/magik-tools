@@ -20,7 +20,7 @@ public class VariableNamingCheck extends MagikCheck {
   private static final String MESSAGE = "Give the variable \"%s\" a proper descriptive name.";
   private static final int DEFAULT_MIN_LENGTH = 3;
   private static final int DEFAULT_MAX_LENGTH = 32;
-  private static final String DEFAULT_WHITELIST = "x,y,z";
+  private static final String DEFAULT_WHITELIST = "x,y,z,id";
 
   /** Minimum number of characters for a variable name. */
   @RuleProperty(
