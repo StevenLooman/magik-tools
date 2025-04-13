@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.helpers;
 
 import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 
@@ -34,7 +35,7 @@ public class ParameterNodeHelper {
     if (this.hasModifier(MagikKeyword.GATHER)) {
       return false;
     }
-    if (this.node.getParent().is(MagikGrammar.ASSIGNMENT_PARAMETER)) {
+    if (AstQuery.parentIs(this.node, MagikGrammar.ASSIGNMENT_PARAMETER)) {
       return false;
     }
 

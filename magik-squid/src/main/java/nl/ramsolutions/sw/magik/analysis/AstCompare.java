@@ -111,8 +111,7 @@ public final class AstCompare {
   }
 
   private static boolean isIdentifierNode(final AstNode node) {
-    if (node.is(MagikGrammar.IDENTIFIER)
-        || node.getParent() != null && node.getParent().is(MagikGrammar.IDENTIFIER)) {
+    if (node.is(MagikGrammar.IDENTIFIER) || AstQuery.parentIs(node, MagikGrammar.IDENTIFIER)) {
       return true;
     }
 

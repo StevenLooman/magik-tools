@@ -175,7 +175,7 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
   }
 
   private boolean nodeIsSlot() {
-    return this.currentNode.getParent().is(MagikGrammar.SLOT);
+    return AstQuery.parentIs(this.currentNode, MagikGrammar.SLOT);
   }
 
   private boolean nodeIsMethodDefinition() {
@@ -191,7 +191,7 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
   private boolean nodeIsInvocation() {
     return this.currentNode.is(MagikGrammar.PROCEDURE_INVOCATION, MagikGrammar.METHOD_INVOCATION)
         || this.currentNode.is(MagikGrammar.IDENTIFIER)
-            && this.currentNode.getParent().is(MagikGrammar.METHOD_INVOCATION);
+            && AstQuery.parentIs(this.currentNode, MagikGrammar.METHOD_INVOCATION);
   }
 
   @Override

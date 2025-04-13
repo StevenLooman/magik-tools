@@ -45,7 +45,7 @@ public final class AstQuery {
    *
    * @param token Token to test.
    * @param types Types to test against.
-   * @returnTrue if token is of type, otherwise false.
+   * @return True if token is of type, otherwise false.
    */
   public static boolean tokenIs(final @Nullable Token token, final TokenType... types) {
     if (token == null) {
@@ -53,6 +53,22 @@ public final class AstQuery {
     }
 
     return Stream.of(types).anyMatch(type -> token.getType() == type);
+  }
+
+  /**
+   * Test of the parent of {@link node} is of one of the given types.
+   *
+   * @param node Node to get/test parent from.
+   * @param types Types to test against.
+   * @return True if node is of type, false otherwise.
+   */
+  public static boolean parentIs(final AstNode node, final AstNodeType... types) {
+    final AstNode parentNode = node.getParent();
+    if (parentNode == null) {
+      return false;
+    }
+
+    return parentNode.is(types);
   }
 
   /**

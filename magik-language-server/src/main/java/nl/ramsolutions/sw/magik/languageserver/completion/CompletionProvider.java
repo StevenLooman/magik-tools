@@ -415,9 +415,7 @@ public class CompletionProvider {
     final AstNode node = magikFile.getTopNode();
     final AstNode tokenNode = AstQuery.nodeAt(node, Lsp4jConversion.positionFromLsp4j(position));
     String cleanedToken = "";
-    if (tokenNode != null
-        && tokenNode.getParent() != null
-        && tokenNode.getParent().is(MagikGrammar.SYNTAX_ERROR)) {
+    if (tokenNode != null && AstQuery.parentIs(tokenNode, MagikGrammar.SYNTAX_ERROR)) {
       // Clean it up a bit and try to re-parse.
       final String source = magikFile.getSource();
       final String[] items = this.cleanSource(source, position);
