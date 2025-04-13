@@ -40,6 +40,7 @@
 - Add MethodIsPublicTypedCheck.
 - Fix method completions by removing `_gather` and `_optional` keywords.
 - Support `_private` keyword as method invocation receiver.
+- Add `id` to `default-whitelist` in `VariableNamingCheck`.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
