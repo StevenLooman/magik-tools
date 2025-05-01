@@ -81,7 +81,7 @@
     <sonar-analyzer-commons.version>2.16.0.3141</sonar-analyzer-commons.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
     <sonar-impl.version>10.4.0.87286</sonar-impl.version>
-    <sonar-maven.version>5.0.0.4389</sonar-maven.version>
+    <sonar-maven.version>5.1.0.4751</sonar-maven.version>
     <sonar-maven-packaging-plugin.version>1.23.0.740</sonar-maven-packaging-plugin.version>
     <sslr-squid-bridge.version>2.7.1.392</sslr-squid-bridge.version>
     <sslr.version>1.24.0.633</sslr.version>
