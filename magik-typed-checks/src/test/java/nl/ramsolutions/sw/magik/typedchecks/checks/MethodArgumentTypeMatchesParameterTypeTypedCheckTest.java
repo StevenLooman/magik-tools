@@ -43,7 +43,7 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
                     ParameterDefinition.Modifier.NONE,
                     TypeString.SW_SYMBOL)),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
     definitionKeeper.add(
@@ -67,7 +67,7 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
                     ParameterDefinition.Modifier.NONE,
                     TypeString.combine(TypeString.SW_SYMBOL, TypeString.SW_UNSET))),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
   }
@@ -119,7 +119,7 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
                 "rope", "sw", TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER)),
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new MethodDefinition(
             null,
@@ -141,7 +141,7 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
                     ParameterDefinition.Modifier.NONE,
                     TypeString.ofGenericReference("E"))),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 

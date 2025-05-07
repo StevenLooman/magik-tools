@@ -32,6 +32,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import org.slf4j.Logger;
@@ -198,6 +199,7 @@ public final class ClassInfoDefinitionReader {
       final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
       location = new Location(uri);
     }
+    final Pragma pragma = new Pragma(null, pragmas);
 
     // Line 3+
     final StringBuilder docBuilder = new StringBuilder();
@@ -211,7 +213,7 @@ public final class ClassInfoDefinitionReader {
     final Instant timestamp = this.getTimestamp();
     final GlobalDefinition definition =
         new GlobalDefinition(
-            location, timestamp, moduleName, doc, null, typeString, TypeString.UNDEFINED);
+            location, timestamp, moduleName, doc, null, typeString, TypeString.UNDEFINED, pragma);
     this.definitionKeeper.add(definition);
   }
 
@@ -275,6 +277,7 @@ public final class ClassInfoDefinitionReader {
       final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
       location = new Location(uri);
     }
+    final Pragma pragma = new Pragma(null, pragmas);
 
     // Line 3+
     final StringBuilder docBuilder = new StringBuilder();
@@ -288,7 +291,7 @@ public final class ClassInfoDefinitionReader {
     final Instant timestamp = this.getTimestamp();
     final ConditionDefinition definition =
         new ConditionDefinition(
-            location, timestamp, moduleName, doc, null, name, parent, dataNames);
+            location, timestamp, moduleName, doc, null, name, parent, dataNames, pragma);
     this.definitionKeeper.add(definition);
   }
 
@@ -350,6 +353,7 @@ public final class ClassInfoDefinitionReader {
       final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
       location = new Location(uri);
     }
+    final Pragma pragma = new Pragma(null, pragmas);
 
     // Line 3+
     final StringBuilder docBuilder = new StringBuilder();
@@ -372,7 +376,7 @@ public final class ClassInfoDefinitionReader {
             modifiers,
             parameters,
             assignmentParameter,
-            Collections.emptySet(),
+            pragma,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.UNDEFINED);
     this.definitionKeeper.add(definition);
@@ -413,14 +417,13 @@ public final class ClassInfoDefinitionReader {
 
     // Line 3
     final String line3 = reader.readLine();
-    final List<String> pragmas;
+    final List<String> pragmas = new ArrayList<>();
     final int commentLineCount;
     final Location location;
     try (Scanner scanner = new Scanner(line3)) {
       commentLineCount = scanner.nextInt();
 
       // Pragmas.
-      pragmas = new ArrayList<>();
       while (scanner.hasNext(NEXT_NOT_SLASH_PATTERN)) {
         final String pragma = scanner.next();
         pragmas.add(pragma);
@@ -431,6 +434,7 @@ public final class ClassInfoDefinitionReader {
       final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
       location = new Location(uri);
     }
+    final Pragma pragma = new Pragma(null, pragmas);
 
     // Line 4+
     final StringBuilder commentBuilder = new StringBuilder();
@@ -453,7 +457,7 @@ public final class ClassInfoDefinitionReader {
             typeString,
             slots,
             parents,
-            Collections.emptySet());
+            pragma);
     this.definitionKeeper.add(definition);
   }
 
@@ -479,14 +483,13 @@ public final class ClassInfoDefinitionReader {
 
     // Line 3
     final String line3 = reader.readLine();
-    final List<String> pragmas;
+    final List<String> pragmas = new ArrayList<>();
     final int commentLineCount;
     final Location location;
     try (Scanner scanner = new Scanner(line3)) {
       commentLineCount = scanner.nextInt();
 
       // Pragmas.
-      pragmas = new ArrayList<>();
       while (scanner.hasNext(NEXT_NOT_SLASH_PATTERN)) {
         final String pragma = scanner.next();
         pragmas.add(pragma);
@@ -497,6 +500,7 @@ public final class ClassInfoDefinitionReader {
       final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
       location = new Location(uri);
     }
+    final Pragma pragma = new Pragma(null, pragmas);
 
     // Line 4+
     final StringBuilder commentBuilder = new StringBuilder();
@@ -519,7 +523,7 @@ public final class ClassInfoDefinitionReader {
             typeString,
             Collections.emptyList(),
             parents,
-            Collections.emptySet());
+            pragma);
     this.definitionKeeper.add(definition);
   }
 
@@ -546,14 +550,14 @@ public final class ClassInfoDefinitionReader {
 
     // Line 3
     final String line3 = reader.readLine();
-    final List<String> pragmas;
+    final List<String> pragmas = new ArrayList<>();
+    ;
     final int commentLineCount;
     final Location location;
     try (Scanner scanner = new Scanner(line3)) {
       commentLineCount = scanner.nextInt();
 
       // Pragmas.
-      pragmas = new ArrayList<>();
       while (scanner.hasNext(NEXT_NOT_SLASH_PATTERN)) {
         final String pragma = scanner.next();
         pragmas.add(pragma);
@@ -564,6 +568,7 @@ public final class ClassInfoDefinitionReader {
       final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
       location = new Location(uri);
     }
+    final Pragma pragma = new Pragma(null, pragmas);
 
     // Line 4+
     final StringBuilder commentBuilder = new StringBuilder();
@@ -586,7 +591,7 @@ public final class ClassInfoDefinitionReader {
             typeString,
             Collections.emptyList(),
             parents,
-            Collections.emptySet());
+            pragma);
     this.definitionKeeper.add(definition);
   }
 
@@ -620,11 +625,11 @@ public final class ClassInfoDefinitionReader {
     final String line3 = reader.readLine();
     final int commentLineCount;
     final Location location;
+    final List<String> pragmas = new ArrayList<>();
     try (Scanner scanner = new Scanner(line3)) {
       commentLineCount = scanner.nextInt();
 
       // Read pragmas.
-      final List<String> pragmas = new ArrayList<>();
       while (scanner.hasNext(NEXT_NOT_SLASH_PATTERN)) {
         final String pragma = scanner.next();
         pragmas.add(pragma);
@@ -635,6 +640,7 @@ public final class ClassInfoDefinitionReader {
       final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
       location = new Location(uri);
     }
+    final Pragma pragma = new Pragma(null, pragmas);
 
     // Line 4+
     final StringBuilder docBuilder = new StringBuilder();
@@ -656,7 +662,7 @@ public final class ClassInfoDefinitionReader {
             typeString,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet());
+            pragma);
     this.definitionKeeper.add(definition);
   }
 

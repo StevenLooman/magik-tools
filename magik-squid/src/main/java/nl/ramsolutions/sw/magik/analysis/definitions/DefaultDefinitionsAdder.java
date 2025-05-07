@@ -45,7 +45,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_OBJECT,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -57,7 +57,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_UNSET,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -69,7 +69,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_FALSE,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -81,7 +81,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_MAYBE,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -93,7 +93,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_INTEGER,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -105,7 +105,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_BIGNUM,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -117,7 +117,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_FLOAT,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -129,7 +129,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_SYMBOL,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -141,7 +141,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_CHARACTER,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -153,7 +153,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_SW_REGEXP,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -165,7 +165,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_PROCEDURE,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -177,7 +177,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_CHAR16_VECTOR,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -189,7 +189,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_SIMPLE_VECTOR,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -201,7 +201,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_HEAVY_THREAD,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -213,7 +213,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_LIGHT_THREAD,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -225,7 +225,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_CONDITION,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -237,7 +237,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_ENUMERATION_VALUE,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -249,7 +249,7 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_INDEXED_FORMAT_MIXIN,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -261,6 +261,6 @@ public final class DefaultDefinitionsAdder {
             TypeString.SW_SLOTTED_FORMAT_MIXIN,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
   }
 }

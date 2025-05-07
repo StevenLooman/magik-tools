@@ -50,7 +50,7 @@ class MethodExistsTypedCheckTest extends MagikTypedCheckTestBase {
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             new ExpressionResultString(TypeString.SW_OBJECT),
             ExpressionResultString.EMPTY));
     final MagikTypedCheck check = new MethodExistsTypedCheck();

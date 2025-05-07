@@ -41,6 +41,7 @@
 - Fix method completions by removing `_gather` and `_optional` keywords.
 - Support `_private` keyword as method invocation receiver.
 - Add `id` to `default-whitelist` in `VariableNamingCheck`.
+- Add more detailed pragma registration.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)

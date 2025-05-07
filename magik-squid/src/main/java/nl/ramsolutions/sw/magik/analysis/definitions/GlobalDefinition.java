@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Instant;
 import java.util.Objects;
@@ -12,6 +13,7 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
 
   private final TypeString typeName;
   private final TypeString aliasedTypeName;
+  private final @Nullable Pragma pragma;
 
   /**
    * Constructor.
@@ -28,10 +30,12 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
       final @Nullable String doc,
       final @Nullable AstNode node,
       final TypeString typeName,
-      final TypeString aliasedTypeName) {
+      final TypeString aliasedTypeName,
+      final @Nullable Pragma pragma) {
     super(location, timestamp, moduleName, doc, node);
     this.typeName = typeName;
     this.aliasedTypeName = aliasedTypeName;
+    this.pragma = pragma;
   }
 
   public TypeString getTypeString() {
@@ -47,6 +51,11 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
     return this.typeName.getFullString();
   }
 
+  @CheckForNull
+  public Pragma getPragma() {
+    return this.pragma;
+  }
+
   @Override
   public GlobalDefinition getBareDefinition() {
     return new GlobalDefinition(
@@ -56,7 +65,8 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
         this.getDoc(),
         null,
         this.typeName,
-        this.aliasedTypeName);
+        this.aliasedTypeName,
+        this.pragma != null ? this.pragma.getBarePragma() : null);
   }
 
   @Override
@@ -77,7 +87,8 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
         this.getModuleName(),
         this.getDoc(),
         this.typeName,
-        this.aliasedTypeName);
+        this.aliasedTypeName,
+        this.pragma);
   }
 
   @Override
@@ -99,6 +110,7 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
         && Objects.equals(this.getModuleName(), other.getModuleName())
         && Objects.equals(this.getDoc(), other.getDoc())
         && Objects.equals(this.typeName, other.typeName)
-        && Objects.equals(this.aliasedTypeName, other.aliasedTypeName);
+        && Objects.equals(this.aliasedTypeName, other.aliasedTypeName)
+        && Objects.equals(this.pragma, other.pragma);
   }
 }

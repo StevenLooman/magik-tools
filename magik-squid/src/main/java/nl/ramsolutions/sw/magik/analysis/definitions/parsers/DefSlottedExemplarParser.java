@@ -17,6 +17,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
@@ -116,6 +117,17 @@ public class DefSlottedExemplarParser extends BaseDefParser {
     final String identifier = argument0Node.getTokenValue().substring(1);
     final TypeString name = TypeString.ofIdentifier(identifier, packageName);
 
+    // Figure pragma.
+    final PragmaNodeHelper pragmaHelper = PragmaNodeHelper.newSafe(this.node);
+    final Pragma pragma =
+        pragmaHelper != null
+            ? new Pragma(
+                pragmaHelper.getNode(),
+                pragmaHelper.getClassifyLevels(),
+                pragmaHelper.getTopics(),
+                pragmaHelper.getUsages())
+            : null;
+
     // Figure slot types.
     final AstNode parentNode = this.node.getParent();
     final TypeDocParser docParser = new TypeDocParser(parentNode);
@@ -164,7 +176,8 @@ public class DefSlottedExemplarParser extends BaseDefParser {
                 slotName,
                 flag,
                 flavor,
-                slotTypeRef);
+                slotTypeRef,
+                pragma);
         methodDefinitions.addAll(slotMethodDefinitions);
       }
     }
@@ -175,13 +188,6 @@ public class DefSlottedExemplarParser extends BaseDefParser {
 
     // Figure doc.
     final String doc = MagikCommentExtractor.extractDocComment(parentNode);
-
-    // Figure topics.
-    final AstNode pragmaNode = PragmaNodeHelper.getPragmaNode(node);
-    final Set<String> topics =
-        pragmaNode != null
-            ? new PragmaNodeHelper(pragmaNode).getAllTopics()
-            : Collections.emptySet();
 
     final ExemplarDefinition slottedExemplarDefinition =
         new ExemplarDefinition(
@@ -194,7 +200,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
             name,
             slots,
             parents,
-            topics);
+            pragma);
 
     final List<MagikDefinition> definitions = new ArrayList<>();
     definitions.add(slottedExemplarDefinition);
@@ -211,7 +217,8 @@ public class DefSlottedExemplarParser extends BaseDefParser {
       final String slotName,
       final String flag,
       final String flavor,
-      final TypeString slotTypeRef) {
+      final TypeString slotTypeRef,
+      final @Nullable Pragma pragma) {
     final List<MethodDefinition> methodDefinitions = new ArrayList<>();
 
     // Figure location.
@@ -238,7 +245,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               getModifiers,
               getParameters,
               null,
-              Collections.emptySet(),
+              pragma,
               new ExpressionResultString(slotTypeRef),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(getMethod);
@@ -261,7 +268,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               getModifiers,
               getParameters,
               null,
-              Collections.emptySet(),
+              pragma,
               new ExpressionResultString(slotTypeRef),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(getMethod);
@@ -295,7 +302,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               setModifiers,
               setParameters,
               assignmentParam,
-              Collections.emptySet(),
+              pragma,
               new ExpressionResultString(TypeString.ofParameterRef("val")),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(setMethod);
@@ -314,7 +321,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               setModifiers,
               setParameters,
               assignmentParam,
-              Collections.emptySet(),
+              pragma,
               new ExpressionResultString(slotTypeRef),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(bootMethod);

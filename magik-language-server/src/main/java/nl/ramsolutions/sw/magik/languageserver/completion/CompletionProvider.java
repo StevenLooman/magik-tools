@@ -253,7 +253,8 @@ public class CompletionProvider {
               item.setDetail(exemplarDef.getTypeString().getFullString());
               item.setDocumentation(exemplarDef.getDoc());
               item.setKind(CompletionItemKind.Class);
-              if (exemplarDef.getTopics().contains(TOPIC_DEPRECATED)) {
+              if (exemplarDef.getPragma() != null
+                  && exemplarDef.getPragma().getTopics().contains(TOPIC_DEPRECATED)) {
                 item.setTags(List.of(CompletionItemTag.Deprecated));
               }
               return item;
@@ -317,7 +318,8 @@ public class CompletionProvider {
               item.setDetail(methodDef.getTypeName().getFullString());
               item.setDocumentation(methodDef.getDoc());
               item.setKind(CompletionItemKind.Method);
-              if (methodDef.getTopics().contains(TOPIC_DEPRECATED)) {
+              if (methodDef.getPragma() != null
+                  && methodDef.getPragma().getTopics().contains(TOPIC_DEPRECATED)) {
                 item.setTags(List.of(CompletionItemTag.Deprecated));
               }
               return item;

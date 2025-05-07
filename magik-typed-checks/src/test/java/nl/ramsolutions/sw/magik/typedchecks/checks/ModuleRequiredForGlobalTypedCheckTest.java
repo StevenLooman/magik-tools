@@ -59,7 +59,7 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
             TypeString.ofIdentifier("rope", "sw"),
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
 
     final MagikTypedCheck check = new ModuleRequiredForGlobalTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(path, definitionKeeper, check);
@@ -91,7 +91,7 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
             TypeString.ofIdentifier("rope", "sw"),
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
 
     final MagikTypedCheck check = new ModuleRequiredForGlobalTypedCheck();
     final List<MagikIssue> checkResults = this.runCheck(path, definitionKeeper, check);
