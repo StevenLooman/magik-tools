@@ -1,0 +1,27 @@
+<p>Pragma contains an invalid usage.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_pragma(classify_level=basic, topic={example}, usage=invalid)
+_method object.do_something()
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_pragma(classify_level=basic, topic={example}, usage=redefinable)
+_method object.do_something()
+_endmethod
+</pre>
+<p>
+    The usage should be one of:
+    <ul>
+        <li>subclassable</li>
+        <li>subclass</li>
+        <li>redefinable</li>
+    </ul>
+
+    Other known, but to be ignored, usages are:
+    <ul>
+        <li>external</li>
+        <li>internal</li>
+    </ul>
+</p>

@@ -13,6 +13,9 @@ import nl.ramsolutions.sw.magik.checks.checks.ForbiddenCallCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenGlobalUsageCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenInheritanceCheck;
 import nl.ramsolutions.sw.magik.checks.checks.FormattingCheck;
+import nl.ramsolutions.sw.magik.checks.checks.HasPragmaCheck;
+import nl.ramsolutions.sw.magik.checks.checks.PragmaValidClassifyLevelCheck;
+import nl.ramsolutions.sw.magik.checks.checks.PragmaValidUsageCheck;
 import nl.ramsolutions.sw.magik.checks.checks.HidesVariableCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ImportMissingDefinitionCheck;
 import nl.ramsolutions.sw.magik.checks.checks.LhsRhsComparatorEqualCheck;
@@ -74,6 +77,7 @@ public final class CheckList {
         ForbiddenGlobalUsageCheck.class,
         ForbiddenInheritanceCheck.class,
         FormattingCheck.class,
+        HasPragmaCheck.class,
         HidesVariableCheck.class,
         ImportMissingDefinitionCheck.class,
         LhsRhsComparatorEqualCheck.class,
@@ -85,6 +89,8 @@ public final class CheckList {
         NoSelfUseCheck.class,
         NoStatementAfterBodyExitCheck.class,
         ParameterCountCheck.class,
+        PragmaValidClassifyLevelCheck.class,
+        PragmaValidUsageCheck.class,
         ScopeCountCheck.class,
         SimplifyIfCheck.class,
         SizeZeroEmptyCheck.class,

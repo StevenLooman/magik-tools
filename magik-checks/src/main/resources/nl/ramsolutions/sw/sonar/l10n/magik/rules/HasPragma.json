@@ -1,0 +1,15 @@
+{
+  "title": "Has pragma",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "10min"
+  },
+  "tags": [
+    "convention"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "HasPragma",
+  "sqKey": "has-pragma"
+}
