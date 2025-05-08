@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 /** Pragma. */
 public class Pragma {
 
+  public static final String CLASSIFY_LEVEL = "classify_level";
   public static final String CLASSIFY_LEVEL_BASIC = "basic";
   public static final String CLASSIFY_LEVEL_ADVANCED = "advanced";
   public static final String CLASSIFY_LEVEL_RESTRICTED = "restricted";
@@ -24,6 +25,7 @@ public class Pragma {
           CLASSIFY_LEVEL_DEBUG,
           CLASSIFY_LEVEL_DEPRECATED);
 
+  public static final String USAGE = "usage";
   public static final String USAGE_SUBCLASSABLE = "subclassable";
   public static final String USAGE_SUBCLASS = "subclass";
   public static final String USAGE_REDEFINABLE = "redefinable";

@@ -1,5 +1,5 @@
 {
-  "title": "Pragma has valid usage",
+  "title": "Pragma has invalid usage",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
@@ -10,6 +10,6 @@
     "convention"
   ],
   "defaultSeverity": "Minor",
-  "ruleSpecification": "PragmaValidUsage",
-  "sqKey": "pragma-valid-usage"
+  "ruleSpecification": "PragmaInvalidUsage",
+  "sqKey": "pragma-invalid-usage"
 }

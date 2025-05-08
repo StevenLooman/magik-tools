@@ -7,6 +7,8 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -22,15 +24,15 @@ import org.sonar.check.Rule;
  *   <li>globals
  * </ul>
  */
-@Rule(key = HasPragmaCheck.CHECK_KEY)
-public class HasPragmaCheck extends MagikCheck {
+@Rule(key = MissingPragmaCheck.CHECK_KEY)
+public class MissingPragmaCheck extends MagikCheck {
 
   private static final String DEF_SLOTTED_EXEMPLAR = "def_slotted_exemplar";
   private static final String SW_DEF_SLOTTED_EXEMPLAR = "sw:def_slotted_exemplar";
   private static final String DEFINE_SHARED_VARIABLE = "define_shared_variable()";
 
   @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String CHECK_KEY = "HasPragma";
+  public static final String CHECK_KEY = "MissingPragma";
 
   private static final String MESSAGE = "Definition does not have a pragma.";
 
@@ -40,10 +42,10 @@ public class HasPragmaCheck extends MagikCheck {
         .filter(this::requiresPragma)
         .filter(this::isPrimaryDefinition)
         .filter(this::missingPragma)
+        .map(this::getIssueNode)
         .forEach(
-            definition -> {
-              final AstNode definitionNode = definition.getNode();
-              this.addIssue(definitionNode, MESSAGE);
+            issueNode -> {
+              this.addIssue(issueNode, MESSAGE);
             });
   }
 
@@ -99,6 +101,39 @@ public class HasPragmaCheck extends MagikCheck {
       return globalDefinition.getPragma() == null;
     } else if (definition instanceof ConditionDefinition conditionDefinition) {
       return conditionDefinition.getPragma() == null;
+    }
+
+    throw new IllegalStateException();
+  }
+
+  private AstNode getIssueNode(final MagikDefinition definition) {
+    if (definition instanceof ExemplarDefinition exemplarDefinition) {
+      final AstNode definitionNode = exemplarDefinition.getNode();
+      final AstNode argumentsNode = definitionNode.getFirstDescendant(MagikGrammar.ARGUMENTS);
+      final ArgumentsNodeHelper helper = new ArgumentsNodeHelper(argumentsNode);
+      return helper.getArgument(0);
+    } else if (definition instanceof MethodDefinition methodDefinition) {
+      final AstNode definitionNode = methodDefinition.getNode();
+      if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
+        final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
+        return helper.getMethodNameNode();
+      } else {
+        final AstNode argumentsNode = definitionNode.getFirstDescendant(MagikGrammar.ARGUMENTS);
+        final ArgumentsNodeHelper helper = new ArgumentsNodeHelper(argumentsNode);
+        return helper.getArgument(0);
+      }
+    } else if (definition instanceof GlobalDefinition globalDefinition) {
+      final AstNode definitionNode = globalDefinition.getNode();
+      if (definitionNode.is(MagikGrammar.VARIABLE_DEFINITION_STATEMENT)) {
+        return definitionNode.getFirstDescendant(MagikGrammar.IDENTIFIER);
+      }
+
+      return definitionNode;
+    } else if (definition instanceof ConditionDefinition conditionDefinition) {
+      final AstNode definitionNode = conditionDefinition.getNode();
+      final AstNode argumentsNode = definitionNode.getFirstDescendant(MagikGrammar.ARGUMENTS);
+      final ArgumentsNodeHelper helper = new ArgumentsNodeHelper(argumentsNode);
+      return helper.getArgument(0);
     }
 
     throw new IllegalStateException();

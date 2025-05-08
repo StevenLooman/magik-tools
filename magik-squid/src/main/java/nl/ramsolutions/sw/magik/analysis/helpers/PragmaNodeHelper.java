@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.helpers;
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,7 +67,7 @@ public class PragmaNodeHelper {
    *
    * @return Classify level.
    */
-  public Map<String, Set<String>> getPragmaValues() {
+  private Map<String, Set<String>> getPragmaValues() {
     return this.node.getDescendants(MagikGrammar.PRAGMA_PARAMS).stream()
         .map(paramsNode -> paramsNode.getChildren(MagikGrammar.PRAGMA_PARAM))
         .flatMap(Collection::stream)
@@ -81,6 +82,24 @@ public class PragmaNodeHelper {
                         .stream()
                         .map(AstNode::getTokenOriginalValue)
                         .collect(Collectors.toSet())));
+  }
+
+  /**
+   * Get all pragma parameters as IDENTIFIER nodes.
+   *
+   * @return Pragma parameter/values nodes.
+   */
+  public Map<AstNode, List<AstNode>> getPragmaParamNodes() {
+    return this.node.getDescendants(MagikGrammar.PRAGMA_PARAMS).stream()
+        .map(paramsNode -> paramsNode.getChildren(MagikGrammar.PRAGMA_PARAM))
+        .flatMap(Collection::stream)
+        .collect(
+            Collectors.toMap(
+                paramNode -> paramNode.getFirstChild(MagikGrammar.IDENTIFIER),
+                paramNode ->
+                    paramNode
+                        .getFirstChild(MagikGrammar.PRAGMA_VALUE)
+                        .getDescendants(MagikGrammar.IDENTIFIER)));
   }
 
   /**

@@ -1,5 +1,5 @@
 {
-  "title": "Has pragma",
+  "title": "Missing pragma",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
@@ -10,6 +10,6 @@
     "convention"
   ],
   "defaultSeverity": "Major",
-  "ruleSpecification": "HasPragma",
-  "sqKey": "has-pragma"
+  "ruleSpecification": "MissingPragma",
+  "sqKey": "missing-pragma"
 }

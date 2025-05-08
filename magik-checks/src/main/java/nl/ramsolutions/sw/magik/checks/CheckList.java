@@ -13,7 +13,6 @@ import nl.ramsolutions.sw.magik.checks.checks.ForbiddenCallCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenGlobalUsageCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenInheritanceCheck;
 import nl.ramsolutions.sw.magik.checks.checks.FormattingCheck;
-import nl.ramsolutions.sw.magik.checks.checks.HasPragmaCheck;
 import nl.ramsolutions.sw.magik.checks.checks.HidesVariableCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ImportMissingDefinitionCheck;
 import nl.ramsolutions.sw.magik.checks.checks.LhsRhsComparatorEqualCheck;
@@ -21,12 +20,13 @@ import nl.ramsolutions.sw.magik.checks.checks.LineLengthCheck;
 import nl.ramsolutions.sw.magik.checks.checks.LocalImportProcedureCheck;
 import nl.ramsolutions.sw.magik.checks.checks.MethodComplexityCheck;
 import nl.ramsolutions.sw.magik.checks.checks.MethodLineCountCheck;
+import nl.ramsolutions.sw.magik.checks.checks.MissingPragmaCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NestingDepthCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoSelfUseCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoStatementAfterBodyExitCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ParameterCountCheck;
-import nl.ramsolutions.sw.magik.checks.checks.PragmaValidClassifyLevelCheck;
-import nl.ramsolutions.sw.magik.checks.checks.PragmaValidUsageCheck;
+import nl.ramsolutions.sw.magik.checks.checks.PragmaInvalidClassifyLevelCheck;
+import nl.ramsolutions.sw.magik.checks.checks.PragmaInvalidUsageCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ScopeCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.SimplifyIfCheck;
 import nl.ramsolutions.sw.magik.checks.checks.SizeZeroEmptyCheck;
@@ -77,7 +77,7 @@ public final class CheckList {
         ForbiddenGlobalUsageCheck.class,
         ForbiddenInheritanceCheck.class,
         FormattingCheck.class,
-        HasPragmaCheck.class,
+        MissingPragmaCheck.class,
         HidesVariableCheck.class,
         ImportMissingDefinitionCheck.class,
         LhsRhsComparatorEqualCheck.class,
@@ -89,8 +89,8 @@ public final class CheckList {
         NoSelfUseCheck.class,
         NoStatementAfterBodyExitCheck.class,
         ParameterCountCheck.class,
-        PragmaValidClassifyLevelCheck.class,
-        PragmaValidUsageCheck.class,
+        PragmaInvalidClassifyLevelCheck.class,
+        PragmaInvalidUsageCheck.class,
         ScopeCountCheck.class,
         SimplifyIfCheck.class,
         SizeZeroEmptyCheck.class,
