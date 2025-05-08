@@ -87,6 +87,16 @@ public class MissingPragmaCheck extends MagikCheck {
           return false;
         }
       }
+    } else if (definition instanceof GlobalDefinition globalDefinition) {
+      final AstNode node = globalDefinition.getNode();
+      if (!node.is(MagikGrammar.VARIABLE_DEFINITION_STATEMENT)) {
+        return false;
+      }
+
+      // Only from top level.
+      final AstNode chainNode =
+          AstQuery.getParentFromChain(node, MagikGrammar.STATEMENT, MagikGrammar.MAGIK);
+      return chainNode != null;
     }
 
     return true;

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -71,5 +72,19 @@ class MissingPragmaCheckTest extends MagikCheckTestBase {
     final MagikCheck check = new MissingPragmaCheck();
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
+  }
+
+  @Test
+  void testGlobalDefinitionInBlock() {
+    final String code =
+        """
+        _block
+          _global prc
+          prc << _proc() _endproc
+        _endblock
+        """;
+    final MagikCheck check = new MissingPragmaCheck();
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
   }
 }
