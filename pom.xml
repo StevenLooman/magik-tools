@@ -435,6 +435,7 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ConditionalBodyHandler.handleConditionalExpression(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.api.MagikNumberParser.parseMagikNumber(java.lang.String)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.checks.checks.FormattingCheck.handleToken()</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.checks.checks.MissingPragmaCheck.isPrimaryDefinition(nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.stackTrace(long)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.slap.SlapProtocol.handleReplyMessage(java.nio.ByteBuffer)</exclude>
