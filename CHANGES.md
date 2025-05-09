@@ -42,7 +42,7 @@
 - Support `_private` keyword as method invocation receiver.
 - Add `id` to `default-whitelist` in `VariableNamingCheck`.
 - Add more detailed pragma registration.
-- Add checks HasPragma, PragmaValidClassifyLevel, PragmaValidUsage.
+- Add checks MissingPragma, PragmaInvalidClassifyLevelCheck, PragmaInvalidUsageCheck.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
