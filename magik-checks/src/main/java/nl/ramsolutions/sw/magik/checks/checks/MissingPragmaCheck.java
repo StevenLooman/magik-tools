@@ -58,48 +58,57 @@ public class MissingPragmaCheck extends MagikCheck {
 
   private boolean isPrimaryDefinition(final MagikDefinition definition) {
     if (definition instanceof MethodDefinition methodDefinition) {
-      final AstNode node = methodDefinition.getNode();
-
-      if (node.is(MagikGrammar.PROCEDURE_INVOCATION)) {
-        // Skip methods which were generated via a exemplar definition.
-        // The exemplar definition itself will get flagged in this case.
-        final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
-        return helper.isProcedureInvocationOf(DEF_SLOTTED_EXEMPLAR)
-            || helper.isProcedureInvocationOf(SW_DEF_SLOTTED_EXEMPLAR);
-      } else if (node.is(MagikGrammar.STATEMENT)) {
-        final AstNode invocationNode =
-            AstQuery.getFirstChildFromChain(
-                node,
-                MagikGrammar.EXPRESSION_STATEMENT,
-                MagikGrammar.EXPRESSION,
-                MagikGrammar.POSTFIX_EXPRESSION,
-                MagikGrammar.METHOD_INVOCATION);
-        if (invocationNode == null) {
-          return true;
-        }
-
-        // Keep only one method generated via a shared variable.
-        // The shared variable definition itself will get flagged in this case.
-        final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(invocationNode);
-        if (helper.isMethodInvocationOf(DEFINE_SHARED_VARIABLE)
-            && (methodDefinition.getMethodName().endsWith("<<")
-                || methodDefinition.getMethodName().endsWith("^<<"))) {
-          return false;
-        }
-      }
+      return isPrimaryMethodDefinition(methodDefinition);
     } else if (definition instanceof GlobalDefinition globalDefinition) {
-      final AstNode node = globalDefinition.getNode();
-      if (!node.is(MagikGrammar.VARIABLE_DEFINITION_STATEMENT)) {
-        return false;
-      }
-
-      // Only from top level.
-      final AstNode chainNode =
-          AstQuery.getParentFromChain(node, MagikGrammar.STATEMENT, MagikGrammar.MAGIK);
-      return chainNode != null;
+      return isPrimaryGlobalDefinition(globalDefinition);
     }
 
     return true;
+  }
+
+  private boolean isPrimaryMethodDefinition(MethodDefinition methodDefinition) {
+    final AstNode node = methodDefinition.getNode();
+
+    if (node.is(MagikGrammar.PROCEDURE_INVOCATION)) {
+      // Skip methods which were generated via a exemplar definition.
+      // The exemplar definition itself will get flagged in this case.
+      final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
+      return helper.isProcedureInvocationOf(DEF_SLOTTED_EXEMPLAR)
+          || helper.isProcedureInvocationOf(SW_DEF_SLOTTED_EXEMPLAR);
+    } else if (node.is(MagikGrammar.STATEMENT)) {
+      final AstNode invocationNode =
+          AstQuery.getFirstChildFromChain(
+              node,
+              MagikGrammar.EXPRESSION_STATEMENT,
+              MagikGrammar.EXPRESSION,
+              MagikGrammar.POSTFIX_EXPRESSION,
+              MagikGrammar.METHOD_INVOCATION);
+      if (invocationNode == null) {
+        return true;
+      }
+
+      // Keep only one method generated via a shared variable.
+      // The shared variable definition itself will get flagged in this case.
+      final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(invocationNode);
+      if (helper.isMethodInvocationOf(DEFINE_SHARED_VARIABLE)
+          && (methodDefinition.getMethodName().endsWith("<<")
+              || methodDefinition.getMethodName().endsWith("^<<"))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private boolean isPrimaryGlobalDefinition(GlobalDefinition globalDefinition) {
+    final AstNode node = globalDefinition.getNode();
+    if (!node.is(MagikGrammar.VARIABLE_DEFINITION_STATEMENT)) {
+      return false;
+    }
+
+    // Only from top level.
+    final AstNode chainNode =
+        AstQuery.getParentFromChain(node, MagikGrammar.STATEMENT, MagikGrammar.MAGIK);
+    return chainNode != null;
   }
 
   private boolean missingPragma(final MagikDefinition definition) {
