@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
@@ -50,21 +51,21 @@ public class MethodDefinitionNodeHelper {
       builder.append(tokenValue);
     }
     if (parametersNode != null) {
-      if (this.anyChildTokenIs(parametersNode, MagikPunctuator.SQUARE_L)) {
+      if (AstQuery.anyChildTokenIs(parametersNode, MagikPunctuator.SQUARE_L)) {
         builder.append("[");
         final int commaCount = parameterNodes.size() - 1;
         final String repeatedCommas = ",".repeat(commaCount);
         builder.append(repeatedCommas);
         builder.append("]");
       }
-      if (this.anyChildTokenIs(parametersNode, MagikPunctuator.PAREN_L)) {
+      if (AstQuery.anyChildTokenIs(parametersNode, MagikPunctuator.PAREN_L)) {
         builder.append("()");
       }
     }
-    if (this.anyChildTokenIs(this.node, MagikOperator.CHEVRON)) {
+    if (AstQuery.anyChildTokenIs(this.node, MagikOperator.CHEVRON)) {
       builder.append(MagikOperator.CHEVRON.getValue());
     }
-    if (this.anyChildTokenIs(this.node, MagikOperator.BOOT_CHEVRON)) {
+    if (AstQuery.anyChildTokenIs(this.node, MagikOperator.BOOT_CHEVRON)) {
       builder.append(MagikOperator.BOOT_CHEVRON.getValue());
     }
 
@@ -213,20 +214,6 @@ public class MethodDefinitionNodeHelper {
         .anyMatch(
             statementNode ->
                 statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == null);
-  }
-
-  private boolean anyChildTokenIs(final AstNode parentNode, final MagikOperator magikOperator) {
-    return parentNode.getChildren().stream()
-        .filter(childNode -> childNode.isNot(MagikGrammar.values()))
-        .map(AstNode::getTokenValue)
-        .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(magikOperator.getValue()));
-  }
-
-  private boolean anyChildTokenIs(final AstNode parentNode, final MagikPunctuator magikPunctuator) {
-    return parentNode.getChildren().stream()
-        .filter(childNode -> childNode.isNot(MagikGrammar.values()))
-        .map(AstNode::getTokenValue)
-        .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(magikPunctuator.getValue()));
   }
 
   /**
