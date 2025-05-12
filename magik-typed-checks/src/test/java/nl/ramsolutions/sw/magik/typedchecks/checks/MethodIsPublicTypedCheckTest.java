@@ -36,7 +36,7 @@ class MethodIsPublicTypedCheckTest extends MagikTypedCheckTestBase {
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.EMPTY,
             ExpressionResultString.EMPTY));
 
@@ -66,7 +66,7 @@ class MethodIsPublicTypedCheckTest extends MagikTypedCheckTestBase {
             Set.of(MethodDefinition.Modifier.PRIVATE),
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.EMPTY,
             ExpressionResultString.EMPTY));
 
@@ -108,7 +108,7 @@ class MethodIsPublicTypedCheckTest extends MagikTypedCheckTestBase {
             TypeString.ofIdentifier("rope", "sw"),
             Collections.emptyList(),
             List.of(TypeString.SW_OBJECT),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new MethodDefinition(
             null,
@@ -121,7 +121,7 @@ class MethodIsPublicTypedCheckTest extends MagikTypedCheckTestBase {
             Set.of(MethodDefinition.Modifier.PRIVATE),
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.EMPTY,
             ExpressionResultString.EMPTY));
 

@@ -158,7 +158,7 @@ public final class JsonDefinitionReader {
           Collections.emptySet(),
           Collections.emptyList(),
           null,
-          Collections.emptySet(),
+          null,
           ExpressionResultString.UNDEFINED,
           ExpressionResultString.UNDEFINED);
     }
@@ -181,7 +181,7 @@ public final class JsonDefinitionReader {
           TypeString.UNDEFINED,
           Collections.emptyList(),
           Collections.emptyList(),
-          Collections.emptySet());
+          null);
     }
   }
 
@@ -202,6 +202,7 @@ public final class JsonDefinitionReader {
           TypeString.UNDEFINED,
           null,
           Collections.emptyList(),
+          null,
           ExpressionResultString.UNDEFINED,
           ExpressionResultString.UNDEFINED);
     }

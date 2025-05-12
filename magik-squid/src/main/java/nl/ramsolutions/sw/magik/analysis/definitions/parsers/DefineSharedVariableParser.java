@@ -14,9 +14,11 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -123,6 +125,17 @@ public class DefineSharedVariableParser {
     // Figure doc.
     final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
+    // Figure pragma.
+    final PragmaNodeHelper pragmaHelper = PragmaNodeHelper.newSafe(this.node);
+    final Pragma pragma =
+        pragmaHelper != null
+            ? new Pragma(
+                pragmaHelper.getNode(),
+                pragmaHelper.getClassifyLevels(),
+                pragmaHelper.getTopics(),
+                pragmaHelper.getUsages())
+            : null;
+
     // Figure type doc.
     final TypeDocParser docParser = new TypeDocParser(parentNode);
     final List<TypeString> returnTypeRefs = docParser.getReturnTypes();
@@ -143,6 +156,7 @@ public class DefineSharedVariableParser {
             variableName,
             flavor,
             doc,
+            pragma,
             typeRef);
     return List.copyOf(methodDefinitions);
   }
@@ -157,6 +171,7 @@ public class DefineSharedVariableParser {
       final String variableName,
       final String flavor,
       final String doc,
+      final @Nullable Pragma pragma,
       final TypeString typeRef) {
     final List<MethodDefinition> methodDefinitions = new ArrayList<>();
 
@@ -178,7 +193,7 @@ public class DefineSharedVariableParser {
             getModifiers,
             getParameters,
             null,
-            Collections.emptySet(),
+            pragma,
             new ExpressionResultString(typeRef),
             ExpressionResultString.EMPTY);
     methodDefinitions.add(getMethod);
@@ -212,7 +227,7 @@ public class DefineSharedVariableParser {
             setModifiers,
             setParameters,
             assignmentParam,
-            Collections.emptySet(),
+            pragma,
             new ExpressionResultString(TypeString.ofParameterRef("val")),
             ExpressionResultString.EMPTY);
     methodDefinitions.add(setMethod);
@@ -231,7 +246,7 @@ public class DefineSharedVariableParser {
             setModifiers,
             setParameters,
             assignmentParam,
-            Collections.emptySet(),
+            pragma,
             new ExpressionResultString(typeRef),
             ExpressionResultString.EMPTY);
     methodDefinitions.add(bootMethod);

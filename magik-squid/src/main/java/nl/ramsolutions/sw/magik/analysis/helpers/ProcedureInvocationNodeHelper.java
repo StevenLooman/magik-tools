@@ -54,7 +54,7 @@ public class ProcedureInvocationNodeHelper {
   /**
    * Get ARGUMENTS -> ARGUMENT -> EXPRESSION nodes.
    *
-   * @return
+   * @return List of expression nodes.
    */
   public List<AstNode> getArgumentExpressionNodes() {
     final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);

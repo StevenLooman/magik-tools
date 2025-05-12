@@ -132,7 +132,7 @@ class JsonDefinitionReaderTest {
                         null, null, null, null, null, "slot1", TypeString.SW_INTEGER),
                     new SlotDefinition(null, null, null, null, null, "slot2", TypeString.SW_FLOAT)),
                 List.of(TypeString.SW_OBJECT),
-                Collections.emptySet()));
+                null));
   }
 
   @Test
@@ -176,7 +176,7 @@ class JsonDefinitionReaderTest {
                         ParameterDefinition.Modifier.NONE,
                         TypeString.UNDEFINED)),
                 null,
-                Collections.emptySet(),
+                null,
                 new ExpressionResultString(TypeString.SW_SYMBOL),
                 ExpressionResultString.EMPTY));
 
@@ -203,7 +203,7 @@ class JsonDefinitionReaderTest {
                     "param2",
                     ParameterDefinition.Modifier.NONE,
                     TypeString.SW_SYMBOL),
-                Collections.emptySet(),
+                null,
                 new ExpressionResultString(TypeString.SW_SYMBOL),
                 ExpressionResultString.EMPTY));
   }
@@ -220,7 +220,7 @@ class JsonDefinitionReaderTest {
     assertThat(conditionError)
         .isEqualTo(
             new ConditionDefinition(
-                null, null, null, null, null, "error", null, List.of("string")));
+                null, null, null, null, null, "error", null, List.of("string"), null));
 
     final Collection<ConditionDefinition> conditionsUnknownValue =
         definitionKeeper.getConditionDefinitions("unknown_value");
@@ -238,7 +238,8 @@ class JsonDefinitionReaderTest {
                 null,
                 "unknown_value",
                 "error",
-                List.of("value", "permitted_values")));
+                List.of("value", "permitted_values"),
+                null));
   }
 
   @Test
@@ -254,7 +255,7 @@ class JsonDefinitionReaderTest {
     assertThat(tabCharGlobalDef)
         .isEqualTo(
             new GlobalDefinition(
-                null, null, null, null, null, tabCharRef, TypeString.SW_CHARACTER));
+                null, null, null, null, null, tabCharRef, TypeString.SW_CHARACTER, null));
 
     final TypeString printFloatPrecisionRef =
         TypeString.ofIdentifier("!print_float_precision!", "sw");
@@ -267,7 +268,7 @@ class JsonDefinitionReaderTest {
     assertThat(printFloatPrecisionDef)
         .isEqualTo(
             new GlobalDefinition(
-                null, null, null, null, null, printFloatPrecisionRef, TypeString.SW_INTEGER));
+                null, null, null, null, null, printFloatPrecisionRef, TypeString.SW_INTEGER, null));
   }
 
   @Test

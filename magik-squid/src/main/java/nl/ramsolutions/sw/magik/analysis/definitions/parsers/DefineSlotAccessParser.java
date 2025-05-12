@@ -14,9 +14,11 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -219,6 +221,17 @@ public class DefineSlotAccessParser {
     // Figure doc.
     final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
+    // Figure pragma.
+    final PragmaNodeHelper pragmaHelper = PragmaNodeHelper.newSafe(this.node);
+    final Pragma pragma =
+        pragmaHelper != null
+            ? new Pragma(
+                pragmaHelper.getNode(),
+                pragmaHelper.getClassifyLevels(),
+                pragmaHelper.getTopics(),
+                pragmaHelper.getUsages())
+            : null;
+
     // Build methods.
     final String slotNameSymbol = argument0Node.getTokenValue();
     final String slotName = slotNameSymbol.substring(1);
@@ -238,7 +251,15 @@ public class DefineSlotAccessParser {
     final TypeString exemplarName = TypeString.ofIdentifier(identifier, pakkage);
     final List<MethodDefinition> methodDefinitions =
         this.generateSlotMethods(
-            timestamp, moduleName, statementNode, exemplarName, slotName, flag, flavor, doc);
+            timestamp,
+            moduleName,
+            statementNode,
+            exemplarName,
+            slotName,
+            flag,
+            flavor,
+            doc,
+            pragma);
     return List.copyOf(methodDefinitions);
   }
 
@@ -251,7 +272,8 @@ public class DefineSlotAccessParser {
       final String slotName,
       final String flag,
       final String flavor,
-      final String doc) {
+      final String doc,
+      final @Nullable Pragma pragma) {
     final List<MethodDefinition> methodDefinitions = new ArrayList<>();
 
     // Figure location.
@@ -278,7 +300,7 @@ public class DefineSlotAccessParser {
               getModifiers,
               getParameters,
               null,
-              Collections.emptySet(),
+              pragma,
               new ExpressionResultString(TypeString.UNDEFINED),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(getMethod);
@@ -301,7 +323,7 @@ public class DefineSlotAccessParser {
               getModifiers,
               getParameters,
               null,
-              Collections.emptySet(),
+              pragma,
               new ExpressionResultString(TypeString.UNDEFINED),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(getMethod);
@@ -335,7 +357,7 @@ public class DefineSlotAccessParser {
               setModifiers,
               setParameters,
               assignmentParam,
-              Collections.emptySet(),
+              pragma,
               new ExpressionResultString(TypeString.ofParameterRef("val")),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(setMethod);
@@ -354,7 +376,7 @@ public class DefineSlotAccessParser {
               setModifiers,
               setParameters,
               assignmentParam,
-              Collections.emptySet(),
+              pragma,
               new ExpressionResultString(TypeString.UNDEFINED),
               ExpressionResultString.EMPTY);
       methodDefinitions.add(bootMethod);

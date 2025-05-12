@@ -8,7 +8,9 @@ import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
@@ -84,9 +86,20 @@ public class GlobalDefinitionParser {
     final AstNode parentNode = this.node.getParent();
     final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
+    // Figure pragma.
+    final PragmaNodeHelper pragmaHelper = PragmaNodeHelper.newSafe(this.node);
+    final Pragma pragma =
+        pragmaHelper != null
+            ? new Pragma(
+                pragmaHelper.getNode(),
+                pragmaHelper.getClassifyLevels(),
+                pragmaHelper.getTopics(),
+                pragmaHelper.getUsages())
+            : null;
+
     final GlobalDefinition globalDefinition =
         new GlobalDefinition(
-            location, timestamp, moduleName, doc, this.node, typeName, aliasedTypeRef);
+            location, timestamp, moduleName, doc, this.node, typeName, aliasedTypeRef, pragma);
     return List.of(globalDefinition);
   }
 

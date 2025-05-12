@@ -51,6 +51,7 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
                 procDef.getTypeString(),
                 procDef.getProcedureName(),
                 procDef.getParameters(),
+                procDef.getPragma(),
                 this.state.getNodeType(node),
                 this.state.getNodeIterType(node))
             : procDef;

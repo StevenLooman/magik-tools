@@ -1,5 +1,6 @@
 _package user
 
+_pragma(classify_level=basic,topic={test, test2})
 ## Test exemplar.
 ## @slot {sw:rope} slot_a
 ## @slot {sw:property_list<K=sw:symbol, E=sw:integer>} slot_b
@@ -11,6 +12,7 @@ def_slotted_exemplar(
     })
 $
 
+_pragma(classify_level=basic,topic={test, test2})
 _method test_exemplar.new()
     ## Constructor.
     ## @return {_self}
@@ -18,6 +20,7 @@ _method test_exemplar.new()
 _endmethod
 $
 
+_pragma(classify_level=basic,topic={test, test2})
 _private _method test_exemplar.init()
     ## Initializer.
     ## @return {_self}
