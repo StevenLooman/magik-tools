@@ -20,10 +20,13 @@ import nl.ramsolutions.sw.magik.checks.checks.LineLengthCheck;
 import nl.ramsolutions.sw.magik.checks.checks.LocalImportProcedureCheck;
 import nl.ramsolutions.sw.magik.checks.checks.MethodComplexityCheck;
 import nl.ramsolutions.sw.magik.checks.checks.MethodLineCountCheck;
+import nl.ramsolutions.sw.magik.checks.checks.MissingPragmaCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NestingDepthCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoSelfUseCheck;
 import nl.ramsolutions.sw.magik.checks.checks.NoStatementAfterBodyExitCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ParameterCountCheck;
+import nl.ramsolutions.sw.magik.checks.checks.PragmaInvalidClassifyLevelCheck;
+import nl.ramsolutions.sw.magik.checks.checks.PragmaInvalidUsageCheck;
 import nl.ramsolutions.sw.magik.checks.checks.ScopeCountCheck;
 import nl.ramsolutions.sw.magik.checks.checks.SimplifyIfCheck;
 import nl.ramsolutions.sw.magik.checks.checks.SizeZeroEmptyCheck;
@@ -68,12 +71,13 @@ public final class CheckList {
         EmptyBlockCheck.class,
         ExemplarSlotCountCheck.class,
         FileMethodCountCheck.class,
-        FileNotInLoadListCheck.class,
         FileMustStartWithPackageStatementCheck.class,
+        FileNotInLoadListCheck.class,
         ForbiddenCallCheck.class,
         ForbiddenGlobalUsageCheck.class,
         ForbiddenInheritanceCheck.class,
         FormattingCheck.class,
+        MissingPragmaCheck.class,
         HidesVariableCheck.class,
         ImportMissingDefinitionCheck.class,
         LhsRhsComparatorEqualCheck.class,
@@ -85,6 +89,8 @@ public final class CheckList {
         NoSelfUseCheck.class,
         NoStatementAfterBodyExitCheck.class,
         ParameterCountCheck.class,
+        PragmaInvalidClassifyLevelCheck.class,
+        PragmaInvalidUsageCheck.class,
         ScopeCountCheck.class,
         SimplifyIfCheck.class,
         SizeZeroEmptyCheck.class,

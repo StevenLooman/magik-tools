@@ -5,11 +5,11 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
@@ -100,12 +100,16 @@ public class DefMixinParser extends BaseDefParser {
     final AstNode parentNode = this.node.getParent();
     final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
-    // Figure topics.
-    final AstNode pragmaNode = PragmaNodeHelper.getPragmaNode(node);
-    final Set<String> topics =
-        pragmaNode != null
-            ? new PragmaNodeHelper(pragmaNode).getAllTopics()
-            : Collections.emptySet();
+    // Figure pragma.
+    final PragmaNodeHelper pragmaHelper = PragmaNodeHelper.newSafe(this.node);
+    final Pragma pragma =
+        pragmaHelper != null
+            ? new Pragma(
+                pragmaHelper.getNode(),
+                pragmaHelper.getClassifyLevels(),
+                pragmaHelper.getTopics(),
+                pragmaHelper.getUsages())
+            : null;
 
     final ExemplarDefinition mixinDefinition =
         new ExemplarDefinition(
@@ -118,7 +122,7 @@ public class DefMixinParser extends BaseDefParser {
             name,
             Collections.emptyList(),
             parents,
-            topics);
+            pragma);
     return List.of(mixinDefinition);
   }
 }

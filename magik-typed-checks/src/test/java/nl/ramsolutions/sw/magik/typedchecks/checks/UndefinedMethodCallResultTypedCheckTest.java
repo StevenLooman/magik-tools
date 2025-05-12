@@ -66,7 +66,7 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             new ExpressionResultString(TypeString.SW_OBJECT),
             ExpressionResultString.EMPTY));
 
@@ -96,7 +96,7 @@ class UndefinedMethodCallResultTypedCheckTest extends MagikTypedCheckTestBase {
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 

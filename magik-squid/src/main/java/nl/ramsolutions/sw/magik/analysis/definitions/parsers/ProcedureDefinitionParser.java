@@ -16,8 +16,10 @@ import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -98,6 +100,17 @@ public class ProcedureDefinitionParser {
     final List<ParameterDefinition> parameters =
         this.createParameterDefinitions(timestamp, moduleName, parametersNode, parameterTypes);
 
+    // Figure pragma.
+    final PragmaNodeHelper pragmaHelper = PragmaNodeHelper.newSafe(this.node);
+    final Pragma pragma =
+        pragmaHelper != null
+            ? new Pragma(
+                pragmaHelper.getNode(),
+                pragmaHelper.getClassifyLevels(),
+                pragmaHelper.getTopics(),
+                pragmaHelper.getUsages())
+            : null;
+
     // Get return types from method docs.
     final List<TypeString> callResultDocs = typeDocParser.getReturnTypes();
     // Ensure we can believe the docs, sort of.
@@ -136,6 +149,7 @@ public class ProcedureDefinitionParser {
             typeString,
             procedureName,
             parameters,
+            pragma,
             callResult,
             loopResult));
   }

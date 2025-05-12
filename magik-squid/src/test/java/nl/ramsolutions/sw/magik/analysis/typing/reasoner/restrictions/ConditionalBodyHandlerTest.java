@@ -545,7 +545,7 @@ class ConditionalBodyHandlerTest {
             Collections.emptySet(),
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             new ExpressionResultString(TypeString.SW_UNSET),
             ExpressionResultString.EMPTY));
     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -584,7 +584,7 @@ class ConditionalBodyHandlerTest {
             Collections.emptySet(),
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             new ExpressionResultString(TypeString.SW_UNSET),
             ExpressionResultString.EMPTY));
     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -649,7 +649,7 @@ class ConditionalBodyHandlerTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new ConditionDefinition(
-            null, null, null, null, null, "error", null, Collections.emptyList()));
+            null, null, null, null, null, "error", null, Collections.emptyList(), null));
 
     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
@@ -688,10 +688,10 @@ class ConditionalBodyHandlerTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new ConditionDefinition(
-            null, null, null, null, null, "error", null, Collections.emptyList()));
+            null, null, null, null, null, "error", null, Collections.emptyList(), null));
     definitionKeeper.add(
         new ConditionDefinition(
-            null, null, null, null, null, "child_error", "error", Collections.emptyList()));
+            null, null, null, null, null, "child_error", "error", Collections.emptyList(), null));
 
     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();

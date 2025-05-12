@@ -420,6 +420,7 @@
                   <excludes>
                     <exclude>nl.ramsolutions.sw.magik.analysis.MagikAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition.equals(java.lang.Object)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper.add(nl.ramsolutions.sw.IDefinition)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper.remove(nl.ramsolutions.sw.IDefinition)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.equals(java.lang.Object)</exclude>
@@ -427,7 +428,9 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader.processLine(java.lang.String)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefineSlotAccessParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodDefinitionParser.parseDefinitions()</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader.parseClassInfo(java.lang.String, java.io.InputStreamReader)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ConditionalBodyHandler.handleConditionalExpression(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.api.MagikNumberParser.parseMagikNumber(java.lang.String)</exclude>

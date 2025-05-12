@@ -12,9 +12,11 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -126,6 +128,17 @@ public class DefineSharedConstantParser {
     // Figure doc.
     final String doc = MagikCommentExtractor.extractDocComment(parentNode);
 
+    // Figure pragma.
+    final PragmaNodeHelper pragmaHelper = PragmaNodeHelper.newSafe(this.node);
+    final Pragma pragma =
+        pragmaHelper != null
+            ? new Pragma(
+                pragmaHelper.getNode(),
+                pragmaHelper.getClassifyLevels(),
+                pragmaHelper.getTopics(),
+                pragmaHelper.getUsages())
+            : null;
+
     // Figure type doc.
     final TypeDocParser docParser = new TypeDocParser(parentNode);
     final List<TypeString> returnTypeRefs = docParser.getReturnTypes();
@@ -154,7 +167,7 @@ public class DefineSharedConstantParser {
             modifiers,
             parameters,
             null,
-            Collections.emptySet(),
+            pragma,
             new ExpressionResultString(typeRef),
             ExpressionResultString.EMPTY);
     return List.of(methodDefinition);

@@ -39,7 +39,7 @@ class ImplementationProviderTest {
             aRef,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new MethodDefinition(
             new Location(
@@ -53,7 +53,7 @@ class ImplementationProviderTest {
             Set.of(MethodDefinition.Modifier.ABSTRACT),
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
     final TypeString bRef = TypeString.ofIdentifier("b", "user");
@@ -68,7 +68,7 @@ class ImplementationProviderTest {
             bRef,
             Collections.emptyList(),
             List.of(aRef),
-            Collections.emptySet()));
+            null));
     definitionKeeper.add(
         new MethodDefinition(
             new Location(
@@ -82,7 +82,7 @@ class ImplementationProviderTest {
             Collections.emptySet(), // Concrete.
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 

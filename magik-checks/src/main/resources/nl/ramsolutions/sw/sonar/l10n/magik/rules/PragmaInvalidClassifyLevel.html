@@ -1,0 +1,23 @@
+<p>Pragma contains an invalid classify_level.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_pragma(classify_level=invalid, topic={example}, usage=redefinable)
+_method object.do_something()
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_pragma(classify_level=basic, topic={example}, usage=redefinable)
+_method object.do_something()
+_endmethod
+</pre>
+<p>
+    The classify_level should be one of:
+    <ul>
+        <li>basic</li>
+        <li>advanced</li>
+        <li>restricted</li>
+        <li>debug</li>
+        <li>deprecated</li>
+    </ul>
+</p>

@@ -29,7 +29,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
   private final String methodName;
   private final List<ParameterDefinition> parameters;
   private final @Nullable ParameterDefinition assignmentParameter;
-  private final Set<String> topics;
+  private final @Nullable Pragma pragma;
   private final ExpressionResultString returnTypes;
   private final ExpressionResultString loopTypes;
   private final List<GlobalUsage> usedGlobals;
@@ -47,7 +47,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
    * @param modifiers Modifiers for method.
    * @param parameters Parameters for method.
    * @param assignmentParameter Assignment parameter.
-   * @param topics Topics.
+   * @param pragma Pragma.
    * @param doc Method doc.
    * @param returnTypes Return types.
    * @param loopTypes Loop types.
@@ -64,7 +64,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
       final Set<Modifier> modifiers,
       final List<ParameterDefinition> parameters,
       final @Nullable ParameterDefinition assignmentParameter,
-      final Set<String> topics,
+      final @Nullable Pragma pragma,
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes) {
     super(location, timestamp, moduleName, doc, node);
@@ -73,7 +73,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     this.modifiers = Set.copyOf(modifiers);
     this.parameters = List.copyOf(parameters);
     this.assignmentParameter = assignmentParameter;
-    this.topics = Set.copyOf(topics);
+    this.pragma = pragma;
     this.returnTypes = returnTypes;
     this.loopTypes = loopTypes;
     this.usedGlobals = Collections.emptyList();
@@ -92,7 +92,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
    * @param modifiers Modifiers for method.
    * @param parameters Parameters for method.
    * @param assignmentParameter Assignment parameter.
-   * @param topics Topics.
+   * @param pragma Pragma.
    * @param doc Method doc.
    * @param returnTypes Return types.
    * @param loopTypes Loop types.
@@ -109,7 +109,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
       final Set<Modifier> modifiers,
       final List<ParameterDefinition> parameters,
       final @Nullable ParameterDefinition assignmentParameter,
-      final Set<String> topics,
+      final @Nullable Pragma pragma,
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes,
       final List<GlobalUsage> usedGlobals,
@@ -122,7 +122,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     this.modifiers = Set.copyOf(modifiers);
     this.parameters = List.copyOf(parameters);
     this.assignmentParameter = assignmentParameter;
-    this.topics = Set.copyOf(topics);
+    this.pragma = pragma;
     this.returnTypes = returnTypes;
     this.loopTypes = loopTypes;
     this.usedGlobals = Collections.unmodifiableList(usedGlobals);
@@ -280,13 +280,9 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     return this.assignmentParameter;
   }
 
-  /**
-   * Get topics.
-   *
-   * @return Topics.
-   */
-  public Set<String> getTopics() {
-    return Collections.unmodifiableSet(this.topics);
+  @CheckForNull
+  public Pragma getPragma() {
+    return this.pragma;
   }
 
   public List<GlobalUsage> getUsedGlobals() {
@@ -318,7 +314,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
         this.modifiers,
         this.parameters.stream().map(ParameterDefinition::getBareDefinition).toList(),
         this.assignmentParameter != null ? this.assignmentParameter.getBareDefinition() : null,
-        this.topics,
+        this.pragma != null ? this.pragma.getBarePragma() : null,
         this.returnTypes,
         this.loopTypes,
         this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).toList(),
@@ -349,7 +345,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
         this.methodName,
         this.parameters,
         this.assignmentParameter,
-        this.topics,
+        this.pragma,
         this.returnTypes,
         this.loopTypes);
   }
@@ -377,7 +373,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
         && Objects.equals(this.methodName, other.methodName)
         && Objects.equals(this.parameters, other.parameters)
         && Objects.equals(this.assignmentParameter, other.assignmentParameter)
-        && Objects.equals(this.topics, other.topics)
+        && Objects.equals(this.pragma, other.pragma)
         && Objects.equals(this.returnTypes, other.returnTypes)
         && Objects.equals(this.loopTypes, other.loopTypes);
   }

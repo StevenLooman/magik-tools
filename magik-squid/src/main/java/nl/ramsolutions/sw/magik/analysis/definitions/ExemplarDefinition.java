@@ -7,7 +7,6 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
@@ -28,7 +27,7 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
   private final TypeString typeName;
   private final List<SlotDefinition> slots;
   private final List<TypeString> parents;
-  private final Set<String> topics;
+  private final @Nullable Pragma pragma;
 
   /**
    * Constructor.
@@ -39,7 +38,7 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
    * @param typeName Name of slotted exemplar.
    * @param slots Slots of slotted exemplar.
    * @param parents Parents of slotted exemplar.
-   * @param topics Topics.
+   * @param pragma Pragma.
    */
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public ExemplarDefinition(
@@ -52,7 +51,7 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
       final TypeString typeName,
       final List<SlotDefinition> slots,
       final List<TypeString> parents,
-      final Set<String> topics) {
+      final @Nullable Pragma pragma) {
     super(location, timestamp, moduleName, doc, node);
 
     if (!typeName.isSingle()) {
@@ -63,7 +62,7 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
     this.typeName = typeName;
     this.slots = List.copyOf(slots);
     this.parents = List.copyOf(parents);
-    this.topics = Set.copyOf(topics);
+    this.pragma = pragma;
   }
 
   public List<SlotDefinition> getSlots() {
@@ -85,8 +84,9 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
     return Collections.unmodifiableList(this.parents);
   }
 
-  public Set<String> getTopics() {
-    return Collections.unmodifiableSet(this.topics);
+  @CheckForNull
+  public Pragma getPragma() {
+    return this.pragma;
   }
 
   @Override
@@ -115,7 +115,7 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
         this.typeName,
         this.slots.stream().map(SlotDefinition::getBareDefinition).toList(),
         this.parents,
-        Collections.emptySet());
+        this.pragma != null ? this.pragma.getBarePragma() : null);
   }
 
   @Override
@@ -137,7 +137,8 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
         this.sort,
         this.typeName,
         this.slots,
-        this.parents);
+        this.parents,
+        this.pragma);
   }
 
   @Override
@@ -161,6 +162,7 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
         && Objects.equals(this.sort, other.sort)
         && Objects.equals(this.typeName, other.typeName)
         && Objects.equals(this.slots, other.slots)
-        && Objects.equals(this.parents, other.parents);
+        && Objects.equals(this.parents, other.parents)
+        && Objects.equals(this.pragma, other.pragma);
   }
 }

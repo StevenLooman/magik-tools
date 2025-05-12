@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
@@ -64,7 +63,7 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
                     ParameterDefinition.Modifier.NONE,
                     TypeString.SW_OBJECT)),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.EMPTY,
             ExpressionResultString.EMPTY));
 
@@ -111,7 +110,7 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest extends MagikTypedC
                     ParameterDefinition.Modifier.NONE,
                     TypeString.SW_OBJECT)),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.EMPTY,
             ExpressionResultString.EMPTY));
 

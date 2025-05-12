@@ -326,7 +326,10 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     final Set<SemanticToken.Modifier> modifiers =
         resolver.getRespondingMethodDefinitions(typeStr, methodName).stream()
-                .anyMatch(method -> method.getTopics().contains(TOPIC_DEPRECATED))
+                .anyMatch(
+                    method ->
+                        method.getPragma() != null
+                            && method.getPragma().getTopics().contains(TOPIC_DEPRECATED))
             ? Set.of(SemanticToken.Modifier.DEPRECATED)
             : Collections.emptySet();
 
@@ -415,7 +418,8 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
                 .orElse(null);
         if (exemplarDef != null) {
           final Set<SemanticToken.Modifier> modifiers =
-              exemplarDef.getTopics().contains(TOPIC_DEPRECATED)
+              exemplarDef.getPragma() != null
+                      && exemplarDef.getPragma().getTopics().contains(TOPIC_DEPRECATED)
                   ? Set.of(
                       SemanticToken.Modifier.VARIABLE_GLOBAL, SemanticToken.Modifier.DEPRECATED)
                   : Set.of(SemanticToken.Modifier.VARIABLE_GLOBAL);
