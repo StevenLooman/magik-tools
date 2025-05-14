@@ -17,9 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
       - run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install html2text==2024.2.26
+          pip install -r .github/scripts/requirements.txt
           python3 .github/scripts/generate-checks-pages.py
       - uses: Andrew-Chen-Wang/github-wiki-action@86138cbd6328b21d759e89ab6e6dd6a139b22270
         with:
