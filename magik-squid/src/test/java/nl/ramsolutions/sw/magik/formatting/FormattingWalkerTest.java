@@ -280,6 +280,20 @@ class FormattingWalkerTest {
     assertThat(edits).isEmpty();
   }
 
+  @Test
+  void testSelfExpression() {
+    final String code = "_self - 1";
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testSelfIndexer() {
+    final String code = "_self[1]";
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
   // endregion
 
   // region: Indenting.

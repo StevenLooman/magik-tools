@@ -190,7 +190,8 @@ class MagikFormattingStrategy extends FormattingStrategy {
             this.lastTextToken,
             "_proc",
             "_loopbody",
-            "_super"); // Except for _proc/_loopbody/_super.
+            "_super") // Except after _proc/_loopbody/_super.
+        && !(this.tokenIs(this.lastTextToken, "_self") && this.tokenIs(token, "(", "["));
   }
 
   private boolean requireNoWhitespaceBefore(final Token token) {
