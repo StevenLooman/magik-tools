@@ -19,7 +19,9 @@ import org.junit.jupiter.api.Test;
 class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
 
   private void addExemplarDefinition(
-      final IDefinitionKeeper definitionKeeper, final TypeString typeName, final String... topics) {
+      final IDefinitionKeeper definitionKeeper,
+      final TypeString typeName,
+      final String classifyLevel) {
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -31,7 +33,7 @@ class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
             typeName,
             Collections.emptyList(),
             Collections.emptyList(),
-            new Pragma(null, Set.of(), Arrays.asList(topics), Set.of())));
+            new Pragma(null, Arrays.asList(classifyLevel), Set.of(), Set.of())));
   }
 
   @Test
@@ -53,7 +55,7 @@ class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
   void testTypeNotDeprecated() {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString typeStr = TypeString.ofIdentifier("test", "user");
-    this.addExemplarDefinition(definitionKeeper, typeStr, "not_deprecated");
+    this.addExemplarDefinition(definitionKeeper, typeStr, "basic");
     final String code =
         """
         _block

@@ -34,8 +34,6 @@ public class Pragma {
   public static final Set<String> USAGES =
       Set.of(USAGE_SUBCLASSABLE, USAGE_SUBCLASS, USAGE_REDEFINABLE, USAGE_EXTERNAL, USAGE_INTERNAL);
 
-  public static final String TOPIC_DEPRECATED = "deprecated";
-
   private final @Nullable AstNode node;
   private final Set<String> classifyLevels;
   private final Set<String> topics;
