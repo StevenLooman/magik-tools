@@ -94,4 +94,3 @@ buildNumber.properties
 # Custom
 jacoco.exec
 */dependency-reduced-pom.xml
-wiki/*
