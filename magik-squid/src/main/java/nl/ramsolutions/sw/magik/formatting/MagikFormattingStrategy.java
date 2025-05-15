@@ -306,6 +306,11 @@ class MagikFormattingStrategy extends FormattingStrategy {
   }
 
   private void trackIndentPre(final Token token) {
+    if (this.currentNode.is(MagikGrammar.SYNTAX_ERROR)) {
+      // Don't touch syntax errors.
+      return;
+    }
+
     if (!this.tokenIs(token, GenericTokenType.COMMENT)
         && this.isBinaryExpression(this.currentNode)
         && this.currentNode.getChildren().get(1).getToken() == token) { // Only indent first.
@@ -319,6 +324,11 @@ class MagikFormattingStrategy extends FormattingStrategy {
   }
 
   private void trackIndentPost(final Token token) {
+    if (this.currentNode.is(MagikGrammar.SYNTAX_ERROR)) {
+      // Don't touch syntax errors.
+      return;
+    }
+
     final String tokenValue = token.getOriginalValue().toLowerCase();
     if (INDENT_INCREASE.contains(tokenValue)) {
       this.indent += 1;
