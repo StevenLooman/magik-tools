@@ -10,6 +10,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.GenericHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
@@ -51,6 +52,7 @@ public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTyped
         argumentNodes.stream()
             .map(argumentNode -> argumentNode.getFirstChild(MagikGrammar.EXPRESSION))
             .map(reasonerState::getNodeType)
+            .map(resultString -> SelfHelper.substituteSelf(resultString, node))
             .toList();
 
     // Get methods.

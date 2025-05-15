@@ -7,15 +7,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.Sort;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
@@ -28,6 +29,11 @@ import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 public class TypeStringResolver {
 
   private static final String ALL_METHODS = "_all_methods";
+
+  private static final Map<ExemplarDefinition.Sort, TypeString> IMPLICIT_PARENTS =
+      Map.of(
+          ExemplarDefinition.Sort.INDEXED, TypeString.SW_INDEXED_FORMAT_MIXIN,
+          ExemplarDefinition.Sort.SLOTTED, TypeString.SW_SLOTTED_FORMAT_MIXIN);
 
   private final IDefinitionKeeper definitionKeeper;
   private final Map<TypeString, Set<ITypeStringDefinition>> typeCache = new HashMap<>();
@@ -371,18 +377,32 @@ public class TypeStringResolver {
       return Collections.emptyList();
     }
 
+    // A parent mixin *can* provide a default mixin, but does not have to be the case. I.e.,
+    // the sw:rope_mixin does inherit from sw:slotted_format_mixin, but
+    // sw:serial_structure_indexed_mixin does not do so. Most mixins do not inherit from
+    // sw:slotted_format_mixin. As such, we assume that a parent mixin does not provide
+    // a default mixin.
     final List<TypeString> parents = exemplarDefinition.getParents();
-    final Set<TypeString> implicitParents = new HashSet<>();
-    if (parents.isEmpty()) {
-      if (exemplarDefinition.getSort() == ExemplarDefinition.Sort.INDEXED) {
-        implicitParents.add(TypeString.SW_INDEXED_FORMAT_MIXIN);
-      } else if (exemplarDefinition.getSort() == ExemplarDefinition.Sort.SLOTTED) {
-        implicitParents.add(TypeString.SW_SLOTTED_FORMAT_MIXIN);
-      }
-    }
+    final Collection<TypeString> nonMixinParents =
+        parents.stream()
+            .filter(
+                parentTypeString -> {
+                  final ExemplarDefinition parentExemplarDefinition =
+                      this.getExemplarDefinition(parentTypeString);
+                  final ExemplarDefinition.Sort parentExemplarSort =
+                      parentExemplarDefinition != null
+                          ? parentExemplarDefinition.getSort()
+                          : ExemplarDefinition.Sort.UNDEFINED;
+                  return parentExemplarSort == ExemplarDefinition.Sort.SLOTTED
+                      || parentExemplarSort == ExemplarDefinition.Sort.INDEXED;
+                })
+            .toList();
+    final Sort sort = exemplarDefinition.getSort();
+    final TypeString implicitParentTypeStr =
+        nonMixinParents.isEmpty() ? IMPLICIT_PARENTS.get(sort) : null;
 
     final TypeString[] thisGenDefs = typeString.getGenerics().toArray(TypeString[]::new);
-    return Stream.concat(parents.stream(), implicitParents.stream())
+    return Stream.concat(parents.stream(), Optional.ofNullable(implicitParentTypeStr).stream())
         .map(
             typeStr ->
                 // Let all parents inherit generic definitions.
@@ -403,7 +423,6 @@ public class TypeStringResolver {
   }
 
   private void getAllAncestors(final TypeString typeString, final List<TypeString> ancestors) {
-    // TODO: Does this skip one level at a time?
     final Collection<TypeString> typeStringParents = this.getParents(typeString);
     ancestors.addAll(typeStringParents);
 
