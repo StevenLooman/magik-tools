@@ -93,32 +93,11 @@ _pragma(classify_level=basic, topic=type_dumper)
 _method definition.as_properties()
 	## Get slots as hash table.
 	## @return {sw:equality_property_list<K=sw:char16_vector, E=sw:object>}
-	_local fix_value <<
-		_proc(value)
-			_if value.is_kind_of?(mt:definition) _orif
-			    value.is_kind_of?(mt:usage)
-			_then
-				_return value.as_properties()
-			_endif
-
-			_return value
-		_endproc
-
 	_local table << sw:equality_property_list.new()
 	_for name, value _over _self.sys!slot_names_and_values()
 	_loop
 		_local fixed_name << name.write_string.split_by(%!)[2]
-		_local fixed_value <<
-			_if value.is_kind_of?(sw:simple_vector)
-			_then
-				>> value.map(fix_value)
-			_elif value.is_kind_of?(mt:definition)
-			_then
-				>> fix_value(value)
-			_else
-				>> value
-			_endif
-		table[fixed_name] << fixed_value
+		table[fixed_name] << value
 	_endloop
 	_return table
 _endmethod
@@ -130,7 +109,22 @@ _method definition.generate_json_string()
 	## @return {sw:char16_vector}
 	_local instruction << _self.as_properties()
 	instruction[:instruction] << _self.class_name.write_string.split_by(%_)[1]
-	_local encoder << sw:json_encoder.new()
+	_local backstop_encoder <<
+		_proc@backstop_encoder(value)
+			## @param {sw:object} value
+			_if value.is_kind_of?(mt:definition) _orif
+			    value.is_kind_of?(mt:usage) _orif
+			    value.is_kind_of?(pragma)
+			_then
+				_return _true, value.as_properties()
+			_elif value.is_kind_of?(sw:set)
+			_then
+				_return _true, value.as_sorted_collection().as_simple_vector()
+			_endif
+
+			_return _false, _unset
+		_endproc
+	_local encoder << sw:json_encoder.new(backstop_encoder)
 	_return encoder.generate_string(instruction)
 _endmethod
 $

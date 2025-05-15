@@ -13,35 +13,39 @@ def_slotted_exemplar(
 		{:name, _unset, :readable, :public},
 		{:data_names, _unset, :readable, :public},
 		{:parent, _unset, :readable, :public},
-		{:doc, _unset, :readable, :public}
+		{:doc, _unset, :readable, :public},
+		{:pragma, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_method condition_definition.new(name, data_names, parent, doc)
+_method condition_definition.new(name, data_names, parent, doc, pragma)
 	## Constructor.
 	## @param {sw:char16_vector} name
 	## @param {sw:simple_vector<E=sw:char16_vector>} data_names
 	## @param {sw:char16_vector|sw:unset} parent
 	## @param {sw:char16_vector|sw:unset} doc
+	## @param {pragma|sw:unset} pragma
 	## @return {_self}
-	_return _clone.init(name, data_names, parent, doc)
+	_return _clone.init(name, data_names, parent, doc, pragma)
 _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_private _method condition_definition.init(name, data_names, parent, doc)
+_private _method condition_definition.init(name, data_names, parent, doc, pragma)
 	## Initializer.
 	## @param {sw:char16_vector} name
 	## @param {sw:simple_vector<E=sw:char16_vector>} data_names
 	## @param {sw:char16_vector|sw:unset} parent
 	## @param {sw:char16_vector|sw:unset} doc
+	## @param {pragma|sw:unset} pragma
 	## @return {_self}
 	.name << name
 	.data_names << data_names
 	.parent << parent
 	.doc << doc
+	.pragma << pragma
 	_return _self
 _endmethod
 $
@@ -57,11 +61,21 @@ _method condition_definition.new_from(cond)
 			>> cond.taxonomy[cond.taxonomy.size - 1]
 		_endif
 	_local doc << method_finder.get_method_comment(cond.name, "<condition>")
+	_local topics <<
+		_try
+			>> method_finder.get_method_topics(cond.name, "<condition>")
+		_when error
+			>> {}
+		_endtry
 	_return _self.new(
 		cond.name,
 		cond.data_name_list,
 		parent,
-		doc)
+		doc,
+		_if _not topics.empty?
+		_then
+			>> pragma.new_from_topics(topics)
+		_endif)
 _endmethod
 $
 
