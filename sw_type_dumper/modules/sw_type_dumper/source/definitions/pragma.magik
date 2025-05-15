@@ -1,0 +1,117 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Pragma.
+## @slot {sw:equality_set<E=sw:char16_vector>} classify_levels
+## @slot {sw:equality_set<E=sw:char16_vector>} topics
+## @slot {sw:equality_set<E=sw:char16_vector>} usages
+def_slotted_exemplar(
+	:pragma,
+	{
+		{:classify_levels, sw:equality_set.new(), :readable, :public},
+		{:topics, sw:equality_set.new(), :readable, :public},
+		{:usages, sw:equality_set.new(), :readable, :public}
+	})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+## All known classify_levels.
+## @return {sw:equality_set<E=sw:char16_vector>}
+pragma.define_shared_constant(
+	:all_classify_levels,
+	sw:equality_set.new_with(
+		"basic",
+		"advanced",
+		"restricted",
+		"debug",
+		"deprecated"),
+	:private)
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+## All known all_usages.
+## @return {sw:equality_set<E=sw:char16_vector>}
+pragma.define_shared_constant(
+	:all_usages,
+	sw:equality_set.new_with(
+		"subclassable",
+		"subclass",
+		"redefinable",
+		"external",
+		"internal"),
+	:private)
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method pragma.new(classify_levels, topics, usages)
+	## Constructor.
+	## @param {sw:equality_set<E=sw:char16_vector>} classify_levels
+	## @param {sw:equality_set<E=sw:char16_vector>} topics
+	## @param {sw:equality_set<E=sw:char16_vector>} usages
+	## @return {_self}
+	_return _clone.init(classify_levels, topics, usages)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method pragma.init(classify_levels, topics, usages)
+	## Initializer.
+	## @param {sw:equality_set<E=sw:char16_vector>} classify_levels
+	## @param {sw:equality_set<E=sw:char16_vector>} topics
+	## @param {sw:equality_set<E=sw:char16_vector>} usages
+	## @return {_self}
+	.classify_levels << classify_levels
+	.topics << topics
+	.usages << usages
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method pragma.new_from_topics(items)
+	## Constructor from method_finder topics.
+	## @param {sw:simple_vector<E=sw:char16_vector>} items
+	## @return {_self}
+	_local items_set << sw:equality_set.new_from(items)
+	_local classify_levels << _self.all_classify_levels.intersection(items_set)
+	_local usages << _self.all_usages.intersection(items_set)
+	_local topics << items_set - classify_levels - usages
+	_return _clone.init(classify_levels, topics, usages)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method pragma.equals?(other)
+	## Equals?
+	## @param {mt:pragma} other
+	## @return {sw:false}
+	_return _self.classify_levels = other.classify_levels _andif
+		_self.topics = other.topics _andif
+		_self.usages = other.usages
+_endmethod
+$
+
+define_binary_operator_case(
+	:|=|, pragma, pragma,
+	_proc(pragma_a, pragma_b)
+		## @param {mt:pragma} pragma_a
+		## @param {mt:pragma} pragma_b
+		## @return {sw:false|sw:maybe}
+		_return pragma_a.equals?(pragma_b)
+	_endproc)
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method pragma.as_properties()
+	## Get slots as hash table.
+	## @return {sw:equality_property_list<K=sw:char16_vector, E=sw:object>}
+	_local table << sw:equality_property_list.new()
+	_for name, value _over _self.sys!slot_names_and_values()
+	_loop
+		_local fixed_name << name.write_string.split_by(%!)[2]
+		table[fixed_name] << value
+	_endloop
+	_return table
+_endmethod
+$
