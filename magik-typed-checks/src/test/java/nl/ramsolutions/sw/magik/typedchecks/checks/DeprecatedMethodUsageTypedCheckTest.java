@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 class DeprecatedMethodUsageTypedCheckTest extends MagikTypedCheckTestBase {
 
   private void addMethodDefinition(
-      final IDefinitionKeeper definitionKeeper, final String... topics) {
+      final IDefinitionKeeper definitionKeeper, final String... classifyLevel) {
     definitionKeeper.add(
         new MethodDefinition(
             null,
@@ -34,7 +34,7 @@ class DeprecatedMethodUsageTypedCheckTest extends MagikTypedCheckTestBase {
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             Collections.emptyList(),
             null,
-            new Pragma(null, Set.of(), Arrays.asList(topics), Set.of()),
+            new Pragma(null, Arrays.asList(classifyLevel), Set.of(), Set.of()),
             ExpressionResultString.EMPTY,
             ExpressionResultString.EMPTY));
   }

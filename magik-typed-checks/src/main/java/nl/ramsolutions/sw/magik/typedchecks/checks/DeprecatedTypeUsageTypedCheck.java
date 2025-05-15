@@ -44,7 +44,7 @@ public class DeprecatedTypeUsageTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    if (!pragma.getTopics().contains(Pragma.TOPIC_DEPRECATED)) {
+    if (!pragma.getClassifyLevels().contains(Pragma.CLASSIFY_LEVEL_DEPRECATED)) {
       return;
     }
 
