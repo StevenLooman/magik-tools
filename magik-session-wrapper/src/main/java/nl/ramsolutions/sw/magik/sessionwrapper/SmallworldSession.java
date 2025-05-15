@@ -153,7 +153,6 @@ class SmallworldSession {
 
   boolean waitForPrompt() {
     // Wait for the io thread to start.
-    LOGGER.debug("Waiting for io thread to start...");
     while (this.promptSeen == null) {
       try {
         Thread.sleep(50);
