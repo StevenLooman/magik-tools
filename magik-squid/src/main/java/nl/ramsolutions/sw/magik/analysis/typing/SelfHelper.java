@@ -34,4 +34,19 @@ public final class SelfHelper {
 
     return typeStr;
   }
+
+  /**
+   * Resolve `_self` for all typer in {@link ExpressionResultString}.
+   *
+   * @param expressionResultString {@link ExpressionResultString} to resolve.
+   * @param node Node to use when resolving `_self`. This must be a node in the method/procedure
+   *     definition.
+   * @return Resolved {@link ExpressionResultString}.
+   */
+  public static ExpressionResultString substituteSelf(
+      final ExpressionResultString expressionResultString, final AstNode node) {
+    return expressionResultString.stream()
+        .map(typeStr -> SelfHelper.substituteSelf(typeStr, node))
+        .collect(ExpressionResultString.COLLECTOR);
+  }
 }
