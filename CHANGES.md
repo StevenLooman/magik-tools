@@ -43,6 +43,7 @@
 - Add `id` to `default-whitelist` in `VariableNamingCheck`.
 - Add more detailed pragma registration.
 - Add checks MissingPragma, PragmaInvalidClassifyLevelCheck, PragmaInvalidUsageCheck.
+- Add f4 t keybinding to VSCode plugin to write a trace command.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
