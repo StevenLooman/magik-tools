@@ -189,6 +189,11 @@
         "command": "magik.custom.reIndex",
         "title": "Reindex files",
         "category": "Magik"
+      },
+      {
+        "command": "magik.traceStatement",
+        "title": "Trace statement",
+        "category": "Magik"
       }
     ],
     "keybindings": [
@@ -216,6 +221,11 @@
         "command": "magik.transmitModuleDef",
         "key": "f4 b",
         "when": "editorTextFocus && editorLangId == module.def"
+      },
+      {
+        "command": "magik.traceStatement",
+        "key": "f4 t",
+        "when": "editorTextFocus && editorLangId == magik"
       }
     ],
     "taskDefinitions": [
