@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import com.sonar.sslr.api.AstNode;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
@@ -17,7 +18,6 @@ public class DeprecatedTypeUsageTypedCheck extends MagikTypedCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "DeprecatedTypeUsage";
 
-  private static final String DEPRECATED_TOPIC = "deprecated";
   private static final String MESSAGE = "Used type '%s' is deprecated";
 
   @Override
@@ -39,8 +39,12 @@ public class DeprecatedTypeUsageTypedCheck extends MagikTypedCheck {
     if (exemplarDef == null) {
       return;
     }
+    final Pragma pragma = exemplarDef.getPragma();
+    if (pragma == null) {
+      return;
+    }
 
-    if (!exemplarDef.getTopics().contains(DeprecatedTypeUsageTypedCheck.DEPRECATED_TOPIC)) {
+    if (!pragma.getClassifyLevels().contains(Pragma.CLASSIFY_LEVEL_DEPRECATED)) {
       return;
     }
 

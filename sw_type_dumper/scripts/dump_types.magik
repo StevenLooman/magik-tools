@@ -29,6 +29,7 @@ _block
 		:|mt:module_usage|,
 		:|mt:package_definition|,
 		:|mt:parameter_definition|,
+		:|mt:pragma|,
 		:|mt:procedure_definition|,
 		:|mt:product_definition|,
 		:|mt:product_usage|,

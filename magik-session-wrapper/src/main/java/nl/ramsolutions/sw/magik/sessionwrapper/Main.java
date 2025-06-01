@@ -165,7 +165,11 @@ public class Main {
       while (session.isAlive()) {
         // Wait for prompt from Smallworld session.
         if (waitForPrompt) {
-          session.waitForPrompt();
+          final boolean interrupted = session.waitForPrompt();
+          if (interrupted) {
+            LOGGER.debug("Interrupted while waiting for prompt.");
+            break;
+          }
         }
 
         // Get input from user.

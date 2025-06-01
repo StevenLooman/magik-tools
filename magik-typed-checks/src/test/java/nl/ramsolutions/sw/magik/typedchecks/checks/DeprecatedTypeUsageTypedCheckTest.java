@@ -2,12 +2,14 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
@@ -17,7 +19,9 @@ import org.junit.jupiter.api.Test;
 class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
 
   private void addExemplarDefinition(
-      final IDefinitionKeeper definitionKeeper, final TypeString typeName, final String... topics) {
+      final IDefinitionKeeper definitionKeeper,
+      final TypeString typeName,
+      final String classifyLevel) {
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -29,7 +33,7 @@ class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
             typeName,
             Collections.emptyList(),
             Collections.emptyList(),
-            Set.of(topics)));
+            new Pragma(null, Arrays.asList(classifyLevel), Set.of(), Set.of())));
   }
 
   @Test
@@ -51,7 +55,7 @@ class DeprecatedTypeUsageTypedCheckTest extends MagikTypedCheckTestBase {
   void testTypeNotDeprecated() {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString typeStr = TypeString.ofIdentifier("test", "user");
-    this.addExemplarDefinition(definitionKeeper, typeStr, "not_deprecated");
+    this.addExemplarDefinition(definitionKeeper, typeStr, "basic");
     final String code =
         """
         _block

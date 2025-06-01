@@ -53,22 +53,22 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <junit.version>5.11.4</junit.version>
+    <junit.version>5.13.0</junit.version>
     <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
     <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <checkstyle.version>10.20.2</checkstyle.version>
     <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
-    <spotless.version>2.43.0</spotless.version>
+    <spotless.version>2.44.5</spotless.version>
     <google-java-format.version>1.22.0</google-java-format.version>
     <cleanthat.version>2.18</cleanthat.version>
-    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
-    <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
+    <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
+    <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
     <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
     <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
     <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
     <spotbugs-maven-plugin.version>4.8.3.1</spotbugs-maven-plugin.version>
-    <spotbugs.version>4.9.0</spotbugs.version>
+    <spotbugs.version>4.9.3</spotbugs.version>
     <com.github.marschall-memoryfilesystem.version>2.8.1</com.github.marschall-memoryfilesystem.version>
 
     <!-- JaCoCo thresholds. Increase gradually as you add tests. -->
@@ -78,21 +78,21 @@
     <jacoco.unit-tests.limit.method-complexity>10</jacoco.unit-tests.limit.method-complexity> <!-- Preferred/future: 5 -->
 
     <sonar.version>9.4.0.54424</sonar.version>
-    <sonar-analyzer-commons.version>2.16.0.3141</sonar-analyzer-commons.version>
+    <sonar-analyzer-commons.version>2.18.0.3393</sonar-analyzer-commons.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
-    <sonar-impl.version>10.4.0.87286</sonar-impl.version>
-    <sonar-maven.version>5.0.0.4389</sonar-maven.version>
+    <sonar-impl.version>25.5.0.107428</sonar-impl.version>
+    <sonar-maven.version>5.1.0.4751</sonar-maven.version>
     <sonar-maven-packaging-plugin.version>1.23.0.740</sonar-maven-packaging-plugin.version>
     <sslr-squid-bridge.version>2.7.1.392</sslr-squid-bridge.version>
     <sslr.version>1.24.0.633</sslr.version>
-    <slf4j.version>2.0.16</slf4j.version>
+    <slf4j.version>2.0.17</slf4j.version>
     <logback.version>1.0.13</logback.version>
-    <lsp4j.version>0.23.1</lsp4j.version>
+    <lsp4j.version>0.24.0</lsp4j.version>
     <commons-cli.version>1.9.0</commons-cli.version>
-    <gson.version>2.12.1</gson.version>
-    <jline.version>3.28.0</jline.version>
+    <gson.version>2.13.1</gson.version>
+    <jline.version>3.30.4</jline.version>
 
-    <assertj-core.version>3.26.3</assertj-core.version>
+    <assertj-core.version>3.27.3</assertj-core.version>
 
     <sonar.organization>stevenlooman</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -420,6 +420,7 @@
                   <excludes>
                     <exclude>nl.ramsolutions.sw.magik.analysis.MagikAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition.equals(java.lang.Object)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper.add(nl.ramsolutions.sw.IDefinition)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper.remove(nl.ramsolutions.sw.IDefinition)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.equals(java.lang.Object)</exclude>
@@ -427,7 +428,9 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader.processLine(java.lang.String)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefineSlotAccessParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodDefinitionParser.parseDefinitions()</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader.parseClassInfo(java.lang.String, java.io.InputStreamReader)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ConditionalBodyHandler.handleConditionalExpression(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.api.MagikNumberParser.parseMagikNumber(java.lang.String)</exclude>

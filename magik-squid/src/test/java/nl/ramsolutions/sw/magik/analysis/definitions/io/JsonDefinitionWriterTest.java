@@ -21,6 +21,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -136,7 +137,7 @@ class JsonDefinitionWriterTest {
             aRef,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
 
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
@@ -168,7 +169,7 @@ class JsonDefinitionWriterTest {
                     ParameterDefinition.Modifier.OPTIONAL,
                     TypeString.UNDEFINED)),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 
@@ -182,7 +183,8 @@ class JsonDefinitionWriterTest {
   void testWriteCondition() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
-        new ConditionDefinition(null, null, null, null, null, "error", null, List.of("string")));
+        new ConditionDefinition(
+            null, null, null, null, null, "error", null, List.of("string"), null));
     definitionKeeper.add(
         new ConditionDefinition(
             new Location(URI.create("file:///file.magik")),
@@ -192,7 +194,8 @@ class JsonDefinitionWriterTest {
             null,
             "unknown_value",
             "error",
-            List.of("value", "permitted_values")));
+            List.of("value", "permitted_values"),
+            new Pragma(null, Set.of("basic"), Set.of(), Set.of())));
 
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
@@ -214,6 +217,7 @@ class JsonDefinitionWriterTest {
             TypeString.ofIdentifier("prc", "user"),
             "test_proc",
             List.of(),
+            null,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 
@@ -228,7 +232,8 @@ class JsonDefinitionWriterTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString aliasedRef = TypeString.ofIdentifier("alias", "user");
     definitionKeeper.add(
-        new GlobalDefinition(null, null, null, null, null, aliasedRef, TypeString.SW_INTEGER));
+        new GlobalDefinition(
+            null, null, null, null, null, aliasedRef, TypeString.SW_INTEGER, null));
 
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 

@@ -33,18 +33,17 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new PackageDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 11), new Position(1, 12))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    "test",
-                    List.of("sw"))));
+        .containsExactly(
+            new PackageDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 11), new Position(1, 12))),
+                null,
+                null,
+                "",
+                null,
+                "test",
+                List.of("sw")));
   }
 
   @Test
@@ -57,18 +56,17 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new PackageDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 11), new Position(1, 12))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    "test",
-                    List.of("p1", "p2"))));
+        .containsExactly(
+            new PackageDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 11), new Position(1, 12))),
+                null,
+                null,
+                "",
+                null,
+                "test",
+                List.of("p1", "p2")));
   }
 
   @Test
@@ -81,21 +79,20 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new ExemplarDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 19), new Position(1, 29))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    ExemplarDefinition.Sort.SLOTTED,
-                    TypeString.ofIdentifier("test_enum", "user"),
-                    Collections.emptyList(),
-                    List.of(TypeString.ofIdentifier("enumeration_value", "sw")),
-                    Collections.emptySet())));
+        .containsExactly(
+            new ExemplarDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 19), new Position(1, 29))),
+                null,
+                null,
+                "",
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                TypeString.ofIdentifier("test_enum", "user"),
+                Collections.emptyList(),
+                List.of(TypeString.ofIdentifier("enumeration_value", "sw")),
+                null));
   }
 
   @Test
@@ -109,41 +106,40 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new ExemplarDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 21), new Position(1, 35))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    ExemplarDefinition.Sort.SLOTTED,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    List.of(
-                        new SlotDefinition(
-                            new Location(
-                                URI.create("memory:///source.magik"),
-                                new Range(new Position(1, 38), new Position(1, 39))),
-                            null,
-                            null,
-                            null,
-                            null,
-                            "slot1",
-                            TypeString.UNDEFINED),
-                        new SlotDefinition(
-                            new Location(
-                                URI.create("memory:///source.magik"),
-                                new Range(new Position(1, 56), new Position(1, 57))),
-                            null,
-                            null,
-                            null,
-                            null,
-                            "slot2",
-                            TypeString.UNDEFINED)),
-                    Collections.emptyList(),
-                    Collections.emptySet())));
+        .containsExactly(
+            new ExemplarDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 21), new Position(1, 35))),
+                null,
+                null,
+                "",
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                List.of(
+                    new SlotDefinition(
+                        new Location(
+                            URI.create("memory:///source.magik"),
+                            new Range(new Position(1, 38), new Position(1, 39))),
+                        null,
+                        null,
+                        null,
+                        null,
+                        "slot1",
+                        TypeString.UNDEFINED),
+                    new SlotDefinition(
+                        new Location(
+                            URI.create("memory:///source.magik"),
+                            new Range(new Position(1, 56), new Position(1, 57))),
+                        null,
+                        null,
+                        null,
+                        null,
+                        "slot2",
+                        TypeString.UNDEFINED)),
+                Collections.emptyList(),
+                null));
   }
 
   @Test
@@ -157,95 +153,94 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new ExemplarDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 21), new Position(1, 35))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    ExemplarDefinition.Sort.SLOTTED,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    List.of(
-                        new SlotDefinition(
-                            new Location(
-                                URI.create("memory:///source.magik"),
-                                new Range(new Position(1, 38), new Position(1, 39))),
-                            null,
-                            null,
-                            null,
-                            null,
-                            "slot1",
-                            TypeString.UNDEFINED)),
-                    Collections.emptyList(),
-                    Collections.emptySet()),
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 38), new Position(1, 39))),
-                    null,
-                    null,
-                    null,
-                    null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1",
-                    Collections.emptySet(),
-                    Collections.emptyList(),
-                    null,
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
-                    ExpressionResultString.EMPTY),
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 38), new Position(1, 39))),
-                    null,
-                    null,
-                    null,
-                    null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1<<",
-                    Set.of(MethodDefinition.Modifier.PRIVATE),
-                    Collections.emptyList(),
-                    new ParameterDefinition(
+        .containsExactly(
+            new ExemplarDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 21), new Position(1, 35))),
+                null,
+                null,
+                "",
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                List.of(
+                    new SlotDefinition(
+                        new Location(
+                            URI.create("memory:///source.magik"),
+                            new Range(new Position(1, 38), new Position(1, 39))),
                         null,
                         null,
                         null,
                         null,
-                        null,
-                        "val",
-                        ParameterDefinition.Modifier.NONE,
-                        TypeString.UNDEFINED),
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.ofParameterRef("val")),
-                    ExpressionResultString.EMPTY),
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 38), new Position(1, 39))),
+                        "slot1",
+                        TypeString.UNDEFINED)),
+                Collections.emptyList(),
+                null),
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 38), new Position(1, 39))),
+                null,
+                null,
+                null,
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot1",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                null,
+                new ExpressionResultString(TypeString.UNDEFINED),
+                ExpressionResultString.EMPTY),
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 38), new Position(1, 39))),
+                null,
+                null,
+                null,
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot1<<",
+                Set.of(MethodDefinition.Modifier.PRIVATE),
+                Collections.emptyList(),
+                new ParameterDefinition(
                     null,
                     null,
                     null,
                     null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1^<<",
-                    Set.of(MethodDefinition.Modifier.PRIVATE),
-                    Collections.emptyList(),
-                    new ParameterDefinition(
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        "val",
-                        ParameterDefinition.Modifier.NONE,
-                        TypeString.UNDEFINED),
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
-                    ExpressionResultString.EMPTY)));
+                    null,
+                    "val",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED),
+                null,
+                new ExpressionResultString(TypeString.ofParameterRef("val")),
+                ExpressionResultString.EMPTY),
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 38), new Position(1, 39))),
+                null,
+                null,
+                null,
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot1^<<",
+                Set.of(MethodDefinition.Modifier.PRIVATE),
+                Collections.emptyList(),
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "val",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED),
+                null,
+                new ExpressionResultString(TypeString.UNDEFINED),
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -258,21 +253,20 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new ExemplarDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 21), new Position(1, 35))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    ExemplarDefinition.Sort.SLOTTED,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    Collections.emptyList(),
-                    List.of(TypeString.ofIdentifier("rope", "sw")),
-                    Collections.emptySet())));
+        .containsExactly(
+            new ExemplarDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 21), new Position(1, 35))),
+                null,
+                null,
+                "",
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                Collections.emptyList(),
+                List.of(TypeString.ofIdentifier("rope", "sw")),
+                null));
   }
 
   @Test
@@ -285,23 +279,22 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new ExemplarDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 21), new Position(1, 35))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    ExemplarDefinition.Sort.SLOTTED,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    Collections.emptyList(),
-                    List.of(
-                        TypeString.ofIdentifier("mixin1", "user"),
-                        TypeString.ofIdentifier("rope", "user")),
-                    Collections.emptySet())));
+        .containsExactly(
+            new ExemplarDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 21), new Position(1, 35))),
+                null,
+                null,
+                "",
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                Collections.emptyList(),
+                List.of(
+                    TypeString.ofIdentifier("mixin1", "user"),
+                    TypeString.ofIdentifier("rope", "user")),
+                null));
   }
 
   @Test
@@ -314,23 +307,22 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new ExemplarDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 21), new Position(1, 35))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    ExemplarDefinition.Sort.INDEXED,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    Collections.emptyList(),
-                    List.of(
-                        TypeString.ofIdentifier("mixin1", "user"),
-                        TypeString.ofIdentifier("integer", "user")),
-                    Collections.emptySet())));
+        .containsExactly(
+            new ExemplarDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 21), new Position(1, 35))),
+                null,
+                null,
+                "",
+                null,
+                ExemplarDefinition.Sort.INDEXED,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                Collections.emptyList(),
+                List.of(
+                    TypeString.ofIdentifier("mixin1", "user"),
+                    TypeString.ofIdentifier("integer", "user")),
+                null));
   }
 
   @Test
@@ -343,21 +335,20 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new ExemplarDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 21), new Position(1, 35))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    ExemplarDefinition.Sort.INDEXED,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    Collections.emptyList(),
-                    Collections.emptyList(),
-                    Collections.emptySet())));
+        .containsExactly(
+            new ExemplarDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 21), new Position(1, 35))),
+                null,
+                null,
+                "",
+                null,
+                ExemplarDefinition.Sort.INDEXED,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                Collections.emptyList(),
+                Collections.emptyList(),
+                null));
   }
 
   @Test
@@ -370,21 +361,20 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new ExemplarDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 10), new Position(1, 21))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    ExemplarDefinition.Sort.INTRINSIC,
-                    TypeString.ofIdentifier("test_mixin", "user"),
-                    Collections.emptyList(),
-                    List.of(TypeString.ofIdentifier("mixin1", "user")),
-                    Collections.emptySet())));
+        .containsExactly(
+            new ExemplarDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 10), new Position(1, 21))),
+                null,
+                null,
+                "",
+                null,
+                ExemplarDefinition.Sort.INTRINSIC,
+                TypeString.ofIdentifier("test_mixin", "user"),
+                Collections.emptyList(),
+                List.of(TypeString.ofIdentifier("mixin1", "user")),
+                null));
   }
 
   @Test
@@ -397,56 +387,56 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new ProcedureDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 50), new Position(1, 55))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    Collections.emptySet(),
-                    TypeString.ofIdentifier("_proc_in_memory_0", TypeString.ANONYMOUS_PACKAGE),
-                    null,
-                    List.of(
-                        new ParameterDefinition(
-                            new Location(
-                                URI.create("memory:///source.magik"),
-                                new Range(new Position(1, 56), new Position(1, 57))),
-                            null,
-                            null,
-                            null,
-                            null,
-                            "a",
-                            ParameterDefinition.Modifier.NONE,
-                            TypeString.UNDEFINED),
-                        new ParameterDefinition(
-                            new Location(
-                                URI.create("memory:///source.magik"),
-                                new Range(new Position(1, 59), new Position(1, 60))),
-                            null,
-                            null,
-                            null,
-                            null,
-                            "b",
-                            ParameterDefinition.Modifier.NONE,
-                            TypeString.UNDEFINED)),
-                    ExpressionResultString.EMPTY,
-                    ExpressionResultString.EMPTY),
-                new BinaryOperatorDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 27), new Position(1, 28))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    ">",
-                    TypeString.ofIdentifier("integer", "user"),
-                    TypeString.ofIdentifier("float", "user"),
-                    TypeString.UNDEFINED)));
+        .containsExactly(
+            new ProcedureDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 50), new Position(1, 55))),
+                null,
+                null,
+                "",
+                null,
+                Collections.emptySet(),
+                TypeString.ofIdentifier("_proc_in_memory_0", TypeString.ANONYMOUS_PACKAGE),
+                null,
+                List.of(
+                    new ParameterDefinition(
+                        new Location(
+                            URI.create("memory:///source.magik"),
+                            new Range(new Position(1, 56), new Position(1, 57))),
+                        null,
+                        null,
+                        null,
+                        null,
+                        "a",
+                        ParameterDefinition.Modifier.NONE,
+                        TypeString.UNDEFINED),
+                    new ParameterDefinition(
+                        new Location(
+                            URI.create("memory:///source.magik"),
+                            new Range(new Position(1, 59), new Position(1, 60))),
+                        null,
+                        null,
+                        null,
+                        null,
+                        "b",
+                        ParameterDefinition.Modifier.NONE,
+                        TypeString.UNDEFINED)),
+                null,
+                ExpressionResultString.EMPTY,
+                ExpressionResultString.EMPTY),
+            new BinaryOperatorDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 27), new Position(1, 28))),
+                null,
+                null,
+                "",
+                null,
+                ">",
+                TypeString.ofIdentifier("integer", "user"),
+                TypeString.ofIdentifier("float", "user"),
+                TypeString.UNDEFINED));
   }
 
   @Test
@@ -459,24 +449,23 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 10), new Position(1, 11))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    TypeString.ofIdentifier("a", "user"),
-                    "b",
-                    Collections.emptySet(),
-                    Collections.emptyList(),
-                    null,
-                    Collections.emptySet(),
-                    ExpressionResultString.EMPTY,
-                    ExpressionResultString.EMPTY)));
+        .containsExactly(
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 10), new Position(1, 11))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("a", "user"),
+                "b",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                null,
+                ExpressionResultString.EMPTY,
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -501,27 +490,26 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 35), new Position(1, 36))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    TypeString.ofIdentifier("a", "user"),
-                    "b()",
-                    Set.of(
-                        MethodDefinition.Modifier.PRIVATE,
-                        MethodDefinition.Modifier.ABSTRACT,
-                        MethodDefinition.Modifier.ITER),
-                    Collections.emptyList(),
-                    null,
-                    Collections.emptySet(),
-                    ExpressionResultString.EMPTY,
-                    ExpressionResultString.EMPTY)));
+        .containsExactly(
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 35), new Position(1, 36))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("a", "user"),
+                "b()",
+                Set.of(
+                    MethodDefinition.Modifier.PRIVATE,
+                    MethodDefinition.Modifier.ABSTRACT,
+                    MethodDefinition.Modifier.ITER),
+                Collections.emptyList(),
+                null,
+                null,
+                ExpressionResultString.EMPTY,
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -534,78 +522,77 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 10), new Position(1, 11))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    TypeString.ofIdentifier("a", "user"),
-                    "b()<<",
-                    Collections.emptySet(),
-                    List.of(
-                        new ParameterDefinition(
-                            new Location(
-                                URI.create("memory:///source.magik"),
-                                new Range(new Position(1, 12), new Position(1, 13))),
-                            null,
-                            null,
-                            null,
-                            null,
-                            "a",
-                            ParameterDefinition.Modifier.NONE,
-                            TypeString.UNDEFINED),
-                        new ParameterDefinition(
-                            new Location(
-                                URI.create("memory:///source.magik"),
-                                new Range(new Position(1, 15), new Position(1, 24))),
-                            null,
-                            null,
-                            null,
-                            null,
-                            "b",
-                            ParameterDefinition.Modifier.OPTIONAL,
-                            TypeString.UNDEFINED),
-                        new ParameterDefinition(
-                            new Location(
-                                URI.create("memory:///source.magik"),
-                                new Range(new Position(1, 28), new Position(1, 29))),
-                            null,
-                            null,
-                            null,
-                            null,
-                            "c",
-                            ParameterDefinition.Modifier.OPTIONAL,
-                            TypeString.UNDEFINED),
-                        new ParameterDefinition(
-                            new Location(
-                                URI.create("memory:///source.magik"),
-                                new Range(new Position(1, 31), new Position(1, 38))),
-                            null,
-                            null,
-                            null,
-                            null,
-                            "d",
-                            ParameterDefinition.Modifier.GATHER,
-                            TypeString.UNDEFINED)),
+        .containsExactly(
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 10), new Position(1, 11))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("a", "user"),
+                "b()<<",
+                Collections.emptySet(),
+                List.of(
                     new ParameterDefinition(
                         new Location(
                             URI.create("memory:///source.magik"),
-                            new Range(new Position(1, 45), new Position(1, 46))),
+                            new Range(new Position(1, 12), new Position(1, 13))),
                         null,
                         null,
                         null,
                         null,
-                        "z",
+                        "a",
                         ParameterDefinition.Modifier.NONE,
                         TypeString.UNDEFINED),
-                    Collections.emptySet(),
-                    ExpressionResultString.EMPTY,
-                    ExpressionResultString.EMPTY)));
+                    new ParameterDefinition(
+                        new Location(
+                            URI.create("memory:///source.magik"),
+                            new Range(new Position(1, 15), new Position(1, 24))),
+                        null,
+                        null,
+                        null,
+                        null,
+                        "b",
+                        ParameterDefinition.Modifier.OPTIONAL,
+                        TypeString.UNDEFINED),
+                    new ParameterDefinition(
+                        new Location(
+                            URI.create("memory:///source.magik"),
+                            new Range(new Position(1, 28), new Position(1, 29))),
+                        null,
+                        null,
+                        null,
+                        null,
+                        "c",
+                        ParameterDefinition.Modifier.OPTIONAL,
+                        TypeString.UNDEFINED),
+                    new ParameterDefinition(
+                        new Location(
+                            URI.create("memory:///source.magik"),
+                            new Range(new Position(1, 31), new Position(1, 38))),
+                        null,
+                        null,
+                        null,
+                        null,
+                        "d",
+                        ParameterDefinition.Modifier.GATHER,
+                        TypeString.UNDEFINED)),
+                new ParameterDefinition(
+                    new Location(
+                        URI.create("memory:///source.magik"),
+                        new Range(new Position(1, 45), new Position(1, 46))),
+                    null,
+                    null,
+                    null,
+                    null,
+                    "z",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED),
+                null,
+                ExpressionResultString.EMPTY,
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -618,24 +605,23 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 0), new Position(1, 13))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1",
-                    Collections.emptySet(),
-                    Collections.emptyList(),
-                    null,
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
-                    ExpressionResultString.EMPTY)));
+        .containsExactly(
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 0), new Position(1, 13))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot1",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                null,
+                new ExpressionResultString(TypeString.UNDEFINED),
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -648,24 +634,23 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 0), new Position(1, 13))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1",
-                    Collections.emptySet(),
-                    Collections.emptyList(),
-                    null,
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
-                    ExpressionResultString.EMPTY)));
+        .containsExactly(
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 0), new Position(1, 13))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot1",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                null,
+                new ExpressionResultString(TypeString.UNDEFINED),
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -678,24 +663,23 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 0), new Position(1, 13))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1",
-                    Collections.emptySet(),
-                    Collections.emptyList(),
-                    null,
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
-                    ExpressionResultString.EMPTY)));
+        .containsExactly(
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 0), new Position(1, 13))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot1",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                null,
+                new ExpressionResultString(TypeString.UNDEFINED),
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -708,72 +692,71 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 0), new Position(1, 13))),
+        .containsExactly(
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 0), new Position(1, 13))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot1",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                null,
+                new ExpressionResultString(TypeString.UNDEFINED),
+                ExpressionResultString.EMPTY),
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 0), new Position(1, 13))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot1<<",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                new ParameterDefinition(
                     null,
                     null,
-                    "",
-                    null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1",
-                    Collections.emptySet(),
-                    Collections.emptyList(),
-                    null,
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
-                    ExpressionResultString.EMPTY),
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 0), new Position(1, 13))),
                     null,
                     null,
-                    "",
                     null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1<<",
-                    Collections.emptySet(),
-                    Collections.emptyList(),
-                    new ParameterDefinition(
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        "val",
-                        ParameterDefinition.Modifier.NONE,
-                        TypeString.UNDEFINED),
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.ofParameterRef("val")),
-                    ExpressionResultString.EMPTY),
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 0), new Position(1, 13))),
+                    "val",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED),
+                null,
+                new ExpressionResultString(TypeString.ofParameterRef("val")),
+                ExpressionResultString.EMPTY),
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 0), new Position(1, 13))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot1^<<",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                new ParameterDefinition(
                     null,
                     null,
-                    "",
                     null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "slot1^<<",
-                    Collections.emptySet(),
-                    Collections.emptyList(),
-                    new ParameterDefinition(
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        "val",
-                        ParameterDefinition.Modifier.NONE,
-                        TypeString.UNDEFINED),
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
-                    ExpressionResultString.EMPTY)));
+                    null,
+                    null,
+                    "val",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED),
+                null,
+                new ExpressionResultString(TypeString.UNDEFINED),
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -786,72 +769,71 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 37), new Position(1, 42))),
+        .containsExactly(
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 37), new Position(1, 42))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "var1",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                null,
+                new ExpressionResultString(TypeString.UNDEFINED),
+                ExpressionResultString.EMPTY),
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 37), new Position(1, 42))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "var1<<",
+                Set.of(MethodDefinition.Modifier.PRIVATE),
+                Collections.emptyList(),
+                new ParameterDefinition(
                     null,
                     null,
-                    "",
-                    null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "var1",
-                    Collections.emptySet(),
-                    Collections.emptyList(),
-                    null,
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
-                    ExpressionResultString.EMPTY),
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 37), new Position(1, 42))),
                     null,
                     null,
-                    "",
                     null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "var1<<",
-                    Set.of(MethodDefinition.Modifier.PRIVATE),
-                    Collections.emptyList(),
-                    new ParameterDefinition(
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        "val",
-                        ParameterDefinition.Modifier.NONE,
-                        TypeString.UNDEFINED),
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.ofParameterRef("val")),
-                    ExpressionResultString.EMPTY),
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 37), new Position(1, 42))),
+                    "val",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED),
+                null,
+                new ExpressionResultString(TypeString.ofParameterRef("val")),
+                ExpressionResultString.EMPTY),
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 37), new Position(1, 42))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "var1^<<",
+                Set.of(MethodDefinition.Modifier.PRIVATE),
+                Collections.emptyList(),
+                new ParameterDefinition(
                     null,
                     null,
-                    "",
                     null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "var1^<<",
-                    Set.of(MethodDefinition.Modifier.PRIVATE),
-                    Collections.emptyList(),
-                    new ParameterDefinition(
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        "val",
-                        ParameterDefinition.Modifier.NONE,
-                        TypeString.UNDEFINED),
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
-                    ExpressionResultString.EMPTY)));
+                    null,
+                    null,
+                    "val",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED),
+                null,
+                new ExpressionResultString(TypeString.UNDEFINED),
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -864,24 +846,23 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 37), new Position(1, 44))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "const1",
-                    Set.of(MethodDefinition.Modifier.PRIVATE),
-                    Collections.emptyList(),
-                    null,
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
-                    ExpressionResultString.EMPTY)));
+        .containsExactly(
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 37), new Position(1, 44))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "const1",
+                Set.of(MethodDefinition.Modifier.PRIVATE),
+                Collections.emptyList(),
+                null,
+                null,
+                new ExpressionResultString(TypeString.UNDEFINED),
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -894,24 +875,23 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new MethodDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 37), new Position(1, 44))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    TypeString.ofIdentifier("test_exemplar", "user"),
-                    "const1",
-                    Collections.emptySet(),
-                    Collections.emptyList(),
-                    null,
-                    Collections.emptySet(),
-                    new ExpressionResultString(TypeString.UNDEFINED),
-                    ExpressionResultString.EMPTY)));
+        .containsExactly(
+            new MethodDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 37), new Position(1, 44))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "const1",
+                Collections.emptySet(),
+                Collections.emptyList(),
+                null,
+                null,
+                new ExpressionResultString(TypeString.UNDEFINED),
+                ExpressionResultString.EMPTY));
   }
 
   @Test
@@ -924,23 +904,27 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new GlobalDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 0), new Position(1, 7))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    TypeString.ofIdentifier("g", "user"),
-                    TypeString.UNDEFINED)));
+        .containsExactly(
+            new GlobalDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 0), new Position(1, 7))),
+                null,
+                null,
+                "",
+                null,
+                TypeString.ofIdentifier("g", "user"),
+                TypeString.UNDEFINED,
+                null));
   }
 
   @Test
   void testParseCondition() {
-    final String code = "condition.define_condition(:cond1, :information, {:data1, :data2})";
+    final String code =
+        """
+        _pragma(classify_level=restricted,topic=test)
+        condition.define_condition(:cond1, :information, {:data1, :data2})
+        """;
     final MagikFile magikFile = this.createMagikFile(code);
     final AstNode node = magikFile.getTopNode();
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
@@ -948,19 +932,19 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new ConditionDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(1, 9), new Position(1, 10))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    "cond1",
-                    "information",
-                    List.of("data1", "data2"))));
+        .containsExactly(
+            new ConditionDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(2, 9), new Position(2, 10))),
+                null,
+                null,
+                "",
+                null,
+                "cond1",
+                "information",
+                List.of("data1", "data2"),
+                new Pragma(null, Set.of("restricted"), Set.of("test"), Set.of())));
   }
 
   @Test
@@ -977,18 +961,18 @@ class DefinitionReaderTest {
 
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
-        .isEqualTo(
-            List.of(
-                new ConditionDefinition(
-                    new Location(
-                        URI.create("memory:///source.magik"),
-                        new Range(new Position(2, 11), new Position(2, 12))),
-                    null,
-                    null,
-                    "",
-                    null,
-                    "cond1",
-                    "information",
-                    List.of("data1", "data2"))));
+        .containsExactly(
+            new ConditionDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(2, 11), new Position(2, 12))),
+                null,
+                null,
+                "",
+                null,
+                "cond1",
+                "information",
+                List.of("data1", "data2"),
+                null));
   }
 }

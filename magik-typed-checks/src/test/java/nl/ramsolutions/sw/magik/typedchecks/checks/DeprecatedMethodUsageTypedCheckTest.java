@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
@@ -19,7 +21,7 @@ import org.junit.jupiter.api.Test;
 class DeprecatedMethodUsageTypedCheckTest extends MagikTypedCheckTestBase {
 
   private void addMethodDefinition(
-      final IDefinitionKeeper definitionKeeper, final String... topics) {
+      final IDefinitionKeeper definitionKeeper, final String... classifyLevel) {
     definitionKeeper.add(
         new MethodDefinition(
             null,
@@ -32,7 +34,7 @@ class DeprecatedMethodUsageTypedCheckTest extends MagikTypedCheckTestBase {
             EnumSet.noneOf(MethodDefinition.Modifier.class),
             Collections.emptyList(),
             null,
-            Set.of(topics),
+            new Pragma(null, Arrays.asList(classifyLevel), Set.of(), Set.of()),
             ExpressionResultString.EMPTY,
             ExpressionResultString.EMPTY));
   }

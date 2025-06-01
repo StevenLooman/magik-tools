@@ -1,0 +1,15 @@
+{
+  "title": "Pragma has invalid classify level",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "10min"
+  },
+  "tags": [
+    "convention"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "PragmaInvalidClassifyLevel",
+  "sqKey": "pragma-invalid-classify-level"
+}

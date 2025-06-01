@@ -33,6 +33,7 @@ public class ProcedureDefinition extends MagikDefinition
   private final Set<GlobalUsage> usedGlobals;
   private final Set<MethodUsage> usedMethods;
   private final Set<ConditionUsage> usedConditions;
+  private final @Nullable Pragma pragma;
 
   /**
    * Constructor.
@@ -43,6 +44,7 @@ public class ProcedureDefinition extends MagikDefinition
    * @param typeName Type name.
    * @param procedureName Procedure name.
    * @param parameters Parameters.
+   * @param pragma Pragma.
    * @param doc Doc.
    * @param returnTypes Return types.
    * @param loopTypes Loop types.
@@ -58,6 +60,7 @@ public class ProcedureDefinition extends MagikDefinition
       final TypeString typeName,
       final @Nullable String procedureName,
       final List<ParameterDefinition> parameters,
+      final @Nullable Pragma pragma,
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes) {
     super(location, timestamp, moduleName, doc, node);
@@ -65,6 +68,7 @@ public class ProcedureDefinition extends MagikDefinition
     this.typeName = typeName;
     this.procedureName = procedureName;
     this.parameters = List.copyOf(parameters);
+    this.pragma = pragma;
     this.returnTypes = returnTypes;
     this.loopTypes = loopTypes;
     this.usedGlobals = Collections.emptySet();
@@ -81,6 +85,7 @@ public class ProcedureDefinition extends MagikDefinition
    * @param typeName Type name.
    * @param procedureName Procedure name.
    * @param parameters Parameters.
+   * @param pragma Pragma.
    * @param doc Doc.
    * @param returnTypes Return types.
    * @param loopTypes Loop types.
@@ -96,6 +101,7 @@ public class ProcedureDefinition extends MagikDefinition
       final TypeString typeName,
       final @Nullable String procedureName,
       final List<ParameterDefinition> parameters,
+      final @Nullable Pragma pragma,
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes,
       final Set<GlobalUsage> usedGlobals,
@@ -106,6 +112,7 @@ public class ProcedureDefinition extends MagikDefinition
     this.typeName = typeName;
     this.procedureName = procedureName;
     this.parameters = List.copyOf(parameters);
+    this.pragma = pragma;
     this.returnTypes = returnTypes;
     this.loopTypes = loopTypes;
     this.usedGlobals = Collections.unmodifiableSet(usedGlobals);
@@ -181,6 +188,11 @@ public class ProcedureDefinition extends MagikDefinition
     return this.parameters;
   }
 
+  @CheckForNull
+  public Pragma getPragma() {
+    return this.pragma;
+  }
+
   @Override
   public ExpressionResultString getReturnTypes() {
     return this.returnTypes;
@@ -194,16 +206,6 @@ public class ProcedureDefinition extends MagikDefinition
   @Override
   public String getName() {
     return Objects.requireNonNullElse(this.procedureName, ProcedureDefinition.DEFAULT_NAME);
-  }
-
-  /**
-   * Get topics.
-   *
-   * @return Topics.
-   */
-  public Set<String> getTopics() {
-    // TODO: Implement.
-    return Collections.emptySet();
   }
 
   public Set<GlobalUsage> getUsedGlobals() {
@@ -230,6 +232,7 @@ public class ProcedureDefinition extends MagikDefinition
         this.typeName,
         this.procedureName,
         this.parameters.stream().map(ParameterDefinition::getBareDefinition).toList(),
+        this.pragma != null ? this.pragma.getBarePragma() : null,
         this.returnTypes,
         this.loopTypes,
         this.usedGlobals,
@@ -248,6 +251,7 @@ public class ProcedureDefinition extends MagikDefinition
         this.typeName,
         this.procedureName,
         this.parameters,
+        this.pragma,
         this.returnTypes,
         this.loopTypes);
   }
@@ -274,6 +278,7 @@ public class ProcedureDefinition extends MagikDefinition
         && Objects.equals(this.typeName, other.typeName)
         && Objects.equals(this.procedureName, other.procedureName)
         && Objects.equals(this.parameters, other.parameters)
+        && Objects.equals(this.pragma, other.pragma)
         && Objects.equals(this.returnTypes, other.returnTypes)
         && Objects.equals(this.loopTypes, other.loopTypes);
   }

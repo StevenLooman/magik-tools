@@ -295,10 +295,24 @@ class FormattingWalkerTest {
   void testProcSelfInvocation() {
     final String code =
         """
-      _proc()
-      	_self()
-      _endproc
-      """;
+        _proc()
+        	_self()
+        _endproc
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testSelfExpression() {
+    final String code = "_self - 1";
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testSelfIndexer() {
+    final String code = "_self[1]";
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }

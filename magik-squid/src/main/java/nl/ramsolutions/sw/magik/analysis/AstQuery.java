@@ -16,6 +16,8 @@ import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.api.MagikOperator;
+import nl.ramsolutions.sw.magik.api.MagikPunctuator;
 import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionGrammar;
 import nl.ramsolutions.sw.productdef.api.SwProductDefinitionGrammar;
 
@@ -107,6 +109,34 @@ public final class AstQuery {
       current = current.getParent();
     }
     return null;
+  }
+
+  /**
+   * Test if any child token is a specific {@link MagikOperator}.
+   *
+   * @param node Node to check.
+   * @param operator Operator to check for.
+   * @return True if any child token is the given operator, false otherwise.
+   */
+  public static boolean anyChildTokenIs(final AstNode node, final MagikOperator operator) {
+    return node.getChildren().stream()
+        .filter(childNode -> childNode.isNot(MagikGrammar.values()))
+        .map(AstNode::getTokenValue)
+        .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(operator.getValue()));
+  }
+
+  /**
+   * Test if any child token is a specific {@link MagikPunctuator}.
+   *
+   * @param node Node to check.
+   * @param punctuator Punctuator to check for.
+   * @return True if any child token is the given punctuator, false otherwise.
+   */
+  public static boolean anyChildTokenIs(final AstNode node, final MagikPunctuator punctuator) {
+    return node.getChildren().stream()
+        .filter(childNode -> childNode.isNot(MagikGrammar.values()))
+        .map(AstNode::getTokenValue)
+        .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(punctuator.getValue()));
   }
 
   /**

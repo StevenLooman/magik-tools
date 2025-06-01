@@ -45,7 +45,7 @@ class HoverProviderTest {
             Collections.emptySet(),
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 
@@ -79,7 +79,7 @@ class HoverProviderTest {
             hoverMeTypeRef,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
 
     final String code =
         """
@@ -111,7 +111,7 @@ class HoverProviderTest {
             Collections.emptySet(),
             Collections.emptyList(),
             null,
-            Collections.emptySet(),
+            null,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
 

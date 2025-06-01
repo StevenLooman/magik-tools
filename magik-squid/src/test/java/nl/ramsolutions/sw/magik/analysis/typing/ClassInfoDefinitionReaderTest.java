@@ -18,6 +18,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +51,8 @@ class ClassInfoDefinitionReaderTest {
             """,
                 null,
                 doAnotherThingRef,
-                TypeString.UNDEFINED));
+                TypeString.UNDEFINED,
+                new Pragma(null, Set.of("restricted"), Set.of(), Set.of())));
     final TypeString reportRef = TypeString.ofIdentifier("!report!", "sw");
     final Collection<GlobalDefinition> reportGlobalDefs =
         definitionKeeper.getGlobalDefinitions(reportRef);
@@ -71,7 +73,8 @@ class ClassInfoDefinitionReaderTest {
             """,
                 null,
                 reportRef,
-                TypeString.UNDEFINED));
+                TypeString.UNDEFINED,
+                new Pragma(null, Set.of("advanced"), Set.of(), Set.of("external"))));
 
     // Conditions.
     final Collection<ConditionDefinition> condition1Defs =
@@ -88,7 +91,8 @@ class ClassInfoDefinitionReaderTest {
                 null,
                 "example_condition_1",
                 null,
-                Collections.emptyList()));
+                Collections.emptyList(),
+                new Pragma(null, Set.of("restricted"), Set.of(), Set.of())));
 
     final Collection<ConditionDefinition> condition2Defs =
         definitionKeeper.getConditionDefinitions("example_condition_2");
@@ -104,7 +108,8 @@ class ClassInfoDefinitionReaderTest {
                 null,
                 "example_condition_2",
                 null,
-                List.of("data1", "data2")));
+                List.of("data1", "data2"),
+                new Pragma(null, Set.of("restricted"), Set.of(), Set.of())));
 
     // Mixins.
     final TypeString exampleMixinRef = TypeString.ofIdentifier("example_mixin", "sw");
@@ -128,7 +133,7 @@ class ClassInfoDefinitionReaderTest {
                 exampleMixinRef,
                 Collections.emptyList(),
                 Collections.emptyList(),
-                Collections.emptySet()));
+                new Pragma(null, Set.of("restricted"), Set.of("example"), Set.of())));
 
     // Classes.
     final TypeString exampleClassRef = TypeString.ofIdentifier("example_class", "sw");
@@ -172,7 +177,7 @@ class ClassInfoDefinitionReaderTest {
                         "slot3",
                         TypeString.UNDEFINED)),
                 List.of(TypeString.ofIdentifier("model", "sw")),
-                Collections.emptySet()));
+                new Pragma(null, Set.of("restricted"), Set.of("example"), Set.of())));
 
     // Enumerations.
     final TypeString enumerationRef = TypeString.ofIdentifier("example_enumeration", "sw");
@@ -192,7 +197,7 @@ class ClassInfoDefinitionReaderTest {
                 enumerationRef,
                 Collections.emptyList(),
                 List.of(TypeString.ofIdentifier("enumerated_format_mixin", "sw")),
-                Collections.emptySet()));
+                new Pragma(null, Set.of("restricted"), Set.of(), Set.of())));
 
     // Enumerations.
     final TypeString exampleIndexedClassRef =
@@ -213,7 +218,7 @@ class ClassInfoDefinitionReaderTest {
                 exampleIndexedClassRef,
                 Collections.emptyList(),
                 List.of(TypeString.ofIdentifier("simple_index_mixin", "sw")),
-                Collections.emptySet()));
+                new Pragma(null, Set.of("advanced"), Set.of(), Set.of())));
 
     // Methods.
     final Collection<MethodDefinition> doSomethingMethodDefs =
@@ -253,7 +258,8 @@ class ClassInfoDefinitionReaderTest {
                         ParameterDefinition.Modifier.NONE,
                         TypeString.UNDEFINED)),
                 null,
-                Collections.emptySet(),
+                new Pragma(
+                    null, Set.of("restricted"), Set.of("example", "private"), Set.of("internal")),
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.UNDEFINED));
 
@@ -296,7 +302,7 @@ for examples.
                         ParameterDefinition.Modifier.NONE,
                         TypeString.UNDEFINED)),
                 null,
-                Collections.emptySet(),
+                new Pragma(null, Set.of("restricted"), Set.of("example"), Set.of()),
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.UNDEFINED));
   }

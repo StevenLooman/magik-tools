@@ -503,7 +503,10 @@ public class HoverProvider {
     builder.append("Module: ").append(moduleName).append(SECTION_END);
 
     // Method topics.
-    final String topics = methodDef.getTopics().stream().collect(Collectors.joining(", "));
+    final String topics =
+        methodDef.getPragma() != null
+            ? methodDef.getPragma().getTopics().stream().collect(Collectors.joining(", "))
+            : "";
     builder.append("Topics: ").append(topics).append(SECTION_END);
 
     // Method doc.
@@ -539,7 +542,10 @@ public class HoverProvider {
     builder.append("Module: ").append(moduleName).append(SECTION_END);
 
     // Procedure topics.
-    final String topics = procDef.getTopics().stream().collect(Collectors.joining(", "));
+    final String topics =
+        procDef.getPragma() != null
+            ? procDef.getPragma().getTopics().stream().collect(Collectors.joining(", "))
+            : "";
     builder.append("Topics: ").append(topics).append(SECTION_END);
 
     // Procedure doc.
@@ -561,7 +567,10 @@ public class HoverProvider {
     final String moduleName = Objects.requireNonNullElse(exemplarDef.getModuleName(), "");
     builder.append("Module: ").append(moduleName).append(SECTION_END);
 
-    final String topics = exemplarDef.getTopics().stream().collect(Collectors.joining(", "));
+    final String topics =
+        exemplarDef.getPragma() != null
+            ? exemplarDef.getPragma().getTopics().stream().collect(Collectors.joining(", "))
+            : "";
     builder.append("Topics: ").append(topics).append(SECTION_END);
 
     final String typeDoc = exemplarDef.getDoc();

@@ -14,7 +14,7 @@ _pragma(classify_level=basic, topic=type_dumper)
 ## @slot {sw:char16_vector|sw:unset} doc
 ## @slot {sw:char16_vector|sw:unset} hash
 ## @slot {sw:char16_vector|sw:unset} module_name
-## @slot {sw:simple_vector<E=sw:char16_vector>} topics
+## @slot {pragma|sw:unset} pragma
 def_slotted_exemplar(
 	:method_definition,
 	{
@@ -29,7 +29,7 @@ def_slotted_exemplar(
 		{:doc, _unset, :readable, :public},
 		{:hash, _unset, :readable, :public},
 		{:module_name, _unset, :readable, :public},
-		{:topics, _unset, :readable, :public}
+		{:pragma, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
@@ -47,7 +47,7 @@ _method method_definition.new(
 	doc,
 	hash,
 	module_name,
-	topics)
+	pragma)
 	## Constructor.
 	## @param {sw:char16_vector} type_name
 	## @param {sw:char16_vector} method_name
@@ -60,7 +60,7 @@ _method method_definition.new(
 	## @param {sw:char16_vector|sw:unset} doc
 	## @param {sw:char16_vector|sw:unset} hash
 	## @param {sw:char16_vector|sw:unset} module_name
-	## @param {sw:simple_vector<E=sw:char16_vector>} topics
+	## @param {pragma|sw:unset} pragma
 	## @return {_self}
 	_return _clone.init(
 		type_name,
@@ -74,7 +74,7 @@ _method method_definition.new(
 		doc,
 		hash,
 		module_name,
-		topics)
+		pragma)
 _endmethod
 $
 
@@ -91,7 +91,7 @@ _private _method method_definition.init(
 	doc,
 	hash,
 	module_name,
-	topics)
+	pragma)
 	## Initializer.
 	## @param {sw:char16_vector} type_name
 	## @param {sw:char16_vector} method_name
@@ -104,7 +104,7 @@ _private _method method_definition.init(
 	## @param {sw:char16_vector|sw:unset} doc
 	## @param {sw:char16_vector|sw:unset} hash
 	## @param {sw:char16_vector|sw:unset} module_name
-	## @param {sw:simple_vector<E=sw:char16_vector>} topics
+	## @param {pragma|sw:unset} pragma
 	## @return {_self}
 	.type_name << type_name
 	.method_name << method_name
@@ -117,7 +117,7 @@ _private _method method_definition.init(
 	.doc << doc
 	.hash << hash
 	.module_name << module_name
-	.topics << topics
+	.pragma << pragma
 	_return _self
 _endmethod
 $
@@ -235,7 +235,10 @@ _method method_definition.new_from(package, name, method)
 		doc,
 		hash,
 		module_name,
-		topics)
+		_if _not topics.empty?
+		_then
+			>> pragma.new_from_topics(topics)
+		_endif)
 _endmethod
 $
 
@@ -263,7 +266,7 @@ _method method_definition.equals?(other)
 		_self.doc = other.doc _andif
 		_self.hash = other.hash _andif
 		_self.module_name = other.module_name _andif
-		_self.topics.eq?(other.topics)
+		_self.pragma = other.pragma
 _endmethod
 $
 
@@ -282,7 +285,7 @@ _method method_definition.equals_disregarding_typing?(other)
 		_self.doc = other.doc _andif
 		_self.hash = other.hash _andif
 		_self.module_name = other.module_name _andif
-		_self.topics.eq?(other.topics)
+		_self.pragma = other.pragma
 _endmethod
 $
 

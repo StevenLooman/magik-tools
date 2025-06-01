@@ -74,7 +74,8 @@ class AssignmentHandler extends LocalTypeReasonerHandler {
         // Store slot.
         this.state.setNodeType(assignedNode, result);
       } else {
-        throw new IllegalStateException();
+        // Don't know what to do with this node, ignore it.
+        return;
       }
     }
 

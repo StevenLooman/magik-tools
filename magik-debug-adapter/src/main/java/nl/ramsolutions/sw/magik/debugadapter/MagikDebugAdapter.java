@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.debugadapter;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -160,6 +161,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
   }
 
   @SuppressWarnings("unchecked")
+  @CheckForNull
   private String getHost(final Map<String, Object> args) {
     try {
       final Map<String, Object> connect = (Map<String, Object>) args.get(CONNECT_ARG);
@@ -170,6 +172,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
   }
 
   @SuppressWarnings("unchecked")
+  @CheckForNull
   private Integer getPort(final Map<String, Object> args) {
     try {
       final Map<String, Object> connect = (Map<String, Object>) args.get(CONNECT_ARG);

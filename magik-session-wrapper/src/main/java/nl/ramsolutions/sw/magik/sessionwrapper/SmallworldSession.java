@@ -19,6 +19,8 @@ class SmallworldSession {
   private static final String SESSION_OUTPUT_THREAD_NAME = "SessionOutputThread";
   private static final Pattern GLOBAL_DOES_NOT_EXIST_PATTERN =
       Pattern.compile("Global .* does not exist: create it\\? \\(Y\\) ");
+  private static final Pattern PLEASE_ANSWER_Y_OR_N =
+      Pattern.compile("Please answer y or n \\(Y\\) ");
   static final Pattern DEFAULT_PROMPT_PATTERN = Pattern.compile("^(Magik|MagikSF)> $");
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SmallworldSession.class);
@@ -27,6 +29,7 @@ class SmallworldSession {
   private final Process process;
   private final Pattern promptPattern;
   private final Thread ioThread;
+  private final Thread mainThread = Thread.currentThread();
   private Object promptSeen;
 
   /**
@@ -47,7 +50,13 @@ class SmallworldSession {
 
     this.process
         .onExit()
-        .thenAccept(p -> LOGGER.debug("Smallworld session exited with code: {}", p));
+        .thenAccept(
+            p -> {
+              LOGGER.debug("Smallworld session exited with code: {}", p);
+
+              // Interrupt the main thread.
+              this.mainThread.interrupt();
+            });
   }
 
   private void sessionOutputThread(final PrintWriter outputWriter) {
@@ -56,7 +65,7 @@ class SmallworldSession {
     final BufferedReader sessionReader = this.getSessionReader();
     final CharBuffer charBuffer = CharBuffer.allocate(1024);
     try {
-      while (true) {
+      while (this.process.isAlive()) {
         sessionReader.read(charBuffer);
         charBuffer.flip();
 
@@ -104,7 +113,8 @@ class SmallworldSession {
   }
 
   private boolean matchesSessionQuestion(final String str) {
-    return GLOBAL_DOES_NOT_EXIST_PATTERN.matcher(str).matches();
+    return GLOBAL_DOES_NOT_EXIST_PATTERN.matcher(str).matches()
+        || PLEASE_ANSWER_Y_OR_N.matcher(str).matches();
   }
 
   BufferedReader getSessionReader() {
@@ -144,27 +154,31 @@ class SmallworldSession {
     }
   }
 
-  void waitForPrompt() {
-    // Wait for the io thread to start up.
+  boolean waitForPrompt() {
+    // Wait for the io thread to start.
     while (this.promptSeen == null) {
       try {
         Thread.sleep(50);
       } catch (final InterruptedException exception) {
-        Thread.currentThread().interrupt();
+        return true;
       }
     }
 
     // Wait for the prompt seen signal.
-    while (true) {
+    LOGGER.debug("Waiting for prompt...");
+    while (this.process.isAlive()) {
       try {
         synchronized (this.promptSeen) {
           this.promptSeen.wait();
         }
 
+        LOGGER.debug("Got prompt signal");
         break;
       } catch (final InterruptedException exception) {
-        Thread.currentThread().interrupt();
+        return true;
       }
     }
+
+    return false;
   }
 }

@@ -45,7 +45,7 @@ class DefinitionsProviderTest {
             ropeRef,
             Collections.emptyList(),
             Collections.emptyList(),
-            Collections.emptySet()));
+            null));
 
     final String code =
         """
@@ -98,7 +98,7 @@ class DefinitionsProviderTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new ConditionDefinition(
-            EMPTY_LOCATION, null, null, null, null, "error", null, Collections.emptyList()));
+            EMPTY_LOCATION, null, null, null, null, "error", null, Collections.emptyList(), null));
     final String code =
         """
         _method object.method

@@ -23,6 +23,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
@@ -131,12 +132,16 @@ public class MethodDefinitionParser {
             .map(String::trim)
             .collect(Collectors.joining("\n"));
 
-    // Figure topics.
-    final AstNode pragmaNode = PragmaNodeHelper.getPragmaNode(node);
-    final Set<String> topics =
-        pragmaNode != null
-            ? new PragmaNodeHelper(pragmaNode).getAllTopics()
-            : Collections.emptySet();
+    // Figure pragma.
+    final PragmaNodeHelper pragmaHelper = PragmaNodeHelper.newSafe(this.node);
+    final Pragma pragma =
+        pragmaHelper != null
+            ? new Pragma(
+                pragmaHelper.getNode(),
+                pragmaHelper.getClassifyLevels(),
+                pragmaHelper.getTopics(),
+                pragmaHelper.getUsages())
+            : null;
 
     final MethodDefinitionUsageParser usageParser = new MethodDefinitionUsageParser(this.node);
     final MagikToolsProperties properties = this.magikFile.getProperties();
@@ -168,7 +173,7 @@ public class MethodDefinitionParser {
             modifiers,
             parameters,
             assignmentParameter,
-            topics,
+            pragma,
             callResult,
             loopResult,
             usedGlobals,

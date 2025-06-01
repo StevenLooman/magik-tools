@@ -145,6 +145,7 @@ class MagikFormattingStrategy extends AbstractFormattingStrategy {
                 "_private",
                 // Loopbody.
                 "_loopbody")
+            && !(AstQuery.tokenIs(this.lastTextToken, "_self") && AstQuery.tokenIs(token, "(", "["))
         || (AstQuery.tokenIs(this.lastTextToken, "_private", "_iter", "_abstract")
             && AstQuery.tokenIs(token, "_method"));
   }

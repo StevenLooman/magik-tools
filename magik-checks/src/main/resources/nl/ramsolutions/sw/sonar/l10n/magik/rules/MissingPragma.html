@@ -1,0 +1,12 @@
+<p>Definition is missing a pragma declaration.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_method object.do_something(param1)
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_pragma(classify_level=basic, topic={example}, usage=redefinable)
+_method object.do_something(param1)
+_endmethod
+</pre>

@@ -93,32 +93,25 @@ public class CompletionProvider {
     // Do our best to get a token value, and clean up the source while we're at it.
     final Map.Entry<MagikTypedFile, String> usables = this.getUsableMagikFile(magikFile, position);
     final MagikTypedFile newMagikFile = usables.getKey();
-    final String removedPart = usables.getValue();
-    final Position newPositionLsp4j =
-        new Position(position.getLine(), position.getCharacter() - removedPart.length());
-    final AstNode node = newMagikFile.getTopNode();
-    final nl.ramsolutions.sw.magik.Position newPosition =
-        Lsp4jConversion.positionFromLsp4j(newPositionLsp4j);
-    final AstNode tokenNodeAt = AstQuery.nodeAt(node, newPosition);
-    final AstNode tokenNodeBefore = AstQuery.nodeBefore(node, newPosition);
-    final Token tokenBefore = tokenNodeBefore != null ? tokenNodeBefore.getToken() : null;
-    final nl.ramsolutions.sw.magik.Position tokenBeforePosition =
-        tokenBefore != null ? nl.ramsolutions.sw.magik.Position.fromTokenStart(tokenBefore) : null;
-    final AstNode tokenNode =
-        tokenNodeAt != null
-            ? tokenNodeAt
-            : tokenBeforePosition.getLine() == newPosition.getLine() ? tokenNodeBefore : null;
-
-    // Ensure not in comment.
-    if (this.inComment(node, position)) {
+    final AstNode newNode = newMagikFile.getTopNode();
+    if (this.inComment(newNode, position)) {
+      // Nothing to complete when in comment.
       return Collections.emptyList();
     }
 
-    // Keyword completion: '_'.
+    final String removedPart = usables.getValue();
     if (removedPart.startsWith("_")) {
+      // Keyword completion: '_'.
       LOGGER.debug("Providing keyword completions");
       return this.provideKeywordCompletions();
     }
+
+    // Find token node at position in cleaned source.
+    final Position newPositionLsp4j =
+        new Position(position.getLine(), position.getCharacter() - removedPart.length());
+    final nl.ramsolutions.sw.magik.Position newPosition =
+        Lsp4jConversion.positionFromLsp4j(newPositionLsp4j);
+    final AstNode tokenNode = this.getTokenNode(newNode, newPosition);
 
     // Method completion: METHOD_INVOCATION or '.'.
     if (tokenNode != null) {
@@ -134,6 +127,24 @@ public class CompletionProvider {
     }
 
     return this.provideGlobalCompletion(newMagikFile, position, tokenNode);
+  }
+
+  private AstNode getTokenNode(
+      final AstNode node, final nl.ramsolutions.sw.magik.Position position) {
+    final AstNode tokenNodeBefore = AstQuery.nodeBefore(node, position);
+    final Token tokenBefore = tokenNodeBefore != null ? tokenNodeBefore.getToken() : null;
+    final nl.ramsolutions.sw.magik.Position tokenBeforePosition =
+        tokenBefore != null ? nl.ramsolutions.sw.magik.Position.fromTokenStart(tokenBefore) : null;
+    final AstNode tokenNodeAt = AstQuery.nodeAt(node, position);
+    final AstNode tokenNode;
+    if (tokenNodeAt != null) {
+      tokenNode = tokenNodeAt;
+    } else if (tokenBeforePosition != null && tokenBeforePosition.getLine() == position.getLine()) {
+      tokenNode = tokenNodeBefore;
+    } else {
+      tokenNode = null;
+    }
+    return tokenNode;
   }
 
   /**
@@ -253,7 +264,8 @@ public class CompletionProvider {
               item.setDetail(exemplarDef.getTypeString().getFullString());
               item.setDocumentation(exemplarDef.getDoc());
               item.setKind(CompletionItemKind.Class);
-              if (exemplarDef.getTopics().contains(TOPIC_DEPRECATED)) {
+              if (exemplarDef.getPragma() != null
+                  && exemplarDef.getPragma().getTopics().contains(TOPIC_DEPRECATED)) {
                 item.setTags(List.of(CompletionItemTag.Deprecated));
               }
               return item;
@@ -317,7 +329,8 @@ public class CompletionProvider {
               item.setDetail(methodDef.getTypeName().getFullString());
               item.setDocumentation(methodDef.getDoc());
               item.setKind(CompletionItemKind.Method);
-              if (methodDef.getTopics().contains(TOPIC_DEPRECATED)) {
+              if (methodDef.getPragma() != null
+                  && methodDef.getPragma().getTopics().contains(TOPIC_DEPRECATED)) {
                 item.setTags(List.of(CompletionItemTag.Deprecated));
               }
               return item;

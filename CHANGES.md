@@ -41,6 +41,10 @@
 - Fix method completions by removing `_gather` and `_optional` keywords.
 - Support `_private` keyword as method invocation receiver.
 - Fix formatting `_self()`.
+- Add `id` to `default-whitelist` in `VariableNamingCheck`.
+- Add more detailed pragma registration.
+- Add checks MissingPragma, PragmaInvalidClassifyLevelCheck, PragmaInvalidUsageCheck.
+- Add f4 t keybinding to VSCode plugin to write a trace command.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)

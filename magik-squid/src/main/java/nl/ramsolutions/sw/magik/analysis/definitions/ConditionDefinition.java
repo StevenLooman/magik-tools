@@ -15,6 +15,7 @@ public class ConditionDefinition extends MagikDefinition {
   private final String name;
   private final @Nullable String parent;
   private final List<String> dataNames;
+  private final @Nullable Pragma pragma;
 
   /**
    * Constructor.
@@ -35,11 +36,13 @@ public class ConditionDefinition extends MagikDefinition {
       final @Nullable AstNode node,
       final String name,
       final @Nullable String parent,
-      final List<String> dataNames) {
+      final List<String> dataNames,
+      final @Nullable Pragma pragma) {
     super(location, timestamp, moduleName, doc, node);
     this.name = name;
     this.parent = parent;
     this.dataNames = List.copyOf(dataNames);
+    this.pragma = pragma;
   }
 
   @Override
@@ -56,6 +59,11 @@ public class ConditionDefinition extends MagikDefinition {
     return Collections.unmodifiableList(this.dataNames);
   }
 
+  @CheckForNull
+  public Pragma getPragma() {
+    return this.pragma;
+  }
+
   @Override
   public ConditionDefinition getBareDefinition() {
     return new ConditionDefinition(
@@ -66,7 +74,8 @@ public class ConditionDefinition extends MagikDefinition {
         null,
         this.name,
         this.parent,
-        this.dataNames);
+        this.dataNames,
+        this.pragma != null ? this.pragma.getBarePragma() : null);
   }
 
   @Override
@@ -78,7 +87,8 @@ public class ConditionDefinition extends MagikDefinition {
         this.getDoc(),
         this.name,
         this.parent,
-        this.dataNames);
+        this.dataNames,
+        this.pragma);
   }
 
   @Override
@@ -101,6 +111,7 @@ public class ConditionDefinition extends MagikDefinition {
         && Objects.equals(this.getDoc(), other.getDoc())
         && Objects.equals(this.name, other.name)
         && Objects.equals(this.parent, other.parent)
-        && Objects.equals(this.dataNames, other.dataNames);
+        && Objects.equals(this.dataNames, other.dataNames)
+        && Objects.equals(this.pragma, other.pragma);
   }
 }

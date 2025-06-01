@@ -24,13 +24,14 @@ import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.junit.jupiter.api.Test;
 
-/** Test MagikIndexer. */
+/** Test {@link MagikIndexer}. */
 class MagikIndexerTest {
 
   /**
@@ -62,12 +63,10 @@ class MagikIndexerTest {
     final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
     final Collection<ExemplarDefinition> exemplarDefs =
         definitionKeeper.getExemplarDefinitions(typeString);
-    assertThat(exemplarDefs).hasSize(1);
-    final ExemplarDefinition exemplarDef = exemplarDefs.stream().findAny().orElseThrow();
-    assertThat(exemplarDef)
-        .isEqualTo(
+    assertThat(exemplarDefs)
+        .containsExactly(
             new ExemplarDefinition(
-                new Location(uri, new Range(new Position(5, 4), new Position(5, 18))),
+                new Location(uri, new Range(new Position(6, 4), new Position(6, 18))),
                 null,
                 null,
                 "Test exemplar.",
@@ -76,7 +75,7 @@ class MagikIndexerTest {
                 typeString,
                 List.of(
                     new SlotDefinition(
-                        new Location(uri, new Range(new Position(7, 8), new Position(7, 9))),
+                        new Location(uri, new Range(new Position(8, 8), new Position(8, 9))),
                         null,
                         null,
                         null,
@@ -84,7 +83,7 @@ class MagikIndexerTest {
                         "slot_a",
                         TypeString.UNDEFINED),
                     new SlotDefinition(
-                        new Location(uri, new Range(new Position(8, 8), new Position(8, 9))),
+                        new Location(uri, new Range(new Position(9, 8), new Position(9, 9))),
                         null,
                         null,
                         null,
@@ -92,19 +91,17 @@ class MagikIndexerTest {
                         "slot_b",
                         TypeString.UNDEFINED)),
                 List.of(TypeString.ofIdentifier("sw_regexp", "sw")),
-                Collections.emptySet()));
+                new Pragma(null, Set.of("basic"), Set.of("test", "test2"), Set.of())));
 
     // Test methods.
     final Collection<MethodDefinition> newMethodDefs =
         definitionKeeper.getMethodDefinitions(typeString).stream()
             .filter(def -> def.getMethodName().equals("new()"))
             .collect(Collectors.toSet());
-    assertThat(newMethodDefs).hasSize(1);
-    final MethodDefinition newMethodDef = newMethodDefs.stream().findAny().orElseThrow();
-    assertThat(newMethodDef)
-        .isEqualTo(
+    assertThat(newMethodDefs)
+        .containsExactly(
             new MethodDefinition(
-                new Location(uri, new Range(new Position(13, 22), new Position(13, 25))),
+                new Location(uri, new Range(new Position(15, 22), new Position(15, 25))),
                 null,
                 null,
                 "Constructor.",
@@ -114,7 +111,7 @@ class MagikIndexerTest {
                 Collections.emptySet(),
                 Collections.emptyList(),
                 null,
-                Collections.emptySet(),
+                new Pragma(null, Set.of("basic"), Set.of("test", "test2"), Set.of()),
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.EMPTY));
 
@@ -122,12 +119,10 @@ class MagikIndexerTest {
         definitionKeeper.getMethodDefinitions(typeString).stream()
             .filter(def -> def.getMethodName().equals("init()"))
             .collect(Collectors.toSet());
-    assertThat(initMethodDefs).hasSize(1);
-    final MethodDefinition initMethodDef = initMethodDefs.stream().findAny().orElseThrow();
-    assertThat(initMethodDef)
-        .isEqualTo(
+    assertThat(initMethodDefs)
+        .containsExactly(
             new MethodDefinition(
-                new Location(uri, new Range(new Position(19, 31), new Position(19, 35))),
+                new Location(uri, new Range(new Position(22, 31), new Position(22, 35))),
                 null,
                 null,
                 "Initializer.",
@@ -137,34 +132,31 @@ class MagikIndexerTest {
                 Set.of(MethodDefinition.Modifier.PRIVATE),
                 Collections.emptyList(),
                 null,
-                Collections.emptySet(),
+                new Pragma(null, Set.of("basic"), Set.of("test", "test2"), Set.of()),
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.EMPTY));
 
     // Test globals.
     final Collection<GlobalDefinition> globalDefs = definitionKeeper.getGlobalDefinitions();
-    assertThat(globalDefs).hasSize(1);
-    final GlobalDefinition globalDef = globalDefs.stream().findAny().orElseThrow();
-    assertThat(globalDef)
-        .isEqualTo(
+    assertThat(globalDefs)
+        .containsExactly(
             new GlobalDefinition(
-                new Location(uri, new Range(new Position(26, 0), new Position(26, 7))),
+                new Location(uri, new Range(new Position(30, 0), new Position(30, 7))),
                 null,
                 null,
                 "",
                 null,
                 TypeString.ofIdentifier("!test_global!", "user"),
-                TypeString.UNDEFINED));
+                TypeString.UNDEFINED,
+                new Pragma(null, Set.of("basic"), Set.of("test", "test2"), Set.of())));
 
     // Test binary expressions.
     final Collection<BinaryOperatorDefinition> binOpDefs =
         definitionKeeper.getBinaryOperatorDefinitions();
-    assertThat(binOpDefs).hasSize(1);
-    final BinaryOperatorDefinition binOpDef = binOpDefs.stream().findAny().orElseThrow();
-    assertThat(binOpDef)
-        .isEqualTo(
+    assertThat(binOpDefs)
+        .containsExactly(
             new BinaryOperatorDefinition(
-                new Location(uri, new Range(new Position(29, 27), new Position(29, 28))),
+                new Location(uri, new Range(new Position(34, 27), new Position(34, 28))),
                 null,
                 null,
                 "@return {sw:false|sw:maybe}",
@@ -181,7 +173,7 @@ class MagikIndexerTest {
     assertThat(procDef)
         .isEqualTo(
             new ProcedureDefinition(
-                new Location(uri, new Range(new Position(30, 4), new Position(30, 9))),
+                new Location(uri, new Range(new Position(35, 4), new Position(35, 9))),
                 null,
                 null,
                 "@return {sw:false|sw:maybe}",
@@ -191,7 +183,7 @@ class MagikIndexerTest {
                 null,
                 List.of(
                     new ParameterDefinition(
-                        new Location(uri, new Range(new Position(30, 10), new Position(30, 13))),
+                        new Location(uri, new Range(new Position(35, 10), new Position(35, 13))),
                         null,
                         null,
                         null,
@@ -200,7 +192,7 @@ class MagikIndexerTest {
                         ParameterDefinition.Modifier.NONE,
                         TypeString.UNDEFINED),
                     new ParameterDefinition(
-                        new Location(uri, new Range(new Position(30, 15), new Position(30, 18))),
+                        new Location(uri, new Range(new Position(35, 15), new Position(35, 18))),
                         null,
                         null,
                         null,
@@ -208,6 +200,7 @@ class MagikIndexerTest {
                         "rhs",
                         ParameterDefinition.Modifier.NONE,
                         TypeString.UNDEFINED)),
+                new Pragma(null, Set.of("basic"), Set.of("test", "test2"), Set.of()),
                 new ExpressionResultString(
                     TypeString.combine(TypeString.SW_FALSE, TypeString.SW_MAYBE)),
                 ExpressionResultString.EMPTY));
@@ -229,12 +222,10 @@ class MagikIndexerTest {
     final TypeString typeString = TypeString.ofIdentifier("test_exemplar", "user");
     final Collection<ExemplarDefinition> exemplarDefs =
         definitionKeeper.getExemplarDefinitions(typeString);
-    assertThat(exemplarDefs).hasSize(1);
-    final ExemplarDefinition exemplarDef = exemplarDefs.stream().findAny().orElseThrow();
-    assertThat(exemplarDef)
-        .isEqualTo(
+    assertThat(exemplarDefs)
+        .containsExactly(
             new ExemplarDefinition(
-                new Location(uri, new Range(new Position(7, 4), new Position(7, 18))),
+                new Location(uri, new Range(new Position(8, 4), new Position(8, 18))),
                 null,
                 null,
                 "Test exemplar.\n@slot {sw:rope} slot_a\n@slot {sw:property_list<K=sw:symbol, E=sw:integer>} slot_b",
@@ -243,7 +234,7 @@ class MagikIndexerTest {
                 typeString,
                 List.of(
                     new SlotDefinition(
-                        new Location(uri, new Range(new Position(9, 8), new Position(9, 9))),
+                        new Location(uri, new Range(new Position(10, 8), new Position(10, 9))),
                         null,
                         null,
                         null,
@@ -251,7 +242,7 @@ class MagikIndexerTest {
                         "slot_a",
                         TypeString.ofIdentifier("rope", "sw")),
                     new SlotDefinition(
-                        new Location(uri, new Range(new Position(10, 8), new Position(10, 9))),
+                        new Location(uri, new Range(new Position(11, 8), new Position(11, 9))),
                         null,
                         null,
                         null,
@@ -263,19 +254,17 @@ class MagikIndexerTest {
                             TypeString.ofGenericDefinition("K", TypeString.SW_SYMBOL),
                             TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER)))),
                 Collections.emptyList(),
-                Collections.emptySet()));
+                new Pragma(null, Set.of("basic"), Set.of("test", "test2"), Set.of())));
 
     // Test methods.
     final Collection<MethodDefinition> newMethodDefs =
         definitionKeeper.getMethodDefinitions(typeString).stream()
             .filter(def -> def.getMethodName().equals("new()"))
             .collect(Collectors.toSet());
-    assertThat(newMethodDefs).hasSize(1);
-    final MethodDefinition newMethodDef = newMethodDefs.stream().findAny().orElseThrow();
-    assertThat(newMethodDef)
-        .isEqualTo(
+    assertThat(newMethodDefs)
+        .containsExactly(
             new MethodDefinition(
-                new Location(uri, new Range(new Position(14, 22), new Position(14, 25))),
+                new Location(uri, new Range(new Position(16, 22), new Position(16, 25))),
                 null,
                 null,
                 "Constructor.\n@return {_self}",
@@ -285,7 +274,7 @@ class MagikIndexerTest {
                 Collections.emptySet(),
                 Collections.emptyList(),
                 null,
-                Collections.emptySet(),
+                new Pragma(null, Set.of("basic"), Set.of("test", "test2"), Set.of()),
                 new ExpressionResultString(TypeString.SELF),
                 ExpressionResultString.EMPTY));
 
@@ -293,12 +282,10 @@ class MagikIndexerTest {
         definitionKeeper.getMethodDefinitions(typeString).stream()
             .filter(def -> def.getMethodName().equals("init()"))
             .collect(Collectors.toSet());
-    assertThat(initMethodDefs).hasSize(1);
-    final MethodDefinition initMethodDef = initMethodDefs.stream().findAny().orElseThrow();
-    assertThat(initMethodDef)
-        .isEqualTo(
+    assertThat(initMethodDefs)
+        .containsExactly(
             new MethodDefinition(
-                new Location(uri, new Range(new Position(21, 31), new Position(21, 35))),
+                new Location(uri, new Range(new Position(24, 31), new Position(24, 35))),
                 null,
                 null,
                 "Initializer.\n@return {_self}",
@@ -308,7 +295,7 @@ class MagikIndexerTest {
                 Set.of(MethodDefinition.Modifier.PRIVATE),
                 Collections.emptyList(),
                 null,
-                Collections.emptySet(),
+                new Pragma(null, Set.of("basic"), Set.of("test", "test2"), Set.of()),
                 new ExpressionResultString(TypeString.SELF),
                 ExpressionResultString.EMPTY));
   }

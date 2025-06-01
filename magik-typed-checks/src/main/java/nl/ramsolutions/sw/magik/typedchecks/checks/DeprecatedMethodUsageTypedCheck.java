@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.typedchecks.checks;
 import com.sonar.sslr.api.AstNode;
 import java.util.Collection;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
@@ -16,7 +17,6 @@ public class DeprecatedMethodUsageTypedCheck extends MagikTypedCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "DeprecatedMethodUsage";
 
-  private static final String DEPRECATED_TOPIC = "deprecated";
   private static final String MESSAGE = "Used method '%s' is deprecated";
 
   @Override
@@ -39,7 +39,11 @@ public class DeprecatedMethodUsageTypedCheck extends MagikTypedCheck {
     methodDefs.stream()
         .filter(
             methodDef ->
-                methodDef.getTopics().contains(DeprecatedMethodUsageTypedCheck.DEPRECATED_TOPIC))
+                methodDef.getPragma() != null
+                    && methodDef
+                        .getPragma()
+                        .getClassifyLevels()
+                        .contains(Pragma.CLASSIFY_LEVEL_DEPRECATED))
         .forEach(
             methodDef -> {
               final String fullName = calledTypeStr.getFullString() + "." + methodName;
