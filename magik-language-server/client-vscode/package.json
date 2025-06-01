@@ -82,6 +82,16 @@
           ".msg"
         ],
         "configuration": "./languages/message-language-configuration.json"
+      },
+      {
+        "id": "translation",
+        "aliases": [
+          "Translation"
+        ],
+        "extensions": [
+          ".trn"
+        ],
+        "configuration": "./languages/translation-language-configuration.json"
       }
     ],
     "grammars": [
