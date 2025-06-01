@@ -90,7 +90,7 @@
     <lsp4j.version>0.24.0</lsp4j.version>
     <commons-cli.version>1.9.0</commons-cli.version>
     <gson.version>2.13.1</gson.version>
-    <jline.version>3.30.0</jline.version>
+    <jline.version>3.30.4</jline.version>
 
     <assertj-core.version>3.27.3</assertj-core.version>
 
