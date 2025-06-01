@@ -18,6 +18,10 @@ class TrailingWhitespaceStrategy extends FormattingStategy {
       return null;
     }
 
+    if (!AstQuery.tokenIs(token, GenericTokenType.EOL, GenericTokenType.EOF)) {
+      return null;
+    }
+
     if (!AstQuery.tokenIs(this.lastToken, GenericTokenType.WHITESPACE)) {
       return null;
     }

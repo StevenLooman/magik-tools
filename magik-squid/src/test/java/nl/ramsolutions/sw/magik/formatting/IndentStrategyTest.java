@@ -6,15 +6,16 @@ import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
 
-/**
- * Base test class for {@link IndentStrategy}s.
- */
-class IndentStrategyTest {
+/** Base test class for {@link IndentStrategy}s. */
+abstract class IndentStrategyTest {
+
+  abstract IndentStrategy createStrategy(final FormattingOptions options);
 
   protected List<TextEdit> getEdits(final String code) {
     final FormattingOptions options = new FormattingOptions(8, false, false, false, false);
@@ -23,7 +24,7 @@ class IndentStrategyTest {
 
   protected List<TextEdit> getEdits(final String code, final FormattingOptions options) {
     final List<TextEdit> edits = new ArrayList<>();
-    final IndentStrategy strategy = new TabbedIndentStrategy(options);
+    final IndentStrategy strategy = this.createStrategy(options);
     final MagikParser parser = new MagikParser();
     final AstNode topNode = parser.parse(code);
     final MagikAstWalker walker =
@@ -59,12 +60,10 @@ class IndentStrategyTest {
 
           @Override
           protected void walkToken(final Token token) {
-            // Mimic MagikFormattingStrategy, calling only indentFor() on new lines.
+            // Mimic FormattingWalker, calling only indentFor() on new lines.
             if (this.lastTextToken != null && !token.isOnSameLineThan(this.lastTextToken)) {
               final TextEdit edit = strategy.ensureIndenting(token, this.currentNode);
-              if (edit != null) {
-                edits.add(edit);
-              }
+              edits.add(edit);
             }
 
             strategy.setLastToken(token);
@@ -76,6 +75,6 @@ class IndentStrategyTest {
         };
     walker.walkAst(topNode);
 
-    return edits;
+    return edits.stream().filter(Objects::nonNull).toList();
   }
 }

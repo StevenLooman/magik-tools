@@ -7,6 +7,7 @@ import com.sonar.sslr.api.TokenType;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -56,6 +57,22 @@ public final class AstQuery {
   }
 
   /**
+   * Test if {@link Token} starts with one of the given values.
+   *
+   * @param token Token to test.
+   * @param values Values to test against.
+   * @return True if token is of type and starts with value, otherwise false.
+   */
+  public static boolean tokenStartsWith(final @Nullable Token token, final String... values) {
+    if (token == null) {
+      return false;
+    }
+
+    final String tokenValue = token.getOriginalValue().toLowerCase();
+    return Arrays.stream(values).map(String::toLowerCase).anyMatch(tokenValue::startsWith);
+  }
+
+  /**
    * Test of the parent of {@link node} is of one of the given types.
    *
    * @param node Node to get/test parent from.
@@ -69,6 +86,27 @@ public final class AstQuery {
     }
 
     return parentNode.is(types);
+  }
+
+  /**
+   * Get ancestor of {@link AstNode} which are of one of the given types, up to the given stop type.
+   *
+   * @param node {@link AstNode} to query
+   * @param stopType {@link AstNodeType} to stop at.
+   * @param nodeTypes {@link AstNodeType}s to match
+   * @return {@link AstNode} which matches query, {@code null} if not found.
+   */
+  @CheckForNull
+  public static AstNode getAncestorUpTo(
+      final AstNode node, final AstNodeType stopType, final AstNodeType... nodeTypes) {
+    AstNode current = node;
+    while (current != null && !current.is(stopType)) {
+      if (current.is(nodeTypes)) {
+        return current;
+      }
+      current = current.getParent();
+    }
+    return null;
   }
 
   /**

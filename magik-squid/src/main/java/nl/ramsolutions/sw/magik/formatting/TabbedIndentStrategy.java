@@ -7,8 +7,37 @@ import java.util.ArrayList;
 import java.util.List;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
-/** Tabbed formatting indent strategy. */
+/**
+ * Tabbed formatting indent strategy.
+ *
+ * <p>This strategy indents on full tabs.
+ */
 class TabbedIndentStrategy extends IndentStrategy {
+
+  private static final AstNodeType[] INDENT_NODE_TYPES =
+      new AstNodeType[] {
+        MagikGrammar.BODY, MagikGrammar.VARIABLE_DEFINITION,
+      };
+  private static final AstNodeType[] SUB_INDENT_NODE_TYPES =
+      new AstNodeType[] {
+        MagikGrammar.ASSIGNMENT_EXPRESSION,
+        MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION,
+        MagikGrammar.OR_EXPRESSION,
+        MagikGrammar.XOR_EXPRESSION,
+        MagikGrammar.AND_EXPRESSION,
+        MagikGrammar.EQUALITY_EXPRESSION,
+        MagikGrammar.RELATIONAL_EXPRESSION,
+        MagikGrammar.ADDITIVE_EXPRESSION,
+        MagikGrammar.MULTIPLICATIVE_EXPRESSION,
+        MagikGrammar.EXPONENTIAL_EXPRESSION,
+        MagikGrammar.SIMPLE_VECTOR,
+        MagikGrammar.ARGUMENTS,
+        MagikGrammar.PARAMETERS,
+        MagikGrammar.METHOD_INVOCATION,
+        MagikGrammar.PROCEDURE_INVOCATION,
+
+        // TODO: Parenthesis around expressions?
+      };
 
   TabbedIndentStrategy(final FormattingOptions options) {
     super(options);
@@ -16,55 +45,33 @@ class TabbedIndentStrategy extends IndentStrategy {
 
   @Override
   public String indentFor(final Token token, final AstNode currentNode) {
-    // Determine depth of this.currentNode.
-    final AstNodeType[] indentNodeTypes =
-        new AstNodeType[] {
-          MagikGrammar.BODY, MagikGrammar.VARIABLE_DEFINITION,
-        };
+    // Construct the list of indent nodes.
     final List<AstNode> indentNodes = new ArrayList<>();
-    AstNode indentNode = currentNode.getFirstAncestor(indentNodeTypes);
+    AstNode indentNode = currentNode.getFirstAncestor(INDENT_NODE_TYPES);
     while (indentNode != null) {
       indentNodes.add(indentNode);
 
-      indentNode = indentNode.getFirstAncestor(indentNodeTypes);
+      indentNode = indentNode.getFirstAncestor(INDENT_NODE_TYPES);
     }
 
-    // If inside expression (thus not the first node of the expression), also increase indent.
-    final AstNodeType[] subIndentNodeTypes =
-        new AstNodeType[] {
-          MagikGrammar.ASSIGNMENT_EXPRESSION,
-          MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION,
-          MagikGrammar.OR_EXPRESSION,
-          MagikGrammar.XOR_EXPRESSION,
-          MagikGrammar.AND_EXPRESSION,
-          MagikGrammar.EQUALITY_EXPRESSION,
-          MagikGrammar.RELATIONAL_EXPRESSION,
-          MagikGrammar.ADDITIVE_EXPRESSION,
-          MagikGrammar.MULTIPLICATIVE_EXPRESSION,
-          MagikGrammar.EXPONENTIAL_EXPRESSION,
-          MagikGrammar.SIMPLE_VECTOR,
-          MagikGrammar.ARGUMENTS,
-          MagikGrammar.PARAMETERS,
-          MagikGrammar.METHOD_INVOCATION,
-          MagikGrammar.PROCEDURE_INVOCATION,
-
-          // TODO: Parenthesis around expressions?
-        };
+    // Find any sub-indent nodes, and add these to indentNodes.
     final List<AstNode> subIndentNodes = new ArrayList<>();
     AstNode subIndentNode = currentNode;
     while (subIndentNode != null) {
       final AstNode parentNode = subIndentNode.getParent();
       if (parentNode != null
-          && parentNode.is(subIndentNodeTypes)
+          && parentNode.is(SUB_INDENT_NODE_TYPES)
           && parentNode.getToken() != subIndentNode.getToken()) {
         subIndentNodes.add(subIndentNode);
       }
+
+      // TODO: Shouldn't this go up maximally to the first INDENT_NODE_TYPE?
 
       subIndentNode = parentNode;
     }
     indentNodes.addAll(0, subIndentNodes);
 
-    // Handle comments at the end of a body. The comments is added as a
+    // Handle comments at the end of a body. The comment is added as a
     // trivia to the next token, instead of the token of the current node.
     // So the comment appears after the node, as seen from this method.
     if (token.getOriginalValue().startsWith("#")
@@ -73,23 +80,8 @@ class TabbedIndentStrategy extends IndentStrategy {
       indentNodes.add(0, currentNode);
     }
 
-    // TODO: Recurse for each indent-node, starting from parent. Then, add n-indent to that.
-    // This is for the emacs endenting rules!
-    // For example, `10` indents n(=4) from `{`, not based node structure:
-    // _local x << {
-    //                 10
-    //             }
-    // So should we indent based on node, and not token?
-
     final int tabSize = this.options.getTabSize();
-    final String tabText = this.options.isInsertSpaces() ? " ".repeat(tabSize) : "\t";
     final int indentSize = indentNodes.size() * tabSize;
-    if (indentSize == 0) {
-      return "";
-    }
-
-    final int indent1 = indentSize / tabSize;
-    final int indent2 = indentSize % tabSize;
-    return tabText.repeat(indent1) + " ".repeat(indent2);
+    return this.indentString(indentSize);
   }
 }

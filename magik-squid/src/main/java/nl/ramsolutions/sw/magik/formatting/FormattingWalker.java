@@ -4,10 +4,10 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
@@ -24,8 +24,8 @@ public class FormattingWalker extends MagikAstWalker {
   private final FinalNewlineStrategy finalNewlineStrategy;
   private AbstractFormattingStrategy activeStrategy;
   private AstNode currentNode;
-  private Token lastToken;
   private Token lastTextToken;
+  private TokenColumnTracker tokenColumnTracker;
 
   /**
    * Constructor.
@@ -51,11 +51,26 @@ public class FormattingWalker extends MagikAstWalker {
     return this.textEdits;
   }
 
+  private void addTextEdit(final @Nullable TextEdit textEdit) {
+    if (textEdit != null) {
+      this.textEdits.add(textEdit);
+
+      this.tokenColumnTracker.applyTextEdit(textEdit);
+    }
+  }
+
   private Stream<AbstractFormattingStrategy> getStrategies() {
     return Stream.of(this.pragmaStrategy, this.magikStrategy, this.finalNewlineStrategy);
   }
 
   // region: AST walker methods.
+  @Override
+  protected void walkPreMagik(final AstNode node) {
+    this.tokenColumnTracker = new TokenColumnTracker(node);
+
+    this.walkPreDefault(node);
+  }
+
   @Override
   protected void walkPrePragma(final AstNode node) {
     this.activeStrategy = this.pragmaStrategy;
@@ -109,7 +124,7 @@ public class FormattingWalker extends MagikAstWalker {
             strategy -> {
               final List<TextEdit> strategyTextEdits = strategy.walkWhitespaceToken(token);
               if (strategy == this.activeStrategy) {
-                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
+                strategyTextEdits.forEach(this::addTextEdit);
               }
             });
 
@@ -143,7 +158,7 @@ public class FormattingWalker extends MagikAstWalker {
             strategy -> {
               final List<TextEdit> strategyTextEdits = strategy.walkCommentToken(token);
               if (strategy == this.activeStrategy) {
-                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
+                strategyTextEdits.forEach(this::addTextEdit);
               }
             });
 
@@ -160,7 +175,7 @@ public class FormattingWalker extends MagikAstWalker {
             strategy -> {
               final List<TextEdit> strategyTextEdits = strategy.walkEolToken(token);
               if (strategy == this.activeStrategy) {
-                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
+                strategyTextEdits.forEach(this::addTextEdit);
               }
             });
 
@@ -175,15 +190,8 @@ public class FormattingWalker extends MagikAstWalker {
   protected void walkEofToken(final Token token) {
     this.handleTrailingWhitespace(token);
 
-    this.activeStrategy = this.finalNewlineStrategy;
-    this.getStrategies()
-        .forEach(
-            strategy -> {
-              final List<TextEdit> strategyTextEdits = strategy.walkEofToken(token);
-              if (strategy == this.activeStrategy) {
-                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
-              }
-            });
+    final List<TextEdit> strategyTextEdits = this.finalNewlineStrategy.walkEofToken(token);
+    strategyTextEdits.forEach(this::addTextEdit);
 
     this.setLastToken(token);
   }
@@ -200,7 +208,7 @@ public class FormattingWalker extends MagikAstWalker {
             strategy -> {
               final List<TextEdit> strategyTextEdits = strategy.walkToken(token);
               if (strategy == this.activeStrategy) {
-                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
+                strategyTextEdits.forEach(this::addTextEdit);
               }
             });
 
@@ -213,6 +221,7 @@ public class FormattingWalker extends MagikAstWalker {
 
   /**
    * Handle indenting.
+   *
    * @param token A {@link GenericTokenType.COMMENT} or text-token.
    */
   void handleIndenting(final Token token) {
@@ -221,13 +230,12 @@ public class FormattingWalker extends MagikAstWalker {
     }
 
     final TextEdit textEdit = this.indentStrategy.ensureIndenting(token, this.currentNode);
-    if (textEdit != null) {
-      this.textEdits.add(textEdit);
-    }
+    this.addTextEdit(textEdit);
   }
 
   /**
    * Handle trailing whitespace, if any.
+   *
    * @param token A {@link GenericTokenType.EOL} of {@link GenericTokenType.EOF} token.
    */
   void handleTrailingWhitespace(final Token token) {
@@ -251,7 +259,5 @@ public class FormattingWalker extends MagikAstWalker {
         token, GenericTokenType.WHITESPACE, GenericTokenType.EOL, GenericTokenType.EOF)) {
       this.lastTextToken = token;
     }
-
-    this.lastToken = token;
   }
 }

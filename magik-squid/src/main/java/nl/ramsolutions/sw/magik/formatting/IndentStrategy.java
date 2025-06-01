@@ -42,4 +42,22 @@ abstract class IndentStrategy extends FormattingStategy {
    * @return Indent string.
    */
   abstract String indentFor(final Token token, final AstNode currentNode);
+
+  /**
+   * Get the indent string for a given size.
+   *
+   * @param indentSize Number of white spaces.
+   * @return Indent string.
+   */
+  String indentString(final int indentSize) {
+    final int tabSize = this.options.getTabSize();
+    final String tabText = this.options.isInsertSpaces() ? " ".repeat(tabSize) : "\t";
+    if (indentSize == 0) {
+      return "";
+    }
+
+    final int indent1 = indentSize / tabSize;
+    final int indent2 = indentSize % tabSize;
+    return tabText.repeat(indent1) + " ".repeat(indent2);
+  }
 }

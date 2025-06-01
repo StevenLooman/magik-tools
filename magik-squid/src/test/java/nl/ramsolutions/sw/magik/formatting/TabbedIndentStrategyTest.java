@@ -10,10 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/**
- * Tests for {@link TabbedIndentStrategy}.
- */
+/** Tests for {@link TabbedIndentStrategy}. */
 class TabbedIndentStrategyTest extends IndentStrategyTest {
+
+  @Override
+  IndentStrategy createStrategy(final FormattingOptions options) {
+    return new TabbedIndentStrategy(options);
+  }
 
   @Test
   void testOk() {
@@ -95,7 +98,8 @@ class TabbedIndentStrategyTest extends IndentStrategyTest {
           >> 1
         _else
           >> 2
-        _endif""";
+        _endif
+        """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
         .containsExactly(
@@ -159,7 +163,8 @@ class TabbedIndentStrategyTest extends IndentStrategyTest {
     final String code =
         """
         _local a <<
-        	10""";
+        	10
+        """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
@@ -170,7 +175,8 @@ class TabbedIndentStrategyTest extends IndentStrategyTest {
   //       """
   //       _local a << {
   //       	10
-  //       }""";
+  //       }
+  //       """;
   //   final List<TextEdit> edits = this.getEdits(code);
   //   assertThat(edits).isEmpty();
   // }
