@@ -44,6 +44,7 @@
 - Add more detailed pragma registration.
 - Add checks MissingPragma, PragmaInvalidClassifyLevelCheck, PragmaInvalidUsageCheck.
 - Add f4 t keybinding to VSCode plugin to write a trace command.
+- Fix determining assigned variable in top scope being a global.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)

@@ -36,10 +36,25 @@ class VariableNamingCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "_local c",
-        "c << 10",
-        "_method a.b(c) _endmethod",
-        "_local l_c",
+        """
+        _method a.b
+          _local c
+        _endmethod
+        """,
+        """
+        _method a.b
+          _local l_c
+        _endmethod
+        """,
+        """
+        _method a.b(c)
+        _endmethod
+        """,
+        """
+        _method a.b
+          c << 10
+        _endmethod
+        """,
       })
   void testInvalid(final String code) {
     final MagikCheck check = new VariableNamingCheck();
@@ -50,10 +65,25 @@ class VariableNamingCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "_local this_is_the_very_long_variable_name",
-        "this_is_the_very_long_variable_name << 10",
-        "_method a.b(this_is_the_very_long_variable_name) _endmethod",
-        "_local l_this_is_the_very_long_variable_name",
+        """
+        _method a.b
+          _local this_is_the_very_long_variable_name
+        _endmethod
+        """,
+        """
+        _method a.b
+          _local l_this_is_the_very_long_variable_name
+        _endmethod
+        """,
+        """
+        _method a.b
+          this_is_the_very_long_variable_name << 10
+        _endmethod
+        """,
+        """
+        _method a.b(this_is_the_very_long_variable_name)
+        _endmethod
+        """,
       })
   void testTooLongVariableName(final String code) {
     final MagikCheck check = new VariableNamingCheck();

@@ -105,7 +105,8 @@ public class ScopeEntry {
 
     final ScopeEntry otherScopeEntry = (ScopeEntry) obj;
     return Objects.equals(otherScopeEntry.getType(), this.getType())
-        && Objects.equals(otherScopeEntry.getIdentifier(), this.getIdentifier());
+        && Objects.equals(otherScopeEntry.getIdentifier(), this.getIdentifier())
+        && Objects.equals(otherScopeEntry.getImportedEntry(), this.getImportedEntry());
   }
 
   @Override
