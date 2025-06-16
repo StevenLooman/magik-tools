@@ -78,6 +78,7 @@ public class VariableNamingCheck extends MagikCheck {
         || lowered.startsWith("c_")) {
       return identifier.substring(2);
     }
+
     return identifier;
   }
 
