@@ -45,7 +45,8 @@
 - Add checks MissingPragma, PragmaInvalidClassifyLevelCheck, PragmaInvalidUsageCheck.
 - Add f4 t keybinding to VSCode plugin to write a trace command.
 - Fix determining assigned variable in top scope being a global.
-- Fix ScopeEntry types when ending up in the global scope.
+- Fix `ScopeEntry` types when ending up in the global scope.
+- Fix `HidesVariableCheck` not seeing `DEFINITION` `ScopeEntry`s.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)

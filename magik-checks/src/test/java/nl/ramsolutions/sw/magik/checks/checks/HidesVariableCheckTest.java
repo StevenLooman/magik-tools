@@ -88,6 +88,12 @@ class HidesVariableCheckTest extends MagikCheckTestBase {
           _endblock
         _endblock
         """,
+        """
+        _method a.b
+          a << 10
+          _local a << 20
+        _endmethod
+        """,
       })
   void testInvalid(final String code) {
     final MagikCheck check = new HidesVariableCheck();
