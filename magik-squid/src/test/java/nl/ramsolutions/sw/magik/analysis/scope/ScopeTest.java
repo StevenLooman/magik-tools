@@ -43,7 +43,7 @@ class ScopeTest {
   @Test
   void testGlobalScopeDefinition() {
     final Scope globalScope = new GlobalScope();
-    globalScope.addDeclaration(ScopeEntry.Type.DEFINITION, "identifier", null, null);
+    globalScope.addDeclaration(ScopeEntry.Type.GLOBAL, "identifier", null, null);
 
     final ScopeEntry entry = globalScope.getScopeEntry("identifier");
     assertThat(entry).isNotNull();

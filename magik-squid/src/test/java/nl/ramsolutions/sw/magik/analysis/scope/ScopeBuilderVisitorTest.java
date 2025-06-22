@@ -570,4 +570,19 @@ class ScopeBuilderVisitorTest {
     final ScopeEntry entry = globalScope.getScopeEntry("x");
     assertThat(entry).isEqualTo(new ScopeEntry(ScopeEntry.Type.GLOBAL, "x", null, null));
   }
+
+  @Test
+  void testGlobalDefinitionInBlock() {
+    final String code =
+        """
+        _block
+          x << 10
+        _endblock
+        """;
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+    final Scope globalScope = visitor.getGlobalScope();
+
+    final ScopeEntry entry = globalScope.getScopeEntry("x");
+    assertThat(entry).isEqualTo(new ScopeEntry(ScopeEntry.Type.GLOBAL, "x", null, null));
+  }
 }
