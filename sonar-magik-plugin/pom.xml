@@ -17,7 +17,6 @@
   <properties>
     <pluginApiMinVersion>9.14.0.375</pluginApiMinVersion>
     <artifactsToPublish>${project.groupId}:sonar-magik-plugin:jar</artifactsToPublish>
-    <sonar.pluginKey>communitymagik</sonar.pluginKey>
   </properties>
 
   <dependencies>
@@ -104,7 +103,7 @@
         <configuration>
           <pluginClass>nl.ramsolutions.sw.sonar.MagikPlugin</pluginClass>
           <pluginName>Magik Code Quality and Security</pluginName>
-          <pluginKey>magik</pluginKey>
+          <pluginKey>communitymagik</pluginKey>
           <skipDependenciesPackaging>true</skipDependenciesPackaging>
           <sonarLintSupported>false</sonarLintSupported>
           <pluginApiMinVersion>${pluginApiMinVersion}</pluginApiMinVersion>
