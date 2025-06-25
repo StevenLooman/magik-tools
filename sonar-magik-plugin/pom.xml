@@ -102,7 +102,7 @@
 
         <configuration>
           <pluginClass>nl.ramsolutions.sw.sonar.MagikPlugin</pluginClass>
-          <pluginName>Magik Code Quality and Security</pluginName>
+          <pluginName>Magik</pluginName>
           <pluginKey>communitymagik</pluginKey>
           <skipDependenciesPackaging>true</skipDependenciesPackaging>
           <sonarLintSupported>false</sonarLintSupported>
