@@ -1,8 +1,6 @@
 name: Lint and package
 on:
   push:
-    branches:
-      - develop
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -40,7 +38,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Package-${{ matrix.os }}
-          path: staging
+          path: |
+            staging
+            !staging/original-*.jar
+            !staging/*-shaded.jar
 
   markdown_lint:
     name: Markdown Lint
