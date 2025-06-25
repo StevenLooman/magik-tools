@@ -2,7 +2,7 @@ name: Lint and package
 on:
   push:
     branches:
-       - develop
+      - develop
   pull_request:
     types: [opened, synchronize, reopened]
 
