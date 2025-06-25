@@ -9,6 +9,7 @@
 
   <name>Magik Tools</name>
   <description>Collection of tools for Magik development</description>
+  <url>https://github.com/StevenLooman/magik-tools</url>
 
   <modules>
     <module>magik-checks</module>
@@ -44,6 +45,11 @@
     <url>https://github.com/StevenLooman/magik-tools</url>
     <tag>HEAD</tag>
   </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/StevenLooman/magik-tools/issues</url>
+  </issueManagement>
 
   <properties>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
