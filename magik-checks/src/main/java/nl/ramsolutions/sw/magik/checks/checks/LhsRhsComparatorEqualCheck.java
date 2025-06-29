@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
 import com.sonar.sslr.api.AstNode;
-import nl.ramsolutions.sw.magik.analysis.AstCompare;
+import nl.ramsolutions.sw.AstCompare;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import org.sonar.check.Rule;
 

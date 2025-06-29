@@ -11,8 +11,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Test FormattingCheck. */
+/**
+ * Test {@link FormattingCheck}.
+ *
+ * <p>These tests use the {@link nl.ramsolutions.sw.magik.formatting.TabbedIndentStrategy} indent
+ * strategy.
+ */
 class FormattingCheckTest extends MagikCheckTestBase {
+
+  private static final String INDENT_STRATEGY = "relative";
 
   @ParameterizedTest
   @ValueSource(
@@ -26,7 +33,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
         "a _orif<< b",
         "show(a, b)",
         "show(% )",
-        ".uri         << items[2]",
+        ".uri << items[2]",
         "_pragma(classify_level=restricted, topic={a, b})",
         "_method",
         """
@@ -40,12 +47,13 @@ class FormattingCheckTest extends MagikCheckTestBase {
         }\r
         """,
         """
-        show(  # comment
+        show( # comment
         	param1)
         """,
       })
   void testProper(final String code) {
-    final MagikCheck check = new FormattingCheck();
+    final FormattingCheck check = new FormattingCheck();
+    check.indentStrategy = INDENT_STRATEGY;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -55,7 +63,10 @@ class FormattingCheckTest extends MagikCheckTestBase {
       strings = {
         "{1,2}",
         "{1 , 2}",
-        "{1 ,\n\t2}",
+        """
+        {1 ,
+        \t2}
+        """,
         "a* b",
         "a *b",
         "show(a, b )",
@@ -63,7 +74,8 @@ class FormattingCheckTest extends MagikCheckTestBase {
         "$\n$",
       })
   void testImproper(final String code) {
-    final MagikCheck check = new FormattingCheck();
+    final FormattingCheck check = new FormattingCheck();
+    check.indentStrategy = INDENT_STRATEGY;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -81,13 +93,14 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @Test
   void testTabIndentLineStartWithTabs() {
     final FormattingCheck check = new FormattingCheck();
+    check.indentStrategy = INDENT_STRATEGY;
     check.indentCharacter = "tab";
     final String code =
         """
-      _block
-      	print(a)
-      _endblock
-      """;
+        _block
+        	print(a)
+        _endblock
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -106,6 +119,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
       })
   void testTabIndentLineStartWithSpaces(final String code) {
     final FormattingCheck check = new FormattingCheck();
+    check.indentStrategy = INDENT_STRATEGY;
     check.indentCharacter = "tab";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
@@ -114,6 +128,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @Test
   void tetSpaceIndentLineStartWithTabs() {
     final FormattingCheck check = new FormattingCheck();
+    check.indentStrategy = INDENT_STRATEGY;
     check.indentCharacter = "space";
     final String code = "\tprint(a)";
     final List<MagikIssue> issues = this.runCheck(code, check);
@@ -123,14 +138,15 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @Test
   void testSpaceIndentLineStrtWithSpaces() {
     final FormattingCheck check = new FormattingCheck();
+    check.indentStrategy = INDENT_STRATEGY;
     check.indentCharacter = "space";
     check.tabWidth = 4;
     final String code =
         """
-      _block
-          print(a)
-      _endblock
-      """;
+        _block
+            print(a)
+        _endblock
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -156,14 +172,16 @@ class FormattingCheckTest extends MagikCheckTestBase {
       })
   @SuppressWarnings("java:S4144")
   void testMultipleWhitelines(final String code) {
-    final MagikCheck check = new FormattingCheck();
+    final FormattingCheck check = new FormattingCheck();
+    check.indentStrategy = INDENT_STRATEGY;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
 
   @Test
   void testMultipleWhitelinesMethodDoc() {
-    final MagikCheck check = new FormattingCheck();
+    final FormattingCheck check = new FormattingCheck();
+    check.indentStrategy = INDENT_STRATEGY;
     final String code =
         """
         _method object.method(param)

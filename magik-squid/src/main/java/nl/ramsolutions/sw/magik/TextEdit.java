@@ -4,19 +4,40 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
 
-/** A text edit. */
+/**
+ * A text edit.
+ *
+ * <p>To quote the <a
+ * href="https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textEditArray">LSP
+ * specification 3.17</a>: All text edits ranges refer to positions in the document they are
+ * computed on. They therefore move a document from state S1 to S2 without describing any
+ * intermediate state.
+ */
 public class TextEdit {
 
   private final Range range;
   private final String newText;
   private final @Nullable String reason;
 
+  /**
+   * Create a new text edit.
+   *
+   * @param range Range of the text edit.
+   * @param newText New text to insert.
+   */
   public TextEdit(final Range range, final String newText) {
     this.range = range;
     this.newText = newText;
     this.reason = null;
   }
 
+  /**
+   * Create a new text edit.
+   *
+   * @param range Range of the text edit.
+   * @param newText New text to insert.
+   * @param reason Reason for the text edit.
+   */
   public TextEdit(final Range range, final String newText, final String reason) {
     this.range = range;
     this.newText = newText;

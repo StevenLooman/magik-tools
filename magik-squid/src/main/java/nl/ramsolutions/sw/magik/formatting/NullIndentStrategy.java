@@ -13,6 +13,11 @@ public class NullIndentStrategy extends IndentStrategy {
   }
 
   @Override
+  public void setTokenColumnTracker(final TokenColumnTracker tokenColumnTracker) {
+    // Null indent strategy does not use the token column tracker.
+  }
+
+  @Override
   public String getStrategyName() {
     return NullIndentStrategy.NAME;
   }

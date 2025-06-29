@@ -48,6 +48,11 @@ class TabbedIndentStrategy extends IndentStrategy {
   }
 
   @Override
+  public void setTokenColumnTracker(final TokenColumnTracker tokenColumnTracker) {
+    // Tabbed indent strategy does not use the token column tracker.
+  }
+
+  @Override
   public String getStrategyName() {
     return TabbedIndentStrategy.NAME;
   }
@@ -96,7 +101,8 @@ class TabbedIndentStrategy extends IndentStrategy {
                   if (acc.isEmpty()) {
                     acc.add(node);
                   } else {
-                    final AstNode lastNode = acc.get(acc.size() - 1);
+                    final int accSize = acc.size();
+                    final AstNode lastNode = acc.get(accSize - 1);
                     if (lastNode.getTokenLine() != node.getTokenLine()) {
                       acc.add(node);
                     }
@@ -113,15 +119,13 @@ class TabbedIndentStrategy extends IndentStrategy {
     // and PARAMETERS, but not for BODY, VARIABLE_DEFINITION, etc.
 
     // But do indent it if the start token is on its own line.
-    // TODO: AI generated this, so review this.
+    // TODO: Should also be done for other nodes in the list?
     if (currentNode.is(MagikGrammar.SIMPLE_VECTOR, MagikGrammar.ARGUMENTS, MagikGrammar.PARAMETERS)
-        && token.getLine()
-            > currentNode
-                .getTokenLine()) { // This is not right, as we don't see if the start-token is on
-      // its own line.
+        && token.getLine() > currentNode.getTokenLine()) {
       dedupedIndentNodes.add(currentNode);
     }
 
+    // Remove the last indent node if the token is a closing brace, square, or parenthesis.
     if (AstQuery.tokenIs(
             token,
             MagikPunctuator.BRACE_R.getValue(),
@@ -132,7 +136,7 @@ class TabbedIndentStrategy extends IndentStrategy {
     }
 
     final int tabSize = this.options.getTabSize();
-    final int indentSize = dedupedIndentNodes.size() * tabSize;
-    return this.indentString(indentSize);
+    final int indentCount = dedupedIndentNodes.size();
+    return this.indentString(indentCount * tabSize);
   }
 }

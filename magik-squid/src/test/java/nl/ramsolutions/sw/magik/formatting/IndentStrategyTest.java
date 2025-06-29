@@ -32,6 +32,13 @@ abstract class IndentStrategyTest {
 
           private AstNode currentNode;
           private Token lastTextToken;
+          private TokenColumnTracker tokenColumnTracker;
+
+          @Override
+          protected void walkPreMagik(AstNode node) {
+            tokenColumnTracker = new TokenColumnTracker(node);
+            strategy.setTokenColumnTracker(tokenColumnTracker);
+          }
 
           @Override
           protected void walkPreDefault(final AstNode node) {
@@ -39,12 +46,12 @@ abstract class IndentStrategyTest {
           }
 
           @Override
-          protected void walkPostDefault(AstNode node) {
+          protected void walkPostDefault(final AstNode node) {
             this.currentNode = this.currentNode.getParent();
           }
 
           @Override
-          protected void walkTrivia(Trivia trivia) {
+          protected void walkTrivia(final Trivia trivia) {
             for (final Token token : trivia.getTokens()) {
               if (trivia.isComment()) {
                 this.walkToken(token);
@@ -63,7 +70,10 @@ abstract class IndentStrategyTest {
             // Mimic FormattingWalker, calling only indentFor() on new lines.
             if (this.lastTextToken != null && !token.isOnSameLineThan(this.lastTextToken)) {
               final TextEdit edit = strategy.ensureIndenting(token, this.currentNode);
-              edits.add(edit);
+              if (edit != null) {
+                tokenColumnTracker.applyTextEdit(edit);
+                edits.add(edit);
+              }
             }
 
             strategy.setLastToken(token);

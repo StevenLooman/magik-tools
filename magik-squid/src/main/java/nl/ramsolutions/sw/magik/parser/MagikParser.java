@@ -5,7 +5,6 @@ import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.impl.Parser;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -15,6 +14,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import nl.ramsolutions.sw.AstNodeHelper;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
+import nl.ramsolutions.sw.TokenHelper;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.slf4j.Logger;
@@ -86,7 +86,7 @@ public class MagikParser {
    */
   public AstNode parseSafe(final String source, final URI uri) {
     final AstNode node = this.parse(source);
-    AstNodeHelper.updateUri(node, uri);
+    AstNodeHelper.setUri(node, uri);
     return node;
   }
 
@@ -138,7 +138,7 @@ public class MagikParser {
     final AstNode node = this.parser.parse(source);
 
     final URI uri = path.toUri();
-    AstNodeHelper.updateUri(node, uri);
+    AstNodeHelper.setUri(node, uri);
 
     this.updateIdentifiersSymbolsCasing(node);
 
@@ -155,17 +155,8 @@ public class MagikParser {
       final String newName = newType.toString();
 
       // Convert node to new type.
-      try {
-        final Field fieldType = AstNode.class.getDeclaredField("type");
-        fieldType.setAccessible(true);
-        fieldType.set(node, newType);
-
-        final Field fieldName = AstNode.class.getDeclaredField("name");
-        fieldName.setAccessible(true);
-        fieldName.set(node, newName);
-      } catch (final ReflectiveOperationException exception) {
-        LOGGER.error(exception.getMessage(), exception);
-      }
+      AstNodeHelper.setType(node, newType);
+      AstNodeHelper.setName(node, newName);
     }
 
     node.getChildren().forEach(this::applyRuleMapping);
@@ -177,17 +168,11 @@ public class MagikParser {
    * @param node Node to update.
    */
   private void updateIdentifiersSymbolsCasing(final AstNode node) {
-    try {
-      final Field field = Token.class.getDeclaredField("value");
-      field.setAccessible(true);
-      if (node.is(MagikGrammar.IDENTIFIER) || node.is(MagikGrammar.SYMBOL)) {
-        final Token token = node.getToken();
-        final String value = token.getValue();
-        final String newValue = MagikParser.parseIdentifier(value);
-        field.set(token, newValue);
-      }
-    } catch (final ReflectiveOperationException exception) {
-      LOGGER.error(exception.getMessage(), exception);
+    if (node.is(MagikGrammar.IDENTIFIER) || node.is(MagikGrammar.SYMBOL)) {
+      final Token token = node.getToken();
+      final String value = token.getValue();
+      final String newValue = MagikParser.parseIdentifier(value);
+      TokenHelper.setValue(token, newValue);
     }
 
     node.getChildren().forEach(this::updateIdentifiersSymbolsCasing);
@@ -201,32 +186,39 @@ public class MagikParser {
    */
   @SuppressWarnings({"java:S127", "checkstyle:ModifiedControlVariable"})
   static String parseIdentifier(final String value) {
-    // if |, read until next |
-    // if \\., read .
-    // else read lowercase
+    // If `|`, read until next `|`.
+    // If `\.`, read `.`.
+    // Else, read lowercase.
     final StringBuilder builder = new StringBuilder(value.length());
 
     for (int i = 0; i < value.length(); ++i) {
       char chr = value.charAt(i);
-      if (chr == '|') {
-        // piped segment
-        ++i; // skip first |
-        // read until next |
+      if (chr == '|') { // Piped segment.
+        // Skip first `|`.
+        ++i;
+
+        // Read until next `|`.
         for (; i < value.length(); ++i) {
           chr = value.charAt(i);
           if (chr == '|') {
             break;
           }
+
           builder.append(chr);
         }
-      } else if (chr == '\\') {
-        // escaped character
-        ++i; // skip \
+      } else if (chr == '\\') { // Escaped character.
+        // Skip `\`.
+        ++i;
+
         chr = value.charAt(i);
         builder.append(chr);
       } else {
-        // normal character
+        // Normal character, but skip whitespaces.
         chr = Character.toLowerCase(chr);
+        if (Character.isWhitespace(chr)) {
+          continue;
+        }
+
         builder.append(chr);
       }
     }

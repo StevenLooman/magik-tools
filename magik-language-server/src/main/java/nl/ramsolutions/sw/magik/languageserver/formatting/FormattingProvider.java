@@ -3,10 +3,13 @@ package nl.ramsolutions.sw.magik.languageserver.formatting;
 import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.util.List;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
-import nl.ramsolutions.sw.magik.formatting.FormattingWalker;
+import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
+import nl.ramsolutions.sw.magik.formatting.next.FormattingWalker2;
+import nl.ramsolutions.sw.magik.formatting.next.IndentStrategyFactory;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -32,11 +35,17 @@ public class FormattingProvider {
       final MagikFile magikFile, final FormattingOptions options) {
     final AstNode node = magikFile.getTopNode();
 
-    final nl.ramsolutions.sw.magik.formatting.FormattingOptions magikToolsFormattingOptions =
+    final nl.ramsolutions.sw.magik.formatting.FormattingOptions formattingOptions =
         Lsp4jConversion.formattingOptionsFromLsp4j(options);
-    final FormattingWalker walker = new FormattingWalker(magikToolsFormattingOptions);
-    walker.walkAst(node);
-    final List<nl.ramsolutions.sw.magik.TextEdit> textEdits = walker.getTextEdits();
+    final MagikToolsProperties properties = magikFile.getProperties();
+    final MagikFormattingSettings formattingSettings = new MagikFormattingSettings(properties);
+    final IndentStrategyFactory factory = new IndentStrategyFactory(formattingSettings);
+    final Class<? extends FormattingWalker2> indentWalker = factory.create();
+    final nl.ramsolutions.sw.magik.formatting.next.FormattingProvider provider =
+        new nl.ramsolutions.sw.magik.formatting.next.FormattingProvider(
+            formattingOptions, indentWalker);
+    final List<nl.ramsolutions.sw.magik.TextEdit> textEdits = provider.format(node);
+    ;
     return textEdits.stream().map(Lsp4jConversion::textEditToLsp4j).toList();
   }
 

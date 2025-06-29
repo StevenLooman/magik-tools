@@ -10,7 +10,7 @@ import java.util.List;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.junit.jupiter.api.Test;
 
-/** Test MagikParser. */
+/** Test {@link MagikParser}. */
 @SuppressWarnings("checkstyle:MagicNumber")
 class MagikParserTest {
 

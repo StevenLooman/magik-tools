@@ -29,7 +29,7 @@ public class MagikFormattingSettings {
    * @return The indent strategy, defaults to "default".
    */
   public String getIndentStrategy() {
-    return this.properties.getPropertyString(KEY_MAGIK_FORMATTING_INDENT_STRATEGY, "default");
+    return this.properties.getPropertyString(KEY_MAGIK_FORMATTING_INDENT_STRATEGY, "null");
   }
 
   /**

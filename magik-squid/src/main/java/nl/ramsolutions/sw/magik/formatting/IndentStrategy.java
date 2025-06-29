@@ -8,7 +8,7 @@ import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 
 /** Abstract indent strategy. */
-abstract class IndentStrategy extends FormattingStategy {
+public abstract class IndentStrategy extends FormattingStategy {
 
   /**
    * Constructor.
@@ -18,6 +18,13 @@ abstract class IndentStrategy extends FormattingStategy {
   IndentStrategy(final FormattingOptions options) {
     super(options);
   }
+
+  /**
+   * Set the TokenColumnTracker.
+   *
+   * @param tokenColumnTracker TokenColumnTracker.
+   */
+  abstract void setTokenColumnTracker(final TokenColumnTracker tokenColumnTracker);
 
   /**
    * Get the name of the strategy.

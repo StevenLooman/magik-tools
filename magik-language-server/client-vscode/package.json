@@ -295,27 +295,36 @@
         },
         "magik.formatting.indentStrategy": {
           "description": "Indent strategy to use",
-          "type": "string"
+          "type": "string",
+          "enum": [
+            "null",
+            "relative"
+          ]
         },
         "magik.formatting.indentChar": {
           "description": "Indent character, 'tab' or 'space'",
-          "type": "string"
+          "type": "string",
+          "default": "tab"
         },
         "magik.formatting.indentWidth": {
           "description": "Indent width (tab size or number of spaces)",
-          "type": "number"
+          "type": "number",
+          "default": 8
         },
         "magik.formatting.insertFinalNewline": {
           "description": "Insert final newline -- only used by the VS Code extension.",
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "magik.formatting.trimTrailingWhitespace": {
           "description": "Trim trailing whitespace -- only used by the VS Code extension.",
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "magik.formatting.trimFinalNewlines": {
           "description": "Trim final newlines -- only used by the VS Code extension.",
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "magik.productDirs": {
           "description": "Paths to (compiled, containing a `libs/` directory) products.",

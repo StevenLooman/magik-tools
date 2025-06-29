@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.io.Writer;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 
-/** AstNode + assigned types printer. Useful for debugging the LocalTypeReasoner. */
+/**
+ * {@link AstNode} + assigned types printer.
+ *
+ * <p>Useful for debugging the {@link LocalTypeReasoner}, for example.
+ */
 public final class AstNodeTypePrinter {
 
   private final LocalTypeReasonerState reasonerState;
@@ -17,7 +21,7 @@ public final class AstNodeTypePrinter {
   }
 
   /**
-   * Print the AstNodes and its types.
+   * Print the {@link AstNode}s and its types.
    *
    * @param reasonerState ReasonerState to get types from.
    * @param rootNode Node to print.
@@ -28,7 +32,7 @@ public final class AstNodeTypePrinter {
     final AstNodeTypePrinter printer = new AstNodeTypePrinter(reasonerState, writer);
     try {
       printer.print(0, rootNode);
-    } catch (IOException exception) {
+    } catch (final IOException exception) {
       exception.printStackTrace(); // NOSONAR: Debug tooling only.
     }
   }

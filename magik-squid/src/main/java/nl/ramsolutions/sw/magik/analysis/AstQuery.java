@@ -21,7 +21,7 @@ import nl.ramsolutions.sw.magik.api.MagikPunctuator;
 import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionGrammar;
 import nl.ramsolutions.sw.productdef.api.SwProductDefinitionGrammar;
 
-/** AstNode query utility functions. */
+/** {@link AstNode} query utility functions. */
 public final class AstQuery {
 
   private AstQuery() {}
@@ -75,6 +75,28 @@ public final class AstQuery {
   }
 
   /**
+   * Test if {@link Token}s of {@link AstNode} are on the same line.
+   *
+   * @param node1 {@link AstNode} to test.
+   * @param node2 {@link AstNode} to test.
+   * @return True if both {@link AstNode}s have a {@link Token} and {@link Token}s are on the same
+   *     line, false otherwise.
+   */
+  public static boolean isOnSameLineThan(final AstNode node1, final @Nullable AstNode node2) {
+    if (node2 == null) {
+      return false;
+    }
+
+    final Token token1 = node1.getToken();
+    final Token token2 = node2.getToken();
+    if (token1 == null || token2 == null) {
+      return false;
+    }
+
+    return token1.isOnSameLineThan(token2);
+  }
+
+  /**
    * Test of the parent of {@link node} is of one of the given types.
    *
    * @param node Node to get/test parent from.
@@ -91,7 +113,10 @@ public final class AstQuery {
   }
 
   /**
-   * Get ancestor of {@link AstNode} which are of one of the given types, up to the given stop type.
+   * Get self or any ancestor of {@link AstNode} which are of one of the given types, up to the
+   * given stop type.
+   *
+   * <p>If node is of any of the given types, it is returned.
    *
    * @param node {@link AstNode} to query
    * @param stopType {@link AstNodeType} to stop at.
@@ -99,16 +124,71 @@ public final class AstQuery {
    * @return {@link AstNode} which matches query, {@code null} if not found.
    */
   @CheckForNull
-  public static AstNode getAncestorUpTo(
+  public static AstNode getSelfOrAncestorUpTo(
       final AstNode node, final AstNodeType stopType, final AstNodeType... nodeTypes) {
     AstNode current = node;
-    while (current != null && !current.is(stopType)) {
+    while (current != null) {
       if (current.is(nodeTypes)) {
         return current;
       }
+
+      if (current.is(stopType)) {
+        return null;
+      }
+
       current = current.getParent();
     }
+
     return null;
+  }
+
+  /**
+   * Get the first child {@link Token} which is any of the given values (case ignored).
+   *
+   * @param node Node to check.
+   * @param tokenValue {@link Token} value to check for.
+   * @return The first child {@link Token} which is any of the given values (case ignored).
+   */
+  @CheckForNull
+  public static Token getFirstChildToken(final AstNode node, final String... tokenValue) {
+    // final Set<String> tokenValues = Set.of(tokenValue);
+    // return node.getChildren().stream()
+    //     .map(AstNode::getToken)
+    //     .filter(Objects::nonNull)
+    //     .filter(
+    //         token -> {
+    //           final String lowerTokenValue = token.getValue().toLowerCase();
+    //           return tokenValues.contains(lowerTokenValue);
+    //         })
+    //     .findAny()
+    //     .orElse(null);
+    final List<Token> matchingChildTokens = AstQuery.getChildTokens(node, tokenValue);
+    if (matchingChildTokens.isEmpty()) {
+      return null;
+    }
+
+    return matchingChildTokens.get(0);
+  }
+
+  /**
+   * Get the first child {@link Token} which is any of the given values (case ignored).
+   *
+   * @param node Node to check.
+   * @param tokenValue {@link Token} value to check for.
+   * @return The first child {@link Token} which is any of the given values (case ignored).
+   */
+  @CheckForNull
+  public static List<Token> getChildTokens(final AstNode node, final String... tokenValue) {
+    final Set<String> tokenValues = Set.of(tokenValue);
+    return node.getChildren().stream()
+        .filter(AstQuery::isTokenNode)
+        .map(AstNode::getToken)
+        .filter(
+            token -> {
+              final String lowerTokenValue = token.getValue().toLowerCase();
+              return tokenValues.contains(lowerTokenValue);
+            })
+        .toList();
   }
 
   /**
@@ -119,10 +199,11 @@ public final class AstQuery {
    * @return True if any child token is the given operator, false otherwise.
    */
   public static boolean anyChildTokenIs(final AstNode node, final MagikOperator operator) {
-    return node.getChildren().stream()
-        .filter(childNode -> childNode.isNot(MagikGrammar.values()))
-        .map(AstNode::getTokenValue)
-        .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(operator.getValue()));
+    return AstQuery.getFirstChildToken(node, operator.getValue()) != null;
+    // return node.getChildren().stream()
+    //     .filter(childNode -> childNode.isNot(MagikGrammar.values()))
+    //     .map(AstNode::getTokenValue)
+    //     .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(operator.getValue()));
   }
 
   /**
@@ -133,10 +214,11 @@ public final class AstQuery {
    * @return True if any child token is the given punctuator, false otherwise.
    */
   public static boolean anyChildTokenIs(final AstNode node, final MagikPunctuator punctuator) {
-    return node.getChildren().stream()
-        .filter(childNode -> childNode.isNot(MagikGrammar.values()))
-        .map(AstNode::getTokenValue)
-        .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(punctuator.getValue()));
+    return AstQuery.getFirstChildToken(node, punctuator.getValue()) != null;
+    // return node.getChildren().stream()
+    //     .filter(childNode -> childNode.isNot(MagikGrammar.values()))
+    //     .map(AstNode::getTokenValue)
+    //     .anyMatch(tokenValue -> tokenValue.equalsIgnoreCase(punctuator.getValue()));
   }
 
   /**

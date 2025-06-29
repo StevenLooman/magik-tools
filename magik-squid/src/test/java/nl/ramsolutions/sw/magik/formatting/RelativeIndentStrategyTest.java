@@ -1,11 +1,11 @@
 package nl.ramsolutions.sw.magik.formatting;
 
-/** Tests for {@link TabbedIndentStrategy}. */
-class TabbedIndentStrategyTest extends IndentStrategyTest {
+/** Tests for {@link RelativeIndentStrategy}. */
+class RelativeIndentStrategyTest extends IndentStrategyTest {
 
   @Override
   IndentStrategy createStrategy(final FormattingOptions options) {
-    return new TabbedIndentStrategy(options);
+    return new RelativeIndentStrategy(options);
   }
 
   // @Test
@@ -31,12 +31,12 @@ class TabbedIndentStrategyTest extends IndentStrategyTest {
   //       """,
   //       """
   //       _block
-  //       # comment
+  //       a << 2
   //       _endblock
   //       """,
   //       """
   //       _block
-  //       a << 2
+  //       # comment
   //       _endblock
   //       """,
   //     })
@@ -62,7 +62,7 @@ class TabbedIndentStrategyTest extends IndentStrategyTest {
   //   assertThat(edits)
   //       .containsExactly(
   //           new TextEdit(
-  //               new Range(new Position(2, 0), new Position(2, 0)), "\t", "improper indenting"),
+  //               new Range(new Position(2, 0), new Position(2, 0)), "    ", "improper indenting"),
   //           new TextEdit(
   //               new Range(new Position(4, 0), new Position(4, 0)), "\t", "improper indenting"));
   // }
@@ -86,23 +86,40 @@ class TabbedIndentStrategyTest extends IndentStrategyTest {
   //       a << _if x?
   //       _then
   //         >> 1
-  //       _else
+  //       _elif x?
+  //       _then
   //         >> 2
+  //       _else
+  //         >> 3
   //       _endif
   //       """;
   //   final List<TextEdit> edits = this.getEdits(code);
   //   assertThat(edits)
   //       .containsExactly(
   //           new TextEdit(
-  //               new Range(new Position(2, 0), new Position(2, 0)), "\t", "improper indenting"),
+  //               new Range(new Position(2, 0), new Position(2, 0)), "     ", "improper
+  // indenting"),
   //           new TextEdit(
-  //               new Range(new Position(3, 0), new Position(3, 2)), "\t\t", "improper indenting"),
+  //               new Range(new Position(3, 0), new Position(3, 2)), "\t     ", "improper
+  // indenting"),
   //           new TextEdit(
-  //               new Range(new Position(4, 0), new Position(4, 0)), "\t", "improper indenting"),
+  //               new Range(new Position(4, 0), new Position(4, 0)), "     ", "improper
+  // indenting"),
   //           new TextEdit(
-  //               new Range(new Position(5, 0), new Position(5, 2)), "\t\t", "improper indenting"),
+  //               new Range(new Position(5, 0), new Position(5, 0)), "     ", "improper
+  // indenting"),
   //           new TextEdit(
-  //               new Range(new Position(6, 0), new Position(6, 0)), "\t", "improper indenting"));
+  //               new Range(new Position(6, 0), new Position(6, 2)), "\t     ", "improper
+  // indenting"),
+  //           new TextEdit(
+  //               new Range(new Position(7, 0), new Position(7, 0)), "     ", "improper
+  // indenting"),
+  //           new TextEdit(
+  //               new Range(new Position(8, 0), new Position(8, 2)), "\t     ", "improper
+  // indenting"),
+  //           new TextEdit(
+  //               new Range(new Position(9, 0), new Position(9, 0)), "     ", "improper
+  // indenting"));
   // }
 
   // @Test

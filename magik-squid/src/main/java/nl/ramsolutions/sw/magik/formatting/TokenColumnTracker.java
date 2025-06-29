@@ -10,8 +10,16 @@ import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
 
-/** Tracks the new positions of tokens, after a {@link TextEdit} would be applied. */
+/**
+ * Tracks the new positions of tokens, after a {@link TextEdit} would be applied.
+ *
+ * <p>Currently only tracks columns, not lines, as the name suggests.
+ */
 class TokenColumnTracker {
+
+  // TODO: Can we convert all tabs to spaces here? Then we don't have to worry about tabs, which
+  // are reported as a column of 1, but can be any number of spaces.
+  // Note that TextEdits can also replace/contain tabs, so we would have to convert those as well.
 
   final Map<Integer, List<Token>> lineTokens;
   final Map<Token, Integer> tokenNewColumns = new HashMap<>();
@@ -24,6 +32,12 @@ class TokenColumnTracker {
   TokenColumnTracker(final AstNode magikNode) {
     this.lineTokens =
         magikNode.getTokens().stream()
+            // // Get trivia tokens as well.
+            // .flatMap(token ->
+            //   Stream.concat(
+            //       Stream.of(token),
+            //       token.getTrivia().stream()
+            //           .flatMap(trivia -> trivia.getTokens().stream())))
             .collect(
                 Collectors.groupingBy(
                     Token::getLine, Collectors.mapping(token -> token, Collectors.toList())));
