@@ -25,7 +25,8 @@ class FormattingWalkerTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedFile magikFile =
         new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
-    final FormattingWalker walker = new FormattingWalker(options);
+    final IndentStrategy indentStrategy = new TabbedIndentStrategy(options);
+    final FormattingWalker walker = new FormattingWalker(indentStrategy, options);
     final AstNode topNode = magikFile.getTopNode();
     walker.walkAst(topNode);
     return walker.getTextEdits();

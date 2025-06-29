@@ -6,8 +6,15 @@ import com.sonar.sslr.api.Token;
 /** Null indent strategy. */
 public class NullIndentStrategy extends IndentStrategy {
 
+  public static final String NAME = "null";
+
   public NullIndentStrategy(final FormattingOptions options) {
     super(options);
+  }
+
+  @Override
+  public String getStrategyName() {
+    return NullIndentStrategy.NAME;
   }
 
   @Override

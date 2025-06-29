@@ -33,8 +33,8 @@ public class FormattingWalker extends MagikAstWalker {
    * @param options Formatting options.
    * @throws IOException -
    */
-  public FormattingWalker(final FormattingOptions options) {
-    this.indentStrategy = new TabbedIndentStrategy(options);
+  public FormattingWalker(final IndentStrategy indentStrategy, final FormattingOptions options) {
+    this.indentStrategy = indentStrategy;
     this.trailingWhitespaceStrategy = new TrailingWhitespaceStrategy(options);
     this.pragmaStrategy = new PragmaFormattingStrategy(options);
     this.magikStrategy = new MagikFormattingStrategy(options);

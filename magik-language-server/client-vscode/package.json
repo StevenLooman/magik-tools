@@ -293,12 +293,16 @@
           "type": "boolean",
           "default": true
         },
+        "magik.formatting.indentStrategy": {
+          "description": "Indent strategy to use",
+          "type": "string"
+        },
         "magik.formatting.indentChar": {
-          "description": "Indent character, 'tab' or 'space' -- only used by the VS Code extension.",
+          "description": "Indent character, 'tab' or 'space'",
           "type": "string"
         },
         "magik.formatting.indentWidth": {
-          "description": "Indent width (tab size or number of spaces) -- only used by the VS Code extension.",
+          "description": "Indent width (tab size or number of spaces)",
           "type": "number"
         },
         "magik.formatting.insertFinalNewline": {

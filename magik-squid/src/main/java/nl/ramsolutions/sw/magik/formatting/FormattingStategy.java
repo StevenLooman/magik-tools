@@ -8,7 +8,7 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 
-/** Indenting strategy. */
+/** Abstract formatting strategy. */
 abstract class FormattingStategy {
 
   @SuppressWarnings("checkstyle:VisibilityModifier")

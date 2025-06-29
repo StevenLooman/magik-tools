@@ -7,6 +7,7 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 
+/** Abstract indent strategy. */
 abstract class IndentStrategy extends FormattingStategy {
 
   /**
@@ -17,6 +18,13 @@ abstract class IndentStrategy extends FormattingStategy {
   IndentStrategy(final FormattingOptions options) {
     super(options);
   }
+
+  /**
+   * Get the name of the strategy.
+   *
+   * @return Strategy name.
+   */
+  abstract String getStrategyName();
 
   @CheckForNull
   TextEdit ensureIndenting(final Token token, final AstNode currentNode) {

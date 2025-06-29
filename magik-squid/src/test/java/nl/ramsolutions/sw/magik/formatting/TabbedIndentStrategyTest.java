@@ -116,7 +116,8 @@ class TabbedIndentStrategyTest extends IndentStrategyTest {
   }
 
   @Test
-  void testIndentArguments() {
+  void testIndentArguments1() {
+    // TODO: Indent on arguments line start.
     final String code =
         """
         def_slotted_exemplar(
@@ -124,6 +125,36 @@ class TabbedIndentStrategyTest extends IndentStrategyTest {
         	{
         		{:slot1, _unset}
         	})
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testIndentArguments2() {
+    // TODO: Indent on arguments line start.
+    final String code =
+        """
+        property_list.new_with(
+        	:key1, {
+        		{:value1}
+        	},
+          :key2, {
+        		{:value2}
+          })
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testIndentArguments3() {
+    // TODO: Indent on parent indent.
+    final String code =
+        """
+        call_me({
+        	:value
+        })
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
@@ -169,18 +200,6 @@ class TabbedIndentStrategyTest extends IndentStrategyTest {
     assertThat(edits).isEmpty();
   }
 
-  // @Test
-  // void testIndentVariableDefinitionAssignmentSimpleVector() {
-  //   final String code =
-  //       """
-  //       _local a << {
-  //       	10
-  //       }
-  //       """;
-  //   final List<TextEdit> edits = this.getEdits(code);
-  //   assertThat(edits).isEmpty();
-  // }
-
   @Test
   void testBinaryExpressionMultiple() {
     final String code =
@@ -194,5 +213,32 @@ class TabbedIndentStrategyTest extends IndentStrategyTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _local a << {
+        10
+        }
+        """,
+        """
+        _local a << {{{
+        10
+        }}}
+        """,
+        """
+        rope.new_with(
+        10
+        )
+        """,
+      })
+  void testPreventDoubleIndent(final String code) {
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits)
+        .containsExactly(
+            new TextEdit(
+                new Range(new Position(2, 0), new Position(2, 0)), "\t", "improper indenting"));
   }
 }

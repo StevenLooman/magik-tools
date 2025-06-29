@@ -7,6 +7,9 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 import nl.ramsolutions.sw.magik.formatting.FormattingWalker;
+import nl.ramsolutions.sw.magik.formatting.IndentStrategy;
+import nl.ramsolutions.sw.magik.formatting.IndentStrategyFactory;
+import nl.ramsolutions.sw.magik.formatting.NullIndentStrategy;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 
@@ -18,8 +21,18 @@ public class FormattingCheck extends MagikCheck {
   public static final String CHECK_KEY = "Formatting";
 
   private static final String MESSAGE = "Improper formatting: %s.";
+  private static final String DEFAULT_INDENT_STRATEGY = NullIndentStrategy.NAME;
   private static final String DEFAULT_INDENT_CHARACTER = "tab";
   private static final int DEFAULT_TAB_WIDTH = 8;
+
+  /** The indent strategy used for indentation (null/default). */
+  @RuleProperty(
+      key = "indent strategy",
+      description = "The strategy used for indentation (null/tabbed)",
+      defaultValue = "" + DEFAULT_INDENT_STRATEGY,
+      type = "STRING")
+  @SuppressWarnings("checkstyle:VisibilityModifier")
+  public String indentStrategy = DEFAULT_INDENT_STRATEGY;
 
   /** The character used for indentation (tab/space). */
   @RuleProperty(
@@ -44,7 +57,9 @@ public class FormattingCheck extends MagikCheck {
     final boolean insertSpaces = this.indentCharacter.equalsIgnoreCase("space");
     final FormattingOptions formattingOptions =
         new FormattingOptions(this.tabWidth, insertSpaces, false, false, false);
-    final FormattingWalker walker = new FormattingWalker(formattingOptions);
+    final IndentStrategy indentStrategy =
+        IndentStrategyFactory.createIndentStrategy(this.indentStrategy, formattingOptions);
+    final FormattingWalker walker = new FormattingWalker(indentStrategy, formattingOptions);
     final AstNode topNode = this.getMagikFile().getTopNode();
     walker.walkAst(topNode);
 
