@@ -246,6 +246,7 @@ export class MagikTestProvider implements vscode.Disposable {
 			.join(",");
 
 		// Build test runner script.
+		const forceModuleReload = "true";  // TODO: Make this configurable.
 		let script = `
 _protect
 	# Require products to be added.
@@ -259,13 +260,14 @@ _protect
 		_endloop
 	_endblock
 
-	# Load modules if needed.
+	# (Re)load modules if needed.
+	# Force a reload so the user does not have to do this manually.
 	_block
 		_for module _over {${modulesStr}}.fast_elements()
 		_loop
 			_if _not sw:sw_module_manager.module(module).loaded?
 			_then
-				sw:sw_module_manager.load_module(module)
+				sw:sw_module_manager.load_module(module, _unset, :force_reload?, ${forceModuleReload})
 			_endif
 		_endloop
 	_endblock
