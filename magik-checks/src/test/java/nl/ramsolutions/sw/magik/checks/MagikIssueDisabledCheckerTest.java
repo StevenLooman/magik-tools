@@ -13,22 +13,22 @@ class MagikIssueDisabledCheckerTest {
 
   @Test
   void testNotDisabled() throws ReflectiveOperationException {
-    assertIssueDisabled("show(1)\n", false);
+    this.assertIssueDisabled("show(1)\n", false);
   }
 
   @Test
   void testDisabledStatementInstruction() throws ReflectiveOperationException {
-    assertIssueDisabled("show(1) # mlint: disable=forbidden-call\n", true);
+    this.assertIssueDisabled("show(1) # mlint: disable=forbidden-call\n", true);
   }
 
   @Test
   void testDisabledAllStatementInstruction() throws ReflectiveOperationException {
-    assertIssueDisabled("show(1) # mlint: disable=all\n", true);
+    this.assertIssueDisabled("show(1) # mlint: disable=all\n", true);
   }
 
   @Test
   void testDisabledScopeInstruction() throws ReflectiveOperationException {
-    assertIssueDisabled(
+    this.assertIssueDisabled(
         """
         # mlint: disable=line-length,forbidden-call
         show(1)
@@ -38,7 +38,7 @@ class MagikIssueDisabledCheckerTest {
 
   @Test
   void testDisabledParentScopeInstruction() throws ReflectiveOperationException {
-    assertIssueDisabled(
+    this.assertIssueDisabled(
         """
         # mlint: disable=forbidden-call
         _block
@@ -50,7 +50,7 @@ class MagikIssueDisabledCheckerTest {
 
   @Test
   void testDisabledAllScopeInstruction() throws ReflectiveOperationException {
-    assertIssueDisabled(
+    this.assertIssueDisabled(
         """
         # mlint: disable=all
         show(1)
@@ -60,7 +60,7 @@ class MagikIssueDisabledCheckerTest {
 
   @Test
   void testDisabledAllParentScopeInstruction() throws ReflectiveOperationException {
-    assertIssueDisabled(
+    this.assertIssueDisabled(
         """
         # mlint: disable=all
         _block
