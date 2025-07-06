@@ -82,6 +82,16 @@
           ".msg"
         ],
         "configuration": "./languages/message-language-configuration.json"
+      },
+      {
+        "id": "translation",
+        "aliases": [
+          "Translation"
+        ],
+        "extensions": [
+          ".trn"
+        ],
+        "configuration": "./languages/translation-language-configuration.json"
       }
     ],
     "grammars": [
@@ -189,6 +199,11 @@
         "command": "magik.custom.reIndex",
         "title": "Reindex files",
         "category": "Magik"
+      },
+      {
+        "command": "magik.traceStatement",
+        "title": "Trace statement",
+        "category": "Magik"
       }
     ],
     "keybindings": [
@@ -216,6 +231,11 @@
         "command": "magik.transmitModuleDef",
         "key": "f4 b",
         "when": "editorTextFocus && editorLangId == module.def"
+      },
+      {
+        "command": "magik.traceStatement",
+        "key": "f4 t",
+        "when": "editorTextFocus && editorLangId == magik"
       }
     ],
     "taskDefinitions": [
@@ -353,18 +373,18 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
-    "postinstall": "cd client && npm install && cd .. && cd server && rm -rf ./* && cp ../../../magik-language-server/target/magik-language-server-*.jar . && cp ../../../magik-debug-adapter/target/magik-debug-adapter-*.jar . && cd ..",
+    "postinstall": "cd client && npm install && cd .. && cd server && rm -rf ./* && cp ../../../magik-language-server/target/magik-language-server-*.jar . && cp ../../../magik-debug-adapter/target/magik-debug-adapter-*.jar . && cp ../../../magik-session-wrapper/target/magik-session-wrapper-*.jar . && cd ..",
     "package": "vsce package"
   },
   "devDependencies": {
-    "@eslint/js": "^9.26.0",
+    "@eslint/js": "^9.30.0",
     "@types/eslint__js": "^8.42.3",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^22.15.18",
+    "@types/node": "^22.15.29",
     "@typescript-eslint/parser": "^8.26.0",
-    "@vscode/vsce": "^3.3.2",
-    "eslint": "^9.26.0",
+    "@vscode/vsce": "^3.6.0",
+    "eslint": "^9.30.0",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.32.1"
+    "typescript-eslint": "^8.35.1"
   }
 }

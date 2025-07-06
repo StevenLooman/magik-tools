@@ -19,6 +19,8 @@ class SmallworldSession {
   private static final String SESSION_OUTPUT_THREAD_NAME = "SessionOutputThread";
   private static final Pattern GLOBAL_DOES_NOT_EXIST_PATTERN =
       Pattern.compile("Global .* does not exist: create it\\? \\(Y\\) ");
+  private static final Pattern PLEASE_ANSWER_Y_OR_N =
+      Pattern.compile("Please answer y or n \\(Y\\) ");
   static final Pattern DEFAULT_PROMPT_PATTERN = Pattern.compile("^(Magik|MagikSF)> $");
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SmallworldSession.class);
@@ -111,7 +113,8 @@ class SmallworldSession {
   }
 
   private boolean matchesSessionQuestion(final String str) {
-    return GLOBAL_DOES_NOT_EXIST_PATTERN.matcher(str).matches();
+    return GLOBAL_DOES_NOT_EXIST_PATTERN.matcher(str).matches()
+        || PLEASE_ANSWER_Y_OR_N.matcher(str).matches();
   }
 
   BufferedReader getSessionReader() {
@@ -153,7 +156,6 @@ class SmallworldSession {
 
   boolean waitForPrompt() {
     // Wait for the io thread to start.
-    LOGGER.debug("Waiting for io thread to start...");
     while (this.promptSeen == null) {
       try {
         Thread.sleep(50);

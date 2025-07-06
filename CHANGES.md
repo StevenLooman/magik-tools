@@ -43,6 +43,10 @@
 - Add `id` to `default-whitelist` in `VariableNamingCheck`.
 - Add more detailed pragma registration.
 - Add checks MissingPragma, PragmaInvalidClassifyLevelCheck, PragmaInvalidUsageCheck.
+- Add f4 t keybinding to VSCode plugin to write a trace command.
+- Fix determining assigned variable in top scope being a global.
+- Fix `ScopeEntry` types when ending up in the global scope.
+- Fix `HidesVariableCheck` not seeing `DEFINITION` `ScopeEntry`s.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)

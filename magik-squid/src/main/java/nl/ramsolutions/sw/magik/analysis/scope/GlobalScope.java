@@ -34,7 +34,14 @@ public class GlobalScope extends Scope {
       final String identifier,
       final AstNode node,
       final @Nullable ScopeEntry parentEntry) {
-    final ScopeEntry scopeEntry = new ScopeEntry(type, identifier, node, parentEntry);
+    // // Commented, lets keep some things working...
+    // if (type != ScopeEntry.Type.GLOBAL) {
+    //   throw new IllegalArgumentException("Only GLOBAL declarations are allowed in GlobalScope.");
+    // }
+
+    // Anything added here becomes a global declaration.
+    final ScopeEntry scopeEntry =
+        new ScopeEntry(ScopeEntry.Type.GLOBAL, identifier, node, parentEntry);
     this.scopeEntries.put(identifier, scopeEntry);
     return scopeEntry;
   }

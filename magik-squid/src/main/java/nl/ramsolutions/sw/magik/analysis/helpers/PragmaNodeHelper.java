@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /** Helper for PRAGMA nodes. */
@@ -81,7 +82,8 @@ public class PragmaNodeHelper {
                         .getDescendants(MagikGrammar.IDENTIFIER)
                         .stream()
                         .map(AstNode::getTokenOriginalValue)
-                        .collect(Collectors.toSet())));
+                        .collect(Collectors.toSet()),
+                (a, b) -> Stream.concat(a.stream(), b.stream()).collect(Collectors.toSet())));
   }
 
   /**

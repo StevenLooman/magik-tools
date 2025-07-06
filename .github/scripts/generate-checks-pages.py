@@ -159,8 +159,7 @@ class JavaToMarkdown:
 
 if __name__ == "__main__":
     output_folder = Path("wiki/checks")
-    if not output_folder.exists():
-        output_folder.mkdir()
+    output_folder.mkdir(parents=True, exist_ok=True)
 
     index_file_path = output_folder / "Checks-Index.md"
 

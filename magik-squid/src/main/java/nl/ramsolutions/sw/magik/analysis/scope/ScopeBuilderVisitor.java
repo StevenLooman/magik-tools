@@ -255,6 +255,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
             .map(childNode -> node.getChildren().indexOf(childNode))
             .max(Comparator.naturalOrder())
             .orElse(null);
+    final AstNode scopeNode = node.getFirstAncestor(MagikGrammar.BODY, MagikGrammar.MAGIK);
 
     final List<AstNode> childNodes = node.getChildren().subList(0, lastAssignmentTokenIndex);
     for (final AstNode childNode : childNodes) {
@@ -275,7 +276,9 @@ public class ScopeBuilderVisitor extends MagikVisitor {
 
       final int index = tokenValue.indexOf(':');
       final ScopeEntry.Type type =
-          index != -1 ? ScopeEntry.Type.GLOBAL : ScopeEntry.Type.DEFINITION;
+          index != -1 || scopeNode.is(MagikGrammar.MAGIK)
+              ? ScopeEntry.Type.GLOBAL
+              : ScopeEntry.Type.DEFINITION;
       final String identifier = index != -1 ? tokenValue.substring(index + 1) : tokenValue;
 
       this.currentScope.addDeclaration(type, identifier, identifierNode, null);

@@ -33,10 +33,10 @@ public class MethodExistsTypedCheck extends MagikTypedCheck {
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
 
-    final TypeString combinedTypeString2 = TypeString.combine(calledTypeStr);
-    Objects.requireNonNull(combinedTypeString2);
-    for (final TypeString typeString : combinedTypeString2.getCombinedTypes()) {
-      final TypeStringResolver resolver = this.getTypeStringResolver();
+    final TypeString combinedTypeString = TypeString.combine(calledTypeStr);
+    Objects.requireNonNull(combinedTypeString);
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    for (final TypeString typeString : combinedTypeString.getCombinedTypes()) {
       final Collection<MethodDefinition> methodDefs =
           resolver.getRespondingMethodDefinitions(typeString, methodName);
 

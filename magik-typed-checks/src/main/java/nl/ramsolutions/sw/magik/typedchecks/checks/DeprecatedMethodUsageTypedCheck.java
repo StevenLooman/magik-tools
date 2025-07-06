@@ -40,7 +40,10 @@ public class DeprecatedMethodUsageTypedCheck extends MagikTypedCheck {
         .filter(
             methodDef ->
                 methodDef.getPragma() != null
-                    && methodDef.getPragma().getTopics().contains(Pragma.TOPIC_DEPRECATED))
+                    && methodDef
+                        .getPragma()
+                        .getClassifyLevels()
+                        .contains(Pragma.CLASSIFY_LEVEL_DEPRECATED))
         .forEach(
             methodDef -> {
               final String fullName = calledTypeStr.getFullString() + "." + methodName;

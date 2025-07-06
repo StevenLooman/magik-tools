@@ -5,33 +5,38 @@ _pragma(classify_level=basic, topic=type_dumper)
 ## Global definition.
 ## @slot {sw:char16_vector} type_name
 ## @slot {sw:char16_vector} aliased_type_name
+## @slot {pragma|sw:unset} pragma
 def_slotted_exemplar(
 	:global_definition,
 	{
 		{:type_name, _unset, :readable, :public},
-		{:aliased_type_name, _unset, :readable, :public}
+		{:aliased_type_name, _unset, :readable, :public},
+		{:pragma, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_method global_definition.new(type_name, aliased_type_name)
+_method global_definition.new(type_name, aliased_type_name, pragma)
 	## Constructor.
 	## @param {sw:char16_vector} type_name
 	## @param {sw:char16_vector} aliased_type_name
+	## @param {pragma|sw:unset} pragma
 	## @return {_self}
-	_return _clone.init(type_name, aliased_type_name)
+	_return _clone.init(type_name, aliased_type_name, pragma)
 _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_private _method global_definition.init(type_name, aliased_type_name)
+_private _method global_definition.init(type_name, aliased_type_name, pragma)
 	## Initializer.
 	## @param {sw:char16_vector} type_name
 	## @param {sw:char16_vector} aliased_type_name
+	## @param {pragma|sw:unset} pragma
 	## @return {_self}
 	.type_name << type_name
 	.aliased_type_name << aliased_type_name
+	.pragma << pragma
 	_return _self
 _endmethod
 $
@@ -53,7 +58,19 @@ _method global_definition.new_from(package, name, method_table)
 			>> write_string("@sw:", metadata[:exemplar_name]).evaluate()
 		_endif
 	_local aliased_type_name << _self.name_from_type(global_var.package, global_var.key)
-	_return _self.new(type_name, aliased_type_name)
+	_local topics <<
+		_try
+			>> method_finder.get_method_topics(name, "<global>")
+		_when error
+			>> {}
+		_endtry
+	_return _self.new(
+		type_name,
+		aliased_type_name,
+		_if _not topics.empty?
+		_then
+			>> pragma.new_from_topics(topics)
+		_endif)
 _endmethod
 $
 
