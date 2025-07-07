@@ -155,9 +155,12 @@ class NestingDepthCheckTest extends MagikCheckTestBase {
     assertThat(issues).isEmpty();
   }
 
-  @ParameterizedTest
-  @ValueSource(
-      strings = {
+  @Test
+  void testHandlingIsNotCountedAsValidEarlyReturnWithCountEarlyReturnEnabled() {
+    final NestingDepthCheck check = new NestingDepthCheck();
+    check.countEarlyReturnAsNestingDepth = true;
+
+    final String code =
         """
         _method a.b
           _handling some_error _with _proc@mute() _return _endproc
@@ -172,19 +175,17 @@ class NestingDepthCheckTest extends MagikCheckTestBase {
             _endloop
           _endif
         _endmethod
-        """,
-      })
-  void testHandlingIsNotCountedAsValidEarlyReturnWithCountEarlyReturnEnabled(final String code) {
-    final NestingDepthCheck check = new NestingDepthCheck();
-    check.countEarlyReturnAsNestingDepth = true;
-
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
 
-  @ParameterizedTest
-  @ValueSource(
-      strings = {
+  @Test
+  void testHandlingIsNotCountedAsValidEarlyReturnWithCountEarlyReturnDisabled() {
+    final NestingDepthCheck check = new NestingDepthCheck();
+    check.countEarlyReturnAsNestingDepth = false;
+
+    final String code =
         """
         _method a.b
           _handling some_error _with _proc@mute() _return _endproc
@@ -199,12 +200,7 @@ class NestingDepthCheckTest extends MagikCheckTestBase {
             _endloop
           _endif
         _endmethod
-        """,
-      })
-  void testHandlingIsNotCountedAsValidEarlyReturnWithCountEarlyReturnDisabled(final String code) {
-    final NestingDepthCheck check = new NestingDepthCheck();
-    check.countEarlyReturnAsNestingDepth = false;
-
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
