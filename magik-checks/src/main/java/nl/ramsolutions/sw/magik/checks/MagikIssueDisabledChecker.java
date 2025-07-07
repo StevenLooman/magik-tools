@@ -48,7 +48,10 @@ public final class MagikIssueDisabledChecker {
             .getOrDefault(fileLineNo, Collections.emptyMap());
     final String[] statementDisableds =
         statementInstructions.getOrDefault(MagikIssueDisabledChecker.KEY_DISABLE, "").split(",");
-    final boolean statementDisabled = List.of(statementDisableds).contains(checkKey);
+    final List<String> disabledList = List.of(statementDisableds);
+    final boolean statementDisabled =
+        disabledList.contains("all") || disabledList.contains(checkKey);
+
     if (statementDisabled) {
       return true;
     }
@@ -68,6 +71,6 @@ public final class MagikIssueDisabledChecker {
                     .getOrDefault(MagikIssueDisabledChecker.KEY_DISABLE, "")
                     .split(","))
         .flatMap(Arrays::stream)
-        .anyMatch(disabled -> disabled.equals(checkKey));
+        .anyMatch(disabled -> disabled.equals("all") || disabled.equals(checkKey));
   }
 }
