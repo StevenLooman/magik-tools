@@ -47,6 +47,7 @@
 - Fix determining assigned variable in top scope being a global.
 - Fix `ScopeEntry` types when ending up in the global scope.
 - Fix `HidesVariableCheck` not seeing `DEFINITION` `ScopeEntry`s.
+- Add support for inline `# mlint: disable=all` to disable all checks.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
