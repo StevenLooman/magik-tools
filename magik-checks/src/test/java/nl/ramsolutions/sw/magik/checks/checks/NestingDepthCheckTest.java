@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.checks.MagikIssue;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -153,5 +154,55 @@ class NestingDepthCheckTest extends MagikCheckTestBase {
 
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
+  }
+
+  @Test
+  void testHandlingIsNotCountedAsValidEarlyReturnWithCountEarlyReturnEnabled() {
+    final NestingDepthCheck check = new NestingDepthCheck();
+    check.countEarlyReturnAsNestingDepth = true;
+
+    final String code =
+        """
+        _method a.b
+          _handling some_error _with _proc@mute() _return _endproc
+
+          _if a
+          _then
+            _loop
+              _if c
+              _then
+                write("Too deep!")
+              _endif
+            _endloop
+          _endif
+        _endmethod
+        """;
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
+
+  @Test
+  void testHandlingIsNotCountedAsValidEarlyReturnWithCountEarlyReturnDisabled() {
+    final NestingDepthCheck check = new NestingDepthCheck();
+    check.countEarlyReturnAsNestingDepth = false;
+
+    final String code =
+        """
+        _method a.b
+          _handling some_error _with _proc@mute() _return _endproc
+
+          _if a
+          _then
+            _loop
+              _if c
+              _then
+                write("Too deep!")
+              _endif
+            _endloop
+          _endif
+        _endmethod
+        """;
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
   }
 }

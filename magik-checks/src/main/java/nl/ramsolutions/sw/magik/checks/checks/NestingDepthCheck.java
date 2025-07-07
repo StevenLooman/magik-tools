@@ -39,7 +39,7 @@ public class NestingDepthCheck extends MagikCheck {
 
   @Override
   protected void walkPreBody(final AstNode node) {
-    if (!countEarlyReturnAsNestingDepth && isEarlyReturn(node)) {
+    if (!this.countEarlyReturnAsNestingDepth && this.isEarlyReturn(node)) {
       return;
     }
 
@@ -74,10 +74,19 @@ public class NestingDepthCheck extends MagikCheck {
     }
 
     AstNode statement = node.getFirstChild();
+
+    if (this.isHandling(statement)) {
+      return false;
+    }
+
     return statement.getFirstChild(
             MagikGrammar.LEAVE_STATEMENT,
             MagikGrammar.CONTINUE_STATEMENT,
             MagikGrammar.RETURN_STATEMENT)
         != null;
+  }
+
+  private boolean isHandling(final AstNode node) {
+    return node.is(MagikGrammar.HANDLING) || node.getFirstAncestor(MagikGrammar.HANDLING) != null;
   }
 }
