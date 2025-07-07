@@ -174,17 +174,38 @@ class NestingDepthCheckTest extends MagikCheckTestBase {
         _endmethod
         """,
       })
-  void testHandlingIsNotCountedAsValidEarlyReturn(final String code) {
-    final NestingDepthCheck checkEnabled = new NestingDepthCheck();
-    checkEnabled.countEarlyReturnAsNestingDepth = true;
+  void testHandlingIsNotCountedAsValidEarlyReturnWithCountEarlyReturnEnabled(final String code) {
+    final NestingDepthCheck check = new NestingDepthCheck();
+    check.countEarlyReturnAsNestingDepth = true;
 
-    final List<MagikIssue> issuesEnabled = this.runCheck(code, checkEnabled);
-    assertThat(issuesEnabled).hasSize(1);
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
 
-    final NestingDepthCheck checkDisabled = new NestingDepthCheck();
-    checkDisabled.countEarlyReturnAsNestingDepth = false;
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _method a.b
+          _handling some_error _with _proc@mute() _return _endproc
 
-    final List<MagikIssue> issuesDisabled = this.runCheck(code, checkDisabled);
-    assertThat(issuesDisabled).hasSize(1);
+          _if a
+          _then
+            _loop
+              _if c
+              _then
+                write("Too deep!")
+              _endif
+            _endloop
+          _endif
+        _endmethod
+        """,
+      })
+  void testHandlingIsNotCountedAsValidEarlyReturnWithCountEarlyReturnDisabled(final String code) {
+    final NestingDepthCheck check = new NestingDepthCheck();
+    check.countEarlyReturnAsNestingDepth = false;
+
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
   }
 }
