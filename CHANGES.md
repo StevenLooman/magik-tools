@@ -48,6 +48,7 @@
 - Fix `ScopeEntry` types when ending up in the global scope.
 - Fix `HidesVariableCheck` not seeing `DEFINITION` `ScopeEntry`s.
 - Add support for inline `# mlint: disable=all` to disable all checks.
+- Fix `VariableDeclarationUsageDistanceCheck` to see augmented assignment (e.g. `_andif<<` or `+<< 1`) as valid usage.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
