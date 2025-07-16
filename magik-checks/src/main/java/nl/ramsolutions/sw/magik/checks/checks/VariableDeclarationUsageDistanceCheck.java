@@ -163,9 +163,7 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
    * @return True if is LHS of assignment, false otherwise.
    */
   private boolean isLhsOfAssignment(final AstNode node) {
-    final AstNode assignmentNode =
-        node.getFirstAncestor(
-            MagikGrammar.ASSIGNMENT_EXPRESSION, MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION);
+    final AstNode assignmentNode = node.getFirstAncestor(MagikGrammar.ASSIGNMENT_EXPRESSION);
     if (assignmentNode == null) {
       return false;
     }
