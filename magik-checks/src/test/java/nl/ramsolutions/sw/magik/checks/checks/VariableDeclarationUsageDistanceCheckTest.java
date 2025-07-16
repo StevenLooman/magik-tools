@@ -36,7 +36,7 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
       })
   void testValid(final String code) {
     final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
-    check.maxDistance = 5;
+    check.maxDistance = 5; // Defaults to 5, but to be explicit.
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -132,6 +132,83 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
         """,
       })
   void testInvalid(final String code) {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 2;
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(1);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _method object.m
+          _local success? << _true
+          do_something()
+          do_something()
+          do_something()
+          success? _andif<< _false
+          write(success?)
+        _endmethod
+        """,
+        """
+        _method object.m
+          _local count << 5
+          do_something()
+          do_something()
+          do_something()
+          count +<< 1
+          write(count)
+        _endmethod
+        """,
+      })
+  void testValidWithReassignment(final String code) {
+    final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
+    check.maxDistance = 4;
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _method object.m
+          _local success? << _true
+          do_something()
+          do_something()
+          do_something()
+          success? << _false
+          write(success?)
+        _endmethod
+        """,
+        """
+        _method object.m
+          _local a << 1
+          do_something()
+          do_something()
+          do_something()
+          a << 2
+          _if _true
+          _then
+            write(a)
+          _endif
+        _endmethod
+        """,
+        """
+        _method object.m
+          _local x << 1
+          do_something()
+          do_something()
+          do_something()
+          x << 2
+          x.do_something()
+          x << 3
+          x.do_another()
+        _endmethod
+        """,
+      })
+  void testInvalidWithReassignment(final String code) {
     final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
     check.maxDistance = 2;
     final List<MagikIssue> issues = this.runCheck(code, check);
