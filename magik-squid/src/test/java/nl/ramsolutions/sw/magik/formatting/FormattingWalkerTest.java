@@ -781,4 +781,18 @@ class FormattingWalkerTest {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
+
+  @Test
+  void testProtect() { // NOSONAR
+    final String code =
+        """
+        _protect
+        	1
+        _protection
+        	2
+        _endprotect
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
 }

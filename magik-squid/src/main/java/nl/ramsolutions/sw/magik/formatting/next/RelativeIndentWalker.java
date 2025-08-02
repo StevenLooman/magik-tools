@@ -27,7 +27,7 @@ public class RelativeIndentWalker extends FormattingWalker2 {
         MagikGrammar.HANDLING,
         MagikGrammar.BLOCK,
         MagikGrammar.PROTECT,
-        MagikGrammar.PROTECTION,
+        // MagikGrammar.PROTECTION,
         MagikGrammar.TRY,
         MagikGrammar.WHEN,
         MagikGrammar.CATCH,
