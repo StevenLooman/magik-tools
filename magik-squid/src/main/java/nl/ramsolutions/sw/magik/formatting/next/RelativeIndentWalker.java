@@ -39,7 +39,7 @@ public class RelativeIndentWalker extends FormattingWalker2 {
         // MagikGrammar.OVER,
         // MagikGrammar.WHILE,
         MagikGrammar.LOOP,
-        MagikGrammar.FINALLY,
+        // MagikGrammar.FINALLY,
         MagikGrammar.METHOD_DEFINITION,
         MagikGrammar.PROCEDURE_DEFINITION,
       };
