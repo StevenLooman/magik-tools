@@ -320,6 +320,11 @@ public class TokenTriviaEditor {
 
     // Get tokens from next line.
     final int nextLine = triviaTokenLine + 1;
+    if (nextLine > this.lineTokens.size()) {
+      // No next line, so nothing to do.
+      return;
+    }
+
     final List<Token> nextLineTokens = this.lineTokens.get(nextLine);
 
     // Shift all tokens from next line after the specified trivia token with
@@ -341,7 +346,7 @@ public class TokenTriviaEditor {
 
     // Move all lineTokens after this token "up" one line.
     final int totalSize = this.lineTokens.size();
-    for (int currentLine = triviaTokenLine + 1; currentLine < totalSize; ++currentLine) {
+    for (int currentLine = triviaTokenLine + 1; currentLine <= totalSize; ++currentLine) {
       final List<Token> followingLineTokens = this.lineTokens.get(currentLine);
       final int newLine = currentLine - 1;
       this.lineTokens.put(newLine, followingLineTokens);
