@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Generates {@link TextEdit}s based on differences in the AST {@link Token}s.
  *
- * <p>Currently only supports whitepace {@link Trivia} changes in the AST. Should be improved to do
+ * <p>Currently only supports whitespace {@link Trivia} changes in the AST. Should be improved to do
  * a full diff, using for example the Myers Standard Algorithm or similar.
  */
 public class TextEditGenerator {
