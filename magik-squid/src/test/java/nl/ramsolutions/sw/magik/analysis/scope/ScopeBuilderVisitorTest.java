@@ -29,8 +29,7 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "a", null, null));
   }
 
   @Test
@@ -46,12 +45,10 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "a", null, null));
 
     final ScopeEntry entryB = methodScope.getScopeEntry("b");
-    assertThat(entryB).isNotNull();
-    assertThat(entryB.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "b", null, null));
   }
 
   @Test
@@ -68,12 +65,10 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("l_a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "l_a", null, null));
 
     final ScopeEntry entryB = methodScope.getScopeEntry("l_b");
-    assertThat(entryB).isNotNull();
-    assertThat(entryB.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "l_b", null, null));
   }
 
   @Test
@@ -89,12 +84,10 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "a", null, null));
 
     final ScopeEntry entryB = methodScope.getScopeEntry("b");
-    assertThat(entryB).isNotNull();
-    assertThat(entryB.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "b", null, null));
   }
 
   @Test
@@ -110,12 +103,10 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "a", null, null));
 
     final ScopeEntry entryB = methodScope.getScopeEntry("b");
-    assertThat(entryB).isNotNull();
-    assertThat(entryB.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "b", null, null));
   }
 
   @Test
@@ -131,12 +122,10 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "a", null, null));
 
     final ScopeEntry entryB = methodScope.getScopeEntry("b");
-    assertThat(entryB).isNotNull();
-    assertThat(entryB.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "b", null, null));
   }
 
   @Test
@@ -152,8 +141,7 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "a", null, null));
   }
 
   @Test
@@ -169,8 +157,7 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.GLOBAL);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.GLOBAL, "a", null, null));
   }
 
   @Test
@@ -186,12 +173,10 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "a", null, null));
 
     final ScopeEntry entryB = methodScope.getScopeEntry("b");
-    assertThat(entryB).isNotNull();
-    assertThat(entryB.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "b", null, null));
   }
 
   @Test
@@ -207,12 +192,10 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.GLOBAL);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.GLOBAL, "a", null, null));
 
     final ScopeEntry entryB = methodScope.getScopeEntry("b");
-    assertThat(entryB).isNotNull();
-    assertThat(entryB.getType()).isEqualTo(ScopeEntry.Type.DEFINITION);
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "b", null, null));
   }
 
   @Test
@@ -228,8 +211,7 @@ class ScopeBuilderVisitorTest {
     final Scope globalScope = visitor.getGlobalScope();
     final Scope tryScope = globalScope.getSelfAndDescendantScopes().get(1);
     final ScopeEntry entryTryB = tryScope.getScopeEntry("b");
-    assertThat(entryTryB).isNotNull();
-    assertThat(entryTryB.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryTryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "b", null, null));
 
     final Scope whenScope = globalScope.getSelfAndDescendantScopes().get(2);
     final ScopeEntry entryWhenB = whenScope.getScopeEntry("b");
@@ -251,13 +233,11 @@ class ScopeBuilderVisitorTest {
     final ScopeEntry entryTryA = tryScope.getScopeEntry("a");
     assertThat(entryTryA).isNull();
     final ScopeEntry entryTryB = tryScope.getScopeEntry("b");
-    assertThat(entryTryB).isNotNull();
-    assertThat(entryTryB.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryTryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "b", null, null));
 
     final Scope whenScope = globalScope.getSelfAndDescendantScopes().get(2);
     final ScopeEntry entryWhenA = whenScope.getScopeEntry("a");
-    assertThat(entryWhenA).isNotNull();
-    assertThat(entryWhenA.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryWhenA).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "a", null, null));
     final ScopeEntry entryWhenB = whenScope.getScopeEntry("b");
     assertThat(entryWhenB).isNull();
   }
@@ -287,12 +267,10 @@ class ScopeBuilderVisitorTest {
 
     final Scope loopScope = globalScope.getSelfAndDescendantScopes().get(2);
     final ScopeEntry entryI = loopScope.getScopeEntry("i");
-    assertThat(entryI).isNotNull();
-    assertThat(entryI.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryI).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "i", null, null));
 
     final ScopeEntry entryJ = loopScope.getScopeEntry("j");
-    assertThat(entryJ).isNotNull();
-    assertThat(entryJ.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryJ).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "j", null, null));
   }
 
   @Test
@@ -307,12 +285,10 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.PARAMETER);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.PARAMETER, "a", null, null));
 
     final ScopeEntry entryB = methodScope.getScopeEntry("b");
-    assertThat(entryB).isNotNull();
-    assertThat(entryB.getType()).isEqualTo(ScopeEntry.Type.PARAMETER);
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.PARAMETER, "b", null, null));
   }
 
   @Test
@@ -327,12 +303,10 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.PARAMETER);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.PARAMETER, "a", null, null));
 
     final ScopeEntry entryB = methodScope.getScopeEntry("b");
-    assertThat(entryB).isNotNull();
-    assertThat(entryB.getType()).isEqualTo(ScopeEntry.Type.PARAMETER);
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.PARAMETER, "b", null, null));
   }
 
   @Test
@@ -347,8 +321,7 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.PARAMETER);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.PARAMETER, "a", null, null));
   }
 
   @Test
@@ -363,8 +336,8 @@ class ScopeBuilderVisitorTest {
     final Scope globalScope = visitor.getGlobalScope();
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
     final ScopeEntry entryCurrentGrs = methodScope.getScopeEntry("!current_grs!");
-    assertThat(entryCurrentGrs).isNotNull();
-    assertThat(entryCurrentGrs.getType()).isEqualTo(ScopeEntry.Type.GLOBAL);
+    assertThat(entryCurrentGrs)
+        .isEqualTo(new ScopeEntry(ScopeEntry.Type.GLOBAL, "!current_grs!", null, null));
   }
 
   @Test
@@ -380,8 +353,7 @@ class ScopeBuilderVisitorTest {
     final Scope globalScope = visitor.getGlobalScope();
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "a", null, null));
     assertThat(entryA.getDefinitionNode().getTokenLine()).isEqualTo(2);
     assertThat(entryA.getUsages()).hasSize(1);
     assertThat(entryA.getUsages().get(0).getTokenLine()).isEqualTo(3);
@@ -401,8 +373,7 @@ class ScopeBuilderVisitorTest {
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = methodScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.LOCAL);
+    assertThat(entryA).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "a", null, null));
     assertThat(entryA.getDefinitionNode().getTokenLine()).isEqualTo(2);
     assertThat(entryA.getUsages()).hasSize(1);
     assertThat(entryA.getUsages().get(0).getTokenLine()).isEqualTo(3);
@@ -428,9 +399,14 @@ class ScopeBuilderVisitorTest {
     final Scope procScope = methodScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = procScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.IMPORT);
-    assertThat(entryA.getImportedEntry()).isNotNull();
+    assertThat(entryA)
+        .isEqualTo(
+            new ScopeEntry(
+                ScopeEntry.Type.IMPORT,
+                "a",
+                null,
+                methodScope.getScopeEntry("a") // Imported from the method scope
+                ));
     assertThat(entryA.getDefinitionNode().getTokenLine()).isEqualTo(4);
     assertThat(entryA.getUsages()).isEmpty();
   }
@@ -454,9 +430,14 @@ class ScopeBuilderVisitorTest {
     final Scope proc2Scope = methodScope.getSelfAndDescendantScopes().get(2);
 
     final ScopeEntry entryA = proc2Scope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.IMPORT);
-    assertThat(entryA.getImportedEntry()).isNotNull();
+    assertThat(entryA)
+        .isEqualTo(
+            new ScopeEntry(
+                ScopeEntry.Type.IMPORT,
+                "a",
+                null,
+                methodScope.getScopeEntry("a") // Imported from the method scope
+                ));
     assertThat(entryA.getDefinitionNode().getTokenLine()).isEqualTo(5);
     assertThat(entryA.getUsages()).isEmpty();
   }
@@ -478,9 +459,14 @@ class ScopeBuilderVisitorTest {
     final Scope procScope = methodScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryA = procScope.getScopeEntry("a");
-    assertThat(entryA).isNotNull();
-    assertThat(entryA.getType()).isEqualTo(ScopeEntry.Type.IMPORT);
-    assertThat(entryA.getImportedEntry()).isNull();
+    assertThat(entryA)
+        .isEqualTo(
+            new ScopeEntry(
+                ScopeEntry.Type.IMPORT,
+                "a",
+                null,
+                null // Not imported from the method scope, as it is not local
+                ));
     assertThat(entryA.getDefinitionNode().getTokenLine()).isEqualTo(4);
     assertThat(entryA.getUsages()).isEmpty();
   }
@@ -497,8 +483,14 @@ class ScopeBuilderVisitorTest {
     final Scope procScope = globalScope.getSelfAndDescendantScopes().get(1);
 
     final ScopeEntry entryTracebackShowArgs = procScope.getScopeEntry("!traceback_show_args?!");
-    assertThat(entryTracebackShowArgs.getType()).isEqualTo(ScopeEntry.Type.IMPORT);
-    assertThat(entryTracebackShowArgs.getImportedEntry()).isNull();
+    assertThat(entryTracebackShowArgs)
+        .isEqualTo(
+            new ScopeEntry(
+                ScopeEntry.Type.IMPORT,
+                "!traceback_show_args?!",
+                null,
+                null // Not imported from the global scope, as it is not local
+                ));
     assertThat(entryTracebackShowArgs.getDefinitionNode().getTokenLine()).isEqualTo(2);
     assertThat(entryTracebackShowArgs.getUsages()).isEmpty();
   }
@@ -519,9 +511,9 @@ class ScopeBuilderVisitorTest {
     final Scope bodyScope = globalScope.getSelfAndDescendantScopes().get(1);
     final Scope loopScope = globalScope.getSelfAndDescendantScopes().get(2);
 
-    final ScopeEntry bodyXEntry = bodyScope.getScopeEntry("x");
-    final ScopeEntry loopXEntry = loopScope.getScopeEntry("x");
-    assertThat(bodyXEntry).isNotSameAs(loopXEntry);
+    final ScopeEntry bodyEntry = bodyScope.getScopeEntry("x");
+    final ScopeEntry loopEntry = loopScope.getScopeEntry("x");
+    assertThat(bodyEntry).isNotSameAs(loopEntry);
   }
 
   @Test
@@ -540,9 +532,9 @@ class ScopeBuilderVisitorTest {
     final Scope bodyScope = globalScope.getSelfAndDescendantScopes().get(1);
     final Scope loopScope = globalScope.getSelfAndDescendantScopes().get(2);
 
-    final ScopeEntry bodyXEntry = bodyScope.getScopeEntry("x");
-    final ScopeEntry loopXEntry = loopScope.getScopeEntry("x");
-    assertThat(bodyXEntry).isEqualTo(loopXEntry);
+    final ScopeEntry bodyEntry = bodyScope.getScopeEntry("x");
+    final ScopeEntry loopEntry = loopScope.getScopeEntry("x");
+    assertThat(bodyEntry).isEqualTo(loopEntry);
   }
 
   @Test
@@ -561,8 +553,36 @@ class ScopeBuilderVisitorTest {
     final Scope bodyScope = globalScope.getSelfAndDescendantScopes().get(1);
     final Scope loopScope = globalScope.getSelfAndDescendantScopes().get(2);
 
-    final ScopeEntry bodyXEntry = bodyScope.getScopeEntry("x");
-    final ScopeEntry loopXEntry = loopScope.getScopeEntry("x");
-    assertThat(bodyXEntry).isEqualTo(loopXEntry);
+    final ScopeEntry bodyEntry = bodyScope.getScopeEntry("x");
+    final ScopeEntry loopEntry = loopScope.getScopeEntry("x");
+    assertThat(bodyEntry).isEqualTo(loopEntry);
+  }
+
+  @Test
+  void testGlobalDefinition() {
+    final String code =
+        """
+        x << 10
+        """;
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+    final Scope globalScope = visitor.getGlobalScope();
+
+    final ScopeEntry entry = globalScope.getScopeEntry("x");
+    assertThat(entry).isEqualTo(new ScopeEntry(ScopeEntry.Type.GLOBAL, "x", null, null));
+  }
+
+  @Test
+  void testGlobalDefinitionInBlock() {
+    final String code =
+        """
+        _block
+          x << 10
+        _endblock
+        """;
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+    final Scope globalScope = visitor.getGlobalScope();
+
+    final ScopeEntry entry = globalScope.getScopeEntry("x");
+    assertThat(entry).isEqualTo(new ScopeEntry(ScopeEntry.Type.GLOBAL, "x", null, null));
   }
 }

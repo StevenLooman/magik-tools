@@ -33,7 +33,7 @@ public class UnusedVariableCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:VisibilityModifier")
   public boolean checkParameters = DEFAULT_CHECK_PARAMETERS;
 
-  private boolean isAssignedToDirectly(final AstNode identifierNode) {
+  private boolean isVariableDefinitionAssignment(final AstNode identifierNode) {
     final AstNode variableDefinitionNode = identifierNode.getParent();
     if (!variableDefinitionNode.is(MagikGrammar.VARIABLE_DEFINITION)) {
       return false;
@@ -48,6 +48,22 @@ public class UnusedVariableCheck extends MagikCheck {
             token ->
                 token.getValue().equals(MagikOperator.CHEVRON.getValue())
                     || token.getValue().equals(MagikOperator.BOOT_CHEVRON.getValue()));
+  }
+
+  private boolean isAssingmentExpressionAssignment(final AstNode identifierNode) {
+    final AstNode atomNode = identifierNode.getParent();
+    if (atomNode == null || !atomNode.is(MagikGrammar.ATOM)) {
+      return false;
+    }
+
+    final AstNode assignmentExpressionNode = atomNode.getParent();
+    if (assignmentExpressionNode == null
+        || !assignmentExpressionNode.is(
+            MagikGrammar.ASSIGNMENT_EXPRESSION, MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION)) {
+      return false;
+    }
+
+    return assignmentExpressionNode.getFirstChild(MagikGrammar.ATOM) == atomNode;
   }
 
   private boolean isPartOfMultiVariableDefinition(final AstNode identifierNode) {
@@ -154,9 +170,10 @@ public class UnusedVariableCheck extends MagikCheck {
       for (final ScopeEntry scopeEntry : scope.getScopeEntriesInScope()) { // NOSONAR
         final AstNode scopeEntryNode = scopeEntry.getDefinitionNode();
 
-        // But not globals/dynamics which are assigned to directly
-        if ((scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC))
-            && this.isAssignedToDirectly(scopeEntryNode)) {
+        // But not globals/dynamics which are assigned to directly.
+        if (scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC)
+            && (this.isVariableDefinitionAssignment(scopeEntryNode)
+                || this.isAssingmentExpressionAssignment(scopeEntryNode))) {
           continue;
         }
 

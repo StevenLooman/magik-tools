@@ -91,7 +91,7 @@ class MagikIndexerTest {
                         "slot_b",
                         TypeString.UNDEFINED)),
                 List.of(TypeString.ofIdentifier("sw_regexp", "sw")),
-                new Pragma(null, Set.of("basic"), Set.of("test", "test2"), Set.of())));
+                new Pragma(null, Set.of("basic"), Set.of("test", "test2", "test4"), Set.of())));
 
     // Test methods.
     final Collection<MethodDefinition> newMethodDefs =

@@ -96,9 +96,9 @@ public abstract class Scope {
   }
 
   /**
-   * Get all parent/ancestor scopes.
+   * Get all parent/ancestor scopes, in order of lowest to highest scope.
    *
-   * @return List with all parent/ancestor scopes.
+   * @return List with all parent/ancestor scopes, in order of lowest to highest scope.
    */
   public List<Scope> getAncestorScopes() {
     final List<Scope> scopes = new ArrayList<>();
@@ -111,9 +111,9 @@ public abstract class Scope {
   }
 
   /**
-   * Get self and all parent/acestor scopes.
+   * Get self and all parent/acestor scopes, in order of lowest to highest scope.
    *
-   * @return List with self and parent/ancestor scopes.
+   * @return List with self and parent/ancestor scopes, in order of lowest to highest scope.
    */
   public List<Scope> getSelfAndAncestorScopes() {
     final List<Scope> scopes = new ArrayList<>();
@@ -180,7 +180,9 @@ public abstract class Scope {
       if (procedureScope != null) {
         return procedureScope.addDeclaration(type, identifier, declarationNode, parentEntry);
       } else if (globalScope != null) {
-        return globalScope.addDeclaration(type, identifier, declarationNode, parentEntry);
+        // Not in a method/procedure, add to global scope.
+        return globalScope.addDeclaration(
+            ScopeEntry.Type.GLOBAL, identifier, declarationNode, parentEntry);
       }
     }
 

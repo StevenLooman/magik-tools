@@ -1,6 +1,6 @@
 _package user
 
-_pragma(classify_level=basic,topic={test, test2})
+_pragma(classify_level=basic,topic={test, test2},topic={test, test4})
 ## Test exemplar.
 def_slotted_exemplar(
     :test_exemplar,

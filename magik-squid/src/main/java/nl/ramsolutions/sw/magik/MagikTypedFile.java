@@ -37,7 +37,7 @@ public class MagikTypedFile extends MagikFile {
    *
    * @param uri URI.
    * @param text Text.
-   * @param definitionKeeper {@link IDefinitionKeeper}.
+   * @param definitionKeeper The {@link IDefinitionKeeper}.
    */
   public MagikTypedFile(
       final URI uri, final String text, final IDefinitionKeeper definitionKeeper) {

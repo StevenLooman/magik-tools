@@ -134,6 +134,17 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
           write(cond.report_contents_string)
         _endtry
         """,
+        """
+        _global x << 10
+        """,
+        """
+        x << 10
+        """,
+        """
+        _method a.b
+          sw:x << 10
+        _endmethod
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new UnusedVariableCheck();
@@ -164,6 +175,11 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
         """
         _method a.b
           _dynamic !notify_database_data_changes?!
+        _endmethod
+        """,
+        """
+        _method a.b
+          _global !notify_database_data_changes?!
         _endmethod
         """,
         """
