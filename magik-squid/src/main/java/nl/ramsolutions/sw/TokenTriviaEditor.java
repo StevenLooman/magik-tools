@@ -92,27 +92,26 @@ public class TokenTriviaEditor {
       return tokenBefore;
     }
 
+    // Keep on searching backwards until we find a token on a previous line.
     final int tokenLine = token.getLine();
-    if (tokenLine <= 1) {
-      // No previous line, so no token before.
-      return null;
-    }
+    for (int tokenLineBefore = tokenLine - 1; tokenLineBefore >= 1; --tokenLineBefore) {
+      final List<Token> tokensOnLineBefore =
+          this.lineTokens.getOrDefault(tokenLineBefore, List.of());
+      if (!tokensOnLineBefore.isEmpty()) {
+        // Return the last token on the previous line.
+        final int lastIndex = tokensOnLineBefore.size() - 1;
+        if (lastIndex < 0) {
+          // No tokens on this line, keep searching.
+          // Can happen with syntax errors.
+          continue;
+        }
 
-    // Go up one line and get the last token on that line.
-    final int tokenLineBefore = tokenLine - 1;
-    final List<Token> tokensOnLineBefore = this.lineTokens.getOrDefault(tokenLineBefore, List.of());
-    if (tokensOnLineBefore.isEmpty()) {
-      throw new IllegalArgumentException("No tokens found on line: " + tokenLineBefore);
+        return tokensOnLineBefore.get(lastIndex);
+      }
     }
 
     // Return the last token on the previous line.
-    final int lastIndex = tokensOnLineBefore.size() - 1;
-    if (lastIndex < 0) {
-      throw new IllegalArgumentException("No tokens found on line: " + tokenLineBefore);
-    }
-
-    // Return the last token on the previous line.
-    return tokensOnLineBefore.get(lastIndex);
+    return null;
   }
 
   /**
