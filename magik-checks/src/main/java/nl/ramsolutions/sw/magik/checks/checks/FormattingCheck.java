@@ -13,7 +13,6 @@ import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
 import nl.ramsolutions.sw.magik.formatting.next.FormattingProvider;
 import nl.ramsolutions.sw.magik.formatting.next.FormattingWalker2;
-import nl.ramsolutions.sw.magik.formatting.next.IndentStrategyFactory;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 
@@ -74,9 +73,8 @@ public class FormattingCheck extends MagikCheck {
           MagikFormattingSettings.KEY_MAGIK_FORMATTING_INDENT_STRATEGY, this.indentStrategy);
     }
     final MagikFormattingSettings formattingSettings = new MagikFormattingSettings(propertiesCopy);
-    final IndentStrategyFactory indentStrategyFactory =
-        new IndentStrategyFactory(formattingSettings);
-    final Class<? extends FormattingWalker2> indentWalker = indentStrategyFactory.create();
+    final Class<? extends FormattingWalker2> indentWalker =
+        formattingSettings.getIndentStrategyClass();
     final FormattingProvider formattingProvider =
         new FormattingProvider(formattingOptions, indentWalker);
     final AstNode topNode = this.getMagikFile().getTopNode();

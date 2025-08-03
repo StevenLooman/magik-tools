@@ -9,7 +9,6 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
 import nl.ramsolutions.sw.magik.formatting.next.FormattingWalker2;
-import nl.ramsolutions.sw.magik.formatting.next.IndentStrategyFactory;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -39,8 +38,8 @@ public class FormattingProvider {
         Lsp4jConversion.formattingOptionsFromLsp4j(options);
     final MagikToolsProperties properties = magikFile.getProperties();
     final MagikFormattingSettings formattingSettings = new MagikFormattingSettings(properties);
-    final IndentStrategyFactory factory = new IndentStrategyFactory(formattingSettings);
-    final Class<? extends FormattingWalker2> indentWalker = factory.create();
+    final Class<? extends FormattingWalker2> indentWalker =
+        formattingSettings.getIndentStrategyClass();
     final nl.ramsolutions.sw.magik.formatting.next.FormattingProvider provider =
         new nl.ramsolutions.sw.magik.formatting.next.FormattingProvider(
             formattingOptions, indentWalker);

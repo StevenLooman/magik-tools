@@ -15,7 +15,6 @@ import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
 import nl.ramsolutions.sw.magik.formatting.next.FormattingProvider;
 import nl.ramsolutions.sw.magik.formatting.next.FormattingWalker2;
-import nl.ramsolutions.sw.magik.formatting.next.IndentStrategyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +39,7 @@ public class FormattingFixer extends MagikCheckFixer {
             settings.insertFinalNewline(),
             settings.trimTrailingWhitespace(),
             settings.trimFinalNewlines());
-    final IndentStrategyFactory factory = new IndentStrategyFactory(settings);
-    final Class<? extends FormattingWalker2> indentWalker = factory.create();
+    final Class<? extends FormattingWalker2> indentWalker = settings.getIndentStrategyClass();
     final FormattingProvider formattingProvider =
         new FormattingProvider(formattingOptions, indentWalker);
     final AstNode topNode = magikFile.getTopNode();

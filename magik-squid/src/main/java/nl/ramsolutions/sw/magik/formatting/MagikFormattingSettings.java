@@ -1,6 +1,10 @@
 package nl.ramsolutions.sw.magik.formatting;
 
+import java.util.Map;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.magik.formatting.next.FormattingWalker2;
+import nl.ramsolutions.sw.magik.formatting.next.NullIndentWalker;
+import nl.ramsolutions.sw.magik.formatting.next.RelativeIndentWalker;
 
 /** Settings for magik formatting. */
 public class MagikFormattingSettings {
@@ -16,6 +20,23 @@ public class MagikFormattingSettings {
   public static final String KEY_MAGIK_FORMATTING_TRIM_FINAL_NEWLINES =
       "magik.formatting.trimFinalNewlines";
 
+  /** Alias for {@link NullIndentWalker}. */
+  private static final String STRATEGY_NONE = "none";
+
+  /** Alias for {@link NullIndentWalker}. */
+  private static final String STRATEGY_BLANK = "";
+
+  private static final Map<String, Class<? extends FormattingWalker2>> INDENT_STRATEGIES =
+      Map.of(
+          STRATEGY_BLANK,
+          NullIndentWalker.class,
+          STRATEGY_NONE,
+          NullIndentWalker.class,
+          NullIndentWalker.STRATEGY_NAME,
+          NullIndentWalker.class,
+          RelativeIndentWalker.STRATEGY_NAME,
+          RelativeIndentWalker.class);
+
   private final MagikToolsProperties properties;
 
   /** Constructor. */
@@ -30,6 +51,22 @@ public class MagikFormattingSettings {
    */
   public String getIndentStrategy() {
     return this.properties.getPropertyString(KEY_MAGIK_FORMATTING_INDENT_STRATEGY, "null");
+  }
+
+  /**
+   * Creates a list of formatting walkers based on the indent strategy.
+   *
+   * @return A list of formatting walker classes.
+   */
+  public Class<? extends FormattingWalker2> getIndentStrategyClass() {
+    final String indentStrategy = this.getIndentStrategy();
+    if (!MagikFormattingSettings.INDENT_STRATEGIES.containsKey(indentStrategy)) {
+      throw new IllegalArgumentException("Unknown indent strategy: " + indentStrategy);
+    }
+
+    final Class<? extends FormattingWalker2> walkerClass =
+        MagikFormattingSettings.INDENT_STRATEGIES.get(indentStrategy);
+    return walkerClass;
   }
 
   /**
