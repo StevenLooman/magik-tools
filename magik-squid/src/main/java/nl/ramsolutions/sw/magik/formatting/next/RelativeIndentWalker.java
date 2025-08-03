@@ -288,7 +288,8 @@ public class RelativeIndentWalker extends FormattingWalker2 {
   private void handleArgumentsNode(final Token token, final AstNode node) {
     final AstNode argumentsOrParametersNode =
         node.is(MagikGrammar.ARGUMENT, MagikGrammar.PARAMETER)
-            ? node.getFirstAncestor(MagikGrammar.ARGUMENTS, MagikGrammar.PARAMETERS)
+            ? node.getFirstAncestor(
+                MagikGrammar.ASSIGNMENT_ARGUMENT, MagikGrammar.ARGUMENTS, MagikGrammar.PARAMETERS)
             : node;
     final AstNode firstArgumentOrParameterNode =
         argumentsOrParametersNode.getFirstChild(MagikGrammar.ARGUMENT, MagikGrammar.PARAMETER);
