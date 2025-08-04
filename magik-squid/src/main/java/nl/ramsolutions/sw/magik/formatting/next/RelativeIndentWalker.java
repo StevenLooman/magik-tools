@@ -98,14 +98,14 @@ public class RelativeIndentWalker extends FormattingWalker2 {
   static {
     NODE_TYPES =
         Stream.of(
-                BACKSTOP_NODE_TYPES,
-                CONSTRUCT_NODE_TYPES,
-                STATEMENT_NODE_TYPES,
-                EXPRESSION_NODE_TYPES,
-                EXPRESSION_2_NODE_TYPES,
-                EXPRESSION_3_NODE_TYPES,
-                METHOD_INVOCATION_NODE_TYPES,
-                ARGUMENTS_NODE_TYPES)
+                RelativeIndentWalker.BACKSTOP_NODE_TYPES,
+                RelativeIndentWalker.CONSTRUCT_NODE_TYPES,
+                RelativeIndentWalker.STATEMENT_NODE_TYPES,
+                RelativeIndentWalker.EXPRESSION_NODE_TYPES,
+                RelativeIndentWalker.EXPRESSION_2_NODE_TYPES,
+                RelativeIndentWalker.EXPRESSION_3_NODE_TYPES,
+                RelativeIndentWalker.METHOD_INVOCATION_NODE_TYPES,
+                RelativeIndentWalker.ARGUMENTS_NODE_TYPES)
             .flatMap(Arrays::stream)
             .toArray(AstNodeType[]::new);
   }
@@ -167,21 +167,21 @@ public class RelativeIndentWalker extends FormattingWalker2 {
     // Determine what we are, and dispatch.
     final AstNode interestNode =
         AstQuery.getSelfOrAncestorUpTo(node, MagikGrammar.MAGIK, RelativeIndentWalker.NODE_TYPES);
-    if (interestNode.is(BACKSTOP_NODE_TYPES)) {
+    if (interestNode.is(RelativeIndentWalker.BACKSTOP_NODE_TYPES)) {
       this.ensureIndent(token, 0);
-    } else if (interestNode.is(CONSTRUCT_NODE_TYPES)) {
+    } else if (interestNode.is(RelativeIndentWalker.CONSTRUCT_NODE_TYPES)) {
       this.handleConstructNode(token, interestNode);
-    } else if (interestNode.is(STATEMENT_NODE_TYPES)) {
+    } else if (interestNode.is(RelativeIndentWalker.STATEMENT_NODE_TYPES)) {
       this.handleStatementNode(token, interestNode);
-    } else if (interestNode.is(EXPRESSION_NODE_TYPES)) {
+    } else if (interestNode.is(RelativeIndentWalker.EXPRESSION_NODE_TYPES)) {
       this.handleExpressionNode(token, interestNode);
-    } else if (interestNode.is(EXPRESSION_2_NODE_TYPES)) {
+    } else if (interestNode.is(RelativeIndentWalker.EXPRESSION_2_NODE_TYPES)) {
       this.handleExpression2Node(token, interestNode);
-    } else if (interestNode.is(EXPRESSION_3_NODE_TYPES)) {
+    } else if (interestNode.is(RelativeIndentWalker.EXPRESSION_3_NODE_TYPES)) {
       this.handleExpression3Node(token, interestNode);
-    } else if (interestNode.is(METHOD_INVOCATION_NODE_TYPES)) {
+    } else if (interestNode.is(RelativeIndentWalker.METHOD_INVOCATION_NODE_TYPES)) {
       this.handleMethodInvocationNode(token, interestNode);
-    } else if (interestNode.is(ARGUMENTS_NODE_TYPES)) {
+    } else if (interestNode.is(RelativeIndentWalker.ARGUMENTS_NODE_TYPES)) {
       this.handleArgumentsNode(token, interestNode);
     } else {
       throw new IllegalStateException("Unknown node type for indent: " + interestNode);
