@@ -45,7 +45,9 @@ class SpecificsFormattingWalker extends FormattingWalker2 {
   @Override
   protected void walkPostMethodDefinition(final AstNode node) {
     final AstNode exemplarNameNode = node.getFirstChild(MagikGrammar.EXEMPLAR_NAME);
-    this.ensureSingleWhitespaceBeforeIfNotFirstTextOnLine(exemplarNameNode);
+    if (exemplarNameNode != null) {
+      this.ensureSingleWhitespaceBeforeIfNotFirstTextOnLine(exemplarNameNode);
+    }
 
     final AstNode methodNameNode = node.getFirstChild(MagikGrammar.METHOD_NAME);
     if (methodNameNode != null) {

@@ -346,6 +346,11 @@ public class TokenTriviaEditor {
     // Move all lineTokens after this token "up" one line.
     final int totalSize = this.lineTokens.size();
     for (int currentLine = triviaTokenLine + 1; currentLine <= totalSize; ++currentLine) {
+      if (!this.lineTokens.containsKey(currentLine)) {
+        // Can happen due to syntax errors.
+        continue;
+      }
+
       final List<Token> followingLineTokens = this.lineTokens.get(currentLine);
       final int newLine = currentLine - 1;
       this.lineTokens.put(newLine, followingLineTokens);
@@ -417,6 +422,11 @@ public class TokenTriviaEditor {
 
     // Move all lineTokens after this token "down" one line.
     for (int currentLine = this.lineTokens.size(); currentLine > tokenLine; --currentLine) {
+      if (!this.lineTokens.containsKey(currentLine)) {
+        // Can happen due to syntax errors.
+        continue;
+      }
+
       final List<Token> followingLineTokens = this.lineTokens.get(currentLine);
       this.lineTokens.put(currentLine + 1, followingLineTokens);
       this.lineTokens.remove(currentLine);
