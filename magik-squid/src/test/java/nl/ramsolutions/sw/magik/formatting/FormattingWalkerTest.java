@@ -795,4 +795,14 @@ class FormattingWalkerTest {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
+
+  @Test
+  void testMultipleAssignmentTuple() { // NOSONAR
+    final String code =
+        """
+        (first, second, third) << (_scatter data)
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
 }

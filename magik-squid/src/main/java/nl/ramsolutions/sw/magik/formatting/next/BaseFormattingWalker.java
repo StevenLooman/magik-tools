@@ -14,11 +14,6 @@ import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 
 class BaseFormattingWalker extends FormattingWalker2 {
 
-  // TODO: How to approach the identifiers with package?
-  // - Change the grammar to separate the package from the identifier. ->
-  // This will result in a lot of changes!
-  // - Allow for single token changes in diff tool.
-
   private static final List<String> KEYWORDS =
       Collections.unmodifiableList(List.of(MagikKeyword.keywordValues()));
   private static final List<String> OPERATORS =
@@ -113,20 +108,6 @@ class BaseFormattingWalker extends FormattingWalker2 {
   }
 
   @Override
-  protected void walkPostLoopbody(final AstNode node) {
-    final Token lParenToken = AstQuery.getFirstChildToken(node, MagikPunctuator.PAREN_L.getValue());
-    this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(lParenToken);
-
-    final AstNode tupleNode = node.getFirstChild(MagikGrammar.TUPLE);
-    if (tupleNode != null) {
-      this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(tupleNode);
-    }
-
-    final Token rParenToken = AstQuery.getFirstChildToken(node, MagikPunctuator.PAREN_R.getValue());
-    this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(rParenToken);
-  }
-
-  @Override
   protected void walkPostConditionName(final AstNode node) {
     this.ensureSingleWhitespaceBeforeIfNotFirstTextOnLine(node);
   }
@@ -158,12 +139,26 @@ class BaseFormattingWalker extends FormattingWalker2 {
   }
 
   @Override
+  protected void walkPreTuple(final AstNode node) {
+    this.ensureSingleWhitespaceBeforeIfNotFirstTextOnLine(node);
+  }
+
+  @Override
   protected void walkPostTuple(final AstNode node) {
     final Token token = node.getToken();
     if (AstQuery.tokenIs(token, MagikPunctuator.PAREN_L.getValue())) {
       // No leading whitespace after the `(` token.
-      final AstNode expressionNode = node.getFirstChild(MagikGrammar.EXPRESSION);
-      this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(expressionNode);
+      final List<Token> tokens = node.getTokens();
+      if (tokens.size() > 1) {
+        final Token secondToken = tokens.get(1);
+        this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(secondToken);
+      }
+    }
+
+    final Token lastToken = node.getLastToken();
+    if (AstQuery.tokenIs(lastToken, MagikPunctuator.PAREN_R.getValue())) {
+      // No trailing whitespace before the `)` token.
+      this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(lastToken);
     }
   }
 

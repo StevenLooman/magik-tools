@@ -115,11 +115,12 @@ class SpecificsFormattingWalker extends FormattingWalker2 {
 
   @Override
   protected void walkPostMultipleAssignmentStatement(final AstNode node) {
-    final AstNode multipleAssigmmentAssignables =
+    final AstNode multipleAssignmentAssignables =
         node.getFirstChild(MagikGrammar.MULTIPLE_ASSIGNMENT_ASSIGNABLES);
-    if (multipleAssigmmentAssignables != null) {
-      this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(multipleAssigmmentAssignables);
-    }
+    this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(multipleAssignmentAssignables);
+
+    final AstNode tupleNode = node.getFirstChild(MagikGrammar.TUPLE);
+    this.ensureSingleWhitespaceBeforeIfNotFirstTextOnLine(tupleNode);
   }
 
   @Override
@@ -137,5 +138,19 @@ class SpecificsFormattingWalker extends FormattingWalker2 {
   protected void walkPostPrimitiveStatement(final AstNode node) {
     final AstNode numberNode = node.getFirstChild(MagikGrammar.NUMBER);
     this.ensureSingleWhitespaceBeforeIfNotFirstTextOnLine(numberNode);
+  }
+
+  @Override
+  protected void walkPostLoopbody(final AstNode node) {
+    final Token lParenToken = AstQuery.getFirstChildToken(node, MagikPunctuator.PAREN_L.getValue());
+    this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(lParenToken);
+
+    final AstNode tupleNode = node.getFirstChild(MagikGrammar.TUPLE);
+    if (tupleNode != null) {
+      this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(tupleNode);
+    }
+
+    final Token rParenToken = AstQuery.getFirstChildToken(node, MagikPunctuator.PAREN_R.getValue());
+    this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(rParenToken);
   }
 }
