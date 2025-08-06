@@ -95,6 +95,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   BLOCK,
   BLOCK_SYNTAX_ERROR,
   PROTECT,
+  LOCKING,
   PROTECT_SYNTAX_ERROR,
   PROTECTION,
   TRY,
@@ -635,11 +636,12 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(PROTECT)
         .is(
             MagikKeyword.PROTECT,
-            b.optional(MagikKeyword.LOCKING, EXPRESSION),
+            b.optional(LOCKING),
             b.firstOf(
                 b.sequence(BODY, PROTECTION, b.next(MagikKeyword.ENDPROTECT)),
                 PROTECT_SYNTAX_ERROR),
             MagikKeyword.ENDPROTECT);
+    b.rule(LOCKING).is(MagikKeyword.LOCKING, EXPRESSION);
     b.rule(PROTECTION).is(MagikKeyword.PROTECTION, BODY);
     b.rule(PROTECT_SYNTAX_ERROR)
         .is(SPACING, b.regexp(MagikGrammar.syntaxErrorRegexp(MagikKeyword.ENDPROTECT)));

@@ -18,8 +18,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class FormattingWalkerTest {
 
-  // TODO: Use the FormattingProvider to test formatting.
-
   private List<TextEdit> getEdits(final String code) {
     final FormattingOptions options = new FormattingOptions(8, false, false, true, false);
     return this.getEdits(code, options);
@@ -759,6 +757,17 @@ class FormattingWalkerTest {
     assertThat(edits).isEmpty();
   }
 
+  @Test
+  void testMultExpressionAdd() {
+    final String code =
+        """
+        1 * 2 +
+        3
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
   // endregion
 
   @Test
@@ -801,6 +810,30 @@ class FormattingWalkerTest {
     final String code =
         """
         (first, second, third) << (_scatter data)
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testProcDefinitionAsArgument() { // NOSONAR
+    final String code =
+        """
+        coll.select(predicate.using(
+        	_proc(obj) _endproc))
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testProcDefinitionAsArgument2() { // NOSONAR
+    final String code =
+        """
+        _if a? _is _false _andif
+            b? _is _false
+        _then
+        _endif
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
