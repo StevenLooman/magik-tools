@@ -8,9 +8,13 @@ import nl.ramsolutions.sw.TokenTriviaEditor;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.TextEditGenerator;
 import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Provides formatting capabilities for Magik code. */
 public class FormattingProvider {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(FormattingProvider.class);
 
   private static final List<Class<? extends FormattingWalker2>> PRE_WALKERS =
       List.of(
@@ -48,6 +52,13 @@ public class FormattingProvider {
    * @return A list of {@link TextEdit}s representing the formatting changes.
    */
   public List<TextEdit> format(final AstNode node) {
+    LOGGER.debug("Formatting node: {}", node);
+    LOGGER.debug("  tab size: {}", this.options.getTabSize());
+    LOGGER.debug("  insert spaces: {}", this.options.isInsertSpaces());
+    LOGGER.debug("  trim trailing whitespace: {}", this.options.isTrimTrailingWhitespace());
+    LOGGER.debug("  insert final newline: {}", this.options.isInsertFinalNewline());
+    LOGGER.debug("  trim final newlines: {}", this.options.isTrimFinalNewlines());
+
     final AstNode nodeCopy = AstNodeHelper.clone(node);
     final TokenTriviaEditor tokenEditor = new TokenTriviaEditor(nodeCopy);
 
