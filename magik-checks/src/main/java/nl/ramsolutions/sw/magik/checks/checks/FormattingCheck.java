@@ -83,23 +83,12 @@ public class FormattingCheck extends MagikCheck {
     return propertiesCopy;
   }
 
-  private FormattingOptions createFormattingOptions(final MagikToolsProperties properties) {
-    final MagikFormattingSettings settings = new MagikFormattingSettings(properties);
-    final boolean insertSpaces = settings.getIndentChar() == MagikFormattingSettings.SPACE;
-    final int tabWidth = settings.getIndentWidth();
-    final boolean insertFinalNewline = settings.insertFinalNewline();
-    final boolean trimTrailingWhitespace = settings.trimTrailingWhitespace();
-    final boolean trimFinalNewlines = settings.trimFinalNewlines();
-    return new FormattingOptions(
-        tabWidth, insertSpaces, insertFinalNewline, trimTrailingWhitespace, trimFinalNewlines);
-  }
-
   @Override
   protected void walkPostMagik(final AstNode node) {
-    final MagikToolsProperties propertiesCopy = this.createMagikToolsProperties();
-    final FormattingOptions formattingOptions = this.createFormattingOptions(propertiesCopy);
+    final MagikToolsProperties properties = this.createMagikToolsProperties();
+    final MagikFormattingSettings formattingSettings = new MagikFormattingSettings(properties);
+    final FormattingOptions formattingOptions = formattingSettings.getFormattingOptions();
 
-    final MagikFormattingSettings formattingSettings = new MagikFormattingSettings(propertiesCopy);
     final Class<? extends FormattingWalker> indentWalker =
         formattingSettings.getIndentStrategyClass();
     final FormattingProvider formattingProvider =

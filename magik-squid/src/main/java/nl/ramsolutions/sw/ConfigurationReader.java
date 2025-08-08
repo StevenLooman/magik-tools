@@ -17,8 +17,8 @@ public final class ConfigurationReader {
   /**
    * Determine the path of the `magik-lint.properties` file to read.
    *
-   * @param overridePath
-   * @return
+   * @param overridePath Override path.
+   * @return Determined path.
    */
   public static Path determinePath(final Path path, final @Nullable String overridePath) {
     if (overridePath != null && !overridePath.isBlank()) {
@@ -28,6 +28,14 @@ public final class ConfigurationReader {
     return ConfigurationLocator.locateConfiguration(path);
   }
 
+  /**
+   * Read properties.
+   *
+   * @param path Path to read properties from.
+   * @param overridePath Override path.
+   * @return Properties read.
+   * @throws IOException -
+   */
   public static MagikToolsProperties readProperties(
       final Path path, final @Nullable String overridePath) throws IOException {
     final Path propertiesPath = ConfigurationReader.determinePath(path, overridePath);

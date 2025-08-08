@@ -31,15 +31,10 @@ public class FormattingFixer extends MagikCheckFixer {
     }
 
     final MagikToolsProperties properties = magikFile.getProperties();
-    final MagikFormattingSettings settings = new MagikFormattingSettings(properties);
-    final FormattingOptions formattingOptions =
-        new FormattingOptions(
-            settings.getIndentWidth(),
-            settings.getIndentChar() == ' ',
-            settings.insertFinalNewline(),
-            settings.trimTrailingWhitespace(),
-            settings.trimFinalNewlines());
-    final Class<? extends FormattingWalker> indentWalker = settings.getIndentStrategyClass();
+    final MagikFormattingSettings formattingSettings = new MagikFormattingSettings(properties);
+    final FormattingOptions formattingOptions = formattingSettings.getFormattingOptions();
+    final Class<? extends FormattingWalker> indentWalker =
+        formattingSettings.getIndentStrategyClass();
     final FormattingProvider formattingProvider =
         new FormattingProvider(formattingOptions, indentWalker);
     final AstNode topNode = magikFile.getTopNode();

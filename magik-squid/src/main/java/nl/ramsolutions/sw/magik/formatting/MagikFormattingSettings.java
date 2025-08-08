@@ -128,4 +128,18 @@ public class MagikFormattingSettings {
     final int indentWidth = this.getIndentWidth();
     return String.valueOf(indentChar).repeat(indentWidth);
   }
+
+  /**
+   * Get the {@link FormattingOptions} based on the current settings.
+   *
+   * @return A new instance of {@link FormattingOptions} based on the current settings.
+   */
+  public FormattingOptions getFormattingOptions() {
+    return new FormattingOptions(
+        this.getIndentWidth(),
+        this.getIndentChar() == SPACE,
+        this.insertFinalNewline(),
+        this.trimTrailingWhitespace(),
+        this.trimFinalNewlines());
+  }
 }
