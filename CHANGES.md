@@ -50,6 +50,7 @@
 - Fix `HidesVariableCheck` not seeing `DEFINITION` `ScopeEntry`s.
 - Add support for inline `# mlint: disable=all` to disable all checks.
 - Fix `VariableDeclarationUsageDistanceCheck` to see augmented assignment (e.g. `_andif<<` or `+<< 1`) as valid usage.
+- Rewrote formatting code, which most likely results in changed formatting rules.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
@@ -63,6 +64,7 @@
 - Add UndefinedVariable check to Sonar way profile. This might result in more issues.
 - Add FileMustStartWithPackageStatement check to test if a file starts with a `_package`-statement. This might result in more issues.
 - FormattingCheck now uses formatting code to detect issues. This might result in more or different issues.
+- Rewrote formatting code, which most likely results in changed formatting rules.
 
 ## 0.10.1 (2024-08-14)
 
