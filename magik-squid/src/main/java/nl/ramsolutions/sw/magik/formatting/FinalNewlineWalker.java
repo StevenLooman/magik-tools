@@ -48,7 +48,7 @@ class FinalNewlineWalker extends FormattingWalker {
     final Trivia lastTrivia =
         !lastTokenTrivias.isEmpty() ? lastTokenTrivias.get(lastTokenTrivias.size() - 1) : null;
 
-    if (lastTrivia == null || lastTrivia.getToken().getType().equals(GenericTokenType.EOL)) {
+    if (lastTrivia == null || !lastTrivia.getToken().getType().equals(GenericTokenType.EOL)) {
       this.ensureEolBefore(lastToken);
     }
   }
