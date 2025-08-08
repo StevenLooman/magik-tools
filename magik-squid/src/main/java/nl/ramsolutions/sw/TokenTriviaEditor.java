@@ -324,11 +324,10 @@ public class TokenTriviaEditor {
       return;
     }
 
-    final List<Token> nextLineTokens = this.lineTokens.get(nextLine);
-
     // Shift all tokens from next line after the specified trivia token with
     // columnOffset.
     // Update the line for all next line tokens.
+    final List<Token> nextLineTokens = this.lineTokens.get(nextLine);
     final int columnOffset = eolToken.getColumn();
     nextLineTokens.forEach(
         nextLineToken -> {
@@ -337,29 +336,32 @@ public class TokenTriviaEditor {
         });
 
     // Merge tokens on current line with next line.
-    final List<Token> tokensBefore = tokensOnLine.subList(0, Integer.max(tokensOnLineIndex - 1, 0));
+    final List<Token> tokensBefore = tokensOnLine.subList(0, tokensOnLineIndex);
     final List<Token> newLineTokens =
         Stream.concat(tokensBefore.stream(), nextLineTokens.stream())
             .collect(Collectors.toCollection(ArrayList::new));
     this.lineTokens.put(triviaTokenLine, newLineTokens);
+    this.lineTokens.remove(nextLine);
 
     // Move all lineTokens after this token "up" one line.
-    final int totalSize = this.lineTokens.size();
-    for (int currentLine = triviaTokenLine + 1; currentLine <= totalSize; ++currentLine) {
+    final int totalSize = this.lineTokens.size() + 1;
+    for (int currentLine = triviaTokenLine + 2; currentLine <= totalSize; ++currentLine) {
       if (!this.lineTokens.containsKey(currentLine)) {
         // Can happen due to syntax errors.
         continue;
       }
 
       final List<Token> followingLineTokens = this.lineTokens.get(currentLine);
-      final int newLine = currentLine - 1;
-      this.lineTokens.put(newLine, followingLineTokens);
+      final int prevLine = currentLine - 1;
+      this.lineTokens.put(prevLine, followingLineTokens);
       this.lineTokens.remove(currentLine);
 
       // Update line in following tokens.
       followingLineTokens.forEach(
-          followingLineToken -> TokenHelper.setLine(followingLineToken, newLine));
+          followingLineToken -> TokenHelper.setLine(followingLineToken, prevLine));
     }
+
+    // this.assertLinesConnected();
 
     // Remove trivia token from triviaTokenTokens.
     this.triviaTokenTokens.remove(eolToken);
@@ -453,4 +455,15 @@ public class TokenTriviaEditor {
 
     return eolToken;
   }
+
+  // private void assertLinesConnected() {
+  //   final int min = 1;
+  //   final int max = this.lineTokens.keySet().stream().max(Integer::compareTo).orElseThrow();
+  //   for (int line = min; line <= max; ++line) {
+  //     final List<Token> tokens = this.lineTokens.get(line);
+  //     if (tokens == null || tokens.isEmpty()) {
+  //       System.err.println("Line " + line + " has no tokens, but should have at least one.");
+  //     }
+  //   }
+  // }
 }
