@@ -251,7 +251,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     final long start = System.nanoTime();
 
     final TextDocumentIdentifier textDocumentIdentifier = params.getTextDocument();
-    LOGGER.debug("didChange, uri: {}}", textDocumentIdentifier.getUri());
+    LOGGER.debug("didChange, uri: {}", textDocumentIdentifier.getUri());
 
     // Read relevant properties.
     final String uriStr = textDocumentIdentifier.getUri();
