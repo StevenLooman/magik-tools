@@ -7,8 +7,8 @@ import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.formatting.FormattingWalker;
 import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
-import nl.ramsolutions.sw.magik.formatting.next.FormattingWalker2;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -38,11 +38,10 @@ public class FormattingProvider {
         Lsp4jConversion.formattingOptionsFromLsp4j(options);
     final MagikToolsProperties properties = magikFile.getProperties();
     final MagikFormattingSettings formattingSettings = new MagikFormattingSettings(properties);
-    final Class<? extends FormattingWalker2> indentWalker =
+    final Class<? extends FormattingWalker> indentWalker =
         formattingSettings.getIndentStrategyClass();
-    final nl.ramsolutions.sw.magik.formatting.next.FormattingProvider provider =
-        new nl.ramsolutions.sw.magik.formatting.next.FormattingProvider(
-            formattingOptions, indentWalker);
+    final nl.ramsolutions.sw.magik.formatting.FormattingProvider provider =
+        new nl.ramsolutions.sw.magik.formatting.FormattingProvider(formattingOptions, indentWalker);
     final List<nl.ramsolutions.sw.magik.TextEdit> textEdits = provider.format(node);
     ;
     return textEdits.stream().map(Lsp4jConversion::textEditToLsp4j).toList();

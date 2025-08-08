@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.formatting.next;
+package nl.ramsolutions.sw.magik.formatting;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -9,7 +9,6 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
-import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 import org.junit.jupiter.api.Test;
 
 class FormattingProviderTest {

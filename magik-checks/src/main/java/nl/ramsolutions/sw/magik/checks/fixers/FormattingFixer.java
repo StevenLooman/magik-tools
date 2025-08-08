@@ -12,9 +12,9 @@ import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.checks.MagikCheckFixer;
 import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
+import nl.ramsolutions.sw.magik.formatting.FormattingProvider;
+import nl.ramsolutions.sw.magik.formatting.FormattingWalker;
 import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
-import nl.ramsolutions.sw.magik.formatting.next.FormattingProvider;
-import nl.ramsolutions.sw.magik.formatting.next.FormattingWalker2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +39,7 @@ public class FormattingFixer extends MagikCheckFixer {
             settings.insertFinalNewline(),
             settings.trimTrailingWhitespace(),
             settings.trimFinalNewlines());
-    final Class<? extends FormattingWalker2> indentWalker = settings.getIndentStrategyClass();
+    final Class<? extends FormattingWalker> indentWalker = settings.getIndentStrategyClass();
     final FormattingProvider formattingProvider =
         new FormattingProvider(formattingOptions, indentWalker);
     final AstNode topNode = magikFile.getTopNode();

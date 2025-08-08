@@ -10,9 +10,9 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
+import nl.ramsolutions.sw.magik.formatting.FormattingProvider;
+import nl.ramsolutions.sw.magik.formatting.FormattingWalker;
 import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
-import nl.ramsolutions.sw.magik.formatting.next.FormattingProvider;
-import nl.ramsolutions.sw.magik.formatting.next.FormattingWalker2;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 
@@ -73,7 +73,7 @@ public class FormattingCheck extends MagikCheck {
           MagikFormattingSettings.KEY_MAGIK_FORMATTING_INDENT_STRATEGY, this.indentStrategy);
     }
     final MagikFormattingSettings formattingSettings = new MagikFormattingSettings(propertiesCopy);
-    final Class<? extends FormattingWalker2> indentWalker =
+    final Class<? extends FormattingWalker> indentWalker =
         formattingSettings.getIndentStrategyClass();
     final FormattingProvider formattingProvider =
         new FormattingProvider(formattingOptions, indentWalker);

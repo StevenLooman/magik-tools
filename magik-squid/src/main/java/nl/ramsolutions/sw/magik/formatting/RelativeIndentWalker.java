@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.formatting.next;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
@@ -11,10 +11,9 @@ import java.util.stream.Stream;
 import nl.ramsolutions.sw.TokenTriviaEditor;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
-import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 
 /** Walker for relative indentation in Magik code. */
-public class RelativeIndentWalker extends FormattingWalker2 {
+public class RelativeIndentWalker extends FormattingWalker {
 
   public static final String STRATEGY_NAME = "relative";
 

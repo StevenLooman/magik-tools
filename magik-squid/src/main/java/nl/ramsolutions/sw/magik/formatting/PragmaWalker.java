@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.formatting.next;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
@@ -6,9 +6,8 @@ import java.util.List;
 import nl.ramsolutions.sw.TokenTriviaEditor;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
-import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 
-class PragmaWalker extends FormattingWalker2 {
+class PragmaWalker extends FormattingWalker {
 
   // TODO: This can use a refresh.
 

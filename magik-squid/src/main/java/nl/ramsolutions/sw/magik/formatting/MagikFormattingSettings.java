@@ -2,9 +2,6 @@ package nl.ramsolutions.sw.magik.formatting;
 
 import java.util.Map;
 import nl.ramsolutions.sw.MagikToolsProperties;
-import nl.ramsolutions.sw.magik.formatting.next.FormattingWalker2;
-import nl.ramsolutions.sw.magik.formatting.next.NullIndentWalker;
-import nl.ramsolutions.sw.magik.formatting.next.RelativeIndentWalker;
 
 /** Settings for magik formatting. */
 public class MagikFormattingSettings {
@@ -26,7 +23,7 @@ public class MagikFormattingSettings {
   /** Alias for {@link NullIndentWalker}. */
   private static final String STRATEGY_BLANK = "";
 
-  private static final Map<String, Class<? extends FormattingWalker2>> INDENT_STRATEGIES =
+  private static final Map<String, Class<? extends FormattingWalker>> INDENT_STRATEGIES =
       Map.of(
           STRATEGY_BLANK,
           NullIndentWalker.class,
@@ -58,13 +55,13 @@ public class MagikFormattingSettings {
    *
    * @return A list of formatting walker classes.
    */
-  public Class<? extends FormattingWalker2> getIndentStrategyClass() {
+  public Class<? extends FormattingWalker> getIndentStrategyClass() {
     final String indentStrategy = this.getIndentStrategy();
     if (!MagikFormattingSettings.INDENT_STRATEGIES.containsKey(indentStrategy)) {
       throw new IllegalArgumentException("Unknown indent strategy: " + indentStrategy);
     }
 
-    final Class<? extends FormattingWalker2> walkerClass =
+    final Class<? extends FormattingWalker> walkerClass =
         MagikFormattingSettings.INDENT_STRATEGIES.get(indentStrategy);
     return walkerClass;
   }

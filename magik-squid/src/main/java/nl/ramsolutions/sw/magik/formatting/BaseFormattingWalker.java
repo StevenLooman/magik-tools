@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.formatting.next;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
@@ -10,9 +10,8 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
-import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 
-class BaseFormattingWalker extends FormattingWalker2 {
+class BaseFormattingWalker extends FormattingWalker {
 
   private static final List<String> KEYWORDS =
       Collections.unmodifiableList(List.of(MagikKeyword.keywordValues()));

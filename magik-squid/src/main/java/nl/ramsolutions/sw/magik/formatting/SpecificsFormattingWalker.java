@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.formatting.next;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
@@ -8,10 +8,9 @@ import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
-import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 
 /** AST walker for formatting arguments and parameters. */
-class SpecificsFormattingWalker extends FormattingWalker2 {
+class SpecificsFormattingWalker extends FormattingWalker {
 
   SpecificsFormattingWalker(final FormattingOptions options, final TokenTriviaEditor tokenEditor) {
     super(options, tokenEditor);

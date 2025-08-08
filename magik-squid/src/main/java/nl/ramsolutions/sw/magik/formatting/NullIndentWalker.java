@@ -1,10 +1,9 @@
-package nl.ramsolutions.sw.magik.formatting.next;
+package nl.ramsolutions.sw.magik.formatting;
 
 import nl.ramsolutions.sw.TokenTriviaEditor;
-import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 
 /** Null indent walker. */
-public class NullIndentWalker extends FormattingWalker2 {
+public class NullIndentWalker extends FormattingWalker {
 
   public static final String STRATEGY_NAME = "null";
 

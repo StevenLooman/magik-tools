@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.formatting.next;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
@@ -7,9 +7,8 @@ import com.sonar.sslr.api.Trivia;
 import java.util.ArrayList;
 import java.util.List;
 import nl.ramsolutions.sw.TokenTriviaEditor;
-import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 
-class FinalNewlineWalker extends FormattingWalker2 {
+class FinalNewlineWalker extends FormattingWalker {
 
   FinalNewlineWalker(final FormattingOptions options, final TokenTriviaEditor tokenEditor) {
     super(options, tokenEditor);

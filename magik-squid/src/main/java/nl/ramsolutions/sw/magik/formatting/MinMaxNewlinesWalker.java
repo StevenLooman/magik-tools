@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.formatting.next;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
@@ -8,9 +8,8 @@ import java.util.List;
 import nl.ramsolutions.sw.TokenTriviaEditor;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
-import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 
-class MinMaxNewlinesWalker extends FormattingWalker2 {
+class MinMaxNewlinesWalker extends FormattingWalker {
 
   private static final int MAX_CONSECUTIVE_NEWLINES = 2;
   private Token lastTextToken = null;

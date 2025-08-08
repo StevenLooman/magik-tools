@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.formatting.next;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.AstNode;
 import java.lang.reflect.Constructor;
@@ -7,7 +7,6 @@ import nl.ramsolutions.sw.AstNodeHelper;
 import nl.ramsolutions.sw.TokenTriviaEditor;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.TextEditGenerator;
-import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +15,7 @@ public class FormattingProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FormattingProvider.class);
 
-  private static final List<Class<? extends FormattingWalker2>> PRE_WALKERS =
+  private static final List<Class<? extends FormattingWalker>> PRE_WALKERS =
       List.of(
           // Base walkers.
           BaseFormattingWalker.class,
@@ -25,13 +24,13 @@ public class FormattingProvider {
           SpecificsFormattingWalker.class,
           PragmaWalker.class);
 
-  private static final List<Class<? extends FormattingWalker2>> POST_WALKERS =
+  private static final List<Class<? extends FormattingWalker>> POST_WALKERS =
       List.of(
           // Newlines etc.
           MinMaxNewlinesWalker.class, TrailingWhitespaceWalker.class, FinalNewlineWalker.class);
 
   private final FormattingOptions options;
-  private final Class<? extends FormattingWalker2> indentWalker;
+  private final Class<? extends FormattingWalker> indentWalker;
 
   /**
    * Constructor for the formatting provider.
@@ -40,7 +39,7 @@ public class FormattingProvider {
    * @param indentWalker Indent walker to apply.
    */
   public FormattingProvider(
-      final FormattingOptions options, final Class<? extends FormattingWalker2> indentWalker) {
+      final FormattingOptions options, final Class<? extends FormattingWalker> indentWalker) {
     this.options = options;
     this.indentWalker = indentWalker;
   }
@@ -67,9 +66,9 @@ public class FormattingProvider {
         .map(
             clazz -> {
               try {
-                final Constructor<? extends FormattingWalker2> constructor =
+                final Constructor<? extends FormattingWalker> constructor =
                     clazz.getDeclaredConstructor(FormattingOptions.class, TokenTriviaEditor.class);
-                return (FormattingWalker2) constructor.newInstance(this.options, tokenEditor);
+                return (FormattingWalker) constructor.newInstance(this.options, tokenEditor);
               } catch (final ReflectiveOperationException exception) {
                 throw new RuntimeException(exception);
               }
@@ -78,11 +77,11 @@ public class FormattingProvider {
 
     // Apply indent walker.
     try {
-      final Constructor<? extends FormattingWalker2> constructor =
+      final Constructor<? extends FormattingWalker> constructor =
           this.indentWalker.getDeclaredConstructor(
               FormattingOptions.class, TokenTriviaEditor.class);
-      final FormattingWalker2 walker =
-          (FormattingWalker2) constructor.newInstance(this.options, tokenEditor);
+      final FormattingWalker walker =
+          (FormattingWalker) constructor.newInstance(this.options, tokenEditor);
       walker.walkAst(nodeCopy);
     } catch (final ReflectiveOperationException exception) {
       throw new RuntimeException(exception);
@@ -93,9 +92,9 @@ public class FormattingProvider {
         .map(
             clazz -> {
               try {
-                final Constructor<? extends FormattingWalker2> constructor =
+                final Constructor<? extends FormattingWalker> constructor =
                     clazz.getDeclaredConstructor(FormattingOptions.class, TokenTriviaEditor.class);
-                return (FormattingWalker2) constructor.newInstance(this.options, tokenEditor);
+                return (FormattingWalker) constructor.newInstance(this.options, tokenEditor);
               } catch (final ReflectiveOperationException exception) {
                 throw new RuntimeException(exception);
               }

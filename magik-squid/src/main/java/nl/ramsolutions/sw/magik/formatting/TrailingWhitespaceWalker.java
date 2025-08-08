@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.formatting.next;
+package nl.ramsolutions.sw.magik.formatting;
 
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
@@ -6,9 +6,8 @@ import com.sonar.sslr.api.Trivia;
 import java.util.ArrayList;
 import java.util.List;
 import nl.ramsolutions.sw.TokenTriviaEditor;
-import nl.ramsolutions.sw.magik.formatting.FormattingOptions;
 
-class TrailingWhitespaceWalker extends FormattingWalker2 {
+class TrailingWhitespaceWalker extends FormattingWalker {
 
   TrailingWhitespaceWalker(final FormattingOptions options, final TokenTriviaEditor tokenEditor) {
     super(options, tokenEditor);
