@@ -32,6 +32,7 @@ class FinalNewlineWalker extends FormattingWalker {
     for (int i = lastTokenTrivias.size() - 1; i >= 0; --i) {
       final Trivia trivia = lastTokenTrivias.get(i);
       final Token triviaToken = trivia.getToken();
+      // Stop at the first non-EOL trivia token.
       if (!triviaToken.getType().equals(GenericTokenType.EOL)) {
         break;
       }

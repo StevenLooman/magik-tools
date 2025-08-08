@@ -42,7 +42,7 @@ public class FormattingCheck extends MagikCheck {
   /** The character used for indentation (tab/space). */
   @RuleProperty(
       key = "indent character",
-      description = "The character used for indentation (tab/space)",
+      description = "The character used for indentation (from_properties/tab/space)",
       defaultValue = "" + DEFAULT_INDENT_CHARACTER,
       type = "STRING")
   @SuppressWarnings("checkstyle:VisibilityModifier")
@@ -51,27 +51,54 @@ public class FormattingCheck extends MagikCheck {
   /** The width of a tab character. */
   @RuleProperty(
       key = "tab width",
-      description = "The width of a tab character",
+      description = "The width of a tab character (-1 for from_properties, default 8)",
       defaultValue = "" + DEFAULT_TAB_WIDTH,
       type = "INTEGER")
   @SuppressWarnings("checkstyle:VisibilityModifier")
   public int tabWidth = DEFAULT_TAB_WIDTH;
 
-  @Override
-  protected void walkPostMagik(final AstNode node) {
-    final boolean insertSpaces = this.indentCharacter.equalsIgnoreCase("space");
-    // TODO: Shouldn't these use the same options as the formatter? I.e.,
-    // create this from MagikFormattingSettings?
-    final FormattingOptions formattingOptions =
-        new FormattingOptions(this.tabWidth, insertSpaces, false, false, false);
-
-    // TODO: Use the settings or the check settings?
+  /**
+   * Read the properties, overriding with check settings.
+   *
+   * @return New instance of {@link MagikToolsProperties} with the check settings applied.
+   */
+  private MagikToolsProperties createMagikToolsProperties() {
     final MagikToolsProperties properties = this.getMagikFile().getProperties();
     final MagikToolsProperties propertiesCopy = new MagikToolsProperties(properties);
+
+    // Override properties with check settings.
     if (!this.indentStrategy.equalsIgnoreCase(FROM_PROPERTIES_INDENT_STRATEGY)) {
       propertiesCopy.setProperty(
           MagikFormattingSettings.KEY_MAGIK_FORMATTING_INDENT_STRATEGY, this.indentStrategy);
     }
+    if (!this.indentCharacter.equalsIgnoreCase("from_properties")) {
+      propertiesCopy.setProperty(
+          MagikFormattingSettings.KEY_MAGIK_FORMATTING_INDENT_CHAR, this.indentCharacter);
+    }
+    if (this.tabWidth > 0) {
+      propertiesCopy.setProperty(
+          MagikFormattingSettings.KEY_MAGIK_FORMATTING_INDENT_WIDTH, this.tabWidth);
+    }
+
+    return propertiesCopy;
+  }
+
+  private FormattingOptions createFormattingOptions(final MagikToolsProperties properties) {
+    final MagikFormattingSettings settings = new MagikFormattingSettings(properties);
+    final boolean insertSpaces = settings.getIndentChar() == MagikFormattingSettings.SPACE;
+    final int tabWidth = settings.getIndentWidth();
+    final boolean insertFinalNewline = settings.insertFinalNewline();
+    final boolean trimTrailingWhitespace = settings.trimTrailingWhitespace();
+    final boolean trimFinalNewlines = settings.trimFinalNewlines();
+    return new FormattingOptions(
+        tabWidth, insertSpaces, insertFinalNewline, trimTrailingWhitespace, trimFinalNewlines);
+  }
+
+  @Override
+  protected void walkPostMagik(final AstNode node) {
+    final MagikToolsProperties propertiesCopy = this.createMagikToolsProperties();
+    final FormattingOptions formattingOptions = this.createFormattingOptions(propertiesCopy);
+
     final MagikFormattingSettings formattingSettings = new MagikFormattingSettings(propertiesCopy);
     final Class<? extends FormattingWalker> indentWalker =
         formattingSettings.getIndentStrategyClass();

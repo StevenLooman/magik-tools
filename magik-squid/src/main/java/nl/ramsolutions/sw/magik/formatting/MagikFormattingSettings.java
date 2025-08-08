@@ -16,6 +16,7 @@ public class MagikFormattingSettings {
       "magik.formatting.trimTrailingWhitespace";
   public static final String KEY_MAGIK_FORMATTING_TRIM_FINAL_NEWLINES =
       "magik.formatting.trimFinalNewlines";
+  public static final char SPACE = ' ';
 
   /** Alias for {@link NullIndentWalker}. */
   private static final String STRATEGY_NONE = "none";
@@ -92,7 +93,7 @@ public class MagikFormattingSettings {
    * @return True if a final newline should be inserted, defaults to true.
    */
   public boolean insertFinalNewline() {
-    return this.properties.getPropertyBoolean(KEY_MAGIK_FORMATTING_INSERT_FINAL_NEWLINE, true);
+    return this.properties.getPropertyBoolean(KEY_MAGIK_FORMATTING_INSERT_FINAL_NEWLINE, false);
   }
 
   /**
@@ -101,7 +102,7 @@ public class MagikFormattingSettings {
    * @return True if trailing whitespace should be trimmed, defaults to true.
    */
   public boolean trimTrailingWhitespace() {
-    return this.properties.getPropertyBoolean(KEY_MAGIK_FORMATTING_TRIM_TRAILING_WHITESPACE, true);
+    return this.properties.getPropertyBoolean(KEY_MAGIK_FORMATTING_TRIM_TRAILING_WHITESPACE, false);
   }
 
   /**
@@ -110,7 +111,7 @@ public class MagikFormattingSettings {
    * @return True if final newlines should be trimmed, defaults to true.
    */
   public boolean trimFinalNewlines() {
-    return this.properties.getPropertyBoolean(KEY_MAGIK_FORMATTING_TRIM_FINAL_NEWLINES, true);
+    return this.properties.getPropertyBoolean(KEY_MAGIK_FORMATTING_TRIM_FINAL_NEWLINES, false);
   }
 
   /**

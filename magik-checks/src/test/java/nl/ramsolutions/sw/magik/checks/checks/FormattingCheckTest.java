@@ -19,7 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 class FormattingCheckTest extends MagikCheckTestBase {
 
-  private static final String INDENT_STRATEGY = "relative";
+  private static final String RELATIVE_INDENT_STRATEGY = "relative";
 
   @ParameterizedTest
   @ValueSource(
@@ -53,7 +53,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
       })
   void testProper(final String code) {
     final FormattingCheck check = new FormattingCheck();
-    check.indentStrategy = INDENT_STRATEGY;
+    check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
@@ -75,7 +75,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
       })
   void testImproper(final String code) {
     final FormattingCheck check = new FormattingCheck();
-    check.indentStrategy = INDENT_STRATEGY;
+    check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -93,7 +93,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @Test
   void testTabIndentLineStartWithTabs() {
     final FormattingCheck check = new FormattingCheck();
-    check.indentStrategy = INDENT_STRATEGY;
+    check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
     check.indentCharacter = "tab";
     final String code =
         """
@@ -119,7 +119,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
       })
   void testTabIndentLineStartWithSpaces(final String code) {
     final FormattingCheck check = new FormattingCheck();
-    check.indentStrategy = INDENT_STRATEGY;
+    check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
     check.indentCharacter = "tab";
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
@@ -128,7 +128,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @Test
   void tetSpaceIndentLineStartWithTabs() {
     final FormattingCheck check = new FormattingCheck();
-    check.indentStrategy = INDENT_STRATEGY;
+    check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
     check.indentCharacter = "space";
     final String code = "\tprint(a)";
     final List<MagikIssue> issues = this.runCheck(code, check);
@@ -138,7 +138,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @Test
   void testSpaceIndentLineStrtWithSpaces() {
     final FormattingCheck check = new FormattingCheck();
-    check.indentStrategy = INDENT_STRATEGY;
+    check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
     check.indentCharacter = "space";
     check.tabWidth = 4;
     final String code =
@@ -173,7 +173,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @SuppressWarnings("java:S4144")
   void testMultipleWhitelines(final String code) {
     final FormattingCheck check = new FormattingCheck();
-    check.indentStrategy = INDENT_STRATEGY;
+    check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }
@@ -181,7 +181,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @Test
   void testMultipleWhitelinesMethodDoc() {
     final FormattingCheck check = new FormattingCheck();
-    check.indentStrategy = INDENT_STRATEGY;
+    check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
     final String code =
         """
         _method object.method(param)

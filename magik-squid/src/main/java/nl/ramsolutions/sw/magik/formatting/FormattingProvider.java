@@ -57,6 +57,7 @@ public class FormattingProvider {
     LOGGER.debug("  trim trailing whitespace: {}", this.options.isTrimTrailingWhitespace());
     LOGGER.debug("  insert final newline: {}", this.options.isInsertFinalNewline());
     LOGGER.debug("  trim final newlines: {}", this.options.isTrimFinalNewlines());
+    LOGGER.debug("  indent strategy: {}", this.indentWalker.getSimpleName());
 
     final AstNode nodeCopy = AstNodeHelper.clone(node);
     final TokenTriviaEditor tokenEditor = new TokenTriviaEditor(nodeCopy);
