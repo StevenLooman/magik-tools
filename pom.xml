@@ -53,13 +53,13 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <junit.version>5.13.2</junit.version>
+    <junit.version>5.13.4</junit.version>
     <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
-    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+    <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <checkstyle.version>10.20.2</checkstyle.version>
     <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
-    <spotless.version>2.44.5</spotless.version>
+    <spotless.version>2.46.1</spotless.version>
     <google-java-format.version>1.22.0</google-java-format.version>
     <cleanthat.version>2.18</cleanthat.version>
     <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
@@ -80,7 +80,7 @@
     <sonar.version>9.4.0.54424</sonar.version>
     <sonar-analyzer-commons.version>2.18.0.3393</sonar-analyzer-commons.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
-    <sonar-impl.version>25.6.0.109173</sonar-impl.version>
+    <sonar-impl.version>25.7.0.110598</sonar-impl.version>
     <sonar-maven.version>5.1.0.4751</sonar-maven.version>
     <sonar-maven-packaging-plugin.version>1.23.0.740</sonar-maven-packaging-plugin.version>
     <sslr-squid-bridge.version>2.7.1.392</sslr-squid-bridge.version>

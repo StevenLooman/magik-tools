@@ -60,6 +60,11 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
       this.assignAtom(node, resolvedTypeStr);
     } else if (scopeEntry.isType(ScopeEntry.Type.IMPORT)) {
       final ScopeEntry parentScopeEntry = scopeEntry.getImportedEntry();
+      if (parentScopeEntry == null) {
+        // Could not find parent scope entry. Ignore this identifier.
+        return;
+      }
+
       Objects.requireNonNull(parentScopeEntry);
       final AstNode lastNodeType = this.state.getCurrentScopeEntryNode(parentScopeEntry);
       final ExpressionResultString result = this.state.getNodeType(lastNodeType);
