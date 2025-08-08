@@ -275,16 +275,25 @@ class FormattingWalkerTest {
         a << 2
         _endblock
         """,
-        // """
-        // _block
-        // # comment
-        // _endblock
-        // """,
       })
   void testIndentBlockStatement(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
         .containsExactly(new TextEdit(new Range(new Position(1, 6), new Position(2, 0)), "\n\t"));
+  }
+
+  @Test
+  void testIndentBlockStatementComment() {
+    final String code =
+        """
+        _block
+        # comment
+        _endblock
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits)
+        .containsExactly(
+            new TextEdit(new Range(new Position(1, 6), new Position(3, 0)), "\n\t# comment\n"));
   }
 
   @Test
@@ -347,14 +356,21 @@ class FormattingWalkerTest {
         	z)
         """,
         """
-        a.method(x,
-        	 y,
-        	 z)
+        a.method1(x,
+        	  y,
+        	  z)
         """,
         """
         a.method(x
         	 , y
         	 , z)
+        """,
+        """
+        a <<
+        	a.method(
+        		x,
+        		y,
+        		z)
         """,
       })
   void testIndentArguments(final String code) {
@@ -818,14 +834,14 @@ class FormattingWalkerTest {
     final String code =
         """
         coll.select(predicate.using(
-        	_proc(obj) _endproc))
+        		    _proc(obj) _endproc))
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
 
   @Test
-  void testProcDefinitionAsArgument2() { // NOSONAR
+  void testLineUpConditionalExpression() { // NOSONAR
     final String code =
         """
         _if a? _is _false _andif

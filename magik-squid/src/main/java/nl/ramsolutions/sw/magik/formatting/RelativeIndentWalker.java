@@ -117,6 +117,17 @@ public class RelativeIndentWalker extends FormattingWalker {
             .toArray(AstNodeType[]::new);
   }
 
+  private static final AstNodeType[] ALL_CONSTRUCT_NODE_TYPES;
+
+  static {
+    ALL_CONSTRUCT_NODE_TYPES =
+        Stream.of(
+                RelativeIndentWalker.CONSTRUCT_NODE_TYPES,
+                RelativeIndentWalker.CONSTRUCT_2_NODE_TYPES)
+            .flatMap(Arrays::stream)
+            .toArray(AstNodeType[]::new);
+  }
+
   private static final List<AstNodeType> OPERATOR_PRECEDENCE_NODE_TYPES =
       List.of(
           // MagikGrammar.ASSIGNMENT_EXPRESSION,
@@ -230,9 +241,8 @@ public class RelativeIndentWalker extends FormattingWalker {
       } else if (parentThing.is(RelativeIndentWalker.ARGUMENTS_NODE_TYPES)) {
         this.handleArgumentsNode(token, parentThing);
       } else if (parentThing.is(RelativeIndentWalker.CONSTRUCT_NODE_TYPES)) {
-        // Indent from parent construct.
-        final Token parentConstructToken = parentThing.getToken();
-        this.ensureIndentFrom(token, parentConstructToken);
+        // Handle as statement.
+        this.handleStatementNode(nodeToken, node);
       }
     }
   }
@@ -292,11 +302,11 @@ public class RelativeIndentWalker extends FormattingWalker {
       final int precedence = OPERATOR_PRECEDENCE_NODE_TYPES.indexOf(nodeType);
       final AstNodeType parentNodeType = parentNode.getType();
       final int parentPrecedence = OPERATOR_PRECEDENCE_NODE_TYPES.indexOf(parentNodeType);
-      if (precedence > parentPrecedence) {
+      final Token parentToken = parentNode.getToken();
+      if (precedence > parentPrecedence && nodeToken.getLine() == parentToken.getLine()) {
         // Line up with first token.
         this.ensureIndentLinedUpWith(token, nodeToken);
       } else {
-        final Token parentToken = parentNode.getToken();
         this.ensureIndentLinedUpWith(token, parentToken);
       }
     } else if (token == nodeToken) {
@@ -362,9 +372,10 @@ public class RelativeIndentWalker extends FormattingWalker {
     final AstNode firstArgumentOrParameterNode =
         argumentsOrParametersNode.getFirstChild(MagikGrammar.ARGUMENT, MagikGrammar.PARAMETER);
     if (node == firstArgumentOrParameterNode) {
-      // On new line, indent from statement.
-      final AstNode parentStatementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
-      final Token parentStatementToken = parentStatementNode.getToken();
+      // On new line, indent from parent thing.
+      final AstNode parentNode =
+          node.getFirstAncestor(MagikGrammar.POSTFIX_EXPRESSION, MagikGrammar.STATEMENT);
+      final Token parentStatementToken = parentNode.getToken();
       this.ensureIndentFrom(token, parentStatementToken);
     } else {
       // Not first argument or parameter, so line up with first argument or parameter.
@@ -374,9 +385,15 @@ public class RelativeIndentWalker extends FormattingWalker {
   }
 
   private void walkLineCommentToken(final Token token, final Token commentToken) {
+    final AstNode usedNode =
+        commentToken.getLine() < this.currentNode.getToken().getLine()
+            ? this.currentNode.getParent()
+            : this.currentNode;
+
     // Find parent construct to indent from.
     final AstNode parentConstruct =
-        this.currentNode.getFirstAncestor(RelativeIndentWalker.CONSTRUCT_NODE_TYPES);
+        AstQuery.getSelfOrAncestorUpTo(
+            usedNode, MagikGrammar.MAGIK, RelativeIndentWalker.ALL_CONSTRUCT_NODE_TYPES);
     if (parentConstruct == null) {
       // No parent construct, so no indent.
       this.ensureIndent(commentToken, 0);
