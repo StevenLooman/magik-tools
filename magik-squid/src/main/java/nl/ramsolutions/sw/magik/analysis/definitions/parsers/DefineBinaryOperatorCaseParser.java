@@ -133,9 +133,14 @@ public class DefineBinaryOperatorCaseParser {
 
     // Figure type doc.
     final AstNode procDefNode = argument3Node.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
-    final TypeDocParser typeDocParser = new TypeDocParser(procDefNode);
-    final List<TypeString> returnTypes = typeDocParser.getReturnTypes();
-    final TypeString returnType = returnTypes.isEmpty() ? TypeString.UNDEFINED : returnTypes.get(0);
+    final TypeString returnType;
+    if (procDefNode != null) {
+      final TypeDocParser typeDocParser = new TypeDocParser(procDefNode);
+      final List<TypeString> returnTypes = typeDocParser.getReturnTypes();
+      returnType = returnTypes.isEmpty() ? TypeString.UNDEFINED : returnTypes.get(0);
+    } else {
+      returnType = TypeString.UNDEFINED;
+    }
 
     // Figure operator & lhs & rhs.
     final String operator = operatorSymbol.substring(1);
