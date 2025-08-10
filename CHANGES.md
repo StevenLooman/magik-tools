@@ -52,6 +52,7 @@
 - Fix `VariableDeclarationUsageDistanceCheck` to see augmented assignment (e.g. `_andif<<` or `+<< 1`) as valid usage.
 - Auto-reload tests upon running tests.
 - Rewrote formatting code, which most likely results in changed formatting rules.
+- Fix Magik grammar not supporting special characters like `ß`.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)

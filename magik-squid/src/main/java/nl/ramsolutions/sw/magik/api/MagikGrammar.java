@@ -180,7 +180,8 @@ public enum MagikGrammar implements GrammarRuleKey {
   private static final String CHARACTER_REGEXP = "%(\\W|\\w+)";
   private static final String REGEXP_REGEXP = "/[^/]*/[cdilmqsux]*";
 
-  private static final String SIMPLE_IDENTIFIER_REGEXP = "([a-z!?]|\\\\.)([a-z0-9_!?]|\\\\.)*";
+  private static final String SIMPLE_IDENTIFIER_REGEXP =
+      "([\\p{L}!?]|\\\\.)([0-9\\p{L}_!?]|\\\\.)*";
   private static final String PIPED_IDENTIFIER_REGEXP = "\\|[^\\|]*\\|";
   private static final String BARE_IDENTIFIER_REGEXP =
       "(" + SIMPLE_IDENTIFIER_REGEXP + "|" + PIPED_IDENTIFIER_REGEXP + ")";

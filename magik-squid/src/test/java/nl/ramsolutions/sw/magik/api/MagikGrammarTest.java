@@ -502,7 +502,10 @@ class MagikGrammarTest {
         .matches("a1:abc")
         .matches("\\|a")
         .matches("xyz\\|abcdef")
-        .notMatches("_loop");
+        .matches("kurzschluß_spg")
+        .matches("ß")
+        .notMatches("_loop")
+        .notMatches("🐛");
   }
 
   @Test
