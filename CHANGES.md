@@ -50,6 +50,7 @@
 - Add support for inline `# mlint: disable=all` to disable all checks.
 - Fix `VariableDeclarationUsageDistanceCheck` to see augmented assignment (e.g. `_andif<<` or `+<< 1`) as valid usage.
 - Auto-reload tests upon running tests.
+- Fix Magik grammar not supporting special characters like `ß`.
 - Several fixes.
 
 ### Breaking changes (reiterated from above)
