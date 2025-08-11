@@ -198,9 +198,9 @@ public class MagikTextDocumentService implements TextDocumentService {
     // Read relevant properties.
     final String uriStr = textDocument.getUri();
     final URI uri = URI.create(uriStr);
-    final MagikToolsProperties fileProperties;
+    final MagikToolsProperties mergedProperties;
     try {
-      fileProperties = ConfigurationReader.readProperties(uri, properties);
+      mergedProperties = ConfigurationReader.readProperties(uri, this.properties);
     } catch (final IOException exception) {
       throw new IllegalStateException(exception);
     }
@@ -225,7 +225,7 @@ public class MagikTextDocumentService implements TextDocumentService {
       case "magik":
         {
           final MagikTypedFile magikFile =
-              new MagikTypedFile(fileProperties, uri, text, this.definitionKeeper);
+              new MagikTypedFile(mergedProperties, uri, text, this.definitionKeeper);
           openedFile = magikFile;
 
           // Publish diagnostics to client.
@@ -256,9 +256,9 @@ public class MagikTextDocumentService implements TextDocumentService {
     // Read relevant properties.
     final String uriStr = textDocumentIdentifier.getUri();
     final URI uri = URI.create(uriStr);
-    final MagikToolsProperties fileProperties;
+    final MagikToolsProperties mergedProperties;
     try {
-      fileProperties = ConfigurationReader.readProperties(uri, properties);
+      mergedProperties = ConfigurationReader.readProperties(uri, this.properties);
     } catch (final IOException exception) {
       throw new IllegalStateException(exception);
     }
@@ -294,7 +294,7 @@ public class MagikTextDocumentService implements TextDocumentService {
       case "magik":
         {
           final MagikTypedFile magikFile =
-              new MagikTypedFile(fileProperties, uri, text, this.definitionKeeper);
+              new MagikTypedFile(mergedProperties, uri, text, this.definitionKeeper);
           openedFile = magikFile;
 
           // Publish diagnostics to client.
