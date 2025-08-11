@@ -445,6 +445,19 @@ class FormattingWalkerTest {
     assertThat(edits).isEmpty();
   }
 
+  @Test
+  void testIndentFluentInterface() {
+    final String code =
+        """
+        obj.
+        	method1().
+        	method2().
+        	method3()
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
   // endregion
 
   // region: Comments
