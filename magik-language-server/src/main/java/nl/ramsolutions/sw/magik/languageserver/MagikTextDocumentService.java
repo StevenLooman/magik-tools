@@ -64,6 +64,7 @@ import org.eclipse.lsp4j.InlayHint;
 import org.eclipse.lsp4j.InlayHintParams;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.LocationLink;
+import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PrepareRenameDefaultBehavior;
 import org.eclipse.lsp4j.PrepareRenameParams;
@@ -651,6 +652,15 @@ public class MagikTextDocumentService implements TextDocumentService {
         () -> {
           if (!this.formattingProvider.canFormat(magikFile)) {
             LOGGER.warn("Cannot format due to syntax error");
+
+            // Inform the client that formatting cannot be done.
+            final LanguageClient languageClient = this.languageServer.getLanguageClient();
+            final MessageParams messageParams =
+                new MessageParams(
+                    org.eclipse.lsp4j.MessageType.Warning,
+                    "Cannot format file due to syntax error. Please fix the syntax errors first.");
+            languageClient.showMessage(messageParams);
+
             return Collections.emptyList();
           }
 
