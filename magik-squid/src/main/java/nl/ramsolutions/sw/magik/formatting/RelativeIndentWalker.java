@@ -24,6 +24,7 @@ public class RelativeIndentWalker extends FormattingWalker {
 
   private static final AstNodeType[] CONSTRUCT_NODE_TYPES =
       new AstNodeType[] {
+        // These are constructs, indent first token from parent body, line up with the first token.
         MagikGrammar.HANDLING, // TODO: No, indent from first token.
         MagikGrammar.BLOCK,
         MagikGrammar.PROTECT,
@@ -31,8 +32,6 @@ public class RelativeIndentWalker extends FormattingWalker {
         MagikGrammar.CATCH,
         MagikGrammar.LOCK,
         MagikGrammar.IF,
-        // MagikGrammar.FOR,
-        // MagikGrammar.WHILE,
         MagikGrammar.METHOD_DEFINITION,
         MagikGrammar.PROCEDURE_DEFINITION,
       };
@@ -52,6 +51,7 @@ public class RelativeIndentWalker extends FormattingWalker {
 
   private static final AstNodeType[] STATEMENT_NODE_TYPES =
       new AstNodeType[] {
+        // Indent first token from parent body, indent other tokens.
         MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT,
         MagikGrammar.EXPRESSION_STATEMENT,
         MagikGrammar.RETURN_STATEMENT,
