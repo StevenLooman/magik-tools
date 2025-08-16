@@ -399,9 +399,12 @@ public class RelativeIndentWalker extends FormattingWalker {
     final AstNode firstArgumentOrParameterNode =
         argumentsOrParametersNode.getFirstChild(MagikGrammar.ARGUMENT, MagikGrammar.PARAMETER);
     if (node == firstArgumentOrParameterNode) {
-      // On new line, indent from parent thing.
+      // On new line, indent from parent construct.
       final AstNode parentNode =
-          node.getFirstAncestor(MagikGrammar.POSTFIX_EXPRESSION, MagikGrammar.STATEMENT);
+          AstQuery.getFirstAncestor(
+              node,
+              RelativeIndentWalker.ALL_CONSTRUCT_NODE_TYPES,
+              RelativeIndentWalker.BACKSTOP_NODE_TYPES);
       final Token parentStatementToken = parentNode.getToken();
       this.ensureIndentFrom(token, parentStatementToken);
     } else {

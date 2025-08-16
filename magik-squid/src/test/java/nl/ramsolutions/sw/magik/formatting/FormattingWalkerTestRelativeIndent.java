@@ -135,10 +135,10 @@ class FormattingWalkerTestRelativeIndent {
         """,
         """
         a <<
-        	a.method(
-        		x,
-        		y,
-        		z)
+        	b.method(
+        	x,
+        	y,
+        	z)
         """,
       })
   void testIndentArguments(final String code) {
@@ -261,6 +261,7 @@ class FormattingWalkerTestRelativeIndent {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
+
   @Test
   void testCommentsLineBefore() {
     final String code =
@@ -377,8 +378,7 @@ class FormattingWalkerTestRelativeIndent {
     final FormattingOptions options = new FormattingOptions(8, false, false, true, false);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits)
-        .containsExactly(
-            new TextEdit(new Range(new Position(1, 6), new Position(3, 0)), "\r\n\t"));
+        .containsExactly(new TextEdit(new Range(new Position(1, 6), new Position(2, 0)), "\r\n\t"));
   }
 
   @Test
