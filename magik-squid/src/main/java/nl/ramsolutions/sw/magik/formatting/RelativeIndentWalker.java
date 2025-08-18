@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
+import com.sonar.sslr.api.TokenType;
 import com.sonar.sslr.api.Trivia;
 import java.util.Arrays;
 import java.util.List;
@@ -104,6 +105,9 @@ public class RelativeIndentWalker extends FormattingWalker {
       new AstNodeType[] {
         MagikGrammar.ASSIGNMENT_EXPRESSION, MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION
       };
+
+  private static final AstNodeType[] VARIABLE_DEFINITION_STATEMENT_NODE_TYPES =
+      new AstNodeType[] {MagikGrammar.VARIABLE_DEFINITION_STATEMENT};
 
   private static final AstNodeType[] NODE_TYPES;
 
@@ -263,15 +267,21 @@ public class RelativeIndentWalker extends FormattingWalker {
               node,
               RelativeIndentWalker.ARGUMENTS_NODE_TYPES,
               RelativeIndentWalker.CONSTRUCT_NODE_TYPES,
-              RelativeIndentWalker.ASSIGNMENT_NODE_TYPES);
+              RelativeIndentWalker.ASSIGNMENT_NODE_TYPES,
+              RelativeIndentWalker.VARIABLE_DEFINITION_STATEMENT_NODE_TYPES);
       if (parentThing == null) {
         // No parent construct, so no indent.
         this.ensureIndent(token, 0);
       } else if (parentThing.is(RelativeIndentWalker.ARGUMENTS_NODE_TYPES)) {
         this.handleArgumentsNode(token, parentThing);
+      } else if (parentThing.is(RelativeIndentWalker.ASSIGNMENT_NODE_TYPES)
+          || parentThing.is(RelativeIndentWalker.VARIABLE_DEFINITION_STATEMENT_NODE_TYPES)) {
+        this.handleStatementNode(token, parentThing);
       } else if (parentThing.is(RelativeIndentWalker.CONSTRUCT_NODE_TYPES)) {
         // Handle as statement.
         this.handleStatementNode(nodeToken, node);
+      } else {
+        throw new IllegalStateException("Unknown parent thing type for indent: " + parentThing);
       }
     }
   }
@@ -399,14 +409,12 @@ public class RelativeIndentWalker extends FormattingWalker {
     final AstNode firstArgumentOrParameterNode =
         argumentsOrParametersNode.getFirstChild(MagikGrammar.ARGUMENT, MagikGrammar.PARAMETER);
     if (node == firstArgumentOrParameterNode) {
-      // On new line, indent from parent construct.
-      final AstNode parentNode =
-          AstQuery.getFirstAncestor(
-              node,
-              RelativeIndentWalker.ALL_CONSTRUCT_NODE_TYPES,
-              RelativeIndentWalker.BACKSTOP_NODE_TYPES);
-      final Token parentStatementToken = parentNode.getToken();
-      this.ensureIndentFrom(token, parentStatementToken);
+      // Indent from parent invocation, first token on that line.
+      final AstNode invocationNode =
+          node.getFirstAncestor(MagikGrammar.METHOD_INVOCATION, MagikGrammar.PROCEDURE_INVOCATION);
+      final Token invocationToken = invocationNode.getToken();
+      final Token invocationNodeFirstLineToken = this.getFirstTextTokenOnLine(invocationToken);
+      this.ensureIndentFrom(token, invocationNodeFirstLineToken);
     } else {
       // Not first argument or parameter, so line up with first argument or parameter.
       final Token firstArgumentOrParameterToken = firstArgumentOrParameterNode.getToken();
@@ -432,6 +440,27 @@ public class RelativeIndentWalker extends FormattingWalker {
       final Token parentConstructToken = parentConstruct.getToken();
       this.ensureIndentFrom(commentToken, parentConstructToken);
     }
+  }
+
+  private Token getFirstTextTokenOnLine(final Token invocationToken) {
+    Token currentToken = invocationToken;
+    Token lastTextToken = invocationToken;
+    while (currentToken != null) {
+      final Token tokenBefore = this.getTokenBeforeOnSameLine(currentToken);
+      if (tokenBefore == null) {
+        // No more tokens before.
+        break;
+      }
+
+      final TokenType tokenBeforeType = tokenBefore.getType();
+      if (!tokenBeforeType.equals(GenericTokenType.WHITESPACE)) {
+        lastTextToken = tokenBefore;
+      }
+
+      currentToken = tokenBefore;
+    }
+
+    return lastTextToken;
   }
 
   /**
@@ -492,11 +521,7 @@ public class RelativeIndentWalker extends FormattingWalker {
         // Has whitespace, but not the correct indent, so we need to replace it.
         this.setTokenOriginalValue(tokenBefore, indentString);
       }
-
-      return;
-    }
-
-    if (indentSize != 0) {
+    } else if (indentSize != 0) {
       // No indent, so remove any existing whitespace.
       this.ensureWhitespaceBefore(token, indentString);
     }

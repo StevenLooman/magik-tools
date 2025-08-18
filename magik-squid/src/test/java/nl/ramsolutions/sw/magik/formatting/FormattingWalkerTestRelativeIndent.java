@@ -136,9 +136,9 @@ class FormattingWalkerTestRelativeIndent {
         """
         a <<
         	b.method(
-        	x,
-        	y,
-        	z)
+        		x,
+        		y,
+        		z)
         """,
       })
   void testIndentArguments(final String code) {
@@ -194,7 +194,7 @@ class FormattingWalkerTestRelativeIndent {
         _local
         	a <<
         	10
-        """
+        """,
       })
   void testIndentVariableDefinitionAssignment(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
@@ -226,14 +226,21 @@ class FormattingWalkerTestRelativeIndent {
     assertThat(edits).isEmpty();
   }
 
-  @Test
-  void testIndentAssignmentConstruct() {
-    final String code =
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         """
         a <<
         	_proc()
         	_endproc
-        """;
+        """,
+        """
+        _local a <<
+        	_proc()
+        	_endproc
+        """,
+      })
+  void testIndentAssignmentConstruct(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
