@@ -230,6 +230,51 @@ class FormattingWalkerTestRelativeIndent {
   @ValueSource(
       strings = {
         """
+        a << _proc()
+             _endproc
+        """,
+        """
+        _local a << _proc()
+        	    _endproc
+        """,
+        """
+        a << _for i _over 1.upto(20)
+             _loop
+             _endloop
+        """,
+        """
+        _local a << _for i _over 1.upto(20)
+        	    _loop
+        	    _endloop
+        """,
+        """
+        a << _over 1.upto(20)
+             _loop
+             _endloop
+        """,
+        """
+        _local a << _over 1.upto(20)
+        	    _loop
+        	    _endloop
+        """,
+        """
+        a << _loop
+             _endloop
+        """,
+        """
+        _local a << _loop
+        	    _endloop
+        """,
+      })
+  void testIndentAssignmentConstructSingleLine(final String code) {
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
         a <<
         	_proc()
         	_endproc
@@ -239,8 +284,42 @@ class FormattingWalkerTestRelativeIndent {
         	_proc()
         	_endproc
         """,
+        """
+        a <<
+        	_for i _over 1.upto(20)
+        	_loop
+        	_endloop
+        """,
+        """
+        _local a <<
+        	_for i _over 1.upto(20)
+        	_loop
+        	_endloop
+        """,
+        """
+        a <<
+        	_over 1.upto(20)
+        	_loop
+        	_endloop
+        """,
+        """
+        _local a <<
+        	_over 1.upto(20)
+        	_loop
+        	_endloop
+        """,
+        """
+        a <<
+        	_loop
+        	_endloop
+        """,
+        """
+        _local a <<
+        	_loop
+        	_endloop
+        """,
       })
-  void testIndentAssignmentConstruct(final String code) {
+  void testIndentAssignmentConstructMultiLine(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
