@@ -284,6 +284,7 @@ public class RelativeIndentWalker extends FormattingWalker {
           AstQuery.getFirstAncestor(
               node,
               RelativeIndentWalker.ARGUMENTS_NODE_TYPES,
+              RelativeIndentWalker.METHOD_DEFINITION_NODE_TYPES,
               RelativeIndentWalker.CONSTRUCT_NODE_TYPES,
               RelativeIndentWalker.ASSIGNMENT_NODE_TYPES,
               RelativeIndentWalker.VARIABLE_DEFINITION_STATEMENT_NODE_TYPES);
@@ -295,7 +296,8 @@ public class RelativeIndentWalker extends FormattingWalker {
       } else if (parentThing.is(RelativeIndentWalker.ASSIGNMENT_NODE_TYPES)
           || parentThing.is(RelativeIndentWalker.VARIABLE_DEFINITION_STATEMENT_NODE_TYPES)) {
         this.handleStatementNode(token, parentThing);
-      } else if (parentThing.is(RelativeIndentWalker.CONSTRUCT_NODE_TYPES)) {
+      } else if (parentThing.is(RelativeIndentWalker.CONSTRUCT_NODE_TYPES)
+          || parentThing.is(RelativeIndentWalker.METHOD_DEFINITION_NODE_TYPES)) {
         // Handle as statement.
         this.handleStatementNode(token, node);
       } else {

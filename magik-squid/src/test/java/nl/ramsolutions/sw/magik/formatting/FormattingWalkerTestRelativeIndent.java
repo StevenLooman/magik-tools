@@ -477,4 +477,18 @@ class FormattingWalkerTestRelativeIndent {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
+
+  @Test
+  void testMethodIf() { // NOSONAR
+    final String code =
+        """
+        _method a.a
+        	_if a?
+        	_then
+        	_endif
+        _endmethod
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
 }
