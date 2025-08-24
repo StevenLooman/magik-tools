@@ -133,13 +133,15 @@ public class MissingPragmaCheck extends MagikCheck {
       return helper.getArgument(0);
     } else if (definition instanceof MethodDefinition methodDefinition) {
       final AstNode definitionNode = methodDefinition.getNode();
+      final AstNode argumentsNode = definitionNode.getFirstDescendant(MagikGrammar.ARGUMENTS);
       if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
         return helper.getMethodNameNode();
-      } else {
-        final AstNode argumentsNode = definitionNode.getFirstDescendant(MagikGrammar.ARGUMENTS);
+      } else if (argumentsNode != null) {
         final ArgumentsNodeHelper helper = new ArgumentsNodeHelper(argumentsNode);
         return helper.getArgument(0);
+      } else {
+        return definitionNode;
       }
     } else if (definition instanceof GlobalDefinition globalDefinition) {
       final AstNode definitionNode = globalDefinition.getNode();
