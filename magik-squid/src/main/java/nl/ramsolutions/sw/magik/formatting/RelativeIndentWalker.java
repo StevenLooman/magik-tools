@@ -383,13 +383,27 @@ public class RelativeIndentWalker extends FormattingWalker {
   private void handleExpressionNode(final Token token, final AstNode node) {
     final Token nodeToken = node.getToken();
     final AstNode parentNode = node.getParent();
+    final Token parentToken = parentNode.getToken();
     if (parentNode.is(RelativeIndentWalker.EXPRESSION_NODE_TYPES)) {
+      // If first of expression, then indent from parent.
+      if (token == parentToken) {
+        final AstNode interestNode =
+            AstQuery.getFirstAncestor(
+                parentNode,
+                RelativeIndentWalker.ALL_CONSTRUCT_NODE_TYPES,
+                RelativeIndentWalker.STATEMENT_NODE_TYPES,
+                RelativeIndentWalker.BACKSTOP_NODE_TYPES);
+        final Token interestToken = interestNode.getToken();
+        final Token interestNodeFirstLineToken = this.getFirstTextTokenOnLine(interestToken);
+        this.ensureIndentFrom(token, interestNodeFirstLineToken);
+        return;
+      }
+
       // We need operator precedence to determine if we should indent from parentNode or line up.
       final AstNodeType nodeType = node.getType();
       final int precedence = OPERATOR_PRECEDENCE_NODE_TYPES.indexOf(nodeType);
       final AstNodeType parentNodeType = parentNode.getType();
       final int parentPrecedence = OPERATOR_PRECEDENCE_NODE_TYPES.indexOf(parentNodeType);
-      final Token parentToken = parentNode.getToken();
       if (precedence > parentPrecedence && nodeToken.getLine() == parentToken.getLine()) {
         // Line up with first token.
         this.ensureIndentLinedUpWith(token, nodeToken);
@@ -458,12 +472,12 @@ public class RelativeIndentWalker extends FormattingWalker {
             : node;
     final AstNode firstParameterNode = parametersNode.getFirstChild(MagikGrammar.PARAMETER);
     if (node == firstParameterNode) {
-      // Indent from parent invocation, first token on that line.
-      final AstNode invocationNode =
-          node.getFirstAncestor(MagikGrammar.METHOD_INVOCATION, MagikGrammar.PROCEDURE_INVOCATION);
-      final Token invocationToken = invocationNode.getToken();
-      final Token invocationNodeFirstLineToken = this.getFirstTextTokenOnLine(invocationToken);
-      this.ensureIndentFrom(token, invocationNodeFirstLineToken);
+      // Indent from parent definition, first token on that line.
+      final AstNode definitionNode =
+          node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+      final Token definitionToken = definitionNode.getToken();
+      final Token definitionNodeFirstLineToken = this.getFirstTextTokenOnLine(definitionToken);
+      this.ensureIndentFrom(token, definitionNodeFirstLineToken);
     } else {
       // Not first parameter, so line up with first parameter.
       final Token firstParameterToken = firstParameterNode.getToken();

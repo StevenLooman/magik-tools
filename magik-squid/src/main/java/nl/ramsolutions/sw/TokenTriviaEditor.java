@@ -57,8 +57,8 @@ public class TokenTriviaEditor {
   @CheckForNull
   public Token getTokenBeforeOnSameLine(final Token token) {
     final int tokenLine = token.getLine();
-    final List<Token> tokensOnLine = this.lineTokens.getOrDefault(tokenLine, List.of());
-    if (tokensOnLine.isEmpty()) {
+    final List<Token> tokensOnLine = this.lineTokens.get(tokenLine);
+    if (tokensOnLine == null) {
       throw new IllegalArgumentException("No tokens found on line: " + tokenLine);
     }
 
@@ -95,9 +95,8 @@ public class TokenTriviaEditor {
     // Keep on searching backwards until we find a token on a previous line.
     final int tokenLine = token.getLine();
     for (int tokenLineBefore = tokenLine - 1; tokenLineBefore >= 1; --tokenLineBefore) {
-      final List<Token> tokensOnLineBefore =
-          this.lineTokens.getOrDefault(tokenLineBefore, List.of());
-      if (!tokensOnLineBefore.isEmpty()) {
+      final List<Token> tokensOnLineBefore = this.lineTokens.get(tokenLineBefore);
+      if (tokensOnLineBefore != null) {
         // Return the last token on the previous line.
         final int lastIndex = tokensOnLineBefore.size() - 1;
         if (lastIndex < 0) {
@@ -137,8 +136,8 @@ public class TokenTriviaEditor {
 
     // Update the tokens after this token on the same line.
     final int tokenLine = token.getLine();
-    final List<Token> tokensOnLine = this.lineTokens.getOrDefault(tokenLine, List.of());
-    if (tokensOnLine.isEmpty()) {
+    final List<Token> tokensOnLine = this.lineTokens.get(tokenLine);
+    if (tokensOnLine == null) {
       throw new IllegalArgumentException("No tokens found on line: " + tokenLine);
     }
 
@@ -170,8 +169,8 @@ public class TokenTriviaEditor {
    */
   public Token addWhitespaceBefore(final Token token, final String whitespace) {
     final int tokenLine = token.getLine();
-    final List<Token> tokensOnLine = this.lineTokens.getOrDefault(tokenLine, List.of());
-    if (tokensOnLine.isEmpty()) {
+    final List<Token> tokensOnLine = this.lineTokens.get(tokenLine);
+    if (tokensOnLine == null) {
       throw new IllegalArgumentException("No tokens found on line: " + tokenLine);
     }
 
@@ -244,8 +243,8 @@ public class TokenTriviaEditor {
     }
 
     final int triviaTokenLine = whitespaceToken.getLine();
-    final List<Token> tokensOnLine = this.lineTokens.getOrDefault(triviaTokenLine, List.of());
-    if (tokensOnLine.isEmpty()) {
+    final List<Token> tokensOnLine = this.lineTokens.get(triviaTokenLine);
+    if (tokensOnLine == null) {
       throw new IllegalArgumentException("No tokens found on line: " + triviaTokenLine);
     }
 
@@ -293,8 +292,8 @@ public class TokenTriviaEditor {
     }
 
     final int triviaTokenLine = eolToken.getLine();
-    final List<Token> tokensOnLine = this.lineTokens.getOrDefault(triviaTokenLine, List.of());
-    if (tokensOnLine.isEmpty()) {
+    final List<Token> tokensOnLine = this.lineTokens.get(triviaTokenLine);
+    if (tokensOnLine == null) {
       throw new IllegalArgumentException("No tokens found on line: " + triviaTokenLine);
     }
 
@@ -378,8 +377,8 @@ public class TokenTriviaEditor {
    */
   public Token addEolBefore(final Token token, final String eol) {
     final int tokenLine = token.getLine();
-    final List<Token> tokensOnLine = this.lineTokens.getOrDefault(tokenLine, List.of());
-    if (tokensOnLine.isEmpty()) {
+    final List<Token> tokensOnLine = this.lineTokens.get(tokenLine);
+    if (tokensOnLine == null) {
       throw new IllegalArgumentException("No tokens found on line: " + tokenLine);
     }
 
@@ -445,6 +444,11 @@ public class TokenTriviaEditor {
     // lineOffset (1).
     for (int currentLine = this.lineTokens.size(); currentLine > tokenLine; --currentLine) {
       final List<Token> followingLineTokens = this.lineTokens.get(currentLine);
+      if (followingLineTokens == null) {
+        // Can happen due to syntax errors.
+        continue;
+      }
+
       followingLineTokens.forEach(
           followingLineToken -> {
             final int line = followingLineToken.getLine();

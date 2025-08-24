@@ -274,7 +274,7 @@ class FormattingWalkerTest {
 
   // endregion
 
-  // region: Newlines
+  // region: Min max newlines
   @Test
   void testRequireNewlineAfterTransmit() {
     final String code =

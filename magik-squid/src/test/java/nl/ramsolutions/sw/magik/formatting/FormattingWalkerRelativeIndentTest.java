@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class FormattingWalkerTestRelativeIndent {
+class FormattingWalkerRelativeIndentTest {
 
   private List<TextEdit> getEdits(final String code) {
     final FormattingOptions options = new FormattingOptions(8, false, false, true, false);
@@ -397,6 +397,18 @@ class FormattingWalkerTestRelativeIndent {
             b? _is _false
         _then
         _endif
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testLineUpAndExpression() { // NOSONAR
+    final String code =
+        """
+        x? <<
+        	a = b _andif
+        	c = d
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
