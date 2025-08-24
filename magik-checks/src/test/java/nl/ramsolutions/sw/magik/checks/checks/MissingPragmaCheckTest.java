@@ -87,4 +87,15 @@ class MissingPragmaCheckTest extends MagikCheckTestBase {
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).isEmpty();
   }
+
+  @Test
+  void testExemplarSlotAccessor() {
+    final String code =
+        """
+        def_slotted_exemplar(:test_exemplar, {{:slot1, _unset, :readable, :public}})
+        """;
+    final MagikCheck check = new MissingPragmaCheck();
+    final List<MagikIssue> issues = this.runCheck(code, check);
+    assertThat(issues).hasSize(2);
+  }
 }
