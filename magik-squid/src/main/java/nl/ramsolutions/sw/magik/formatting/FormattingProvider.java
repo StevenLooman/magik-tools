@@ -47,19 +47,19 @@ public class FormattingProvider {
   /**
    * Formats the given AST node.
    *
-   * @param node The root {@link AstNode} of the AST to format.
+   * @param rootNode The root {@link AstNode} of the AST to format.
    * @return A list of {@link TextEdit}s representing the formatting changes.
    */
-  public List<TextEdit> format(final AstNode node) {
-    LOGGER.debug("Formatting node: {}", node);
-    LOGGER.debug("  tab size: {}", this.options.getTabSize());
-    LOGGER.debug("  insert spaces: {}", this.options.isInsertSpaces());
-    LOGGER.debug("  trim trailing whitespace: {}", this.options.isTrimTrailingWhitespace());
-    LOGGER.debug("  insert final newline: {}", this.options.isInsertFinalNewline());
-    LOGGER.debug("  trim final newlines: {}", this.options.isTrimFinalNewlines());
-    LOGGER.debug("  indent strategy: {}", this.indentWalker.getSimpleName());
+  public List<TextEdit> format(final AstNode rootNode) {
+    // LOGGER.debug("Formatting node: {}", rootNode);
+    // LOGGER.debug("  tab size: {}", this.options.getTabSize());
+    // LOGGER.debug("  insert spaces: {}", this.options.isInsertSpaces());
+    // LOGGER.debug("  trim trailing whitespace: {}", this.options.isTrimTrailingWhitespace());
+    // LOGGER.debug("  insert final newline: {}", this.options.isInsertFinalNewline());
+    // LOGGER.debug("  trim final newlines: {}", this.options.isTrimFinalNewlines());
+    // LOGGER.debug("  indent strategy: {}", this.indentWalker.getSimpleName());
 
-    final AstNode nodeCopy = AstNodeHelper.clone(node);
+    final AstNode nodeCopy = AstNodeHelper.clone(rootNode);
     final TokenTriviaEditor tokenEditor = new TokenTriviaEditor(nodeCopy);
 
     // Apply pre walkers.
@@ -104,6 +104,6 @@ public class FormattingProvider {
 
     // Return the edits.
     final TextEditGenerator textEditGenerator = new TextEditGenerator();
-    return textEditGenerator.generateEdits(node, nodeCopy);
+    return textEditGenerator.generateEdits(rootNode, nodeCopy);
   }
 }

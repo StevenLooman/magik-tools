@@ -24,18 +24,42 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "{1, 2}",
-        "{1, :|a|, 2}",
-        "a * b",
-        "a _isnt b",
-        "a +<< b",
-        "a *<< b",
-        "a _orif<< b",
-        "show(a, b)",
-        "show(% )",
-        ".uri << items[2]",
-        "_pragma(classify_level=restricted, topic={a, b})",
-        "_method",
+        """
+        {1, 2}
+        """,
+        """
+        {1, :a, 2}
+        """,
+        """
+        a * b
+        """,
+        """
+        a _isnt b
+        """,
+        """
+        a +<< b
+        """,
+        """
+        a *<< b
+        """,
+        """
+        a _orif<< b
+        """,
+        """
+        show(a, b)
+        """,
+        """
+        show(% )
+        """,
+        """
+        .uri << items[2]
+        """,
+        """
+        _pragma(classify_level=restricted, topic={a, b})
+        """,
+        """
+        _method
+        """,
         """
         {
         	2
@@ -44,7 +68,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
         """
         {\r
         	3\r
-        }\r
+        }
         """,
         """
         show( # comment
@@ -61,17 +85,31 @@ class FormattingCheckTest extends MagikCheckTestBase {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "{1,2}",
-        "{1 , 2}",
+        """
+        {1,2}
+        """,
+        """
+        {1 , 2}
+        """,
         """
         {1 ,
         \t2}
         """,
-        "a* b",
-        "a *b",
-        "show(a, b )",
-        "show( a, b)",
-        "$\n$",
+        """
+        a* b
+        """,
+        """
+        a *b
+        """,
+        """
+        show(a, b )
+        """,
+        """
+        show( a, b)
+        """,
+        """
+        $\n$
+        """,
       })
   void testImproper(final String code) {
     final FormattingCheck check = new FormattingCheck();
@@ -126,11 +164,14 @@ class FormattingCheckTest extends MagikCheckTestBase {
   }
 
   @Test
-  void tetSpaceIndentLineStartWithTabs() {
+  void testSpaceIndentLineStartWithTabs() {
     final FormattingCheck check = new FormattingCheck();
     check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
     check.indentCharacter = "space";
-    final String code = "\tprint(a)";
+    final String code =
+        """
+        \tprint(a)
+        """;
     final List<MagikIssue> issues = this.runCheck(code, check);
     assertThat(issues).hasSize(1);
   }

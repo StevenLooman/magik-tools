@@ -312,17 +312,17 @@
           "default": 8
         },
         "magik.formatting.insertFinalNewline": {
-          "description": "Insert final newline -- only used by the VS Code extension.",
+          "description": "Insert final newline",
           "type": "boolean",
           "default": true
         },
         "magik.formatting.trimTrailingWhitespace": {
-          "description": "Trim trailing whitespace -- only used by the VS Code extension.",
+          "description": "Trim trailing whitespace",
           "type": "boolean",
           "default": true
         },
         "magik.formatting.trimFinalNewlines": {
-          "description": "Trim final newlines -- only used by the VS Code extension.",
+          "description": "Trim final newlines",
           "type": "boolean",
           "default": true
         },
