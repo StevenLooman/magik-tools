@@ -11,8 +11,6 @@ import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 /** AST walker for formatting Magik code. */
 public abstract class FormattingWalker extends MagikAstWalker {
 
-  private static final String NEWLINE = "\n";
-
   private final FormattingOptions options;
   private final TokenTriviaEditor tokenEditor;
 
@@ -149,14 +147,16 @@ public abstract class FormattingWalker extends MagikAstWalker {
     final Token beforeToken = this.tokenEditor.getTokenBefore(token);
     if (beforeToken == null || !beforeToken.getType().equals(GenericTokenType.EOL)) {
       // No EOL token before, so we can just add one.
-      return this.tokenEditor.addEolBefore(token, NEWLINE);
+      final String newline = this.tokenEditor.getLineSeparator();
+      return this.tokenEditor.addEolBefore(token, newline);
     }
 
     return beforeToken;
   }
 
   protected Token addEolBefore(final Token token) {
-    return this.tokenEditor.addEolBefore(token, NEWLINE);
+    final String newline = this.tokenEditor.getLineSeparator();
+    return this.tokenEditor.addEolBefore(token, newline);
   }
 
   protected boolean hasNewlineTrivia(final Token token) {

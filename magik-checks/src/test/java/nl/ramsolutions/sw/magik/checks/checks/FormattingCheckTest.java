@@ -68,7 +68,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
         """
         {\r
         	3\r
-        }
+        }\r
         """,
         """
         show( # comment
@@ -108,7 +108,8 @@ class FormattingCheckTest extends MagikCheckTestBase {
         show( a, b)
         """,
         """
-        $\n$
+        $
+        $
         """,
       })
   void testImproper(final String code) {

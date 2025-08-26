@@ -3,6 +3,7 @@ package nl.ramsolutions.sw;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
+import com.sonar.sslr.api.TokenType;
 import com.sonar.sslr.api.Trivia;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.ArrayList;
@@ -458,6 +459,26 @@ public class TokenTriviaEditor {
     }
 
     return eolToken;
+  }
+
+  /**
+   * Get the line separator used in this file.
+   *
+   * @return The used line separator in this file.
+   */
+  public String getLineSeparator() {
+    // Scan for the first newline in this file, and use that.
+    final List<Token> firstLineTokens = this.lineTokens.get(1);
+    if (firstLineTokens != null && !firstLineTokens.isEmpty()) {
+      final Token lastToken = firstLineTokens.get(firstLineTokens.size() - 1);
+      final TokenType lastTokenType = lastToken.getType();
+      if (lastTokenType.equals(GenericTokenType.EOL)) {
+        return lastToken.getOriginalValue();
+      }
+    }
+
+    // Otherwise, newline.
+    return "\n"; // TODO: System.lineSeparator() ?
   }
 
   // private void assertLinesConnected() {
