@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefConditionParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefEnumerationParser;
@@ -90,9 +91,7 @@ public class MagikDefinitionReader extends MagikAstWalker {
   @Override
   protected void walkPostMethodInvocation(final AstNode node) {
     final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
-    if (statementNode != null
-        && statementNode.getParent() != null
-        && statementNode.getParent().is(MagikGrammar.MAGIK)) {
+    if (statementNode != null && AstQuery.parentIs(statementNode, MagikGrammar.MAGIK)) {
       // Some more sanity: Directly under top level.
       if (DefineSlotAccessParser.isDefineSlotAccess(node)
           || DefineSlotAccessParser.isDefineSlotExternallyReadable(node)

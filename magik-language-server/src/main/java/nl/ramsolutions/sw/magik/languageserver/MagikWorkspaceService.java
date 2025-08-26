@@ -284,7 +284,7 @@ public class MagikWorkspaceService implements WorkspaceService {
           progressParams.setToken(token);
 
           final WorkDoneProgressBegin begin = new WorkDoneProgressBegin();
-          begin.setTitle("Indexing workspace");
+          begin.setTitle("Magik: Indexing workspace");
           progressParams.setValue(Either.forLeft(begin));
           languageClient.notifyProgress(progressParams);
 
@@ -295,7 +295,7 @@ public class MagikWorkspaceService implements WorkspaceService {
           }
 
           final WorkDoneProgressEnd end = new WorkDoneProgressEnd();
-          end.setMessage("Done indexing workspace");
+          end.setMessage("Magik: Done indexing workspace");
           progressParams.setValue(Either.forLeft(end));
           languageClient.notifyProgress(progressParams);
           LOGGER.trace("Done indexing workspace in background");

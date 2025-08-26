@@ -3,9 +3,7 @@ package nl.ramsolutions.sw.magik.languageserver.formatting;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
-import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.FormattingOptions;
 import org.eclipse.lsp4j.Position;
@@ -23,9 +21,7 @@ class FormattingProviderTest {
   }
 
   private List<TextEdit> getEdits(final String code, final FormattingOptions options) {
-    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedFile magikFile =
-        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
 
     final FormattingProvider provider = new FormattingProvider();
     return provider.provideFormatting(magikFile, options);
@@ -41,9 +37,7 @@ class FormattingProviderTest {
       final String code,
       final FormattingOptions options,
       final nl.ramsolutions.sw.magik.Range range) {
-    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedFile magikFile =
-        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
 
     final FormattingProvider provider = new FormattingProvider();
     return provider.provideRangeFormatting(magikFile, options, range);

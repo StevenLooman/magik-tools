@@ -95,6 +95,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   BLOCK,
   BLOCK_SYNTAX_ERROR,
   PROTECT,
+  LOCKING,
   PROTECT_SYNTAX_ERROR,
   PROTECTION,
   TRY,
@@ -186,16 +187,18 @@ public enum MagikGrammar implements GrammarRuleKey {
       "(" + SIMPLE_IDENTIFIER_REGEXP + "|" + PIPED_IDENTIFIER_REGEXP + ")";
   private static final String LABEL_REGEXP = "(?is)" + BARE_IDENTIFIER_REGEXP + "+";
   private static final String IDENTIFIER_REGEXP =
-      "(?is)("
-          + BARE_IDENTIFIER_REGEXP
-          + "["
-          + WHITESPACE_SINGLE_REGEXP
-          + "]*"
-          + ":"
-          + "["
-          + WHITESPACE_SINGLE_REGEXP
-          + "]*"
-          + ")?("
+      "(?is)"
+          + ("("
+              + BARE_IDENTIFIER_REGEXP
+              + "["
+              + WHITESPACE_SINGLE_REGEXP
+              + "]*"
+              + MagikPunctuator.COLON.getValue()
+              + "["
+              + WHITESPACE_SINGLE_REGEXP
+              + "]*"
+              + ")?")
+          + "("
           + BARE_IDENTIFIER_REGEXP
           + ")+";
 
@@ -306,7 +309,8 @@ public enum MagikGrammar implements GrammarRuleKey {
   }
 
   private static void expressions(final LexerlessGrammarBuilder b) {
-    b.rule(SLOT).is(MagikPunctuator.DOT, SPACING_NO_LB_2, IDENTIFIER);
+    b.rule(SLOT)
+        .is(MagikPunctuator.DOT, SPACING_NO_LB_2, IDENTIFIER); // TODO: SIMPLE_IDENTIFIER_REGEXP?
     b.rule(SIMPLE_VECTOR)
         .is(
             MagikPunctuator.BRACE_L,
@@ -319,7 +323,7 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(SIMPLE_VECTOR_SYNTAX_ERROR)
         .is(SPACING, b.regexp(MagikGrammar.syntaxErrorRegexp(MagikPunctuator.BRACE_R)));
 
-    b.rule(CLASS).is(MagikKeyword.CLASS, IDENTIFIER);
+    b.rule(CLASS).is(MagikKeyword.CLASS, IDENTIFIER); // TODO: SIMPLE_IDENTIFIER_REGEXP?
     b.rule(GATHER_EXPRESSION).is(MagikKeyword.GATHER, TUPLE);
 
     b.rule(EXPRESSION).is(ASSIGNMENT_EXPRESSION);
@@ -475,7 +479,10 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(SUPER)
         .is(
             MagikKeyword.SUPER,
-            b.optional(MagikPunctuator.PAREN_L, IDENTIFIER, MagikPunctuator.PAREN_R));
+            b.optional(
+                MagikPunctuator.PAREN_L,
+                IDENTIFIER, // TODO: SIMPLE_IDENTIFIER_REGEXP?
+                MagikPunctuator.PAREN_R));
 
     b.rule(METHOD_INVOCATION)
         .is(
@@ -630,11 +637,12 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(PROTECT)
         .is(
             MagikKeyword.PROTECT,
-            b.optional(MagikKeyword.LOCKING, EXPRESSION),
+            b.optional(LOCKING),
             b.firstOf(
                 b.sequence(BODY, PROTECTION, b.next(MagikKeyword.ENDPROTECT)),
                 PROTECT_SYNTAX_ERROR),
             MagikKeyword.ENDPROTECT);
+    b.rule(LOCKING).is(MagikKeyword.LOCKING, EXPRESSION);
     b.rule(PROTECTION).is(MagikKeyword.PROTECTION, BODY);
     b.rule(PROTECT_SYNTAX_ERROR)
         .is(SPACING, b.regexp(MagikGrammar.syntaxErrorRegexp(MagikKeyword.ENDPROTECT)));
@@ -642,20 +650,20 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(TRY)
         .is(
             MagikKeyword.TRY,
-            b.optional(MagikKeyword.WITH, TRY_VARIABLE),
+            b.optional(MagikKeyword.WITH, TRY_VARIABLE), // TODO: Move this to own node?
             b.firstOf(
                 b.sequence(BODY, b.oneOrMore(WHEN), b.next(MagikKeyword.ENDTRY)), TRY_SYNTAX_ERROR),
             MagikKeyword.ENDTRY);
     b.rule(TRY_SYNTAX_ERROR)
         .is(SPACING, b.regexp(MagikGrammar.syntaxErrorRegexp(MagikKeyword.ENDTRY)));
-    b.rule(TRY_VARIABLE).is(IDENTIFIER);
+    b.rule(TRY_VARIABLE).is(IDENTIFIER); // TODO: SIMPLE_IDENTIFIER_REGEXP?
     b.rule(WHEN)
         .is(
             MagikKeyword.WHEN,
             CONDITION_NAME,
             b.zeroOrMore(MagikPunctuator.COMMA, CONDITION_NAME),
             BODY);
-    b.rule(CONDITION_NAME).is(IDENTIFIER);
+    b.rule(CONDITION_NAME).is(IDENTIFIER); // TODO: SIMPLE_IDENTIFIER_REGEXP?
 
     b.rule(CATCH)
         .is(
@@ -736,7 +744,7 @@ public enum MagikGrammar implements GrammarRuleKey {
                 METHOD_DEFINITION_SYNTAX_ERROR),
             MagikKeyword.ENDMETHOD);
     b.rule(EXEMPLAR_NAME).is(IDENTIFIER);
-    b.rule(METHOD_NAME).is(IDENTIFIER);
+    b.rule(METHOD_NAME).is(IDENTIFIER); // TODO: SIMPLE_IDENTIFIER_REGEXP?
     b.rule(METHOD_DEFINITION_SYNTAX_ERROR)
         .is(SPACING, b.regexp(MagikGrammar.syntaxErrorRegexp(MagikKeyword.ENDMETHOD)));
 
@@ -796,7 +804,8 @@ public enum MagikGrammar implements GrammarRuleKey {
                 b.optional(
                     b.optional(MagikPunctuator.COMMA), b.next(MagikKeyword.GATHER), PARAMETER)))
         .skip();
-    b.rule(PARAMETER).is(b.optional(PARAMETER_MODIFIER), IDENTIFIER);
+    b.rule(PARAMETER)
+        .is(b.optional(PARAMETER_MODIFIER), IDENTIFIER); // TODO: SIMPLE_IDENTIFIER_REGEXP?
     b.rule(PARAMETER_MODIFIER).is(b.firstOf(MagikKeyword.GATHER, MagikKeyword.OPTIONAL));
     b.rule(ASSIGNMENT_PARAMETER)
         .is(b.nextNot(MagikKeyword.OPTIONAL), b.nextNot(MagikKeyword.GATHER), PARAMETER);
@@ -876,15 +885,17 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(PRAGMA)
         .is(MagikKeyword.PRAGMA, MagikPunctuator.PAREN_L, PRAGMA_PARAMS, MagikPunctuator.PAREN_R);
     b.rule(PRAGMA_PARAMS).is(PRAGMA_PARAM, b.zeroOrMore(MagikPunctuator.COMMA, PRAGMA_PARAM));
-    b.rule(PRAGMA_PARAM).is(IDENTIFIER, MagikOperator.EQ, PRAGMA_VALUE);
+    b.rule(PRAGMA_PARAM)
+        .is(IDENTIFIER, MagikOperator.EQ, PRAGMA_VALUE); // TODO: SIMPLE_IDENTIFIER_REGEXP?
     b.rule(PRAGMA_VALUE)
         .is(
             b.firstOf(
-                IDENTIFIER,
+                IDENTIFIER, // TODO: SIMPLE_IDENTIFIER_REGEXP?
                 b.sequence(
                     MagikPunctuator.BRACE_L,
-                    IDENTIFIER,
-                    b.zeroOrMore(MagikPunctuator.COMMA, IDENTIFIER),
+                    IDENTIFIER, // TODO: SIMPLE_IDENTIFIER_REGEXP?
+                    b.zeroOrMore(
+                        MagikPunctuator.COMMA, IDENTIFIER), // TODO: SIMPLE_IDENTIFIER_REGEXP?
                     MagikPunctuator.BRACE_R)));
 
     b.rule(PACKAGE_IDENTIFIER).is(SPACING, b.regexp(BARE_IDENTIFIER_REGEXP));

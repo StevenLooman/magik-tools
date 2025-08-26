@@ -14,6 +14,7 @@
   },
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
   "java.autobuild.enabled": false,
   "java.checkstyle.configuration": "/google_checks.xml",
   "java.checkstyle.version": "10.15.0",

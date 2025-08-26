@@ -37,8 +37,22 @@ public class MagikToolsProperties {
 
   public MagikToolsProperties() {}
 
+  /**
+   * Constructor.
+   *
+   * @param properties Properties to initialize with.
+   */
   public MagikToolsProperties(final Map<String, String> properties) {
     this.properties.putAll(properties);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param properties Properties to initialize with.
+   */
+  public MagikToolsProperties(final MagikToolsProperties properties) {
+    this.properties.putAll(properties.properties);
   }
 
   /**

@@ -40,6 +40,7 @@
 - Add MethodIsPublicTypedCheck.
 - Fix method completions by removing `_gather` and `_optional` keywords.
 - Support `_private` keyword as method invocation receiver.
+- Fix formatting `_self()`.
 - Add `id` to `default-whitelist` in `VariableNamingCheck`.
 - Add more detailed pragma registration.
 - Add checks MissingPragma, PragmaInvalidClassifyLevelCheck, PragmaInvalidUsageCheck.
@@ -50,6 +51,7 @@
 - Add support for inline `# mlint: disable=all` to disable all checks.
 - Fix `VariableDeclarationUsageDistanceCheck` to see augmented assignment (e.g. `_andif<<` or `+<< 1`) as valid usage.
 - Auto-reload tests upon running tests.
+- Rewrote formatting code, which most likely results in changed formatting rules.
 - Fix Magik grammar not supporting special characters like `ß`.
 - Several fixes.
 
@@ -64,6 +66,7 @@
 - Add UndefinedVariable check to Sonar way profile. This might result in more issues.
 - Add FileMustStartWithPackageStatement check to test if a file starts with a `_package`-statement. This might result in more issues.
 - FormattingCheck now uses formatting code to detect issues. This might result in more or different issues.
+- Rewrote formatting code, which most likely results in changed formatting rules.
 
 ## 0.10.1 (2024-08-14)
 

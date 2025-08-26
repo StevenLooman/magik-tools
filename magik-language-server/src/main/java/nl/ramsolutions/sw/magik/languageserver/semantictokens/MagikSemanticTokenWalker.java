@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
@@ -356,7 +357,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
     } else if (parentNode.is(MagikGrammar.VARIABLE_DEFINITION)) {
       this.walkPostIdentifierVariableDefinition(node);
     } else if (parentNode.getParent() != null
-        && parentNode.getParent().is(MagikGrammar.VARIABLE_DEFINITION_MULTI)) {
+        && AstQuery.parentIs(parentNode, MagikGrammar.VARIABLE_DEFINITION_MULTI)) {
       this.walkPostIdentifierVariableDefinitionMulti(node);
     }
 
