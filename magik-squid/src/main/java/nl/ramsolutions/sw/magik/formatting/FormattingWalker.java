@@ -4,191 +4,174 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
-import nl.ramsolutions.sw.magik.TextEdit;
+import nl.ramsolutions.sw.TokenTriviaEditor;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 
-/** Formatting AST walker which produces {@link TextEdit}s. */
-public class FormattingWalker extends MagikAstWalker {
+/** AST walker for formatting Magik code. */
+public abstract class FormattingWalker extends MagikAstWalker {
 
-  private final List<TextEdit> textEdits = new ArrayList<>();
-  private final PragmaFormattingStrategy pragmaStrategy;
-  private final MagikFormattingStrategy magikStrategy;
-  private final FinalNewlineStrategy finalNewlineStrategy;
-  private FormattingStrategy activeStrategy;
+  private final FormattingOptions options;
+  private final TokenTriviaEditor tokenEditor;
 
   /**
    * Constructor.
    *
    * @param options Formatting options.
-   * @throws IOException -
    */
-  public FormattingWalker(final FormattingOptions options) {
-    this.pragmaStrategy = new PragmaFormattingStrategy(options);
-    this.magikStrategy = new MagikFormattingStrategy(options);
-    this.finalNewlineStrategy = new FinalNewlineStrategy(options);
-    this.activeStrategy = this.magikStrategy;
+  FormattingWalker(final FormattingOptions options, final TokenTriviaEditor tokenEditor) {
+    this.options = options;
+    this.tokenEditor = tokenEditor;
+  }
+
+  protected FormattingOptions getOptions() {
+    return this.options;
+  }
+
+  protected void setTokenOriginalValue(final Token token, final String value) {
+    this.tokenEditor.setTokenOriginalValue(token, value);
+  }
+
+  protected Token getTokenBeforeOnSameLine(final Token token) {
+    return this.tokenEditor.getTokenBeforeOnSameLine(token);
   }
 
   /**
-   * Get the edits.
+   * Ensures that there is a single whitespace before the given {@link AstNode}, if the token is NOT
+   * the first text token of its line.
    *
-   * @return Edits.
+   * @param node The {@link Token} to get from the {@link AstNode} to check and potentially modify.
    */
-  public List<TextEdit> getTextEdits() {
-    return this.textEdits;
-  }
-
-  private Stream<FormattingStrategy> getStrategies() {
-    return Stream.of(this.pragmaStrategy, this.magikStrategy, this.finalNewlineStrategy);
-  }
-
-  // region: AST walker methods.
-  @Override
-  protected void walkPrePragma(final AstNode node) {
-    this.activeStrategy = this.pragmaStrategy;
-  }
-
-  @Override
-  protected void walkPostPragma(final AstNode node) {
-    this.activeStrategy = this.magikStrategy;
-  }
-
-  @Override
-  protected void walkPreDefault(final AstNode node) {
-    this.getStrategies().forEach(strategy -> strategy.walkPreNode(node));
-  }
-
-  @Override
-  protected void walkPostDefault(final AstNode node) {
-    this.getStrategies().forEach(strategy -> strategy.walkPostNode(node));
-  }
-
-  // endregion
-
-  // region: Tokens/Trivia walker methods.
-  @Override
-  protected void walkTrivia(final Trivia trivia) {
-    for (final Token token : trivia.getTokens()) {
-      if (trivia.isComment()) {
-        this.walkCommentToken(token);
-      } else if (trivia.isSkippedText()) {
-        if (token.getType() == GenericTokenType.EOL) {
-          this.walkEolToken(token);
-        } else if (token.getType() == GenericTokenType.WHITESPACE) {
-          this.walkWhitespaceToken(token);
-        }
-      }
+  protected void ensureSingleWhitespaceBeforeIfNotFirstTextOnLine(final AstNode node) {
+    final Token token = node.getToken();
+    if (token == null) {
+      throw new IllegalStateException("Node has no token");
     }
+
+    this.ensureSingleWhitespaceBeforeIfNotFirstTextOnLine(token);
   }
 
   /**
-   * Walk whitespace token.
+   * Ensures that there is a single whitespace before the given {@link Token}, if the token is NOT
+   * the first text token of its line.
    *
-   * @param token Whitespace token.
+   * @param token The {@link Token} to ensure a whitespace before, if not first text token on line.
    */
-  protected void walkWhitespaceToken(final Token token) {
-    this.getStrategies()
-        .forEach(
-            strategy -> {
-              final List<TextEdit> strategyTextEdits = strategy.walkWhitespaceToken(token);
-              if (strategy == this.activeStrategy) {
-                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
-              }
-
-              strategy.setLastToken(token);
-            });
-  }
-
-  private void walkCommentToken(final Token token) {
-    // Fixer upper: If comment token contains trailing whitespace, split the token and process
-    // separately.
-    final String comment = token.getOriginalValue();
-    final String trimmedComment = comment.stripTrailing();
-    if (comment.length() != trimmedComment.length()) {
-      final Token commentToken =
-          Token.builder(token).setValueAndOriginalValue(trimmedComment).build();
-      this.walkCommentToken(commentToken);
-
-      final String trimmed = comment.substring(trimmedComment.length());
-      final Token whitespaceToken =
-          Token.builder(token)
-              .setValueAndOriginalValue(trimmed)
-              .setColumn(token.getColumn() + trimmedComment.length())
-              .setType(GenericTokenType.WHITESPACE)
-              .build();
-      this.walkWhitespaceToken(whitespaceToken);
-
+  protected void ensureSingleWhitespaceBeforeIfNotFirstTextOnLine(final Token token) {
+    // Don't ensure anything when we are the first (text) token on the line.
+    if (this.hasNewlineTrivia(token) || this.isFirstTextToken(token)) {
       return;
     }
 
-    this.getStrategies()
-        .forEach(
-            strategy -> {
-              final List<TextEdit> strategyTextEdits = strategy.walkCommentToken(token);
-              if (strategy == this.activeStrategy) {
-                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
-              }
-
-              strategy.setLastToken(token);
-            });
-  }
-
-  private void walkEolToken(final Token token) {
-    this.getStrategies()
-        .forEach(
-            strategy -> {
-              final List<TextEdit> strategyTextEdits = strategy.walkEolToken(token);
-              if (strategy == this.activeStrategy) {
-                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
-              }
-
-              strategy.setLastToken(token);
-            });
+    this.ensureWhitespaceBefore(token, " ");
   }
 
   /**
-   * Walk EOF token.
+   * Ensures that there is a (single) whitespace before the given {@link Token}.
    *
-   * @param token EOF token.
+   * @param token The {@link Token} to check and potentially modify. Can be a regular token or a
+   *     trivia token.
+   * @param whitespace The whitespace to ensure before the token.
    */
-  protected void walkEofToken(final Token token) {
-    this.activeStrategy = this.finalNewlineStrategy;
+  protected Token ensureWhitespaceBefore(final Token token, final String whitespace) {
+    final Token tokenBefore = this.tokenEditor.getTokenBeforeOnSameLine(token);
+    if (tokenBefore == null || !tokenBefore.getType().equals(GenericTokenType.WHITESPACE)) {
+      // No token before, so we can just add the whitespace.
+      return this.tokenEditor.addWhitespaceBefore(token, whitespace);
+    }
 
-    this.getStrategies()
-        .forEach(
-            strategy -> {
-              final List<TextEdit> strategyTextEdits = strategy.walkEofToken(token);
-              if (strategy == this.activeStrategy) {
-                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
-              }
+    if (!tokenBefore.getValue().equals(whitespace)) {
+      return this.tokenEditor.setTokenOriginalValue(tokenBefore, whitespace);
+    }
 
-              strategy.setLastToken(token);
-            });
+    return tokenBefore;
   }
 
-  @Override
-  protected void walkToken(final Token token) {
-    if (token.getType() == GenericTokenType.EOF) {
-      this.walkEofToken(token);
+  protected void ensureNoWhitespaceBeforeIfNotFirstTextOnLine(final AstNode node) {
+    final Token token = node.getToken();
+    if (token == null) {
+      throw new IllegalStateException("Node has no token");
+    }
+
+    this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(token);
+  }
+
+  protected void ensureNoWhitespaceBeforeIfNotFirstTextOnLine(final Token token) {
+    // Don't ensure anything when we are the first (text) token on the line.
+    if (this.hasNewlineTrivia(token) || this.isFirstTextToken(token)) {
       return;
     }
 
-    this.getStrategies()
-        .forEach(
-            strategy -> {
-              final List<TextEdit> strategyTextEdits = strategy.walkToken(token);
-              if (strategy == this.activeStrategy) {
-                strategyTextEdits.stream().filter(Objects::nonNull).forEach(this.textEdits::add);
-              }
-
-              strategy.setLastToken(token);
-            });
+    this.ensureNoWhitespaceBefore(token);
   }
-  // endregion
 
+  /**
+   * Ensures that there is no whitespace before the given {@link AstNode}.
+   *
+   * @param node The {@link Token} to get from the {@link AstNode} to check and potentially modify.
+   */
+  protected void ensureNoWhitespaceBefore(final AstNode node) {
+    final Token token = node.getToken();
+    if (token == null) {
+      throw new IllegalStateException("Node has no token");
+    }
+
+    this.ensureNoWhitespaceBefore(token);
+  }
+
+  /**
+   * Ensures that there is no whitespace after the given {@link Token}.
+   *
+   * @param token The {@link Token} to check and potentially modify. Can be a regular token or a
+   *     trivia token.
+   */
+  protected void ensureNoWhitespaceBefore(final Token token) {
+    final Token tokenBefore = this.tokenEditor.getTokenBeforeOnSameLine(token);
+    if (tokenBefore == null || !tokenBefore.getType().equals(GenericTokenType.WHITESPACE)) {
+      // No token before, so we can just add the whitespace.
+      return;
+    }
+
+    this.tokenEditor.removeWhitespaceToken(tokenBefore);
+  }
+
+  protected void removeWhitespaceToken(final Token whitespaceToken) {
+    this.tokenEditor.removeWhitespaceToken(whitespaceToken);
+  }
+
+  protected void removeEolToken(final Token eolToken) {
+    this.tokenEditor.removeEolToken(eolToken);
+  }
+
+  protected Token ensureEolBefore(final Token token) {
+    final Token beforeToken = this.tokenEditor.getTokenBefore(token);
+    if (beforeToken == null || !beforeToken.getType().equals(GenericTokenType.EOL)) {
+      // No EOL token before, so we can just add one.
+      final String newline = this.tokenEditor.getLineSeparator();
+      return this.tokenEditor.addEolBefore(token, newline);
+    }
+
+    return beforeToken;
+  }
+
+  protected Token addEolBefore(final Token token) {
+    final String newline = this.tokenEditor.getLineSeparator();
+    return this.tokenEditor.addEolBefore(token, newline);
+  }
+
+  protected boolean hasNewlineTrivia(final Token token) {
+    return token.getTrivia().stream()
+        .anyMatch(trivia -> trivia.getToken().getType().equals(GenericTokenType.EOL));
+  }
+
+  protected boolean isFirstTextToken(final Token token) {
+    final List<Trivia> trivias = token.getTrivia();
+    if (trivias.isEmpty()) {
+      return token.getLine() == 1 && token.getColumn() == 0;
+    }
+
+    final Trivia firstTrivia = trivias.get(0);
+    final Token triviaToken = firstTrivia.getToken();
+    return triviaToken.getLine() == 1 && triviaToken.getColumn() == 0;
+  }
 }

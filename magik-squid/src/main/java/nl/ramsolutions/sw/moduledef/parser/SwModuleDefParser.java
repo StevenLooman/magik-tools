@@ -48,7 +48,7 @@ public class SwModuleDefParser {
    */
   public AstNode parse(final String source, final URI uri) {
     final AstNode node = this.parser.parse(source);
-    AstNodeHelper.updateUri(node, uri);
+    AstNodeHelper.setUri(node, uri);
     return node;
   }
 }

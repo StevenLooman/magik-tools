@@ -94,6 +94,12 @@ public final class Lsp4jConversion {
     return new org.eclipse.lsp4j.TextEdit(rangeLsp4j, newText);
   }
 
+  /**
+   * Convert FormattingOptions from LSP4J to MagikLanguageServer.
+   *
+   * @param options FormattingOptions to convert.
+   * @return FormattingOptions in {@code magik.analysis}.
+   */
   public static FormattingOptions formattingOptionsFromLsp4j(
       final org.eclipse.lsp4j.FormattingOptions options) {
     return new FormattingOptions(

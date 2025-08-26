@@ -17,8 +17,8 @@ public final class ConfigurationReader {
   /**
    * Determine the path of the `magik-lint.properties` file to read.
    *
-   * @param overridePath
-   * @return
+   * @param overridePath Override path.
+   * @return Determined path.
    */
   public static Path determinePath(final Path path, final @Nullable String overridePath) {
     if (overridePath != null && !overridePath.isBlank()) {
@@ -28,6 +28,14 @@ public final class ConfigurationReader {
     return ConfigurationLocator.locateConfiguration(path);
   }
 
+  /**
+   * Read properties.
+   *
+   * @param path Path to read properties from.
+   * @param overridePath Override path.
+   * @return Properties read.
+   * @throws IOException -
+   */
   public static MagikToolsProperties readProperties(
       final Path path, final @Nullable String overridePath) throws IOException {
     final Path propertiesPath = ConfigurationReader.determinePath(path, overridePath);
@@ -37,10 +45,14 @@ public final class ConfigurationReader {
   }
 
   /**
-   * Read properties.
+   * Read properties from a URI, and merges it with the given properties.
    *
    * <p>Uses {@link nl.ramsolutions.sw.magik.lint.MagikLint.KEY_OVERRIDE_CONFIG} in case the
    * settings file is overridden.
+   *
+   * @param path Path to read properties from.
+   * @param properties Properties to use as base.
+   * @return Properties read, merged with the given properties.
    */
   public static MagikToolsProperties readProperties(
       final Path path, final MagikToolsProperties properties) throws IOException {
@@ -59,6 +71,17 @@ public final class ConfigurationReader {
     return MagikToolsProperties.merge(properties, fileProperties);
   }
 
+  /**
+   * Read properties from a URI, and merges it with the given properties.
+   *
+   * <p>Uses {@link nl.ramsolutions.sw.magik.lint.MagikLint.KEY_OVERRIDE_CONFIG} in case the
+   * settings file is overridden.
+   *
+   * @param uri URI to read properties from.
+   * @param properties Properties to override.
+   * @return Properties read, merged with the given properties.
+   * @throws IOException -
+   */
   public static MagikToolsProperties readProperties(
       final URI uri, final MagikToolsProperties properties) throws IOException {
     final Path path = Path.of(uri);

@@ -39,7 +39,8 @@ public class MagikChecksConfiguration {
   /**
    * Get {@link MagikCheck}s, each contained by a {@link MagikCheckHolder}.
    *
-   * @return
+   * @return List of {@link MagikCheckHolder}s, each containing a {@link MagikCheck} and its
+   *     configured parameters.
    */
   public List<MagikCheckHolder> getAllChecks() {
     final List<MagikCheckHolder> holders = new ArrayList<>();

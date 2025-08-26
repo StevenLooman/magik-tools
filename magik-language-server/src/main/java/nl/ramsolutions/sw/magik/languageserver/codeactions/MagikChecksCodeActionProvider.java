@@ -26,7 +26,8 @@ public class MagikChecksCodeActionProvider {
 
   /**
    * Provide {@link CodeAction} for {@link MagikCheck} checks.
-   * @param magikFile {@link MagikTypedFile{} to check on.
+   *
+   * @param magikFile {@link MagikTypedFile} to check on.
    * @param range {@link Range} to get {@link CodeAction}s for.
    * @return List of {@link CodeAction}s.
    * @throws ReflectiveOperationException -
