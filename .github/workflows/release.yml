@@ -28,11 +28,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: mvn --batch-mode --update-snapshots verify test package
-      - run: mkdir staging && cp **/target/*.jar staging
+      - run: mkdir -v staging && cp -v **/target/*.jar staging
       - run: npm install . && npm run package
         working-directory: magik-language-server/client-vscode
-      - run: cp magik-language-server/client-vscode/magik-language-server-*.vsix staging
-      - run: rm -f staging/original-*.jar
+      - run: cp -v magik-language-server/client-vscode/magik-language-server-*.vsix staging
+      - run: rm -vf staging/original-*.jar
 
       - name: Release
         uses: softprops/action-gh-release@v2
