@@ -28,6 +28,12 @@ This language server has the following settings:
 - `magik.typing.indexSlotUsages`: Enable indexing of usages of slots by methods.
 - `magik.typing.indexConditionUsages`: Enable indexing of usages of conditions by methods.
 - `magik.typing.cacheIndexedDefinitions`: Store and load the indexed definitions in the workspace folders.
+- `magik.formatting.indentChar`: Indent character, 'tab' or 'space'.
+- `magik.formatting.indentWidth`: Indent width (tab size or number of spaces).
+- `magik.formatting.insertFinalNewline`: Insert final newline.
+- `magik.formatting.trimTrailingWhitespace`: Trim trailing whitespace.
+- `magik.formatting.trimFinalNewlines`: Trim final newlines.
+- `magik.formatting.indentStrategy`: The strategy used for indentation, 'null' or 'relative'.
 
 ### Additional configuration for VSCode
 
@@ -35,11 +41,6 @@ This language server has the following settings:
 - `magik.javaHome`: Path to Java Runtime, Java 17 minimum.
 - `magik.aliases`: Path to gis_aliases file.
 - `magik.environment`: Path to your environment file.
-- `magik.formatting.indentChar`: Indent character, 'tab' or 'space'.
-- `magik.formatting.indentWidth`: Indent width (tab size or number of spaces).
-- `magik.formatting.insertFinalNewline`: Insert final newline.
-- `magik.formatting.trimTrailingWhitespace`: Trim trailing whitespace.
-- `magik.formatting.trimFinalNewlines`: Trim final newlines.
 
 Via the VSCode client you can start a new session, using the specified environment and aliases file. The aliases file is parsed and the entries are provided as Tasks.
 
