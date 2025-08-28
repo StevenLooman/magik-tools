@@ -272,12 +272,12 @@
       "type": "object",
       "title": "Smallworld/Magik",
       "properties": {
-        "magik.javaHome": {
-          "description": "Path to Java Runtime, Java 17 minimum -- only used by the VS Code extension.",
-          "type": "string"
-        },
         "magik.smallworldGis": {
           "description": "Path to Smallworld Core -- only used by the VS Code extension.",
+          "type": "string"
+        },
+        "magik.javaHome": {
+          "description": "Path to Java Runtime, Java 17 minimum -- only used by the VS Code extension.",
           "type": "string"
         },
         "magik.aliases": {
@@ -289,40 +289,7 @@
           "type": "string"
         },
         "magik.useSessionWrapper": {
-          "description": "Use Smallworld session wrapper.",
-          "type": "boolean",
-          "default": true
-        },
-        "magik.formatting.indentStrategy": {
-          "description": "Indent strategy to use",
-          "type": "string",
-          "enum": [
-            "null",
-            "relative"
-          ]
-        },
-        "magik.formatting.indentChar": {
-          "description": "Indent character, 'tab' or 'space'",
-          "type": "string",
-          "default": "tab"
-        },
-        "magik.formatting.indentWidth": {
-          "description": "Indent width (tab size or number of spaces)",
-          "type": "number",
-          "default": 8
-        },
-        "magik.formatting.insertFinalNewline": {
-          "description": "Insert final newline",
-          "type": "boolean",
-          "default": true
-        },
-        "magik.formatting.trimTrailingWhitespace": {
-          "description": "Trim trailing whitespace",
-          "type": "boolean",
-          "default": true
-        },
-        "magik.formatting.trimFinalNewlines": {
-          "description": "Trim final newlines",
+          "description": "Use Smallworld session wrapper -- only used by the VS Code extension.",
           "type": "boolean",
           "default": true
         },
@@ -375,6 +342,39 @@
         },
         "magik.typing.cacheIndexedDefinitions": {
           "description": "Store and load the indexed definitions in the workspace folders, in file types.jsonl.",
+          "type": "boolean",
+          "default": true
+        },
+        "magik.formatting.indentStrategy": {
+          "description": "Indent strategy to use",
+          "type": "string",
+          "enum": [
+            "null",
+            "relative"
+          ]
+        },
+        "magik.formatting.indentChar": {
+          "description": "Indent character, 'tab' or 'space'",
+          "type": "string",
+          "default": "tab"
+        },
+        "magik.formatting.indentWidth": {
+          "description": "Indent width (tab size or number of spaces)",
+          "type": "number",
+          "default": 8
+        },
+        "magik.formatting.insertFinalNewline": {
+          "description": "Insert final newline",
+          "type": "boolean",
+          "default": true
+        },
+        "magik.formatting.trimTrailingWhitespace": {
+          "description": "Trim trailing whitespace",
+          "type": "boolean",
+          "default": true
+        },
+        "magik.formatting.trimFinalNewlines": {
+          "description": "Trim final newlines",
           "type": "boolean",
           "default": true
         }
