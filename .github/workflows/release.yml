@@ -4,6 +4,10 @@ on:
     tags:
       - "*"
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   release:
     name: Package and create a release with assets
