@@ -1,1 +1,2 @@
 html2text==2025.4.15
+towncrier==25.8.0

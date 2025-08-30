@@ -1,0 +1,25 @@
+[tool.towncrier]
+directory = "changes"
+filename = "CHANGES.md"
+start_string = "<!-- towncrier release notes start -->\n"
+underlines = ["", "", ""]
+title_format = "## [{version}](https://github.com/StevenLooman/magik-tools/tree/{version}) - {project_date}"
+issue_format = "[#{issue}](https://github.com/StevenLooman/magik-tools/issues/{issue})"
+
+[[tool.towncrier.type]]
+name = "Security"
+
+[[tool.towncrier.type]]
+name = "Removed"
+
+[[tool.towncrier.type]]
+name = "Deprecated"
+
+[[tool.towncrier.type]]
+name = "Added"
+
+[[tool.towncrier.type]]
+name = "Changed"
+
+[[tool.towncrier.type]]
+name = "Fixed"
