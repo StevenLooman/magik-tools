@@ -92,6 +92,33 @@ $ mvn clean test
 
 Results will be shown on the console.
 
+### Changes
+
+Changes are recorded using [Towncier](https://towncrier.readthedocs.io/). Once a new release is created, towncrier is used to write the changelog to `CHANGES.md`.
+
+To create a new changelog entry run:
+
+```shell
+$ towncrier create -c "You description here, in Markdown" <pr-number>.<change type>
+...
+```
+
+A change type can be one of:
+
+* `feature`: Signifying a new feature.
+* `bugfix`: Signifying a bug fix.
+* `doc`: Signifying a documentation improvement.
+* `removal`: Signifying a deprecation or removal of public API.
+* `misc`: A ticket has been closed, but it is not of interest to users.
+
+Please add the following fragment before the changelog entry when a breaking change is introduced:
+
+```markdown
+**Breaking change**
+```
+
+A new file is then created in the ``changes`` directory. Add a short description of the change to that file.
+
 ### Releasing
 
 You can update versions using the [Versions Maven Plugin](https://www.mojohaus.org/versions/versions-maven-plugin/index.html).
@@ -108,6 +135,15 @@ Also update these files:
 * `magik-language-server/client-vscode/package.json`
 * `magik-language-server/client-vscode/client/package.json`
 * `magik-language-server/client-vscode/client/src/const.ts`
+
+Run Towncrier:
+
+```shell
+$ towncrier build --version <version>
+...
+$ git commit -m "Towncrier"
+...
+```
 
 Then, create a release by pushing a new tag to Github.
 
