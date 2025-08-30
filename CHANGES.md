@@ -1,6 +1,6 @@
 # Changes
 
-## 0.11.0 (unreleased)
+## 0.11.0 (2025-08-28)
 
 - Fix error when parsing `def_slotted_exemplar()`/`def_indexed_exemplar()`/`define_condition()` with unknown children/data names.
 - Fix VariableCountCheck, improve message.
