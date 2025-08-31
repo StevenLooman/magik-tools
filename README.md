@@ -121,31 +121,16 @@ A new file is then created in the ``changes`` directory. Add a short description
 
 ### Releasing
 
-You can update versions using the [Versions Maven Plugin](https://www.mojohaus.org/versions/versions-maven-plugin/index.html).
-
-To update all projects:
+Call the script at `.github/scripts/release.sh`, with the new version as the argument. For example:
 
 ```shell
-$ mvn -B versions:set -DgenerateBackupPoms=false -DnewVersion=<version>
+$ .github/scripts/release.sh 0.12.0
 ...
 ```
 
-Also update these files:
+This will set the versions for all relevant components, commit the changes and tag it. No push is being done.
 
-* `magik-language-server/client-vscode/package.json`
-* `magik-language-server/client-vscode/client/package.json`
-* `magik-language-server/client-vscode/client/src/const.ts`
-
-Run Towncrier:
-
-```shell
-$ towncrier build --version <version>
-...
-$ git commit -m "Towncrier"
-...
-```
-
-Then, create a release by pushing a new tag to Github.
+To continue development, append `-SNAPSHOT` to the version. E.g., `0.12.0-SNAPSHOT`.
 
 ### Updating (maven)
 
