@@ -394,7 +394,7 @@
     "@types/eslint__js": "^8.42.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.1.0",
-    "@typescript-eslint/parser": "^8.26.0",
+    "@typescript-eslint/parser": "^8.41.0",
     "@vscode/vsce": "^3.6.0",
     "eslint": "^9.32.0",
     "typescript": "^5.8.3",
