@@ -1,4 +1,4 @@
-Add delayed running of checks, after last update or directly on save.
+Add delayed running of checks after last update, or directly on save.
 
 Setting `magik.lint.runChecksOnChangeDelay` to any value greater than 0 specifies
 that the checks run after the given delay, in milliseconds. If there is a run-checks-task

@@ -14,6 +14,6 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
         run: |
           if [ ! -f "changes/${PR_NUMBER}.feature" ] && [ ! -f "changes/${PR_NUMBER}.bugfix" ] && [ ! -f "changes/${PR_NUMBER}.doc" ] && [ ! -f "changes/${PR_NUMBER}.removal" ] && [ ! -f "changes/${PR_NUMBER}.misc" ]; then
-            echo "Towncrier file for #${PR_NUMBER} not found. Please add a changes file to the `changes/` directory. See README.rst for more information."
+            echo "Towncrier file for #${PR_NUMBER} not found. Please add a changes file to the `changes/` directory. See README.md for more information."
             exit 1
           fi
