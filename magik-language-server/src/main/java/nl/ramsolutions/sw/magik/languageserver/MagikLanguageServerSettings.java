@@ -14,6 +14,8 @@ public final class MagikLanguageServerSettings {
   private static final String SHOW_TYPING_INLAY_HINTS = "magik.typing.showTypingInlayHints";
   private static final String SHOW_ARGUMENT_INLAY_HINTS = "magik.typing.showArgumentInlayHints";
   private static final String ENABLE_TYPING_CHECKS = "magik.typing.enableChecks";
+  private static final String RUN_CHECKS_ON_SAVE = "magik.lint.runChecksOnSave";
+  private static final String RUN_CHECKS_ON_UPDATE_DELAY = "magik.lint.runChecksOnUpdateDelay";
 
   private final MagikToolsProperties properties;
 
@@ -77,5 +79,24 @@ public final class MagikLanguageServerSettings {
   public Path getChecksOverrideSettingsPath() {
     final String overrideConfigFile = this.properties.getPropertyString(OVERRIDE_CONFIG_FILE);
     return overrideConfigFile != null ? Path.of(overrideConfigFile) : null;
+  }
+
+  /**
+   * Get magik.lint.runChecksOnSave.
+   *
+   * @return magik.lint.runChecksOnSave
+   */
+  public boolean runChecksOnSave() {
+    return this.properties.getPropertyBoolean(RUN_CHECKS_ON_SAVE, false) == Boolean.TRUE;
+  }
+
+  /**
+   * Get magik.lint.runChecksOnUpdateDelay.
+   *
+   * @return magik.lint.runChecksOnUpdateDelay
+   */
+  @CheckForNull
+  public Integer getRunChecksOnUpdateDelay() {
+    return this.properties.getPropertyInteger(RUN_CHECKS_ON_UPDATE_DELAY);
   }
 }

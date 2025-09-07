@@ -301,6 +301,16 @@
           "description": "Override path to magiklintrc.properties.",
           "type": "string"
         },
+        "magik.lint.runChecksOnSave": {
+          "description": "Run checks when saving the file, immediately.",
+          "type": "boolean",
+          "default": false
+        },
+        "magik.lint.runChecksOnUpdateDelay": {
+          "description": "Run checks delayed after <value> milliseconds since last change. The next update resets the delay.",
+          "type": "integer",
+          "default": 300
+        },
         "magik.typing.typeDatabasePaths": {
           "description": "Paths to type databases.",
           "type": "array"
