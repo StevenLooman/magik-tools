@@ -306,7 +306,7 @@
           "type": "boolean",
           "default": false
         },
-        "magik.lint.runChecksOnUpdateDelay": {
+        "magik.lint.runChecksOnChangeDelay": {
           "description": "Run checks delayed after <value> milliseconds since last change. The next update resets the delay.",
           "type": "integer",
           "default": 300

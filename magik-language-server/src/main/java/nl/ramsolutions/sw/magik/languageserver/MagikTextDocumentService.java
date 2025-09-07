@@ -311,7 +311,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           // Determine delay.
           final MagikLanguageServerSettings settings =
               new MagikLanguageServerSettings(mergedProperties);
-          final Integer runChecksOnUpdateDelay = settings.getRunChecksOnUpdateDelay();
+          final Integer runChecksOnUpdateDelay = settings.getRunChecksOnChangeDelay();
           final int delay = runChecksOnUpdateDelay != null ? runChecksOnUpdateDelay : 0;
 
           // Use delayed executor to run after delay.
