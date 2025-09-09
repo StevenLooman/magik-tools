@@ -308,8 +308,9 @@
         },
         "magik.lint.runChecksOnChangeDelay": {
           "description": "Run checks delayed after <value> milliseconds since last change. The next update resets the delay.",
+          "minimum": 0,
           "type": "integer",
-          "default": 300
+          "default": 333
         },
         "magik.typing.typeDatabasePaths": {
           "description": "Paths to type databases.",

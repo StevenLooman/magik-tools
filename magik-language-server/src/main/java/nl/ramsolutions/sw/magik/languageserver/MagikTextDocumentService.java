@@ -311,11 +311,11 @@ public class MagikTextDocumentService implements TextDocumentService {
           // Determine delay.
           final MagikLanguageServerSettings settings =
               new MagikLanguageServerSettings(mergedProperties);
-          final Integer runChecksOnUpdateDelay = settings.getRunChecksOnChangeDelay();
-          final int delay = runChecksOnUpdateDelay != null ? runChecksOnUpdateDelay : 0;
+          final int runChecksOnUpdateDelay = settings.getRunChecksOnChangeDelay();
 
           // Use delayed executor to run after delay.
-          final Executor executor = CompletableFuture.delayedExecutor(delay, TimeUnit.MILLISECONDS);
+          final Executor executor =
+              CompletableFuture.delayedExecutor(runChecksOnUpdateDelay, TimeUnit.MILLISECONDS);
           final CompletableFuture<Void> future =
               CompletableFuture.runAsync(() -> this.publishDiagnostics(magikFile), executor);
           this.pendingTasks.put(realTextDocumentIdentifier, future);

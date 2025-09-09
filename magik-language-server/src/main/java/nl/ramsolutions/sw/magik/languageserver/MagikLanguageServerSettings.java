@@ -95,8 +95,7 @@ public final class MagikLanguageServerSettings {
    *
    * @return magik.lint.runChecksOnChangeDelay
    */
-  @CheckForNull
-  public Integer getRunChecksOnChangeDelay() {
-    return this.properties.getPropertyInteger(RUN_CHECKS_ON_CHANGE_DELAY);
+  public int getRunChecksOnChangeDelay() {
+    return this.properties.getPropertyInteger(RUN_CHECKS_ON_CHANGE_DELAY, 333);
   }
 }
