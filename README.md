@@ -99,7 +99,7 @@ Changes are recorded using [Towncier](https://towncrier.readthedocs.io/). Once a
 To create a new changelog entry run:
 
 ```shell
-$ towncrier create -c "You description here, in Markdown" <pr-number>.<change type>
+$ towncrier create -c "You description here, in Markdown" <pr-number>.<change type>.md
 ...
 ```
 

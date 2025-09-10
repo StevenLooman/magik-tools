@@ -3,10 +3,12 @@ package nl.ramsolutions.sw.magik.languageserver;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
@@ -127,7 +129,9 @@ public class MagikTextDocumentService implements TextDocumentService {
   private final CodeActionProvider codeActionProvider;
   private final SelectionRangeProvider selectionRangeProvider;
   private final CallHierarchyProvider callHierarchyProvider;
-  private final Map<TextDocumentIdentifier, OpenedFile> openedFiles = new HashMap<>();
+  private final Map<TextDocumentIdentifier, OpenedFile> openedFiles = new ConcurrentHashMap<>();
+  private final Map<TextDocumentIdentifier, CompletableFuture<?>> pendingTasks =
+      new ConcurrentHashMap<>();
 
   /**
    * Constructor.
@@ -299,7 +303,23 @@ public class MagikTextDocumentService implements TextDocumentService {
           openedFile = magikFile;
 
           // Publish diagnostics to client.
-          this.publishDiagnostics(magikFile);
+          // If a task is already pending, cancel it.
+          if (this.pendingTasks.containsKey(realTextDocumentIdentifier)) {
+            this.pendingTasks.get(realTextDocumentIdentifier).cancel(true);
+            this.pendingTasks.remove(realTextDocumentIdentifier);
+          }
+
+          // Determine delay.
+          final MagikLanguageServerSettings settings =
+              new MagikLanguageServerSettings(mergedProperties);
+          final int runChecksOnUpdateDelay = settings.getRunChecksOnChangeDelay();
+
+          // Use delayed executor to run after delay.
+          final Executor executor =
+              CompletableFuture.delayedExecutor(runChecksOnUpdateDelay, TimeUnit.MILLISECONDS);
+          final CompletableFuture<Void> future =
+              CompletableFuture.runAsync(() -> this.publishDiagnostics(magikFile), executor);
+          this.pendingTasks.put(realTextDocumentIdentifier, future);
           break;
         }
 
@@ -326,9 +346,16 @@ public class MagikTextDocumentService implements TextDocumentService {
 
     this.openedFiles.remove(textDocumentIdentifier);
 
+    // Remove any pending tasks for this file.
+    final String uriStr = textDocumentIdentifier.getUri();
+    final TextDocumentIdentifier realTextDocumentIdentifier = new TextDocumentIdentifier(uriStr);
+    if (this.pendingTasks.containsKey(realTextDocumentIdentifier)) {
+      this.pendingTasks.get(realTextDocumentIdentifier).cancel(true);
+      this.pendingTasks.remove(realTextDocumentIdentifier);
+    }
+
     // Clear published diagnostics.
     final List<Diagnostic> diagnostics = Collections.emptyList();
-    final String uriStr = textDocumentIdentifier.getUri();
     final PublishDiagnosticsParams publishParams =
         new PublishDiagnosticsParams(uriStr, diagnostics);
     final LanguageClient languageClient = this.languageServer.getLanguageClient();
@@ -348,6 +375,50 @@ public class MagikTextDocumentService implements TextDocumentService {
 
     final TextDocumentIdentifier textDocumentIdentifier = params.getTextDocument();
     LOGGER.debug("didSave, uri: {}", textDocumentIdentifier.getUri());
+
+    // Read relevant properties.
+    final String uriStr = textDocumentIdentifier.getUri();
+    final URI uri = URI.create(uriStr);
+    final MagikToolsProperties mergedProperties;
+    try {
+      mergedProperties = ConfigurationReader.readProperties(uri, this.properties);
+    } catch (final IOException exception) {
+      throw new IllegalStateException(exception);
+    }
+
+    // Find original TextDocumentIdentifier.
+    final TextDocumentIdentifier realTextDocumentIdentifier = new TextDocumentIdentifier(uriStr);
+    final OpenedFile existingOpenedFile = this.openedFiles.get(realTextDocumentIdentifier);
+    if (existingOpenedFile == null) {
+      // Race condition?
+      return;
+    }
+
+    final String languageId = existingOpenedFile.getLanguageId();
+    switch (languageId) {
+      case "product.def":
+        break;
+
+      case "module.def":
+        break;
+
+      case "magik":
+        {
+          final MagikTypedFile magikFile = (MagikTypedFile) existingOpenedFile;
+
+          final MagikLanguageServerSettings settings =
+              new MagikLanguageServerSettings(mergedProperties);
+          if (settings.runChecksOnSave()) {
+            this.publishDiagnostics(magikFile);
+          }
+
+          break;
+        }
+
+      default:
+        throw new UnsupportedOperationException();
+    }
+
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didSave, uri: {}",
@@ -357,6 +428,9 @@ public class MagikTextDocumentService implements TextDocumentService {
   }
 
   private void publishDiagnostics(final MagikTypedFile magikFile) {
+    final long start = System.nanoTime();
+
+    LOGGER.debug("publishDiagnostics, uri: {}", magikFile.getUri());
     final List<Diagnostic> diagnostics = this.diagnosticsProvider.provideDiagnostics(magikFile);
 
     // Publish to client.
@@ -364,6 +438,13 @@ public class MagikTextDocumentService implements TextDocumentService {
     final PublishDiagnosticsParams publishParams = new PublishDiagnosticsParams(uri, diagnostics);
     final LanguageClient languageClient = this.languageServer.getLanguageClient();
     languageClient.publishDiagnostics(publishParams);
+
+    if (LOGGER_DURATION.isTraceEnabled()) {
+      LOGGER_DURATION.trace(
+          "Duration: {} didSave, uri: {}",
+          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          magikFile.getUri());
+    }
   }
 
   @Override

@@ -19,6 +19,8 @@ This language server has the following settings:
 
 - `magik.productDirs`: Paths to (compiled, containing a `libs/` directory) products.
 - `magik.lint.overrideConfigFile`: Override path to magiklintrc.properties.
+- `magik.lint.runChecksOnChangeDelay`: Run checks delayed after `value` milliseconds since last change. The next update resets the delay.
+- `magik.lint.runChecksOnSave`: Run checks when saving the file, immediately.
 - `magik.typing.typeDatabasePaths`: Paths to type databases.
 - `magik.typing.showTypingInlayHints`: Show typing inlay hints.
 - `magik.typing.showArgumentInlayHints`: Show (certain) argument name inlay hints.
