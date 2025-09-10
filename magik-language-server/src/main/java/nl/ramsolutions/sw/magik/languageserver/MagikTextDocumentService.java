@@ -3,10 +3,10 @@ package nl.ramsolutions.sw.magik.languageserver;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import nl.ramsolutions.sw.ConfigurationReader;
@@ -129,8 +129,9 @@ public class MagikTextDocumentService implements TextDocumentService {
   private final CodeActionProvider codeActionProvider;
   private final SelectionRangeProvider selectionRangeProvider;
   private final CallHierarchyProvider callHierarchyProvider;
-  private final Map<TextDocumentIdentifier, OpenedFile> openedFiles = new HashMap<>();
-  private final Map<TextDocumentIdentifier, CompletableFuture<?>> pendingTasks = new HashMap<>();
+  private final Map<TextDocumentIdentifier, OpenedFile> openedFiles = new ConcurrentHashMap<>();
+  private final Map<TextDocumentIdentifier, CompletableFuture<?>> pendingTasks =
+      new ConcurrentHashMap<>();
 
   /**
    * Constructor.
