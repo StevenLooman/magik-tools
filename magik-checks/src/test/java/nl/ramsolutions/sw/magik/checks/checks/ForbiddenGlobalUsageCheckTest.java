@@ -1,15 +1,14 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Test ForbiddenGlobalUsageCheck. */
-class ForbiddenGlobalUsageCheckTest extends MagikCheckTestBase {
+/** Test {@link ForbiddenGlobalUsageCheck}. */
+class ForbiddenGlobalUsageCheckTest {
 
   @ParameterizedTest
   @ValueSource(
@@ -28,8 +27,7 @@ class ForbiddenGlobalUsageCheckTest extends MagikCheckTestBase {
     final ForbiddenGlobalUsageCheck check = new ForbiddenGlobalUsageCheck();
     check.forbiddenGlobals = "!current_world!";
 
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -65,8 +63,7 @@ class ForbiddenGlobalUsageCheckTest extends MagikCheckTestBase {
     final ForbiddenGlobalUsageCheck check = new ForbiddenGlobalUsageCheck();
     check.forbiddenGlobals = "!current_world!";
 
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -80,7 +77,6 @@ class ForbiddenGlobalUsageCheckTest extends MagikCheckTestBase {
           _dynamic (!current_grs!, !current_world!) << (x, y)
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(2);
+    assertThat(check).reportsIssueCount(code, 2);
   }
 }

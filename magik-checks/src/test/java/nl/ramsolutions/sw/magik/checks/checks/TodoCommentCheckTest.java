@@ -1,15 +1,14 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** Test {@link TodoCommentCheck}. */
-class TodoCommentCheckTest extends MagikCheckTestBase {
+class TodoCommentCheckTest {
 
   @ParameterizedTest
   @ValueSource(
@@ -21,8 +20,7 @@ class TodoCommentCheckTest extends MagikCheckTestBase {
       })
   void testOk(final String code) {
     final MagikCheck check = new TodoCommentCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -33,8 +31,7 @@ class TodoCommentCheckTest extends MagikCheckTestBase {
       })
   void testForbiddenWord(final String code) {
     final MagikCheck check = new TodoCommentCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @ParameterizedTest
@@ -45,7 +42,6 @@ class TodoCommentCheckTest extends MagikCheckTestBase {
       })
   void testForbiddenWordTwice(final String code) {
     final MagikCheck check = new TodoCommentCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(2);
+    assertThat(check).reportsIssueCount(code, 2);
   }
 }

@@ -1,16 +1,15 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Test CommentedCodeCheck. */
-class CommentedCodeCheckTest extends MagikCheckTestBase {
+/** Test {@link CommentedCodeCheck}. */
+class CommentedCodeCheckTest {
 
   @ParameterizedTest
   @ValueSource(
@@ -61,8 +60,7 @@ class CommentedCodeCheckTest extends MagikCheckTestBase {
       })
   void testValid(final String code) {
     final MagikCheck check = new CommentedCodeCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -119,13 +117,11 @@ class CommentedCodeCheckTest extends MagikCheckTestBase {
       })
   void testInvalid(final String code) {
     final MagikCheck check = new CommentedCodeCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
   void testInvalid2() {
-    final MagikCheck check = new CommentedCodeCheck();
     final String code =
         """
         _method a.b
@@ -140,7 +136,7 @@ class CommentedCodeCheckTest extends MagikCheckTestBase {
           #_return x
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(2);
+    final MagikCheck check = new CommentedCodeCheck();
+    assertThat(check).reportsIssueCount(code, 2);
   }
 }

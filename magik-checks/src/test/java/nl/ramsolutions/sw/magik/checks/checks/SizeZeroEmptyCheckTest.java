@@ -1,16 +1,15 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Test SizeZeroEmptyCheck. */
-class SizeZeroEmptyCheckTest extends MagikCheckTestBase {
+/** Test {@link SizeZeroEmptyCheck}. */
+class SizeZeroEmptyCheckTest {
 
   @ParameterizedTest
   @ValueSource(
@@ -23,15 +22,13 @@ class SizeZeroEmptyCheckTest extends MagikCheckTestBase {
       })
   void testInvalid(final String code) {
     final MagikCheck check = new SizeZeroEmptyCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
   void testValid() {
     final MagikCheck check = new SizeZeroEmptyCheck();
     final String code = "a.empty?\n";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 }

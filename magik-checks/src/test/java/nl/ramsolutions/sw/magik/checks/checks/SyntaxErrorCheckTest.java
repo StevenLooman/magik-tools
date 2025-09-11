@@ -1,14 +1,13 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
-/** Test SyntaxErrorCheck. */
-class SyntaxErrorCheckTest extends MagikCheckTestBase {
+/** Test {@link SyntaxErrorCheck}. */
+class SyntaxErrorCheckTest {
 
   @Test
   void testSyntaxError() {
@@ -17,15 +16,13 @@ class SyntaxErrorCheckTest extends MagikCheckTestBase {
         """
         _block
         _endbloc""";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
   void testSytnaxError2() {
     final MagikCheck check = new SyntaxErrorCheck();
     final String code = "_method";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isNotEmpty();
+    assertThat(check).reportsIssueCount(code, 1);
   }
 }

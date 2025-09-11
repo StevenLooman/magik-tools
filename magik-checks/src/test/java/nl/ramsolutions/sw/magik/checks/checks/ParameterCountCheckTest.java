@@ -1,13 +1,12 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
-/** Tests for ParameterCountCheck. */
-class ParameterCountCheckTest extends MagikCheckTestBase {
+/** Tests for {@link ParameterCountCheck}. */
+class ParameterCountCheckTest {
 
   @Test
   void testMaxMethodParameterCountExceeded() {
@@ -18,8 +17,7 @@ class ParameterCountCheckTest extends MagikCheckTestBase {
         _method object.x(p1, p2, p3)
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -31,8 +29,7 @@ class ParameterCountCheckTest extends MagikCheckTestBase {
         _proc(p1, p2, p3)
         _endproc
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @SuppressWarnings("checkstyle:MagicNumber")
@@ -45,8 +42,7 @@ class ParameterCountCheckTest extends MagikCheckTestBase {
         _method object.x(p1, p2, p3)
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @SuppressWarnings("checkstyle:MagicNumber")
@@ -59,7 +55,6 @@ class ParameterCountCheckTest extends MagikCheckTestBase {
         _proc(p1, p2, p3)
         _endproc
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 }

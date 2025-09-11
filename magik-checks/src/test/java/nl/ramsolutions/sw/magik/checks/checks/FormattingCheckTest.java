@@ -1,12 +1,11 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -17,7 +16,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * <p>These tests use the {@link nl.ramsolutions.sw.magik.formatting.TabbedIndentStrategy} indent
  * strategy.
  */
-class FormattingCheckTest extends MagikCheckTestBase {
+class FormattingCheckTest {
 
   private static final String RELATIVE_INDENT_STRATEGY = "relative";
 
@@ -78,8 +77,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
   void testProper(final String code) {
     final FormattingCheck check = new FormattingCheck();
     check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -115,8 +113,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
   void testImproper(final String code) {
     final FormattingCheck check = new FormattingCheck();
     check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -125,8 +122,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
     final Path path =
         Path.of(
             "magik-checks/src/test/resources/test_product/test_module/source/in_load_list.magik");
-    final List<MagikIssue> issues = this.runCheck(path, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(path);
   }
 
   @Test
@@ -140,8 +136,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
         	print(a)
         _endblock
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -160,8 +155,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
     final FormattingCheck check = new FormattingCheck();
     check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
     check.indentCharacter = "tab";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -173,8 +167,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
         """
         \tprint(a)
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -189,8 +182,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
             print(a)
         _endblock
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -216,8 +208,7 @@ class FormattingCheckTest extends MagikCheckTestBase {
   void testMultipleWhitelines(final String code) {
     final FormattingCheck check = new FormattingCheck();
     check.indentStrategy = FormattingCheckTest.RELATIVE_INDENT_STRATEGY;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -233,7 +224,6 @@ class FormattingCheckTest extends MagikCheckTestBase {
         _endmethod
         $
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 }
