@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
+import static nl.ramsolutions.sw.magik.typedchecks.checks.MagikTypedCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
@@ -12,14 +13,13 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** Tests for {@link MethodIsPublicTypedCheck}. */
-class MethodIsPublicTypedCheckTest extends MagikTypedCheckTestBase {
+class MethodIsPublicTypedCheckTest {
 
   @Test
   void testMethodIsPublic() {
@@ -47,8 +47,7 @@ class MethodIsPublicTypedCheckTest extends MagikTypedCheckTestBase {
         _endblock
         """;
     final MagikTypedCheck check = new MethodIsPublicTypedCheck();
-    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
   @Test
@@ -77,8 +76,7 @@ class MethodIsPublicTypedCheckTest extends MagikTypedCheckTestBase {
         _endblock
         """;
     final MagikTypedCheck check = new MethodIsPublicTypedCheck();
-    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 
   @ParameterizedTest
@@ -126,7 +124,6 @@ class MethodIsPublicTypedCheckTest extends MagikTypedCheckTestBase {
             ExpressionResultString.EMPTY));
 
     final MagikTypedCheck check = new MethodIsPublicTypedCheck();
-    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 }

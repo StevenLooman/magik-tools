@@ -1,15 +1,14 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
-/** Test MethodComplexityCheck. */
+/** Test {@link MethodComplexityCheck}. */
 @SuppressWarnings("checkstyle:MagicNumber")
-class MethodComplexityCheckTest extends MagikCheckTestBase {
+class MethodComplexityCheckTest {
 
   @Test
   void testTooComplex() {
@@ -36,8 +35,7 @@ class MethodComplexityCheckTest extends MagikCheckTestBase {
           _endif
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -51,7 +49,6 @@ class MethodComplexityCheckTest extends MagikCheckTestBase {
           _endif
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 }

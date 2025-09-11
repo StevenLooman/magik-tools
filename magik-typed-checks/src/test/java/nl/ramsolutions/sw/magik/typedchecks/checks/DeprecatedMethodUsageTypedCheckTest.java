@@ -1,11 +1,11 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
+import static nl.ramsolutions.sw.magik.typedchecks.checks.MagikTypedCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -13,12 +13,11 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Test {@link DeprecatedMethodUsageTypedCheck}. */
-class DeprecatedMethodUsageTypedCheckTest extends MagikTypedCheckTestBase {
+class DeprecatedMethodUsageTypedCheckTest {
 
   private void addMethodDefinition(
       final IDefinitionKeeper definitionKeeper, final String... classifyLevel) {
@@ -49,8 +48,7 @@ class DeprecatedMethodUsageTypedCheckTest extends MagikTypedCheckTestBase {
           object.m()
         _endblock""";
     final MagikTypedCheck check = new DeprecatedMethodUsageTypedCheck();
-    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 
   @Test
@@ -63,7 +61,6 @@ class DeprecatedMethodUsageTypedCheckTest extends MagikTypedCheckTestBase {
           object.m()
         _endblock""";
     final MagikTypedCheck check = new DeprecatedMethodUsageTypedCheck();
-    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 }

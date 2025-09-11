@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
+import static nl.ramsolutions.sw.magik.typedchecks.checks.MagikTypedCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
@@ -8,13 +9,12 @@ import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** Tests for {@link ComparedTypesDoNotMatchTypedCheck}. */
-class ComparedTypesDoNotMatchTypedCheckTest extends MagikTypedCheckTestBase {
+class ComparedTypesDoNotMatchTypedCheckTest {
 
   @ParameterizedTest
   @ValueSource(
@@ -44,8 +44,7 @@ class ComparedTypesDoNotMatchTypedCheckTest extends MagikTypedCheckTestBase {
   void testDoesNotCheckUndefined(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
-    assertThat(checkResults).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
   @ParameterizedTest
@@ -121,8 +120,7 @@ class ComparedTypesDoNotMatchTypedCheckTest extends MagikTypedCheckTestBase {
             List.of(TypeString.ofIdentifier("parent", "user")),
             null));
     final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
-    assertThat(checkResults).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
   @ParameterizedTest
@@ -165,7 +163,6 @@ class ComparedTypesDoNotMatchTypedCheckTest extends MagikTypedCheckTestBase {
   void testTypeNotMatchable(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
-    assertThat(checkResults).hasSize(1);
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 }

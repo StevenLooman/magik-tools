@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
+import static nl.ramsolutions.sw.magik.typedchecks.checks.MagikTypedCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
@@ -12,14 +13,13 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** Test {@link MethodArgumentTypeMatchesParameterTypeTypedCheck}. */
-class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedCheckTestBase {
+class MethodArgumentTypeMatchesParameterTypeTypedCheckTest {
 
   private void addTestMethods(final IDefinitionKeeper definitionKeeper) {
     definitionKeeper.add(
@@ -85,8 +85,7 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
     this.addTestMethods(definitionKeeper);
 
     final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
-    assertThat(checkResults).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
   @ParameterizedTest
@@ -100,8 +99,7 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
     this.addTestMethods(definitionKeeper);
 
     final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
-    assertThat(checkResults).hasSize(1);
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 
   @Test
@@ -153,7 +151,6 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest extends MagikTypedChe
         _endblock
         """;
     final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
-    assertThat(checkResults).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 }

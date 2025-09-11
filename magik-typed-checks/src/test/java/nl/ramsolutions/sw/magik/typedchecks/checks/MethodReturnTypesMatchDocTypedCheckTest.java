@@ -1,16 +1,15 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
+import static nl.ramsolutions.sw.magik.typedchecks.checks.MagikTypedCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Tests for {@link MethodReturnTypesMatchDocTypedCheck}. */
-class MethodReturnTypesMatchDocTypedCheckTest extends MagikTypedCheckTestBase {
+class MethodReturnTypesMatchDocTypedCheckTest {
 
   @Test
   void testTypesMatches() {
@@ -23,8 +22,7 @@ class MethodReturnTypesMatchDocTypedCheckTest extends MagikTypedCheckTestBase {
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
-    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
   @Test
@@ -38,8 +36,7 @@ class MethodReturnTypesMatchDocTypedCheckTest extends MagikTypedCheckTestBase {
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
-    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 
   @Test
@@ -52,7 +49,6 @@ class MethodReturnTypesMatchDocTypedCheckTest extends MagikTypedCheckTestBase {
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new MethodReturnTypesMatchDocTypedCheck();
-    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 }

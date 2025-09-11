@@ -1,16 +1,15 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** Test {@link MissingPragmaCheck}. */
-class MissingPragmaCheckTest extends MagikCheckTestBase {
+class MissingPragmaCheckTest {
 
   @ParameterizedTest
   @ValueSource(
@@ -42,8 +41,7 @@ class MissingPragmaCheckTest extends MagikCheckTestBase {
       })
   void testValid(final String code) {
     final MagikCheck check = new MissingPragmaCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -70,8 +68,7 @@ class MissingPragmaCheckTest extends MagikCheckTestBase {
       })
   void testInvalid(final String code) {
     final MagikCheck check = new MissingPragmaCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -84,8 +81,7 @@ class MissingPragmaCheckTest extends MagikCheckTestBase {
         _endblock
         """;
     final MagikCheck check = new MissingPragmaCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @Test
@@ -95,7 +91,6 @@ class MissingPragmaCheckTest extends MagikCheckTestBase {
         def_slotted_exemplar(:test_exemplar, {{:slot1, _unset, :readable, :public}})
         """;
     final MagikCheck check = new MissingPragmaCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(2);
+    assertThat(check).reportsIssueCount(code, 2);
   }
 }

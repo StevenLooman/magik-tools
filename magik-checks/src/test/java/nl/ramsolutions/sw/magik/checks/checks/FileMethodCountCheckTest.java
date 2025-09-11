@@ -1,13 +1,12 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
-/** Test FileMethodCountCheck. */
-class FileMethodCountCheckTest extends MagikCheckTestBase {
+/** Test {@link FileMethodCountCheck}. */
+class FileMethodCountCheckTest {
 
   @Test
   void testTooManyMethods() {
@@ -19,8 +18,7 @@ class FileMethodCountCheckTest extends MagikCheckTestBase {
         _method a.m1 _endmethod
         _method a.m1 _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @SuppressWarnings("checkstyle:MagicNumber")
@@ -34,7 +32,6 @@ class FileMethodCountCheckTest extends MagikCheckTestBase {
         _method a.m1 _endmethod
         _method a.m1 _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 }

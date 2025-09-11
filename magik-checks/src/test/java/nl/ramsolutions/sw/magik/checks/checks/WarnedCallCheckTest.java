@@ -1,16 +1,15 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Test WarnedCallCheck. */
-class WarnedCallCheckTest extends MagikCheckTestBase {
+/** Test {@link WarnedCallCheck}. */
+class WarnedCallCheckTest {
 
   @ParameterizedTest
   @ValueSource(
@@ -20,8 +19,7 @@ class WarnedCallCheckTest extends MagikCheckTestBase {
       })
   void testValid(final String code) {
     final MagikCheck check = new WarnedCallCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -36,8 +34,7 @@ class WarnedCallCheckTest extends MagikCheckTestBase {
       })
   void testInvalid(final String code) {
     final MagikCheck check = new WarnedCallCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -45,8 +42,7 @@ class WarnedCallCheckTest extends MagikCheckTestBase {
     final String code = "a.warned_method()";
     final WarnedCallCheck check = new WarnedCallCheck();
     check.warnedCalls = ".warned_method()";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -54,7 +50,6 @@ class WarnedCallCheckTest extends MagikCheckTestBase {
     final String code = "write(1)";
     final WarnedCallCheck check = new WarnedCallCheck();
     check.warnedCalls = ".warned_method()";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 }
