@@ -1,27 +1,34 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 
-import java.util.List;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-/** Test ExemplarSlotCountCheck. */
-class ExemplarSlotCountCheckTest extends MagikCheckTestBase {
+/** Test {@link ExemplarSlotCountCheck}. */
+class ExemplarSlotCountCheckTest {
 
-  @Test
-  void testMaxSlotCountExceeded() {
-    final ExemplarSlotCountCheck check = new ExemplarSlotCountCheck();
-    check.maxSlotCount = 2;
-    final String code =
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         """
         def_slotted_exemplar(:exemplar, {
           {:slot_1, _unset},
           {:slot_2, _unset},
           {:slot_3, _unset}})
-        """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+        """,
+        """
+        sw:def_slotted_exemplar(:exemplar, {
+          {:slot_1, _unset},
+          {:slot_2, _unset},
+          {:slot_3, _unset}})
+        """,
+      })
+  void testMaxSlotCountExceeded(final String code) {
+    final ExemplarSlotCountCheck check = new ExemplarSlotCountCheck();
+    check.maxSlotCount = 2;
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -33,22 +40,6 @@ class ExemplarSlotCountCheckTest extends MagikCheckTestBase {
         def_slotted_exemplar(:exemplar, {
           {:slot_1, _unset}})
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
-  }
-
-  @Test
-  void testMaxSlotCountExceededPackage() {
-    final ExemplarSlotCountCheck check = new ExemplarSlotCountCheck();
-    check.maxSlotCount = 2;
-    final String code =
-        """
-        sw:def_slotted_exemplar(:exemplar, {
-          {:slot_1, _unset},
-          {:slot_2, _unset},
-          {:slot_3, _unset}})
-        """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsNoIssues(code);
   }
 }

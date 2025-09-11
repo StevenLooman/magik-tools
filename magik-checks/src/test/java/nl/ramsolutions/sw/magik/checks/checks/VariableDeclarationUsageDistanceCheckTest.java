@@ -1,15 +1,14 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Test VariableDeclarationUsageDistanceCheck. */
+/** Test {@link VariableDeclarationUsageDistanceCheck}. */
 @SuppressWarnings("checkstyle:MagicNumber")
-class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
+class VariableDeclarationUsageDistanceCheckTest {
 
   @ParameterizedTest
   @ValueSource(
@@ -37,8 +36,7 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
   void testValid(final String code) {
     final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
     check.maxDistance = 5; // Defaults to 5, but to be explicit.
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -94,8 +92,7 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
     final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
     check.maxDistance = 2;
     check.ignoreConstants = true; // Defaults to true, but to be explicit.
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -134,8 +131,7 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
   void testInvalid(final String code) {
     final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
     check.maxDistance = 2;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @ParameterizedTest
@@ -165,8 +161,7 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
   void testValidWithReassignment(final String code) {
     final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
     check.maxDistance = 4;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -211,7 +206,6 @@ class VariableDeclarationUsageDistanceCheckTest extends MagikCheckTestBase {
   void testInvalidWithReassignment(final String code) {
     final VariableDeclarationUsageDistanceCheck check = new VariableDeclarationUsageDistanceCheck();
     check.maxDistance = 2;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 }

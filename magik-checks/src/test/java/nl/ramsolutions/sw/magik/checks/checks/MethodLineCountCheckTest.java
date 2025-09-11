@@ -1,14 +1,13 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
-/** Test MethodLineCountCheck. */
-class MethodLineCountCheckTest extends MagikCheckTestBase {
+/** Test {@link MethodLineCountCheck}. */
+class MethodLineCountCheckTest {
 
   @Test
   void testMethodTooLong() {
@@ -23,8 +22,7 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
           _endif
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -37,8 +35,7 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
           do()
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @Test
@@ -54,8 +51,7 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
           _endif
         _endproc
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -68,8 +64,7 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
           do()
         _endproc
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @Test
@@ -81,7 +76,6 @@ class MethodLineCountCheckTest extends MagikCheckTestBase {
           >> _self.
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 }

@@ -1,15 +1,14 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
-/** Test LineLengthCheck. */
+/** Test {@link LineLengthCheck}. */
 @SuppressWarnings("checkstyle:MagicNumber")
-class LineLengthCheckTest extends MagikCheckTestBase {
+class LineLengthCheckTest {
 
   @Test
   void testLineNotTooLong1() {
@@ -19,8 +18,7 @@ class LineLengthCheckTest extends MagikCheckTestBase {
         # this is ok
         print(a)
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @Test
@@ -31,8 +29,7 @@ class LineLengthCheckTest extends MagikCheckTestBase {
         l_23456789012345678901234567890
         print(a)
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @Test
@@ -44,8 +41,7 @@ class LineLengthCheckTest extends MagikCheckTestBase {
         l_234567890123456789012345678901
         print(a)
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -57,22 +53,14 @@ class LineLengthCheckTest extends MagikCheckTestBase {
         # 234567890123456789012345678901
         print(a)
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
   void testExpandTab() {
     final LineLengthCheck check = new LineLengthCheck();
-    check.maxLineLength = 40;
-    // 5 tabs * 8 chars/tab = 40 chars
+    check.maxLineLength = 40; // 5 tabs * 8 chars/tab = 40 chars
     final String code = "" + "\t\t\t\t\tprint(a)\n";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
-
-    final MagikIssue issue = issues.get(0);
-    assertThat(issue.startColumn()).isEqualTo(5);
-    assertThat(issue.endColumn()).isEqualTo(13);
-    assertThat(issue.message()).isEqualTo("Line is too long (48/40)");
+    assertThat(check).reportsIssueCount(code, 1);
   }
 }

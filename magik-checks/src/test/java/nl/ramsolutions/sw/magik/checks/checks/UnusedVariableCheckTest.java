@@ -1,16 +1,15 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Test UnusedVariableCheck. */
-class UnusedVariableCheckTest extends MagikCheckTestBase {
+/** Test {@link UnusedVariableCheck}. */
+class UnusedVariableCheckTest {
 
   @ParameterizedTest
   @ValueSource(
@@ -148,8 +147,7 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
       })
   void testValid(final String code) {
     final MagikCheck check = new UnusedVariableCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @ParameterizedTest
@@ -202,8 +200,7 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
       })
   void testVariableNotUsed(final String code) {
     final MagikCheck check = new UnusedVariableCheck();
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -215,8 +212,7 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
           _local (a, b) << (_scatter {1,2})
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(2);
+    assertThat(check).reportsIssueCount(code, 2);
   }
 
   @Test
@@ -228,8 +224,7 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
         _method a.b(p_param1)
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -241,7 +236,6 @@ class UnusedVariableCheckTest extends MagikCheckTestBase {
         _abstract _method a.b(p_param1)
         _endmethod
         """;
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 }

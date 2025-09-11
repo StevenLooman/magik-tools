@@ -1,13 +1,12 @@
 package nl.ramsolutions.sw.magik.checks.checks;
 
+import static nl.ramsolutions.sw.magik.checks.checks.MagikCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.junit.jupiter.api.Test;
 
-/** Tests for ForbiddenInheritanceCheck. */
-class ForbiddenInheritanceCheckTest extends MagikCheckTestBase {
+/** Tests for {@link ForbiddenInheritanceCheck}. */
+class ForbiddenInheritanceCheckTest {
 
   @Test
   void testParentOk() {
@@ -18,8 +17,7 @@ class ForbiddenInheritanceCheckTest extends MagikCheckTestBase {
         def_slotted_exemplar(
           :test_exemplar,
           {})""";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @Test
@@ -32,8 +30,7 @@ class ForbiddenInheritanceCheckTest extends MagikCheckTestBase {
           :test_exemplar,
           {},
           :rwo_record)""";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -46,7 +43,6 @@ class ForbiddenInheritanceCheckTest extends MagikCheckTestBase {
           :test_exemplar,
           {},
           {@sw:rwo_record})""";
-    final List<MagikIssue> issues = this.runCheck(code, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, 1);
   }
 }

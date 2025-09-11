@@ -1,17 +1,16 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
+import static nl.ramsolutions.sw.magik.typedchecks.checks.MagikTypedCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** Tests for {@link ConditionalExpressionIsFalseTypedCheck}. */
-class ConditionalExpressionIsFalseTypedCheckTest extends MagikTypedCheckTestBase {
+class ConditionalExpressionIsFalseTypedCheckTest {
 
   @ParameterizedTest
   @ValueSource(
@@ -35,8 +34,7 @@ class ConditionalExpressionIsFalseTypedCheckTest extends MagikTypedCheckTestBase
   void testOk(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new ConditionalExpressionIsFalseTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
-    assertThat(checkResults).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
   @ParameterizedTest
@@ -56,7 +54,6 @@ class ConditionalExpressionIsFalseTypedCheckTest extends MagikTypedCheckTestBase
   void testFail(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new ConditionalExpressionIsFalseTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
-    assertThat(checkResults).hasSize(1);
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 }
