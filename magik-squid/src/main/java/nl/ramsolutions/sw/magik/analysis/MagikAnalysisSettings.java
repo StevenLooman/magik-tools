@@ -18,28 +18,70 @@ public class MagikAnalysisSettings {
 
   private final MagikToolsProperties properties;
 
-  /** Constructor. */
+  /**
+   * Constructor.
+   *
+   * @param properties The properties to use.
+   */
   public MagikAnalysisSettings(final MagikToolsProperties properties) {
     this.properties = properties;
   }
 
+  /**
+   * Determine if global usages should be indexed.
+   *
+   * @return True if global usages should be indexed, false otherwise.
+   */
   public boolean getTypingIndexGlobalUsages() {
     return this.properties.getPropertyBoolean(INDEX_GLOBAL_USAGES) != Boolean.FALSE;
   }
 
+  /**
+   * Determine if method usages should be indexed.
+   *
+   * @return True if method usages should be indexed, false otherwise.
+   */
   public boolean getTypingIndexMethodUsages() {
     return this.properties.getPropertyBoolean(INDEX_METHOD_USAGES) == Boolean.TRUE;
   }
 
+  /**
+   * Determine if slot usages should be indexed.
+   *
+   * @return True if slot usages should be indexed, false otherwise.
+   */
   public boolean getTypingIndexSlotUsages() {
     return this.properties.getPropertyBoolean(INDEX_SLOT_USAGES) != Boolean.FALSE;
   }
 
+  /**
+   * Determine if condition usages should be indexed.
+   *
+   * @return True if condition usages should be indexed, false otherwise.
+   */
   public boolean getTypingIndexConditionUsages() {
     return this.properties.getPropertyBoolean(INDEX_CONDITION_USAGES) != Boolean.FALSE;
   }
 
+  /**
+   * Determine if indexed definitions should be cached for typing.
+   *
+   * @return True if indexed definitions should be cached, false otherwise.
+   */
   public boolean getTypingCacheIndexedDefinitions() {
     return this.properties.getPropertyBoolean(CACHE_INDEXED_DEFINITIONS) != Boolean.FALSE;
+  }
+
+  /**
+   * Determine if switching from this settings to the other settings requires reindexing.
+   *
+   * @param other The other settings.
+   * @return True if reindexing is required, false otherwise.
+   */
+  public boolean requiresReindexing(final MagikAnalysisSettings other) {
+    return this.getTypingIndexMethodUsages() != other.getTypingIndexMethodUsages()
+        || this.getTypingIndexSlotUsages() != other.getTypingIndexSlotUsages()
+        || this.getTypingIndexConditionUsages() != other.getTypingIndexConditionUsages()
+        || this.getTypingCacheIndexedDefinitions() != other.getTypingCacheIndexedDefinitions();
   }
 }
