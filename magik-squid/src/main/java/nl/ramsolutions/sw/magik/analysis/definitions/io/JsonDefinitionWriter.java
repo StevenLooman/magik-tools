@@ -104,8 +104,8 @@ public final class JsonDefinitionWriter {
     LOGGER.debug("Writing type database to path: {}", path);
 
     final File file = path.toFile();
-    try (FileWriter fileReader = new FileWriter(file, StandardCharsets.ISO_8859_1);
-        BufferedWriter bufferedWriter = new BufferedWriter(fileReader)) {
+    try (final FileWriter fileReader = new FileWriter(file, StandardCharsets.ISO_8859_1);
+        final BufferedWriter bufferedWriter = new BufferedWriter(fileReader)) {
       this.writeProducts(bufferedWriter);
       this.writeModules(bufferedWriter);
       this.writeMagikFiles(bufferedWriter);
