@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
@@ -94,13 +95,23 @@ public class MagikWorkspaceService implements WorkspaceService {
   public void didChangeConfiguration(final DidChangeConfigurationParams params) {
     LOGGER.trace("didChangeConfiguration");
 
+    final MagikToolsProperties oldProperties =
+        new MagikToolsProperties(this.languageServerProperties);
+
     final JsonObject settings = (JsonObject) params.getSettings();
     final Properties props = JsonObjectPropertiesConverter.convert(settings);
     LOGGER.debug("New properties: {}", props);
     this.languageServerProperties.reset();
     this.languageServerProperties.putAll(props);
 
-    this.runIndexersInBackground();
+    // Only reindex if settings changed that require reindexing.
+    final MagikAnalysisSettings oldSettings = new MagikAnalysisSettings(oldProperties);
+    final MagikAnalysisSettings newSettings =
+        new MagikAnalysisSettings(this.languageServerProperties);
+    if (newSettings.requiresReindexing(oldSettings)) {
+      LOGGER.info("Settings changed that require reindexing");
+      this.reIndex();
+    }
   }
 
   private void readProductsClassInfos(final List<String> productDirs) {
