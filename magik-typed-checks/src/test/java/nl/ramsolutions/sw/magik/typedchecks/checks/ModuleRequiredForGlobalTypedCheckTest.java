@@ -1,16 +1,15 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
+import static nl.ramsolutions.sw.magik.typedchecks.checks.MagikTypedCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
@@ -18,7 +17,7 @@ import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import org.junit.jupiter.api.Test;
 
 /** Tests for {@link ModuleRequiredForGlobalTypedCheck}. */
-class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
+class ModuleRequiredForGlobalTypedCheckTest {
 
   /**
    * VSCode runs from module directory, mvn runs from project directory.
@@ -62,8 +61,7 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
             null));
 
     final MagikTypedCheck check = new ModuleRequiredForGlobalTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(path, definitionKeeper, check);
-    assertThat(checkResults).isEmpty();
+    assertThat(check).reportsNoIssues(path, definitionKeeper);
   }
 
   @Test
@@ -94,7 +92,6 @@ class ModuleRequiredForGlobalTypedCheckTest extends MagikTypedCheckTestBase {
             null));
 
     final MagikTypedCheck check = new ModuleRequiredForGlobalTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(path, definitionKeeper, check);
-    assertThat(checkResults).hasSize(1);
+    assertThat(check).reportsIssueCount(path, definitionKeeper, 1);
   }
 }

@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
+import static nl.ramsolutions.sw.magik.typedchecks.checks.MagikTypedCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
@@ -9,12 +10,11 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Test {@link SlotExistsTypedCheck}. */
-class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
+class SlotExistsTypedCheckTest {
 
   @Test
   void testTypeUnknown() {
@@ -26,8 +26,7 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new SlotExistsTypedCheck();
-    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
   @Test
@@ -40,8 +39,7 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new SlotExistsTypedCheck();
-    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).hasSize(1);
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 
   @Test
@@ -67,7 +65,6 @@ class SlotExistsTypedCheckTest extends MagikTypedCheckTestBase {
             Collections.emptyList(),
             null));
     final MagikTypedCheck check = new SlotExistsTypedCheck();
-    final List<MagikIssue> issues = this.runCheck(code, definitionKeeper, check);
-    assertThat(issues).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 }

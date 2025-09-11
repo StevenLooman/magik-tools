@@ -1,16 +1,15 @@
 package nl.ramsolutions.sw.magik.typedchecks.checks;
 
+import static nl.ramsolutions.sw.magik.typedchecks.checks.MagikTypedCheckAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
 import org.junit.jupiter.api.Test;
 
 /** Test {@link GlobalExistsTypedCheck}. */
-class GlobalExistsTypedCheckTest extends MagikTypedCheckTestBase {
+class GlobalExistsTypedCheckTest {
 
   @Test
   void testKnownGlobal() {
@@ -18,8 +17,7 @@ class GlobalExistsTypedCheckTest extends MagikTypedCheckTestBase {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
     final MagikTypedCheck check = new GlobalExistsTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
-    assertThat(checkResults).isEmpty();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
   @Test
@@ -28,7 +26,6 @@ class GlobalExistsTypedCheckTest extends MagikTypedCheckTestBase {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
 
     final MagikTypedCheck check = new GlobalExistsTypedCheck();
-    final List<MagikIssue> checkResults = this.runCheck(code, definitionKeeper, check);
-    assertThat(checkResults).hasSize(1);
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 }
