@@ -156,10 +156,11 @@ public class TypeDocParser {
     final AstNode node = this.getTypeDocNode();
     return node.getChildren(TypeDocGrammar.PARAM).stream()
         .filter(this::noEmptyName)
-        .collect(Collectors.toMap(
-          this::getName,
-          this::getTypeString,
-          (a, b) -> a));  // In case of duplicate param names, keep the first one.
+        .collect(
+            Collectors.toMap(
+                this::getName,
+                this::getTypeString,
+                (a, b) -> a)); // In case of duplicate param names, keep the first one.
   }
 
   /**
