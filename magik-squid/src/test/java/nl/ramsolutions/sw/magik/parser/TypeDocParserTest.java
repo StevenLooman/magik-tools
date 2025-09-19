@@ -72,6 +72,21 @@ class TypeDocParserTest {
   }
 
   @Test
+  void testParameterDuplicate() throws IOException {
+    final String code =
+        """
+        _method a.b(p1)
+            ## @param {sw:integer} p1 First parameter.
+            ## @param {sw:integer} p1 First parameter, again.
+        _endmethod""";
+    final AstNode topNode = this.parseMagik(code);
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final TypeDocParser docParser = new TypeDocParser(methodNode);
+    final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
+    assertThat(parameterTypes).containsExactly(Map.entry("p1", TypeString.SW_INTEGER));
+  }
+
+  @Test
   void testReturn() throws IOException {
     final String code =
         """
