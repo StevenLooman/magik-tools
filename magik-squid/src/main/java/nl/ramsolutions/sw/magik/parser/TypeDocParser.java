@@ -156,13 +156,17 @@ public class TypeDocParser {
     final AstNode node = this.getTypeDocNode();
     return node.getChildren(TypeDocGrammar.PARAM).stream()
         .filter(this::noEmptyName)
-        .collect(Collectors.toMap(this::getName, this::getTypeString));
+        .collect(
+            Collectors.toMap(
+                this::getName,
+                this::getTypeString,
+                (a, b) -> a)); // In case of duplicate param names, keep the first one.
   }
 
   /**
    * Get @param nodes + type strings.
    *
-   * @return
+   * @return Map with @param type nodes + type names.
    */
   public Map<AstNode, TypeString> getParameterTypeNodes() {
     final AstNode node = this.getTypeDocNode();
@@ -174,7 +178,7 @@ public class TypeDocParser {
   /**
    * Get @param name node + names.
    *
-   * @return
+   * @return Map with @param name nodes + names.
    */
   public Map<AstNode, String> getParameterNameNodes() {
     final AstNode node = this.getTypeDocNode();
@@ -199,7 +203,7 @@ public class TypeDocParser {
   /**
    * Get @generic nodes + type strings.
    *
-   * @return
+   * @return Map with @generic type nodes + type names.
    */
   public Map<AstNode, TypeString> getGenericTypeNodes() {
     final AstNode node = this.getTypeDocNode();
@@ -271,7 +275,7 @@ public class TypeDocParser {
   /**
    * Get @slot type nodes + types.
    *
-   * @return
+   * @return Map with @slot type nodes + type names.
    */
   public Map<AstNode, TypeString> getSlotTypeNodes() {
     final AstNode node = this.getTypeDocNode();
@@ -283,7 +287,7 @@ public class TypeDocParser {
   /**
    * Get @slot name nodes + name.
    *
-   * @return
+   * @return Map with @slot name nodes + names.
    */
   public Map<String, AstNode> getSlotNameNodes() {
     final AstNode node = this.getTypeDocNode();

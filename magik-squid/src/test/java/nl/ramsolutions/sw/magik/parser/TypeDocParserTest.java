@@ -27,7 +27,8 @@ class TypeDocParserTest {
             ## @param    {integer} param2 Test parameter 2.
             ## @param {integer} param3    Test parameter 3.
             ## @param {integer|float} param4 Test parameter 4.
-        _endmethod""";
+        _endmethod
+        """;
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
@@ -54,7 +55,8 @@ class TypeDocParserTest {
             ## @param {integer} param2
             ## @param {integer} param3\s
             ## @param {integer|float} param4
-        _endmethod""";
+        _endmethod
+        """;
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
@@ -72,12 +74,29 @@ class TypeDocParserTest {
   }
 
   @Test
+  void testParameterDuplicate() throws IOException {
+    final String code =
+        """
+        _method a.b(p1)
+            ## @param {sw:integer} p1 First parameter.
+            ## @param {sw:integer} p1 First parameter, again.
+        _endmethod
+        """;
+    final AstNode topNode = this.parseMagik(code);
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final TypeDocParser docParser = new TypeDocParser(methodNode);
+    final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
+    assertThat(parameterTypes).containsExactly(Map.entry("p1", TypeString.SW_INTEGER));
+  }
+
+  @Test
   void testReturn() throws IOException {
     final String code =
         """
         _method a.b
             ## @return {sw:integer} An Integer.
-        _endmethod""";
+        _endmethod
+        """;
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
@@ -94,7 +113,8 @@ class TypeDocParserTest {
             ## @return {sw:integer}
             ## @return {sw:integer}\s
             ## @return {sw:integer|sw:float}
-        _endmethod""";
+        _endmethod
+        """;
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
@@ -113,7 +133,8 @@ class TypeDocParserTest {
         """
         _method a.b
             ## @return {_self}
-        _endmethod""";
+        _endmethod
+        """;
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
@@ -131,7 +152,8 @@ class TypeDocParserTest {
                 _proc(item)
                     ## @return {sw:float} Nested
                 _endproc())
-        _endmethod""";
+        _endmethod
+        """;
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser methodDocParser = new TypeDocParser(methodNode);
@@ -171,7 +193,8 @@ class TypeDocParserTest {
         """
         _proc@test1(param1)
             ## @param {sw:symbol} param1 Test parameter 1.
-        _endproc""";
+        _endproc
+        """;
     final AstNode topNode = this.parseMagik(code);
     final AstNode definitionNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(definitionNode);
@@ -189,7 +212,8 @@ class TypeDocParserTest {
         """
         _method a.b(p1)
             ## @return {_parameter(p1)} First parameter.
-        _endmethod""";
+        _endmethod
+        """;
     final AstNode topNode = this.parseMagik(code);
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
