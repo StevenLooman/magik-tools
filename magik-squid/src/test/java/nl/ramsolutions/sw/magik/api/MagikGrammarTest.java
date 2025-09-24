@@ -336,7 +336,8 @@ class MagikGrammarTest {
         .matches("{a, b, c, _scatter d}")
         .matches("{_scatter d}");
     MagikRuleRequiredAssert.assertThat(rule, MagikGrammar.SIMPLE_VECTOR_SYNTAX_ERROR)
-        .matches("{a, b, c, _scatter d, _scatter e}");
+        .matches("{a, b, c, _scatter d, _scatter e}")
+        .matches("{_scatter a, b}");
   }
 
   @Test
