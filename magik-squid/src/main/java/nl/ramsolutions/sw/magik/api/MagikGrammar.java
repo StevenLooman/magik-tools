@@ -316,7 +316,15 @@ public enum MagikGrammar implements GrammarRuleKey {
             MagikPunctuator.BRACE_L,
             b.firstOf(
                 b.sequence(
-                    b.optional(EXPRESSION, b.zeroOrMore(MagikPunctuator.COMMA, EXPRESSION)),
+                    b.optional(
+                        b.nextNot(MagikKeyword.SCATTER),
+                        EXPRESSION,
+                        b.zeroOrMore(
+                            MagikPunctuator.COMMA, b.nextNot(MagikKeyword.SCATTER), EXPRESSION)),
+                    b.optional(
+                        b.optional(MagikPunctuator.COMMA),
+                        b.next(MagikKeyword.SCATTER),
+                        EXPRESSION),
                     b.next(MagikPunctuator.BRACE_R)),
                 SIMPLE_VECTOR_SYNTAX_ERROR),
             MagikPunctuator.BRACE_R);
@@ -771,7 +779,12 @@ public enum MagikGrammar implements GrammarRuleKey {
                 b.sequence(
                     b.nextNot(MagikKeyword.OPTIONAL),
                     b.nextNot(MagikKeyword.GATHER),
-                    PARAMETERS,
+                    PARAMETER,
+                    b.zeroOrMore(
+                        MagikPunctuator.COMMA,
+                        b.nextNot(MagikKeyword.OPTIONAL),
+                        b.nextNot(MagikKeyword.GATHER),
+                        PARAMETER),
                     b.next(MagikPunctuator.SQUARE_R)),
                 PARAMETERS_SQUARE_SYNTAX_ERROR),
             MagikPunctuator.SQUARE_R);
@@ -832,7 +845,10 @@ public enum MagikGrammar implements GrammarRuleKey {
         .is(
             b.optional(
                 // Normal arguments.
-                b.optional(ARGUMENT, b.zeroOrMore(MagikPunctuator.COMMA, ARGUMENT)),
+                b.optional(
+                    b.nextNot(MagikKeyword.SCATTER),
+                    ARGUMENT,
+                    b.zeroOrMore(MagikPunctuator.COMMA, b.nextNot(MagikKeyword.SCATTER), ARGUMENT)),
                 b.optional(
                     b.optional(MagikPunctuator.COMMA), b.next(MagikKeyword.SCATTER), ARGUMENT)))
         .skip();
