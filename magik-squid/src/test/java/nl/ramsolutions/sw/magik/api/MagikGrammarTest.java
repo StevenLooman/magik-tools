@@ -104,11 +104,29 @@ class MagikGrammarTest {
   }
 
   @Test
-  void testArguments() {
+  void testArgumentsParen() {
     final Rule rule = g.rule(MagikGrammar.ARGUMENTS_PAREN);
     MagikRuleForbiddenAssert.assertThat(rule, MagikGrammar.ARGUMENTS_PAREN_SYNTAX_ERROR)
         .matches("()")
-        .matches("(1, 2)");
+        .matches("(a, b)")
+        .matches("(a, _scatter b)")
+        .matches("(a _scatter b)");
+    MagikRuleRequiredAssert.assertThat(rule, MagikGrammar.ARGUMENTS_PAREN_SYNTAX_ERROR)
+        .matches("(a b)")
+        .matches("(_scatter a, _scatter b)");
+  }
+
+  @Test
+  void testArgumentsSquare() {
+    final Rule rule = g.rule(MagikGrammar.ARGUMENTS_SQUARE);
+    MagikRuleForbiddenAssert.assertThat(rule, MagikGrammar.ARGUMENTS_SQUARE_SYNTAX_ERROR)
+        .matches("[a]")
+        .matches("[a, b]")
+        .matches("[a, _scatter b]")
+        .matches("[a _scatter b]");
+    MagikRuleRequiredAssert.assertThat(rule, MagikGrammar.ARGUMENTS_SQUARE_SYNTAX_ERROR)
+        .matches("[a b]")
+        .matches("[_scatter a, _scatter b]");
   }
 
   @Test
@@ -305,6 +323,21 @@ class MagikGrammarTest {
         .matches("_primitive 1")
         .matches("_primitive 512")
         .notMatches("_primitive");
+  }
+
+  @Test
+  void testSimpleVector() {
+    final Rule rule = g.rule(MagikGrammar.SIMPLE_VECTOR);
+    MagikRuleForbiddenAssert.assertThat(rule, MagikGrammar.SIMPLE_VECTOR_SYNTAX_ERROR)
+        .matches("{}")
+        .matches("{a}")
+        .matches("{a, b}")
+        .matches("{a, b, c}")
+        .matches("{a, b, c, _scatter d}")
+        .matches("{_scatter d}");
+    MagikRuleRequiredAssert.assertThat(rule, MagikGrammar.SIMPLE_VECTOR_SYNTAX_ERROR)
+        .matches("{a, b, c, _scatter d, _scatter e}")
+        .matches("{_scatter a, b}");
   }
 
   @Test
