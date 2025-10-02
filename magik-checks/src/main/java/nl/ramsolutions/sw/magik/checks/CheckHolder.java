@@ -12,10 +12,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.sonar.check.Rule;
 
-/** MagicCheck holder/factory. */
-public class MagikCheckHolder {
+/** {@link Check} holder/factory. */
+public class CheckHolder {
 
-  /** Parameter to check. */
+  /** Parameter/value for check. */
   public static class Parameter {
 
     private final String name;
@@ -49,10 +49,10 @@ public class MagikCheckHolder {
     }
   }
 
-  private final Class<? extends MagikCheck> checkClass;
+  private final Class<? extends Check> checkClass;
   private final Set<Parameter> parameters;
   private final boolean enabled;
-  private MagikCheckMetadata metadata;
+  private CheckMetadata metadata;
 
   /**
    * Constructor.
@@ -61,8 +61,8 @@ public class MagikCheckHolder {
    * @param parameters Parameters.
    * @param enabled Check is enabled.
    */
-  public MagikCheckHolder(
-      final Class<? extends MagikCheck> checkClass,
+  public CheckHolder(
+      final Class<? extends Check> checkClass,
       final Set<Parameter> parameters,
       final boolean enabled) {
     this.checkClass = checkClass;
@@ -77,8 +77,8 @@ public class MagikCheckHolder {
    * @return Check
    * @throws ReflectiveOperationException -
    */
-  public MagikCheck createCheck() throws ReflectiveOperationException {
-    final MagikCheck check = this.checkClass.getDeclaredConstructor().newInstance();
+  public Check createCheck() throws ReflectiveOperationException {
+    final Check check = this.checkClass.getDeclaredConstructor().newInstance();
     check.setHolder(this);
 
     for (final Parameter parameter : this.parameters) {
@@ -100,11 +100,11 @@ public class MagikCheckHolder {
   }
 
   /**
-   * Get the {@link MagikCheck} class.
+   * Get the {@link Check} class.
    *
-   * @return {@link MagikCheck} class.
+   * @return {@link Check} class.
    */
-  public Class<? extends MagikCheck> getCheckClass() {
+  public Class<? extends Check> getCheckClass() {
     return this.checkClass;
   }
 
@@ -119,12 +119,12 @@ public class MagikCheckHolder {
   }
 
   /**
-   * Get metadata for the {@link MagikCheck}.
+   * Get metadata for the {@link Check}.
    *
    * @return Metadata.
    * @throws IOException -
    */
-  public MagikCheckMetadata getMetadata() throws IOException {
+  public CheckMetadata getMetadata() throws IOException {
     if (this.metadata == null) {
       synchronized (this) {
         // determine path
@@ -136,12 +136,12 @@ public class MagikCheckHolder {
                 : simpleName.substring(0, simpleName.length() - "Check".length()); // strip Check
         final String filename = String.format("/%s/%s.json", CheckList.PROFILE_DIR, name);
 
-        // parse json
+        // Parse json.
         final Gson gson = new Gson();
         try (InputStream inputStream = this.getClass().getResourceAsStream(filename)) {
           final InputStreamReader reader = new InputStreamReader(inputStream);
           final JsonReader jsonReader = gson.newJsonReader(reader);
-          this.metadata = gson.fromJson(jsonReader, MagikCheckMetadata.class);
+          this.metadata = gson.fromJson(jsonReader, CheckMetadata.class);
         }
       }
     }
@@ -166,7 +166,7 @@ public class MagikCheckHolder {
    */
   public String getCheckKeyKebabCase() {
     final String checkKey = this.getCheckKey();
-    return MagikCheckHolder.toKebabCase(checkKey);
+    return CheckHolder.toKebabCase(checkKey);
   }
 
   /**

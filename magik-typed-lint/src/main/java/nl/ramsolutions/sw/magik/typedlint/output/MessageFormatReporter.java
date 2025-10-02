@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
-import nl.ramsolutions.sw.magik.checks.MagikCheckMetadata;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
+import nl.ramsolutions.sw.magik.checks.CheckHolder;
+import nl.ramsolutions.sw.magik.checks.CheckMetadata;
+import nl.ramsolutions.sw.magik.checks.Issue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +45,8 @@ public class MessageFormatReporter implements Reporter {
     this.reportedSeverities = new HashSet<>();
   }
 
-  private Map<String, String> createMapForMagikIssue(final Path path, final MagikIssue issue) {
-    final MagikCheckHolder holder = issue.check().getHolder();
+  private Map<String, String> createMapForIssue(final Path path, final Issue issue) {
+    final CheckHolder holder = issue.check().getHolder();
     if (holder == null) {
       throw new IllegalStateException();
     }
@@ -56,7 +56,7 @@ public class MessageFormatReporter implements Reporter {
     map.put("abspath", path.toAbsolutePath().toString());
     map.put("msg", issue.message());
     try {
-      final MagikCheckMetadata metadata = holder.getMetadata();
+      final CheckMetadata metadata = holder.getMetadata();
       map.put("msg_id", metadata.getSqKey());
       map.put("symbol", metadata.getSqKey());
       map.put("severity", metadata.getDefaultSeverity());
@@ -95,10 +95,10 @@ public class MessageFormatReporter implements Reporter {
   }
 
   @Override
-  public void reportIssue(final MagikIssue magikIssue) {
+  public void reportIssue(final Issue issue) {
     // Create map for find/replace.
-    final Path path = magikIssue.location().getPath();
-    final Map<String, String> map = this.createMapForMagikIssue(path, magikIssue);
+    final Path path = issue.location().getPath();
+    final Map<String, String> map = this.createMapForIssue(path, issue);
 
     // Save severity.
     final String severity = map.get("severity");

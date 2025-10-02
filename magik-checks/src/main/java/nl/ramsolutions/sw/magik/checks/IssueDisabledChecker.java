@@ -11,7 +11,7 @@ import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
 
 /** Check if {@link MagikIssue} is disabled via an annotation/comment. */
-public final class MagikIssueDisabledChecker {
+public final class IssueDisabledChecker {
 
   private static final String NAME_MLINT = "mlint";
   private static final String KEY_DISABLE = "disable";
@@ -22,7 +22,7 @@ public final class MagikIssueDisabledChecker {
       new CommentInstructionReader.Instruction(
           NAME_MLINT, CommentInstructionReader.Instruction.Sort.SCOPE);
 
-  private MagikIssueDisabledChecker() {
+  private IssueDisabledChecker() {
     // Utility class.
   }
 
@@ -33,8 +33,8 @@ public final class MagikIssueDisabledChecker {
    * @param magikIssue Issue to check.
    * @return true if issue is disabled at line.
    */
-  public static boolean issueDisabled(final MagikFile magikFile, final MagikIssue magikIssue) {
-    final MagikCheckHolder holder = magikIssue.check().getHolder();
+  public static boolean issueDisabled(final MagikFile magikFile, final Issue magikIssue) {
+    final CheckHolder holder = magikIssue.check().getHolder();
     Objects.requireNonNull(holder);
     final String checkKey = holder.getCheckKeyKebabCase();
 
@@ -47,7 +47,7 @@ public final class MagikIssueDisabledChecker {
             .getStatementInstructions(MLINT_STATEMENT_INSTRUCTION)
             .getOrDefault(fileLineNo, Collections.emptyMap());
     final String[] statementDisableds =
-        statementInstructions.getOrDefault(MagikIssueDisabledChecker.KEY_DISABLE, "").split(",");
+        statementInstructions.getOrDefault(IssueDisabledChecker.KEY_DISABLE, "").split(",");
     final List<String> disabledList = List.of(statementDisableds);
     final boolean statementDisabled =
         disabledList.contains("all") || disabledList.contains(checkKey);
@@ -67,9 +67,7 @@ public final class MagikIssueDisabledChecker {
                     .getOrDefault(scope, Collections.emptyMap()))
         .map(
             scopeInstructions ->
-                scopeInstructions
-                    .getOrDefault(MagikIssueDisabledChecker.KEY_DISABLE, "")
-                    .split(","))
+                scopeInstructions.getOrDefault(IssueDisabledChecker.KEY_DISABLE, "").split(","))
         .flatMap(Arrays::stream)
         .anyMatch(disabled -> disabled.equals("all") || disabled.equals(checkKey));
   }

@@ -8,8 +8,8 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.checks.checks.ForbiddenCallCheck;
 import org.junit.jupiter.api.Test;
 
-/** Tests for MagikIssueDisabledChecker. */
-class MagikIssueDisabledCheckerTest {
+/** Tests for {@link IssueDisabledChecker}. */
+class IssueDisabledCheckerTest {
 
   @Test
   void testNotDisabled() throws ReflectiveOperationException {
@@ -73,12 +73,12 @@ class MagikIssueDisabledCheckerTest {
   private void assertIssueDisabled(String code, boolean expectedDisabled)
       throws ReflectiveOperationException {
     final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
-    final MagikCheckHolder holder =
-        new MagikCheckHolder(ForbiddenCallCheck.class, Collections.emptySet(), true);
-    final MagikCheck check = holder.createCheck();
-    final List<MagikIssue> issues = check.scanFileForIssues(magikFile);
-    final MagikIssue issue = issues.get(0);
-    final boolean issueDisabled = MagikIssueDisabledChecker.issueDisabled(magikFile, issue);
+    final CheckHolder holder =
+        new CheckHolder(ForbiddenCallCheck.class, Collections.emptySet(), true);
+    final Check check = holder.createCheck();
+    final List<Issue> issues = check.scanFileForIssues(magikFile);
+    final Issue issue = issues.get(0);
+    final boolean issueDisabled = IssueDisabledChecker.issueDisabled(magikFile, issue);
     assertThat(issueDisabled).isEqualTo(expectedDisabled);
   }
 }

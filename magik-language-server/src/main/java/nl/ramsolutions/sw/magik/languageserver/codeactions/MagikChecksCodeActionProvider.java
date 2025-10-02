@@ -9,10 +9,10 @@ import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.checks.CheckFixer;
+import nl.ramsolutions.sw.magik.checks.CheckHolder;
 import nl.ramsolutions.sw.magik.checks.CheckList;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikCheckFixer;
-import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 
 /** Provide {@link CodeAction}s for {@link MagikCheck}s. */
@@ -36,17 +36,16 @@ public class MagikChecksCodeActionProvider {
   public List<CodeAction> provideCodeActions(final MagikTypedFile magikFile, final Range range)
       throws ReflectiveOperationException, IOException {
     final List<CodeAction> codeActions = new ArrayList<>();
-    for (final Entry<Class<? extends MagikCheck>, List<Class<? extends MagikCheckFixer>>> entry :
+    for (final Entry<Class<? extends MagikCheck>, List<Class<? extends CheckFixer>>> entry :
         CheckList.getFixers().entrySet()) {
       final Class<?> checkClass = entry.getKey();
-      final List<Class<? extends MagikCheckFixer>> fixerClassses = entry.getValue();
+      final List<Class<? extends CheckFixer>> fixerClassses = entry.getValue();
       for (final Class<?> fixerClass : fixerClassses) {
         if (!this.isCheckEnabled(magikFile, checkClass)) {
           continue;
         }
 
-        final MagikCheckFixer fixer =
-            (MagikCheckFixer) fixerClass.getDeclaredConstructor().newInstance();
+        final CheckFixer fixer = (CheckFixer) fixerClass.getDeclaredConstructor().newInstance();
         List<CodeAction> fixerCodeActions = fixer.provideCodeActions(magikFile, range);
         codeActions.addAll(fixerCodeActions);
       }
@@ -61,8 +60,8 @@ public class MagikChecksCodeActionProvider {
         MagikToolsProperties.merge(this.properties, fileProperties);
     final MagikChecksConfiguration config =
         new MagikChecksConfiguration(CheckList.getChecks(), actualProperties);
-    final List<MagikCheckHolder> allChecks = config.getAllChecks();
-    for (final MagikCheckHolder checkHolder : allChecks) {
+    final List<CheckHolder> allChecks = config.getAllChecks();
+    for (final CheckHolder checkHolder : allChecks) {
       if (checkHolder.getCheckClass().equals(checkClass)) {
         return checkHolder.isEnabled();
       }

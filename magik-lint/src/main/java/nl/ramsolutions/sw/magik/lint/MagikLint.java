@@ -16,13 +16,13 @@ import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.checks.Check;
+import nl.ramsolutions.sw.magik.checks.CheckHolder;
 import nl.ramsolutions.sw.magik.checks.CheckList;
-import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
-import nl.ramsolutions.sw.magik.checks.MagikCheckMetadata;
+import nl.ramsolutions.sw.magik.checks.CheckMetadata;
+import nl.ramsolutions.sw.magik.checks.Issue;
+import nl.ramsolutions.sw.magik.checks.IssueDisabledChecker;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
-import nl.ramsolutions.sw.magik.checks.MagikIssueDisabledChecker;
 import nl.ramsolutions.sw.magik.lint.output.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +52,10 @@ public class MagikLint {
   }
 
   /**
-   * Build context for a file.
+   * Build {@link MagikFile} for path.
    *
    * @param path Path to file
-   * @return Visitor context for file.
+   * @return {@link MagikFile} for path.
    * @throws IOException -
    */
   private MagikFile buildMagikFile(final Path path) {
@@ -75,13 +75,13 @@ public class MagikLint {
    * Run a single check on context.
    *
    * @param magikFile File to run check on.
-   * @param holder MagikCheckHolder Check to run.
+   * @param holder {@link CheckHolder} {@link Check} to run.
    * @return Issues/infractions found.
    * @throws ReflectiveOperationException -
    */
-  private List<MagikIssue> runCheckOnFile(final MagikFile magikFile, final MagikCheckHolder holder)
+  private List<Issue> runCheckOnFile(final MagikFile magikFile, final CheckHolder holder)
       throws ReflectiveOperationException {
-    final MagikCheck check = holder.createCheck();
+    final Check check = holder.createCheck();
     return check.scanFileForIssues(magikFile);
   }
 
@@ -97,16 +97,16 @@ public class MagikLint {
       throws ReflectiveOperationException, IOException {
     final MagikChecksConfiguration checksConfig =
         new MagikChecksConfiguration(CheckList.getChecks(), this.properties);
-    final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
-    for (final MagikCheckHolder holder : holders) {
-      final MagikCheckMetadata metadata = holder.getMetadata();
+    final Iterable<CheckHolder> holders = checksConfig.getAllChecks();
+    for (final CheckHolder holder : holders) {
+      final CheckMetadata metadata = holder.getMetadata();
       if (!showDisabled && holder.isEnabled() || showDisabled && !holder.isEnabled()) {
         writer.write("- " + metadata.getSqKey() + " (" + metadata.getTitle() + ")\n");
       } else {
         continue;
       }
 
-      for (final MagikCheckHolder.Parameter parameter : holder.getParameters()) {
+      for (final CheckHolder.Parameter parameter : holder.getParameters()) {
         writer.write(
             " ".repeat(2)
                 + "*"
@@ -187,39 +187,38 @@ public class MagikLint {
   }
 
   /**
-   * Run {@link MagikCheckHolder}s on {@link MagikFile}.
+   * Run {@link CheckHolder}s on {@link MagikFile}.
    *
    * @param magikFile File to run on.
-   * @param holders {@link MagikCheckHolder}s to run.
-   * @return List of {@link MagikIssue}s for the given file.
+   * @param holders {@link CheckHolder}s to run.
+   * @return List of {@link Issue}s for the given file.
    */
-  private List<MagikIssue> runChecksOnFile(final MagikFile magikFile) {
+  private List<Issue> runChecksOnFile(final MagikFile magikFile) {
     LOGGER.trace("Thread: {}, checking file: {}", Thread.currentThread().getName(), magikFile);
 
-    final List<MagikIssue> magikIssues = new ArrayList<>();
+    final List<Issue> allIssues = new ArrayList<>();
 
     // Run checks on files.
     final MagikToolsProperties fileProperties = magikFile.getProperties();
     final MagikChecksConfiguration checksConfig =
         new MagikChecksConfiguration(CheckList.getChecks(), fileProperties);
-    final Iterable<MagikCheckHolder> holders = checksConfig.getAllChecks();
-    for (final MagikCheckHolder holder : holders) {
+    final Iterable<CheckHolder> holders = checksConfig.getAllChecks();
+    for (final CheckHolder holder : holders) {
       if (!holder.isEnabled()) {
         continue;
       }
 
       try {
-        final List<MagikIssue> issues =
+        final List<Issue> issues =
             this.runCheckOnFile(magikFile, holder).stream()
-                .filter(
-                    magikIssue -> !MagikIssueDisabledChecker.issueDisabled(magikFile, magikIssue))
+                .filter(magikIssue -> !IssueDisabledChecker.issueDisabled(magikFile, magikIssue))
                 .toList();
-        magikIssues.addAll(issues);
+        allIssues.addAll(issues);
       } catch (final ReflectiveOperationException exception) {
         LOGGER.error(exception.getMessage(), exception);
       }
     }
 
-    return magikIssues;
+    return allIssues;
   }
 }

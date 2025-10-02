@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikVisitor;
 import nl.ramsolutions.sw.magik.checks.CheckList;
+import nl.ramsolutions.sw.magik.checks.Issue;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.metrics.FileMetrics;
 import nl.ramsolutions.sw.sonar.language.Magik;
 import nl.ramsolutions.sw.sonar.sensors.cpd.CpdTokenSaver;
@@ -60,12 +61,12 @@ public class MagikSensor implements Sensor {
   }
 
   @Override
-  public void describe(final SensorDescriptor descriptor) {
+  public void describe(final @Nonnull SensorDescriptor descriptor) {
     descriptor.onlyOnLanguage(Magik.KEY).name("Magik Sensor");
   }
 
   @Override
-  public void execute(final SensorContext context) {
+  public void execute(final @Nonnull SensorContext context) {
     final FileSystem fileSystem = context.fileSystem();
     final FilePredicates predicates = fileSystem.predicates();
 
@@ -113,7 +114,7 @@ public class MagikSensor implements Sensor {
             .addAnnotatedChecks(CheckList.getChecks());
     for (final MagikCheck check : checks.all()) {
       LOGGER.debug("Running check: {}", check);
-      final List<MagikIssue> issues = check.scanFileForIssues(magikFile);
+      final List<Issue> issues = check.scanFileForIssues(magikFile);
       final RuleKey ruleKey = checks.ruleKey(check);
       if (ruleKey == null) {
         continue;
@@ -177,9 +178,9 @@ public class MagikSensor implements Sensor {
   private void saveIssues(
       final SensorContext context,
       final RuleKey ruleKey,
-      final List<MagikIssue> magikIssues,
+      final List<Issue> issues,
       final InputFile inputFile) {
-    for (final MagikIssue magikIssue : magikIssues) {
+    for (final Issue magikIssue : issues) {
       LOGGER.debug("Saving issue, file: {}, issue: {}", inputFile, magikIssue);
 
       final NewIssue issue = context.newIssue();

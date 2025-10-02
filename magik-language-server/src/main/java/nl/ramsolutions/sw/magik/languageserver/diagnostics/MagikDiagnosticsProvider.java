@@ -13,13 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Provides diagnostics for Magik files. */
-public class DiagnosticsProvider {
+public class MagikDiagnosticsProvider {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MagikDiagnosticsProvider.class);
 
   private final MagikToolsProperties properties;
 
-  public DiagnosticsProvider(final MagikToolsProperties properties) {
+  public MagikDiagnosticsProvider(final MagikToolsProperties properties) {
     this.properties = properties;
   }
 
@@ -38,7 +38,7 @@ public class DiagnosticsProvider {
 
     // Linter diagnostics.
     final List<Diagnostic> diagnosticsLinter =
-        DiagnosticsProvider.getDiagnosticsFromLinter(magikFile);
+        MagikDiagnosticsProvider.getDiagnosticsFromLinter(magikFile);
     diagnostics.addAll(diagnosticsLinter);
 
     // Typing diagnostics.
@@ -46,7 +46,7 @@ public class DiagnosticsProvider {
     final Boolean typingEnableChecks = settings.getTypingEnableChecks();
     if (Boolean.TRUE.equals(typingEnableChecks)) {
       final List<Diagnostic> diagnosticsTyping =
-          DiagnosticsProvider.getDiagnosticsFromTyping(magikFile);
+          MagikDiagnosticsProvider.getDiagnosticsFromTyping(magikFile);
       diagnostics.addAll(diagnosticsTyping);
     }
 

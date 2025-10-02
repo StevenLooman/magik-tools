@@ -2,6 +2,7 @@ package nl.ramsolutions.sw;
 
 import java.net.URI;
 
+/** An opened file, with its URI and source text. */
 public abstract class OpenedFile {
 
   private final URI uri;
@@ -39,7 +40,7 @@ public abstract class OpenedFile {
   /**
    * Get the language ID for this file.
    *
-   * @return
+   * @return Language ID.
    */
   public abstract String getLanguageId();
 }

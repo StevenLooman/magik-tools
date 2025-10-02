@@ -9,13 +9,13 @@ import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.checks.Check;
+import nl.ramsolutions.sw.magik.checks.CheckHolder;
 import nl.ramsolutions.sw.magik.checks.CheckList;
-import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
-import nl.ramsolutions.sw.magik.checks.MagikCheckMetadata;
+import nl.ramsolutions.sw.magik.checks.CheckMetadata;
+import nl.ramsolutions.sw.magik.checks.Issue;
+import nl.ramsolutions.sw.magik.checks.IssueDisabledChecker;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
-import nl.ramsolutions.sw.magik.checks.MagikIssueDisabledChecker;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -41,7 +41,7 @@ public class MagikChecksDiagnosticsProvider {
   /**
    * Constructor.
    *
-   * @param overrideConfigurationPath Path to override configuration.
+   * @param properties Properties.
    */
   public MagikChecksDiagnosticsProvider(final MagikToolsProperties properties) {
     this.properties = properties;
@@ -60,10 +60,10 @@ public class MagikChecksDiagnosticsProvider {
 
     return this.createChecks(magikFile).stream()
         .flatMap(check -> this.runChecks(check, magikFile).stream())
-        .filter(magikIssue -> !MagikIssueDisabledChecker.issueDisabled(magikFile, magikIssue))
+        .filter(issue -> !IssueDisabledChecker.issueDisabled(magikFile, issue))
         .map(
             issue -> {
-              final MagikCheckHolder holder = issue.check().getHolder();
+              final CheckHolder holder = issue.check().getHolder();
               final Location location = Lsp4jConversion.locationToLsp4j(issue.location());
               final Range range = location.getRange();
               final String message = issue.message();
@@ -75,10 +75,10 @@ public class MagikChecksDiagnosticsProvider {
         .toList();
   }
 
-  private List<MagikIssue> runChecks(final MagikCheck check, final MagikFile magikFile) {
+  private List<Issue> runChecks(final Check check, final MagikFile magikFile) {
     final long start = System.nanoTime();
 
-    final List<MagikIssue> issues = check.scanFileForIssues(magikFile);
+    final List<Issue> issues = check.scanFileForIssues(magikFile);
 
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
@@ -91,15 +91,15 @@ public class MagikChecksDiagnosticsProvider {
     return issues;
   }
 
-  private Collection<MagikCheck> createChecks(final MagikFile magikFile) throws IOException {
+  private Collection<Check> createChecks(final MagikFile magikFile) throws IOException {
     final MagikToolsProperties fileProperties = magikFile.getProperties();
     final MagikToolsProperties actualProperties =
         MagikToolsProperties.merge(this.properties, fileProperties);
     final MagikChecksConfiguration config =
         new MagikChecksConfiguration(CheckList.getChecks(), actualProperties);
-    final List<MagikCheckHolder> holders = config.getAllChecks();
+    final List<CheckHolder> holders = config.getAllChecks();
     return holders.stream()
-        .filter(MagikCheckHolder::isEnabled)
+        .filter(CheckHolder::isEnabled)
         .map(
             holder -> {
               try {
@@ -114,10 +114,10 @@ public class MagikChecksDiagnosticsProvider {
         .collect(Collectors.toSet());
   }
 
-  private DiagnosticSeverity getCheckSeverity(final MagikCheckHolder holder) {
+  private DiagnosticSeverity getCheckSeverity(final CheckHolder holder) {
     final String severity;
     try {
-      final MagikCheckMetadata metadata = holder.getMetadata();
+      final CheckMetadata metadata = holder.getMetadata();
       severity = metadata.getDefaultSeverity();
     } catch (final IOException exception) {
       LOGGER.error(exception.getMessage(), exception);

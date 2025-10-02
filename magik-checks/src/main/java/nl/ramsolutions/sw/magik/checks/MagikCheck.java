@@ -9,6 +9,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikVisitor;
@@ -18,20 +19,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.check.RuleProperty;
 
-/** MagikCheck class. */
-public abstract class MagikCheck extends MagikVisitor {
+/** Magik {@link Check} class. */
+public abstract class MagikCheck extends MagikVisitor implements Check {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikCheck.class);
 
-  private final List<MagikIssue> issues = new ArrayList<>();
-  private MagikCheckHolder holder;
+  private final List<Issue> issues = new ArrayList<>();
+  private CheckHolder holder;
 
-  public void setHolder(final MagikCheckHolder holder) {
+  public void setHolder(final CheckHolder holder) {
     this.holder = holder;
   }
 
   @CheckForNull
-  public MagikCheckHolder getHolder() {
+  public CheckHolder getHolder() {
     return holder;
   }
 
@@ -74,10 +75,14 @@ public abstract class MagikCheck extends MagikVisitor {
   /**
    * Scan the file from the context for issues.
    *
-   * @param magikFile File to use.
+   * @param openedFile File to use.
    * @return List issues.
    */
-  public List<MagikIssue> scanFileForIssues(final MagikFile magikFile) {
+  public List<Issue> scanFileForIssues(final OpenedFile openedFile) {
+    if (!(openedFile instanceof MagikFile magikFile)) {
+      throw new IllegalArgumentException("Expected MagikFile, got: " + openedFile.getClass());
+    }
+
     this.scanFile(magikFile);
     return Collections.unmodifiableList(this.issues);
   }
@@ -88,8 +93,8 @@ public abstract class MagikCheck extends MagikVisitor {
    * @param location Location of issue.
    * @param message Message of issue.
    */
-  public void addIssue(final Location location, final String message) {
-    final MagikIssue issue = new MagikIssue(location, message, this);
+  protected void addIssue(final Location location, final String message) {
+    final Issue issue = new Issue(location, message, this);
     this.issues.add(issue);
   }
 
@@ -99,7 +104,7 @@ public abstract class MagikCheck extends MagikVisitor {
    * @param node AstNode of issue.
    * @param message Message of issue.
    */
-  public void addIssue(final AstNode node, final String message) {
+  protected void addIssue(final AstNode node, final String message) {
     final URI uri = this.getMagikFile().getUri();
     final Range range = Range.fromTree(node);
     final Location location = new Location(uri, range);
@@ -112,7 +117,7 @@ public abstract class MagikCheck extends MagikVisitor {
    * @param token Token of issue.
    * @param message Message of issue.
    */
-  public void addIssue(final Token token, final String message) {
+  protected void addIssue(final Token token, final String message) {
     final URI uri = this.getMagikFile().getUri();
     final Location location = new Location(uri, token);
     this.addIssue(location, message);
@@ -127,7 +132,7 @@ public abstract class MagikCheck extends MagikVisitor {
    * @param endColumn End column of issue.
    * @param message Message of issue.
    */
-  public void addIssue(
+  protected void addIssue(
       final int startLine,
       final int startColumn,
       final int endLine,
@@ -146,7 +151,7 @@ public abstract class MagikCheck extends MagikVisitor {
    *
    * @param message Message of the issue.
    */
-  public void addFileIssue(final String message) {
+  protected void addFileIssue(final String message) {
     final URI uri = this.getMagikFile().getUri();
     final Location location = new Location(uri);
     this.addIssue(location, message);

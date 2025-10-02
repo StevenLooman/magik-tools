@@ -9,8 +9,8 @@ import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.checks.CheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
 import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import nl.ramsolutions.sw.magik.typedchecks.CheckList;
 import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
@@ -62,8 +62,8 @@ public class MagikTypedChecksCodeActionProvider {
         MagikToolsProperties.merge(this.properties, fileProperties);
     final MagikChecksConfiguration config =
         new MagikChecksConfiguration(CheckList.getChecks(), actualProperties);
-    final List<MagikCheckHolder> allChecks = config.getAllChecks();
-    for (final MagikCheckHolder checkHolder : allChecks) {
+    final List<CheckHolder> allChecks = config.getAllChecks();
+    for (final CheckHolder checkHolder : allChecks) {
       if (checkHolder.getCheckClass().equals(checkClass)) {
         return checkHolder.isEnabled();
       }

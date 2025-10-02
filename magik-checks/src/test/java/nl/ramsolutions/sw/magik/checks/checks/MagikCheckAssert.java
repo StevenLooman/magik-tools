@@ -6,8 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.checks.Issue;
 import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import org.assertj.core.api.AbstractAssert;
 
 /** {@link MagikCheck} assert. */
@@ -36,7 +36,7 @@ public class MagikCheckAssert extends AbstractAssert<MagikCheckAssert, MagikChec
   public MagikCheckAssert reportsNoIssues(final String code) {
     this.isNotNull();
 
-    final List<MagikIssue> issues = this.runCheck(code);
+    final List<Issue> issues = this.runCheck(code);
     if (!issues.isEmpty()) {
       this.failWithMessage(
           "Expected check to report no issues, but gotten <%s> issues", issues.size());
@@ -57,7 +57,7 @@ public class MagikCheckAssert extends AbstractAssert<MagikCheckAssert, MagikChec
       throws IllegalArgumentException, IOException {
     this.isNotNull();
 
-    final List<MagikIssue> issues = this.runCheck(path);
+    final List<Issue> issues = this.runCheck(path);
     if (!issues.isEmpty()) {
       this.failWithMessage(
           "Expected check to report no issues, but gotten <%s> issues", issues.size());
@@ -76,7 +76,7 @@ public class MagikCheckAssert extends AbstractAssert<MagikCheckAssert, MagikChec
   public MagikCheckAssert reportsIssueCount(final String code, final int issueCount) {
     this.isNotNull();
 
-    final List<MagikIssue> issues = this.runCheck(code);
+    final List<Issue> issues = this.runCheck(code);
     if (issues.size() != issueCount) {
       this.failWithMessage(
           "Expected check to report <%s> issues, but gotten <%s> issues",
@@ -99,7 +99,7 @@ public class MagikCheckAssert extends AbstractAssert<MagikCheckAssert, MagikChec
       throws IllegalArgumentException, IOException {
     this.isNotNull();
 
-    final List<MagikIssue> issues = this.runCheck(path);
+    final List<Issue> issues = this.runCheck(path);
     if (issues.size() != issueCount) {
       this.failWithMessage(
           "Expected check to report <%s> issues, but gotten <%s> issues",
@@ -109,12 +109,12 @@ public class MagikCheckAssert extends AbstractAssert<MagikCheckAssert, MagikChec
     return this;
   }
 
-  private List<MagikIssue> runCheck(final String code) throws IllegalArgumentException {
+  private List<Issue> runCheck(final String code) throws IllegalArgumentException {
     final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
     return this.actual.scanFileForIssues(magikFile);
   }
 
-  private List<MagikIssue> runCheck(final Path relativePath)
+  private List<Issue> runCheck(final Path relativePath)
       throws IllegalArgumentException, IOException {
     // Ensure proper path.
     final Path currentPath = Path.of(".").toAbsolutePath().getParent();

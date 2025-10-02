@@ -2,8 +2,8 @@ package nl.ramsolutions.sw.magik.checks;
 
 import java.util.List;
 
-/** {@link MagikCheck} metadata. */
-public class MagikCheckMetadata {
+/** {@link Check} metadata. */
+public class CheckMetadata {
 
   /** Type. */
   @SuppressWarnings("checkstyle:JavadocVariable")
@@ -54,7 +54,7 @@ public class MagikCheckMetadata {
    * @param sqKey SonarQube key.
    */
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
-  public MagikCheckMetadata(
+  public CheckMetadata(
       final String title,
       final Type type,
       final String status,

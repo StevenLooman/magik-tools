@@ -12,9 +12,8 @@ class CheckListTest {
   @Test
   void testAllChecksHaveAJsonFile() throws IOException {
     for (Class<? extends MagikCheck> checkClass : CheckList.getChecks()) {
-      final MagikCheckHolder holder =
-          new MagikCheckHolder(checkClass, Collections.emptySet(), true);
-      final MagikCheckMetadata metadata = holder.getMetadata();
+      final CheckHolder holder = new CheckHolder(checkClass, Collections.emptySet(), true);
+      final CheckMetadata metadata = holder.getMetadata();
       assertThat(metadata).isNotNull();
     }
   }

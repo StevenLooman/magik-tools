@@ -24,9 +24,9 @@ public class SizeZeroEmptyCheck extends MagikCheck {
   protected void walkPreEqualityExpression(final AstNode node) {
     final AstNode leftHandSide = node.getFirstChild();
     final AstNode rightHandSide = node.getLastChild();
-    if (hasEqOperator(node)
-        && (isMethodInvocationSize(leftHandSide) && isNumberZero(rightHandSide)
-            || isMethodInvocationSize(rightHandSide) && isNumberZero(leftHandSide))) {
+    if (this.hasEqOperator(node)
+        && (this.isMethodInvocationSize(leftHandSide) && this.isNumberZero(rightHandSide)
+            || this.isMethodInvocationSize(rightHandSide) && this.isNumberZero(leftHandSide))) {
       this.addIssue(node, MESSAGE);
     }
   }
@@ -39,7 +39,8 @@ public class SizeZeroEmptyCheck extends MagikCheck {
   }
 
   private boolean isMethodInvocationSize(final AstNode node) {
-    final AstNode methodInvocationNode = getLastDescendant(node, MagikGrammar.METHOD_INVOCATION);
+    final AstNode methodInvocationNode =
+        this.getLastDescendant(node, MagikGrammar.METHOD_INVOCATION);
     if (methodInvocationNode == null) {
       return false;
     }
@@ -70,7 +71,7 @@ public class SizeZeroEmptyCheck extends MagikCheck {
         return child;
       }
 
-      childNode = getLastDescendant(child, nodeType);
+      childNode = this.getLastDescendant(child, nodeType);
     } while (childNode == null);
 
     return null;

@@ -3,12 +3,12 @@ package nl.ramsolutions.sw.magik.checks;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Range;
 
-/** Magik issue, resulting from a MagikCheck. */
-public class MagikIssue {
+/** Issues, resulting from a {@link Check}. */
+public class Issue {
 
   private final Location location;
   private final String message;
-  private final MagikCheck check;
+  private final Check check;
 
   /**
    * Constructor.
@@ -17,7 +17,7 @@ public class MagikIssue {
    * @param message Message for issue.
    * @param check Check giving the issue.
    */
-  public MagikIssue(final Location location, final String message, final MagikCheck check) {
+  public Issue(final Location location, final String message, final Check check) {
     this.location = location;
     this.message = message;
     this.check = check;
@@ -96,7 +96,7 @@ public class MagikIssue {
    *
    * @return {@link MagikCheck} giving the issue.
    */
-  public MagikCheck check() {
+  public Check check() {
     return this.check;
   }
 }
