@@ -4,7 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
-import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionGrammar;
+import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 
 /**
  * A {@link AstNode} tree walker with pre- and post-methods to iterate a parse tree. Note that this
@@ -35,7 +35,7 @@ public abstract class ModuleDefAstWalker {
   @SuppressWarnings({"java:S1479", "checkstyle:MethodLength"})
   public void walkAst(final AstNode node) {
     final AstNodeType nodeType = node.getType();
-    if (!(nodeType instanceof SwModuleDefinitionGrammar value)) {
+    if (!(nodeType instanceof ModuleDefinitionGrammar value)) {
       this.walkTokens(node);
       return;
     }

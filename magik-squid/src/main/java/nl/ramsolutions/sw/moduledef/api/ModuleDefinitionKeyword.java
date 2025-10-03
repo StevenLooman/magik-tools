@@ -2,9 +2,9 @@ package nl.ramsolutions.sw.moduledef.api;
 
 import org.sonar.sslr.grammar.GrammarRuleKey;
 
-/** Keywords for {@link SwModuleDefinitionGrammar}. */
+/** Keywords for {@link ModuleDefinitionGrammar}. */
 @SuppressWarnings("checkstyle:JavadocVariable")
-public enum SwModuleDefinitionKeyword implements GrammarRuleKey {
+public enum ModuleDefinitionKeyword implements GrammarRuleKey {
   CONDITION_MESSAGE_ACCESSOR,
   DESCRIPTION,
   DO_NOT_TRANSLATE,
@@ -41,9 +41,9 @@ public enum SwModuleDefinitionKeyword implements GrammarRuleKey {
    * @return Keyword values
    */
   public static String[] keywordValues() {
-    final String[] keywordsValue = new String[SwModuleDefinitionKeyword.values().length];
+    final String[] keywordsValue = new String[ModuleDefinitionKeyword.values().length];
     int idx = 0;
-    for (final SwModuleDefinitionKeyword keyword : SwModuleDefinitionKeyword.values()) {
+    for (final ModuleDefinitionKeyword keyword : ModuleDefinitionKeyword.values()) {
       keywordsValue[idx] = keyword.getValue();
       idx++;
     }

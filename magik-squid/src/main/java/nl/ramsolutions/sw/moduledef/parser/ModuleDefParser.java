@@ -10,18 +10,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.AstNodeHelper;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
-import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionGrammar;
+import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import org.sonar.sslr.parser.LexerlessGrammar;
 import org.sonar.sslr.parser.ParserAdapter;
 
 /** Smallworld module.def parser. */
-public class SwModuleDefParser {
+public class ModuleDefParser {
 
   private final Parser<LexerlessGrammar> parser;
 
   /** Constructor with default charset. */
-  public SwModuleDefParser() {
-    final LexerlessGrammar moduleDefGrammar = SwModuleDefinitionGrammar.create();
+  public ModuleDefParser() {
+    final LexerlessGrammar moduleDefGrammar = ModuleDefinitionGrammar.create();
     this.parser = new ParserAdapter<>(StandardCharsets.ISO_8859_1, moduleDefGrammar);
   }
 

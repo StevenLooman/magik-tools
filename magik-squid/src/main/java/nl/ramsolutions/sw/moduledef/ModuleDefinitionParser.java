@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionGrammar;
-import nl.ramsolutions.sw.moduledef.parser.SwModuleDefParser;
+import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
+import nl.ramsolutions.sw.moduledef.parser.ModuleDefParser;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 
 public class ModuleDefinitionParser {
@@ -19,7 +19,7 @@ public class ModuleDefinitionParser {
 
   public ModuleDefinition parseDefinition(
       final ModuleDefFile moduleDefFile, final @Nullable ProductDefinition productDefinition) {
-    final SwModuleDefParser parser = new SwModuleDefParser();
+    final ModuleDefParser parser = new ModuleDefParser();
     final String source = moduleDefFile.getSource();
     final URI uri = moduleDefFile.getUri();
     final AstNode node = parser.parse(source, uri);
@@ -28,13 +28,13 @@ public class ModuleDefinitionParser {
     final String baseVersion;
     final String currentVersion;
     final AstNode moduleIdentNode =
-        node.getFirstChild(SwModuleDefinitionGrammar.MODULE_IDENTIFICATION);
+        node.getFirstChild(ModuleDefinitionGrammar.MODULE_IDENTIFICATION);
     if (moduleIdentNode != null) {
-      final AstNode nameNode = moduleIdentNode.getFirstChild(SwModuleDefinitionGrammar.MODULE_NAME);
+      final AstNode nameNode = moduleIdentNode.getFirstChild(ModuleDefinitionGrammar.MODULE_NAME);
       moduleName = nameNode.getTokenValue();
 
       final List<AstNode> versionNodes =
-          moduleIdentNode.getChildren(SwModuleDefinitionGrammar.VERSION);
+          moduleIdentNode.getChildren(ModuleDefinitionGrammar.VERSION);
       final AstNode baseVersionNode = versionNodes.get(0);
       baseVersion = baseVersionNode.getTokenValue();
       final AstNode currentVersionNode = versionNodes.size() > 1 ? versionNodes.get(1) : null;
@@ -47,18 +47,18 @@ public class ModuleDefinitionParser {
 
     final String productName = productDefinition != null ? productDefinition.getName() : null;
 
-    final AstNode descriptionNode = node.getFirstChild(SwModuleDefinitionGrammar.DESCRIPTION);
+    final AstNode descriptionNode = node.getFirstChild(ModuleDefinitionGrammar.DESCRIPTION);
     final String description =
         descriptionNode != null
-            ? descriptionNode.getChildren(SwModuleDefinitionGrammar.FREE_LINES).stream()
+            ? descriptionNode.getChildren(ModuleDefinitionGrammar.FREE_LINES).stream()
                 .map(AstNode::getTokenValue)
                 .collect(Collectors.joining("\n"))
             : null;
 
-    final AstNode requiresNode = node.getFirstChild(SwModuleDefinitionGrammar.REQUIRES);
+    final AstNode requiresNode = node.getFirstChild(ModuleDefinitionGrammar.REQUIRES);
     final List<ModuleUsage> usages =
         requiresNode != null
-            ? requiresNode.getDescendants(SwModuleDefinitionGrammar.MODULE_REF).stream()
+            ? requiresNode.getDescendants(ModuleDefinitionGrammar.MODULE_REF).stream()
                 .map(
                     moduleRefNode -> {
                       final String moduleRefName = moduleRefNode.getTokenValue();

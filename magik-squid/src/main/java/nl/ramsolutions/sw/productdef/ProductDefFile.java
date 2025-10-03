@@ -13,7 +13,7 @@ import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.productdef.parser.SwProductDefParser;
+import nl.ramsolutions.sw.productdef.parser.ProductDefParser;
 
 /** Product definition file. */
 public class ProductDefFile extends OpenedFile {
@@ -100,7 +100,7 @@ public class ProductDefFile extends OpenedFile {
    */
   public synchronized AstNode getTopNode() {
     if (this.astNode == null) {
-      final SwProductDefParser parser = new SwProductDefParser();
+      final ProductDefParser parser = new ProductDefParser();
       final String source = this.getSource();
       final URI uri = this.getUri();
       this.astNode = parser.parse(source, uri);

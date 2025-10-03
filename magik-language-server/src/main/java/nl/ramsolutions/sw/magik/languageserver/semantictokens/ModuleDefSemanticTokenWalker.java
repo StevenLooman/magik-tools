@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker;
-import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionKeyword;
+import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionKeyword;
 
 /** SwModuleDef semantic token walker. */
 public class ModuleDefSemanticTokenWalker extends ModuleDefAstWalker {
 
   private static final Set<String> KEYWORD_VALUES =
-      Arrays.stream(SwModuleDefinitionKeyword.values())
-          .map(SwModuleDefinitionKeyword::getValue)
+      Arrays.stream(ModuleDefinitionKeyword.values())
+          .map(ModuleDefinitionKeyword::getValue)
           .collect(Collectors.toUnmodifiableSet());
 
   private final List<SemanticToken> semanticTokens = new ArrayList<>();

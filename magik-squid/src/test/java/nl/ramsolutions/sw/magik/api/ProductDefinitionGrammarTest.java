@@ -3,26 +3,26 @@ package nl.ramsolutions.sw.magik.api;
 import static org.sonar.sslr.tests.Assertions.assertThat;
 
 import com.sonar.sslr.api.Grammar;
-import nl.ramsolutions.sw.productdef.api.SwProductDefinitionGrammar;
+import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 import org.junit.jupiter.api.Test;
 
 /** Tests for SwProductDefinitionGrammar. */
-class SwProductDefinitionGrammarTest {
-  private Grammar g = SwProductDefinitionGrammar.create();
+class ProductDefinitionGrammarTest {
+  private final Grammar grammar = ProductDefinitionGrammar.create();
 
   @Test
   void testNumber() {
-    assertThat(g.rule(SwProductDefinitionGrammar.NUMBER)).matches("1");
+    assertThat(grammar.rule(ProductDefinitionGrammar.NUMBER)).matches("1");
   }
 
   @Test
   void testIdentifier() {
-    assertThat(g.rule(SwProductDefinitionGrammar.IDENTIFIER)).matches("test_product");
+    assertThat(grammar.rule(ProductDefinitionGrammar.IDENTIFIER)).matches("test_product");
   }
 
   @Test
   void testProductIdentifictaion() {
-    assertThat(g.rule(SwProductDefinitionGrammar.PRODUCT_IDENTIFICATION))
+    assertThat(grammar.rule(ProductDefinitionGrammar.PRODUCT_IDENTIFICATION))
         .matches("a_product layered_product")
         .matches("a_product customisation_product")
         .matches("a_product config_product");
@@ -30,17 +30,17 @@ class SwProductDefinitionGrammarTest {
 
   @Test
   void testComment() {
-    assertThat(g.rule(SwProductDefinitionGrammar.COMMENT)).matches("# commented");
+    assertThat(grammar.rule(ProductDefinitionGrammar.COMMENT)).matches("# commented");
   }
 
   @Test
   void testDescription() {
-    assertThat(g.rule(SwProductDefinitionGrammar.FREE_LINE))
+    assertThat(grammar.rule(ProductDefinitionGrammar.FREE_LINE))
         .matches("abc\n")
         .matches("etc etc etc\n")
         .matches("this is the end\n")
         .notMatches("end\n");
-    assertThat(g.rule(SwProductDefinitionGrammar.DESCRIPTION))
+    assertThat(grammar.rule(ProductDefinitionGrammar.DESCRIPTION))
         .matches("description\nend")
         .matches("description\n\t\nend")
         .matches("description\nabc\nend")
@@ -51,12 +51,12 @@ class SwProductDefinitionGrammarTest {
 
   @Test
   void testDoNotTranslate() {
-    assertThat(g.rule(SwProductDefinitionGrammar.DO_NOT_TRANSLATE)).matches("do_not_translate");
+    assertThat(grammar.rule(ProductDefinitionGrammar.DO_NOT_TRANSLATE)).matches("do_not_translate");
   }
 
   @Test
   void testRequires() {
-    assertThat(g.rule(SwProductDefinitionGrammar.REQUIRES))
+    assertThat(grammar.rule(ProductDefinitionGrammar.REQUIRES))
         .matches("requires\nend")
         .matches("requires\nx\nend")
         .matches("requires\nx 1\nend")
@@ -65,7 +65,7 @@ class SwProductDefinitionGrammarTest {
 
   @Test
   void testTitle() {
-    assertThat(g.rule(SwProductDefinitionGrammar.TITLE))
+    assertThat(grammar.rule(ProductDefinitionGrammar.TITLE))
         .matches("title\nend")
         .matches("title\n\t\nend")
         .matches("title\nabc\nend")
@@ -74,7 +74,7 @@ class SwProductDefinitionGrammarTest {
 
   @Test
   void testVersion() {
-    assertThat(g.rule(SwProductDefinitionGrammar.VERSION))
+    assertThat(grammar.rule(ProductDefinitionGrammar.VERSION))
         .matches("version 1.0")
         .matches("version 1.0.1")
         .matches("version 1.0.1 RC1")
@@ -83,18 +83,18 @@ class SwProductDefinitionGrammarTest {
 
   @Test
   void testProductsDefinition() {
-    assertThat(g.rule(SwProductDefinitionGrammar.PRODUCT_DEFINITION))
+    assertThat(grammar.rule(ProductDefinitionGrammar.PRODUCT_DEFINITION))
         .matches("id layered_product\n#comment");
   }
 
   @Test
   void testSyntaxError() {
-    assertThat(g.rule(SwProductDefinitionGrammar.SYNTAX_ERROR_SECTION)).matches("abc\nend");
+    assertThat(grammar.rule(ProductDefinitionGrammar.SYNTAX_ERROR_SECTION)).matches("abc\nend");
   }
 
   @Test
   void testMethodDefinition() {
-    assertThat(g.rule(SwProductDefinitionGrammar.PRODUCT_DEFINITION))
+    assertThat(grammar.rule(ProductDefinitionGrammar.PRODUCT_DEFINITION))
         .matches("")
         .matches("test_product_a")
         .matches("test_product_a layered_p")

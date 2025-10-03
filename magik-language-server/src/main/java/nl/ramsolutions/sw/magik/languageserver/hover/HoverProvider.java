@@ -28,10 +28,10 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
-import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionGrammar;
+import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
-import nl.ramsolutions.sw.productdef.api.SwProductDefinitionGrammar;
+import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.MarkupKind;
@@ -76,8 +76,8 @@ public class HoverProvider {
     final AstNode productNameNode =
         AstQuery.getParentFromChain(
             hoveredTokenNode,
-            SwProductDefinitionGrammar.IDENTIFIER,
-            SwProductDefinitionGrammar.PRODUCT_NAME);
+            ProductDefinitionGrammar.IDENTIFIER,
+            ProductDefinitionGrammar.PRODUCT_NAME);
     if (productNameNode == null) {
       return null;
     }
@@ -114,8 +114,8 @@ public class HoverProvider {
     final AstNode moduleNameNode =
         AstQuery.getParentFromChain(
             hoveredTokenNode,
-            SwModuleDefinitionGrammar.IDENTIFIER,
-            SwModuleDefinitionGrammar.MODULE_NAME);
+            ModuleDefinitionGrammar.IDENTIFIER,
+            ModuleDefinitionGrammar.MODULE_NAME);
     if (moduleNameNode == null) {
       return null;
     }

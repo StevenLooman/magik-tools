@@ -7,7 +7,7 @@ import org.sonar.sslr.parser.LexerlessGrammar;
 
 /** Product definition grammar. */
 @SuppressWarnings("checkstyle:JavadocVariable")
-public enum SwProductDefinitionGrammar implements GrammarRuleKey {
+public enum ProductDefinitionGrammar implements GrammarRuleKey {
   PRODUCT_DEFINITION,
 
   PRODUCT_IDENTIFICATION,
@@ -47,7 +47,7 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
   public static LexerlessGrammar create() {
     final LexerlessGrammarBuilder builder = LexerlessGrammarBuilder.create();
 
-    SwProductDefinitionGrammar.keywords(builder);
+    ProductDefinitionGrammar.keywords(builder);
 
     builder
         .rule(PRODUCT_DEFINITION)
@@ -71,12 +71,12 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
         .rule(SYNTAX_ERROR_SECTION)
         .is(
             builder.regexp(
-                SwProductDefinitionGrammar.syntaxErrorRegexp(SwProductDefinitionKeyword.END)),
-            SwProductDefinitionKeyword.END);
+                ProductDefinitionGrammar.syntaxErrorRegexp(ProductDefinitionKeyword.END)),
+            ProductDefinitionKeyword.END);
     builder
         .rule(SYNTAX_ERROR_LINE)
         .is(
-            builder.regexp("(?!" + SwProductDefinitionKeyword.END.getValue() + ").+"),
+            builder.regexp("(?!" + ProductDefinitionKeyword.END.getValue() + ").+"),
             builder.optional(builder.regexp("[\r\n]+")));
 
     builder.rule(PRODUCT_IDENTIFICATION).is(PRODUCT_NAME, WHITESPACE, PRODUCT_TYPE);
@@ -84,32 +84,24 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
     builder
         .rule(DESCRIPTION)
         .is(
-            SwProductDefinitionKeyword.DESCRIPTION,
+            ProductDefinitionKeyword.DESCRIPTION,
             SPACING,
             FREE_LINES,
-            SwProductDefinitionKeyword.END);
-    builder.rule(DO_NOT_TRANSLATE).is(SwProductDefinitionKeyword.DO_NOT_TRANSLATE);
+            ProductDefinitionKeyword.END);
+    builder.rule(DO_NOT_TRANSLATE).is(ProductDefinitionKeyword.DO_NOT_TRANSLATE);
     builder
         .rule(REQUIRES)
-        .is(
-            SwProductDefinitionKeyword.REQUIRES,
-            SPACING,
-            PRODUCT_REFS,
-            SwProductDefinitionKeyword.END);
+        .is(ProductDefinitionKeyword.REQUIRES, SPACING, PRODUCT_REFS, ProductDefinitionKeyword.END);
     builder
         .rule(OPTIONAL)
-        .is(
-            SwProductDefinitionKeyword.OPTIONAL,
-            SPACING,
-            PRODUCT_REFS,
-            SwProductDefinitionKeyword.END);
+        .is(ProductDefinitionKeyword.OPTIONAL, SPACING, PRODUCT_REFS, ProductDefinitionKeyword.END);
     builder
         .rule(TITLE)
-        .is(SwProductDefinitionKeyword.TITLE, SPACING, FREE_LINES, SwProductDefinitionKeyword.END);
+        .is(ProductDefinitionKeyword.TITLE, SPACING, FREE_LINES, ProductDefinitionKeyword.END);
     builder
         .rule(VERSION)
         .is(
-            SwProductDefinitionKeyword.VERSION,
+            ProductDefinitionKeyword.VERSION,
             WHITESPACE,
             VERSION_NUMBER,
             builder.optional(WHITESPACE, REST_OF_LINE));
@@ -118,16 +110,16 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
         .rule(PRODUCT_TYPE)
         .is(
             builder.firstOf(
-                SwProductDefinitionKeyword.LAYERED_PRODUCT,
-                SwProductDefinitionKeyword.CUSTOMISATION_PRODUCT,
-                SwProductDefinitionKeyword.CONFIG_PRODUCT));
+                ProductDefinitionKeyword.LAYERED_PRODUCT,
+                ProductDefinitionKeyword.CUSTOMISATION_PRODUCT,
+                ProductDefinitionKeyword.CONFIG_PRODUCT));
     builder.rule(PRODUCT_REFS).is(builder.zeroOrMore(PRODUCT_REF, SPACING));
     builder.rule(PRODUCT_REF).is(PRODUCT_NAME, builder.optional(WHITESPACE, VERSION));
     builder.rule(VERSION_NUMBER).is(NUMBER, builder.zeroOrMore(".", NUMBER));
     builder.rule(FREE_LINES).is(builder.zeroOrMore(FREE_LINE));
     builder
         .rule(FREE_LINE)
-        .is(builder.regexp("(?!" + SwProductDefinitionKeyword.END.getValue() + ").*[\r\n]+"));
+        .is(builder.regexp("(?!" + ProductDefinitionKeyword.END.getValue() + ").*[\r\n]+"));
 
     builder
         .rule(SPACING)
@@ -142,7 +134,7 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
     builder.rule(COMMENT).is(builder.commentTrivia(builder.regexp("(?s)#[^\r\n]*"))).skip();
     builder
         .rule(IDENTIFIER)
-        .is(builder.regexp("(?!" + SwProductDefinitionKeyword.END.getValue() + ")[a-zA-Z0-9_!]+"));
+        .is(builder.regexp("(?!" + ProductDefinitionKeyword.END.getValue() + ")[a-zA-Z0-9_!]+"));
     builder.rule(NUMBER).is(builder.regexp("[0-9]+"));
     builder.rule(REST_OF_LINE).is(builder.regexp("[^\r\n]*+"));
 
@@ -152,12 +144,12 @@ public enum SwProductDefinitionGrammar implements GrammarRuleKey {
   }
 
   private static void keywords(final LexerlessGrammarBuilder builder) {
-    for (final SwProductDefinitionKeyword keyword : SwProductDefinitionKeyword.values()) {
+    for (final ProductDefinitionKeyword keyword : ProductDefinitionKeyword.values()) {
       builder.rule(keyword).is(builder.regexp("(?i)" + keyword.getValue() + "(?!\\w)")).skip();
     }
   }
 
-  static String syntaxErrorRegexp(final SwProductDefinitionKeyword keyword) {
+  static String syntaxErrorRegexp(final ProductDefinitionKeyword keyword) {
     // Eat up anything to keyword.
     return "(?s).+?(?=(?i)" + keyword.getValue() + ")";
   }

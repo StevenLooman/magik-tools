@@ -10,18 +10,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.AstNodeHelper;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
-import nl.ramsolutions.sw.productdef.api.SwProductDefinitionGrammar;
+import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 import org.sonar.sslr.parser.LexerlessGrammar;
 import org.sonar.sslr.parser.ParserAdapter;
 
 /** Smallworld product.def parser. */
-public class SwProductDefParser {
+public class ProductDefParser {
 
   private final Parser<LexerlessGrammar> parser;
 
   /** Constructor with default charset. */
-  public SwProductDefParser() {
-    final LexerlessGrammar productDefGrammar = SwProductDefinitionGrammar.create();
+  public ProductDefParser() {
+    final LexerlessGrammar productDefGrammar = ProductDefinitionGrammar.create();
     this.parser = new ParserAdapter<>(StandardCharsets.ISO_8859_1, productDefGrammar);
   }
 

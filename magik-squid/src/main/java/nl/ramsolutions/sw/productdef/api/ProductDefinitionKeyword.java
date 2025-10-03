@@ -2,9 +2,9 @@ package nl.ramsolutions.sw.productdef.api;
 
 import org.sonar.sslr.grammar.GrammarRuleKey;
 
-/** Keywords for {@link SwProductDefinitionGrammar}. */
+/** Keywords for {@link ProductDefinitionGrammar}. */
 @SuppressWarnings("checkstyle:JavadocVariable")
-public enum SwProductDefinitionKeyword implements GrammarRuleKey {
+public enum ProductDefinitionKeyword implements GrammarRuleKey {
   DESCRIPTION,
   DO_NOT_TRANSLATE,
   REQUIRES,
@@ -22,9 +22,9 @@ public enum SwProductDefinitionKeyword implements GrammarRuleKey {
    * @return Keyword values
    */
   public static String[] keywordValues() {
-    final String[] keywordsValue = new String[SwProductDefinitionKeyword.values().length];
+    final String[] keywordsValue = new String[ProductDefinitionKeyword.values().length];
     int idx = 0;
-    for (final SwProductDefinitionKeyword keyword : SwProductDefinitionKeyword.values()) {
+    for (final ProductDefinitionKeyword keyword : ProductDefinitionKeyword.values()) {
       keywordsValue[idx] = keyword.getValue();
       idx++;
     }

@@ -24,10 +24,10 @@ import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
-import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionGrammar;
+import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
-import nl.ramsolutions.sw.productdef.api.SwProductDefinitionGrammar;
+import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 import org.eclipse.lsp4j.ServerCapabilities;
 
 /** Definitions provider. */
@@ -60,8 +60,8 @@ public class DefinitionsProvider {
     final AstNode productNameNode =
         AstQuery.getParentFromChain(
             positionTokenNode,
-            SwProductDefinitionGrammar.IDENTIFIER,
-            SwProductDefinitionGrammar.PRODUCT_NAME);
+            ProductDefinitionGrammar.IDENTIFIER,
+            ProductDefinitionGrammar.PRODUCT_NAME);
     if (productNameNode == null) {
       return Collections.emptyList();
     }
@@ -87,8 +87,8 @@ public class DefinitionsProvider {
     final AstNode moduleNameNode =
         AstQuery.getParentFromChain(
             hoveredTokenNode,
-            SwModuleDefinitionGrammar.IDENTIFIER,
-            SwModuleDefinitionGrammar.MODULE_NAME);
+            ModuleDefinitionGrammar.IDENTIFIER,
+            ModuleDefinitionGrammar.MODULE_NAME);
     if (moduleNameNode == null) {
       return Collections.emptyList();
     }

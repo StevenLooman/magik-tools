@@ -3,44 +3,44 @@ package nl.ramsolutions.sw.magik.api;
 import static org.sonar.sslr.tests.Assertions.assertThat;
 
 import com.sonar.sslr.api.Grammar;
-import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionGrammar;
+import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import org.junit.jupiter.api.Test;
 
 /** Tests for SwModuleDefinitionGrammar. */
-class SwModuleDefinitionGrammarTest {
-  private Grammar g = SwModuleDefinitionGrammar.create();
+class ModuleDefinitionGrammarTest {
+  private final Grammar grammar = ModuleDefinitionGrammar.create();
 
   @Test
   void testNumber() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.NUMBER)).matches("1");
+    assertThat(grammar.rule(ModuleDefinitionGrammar.NUMBER)).matches("1");
   }
 
   @Test
   void testIdentifier() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.IDENTIFIER)).matches("test_module");
+    assertThat(grammar.rule(ModuleDefinitionGrammar.IDENTIFIER)).matches("test_module");
   }
 
   @Test
   void testModuleIdentification() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.MODULE_IDENTIFICATION))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.MODULE_IDENTIFICATION))
         .matches("test_module 1")
         .matches("test_module 1 1");
   }
 
   @Test
   void testConditionMessageAccessor() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.CONDITION_MESSAGE_ACCESSOR))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.CONDITION_MESSAGE_ACCESSOR))
         .matches("condition_message_accessor x");
   }
 
   @Test
   void testDescription() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.FREE_LINE))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.FREE_LINE))
         .matches("abc\n")
         .matches("etc etc etc\n")
         .matches("this is the end\n")
         .notMatches("end\n");
-    assertThat(g.rule(SwModuleDefinitionGrammar.DESCRIPTION))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.DESCRIPTION))
         .matches("description\nend")
         .matches("description\n\t\nend")
         .matches("description\nabc\nend")
@@ -51,29 +51,29 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testDoNotTranslate() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.DO_NOT_TRANSLATE)).matches("do_not_translate");
+    assertThat(grammar.rule(ModuleDefinitionGrammar.DO_NOT_TRANSLATE)).matches("do_not_translate");
   }
 
   @Test
   void testHidden() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.HIDDEN)).matches("hidden");
+    assertThat(grammar.rule(ModuleDefinitionGrammar.HIDDEN)).matches("hidden");
   }
 
   @Test
   void testLanguage() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.LANGUAGE)).matches("language en_gb");
+    assertThat(grammar.rule(ModuleDefinitionGrammar.LANGUAGE)).matches("language en_gb");
   }
 
   @Test
   void testMessages() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.MESSAGES))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.MESSAGES))
         .matches("messages a")
         .matches("messages a b c");
   }
 
   @Test
   void testOptional() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.OPTIONAL))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.OPTIONAL))
         .matches("optional\nend")
         .matches("optional\nx\nend")
         .matches("optional\nx 1\nend")
@@ -82,7 +82,7 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testRequiredBy() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.REQUIRED_BY))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.REQUIRED_BY))
         .matches("required_by\nend")
         .matches("required_by\nx\nend")
         .matches("required_by\nx 1\nend")
@@ -91,7 +91,7 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testRequires() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.REQUIRES))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.REQUIRES))
         .matches("requires\nend")
         .matches("requires\nx\nend")
         .matches("requires\nx 1\nend")
@@ -100,13 +100,13 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testRequiresJava() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.REQUIRES_JAVA))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.REQUIRES_JAVA))
         .matches("requires_java\n\tcom.gesmallworld.magik.http\nend");
   }
 
   @Test
   void testRequiresDatamodel() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.REQUIRES_DATAMODEL))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.REQUIRES_DATAMODEL))
         .matches("requires_datamodel\nend")
         .matches("requires_datamodel\ndb\nend")
         .matches("requires_datamodel\ndb1 gis\nend")
@@ -118,14 +118,14 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testTemplates() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.TEMPLATES))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.TEMPLATES))
         .matches("templates\nend")
         .matches("templates\ndb\nend");
   }
 
   @Test
   void testTest() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.TEST))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.TEST))
         .matches("test\nend")
         .matches("test\nname x_tests\nend")
         .matches("test\nframework munit\nend")
@@ -141,7 +141,7 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testTestsModules() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.TESTS_MODULES))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.TESTS_MODULES))
         .matches("tests_modules\nend")
         .matches("tests_modules\nx\nend")
         .matches("tests_modules\nx 1\nend")
@@ -150,7 +150,7 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testAceInstallation() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.ACE_INSTALLATION))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.ACE_INSTALLATION))
         .matches("ace_installation\nend")
         .matches("ace_installation\nx\nend")
         .matches("ace_installation\nx\ny\nz\nend")
@@ -159,7 +159,7 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testAuthInstallation() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.AUTH_INSTALLATION))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.AUTH_INSTALLATION))
         .matches("auth_installation\nend")
         .matches("auth_installation\nx\nend")
         .matches("auth_installation\nx\ny\nz\nend")
@@ -168,7 +168,7 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testCaseInstallation() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.CASE_INSTALLATION))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.CASE_INSTALLATION))
         .matches("case_installation\nend")
         .matches("case_installation\nx\nend")
         .matches("case_installation\nx\ny\nz\nend")
@@ -177,7 +177,7 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testStyleInstallation() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.STYLE_INSTALLATION))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.STYLE_INSTALLATION))
         .matches("style_installation\nend")
         .matches("style_installation\nx\nend")
         .matches("style_installation\nx\ny\nz\nend")
@@ -186,7 +186,7 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testSystemInstallation() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.SYSTEM_INSTALLATION))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.SYSTEM_INSTALLATION))
         .matches("system_installation\nend")
         .matches("system_installation\nx\nend")
         .matches("system_installation\nx\ny\nz\nend")
@@ -195,12 +195,12 @@ class SwModuleDefinitionGrammarTest {
 
   @Test
   void testSyntaxError() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.SYNTAX_ERROR_SECTION)).matches("abc\nend");
+    assertThat(grammar.rule(ModuleDefinitionGrammar.SYNTAX_ERROR_SECTION)).matches("abc\nend");
   }
 
   @Test
   void testMethodDefinition() {
-    assertThat(g.rule(SwModuleDefinitionGrammar.MODULE_DEFINITION))
+    assertThat(grammar.rule(ModuleDefinitionGrammar.MODULE_DEFINITION))
         .matches("")
         .matches("module")
         .matches("module 1 2 3 4 5")
