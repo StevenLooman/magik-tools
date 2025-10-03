@@ -35,12 +35,11 @@ public abstract class ModuleDefAstWalker {
   @SuppressWarnings({"java:S1479", "checkstyle:MethodLength"})
   public void walkAst(final AstNode node) {
     final AstNodeType nodeType = node.getType();
-    if (!(nodeType instanceof SwModuleDefinitionGrammar)) {
+    if (!(nodeType instanceof SwModuleDefinitionGrammar value)) {
       this.walkTokens(node);
       return;
     }
 
-    final SwModuleDefinitionGrammar value = (SwModuleDefinitionGrammar) nodeType;
     switch (value) {
       case MODULE_DEFINITION:
         this.walkPreModuleDefinition(node);

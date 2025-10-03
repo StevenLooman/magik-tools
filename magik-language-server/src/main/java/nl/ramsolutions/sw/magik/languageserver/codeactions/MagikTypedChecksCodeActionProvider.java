@@ -5,16 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.checks.CheckHolder;
+import nl.ramsolutions.sw.checks.ChecksConfiguration;
+import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
-import nl.ramsolutions.sw.magik.checks.CheckHolder;
-import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
-import nl.ramsolutions.sw.magik.typedchecks.CheckList;
-import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheck;
-import nl.ramsolutions.sw.magik.typedchecks.MagikTypedCheckFixer;
+import nl.ramsolutions.sw.typedchecks.MagikTypedCheck;
+import nl.ramsolutions.sw.typedchecks.MagikTypedCheckFixer;
+import nl.ramsolutions.sw.typedchecks.MagikTypedCheckList;
 
 /** Provide {@link CodeAction}s for {@link MagikTypedCheck}s. */
 public class MagikTypedChecksCodeActionProvider {
@@ -38,7 +38,7 @@ public class MagikTypedChecksCodeActionProvider {
       throws ReflectiveOperationException, IOException {
     final List<CodeAction> codeActions = new ArrayList<>();
     for (final Entry<Class<? extends MagikCheck>, List<Class<? extends MagikTypedCheckFixer>>>
-        entry : CheckList.getFixers().entrySet()) {
+        entry : MagikTypedCheckList.getFixers().entrySet()) {
       final Class<? extends MagikCheck> checkClass = entry.getKey();
       final List<Class<? extends MagikTypedCheckFixer>> fixerClassses = entry.getValue();
       for (final Class<?> fixerClass : fixerClassses) {
@@ -60,8 +60,8 @@ public class MagikTypedChecksCodeActionProvider {
     final MagikToolsProperties fileProperties = magikFile.getProperties();
     final MagikToolsProperties actualProperties =
         MagikToolsProperties.merge(this.properties, fileProperties);
-    final MagikChecksConfiguration config =
-        new MagikChecksConfiguration(CheckList.getChecks(), actualProperties);
+    final ChecksConfiguration config =
+        new ChecksConfiguration(MagikTypedCheckList.getBaseChecks(), actualProperties);
     final List<CheckHolder> allChecks = config.getAllChecks();
     for (final CheckHolder checkHolder : allChecks) {
       if (checkHolder.getCheckClass().equals(checkClass)) {

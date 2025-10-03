@@ -8,14 +8,14 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.checks.Check;
+import nl.ramsolutions.sw.checks.CheckHolder;
+import nl.ramsolutions.sw.checks.CheckMetadata;
+import nl.ramsolutions.sw.checks.ChecksConfiguration;
+import nl.ramsolutions.sw.checks.Issue;
+import nl.ramsolutions.sw.checks.IssueDisabledChecker;
+import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.checks.Check;
-import nl.ramsolutions.sw.magik.checks.CheckHolder;
-import nl.ramsolutions.sw.magik.checks.CheckList;
-import nl.ramsolutions.sw.magik.checks.CheckMetadata;
-import nl.ramsolutions.sw.magik.checks.Issue;
-import nl.ramsolutions.sw.magik.checks.IssueDisabledChecker;
-import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -95,8 +95,8 @@ public class MagikChecksDiagnosticsProvider {
     final MagikToolsProperties fileProperties = magikFile.getProperties();
     final MagikToolsProperties actualProperties =
         MagikToolsProperties.merge(this.properties, fileProperties);
-    final MagikChecksConfiguration config =
-        new MagikChecksConfiguration(CheckList.getChecks(), actualProperties);
+    final ChecksConfiguration config =
+        new ChecksConfiguration(MagikCheckList.getBaseChecks(), actualProperties);
     final List<CheckHolder> holders = config.getAllChecks();
     return holders.stream()
         .filter(CheckHolder::isEnabled)

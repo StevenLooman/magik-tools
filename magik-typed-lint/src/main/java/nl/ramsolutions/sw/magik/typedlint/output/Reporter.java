@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.typedlint.output;
 
 import java.util.Set;
-import nl.ramsolutions.sw.magik.checks.Issue;
+import nl.ramsolutions.sw.checks.Issue;
 
 /** Reporter interface. */
 public interface Reporter {

@@ -35,12 +35,11 @@ public abstract class ProductDefAstWalker {
   @SuppressWarnings({"java:S1479", "checkstyle:MethodLength"})
   public void walkAst(final AstNode node) {
     final AstNodeType nodeType = node.getType();
-    if (!(nodeType instanceof SwProductDefinitionGrammar)) {
+    if (!(nodeType instanceof SwProductDefinitionGrammar value)) {
       this.walkTokens(node);
       return;
     }
 
-    final SwProductDefinitionGrammar value = (SwProductDefinitionGrammar) nodeType;
     switch (value) {
       case PRODUCT_DEFINITION:
         this.walkPreProductDefinition(node);

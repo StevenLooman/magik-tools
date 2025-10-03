@@ -400,12 +400,12 @@
                     </limit>
                   </limits>
                   <excludes>
-                    <exclude>nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker</exclude>
-                    <exclude>nl.ramsolutions.sw.productdef.analysis.ProductDefAstWalker</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.MagikAstWalker</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.MagikTextDocumentService</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider</exclude>
+                    <exclude>nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker</exclude>
+                    <exclude>nl.ramsolutions.sw.productdef.analysis.ProductDefAstWalker</exclude>
                   </excludes>
                 </rule>
                 <rule>
@@ -418,6 +418,7 @@
                     </limit>
                   </limits>
                   <excludes>
+                    <exclude>nl.ramsolutions.sw.checks.magik.UnusedVariableCheck.getCheckableScopeEntries()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.MagikAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition.equals(java.lang.Object)</exclude>
@@ -434,17 +435,10 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader.parseClassInfo(java.lang.String, java.io.InputStreamReader)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ConditionalBodyHandler.handleConditionalExpression(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.api.MagikNumberParser.parseMagikNumber(java.lang.String)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.checks.checks.FormattingCheck.handleToken()</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.checks.checks.UnusedVariableCheck.getCheckableScopeEntries()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.stackTrace(long)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.slap.SlapProtocol.handleReplyMessage(java.nio.ByteBuffer)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.formatting.MagikFormattingStrategy.requireNoWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.formatting.MagikFormattingStrategy.requireWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.formatting.RelativeIndentWalker.handleTokenNode(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.formatting.StandardFormattingStrategy.requireNoWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.formatting.StandardFormattingStrategy.requireWhitespaceBefore(com.sonar.sslr.api.Token)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.formatting.TabbedIndentStrategy.indentFor(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider.provideDefinitions(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider.provideHover(nl.ramsolutions.sw.magik.MagikTypedFile, org.eclipse.lsp4j.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider.provideReferences(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
@@ -452,8 +446,7 @@
                     <exclude>nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider.getSymbols(java.lang.String)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.lint.ConfigurationLocator.locateConfiguration()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.parser.MagikWhitespaceTriviaAdder.createWhitespaceTokens(com.sonar.sslr.api.Token, com.sonar.sslr.api.Token)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.typedchecks.fixers.TypeDocReturnTypeFixer.lambda$5(nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition, java.lang.String, java.util.Map.Entry)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.typedchecks.fixers.TypeDocReturnTypeFixer.lambda$extractReturnTypeCodeActions$2(nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition, java.lang.String, java.util.Map.Entry)</exclude>
+                    <exclude>nl.ramsolutions.sw.typedchecks.magik.fixers.TypeDocReturnTypeFixer.lambda$extractReturnTypeCodeActions$2(nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition, java.lang.String, java.util.Map.Entry)</exclude>
                     <exclude>nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.productdef.ProductDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.productdef.analysis.ProductDefAstWalker.*</exclude>

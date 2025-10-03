@@ -14,15 +14,15 @@ import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.checks.Check;
+import nl.ramsolutions.sw.checks.CheckFixer;
+import nl.ramsolutions.sw.checks.CheckHolder;
+import nl.ramsolutions.sw.checks.ChecksConfiguration;
+import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
-import nl.ramsolutions.sw.magik.checks.Check;
-import nl.ramsolutions.sw.magik.checks.CheckFixer;
-import nl.ramsolutions.sw.magik.checks.CheckHolder;
-import nl.ramsolutions.sw.magik.checks.CheckList;
-import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +89,7 @@ public class MagikFixer {
 
   private List<CheckFixer> getFixers(final MagikFile magikFile) {
     final List<Class<? extends Check>> enabledChecks = this.getEnabledChecks(magikFile);
-    return CheckList.getFixers().entrySet().stream()
+    return MagikCheckList.getFixers().entrySet().stream()
         .filter(entry -> enabledChecks.contains(entry.getKey()))
         .flatMap(entry -> entry.getValue().stream())
         .map(this::instantiateFixer)
@@ -122,8 +122,8 @@ public class MagikFixer {
 
   private List<Class<? extends Check>> getEnabledChecks(final MagikFile magikFile) {
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final MagikChecksConfiguration checksConfig =
-        new MagikChecksConfiguration(CheckList.getChecks(), fileProperties);
+    final ChecksConfiguration checksConfig =
+        new ChecksConfiguration(MagikCheckList.getBaseChecks(), fileProperties);
     return checksConfig.getAllChecks().stream()
         .filter(CheckHolder::isEnabled)
         .map(CheckHolder::getCheckClass)
@@ -132,8 +132,8 @@ public class MagikFixer {
 
   private boolean isFileIgnored(final MagikFile magikFile) {
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final MagikChecksConfiguration checksConfig =
-        new MagikChecksConfiguration(CheckList.getChecks(), fileProperties);
+    final ChecksConfiguration checksConfig =
+        new ChecksConfiguration(MagikCheckList.getBaseChecks(), fileProperties);
     final URI uri = magikFile.getUri();
     final Path path = Path.of(uri);
     final FileSystem fs = FileSystems.getDefault();

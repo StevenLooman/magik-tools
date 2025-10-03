@@ -14,15 +14,15 @@ import java.util.List;
 import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.checks.Check;
+import nl.ramsolutions.sw.checks.CheckHolder;
+import nl.ramsolutions.sw.checks.CheckMetadata;
+import nl.ramsolutions.sw.checks.ChecksConfiguration;
+import nl.ramsolutions.sw.checks.Issue;
+import nl.ramsolutions.sw.checks.IssueDisabledChecker;
+import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.checks.Check;
-import nl.ramsolutions.sw.magik.checks.CheckHolder;
-import nl.ramsolutions.sw.magik.checks.CheckList;
-import nl.ramsolutions.sw.magik.checks.CheckMetadata;
-import nl.ramsolutions.sw.magik.checks.Issue;
-import nl.ramsolutions.sw.magik.checks.IssueDisabledChecker;
-import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import nl.ramsolutions.sw.magik.lint.output.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,8 +95,8 @@ public class MagikLint {
    */
   void showChecks(final Writer writer, final boolean showDisabled)
       throws ReflectiveOperationException, IOException {
-    final MagikChecksConfiguration checksConfig =
-        new MagikChecksConfiguration(CheckList.getChecks(), this.properties);
+    final ChecksConfiguration checksConfig =
+        new ChecksConfiguration(MagikCheckList.getBaseChecks(), this.properties);
     final Iterable<CheckHolder> holders = checksConfig.getAllChecks();
     for (final CheckHolder holder : holders) {
       final CheckMetadata metadata = holder.getMetadata();
@@ -171,8 +171,8 @@ public class MagikLint {
 
   private boolean isFileIgnored(final MagikFile magikFile) {
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final MagikChecksConfiguration checksConfig =
-        new MagikChecksConfiguration(CheckList.getChecks(), fileProperties);
+    final ChecksConfiguration checksConfig =
+        new ChecksConfiguration(MagikCheckList.getBaseChecks(), fileProperties);
     final URI uri = magikFile.getUri();
     final Path path = Path.of(uri);
     final FileSystem fs = FileSystems.getDefault();
@@ -200,8 +200,8 @@ public class MagikLint {
 
     // Run checks on files.
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final MagikChecksConfiguration checksConfig =
-        new MagikChecksConfiguration(CheckList.getChecks(), fileProperties);
+    final ChecksConfiguration checksConfig =
+        new ChecksConfiguration(MagikCheckList.getBaseChecks(), fileProperties);
     final Iterable<CheckHolder> holders = checksConfig.getAllChecks();
     for (final CheckHolder holder : holders) {
       if (!holder.isEnabled()) {

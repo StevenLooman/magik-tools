@@ -2,7 +2,7 @@ package nl.ramsolutions.sw.magik.typedlint.output;
 
 import java.util.Collections;
 import java.util.Set;
-import nl.ramsolutions.sw.magik.checks.Issue;
+import nl.ramsolutions.sw.checks.Issue;
 
 /** Null reporter. */
 public class NullReporter implements Reporter {

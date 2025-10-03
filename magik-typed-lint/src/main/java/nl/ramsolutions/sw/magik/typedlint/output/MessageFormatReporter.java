@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import nl.ramsolutions.sw.magik.checks.CheckHolder;
-import nl.ramsolutions.sw.magik.checks.CheckMetadata;
-import nl.ramsolutions.sw.magik.checks.Issue;
+import nl.ramsolutions.sw.checks.CheckHolder;
+import nl.ramsolutions.sw.checks.CheckMetadata;
+import nl.ramsolutions.sw.checks.Issue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

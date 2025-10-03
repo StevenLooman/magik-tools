@@ -5,11 +5,11 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
+import nl.ramsolutions.sw.checks.Issue;
+import nl.ramsolutions.sw.checks.MagikCheck;
+import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikVisitor;
-import nl.ramsolutions.sw.magik.checks.CheckList;
-import nl.ramsolutions.sw.magik.checks.Issue;
-import nl.ramsolutions.sw.magik.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.metrics.FileMetrics;
 import nl.ramsolutions.sw.sonar.language.Magik;
 import nl.ramsolutions.sw.sonar.sensors.cpd.CpdTokenSaver;
@@ -110,8 +110,8 @@ public class MagikSensor implements Sensor {
     LOGGER.debug("Running checks");
     final Checks<MagikCheck> checks =
         checkFactory
-            .<MagikCheck>create(CheckList.REPOSITORY_KEY)
-            .addAnnotatedChecks(CheckList.getChecks());
+            .<MagikCheck>create(MagikCheckList.REPOSITORY_KEY)
+            .addAnnotatedChecks(MagikCheckList.getChecks());
     for (final MagikCheck check : checks.all()) {
       LOGGER.debug("Running check: {}", check);
       final List<Issue> issues = check.scanFileForIssues(magikFile);
