@@ -18,7 +18,7 @@ import nl.ramsolutions.sw.productdef.parser.ProductDefParser;
 /** Product definition file. */
 public class ProductDefFile extends OpenedFile {
 
-  private static final URI DEFAULT_URI = URI.create("memory://product.def");
+  public static final URI DEFAULT_URI = URI.create("memory://product.def");
   public static final Location DEFAULT_LOCATION = new Location(DEFAULT_URI, Range.DEFAULT_RANGE);
 
   private final @Nullable Instant timestamp;
