@@ -97,7 +97,7 @@ public class CommentInstructionReader {
    * Constructor.
    *
    * @param magikFile Magik file.
-   * @param instructions Instrunction to read.
+   * @param instructions Instructions to read.
    */
   public CommentInstructionReader(final MagikFile magikFile, final Set<Instruction> instructions) {
     this.magikFile = magikFile;

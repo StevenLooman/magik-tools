@@ -5,14 +5,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.OpenedFile;
+import nl.ramsolutions.sw.checks.Check;
+import nl.ramsolutions.sw.checks.MagikCheckList;
+import nl.ramsolutions.sw.checks.ProductDefCheckList;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.languageserver.MagikLanguageServerSettings;
+import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.typedchecks.MagikTypedCheckList;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Provides diagnostics for Magik files. */
+/** Provides diagnostics. */
 public class MagikDiagnosticsProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikDiagnosticsProvider.class);
@@ -28,7 +34,24 @@ public class MagikDiagnosticsProvider {
   }
 
   /**
-   * Provides diagnostics for a Magik file.
+   * Provides diagnostics for a {@link ProductDefFile}.
+   *
+   * @param productDefFile Product definition file.
+   * @return Diagnostics.
+   */
+  public List<Diagnostic> provideDiagnostics(final ProductDefFile productDefFile) {
+    final List<Diagnostic> diagnostics = new ArrayList<>();
+
+    final List<Diagnostic> diagnosticsChecks =
+        MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(
+            productDefFile, ProductDefCheckList.getBaseChecks());
+    diagnostics.addAll(diagnosticsChecks);
+
+    return diagnostics;
+  }
+
+  /**
+   * Provides diagnostics for a {@link MagikFile}.
    *
    * @param magikFile Magik file.
    * @return Diagnostics.
@@ -36,42 +59,32 @@ public class MagikDiagnosticsProvider {
   public List<Diagnostic> provideDiagnostics(final MagikTypedFile magikFile) {
     final List<Diagnostic> diagnostics = new ArrayList<>();
 
-    // Linter diagnostics.
-    final List<Diagnostic> diagnosticsLinter =
-        MagikDiagnosticsProvider.getDiagnosticsFromLinter(magikFile);
-    diagnostics.addAll(diagnosticsLinter);
+    // Magik diagnostics.
+    final List<Diagnostic> diagnosticsChecks =
+        MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(
+            magikFile, MagikCheckList.getBaseChecks());
+    diagnostics.addAll(diagnosticsChecks);
 
-    // Typing diagnostics.
+    // Magik typed diagnostics.
     final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
     final Boolean typingEnableChecks = settings.getTypingEnableChecks();
     if (Boolean.TRUE.equals(typingEnableChecks)) {
-      final List<Diagnostic> diagnosticsTyping =
-          MagikDiagnosticsProvider.getDiagnosticsFromTyping(magikFile);
-      diagnostics.addAll(diagnosticsTyping);
+      final List<Diagnostic> diagnosticsTypedChecks =
+          MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(
+              magikFile, MagikTypedCheckList.getBaseChecks());
+      diagnostics.addAll(diagnosticsTypedChecks);
     }
 
     return diagnostics;
   }
 
-  private static List<Diagnostic> getDiagnosticsFromLinter(final MagikTypedFile magikFile) {
-    final MagikToolsProperties magikFileProperties = magikFile.getProperties();
-    final MagikChecksDiagnosticsProvider lintProvider =
-        new MagikChecksDiagnosticsProvider(magikFileProperties);
+  private static List<Diagnostic> getDiagnosticsFromFileAndChecks(
+      final OpenedFile openedFile, final List<Class<? extends Check>> checks) {
+    final MagikToolsProperties magikFileProperties = openedFile.getProperties();
+    final ChecksDiagnosticsProvider diagnosticsProvider =
+        new ChecksDiagnosticsProvider(checks, magikFileProperties);
     try {
-      return lintProvider.getDiagnostics(magikFile);
-    } catch (final IOException exception) {
-      LOGGER.error(exception.getMessage(), exception);
-    }
-
-    return Collections.emptyList();
-  }
-
-  private static List<Diagnostic> getDiagnosticsFromTyping(final MagikTypedFile magikFile) {
-    final MagikToolsProperties magikFileProperties = magikFile.getProperties();
-    final MagikTypedChecksDiagnosticsProvider typedDiagnosticsProvider =
-        new MagikTypedChecksDiagnosticsProvider(magikFileProperties);
-    try {
-      return typedDiagnosticsProvider.getDiagnostics(magikFile);
+      return diagnosticsProvider.getDiagnostics(openedFile);
     } catch (final IOException exception) {
       LOGGER.error(exception.getMessage(), exception);
     }

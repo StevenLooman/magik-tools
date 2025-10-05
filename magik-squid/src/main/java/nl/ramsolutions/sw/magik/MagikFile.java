@@ -2,10 +2,8 @@ package nl.ramsolutions.sw.magik;
 
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Collection;
@@ -18,7 +16,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
@@ -38,8 +35,6 @@ public class MagikFile extends OpenedFile {
   public static final URI DEFAULT_URI = URI.create("memory:///source.magik");
   public static final Location DEFAULT_LOCATION = new Location(DEFAULT_URI, Range.DEFAULT_RANGE);
 
-  private final @Nullable Instant timestamp;
-  private final MagikToolsProperties properties;
   private AstNode astNode;
   private GlobalScope globalScope;
   private List<MagikDefinition> definitions;
@@ -66,9 +61,7 @@ public class MagikFile extends OpenedFile {
    * @param source Source.
    */
   public MagikFile(final MagikToolsProperties properties, final URI uri, final String source) {
-    super(uri, source);
-    this.timestamp = null;
-    this.properties = properties;
+    super(properties, uri, source);
   }
 
   /**
@@ -79,33 +72,12 @@ public class MagikFile extends OpenedFile {
    * @throws IOException -
    */
   public MagikFile(final MagikToolsProperties properties, final Path path) throws IOException {
-    super(path.toUri(), Files.readString(path, FileCharsetDeterminer.determineCharset(path)));
-    this.timestamp = Files.getLastModifiedTime(path).toInstant();
-    this.properties = properties;
+    super(properties, path);
   }
 
   @Override
   public String getLanguageId() {
     return "magik";
-  }
-
-  @CheckForNull
-  public Instant getTimestamp() {
-    return this.timestamp;
-  }
-
-  public MagikToolsProperties getProperties() {
-    return this.properties;
-  }
-
-  /**
-   * Get the source lines.
-   *
-   * @return Source lines.
-   */
-  public String[] getSourceLines() {
-    final String source = this.getSource();
-    return source.split("\r\n|\n|\r");
   }
 
   /**
@@ -153,7 +125,8 @@ public class MagikFile extends OpenedFile {
     }
 
     final Location location = new Location(uri);
-    return new MagikFileDefinition(location, this.timestamp);
+    final Instant timestamp = this.getTimestamp();
+    return new MagikFileDefinition(location, timestamp);
   }
 
   /**

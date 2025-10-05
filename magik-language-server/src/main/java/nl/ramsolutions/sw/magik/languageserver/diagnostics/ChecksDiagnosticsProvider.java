@@ -8,14 +8,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.CheckHolder;
 import nl.ramsolutions.sw.checks.CheckMetadata;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.IssueDisabledChecker;
-import nl.ramsolutions.sw.checks.MagikCheckList;
-import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
@@ -24,43 +23,46 @@ import org.eclipse.lsp4j.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** MagikLint diagnostics provider. */
-public class MagikChecksDiagnosticsProvider {
+/** {@link Check}s diagnostics provider. */
+public class ChecksDiagnosticsProvider {
 
-  private static final Logger LOGGER =
-      LoggerFactory.getLogger(MagikChecksDiagnosticsProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ChecksDiagnosticsProvider.class);
   private static final Logger LOGGER_DURATION =
-      LoggerFactory.getLogger(MagikChecksDiagnosticsProvider.class.getName() + "Duration");
+      LoggerFactory.getLogger(ChecksDiagnosticsProvider.class.getName() + "Duration");
   private static final Map<String, DiagnosticSeverity> SEVERITY_MAPPING =
       Map.of(
           "Major", DiagnosticSeverity.Error,
           "Minor", DiagnosticSeverity.Warning);
 
+  private final List<Class<? extends Check>> checks;
   private final MagikToolsProperties properties;
 
   /**
    * Constructor.
    *
+   * @param checks Checks.
    * @param properties Properties.
    */
-  public MagikChecksDiagnosticsProvider(final MagikToolsProperties properties) {
+  public ChecksDiagnosticsProvider(
+      final List<Class<? extends Check>> checks, final MagikToolsProperties properties) {
+    this.checks = checks;
     this.properties = properties;
   }
 
   /**
    * Get {@link Diagnostic}s.
    *
-   * @param magikFile Magik file.
+   * @param openedFile Magik file.
    * @return List with {@link Diagnostic}s.
    * @throws IOException -
    */
-  public List<Diagnostic> getDiagnostics(final MagikFile magikFile) throws IOException {
+  public List<Diagnostic> getDiagnostics(final OpenedFile openedFile) throws IOException {
     // Empty cache, as the configuration may have changed without us knowing it.
     ConfigurationLocator.resetCache();
 
-    return this.createChecks(magikFile).stream()
-        .flatMap(check -> this.runChecks(check, magikFile).stream())
-        .filter(issue -> !IssueDisabledChecker.issueDisabled(magikFile, issue))
+    return this.createChecks(openedFile).stream()
+        .flatMap(check -> this.runChecks(check, openedFile).stream())
+        .filter(issue -> !IssueDisabledChecker.issueDisabled(openedFile, issue))
         .map(
             issue -> {
               final CheckHolder holder = issue.check().getHolder();
@@ -75,28 +77,27 @@ public class MagikChecksDiagnosticsProvider {
         .toList();
   }
 
-  private List<Issue> runChecks(final Check check, final MagikFile magikFile) {
+  private List<Issue> runChecks(final Check check, final OpenedFile openedFile) {
     final long start = System.nanoTime();
 
-    final List<Issue> issues = check.scanFileForIssues(magikFile);
+    final List<Issue> issues = check.scanFileForIssues(openedFile);
 
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} check: {}, uri: {}",
           String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
           check.getClass().getSimpleName(),
-          magikFile.getUri());
+          openedFile.getUri());
     }
 
     return issues;
   }
 
-  private Collection<Check> createChecks(final MagikFile magikFile) throws IOException {
-    final MagikToolsProperties fileProperties = magikFile.getProperties();
+  private Collection<Check> createChecks(final OpenedFile openedFile) throws IOException {
+    final MagikToolsProperties fileProperties = openedFile.getProperties();
     final MagikToolsProperties actualProperties =
         MagikToolsProperties.merge(this.properties, fileProperties);
-    final ChecksConfiguration config =
-        new ChecksConfiguration(MagikCheckList.getBaseChecks(), actualProperties);
+    final ChecksConfiguration config = new ChecksConfiguration(this.checks, actualProperties);
     final List<CheckHolder> holders = config.getAllChecks();
     return holders.stream()
         .filter(CheckHolder::isEnabled)
@@ -124,7 +125,7 @@ public class MagikChecksDiagnosticsProvider {
       return DiagnosticSeverity.Error;
     }
 
-    return MagikChecksDiagnosticsProvider.SEVERITY_MAPPING.getOrDefault(
+    return ChecksDiagnosticsProvider.SEVERITY_MAPPING.getOrDefault(
         severity, DiagnosticSeverity.Error);
   }
 }

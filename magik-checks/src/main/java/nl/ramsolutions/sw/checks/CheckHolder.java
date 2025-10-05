@@ -127,18 +127,14 @@ public class CheckHolder {
   public CheckMetadata getMetadata() throws IOException {
     if (this.metadata == null) {
       synchronized (this) {
-        // determine path
-        final String simpleName = this.checkClass.getSimpleName();
-        final String name =
-            simpleName.endsWith("TypedCheck")
-                ? simpleName.substring(
-                    0, simpleName.length() - "TypedCheck".length()) // strip TypedCheck
-                : simpleName.substring(0, simpleName.length() - "Check".length()); // strip Check
-        final String filename = String.format("/%s/%s.json", MagikCheckList.PROFILE_DIR, name);
+        // Determine path.
+        final String name = this.getCheckName();
+        final String profileDir = this.getCheckProfileDir();
+        final String filename = String.format("/%s/%s.json", profileDir, name);
 
         // Parse json.
         final Gson gson = new Gson();
-        try (InputStream inputStream = this.getClass().getResourceAsStream(filename)) {
+        try (final InputStream inputStream = this.getClass().getResourceAsStream(filename)) {
           final InputStreamReader reader = new InputStreamReader(inputStream);
           final JsonReader jsonReader = gson.newJsonReader(reader);
           this.metadata = gson.fromJson(jsonReader, CheckMetadata.class);
@@ -147,6 +143,32 @@ public class CheckHolder {
     }
 
     return this.metadata;
+  }
+
+  private String getCheckName() {
+    // TODO: Can't we do this better? Perhaps use the Rule annotation?
+    final String simpleName = this.checkClass.getSimpleName();
+    return simpleName.endsWith("TypedCheck")
+        ? simpleName.substring(0, simpleName.length() - "TypedCheck".length()) // Strip TypedCheck.
+        : simpleName.substring(0, simpleName.length() - "Check".length()); // Strip Check.
+  }
+
+  private String getCheckProfileDir() {
+    // TODO: Can't we do this better?
+    if (this.checkClass.getGenericSuperclass().equals(ProductDefCheck.class)) {
+      return ProductDefCheckList.PROFILE_DIR;
+    } else if (this.checkClass.getGenericSuperclass().equals(MagikCheck.class)) {
+      return MagikCheckList.PROFILE_DIR;
+    } else if (this.checkClass
+        .getGenericSuperclass()
+        .getTypeName()
+        .equals("nl.ramsolutions.sw.typedchecks.MagikTypedCheck")) {
+      return MagikCheckList.PROFILE_DIR;
+    }
+
+    throw new IllegalStateException(
+        String.format(
+            "Unknown check class: %s", this.checkClass.getGenericSuperclass().getTypeName()));
   }
 
   /**

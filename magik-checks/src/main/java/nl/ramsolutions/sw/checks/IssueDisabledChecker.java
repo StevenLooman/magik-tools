@@ -5,12 +5,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
 
-/** Check if {@link MagikIssue} is disabled via an annotation/comment. */
+/** Check if {@link Issue} is disabled via an annotation/comment. */
 public final class IssueDisabledChecker {
 
   private static final String NAME_MLINT = "mlint";
@@ -29,17 +30,22 @@ public final class IssueDisabledChecker {
   /**
    * Check if a found issue/infraction is NOT disable via line or scope.
    *
-   * @param magikFile Magik file.
-   * @param magikIssue Issue to check.
+   * @param openedFile Opened file.
+   * @param issue Issue to check.
    * @return true if issue is disabled at line.
    */
-  public static boolean issueDisabled(final MagikFile magikFile, final Issue magikIssue) {
-    final CheckHolder holder = magikIssue.check().getHolder();
+  public static boolean issueDisabled(final OpenedFile openedFile, final Issue issue) {
+    // TODO: Implement this for non-MagikFile files.
+    if (!(openedFile instanceof MagikFile magikFile)) {
+      return false;
+    }
+
+    final CheckHolder holder = issue.check().getHolder();
     Objects.requireNonNull(holder);
     final String checkKey = holder.getCheckKeyKebabCase();
 
-    final Integer issueLineNo = magikIssue.startLine(); // 1-based.
-    final Integer columnNo = magikIssue.startColumn();
+    final Integer issueLineNo = issue.startLine(); // 1-based.
+    final Integer columnNo = issue.startColumn();
     final Integer fileLineNo = issueLineNo - 1; // 0-based.
 
     final Map<String, String> statementInstructions =

@@ -8,15 +8,15 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.CheckHolder;
 import nl.ramsolutions.sw.checks.CheckMetadata;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.IssueDisabledChecker;
-import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.checks.ProductDefCheckList;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
-import nl.ramsolutions.sw.typedchecks.MagikTypedCheck;
-import nl.ramsolutions.sw.typedchecks.MagikTypedCheckList;
+import nl.ramsolutions.sw.productdef.ProductDefFile;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Location;
@@ -24,13 +24,13 @@ import org.eclipse.lsp4j.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** MagikType diagnostics provider. */
-public class MagikTypedChecksDiagnosticsProvider {
+/** product.def diagnostics provider. */
+public class ProductDefChecksDiagnosticrProvider {
 
   private static final Logger LOGGER =
-      LoggerFactory.getLogger(MagikTypedChecksDiagnosticsProvider.class);
+      LoggerFactory.getLogger(ProductDefChecksDiagnosticrProvider.class);
   private static final Logger LOGGER_DURATION =
-      LoggerFactory.getLogger(MagikTypedChecksDiagnosticsProvider.class.getName() + "Duration");
+      LoggerFactory.getLogger(ProductDefChecksDiagnosticrProvider.class.getName() + "Duration");
   private static final Map<String, DiagnosticSeverity> SEVERITY_MAPPING =
       Map.of(
           "Major", DiagnosticSeverity.Error,
@@ -43,25 +43,24 @@ public class MagikTypedChecksDiagnosticsProvider {
    *
    * @param properties Properties.
    */
-  public MagikTypedChecksDiagnosticsProvider(final MagikToolsProperties properties) {
+  public ProductDefChecksDiagnosticrProvider(final MagikToolsProperties properties) {
     this.properties = properties;
   }
 
   /**
-   * Get magik-typed related {@link Diagnostic}s.
+   * Get {@link Diagnostic}s.
    *
-   * @param magikFile Magik file.
+   * @param productDefFile product.def file.
    * @return List with {@link Diagnostic}s.
    * @throws IOException -
    */
-  public List<Diagnostic> getDiagnostics(final MagikTypedFile magikFile) throws IOException {
+  public List<Diagnostic> getDiagnostics(final ProductDefFile productDefFile) throws IOException {
     // Empty cache, as the configuration may have changed without us knowing it.
     ConfigurationLocator.resetCache();
 
-    // Parse the file, determine types, and get issues.
-    return this.createChecks(magikFile).stream()
-        .flatMap(check -> this.runChecks(check, magikFile).stream())
-        .filter(issue -> !IssueDisabledChecker.issueDisabled(magikFile, issue))
+    return this.createChecks(productDefFile).stream()
+        .flatMap(check -> this.runChecks(check, productDefFile).stream())
+        .filter(issue -> !IssueDisabledChecker.issueDisabled(productDefFile, issue))
         .map(
             issue -> {
               final CheckHolder holder = issue.check().getHolder();
@@ -70,13 +69,13 @@ public class MagikTypedChecksDiagnosticsProvider {
               final String message = issue.message();
               final DiagnosticSeverity severity = this.getCheckSeverity(holder);
               final String checkKeyKebabCase = holder.getCheckKeyKebabCase();
-              final String diagnosticSource = String.format("mtype (%s)", checkKeyKebabCase);
+              final String diagnosticSource = String.format("mlint (%s)", checkKeyKebabCase);
               return new Diagnostic(range, message, severity, diagnosticSource);
             })
         .toList();
   }
 
-  private List<Issue> runChecks(final MagikTypedCheck check, final MagikTypedFile magikFile) {
+  private List<Issue> runChecks(final Check check, final ProductDefFile magikFile) {
     final long start = System.nanoTime();
 
     final List<Issue> issues = check.scanFileForIssues(magikFile);
@@ -92,20 +91,19 @@ public class MagikTypedChecksDiagnosticsProvider {
     return issues;
   }
 
-  private Collection<MagikTypedCheck> createChecks(final MagikTypedFile magikFile)
-      throws IOException {
-    final MagikToolsProperties fileProperties = magikFile.getProperties();
+  private Collection<Check> createChecks(final ProductDefFile productDefFile) throws IOException {
+    final MagikToolsProperties fileProperties = productDefFile.getProperties();
     final MagikToolsProperties actualProperties =
         MagikToolsProperties.merge(this.properties, fileProperties);
     final ChecksConfiguration config =
-        new ChecksConfiguration(MagikTypedCheckList.getBaseChecks(), actualProperties);
+        new ChecksConfiguration(ProductDefCheckList.getBaseChecks(), actualProperties);
     final List<CheckHolder> holders = config.getAllChecks();
     return holders.stream()
         .filter(CheckHolder::isEnabled)
         .map(
             holder -> {
               try {
-                return (MagikTypedCheck) holder.createCheck();
+                return holder.createCheck();
               } catch (final ReflectiveOperationException exception) {
                 LOGGER.error(exception.getMessage(), exception);
               }
@@ -126,7 +124,7 @@ public class MagikTypedChecksDiagnosticsProvider {
       return DiagnosticSeverity.Error;
     }
 
-    return MagikTypedChecksDiagnosticsProvider.SEVERITY_MAPPING.getOrDefault(
+    return ProductDefChecksDiagnosticrProvider.SEVERITY_MAPPING.getOrDefault(
         severity, DiagnosticSeverity.Error);
   }
 }

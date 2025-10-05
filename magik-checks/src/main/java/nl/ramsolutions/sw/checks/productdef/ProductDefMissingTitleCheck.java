@@ -4,9 +4,14 @@ import com.sonar.sslr.api.AstNode;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.checks.ProductDefCheck;
 import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
+import org.sonar.check.Rule;
 
 /** Check that a product.def file has a title. */
+@Rule(key = ProductDefMissingTitleCheck.CHECK_KEY)
 public class ProductDefMissingTitleCheck extends ProductDefCheck {
+
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final String CHECK_KEY = "ProductDefMissingTitle";
 
   private static final String MESSAGE = "Product title is missing, or is empty.";
 

@@ -26,6 +26,9 @@ import nl.ramsolutions.sw.typedchecks.magik.fixers.TypeDocReturnTypeFixer;
 /** Check list. */
 public final class MagikTypedCheckList {
 
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final String PROFILE_DIR = "nl/ramsolutions/sw/sonar/l10n/magik/rules";
+
   private MagikTypedCheckList() {}
 
   /**
