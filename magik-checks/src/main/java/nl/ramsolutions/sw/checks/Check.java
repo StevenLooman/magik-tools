@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.checks;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.List;
 import nl.ramsolutions.sw.OpenedFile;
 
@@ -10,6 +11,7 @@ public interface Check {
 
   public void setHolder(final CheckHolder holder);
 
+  @CheckForNull
   public CheckHolder getHolder();
 
   public void setParameter(final String name, final Object value) throws IllegalAccessException;

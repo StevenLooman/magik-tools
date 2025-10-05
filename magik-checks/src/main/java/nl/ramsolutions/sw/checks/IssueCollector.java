@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.magik.Location;
@@ -29,7 +30,7 @@ public class IssueCollector {
   }
 
   public List<Issue> getIssues() {
-    return issues;
+    return Collections.unmodifiableList(this.issues);
   }
 
   /**
