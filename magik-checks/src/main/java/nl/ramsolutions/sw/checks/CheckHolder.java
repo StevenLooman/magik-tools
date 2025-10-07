@@ -159,11 +159,8 @@ public class CheckHolder {
       return ProductDefCheckList.PROFILE_DIR;
     } else if (this.checkClass.getGenericSuperclass().equals(MagikCheck.class)) {
       return MagikCheckList.PROFILE_DIR;
-    } else if (this.checkClass
-        .getGenericSuperclass()
-        .getTypeName()
-        .equals("nl.ramsolutions.sw.typedchecks.MagikTypedCheck")) {
-      return MagikCheckList.PROFILE_DIR;
+    } else if (this.checkClass.getGenericSuperclass().equals(MagikTypedCheck.class)) {
+      return MagikTypedCheckList.PROFILE_DIR;
     }
 
     throw new IllegalStateException(

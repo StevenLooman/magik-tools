@@ -121,7 +121,7 @@ class FormattingCheckTest {
     final MagikCheck check = new FormattingCheck();
     final Path path =
         Path.of(
-            "magik-checks/src/test/resources/test_product/test_module/source/in_load_list.magik");
+            "magik-checks/src/test/resources/test_product/modules/test_module/source/in_load_list.magik");
     assertThat(check).reportsNoIssues(path);
   }
 

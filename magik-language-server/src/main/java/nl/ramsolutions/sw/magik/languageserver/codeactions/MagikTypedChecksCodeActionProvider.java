@@ -8,13 +8,13 @@ import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.checks.CheckHolder;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.MagikCheck;
+import nl.ramsolutions.sw.checks.MagikTypedCheck;
+import nl.ramsolutions.sw.checks.MagikTypedCheckFixer;
+import nl.ramsolutions.sw.checks.MagikTypedCheckList;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
-import nl.ramsolutions.sw.typedchecks.MagikTypedCheck;
-import nl.ramsolutions.sw.typedchecks.MagikTypedCheckFixer;
-import nl.ramsolutions.sw.typedchecks.MagikTypedCheckList;
 
 /** Provide {@link CodeAction}s for {@link MagikTypedCheck}s. */
 public class MagikTypedChecksCodeActionProvider {

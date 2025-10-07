@@ -17,7 +17,6 @@
     <module>magik-lint</module>
     <module>magik-squid</module>
     <module>magik-session-wrapper</module>
-    <module>magik-typed-checks</module>
     <module>magik-typed-lint</module>
     <module>sonar-magik-plugin</module>
     <module>sslr-magik-toolkit</module>
@@ -419,6 +418,7 @@
                   </limits>
                   <excludes>
                     <exclude>nl.ramsolutions.sw.checks.magik.UnusedVariableCheck.getCheckableScopeEntries()</exclude>
+                    <exclude>nl.ramsolutions.sw.checks.magiktyped.fixers.TypeDocReturnTypeFixer.lambda$extractReturnTypeCodeActions$2(nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition, java.lang.String, java.util.Map.Entry)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.MagikAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition.equals(java.lang.Object)</exclude>

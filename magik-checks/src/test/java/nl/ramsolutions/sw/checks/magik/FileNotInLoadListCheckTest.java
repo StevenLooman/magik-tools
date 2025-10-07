@@ -15,7 +15,7 @@ class FileNotInLoadListCheckTest {
   void testNotInLoadList() throws IllegalArgumentException, IOException {
     final Path path =
         Path.of(
-            "magik-checks/src/test/resources/test_product/test_module/source/not_in_load_list.magik");
+            "magik-checks/src/test/resources/test_product/modules/test_module/source/not_in_load_list.magik");
     final MagikCheck check = new FileNotInLoadListCheck();
     assertThat(check).reportsIssueCount(path, 1);
   }
@@ -24,7 +24,7 @@ class FileNotInLoadListCheckTest {
   void testInLoadList() throws IllegalArgumentException, IOException {
     final Path path =
         Path.of(
-            "magik-checks/src/test/resources/test_product/test_module/source/in_load_list.magik");
+            "magik-checks/src/test/resources/test_product/modules/test_module/source/in_load_list.magik");
     final MagikCheck check = new FileNotInLoadListCheck();
     assertThat(check).reportsNoIssues(path);
   }

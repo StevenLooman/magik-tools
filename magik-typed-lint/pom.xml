@@ -19,7 +19,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>magik-typed-checks</artifactId>
+      <artifactId>magik-checks</artifactId>
       <version>${project.version}</version>
     </dependency>
 
