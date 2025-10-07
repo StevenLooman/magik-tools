@@ -49,33 +49,34 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
   // _endloop
   // ```
   private static final String DEFAULT_ALWAYS_LOADED_MODULES =
-      "ace_core,acpt,acpt_geometry,actions,application,authorisation,base_dialogs,bookmark_manager,"
-          + "browser,browser_sub_dialogs,cached_record_collection,collection_export_engine,"
-          + "command_design_pattern,component_framework,connection_service,construction_pack_common,"
-          + "core_resources,dataset_controller_core,datastore_base,datastore_geometry_raster,"
-          + "datastore_geometry_raster_acps,datastore_geometry_spatial_predicate,datastore_geometry_tin,"
-          + "datastore_geometry_topology_engine,datastore_geometry_transforms,datastore_geometry_vector,"
-          + "debugger_core,dialogs,display_grid,document_list_views,document_manager,documents,drafting,"
-          + "ds_src,dxf_exemplars,dynamic_transform_manager,extdb,formats,formatted_document,"
-          + "geometry_raster,geometry_raster_streams,geometry_set_factory,geometry_tin,"
-          + "geometry_transforms,geometry_vector,history_manager,infraction_checker,interaction_handler,"
-          + "layout_engine,layout_gui,lazy_record_collection,legacy_widget_emulation,licence_manager,"
-          + "magik_gui_components,magikscript,map_plugin,map_projections_catalogue,map_rendering,"
-          + "map_support,map_trail,memento,messages_base,mgr_src,model,module_management,"
-          + "module_management_magik_gui,multiple_deletion_dialog,network_analysis_plugin,"
-          + "network_follower,oledb_provider_component,oledb_reader,options_plugin,outlook_bar_plugin,"
-          + "pdf_generator,pdf_generator_application,plotting,predicates,printer_setup_wizard,profiler,"
-          + "progress_manager,query_designers,query_dialog,rotate_view_dialog,rwo_actions_plugin,"
-          + "rwo_core,rwo_sets,scrapbook,secure_storage,selection_set_lister,session_management,"
-          + "short_transaction_manager_base,short_transaction_manager_client,"
-          + "short_transaction_manager_server,simple_xml,sockets,style_core,style_properties,"
-          + "style_symbol_magik_gui,style_widgets,super_dd,sw_automation,sw_automation_client,"
-          + "sw_core_magik_sessions,sw_job_engine,swift_address_callouts,swift_base,swift_find,"
-          + "swift_google,swift_layout_series,swift_map,swift_plugins,swift_sketch,"
-          + "swift_view_application,sys_acps,sys_misc,sys_src,threading_tools,tics,transient_urwo_som,"
-          + "tree,tree_item,undo_manager,units_configuration,units_core,units_definitions,"
-          + "universal_extdb_rwo,universal_rwo,urn_manager,value_managers,wcm_credential_dialog,widgets,"
-          + "xml_output";
+      """
+      ace_core,acpt,acpt_geometry,actions,application,authorisation,base_dialogs,bookmark_manager,\
+      browser,browser_sub_dialogs,cached_record_collection,collection_export_engine,\
+      command_design_pattern,component_framework,connection_service,construction_pack_common,\
+      core_resources,dataset_controller_core,datastore_base,datastore_geometry_raster,\
+      datastore_geometry_raster_acps,datastore_geometry_spatial_predicate,datastore_geometry_tin,\
+      datastore_geometry_topology_engine,datastore_geometry_transforms,datastore_geometry_vector,\
+      debugger_core,dialogs,display_grid,document_list_views,document_manager,documents,drafting,\
+      ds_src,dxf_exemplars,dynamic_transform_manager,extdb,formats,formatted_document,\
+      geometry_raster,geometry_raster_streams,geometry_set_factory,geometry_tin,\
+      geometry_transforms,geometry_vector,history_manager,infraction_checker,interaction_handler,\
+      layout_engine,layout_gui,lazy_record_collection,legacy_widget_emulation,licence_manager,\
+      magik_gui_components,magikscript,map_plugin,map_projections_catalogue,map_rendering,\
+      map_support,map_trail,memento,messages_base,mgr_src,model,module_management,\
+      module_management_magik_gui,multiple_deletion_dialog,network_analysis_plugin,\
+      network_follower,oledb_provider_component,oledb_reader,options_plugin,outlook_bar_plugin,\
+      pdf_generator,pdf_generator_application,plotting,predicates,printer_setup_wizard,profiler,\
+      progress_manager,query_designers,query_dialog,rotate_view_dialog,rwo_actions_plugin,\
+      rwo_core,rwo_sets,scrapbook,secure_storage,selection_set_lister,session_management,\
+      short_transaction_manager_base,short_transaction_manager_client,\
+      short_transaction_manager_server,simple_xml,sockets,style_core,style_properties,\
+      style_symbol_magik_gui,style_widgets,super_dd,sw_automation,sw_automation_client,\
+      sw_core_magik_sessions,sw_job_engine,swift_address_callouts,swift_base,swift_find,\
+      swift_google,swift_layout_series,swift_map,swift_plugins,swift_sketch,\
+      swift_view_application,sys_acps,sys_misc,sys_src,threading_tools,tics,transient_urwo_som,\
+      tree,tree_item,undo_manager,units_configuration,units_core,units_definitions,\
+      universal_extdb_rwo,universal_rwo,urn_manager,value_managers,wcm_credential_dialog,widgets,\
+      xml_output""";
 
   /** List of comment words, separated by ','. */
   @RuleProperty(
