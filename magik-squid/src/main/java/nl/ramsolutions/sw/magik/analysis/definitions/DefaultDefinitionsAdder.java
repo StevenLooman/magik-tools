@@ -12,9 +12,9 @@ public final class DefaultDefinitionsAdder {
   /**
    * Add base definitions, required for magik-tools itself.
    *
-   * @param definitionKeeper
+   * @param definitionKeeper {@link IDefinitionKeeper} to add to.
    */
-  public static void addBaseDefinitions(IDefinitionKeeper definitionKeeper) {
+  public static void addBaseDefinitions(final IDefinitionKeeper definitionKeeper) {
     definitionKeeper.add(
         new PackageDefinition(
             null, null, null, null, null, TypeString.ANONYMOUS_PACKAGE, Collections.emptyList()));

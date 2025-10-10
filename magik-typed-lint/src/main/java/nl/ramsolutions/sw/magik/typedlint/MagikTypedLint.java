@@ -103,8 +103,8 @@ public class MagikTypedLint {
    */
   void showChecks(final Writer writer, final boolean showDisabled)
       throws ReflectiveOperationException, IOException {
-    final ChecksConfiguration checksConfig =
-        new ChecksConfiguration(MagikTypedCheckList.getBaseChecks(), this.properties);
+    final List<Class<? extends Check>> checks = MagikTypedCheckList.getBaseChecks();
+    final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, this.properties);
     final Iterable<CheckHolder> holders = checksConfig.getAllChecks();
     for (final CheckHolder holder : holders) {
       final CheckMetadata metadata = holder.getMetadata();
@@ -180,8 +180,8 @@ public class MagikTypedLint {
   private boolean isFileIgnored(final MagikFile magikFile) {
     // TODO: Is this still current?
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final ChecksConfiguration checksConfig =
-        new ChecksConfiguration(MagikTypedCheckList.getBaseChecks(), fileProperties);
+    final List<Class<? extends Check>> checks = MagikTypedCheckList.getBaseChecks();
+    final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, fileProperties);
     final URI uri = magikFile.getUri();
     final Path path = Path.of(uri);
     final FileSystem fs = FileSystems.getDefault();
@@ -209,8 +209,8 @@ public class MagikTypedLint {
 
     // Run checks on files.
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final ChecksConfiguration checksConfig =
-        new ChecksConfiguration(MagikTypedCheckList.getBaseChecks(), fileProperties);
+    final List<Class<? extends Check>> checks = MagikTypedCheckList.getBaseChecks();
+    final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, fileProperties);
     final Iterable<CheckHolder> holders = checksConfig.getAllChecks();
     for (final CheckHolder holder : holders) {
       if (!holder.isEnabled()) {

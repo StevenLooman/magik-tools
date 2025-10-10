@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.checks.checks.magik.fixers;
+package nl.ramsolutions.sw.checks.magik.fixers;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.Collections;

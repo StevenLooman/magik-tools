@@ -15,6 +15,8 @@ import org.sonar.check.Rule;
 /** {@link Check} holder/factory. */
 public class CheckHolder {
 
+  private static final Pattern KEBAB_CASE_RE = Pattern.compile("(?=[A-Z][a-z])");
+
   /** Parameter/value for check. */
   public static class Parameter {
 
@@ -194,9 +196,8 @@ public class CheckHolder {
    * @param string String in camel case.
    * @return String in kebab case.
    */
-  public static String toKebabCase(String string) {
-    final Pattern pattern = Pattern.compile("(?=[A-Z][a-z])");
-    final Matcher matcher = pattern.matcher(string);
+  public static String toKebabCase(final String string) {
+    final Matcher matcher = CheckHolder.KEBAB_CASE_RE.matcher(string);
     final String stringKebab = matcher.replaceAll("-").toLowerCase();
     if (stringKebab.startsWith("-")) {
       return stringKebab.substring(1);

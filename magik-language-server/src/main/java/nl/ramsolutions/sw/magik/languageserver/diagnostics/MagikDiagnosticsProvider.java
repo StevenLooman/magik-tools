@@ -60,18 +60,18 @@ public class MagikDiagnosticsProvider {
     final List<Diagnostic> diagnostics = new ArrayList<>();
 
     // Magik diagnostics.
+    final List<Class<? extends Check>> magikChecks = MagikCheckList.getBaseChecks();
     final List<Diagnostic> diagnosticsChecks =
-        MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(
-            magikFile, MagikCheckList.getBaseChecks());
+        MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(magikFile, magikChecks);
     diagnostics.addAll(diagnosticsChecks);
 
     // Magik typed diagnostics.
     final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
     final Boolean typingEnableChecks = settings.getTypingEnableChecks();
     if (Boolean.TRUE.equals(typingEnableChecks)) {
+      final List<Class<? extends Check>> typedChecks = MagikTypedCheckList.getBaseChecks();
       final List<Diagnostic> diagnosticsTypedChecks =
-          MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(
-              magikFile, MagikTypedCheckList.getBaseChecks());
+          MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(magikFile, typedChecks);
       diagnostics.addAll(diagnosticsTypedChecks);
     }
 

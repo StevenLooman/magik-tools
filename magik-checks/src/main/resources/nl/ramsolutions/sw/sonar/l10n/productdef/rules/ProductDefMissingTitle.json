@@ -1,5 +1,5 @@
 {
-  "title": "Block is empty and can be removed",
+  "title": "product.def is missing title",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
@@ -7,12 +7,11 @@
     "constantCost": "5min"
   },
   "tags": [
-    "brain-overload",
-    "complexity",
+    "bad-practice",
     "confusing",
-    "unused"
+    "convention"
   ],
   "defaultSeverity": "Minor",
-  "ruleSpecification": "EmptyBlock",
-  "sqKey": "empty-block"
+  "ruleSpecification": "ProductDefMissingTitle",
+  "sqKey": "product-def-missing-title"
 }

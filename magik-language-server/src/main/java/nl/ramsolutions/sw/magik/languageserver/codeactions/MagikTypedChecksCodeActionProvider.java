@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.CheckHolder;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.MagikCheck;
@@ -59,8 +60,8 @@ public class MagikTypedChecksCodeActionProvider {
     final MagikToolsProperties fileProperties = magikFile.getProperties();
     final MagikToolsProperties actualProperties =
         MagikToolsProperties.merge(this.properties, fileProperties);
-    final ChecksConfiguration config =
-        new ChecksConfiguration(MagikTypedCheckList.getBaseChecks(), actualProperties);
+    final List<Class<? extends Check>> checks = MagikTypedCheckList.getBaseChecks();
+    final ChecksConfiguration config = new ChecksConfiguration(checks, actualProperties);
     final List<CheckHolder> allChecks = config.getAllChecks();
     for (final CheckHolder checkHolder : allChecks) {
       if (checkHolder.getCheckClass().equals(checkClass)) {

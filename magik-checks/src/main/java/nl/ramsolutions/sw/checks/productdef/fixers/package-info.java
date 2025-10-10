@@ -1,4 +1,4 @@
 /** Defaults. */
 @edu.umd.cs.findbugs.annotations.DefaultAnnotationForParameters(
     edu.umd.cs.findbugs.annotations.NonNull.class)
-package nl.ramsolutions.sw.checks.magiktyped.fixers;
+package nl.ramsolutions.sw.checks.productdef.fixers;

@@ -26,6 +26,8 @@ public class SourceFileScanner {
       path -> path.getFileName().toString().equalsIgnoreCase("module.def");
   public static final Predicate<Path> PRODUCT_DEF_FILE_FILTER =
       path -> path.getFileName().toString().equalsIgnoreCase("product.def");
+  public static final Predicate<Path> MAGIK_OR_PRODUCT_DEF =
+      MAGIK_FILE_FILTER.or(PRODUCT_DEF_FILE_FILTER);
   public static final Predicate<Path> ANY_MAGIK_RELATED_FILE_FILTER =
       MAGIK_FILE_FILTER.or(MODULE_DEF_FILE_FILTER).or(PRODUCT_DEF_FILE_FILTER);
 

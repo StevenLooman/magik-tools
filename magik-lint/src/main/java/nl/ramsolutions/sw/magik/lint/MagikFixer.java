@@ -122,8 +122,8 @@ public class MagikFixer {
 
   private List<Class<? extends Check>> getEnabledChecks(final MagikFile magikFile) {
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final ChecksConfiguration checksConfig =
-        new ChecksConfiguration(MagikCheckList.getBaseChecks(), fileProperties);
+    final List<Class<? extends Check>> checks = MagikCheckList.getBaseChecks();
+    final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, fileProperties);
     return checksConfig.getAllChecks().stream()
         .filter(CheckHolder::isEnabled)
         .map(CheckHolder::getCheckClass)
@@ -132,8 +132,8 @@ public class MagikFixer {
 
   private boolean isFileIgnored(final MagikFile magikFile) {
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final ChecksConfiguration checksConfig =
-        new ChecksConfiguration(MagikCheckList.getBaseChecks(), fileProperties);
+    final List<Class<? extends Check>> checks = MagikCheckList.getBaseChecks();
+    final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, fileProperties);
     final URI uri = magikFile.getUri();
     final Path path = Path.of(uri);
     final FileSystem fs = FileSystems.getDefault();

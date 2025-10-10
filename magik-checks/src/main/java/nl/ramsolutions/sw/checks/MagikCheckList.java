@@ -44,7 +44,7 @@ import nl.ramsolutions.sw.checks.magik.VariableCountCheck;
 import nl.ramsolutions.sw.checks.magik.VariableDeclarationUsageDistanceCheck;
 import nl.ramsolutions.sw.checks.magik.VariableNamingCheck;
 import nl.ramsolutions.sw.checks.magik.WarnedCallCheck;
-import nl.ramsolutions.sw.magik.checks.checks.magik.fixers.FormattingFixer;
+import nl.ramsolutions.sw.checks.magik.fixers.FormattingFixer;
 
 /** Magik {@link Check} list. */
 public final class MagikCheckList {
