@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.OpenedFile;
+import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -143,7 +144,8 @@ public class ModuleDefFile extends OpenedFile {
     final Path path = Path.of(uri);
     final ModuleDefFile moduleDefFile;
     try {
-      final Path moduleDefPath = ModuleDefFileScanner.getModuleDefFileForPath(path);
+      final Path moduleDefPath =
+          SourceFileScanner.searchFileUpwards(path, SourceFileScanner.SW_MODULE_DEF);
       if (moduleDefPath == null) {
         return null;
       }

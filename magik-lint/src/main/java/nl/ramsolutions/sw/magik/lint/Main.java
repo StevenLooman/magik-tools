@@ -16,7 +16,7 @@ import java.util.logging.LogManager;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
-import nl.ramsolutions.sw.magik.MagikFileScanner;
+import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.lint.output.MessageFormatReporter;
 import nl.ramsolutions.sw.magik.lint.output.NullReporter;
 import nl.ramsolutions.sw.magik.lint.output.Reporter;
@@ -140,7 +140,8 @@ public final class Main {
     final Collection<Path> paths = new ArrayList<>();
 
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
-    final MagikFileScanner scanner = new MagikFileScanner(ignoreHandler);
+    final SourceFileScanner scanner =
+        new SourceFileScanner(ignoreHandler, SourceFileScanner.MAGIK_FILE_FILTER);
     for (final String arg : args) {
       final Path path = Path.of(arg);
       final List<Path> argPaths = scanner.getFiles(path).toList();

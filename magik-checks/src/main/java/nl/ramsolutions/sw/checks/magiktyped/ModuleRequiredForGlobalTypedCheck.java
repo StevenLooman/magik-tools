@@ -13,6 +13,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -23,7 +24,6 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
-import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.moduledef.ModuleUsage;
 import org.slf4j.Logger;
@@ -101,7 +101,8 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
   private ModuleDefinition readModuleDefinition() {
     final URI uri = this.getMagikFile().getUri();
     final Path path = Path.of(uri);
-    final Path moduleDefPath = ModuleDefFileScanner.getModuleDefFileForPath(path);
+    final Path moduleDefPath =
+        SourceFileScanner.searchFileUpwards(path, SourceFileScanner.SW_MODULE_DEF);
     if (moduleDefPath == null) {
       return null;
     }

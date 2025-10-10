@@ -8,7 +8,6 @@ import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.checks.CheckHolder;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.MagikCheck;
-import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.checks.MagikTypedCheckFixer;
 import nl.ramsolutions.sw.checks.MagikTypedCheckList;
 import nl.ramsolutions.sw.magik.CodeAction;

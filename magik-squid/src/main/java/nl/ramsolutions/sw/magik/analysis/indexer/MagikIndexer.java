@@ -5,10 +5,11 @@ import java.nio.file.Path;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.MagikFileScanner;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,8 @@ public class MagikIndexer {
     }
 
     if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
-      final MagikFileScanner scanner = new MagikFileScanner(this.ignoreHandler);
+      final SourceFileScanner scanner =
+          new SourceFileScanner(ignoreHandler, SourceFileScanner.MAGIK_FILE_FILTER);
       scanner.getFiles(path).forEach(this::indexFile);
     }
 
