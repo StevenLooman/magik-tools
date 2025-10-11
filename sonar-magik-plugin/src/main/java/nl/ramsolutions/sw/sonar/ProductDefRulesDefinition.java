@@ -2,20 +2,20 @@ package nl.ramsolutions.sw.sonar;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.checks.MagikCheckList;
-import nl.ramsolutions.sw.sonar.language.Magik;
+import nl.ramsolutions.sw.checks.ProductDefCheckList;
+import nl.ramsolutions.sw.sonar.language.ProductDef;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonarsource.analyzer.commons.RuleMetadataLoader;
 
-/** Magik rules definition. */
-public class MagikRulesDefinition implements RulesDefinition {
+/** ProductDef rules definition. */
+public class ProductDefRulesDefinition implements RulesDefinition {
 
   private static final String REPOSITORY_NAME = "SonarAnalyzer";
 
   private final SonarRuntime runtime;
 
-  public MagikRulesDefinition(final SonarRuntime runtime) {
+  public ProductDefRulesDefinition(final SonarRuntime runtime) {
     this.runtime = runtime;
   }
 
@@ -23,21 +23,20 @@ public class MagikRulesDefinition implements RulesDefinition {
   public void define(final Context context) {
     final NewRepository repository =
         context
-            .createRepository(MagikCheckList.REPOSITORY_KEY, Magik.KEY)
-            .setName(MagikRulesDefinition.REPOSITORY_NAME);
+            .createRepository(ProductDefCheckList.REPOSITORY_KEY, ProductDef.KEY)
+            .setName(ProductDefRulesDefinition.REPOSITORY_NAME);
 
-    this.loadMagikRules(repository);
+    this.loadProductDefRules(repository);
 
     repository.done();
   }
 
-  private void loadMagikRules(final NewRepository repository) {
+  private void loadProductDefRules(final NewRepository repository) {
     final RuleMetadataLoader loader =
-        new RuleMetadataLoader(
-            MagikCheckList.PROFILE_DIR, MagikCheckList.PROFILE_LOCATION, this.runtime);
+        new RuleMetadataLoader(ProductDefCheckList.PROFILE_DIR, this.runtime);
 
     final List<Class<?>> checkClasses =
-        MagikCheckList.getChecks().stream()
+        ProductDefCheckList.getChecks().stream()
             .map(clazz -> (Class<?>) clazz)
             .collect(Collectors.toUnmodifiableList());
     loader.addRulesByAnnotatedClass(repository, checkClasses);

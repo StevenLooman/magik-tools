@@ -1,27 +1,23 @@
 package nl.ramsolutions.sw.sonar.language;
 
-import java.util.Arrays;
 import java.util.Objects;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.resources.AbstractLanguage;
 
-/** Smallworld Magik language. */
-public class Magik extends AbstractLanguage {
+/** Smallworld product.def language. */
+public class ProductDef extends AbstractLanguage {
 
   /** Key for language. */
-  public static final String KEY = "magik";
+  public static final String KEY = "product.def";
 
   /** Name for language. */
-  public static final String NAME = "Magik";
+  public static final String NAME = "Product Definition";
 
   /** Category for language. */
-  public static final String MAGIK_CATEGORY = "magik";
+  public static final String PRODUCT_DEF_CATEGORY = "product.def";
 
-  /** File suffixes key. */
-  public static final String FILE_SUFFIXES_KEY = "sonar.magik.file.suffixes";
-
-  /** Default file suffixes. */
-  public static final String DEFAULT_FILE_SUFFIXES = ".magik";
+  /** File suffixes. */
+  public static final String[] FILE_SUFFIXES = new String[] {".def"};
 
   private final Configuration configuration;
 
@@ -30,8 +26,8 @@ public class Magik extends AbstractLanguage {
    *
    * @param configuration Configuration.
    */
-  public Magik(final Configuration configuration) {
-    super(Magik.KEY, Magik.NAME);
+  public ProductDef(final Configuration configuration) {
+    super(ProductDef.KEY, ProductDef.NAME);
     this.configuration = configuration;
   }
 
@@ -42,13 +38,7 @@ public class Magik extends AbstractLanguage {
    */
   @Override
   public String[] getFileSuffixes() {
-    final String[] stringArray = this.configuration.getStringArray(Magik.FILE_SUFFIXES_KEY);
-    final String[] suffixes =
-        Arrays.stream(stringArray)
-            .filter(s -> s != null)
-            .filter(s -> !s.trim().isEmpty())
-            .toArray(String[]::new);
-    return suffixes.length == 0 ? Magik.DEFAULT_FILE_SUFFIXES.split(",") : suffixes;
+    return ProductDef.FILE_SUFFIXES;
   }
 
   @Override
@@ -70,7 +60,7 @@ public class Magik extends AbstractLanguage {
       return false;
     }
 
-    final Magik other = (Magik) obj;
+    final ProductDef other = (ProductDef) obj;
     return Objects.equals(this.configuration, other.configuration);
   }
 }

@@ -9,7 +9,7 @@ import nl.ramsolutions.sw.checks.productdef.ProductDefMissingTitleCheck;
 public class ProductDefCheckList {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String REPOSITORY_KEY = "magik";
+  public static final String REPOSITORY_KEY = "product.def";
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String PROFILE_DIR = "nl/ramsolutions/sw/sonar/l10n/productdef/rules";

@@ -27,8 +27,7 @@ class MagikTypedCheckListTest {
   }
 
   private static String toKebabCase(final String string) {
-    final String stringKebab =
-        string.replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase();
+    final String stringKebab = string.replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase();
     if (stringKebab.startsWith("-")) {
       return stringKebab.substring(1);
     }

@@ -6,14 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import nl.ramsolutions.sw.checks.Issue;
-import nl.ramsolutions.sw.checks.MagikCheck;
-import nl.ramsolutions.sw.checks.MagikCheckList;
-import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.MagikVisitor;
-import nl.ramsolutions.sw.magik.metrics.FileMetrics;
-import nl.ramsolutions.sw.sonar.language.Magik;
+import nl.ramsolutions.sw.checks.ProductDefCheck;
+import nl.ramsolutions.sw.checks.ProductDefCheckList;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.productdef.metrics.FileMetrics;
+import nl.ramsolutions.sw.sonar.language.ProductDef;
 import nl.ramsolutions.sw.sonar.sensors.cpd.CpdTokenSaver;
-import nl.ramsolutions.sw.sonar.visitors.MagikHighlighterVisitor;
+import nl.ramsolutions.sw.sonar.visitors.ProductDefHighlighterVisitor;
 import org.sonar.api.batch.fs.FilePredicate;
 import org.sonar.api.batch.fs.FilePredicates;
 import org.sonar.api.batch.fs.FileSystem;
@@ -35,10 +36,10 @@ import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 import org.sonar.squidbridge.ProgressReport;
 
-/** Magik squid Sensor. */
-public class MagikSensor implements Sensor {
+/** product.def squid Sensor. */
+public class ProductDefSensor implements Sensor {
 
-  private static final Logger LOGGER = Loggers.get(MagikSensor.class);
+  private static final Logger LOGGER = Loggers.get(ProductDefSensor.class);
   private static final long SLEEP_PERIOD = 100;
 
   private final CheckFactory checkFactory;
@@ -51,7 +52,7 @@ public class MagikSensor implements Sensor {
    * @param checkFactory Factory.
    * @param fileLinesContextFactory Factory.
    */
-  public MagikSensor(
+  public ProductDefSensor(
       final CheckFactory checkFactory,
       final FileLinesContextFactory fileLinesContextFactory,
       final NoSonarFilter noSonarFilter) {
@@ -62,7 +63,7 @@ public class MagikSensor implements Sensor {
 
   @Override
   public void describe(final @Nonnull SensorDescriptor descriptor) {
-    descriptor.onlyOnLanguage(Magik.KEY).name("Magik Sensor");
+    descriptor.onlyOnLanguage(ProductDef.KEY).name("ProductDef Sensor");
   }
 
   @Override
@@ -71,26 +72,29 @@ public class MagikSensor implements Sensor {
     final FilePredicates predicates = fileSystem.predicates();
 
     final FilePredicate filePredicate =
-        predicates.and(predicates.hasType(InputFile.Type.MAIN), predicates.hasLanguage(Magik.KEY));
+        predicates.and(
+            predicates.hasType(InputFile.Type.MAIN),
+            predicates.hasLanguage(ProductDef.KEY),
+            predicates.hasFilename("product.def"));
 
     final List<InputFile> inputFiles = new ArrayList<>();
     fileSystem.inputFiles(filePredicate).forEach(inputFiles::add);
 
     final ProgressReport progressReport =
-        new ProgressReport("Report about progress of Sonar Magik analyzer", SLEEP_PERIOD);
+        new ProgressReport("Report about progress of Sonar product.def analyzer", SLEEP_PERIOD);
     final List<String> filenames = inputFiles.stream().map(InputFile::toString).toList();
     progressReport.start(filenames);
 
     for (final InputFile inputFile : inputFiles) {
-      this.scanMagikFile(context, inputFile);
+      this.scanProductDefFile(context, inputFile);
       progressReport.nextFile();
     }
 
     progressReport.stop();
   }
 
-  private void scanMagikFile(final SensorContext context, final InputFile inputFile) {
-    LOGGER.debug("Scanning magik file: {}", inputFile);
+  private void scanProductDefFile(final SensorContext context, final InputFile inputFile) {
+    LOGGER.debug("Scanning product.def file: {}", inputFile);
 
     // Read contents.
     final URI uri = inputFile.uri();
@@ -101,21 +105,23 @@ public class MagikSensor implements Sensor {
       throw new IllegalStateException("Cannot read " + inputFile, ex);
     }
 
-    final MagikFile magikFile = new MagikFile(uri, fileContent);
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper(false);
+    final ProductDefFile productDefFile =
+        new ProductDefFile(uri, fileContent, definitionKeeper, null);
 
     // Save metrics.
     LOGGER.debug("Save measures");
-    this.saveMetrics(context, inputFile, magikFile);
+    this.saveMetrics(context, inputFile, productDefFile);
 
     // Save issues.
     LOGGER.debug("Running checks");
-    final Checks<MagikCheck> checks =
+    final Checks<ProductDefCheck> checks =
         checkFactory
-            .<MagikCheck>create(MagikCheckList.REPOSITORY_KEY)
-            .addAnnotatedChecks(MagikCheckList.getChecks());
-    for (final MagikCheck check : checks.all()) {
+            .<ProductDefCheck>create(ProductDefCheckList.REPOSITORY_KEY)
+            .addAnnotatedChecks(ProductDefCheckList.getChecks());
+    for (final ProductDefCheck check : checks.all()) {
       LOGGER.debug("Running check: {}", check);
-      final List<Issue> issues = check.scanFileForIssues(magikFile);
+      final List<Issue> issues = check.scanFileForIssues(productDefFile);
       final RuleKey ruleKey = checks.ruleKey(check);
       if (ruleKey == null) {
         continue;
@@ -126,40 +132,32 @@ public class MagikSensor implements Sensor {
 
     // Save highlighted tokens.
     LOGGER.debug("Saving highlighted tokens");
-    final MagikVisitor tokensVisitor = new MagikHighlighterVisitor(context, inputFile);
-    tokensVisitor.scanFile(magikFile);
+    final ProductDefHighlighterVisitor tokensVisitor =
+        new ProductDefHighlighterVisitor(context, inputFile);
+    tokensVisitor.scanFile(productDefFile);
 
     // Save CPD tokens.
     LOGGER.debug("Saving CPD tokens");
     final CpdTokenSaver cpdTokenSaver = new CpdTokenSaver(context);
-    cpdTokenSaver.saveCpdTokens(inputFile, magikFile);
+    cpdTokenSaver.saveCpdTokens(inputFile, productDefFile);
   }
 
   private void saveMetrics(
-      final SensorContext context, final InputFile inputFile, final MagikFile magikFile) {
-    final FileMetrics metrics = new FileMetrics(magikFile, true);
+      final SensorContext context, final InputFile inputFile, final ProductDefFile productDefFile) {
+    final FileMetrics metrics = new FileMetrics(productDefFile, true);
 
     // Metrics on file.
-    this.saveMetric(context, inputFile, CoreMetrics.NCLOC, metrics.linesOfCode().size());
+    this.saveMetric(context, inputFile, CoreMetrics.NCLOC, metrics.linesOfDefinition().size());
     this.saveMetric(context, inputFile, CoreMetrics.COMMENT_LINES, metrics.commentLineCount());
-    this.saveMetric(context, inputFile, CoreMetrics.CLASSES, metrics.numberOfExemplars());
-    this.saveMetric(
-        context,
-        inputFile,
-        CoreMetrics.FUNCTIONS,
-        metrics.numberOfMethods() + metrics.numberOfProcedures());
-    this.saveMetric(context, inputFile, CoreMetrics.STATEMENTS, metrics.numberOfStatements());
-    this.saveMetric(context, inputFile, CoreMetrics.COMPLEXITY, metrics.fileComplexity());
+    // A product.def file is always one class.
+    // TODO: Do we really want this?
+    this.saveMetric(context, inputFile, CoreMetrics.CLASSES, 1);
 
     // Metrics on lines.
     final FileLinesContext fileLinesContext = this.fileLinesContextFactory.createFor(inputFile);
     metrics
-        .linesOfCode()
+        .linesOfDefinition()
         .forEach(line -> fileLinesContext.setIntValue(CoreMetrics.NCLOC_DATA_KEY, line, 1));
-    metrics
-        .executableLines()
-        .forEach(
-            line -> fileLinesContext.setIntValue(CoreMetrics.EXECUTABLE_LINES_DATA_KEY, line, 1));
     fileLinesContext.save();
 
     // No sonar filter.
@@ -181,13 +179,13 @@ public class MagikSensor implements Sensor {
       final RuleKey ruleKey,
       final List<Issue> issues,
       final InputFile inputFile) {
-    for (final Issue magikIssue : issues) {
-      LOGGER.debug("Saving issue, file: {}, issue: {}", inputFile, magikIssue);
+    for (final Issue productDefIssue : issues) {
+      LOGGER.debug("Saving issue, file: {}, issue: {}", inputFile, productDefIssue);
 
       final NewIssue issue = context.newIssue();
       final NewIssueLocation location =
-          issue.newLocation().on(inputFile).message(magikIssue.message());
-      final Integer line = magikIssue.startLine();
+          issue.newLocation().on(inputFile).message(productDefIssue.message());
+      final Integer line = productDefIssue.startLine();
       if (line != null) {
         location.at(inputFile.selectLine(line));
       }

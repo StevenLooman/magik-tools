@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** File scanner. */
+/** Source file scanner. */
 public class SourceFileScanner {
 
   public static final String SW_MODULE_DEF = "module.def";
