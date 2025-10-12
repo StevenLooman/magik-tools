@@ -30,6 +30,7 @@ public enum ProductDefinitionGrammar implements GrammarRuleKey {
 
   SYNTAX_ERROR_SECTION,
   SYNTAX_ERROR_LINE,
+  SYNTAX_ERROR,
 
   SPACING,
   NEWLINE,
