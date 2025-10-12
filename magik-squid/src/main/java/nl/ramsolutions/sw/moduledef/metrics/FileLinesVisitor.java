@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.productdef.metrics;
+package nl.ramsolutions.sw.moduledef.metrics;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.GenericTokenType;
@@ -8,12 +8,17 @@ import com.sonar.sslr.api.Trivia;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import nl.ramsolutions.sw.productdef.ProductDefVisitor;
+import nl.ramsolutions.sw.ConfigurationLocator;
+import nl.ramsolutions.sw.moduledef.ModuleDefVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Visitor that computes NCLOC_DATA_KEY and COMMENT_LINES_DATA_KEY metrics used by the DevCockpit.
  */
-public class FileLinesVisitor extends ProductDefVisitor {
+public class FileLinesVisitor extends ModuleDefVisitor {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationLocator.class);
 
   private final boolean ignoreHeaderComments;
   private boolean seenFirstToken;
@@ -44,7 +49,7 @@ public class FileLinesVisitor extends ProductDefVisitor {
   }
 
   @Override
-  protected void walkPreProductDefinition(final AstNode node) {
+  protected void walkPreModuleDefinition(final AstNode node) {
     this.nosonarLines.clear();
     this.linesOfDefinition.clear();
     this.linesOfComments.clear();

@@ -12,7 +12,8 @@ import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
 import nl.ramsolutions.sw.productdef.metrics.FileMetrics;
-import nl.ramsolutions.sw.sonar.language.ProductDef;
+import nl.ramsolutions.sw.sonar.ProductModuleDefRulesDefinition;
+import nl.ramsolutions.sw.sonar.language.ProductModuleDefLanguage;
 import nl.ramsolutions.sw.sonar.sensors.cpd.CpdTokenSaver;
 import nl.ramsolutions.sw.sonar.visitors.ProductDefHighlighterVisitor;
 import org.sonar.api.batch.fs.FilePredicate;
@@ -39,6 +40,7 @@ import org.sonar.squidbridge.ProgressReport;
 /** product.def squid Sensor. */
 public class ProductDefSensor implements Sensor {
 
+  private static final String PRODUCT_DEF = "product.def";
   private static final Logger LOGGER = Loggers.get(ProductDefSensor.class);
   private static final long SLEEP_PERIOD = 100;
 
@@ -63,19 +65,21 @@ public class ProductDefSensor implements Sensor {
 
   @Override
   public void describe(final @Nonnull SensorDescriptor descriptor) {
-    descriptor.onlyOnLanguage(ProductDef.KEY).name("ProductDef Sensor");
+    descriptor.onlyOnLanguage(ProductModuleDefLanguage.KEY).name("ProductDef Sensor");
   }
 
   @Override
   public void execute(final @Nonnull SensorContext context) {
+    LOGGER.debug("Executing ProductDefSensor");
+
     final FileSystem fileSystem = context.fileSystem();
     final FilePredicates predicates = fileSystem.predicates();
 
     final FilePredicate filePredicate =
         predicates.and(
             predicates.hasType(InputFile.Type.MAIN),
-            predicates.hasLanguage(ProductDef.KEY),
-            predicates.hasFilename("product.def"));
+            predicates.hasLanguage(ProductModuleDefLanguage.KEY),
+            predicates.hasFilename(PRODUCT_DEF));
 
     final List<InputFile> inputFiles = new ArrayList<>();
     fileSystem.inputFiles(filePredicate).forEach(inputFiles::add);
@@ -117,7 +121,7 @@ public class ProductDefSensor implements Sensor {
     LOGGER.debug("Running checks");
     final Checks<ProductDefCheck> checks =
         checkFactory
-            .<ProductDefCheck>create(ProductDefCheckList.REPOSITORY_KEY)
+            .<ProductDefCheck>create(ProductModuleDefRulesDefinition.REPOSITORY_KEY)
             .addAnnotatedChecks(ProductDefCheckList.getChecks());
     for (final ProductDefCheck check : checks.all()) {
       LOGGER.debug("Running check: {}", check);

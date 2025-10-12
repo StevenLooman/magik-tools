@@ -1,8 +1,8 @@
-package nl.ramsolutions.sw.productdef.metrics;
+package nl.ramsolutions.sw.moduledef.metrics;
 
 import java.util.Collections;
 import java.util.Set;
-import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 
 /** File metrics extractor. */
 public class FileMetrics {
@@ -14,12 +14,12 @@ public class FileMetrics {
   /**
    * Constructor.
    *
-   * @param productDefFile product.def file.
+   * @param moduleDefFile module.def file.
    * @param ignoreHeaderComments Ignore first (header) comment of file.
    */
-  public FileMetrics(final ProductDefFile productDefFile, final boolean ignoreHeaderComments) {
+  public FileMetrics(final ModuleDefFile moduleDefFile, final boolean ignoreHeaderComments) {
     final FileLinesVisitor fileLinesVisitor = new FileLinesVisitor(ignoreHeaderComments);
-    fileLinesVisitor.scanFile(productDefFile);
+    fileLinesVisitor.scanFile(moduleDefFile);
     this.linesOfDefinition = fileLinesVisitor.getLinesOfDefinition();
     this.commentLines = fileLinesVisitor.getLinesOfComments();
     this.nosonarLines = fileLinesVisitor.getNosonarLines();

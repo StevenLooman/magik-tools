@@ -4,6 +4,7 @@ import com.sonar.sslr.api.Token;
 import java.util.Comparator;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
 import nl.ramsolutions.sw.sonar.TokenLocation;
 import org.sonar.api.batch.fs.InputFile;
@@ -47,6 +48,17 @@ public class CpdTokenSaver {
    */
   public void saveCpdTokens(final InputFile inputFile, final ProductDefFile productDefFile) {
     final List<Token> tokens = productDefFile.getTopNode().getTokens();
+    this.saveCpdTokens(inputFile, tokens);
+  }
+
+  /**
+   * Save tokens for CPD.
+   *
+   * @param inputFile Input file.
+   * @param moduleDefFile ModuleDef file.
+   */
+  public void saveCpdTokens(final InputFile inputFile, final ModuleDefFile moduleDefFile) {
+    final List<Token> tokens = moduleDefFile.getTopNode().getTokens();
     this.saveCpdTokens(inputFile, tokens);
   }
 

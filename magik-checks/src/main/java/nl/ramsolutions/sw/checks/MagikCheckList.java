@@ -55,9 +55,6 @@ public final class MagikCheckList {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String PROFILE_DIR = "nl/ramsolutions/sw/sonar/l10n/magik/rules";
 
-  @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String PROFILE_LOCATION = PROFILE_DIR + "/Sonar_way_profile.json";
-
   private MagikCheckList() {}
 
   /**
@@ -116,7 +113,7 @@ public final class MagikCheckList {
    * @return List of {@link Check}s.
    */
   public static List<Class<? extends Check>> getBaseChecks() {
-    return getChecks().stream()
+    return MagikCheckList.getChecks().stream()
         .map(clazz -> (Class<? extends Check>) clazz)
         .collect(Collectors.toList());
   }

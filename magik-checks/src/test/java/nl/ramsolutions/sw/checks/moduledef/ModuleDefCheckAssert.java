@@ -1,22 +1,22 @@
-package nl.ramsolutions.sw.checks.productdef;
+package nl.ramsolutions.sw.checks.moduledef;
 
 import java.net.URI;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.CheckAssert;
-import nl.ramsolutions.sw.checks.ProductDefCheck;
+import nl.ramsolutions.sw.checks.ModuleDefCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 
 /**
- * Assertions for {@link ProductDefCheck} instances.
+ * Assertions for {@link ModuleDefCheck} instances.
  *
- * <p>Use via {@link #assertThat(ProductDefCheck)}.
+ * <p>Use via {@link #assertThat(ModuleDefCheck)}.
  */
-public class ProductDefCheckAssert extends CheckAssert {
+public class ModuleDefCheckAssert extends CheckAssert {
 
-  protected ProductDefCheckAssert(final Check actual) {
+  protected ModuleDefCheckAssert(final Check actual) {
     super(actual);
   }
 
@@ -26,19 +26,19 @@ public class ProductDefCheckAssert extends CheckAssert {
    * @param actual {@link Check} instance.
    * @return Self.
    */
-  public static ProductDefCheckAssert assertThat(final ProductDefCheck actual) {
-    return new ProductDefCheckAssert(actual);
+  public static ModuleDefCheckAssert assertThat(final ModuleDefCheck actual) {
+    return new ModuleDefCheckAssert(actual);
   }
 
   @Override
   protected OpenedFile createOpenedFile(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper(false);
-    return new ProductDefFile(ProductDefFile.DEFAULT_URI, code, definitionKeeper, null);
+    return new ModuleDefFile(ModuleDefFile.DEFAULT_URI, code, definitionKeeper, null);
   }
 
   @Override
   protected OpenedFile createOpenedFile(final URI uri, final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper(false);
-    return new ProductDefFile(uri, code, definitionKeeper, null);
+    return new ModuleDefFile(uri, code, definitionKeeper, null);
   }
 }

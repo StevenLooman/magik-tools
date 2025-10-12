@@ -6,12 +6,12 @@ import java.io.IOException;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
-/** Tests for {@link ProductDefCheckList}. */
-class ProductDefCheckListTest {
+/** Tests for {@link ModuleDefCheckList}. */
+class ModuleDefCheckListTest {
 
   @Test
   void testAllChecksHaveJsonFile() throws IOException {
-    for (Class<? extends ProductDefCheck> checkClass : ProductDefCheckList.getChecks()) {
+    for (Class<? extends ModuleDefCheck> checkClass : ModuleDefCheckList.getChecks()) {
       final CheckHolder holder = new CheckHolder(checkClass, Collections.emptySet(), true);
       final CheckMetadata metadata = holder.getMetadata();
       assertThat(metadata).isNotNull();
@@ -21,7 +21,7 @@ class ProductDefCheckListTest {
       assertThat(ruleKeySpecification).isEqualTo(simpleName);
 
       final String sqKey = metadata.getSqKey();
-      final String simpleNameKebabCase = ProductDefCheckListTest.toKebabCase(sqKey);
+      final String simpleNameKebabCase = ModuleDefCheckListTest.toKebabCase(sqKey);
       assertThat(sqKey).isEqualTo(simpleNameKebabCase);
     }
   }

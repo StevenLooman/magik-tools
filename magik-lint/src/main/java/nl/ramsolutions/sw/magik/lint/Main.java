@@ -141,7 +141,7 @@ public final class Main {
 
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
     final SourceFileScanner scanner =
-        new SourceFileScanner(ignoreHandler, SourceFileScanner.MAGIK_OR_PRODUCT_DEF);
+        new SourceFileScanner(ignoreHandler, SourceFileScanner.ANY_MAGIK_RELATED_FILE_FILTER);
     for (final String arg : args) {
       final Path path = Path.of(arg);
       final List<Path> argPaths = scanner.getFiles(path).toList();

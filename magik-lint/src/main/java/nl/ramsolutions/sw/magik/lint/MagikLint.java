@@ -25,12 +25,14 @@ import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.IssueDisabledChecker;
 import nl.ramsolutions.sw.checks.MagikCheckList;
+import nl.ramsolutions.sw.checks.ModuleDefCheckList;
 import nl.ramsolutions.sw.checks.ProductDefCheckList;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.lint.output.Reporter;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +81,9 @@ public class MagikLint {
       } else if (SourceFileScanner.PRODUCT_DEF_FILE_FILTER.test(path)) {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper(false);
         return new ProductDefFile(fileProperties, uri, fileContents, definitionKeeper, null);
+      } else if (SourceFileScanner.MODULE_DEF_FILE_FILTER.test(path)) {
+        final IDefinitionKeeper definitionKeeper = new DefinitionKeeper(false);
+        return new ModuleDefFile(fileProperties, uri, fileContents, definitionKeeper, null);
       } else {
         throw new IllegalStateException("Unsupported file type: " + path);
       }
@@ -243,14 +248,19 @@ public class MagikLint {
       return MagikCheckList.getBaseChecks();
     } else if (openedFile instanceof ProductDefFile) {
       return ProductDefCheckList.getBaseChecks();
+    } else if (openedFile instanceof ModuleDefFile) {
+      return ModuleDefCheckList.getBaseChecks();
     } else {
       throw new IllegalStateException("Unsupported file type: " + openedFile.getClass());
     }
   }
 
   private List<Class<? extends Check>> getAllChecks() {
-    return Stream.concat(
-            ProductDefCheckList.getBaseChecks().stream(), MagikCheckList.getBaseChecks().stream())
+    return Stream.of(
+            ProductDefCheckList.getBaseChecks().stream(),
+            ModuleDefCheckList.getBaseChecks().stream(),
+            MagikCheckList.getBaseChecks().stream())
+        .flatMap(stream -> stream)
         .sorted(Comparator.comparing(Class::getSimpleName))
         .toList();
   }

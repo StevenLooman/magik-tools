@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.Location;
@@ -21,10 +21,9 @@ import nl.ramsolutions.sw.productdef.ProductDefinition;
 /** Module definition file. */
 public class ModuleDefFile extends OpenedFile {
 
-  private static final URI DEFAULT_URI = URI.create("memory://module.def");
+  public static final URI DEFAULT_URI = URI.create("memory://module.def");
   public static final Location DEFAULT_LOCATION = new Location(DEFAULT_URI, Range.DEFAULT_RANGE);
 
-  private final @Nullable Instant timestamp;
   private final IDefinitionKeeper definitionKeeper;
   private final @Nullable ProductDefFile parentProductDefFile;
   private AstNode astNode;
@@ -43,7 +42,25 @@ public class ModuleDefFile extends OpenedFile {
       final IDefinitionKeeper definitionKeeper,
       final @Nullable ProductDefFile parentProductDefFile) {
     super(uri, source);
-    this.timestamp = null;
+    this.definitionKeeper = definitionKeeper;
+    this.parentProductDefFile = parentProductDefFile;
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param properties Properties.
+   * @param uri URI.
+   * @param source Source.
+   * @param definitionKeeper DefinitionKeeper.
+   */
+  public ModuleDefFile(
+      final MagikToolsProperties properties,
+      final URI uri,
+      final String source,
+      final IDefinitionKeeper definitionKeeper,
+      final @Nullable ProductDefFile parentProductDefFile) {
+    super(properties, uri, source);
     this.definitionKeeper = definitionKeeper;
     this.parentProductDefFile = parentProductDefFile;
   }
@@ -62,19 +79,8 @@ public class ModuleDefFile extends OpenedFile {
       final @Nullable ProductDefFile parentProductDefFile)
       throws IOException {
     super(path.toUri(), Files.readString(path, FileCharsetDeterminer.determineCharset(path)));
-    this.timestamp = Files.getLastModifiedTime(path).toInstant();
     this.definitionKeeper = definitionKeeper;
     this.parentProductDefFile = parentProductDefFile;
-  }
-
-  /**
-   * Get the timestamp for this file.
-   *
-   * @return Timestamp for this file.
-   */
-  @CheckForNull
-  public Instant getTimestamp() {
-    return this.timestamp;
   }
 
   /**

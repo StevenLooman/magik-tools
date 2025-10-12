@@ -107,7 +107,7 @@
           <skipDependenciesPackaging>true</skipDependenciesPackaging>
           <sonarLintSupported>false</sonarLintSupported>
           <pluginApiMinVersion>${pluginApiMinVersion}</pluginApiMinVersion>
-          <requiredForLanguages>magik,product_def</requiredForLanguages>
+          <requiredForLanguages>magik,product_def,module_def</requiredForLanguages>
           <jreMinVersion>17</jreMinVersion>
           <archive>
             <manifestEntries>

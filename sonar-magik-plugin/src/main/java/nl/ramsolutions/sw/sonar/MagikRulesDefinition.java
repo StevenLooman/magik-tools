@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.sonar;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.checks.MagikCheckList;
-import nl.ramsolutions.sw.sonar.language.Magik;
+import nl.ramsolutions.sw.sonar.language.MagikLanguage;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonarsource.analyzer.commons.RuleMetadataLoader;
@@ -23,7 +23,7 @@ public class MagikRulesDefinition implements RulesDefinition {
   public void define(final Context context) {
     final NewRepository repository =
         context
-            .createRepository(MagikCheckList.REPOSITORY_KEY, Magik.KEY)
+            .createRepository(MagikCheckList.REPOSITORY_KEY, MagikLanguage.KEY)
             .setName(MagikRulesDefinition.REPOSITORY_NAME);
 
     this.loadMagikRules(repository);
@@ -33,8 +33,7 @@ public class MagikRulesDefinition implements RulesDefinition {
 
   private void loadMagikRules(final NewRepository repository) {
     final RuleMetadataLoader loader =
-        new RuleMetadataLoader(
-            MagikCheckList.PROFILE_DIR, MagikCheckList.PROFILE_LOCATION, this.runtime);
+        new RuleMetadataLoader(MagikCheckList.PROFILE_DIR, this.runtime);
 
     final List<Class<?>> checkClasses =
         MagikCheckList.getChecks().stream()

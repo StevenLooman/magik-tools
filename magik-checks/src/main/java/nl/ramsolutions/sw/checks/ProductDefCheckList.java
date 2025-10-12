@@ -9,13 +9,10 @@ import nl.ramsolutions.sw.checks.productdef.ProductDefMissingTitleCheck;
 public class ProductDefCheckList {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String REPOSITORY_KEY = "product.def";
+  public static final String REPOSITORY_KEY = "product_def";
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String PROFILE_DIR = "nl/ramsolutions/sw/sonar/l10n/productdef/rules";
-
-  @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String PROFILE_LOCATION = PROFILE_DIR + "/Sonar_way_profile.json";
 
   private ProductDefCheckList() {}
 
@@ -34,7 +31,7 @@ public class ProductDefCheckList {
    * @return List of {@link Check}s.
    */
   public static List<Class<? extends Check>> getBaseChecks() {
-    return getChecks().stream()
+    return ProductDefCheckList.getChecks().stream()
         .map(clazz -> (Class<? extends Check>) clazz)
         .collect(Collectors.toList());
   }

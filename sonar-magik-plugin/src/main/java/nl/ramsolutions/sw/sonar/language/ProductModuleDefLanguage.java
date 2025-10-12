@@ -5,23 +5,27 @@ import java.util.Objects;
 import org.sonar.api.config.Configuration;
 import org.sonar.api.resources.AbstractLanguage;
 
-/** Smallworld Magik language. */
-public class Magik extends AbstractLanguage {
+/**
+ * Smallworld product.def and module.def languages.
+ *
+ * <p>Combined into one {@link AbstractLanguage} because they share the same file suffixes.
+ */
+public class ProductModuleDefLanguage extends AbstractLanguage {
 
   /** Key for language. */
-  public static final String KEY = "magik";
+  public static final String KEY = "product_module_def";
 
   /** Name for language. */
-  public static final String NAME = "Magik";
+  public static final String NAME = "Product Module Definition";
 
   /** Category for language. */
-  public static final String MAGIK_CATEGORY = "magik";
+  public static final String PRODUCT_DEF_CATEGORY = "product_module_def";
 
   /** File suffixes key. */
-  public static final String FILE_SUFFIXES_KEY = "sonar.magik.file.suffixes";
+  public static final String FILE_SUFFIXES_KEY = "sonar.product_module_def.file.suffixes";
 
-  /** Default file suffixes. */
-  public static final String DEFAULT_FILE_SUFFIXES = ".magik";
+  /** File suffixes. */
+  public static final String DEFAULT_FILE_SUFFIXES = ".def";
 
   private final Configuration configuration;
 
@@ -30,8 +34,8 @@ public class Magik extends AbstractLanguage {
    *
    * @param configuration Configuration.
    */
-  public Magik(final Configuration configuration) {
-    super(Magik.KEY, Magik.NAME);
+  public ProductModuleDefLanguage(final Configuration configuration) {
+    super(ProductModuleDefLanguage.KEY, ProductModuleDefLanguage.NAME);
     this.configuration = configuration;
   }
 
@@ -42,13 +46,16 @@ public class Magik extends AbstractLanguage {
    */
   @Override
   public String[] getFileSuffixes() {
-    final String[] stringArray = this.configuration.getStringArray(Magik.FILE_SUFFIXES_KEY);
+    final String[] stringArray =
+        this.configuration.getStringArray(ProductModuleDefLanguage.FILE_SUFFIXES_KEY);
     final String[] suffixes =
         Arrays.stream(stringArray)
             .filter(s -> s != null)
             .filter(s -> !s.trim().isEmpty())
             .toArray(String[]::new);
-    return suffixes.length == 0 ? Magik.DEFAULT_FILE_SUFFIXES.split(",") : suffixes;
+    return suffixes.length == 0
+        ? ProductModuleDefLanguage.DEFAULT_FILE_SUFFIXES.split(",")
+        : suffixes;
   }
 
   @Override
@@ -70,7 +77,7 @@ public class Magik extends AbstractLanguage {
       return false;
     }
 
-    final Magik other = (Magik) obj;
+    final ProductModuleDefLanguage other = (ProductModuleDefLanguage) obj;
     return Objects.equals(this.configuration, other.configuration);
   }
 }

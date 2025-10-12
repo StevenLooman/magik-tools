@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.metrics;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
+import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.TokenType;
 import com.sonar.sslr.api.Trivia;
@@ -74,6 +75,11 @@ public class FileLinesVisitor extends MagikVisitor {
 
   @Override
   public void walkToken(final Token token) {
+    final TokenType tokenType = token.getType();
+    if (tokenType.equals(GenericTokenType.EOF)) {
+      return;
+    }
+
     // process lines of code
     final String[] tokenLines = token.getValue().split("\n", -1);
     for (int line = token.getLine(); line < token.getLine() + tokenLines.length; line++) {
@@ -89,7 +95,7 @@ public class FileLinesVisitor extends MagikVisitor {
     // process comment
     for (final Trivia trivia : token.getTrivia()) {
       if (trivia.isComment()) {
-        visitComment(trivia);
+        this.visitComment(trivia);
       }
     }
   }

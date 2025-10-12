@@ -159,6 +159,8 @@ public class CheckHolder {
     // TODO: Can't we do this better?
     if (this.checkClass.getGenericSuperclass().equals(ProductDefCheck.class)) {
       return ProductDefCheckList.PROFILE_DIR;
+    } else if (this.checkClass.getGenericSuperclass().equals(ModuleDefCheck.class)) {
+      return ModuleDefCheckList.PROFILE_DIR;
     } else if (this.checkClass.getGenericSuperclass().equals(MagikCheck.class)) {
       return MagikCheckList.PROFILE_DIR;
     } else if (this.checkClass.getGenericSuperclass().equals(MagikTypedCheck.class)) {
