@@ -12,11 +12,19 @@ import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import nl.ramsolutions.sw.moduledef.parser.ModuleDefParser;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 
+/** Parser for Smallworld module.def files. */
 public class ModuleDefinitionParser {
 
   private static final String UNDEFINED_MODULE_NAME = "_undefined_module";
   private static final String UNDEFINED_MODULE_VERSION = "_undefined_version";
 
+  /**
+   * Parse a module.def file.
+   *
+   * @param moduleDefFile The file to parse.
+   * @param productDefinition The product definition, may be null.
+   * @return The parsed module definition.
+   */
   public ModuleDefinition parseDefinition(
       final ModuleDefFile moduleDefFile, final @Nullable ProductDefinition productDefinition) {
     final ModuleDefParser parser = new ModuleDefParser();

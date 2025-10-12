@@ -58,6 +58,7 @@ public enum ModuleDefinitionGrammar implements GrammarRuleKey {
 
   SYNTAX_ERROR_SECTION,
   SYNTAX_ERROR_LINE,
+  SYNTAX_ERROR,
 
   IDENTIFIERS,
   IDENTIFIER_LIST;
