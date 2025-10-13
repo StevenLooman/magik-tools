@@ -4,8 +4,9 @@
     "ModuleDefMissingDescription",
     "ModuleDefNameDoesNotMatchDirectoryNameCheck",
     "ModuleDefSyntaxError",
-    "ProductDefSyntaxError",
     "ProductDefMissingDescription",
-    "ProductDefMissingTitle"
+    "ProductDefMissingTitle",
+    "ProductDefNameDoesNotMatchDirectoryNameCheck",
+    "ProductDefSyntaxError"
   ]
 }
