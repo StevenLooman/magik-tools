@@ -1,0 +1,10 @@
+test_module_two	1
+
+description
+	Test module two
+end
+
+requires
+	module	1
+    super_test_module   1
+end

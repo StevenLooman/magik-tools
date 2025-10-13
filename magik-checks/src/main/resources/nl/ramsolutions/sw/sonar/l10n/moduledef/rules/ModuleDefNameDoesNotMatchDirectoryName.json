@@ -1,0 +1,16 @@
+{
+  "title": "Module name does not match directory name",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bad-practice",
+    "confusing"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "ModuleNameDoesNotMatchDirectoryName",
+  "sqKey": "module-name-does-not-match-directory-name"
+}
