@@ -137,6 +137,9 @@ public class CheckHolder {
         // Parse json.
         final Gson gson = new Gson();
         try (final InputStream inputStream = this.getClass().getResourceAsStream(filename)) {
+          if (inputStream == null) {
+            return null;
+          }
           final InputStreamReader reader = new InputStreamReader(inputStream);
           final JsonReader jsonReader = gson.newJsonReader(reader);
           this.metadata = gson.fromJson(jsonReader, CheckMetadata.class);

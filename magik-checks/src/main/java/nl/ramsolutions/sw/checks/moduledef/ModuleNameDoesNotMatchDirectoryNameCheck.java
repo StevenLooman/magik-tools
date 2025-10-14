@@ -8,8 +8,8 @@ import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import org.sonar.check.Rule;
 
 /** Check that a module definition matches the directory name. */
-@Rule(key = ModuleDefNameDoesNotMatchDirectoryNameCheck.CHECK_KEY)
-public class ModuleDefNameDoesNotMatchDirectoryNameCheck extends ModuleDefCheck {
+@Rule(key = ModuleNameDoesNotMatchDirectoryNameCheck.CHECK_KEY)
+public class ModuleNameDoesNotMatchDirectoryNameCheck extends ModuleDefCheck {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "ModuleNameDoesNotMatchDirectoryName";

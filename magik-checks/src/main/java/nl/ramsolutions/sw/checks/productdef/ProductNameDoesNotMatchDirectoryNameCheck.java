@@ -9,8 +9,8 @@ import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 import org.sonar.check.Rule;
 
 /** Check that a product definition matches the directory name. */
-@Rule(key = ProductDefNameDoesNotMatchDirectoryNameCheck.CHECK_KEY)
-public class ProductDefNameDoesNotMatchDirectoryNameCheck extends ProductDefCheck {
+@Rule(key = ProductNameDoesNotMatchDirectoryNameCheck.CHECK_KEY)
+public class ProductNameDoesNotMatchDirectoryNameCheck extends ProductDefCheck {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "ProductNameDoesNotMatchDirectoryName";
