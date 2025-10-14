@@ -12,7 +12,7 @@ import org.sonar.check.Rule;
 public class ModuleDefNameDoesNotMatchDirectoryNameCheck extends ModuleDefCheck {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String CHECK_KEY = "ModuleNameDoesNotMatchDirectoryName";
+  public static final String CHECK_KEY = "ModuleDefNameDoesNotMatchDirectoryName";
 
   private static final String MESSAGE = "Module name does not match directory name.";
 

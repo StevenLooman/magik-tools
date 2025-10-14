@@ -11,6 +11,6 @@
     "confusing"
   ],
   "defaultSeverity": "Minor",
-  "ruleSpecification": "ModuleNameDoesNotMatchDirectoryName",
-  "sqKey": "module-name-does-not-match-directory-name"
+  "ruleSpecification": "ModuleDefNameDoesNotMatchDirectoryName",
+  "sqKey": "module-def-name-does-not-match-directory-name"
 }

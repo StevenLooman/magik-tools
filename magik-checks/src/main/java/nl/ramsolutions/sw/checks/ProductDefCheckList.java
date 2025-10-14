@@ -3,7 +3,10 @@ package nl.ramsolutions.sw.checks;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.checks.productdef.ProductDefMissingDescriptionCheck;
 import nl.ramsolutions.sw.checks.productdef.ProductDefMissingTitleCheck;
+import nl.ramsolutions.sw.checks.productdef.ProductDefNameDoesNotMatchDirectoryNameCheck;
+import nl.ramsolutions.sw.checks.productdef.ProductDefSyntaxErrorCheck;
 
 /** product.def {@link Check} list. */
 public class ProductDefCheckList {
@@ -22,7 +25,11 @@ public class ProductDefCheckList {
    * @return List of {@link ProductDefCheck}s.
    */
   public static List<Class<? extends ProductDefCheck>> getChecks() {
-    return List.of(ProductDefMissingTitleCheck.class);
+    return List.of(
+        ProductDefMissingDescriptionCheck.class,
+        ProductDefMissingTitleCheck.class,
+        ProductDefNameDoesNotMatchDirectoryNameCheck.class,
+        ProductDefSyntaxErrorCheck.class);
   }
 
   /**

@@ -11,6 +11,6 @@
     "confusing"
   ],
   "defaultSeverity": "Minor",
-  "ruleSpecification": "ProductNameDoesNotMatchDirectoryName",
-  "sqKey": "product-name-does-not-match-directory-name"
+  "ruleSpecification": "ProductDefNameDoesNotMatchDirectoryName",
+  "sqKey": "product-def-name-does-not-match-directory-name"
 }
