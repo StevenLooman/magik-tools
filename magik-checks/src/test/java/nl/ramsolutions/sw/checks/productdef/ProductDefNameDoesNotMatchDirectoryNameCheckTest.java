@@ -19,6 +19,15 @@ class ProductDefNameDoesNotMatchDirectoryNameCheckTest {
   }
 
   @Test
+  void testOkIgnored() throws IllegalArgumentException, IOException {
+    final ProductDefNameDoesNotMatchDirectoryNameCheck check =
+        new ProductDefNameDoesNotMatchDirectoryNameCheck();
+    check.ignoredDirectoryNames = "config,test_product_2";
+    final Path path = Path.of("magik-checks/src/test/resources/test_product_2/product.def");
+    assertThat(check).reportsNoIssues(path);
+  }
+
+  @Test
   void testInvalid() throws IllegalArgumentException, IOException {
     final ProductDefCheck check = new ProductDefNameDoesNotMatchDirectoryNameCheck();
     final Path path = Path.of("magik-checks/src/test/resources/test_product_2/product.def");

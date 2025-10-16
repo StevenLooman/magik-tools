@@ -20,6 +20,16 @@ class ModuleDefNameDoesNotMatchDirectoryNameCheckTest {
   }
 
   @Test
+  void testOkIgnored() throws IllegalArgumentException, IOException {
+    final ModuleDefNameDoesNotMatchDirectoryNameCheck check =
+        new ModuleDefNameDoesNotMatchDirectoryNameCheck();
+    check.ignoredDirectoryNames = "magik_sessions,test_module_2";
+    final Path path =
+        Path.of("magik-checks/src/test/resources/test_product_2/modules/test_module_2/module.def");
+    assertThat(check).reportsNoIssues(path);
+  }
+
+  @Test
   void testInvalid() throws IllegalArgumentException, IOException {
     final ModuleDefCheck check = new ModuleDefNameDoesNotMatchDirectoryNameCheck();
     final Path path =
