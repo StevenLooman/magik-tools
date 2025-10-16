@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
@@ -222,7 +223,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           openedFile = productDefFile;
 
           this.runDelayedTaskForTextDocument(
-              () -> this.publishDiagnostics(productDefFile), textDocumentIdentifier);
+              () -> this.publishDiagnostics(productDefFile), textDocumentIdentifier, 0);
           break;
         }
 
@@ -233,7 +234,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           openedFile = moduleDefFile;
 
           this.runDelayedTaskForTextDocument(
-              () -> this.publishDiagnostics(moduleDefFile), textDocumentIdentifier);
+              () -> this.publishDiagnostics(moduleDefFile), textDocumentIdentifier, 0);
           break;
         }
 
@@ -244,7 +245,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           openedFile = magikFile;
 
           this.runDelayedTaskForTextDocument(
-              () -> this.publishDiagnostics(magikFile), textDocumentIdentifier);
+              () -> this.publishDiagnostics(magikFile), textDocumentIdentifier, 0);
           break;
         }
 
@@ -301,13 +302,18 @@ public class MagikTextDocumentService implements TextDocumentService {
           openedFile = productDefFile;
 
           this.runDelayedTaskForTextDocument(
-              () -> this.publishDiagnostics(productDefFile), realTextDocumentIdentifier);
+              () -> this.publishDiagnostics(productDefFile), realTextDocumentIdentifier, null);
           break;
         }
 
       case "module.def":
         {
-          openedFile = new ModuleDefFile(uri, text, this.definitionKeeper, null);
+          final ModuleDefFile moduleDefFile =
+              new ModuleDefFile(uri, text, this.definitionKeeper, null);
+          openedFile = moduleDefFile;
+
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(moduleDefFile), realTextDocumentIdentifier, null);
           break;
         }
 
@@ -318,7 +324,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           openedFile = magikFile;
 
           this.runDelayedTaskForTextDocument(
-              () -> this.publishDiagnostics(magikFile), realTextDocumentIdentifier);
+              () -> this.publishDiagnostics(magikFile), realTextDocumentIdentifier, null);
           break;
         }
 
@@ -337,7 +343,9 @@ public class MagikTextDocumentService implements TextDocumentService {
   }
 
   private void runDelayedTaskForTextDocument(
-      final Runnable task, final TextDocumentIdentifier textDocumentIdentifier) {
+      final Runnable task,
+      final TextDocumentIdentifier textDocumentIdentifier,
+      final @Nullable Integer overrideDelay) {
     // If a task is already pending, cancel it.
     if (this.pendingTasks.containsKey(textDocumentIdentifier)) {
       this.pendingTasks.get(textDocumentIdentifier).cancel(true);
@@ -345,8 +353,13 @@ public class MagikTextDocumentService implements TextDocumentService {
     }
 
     // Determine delay.
-    final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
-    final int runChecksOnUpdateDelay = settings.getRunChecksOnChangeDelay();
+    final int runChecksOnUpdateDelay;
+    if (overrideDelay != null) {
+      runChecksOnUpdateDelay = overrideDelay;
+    } else {
+      final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
+      runChecksOnUpdateDelay = settings.getRunChecksOnChangeDelay();
+    }
 
     // Use delayed executor to run after delay.
     final Executor executor =
@@ -416,10 +429,32 @@ public class MagikTextDocumentService implements TextDocumentService {
     final String languageId = existingOpenedFile.getLanguageId();
     switch (languageId) {
       case "product.def":
-        break;
+        {
+          final ProductDefFile productDefFile = (ProductDefFile) existingOpenedFile;
+
+          final MagikLanguageServerSettings settings =
+              new MagikLanguageServerSettings(mergedProperties);
+          if (settings.runChecksOnSave()) {
+            this.runDelayedTaskForTextDocument(
+                () -> this.publishDiagnostics(productDefFile), realTextDocumentIdentifier, 0);
+          }
+
+          break;
+        }
 
       case "module.def":
-        break;
+        {
+          final ModuleDefFile moduleDefFile = (ModuleDefFile) existingOpenedFile;
+
+          final MagikLanguageServerSettings settings =
+              new MagikLanguageServerSettings(mergedProperties);
+          if (settings.runChecksOnSave()) {
+            this.runDelayedTaskForTextDocument(
+                () -> this.publishDiagnostics(moduleDefFile), realTextDocumentIdentifier, 0);
+          }
+
+          break;
+        }
 
       case "magik":
         {
@@ -429,7 +464,7 @@ public class MagikTextDocumentService implements TextDocumentService {
               new MagikLanguageServerSettings(mergedProperties);
           if (settings.runChecksOnSave()) {
             this.runDelayedTaskForTextDocument(
-                () -> this.publishDiagnostics(magikFile), realTextDocumentIdentifier);
+                () -> this.publishDiagnostics(magikFile), realTextDocumentIdentifier, 0);
           }
 
           break;
