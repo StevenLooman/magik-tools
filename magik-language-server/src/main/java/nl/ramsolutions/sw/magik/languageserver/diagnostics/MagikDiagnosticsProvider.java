@@ -9,9 +9,11 @@ import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.checks.MagikTypedCheckList;
+import nl.ramsolutions.sw.checks.ModuleDefCheckList;
 import nl.ramsolutions.sw.checks.ProductDefCheckList;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.languageserver.MagikLanguageServerSettings;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -45,6 +47,23 @@ public class MagikDiagnosticsProvider {
     final List<Diagnostic> diagnosticsChecks =
         MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(
             productDefFile, ProductDefCheckList.getBaseChecks());
+    diagnostics.addAll(diagnosticsChecks);
+
+    return diagnostics;
+  }
+
+  /**
+   * Provides diagnostics for a {@link ModuleDefFile}.
+   *
+   * @param moduleDefFile Module definition file.
+   * @return Diagnostics.
+   */
+  public List<Diagnostic> provideDiagnostics(final ModuleDefFile moduleDefFile) {
+    final List<Diagnostic> diagnostics = new ArrayList<>();
+
+    final List<Diagnostic> diagnosticsChecks =
+        MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(
+            moduleDefFile, ModuleDefCheckList.getBaseChecks());
     diagnostics.addAll(diagnosticsChecks);
 
     return diagnostics;

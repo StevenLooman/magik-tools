@@ -228,7 +228,12 @@ public class MagikTextDocumentService implements TextDocumentService {
 
       case "module.def":
         {
-          openedFile = new ModuleDefFile(uri, text, this.definitionKeeper, null);
+          final ModuleDefFile moduleDefFile =
+              new ModuleDefFile(uri, text, this.definitionKeeper, null);
+          openedFile = moduleDefFile;
+
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(moduleDefFile), textDocumentIdentifier);
           break;
         }
 
@@ -484,6 +489,26 @@ public class MagikTextDocumentService implements TextDocumentService {
           "Duration: {} didSave, uri: {}",
           String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
           productDefFile.getUri());
+    }
+  }
+
+  private void publishDiagnostics(final ModuleDefFile moduleDefFile) {
+    final long start = System.nanoTime();
+
+    LOGGER.debug("publishDiagnostics, uri: {}", moduleDefFile.getUri());
+    final List<Diagnostic> diagnostics = this.diagnosticsProvider.provideDiagnostics(moduleDefFile);
+
+    // Publish to client.
+    final String uri = moduleDefFile.getUri().toString();
+    final PublishDiagnosticsParams publishParams = new PublishDiagnosticsParams(uri, diagnostics);
+    final LanguageClient languageClient = this.languageServer.getLanguageClient();
+    languageClient.publishDiagnostics(publishParams);
+
+    if (LOGGER_DURATION.isTraceEnabled()) {
+      LOGGER_DURATION.trace(
+          "Duration: {} didSave, uri: {}",
+          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          moduleDefFile.getUri());
     }
   }
 
