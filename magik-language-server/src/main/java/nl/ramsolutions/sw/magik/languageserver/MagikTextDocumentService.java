@@ -355,30 +355,6 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.pendingTasks.put(textDocumentIdentifier, future);
   }
 
-  // private void provideDiagnostics(
-  //     final MagikToolsProperties mergedProperties,
-  //     final TextDocumentIdentifier realTextDocumentIdentifier,
-  //     final MagikTypedFile magikFile) {
-  //   // Publish diagnostics to client.
-  //   // If a task is already pending, cancel it.
-  //   if (this.pendingTasks.containsKey(realTextDocumentIdentifier)) {
-  //     this.pendingTasks.get(realTextDocumentIdentifier).cancel(true);
-  //     this.pendingTasks.remove(realTextDocumentIdentifier);
-  //   }
-
-  //   // Determine delay.
-  //   final MagikLanguageServerSettings settings =
-  //       new MagikLanguageServerSettings(mergedProperties);
-  //   final int runChecksOnUpdateDelay = settings.getRunChecksOnChangeDelay();
-
-  //   // Use delayed executor to run after delay.
-  //   final Executor executor =
-  //       CompletableFuture.delayedExecutor(runChecksOnUpdateDelay, TimeUnit.MILLISECONDS);
-  //   final CompletableFuture<Void> future =
-  //       CompletableFuture.runAsync(() -> this.publishDiagnostics(magikFile), executor);
-  //   this.pendingTasks.put(realTextDocumentIdentifier, future);
-  // }
-
   @Override
   public void didClose(final DidCloseTextDocumentParams params) {
     final long start = System.nanoTime();
