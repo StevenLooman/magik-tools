@@ -4,6 +4,8 @@ import com.sonar.sslr.api.Token;
 import java.util.Comparator;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
+import nl.ramsolutions.sw.productdef.ProductDefFile;
 import nl.ramsolutions.sw.sonar.TokenLocation;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -34,10 +36,42 @@ public class CpdTokenSaver {
    * @param magikFile Magik file.
    */
   public void saveCpdTokens(final InputFile inputFile, final MagikFile magikFile) {
+    final List<Token> tokens = magikFile.getTopNode().getTokens();
+    this.saveCpdTokens(inputFile, tokens);
+  }
+
+  /**
+   * Save tokens for CPD.
+   *
+   * @param inputFile Input file.
+   * @param productDefFile ProductDef file.
+   */
+  public void saveCpdTokens(final InputFile inputFile, final ProductDefFile productDefFile) {
+    final List<Token> tokens = productDefFile.getTopNode().getTokens();
+    this.saveCpdTokens(inputFile, tokens);
+  }
+
+  /**
+   * Save tokens for CPD.
+   *
+   * @param inputFile Input file.
+   * @param moduleDefFile ModuleDef file.
+   */
+  public void saveCpdTokens(final InputFile inputFile, final ModuleDefFile moduleDefFile) {
+    final List<Token> tokens = moduleDefFile.getTopNode().getTokens();
+    this.saveCpdTokens(inputFile, tokens);
+  }
+
+  /**
+   * Save tokens for CPD.
+   *
+   * @param inputFile Input file.
+   * @param tokens Tokens to save.
+   */
+  private void saveCpdTokens(final InputFile inputFile, final List<Token> tokens) {
     LOGGER.debug("Saving CPD tokens, file: {}", inputFile);
 
     final NewCpdTokens newCpdTokens = this.context.newCpdTokens().onFile(inputFile);
-    final List<Token> tokens = magikFile.getTopNode().getTokens();
 
     // Ensure order of tokens is preserved.
     final Comparator<TokenLocation> byLine = Comparator.comparing(TokenLocation::line);

@@ -17,8 +17,8 @@ import java.util.logging.LogManager;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.FileEvent;
-import nl.ramsolutions.sw.magik.MagikFileScanner;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
@@ -160,7 +160,8 @@ public final class Main {
     final Collection<Path> paths = new ArrayList<>();
 
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
-    final MagikFileScanner scanner = new MagikFileScanner(ignoreHandler);
+    final SourceFileScanner scanner =
+        new SourceFileScanner(ignoreHandler, SourceFileScanner.MAGIK_FILE_FILTER);
     for (final String arg : args) {
       final Path path = Path.of(arg);
       final List<Path> argPaths = scanner.getFiles(path).toList();

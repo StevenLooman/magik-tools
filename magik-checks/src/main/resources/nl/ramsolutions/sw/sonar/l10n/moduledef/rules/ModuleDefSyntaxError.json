@@ -1,0 +1,16 @@
+{
+  "title": "module.def contains a syntax error",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug",
+    "suspicious"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "ModuleDefSyntaxError",
+  "sqKey": "module-def-syntax-error"
+}

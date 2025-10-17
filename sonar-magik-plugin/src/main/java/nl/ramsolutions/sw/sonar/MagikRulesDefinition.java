@@ -2,8 +2,8 @@ package nl.ramsolutions.sw.sonar;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.magik.checks.CheckList;
-import nl.ramsolutions.sw.sonar.language.Magik;
+import nl.ramsolutions.sw.checks.MagikCheckList;
+import nl.ramsolutions.sw.sonar.language.MagikLanguage;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.server.rule.RulesDefinition;
 import org.sonarsource.analyzer.commons.RuleMetadataLoader;
@@ -23,19 +23,22 @@ public class MagikRulesDefinition implements RulesDefinition {
   public void define(final Context context) {
     final NewRepository repository =
         context
-            .createRepository(CheckList.REPOSITORY_KEY, Magik.KEY)
+            .createRepository(MagikCheckList.REPOSITORY_KEY, MagikLanguage.KEY)
             .setName(MagikRulesDefinition.REPOSITORY_NAME);
 
-    final RuleMetadataLoader loader =
-        new RuleMetadataLoader(CheckList.PROFILE_DIR, CheckList.PROFILE_LOCATION, this.runtime);
-    loader.addRulesByAnnotatedClass(repository, MagikRulesDefinition.getCheckClasses());
+    this.loadMagikRules(repository);
 
     repository.done();
   }
 
-  private static List<Class<?>> getCheckClasses() {
-    return CheckList.getChecks().stream()
-        .map(clazz -> (Class<?>) clazz)
-        .collect(Collectors.toUnmodifiableList()); // NOSONAR: Keep VSCode/Java plugin sane.
+  private void loadMagikRules(final NewRepository repository) {
+    final RuleMetadataLoader loader =
+        new RuleMetadataLoader(MagikCheckList.PROFILE_DIR, this.runtime);
+
+    final List<Class<?>> checkClasses =
+        MagikCheckList.getChecks().stream()
+            .map(clazz -> (Class<?>) clazz)
+            .collect(Collectors.toUnmodifiableList());
+    loader.addRulesByAnnotatedClass(repository, checkClasses);
   }
 }

@@ -1,0 +1,16 @@
+{
+  "title": "Use of sw:char16_vector.evaluate()",
+  "type": "VULNERABILITY",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "typing",
+    "vulnerability"
+  ],
+  "defaultSeverity": "Critical",
+  "ruleSpecification": "SwChar16VectorEvaluateInvocation",
+  "sqKey": "sw-char16-vector-evaluate-invocation"
+}

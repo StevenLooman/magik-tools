@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -17,10 +18,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
-import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
-import nl.ramsolutions.sw.productdef.ProductDefFileScanner;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
@@ -145,7 +144,7 @@ public class MUnitTestItemProvider {
   }
 
   private ProductDefinition getSwProduct(final Path path) throws IOException {
-    final Path productDefPath = path.resolve(ProductDefFileScanner.SW_PRODUCT_DEF);
+    final Path productDefPath = path.resolve(SourceFileScanner.SW_PRODUCT_DEF);
     if (!Files.exists(productDefPath)) {
       final Path parentPath = path.getParent();
       if (parentPath == null) {
@@ -163,7 +162,7 @@ public class MUnitTestItemProvider {
   }
 
   private ModuleDefinition getSwModule(final Path path) throws IOException {
-    final Path moduleDefPath = path.resolve(ModuleDefFileScanner.SW_MODULE_DEF);
+    final Path moduleDefPath = path.resolve(SourceFileScanner.SW_MODULE_DEF);
     if (!Files.exists(moduleDefPath)) {
       final Path parentPath = path.getParent();
       if (parentPath == null) {

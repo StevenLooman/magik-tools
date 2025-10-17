@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
@@ -18,7 +19,7 @@ import nl.ramsolutions.sw.magik.languageserver.callhierarchy.CallHierarchyProvid
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
 import nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider;
-import nl.ramsolutions.sw.magik.languageserver.diagnostics.DiagnosticsProvider;
+import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikDiagnosticsProvider;
 import nl.ramsolutions.sw.magik.languageserver.documentsymbols.DocumentSymbolProvider;
 import nl.ramsolutions.sw.magik.languageserver.folding.FoldingRangeProvider;
 import nl.ramsolutions.sw.magik.languageserver.formatting.FormattingProvider;
@@ -112,7 +113,7 @@ public class MagikTextDocumentService implements TextDocumentService {
   private final MagikLanguageServer languageServer;
   private final MagikToolsProperties properties;
   private final IDefinitionKeeper definitionKeeper;
-  private final DiagnosticsProvider diagnosticsProvider;
+  private final MagikDiagnosticsProvider diagnosticsProvider;
   private final HoverProvider hoverProvider;
   private final ImplementationProvider implementationProvider;
   private final SignatureHelpProvider signatureHelpProvider;
@@ -147,7 +148,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.properties = properties;
     this.definitionKeeper = definitionKeeper;
 
-    this.diagnosticsProvider = new DiagnosticsProvider(this.properties);
+    this.diagnosticsProvider = new MagikDiagnosticsProvider(this.properties);
     this.hoverProvider = new HoverProvider();
     this.implementationProvider = new ImplementationProvider();
     this.signatureHelpProvider = new SignatureHelpProvider();
@@ -217,13 +218,23 @@ public class MagikTextDocumentService implements TextDocumentService {
     switch (textDocument.getLanguageId()) {
       case "product.def":
         {
-          openedFile = new ProductDefFile(uri, text, this.definitionKeeper, null);
+          final ProductDefFile productDefFile =
+              new ProductDefFile(mergedProperties, uri, text, this.definitionKeeper, null);
+          openedFile = productDefFile;
+
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(productDefFile), textDocumentIdentifier, 0);
           break;
         }
 
       case "module.def":
         {
-          openedFile = new ModuleDefFile(uri, text, this.definitionKeeper, null);
+          final ModuleDefFile moduleDefFile =
+              new ModuleDefFile(uri, text, this.definitionKeeper, null);
+          openedFile = moduleDefFile;
+
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(moduleDefFile), textDocumentIdentifier, 0);
           break;
         }
 
@@ -233,8 +244,8 @@ public class MagikTextDocumentService implements TextDocumentService {
               new MagikTypedFile(mergedProperties, uri, text, this.definitionKeeper);
           openedFile = magikFile;
 
-          // Publish diagnostics to client.
-          this.publishDiagnostics(magikFile);
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(magikFile), textDocumentIdentifier, 0);
           break;
         }
 
@@ -286,13 +297,23 @@ public class MagikTextDocumentService implements TextDocumentService {
     switch (languageId) {
       case "product.def":
         {
-          openedFile = new ProductDefFile(uri, text, this.definitionKeeper, null);
+          final ProductDefFile productDefFile =
+              new ProductDefFile(mergedProperties, uri, text, this.definitionKeeper, null);
+          openedFile = productDefFile;
+
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(productDefFile), realTextDocumentIdentifier, null);
           break;
         }
 
       case "module.def":
         {
-          openedFile = new ModuleDefFile(uri, text, this.definitionKeeper, null);
+          final ModuleDefFile moduleDefFile =
+              new ModuleDefFile(uri, text, this.definitionKeeper, null);
+          openedFile = moduleDefFile;
+
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(moduleDefFile), realTextDocumentIdentifier, null);
           break;
         }
 
@@ -302,24 +323,8 @@ public class MagikTextDocumentService implements TextDocumentService {
               new MagikTypedFile(mergedProperties, uri, text, this.definitionKeeper);
           openedFile = magikFile;
 
-          // Publish diagnostics to client.
-          // If a task is already pending, cancel it.
-          if (this.pendingTasks.containsKey(realTextDocumentIdentifier)) {
-            this.pendingTasks.get(realTextDocumentIdentifier).cancel(true);
-            this.pendingTasks.remove(realTextDocumentIdentifier);
-          }
-
-          // Determine delay.
-          final MagikLanguageServerSettings settings =
-              new MagikLanguageServerSettings(mergedProperties);
-          final int runChecksOnUpdateDelay = settings.getRunChecksOnChangeDelay();
-
-          // Use delayed executor to run after delay.
-          final Executor executor =
-              CompletableFuture.delayedExecutor(runChecksOnUpdateDelay, TimeUnit.MILLISECONDS);
-          final CompletableFuture<Void> future =
-              CompletableFuture.runAsync(() -> this.publishDiagnostics(magikFile), executor);
-          this.pendingTasks.put(realTextDocumentIdentifier, future);
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(magikFile), realTextDocumentIdentifier, null);
           break;
         }
 
@@ -335,6 +340,32 @@ public class MagikTextDocumentService implements TextDocumentService {
           String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
           textDocumentIdentifier.getUri());
     }
+  }
+
+  private void runDelayedTaskForTextDocument(
+      final Runnable task,
+      final TextDocumentIdentifier textDocumentIdentifier,
+      final @Nullable Integer overrideDelay) {
+    // If a task is already pending, cancel it.
+    if (this.pendingTasks.containsKey(textDocumentIdentifier)) {
+      this.pendingTasks.get(textDocumentIdentifier).cancel(true);
+      this.pendingTasks.remove(textDocumentIdentifier);
+    }
+
+    // Determine delay.
+    final int runChecksOnUpdateDelay;
+    if (overrideDelay != null) {
+      runChecksOnUpdateDelay = overrideDelay;
+    } else {
+      final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
+      runChecksOnUpdateDelay = settings.getRunChecksOnChangeDelay();
+    }
+
+    // Use delayed executor to run after delay.
+    final Executor executor =
+        CompletableFuture.delayedExecutor(runChecksOnUpdateDelay, TimeUnit.MILLISECONDS);
+    final CompletableFuture<Void> future = CompletableFuture.runAsync(task, executor);
+    this.pendingTasks.put(textDocumentIdentifier, future);
   }
 
   @Override
@@ -387,6 +418,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     }
 
     // Find original TextDocumentIdentifier.
+    // TODO: Why not use textDocumentIdentifier?
     final TextDocumentIdentifier realTextDocumentIdentifier = new TextDocumentIdentifier(uriStr);
     final OpenedFile existingOpenedFile = this.openedFiles.get(realTextDocumentIdentifier);
     if (existingOpenedFile == null) {
@@ -397,10 +429,32 @@ public class MagikTextDocumentService implements TextDocumentService {
     final String languageId = existingOpenedFile.getLanguageId();
     switch (languageId) {
       case "product.def":
-        break;
+        {
+          final ProductDefFile productDefFile = (ProductDefFile) existingOpenedFile;
+
+          final MagikLanguageServerSettings settings =
+              new MagikLanguageServerSettings(mergedProperties);
+          if (settings.runChecksOnSave()) {
+            this.runDelayedTaskForTextDocument(
+                () -> this.publishDiagnostics(productDefFile), realTextDocumentIdentifier, 0);
+          }
+
+          break;
+        }
 
       case "module.def":
-        break;
+        {
+          final ModuleDefFile moduleDefFile = (ModuleDefFile) existingOpenedFile;
+
+          final MagikLanguageServerSettings settings =
+              new MagikLanguageServerSettings(mergedProperties);
+          if (settings.runChecksOnSave()) {
+            this.runDelayedTaskForTextDocument(
+                () -> this.publishDiagnostics(moduleDefFile), realTextDocumentIdentifier, 0);
+          }
+
+          break;
+        }
 
       case "magik":
         {
@@ -409,7 +463,8 @@ public class MagikTextDocumentService implements TextDocumentService {
           final MagikLanguageServerSettings settings =
               new MagikLanguageServerSettings(mergedProperties);
           if (settings.runChecksOnSave()) {
-            this.publishDiagnostics(magikFile);
+            this.runDelayedTaskForTextDocument(
+                () -> this.publishDiagnostics(magikFile), realTextDocumentIdentifier, 0);
           }
 
           break;
@@ -424,6 +479,47 @@ public class MagikTextDocumentService implements TextDocumentService {
           "Duration: {} didSave, uri: {}",
           String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
           textDocumentIdentifier.getUri());
+    }
+  }
+
+  private void publishDiagnostics(final ProductDefFile productDefFile) {
+    final long start = System.nanoTime();
+
+    LOGGER.debug("publishDiagnostics, uri: {}", productDefFile.getUri());
+    final List<Diagnostic> diagnostics =
+        this.diagnosticsProvider.provideDiagnostics(productDefFile);
+
+    // Publish to client.
+    final String uri = productDefFile.getUri().toString();
+    final PublishDiagnosticsParams publishParams = new PublishDiagnosticsParams(uri, diagnostics);
+    final LanguageClient languageClient = this.languageServer.getLanguageClient();
+    languageClient.publishDiagnostics(publishParams);
+
+    if (LOGGER_DURATION.isTraceEnabled()) {
+      LOGGER_DURATION.trace(
+          "Duration: {} didSave, uri: {}",
+          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          productDefFile.getUri());
+    }
+  }
+
+  private void publishDiagnostics(final ModuleDefFile moduleDefFile) {
+    final long start = System.nanoTime();
+
+    LOGGER.debug("publishDiagnostics, uri: {}", moduleDefFile.getUri());
+    final List<Diagnostic> diagnostics = this.diagnosticsProvider.provideDiagnostics(moduleDefFile);
+
+    // Publish to client.
+    final String uri = moduleDefFile.getUri().toString();
+    final PublishDiagnosticsParams publishParams = new PublishDiagnosticsParams(uri, diagnostics);
+    final LanguageClient languageClient = this.languageServer.getLanguageClient();
+    languageClient.publishDiagnostics(publishParams);
+
+    if (LOGGER_DURATION.isTraceEnabled()) {
+      LOGGER_DURATION.trace(
+          "Duration: {} didSave, uri: {}",
+          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          moduleDefFile.getUri());
     }
   }
 

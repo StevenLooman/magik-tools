@@ -1,0 +1,16 @@
+{
+  "title": "Product name does not match directory name",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bad-practice",
+    "confusing"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "ProductDefNameDoesNotMatchDirectoryName",
+  "sqKey": "product-def-name-does-not-match-directory-name"
+}

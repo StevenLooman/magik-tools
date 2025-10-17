@@ -16,9 +16,9 @@ import java.util.stream.Stream;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
-import nl.ramsolutions.sw.magik.MagikFileScanner;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
 import nl.ramsolutions.sw.magik.analysis.definitions.FilterableDefinitionKeeperAdapter;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -28,9 +28,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionWriter;
 import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ModuleIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ProductIndexer;
-import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
-import nl.ramsolutions.sw.productdef.ProductDefFileScanner;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.slf4j.Logger;
@@ -128,12 +126,10 @@ public class MagikWorkspaceFolder {
   private void runProductIndexer() throws IOException {
     LOGGER.debug("Running ProductIndexer for: {}", this);
 
-    final ProductDefFileScanner scanner = new ProductDefFileScanner(this.ignoreHandler);
+    final SourceFileScanner scanner =
+        new SourceFileScanner(ignoreHandler, SourceFileScanner.PRODUCT_DEF_FILE_FILTER);
     final Path workspacePath = this.getWorkspacePath();
-    final Stream<Path> indexableFiles =
-        scanner.getProductTrees(workspacePath).stream()
-            .flatMap(ProductDefFileScanner.Tree::stream)
-            .map(ProductDefFileScanner.Tree::getPath);
+    final Stream<Path> indexableFiles = scanner.getFiles(workspacePath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();
     final Collection<ProductDefinition> indexedProductDefinitions =
@@ -149,9 +145,10 @@ public class MagikWorkspaceFolder {
   private void runModuleIndexer() throws IOException {
     LOGGER.debug("Running ModuleIndexer for: {}", this);
 
-    final ModuleDefFileScanner scanner = new ModuleDefFileScanner(this.ignoreHandler);
     final Path workspacePath = this.getWorkspacePath();
-    final Stream<Path> indexableFiles = scanner.getModuleDefFiles(workspacePath).stream();
+    final SourceFileScanner scanner =
+        new SourceFileScanner(ignoreHandler, SourceFileScanner.MODULE_DEF_FILE_FILTER);
+    final Stream<Path> indexableFiles = scanner.getFiles(workspacePath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();
     final Collection<ModuleDefinition> indexedModuleDefinitions =
@@ -168,8 +165,9 @@ public class MagikWorkspaceFolder {
     LOGGER.debug("Running MagikIndexer for: {}", this);
 
     final Path workspaceFolderPath = this.getWorkspacePath();
-    final MagikFileScanner magikFileScanner = new MagikFileScanner(this.ignoreHandler);
-    final Stream<Path> indexableFiles = magikFileScanner.getFiles(workspaceFolderPath);
+    final SourceFileScanner scanner =
+        new SourceFileScanner(ignoreHandler, SourceFileScanner.MAGIK_FILE_FILTER);
+    final Stream<Path> indexableFiles = scanner.getFiles(workspaceFolderPath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();
     final Collection<MagikFileDefinition> indexedMagikFileDefinitions =

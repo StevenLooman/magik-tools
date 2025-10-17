@@ -14,19 +14,19 @@ import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.checks.Check;
+import nl.ramsolutions.sw.checks.CheckFixer;
+import nl.ramsolutions.sw.checks.CheckHolder;
+import nl.ramsolutions.sw.checks.ChecksConfiguration;
+import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
-import nl.ramsolutions.sw.magik.checks.CheckList;
-import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikCheckFixer;
-import nl.ramsolutions.sw.magik.checks.MagikCheckHolder;
-import nl.ramsolutions.sw.magik.checks.MagikChecksConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Apply any fixes using the registered {@link MagikCheckFixer}s. */
+/** Apply any fixes using the registered {@link CheckFixer}s. */
 public class MagikFixer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikFixer.class);
@@ -57,7 +57,7 @@ public class MagikFixer {
   private void runOnFile(final MagikFile originalMagikFile) throws IOException {
     MagikFile magikFile = originalMagikFile;
     final URI uri = magikFile.getUri();
-    for (final MagikCheckFixer fixer : this.getFixers(magikFile)) {
+    for (final CheckFixer fixer : this.getFixers(magikFile)) {
       final String newSource = this.applyFixer(fixer, magikFile);
       magikFile = new MagikFile(uri, newSource);
     }
@@ -73,7 +73,7 @@ public class MagikFixer {
     Files.writeString(path, newSource, charset);
   }
 
-  private String applyFixer(final MagikCheckFixer fixer, final MagikFile magikFile) {
+  private String applyFixer(final CheckFixer fixer, final MagikFile magikFile) {
     final String source = magikFile.getSource();
     final CodeActionApplier applier = new CodeActionApplier(source);
     final Range range =
@@ -87,16 +87,16 @@ public class MagikFixer {
     return applier.getSource();
   }
 
-  private List<MagikCheckFixer> getFixers(final MagikFile magikFile) {
-    final List<Class<? extends MagikCheck>> enabledChecks = this.getEnabledChecks(magikFile);
-    return CheckList.getFixers().entrySet().stream()
+  private List<CheckFixer> getFixers(final MagikFile magikFile) {
+    final List<Class<? extends Check>> enabledChecks = this.getEnabledChecks(magikFile);
+    return MagikCheckList.getFixers().entrySet().stream()
         .filter(entry -> enabledChecks.contains(entry.getKey()))
         .flatMap(entry -> entry.getValue().stream())
         .map(this::instantiateFixer)
         .toList();
   }
 
-  private MagikCheckFixer instantiateFixer(final Class<? extends MagikCheckFixer> fixerClass) {
+  private CheckFixer instantiateFixer(final Class<? extends CheckFixer> fixerClass) {
     try {
       return fixerClass.getDeclaredConstructor().newInstance();
     } catch (final ReflectiveOperationException exception) {
@@ -120,20 +120,20 @@ public class MagikFixer {
     return new MagikFile(fileProperties, uri, fileContents);
   }
 
-  private List<Class<? extends MagikCheck>> getEnabledChecks(final MagikFile magikFile) {
+  private List<Class<? extends Check>> getEnabledChecks(final MagikFile magikFile) {
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final MagikChecksConfiguration checksConfig =
-        new MagikChecksConfiguration(CheckList.getChecks(), fileProperties);
+    final List<Class<? extends Check>> checks = MagikCheckList.getBaseChecks();
+    final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, fileProperties);
     return checksConfig.getAllChecks().stream()
-        .filter(MagikCheckHolder::isEnabled)
-        .map(MagikCheckHolder::getCheckClass)
+        .filter(CheckHolder::isEnabled)
+        .map(CheckHolder::getCheckClass)
         .collect(Collectors.toUnmodifiableList()); // NOSONAR: Keep VSCode/Java plugin sane.
   }
 
   private boolean isFileIgnored(final MagikFile magikFile) {
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final MagikChecksConfiguration checksConfig =
-        new MagikChecksConfiguration(CheckList.getChecks(), fileProperties);
+    final List<Class<? extends Check>> checks = MagikCheckList.getBaseChecks();
+    final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, fileProperties);
     final URI uri = magikFile.getUri();
     final Path path = Path.of(uri);
     final FileSystem fs = FileSystems.getDefault();

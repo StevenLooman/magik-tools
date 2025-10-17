@@ -5,12 +5,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
-import nl.ramsolutions.sw.productdef.ProductDefFileScanner;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,10 +44,10 @@ public class ProductIndexer {
     }
 
     if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
-      final ProductDefFileScanner productDefFileScanner =
-          new ProductDefFileScanner(this.ignoreHandler);
       final Path parentPath = path.getParent();
-      productDefFileScanner.getProductTrees(parentPath).forEach(this::indexFile);
+      final SourceFileScanner scanner =
+          new SourceFileScanner(this.ignoreHandler, SourceFileScanner.PRODUCT_DEF_FILE_FILTER);
+      scanner.getFiles(parentPath).forEach(this::indexFile);
     }
 
     LOGGER.debug("Handled file event: {}", fileEvent);
@@ -60,8 +59,7 @@ public class ProductIndexer {
    * @param path Path to magik file.
    */
   @SuppressWarnings("checkstyle:IllegalCatch")
-  private void indexFile(final ProductDefFileScanner.Tree productDefTree) {
-    final Path path = productDefTree.getPath();
+  private void indexFile(final Path path) {
     LOGGER.debug("Scanning created file: {}", path);
 
     try {
@@ -72,11 +70,12 @@ public class ProductIndexer {
   }
 
   private void readDefinitions(final Path path) throws IOException {
-    final Path parentPath = path.resolve("..").resolve("..");
-    final Path productDefPath = ModuleDefFileScanner.getProductDefFileForPath(parentPath);
+    final Path parentParentPath = path.resolve("..").resolve("..");
+    final Path parentProductDefPath =
+        SourceFileScanner.searchFileUpwards(parentParentPath, SourceFileScanner.SW_PRODUCT_DEF);
     final ProductDefFile parentProductDefFile;
-    if (productDefPath != null) {
-      parentProductDefFile = new ProductDefFile(productDefPath, this.definitionKeeper, null);
+    if (parentProductDefPath != null) {
+      parentProductDefFile = new ProductDefFile(parentProductDefPath, this.definitionKeeper, null);
     } else {
       parentProductDefFile = null;
     }

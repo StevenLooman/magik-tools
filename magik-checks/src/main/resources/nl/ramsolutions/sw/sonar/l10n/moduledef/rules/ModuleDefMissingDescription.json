@@ -1,0 +1,17 @@
+{
+  "title": "module.def is missing description",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bad-practice",
+    "confusing",
+    "convention"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "ModuleDefMissingDescription",
+  "sqKey": "module-def-missing-description"
+}
