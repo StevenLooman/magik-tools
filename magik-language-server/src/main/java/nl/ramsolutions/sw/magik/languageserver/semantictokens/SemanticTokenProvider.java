@@ -49,8 +49,8 @@ public class SemanticTokenProvider {
     semanticTokensProvider.setRange(false);
     semanticTokensProvider.setDocumentSelector(
         List.of(
-            new DocumentFilter("product.def", "file", null),
-            new DocumentFilter("module.def", "file", null),
+            new DocumentFilter("sw-product-def", "file", null),
+            new DocumentFilter("sw-module-def", "file", null),
             new DocumentFilter("magik", "file", null)));
     capabilities.setSemanticTokensProvider(semanticTokensProvider);
   }
