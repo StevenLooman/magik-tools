@@ -1,0 +1,48 @@
+Fix typo in CHECK_KEY for ProductDefNameDoesNotMatchDirectoryNameCheck
+
+This gave issues when loading the sonar-magik-plugin in SQ:
+
+```log
+2025-10-17T21:30:14.008Z 2025.10.17 21:30:14 WARN  web[][o.s.c.a.AnnotationConfigApplicationContext] Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jdk.internal.loader.ClassLoaders$AppClassLoader@9bd0fa6-org.sonar.server.rule.registration.RulesRegistrant': Can't read resource: nl/ramsolutions/sw/sonar/l10n/productdef/rules/ProductNameDoesNotMatchDirectoryName.html
+2025-10-17T21:30:14.010Z 2025.10.17 21:30:14 ERROR web[][o.s.s.p.Platform] Background initialization failed. Stopping SonarQube
+2025-10-17T21:30:14.010Z org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'jdk.internal.loader.ClassLoaders$AppClassLoader@9bd0fa6-org.sonar.server.rule.registration.RulesRegistrant': Can't read resource: nl/ramsolutions/sw/sonar/l10n/productdef/rules/ProductNameDoesNotMatchDirectoryName.html
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:614)
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529)
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339)
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:373)
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337)
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202)
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.DefaultListableBeanFactory.instantiateSingleton(DefaultListableBeanFactory.java:1222)
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingleton(DefaultListableBeanFactory.java:1188)
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:1123)
+2025-10-17T21:30:14.010Z        at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:987)
+2025-10-17T21:30:14.010Z        at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:627)
+2025-10-17T21:30:14.010Z        at org.sonar.core.platform.SpringComponentContainer.startComponents(SpringComponentContainer.java:226)
+2025-10-17T21:30:14.010Z        at org.sonar.server.platform.platformlevel.PlatformLevel.start(PlatformLevel.java:80)
+2025-10-17T21:30:14.010Z        at org.sonar.server.platform.platformlevel.PlatformLevelStartup.access$001(PlatformLevelStartup.java:59)
+2025-10-17T21:30:14.010Z        at org.sonar.server.platform.platformlevel.PlatformLevelStartup$1.doPrivileged(PlatformLevelStartup.java:136)
+2025-10-17T21:30:14.010Z        at org.sonar.server.user.DoPrivileged.execute(DoPrivileged.java:47)
+2025-10-17T21:30:14.010Z        at org.sonar.server.platform.platformlevel.PlatformLevelStartup.start(PlatformLevelStartup.java:133)
+2025-10-17T21:30:14.010Z        at org.sonar.server.platform.PlatformImpl.executeStartupTasks(PlatformImpl.java:204)
+2025-10-17T21:30:14.010Z        at org.sonar.server.platform.PlatformImpl$AutoStarterRunnable.runIfNotAborted(PlatformImpl.java:365)
+2025-10-17T21:30:14.010Z        at org.sonar.server.platform.PlatformImpl$1.doRun(PlatformImpl.java:119)
+2025-10-17T21:30:14.010Z        at org.sonar.server.platform.PlatformImpl$AutoStarterRunnable.run(PlatformImpl.java:349)
+2025-10-17T21:30:14.010Z        at java.base/java.lang.Thread.run(Unknown Source)
+2025-10-17T21:30:14.010Z Caused by: java.lang.IllegalStateException: Can't read resource: nl/ramsolutions/sw/sonar/l10n/productdef/rules/ProductNameDoesNotMatchDirectoryName.html
+2025-10-17T21:30:14.010Z        at org.sonarsource.analyzer.commons.RuleMetadataLoader.setDescriptionFromHtmlFile(RuleMetadataLoader.java:181)
+2025-10-17T21:30:14.010Z        at org.sonarsource.analyzer.commons.RuleMetadataLoader.addRuleByAnnotatedClass(RuleMetadataLoader.java:114)
+2025-10-17T21:30:14.010Z        at org.sonarsource.analyzer.commons.RuleMetadataLoader.addRulesByAnnotatedClass(RuleMetadataLoader.java:102)
+2025-10-17T21:30:14.010Z        at nl.ramsolutions.sw.sonar.ProductModuleDefRulesDefinition.loadProductDefRules(ProductModuleDefRulesDefinition.java:51)
+2025-10-17T21:30:14.010Z        at nl.ramsolutions.sw.sonar.ProductModuleDefRulesDefinition.define(ProductModuleDefRulesDefinition.java:37)
+2025-10-17T21:30:14.010Z        at org.sonar.server.rule.RuleDefinitionsLoader.load(RuleDefinitionsLoader.java:55)
+2025-10-17T21:30:14.010Z        at org.sonar.server.rule.registration.RulesRegistrant.start(RulesRegistrant.java:111)
+2025-10-17T21:30:14.010Z        at org.sonar.core.platform.StartableBeanPostProcessor.postProcessBeforeInitialization(StartableBeanPostProcessor.java:33)
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:429)
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818)
+2025-10-17T21:30:14.010Z        at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607)
+2025-10-17T21:30:14.010Z        ... 21 common frames omitted
+2025-10-17T21:30:14.010Z Caused by: java.io.IOException: Resource not found in the classpath: /nl/ramsolutions/sw/sonar/l10n/productdef/rules/ProductNameDoesNotMatchDirectoryName.html
+2025-10-17T21:30:14.010Z        at org.sonarsource.analyzer.commons.Resources.toString(Resources.java:48)
+2025-10-17T21:30:14.010Z        at org.sonarsource.analyzer.commons.RuleMetadataLoader.setDescriptionFromHtmlFile(RuleMetadataLoader.java:179)
+2025-10-17T21:30:14.010Z        ... 31 common frames omitted
+```
