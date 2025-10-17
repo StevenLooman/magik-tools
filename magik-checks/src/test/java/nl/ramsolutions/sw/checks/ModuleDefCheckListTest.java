@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +24,24 @@ class ModuleDefCheckListTest {
       final String sqKey = metadata.getSqKey();
       final String simpleNameKebabCase = ModuleDefCheckListTest.toKebabCase(sqKey);
       assertThat(sqKey).isEqualTo(simpleNameKebabCase);
+    }
+  }
+
+  @Test
+  void testAllChecksHaveHtmlFile() throws IOException {
+    for (Class<? extends ModuleDefCheck> checkClass : ModuleDefCheckList.getChecks()) {
+      final String simpleName = checkClass.getSimpleName().replaceAll("Check$", "");
+
+      // Get path to HTML file.
+      final String htmlFileName = simpleName + ".html";
+      final String htmlFilePath = "/" + ModuleDefCheckList.PROFILE_DIR + "/" + htmlFileName;
+      try (final InputStream htmlFileStream =
+          ModuleDefCheckListTest.class.getResourceAsStream(htmlFilePath)) {
+        assertThat(htmlFileStream)
+            .withFailMessage(
+                "No HTML file found for check %s at path %s", checkClass.getName(), htmlFilePath)
+            .isNotNull();
+      }
     }
   }
 

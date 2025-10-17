@@ -99,9 +99,9 @@ public class MagikDiagnosticsProvider {
 
   private static List<Diagnostic> getDiagnosticsFromFileAndChecks(
       final OpenedFile openedFile, final List<Class<? extends Check>> checks) {
-    final MagikToolsProperties magikFileProperties = openedFile.getProperties();
+    final MagikToolsProperties properties = openedFile.getProperties();
     final ChecksDiagnosticsProvider diagnosticsProvider =
-        new ChecksDiagnosticsProvider(checks, magikFileProperties);
+        new ChecksDiagnosticsProvider(checks, properties);
     try {
       return diagnosticsProvider.getDiagnostics(openedFile);
     } catch (final IOException exception) {

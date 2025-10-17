@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.checks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +24,24 @@ class MagikCheckListTest {
       final String sqKey = metadata.getSqKey();
       final String simpleNameKebabCase = MagikCheckListTest.toKebabCase(sqKey);
       assertThat(sqKey).isEqualTo(simpleNameKebabCase);
+    }
+  }
+
+  @Test
+  void testAllChecksHaveHtmlFile() throws IOException {
+    for (Class<? extends MagikCheck> checkClass : MagikCheckList.getChecks()) {
+      final String simpleName = checkClass.getSimpleName().replaceAll("Check$", "");
+
+      // Get path to HTML file.
+      final String htmlFileName = simpleName + ".html";
+      final String htmlFilePath = "/" + MagikCheckList.PROFILE_DIR + "/" + htmlFileName;
+      try (final InputStream htmlFileStream =
+          MagikCheckListTest.class.getResourceAsStream(htmlFilePath)) {
+        assertThat(htmlFileStream)
+            .withFailMessage(
+                "No HTML file found for check %s at path %s", checkClass.getName(), htmlFilePath)
+            .isNotNull();
+      }
     }
   }
 

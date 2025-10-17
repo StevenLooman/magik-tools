@@ -21,7 +21,7 @@ public class ProductDefNameDoesNotMatchDirectoryNameCheck extends ProductDefChec
 
   private static final String MESSAGE = "Product name does not match directory name.";
 
-  private static final String DEFAULT_IGNORED_DIRECTORY_NAMES = "config";
+  private static final String DEFAULT_IGNORED_DIRECTORY_NAMES = "config,tests,unit_tests";
 
   @RuleProperty(
       key = "ignored directory names",
