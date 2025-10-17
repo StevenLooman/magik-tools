@@ -2,11 +2,11 @@
   "name": "Sonar way recommended",
   "ruleKeys": [
     "ModuleDefMissingDescription",
-    "ModuleDefNameDoesNotMatchDirectoryNameCheck",
+    "ModuleDefNameDoesNotMatchDirectoryName",
     "ModuleDefSyntaxError",
     "ProductDefMissingDescription",
     "ProductDefMissingTitle",
-    "ProductDefNameDoesNotMatchDirectoryNameCheck",
+    "ProductDefNameDoesNotMatchDirectoryName",
     "ProductDefSyntaxError"
   ]
 }
