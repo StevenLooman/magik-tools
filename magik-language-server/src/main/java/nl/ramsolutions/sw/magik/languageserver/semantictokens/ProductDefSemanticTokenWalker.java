@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.productdef.analysis.ProductDefAstWalker;
-import nl.ramsolutions.sw.productdef.api.SwProductDefinitionKeyword;
+import nl.ramsolutions.sw.productdef.api.ProductDefinitionKeyword;
 
 /** SwProductDef semantic token walker. */
 public class ProductDefSemanticTokenWalker extends ProductDefAstWalker {
 
   private static final Set<String> KEYWORD_VALUES =
-      Arrays.stream(SwProductDefinitionKeyword.values())
-          .map(SwProductDefinitionKeyword::getValue)
+      Arrays.stream(ProductDefinitionKeyword.values())
+          .map(ProductDefinitionKeyword::getValue)
           .collect(Collectors.toUnmodifiableSet());
 
   private final List<SemanticToken> semanticTokens = new ArrayList<>();

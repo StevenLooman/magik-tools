@@ -101,13 +101,13 @@
         <extensions>true</extensions>
 
         <configuration>
-          <pluginClass>nl.ramsolutions.sw.sonar.MagikPlugin</pluginClass>
+          <pluginClass>nl.ramsolutions.sw.sonar.SonarMagikPlugin</pluginClass>
           <pluginName>Magik Code Quality and Security</pluginName>
           <pluginKey>magik</pluginKey>
           <skipDependenciesPackaging>true</skipDependenciesPackaging>
           <sonarLintSupported>false</sonarLintSupported>
           <pluginApiMinVersion>${pluginApiMinVersion}</pluginApiMinVersion>
-          <requiredForLanguages>magik</requiredForLanguages>
+          <requiredForLanguages>magik,product_def,module_def</requiredForLanguages>
           <jreMinVersion>17</jreMinVersion>
           <archive>
             <manifestEntries>

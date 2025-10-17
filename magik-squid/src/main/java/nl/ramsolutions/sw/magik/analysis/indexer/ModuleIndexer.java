@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
-import nl.ramsolutions.sw.moduledef.ModuleDefFileScanner;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
 import org.slf4j.Logger;
@@ -45,9 +45,10 @@ public class ModuleIndexer {
     }
 
     if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
-      final ModuleDefFileScanner moduleDefFileScanner =
-          new ModuleDefFileScanner(this.ignoreHandler);
-      moduleDefFileScanner.getModuleDefFiles(path).stream().forEach(this::indexFile);
+      final SourceFileScanner scanner =
+          new SourceFileScanner(this.ignoreHandler, SourceFileScanner.MODULE_DEF_FILE_FILTER);
+      final Path parentPath = path.getParent();
+      scanner.getFiles(parentPath).forEach(this::indexFile);
     }
 
     LOGGER.debug("Handled file event: {}", fileEvent);
@@ -70,7 +71,8 @@ public class ModuleIndexer {
   }
 
   private void readDefinitions(final Path path) throws IOException {
-    final Path productDefPath = ModuleDefFileScanner.getProductDefFileForPath(path);
+    final Path productDefPath =
+        SourceFileScanner.searchFileUpwards(path, SourceFileScanner.SW_PRODUCT_DEF);
     final ProductDefFile productDefFile;
     if (productDefPath != null) {
       productDefFile = new ProductDefFile(productDefPath, this.definitionKeeper, null);

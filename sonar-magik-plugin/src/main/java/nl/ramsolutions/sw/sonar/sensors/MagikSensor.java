@@ -4,13 +4,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import nl.ramsolutions.sw.checks.Issue;
+import nl.ramsolutions.sw.checks.MagikCheck;
+import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikVisitor;
-import nl.ramsolutions.sw.magik.checks.CheckList;
-import nl.ramsolutions.sw.magik.checks.MagikCheck;
-import nl.ramsolutions.sw.magik.checks.MagikIssue;
 import nl.ramsolutions.sw.magik.metrics.FileMetrics;
-import nl.ramsolutions.sw.sonar.language.Magik;
+import nl.ramsolutions.sw.sonar.language.MagikLanguage;
 import nl.ramsolutions.sw.sonar.sensors.cpd.CpdTokenSaver;
 import nl.ramsolutions.sw.sonar.visitors.MagikHighlighterVisitor;
 import org.sonar.api.batch.fs.FilePredicate;
@@ -60,17 +61,20 @@ public class MagikSensor implements Sensor {
   }
 
   @Override
-  public void describe(final SensorDescriptor descriptor) {
-    descriptor.onlyOnLanguage(Magik.KEY).name("Magik Sensor");
+  public void describe(final @Nonnull SensorDescriptor descriptor) {
+    descriptor.onlyOnLanguage(MagikLanguage.KEY).name("Magik Sensor");
   }
 
   @Override
-  public void execute(final SensorContext context) {
+  public void execute(final @Nonnull SensorContext context) {
+    LOGGER.debug("Executing MagikSensor");
+
     final FileSystem fileSystem = context.fileSystem();
     final FilePredicates predicates = fileSystem.predicates();
 
     final FilePredicate filePredicate =
-        predicates.and(predicates.hasType(InputFile.Type.MAIN), predicates.hasLanguage(Magik.KEY));
+        predicates.and(
+            predicates.hasType(InputFile.Type.MAIN), predicates.hasLanguage(MagikLanguage.KEY));
 
     final List<InputFile> inputFiles = new ArrayList<>();
     fileSystem.inputFiles(filePredicate).forEach(inputFiles::add);
@@ -99,6 +103,7 @@ public class MagikSensor implements Sensor {
     } catch (IOException ex) {
       throw new IllegalStateException("Cannot read " + inputFile, ex);
     }
+
     final MagikFile magikFile = new MagikFile(uri, fileContent);
 
     // Save metrics.
@@ -109,11 +114,11 @@ public class MagikSensor implements Sensor {
     LOGGER.debug("Running checks");
     final Checks<MagikCheck> checks =
         checkFactory
-            .<MagikCheck>create(CheckList.REPOSITORY_KEY)
-            .addAnnotatedChecks(CheckList.getChecks());
+            .<MagikCheck>create(MagikCheckList.REPOSITORY_KEY)
+            .addAnnotatedChecks(MagikCheckList.getChecks());
     for (final MagikCheck check : checks.all()) {
       LOGGER.debug("Running check: {}", check);
-      final List<MagikIssue> issues = check.scanFileForIssues(magikFile);
+      final List<Issue> issues = check.scanFileForIssues(magikFile);
       final RuleKey ruleKey = checks.ruleKey(check);
       if (ruleKey == null) {
         continue;
@@ -177,9 +182,9 @@ public class MagikSensor implements Sensor {
   private void saveIssues(
       final SensorContext context,
       final RuleKey ruleKey,
-      final List<MagikIssue> magikIssues,
+      final List<Issue> issues,
       final InputFile inputFile) {
-    for (final MagikIssue magikIssue : magikIssues) {
+    for (final Issue magikIssue : issues) {
       LOGGER.debug("Saving issue, file: {}, issue: {}", inputFile, magikIssue);
 
       final NewIssue issue = context.newIssue();

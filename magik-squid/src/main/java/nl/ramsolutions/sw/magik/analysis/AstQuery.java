@@ -18,8 +18,8 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
-import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionGrammar;
-import nl.ramsolutions.sw.productdef.api.SwProductDefinitionGrammar;
+import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
+import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 
 /** {@link AstNode} query utility functions. */
 public final class AstQuery {
@@ -537,14 +537,14 @@ public final class AstQuery {
   }
 
   private static boolean isGrammarNode(final AstNode node) {
-    return node.is(SwProductDefinitionGrammar.values())
-        || node.is(SwModuleDefinitionGrammar.values())
+    return node.is(ProductDefinitionGrammar.values())
+        || node.is(ModuleDefinitionGrammar.values())
         || node.is(MagikGrammar.values());
   }
 
   private static boolean isTokenNode(final AstNode node) {
-    return node.isNot(SwProductDefinitionGrammar.values())
-        && node.isNot(SwModuleDefinitionGrammar.values())
+    return node.isNot(ProductDefinitionGrammar.values())
+        && node.isNot(ModuleDefinitionGrammar.values())
         && node.isNot(MagikGrammar.values());
   }
 }

@@ -30,10 +30,10 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.moduledef.ModuleUsage;
-import nl.ramsolutions.sw.moduledef.api.SwModuleDefinitionGrammar;
+import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
 import nl.ramsolutions.sw.productdef.ProductUsage;
-import nl.ramsolutions.sw.productdef.api.SwProductDefinitionGrammar;
+import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,8 +71,8 @@ public class ReferencesProvider {
     final AstNode productNameNode =
         AstQuery.getParentFromChain(
             hoveredTokenNode,
-            SwProductDefinitionGrammar.IDENTIFIER,
-            SwProductDefinitionGrammar.PRODUCT_NAME);
+            ProductDefinitionGrammar.IDENTIFIER,
+            ProductDefinitionGrammar.PRODUCT_NAME);
     if (productNameNode == null) {
       return Collections.emptyList();
     }
@@ -100,7 +100,7 @@ public class ReferencesProvider {
 
     final AstNode moduleNameNode =
         AstQuery.getParentFromChain(
-            tokenNode, SwModuleDefinitionGrammar.IDENTIFIER, SwModuleDefinitionGrammar.MODULE_NAME);
+            tokenNode, ModuleDefinitionGrammar.IDENTIFIER, ModuleDefinitionGrammar.MODULE_NAME);
     if (moduleNameNode == null) {
       return Collections.emptyList();
     }

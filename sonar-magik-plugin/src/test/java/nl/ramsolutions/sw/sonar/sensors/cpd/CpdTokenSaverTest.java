@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.sonar.language.Magik;
+import nl.ramsolutions.sw.sonar.language.MagikLanguage;
 import org.junit.jupiter.api.Test;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.InputFile.Type;
@@ -37,7 +37,7 @@ class CpdTokenSaverTest {
             .setModuleBaseDir(filePath)
             .setCharset(StandardCharsets.ISO_8859_1)
             .setType(Type.MAIN)
-            .setLanguage(Magik.KEY)
+            .setLanguage(MagikLanguage.KEY)
             .setContents(fileContents)
             .setStatus(InputFile.Status.ADDED)
             .build();

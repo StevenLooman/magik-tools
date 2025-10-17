@@ -4,7 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
-import nl.ramsolutions.sw.productdef.api.SwProductDefinitionGrammar;
+import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 
 /**
  * A {@link AstNode} tree walker with pre- and post-methods to iterate a parse tree. Note that this
@@ -35,12 +35,11 @@ public abstract class ProductDefAstWalker {
   @SuppressWarnings({"java:S1479", "checkstyle:MethodLength"})
   public void walkAst(final AstNode node) {
     final AstNodeType nodeType = node.getType();
-    if (!(nodeType instanceof SwProductDefinitionGrammar)) {
+    if (!(nodeType instanceof ProductDefinitionGrammar value)) {
       this.walkTokens(node);
       return;
     }
 
-    final SwProductDefinitionGrammar value = (SwProductDefinitionGrammar) nodeType;
     switch (value) {
       case PRODUCT_DEFINITION:
         this.walkPreProductDefinition(node);

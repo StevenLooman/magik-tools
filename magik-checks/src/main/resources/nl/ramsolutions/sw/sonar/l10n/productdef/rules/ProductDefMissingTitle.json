@@ -1,0 +1,17 @@
+{
+  "title": "product.def is missing title",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bad-practice",
+    "confusing",
+    "convention"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "ProductDefMissingTitle",
+  "sqKey": "product-def-missing-title"
+}
