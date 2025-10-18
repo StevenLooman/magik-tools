@@ -1,0 +1,24 @@
+<p>Ensure that no module listed in <code>tests_modules</code> also appears in <code>requires</code>. 
+If a module is listed as <code>tests_modules</code>, it is already required implicitly. Adding it to <code>requires</code> is redundant.</p>
+
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+example_module_tests 1
+
+requires
+    example_module
+end
+
+tests_modules
+    example_module
+end
+</pre>
+
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+example_module_tests 1
+
+tests_modules
+    example_module
+end
+</pre>
