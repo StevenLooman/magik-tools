@@ -11,8 +11,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 class RequiredModuleAlreadyInTestsModulesCheckTest {
 
   @ParameterizedTest(name = "Valid module.def example {index}")
-  @ValueSource(strings = {
-    """
+  @ValueSource(
+      strings = {
+        """
     example_module_test 1
 
     requires
@@ -24,14 +25,14 @@ class RequiredModuleAlreadyInTestsModulesCheckTest {
         example_module
     end
     """,
-    """
+        """
     example_module_test 1
 
     tests_modules
         example_module
     end
     """,
-    """
+        """
     example_module_test 1
 
     requires
@@ -41,24 +42,24 @@ class RequiredModuleAlreadyInTestsModulesCheckTest {
         example_module
     end
     """,
-    """
-    example_module_test 1
-
-    requires
-        other_module
-        another_module
-    end
-
-    tests_modules
-
-    end
-    """,
-    """
+        """
     example_module_test 1
 
     requires
         other_module
         another_module
+    end
+
+    tests_modules
+
+    end
+    """,
+        """
+    example_module_test 1
+
+    requires
+        other_module
+        another_module
         example_module
     end
 
@@ -66,7 +67,7 @@ class RequiredModuleAlreadyInTestsModulesCheckTest {
 
     end
     """,
-  })
+      })
   void testOk(final String code) {
     final ModuleDefCheck check = new RequiredModuleAlreadyInTestsModulesCheck();
     assertThat(check).reportsNoIssues(code);
