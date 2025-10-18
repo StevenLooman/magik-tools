@@ -12,5 +12,5 @@
   ],
   "defaultSeverity": "Critical",
   "ruleSpecification": "SwChar16VectorEvaluateInvocation",
-  "sqKey": "sw-char16-vector-evaluate-invocation"
+  "sqKey": "sw-char16vector-evaluate-invocation"
 }

@@ -129,12 +129,7 @@ public class CheckHolder {
   public CheckMetadata getMetadata() throws IOException {
     if (this.metadata == null) {
       synchronized (this) {
-        // Determine path.
-        final String name = this.getCheckName();
-        final String profileDir = this.getCheckProfileDir();
-        final String filename = String.format("/%s/%s.json", profileDir, name);
-
-        // Parse json.
+        final String filename = this.getFileForCheck("json");
         final Gson gson = new Gson();
         try (final InputStream inputStream = this.getClass().getResourceAsStream(filename)) {
           final InputStreamReader reader = new InputStreamReader(inputStream);
@@ -147,8 +142,18 @@ public class CheckHolder {
     return this.metadata;
   }
 
+  /**
+   * Get an {@link InputStream} to the HTML file for the {@link Check}.
+   *
+   * @return {@link InputStream} for HTML file.
+   * @throws IOException -
+   */
+  public InputStream getHtmlFileStream() throws IOException {
+    final String filename = this.getFileForCheck("html");
+    return this.getClass().getResourceAsStream(filename);
+  }
+
   private String getCheckName() {
-    // TODO: Can't we do this better? Perhaps use the Rule annotation?
     final String simpleName = this.checkClass.getSimpleName();
     return simpleName.endsWith("TypedCheck")
         ? simpleName.substring(0, simpleName.length() - "TypedCheck".length()) // Strip TypedCheck.
@@ -170,6 +175,11 @@ public class CheckHolder {
     throw new IllegalStateException(
         String.format(
             "Unknown check class: %s", this.checkClass.getGenericSuperclass().getTypeName()));
+  }
+
+  private String getFileForCheck(final String extension) {
+    final String profileDir = this.getCheckProfileDir();
+    return String.format("/%s/%s.%s", profileDir, this.getCheckName(), extension);
   }
 
   /**
@@ -204,6 +214,7 @@ public class CheckHolder {
     if (stringKebab.startsWith("-")) {
       return stringKebab.substring(1);
     }
+
     return stringKebab;
   }
 
