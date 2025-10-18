@@ -7,7 +7,6 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -130,11 +129,7 @@ public class CheckHolder {
   public CheckMetadata getMetadata() throws IOException {
     if (this.metadata == null) {
       synchronized (this) {
-        // Determine path.
-        final Path path = this.getProfileFilePath("json");
-        final String filename = path.toString();
-
-        // Parse json.
+        final String filename = this.getFileForCheck("json");
         final Gson gson = new Gson();
         try (final InputStream inputStream = this.getClass().getResourceAsStream(filename)) {
           final InputStreamReader reader = new InputStreamReader(inputStream);
@@ -148,19 +143,17 @@ public class CheckHolder {
   }
 
   /**
-   * Get the HTML file for the {@link Check}.
+   * Get an {@link InputStream} to the HTML file for the {@link Check}.
    *
-   * @return Input stream for HTML file.
+   * @return {@link InputStream} for HTML file.
    * @throws IOException -
    */
   public InputStream getHtmlFileStream() throws IOException {
-    final Path path = this.getProfileFilePath("html");
-    final String filename = path.toString();
+    final String filename = this.getFileForCheck("html");
     return this.getClass().getResourceAsStream(filename);
   }
 
   private String getCheckName() {
-    // TODO: Can't we do this better? Perhaps use the Rule annotation?
     final String simpleName = this.checkClass.getSimpleName();
     return simpleName.endsWith("TypedCheck")
         ? simpleName.substring(0, simpleName.length() - "TypedCheck".length()) // Strip TypedCheck.
@@ -184,10 +177,9 @@ public class CheckHolder {
             "Unknown check class: %s", this.checkClass.getGenericSuperclass().getTypeName()));
   }
 
-  private Path getProfileFilePath(final String extension) {
+  private String getFileForCheck(final String extension) {
     final String profileDir = this.getCheckProfileDir();
-    final String fullPath = "/" + profileDir + "/" + this.getCheckName() + "." + extension;
-    return Path.of(fullPath);
+    return String.format("/%s/%s.%s", profileDir, this.getCheckName(), extension);
   }
 
   /**
@@ -222,6 +214,7 @@ public class CheckHolder {
     if (stringKebab.startsWith("-")) {
       return stringKebab.substring(1);
     }
+
     return stringKebab;
   }
 
