@@ -1,0 +1,9 @@
+test_module_2 1
+
+requires
+  test_module
+end
+
+tests_modules
+  test_module
+end
