@@ -6,9 +6,12 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
+import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonar.check.RuleProperty;
@@ -147,5 +150,32 @@ public abstract class ModuleDefCheck implements Check {
    */
   protected void addFileIssue(final String message) {
     this.issueCollector.addFileIssue(message);
+  }
+
+  /**
+   * Get all module name nodes.
+   *
+   * @param node Top node.
+   * @return a {@link Set} of {@link AstNode} objects representing module names.
+   */
+  public List<AstNode> getModuleNameNodes(final AstNode node) {
+    if (node == null) {
+      return List.of();
+    }
+    return node.getDescendants(ModuleDefinitionGrammar.MODULE_NAME);
+  }
+
+  /**
+   * Get all module names.
+   *
+   * @param node Top node.
+   * @return a {@link Set} of module name {@link String}.
+   */
+  public Set<String> getModuleNames(final AstNode node) {
+    return this.getModuleNameNodes(node).stream()
+        .map(AstNode::getTokenValue)
+        .map(String::trim)
+        .filter(s -> !s.isEmpty())
+        .collect(Collectors.toSet());
   }
 }
