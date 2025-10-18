@@ -17,7 +17,7 @@ import org.sonar.check.RuleProperty;
 public class ProductDefNameDoesNotMatchDirectoryNameCheck extends ProductDefCheck {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String CHECK_KEY = "ProductNameDoesNotMatchDirectoryName";
+  public static final String CHECK_KEY = "ProductDefNameDoesNotMatchDirectoryName";
 
   private static final String MESSAGE = "Product name does not match directory name.";
 

@@ -30,11 +30,11 @@ public final class MagikTypedCheckList {
   private MagikTypedCheckList() {}
 
   /**
-   * Get the list of {@link MagikCheck}s.
+   * Get the list of {@link MagikTypedCheck}s.
    *
-   * @return List of with {@link MagikCheck}s
+   * @return List of with {@link MagikTypedCheck}s
    */
-  public static List<Class<? extends MagikCheck>> getChecks() {
+  public static List<Class<? extends MagikTypedCheck>> getChecks() {
     return List.of(
         ConditionalExpressionIsFalseTypedCheck.class,
         DeprecatedMethodUsageTypedCheck.class,
@@ -53,7 +53,7 @@ public final class MagikTypedCheckList {
   }
 
   /**
-   * Get the list of {@link MagikCheck}s, casted to {@link Check}s.
+   * Get the list of {@link MagikTypedCheck}s, casted to {@link Check}s.
    *
    * @return List of {@link Check}s.
    */
@@ -70,6 +70,7 @@ public final class MagikTypedCheckList {
    */
   public static Map<Class<? extends MagikCheck>, List<Class<? extends MagikTypedCheckFixer>>>
       getFixers() {
+    // TODO: For now in MagikTypedCheckList, even it is a regular MagikCheck.
     return Map.of(
         TypeDocCheck.class, List.of(TypeDocParameterFixer.class, TypeDocReturnTypeFixer.class));
   }
