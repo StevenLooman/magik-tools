@@ -216,7 +216,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     final String text = textDocument.getText();
     final OpenedFile openedFile;
     switch (textDocument.getLanguageId()) {
-      case "product.def":
+      case "sw-product-def":
         {
           final ProductDefFile productDefFile =
               new ProductDefFile(mergedProperties, uri, text, this.definitionKeeper, null);
@@ -227,7 +227,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "module.def":
+      case "sw-module-def":
         {
           final ModuleDefFile moduleDefFile =
               new ModuleDefFile(uri, text, this.definitionKeeper, null);
@@ -295,7 +295,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     final String languageId = existingOpenedFile.getLanguageId();
     final OpenedFile openedFile;
     switch (languageId) {
-      case "product.def":
+      case "sw-product-def":
         {
           final ProductDefFile productDefFile =
               new ProductDefFile(mergedProperties, uri, text, this.definitionKeeper, null);
@@ -306,7 +306,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "module.def":
+      case "sw-module-def":
         {
           final ModuleDefFile moduleDefFile =
               new ModuleDefFile(uri, text, this.definitionKeeper, null);
@@ -428,7 +428,7 @@ public class MagikTextDocumentService implements TextDocumentService {
 
     final String languageId = existingOpenedFile.getLanguageId();
     switch (languageId) {
-      case "product.def":
+      case "sw-product-def":
         {
           final ProductDefFile productDefFile = (ProductDefFile) existingOpenedFile;
 
@@ -442,7 +442,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "module.def":
+      case "sw-module-def":
         {
           final ModuleDefFile moduleDefFile = (ModuleDefFile) existingOpenedFile;
 
