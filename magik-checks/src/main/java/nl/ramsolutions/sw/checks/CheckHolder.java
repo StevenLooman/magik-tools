@@ -7,6 +7,7 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -130,9 +131,8 @@ public class CheckHolder {
     if (this.metadata == null) {
       synchronized (this) {
         // Determine path.
-        final String name = this.getCheckName();
-        final String profileDir = this.getCheckProfileDir();
-        final String filename = String.format("/%s/%s.json", profileDir, name);
+        final Path path = this.getProfileFilePath("json");
+        final String filename = path.toString();
 
         // Parse json.
         final Gson gson = new Gson();
@@ -145,6 +145,18 @@ public class CheckHolder {
     }
 
     return this.metadata;
+  }
+
+  /**
+   * Get the HTML file for the {@link Check}.
+   *
+   * @return Input stream for HTML file.
+   * @throws IOException -
+   */
+  public InputStream getHtmlFileStream() throws IOException {
+    final Path path = this.getProfileFilePath("html");
+    final String filename = path.toString();
+    return this.getClass().getResourceAsStream(filename);
   }
 
   private String getCheckName() {
@@ -170,6 +182,12 @@ public class CheckHolder {
     throw new IllegalStateException(
         String.format(
             "Unknown check class: %s", this.checkClass.getGenericSuperclass().getTypeName()));
+  }
+
+  private Path getProfileFilePath(final String extension) {
+    final String profileDir = this.getCheckProfileDir();
+    final String fullPath = "/" + profileDir + "/" + this.getCheckName() + "." + extension;
+    return Path.of(fullPath);
   }
 
   /**

@@ -11,11 +11,11 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.sonar.check.Rule;
 
 /** Test if called method is not private. */
-@Rule(key = UndefinedMethodCallResultTypedCheck.CHECK_KEY)
+@Rule(key = MethodIsPublicTypedCheck.CHECK_KEY)
 public class MethodIsPublicTypedCheck extends MagikTypedCheck {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String CHECK_KEY = "UndefinedMethodCallResult";
+  public static final String CHECK_KEY = "MethodIsPublic";
 
   private static final String MESSAGE = "Called method is not public: %s";
 
