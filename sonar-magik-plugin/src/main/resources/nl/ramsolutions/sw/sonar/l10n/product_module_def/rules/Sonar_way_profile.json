@@ -4,6 +4,7 @@
     "ModuleDefMissingDescription",
     "ModuleDefNameDoesNotMatchDirectoryName",
     "ModuleDefSyntaxError",
+    "RequiredModuleAlreadyInTestsModules",
     "ProductDefMissingDescription",
     "ProductDefMissingTitle",
     "ProductDefNameDoesNotMatchDirectoryName",
