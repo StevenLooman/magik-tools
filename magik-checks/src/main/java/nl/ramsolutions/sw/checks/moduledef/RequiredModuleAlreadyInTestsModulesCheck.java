@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.checks.moduledef;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,9 +39,7 @@ public class RequiredModuleAlreadyInTestsModulesCheck extends ModuleDefCheck {
     for (AstNode moduleNode : requiresModules) {
       final String moduleName = moduleNode.getTokenValue().trim();
       if (testsModules.contains(moduleName)) {
-        this.addIssue(
-            moduleNode,
-            String.format(MESSAGE_TEMPLATE, moduleName));
+        this.addIssue(moduleNode, String.format(MESSAGE_TEMPLATE, moduleName));
       }
     }
   }
