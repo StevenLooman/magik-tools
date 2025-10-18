@@ -120,6 +120,6 @@ public class ProductDefFile extends OpenedFile {
 
   @Override
   public String getLanguageId() {
-    return "product.def";
+    return "sw-product-def";
   }
 }

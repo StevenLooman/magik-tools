@@ -44,34 +44,35 @@
         "configuration": "./languages/magik-language-configuration.json"
       },
       {
-        "id": "load_list.txt",
+        "id": "sw-load-list",
         "aliases": [
           "Smallworld Load List"
         ],
         "filenames": [
-          "load_list.txt"
+          "load_list.txt",
+          "patch_list.txt"
         ],
         "configuration": "./languages/load-list-language-configuration.json"
       },
       {
-        "id": "product.def",
+        "id": "sw-product-def",
         "aliases": [
           "Smallworld Product definition"
         ],
         "filenames": [
           "product.def"
         ],
-        "configuration": "./languages/product-definition-language-configuration.json"
+        "configuration": "./languages/sw-product-def-language-configuration.json"
       },
       {
-        "id": "module.def",
+        "id": "sw-module-def",
         "aliases": [
           "Smallworld Module definition"
         ],
         "filenames": [
           "module.def"
         ],
-        "configuration": "./languages/module-definition-language-configuration.json"
+        "configuration": "./languages/sw-module-def-language-configuration.json"
       },
       {
         "id": "message",
@@ -107,16 +108,16 @@
         "path": "./snippets/magik-snippets.json"
       },
       {
-        "language": "load_list.txt",
-        "path": "./snippets/load-list-snippets.json"
+        "language": "sw-load-list",
+        "path": "./snippets/sw-load-list-snippets.json"
       },
       {
-        "language": "product.def",
-        "path": "./snippets/product-def-snippets.json"
+        "language": "sw-product-def",
+        "path": "./snippets/sw-product-def-snippets.json"
       },
       {
-        "language": "module.def",
-        "path": "./snippets/module-def-snippets.json"
+        "language": "sw-module-def",
+        "path": "./snippets/sw-module-def-snippets.json"
       },
       {
         "language": "message",
@@ -220,17 +221,17 @@
       {
         "command": "magik.transmitLoadList",
         "key": "f4 b",
-        "when": "editorTextFocus && editorLangId == load_list.txt"
+        "when": "editorTextFocus && editorLangId == sw-load-list"
       },
       {
         "command": "magik.transmitProductDef",
         "key": "f4 b",
-        "when": "editorTextFocus && editorLangId == product.def"
+        "when": "editorTextFocus && editorLangId == sw-product-def"
       },
       {
         "command": "magik.transmitModuleDef",
         "key": "f4 b",
-        "when": "editorTextFocus && editorLangId == module.def"
+        "when": "editorTextFocus && editorLangId == sw-module-def"
       },
       {
         "command": "magik.traceStatement",
