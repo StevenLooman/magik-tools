@@ -129,7 +129,7 @@ public class ModuleDefFile extends OpenedFile {
 
   @Override
   public String getLanguageId() {
-    return "module.def";
+    return "sw-module-def";
   }
 
   /**
