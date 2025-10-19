@@ -13,5 +13,6 @@ public abstract class MagikTypedCheckFixer {
    *
    * @return List of {@link CodeAction}s to be applied.
    */
-  public abstract List<CodeAction> provideCodeActions(MagikTypedFile magikFile, Range range);
+  public abstract List<CodeAction> provideCodeActions(
+      final MagikTypedFile magikFile, final Range range);
 }
