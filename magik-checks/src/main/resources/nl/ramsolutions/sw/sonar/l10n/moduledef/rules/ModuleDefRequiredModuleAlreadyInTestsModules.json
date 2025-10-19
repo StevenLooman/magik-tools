@@ -1,5 +1,5 @@
 {
-  "title": "Module listed in tests_modules also appears in requires",
+  "title": "Module already in tests_modules, no need to list in requires",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
@@ -12,6 +12,6 @@
     "convention"
   ],
   "defaultSeverity": "Minor",
-  "ruleSpecification": "RequiredModuleAlreadyInTestsModules",
-  "sqKey": "required-module-already-in-tests-modules"
+  "ruleSpecification": "ModuleDefRequiredModuleAlreadyInTestsModules",
+  "sqKey": "module-def-required-module-already-in-tests-modules"
 }

@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.checks.moduledef.ModuleDefMissingDescriptionCheck;
 import nl.ramsolutions.sw.checks.moduledef.ModuleDefNameDoesNotMatchDirectoryNameCheck;
+import nl.ramsolutions.sw.checks.moduledef.ModuleDefRequiredModuleAlreadyInTestsModulesCheck;
 import nl.ramsolutions.sw.checks.moduledef.ModuleDefSyntaxErrorCheck;
-import nl.ramsolutions.sw.checks.moduledef.RequiredModuleAlreadyInTestsModulesCheck;
 
 /** module.def {@link Check} list. */
 public class ModuleDefCheckList {
@@ -28,8 +28,8 @@ public class ModuleDefCheckList {
     return List.of(
         ModuleDefMissingDescriptionCheck.class,
         ModuleDefNameDoesNotMatchDirectoryNameCheck.class,
-        ModuleDefSyntaxErrorCheck.class,
-        RequiredModuleAlreadyInTestsModulesCheck.class);
+        ModuleDefRequiredModuleAlreadyInTestsModulesCheck.class,
+        ModuleDefSyntaxErrorCheck.class);
   }
 
   /**
