@@ -1,5 +1,5 @@
 {
-  "title": "Compare strings and bignums with the equality-operators",
+  "title": "Compare strings, bignums, and floats with the equality-operators",
   "type": "BUG",
   "status": "ready",
   "remediation": {
