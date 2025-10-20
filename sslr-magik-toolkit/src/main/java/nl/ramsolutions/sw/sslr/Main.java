@@ -87,7 +87,7 @@ public final class Main {
       return; // Keep inferer happy.
     }
 
-    final String title = "SSLR Toolkit: " + grammar;
+    final String title = "SSLR Magik Toolkit: " + grammar;
     final Toolkit toolkit = new Toolkit(title, configurationModel);
     toolkit.run();
   }
@@ -95,6 +95,6 @@ public final class Main {
   private static void showHelp() throws IOException {
     final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
     helpFormatter.printHelp(
-        "java -jar sslr-magik-toolkit.jar", "sslr-magik-toolkit", OPTIONS, "", true);
+        "java -jar sslr-magik-toolkit.jar", "sslr-magik-toolkit", Main.OPTIONS, "", true);
   }
 }
