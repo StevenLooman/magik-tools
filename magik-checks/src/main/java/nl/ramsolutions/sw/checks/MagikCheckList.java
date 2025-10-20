@@ -45,6 +45,7 @@ import nl.ramsolutions.sw.checks.magik.VariableDeclarationUsageDistanceCheck;
 import nl.ramsolutions.sw.checks.magik.VariableNamingCheck;
 import nl.ramsolutions.sw.checks.magik.WarnedCallCheck;
 import nl.ramsolutions.sw.checks.magik.fixers.FormattingFixer;
+import nl.ramsolutions.sw.checks.magik.fixers.SizeZeroEmptyFixer;
 import nl.ramsolutions.sw.checks.magik.fixers.UseValueCompareFixer;
 
 /** Magik {@link Check} list. */
@@ -127,6 +128,7 @@ public final class MagikCheckList {
   public static Map<Class<? extends MagikCheck>, List<Class<? extends CheckFixer>>> getFixers() {
     return Map.of(
         FormattingCheck.class, List.of(FormattingFixer.class),
+        SizeZeroEmptyCheck.class, List.of(SizeZeroEmptyFixer.class),
         UseValueCompareCheck.class, List.of(UseValueCompareFixer.class));
   }
 }

@@ -33,9 +33,7 @@ public class SizeZeroEmptyCheck extends MagikCheck {
 
   private boolean hasEqOperator(final AstNode node) {
     final AstNode operatorNode = node.getChildren().get(1);
-    return operatorNode.getTokenValue().equals("=")
-        || operatorNode.getTokenValue().equals(">=")
-        || operatorNode.getTokenValue().equals("_is");
+    return operatorNode.getTokenValue().equals("=") || operatorNode.getTokenValue().equals("_is");
   }
 
   private boolean isMethodInvocationSize(final AstNode node) {

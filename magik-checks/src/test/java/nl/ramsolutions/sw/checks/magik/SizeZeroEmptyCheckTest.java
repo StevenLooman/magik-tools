@@ -17,8 +17,11 @@ class SizeZeroEmptyCheckTest {
         "a.size _is 0",
         "a.b.size _is 0",
         "0 _is a.size",
+        "0 _is a.b.size",
         "a.size = 0",
+        "a.b.size = 0",
         "0 = a.size",
+        "0 = a.b.size",
       })
   void testInvalid(final String code) {
     final MagikCheck check = new SizeZeroEmptyCheck();
