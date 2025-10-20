@@ -15,9 +15,9 @@ import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.checks.Check;
-import nl.ramsolutions.sw.checks.CheckFixer;
 import nl.ramsolutions.sw.checks.CheckHolder;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
+import nl.ramsolutions.sw.checks.MagikCheckFixer;
 import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -26,7 +26,7 @@ import nl.ramsolutions.sw.magik.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Apply any fixes using the registered {@link CheckFixer}s. */
+/** Apply any fixes using the registered {@link MagikCheckFixer}s. */
 public class MagikFixer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikFixer.class);
@@ -57,7 +57,7 @@ public class MagikFixer {
   private void runOnFile(final MagikFile originalMagikFile) throws IOException {
     MagikFile magikFile = originalMagikFile;
     final URI uri = magikFile.getUri();
-    for (final CheckFixer fixer : this.getFixers(magikFile)) {
+    for (final MagikCheckFixer fixer : this.getFixers(magikFile)) {
       final String newSource = this.applyFixer(fixer, magikFile);
       magikFile = new MagikFile(uri, newSource);
     }
@@ -73,7 +73,7 @@ public class MagikFixer {
     Files.writeString(path, newSource, charset);
   }
 
-  private String applyFixer(final CheckFixer fixer, final MagikFile magikFile) {
+  private String applyFixer(final MagikCheckFixer fixer, final MagikFile magikFile) {
     final String source = magikFile.getSource();
     final CodeActionApplier applier = new CodeActionApplier(source);
     final Range range =
@@ -87,7 +87,7 @@ public class MagikFixer {
     return applier.getSource();
   }
 
-  private List<CheckFixer> getFixers(final MagikFile magikFile) {
+  private List<MagikCheckFixer> getFixers(final MagikFile magikFile) {
     final List<Class<? extends Check>> enabledChecks = this.getEnabledChecks(magikFile);
     return MagikCheckList.getFixers().entrySet().stream()
         .filter(entry -> enabledChecks.contains(entry.getKey()))
@@ -96,7 +96,7 @@ public class MagikFixer {
         .toList();
   }
 
-  private CheckFixer instantiateFixer(final Class<? extends CheckFixer> fixerClass) {
+  private MagikCheckFixer instantiateFixer(final Class<? extends MagikCheckFixer> fixerClass) {
     try {
       return fixerClass.getDeclaredConstructor().newInstance();
     } catch (final ReflectiveOperationException exception) {

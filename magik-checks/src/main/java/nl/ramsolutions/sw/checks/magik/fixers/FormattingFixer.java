@@ -5,8 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.AstNodeHelper;
 import nl.ramsolutions.sw.MagikToolsProperties;
-import nl.ramsolutions.sw.OpenedFile;
-import nl.ramsolutions.sw.checks.CheckFixer;
+import nl.ramsolutions.sw.checks.MagikCheckFixer;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Range;
@@ -20,29 +19,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Fixer for formatting issues. */
-public class FormattingFixer extends CheckFixer {
+public class FormattingFixer extends MagikCheckFixer {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FormattingFixer.class);
 
   @Override
-  public List<CodeAction> provideCodeActions(final OpenedFile openedFile, final Range range) {
-    if (!(openedFile instanceof MagikFile magikFile)) {
-      return Collections.emptyList();
-    }
-
-    if (!this.canFormat(magikFile)) {
+  public List<CodeAction> provideCodeActions(final MagikFile file, final Range range) {
+    if (!this.canFormat(file)) {
       LOGGER.warn("Cannot format due to syntax errors");
       return Collections.emptyList();
     }
 
-    final MagikToolsProperties properties = magikFile.getProperties();
+    final MagikToolsProperties properties = file.getProperties();
     final MagikFormattingSettings formattingSettings = new MagikFormattingSettings(properties);
     final FormattingOptions formattingOptions = formattingSettings.getFormattingOptions();
     final Class<? extends FormattingWalker> indentWalker =
         formattingSettings.getIndentStrategyClass();
     final FormattingProvider formattingProvider =
         new FormattingProvider(formattingOptions, indentWalker);
-    final AstNode topNode = magikFile.getTopNode();
+    final AstNode topNode = file.getTopNode();
     final AstNode topNodeClone = AstNodeHelper.clone(topNode);
     final List<TextEdit> textEdits = formattingProvider.format(topNodeClone);
     return textEdits.stream()
@@ -51,8 +46,8 @@ public class FormattingFixer extends CheckFixer {
         .toList();
   }
 
-  private boolean canFormat(final MagikFile magikFile) {
-    final AstNode node = magikFile.getTopNode();
+  private boolean canFormat(final MagikFile file) {
+    final AstNode node = file.getTopNode();
     return node.getFirstDescendant(MagikGrammar.SYNTAX_ERROR) == null;
   }
 }

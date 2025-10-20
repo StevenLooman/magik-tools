@@ -1,13 +1,11 @@
 package nl.ramsolutions.sw.checks.magik.fixers;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import nl.ramsolutions.sw.OpenedFile;
-import nl.ramsolutions.sw.checks.CheckFixer;
 import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.MagikCheck;
+import nl.ramsolutions.sw.checks.MagikCheckFixer;
 import nl.ramsolutions.sw.checks.magik.UseValueCompareCheck;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
@@ -17,18 +15,14 @@ import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /** Fixer for {@link UseValueCompareCheck} issues. */
-public class UseValueCompareFixer extends CheckFixer {
+public class UseValueCompareFixer extends MagikCheckFixer {
 
   @Override
-  public List<CodeAction> provideCodeActions(final OpenedFile openedFile, final Range range) {
-    if (!(openedFile instanceof MagikFile magikFile)) {
-      return Collections.emptyList();
-    }
-
+  public List<CodeAction> provideCodeActions(final MagikFile file, final Range range) {
     // Run the check to get the violation(s).
     final MagikCheck check = new UseValueCompareCheck();
-    final List<Issue> issues = check.scanFileForIssues(openedFile);
-    final AstNode topNode = magikFile.getTopNode();
+    final List<Issue> issues = check.scanFileForIssues(file);
+    final AstNode topNode = file.getTopNode();
     return issues.stream()
         .map(Issue::range)
         .filter(issueRange -> range.overlapsWith(issueRange))

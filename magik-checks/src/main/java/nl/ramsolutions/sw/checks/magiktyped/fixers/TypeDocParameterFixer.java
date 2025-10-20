@@ -29,16 +29,16 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
   /**
    * Provide code actions related to parameter types.
    *
-   * @param magikFile Magik file.
+   * @param file Magik file.
    * @param range Range to provide code actions for.
    * @return List of code actions.
    */
   @Override
-  public List<CodeAction> provideCodeActions(final MagikTypedFile magikFile, final Range range) {
-    final MagikToolsProperties properties = magikFile.getProperties();
+  public List<CodeAction> provideCodeActions(final MagikTypedFile file, final Range range) {
+    final MagikToolsProperties properties = file.getProperties();
     final MagikFormattingSettings settings = new MagikFormattingSettings(properties);
     final String indent = settings.getIndent();
-    return magikFile.getMagikDefinitions().stream()
+    return file.getMagikDefinitions().stream()
         .filter(MethodDefinition.class::isInstance)
         .map(MethodDefinition.class::cast)
         .filter(MethodDefinition::isActualMethodDefinition)

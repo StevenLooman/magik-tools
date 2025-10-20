@@ -11,7 +11,7 @@ public final class MagikNumberParser {
    *
    * <p>Throws an exception when number could not be parsed.
    *
-   * @param numberStr
+   * @param numberStr The string to parse as a Magik-formatted number
    * @return Parsed number.
    */
   public static Number parseMagikNumber(final String numberStr) {
@@ -67,6 +67,15 @@ public final class MagikNumberParser {
     return number;
   }
 
+  /**
+   * Parse a Magik number, returning null on failure instead of throwing.
+   *
+   * <p>This is a safe variant of {@link #parseMagikNumber(String)} that returns null when the
+   * provided string cannot be parsed as a Magik number.
+   *
+   * @param numberStr The string to parse
+   * @return The parsed Number, or {@code null} if parsing failed
+   */
   @CheckForNull
   public static Number parseMagikNumberSafe(final String numberStr) {
     try {

@@ -42,11 +42,11 @@ public class ModuleDefCheckList {
   }
 
   /**
-   * Get the {@link ModuleDefCheck}s which have a {@link CheckFixer}.
+   * Get the {@link ModuleDefCheck}s which have a {@link MagikCheckFixer}.
    *
-   * @return Map of {@link ModuleDefCheck}s and their {@link CheckFixer}s.
+   * @return Map of {@link ModuleDefCheck}s and their {@link MagikCheckFixer}s.
    */
-  public static Map<Class<? extends ModuleDefCheck>, List<Class<? extends CheckFixer>>>
+  public static Map<Class<? extends ModuleDefCheck>, List<Class<? extends MagikCheckFixer>>>
       getFixers() {
     return Map.of();
   }

@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.checks.Check;
-import nl.ramsolutions.sw.checks.CheckFixer;
 import nl.ramsolutions.sw.checks.CheckHolder;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.MagikCheck;
+import nl.ramsolutions.sw.checks.MagikCheckFixer;
 import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
@@ -37,16 +37,17 @@ public class MagikChecksCodeActionProvider {
   public List<CodeAction> provideCodeActions(final MagikTypedFile magikFile, final Range range)
       throws ReflectiveOperationException, IOException {
     final List<CodeAction> codeActions = new ArrayList<>();
-    for (final Entry<Class<? extends MagikCheck>, List<Class<? extends CheckFixer>>> entry :
+    for (final Entry<Class<? extends MagikCheck>, List<Class<? extends MagikCheckFixer>>> entry :
         MagikCheckList.getFixers().entrySet()) {
       final Class<?> checkClass = entry.getKey();
-      final List<Class<? extends CheckFixer>> fixerClassses = entry.getValue();
+      final List<Class<? extends MagikCheckFixer>> fixerClassses = entry.getValue();
       for (final Class<?> fixerClass : fixerClassses) {
         if (!this.isCheckEnabled(magikFile, checkClass)) {
           continue;
         }
 
-        final CheckFixer fixer = (CheckFixer) fixerClass.getDeclaredConstructor().newInstance();
+        final MagikCheckFixer fixer =
+            (MagikCheckFixer) fixerClass.getDeclaredConstructor().newInstance();
         List<CodeAction> fixerCodeActions = fixer.provideCodeActions(magikFile, range);
         codeActions.addAll(fixerCodeActions);
       }

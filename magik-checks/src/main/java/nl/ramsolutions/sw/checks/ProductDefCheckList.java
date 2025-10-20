@@ -44,11 +44,11 @@ public class ProductDefCheckList {
   }
 
   /**
-   * Get the {@link ProductDefCheck}s which have a {@link CheckFixer}.
+   * Get the {@link ProductDefCheck}s which have a {@link MagikCheckFixer}.
    *
-   * @return Map of {@link ProductDefCheck}s and their {@link CheckFixer}s.
+   * @return Map of {@link ProductDefCheck}s and their {@link MagikCheckFixer}s.
    */
-  public static Map<Class<? extends ProductDefCheck>, List<Class<? extends CheckFixer>>>
+  public static Map<Class<? extends ProductDefCheck>, List<Class<? extends MagikCheckFixer>>>
       getFixers() {
     return Map.of();
   }

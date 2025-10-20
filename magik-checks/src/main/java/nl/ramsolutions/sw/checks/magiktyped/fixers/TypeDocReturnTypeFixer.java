@@ -29,20 +29,19 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
   /**
    * Provide code actions related to return types.
    *
-   * @param magikFile Magik file.
+   * @param file Magik file.
    * @param range Range to provide code actions for.
    * @return List of code actions.
    */
   @Override
-  public List<CodeAction> provideCodeActions(final MagikTypedFile magikFile, final Range range) {
-    return magikFile.getMagikDefinitions().stream()
+  public List<CodeAction> provideCodeActions(final MagikTypedFile file, final Range range) {
+    return file.getMagikDefinitions().stream()
         .filter(MethodDefinition.class::isInstance)
         .map(MethodDefinition.class::cast)
         .filter(MethodDefinition::isActualMethodDefinition)
         .filter(methodDef -> Range.fromTree(methodDef.getNode()).overlapsWith(range))
         .flatMap(
-            methodDefinition ->
-                this.extractReturnTypeCodeActions(magikFile, methodDefinition).stream())
+            methodDefinition -> this.extractReturnTypeCodeActions(file, methodDefinition).stream())
         .toList();
   }
 

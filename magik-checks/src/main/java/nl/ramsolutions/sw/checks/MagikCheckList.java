@@ -120,11 +120,12 @@ public final class MagikCheckList {
   }
 
   /**
-   * Get the {@link MagikCheck}s which have a {@link CheckFixer}.
+   * Get the {@link MagikCheck}s which have a {@link MagikCheckFixer}.
    *
-   * @return Map of {@link MagikCheck}s and their {@link CheckFixer}s.
+   * @return Map of {@link MagikCheck}s and their {@link MagikCheckFixer}s.
    */
-  public static Map<Class<? extends MagikCheck>, List<Class<? extends CheckFixer>>> getFixers() {
+  public static Map<Class<? extends MagikCheck>, List<Class<? extends MagikCheckFixer>>>
+      getFixers() {
     return Map.of(
         FormattingCheck.class, List.of(FormattingFixer.class),
         UseValueCompareCheck.class, List.of(UseValueCompareFixer.class));
