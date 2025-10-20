@@ -94,6 +94,7 @@ public final class Main {
 
   private static void showHelp() throws IOException {
     final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
-    helpFormatter.printHelp("java -jar sslr-magik-toolkit.jar", "sslr-magik-toolkit", OPTIONS, "", true);
+    helpFormatter.printHelp(
+        "java -jar sslr-magik-toolkit.jar", "sslr-magik-toolkit", OPTIONS, "", true);
   }
 }
