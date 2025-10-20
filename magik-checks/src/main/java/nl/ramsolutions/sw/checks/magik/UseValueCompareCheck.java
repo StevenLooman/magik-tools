@@ -14,15 +14,14 @@ public class UseValueCompareCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "UseValueCompare";
 
-  private static final String MESSAGE = "Type '%s' should not be compare with _is.";
+  private static final String MESSAGE = "Type should not be compare with _is/_isnt.";
   // Note that SW4 uses bignum from 1<<29. SW5 uses bignum from 1<<31.
   private static final int BIGNUM_LIMIT = 1 << 29;
 
   @Override
   protected void walkPreEqualityExpression(final AstNode node) {
     if (this.isInstanceCompare(node) && (this.hasStringLiteral(node) || this.hasNumLiteral(node))) {
-      final String message = String.format(MESSAGE, "string");
-      this.addIssue(node, message);
+      this.addIssue(node, MESSAGE);
     }
   }
 

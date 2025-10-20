@@ -72,7 +72,7 @@ public class ChecksDiagnosticsProvider {
               final DiagnosticSeverity severity = this.getCheckSeverity(holder);
               final String checkKeyKebabCase = holder.getCheckKeyKebabCase();
               final String diagnosticSource = String.format("mlint (%s)", checkKeyKebabCase);
-              return new Diagnostic(range, message, severity, diagnosticSource);
+              return new Diagnostic(range, message, severity, diagnosticSource, checkKeyKebabCase);
             })
         .toList();
   }
