@@ -18,7 +18,7 @@ public final class Main {
 
   private static final Options OPTIONS;
   private static final Option OPTION_DEBUG =
-      Option.builder().longOpt("debug").desc("Show debug messages").build();
+      Option.builder().longOpt("debug").desc("Show debug messages").get();
 
   static {
     OPTIONS = new Options();

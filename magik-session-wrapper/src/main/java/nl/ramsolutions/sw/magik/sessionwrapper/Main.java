@@ -35,26 +35,23 @@ public class Main {
 
   private static final Options OPTIONS;
   private static final Option OPTION_DEBUG =
-      Option.builder().longOpt("debug").desc("Show debug messages").build();
+      Option.builder().longOpt("debug").desc("Show debug messages").get();
   private static final Option OPTION_HISTORY_FILE =
       Option.builder()
           .longOpt("history-file")
           .desc("Path to history file")
           .hasArg()
           .type(PatternOptionBuilder.FILE_VALUE)
-          .build();
+          .get();
   private static final Option OPTION_DO_NOT_WAIT_FOR_PROMPT =
-      Option.builder()
-          .longOpt("do-not-wait-for-prompt")
-          .desc("Do not wait for Magik prompt")
-          .build();
+      Option.builder().longOpt("do-not-wait-for-prompt").desc("Do not wait for Magik prompt").get();
   private static final Option OPTION_PROMPT_PATTERN =
       Option.builder()
           .longOpt("prompt-pattern")
           .desc("Prompt pattern (regex)")
           .hasArg()
           .type(PatternOptionBuilder.STRING_VALUE)
-          .build();
+          .get();
 
   static {
     OPTIONS = new Options();
