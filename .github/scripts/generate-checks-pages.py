@@ -3,7 +3,7 @@
 import html2text
 from pathlib import Path
 import re
-
+import json
 
 class Writer:
     FOOTER_NOTE = "\n> [!NOTE]\n> This page is generated. Any changes made to this page through the wiki will be lost in the future.\n"
@@ -47,7 +47,7 @@ class HTMLToMarkdown:
         markdown_content = converter.handle(html_content)
         self.markdown_content = markdown_content
 
-    def write_to_file(self, file_path: Path, overwrite: bool):
+    def write_to_file(self, file_path: Path, overwrite: bool = False):
         """
         Write the converted Markdown content to a file.
         """
@@ -69,9 +69,7 @@ class JavaToMarkdown:
     KEY_PATTERN = r'key\s*=\s*"([^"]*)"'
     DESCRIPTION_PATTERN = r'description\s*=\s*"([^"]*)"'
     KEBAB_CASE_PATTERN = r"(?<!^)(?=[A-Z])"
-
-    TABLE_HEADER = "## Options\n\n| Option | Default value | Description |\n|--------|---------------|-------------|"
-
+    TABLE_HEADER = "\n## Options\n\n| Option | Default value | Description |\n|--------|---------------|-------------|"
 
     def __init__(self, file_path: Path):
         """
@@ -164,35 +162,61 @@ if __name__ == "__main__":
     index_file_path = output_folder / "Checks-Index.md"
 
     index_writer = Writer(index_file_path)
-    index_writer.write_to_file("# Available checks\n\n", True)
+    index_writer.write_to_file("# Available checks\n", True)
 
-    java_checks_folder = Path(
-        "magik-checks/src/main/java/nl/ramsolutions/sw/magik/checks/checks"
-    )
+    CHECK_TYPES = {
+        "Magik checks": (
+            Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/magik"),
+            Path("magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules")
+        ),
+        "Magik typed checks": (
+            Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/magiktyped"),
+            Path("magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magiktyped/rules")
+        ),
+        "module.def checks": (
+            Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/moduledef"),
+            Path("magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/moduledef/rules")
+        ),
+        "product.def checks": (
+            Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/productdef"),
+            Path("magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/productdef/rules")
+        ),
+    }
 
-    for html_file_path in sorted(
-        Path(
-            "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules"
-        ).glob("*.html")
-    ):
-        html_file_name = html_file_path.stem
-        output_file_path = output_folder.joinpath(f"Check-{html_file_name}.md")
+    for check_type, (java_checks_folder, sonar_rules_folder) in CHECK_TYPES.items():
+        index_writer.write_to_file(f"\n## {check_type}\n\n")
 
-        print(f"Generating {output_file_path}")
+        for html_file_path in sorted(sonar_rules_folder.glob("*.html")):
+            file_name = html_file_path.stem
+            output_file_path = output_folder.joinpath(f"Check-{file_name}.md")
 
-        converter = HTMLToMarkdown(html_file_path)
-        converter.convert_to_markdown()
-        converter.write_to_file(output_file_path, True)
+            print(f"Generating {output_file_path}")
 
-        java_file = java_checks_folder.joinpath(f"{html_file_name}Check.java")
-        if java_file.exists():
-            converter = JavaToMarkdown(java_file)
+            json_file_path = sonar_rules_folder / f"{file_name}.json"
+            if json_file_path.exists():
+                metadata = json.loads(json_file_path.read_text())
+                title = metadata.get("sqKey", file_name)
+
+            writer = Writer(output_file_path)
+            writer.write_to_file(f"<!-- markdownlint-disable MD013 MD024 -->\n# `{title}` - ", True)
+
+            converter = HTMLToMarkdown(html_file_path)
             converter.convert_to_markdown()
             converter.write_to_file(output_file_path)
 
-        writer = Writer(output_file_path)
-        writer.write_footer()
+            if check_type == "Magik Typed Checks":
+              java_file = java_checks_folder.joinpath(f"{file_name}TypedCheck.java")
+            else:
+              java_file = java_checks_folder.joinpath(f"{file_name}Check.java")
 
-        index_writer.write_to_file(f"- [[{html_file_name}|Check-{html_file_name}]]\n")
+            if java_file.exists():
+                converter = JavaToMarkdown(java_file)
+                converter.convert_to_markdown()
+                converter.write_to_file(output_file_path)
+
+            writer = Writer(output_file_path)
+            writer.write_footer()
+
+            index_writer.write_to_file(f"- **[{title}](Check-{file_name})**\n")
 
     index_writer.write_footer()
