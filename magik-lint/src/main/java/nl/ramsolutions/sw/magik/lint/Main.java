@@ -220,7 +220,7 @@ public final class Main {
     // Help.
     if (commandLine.hasOption(OPTION_HELP) || commandLine.getArgs().length == 0) {
       final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
-      helpFormatter.printHelp("java -jar magik-lint.jar", "", Main.OPTIONS, "", true);
+      helpFormatter.printHelp("java -jar magik-lint.jar", "magik-lint", Main.OPTIONS, "", true);
 
       System.exit(0);
     }
