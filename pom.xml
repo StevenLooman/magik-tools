@@ -482,7 +482,16 @@
           <activeRecipes>
             <recipe>org.openrewrite.java.migrate.UpgradeToJava17</recipe>
           </activeRecipes>
+          <failOnDryRunResults>true</failOnDryRunResults>
         </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>dryRun</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
         <dependencies>
           <dependency>
             <groupId>org.openrewrite.recipe</groupId>
