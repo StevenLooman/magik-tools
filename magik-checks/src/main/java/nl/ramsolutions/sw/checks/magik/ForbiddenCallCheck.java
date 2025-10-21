@@ -46,7 +46,7 @@ public class ForbiddenCallCheck extends MagikCheck {
     }
 
     final AstNode methodNameNode = helper.getMethodNameNode();
-    final String message = String.format(MESSAGE, methodName);
+    final String message = MESSAGE.formatted(methodName);
     this.addIssue(methodNameNode, message);
   }
 
@@ -62,7 +62,7 @@ public class ForbiddenCallCheck extends MagikCheck {
       return;
     }
 
-    final String message = String.format(MESSAGE, identifier);
+    final String message = MESSAGE.formatted(identifier);
     this.addIssue(parentNode, message);
   }
 }

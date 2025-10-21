@@ -1,12 +1,13 @@
 package nl.ramsolutions.sw.magik.debugadapter.slap;
 
+import java.io.Serial;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ErrorResponse;
 
 /** Slap error exception. */
 public class SlapErrorException extends SlapException {
 
   /** Serial version UID. */
-  private static final long serialVersionUID = 4756599758479724128L;
+  @Serial private static final long serialVersionUID = 4756599758479724128L;
 
   private final ErrorResponse error;
 
@@ -17,9 +18,8 @@ public class SlapErrorException extends SlapException {
    */
   public SlapErrorException(final ErrorResponse errorResponse) {
     super(
-        String.format(
-            "Caught error: %s, on request: %s%n",
-            errorResponse.getErrorMessage(), errorResponse.getRequestType()));
+        "Caught error: %s, on request: %s%n"
+            .formatted(errorResponse.getErrorMessage(), errorResponse.getRequestType()));
     this.error = errorResponse;
   }
 

@@ -45,7 +45,7 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
             entry -> {
               final AstNode typeNode = entry.getKey();
               final TypeString typeString = entry.getValue();
-              final String message = String.format(MESSAGE, typeString.getFullString());
+              final String message = MESSAGE.formatted(typeString.getFullString());
               this.addIssue(typeNode, message);
             });
   }
@@ -58,7 +58,7 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
             entry -> {
               final AstNode typeNode = entry.getKey();
               final TypeString typeString = entry.getValue();
-              final String message = String.format(MESSAGE, typeString.getFullString());
+              final String message = MESSAGE.formatted(typeString.getFullString());
               this.addIssue(typeNode, message);
             });
   }
@@ -71,7 +71,7 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
             entry -> {
               final AstNode typeNode = entry.getKey();
               final TypeString typeString = entry.getValue();
-              final String message = String.format(MESSAGE, typeString.getFullString());
+              final String message = MESSAGE.formatted(typeString.getFullString());
               this.addIssue(typeNode, message);
             });
   }
@@ -94,7 +94,7 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
             entry -> {
               final AstNode typeNode = entry.getKey();
               final TypeString typeString = entry.getValue();
-              final String message = String.format(MESSAGE, typeString.getFullString());
+              final String message = MESSAGE.formatted(typeString.getFullString());
               this.addIssue(typeNode, message);
             });
   }

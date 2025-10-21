@@ -48,9 +48,9 @@ public class SlapProtocol implements ISlapProtocol {
 
     @Override
     public String toString() {
-      return String.format(
-          "%s@%s(%s)",
-          this.getClass().getName(), Integer.toHexString(this.hashCode()), this.requestType);
+      return "%s@%s(%s)"
+          .formatted(
+              this.getClass().getName(), Integer.toHexString(this.hashCode()), this.requestType);
     }
   }
 
@@ -802,7 +802,7 @@ public class SlapProtocol implements ISlapProtocol {
     synchronized (this.requestFutures) {
       final Optional<RequestFuture> first =
           this.requestFutures.stream().filter(pair -> pair.requestType == requestType).findFirst();
-      if (!first.isPresent()) {
+      if (first.isEmpty()) {
         LOGGER.warn(
             "Thread: {}, Trying to handle request, but not available, request type: {}",
             Thread.currentThread().getName(),
@@ -831,7 +831,7 @@ public class SlapProtocol implements ISlapProtocol {
     synchronized (this.requestFutures) {
       final Optional<RequestFuture> findFirst =
           this.requestFutures.stream().filter(pair -> pair.requestType == requestType).findFirst();
-      if (!findFirst.isPresent()) {
+      if (findFirst.isEmpty()) {
         LOGGER.warn(
             "Thread: {}, Trying to handle request, but not available, request type: {}",
             Thread.currentThread().getName(),

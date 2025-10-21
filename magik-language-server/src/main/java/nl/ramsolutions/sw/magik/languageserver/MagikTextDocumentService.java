@@ -257,7 +257,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didOpen, uri: {}",
-          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
           textDocument.getUri());
     }
   }
@@ -337,7 +337,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didChange, uri: {}",
-          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
           textDocumentIdentifier.getUri());
     }
   }
@@ -395,7 +395,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didClose, uri: {}",
-          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
           textDocumentIdentifier.getUri());
     }
   }
@@ -477,7 +477,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didSave, uri: {}",
-          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
           textDocumentIdentifier.getUri());
     }
   }
@@ -498,7 +498,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didSave, uri: {}",
-          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
           productDefFile.getUri());
     }
   }
@@ -518,7 +518,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didSave, uri: {}",
-          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
           moduleDefFile.getUri());
     }
   }
@@ -538,7 +538,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} didSave, uri: {}",
-          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
           magikFile.getUri());
     }
   }
@@ -575,7 +575,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} hover, uri: {}, position: {},{}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -614,7 +614,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} implementation, uri: {}, position: {},{}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -648,7 +648,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} signatureHelp, uri: {}, position: {},{}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -684,7 +684,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} foldingRange, uri: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return foldingRanges;
@@ -723,7 +723,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} definitions, uri: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return forLeft;
@@ -768,7 +768,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} references, uri: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return references;
@@ -801,7 +801,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} completion, uri: {}, position: {},{}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -846,7 +846,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} formatting, uri: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return textEdits;
@@ -882,7 +882,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} rangeFormatting, uri: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return textEdits;
@@ -915,7 +915,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} semanticTokensFull, uri: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return semanticTokens;
@@ -948,7 +948,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} prepareRename, uri: {}, position: {},{}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -983,7 +983,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} rename, uri: {}, position: {},{}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -1013,7 +1013,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} documentSymbol, uri: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return documentSymbols;
@@ -1042,7 +1042,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} selectionRange, uri: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri());
           }
           return selectionRanges;
@@ -1076,7 +1076,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} prepareTypeHierarchy, uri: {}, position: {},{}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 params.getPosition().getLine(),
                 params.getPosition().getCharacter());
@@ -1100,7 +1100,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} typeHierarchySubtypes, item: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 item.getName());
           }
           return subtypes;
@@ -1122,7 +1122,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} typeHierarchySupertypes, item: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 item.getName());
           }
           return supertypes;
@@ -1155,7 +1155,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} inlayHint, uri: {}, range: {},{}-{},{}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 range.getStart().getLine(),
                 range.getStart().getCharacter(),
@@ -1204,7 +1204,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} codeAction, uri: {}, range: {},{}-{},{}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 range.getStart().getLine(),
                 range.getStart().getCharacter(),
@@ -1241,7 +1241,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} prepareCallHierarchy, uri: {}, position: {},{}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 textDocument.getUri(),
                 position.getLine(),
                 position.getCharacter());
@@ -1265,7 +1265,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} callHierarchyIncomingCalls, item: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 item.getName());
           }
           return items;
@@ -1287,7 +1287,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} callHierarchyOutgoingCalls, item: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 item.getName());
           }
           return items;

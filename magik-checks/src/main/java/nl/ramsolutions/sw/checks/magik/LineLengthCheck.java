@@ -71,7 +71,7 @@ public class LineLengthCheck extends MagikCheck {
         final Position endPosition = new Position(lineNo, line.length());
         final Range range = new Range(startPosition, endPosition);
         final Location location = new Location(uri, range);
-        final String message = String.format(MESSAGE, columnNo, this.maxLineLength);
+        final String message = MESSAGE.formatted(columnNo, this.maxLineLength);
         this.addIssue(location, message);
       }
 
