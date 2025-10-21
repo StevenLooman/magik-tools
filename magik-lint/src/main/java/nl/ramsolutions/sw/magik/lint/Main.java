@@ -23,12 +23,12 @@ import nl.ramsolutions.sw.magik.lint.output.Reporter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
 import org.apache.commons.cli.UnrecognizedOptionException;
+import org.apache.commons.cli.help.HelpFormatter;
 
 /** Main entry point for magik linter. */
 public final class Main {
@@ -40,38 +40,38 @@ public final class Main {
           .desc("Output pattern")
           .hasArg()
           .type(PatternOptionBuilder.STRING_VALUE)
-          .build();
+          .get();
   private static final Option OPTION_RCFILE =
       Option.builder()
           .longOpt("rcfile")
           .desc("Configuration file")
           .hasArg()
           .type(PatternOptionBuilder.FILE_VALUE)
-          .build();
+          .get();
   private static final Option OPTION_SHOW_CHECKS =
-      Option.builder().longOpt("show-checks").desc("Show checks and exit").build();
+      Option.builder().longOpt("show-checks").desc("Show checks and exit").get();
   private static final Option OPTION_COLUMN_OFFSET =
       Option.builder()
           .longOpt("column-offset")
           .desc("Set column offset, positive or negative")
           .hasArg()
           .type(PatternOptionBuilder.NUMBER_VALUE)
-          .build();
+          .get();
   private static final Option OPTION_MAX_INFRACTIONS =
       Option.builder()
           .longOpt("max-infractions")
           .desc("Set max number of reporter infractions")
           .hasArg()
           .type(PatternOptionBuilder.NUMBER_VALUE)
-          .build();
+          .get();
   private static final Option OPTION_DEBUG =
-      Option.builder().longOpt("debug").desc("Enable showing of debug information").build();
+      Option.builder().longOpt("debug").desc("Enable showing of debug information").get();
   private static final Option OPTION_VERSION =
-      Option.builder().longOpt("version").desc("Show version and exit").build();
+      Option.builder().longOpt("version").desc("Show version and exit").get();
   private static final Option OPTION_HELP =
-      Option.builder().longOpt("help").desc("Show this help and exit").build();
+      Option.builder().longOpt("help").desc("Show this help and exit").get();
   private static final Option OPTION_APPLY_FIXES =
-      Option.builder().longOpt("apply-fixes").desc("Apply fixes automatically").build();
+      Option.builder().longOpt("apply-fixes").desc("Apply fixes automatically").get();
 
   static {
     OPTIONS = new Options();
@@ -219,8 +219,8 @@ public final class Main {
 
     // Help.
     if (commandLine.hasOption(OPTION_HELP) || commandLine.getArgs().length == 0) {
-      final HelpFormatter formatter = new HelpFormatter();
-      formatter.printHelp("magik-lint", Main.OPTIONS);
+      final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
+      helpFormatter.printHelp("java -jar magik-lint.jar", "", Main.OPTIONS, "", true);
 
       System.exit(0);
     }
