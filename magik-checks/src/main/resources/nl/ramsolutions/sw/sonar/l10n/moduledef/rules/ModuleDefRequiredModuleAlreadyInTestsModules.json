@@ -1,0 +1,17 @@
+{
+  "title": "Module already in tests_modules, no need to list in requires",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bad-practice",
+    "confusing",
+    "convention"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "ModuleDefRequiredModuleAlreadyInTestsModules",
+  "sqKey": "module-def-required-module-already-in-tests-modules"
+}

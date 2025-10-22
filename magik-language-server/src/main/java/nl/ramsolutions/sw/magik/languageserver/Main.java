@@ -18,12 +18,12 @@ public final class Main {
 
   private static final Options OPTIONS;
   private static final Option OPTION_DEBUG =
-      Option.builder().longOpt("debug").desc("Show debug messages").build();
+      Option.builder().longOpt("debug").desc("Show debug messages").get();
   private static final Option OPTION_STDIO =
       Option.builder()
           .longOpt("stdio")
           .desc("Use STDIO (default, no other option to interface with this language server)")
-          .build();
+          .get();
 
   static {
     OPTIONS = new Options();
