@@ -20,12 +20,11 @@ class Writer:
         """
         self.write_to_file(self.FOOTER_NOTE)
 
-    def write_to_file(self, content: str, overwrite: bool = False):
+    def write_to_file(self, content: str):
         """
         Write the content to the file.
         """
-        mode = "w" if overwrite else "a"
-        with self.file_path.open(mode=mode, encoding="utf-8") as file:
+        with self.file_path.open(mode="a", encoding="utf-8") as file:
             file.write(content)
 
 
@@ -47,7 +46,7 @@ class HTMLToMarkdown:
         markdown_content = converter.handle(html_content)
         self.markdown_content = markdown_content
 
-    def write_to_file(self, file_path: Path, overwrite: bool = False):
+    def write_to_file(self, file_path: Path):
         """
         Write the converted Markdown content to a file.
         """
@@ -59,7 +58,7 @@ class HTMLToMarkdown:
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
         writer = Writer(file_path)
-        writer.write_to_file(self.markdown_content, overwrite)
+        writer.write_to_file(self.markdown_content)
 
 
 class JavaToMarkdown:
@@ -140,7 +139,7 @@ class JavaToMarkdown:
             java_content = ""
         self.markdown_content = java_content
 
-    def write_to_file(self, file_path: Path, overwrite: bool = False):
+    def write_to_file(self, file_path: Path, append: bool = False):
         """
         Write the converted Java content to a file.
         """
@@ -152,7 +151,7 @@ class JavaToMarkdown:
             return
 
         writer = Writer(file_path)
-        writer.write_to_file(self.markdown_content, overwrite)
+        writer.write_to_file(self.markdown_content)
 
 
 if __name__ == "__main__":
@@ -162,7 +161,7 @@ if __name__ == "__main__":
     index_file_path = output_folder / "Checks-Index.md"
 
     index_writer = Writer(index_file_path)
-    index_writer.write_to_file("# Available checks\n", True)
+    index_writer.write_to_file("# Available checks\n")
 
     CHECK_TYPES = {
         "Magik checks": (
@@ -193,28 +192,26 @@ if __name__ == "__main__":
             print(f"Generating {output_file_path}")
 
             json_file_path = sonar_rules_folder / f"{file_name}.json"
-            if json_file_path.exists():
-                metadata = json.loads(json_file_path.read_text())
-                title = metadata.get("sqKey", file_name)
+            json_text = json_file_path.read_text()
+            metadata = json.loads(json_text)
+            title = metadata.get("sqKey", file_name)
 
             writer = Writer(output_file_path)
-            writer.write_to_file(f"<!-- markdownlint-disable MD013 MD024 -->\n# `{title}` - ", True)
+            writer.write_to_file(f"<!-- markdownlint-disable MD013 MD024 -->\n# `{title}` - ")
 
-            converter = HTMLToMarkdown(html_file_path)
-            converter.convert_to_markdown()
-            converter.write_to_file(output_file_path)
+            html_to_markdown_converter = HTMLToMarkdown(html_file_path)
+            html_to_markdown_converter.convert_to_markdown()
+            html_to_markdown_converter.write_to_file(output_file_path)
 
             if check_type == "Magik Typed Checks":
               java_file = java_checks_folder.joinpath(f"{file_name}TypedCheck.java")
             else:
               java_file = java_checks_folder.joinpath(f"{file_name}Check.java")
 
-            if java_file.exists():
-                converter = JavaToMarkdown(java_file)
-                converter.convert_to_markdown()
-                converter.write_to_file(output_file_path)
+            java_to_markdown_converter = JavaToMarkdown(java_file)
+            java_to_markdown_converter.convert_to_markdown()
+            java_to_markdown_converter.write_to_file(output_file_path)
 
-            writer = Writer(output_file_path)
             writer.write_footer()
 
             index_writer.write_to_file(f"- **[{title}](Check-{file_name})**\n")
