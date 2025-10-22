@@ -28,7 +28,7 @@ jobs:
         with:
           globs: 'wiki/checks/*.md'
           fix: true
-      - uses: Andrew-Chen-Wang/github-wiki-action@6448478bd55f1f3f752c93af8ac03207eccc3213 # v5.0.3
+      - uses: Andrew-Chen-Wang/github-wiki-action@v5
         with:
           path: wiki
           #dry-run: true
