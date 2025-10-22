@@ -43,7 +43,7 @@ public class ModuleDefRequiredModuleAlreadyInTestsModulesCheck extends ModuleDef
     for (final AstNode moduleNode : requiresModules) {
       final String moduleName = moduleNode.getTokenValue();
       if (testsModules.stream().anyMatch(moduleName::equalsIgnoreCase)) {
-        this.addIssue(moduleNode, String.format(MESSAGE, moduleName));
+        this.addIssue(moduleNode, MESSAGE.formatted(moduleName));
       }
     }
   }

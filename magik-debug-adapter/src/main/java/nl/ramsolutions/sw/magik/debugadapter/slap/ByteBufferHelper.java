@@ -22,10 +22,10 @@ public final class ByteBufferHelper {
     final StringBuilder builder = new StringBuilder();
     for (int i = 0; i < byteBuffer.limit(); ++i) {
       if (i % ELEMENTS_PER_LINE == 0) {
-        builder.append(String.format("%04X - ", i));
+        builder.append("%04X - ".formatted(i));
       }
       final byte value = byteBuffer.get(i);
-      builder.append(String.format("%02X ", value));
+      builder.append("%02X ".formatted(value));
       if (i % ELEMENTS_PER_LINE == 15) {
         builder.append("\n");
       }

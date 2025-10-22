@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.checks.productdef;
 
 import static nl.ramsolutions.sw.checks.productdef.ProductDefCheckAssert.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import nl.ramsolutions.sw.checks.ProductDefCheck;
 import org.junit.jupiter.api.Test;

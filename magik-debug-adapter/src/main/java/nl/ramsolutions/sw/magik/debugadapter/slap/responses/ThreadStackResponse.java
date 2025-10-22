@@ -74,14 +74,14 @@ public class ThreadStackResponse implements ISlapResponse {
 
     @Override
     public String toString() {
-      return String.format(
-          "%s@%s(%s, %s, %s, %s)",
-          this.getClass().getName(),
-          Integer.toHexString(this.hashCode()),
-          this.level,
-          this.offset,
-          this.name,
-          this.language);
+      return "%s@%s(%s, %s, %s, %s)"
+          .formatted(
+              this.getClass().getName(),
+              Integer.toHexString(this.hashCode()),
+              this.level,
+              this.offset,
+              this.name,
+              this.language);
     }
 
     @Override

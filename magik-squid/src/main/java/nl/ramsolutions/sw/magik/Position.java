@@ -144,8 +144,11 @@ public class Position implements Comparable<Position> {
 
   @Override
   public String toString() {
-    return String.format(
-        "%s@%s(%s, %s)",
-        this.getClass().getName(), Integer.toHexString(this.hashCode()), this.line, this.column);
+    return "%s@%s(%s, %s)"
+        .formatted(
+            this.getClass().getName(),
+            Integer.toHexString(this.hashCode()),
+            this.line,
+            this.column);
   }
 }

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <!-- TODO: mvn versions:display-dependency-updates -->
   <modelVersion>4.0.0</modelVersion>
   <groupId>nl.ramsolutions</groupId>
@@ -62,13 +64,14 @@
     <google-java-format.version>1.22.0</google-java-format.version>
     <cleanthat.version>2.18</cleanthat.version>
     <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
-    <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
     <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
     <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
     <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
     <spotbugs-maven-plugin.version>4.8.3.1</spotbugs-maven-plugin.version>
     <spotbugs.version>4.9.4</spotbugs.version>
     <com.github.marschall-memoryfilesystem.version>2.8.1</com.github.marschall-memoryfilesystem.version>
+    <openrewrite.rewrite-maven-plugin.version>6.21.1</openrewrite.rewrite-maven-plugin.version>
 
     <!-- JaCoCo thresholds. Increase gradually as you add tests. -->
     <jacoco.unit-tests.limit.instruction-ratio>0%</jacoco.unit-tests.limit.instruction-ratio>
@@ -184,6 +187,12 @@
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-annotations</artifactId>
         <version>${spotbugs.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>jakarta.annotation</groupId>
+        <artifactId>jakarta.annotation-api</artifactId>
+        <version>${jakarta.annotation-api.version}</version>
       </dependency>
 
       <dependency>
@@ -462,9 +471,36 @@
         <artifactId>sonar-maven-plugin</artifactId>
         <version>${sonar-maven.version}</version>
         <configuration>
-            <sonar.python.version>3</sonar.python.version>
+          <sonar.python.version>3</sonar.python.version>
         </configuration>
-        </plugin>
+      </plugin>
+      <plugin>
+        <groupId>org.openrewrite.maven</groupId>
+        <artifactId>rewrite-maven-plugin</artifactId>
+        <version>${openrewrite.rewrite-maven-plugin.version}</version>
+        <configuration>
+          <activeRecipes>
+            <recipe>org.openrewrite.java.RemoveUnusedImports</recipe>
+            <recipe>org.openrewrite.java.migrate.UpgradeToJava17</recipe>
+          </activeRecipes>
+          <failOnDryRunResults>true</failOnDryRunResults>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>dryRun</goal>
+            </goals>
+            <phase>verify</phase>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.openrewrite.recipe</groupId>
+            <artifactId>rewrite-migrate-java</artifactId>
+            <version>3.19.0</version>
+          </dependency>
+        </dependencies>
+      </plugin>
     </plugins>
   </build>
 

@@ -173,13 +173,12 @@ public class CheckHolder {
     }
 
     throw new IllegalStateException(
-        String.format(
-            "Unknown check class: %s", this.checkClass.getGenericSuperclass().getTypeName()));
+        "Unknown check class: %s".formatted(this.checkClass.getGenericSuperclass().getTypeName()));
   }
 
   private String getFileForCheck(final String extension) {
     final String profileDir = this.getCheckProfileDir();
-    return String.format("/%s/%s.%s", profileDir, this.getCheckName(), extension);
+    return "/%s/%s.%s".formatted(profileDir, this.getCheckName(), extension);
   }
 
   /**
@@ -220,8 +219,8 @@ public class CheckHolder {
 
   @Override
   public String toString() {
-    return String.format(
-        "%s@%s(%s)",
-        this.getClass().getName(), Integer.toHexString(this.hashCode()), this.getCheckKey());
+    return "%s@%s(%s)"
+        .formatted(
+            this.getClass().getName(), Integer.toHexString(this.hashCode()), this.getCheckKey());
   }
 }

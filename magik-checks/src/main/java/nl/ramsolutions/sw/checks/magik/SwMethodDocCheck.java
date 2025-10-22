@@ -45,7 +45,7 @@ public class SwMethodDocCheck extends MagikCheck {
     final AstNode methodNameNode = helper.getMethodNameNode();
     final String methodDoc = this.extractDoc(node);
     if (methodDoc.isBlank() && !allowBlankMethodDoc) {
-      final String message = String.format(MESSAGE, "all");
+      final String message = MESSAGE.formatted("all");
       this.addIssue(methodNameNode, message);
       return;
     }
@@ -54,7 +54,7 @@ public class SwMethodDocCheck extends MagikCheck {
     final Set<String> docParameters = this.getDocParameters(node);
     methodParameters.removeAll(docParameters);
     for (final String missing : methodParameters) {
-      final String message = String.format(MESSAGE, missing);
+      final String message = MESSAGE.formatted(missing);
       this.addIssue(methodNameNode, message);
     }
   }

@@ -40,12 +40,12 @@ public class CodeAction {
 
   @Override
   public String toString() {
-    return String.format(
-        "%s@%s(%s, %s)",
-        this.getClass().getName(),
-        Integer.toHexString(this.hashCode()),
-        this.getTitle(),
-        this.getEdits());
+    return "%s@%s(%s, %s)"
+        .formatted(
+            this.getClass().getName(),
+            Integer.toHexString(this.hashCode()),
+            this.getTitle(),
+            this.getEdits());
   }
 
   @Override

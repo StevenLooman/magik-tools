@@ -51,7 +51,7 @@ public class TypeDocCheck extends MagikCheck {
             entry -> {
               final String docName = entry.getValue();
               final AstNode docNode = entry.getKey();
-              final String message = String.format(MESSAGE_PARAM_UNKNOWN, docName);
+              final String message = MESSAGE_PARAM_UNKNOWN.formatted(docName);
               this.addIssue(docNode, message);
             });
 
@@ -61,7 +61,7 @@ public class TypeDocCheck extends MagikCheck {
             entry -> {
               final String docName = entry.getKey();
               final AstNode docNode = entry.getValue().getFirstDescendant(MagikGrammar.IDENTIFIER);
-              final String message = String.format(MESSAGE_PARAM_MISSING, docName);
+              final String message = MESSAGE_PARAM_MISSING.formatted(docName);
               this.addIssue(docNode, message);
             });
   }
@@ -102,7 +102,7 @@ public class TypeDocCheck extends MagikCheck {
             entry -> {
               final String docName = entry.getKey();
               final AstNode docNode = entry.getValue();
-              final String message = String.format(MESSAGE_SLOT_UNKNOWN, docName);
+              final String message = MESSAGE_SLOT_UNKNOWN.formatted(docName);
               this.addIssue(docNode, message);
             });
 
@@ -112,7 +112,7 @@ public class TypeDocCheck extends MagikCheck {
             entry -> {
               final String docName = entry.getKey();
               final AstNode docNode = entry.getValue().getNode();
-              final String message = String.format(MESSAGE_SLOT_MISSING, docName);
+              final String message = MESSAGE_SLOT_MISSING.formatted(docName);
               this.addIssue(docNode, message);
             });
   }

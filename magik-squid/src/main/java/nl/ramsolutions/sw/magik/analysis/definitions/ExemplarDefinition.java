@@ -120,11 +120,11 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
 
   @Override
   public String toString() {
-    return String.format(
-        "%s@%s(%s)",
-        this.getClass().getName(),
-        Integer.toHexString(this.hashCode()),
-        this.getTypeString().getFullString());
+    return "%s@%s(%s)"
+        .formatted(
+            this.getClass().getName(),
+            Integer.toHexString(this.hashCode()),
+            this.getTypeString().getFullString());
   }
 
   @Override
