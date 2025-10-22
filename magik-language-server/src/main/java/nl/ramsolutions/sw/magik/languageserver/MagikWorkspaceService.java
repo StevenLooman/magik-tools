@@ -205,7 +205,7 @@ public class MagikWorkspaceService implements WorkspaceService {
           if (LOGGER_DURATION.isTraceEnabled()) {
             LOGGER_DURATION.trace(
                 "Duration: {} symbol, query: {}",
-                String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
                 query);
           }
 

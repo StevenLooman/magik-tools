@@ -110,8 +110,7 @@ public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTyped
                 if (!resolver.isKindOf(argumentTypeStr, substitutedParameterTypeStr)) {
                   final AstNode argumentNode = argumentNodes.get(index);
                   final String message =
-                      String.format(
-                          MESSAGE,
+                      MESSAGE.formatted(
                           argumentTypeStr.getFullString(),
                           substitutedParameterTypeStr.getFullString());
                   this.addIssue(argumentNode, message);

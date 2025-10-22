@@ -41,12 +41,12 @@ public class BreakpointEvent implements ISlapEvent {
 
   @Override
   public String toString() {
-    return String.format(
-        "%s@%s(%s, %s)",
-        this.getClass().getName(),
-        Integer.toHexString(this.hashCode()),
-        this.breakpointId,
-        this.threadId);
+    return "%s@%s(%s, %s)"
+        .formatted(
+            this.getClass().getName(),
+            Integer.toHexString(this.hashCode()),
+            this.breakpointId,
+            this.threadId);
   }
 
   /**

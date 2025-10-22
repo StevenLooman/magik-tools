@@ -31,7 +31,7 @@ public class ConditionalExpressionIsFalseTypedCheck extends MagikTypedCheck {
 
     if (!typeStr.equals(TypeString.SW_FALSE)) {
       final String typeStringStr = typeStr.getFullString();
-      final String message = String.format(MESSAGE, typeStringStr);
+      final String message = MESSAGE.formatted(typeStringStr);
       this.addIssue(node, message);
     }
   }

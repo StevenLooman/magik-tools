@@ -86,8 +86,7 @@ public abstract class MagikRuleAssert extends RuleAssert {
   protected ParseNode findParseTreeWithRule(
       final ParseNode parseNode, final MagikGrammar findRuleKey) {
     final Matcher matcher = parseNode.getMatcher();
-    if (matcher instanceof MutableParsingRule) {
-      final MutableParsingRule parsingRule = (MutableParsingRule) matcher;
+    if (matcher instanceof MutableParsingRule parsingRule) {
       final GrammarRuleKey ruleKey = parsingRule.getRuleKey();
       if (ruleKey == findRuleKey) {
         return parseNode;

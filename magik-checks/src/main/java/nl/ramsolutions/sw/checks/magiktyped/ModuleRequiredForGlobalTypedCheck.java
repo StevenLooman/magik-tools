@@ -202,7 +202,7 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
             def -> {
               final String globalModuleName = def.getModuleName();
               final String typeStringStr = typeStr.getFullString();
-              final String message = String.format(MESSAGE, globalModuleName, typeStringStr);
+              final String message = MESSAGE.formatted(globalModuleName, typeStringStr);
               this.addIssue(node, message);
             });
   }

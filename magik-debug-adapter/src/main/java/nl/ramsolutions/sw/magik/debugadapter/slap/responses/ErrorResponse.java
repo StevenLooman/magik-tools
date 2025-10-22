@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.debugadapter.slap.responses;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ByteBufferHelper;
@@ -18,7 +19,7 @@ public class ErrorResponse implements ISlapResponse, Serializable {
   // 12-16: uint32, error type
   public static final int OFFSET_ERROR_TYPE = 12;
 
-  private static final long serialVersionUID = -411188628207257975L;
+  @Serial private static final long serialVersionUID = -411188628207257975L;
 
   private final RequestType requestType;
   private final ErrorMessage errorMessage;
@@ -34,9 +35,9 @@ public class ErrorResponse implements ISlapResponse, Serializable {
 
   @Override
   public String toString() {
-    return String.format(
-        "%s@%s(%s)",
-        this.getClass().getName(), Integer.toHexString(this.hashCode()), this.errorMessage);
+    return "%s@%s(%s)"
+        .formatted(
+            this.getClass().getName(), Integer.toHexString(this.hashCode()), this.errorMessage);
   }
 
   @Override

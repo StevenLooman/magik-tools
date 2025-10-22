@@ -68,7 +68,7 @@ public class ScopeCountCheck extends MagikCheck {
             .toList();
     final int scopeCount = procedureScopeEntries.size();
     if (scopeCount > this.maxScopeCount) {
-      final String message = String.format(MESSAGE, scopeCount, this.maxScopeCount);
+      final String message = MESSAGE.formatted(scopeCount, this.maxScopeCount);
       final AstNode issueNode;
       if (node.is(MagikGrammar.METHOD_DEFINITION)) {
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);

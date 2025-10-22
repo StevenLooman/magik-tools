@@ -44,8 +44,8 @@ public class UseValueCompareFixer extends CheckFixer {
               final String replacementOperator = operator.equals("_is") ? "=" : "<>";
               final Range operatorRange = Range.fromTree(node.getChildren().get(1));
               return new CodeAction(
-                  String.format(
-                      "Replace `%s` operator with `%s` operator", operator, replacementOperator),
+                  "Replace `%s` operator with `%s` operator"
+                      .formatted(operator, replacementOperator),
                   new TextEdit(operatorRange, replacementOperator));
             })
         .toList();

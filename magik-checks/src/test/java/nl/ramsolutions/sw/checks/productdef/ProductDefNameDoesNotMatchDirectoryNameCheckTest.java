@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.checks.productdef;
 
 import static nl.ramsolutions.sw.checks.productdef.ProductDefCheckAssert.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Path;

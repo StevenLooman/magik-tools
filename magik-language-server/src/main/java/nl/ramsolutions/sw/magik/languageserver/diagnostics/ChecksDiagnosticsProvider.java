@@ -71,7 +71,7 @@ public class ChecksDiagnosticsProvider {
               final String message = issue.message();
               final DiagnosticSeverity severity = this.getCheckSeverity(holder);
               final String checkKeyKebabCase = holder.getCheckKeyKebabCase();
-              final String diagnosticSource = String.format("mlint (%s)", checkKeyKebabCase);
+              final String diagnosticSource = "mlint (%s)".formatted(checkKeyKebabCase);
               return new Diagnostic(range, message, severity, diagnosticSource, checkKeyKebabCase);
             })
         .toList();
@@ -85,7 +85,7 @@ public class ChecksDiagnosticsProvider {
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
           "Duration: {} check: {}, uri: {}",
-          String.format("%.3f", (System.nanoTime() - start) / 1000000000.0),
+          "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
           check.getClass().getSimpleName(),
           openedFile.getUri());
     }

@@ -86,8 +86,7 @@ public final class JsonDefinitionReader {
         final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
         throws JsonParseException {
       final String value = json.getAsString().toUpperCase();
-      if (typeOfT instanceof Class) {
-        final Class<?> clazz = (Class<?>) typeOfT;
+      if (typeOfT instanceof Class<?> clazz) {
         if (clazz.isEnum()) {
           return Arrays.stream(clazz.getEnumConstants())
               .filter(enumValue -> enumValue.toString().equals(value))

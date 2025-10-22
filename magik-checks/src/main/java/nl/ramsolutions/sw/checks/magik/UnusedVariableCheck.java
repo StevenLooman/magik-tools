@@ -142,7 +142,7 @@ public class UnusedVariableCheck extends MagikCheck {
         .forEach(
             entryNode -> {
               final String name = entryNode.getTokenValue();
-              final String message = String.format(MESSAGE, name);
+              final String message = MESSAGE.formatted(name);
               this.addIssue(entryNode, message);
             });
   }

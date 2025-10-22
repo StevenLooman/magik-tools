@@ -85,7 +85,7 @@ public class ForbiddenGlobalUsageCheck extends MagikCheck {
 
     final Set<String> globals = this.getForbiddenGlobals();
     if (globals.contains(identifier)) {
-      final String message = String.format(MESSAGE, identifier);
+      final String message = MESSAGE.formatted(identifier);
       this.addIssue(node, message);
     }
   }

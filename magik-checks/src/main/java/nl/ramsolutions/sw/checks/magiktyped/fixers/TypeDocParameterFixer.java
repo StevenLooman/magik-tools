@@ -87,10 +87,9 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
                       new Position(lastTypeDocParameterLine + 1, 0),
                       new Position(lastTypeDocParameterLine + 1, 0));
               final String typeDocLine =
-                  String.format(
-                      "%s## @param {_undefined} %s Description%n", indent, paramDef.getName());
+                  "%s## @param {_undefined} %s Description%n".formatted(indent, paramDef.getName());
               final String description =
-                  String.format("Add type-doc for parameter %s", paramDef.getName());
+                  "Add type-doc for parameter %s".formatted(paramDef.getName());
               final TextEdit edit = new TextEdit(range, typeDocLine);
               return new CodeAction(description, edit);
             })
@@ -123,7 +122,7 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
                       new Position(treeRange.getEndPosition().getLine() + 1, 0));
               final String newText = "";
               final String description =
-                  String.format("Remove type-doc for parameter %s", entry.getValue());
+                  "Remove type-doc for parameter %s".formatted(entry.getValue());
               final TextEdit edit = new TextEdit(expandedRange, newText);
               return new CodeAction(description, edit);
             })

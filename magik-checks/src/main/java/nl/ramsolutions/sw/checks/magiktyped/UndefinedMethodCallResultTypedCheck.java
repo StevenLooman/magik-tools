@@ -47,7 +47,7 @@ public class UndefinedMethodCallResultTypedCheck extends MagikTypedCheck {
       final AstNode methodNameNode = helper.getMethodNameNode();
       final AstNode issueNode = Objects.requireNonNullElse(methodNameNode, node);
       final String fullMethodName = receiverTypeStr.getFullString() + "." + methodName;
-      final String message = String.format(MESSAGE, fullMethodName);
+      final String message = MESSAGE.formatted(fullMethodName);
       this.addIssue(issueNode, message);
     }
   }

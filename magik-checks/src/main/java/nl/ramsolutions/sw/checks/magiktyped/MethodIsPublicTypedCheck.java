@@ -41,7 +41,7 @@ public class MethodIsPublicTypedCheck extends MagikTypedCheck {
             methodDef -> {
               final AstNode issueNode = helper.getMethodNameNode();
               final String methodDefName = methodDef.getName();
-              final String message = String.format(MESSAGE, methodDefName);
+              final String message = MESSAGE.formatted(methodDefName);
               this.addIssue(issueNode, message);
             });
   }

@@ -1,10 +1,10 @@
 package nl.ramsolutions.sw.sonar.sensors;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.checks.MagikCheckList;
@@ -61,12 +61,12 @@ public class MagikSensor implements Sensor {
   }
 
   @Override
-  public void describe(final @Nonnull SensorDescriptor descriptor) {
+  public void describe(final @NonNull SensorDescriptor descriptor) {
     descriptor.onlyOnLanguage(MagikLanguage.KEY).name("Magik Sensor");
   }
 
   @Override
-  public void execute(final @Nonnull SensorContext context) {
+  public void execute(final @NonNull SensorContext context) {
     LOGGER.debug("Executing MagikSensor");
 
     final FileSystem fileSystem = context.fileSystem();

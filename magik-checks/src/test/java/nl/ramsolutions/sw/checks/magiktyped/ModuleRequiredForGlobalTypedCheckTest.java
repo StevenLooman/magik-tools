@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.checks.magiktyped;
 
 import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Path;

@@ -47,7 +47,7 @@ public class DeprecatedMethodUsageTypedCheck extends MagikTypedCheck {
         .forEach(
             methodDef -> {
               final String fullName = calledTypeStr.getFullString() + "." + methodName;
-              final String message = String.format(MESSAGE, fullName);
+              final String message = MESSAGE.formatted(fullName);
               this.addIssue(node, message);
             });
   }
