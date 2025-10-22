@@ -480,6 +480,7 @@
         <version>${openrewrite.rewrite-maven-plugin.version}</version>
         <configuration>
           <activeRecipes>
+            <recipe>org.openrewrite.java.RemoveUnusedImports</recipe>
             <recipe>org.openrewrite.java.migrate.UpgradeToJava17</recipe>
           </activeRecipes>
           <failOnDryRunResults>true</failOnDryRunResults>

@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.checks.magik;
 
 import static nl.ramsolutions.sw.checks.magik.MagikCheckAssert.assertThat;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
