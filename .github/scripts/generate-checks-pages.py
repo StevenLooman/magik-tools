@@ -5,215 +5,148 @@ from pathlib import Path
 import re
 import json
 
-class Writer:
-    FOOTER_NOTE = "\n> [!NOTE]\n> This page is generated. Any changes made to this page through the wiki will be lost in the future.\n"
+FOOTER_NOTE = """\n> [!NOTE]\n> This page is generated. Any changes made to this page through the wiki will be lost in the future.\n"""
 
-    def __init__(self, file_path: Path):
-        """
-        Initialize the Writer class with output file path.
-        """
-        self.file_path = file_path
-
-    def write_footer(self):
-        """
-        Write the footer to the file.
-        """
-        self.write_to_file(self.FOOTER_NOTE)
-
-    def write_to_file(self, content: str):
-        """
-        Write the content to the file.
-        """
-        with self.file_path.open(mode="a", encoding="utf-8") as file:
-            file.write(content)
+TABLE_HEADER = """\n## Options\n\n| Option | Default value | Description |\n|--------|---------------|-------------|"""
 
 
-class HTMLToMarkdown:
-    def __init__(self, file_path: Path):
-        """
-        Initialize the HTMLToMarkdown class with HTML file path.
-        """
-        self.file_path = file_path
-        self.markdown_content = None
-
-    def convert_to_markdown(self):
-        """
-        Convert the HTML content to Markdown using html2text.
-        """
-        html_content = self.file_path.read_text()
-        converter = html2text.HTML2Text()
-        converter.body_width = 0
-        markdown_content = converter.handle(html_content)
-        self.markdown_content = markdown_content
-
-    def write_to_file(self, file_path: Path):
-        """
-        Write the converted Markdown content to a file.
-        """
-        if self.markdown_content is None:
-            raise ValueError(
-                "Markdown content is not generated. Call convert_to_markdown() first."
-            )
-
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-
-        writer = Writer(file_path)
-        writer.write_to_file(self.markdown_content)
+def write_file(file_path: Path, content: str):
+    """Write (overwrite) content to a file."""
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_path.write_text(content, encoding="utf-8")
 
 
-class JavaToMarkdown:
-    RULE_PROPERTY_PATTERN = r"@RuleProperty\s*\(((?:[^()]|\([^()]*\))*?)\)"
-    DEFAULT_VALUE_PATTERN = r'defaultValue\s*=\s*""\s*\+\s*(DEFAULT_[^,\s]*)'
-    DEFAULT_VALUE_DIRECT_PATTERN = r'defaultValue\s*=\s*"([^"]*)"'
-    KEY_PATTERN = r'key\s*=\s*"([^"]*)"'
-    DESCRIPTION_PATTERN = r'description\s*=\s*"([^"]*)"'
-    KEBAB_CASE_PATTERN = r"(?<!^)(?=[A-Z])"
-    TABLE_HEADER = "\n## Options\n\n| Option | Default value | Description |\n|--------|---------------|-------------|"
-
-    def __init__(self, file_path: Path):
-        """
-        Initialize the JavaToMarkdown class with Java file_path.
-        """
-        self.file_path = file_path
-        self.markdown_content = None
-
-    def extract_default_value_from_property(self, content: str, property_text: str):
-        """ """
-        default_ref = re.search(self.DEFAULT_VALUE_PATTERN, property_text)
-        if default_ref:
-            constant_name = default_ref.group(1)
-            constant_pattern = (
-                f"private static final \\w+ {constant_name}\\s*=\\s*([^;]*?)\\s*;"
-            )
-            constant_match = re.search(constant_pattern, content, re.DOTALL)
-            if constant_match:
-                value = constant_match.group(1).replace("\n", "").replace('"', "")
-                clean_value = "".join(value.split()).replace("+", "")
-                return ",  ".join(item for item in clean_value.split(",") if item)
-
-        direct_value = re.search(self.DEFAULT_VALUE_DIRECT_PATTERN, property_text)
-        return direct_value.group(1) if direct_value else ""
-
-    def extract_rule_properties(self):
-        """
-        Extract the RuleProperty's from the given Java file_path.
-        """
-        java_content = self.file_path.read_text()
-        check_name = self.file_path.stem.replace("Check", "")
-        check_name_as_kebab_case = re.sub(
-            self.KEBAB_CASE_PATTERN, "-", check_name
-        ).lower()
-
-        properties = []
-
-        for property in re.finditer(
-            self.RULE_PROPERTY_PATTERN, java_content, re.DOTALL
-        ):
-            property_text = property.group(1)
-            option_name = (
-                re.search(self.KEY_PATTERN, property_text).group(1).replace(" ", "-")
-            )
-
-            check_name_with_option_name = f"{check_name_as_kebab_case}.{option_name}"
-            description = re.search(self.DESCRIPTION_PATTERN, property_text).group(1)
-            default_value = self.extract_default_value_from_property(
-                java_content, property_text
-            )
-
-            properties.append(
-                f"| {check_name_with_option_name} | {default_value} | {description} |"
-            )
-
-        return properties
-
-    def convert_to_markdown(self):
-        """
-        Convert the Java content to Markdown by extracting the RuleProperty information.
-        """
-
-        properties = self.extract_rule_properties()
-        if properties != []:
-            properties.insert(0, self.TABLE_HEADER)
-            java_content = "\n".join(properties) + "\n"
-        else:
-            java_content = ""
-        self.markdown_content = java_content
-
-    def write_to_file(self, file_path: Path, append: bool = False):
-        """
-        Write the converted Java content to a file.
-        """
-        if self.markdown_content is None:
-            raise ValueError(
-                "Java content is not generated. Call convert_to_markdown() first."
-            )
-        elif self.markdown_content == "":
-            return
-
-        writer = Writer(file_path)
-        writer.write_to_file(self.markdown_content)
+def html_to_markdown(file_path: Path) -> str:
+    """Convert an HTML file to Markdown."""
+    html_content = file_path.read_text(encoding="utf-8")
+    converter = html2text.HTML2Text()
+    converter.body_width = 0
+    return converter.handle(html_content)
 
 
-if __name__ == "__main__":
+def extract_default_value(java_content: str, property_text: str) -> str:
+    """Extract default value from @RuleProperty."""
+    default_ref = re.search(
+        r'defaultValue\s*=\s*""\s*\+\s*(DEFAULT_[^,\s]*)', property_text
+    )
+    if default_ref:
+        constant_name = default_ref.group(1)
+        pattern = f"private static final \\w+ {constant_name}\\s*=\\s*([^;]*?)\\s*;"
+        match = re.search(pattern, java_content, re.DOTALL)
+        if match:
+            value = match.group(1).replace("\n", "").replace('"', "")
+            clean_value = "".join(value.split()).replace("+", "")
+            return ",  ".join(item for item in clean_value.split(",") if item)
+
+    direct = re.search(r'defaultValue\s*=\s*"([^"]*)"', property_text)
+    return direct.group(1) if direct else ""
+
+
+def extract_rule_properties(java_file: Path) -> list[str]:
+    """Extract @RuleProperty details from a Java file."""
+    java_content = java_file.read_text(encoding="utf-8")
+    check_name = java_file.stem.replace("Check", "")
+    kebab_case = re.sub(r"(?<!^)(?=[A-Z])", "-", check_name).lower()
+
+    props = []
+    for prop in re.finditer(
+        r"@RuleProperty\s*\(((?:[^()]|\([^()]*\))*?)\)", java_content, re.DOTALL
+    ):
+        text = prop.group(1)
+        key_match = re.search(r'key\s*=\s*"([^"]*)"', text)
+        desc_match = re.search(r'description\s*=\s*"([^"]*)"', text)
+        if not key_match or not desc_match:
+            continue
+
+        option_name = key_match.group(1).replace(" ", "-")
+        description = desc_match.group(1)
+        default_value = extract_default_value(java_content, text)
+
+        props.append(
+            f"| {kebab_case}.{option_name} | {default_value} | {description} |"
+        )
+
+    return props
+
+
+def java_to_markdown(java_file: Path) -> str:
+    """Convert Java @RuleProperty annotations to Markdown table."""
+    properties = extract_rule_properties(java_file)
+    if not properties:
+        return ""
+    return "\n".join([TABLE_HEADER, *properties, ""]) + "\n"
+
+
+def generate_markdown_pages():
     output_folder = Path("wiki/checks")
     output_folder.mkdir(parents=True, exist_ok=True)
-
-    index_file_path = output_folder / "Checks-Index.md"
-
-    index_writer = Writer(index_file_path)
-    index_writer.write_to_file("# Available checks\n")
+    index_file = output_folder / "Checks-Index.md"
+    index_content = ["# Available checks\n"]
 
     CHECK_TYPES = {
         "Magik checks": (
             Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/magik"),
-            Path("magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules")
+            Path(
+                "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules"
+            ),
         ),
         "Magik typed checks": (
             Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/magiktyped"),
-            Path("magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magiktyped/rules")
+            Path(
+                "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magiktyped/rules"
+            ),
         ),
         "module.def checks": (
             Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/moduledef"),
-            Path("magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/moduledef/rules")
+            Path(
+                "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/moduledef/rules"
+            ),
         ),
         "product.def checks": (
             Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/productdef"),
-            Path("magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/productdef/rules")
+            Path(
+                "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/productdef/rules"
+            ),
         ),
     }
 
-    for check_type, (java_checks_folder, sonar_rules_folder) in CHECK_TYPES.items():
-        index_writer.write_to_file(f"\n## {check_type}\n\n")
+    for check_type, (java_folder, sonar_folder) in CHECK_TYPES.items():
+        index_content.append(f"\n## {check_type}\n\n")
 
-        for html_file_path in sorted(sonar_rules_folder.glob("*.html")):
-            file_name = html_file_path.stem
-            output_file_path = output_folder.joinpath(f"Check-{file_name}.md")
+        for json_file in sorted(sonar_folder.glob("*.json")):
+            file_name = json_file.stem
+            output_file = output_folder / f"Check-{file_name}.md"
+            print(f"Generating {output_file}.")
 
-            print(f"Generating {output_file_path}")
-
-            json_file_path = sonar_rules_folder / f"{file_name}.json"
-            json_text = json_file_path.read_text()
-            metadata = json.loads(json_text)
+            json_content = json_file.read_text(encoding="utf-8")
+            metadata = json.loads(json_content)
             title = metadata.get("sqKey", file_name)
 
-            writer = Writer(output_file_path)
-            writer.write_to_file(f"<!-- markdownlint-disable MD013 MD024 -->\n# `{title}` - ")
+            html_file = sonar_folder / f"{file_name}.html"
+            html_parts = html_to_markdown(html_file)
 
-            html_to_markdown_converter = HTMLToMarkdown(html_file_path)
-            html_to_markdown_converter.convert_to_markdown()
-            html_to_markdown_converter.write_to_file(output_file_path)
+            java_file = java_folder / (
+                f"{file_name}TypedCheck.java"
+                if check_type == "Magik typed checks"
+                else f"{file_name}Check.java"
+            )
+            java_parts = java_to_markdown(java_file)
 
-            if check_type == "Magik typed checks":
-              java_file = java_checks_folder.joinpath(f"{file_name}TypedCheck.java")
-            else:
-              java_file = java_checks_folder.joinpath(f"{file_name}Check.java")
+            parts = [
+                "<!-- markdownlint-disable MD013 MD024 -->",
+                f"# `{title}` - " + html_parts,
+                java_parts,
+                FOOTER_NOTE,
+            ]
 
-            java_to_markdown_converter = JavaToMarkdown(java_file)
-            java_to_markdown_converter.convert_to_markdown()
-            java_to_markdown_converter.write_to_file(output_file_path)
+            joined_parts = "\n".join(part for part in parts if part)
 
-            writer.write_footer()
+            write_file(output_file, joined_parts)
+            index_content.append(f"- **[{title}](Check-{file_name})**\n")
 
-            index_writer.write_to_file(f"- **[{title}](Check-{file_name})**\n")
+    index_content.append(FOOTER_NOTE)
+    write_file(index_file, "".join(index_content))
 
-    index_writer.write_footer()
+
+if __name__ == "__main__":
+    generate_markdown_pages()
