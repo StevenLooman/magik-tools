@@ -160,7 +160,7 @@ class ThreadManager {
           final int level = stackElement.getLevel();
 
           final String exemplarName = ":|" + method.substring(0, index - 1) + "|";
-          final String expr = String.format(EVAL_EXEMPLAR_PACKAGE, exemplarName);
+          final String expr = EVAL_EXEMPLAR_PACKAGE.formatted(exemplarName);
           LOGGER.debug("Eval expression: '{}'", expr);
           final EvalResponse eval =
               (EvalResponse) this.slapProtocol.evaluate(threadId, level, expr).get();

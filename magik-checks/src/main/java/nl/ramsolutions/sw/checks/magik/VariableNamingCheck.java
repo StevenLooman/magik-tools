@@ -61,7 +61,7 @@ public class VariableNamingCheck extends MagikCheck {
           final String identifier = scopeEntry.getIdentifier();
 
           if (!this.isValidName(identifier)) {
-            final String message = String.format(MESSAGE, identifier);
+            final String message = MESSAGE.formatted(identifier);
             final AstNode identifierNode = scopeEntry.getDefinitionNode();
             this.addIssue(identifierNode, message);
           }

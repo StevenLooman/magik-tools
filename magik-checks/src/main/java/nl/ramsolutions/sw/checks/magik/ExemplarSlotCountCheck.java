@@ -41,7 +41,7 @@ public class ExemplarSlotCountCheck extends MagikCheck {
     final ExemplarDefinition definition = (ExemplarDefinition) parsedDefinitions.get(0);
     final int slotCount = definition.getSlots().size();
     if (slotCount > this.maxSlotCount) {
-      final String message = String.format(MESSAGE, slotCount, this.maxSlotCount);
+      final String message = MESSAGE.formatted(slotCount, this.maxSlotCount);
       this.addIssue(node, message);
     }
   }

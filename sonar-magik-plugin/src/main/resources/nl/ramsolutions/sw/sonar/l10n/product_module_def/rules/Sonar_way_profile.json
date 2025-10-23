@@ -3,6 +3,7 @@
   "ruleKeys": [
     "ModuleDefMissingDescription",
     "ModuleDefNameDoesNotMatchDirectoryName",
+    "ModuleDefRequiredModuleAlreadyInTestsModules",
     "ModuleDefSyntaxError",
     "ProductDefMissingDescription",
     "ProductDefMissingTitle",

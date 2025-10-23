@@ -197,9 +197,11 @@ public class ExpressionResultString {
   @Override
   @SuppressWarnings("checkstyle:NestedIfDepth")
   public String toString() {
-    return String.format(
-        "%s@%s(%s)",
-        this.getClass().getName(), Integer.toHexString(this.hashCode()), this.getTypeNames(","));
+    return "%s@%s(%s)"
+        .formatted(
+            this.getClass().getName(),
+            Integer.toHexString(this.hashCode()),
+            this.getTypeNames(","));
   }
 
   @Override

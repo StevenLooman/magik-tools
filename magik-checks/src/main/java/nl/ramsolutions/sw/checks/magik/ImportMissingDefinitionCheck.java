@@ -43,7 +43,7 @@ public class ImportMissingDefinitionCheck extends MagikCheck {
               final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
               if (scopeEntry.isType(Type.IMPORT) && scopeEntry.getImportedEntry() == null) {
                 final String originalIdentifier = identifierNode.getTokenOriginalValue();
-                final String message = String.format(MESSAGE, originalIdentifier);
+                final String message = MESSAGE.formatted(originalIdentifier);
                 this.addIssue(identifierNode, message);
               }
             });

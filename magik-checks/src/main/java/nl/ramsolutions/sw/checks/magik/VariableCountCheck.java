@@ -67,7 +67,7 @@ public class VariableCountCheck extends MagikCheck {
                         ScopeEntry.Type.LOCAL))
             .collect(Collectors.counting());
     if (variableCount > this.maxVariableCount) {
-      final String message = String.format(MESSAGE, variableCount, this.maxVariableCount);
+      final String message = MESSAGE.formatted(variableCount, this.maxVariableCount);
       final AstNode issueNode;
       if (node.is(MagikGrammar.METHOD_DEFINITION)) {
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);

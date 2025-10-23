@@ -101,7 +101,7 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
       final TypeString methodTypeString, final AstNode typeValueNode) {
     final Range range = Range.fromTree(typeValueNode);
     final String methodTypeStringString = methodTypeString.getFullString();
-    final String description = String.format("Update @return type to %s", methodTypeStringString);
+    final String description = "Update @return type to %s".formatted(methodTypeStringString);
     final TextEdit edit = new TextEdit(range, methodTypeStringString);
     return new CodeAction(description, edit);
   }
@@ -127,9 +127,8 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
     final Range range =
         new Range(new Position(lastMethodDocLine + 1, 0), new Position(lastMethodDocLine + 1, 0));
     final String textEdit =
-        String.format("%s## @return {%s} Description%n", indent, methodTypeString.getFullString());
-    final String description =
-        String.format("Add @return type %s", methodTypeString.getFullString());
+        "%s## @return {%s} Description%n".formatted(indent, methodTypeString.getFullString());
+    final String description = "Add @return type %s".formatted(methodTypeString.getFullString());
     final TextEdit edit = new TextEdit(range, textEdit);
     return new CodeAction(description, edit);
   }

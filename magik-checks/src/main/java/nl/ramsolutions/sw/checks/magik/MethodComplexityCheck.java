@@ -44,7 +44,7 @@ public class MethodComplexityCheck extends MagikCheck {
 
     final int complexity = visitor.getComplexity();
     if (complexity > this.maxComplexity) {
-      final String message = String.format(MESSAGE, complexity, this.maxComplexity);
+      final String message = MESSAGE.formatted(complexity, this.maxComplexity);
       final AstNode issueNode;
       if (node.is(MagikGrammar.METHOD_DEFINITION)) {
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);

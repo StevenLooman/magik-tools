@@ -100,8 +100,7 @@ public class FormattingCheck extends MagikCheck {
     textEdits.forEach(
         textEdit -> {
           final String reason = textEdit.getReason();
-          final String message =
-              reason != null ? String.format(MESSAGE_WITH_REASON, reason) : MESSAGE;
+          final String message = reason != null ? MESSAGE_WITH_REASON.formatted(reason) : MESSAGE;
           final Range range = textEdit.getRange();
           final Location location = new Location(uri, range);
           this.addIssue(location, message);

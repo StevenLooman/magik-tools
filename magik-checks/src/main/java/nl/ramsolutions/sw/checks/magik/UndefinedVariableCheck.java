@@ -27,7 +27,7 @@ public class UndefinedVariableCheck extends MagikCheck {
             scopeEntry -> {
               AstNode scopeEntryNode = scopeEntry.getDefinitionNode();
               String identifier = scopeEntry.getIdentifier();
-              String message = String.format(MESSAGE, identifier);
+              String message = MESSAGE.formatted(identifier);
               this.addIssue(scopeEntryNode, message);
             });
   }

@@ -29,7 +29,7 @@ public class PragmaInvalidUsageCheck extends MagikCheck {
         .forEach(
             identifierNode -> {
               final String classifyLevel = identifierNode.getTokenOriginalValue();
-              final String message = String.format(MESSAGE, classifyLevel);
+              final String message = MESSAGE.formatted(classifyLevel);
               this.addIssue(node, message);
             });
   }

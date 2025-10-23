@@ -92,7 +92,7 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
 
     final int distance = this.distanceBetweenStatements(declarationNode, node);
     if (distance > this.maxDistance) {
-      final String message = String.format(MESSAGE, distance, this.maxDistance);
+      final String message = MESSAGE.formatted(distance, this.maxDistance);
       this.addIssue(node, message);
     }
   }
