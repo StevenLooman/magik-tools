@@ -203,7 +203,7 @@ if __name__ == "__main__":
             html_to_markdown_converter.convert_to_markdown()
             html_to_markdown_converter.write_to_file(output_file_path)
 
-            if check_type == "Magik Typed Checks":
+            if check_type == "Magik typed checks":
               java_file = java_checks_folder.joinpath(f"{file_name}TypedCheck.java")
             else:
               java_file = java_checks_folder.joinpath(f"{file_name}Check.java")
