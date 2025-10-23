@@ -8,6 +8,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
+import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -121,5 +122,38 @@ public class ProductDefFile extends OpenedFile {
   @Override
   public String getLanguageId() {
     return "sw-product-def";
+  }
+
+  /**
+   * Get the product name for the given URI.
+   *
+   * <p>Scans upwards from the given URI to find the product definition file and extracts the
+   * product name from the `product.def` file..
+   *
+   * @param uri URI to start searching from.
+   * @return product name, or null if no product was found.
+   */
+  @CheckForNull
+  public static String getProductNameForUri(final URI uri) {
+    if (!uri.getScheme().equals("file")) {
+      return null;
+    }
+
+    final Path path = Path.of(uri);
+    final ProductDefFile productDefFile;
+    try {
+      final Path productDefPath =
+          SourceFileScanner.searchFileUpwards(path, SourceFileScanner.SW_PRODUCT_DEF);
+      if (productDefPath == null) {
+        return null;
+      }
+
+      productDefFile = new ProductDefFile(productDefPath, null, null);
+    } catch (final IOException exception) {
+      throw new IllegalStateException(exception);
+    }
+
+    final ProductDefinition productDefinition = productDefFile.getProductDefinition();
+    return productDefinition.getName();
   }
 }
