@@ -45,6 +45,10 @@ public class MagikFixer {
    */
   public void run(final Collection<Path> paths) throws IOException {
     for (final Path path : paths) {
+      if (!path.endsWith(".magik")) {
+        continue;
+      }
+
       final MagikFile magikFile = this.buildMagikFile(path);
       if (this.isFileIgnored(magikFile)) {
         continue;

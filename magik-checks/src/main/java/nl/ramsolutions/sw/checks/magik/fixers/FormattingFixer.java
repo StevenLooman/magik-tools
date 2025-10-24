@@ -31,7 +31,8 @@ public class FormattingFixer extends CheckFixer {
     }
 
     if (!this.canFormat(magikFile)) {
-      LOGGER.warn("Cannot format due to syntax errors");
+      final String filePath = magikFile.getUri().getPath();
+      LOGGER.warn("Cannot format %s due to syntax errors".formatted(filePath));
       return Collections.emptyList();
     }
 
