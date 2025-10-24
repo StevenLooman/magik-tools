@@ -234,6 +234,19 @@ class FormattingWalkerTest {
     assertThat(edits).isEmpty();
   }
 
+  @Test
+  void testWhitespaceAfterTransmitBeforePragma() {
+    final String code =
+        """
+        $
+
+         _pragma(classify_level=debug)
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits)
+        .containsExactly(new TextEdit(new Range(new Position(1, 1), new Position(3, 1)), "\n\n\n"));
+  }
+
   // endregion
 
   // region: Trimming
