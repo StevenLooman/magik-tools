@@ -21,13 +21,11 @@ class FormattingFixerTest {
 
   @Test
   void testAddSpaceAfterComma() {
-    final String code = "call(arg1,arg2)";
+    final String code = "call(arg1,arg2)\n";
     final Range range = new Range(new Position(0, 0), new Position(2, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
-    assertThat(codeactions).hasSize(2);
-    final CodeAction codeAction = codeactions.get(0);
-    assertThat(codeAction)
-        .isEqualTo(
+    assertThat(codeactions)
+        .containsOnly(
             new CodeAction(
                 "Fix formatting",
                 new TextEdit(new Range(new Position(1, 10), new Position(1, 10)), " ")));
@@ -35,13 +33,11 @@ class FormattingFixerTest {
 
   @Test
   void testRemoveSpaceBeforeComma() {
-    final String code = "call(arg1 , arg2)";
+    final String code = "call(arg1 , arg2)\n";
     final Range range = new Range(new Position(0, 0), new Position(2, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
-    assertThat(codeactions).hasSize(2);
-    final CodeAction codeAction = codeactions.get(0);
-    assertThat(codeAction)
-        .isEqualTo(
+    assertThat(codeactions)
+        .containsOnly(
             new CodeAction(
                 "Fix formatting",
                 new TextEdit(new Range(new Position(1, 9), new Position(1, 10)), "")));
@@ -49,13 +45,11 @@ class FormattingFixerTest {
 
   @Test
   void testRemoveSpaceAfterBracket() {
-    final String code = "call( arg1, arg2)";
+    final String code = "call( arg1, arg2)\n";
     final Range range = new Range(new Position(0, 0), new Position(2, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
-    assertThat(codeactions).hasSize(2);
-    final CodeAction codeAction = codeactions.get(0);
-    assertThat(codeAction)
-        .isEqualTo(
+    assertThat(codeactions)
+        .containsOnly(
             new CodeAction(
                 "Fix formatting",
                 new TextEdit(new Range(new Position(1, 5), new Position(1, 6)), "")));
@@ -63,13 +57,11 @@ class FormattingFixerTest {
 
   @Test
   void testRemoveSpaceBeforeBracket() {
-    final String code = "call(arg1, arg2 )";
+    final String code = "call(arg1, arg2 )\n";
     final Range range = new Range(new Position(0, 0), new Position(2, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
-    assertThat(codeactions).hasSize(2);
-    final CodeAction codeAction = codeactions.get(0);
-    assertThat(codeAction)
-        .isEqualTo(
+    assertThat(codeactions)
+        .containsOnly(
             new CodeAction(
                 "Fix formatting",
                 new TextEdit(new Range(new Position(1, 15), new Position(1, 16)), "")));
@@ -77,13 +69,11 @@ class FormattingFixerTest {
 
   @Test
   void testRemoveSpaceAfterMethodInvocation() {
-    final String code = "xxx. yyy(arg1, arg2)";
+    final String code = "xxx. yyy(arg1, arg2)\n";
     final Range range = new Range(new Position(0, 0), new Position(2, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
-    assertThat(codeactions).hasSize(2);
-    final CodeAction codeAction = codeactions.get(0);
-    assertThat(codeAction)
-        .isEqualTo(
+    assertThat(codeactions)
+        .containsOnly(
             new CodeAction(
                 "Fix formatting",
                 new TextEdit(new Range(new Position(1, 4), new Position(1, 5)), "")));
@@ -91,13 +81,11 @@ class FormattingFixerTest {
 
   @Test
   void testRemoveSpaceBeforeMethodInvocation() {
-    final String code = "xxx .yyy(arg1, arg2)";
+    final String code = "xxx .yyy(arg1, arg2)\n";
     final Range range = new Range(new Position(0, 0), new Position(2, 0));
     final List<CodeAction> codeactions = this.getCodeActions(code, range);
-    assertThat(codeactions).hasSize(2);
-    final CodeAction codeAction = codeactions.get(0);
-    assertThat(codeAction)
-        .isEqualTo(
+    assertThat(codeactions)
+        .containsOnly(
             new CodeAction(
                 "Fix formatting",
                 new TextEdit(new Range(new Position(1, 3), new Position(1, 4)), "")));
