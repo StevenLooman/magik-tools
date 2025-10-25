@@ -32,6 +32,11 @@ public class ModuleDefHighlighterVisitor extends ModuleDefVisitor {
   @Override
   protected void walkPreFreeLine(final AstNode node) {
     final Token token = node.getToken();
+    final String tokenValue = token.getValue();
+    if (tokenValue.isBlank()) {
+      return;
+    }
+
     this.highlight(token, TypeOfText.STRING);
   }
 
