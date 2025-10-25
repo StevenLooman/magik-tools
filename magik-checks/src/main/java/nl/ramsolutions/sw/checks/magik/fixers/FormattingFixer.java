@@ -26,7 +26,8 @@ public class FormattingFixer extends MagikCodeActionSupplier {
   @Override
   public List<CodeAction> provideMagikCodeActions(final MagikFile magikFile, final Range range) {
     if (!this.canFormat(magikFile)) {
-      LOGGER.warn("Cannot format due to syntax errors");
+      final String path = magikFile.getUri().getPath();
+      LOGGER.warn("Cannot format %s due to syntax errors".formatted(path));
       return Collections.emptyList();
     }
 
