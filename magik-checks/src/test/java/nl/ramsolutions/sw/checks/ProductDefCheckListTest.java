@@ -10,7 +10,8 @@ class ProductDefCheckListTest {
 
   @Test
   void testAllChecksHaveValidAdministration() throws IOException {
-    for (final Class<? extends ProductDefCheck> checkClass : ProductDefCheckList.getChecks()) {
+    for (final Class<? extends ProductDefCheck> checkClass :
+        ProductDefCheckList.INSTANCE.getChecks()) {
       assertThat(checkClass)
           .hasProperRuleAnnotation()
           .hasMetadata()

@@ -122,7 +122,7 @@ public class ProductDefSensor implements Sensor {
     final Checks<ProductDefCheck> checks =
         checkFactory
             .<ProductDefCheck>create(ProductModuleDefRulesDefinition.REPOSITORY_KEY)
-            .addAnnotatedChecks(ProductDefCheckList.getChecks());
+            .addAnnotatedChecks(ProductDefCheckList.INSTANCE.getChecks());
     for (final ProductDefCheck check : checks.all()) {
       LOGGER.debug("Running check: {}", check);
       final List<Issue> issues = check.scanFileForIssues(productDefFile);

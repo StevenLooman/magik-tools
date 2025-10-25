@@ -10,7 +10,7 @@ class MagikTypedCheckListTest {
 
   @Test
   void testAllChecksHaveValidAdministration() throws IOException {
-    for (final Class<? extends MagikCheck> checkClass : MagikTypedCheckList.getChecks()) {
+    for (final Class<? extends MagikCheck> checkClass : MagikTypedCheckList.INSTANCE.getChecks()) {
       assertThat(checkClass)
           .hasProperRuleAnnotation()
           .hasMetadata()

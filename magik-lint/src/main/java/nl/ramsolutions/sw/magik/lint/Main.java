@@ -229,7 +229,7 @@ public final class Main {
     final String[] leftOverArgs = commandLine.getArgs();
     final Collection<Path> paths = Main.getFilesFromArgs(leftOverArgs);
     if (commandLine.hasOption(OPTION_APPLY_FIXES)) {
-      final MagikFixer fixer = new MagikFixer(properties);
+      final MagikLintFixApplier fixer = new MagikLintFixApplier(properties);
       fixer.run(paths);
 
       System.exit(0);

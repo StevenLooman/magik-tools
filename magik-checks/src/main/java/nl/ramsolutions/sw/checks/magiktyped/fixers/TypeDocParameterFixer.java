@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.MagikToolsProperties;
-import nl.ramsolutions.sw.checks.MagikTypedCheckFixer;
+import nl.ramsolutions.sw.checks.MagikTypedCodeActionSupplier;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -24,7 +24,7 @@ import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 
 /** TypeDoc parameter fixer. */
-public class TypeDocParameterFixer extends MagikTypedCheckFixer {
+public class TypeDocParameterFixer extends MagikTypedCodeActionSupplier {
 
   /**
    * Provide code actions related to parameter types.
@@ -34,7 +34,8 @@ public class TypeDocParameterFixer extends MagikTypedCheckFixer {
    * @return List of code actions.
    */
   @Override
-  public List<CodeAction> provideCodeActions(final MagikTypedFile magikFile, final Range range) {
+  public List<CodeAction> provideMagikTypedCodeActions(
+      final MagikTypedFile magikFile, final Range range) {
     final MagikToolsProperties properties = magikFile.getProperties();
     final MagikFormattingSettings settings = new MagikFormattingSettings(properties);
     final String indent = settings.getIndent();
