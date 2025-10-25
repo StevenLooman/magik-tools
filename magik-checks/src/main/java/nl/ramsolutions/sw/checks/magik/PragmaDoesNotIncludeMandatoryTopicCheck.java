@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.checks.DisabledByDefault;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
@@ -16,6 +17,7 @@ import org.sonar.check.RuleProperty;
  * Check if the pragma topics include the mandatory topics (can be module name, product name or a
  * list of mandatory topics or a combination of all three).
  */
+@DisabledByDefault
 @Rule(key = PragmaDoesNotIncludeMandatoryTopicCheck.CHECK_KEY)
 public class PragmaDoesNotIncludeMandatoryTopicCheck extends MagikCheck {
 
