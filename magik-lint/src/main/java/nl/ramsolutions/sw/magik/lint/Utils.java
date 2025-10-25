@@ -92,8 +92,8 @@ final class Utils {
       return ProductDefCheckList.INSTANCE;
     } else if (openedFile instanceof ModuleDefFile) {
       return ModuleDefCheckList.INSTANCE;
-    } else {
-      throw new IllegalStateException("Unsupported file type: " + openedFile.getClass());
     }
+
+    throw new IllegalStateException("Unsupported file type: " + openedFile.getClass());
   }
 }

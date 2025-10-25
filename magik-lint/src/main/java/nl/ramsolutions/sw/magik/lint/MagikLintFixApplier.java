@@ -21,6 +21,9 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
+import nl.ramsolutions.sw.productdef.ProductDefFile;
 
 /** Apply {@link CodeAction}s using the registered {@link CodeActionSupplier}s. */
 public class MagikLintFixApplier {
@@ -53,7 +56,7 @@ public class MagikLintFixApplier {
     final URI uri = openedFile.getUri();
     for (final CodeActionSupplier codeActionSupplier : this.getCodeActionSuppliers(openedFile)) {
       final String newSource = this.applyCodeActionSupplier(codeActionSupplier, openedFile);
-      openedFile = new MagikFile(uri, newSource);
+      openedFile = this.createNewFile(originalOpenedFile, newSource);
     }
 
     // Write file, if changed.
@@ -109,5 +112,20 @@ public class MagikLintFixApplier {
         .filter(CheckHolder::isEnabled)
         .map(CheckHolder::getCheckClass)
         .collect(Collectors.toUnmodifiableList()); // NOSONAR: Keep VSCode/Java plugin sane.
+  }
+
+  private OpenedFile createNewFile(final OpenedFile openedFile, final String newSource) {
+    final URI uri = openedFile.getUri();
+    if (openedFile instanceof ProductDefFile productDefFile) {
+      final IDefinitionKeeper definitionKeeper = productDefFile.getDefinitionKeeper();
+      return new ProductDefFile(uri, newSource, definitionKeeper, null);
+    } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
+      final IDefinitionKeeper definitionKeeper = moduleDefFile.getDefinitionKeeper();
+      return new ModuleDefFile(uri, newSource, definitionKeeper, null);
+    } else if (openedFile instanceof MagikFile) {
+      return new MagikFile(uri, newSource);
+    }
+
+    throw new IllegalStateException("Unsupported file type: " + openedFile.getClass());
   }
 }

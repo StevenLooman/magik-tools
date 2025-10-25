@@ -72,10 +72,10 @@ public class CodeActionProvider {
       return this.provideCodeActions(moduleDefFile, range, context);
     } else if (openedFile instanceof MagikTypedFile magikTypedFile) {
       return this.provideCodeActions(magikTypedFile, range, context);
-    } else {
-      throw new IllegalArgumentException(
-          "Unsupported opened file type: " + openedFile.getClass().getName());
     }
+
+    throw new IllegalArgumentException(
+        "Unsupported opened file type: " + openedFile.getClass().getName());
   }
 
   /**
