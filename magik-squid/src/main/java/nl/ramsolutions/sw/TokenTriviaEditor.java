@@ -407,7 +407,7 @@ public class TokenTriviaEditor {
                 .build());
     TokenHelper.addTrivia(realToken, beforeTrivia, eolTrivia);
 
-    final List<Token> tokensBefore = tokensOnLine.subList(0, Integer.max(tokensOnLineIndex - 1, 0));
+    final List<Token> tokensBefore = tokensOnLine.subList(0, tokensOnLineIndex);
     final List<Token> tokensAfter = tokensOnLine.subList(tokensOnLineIndex, tokensOnLine.size());
 
     // Shift token + token after with (negative) columnOffset, so that these begin
@@ -481,6 +481,9 @@ public class TokenTriviaEditor {
     return "\n"; // TODO: System.lineSeparator() ?
   }
 
+  // /**
+  //  * Debug method to assert that all lines from 1 to max line have at least one token.
+  //  */
   // private void assertLinesConnected() {
   //   final int min = 1;
   //   final int max = this.lineTokens.keySet().stream().max(Integer::compareTo).orElseThrow();
@@ -490,5 +493,18 @@ public class TokenTriviaEditor {
   //       System.err.println("Line " + line + " has no tokens, but should have at least one.");
   //     }
   //   }
+  // }
+
+  // /**
+  //  * Debug method to get the full text represented by the current tokens.
+  //  *
+  //  * @return The full text.
+  //  */
+  // private String getText() {
+  //   return this.lineTokens.keySet().stream()
+  //       .sorted()
+  //       .flatMap(line -> this.lineTokens.get(line).stream())
+  //       .map(Token::getOriginalValue)
+  //       .collect(Collectors.joining());
   // }
 }
