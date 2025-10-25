@@ -33,9 +33,9 @@ public class BreakpointSetResponse implements ISlapResponse {
 
   @Override
   public String toString() {
-    return String.format(
-        "%s@%s(%s)",
-        this.getClass().getName(), Integer.toHexString(this.hashCode()), this.breakpointId);
+    return "%s@%s(%s)"
+        .formatted(
+            this.getClass().getName(), Integer.toHexString(this.hashCode()), this.breakpointId);
   }
 
   /**

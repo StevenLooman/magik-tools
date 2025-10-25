@@ -53,7 +53,7 @@ public class TodoCommentCheck extends MagikCheck {
     final Matcher matcher = pattern.matcher(comment);
     while (matcher.find()) {
       final String word = matcher.group(1);
-      final String message = String.format(MESSAGE, word);
+      final String message = MESSAGE.formatted(word);
       this.addIssue(
           token.getLine(),
           token.getColumn() + matcher.start(1),

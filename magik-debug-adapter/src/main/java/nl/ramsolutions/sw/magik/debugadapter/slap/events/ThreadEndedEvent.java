@@ -33,9 +33,8 @@ public class ThreadEndedEvent implements ISlapEvent {
 
   @Override
   public String toString() {
-    return String.format(
-        "%s@%s(%s)",
-        this.getClass().getName(), Integer.toHexString(this.hashCode()), this.threadId);
+    return "%s@%s(%s)"
+        .formatted(this.getClass().getName(), Integer.toHexString(this.hashCode()), this.threadId);
   }
 
   /**

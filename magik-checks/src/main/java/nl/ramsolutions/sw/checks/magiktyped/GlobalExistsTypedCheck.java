@@ -58,7 +58,7 @@ public class GlobalExistsTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    final String message = String.format(MESSAGE, identifier);
+    final String message = MESSAGE.formatted(identifier);
     this.addIssue(node, message);
   }
 }

@@ -38,7 +38,7 @@ public class SlotExistsTypedCheck extends MagikTypedCheck {
 
     final SlotDefinition slotDef = exemplarDefinition.getSlot(slotName);
     if (slotDef == null) {
-      final String message = String.format(MESSAGE, slotName);
+      final String message = MESSAGE.formatted(slotName);
       final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
       this.addIssue(identifierNode, message);
     }

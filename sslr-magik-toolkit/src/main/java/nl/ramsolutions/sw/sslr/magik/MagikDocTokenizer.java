@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.ramsolutions;
+package nl.ramsolutions.sw.sslr.magik;
 
 import org.sonar.colorizer.InlineDocTokenizer;
 
@@ -11,7 +11,7 @@ class MagikDocTokenizer extends InlineDocTokenizer {
    * @param tagBefore Tag before.
    * @param tagAfter Tag after.
    */
-  MagikDocTokenizer(String tagBefore, String tagAfter) {
+  MagikDocTokenizer(final String tagBefore, final String tagAfter) {
     super("##", tagBefore, tagAfter);
   }
 }

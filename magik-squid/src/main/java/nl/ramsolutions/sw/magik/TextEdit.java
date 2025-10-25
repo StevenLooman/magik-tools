@@ -59,13 +59,13 @@ public class TextEdit {
 
   @Override
   public String toString() {
-    return String.format(
-        "%s@%s(%s, '%s', %s)",
-        this.getClass().getName(),
-        Integer.toHexString(this.hashCode()),
-        this.getRange(),
-        this.getNewText(),
-        this.getReason());
+    return "%s@%s(%s, '%s', %s)"
+        .formatted(
+            this.getClass().getName(),
+            Integer.toHexString(this.hashCode()),
+            this.getRange(),
+            this.getNewText(),
+            this.getReason());
   }
 
   @Override

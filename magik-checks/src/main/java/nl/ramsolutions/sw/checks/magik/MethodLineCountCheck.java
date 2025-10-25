@@ -49,7 +49,7 @@ public class MethodLineCountCheck extends MagikCheck {
     final long lineCount =
         bodyNode.getTokens().stream().map(Token::getLine).distinct().collect(Collectors.counting());
     if (lineCount > this.maxLineCount) {
-      final String message = String.format(MESSAGE, lineCount, this.maxLineCount);
+      final String message = MESSAGE.formatted(lineCount, this.maxLineCount);
       final AstNode issueNode;
       if (node.is(MagikGrammar.METHOD_DEFINITION)) {
         final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);

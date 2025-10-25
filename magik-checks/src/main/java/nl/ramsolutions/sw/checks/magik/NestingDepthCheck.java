@@ -63,7 +63,7 @@ public class NestingDepthCheck extends MagikCheck {
 
   private void checkNestingDepth(final AstNode node) {
     if (this.getCurrentDepth() == this.maxNestingDepth) {
-      final String message = String.format(MESSAGE, this.maxNestingDepth);
+      final String message = MESSAGE.formatted(this.maxNestingDepth);
       this.addIssue(node, message);
     }
   }

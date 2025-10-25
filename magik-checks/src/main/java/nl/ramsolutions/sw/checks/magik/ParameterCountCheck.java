@@ -33,7 +33,7 @@ public class ParameterCountCheck extends MagikCheck {
     final Map<String, AstNode> parameterNodes = helper.getParameterNodes();
     final int parameterCount = parameterNodes.size();
     if (parameterCount > this.maxParameterCount) {
-      final String message = String.format(MESSAGE, parameterCount, this.maxParameterCount);
+      final String message = MESSAGE.formatted(parameterCount, this.maxParameterCount);
       final AstNode issueNode = helper.getMethodNameNode();
       this.addIssue(issueNode, message);
     }
@@ -45,7 +45,7 @@ public class ParameterCountCheck extends MagikCheck {
     final Map<String, AstNode> parameterNodes = helper.getParameterNodes();
     final int parameterCount = parameterNodes.size();
     if (parameterCount > this.maxParameterCount) {
-      final String message = String.format(MESSAGE, parameterCount, this.maxParameterCount);
+      final String message = MESSAGE.formatted(parameterCount, this.maxParameterCount);
       final AstNode issueNode = helper.getProcedureNode();
       this.addIssue(issueNode, message);
     }

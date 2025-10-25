@@ -43,7 +43,7 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
     final TypeString intersection = TypeString.intersection(leftTypeStr, rightTypeStr);
     if (intersection == null) {
       final String message =
-          String.format(MESSAGE, leftTypeStr.getFullString(), rightTypeStr.getFullString());
+          MESSAGE.formatted(leftTypeStr.getFullString(), rightTypeStr.getFullString());
       this.addIssue(node, message);
     }
   }
@@ -77,16 +77,14 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
         final TypeString intersection = TypeString.intersection(receiverTypeStr, checkedTypeStr);
         if (intersection == null) {
           final String message =
-              String.format(
-                  MESSAGE, receiverTypeStr.getFullString(), checkedTypeStr.getFullString());
+              MESSAGE.formatted(receiverTypeStr.getFullString(), checkedTypeStr.getFullString());
           this.addIssue(node, message);
         }
       } else { // isKindOf.
         final TypeStringResolver resolver = this.getTypeStringResolver();
         if (!resolver.isKindOf(receiverTypeStr, checkedTypeStr)) {
           final String message =
-              String.format(
-                  MESSAGE, receiverTypeStr.getFullString(), checkedTypeStr.getFullString());
+              MESSAGE.formatted(receiverTypeStr.getFullString(), checkedTypeStr.getFullString());
           this.addIssue(node, message);
         }
       }
