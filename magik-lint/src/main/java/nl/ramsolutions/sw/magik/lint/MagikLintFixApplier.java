@@ -24,9 +24,13 @@ import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Apply {@link CodeAction}s using the registered {@link CodeActionSupplier}s. */
 public class MagikLintFixApplier {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MagikLint.class);
 
   private final MagikToolsProperties properties;
 
@@ -52,9 +56,12 @@ public class MagikLintFixApplier {
   }
 
   private void runOnFile(final OpenedFile originalOpenedFile) throws IOException {
+    LOGGER.trace("Applying fixers to file: {}", originalOpenedFile);
+
     OpenedFile openedFile = originalOpenedFile;
     final URI uri = openedFile.getUri();
     for (final CodeActionSupplier codeActionSupplier : this.getCodeActionSuppliers(openedFile)) {
+      LOGGER.trace("Applying code action supplier: {}", codeActionSupplier.getClass().getName());
       final String newSource = this.applyCodeActionSupplier(codeActionSupplier, openedFile);
       openedFile = this.createNewFile(originalOpenedFile, newSource);
     }
@@ -65,6 +72,7 @@ public class MagikLintFixApplier {
       return;
     }
 
+    LOGGER.debug("Saving file: {}", openedFile);
     final Charset charset = FileCharsetDeterminer.determineCharset(newSource);
     final Path path = Path.of(uri);
     Files.writeString(path, newSource, charset);

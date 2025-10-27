@@ -56,9 +56,9 @@ public class CodeActionProvider {
   }
 
   /**
-   * Provide code actions for {@link ProductDefFile}.
+   * Provide code actions for {@link OpenedFile}.
    *
-   * @param openedFile {@link OpenedFile} product definition file.
+   * @param openedFile File to provide {@link CodeAction}s for.
    * @param range Range to provide code actions for.
    * @param context Code action context.
    * @return List of code actions.
