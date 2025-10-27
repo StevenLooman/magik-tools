@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import nl.ramsolutions.sw.MagikToolsProperties;
-import nl.ramsolutions.sw.checks.MagikTypedCheckFixer;
+import nl.ramsolutions.sw.checks.MagikTypedCodeActionSupplier;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -24,7 +24,7 @@ import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.magik.utils.StreamUtils;
 
 /** TypeDoc return type fixer. */
-public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
+public class TypeDocReturnTypeFixer extends MagikTypedCodeActionSupplier {
 
   /**
    * Provide code actions related to return types.
@@ -34,7 +34,8 @@ public class TypeDocReturnTypeFixer extends MagikTypedCheckFixer {
    * @return List of code actions.
    */
   @Override
-  public List<CodeAction> provideCodeActions(final MagikTypedFile magikFile, final Range range) {
+  public List<CodeAction> provideMagikTypedCodeActions(
+      final MagikTypedFile magikFile, final Range range) {
     return magikFile.getMagikDefinitions().stream()
         .filter(MethodDefinition.class::isInstance)
         .map(MethodDefinition.class::cast)

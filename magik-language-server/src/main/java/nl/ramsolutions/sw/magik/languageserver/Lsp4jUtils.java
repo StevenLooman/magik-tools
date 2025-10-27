@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.magik.languageserver;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
-import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.OpenedFile;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Position;
@@ -38,19 +38,19 @@ public final class Lsp4jUtils {
   /**
    * Create a {@link CodeAction}.
    *
-   * @param magikFile The {@link MagikTypedFile}.
+   * @param openedFile The {@link OpenedFile}.
    * @param description The description.
    * @param textEdits The {@link TextEdit}s.
    * @return The {@link CodeAction}.
    */
   public static CodeAction createCodeAction(
-      final MagikTypedFile magikFile,
+      final OpenedFile openedFile,
       final String description,
       final List<nl.ramsolutions.sw.magik.TextEdit> textEdits) {
     final List<org.eclipse.lsp4j.TextEdit> lsp4jTextEdits =
         textEdits.stream().map(Lsp4jConversion::textEditToLsp4j).toList();
     final VersionedTextDocumentIdentifier versionedTextDocumentIdentifier =
-        new VersionedTextDocumentIdentifier(magikFile.getUri().toString(), TEXT_DOCUMENT_VERSION);
+        new VersionedTextDocumentIdentifier(openedFile.getUri().toString(), TEXT_DOCUMENT_VERSION);
     final TextDocumentEdit textDocumentEdit =
         new TextDocumentEdit(versionedTextDocumentIdentifier, lsp4jTextEdits);
     final WorkspaceEdit workspaceEdit =
