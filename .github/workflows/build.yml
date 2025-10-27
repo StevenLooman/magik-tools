@@ -41,7 +41,7 @@ jobs:
       - run: npm install . && npm run package
         working-directory: magik-language-server/client-vscode
       - run: cp -v magik-language-server/client-vscode/magik-language-server-*.vsix staging
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: Package-${{ matrix.os }}
           path: staging
