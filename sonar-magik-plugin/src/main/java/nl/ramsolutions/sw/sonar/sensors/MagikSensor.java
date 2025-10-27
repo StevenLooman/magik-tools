@@ -115,7 +115,7 @@ public class MagikSensor implements Sensor {
     final Checks<MagikCheck> checks =
         checkFactory
             .<MagikCheck>create(MagikCheckList.REPOSITORY_KEY)
-            .addAnnotatedChecks(MagikCheckList.getChecks());
+            .addAnnotatedChecks(MagikCheckList.INSTANCE.getChecks());
     for (final MagikCheck check : checks.all()) {
       LOGGER.debug("Running check: {}", check);
       final List<Issue> issues = check.scanFileForIssues(magikFile);

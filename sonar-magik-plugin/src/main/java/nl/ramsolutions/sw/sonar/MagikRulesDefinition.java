@@ -36,7 +36,7 @@ public class MagikRulesDefinition implements RulesDefinition {
         new RuleMetadataLoader(MagikCheckList.PROFILE_DIR, this.runtime);
 
     final List<Class<?>> checkClasses =
-        MagikCheckList.getChecks().stream()
+        MagikCheckList.INSTANCE.getChecks().stream()
             .map(clazz -> (Class<?>) clazz)
             .collect(Collectors.toUnmodifiableList());
     loader.addRulesByAnnotatedClass(repository, checkClasses);

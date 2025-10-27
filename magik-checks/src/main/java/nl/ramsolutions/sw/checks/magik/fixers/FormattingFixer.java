@@ -5,8 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.AstNodeHelper;
 import nl.ramsolutions.sw.MagikToolsProperties;
-import nl.ramsolutions.sw.OpenedFile;
-import nl.ramsolutions.sw.checks.CheckFixer;
+import nl.ramsolutions.sw.checks.MagikCodeActionSupplier;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Range;
@@ -20,18 +19,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Fixer for formatting issues. */
-public class FormattingFixer extends CheckFixer {
+public class FormattingFixer extends MagikCodeActionSupplier {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FormattingFixer.class);
 
   @Override
-  public List<CodeAction> provideCodeActions(final OpenedFile openedFile, final Range range) {
-    if (!(openedFile instanceof MagikFile magikFile)) {
-      return Collections.emptyList();
-    }
-
+  public List<CodeAction> provideMagikCodeActions(final MagikFile magikFile, final Range range) {
     if (!this.canFormat(magikFile)) {
-      LOGGER.warn("Cannot format due to syntax errors");
+      final String path = magikFile.getUri().getPath();
+      LOGGER.warn("Cannot format %s due to syntax errors".formatted(path));
       return Collections.emptyList();
     }
 

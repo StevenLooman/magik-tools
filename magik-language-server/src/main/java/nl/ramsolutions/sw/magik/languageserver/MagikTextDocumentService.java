@@ -1182,23 +1182,18 @@ public class MagikTextDocumentService implements TextDocumentService {
         range.getEnd().getCharacter());
 
     final OpenedFile openedFile = this.openedFiles.get(textDocument);
-    if (!(openedFile instanceof MagikTypedFile)) {
-      return CompletableFuture.supplyAsync(Collections::emptyList);
-    }
-
-    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
     final nl.ramsolutions.sw.magik.Range magikRange = Lsp4jConversion.rangeFromLsp4j(range);
     final CodeActionContext context = params.getContext();
     return CompletableFuture.supplyAsync(
         () -> {
           final List<nl.ramsolutions.sw.magik.CodeAction> codeActions =
-              this.codeActionProvider.provideCodeActions(magikFile, magikRange, context);
+              this.codeActionProvider.provideCodeActions(openedFile, magikRange, context);
           final List<Either<Command, CodeAction>> codeActionsLsp4j =
               codeActions.stream()
                   .map(
                       codeAction ->
                           Lsp4jUtils.createCodeAction(
-                              magikFile, codeAction.getTitle(), codeAction.getEdits()))
+                              openedFile, codeAction.getTitle(), codeAction.getEdits()))
                   .map(Either::<Command, CodeAction>forRight)
                   .toList();
           if (LOGGER_DURATION.isTraceEnabled()) {

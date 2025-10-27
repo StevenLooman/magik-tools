@@ -164,4 +164,10 @@ public class ModuleDefFile extends OpenedFile {
     final ModuleDefinition moduleDefinition = moduleDefFile.getModuleDefinition();
     return moduleDefinition.getName();
   }
+
+  @Override
+  public String toString() {
+    return "%s@%s(%s)"
+        .formatted(this.getClass().getName(), Integer.toHexString(this.hashCode()), this.getUri());
+  }
 }

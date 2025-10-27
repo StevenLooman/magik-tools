@@ -122,4 +122,10 @@ public class ProductDefFile extends OpenedFile {
   public String getLanguageId() {
     return "sw-product-def";
   }
+
+  @Override
+  public String toString() {
+    return "%s@%s(%s)"
+        .formatted(this.getClass().getName(), Integer.toHexString(this.hashCode()), this.getUri());
+  }
 }

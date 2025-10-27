@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.checks;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.checks.magik.TypeDocCheck;
 import nl.ramsolutions.sw.checks.magiktyped.ConditionalExpressionIsFalseTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.DeprecatedMethodUsageTypedCheck;
@@ -22,10 +21,14 @@ import nl.ramsolutions.sw.checks.magiktyped.fixers.TypeDocParameterFixer;
 import nl.ramsolutions.sw.checks.magiktyped.fixers.TypeDocReturnTypeFixer;
 
 /** Check list. */
-public final class MagikTypedCheckList {
+public final class MagikTypedCheckList extends CheckList<MagikCheck, MagikTypedCodeActionSupplier> {
+  // TODO: Yes, T=MagikCheck. This is due to TypeDocCheck.
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String PROFILE_DIR = "nl/ramsolutions/sw/sonar/l10n/magiktyped/rules";
+
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final MagikTypedCheckList INSTANCE = new MagikTypedCheckList();
 
   private MagikTypedCheckList() {}
 
@@ -34,7 +37,8 @@ public final class MagikTypedCheckList {
    *
    * @return List of with {@link MagikTypedCheck}s
    */
-  public static List<Class<? extends MagikTypedCheck>> getChecks() {
+  @Override
+  public List<Class<? extends MagikCheck>> getChecks() {
     return List.of(
         ConditionalExpressionIsFalseTypedCheck.class,
         DeprecatedMethodUsageTypedCheck.class,
@@ -53,22 +57,12 @@ public final class MagikTypedCheckList {
   }
 
   /**
-   * Get the list of {@link MagikTypedCheck}s, casted to {@link Check}s.
+   * Get the {@link MagikCheck}s which have a {@link MagikTypedCodeActionSupplier}.
    *
-   * @return List of {@link Check}s.
+   * @return Map of {@link MagikCheck} and list of {@link MagikTypedCodeActionSupplier}
    */
-  public static List<Class<? extends Check>> getBaseChecks() {
-    return getChecks().stream()
-        .map(clazz -> (Class<? extends Check>) clazz)
-        .collect(Collectors.toList());
-  }
-
-  /**
-   * Get the {@link MagikCheck}s which have a {@link MagikTypedCheckFixer}.
-   *
-   * @return Map of {@link MagikCheck} and list of {@link MagikTypedCheckFixer}
-   */
-  public static Map<Class<? extends MagikCheck>, List<Class<? extends MagikTypedCheckFixer>>>
+  @Override
+  public Map<Class<? extends MagikCheck>, List<Class<? extends MagikTypedCodeActionSupplier>>>
       getFixers() {
     // TODO: For now in MagikTypedCheckList, even it is a regular MagikCheck.
     return Map.of(

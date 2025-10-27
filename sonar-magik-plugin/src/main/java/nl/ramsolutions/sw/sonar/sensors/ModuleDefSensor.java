@@ -121,7 +121,7 @@ public class ModuleDefSensor implements Sensor {
     final Checks<ModuleDefCheck> checks =
         checkFactory
             .<ModuleDefCheck>create(ProductModuleDefRulesDefinition.REPOSITORY_KEY)
-            .addAnnotatedChecks(ModuleDefCheckList.getChecks());
+            .addAnnotatedChecks(ModuleDefCheckList.INSTANCE.getChecks());
     for (final ModuleDefCheck check : checks.all()) {
       LOGGER.debug("Running check: {}", check);
       final List<Issue> issues = check.scanFileForIssues(moduleDefFile);
