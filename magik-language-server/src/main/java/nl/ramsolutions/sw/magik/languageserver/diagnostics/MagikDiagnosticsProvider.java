@@ -46,7 +46,7 @@ public class MagikDiagnosticsProvider {
 
     final List<Diagnostic> diagnosticsChecks =
         MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(
-            productDefFile, ProductDefCheckList.getBaseChecks());
+            productDefFile, ProductDefCheckList.INSTANCE.getBaseChecks());
     diagnostics.addAll(diagnosticsChecks);
 
     return diagnostics;
@@ -63,7 +63,7 @@ public class MagikDiagnosticsProvider {
 
     final List<Diagnostic> diagnosticsChecks =
         MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(
-            moduleDefFile, ModuleDefCheckList.getBaseChecks());
+            moduleDefFile, ModuleDefCheckList.INSTANCE.getBaseChecks());
     diagnostics.addAll(diagnosticsChecks);
 
     return diagnostics;
@@ -79,7 +79,7 @@ public class MagikDiagnosticsProvider {
     final List<Diagnostic> diagnostics = new ArrayList<>();
 
     // Magik diagnostics.
-    final List<Class<? extends Check>> magikChecks = MagikCheckList.getBaseChecks();
+    final List<Class<? extends Check>> magikChecks = MagikCheckList.INSTANCE.getBaseChecks();
     final List<Diagnostic> diagnosticsChecks =
         MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(magikFile, magikChecks);
     diagnostics.addAll(diagnosticsChecks);
@@ -88,7 +88,7 @@ public class MagikDiagnosticsProvider {
     final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
     final Boolean typingEnableChecks = settings.getTypingEnableChecks();
     if (Boolean.TRUE.equals(typingEnableChecks)) {
-      final List<Class<? extends Check>> typedChecks = MagikTypedCheckList.getBaseChecks();
+      final List<Class<? extends Check>> typedChecks = MagikTypedCheckList.INSTANCE.getBaseChecks();
       final List<Diagnostic> diagnosticsTypedChecks =
           MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(magikFile, typedChecks);
       diagnostics.addAll(diagnosticsTypedChecks);

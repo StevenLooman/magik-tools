@@ -103,7 +103,7 @@ public class MagikTypedLint {
    */
   void showChecks(final Writer writer, final boolean showDisabled)
       throws ReflectiveOperationException, IOException {
-    final List<Class<? extends Check>> checks = MagikTypedCheckList.getBaseChecks();
+    final List<Class<? extends Check>> checks = MagikTypedCheckList.INSTANCE.getBaseChecks();
     final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, this.properties);
     final Iterable<CheckHolder> holders = checksConfig.getAllChecks();
     for (final CheckHolder holder : holders) {
@@ -180,7 +180,7 @@ public class MagikTypedLint {
   private boolean isFileIgnored(final MagikFile magikFile) {
     // TODO: Is this still current?
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final List<Class<? extends Check>> checks = MagikTypedCheckList.getBaseChecks();
+    final List<Class<? extends Check>> checks = MagikTypedCheckList.INSTANCE.getBaseChecks();
     final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, fileProperties);
     final URI uri = magikFile.getUri();
     final Path path = Path.of(uri);
@@ -209,7 +209,7 @@ public class MagikTypedLint {
 
     // Run checks on files.
     final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final List<Class<? extends Check>> checks = MagikTypedCheckList.getBaseChecks();
+    final List<Class<? extends Check>> checks = MagikTypedCheckList.INSTANCE.getBaseChecks();
     final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, fileProperties);
     final Iterable<CheckHolder> holders = checksConfig.getAllChecks();
     for (final CheckHolder holder : holders) {

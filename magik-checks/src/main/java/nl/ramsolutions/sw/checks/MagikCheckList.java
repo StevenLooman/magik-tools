@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.checks;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import nl.ramsolutions.sw.checks.magik.CommentedCodeCheck;
 import nl.ramsolutions.sw.checks.magik.DuplicateMethodInFileCheck;
 import nl.ramsolutions.sw.checks.magik.EmptyBlockCheck;
@@ -49,13 +48,16 @@ import nl.ramsolutions.sw.checks.magik.fixers.FormattingFixer;
 import nl.ramsolutions.sw.checks.magik.fixers.UseValueCompareFixer;
 
 /** Magik {@link Check} list. */
-public final class MagikCheckList {
+public final class MagikCheckList extends CheckList<MagikCheck, MagikCodeActionSupplier> {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String REPOSITORY_KEY = "magik";
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String PROFILE_DIR = "nl/ramsolutions/sw/sonar/l10n/magik/rules";
+
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final MagikCheckList INSTANCE = new MagikCheckList();
 
   private MagikCheckList() {}
 
@@ -64,7 +66,8 @@ public final class MagikCheckList {
    *
    * @return List of {@link MagikCheck}s.
    */
-  public static List<Class<? extends MagikCheck>> getChecks() {
+  @Override
+  public List<Class<? extends MagikCheck>> getChecks() {
     return List.of(
         CommentedCodeCheck.class,
         DuplicateMethodInFileCheck.class,
@@ -111,22 +114,13 @@ public final class MagikCheckList {
   }
 
   /**
-   * Get the list of {@link MagikCheck}s, casted to {@link Check}s.
+   * Get the {@link MagikCheck}s which have a {@link CodeActionSupplier}.
    *
-   * @return List of {@link Check}s.
+   * @return Map of {@link MagikCheck}s and their {@link CodeActionSupplier}s.
    */
-  public static List<Class<? extends Check>> getBaseChecks() {
-    return MagikCheckList.getChecks().stream()
-        .map(clazz -> (Class<? extends Check>) clazz)
-        .collect(Collectors.toList());
-  }
-
-  /**
-   * Get the {@link MagikCheck}s which have a {@link CheckFixer}.
-   *
-   * @return Map of {@link MagikCheck}s and their {@link CheckFixer}s.
-   */
-  public static Map<Class<? extends MagikCheck>, List<Class<? extends CheckFixer>>> getFixers() {
+  @Override
+  public Map<Class<? extends MagikCheck>, List<Class<? extends MagikCodeActionSupplier>>>
+      getFixers() {
     return Map.of(
         FormattingCheck.class, List.of(FormattingFixer.class),
         UseValueCompareCheck.class, List.of(UseValueCompareFixer.class));

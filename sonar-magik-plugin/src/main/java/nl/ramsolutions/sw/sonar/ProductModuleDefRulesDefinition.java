@@ -45,7 +45,7 @@ public class ProductModuleDefRulesDefinition implements RulesDefinition {
         new RuleMetadataLoader(ProductDefCheckList.PROFILE_DIR, this.runtime);
 
     final List<Class<?>> checkClasses =
-        ProductDefCheckList.getChecks().stream()
+        ProductDefCheckList.INSTANCE.getChecks().stream()
             .map(clazz -> (Class<?>) clazz)
             .collect(Collectors.toUnmodifiableList());
     loader.addRulesByAnnotatedClass(repository, checkClasses);
@@ -56,7 +56,7 @@ public class ProductModuleDefRulesDefinition implements RulesDefinition {
         new RuleMetadataLoader(ModuleDefCheckList.PROFILE_DIR, this.runtime);
 
     final List<Class<?>> checkClasses =
-        ModuleDefCheckList.getChecks().stream()
+        ModuleDefCheckList.INSTANCE.getChecks().stream()
             .map(clazz -> (Class<?>) clazz)
             .collect(Collectors.toUnmodifiableList());
     loader.addRulesByAnnotatedClass(repository, checkClasses);

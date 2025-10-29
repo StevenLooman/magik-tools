@@ -156,4 +156,10 @@ public class ProductDefFile extends OpenedFile {
     final ProductDefinition productDefinition = productDefFile.getProductDefinition();
     return productDefinition.getName();
   }
+
+  @Override
+  public String toString() {
+    return "%s@%s(%s)"
+        .formatted(this.getClass().getName(), Integer.toHexString(this.hashCode()), this.getUri());
+  }
 }
