@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -130,7 +131,8 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
   private void walkCommentToken(final Token token) {
     final String value = token.getOriginalValue();
     if (value.startsWith("##")) {
-      final Set<SemanticToken.Modifier> docModifier = Set.of(SemanticToken.Modifier.DOCUMENTATION);
+      final Set<SemanticToken.Modifier> docModifier =
+          EnumSet.of(SemanticToken.Modifier.DOCUMENTATION);
 
       final List<Token> docTokens = List.of(token);
       final TypeDocParser typeDocParser = new TypeDocParser(docTokens, this.currentPakkage);
@@ -188,7 +190,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
   private void walkCommentType(
       final AstNode typeNode, final Set<SemanticToken.Modifier> docModifier) {
     final Set<SemanticToken.Modifier> constModifier =
-        Set.of(SemanticToken.Modifier.DOCUMENTATION, SemanticToken.Modifier.READONLY);
+        EnumSet.of(SemanticToken.Modifier.DOCUMENTATION, SemanticToken.Modifier.READONLY);
     final List<AstNode> typeValueNodes = typeNode.getChildren(TypeDocGrammar.TYPE_VALUE);
     if (!typeValueNodes.isEmpty()) {
       final AstNode typeValueNode = typeValueNodes.get(0);
@@ -276,7 +278,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
 
   private void walkPostKeywordContstant(final AstNode node) {
     final Token token = node.getToken();
-    final Set<SemanticToken.Modifier> modifier = Set.of(SemanticToken.Modifier.READONLY);
+    final Set<SemanticToken.Modifier> modifier = EnumSet.of(SemanticToken.Modifier.READONLY);
     this.addSemanticToken(token, SemanticToken.Type.VARIABLE, modifier);
   }
 
@@ -331,7 +333,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
                     method ->
                         method.getPragma() != null
                             && method.getPragma().getTopics().contains(TOPIC_DEPRECATED))
-            ? Set.of(SemanticToken.Modifier.DEPRECATED)
+            ? EnumSet.of(SemanticToken.Modifier.DEPRECATED)
             : Collections.emptySet();
 
     this.addSemanticToken(identifierNode, SemanticToken.Type.METHOD, modifiers);
@@ -421,9 +423,9 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
           final Set<SemanticToken.Modifier> modifiers =
               exemplarDef.getPragma() != null
                       && exemplarDef.getPragma().getTopics().contains(TOPIC_DEPRECATED)
-                  ? Set.of(
+                  ? EnumSet.of(
                       SemanticToken.Modifier.VARIABLE_GLOBAL, SemanticToken.Modifier.DEPRECATED)
-                  : Set.of(SemanticToken.Modifier.VARIABLE_GLOBAL);
+                  : EnumSet.of(SemanticToken.Modifier.VARIABLE_GLOBAL);
           this.addSemanticToken(node, SemanticToken.Type.CLASS, modifiers);
         } else {
           this.addSemanticToken(
