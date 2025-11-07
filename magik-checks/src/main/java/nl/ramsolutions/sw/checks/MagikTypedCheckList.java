@@ -3,6 +3,8 @@ package nl.ramsolutions.sw.checks;
 import java.util.List;
 import java.util.Map;
 import nl.ramsolutions.sw.checks.magik.TypeDocCheck;
+import nl.ramsolutions.sw.checks.magiktyped.AssignedTypeDoesNotMatchSlotTypeTypedCheck;
+import nl.ramsolutions.sw.checks.magiktyped.ComparedTypesDoNotMatchTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.ConditionalExpressionIsFalseTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.DeprecatedMethodUsageTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.DeprecatedTypeUsageTypedCheck;
@@ -40,6 +42,8 @@ public final class MagikTypedCheckList extends CheckList<MagikCheck, MagikTypedC
   @Override
   public List<Class<? extends MagikCheck>> getChecks() {
     return List.of(
+        AssignedTypeDoesNotMatchSlotTypeTypedCheck.class,
+        ComparedTypesDoNotMatchTypedCheck.class,
         ConditionalExpressionIsFalseTypedCheck.class,
         DeprecatedMethodUsageTypedCheck.class,
         DeprecatedTypeUsageTypedCheck.class,
