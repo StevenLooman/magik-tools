@@ -1,0 +1,11 @@
+<p>Module required for used global</p>
+<h2>Explanation</h2>
+<pre>
+# Inside a module which does NOT require the appropriate module to get
+# the test_exemplar_from_another_module global variable.
+_block
+    _local var << test_exemplar_from_another_module
+_endblock
+$
+</pre>
+<p>This will raise an issue, because the <pre>test_exemplar_from_another_module</pre> might not be loaded, as the module containing this example code does not require the module which supplies the <pre>test_exemplar_from_another_module</pre>.</p>

@@ -1,0 +1,15 @@
+<p>Argument type does not match parameter type</p>
+<h2>Explanation</h2>
+<pre>
+_method a.m(param1, param2)
+    ## @param {sw:integer} param1
+    ## @param {sw:integer} param2
+_endmethod
+$
+
+_block
+    a.m(1, :a)
+_endblock
+$
+</pre>
+<p>The method <pre>a.m()</pre> is called with arguments of type <pre>sw:integer</pre> and <pre>sw:symbol</pre>, while the method expects <pre>sw:integer</pre> twice, as per method doc.</p>
