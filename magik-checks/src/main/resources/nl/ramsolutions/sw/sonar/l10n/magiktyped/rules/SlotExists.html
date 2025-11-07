@@ -1,1 +1,17 @@
 <p>Slot Exists</p>
+<h2>Explanation</h2>
+<pre>
+## Example exemplar.
+def_slotted_exemplar(
+        :example_exemplar,
+        {
+            {:slot_a, _unset}
+        })
+
+_method example_exemplar.example_method()
+    ## This assignment will raise an issue, because slot_1 does not exist.
+    .slot_1 << 12345
+_endmethod
+$
+</pre>
+<p>In the method <pre>example_exemplar.example_method()</pre>, <pre>slot_1</pre> does not exist. Trying to use this slot will result in an error.</p>

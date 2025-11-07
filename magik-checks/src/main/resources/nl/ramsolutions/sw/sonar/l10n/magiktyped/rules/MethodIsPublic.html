@@ -1,1 +1,14 @@
 <p>Method Is Public</p>
+<h2>Explanation</h2>
+<pre>
+_private _method example_exemplar.private_example_method()
+    ## Private method which cannot be called from other methods or blocks.
+_endmethod
+$
+
+_block
+    example_exemplar.private_example_method()
+_endblock
+$
+</pre>
+<p>The call to <pre>example_exemplar.private_example_method()</pre> will result in an error, because the method is private and cannot be called from outside its own definition.</p>

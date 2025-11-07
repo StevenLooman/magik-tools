@@ -1,1 +1,7 @@
 <p>Use of sw:char16_vector.evaluate()</p>
+<h2>Explanation</h2>
+<pre>
+_local user_input << "gis_program_manager.cached_dataset(:gis).collection(:very_important_data).empty()"
+user_input.evaluate()
+</pre>
+<p>The example shows the use of <code>sw:char16_vector.evaluate()</code> to execute user input as Magik code. This is dangerous as it can lead to code injection vulnerabilities if the user input is not properly sanitized.</p>

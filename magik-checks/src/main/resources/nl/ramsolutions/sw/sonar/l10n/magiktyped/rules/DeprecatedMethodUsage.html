@@ -1,1 +1,15 @@
 <p>Deprecated method usage</p>
+<h2>Explanation</h2>
+<pre>
+_pragma(classify_level=deprecated)
+_method exemplar.example_method()
+_endmethod
+$
+
+_block
+    _local exem << exemplar
+    exem.example_method()
+_endblock
+$
+</pre>
+<p>In the example above, the method call <pre>exem.example_method()</pre> is marked as deprecated using the <pre>_pragma(classify_level=deprecated)</pre> directive.</p>

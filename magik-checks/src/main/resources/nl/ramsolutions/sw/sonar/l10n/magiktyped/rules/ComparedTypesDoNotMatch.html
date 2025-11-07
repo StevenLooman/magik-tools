@@ -1,1 +1,14 @@
 <p>Compared types do not match</p>
+<h2>Explanation</h2>
+<pre>
+_method a.m(param1)
+    ## @param {sw:integer} param1
+    _if param1 _is _unset
+    _then
+        # This condition will never be true, since param1 is defined as sw:integer,
+        # and can therefore never be sw:unset.
+    _endif
+_endmethod
+$
+</pre>
+<p>In the above example, we are trying to compare two different types: <pre>sw:integer</pre> and <pre>sw:unset</pre>. Given that the type definition of <pre>param1</pre> is <pre>sw:integer</pre>, it can never be <pre>sw:unset</pre>.</p>

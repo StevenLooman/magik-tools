@@ -1,1 +1,9 @@
 <p>Type-doc Type Exists</p>
+<h2>Explanation</h2>
+<pre>
+_method a.b(p1)
+    ## @param {user:non_existing_exemplar} p1
+    ## @return {user:non_existing_exemplar}
+_endmethod
+</pre>
+<p>This check ensures that all types referenced in type-doc comments actually exist in the codebase. In the example above, both the parameter type and return type refer to a non-existing exemplar.</p>
