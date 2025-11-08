@@ -18,17 +18,17 @@ class UseValueCompareFixerTest {
   private static final String REPLACE_ISNT_WITH_NOT_EQUAL_SIGN =
       "Replace `_isnt` operator with `<>` operator";
 
-  private List<CodeAction> getCodeActions(final String code, final Range range) {
+  private List<CodeAction> getCodeActions(final String code) {
     final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
     final UseValueCompareFixer fixer = new UseValueCompareFixer();
+    final Range range = new Range(new Position(0, 0), new Position(Integer.MAX_VALUE, 0));
     return fixer.provideCodeActions(magikFile, range);
   }
 
   @Test
   void testReplaceIsWithEquals1() {
     final String code = "\"a\" _is b";
-    final Range range = new Range(new Position(0, 0), new Position(1, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -39,8 +39,7 @@ class UseValueCompareFixerTest {
   @Test
   void testReplaceIsWithEquals2() {
     final String code = "a _is \"b\"";
-    final Range range = new Range(new Position(0, 0), new Position(1, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -51,8 +50,7 @@ class UseValueCompareFixerTest {
   @Test
   void testReplaceIsWithEquals3() {
     final String code = "a _is 0.0";
-    final Range range = new Range(new Position(0, 0), new Position(1, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -63,8 +61,7 @@ class UseValueCompareFixerTest {
   @Test
   void testReplaceIsWithEquals4() {
     final String code = "536870913 _is a";
-    final Range range = new Range(new Position(0, 0), new Position(1, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -75,8 +72,7 @@ class UseValueCompareFixerTest {
   @Test
   void testReplaceIsWithEquals5() {
     final String code = "a _is 16rffffffffffff";
-    final Range range = new Range(new Position(0, 0), new Position(1, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -87,8 +83,7 @@ class UseValueCompareFixerTest {
   @Test
   void testReplaceIsntWithNotEquals1() {
     final String code = "\"a\" _isnt \"b\"";
-    final Range range = new Range(new Position(0, 0), new Position(1, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -99,8 +94,7 @@ class UseValueCompareFixerTest {
   @Test
   void testReplaceIsntWithNotEquals2() {
     final String code = "a _isnt \"b\"";
-    final Range range = new Range(new Position(0, 0), new Position(1, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -111,8 +105,7 @@ class UseValueCompareFixerTest {
   @Test
   void testReplaceIsntWithNotEquals3() {
     final String code = "a _isnt 0.0";
-    final Range range = new Range(new Position(0, 0), new Position(1, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -123,8 +116,7 @@ class UseValueCompareFixerTest {
   @Test
   void testReplaceIsntWithNotEquals4() {
     final String code = "536870913 _isnt a";
-    final Range range = new Range(new Position(0, 0), new Position(1, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -135,8 +127,7 @@ class UseValueCompareFixerTest {
   @Test
   void testReplaceIsntWithNotEquals5() {
     final String code = "a _isnt 16rffffffffffff";
-    final Range range = new Range(new Position(0, 0), new Position(1, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(

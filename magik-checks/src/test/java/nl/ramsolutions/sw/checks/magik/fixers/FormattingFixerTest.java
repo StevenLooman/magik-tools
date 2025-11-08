@@ -13,17 +13,17 @@ import org.junit.jupiter.api.Test;
 /** Tests for {@link FormattingFixer}. */
 @SuppressWarnings("checkstyle:MagicNumber")
 class FormattingFixerTest {
-  private List<CodeAction> getCodeActions(final String code, final Range range) {
+  private List<CodeAction> getCodeActions(final String code) {
     final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
     final FormattingFixer fixer = new FormattingFixer();
+    final Range range = new Range(new Position(0, 0), new Position(Integer.MAX_VALUE, 0));
     return fixer.provideCodeActions(magikFile, range);
   }
 
   @Test
   void testAddSpaceAfterComma() {
     final String code = "call(arg1,arg2)\n";
-    final Range range = new Range(new Position(0, 0), new Position(2, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -34,8 +34,7 @@ class FormattingFixerTest {
   @Test
   void testRemoveSpaceBeforeComma() {
     final String code = "call(arg1 , arg2)\n";
-    final Range range = new Range(new Position(0, 0), new Position(2, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -46,8 +45,7 @@ class FormattingFixerTest {
   @Test
   void testRemoveSpaceAfterBracket() {
     final String code = "call( arg1, arg2)\n";
-    final Range range = new Range(new Position(0, 0), new Position(2, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -58,8 +56,7 @@ class FormattingFixerTest {
   @Test
   void testRemoveSpaceBeforeBracket() {
     final String code = "call(arg1, arg2 )\n";
-    final Range range = new Range(new Position(0, 0), new Position(2, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -70,8 +67,7 @@ class FormattingFixerTest {
   @Test
   void testRemoveSpaceAfterMethodInvocation() {
     final String code = "xxx. yyy(arg1, arg2)\n";
-    final Range range = new Range(new Position(0, 0), new Position(2, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -82,8 +78,7 @@ class FormattingFixerTest {
   @Test
   void testRemoveSpaceBeforeMethodInvocation() {
     final String code = "xxx .yyy(arg1, arg2)\n";
-    final Range range = new Range(new Position(0, 0), new Position(2, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
@@ -94,8 +89,7 @@ class FormattingFixerTest {
   @Test
   void testRemoveTrailingWhitespace() {
     final String code = "show(1)  \n";
-    final Range range = new Range(new Position(0, 0), new Position(3, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
+    final List<CodeAction> codeactions = this.getCodeActions(code);
     assertThat(codeactions)
         .containsOnly(
             new CodeAction(
