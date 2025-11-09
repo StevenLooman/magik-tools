@@ -1,1 +1,15 @@
-<p>Pragma does not contain all topics from the list in topics.</p>
+<p>Pragma does not contain all topics from the configured list in topics.</p>
+<p>Given the next configuration:</p>
+<code>pragma-does-not-include-topic-in-topics.topics=magik</code>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_pragma(classify_level=basic, topic={})
+def_slotted_exemplar(:example, {})
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_pragma(classify_level=basic, topic={magik})
+def_slotted_exemplar(:example, {})
+$
+</pre>
