@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.indexer;
 
 import com.sonar.sslr.api.RecognitionException;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
@@ -71,23 +72,20 @@ public class ModuleIndexer {
   }
 
   private void readDefinitions(final Path path) throws IOException {
-    final Path productDefPath =
-        SourceFileScanner.searchFileUpwards(path, SourceFileScanner.SW_PRODUCT_DEF);
-    final ProductDefFile productDefFile;
-    if (productDefPath != null) {
-      productDefFile = new ProductDefFile(productDefPath, this.definitionKeeper, null);
-    } else {
-      productDefFile = null;
-    }
-
+    final URI uri = path.toUri();
+    final ProductDefFile productDefFile =
+        ProductDefFile.getProductDefFileForUri(uri, this.definitionKeeper);
+    final ModuleDefFile moduleDefFile =
+        new ModuleDefFile(path, this.definitionKeeper, productDefFile);
+    final ModuleDefinition definition;
     try {
-      final ModuleDefFile moduleDefFile =
-          new ModuleDefFile(path, this.definitionKeeper, productDefFile);
-      final ModuleDefinition definition = moduleDefFile.getModuleDefinition();
-      final IDefinition bareDefinition = definition.getBareDefinition();
-      this.definitionKeeper.add(bareDefinition);
+      definition = moduleDefFile.getModuleDefinition();
     } catch (final RecognitionException exception) {
       LOGGER.warn("Error parsing definition at: " + path, exception);
+      return;
     }
+
+    final IDefinition bareDefinition = definition.getBareDefinition();
+    this.definitionKeeper.add(bareDefinition);
   }
 }

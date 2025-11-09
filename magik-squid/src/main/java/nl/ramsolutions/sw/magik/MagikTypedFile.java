@@ -1,11 +1,14 @@
 package nl.ramsolutions.sw.magik;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.net.URI;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
+import nl.ramsolutions.sw.productdef.ProductDefFile;
 
 /** Typed magik file. */
 public class MagikTypedFile extends MagikFile {
@@ -73,6 +76,20 @@ public class MagikTypedFile extends MagikFile {
     }
 
     return this.reasonerState;
+  }
+
+  @Override
+  @CheckForNull
+  protected ModuleDefFile findModuleDefFile() {
+    final URI uri = this.getUri();
+    return ModuleDefFile.getModuleDefFileForUri(uri, this.definitionKeeper);
+  }
+
+  @Override
+  @CheckForNull
+  protected ProductDefFile findProductDefFile() {
+    final URI uri = this.getUri();
+    return ProductDefFile.getProductDefFileForUri(uri, this.definitionKeeper);
   }
 
   @Override

@@ -1,0 +1,6 @@
+#%text_encoding=utf8
+_package user
+
+_pragma(classify_level=basic, topic={test_module_two, test_product_two})
+def_slotted_exemplar(:test_exemplar, {})
+$

@@ -8,8 +8,10 @@ import java.net.URI;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
+import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.productdef.parser.ProductDefParser;
 
@@ -121,6 +123,43 @@ public class ProductDefFile extends OpenedFile {
   @Override
   public String getLanguageId() {
     return "sw-product-def";
+  }
+
+  /**
+   * Get the {@link ProductDefFile} for the given URI.
+   *
+   * <p>Note that this method does not find/set the parent product.def file.
+   *
+   * @param uri
+   * @param definitionKeeper
+   * @return {@link ProductDefFile} for the given URI, or null if no product.def file was found.
+   */
+  @CheckForNull
+  public static ProductDefFile getProductDefFileForUri(
+      final URI uri, final @Nullable IDefinitionKeeper definitionKeeper) {
+    if (!uri.getScheme().equals("file")) {
+      throw new IllegalStateException("Cannot get product.def for non-file URI");
+    }
+
+    final Path path = Path.of(uri);
+    final Path productDefPath =
+        SourceFileScanner.searchFileUpwards(path, SourceFileScanner.SW_PRODUCT_DEF);
+    if (productDefPath == null) {
+      return null;
+    }
+
+    final ProductDefFile productDefFile;
+    final IDefinitionKeeper defKeeper =
+        definitionKeeper != null
+            ? definitionKeeper
+            : new DefinitionKeeper(false); // Use empty definition keeper.
+    try {
+      productDefFile = new ProductDefFile(productDefPath, defKeeper, null);
+    } catch (final IOException exception) {
+      throw new IllegalStateException(exception);
+    }
+
+    return productDefFile;
   }
 
   @Override

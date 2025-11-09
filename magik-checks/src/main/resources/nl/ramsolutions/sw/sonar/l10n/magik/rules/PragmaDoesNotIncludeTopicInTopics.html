@@ -1,0 +1,15 @@
+<p>Pragma topic does not contain all the required configured topics.</p>
+<p>Given the next configuration:</p>
+<code>pragma-does-not-include-topic-in-topics.topics=magik</code>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_pragma(classify_level=basic, topic={something_else})
+def_slotted_exemplar(:example, {})
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_pragma(classify_level=basic, topic={something_else, magik})
+def_slotted_exemplar(:example, {})
+$
+</pre>

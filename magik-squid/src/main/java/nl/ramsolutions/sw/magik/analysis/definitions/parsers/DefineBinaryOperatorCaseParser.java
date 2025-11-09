@@ -119,7 +119,9 @@ public class DefineBinaryOperatorCaseParser {
     final Instant timestamp = this.magikFile.getTimestamp();
 
     // Figure module name.
-    final String moduleName = ModuleDefFile.getModuleNameForUri(uri);
+    final ModuleDefFile moduleDefFile = this.magikFile.getModuleDefFile();
+    final String moduleName =
+        moduleDefFile != null ? moduleDefFile.getModuleDefinition().getName() : null;
 
     // Figure statement node.
     final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);

@@ -13,6 +13,7 @@ import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.moduledef.parser.ModuleDefParser;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
@@ -133,36 +134,40 @@ public class ModuleDefFile extends OpenedFile {
   }
 
   /**
-   * Get the module name for the given URI.
+   * Get the {@link ModuleDefFile} for the given file-URI.
    *
-   * <p>Scans upwards from the given URI to find the module definition file and extracts the module
-   * name from the `module.def` file..
+   * <p>Note that this method does not find/set the parent product.def file.
    *
-   * @param uri URI to start searching from.
-   * @return Module name, or null if no module was found.
+   * @param uri
+   * @param definitionKeeper
+   * @return {@link ModuleDefFile} for the given URI, or null if no module.def file was found.
    */
   @CheckForNull
-  public static String getModuleNameForUri(final URI uri) {
+  public static ModuleDefFile getModuleDefFileForUri(
+      final URI uri, final @Nullable IDefinitionKeeper definitionKeeper) {
     if (!uri.getScheme().equals("file")) {
       return null;
     }
 
     final Path path = Path.of(uri);
-    final ModuleDefFile moduleDefFile;
-    try {
-      final Path moduleDefPath =
-          SourceFileScanner.searchFileUpwards(path, SourceFileScanner.SW_MODULE_DEF);
-      if (moduleDefPath == null) {
-        return null;
-      }
+    final Path moduleDefPath =
+        SourceFileScanner.searchFileUpwards(path, SourceFileScanner.SW_MODULE_DEF);
+    if (moduleDefPath == null) {
+      return null;
+    }
 
-      moduleDefFile = new ModuleDefFile(moduleDefPath, null, null);
+    final ModuleDefFile moduleDefFile;
+    final IDefinitionKeeper defKeeper =
+        definitionKeeper != null
+            ? definitionKeeper
+            : new DefinitionKeeper(false); // Use empty definition keeper.
+    try {
+      moduleDefFile = new ModuleDefFile(moduleDefPath, defKeeper, null);
     } catch (final IOException exception) {
       throw new IllegalStateException(exception);
     }
 
-    final ModuleDefinition moduleDefinition = moduleDefFile.getModuleDefinition();
-    return moduleDefinition.getName();
+    return moduleDefFile;
   }
 
   @Override
