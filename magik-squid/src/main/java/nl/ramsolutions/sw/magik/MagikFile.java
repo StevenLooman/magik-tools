@@ -170,6 +170,9 @@ public class MagikFile extends OpenedFile {
   /**
    * Get the {@link ModuleDefFile} for this file.
    *
+   * <p>Note that this method caches the {@link ModuleDefFile}. If in the meantime the file contents
+   * change, the cached {@link ModuleDefFile} may become stale.
+   *
    * @return {@link ModuleDefFile} for this file.
    */
   @CheckForNull
@@ -189,6 +192,9 @@ public class MagikFile extends OpenedFile {
 
   /**
    * Get the {@link ProductDefFile} for this file.
+   *
+   * <p>Note that this method caches the {@link ProductDefFile}. If in the meantime the file
+   * contents change, the cached {@link ProductDefFile} may become stale.
    *
    * @return {@link ProductDefFile} for this file.
    */
