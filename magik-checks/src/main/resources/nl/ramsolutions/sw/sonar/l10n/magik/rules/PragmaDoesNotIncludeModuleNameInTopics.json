@@ -1,5 +1,5 @@
 {
-  "title": "Pragma does not include mandatory topic",
+  "title": "Pragma does not include module name in topics",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
@@ -10,6 +10,6 @@
     "convention"
   ],
   "defaultSeverity": "Minor",
-  "ruleSpecification": "PragmaDoesNotIncludeMandatoryTopic",
-  "sqKey": "pragma-does-not-include-mandatory-topic"
+  "ruleSpecification": "PragmaDoesNotIncludeModuleNameInTopics",
+  "sqKey": "pragma-does-not-include-module-name-in-topics"
 }
