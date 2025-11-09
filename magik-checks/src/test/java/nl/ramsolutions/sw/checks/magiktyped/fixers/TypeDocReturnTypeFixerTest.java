@@ -18,11 +18,12 @@ class TypeDocReturnTypeFixerTest {
 
   private static final String NEWLINE = System.lineSeparator();
 
-  private List<CodeAction> getCodeActions(final String code, final Range range) {
+  private List<CodeAction> getCodeActions(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedFile magikFile =
         new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
     final TypeDocReturnTypeFixer fixer = new TypeDocReturnTypeFixer();
+    final Range range = new Range(new Position(0, 0), new Position(Integer.MAX_VALUE, 0));
     return fixer.provideCodeActions(magikFile, range);
   }
 
@@ -34,12 +35,9 @@ class TypeDocReturnTypeFixerTest {
           _return 1
         _endmethod
         """;
-    final Range range = new Range(new Position(0, 0), new Position(3, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
-    assertThat(codeactions).hasSize(1);
-    final CodeAction codeAction = codeactions.get(0);
-    assertThat(codeAction)
-        .isEqualTo(
+    final List<CodeAction> codeActions = this.getCodeActions(code);
+    assertThat(codeActions)
+        .containsOnly(
             new CodeAction(
                 "Add @return type sw:integer",
                 new TextEdit(
@@ -55,12 +53,9 @@ class TypeDocReturnTypeFixerTest {
           ## @return {sw:integer} Test
         _endmethod
         """;
-    final Range range = new Range(new Position(0, 0), new Position(3, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
-    assertThat(codeactions).hasSize(1);
-    final CodeAction codeAction = codeactions.get(0);
-    assertThat(codeAction)
-        .isEqualTo(
+    final List<CodeAction> codeActions = this.getCodeActions(code);
+    assertThat(codeActions)
+        .containsOnly(
             new CodeAction(
                 "Remove @return type",
                 new TextEdit(new Range(new Position(2, 0), new Position(3, 0)), "")));
@@ -75,12 +70,9 @@ class TypeDocReturnTypeFixerTest {
           _return 1
         _endmethod
         """;
-    final Range range = new Range(new Position(0, 0), new Position(4, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
-    assertThat(codeactions).hasSize(1);
-    final CodeAction codeAction = codeactions.get(0);
-    assertThat(codeAction)
-        .isEqualTo(
+    final List<CodeAction> codeActions = this.getCodeActions(code);
+    assertThat(codeActions)
+        .containsOnly(
             new CodeAction(
                 "Update @return type to sw:integer",
                 new TextEdit(new Range(new Position(2, 14), new Position(2, 22)), "sw:integer")));
@@ -95,8 +87,7 @@ class TypeDocReturnTypeFixerTest {
           _return 1
         _endmethod
         """;
-    final Range range = new Range(new Position(0, 0), new Position(4, 0));
-    final List<CodeAction> codeactions = this.getCodeActions(code, range);
-    assertThat(codeactions).isEmpty();
+    final List<CodeAction> codeActions = this.getCodeActions(code);
+    assertThat(codeActions).isEmpty();
   }
 }

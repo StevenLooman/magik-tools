@@ -1,0 +1,11 @@
+<p>Method return types match doc</p>
+<h2>Explanation</h2>
+<pre>
+_method example_exemplar.example_method()
+    ## Method returning an sw:integer.
+    ## @return {sw:integer} Returned value.
+    _return :symbol
+_endmethod
+$
+</pre>
+<p>This will raise an issue, because the method is documented to return an <pre>sw:integer</pre>, but actually returns a <pre>sw:symbol</pre>.</p>

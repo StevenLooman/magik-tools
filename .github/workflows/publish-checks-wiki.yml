@@ -24,7 +24,11 @@ jobs:
       - run: |
           pip install -r .github/scripts/requirements.txt
           python3 .github/scripts/generate-checks-pages.py
-      - uses: Andrew-Chen-Wang/github-wiki-action@86138cbd6328b21d759e89ab6e6dd6a139b22270
+      - uses: DavidAnson/markdownlint-cli2-action@v20
+        with:
+          globs: 'wiki/checks/*.md'
+          fix: true
+      - uses: Andrew-Chen-Wang/github-wiki-action@v5
         with:
           path: wiki
           #dry-run: true
