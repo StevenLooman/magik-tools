@@ -1,0 +1,21 @@
+<p>Pragma does not contain the product name in the topics.</p>
+<p>Given the next product.def:</p>
+<code>
+example_product layered_product
+
+description
+	Example product
+end
+</code>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_pragma(classify_level=basic, topic={something_else})
+def_slotted_exemplar(:example, {})
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_pragma(classify_level=basic, topic={something_else, example_product})
+def_slotted_exemplar(:example, {})
+$
+</pre>

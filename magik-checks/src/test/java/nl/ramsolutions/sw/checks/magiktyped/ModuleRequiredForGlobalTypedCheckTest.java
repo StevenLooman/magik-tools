@@ -3,9 +3,9 @@ package nl.ramsolutions.sw.checks.magiktyped;
 import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertThat;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collections;
-import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -30,6 +30,14 @@ class ModuleRequiredForGlobalTypedCheckTest {
         : Path.of(".").resolve(path);
   }
 
+  private void addModuleDefinitionToDefinitionKeeper(
+      final Path path, final IDefinitionKeeper definitionKeeper) throws IOException {
+    final Path fixedPath = this.getPath(path);
+    final URI fixedUri = fixedPath.toUri();
+    ModuleDefFile moduleDefFile = ModuleDefFile.getModuleDefFileForUri(fixedUri, definitionKeeper);
+    definitionKeeper.add(moduleDefFile.getModuleDefinition());
+  }
+
   @Test
   void testModuleIsRequired() throws IllegalArgumentException, IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper(true);
@@ -37,12 +45,7 @@ class ModuleRequiredForGlobalTypedCheckTest {
     final Path path =
         Path.of(
             "magik-checks/src/test/resources/test_product/modules/test_module/source/test_exemplar.magik");
-    final Path fixedPath = this.getPath(path);
-    final Path moduleDefPath =
-        SourceFileScanner.searchFileUpwards(fixedPath, SourceFileScanner.SW_MODULE_DEF);
-    final ModuleDefFile moduleDefFile = new ModuleDefFile(moduleDefPath, definitionKeeper, null);
-    final ModuleDefinition moduleDefinition = moduleDefFile.getModuleDefinition();
-    definitionKeeper.add(moduleDefinition);
+    this.addModuleDefinitionToDefinitionKeeper(path, definitionKeeper);
 
     definitionKeeper.add(
         new ModuleDefinition(
@@ -70,12 +73,7 @@ class ModuleRequiredForGlobalTypedCheckTest {
     final Path path =
         Path.of(
             "magik-checks/src/test/resources/test_product/modules/test_module/source/test_exemplar.magik");
-    final Path fixedPath = this.getPath(path);
-    final Path moduleDefPath =
-        SourceFileScanner.searchFileUpwards(fixedPath, SourceFileScanner.SW_MODULE_DEF);
-    final ModuleDefFile moduleDefFile = new ModuleDefFile(moduleDefPath, definitionKeeper, null);
-    final ModuleDefinition moduleDefinition = moduleDefFile.getModuleDefinition();
-    definitionKeeper.add(moduleDefinition);
+    this.addModuleDefinitionToDefinitionKeeper(path, definitionKeeper);
 
     definitionKeeper.add(
         new ModuleDefinition(

@@ -1,11 +1,7 @@
 package nl.ramsolutions.sw.checks.magiktyped;
 
 import com.sonar.sslr.api.AstNode;
-import com.sonar.sslr.api.RecognitionException;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,7 +9,6 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
-import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -99,24 +94,8 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
 
   @CheckForNull
   private ModuleDefinition readModuleDefinition() {
-    final URI uri = this.getMagikFile().getUri();
-    final Path path = Path.of(uri);
-    final Path moduleDefPath =
-        SourceFileScanner.searchFileUpwards(path, SourceFileScanner.SW_MODULE_DEF);
-    if (moduleDefPath == null) {
-      return null;
-    }
-
-    final ModuleDefFile moduleDefFile;
-    final IDefinitionKeeper definitionKeeper = this.getDefinitionKeeper();
-    try {
-      // TODO: Better get this from IDefinitionKeeper, instead of reading this for every file.
-      moduleDefFile = new ModuleDefFile(moduleDefPath, definitionKeeper, null);
-    } catch (final RecognitionException exception) {
-      LOGGER.warn("Unable to parse module.def");
-      return null;
-    } catch (final IOException exception) {
-      LOGGER.warn("Caught exception", exception);
+    final ModuleDefFile moduleDefFile = this.getMagikFile().getModuleDefFile();
+    if (moduleDefFile == null) {
       return null;
     }
 

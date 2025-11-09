@@ -25,6 +25,9 @@ import nl.ramsolutions.sw.checks.magik.NestingDepthCheck;
 import nl.ramsolutions.sw.checks.magik.NoSelfUseCheck;
 import nl.ramsolutions.sw.checks.magik.NoStatementAfterBodyExitCheck;
 import nl.ramsolutions.sw.checks.magik.ParameterCountCheck;
+import nl.ramsolutions.sw.checks.magik.PragmaDoesNotIncludeModuleNameInTopicsCheck;
+import nl.ramsolutions.sw.checks.magik.PragmaDoesNotIncludeProductNameInTopicsCheck;
+import nl.ramsolutions.sw.checks.magik.PragmaDoesNotIncludeTopicInTopicsCheck;
 import nl.ramsolutions.sw.checks.magik.PragmaInvalidClassifyLevelCheck;
 import nl.ramsolutions.sw.checks.magik.PragmaInvalidUsageCheck;
 import nl.ramsolutions.sw.checks.magik.ScopeCountCheck;
@@ -91,6 +94,9 @@ public final class MagikCheckList extends CheckList<MagikCheck, MagikCodeActionS
         NoSelfUseCheck.class,
         NoStatementAfterBodyExitCheck.class,
         ParameterCountCheck.class,
+        PragmaDoesNotIncludeModuleNameInTopicsCheck.class,
+        PragmaDoesNotIncludeProductNameInTopicsCheck.class,
+        PragmaDoesNotIncludeTopicInTopicsCheck.class,
         PragmaInvalidClassifyLevelCheck.class,
         PragmaInvalidUsageCheck.class,
         ScopeCountCheck.class,
