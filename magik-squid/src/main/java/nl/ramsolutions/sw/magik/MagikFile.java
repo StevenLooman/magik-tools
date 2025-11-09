@@ -28,6 +28,8 @@ import nl.ramsolutions.sw.magik.analysis.scope.ScopeBuilderVisitor;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader.Instruction;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
+import nl.ramsolutions.sw.moduledef.ModuleDefFile;
+import nl.ramsolutions.sw.productdef.ProductDefFile;
 
 /** Magik file. */
 public class MagikFile extends OpenedFile {
@@ -38,6 +40,8 @@ public class MagikFile extends OpenedFile {
   private AstNode astNode;
   private GlobalScope globalScope;
   private List<MagikDefinition> definitions;
+  private ModuleDefFile moduleDefFile;
+  private ProductDefFile productDefFile;
   private final Map<CommentInstructionReader.Instruction, Map<Integer, Map<String, String>>>
       statementInstructions = new HashMap<>();
   private final Map<CommentInstructionReader.Instruction, Map<Scope, Map<String, String>>>
@@ -161,6 +165,46 @@ public class MagikFile extends OpenedFile {
     }
 
     return Collections.unmodifiableList(this.definitions);
+  }
+
+  /**
+   * Get the {@link ModuleDefFile} for this file.
+   *
+   * @return {@link ModuleDefFile} for this file.
+   */
+  @CheckForNull
+  public synchronized ModuleDefFile getModuleDefFile() {
+    if (this.moduleDefFile == null) {
+      this.moduleDefFile = this.findModuleDefFile();
+    }
+
+    return this.moduleDefFile;
+  }
+
+  @CheckForNull
+  protected ModuleDefFile findModuleDefFile() {
+    final URI uri = this.getUri();
+    return ModuleDefFile.getModuleDefFileForUri(uri, null);
+  }
+
+  /**
+   * Get the {@link ProductDefFile} for this file.
+   *
+   * @return {@link ProductDefFile} for this file.
+   */
+  @CheckForNull
+  public synchronized ProductDefFile getProductDefFile() {
+    if (this.productDefFile == null) {
+      this.productDefFile = this.findProductDefFile();
+    }
+
+    return this.productDefFile;
+  }
+
+  @CheckForNull
+  protected ProductDefFile findProductDefFile() {
+    final URI uri = this.getUri();
+    return ProductDefFile.getProductDefFileForUri(uri, null);
   }
 
   /**

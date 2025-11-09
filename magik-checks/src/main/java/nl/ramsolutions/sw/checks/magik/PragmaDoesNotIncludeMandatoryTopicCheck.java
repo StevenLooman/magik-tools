@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.checks.magik;
 
 import com.sonar.sslr.api.AstNode;
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -73,12 +72,12 @@ public class PragmaDoesNotIncludeMandatoryTopicCheck extends MagikCheck {
   }
 
   private void checkModuleName(final AstNode node) {
-    final URI uri = node.getToken().getURI();
-    final String moduleName = ModuleDefFile.getModuleNameForUri(uri);
-    if (moduleName == null) {
+    final ModuleDefFile moduleDefFile = this.getMagikFile().getModuleDefFile();
+    if (moduleDefFile == null) {
       return;
     }
 
+    final String moduleName = moduleDefFile.getModuleDefinition().getName();
     final PragmaNodeHelper helper = new PragmaNodeHelper(node);
     final Set<String> topics = helper.getTopics();
     if (!topics.contains(moduleName)) {
@@ -88,12 +87,12 @@ public class PragmaDoesNotIncludeMandatoryTopicCheck extends MagikCheck {
   }
 
   private void checkProductName(final AstNode node) {
-    final URI uri = node.getToken().getURI();
-    final String productName = ProductDefFile.getProductNameForUri(uri);
-    if (productName == null) {
+    final ProductDefFile productDefFile = this.getMagikFile().getProductDefFile();
+    if (productDefFile == null) {
       return;
     }
 
+    final String productName = productDefFile.getProductDefinition().getName();
     final PragmaNodeHelper helper = new PragmaNodeHelper(node);
     final Set<String> topics = helper.getTopics();
     if (!topics.contains(productName)) {
