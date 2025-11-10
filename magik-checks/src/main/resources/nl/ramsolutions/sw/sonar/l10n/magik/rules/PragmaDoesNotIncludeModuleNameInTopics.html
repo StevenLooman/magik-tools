@@ -1,12 +1,12 @@
 <p>Pragma does not contain the module name in the topics.</p>
-<p>Given the next module.def:</p>
-<code>
+<p>Given the next <code>module.def</code>:</p>
+<pre>
 example_module	1
 
 description
 	Example module
 end
-</code>
+</pre>
 <h2>Non-compliant Code Example</h2>
 <pre data-diff-id="1" data-diff-type="noncompliant">
 _pragma(classify_level=basic, topic={something_else})
