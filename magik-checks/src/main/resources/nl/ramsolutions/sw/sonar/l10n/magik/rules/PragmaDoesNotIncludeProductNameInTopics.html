@@ -1,12 +1,12 @@
 <p>Pragma does not contain the product name in the topics.</p>
-<p>Given the next product.def:</p>
-<code>
+<p>Given the next <code>product.def</code>:</p>
+<pre>
 example_product layered_product
 
 description
 	Example product
 end
-</code>
+</pre>
 <h2>Non-compliant Code Example</h2>
 <pre data-diff-id="1" data-diff-type="noncompliant">
 _pragma(classify_level=basic, topic={something_else})
