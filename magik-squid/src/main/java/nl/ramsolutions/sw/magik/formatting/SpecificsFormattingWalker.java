@@ -70,14 +70,6 @@ class SpecificsFormattingWalker extends FormattingWalker {
   }
 
   @Override
-  protected void walkPostProcedureDefinition(final AstNode node) {
-    final AstNode procedureNameNode = node.getFirstChild(MagikGrammar.PROCEDURE_NAME);
-    if (procedureNameNode != null) {
-      this.ensureNoWhitespaceBeforeIfNotFirstTextOnLine(procedureNameNode);
-    }
-  }
-
-  @Override
   protected void walkPostMethodInvocation(final AstNode node) {
     // Ensure no whitespace before the `.` or `[` token.
     final List<AstNode> childNodes = node.getChildren();
