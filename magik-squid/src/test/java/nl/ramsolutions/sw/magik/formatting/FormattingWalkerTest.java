@@ -198,7 +198,7 @@ class FormattingWalkerTest {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "_proc@b(x, y, z) _endproc",
+        "_proc @b(x, y, z) _endproc",
         "_proc(x, y, z) _endproc",
       })
   void testProcDefinitionParameters(final String code) {
