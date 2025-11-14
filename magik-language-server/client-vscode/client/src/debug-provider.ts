@@ -33,7 +33,7 @@ class DebugAdapterExecutableFactory implements vscode.DebugAdapterDescriptorFact
 			return;
 		}
 		const jar = path.join(__dirname, '..', '..', 'server', 'magik-debug-adapter-' + MAGIK_TOOLS_VERSION + '.jar');
-		const javaDebuggerOptions = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,quiet=y,address=5006';
+		const javaDebuggerOptions = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,quiet=y,address=127.0.0.1:5006';
 
 		const command = javaExec.toString();
 		const args = [javaDebuggerOptions, '-jar', jar, '--debug'];
