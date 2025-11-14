@@ -55,6 +55,14 @@
     },
     {
       "type": "java",
+      "name": "Debug (Attach)-MagikSessionWrapper<magik-session-wrapper>",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5008,
+      "projectName": "magik-session-wrapper"
+    },
+    {
+      "type": "java",
       "name": "Debug (Launch)-MagikToolkit<sslr-magik-toolkit>",
       "request": "launch",
       "mainClass": "nl.ramsolutions.sw.magik.toolkit.MagikToolkit",
