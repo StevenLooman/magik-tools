@@ -1,0 +1,3 @@
+# Valid load list
+file1
+subdir/

@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
@@ -131,6 +132,18 @@ public class HoverProvider {
     final Range range = new Range(hoveredTokenNode);
     final org.eclipse.lsp4j.Range rangeLsp4j = Lsp4jConversion.rangeToLsp4j(range);
     return new Hover(contents, rangeLsp4j);
+  }
+
+  /**
+   * Provide a hover at the given position.
+   *
+   * @param loadListFile LoadList file.
+   * @param position Position in file.
+   * @return Hover at position.
+   */
+  @SuppressWarnings("java:S3776")
+  public Hover provideHover(final LoadListFile loadListFile, final Position position) {
+    return null;
   }
 
   /**

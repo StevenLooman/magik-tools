@@ -63,6 +63,7 @@ export class MagikLanguageClient implements vscode.Disposable {
 			documentSelector: [
 				{ scheme: 'file', language: 'sw-product-def' },
 				{ scheme: 'file', language: 'sw-module-def' },
+				{ scheme: 'file', language: 'sw-load-list' },
 				{ scheme: 'file', language: 'magik' },
 			],
 			synchronize: {

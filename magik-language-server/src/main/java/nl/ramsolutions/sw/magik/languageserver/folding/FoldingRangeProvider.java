@@ -1,7 +1,9 @@
 package nl.ramsolutions.sw.magik.languageserver.folding;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Collections;
 import java.util.List;
+import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
@@ -63,6 +65,16 @@ public class FoldingRangeProvider {
               return new FoldingRange(startLine, endLine);
             })
         .toList();
+  }
+
+  /**
+   * Provide folding ranges.
+   *
+   * @param loadListFile LoadList file.
+   * @return {@link FoldingRange}s.
+   */
+  public List<FoldingRange> provideFoldingRanges(final LoadListFile loadListFile) {
+    return Collections.emptyList();
   }
 
   /**

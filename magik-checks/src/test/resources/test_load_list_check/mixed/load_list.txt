@@ -1,0 +1,5 @@
+# Mixed scenario
+valid
+missing
+valid_dir/
+missing_dir/

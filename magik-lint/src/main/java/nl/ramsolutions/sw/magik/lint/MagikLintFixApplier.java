@@ -16,6 +16,7 @@ import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.CheckHolder;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.CodeActionSupplier;
+import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -130,6 +131,8 @@ public class MagikLintFixApplier {
     } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
       final IDefinitionKeeper definitionKeeper = moduleDefFile.getDefinitionKeeper();
       return new ModuleDefFile(uri, newSource, definitionKeeper, null);
+    } else if (openedFile instanceof LoadListFile) {
+      return new LoadListFile(uri, newSource);
     } else if (openedFile instanceof MagikFile) {
       return new MagikFile(uri, newSource);
     }

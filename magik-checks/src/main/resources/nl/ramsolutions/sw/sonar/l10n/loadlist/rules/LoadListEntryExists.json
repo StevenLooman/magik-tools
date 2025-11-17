@@ -1,0 +1,16 @@
+{
+  "title": "load_list.txt/patch_list.txt entry does not exist",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug",
+    "suspicious"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "LoadListEntryExists",
+  "sqKey": "load-list-entry-exists"
+}

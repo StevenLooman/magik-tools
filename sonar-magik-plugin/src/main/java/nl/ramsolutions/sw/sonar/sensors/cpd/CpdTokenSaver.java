@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.sonar.sensors.cpd;
 import com.sonar.sslr.api.Token;
 import java.util.Comparator;
 import java.util.List;
+import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
@@ -33,17 +34,6 @@ public class CpdTokenSaver {
    * Save tokens for CPD.
    *
    * @param inputFile Input file.
-   * @param magikFile Magik file.
-   */
-  public void saveCpdTokens(final InputFile inputFile, final MagikFile magikFile) {
-    final List<Token> tokens = magikFile.getTopNode().getTokens();
-    this.saveCpdTokens(inputFile, tokens);
-  }
-
-  /**
-   * Save tokens for CPD.
-   *
-   * @param inputFile Input file.
    * @param productDefFile ProductDef file.
    */
   public void saveCpdTokens(final InputFile inputFile, final ProductDefFile productDefFile) {
@@ -59,6 +49,28 @@ public class CpdTokenSaver {
    */
   public void saveCpdTokens(final InputFile inputFile, final ModuleDefFile moduleDefFile) {
     final List<Token> tokens = moduleDefFile.getTopNode().getTokens();
+    this.saveCpdTokens(inputFile, tokens);
+  }
+
+  /**
+   * Save tokens for CPD.
+   *
+   * @param inputFile Input file.
+   * @param loadListFile LoadList file.
+   */
+  public void saveCpdTokens(final InputFile inputFile, final LoadListFile loadListFile) {
+    final List<Token> tokens = loadListFile.getTopNode().getTokens();
+    this.saveCpdTokens(inputFile, tokens);
+  }
+
+  /**
+   * Save tokens for CPD.
+   *
+   * @param inputFile Input file.
+   * @param magikFile Magik file.
+   */
+  public void saveCpdTokens(final InputFile inputFile, final MagikFile magikFile) {
+    final List<Token> tokens = magikFile.getTopNode().getTokens();
     this.saveCpdTokens(inputFile, tokens);
   }
 

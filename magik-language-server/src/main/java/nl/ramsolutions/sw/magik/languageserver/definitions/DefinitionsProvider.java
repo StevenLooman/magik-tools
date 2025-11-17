@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import nl.ramsolutions.sw.IDefinition;
+import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -94,6 +95,18 @@ public class DefinitionsProvider {
     }
 
     return this.locationsForModuleName(moduleDefFile, moduleNameNode);
+  }
+
+  /**
+   * Provide definitions.
+   *
+   * @param loadListFile LoadList file.
+   * @param position Position.
+   * @return Definitions.
+   */
+  public List<Location> provideDefinitions(
+      final LoadListFile loadListFile, final Position position) {
+    return Collections.emptyList();
   }
 
   /**
