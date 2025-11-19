@@ -309,7 +309,7 @@ $`;
 	}
 
 	private expandTransmittableSelection(doc: vscode.TextDocument, position: vscode.Position) {
-		let startPosition = position;
+		let startPosition = new vscode.Position(position.line, 0);
 		while (startPosition.line > 0) {
 			const line = doc.lineAt(startPosition.line);
 			if (line.text === "$") {
