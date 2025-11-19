@@ -14,8 +14,8 @@ class LoadListSyntaxErrorCheckTest {
     final String code =
         """
         # Valid load list
-        file1.magik
-        file2.magik # inline comment
+        file1
+        file2 # inline comment
         subdir/
         """;
     assertThat(check).reportsNoIssues(code);

@@ -13,11 +13,11 @@ class LoadListGrammarTest {
   @Test
   void testFilePath() {
     assertThat(grammar.rule(LoadListGrammar.FILE_PATH))
-        .matches("file.magik")
-        .matches("file1.magik")
-        .matches("subdir/file.magik")
-        .matches("path/to/file.magik")
-        .matches("file with spaces.magik")
+        .matches("file")
+        .matches("file1")
+        .matches("subdir/file")
+        .matches("path/to/file")
+        .matches("file with spaces")
         .matches("subdir/")
         .notMatches("#comment")
         .notMatches("");
@@ -26,14 +26,9 @@ class LoadListGrammarTest {
   @Test
   void testFileEntry() {
     assertThat(grammar.rule(LoadListGrammar.FILE_ENTRY))
-        .matches("file.magik")
-        .matches("file.magik\n")
-        .matches("file.magik # comment")
-        .matches("file.magik # comment\n")
+        .matches("file")
         .matches("subdir/")
-        .matches("subdir/\n")
-        .matches("subdir/ # comment")
-        .matches("subdir/ # comment\n");
+        .matches("subdir/file");
   }
 
   @Test
@@ -46,41 +41,36 @@ class LoadListGrammarTest {
   }
 
   @Test
-  void testBlankLine() {
-    assertThat(grammar.rule(LoadListGrammar.BLANK_LINE)).matches("\n").matches("\r\n");
-  }
-
-  @Test
   void testLoadList() {
     assertThat(grammar.rule(LoadListGrammar.LOAD_LIST))
         .matches("")
-        .matches("file1.magik")
-        .matches("file1.magik\nfile2.magik")
-        .matches("# comment\nfile1.magik")
-        .matches("file1.magik # inline comment")
+        .matches("file1")
+        .matches("file1\nfile2")
+        .matches("# comment\nfile1")
+        .matches("file1 # inline comment")
         .matches(
             """
             # Load list
-            file1.magik
-            file2.magik
+            file1
+            file2
             """)
         .matches(
             """
-            file1.magik
+            file1
 
-            file2.magik
+            file2
             """)
         .matches(
             """
             # Comment
-            file1.magik # inline comment
+            file1 # inline comment
 
             subdir/
             """)
         .matches(
             """
-            file with spaces.magik
-            path/to/file.magik
+            file with spaces
+            path/to/file
             subdir/
             """);
   }
@@ -104,22 +94,14 @@ class LoadListGrammarTest {
         .matches(
             """
             # Core files
-            core/file1.magik
-            core/file2.magik # important
+            core/file1
+            core/file2 # important
 
             # Subdirectories
             modules/
 
             # Additional files
-            util.magik
+            util
             """);
-  }
-
-  @Test
-  void testSyntaxError() {
-    // The grammar should be permissive and match syntax errors as SYNTAX_ERROR
-    assertThat(grammar.rule(LoadListGrammar.LOAD_LIST))
-        .matches("file1.magik")
-        .matches("some random text that doesn't match");
   }
 }

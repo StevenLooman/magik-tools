@@ -78,7 +78,8 @@ public class LoadListEntryExistsCheck extends LoadListCheck {
 
   private void checkFileEntry(final AstNode node, final String entry, final Path path) {
     // File should exist.
-    final String fileName = path.getFileName() + ".magik";
+    final String appendExtension = entry.endsWith(".magik") ? "" : ".magik";
+    final String fileName = path.getFileName() + appendExtension;
     final Path sourceFilePath = path.resolveSibling(fileName);
     if (!Files.exists(sourceFilePath)) {
       this.addIssue(node, MESSAGE_FILE.formatted(entry));

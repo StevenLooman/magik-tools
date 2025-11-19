@@ -74,6 +74,7 @@ public class SonarMagikPlugin implements Plugin {
             .subCategory("General")
             .onQualifiers(Qualifiers.PROJECT)
             .build());
+    context.addExtension(LoadListSonarWayProfile.class);
     context.addExtension(LoadListRulesDefinition.class);
     context.addExtension(LoadListSensor.class);
   }

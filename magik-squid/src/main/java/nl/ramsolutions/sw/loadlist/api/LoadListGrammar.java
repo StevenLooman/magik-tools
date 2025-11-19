@@ -17,7 +17,6 @@ public enum LoadListGrammar implements GrammarRuleKey {
   NEWLINE,
   WHITESPACE,
   COMMENT,
-  BLANK_LINE,
 
   SYNTAX_ERROR;
 
@@ -32,19 +31,16 @@ public enum LoadListGrammar implements GrammarRuleKey {
     builder
         .rule(LOAD_LIST)
         .is(
-            builder.optional(SPACING),
-            builder.zeroOrMore(builder.firstOf(FILE_ENTRY, BLANK_LINE, SPACING, SYNTAX_ERROR)),
+            builder.zeroOrMore(builder.firstOf(FILE_ENTRY, NEWLINE, SPACING, SYNTAX_ERROR)),
             builder.token(GenericTokenType.EOF, builder.endOfInput()));
 
     builder
         .rule(SYNTAX_ERROR)
         .is(builder.regexp(".+"), builder.optional(builder.regexp("[\r\n]+")));
 
-    builder.rule(FILE_ENTRY).is(FILE_PATH, builder.optional(COMMENT), builder.optional(NEWLINE));
+    builder.rule(FILE_ENTRY).is(FILE_PATH, builder.optional(COMMENT));
 
     builder.rule(FILE_PATH).is(builder.regexp("(?!#)[^#\\r\\n]+"));
-
-    builder.rule(BLANK_LINE).is(NEWLINE);
 
     builder
         .rule(SPACING)

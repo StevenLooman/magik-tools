@@ -9,6 +9,7 @@ import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.LoadListCheck;
 import nl.ramsolutions.sw.checks.LoadListCheckList;
 import nl.ramsolutions.sw.loadlist.LoadListFile;
+import nl.ramsolutions.sw.loadlist.metrics.FileMetrics;
 import nl.ramsolutions.sw.sonar.LoadListRulesDefinition;
 import nl.ramsolutions.sw.sonar.language.LoadListLanguage;
 import nl.ramsolutions.sw.sonar.sensors.cpd.CpdTokenSaver;
@@ -25,6 +26,10 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.issue.NewIssue;
 import org.sonar.api.batch.sensor.issue.NewIssueLocation;
 import org.sonar.api.issue.NoSonarFilter;
+import org.sonar.api.measures.CoreMetrics;
+import org.sonar.api.measures.FileLinesContext;
+import org.sonar.api.measures.FileLinesContextFactory;
+import org.sonar.api.measures.Metric;
 import org.sonar.api.rule.RuleKey;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -37,6 +42,7 @@ public class LoadListSensor implements Sensor {
   private static final long SLEEP_PERIOD = 100;
 
   private final CheckFactory checkFactory;
+  private final FileLinesContextFactory fileLinesContextFactory;
   private final NoSonarFilter noSonarFilter;
 
   /**
@@ -44,8 +50,12 @@ public class LoadListSensor implements Sensor {
    *
    * @param checkFactory Factory.
    */
-  public LoadListSensor(final CheckFactory checkFactory, final NoSonarFilter noSonarFilter) {
+  public LoadListSensor(
+      final CheckFactory checkFactory,
+      final FileLinesContextFactory fileLinesContextFactory,
+      final NoSonarFilter noSonarFilter) {
     this.checkFactory = checkFactory;
+    this.fileLinesContextFactory = fileLinesContextFactory;
     this.noSonarFilter = noSonarFilter;
   }
 
@@ -100,6 +110,10 @@ public class LoadListSensor implements Sensor {
 
     final LoadListFile loadListFile = new LoadListFile(uri, fileContent);
 
+    // Save metrics.
+    LOGGER.debug("Save measures");
+    this.saveMetrics(context, inputFile, loadListFile);
+
     // Save issues.
     LOGGER.debug("Running checks");
     final Checks<LoadListCheck> checks =
@@ -127,6 +141,35 @@ public class LoadListSensor implements Sensor {
     LOGGER.debug("Saving CPD tokens");
     final CpdTokenSaver cpdTokenSaver = new CpdTokenSaver(context);
     cpdTokenSaver.saveCpdTokens(inputFile, loadListFile);
+  }
+
+  private void saveMetrics(
+      final SensorContext context, final InputFile inputFile, final LoadListFile loadListFile) {
+    final FileMetrics metrics = new FileMetrics(loadListFile, true);
+
+    // Metrics on file.
+    this.saveMetric(context, inputFile, CoreMetrics.NCLOC, metrics.linesOfEntries().size());
+    this.saveMetric(context, inputFile, CoreMetrics.COMMENT_LINES, metrics.commentLineCount());
+
+    // Metrics on lines.
+    final FileLinesContext fileLinesContext = this.fileLinesContextFactory.createFor(inputFile);
+    metrics
+        .linesOfEntries()
+        .forEach(line -> fileLinesContext.setIntValue(CoreMetrics.NCLOC_DATA_KEY, line, 1));
+    fileLinesContext.save();
+
+    // No sonar filter.
+    this.noSonarFilter.noSonarInFile(inputFile, metrics.nosonarLines());
+  }
+
+  private void saveMetric(
+      final SensorContext context,
+      final InputFile inputFile,
+      final Metric<Integer> metric,
+      final Integer value) {
+    LOGGER.debug("Saving metric, file: {}, metric: {} value: {}", inputFile, metric, value);
+
+    context.<Integer>newMeasure().withValue(value).forMetric(metric).on(inputFile).save();
   }
 
   private void saveIssues(
