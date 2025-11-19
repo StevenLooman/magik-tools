@@ -14,11 +14,11 @@ export class MagikEditorCommandsProvider implements vscode.Disposable {
 	}
 
 	private registerCommands() {
-		const transmitFileCommand = vscode.commands.registerTextEditorCommand(
+		const traceStatementCommand = vscode.commands.registerTextEditorCommand(
 			"magik.traceStatement",
 			() => this.traceStatement()
 		);
-		this.context.subscriptions.push(transmitFileCommand);
+		this.context.subscriptions.push(traceStatementCommand);
 	}
 
 	private traceStatement() {
