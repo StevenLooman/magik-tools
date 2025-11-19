@@ -138,8 +138,8 @@ public class ModuleDefFile extends OpenedFile {
    *
    * <p>Note that this method does not find/set the parent product.def file.
    *
-   * @param uri
-   * @param definitionKeeper
+   * @param uri URI.
+   * @param definitionKeeper DefinitionKeeper.
    * @return {@link ModuleDefFile} for the given URI, or null if no module.def file was found.
    */
   @CheckForNull

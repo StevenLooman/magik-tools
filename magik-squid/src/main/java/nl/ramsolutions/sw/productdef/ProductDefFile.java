@@ -130,8 +130,8 @@ public class ProductDefFile extends OpenedFile {
    *
    * <p>Note that this method does not find/set the parent product.def file.
    *
-   * @param uri
-   * @param definitionKeeper
+   * @param uri URI.
+   * @param definitionKeeper DefinitionKeeper.
    * @return {@link ProductDefFile} for the given URI, or null if no product.def file was found.
    */
   @CheckForNull
