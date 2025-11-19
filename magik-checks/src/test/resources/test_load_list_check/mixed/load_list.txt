@@ -1,0 +1,5 @@
+# Mixed scenario
+valid.magik
+missing
+valid_dir/
+missing_dir/

@@ -1,0 +1,18 @@
+<p>load_list.txt or patch_list.txt contains a syntax error.</p>
+<h2>Description</h2>
+<p>Load list files should contain one file path per line, with optional comments starting with #.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+# Load list example
+file1.magik
+file2.magik
+invalid syntax here that doesn't parse
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+# Load list example
+file1.magik
+file2.magik
+# This is a valid comment
+subdir/file3.magik
+</pre>

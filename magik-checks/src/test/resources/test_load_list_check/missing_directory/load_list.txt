@@ -1,0 +1,2 @@
+# Load list with missing directory
+missing_dir/

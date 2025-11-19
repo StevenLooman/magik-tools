@@ -166,6 +166,8 @@ public class CheckHolder {
       return ProductDefCheckList.PROFILE_DIR;
     } else if (this.checkClass.getGenericSuperclass().equals(ModuleDefCheck.class)) {
       return ModuleDefCheckList.PROFILE_DIR;
+    } else if (this.checkClass.getGenericSuperclass().equals(LoadListCheck.class)) {
+      return LoadListCheckList.PROFILE_DIR;
     } else if (this.checkClass.getGenericSuperclass().equals(MagikCheck.class)) {
       return MagikCheckList.PROFILE_DIR;
     } else if (this.checkClass.getGenericSuperclass().equals(MagikTypedCheck.class)) {

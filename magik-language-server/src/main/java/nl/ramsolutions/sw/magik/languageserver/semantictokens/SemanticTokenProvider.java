@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
@@ -51,28 +52,36 @@ public class SemanticTokenProvider {
         List.of(
             new DocumentFilter("sw-product-def", "file", null),
             new DocumentFilter("sw-module-def", "file", null),
+            new DocumentFilter("sw-load-list", "file", null),
             new DocumentFilter("magik", "file", null)));
     capabilities.setSemanticTokensProvider(semanticTokensProvider);
   }
 
   /**
-   * Build SemanticTokens.
+   * Build {@link SemanticTokens}.
    *
-   * @param magikFile Magik file.
-   * @return SemanticTokens.
+   * @param productDefFile ProductDef file.
+   * @return Semantic tokens for file.
    * @throws IOException -
    */
-  public SemanticTokens provideSemanticTokensFull(final MagikTypedFile magikFile) {
-    LOGGER.debug("Providing semantic tokens full, file: {}", magikFile);
+  public SemanticTokens provideSemanticTokensFull(final ProductDefFile productDefFile) {
+    LOGGER.debug("Providing semantic tokens full, file: {}", productDefFile);
 
-    final MagikSemanticTokenWalker walker = new MagikSemanticTokenWalker(magikFile);
-    final AstNode topNode = magikFile.getTopNode();
+    final ProductDefSemanticTokenWalker walker = new ProductDefSemanticTokenWalker();
+    final AstNode topNode = productDefFile.getTopNode();
     walker.walkAst(topNode);
 
     final List<SemanticToken> walkedSemanticTokens = walker.getSemanticTokens();
     return this.buildSemanticTokens(walkedSemanticTokens);
   }
 
+  /**
+   * Build {@link SemanticTokens}.
+   *
+   * @param moduleDefFile ModuleDef file.
+   * @return Semantic tokens for file.
+   * @throws IOException -
+   */
   public SemanticTokens provideSemanticTokensFull(final ModuleDefFile moduleDefFile) {
     LOGGER.debug("Providing semantic tokens full, file: {}", moduleDefFile);
 
@@ -84,11 +93,36 @@ public class SemanticTokenProvider {
     return this.buildSemanticTokens(walkedSemanticTokens);
   }
 
-  public SemanticTokens provideSemanticTokensFull(final ProductDefFile productDefFile) {
-    LOGGER.debug("Providing semantic tokens full, file: {}", productDefFile);
+  /**
+   * Build {@link SemanticTokens}.
+   *
+   * @param loadListFile LoadList file.
+   * @return Semantic tokens for file.
+   * @throws IOException -
+   */
+  public SemanticTokens provideSemanticTokensFull(final LoadListFile loadListFile) {
+    LOGGER.debug("Providing semantic tokens full, file: {}", loadListFile);
 
-    final ProductDefSemanticTokenWalker walker = new ProductDefSemanticTokenWalker();
-    final AstNode topNode = productDefFile.getTopNode();
+    final LoadListSemanticTokenWalker walker = new LoadListSemanticTokenWalker();
+    final AstNode topNode = loadListFile.getTopNode();
+    walker.walkAst(topNode);
+
+    final List<SemanticToken> walkedSemanticTokens = walker.getSemanticTokens();
+    return this.buildSemanticTokens(walkedSemanticTokens);
+  }
+
+  /**
+   * Build {@link SemanticTokens}.
+   *
+   * @param magikFile Magik file.
+   * @return Semantic tokens for file.
+   * @throws IOException -
+   */
+  public SemanticTokens provideSemanticTokensFull(final MagikTypedFile magikFile) {
+    LOGGER.debug("Providing semantic tokens full, file: {}", magikFile);
+
+    final MagikSemanticTokenWalker walker = new MagikSemanticTokenWalker(magikFile);
+    final AstNode topNode = magikFile.getTopNode();
     walker.walkAst(topNode);
 
     final List<SemanticToken> walkedSemanticTokens = walker.getSemanticTokens();

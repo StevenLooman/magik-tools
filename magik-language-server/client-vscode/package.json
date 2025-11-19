@@ -34,27 +34,6 @@
   "contributes": {
     "languages": [
       {
-        "id": "magik",
-        "aliases": [
-          "Magik"
-        ],
-        "extensions": [
-          ".magik"
-        ],
-        "configuration": "./languages/magik-language-configuration.json"
-      },
-      {
-        "id": "sw-load-list",
-        "aliases": [
-          "Smallworld Load List"
-        ],
-        "filenames": [
-          "load_list.txt",
-          "patch_list.txt"
-        ],
-        "configuration": "./languages/load-list-language-configuration.json"
-      },
-      {
         "id": "sw-product-def",
         "aliases": [
           "Smallworld Product definition"
@@ -73,6 +52,27 @@
           "module.def"
         ],
         "configuration": "./languages/sw-module-def-language-configuration.json"
+      },
+      {
+        "id": "sw-load-list",
+        "aliases": [
+          "Smallworld Load List"
+        ],
+        "filenames": [
+          "load_list.txt",
+          "patch_list.txt"
+        ],
+        "configuration": "./languages/load-list-language-configuration.json"
+      },
+      {
+        "id": "magik",
+        "aliases": [
+          "Magik"
+        ],
+        "extensions": [
+          ".magik"
+        ],
+        "configuration": "./languages/magik-language-configuration.json"
       },
       {
         "id": "message",

@@ -1,10 +1,13 @@
 package nl.ramsolutions.sw.magik.languageserver.definitions;
 
 import com.sonar.sslr.api.AstNode;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import nl.ramsolutions.sw.IDefinition;
+import nl.ramsolutions.sw.loadlist.LoadListFile;
+import nl.ramsolutions.sw.loadlist.api.LoadListGrammar;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -79,14 +82,14 @@ public class DefinitionsProvider {
   public List<Location> provideDefinitions(
       final ModuleDefFile moduleDefFile, final Position position) {
     final AstNode node = moduleDefFile.getTopNode();
-    final AstNode hoveredTokenNode = AstQuery.nodeAt(node, position);
-    if (hoveredTokenNode == null) {
+    final AstNode positionTokenNode = AstQuery.nodeAt(node, position);
+    if (positionTokenNode == null) {
       return Collections.emptyList();
     }
 
     final AstNode moduleNameNode =
         AstQuery.getParentFromChain(
-            hoveredTokenNode,
+            positionTokenNode,
             ModuleDefinitionGrammar.IDENTIFIER,
             ModuleDefinitionGrammar.MODULE_NAME);
     if (moduleNameNode == null) {
@@ -94,6 +97,24 @@ public class DefinitionsProvider {
     }
 
     return this.locationsForModuleName(moduleDefFile, moduleNameNode);
+  }
+
+  /**
+   * Provide definitions.
+   *
+   * @param loadListFile LoadList file.
+   * @param position Position.
+   * @return Definitions.
+   */
+  public List<Location> provideDefinitions(
+      final LoadListFile loadListFile, final Position position) {
+    final AstNode node = loadListFile.getTopNode();
+    final AstNode positionNode = AstQuery.nodeAt(node, position, LoadListGrammar.FILE_PATH);
+    if (positionNode == null) {
+      return Collections.emptyList();
+    }
+
+    return this.locationsForFileEntry(loadListFile, positionNode);
   }
 
   /**
@@ -107,13 +128,13 @@ public class DefinitionsProvider {
       final MagikTypedFile magikFile, final Position position) {
     // Should always be on an identifier.
     final AstNode node = magikFile.getTopNode();
-    final AstNode currentNode = AstQuery.nodeAt(node, position, MagikGrammar.IDENTIFIER);
-    if (currentNode == null) {
+    final AstNode positionNode = AstQuery.nodeAt(node, position, MagikGrammar.IDENTIFIER);
+    if (positionNode == null) {
       return Collections.emptyList();
     }
 
     final AstNode wantedNode =
-        currentNode.getFirstAncestor(
+        positionNode.getFirstAncestor(
             MagikGrammar.METHOD_INVOCATION,
             MagikGrammar.METHOD_DEFINITION,
             MagikGrammar.ATOM,
@@ -121,12 +142,12 @@ public class DefinitionsProvider {
     if (wantedNode == null) {
       return Collections.emptyList();
     } else if (wantedNode.is(MagikGrammar.METHOD_INVOCATION)) {
-      return this.locationsForMethodInvocation(magikFile, currentNode);
+      return this.locationsForMethodInvocation(magikFile, positionNode);
     } else if (wantedNode.is(MagikGrammar.ATOM)
         && wantedNode.getFirstChild().is(MagikGrammar.IDENTIFIER)) {
-      return this.locationsForAtom(magikFile, currentNode);
+      return this.locationsForAtom(magikFile, positionNode);
     } else if (wantedNode.is(MagikGrammar.CONDITION_NAME)) {
-      return this.locationsForCondition(magikFile, currentNode);
+      return this.locationsForCondition(magikFile, positionNode);
     }
 
     // TODO: Slot definitions.
@@ -215,5 +236,20 @@ public class DefinitionsProvider {
         .map(ModuleDefinition::getLocation)
         .filter(Objects::nonNull)
         .toList();
+  }
+
+  private List<Location> locationsForFileEntry(
+      final LoadListFile loadListFile, final AstNode fileEntryNode) {
+    final String fileEntryValue = fileEntryNode.getTokenValue().strip();
+    if (fileEntryValue.endsWith("/")) {
+      // Don't do anything for directory entries.
+      return Collections.emptyList();
+    }
+
+    final URI uri = loadListFile.getUri();
+    final String appendExtension = fileEntryValue.endsWith(".magik") ? "" : ".magik";
+    final URI fileEntryUri = uri.resolve(fileEntryValue + appendExtension);
+    final Location location = new Location(fileEntryUri);
+    return List.of(location);
   }
 }
