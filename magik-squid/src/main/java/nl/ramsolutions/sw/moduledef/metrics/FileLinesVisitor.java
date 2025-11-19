@@ -8,17 +8,12 @@ import com.sonar.sslr.api.Trivia;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.moduledef.ModuleDefVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Visitor that computes NCLOC_DATA_KEY and COMMENT_LINES_DATA_KEY metrics used by the DevCockpit.
  */
 public class FileLinesVisitor extends ModuleDefVisitor {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationLocator.class);
 
   private final boolean ignoreHeaderComments;
   private boolean seenFirstToken;
