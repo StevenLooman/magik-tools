@@ -59,6 +59,12 @@ class ConditionalBodyHandler extends LocalTypeReasonerHandler {
   @SuppressWarnings("checkstyle:NestedIfDepth")
   void handleConditionalExpression(final AstNode node) {
     final AstNode parentNode = node.getParent();
+    final AstNode syntaxErrorNode = parentNode.getFirstDescendant(MagikGrammar.SYNTAX_ERROR);
+    if (syntaxErrorNode != null) {
+      // Handle SYNTAX_ERROR nodes gracefully.
+      return;
+    }
+
     final AstNode bodyNode;
     if (parentNode.is(MagikGrammar.IF, MagikGrammar.ELIF)) {
       bodyNode = node.getNextSibling().getNextSibling();

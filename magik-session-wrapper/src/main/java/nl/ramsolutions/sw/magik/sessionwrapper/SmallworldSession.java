@@ -66,7 +66,12 @@ class SmallworldSession {
     final CharBuffer charBuffer = CharBuffer.allocate(1024);
     try {
       while (this.process.isAlive()) {
-        sessionReader.read(charBuffer);
+        final int charsRead = sessionReader.read(charBuffer);
+        if (charsRead == -1) {
+          // End of stream reached
+          break;
+        }
+
         charBuffer.flip();
 
         final String sessionOutput = charBuffer.toString();

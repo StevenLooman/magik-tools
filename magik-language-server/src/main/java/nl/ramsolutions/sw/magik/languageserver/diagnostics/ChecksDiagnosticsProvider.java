@@ -70,8 +70,8 @@ public class ChecksDiagnosticsProvider {
               final Range range = location.getRange();
               final String message = issue.message();
               final DiagnosticSeverity severity = this.getCheckSeverity(holder);
+              final String diagnosticSource = "mlint";
               final String checkKeyKebabCase = holder.getCheckKeyKebabCase();
-              final String diagnosticSource = "mlint (%s)".formatted(checkKeyKebabCase);
               return new Diagnostic(range, message, severity, diagnosticSource, checkKeyKebabCase);
             })
         .toList();

@@ -153,7 +153,7 @@ function getCommandLine(runAliasPath: fs.PathLike, aliasesPath: fs.PathLike, ent
 
 		const javaDebuggerOptions = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,quiet=y,address=127.0.0.1:5008';
 		const jar = path.join(__dirname, '..', '..', 'server', 'magik-session-wrapper-' + MAGIK_TOOLS_VERSION + '.jar');
-		commandLine = `${javaExec} ${javaDebuggerOptions} -jar ${jar} --debug -- ${commandLine}`;
+		commandLine = `${javaExec} ${javaDebuggerOptions} -jar ${jar} --debug --do-not-wait-for-prompt -- ${commandLine}`;
 	}
 
 	return commandLine;
