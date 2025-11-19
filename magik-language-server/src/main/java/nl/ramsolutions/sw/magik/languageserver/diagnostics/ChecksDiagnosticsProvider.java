@@ -70,8 +70,12 @@ public class ChecksDiagnosticsProvider {
               final Range range = location.getRange();
               final String message = issue.message();
               final DiagnosticSeverity severity = this.getCheckSeverity(holder);
-              final String checkKeyKebabCase = holder.getCheckKeyKebabCase();
               final String diagnosticSource = "mlint";
+              final String checkKeyKebabCase = holder.getCheckKeyKebabCase();
+<<<<<<< HEAD
+              final String diagnosticSource = "mlint";
+=======
+>>>>>>> c560c057 (Prevent duplicate issue naming (#372))
               return new Diagnostic(range, message, severity, diagnosticSource, checkKeyKebabCase);
             })
         .toList();
