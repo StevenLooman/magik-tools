@@ -108,6 +108,12 @@ def generate_markdown_pages():
                 "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/productdef/rules"
             ),
         ),
+        "Load list checks": (
+            Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/loadlist"),
+            Path(
+                "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/loadlist/rules"
+            ),
+        ),
     }
 
     for check_type, (java_folder, sonar_folder) in CHECK_TYPES.items():
