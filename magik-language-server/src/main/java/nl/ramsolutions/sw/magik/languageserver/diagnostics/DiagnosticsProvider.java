@@ -21,13 +21,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Provides diagnostics. */
-public class MagikDiagnosticsProvider {
+public class DiagnosticsProvider {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MagikDiagnosticsProvider.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsProvider.class);
 
   private final MagikToolsProperties properties;
 
-  public MagikDiagnosticsProvider(final MagikToolsProperties properties) {
+  public DiagnosticsProvider(final MagikToolsProperties properties) {
     this.properties = properties;
   }
 
@@ -45,7 +45,7 @@ public class MagikDiagnosticsProvider {
     final List<Diagnostic> diagnostics = new ArrayList<>();
 
     final List<Diagnostic> diagnosticsChecks =
-        MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(
+        DiagnosticsProvider.getDiagnosticsFromFileAndChecks(
             productDefFile, ProductDefCheckList.INSTANCE.getBaseChecks());
     diagnostics.addAll(diagnosticsChecks);
 
@@ -62,7 +62,7 @@ public class MagikDiagnosticsProvider {
     final List<Diagnostic> diagnostics = new ArrayList<>();
 
     final List<Diagnostic> diagnosticsChecks =
-        MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(
+        DiagnosticsProvider.getDiagnosticsFromFileAndChecks(
             moduleDefFile, ModuleDefCheckList.INSTANCE.getBaseChecks());
     diagnostics.addAll(diagnosticsChecks);
 
@@ -81,7 +81,7 @@ public class MagikDiagnosticsProvider {
     // Magik diagnostics.
     final List<Class<? extends Check>> magikChecks = MagikCheckList.INSTANCE.getBaseChecks();
     final List<Diagnostic> diagnosticsChecks =
-        MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(magikFile, magikChecks);
+        DiagnosticsProvider.getDiagnosticsFromFileAndChecks(magikFile, magikChecks);
     diagnostics.addAll(diagnosticsChecks);
 
     // Magik typed diagnostics.
@@ -90,7 +90,7 @@ public class MagikDiagnosticsProvider {
     if (Boolean.TRUE.equals(typingEnableChecks)) {
       final List<Class<? extends Check>> typedChecks = MagikTypedCheckList.INSTANCE.getBaseChecks();
       final List<Diagnostic> diagnosticsTypedChecks =
-          MagikDiagnosticsProvider.getDiagnosticsFromFileAndChecks(magikFile, typedChecks);
+          DiagnosticsProvider.getDiagnosticsFromFileAndChecks(magikFile, typedChecks);
       diagnostics.addAll(diagnosticsTypedChecks);
     }
 
