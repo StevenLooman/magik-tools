@@ -57,7 +57,7 @@
       "type": "java",
       "name": "Debug (Attach)-MagikSessionWrapper<magik-session-wrapper>",
       "request": "attach",
-      "hostName": "localhost",
+      "hostName": "127.0.0.1",
       "port": 5008,
       "projectName": "magik-session-wrapper"
     },
@@ -72,7 +72,7 @@
       "type": "java",
       "name": "Debug (Attach)-LanguageServer<magik-language-server>",
       "request": "attach",
-      "hostName": "localhost",
+      "hostName": "127.0.0.1",
       "port": 5005,
       "projectName": "magik-language-server"
     },
@@ -80,7 +80,7 @@
       "type": "java",
       "name": "Debug (Attach)-DebugAdapter<magik-debug-adapter>",
       "request": "attach",
-      "hostName": "localhost",
+      "hostName": "127.0.0.1",
       "port": 5006,
       "projectName": "magik-debug-adapter"
     },
