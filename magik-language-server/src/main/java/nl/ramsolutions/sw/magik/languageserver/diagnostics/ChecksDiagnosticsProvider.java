@@ -72,10 +72,6 @@ public class ChecksDiagnosticsProvider {
               final DiagnosticSeverity severity = this.getCheckSeverity(holder);
               final String diagnosticSource = "mlint";
               final String checkKeyKebabCase = holder.getCheckKeyKebabCase();
-<<<<<<< HEAD
-              final String diagnosticSource = "mlint";
-=======
->>>>>>> c560c057 (Prevent duplicate issue naming (#372))
               return new Diagnostic(range, message, severity, diagnosticSource, checkKeyKebabCase);
             })
         .toList();
