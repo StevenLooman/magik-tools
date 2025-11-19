@@ -1,0 +1,16 @@
+{
+  "title": "load_list.txt/patch_list.txt contains a syntax error",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug",
+    "suspicious"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "LoadListSyntaxError",
+  "sqKey": "load-list-syntax-error"
+}

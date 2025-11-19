@@ -7,10 +7,12 @@ import java.util.List;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.checks.Check;
+import nl.ramsolutions.sw.checks.LoadListCheckList;
 import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.checks.MagikTypedCheckList;
 import nl.ramsolutions.sw.checks.ModuleDefCheckList;
 import nl.ramsolutions.sw.checks.ProductDefCheckList;
+import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.languageserver.MagikLanguageServerSettings;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
@@ -64,6 +66,23 @@ public class DiagnosticsProvider {
     final List<Diagnostic> diagnosticsChecks =
         DiagnosticsProvider.getDiagnosticsFromFileAndChecks(
             moduleDefFile, ModuleDefCheckList.INSTANCE.getBaseChecks());
+    diagnostics.addAll(diagnosticsChecks);
+
+    return diagnostics;
+  }
+
+  /**
+   * Provides diagnostics for a {@link LoadListFile}.
+   *
+   * @param loadListFile Load list file.
+   * @return Diagnostics.
+   */
+  public List<Diagnostic> provideDiagnostics(final LoadListFile loadListFile) {
+    final List<Diagnostic> diagnostics = new ArrayList<>();
+
+    final List<Diagnostic> diagnosticsChecks =
+        DiagnosticsProvider.getDiagnosticsFromFileAndChecks(
+            loadListFile, LoadListCheckList.INSTANCE.getBaseChecks());
     diagnostics.addAll(diagnosticsChecks);
 
     return diagnostics;

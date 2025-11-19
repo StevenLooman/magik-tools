@@ -12,8 +12,10 @@ import org.slf4j.LoggerFactory;
 /** Source file scanner. */
 public class SourceFileScanner {
 
-  public static final String SW_MODULE_DEF = "module.def";
   public static final String SW_PRODUCT_DEF = "product.def";
+  public static final String SW_MODULE_DEF = "module.def";
+  public static final String SW_LOAD_LIST = "load_list.txt";
+  public static final String SW_PATCH_LIST = "patch_list.txt";
 
   public static final Predicate<Path> MAGIK_FILE_FILTER =
       path -> {
@@ -23,11 +25,19 @@ public class SourceFileScanner {
             && fileName.endsWith(".magik");
       };
   public static final Predicate<Path> MODULE_DEF_FILE_FILTER =
-      path -> path.getFileName().toString().equalsIgnoreCase("module.def");
+      path -> path.getFileName().toString().equalsIgnoreCase(SW_MODULE_DEF);
   public static final Predicate<Path> PRODUCT_DEF_FILE_FILTER =
-      path -> path.getFileName().toString().equalsIgnoreCase("product.def");
+      path -> path.getFileName().toString().equalsIgnoreCase(SW_PRODUCT_DEF);
+  public static final Predicate<Path> LOAD_LIST_FILE_FILTER =
+      path -> {
+        final String fileName = path.getFileName().toString().toLowerCase();
+        return fileName.equals(SW_LOAD_LIST) || fileName.equals(SW_PATCH_LIST);
+      };
   public static final Predicate<Path> ANY_MAGIK_RELATED_FILE_FILTER =
-      MAGIK_FILE_FILTER.or(MODULE_DEF_FILE_FILTER).or(PRODUCT_DEF_FILE_FILTER);
+      MAGIK_FILE_FILTER
+          .or(MODULE_DEF_FILE_FILTER)
+          .or(PRODUCT_DEF_FILE_FILTER)
+          .or(LOAD_LIST_FILE_FILTER);
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SourceFileScanner.class);
   private static final long MAX_SIZE = 1024L * 1024L * 10L; // 10 MB

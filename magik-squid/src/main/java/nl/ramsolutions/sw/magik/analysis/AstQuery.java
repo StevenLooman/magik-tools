@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.loadlist.api.LoadListGrammar;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -539,12 +540,14 @@ public final class AstQuery {
   private static boolean isGrammarNode(final AstNode node) {
     return node.is(ProductDefinitionGrammar.values())
         || node.is(ModuleDefinitionGrammar.values())
+        || node.is(LoadListGrammar.values())
         || node.is(MagikGrammar.values());
   }
 
   private static boolean isTokenNode(final AstNode node) {
     return node.isNot(ProductDefinitionGrammar.values())
         && node.isNot(ModuleDefinitionGrammar.values())
+        && node.isNot(LoadListGrammar.values())
         && node.isNot(MagikGrammar.values());
   }
 }

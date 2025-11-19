@@ -16,9 +16,11 @@ import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.CheckList;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
+import nl.ramsolutions.sw.checks.LoadListCheckList;
 import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.checks.ModuleDefCheckList;
 import nl.ramsolutions.sw.checks.ProductDefCheckList;
+import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -59,6 +61,8 @@ final class Utils {
       } else if (SourceFileScanner.MODULE_DEF_FILE_FILTER.test(path)) {
         final IDefinitionKeeper definitionKeeper = new DefinitionKeeper(false);
         return new ModuleDefFile(fileProperties, uri, fileContents, definitionKeeper, null);
+      } else if (SourceFileScanner.LOAD_LIST_FILE_FILTER.test(path)) {
+        return new LoadListFile(fileProperties, uri, fileContents);
       } else {
         throw new IllegalStateException("Unsupported file type: " + path);
       }
@@ -92,6 +96,8 @@ final class Utils {
       return ProductDefCheckList.INSTANCE;
     } else if (openedFile instanceof ModuleDefFile) {
       return ModuleDefCheckList.INSTANCE;
+    } else if (openedFile instanceof LoadListFile) {
+      return LoadListCheckList.INSTANCE;
     }
 
     throw new IllegalStateException("Unsupported file type: " + openedFile.getClass());

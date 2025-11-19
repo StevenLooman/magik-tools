@@ -1,7 +1,9 @@
 package nl.ramsolutions.sw.sonar;
 
+import nl.ramsolutions.sw.sonar.language.LoadListLanguage;
 import nl.ramsolutions.sw.sonar.language.MagikLanguage;
 import nl.ramsolutions.sw.sonar.language.ProductModuleDefLanguage;
+import nl.ramsolutions.sw.sonar.sensors.LoadListSensor;
 import nl.ramsolutions.sw.sonar.sensors.MagikSensor;
 import nl.ramsolutions.sw.sonar.sensors.ModuleDefSensor;
 import nl.ramsolutions.sw.sonar.sensors.ProductDefSensor;
@@ -16,6 +18,7 @@ public class SonarMagikPlugin implements Plugin {
   public void define(final Context context) {
     this.defineMagik(context);
     this.defineProductModuleDef(context);
+    this.defineLoadList(context);
   }
 
   private void defineMagik(final Context context) {
@@ -55,5 +58,24 @@ public class SonarMagikPlugin implements Plugin {
     context.addExtension(ProductModuleDefSonarWayProfile.class);
     context.addExtension(ProductDefSensor.class);
     context.addExtension(ModuleDefSensor.class);
+  }
+
+  private void defineLoadList(final Context context) {
+    context.addExtension(LoadListLanguage.class);
+    context.addExtension(
+        PropertyDefinition.builder(LoadListLanguage.FILE_SUFFIXES_KEY)
+            .defaultValue(LoadListLanguage.DEFAULT_FILE_SUFFIXES)
+            .category(LoadListLanguage.LOAD_LIST_CATEGORY)
+            .name("File suffixes")
+            .multiValues(true)
+            .description(
+                "List of suffixes for load_list.txt and patch_list.txt files to analyze. "
+                    + "To not filter, leave the list empty.")
+            .subCategory("General")
+            .onQualifiers(Qualifiers.PROJECT)
+            .build());
+    context.addExtension(LoadListSonarWayProfile.class);
+    context.addExtension(LoadListRulesDefinition.class);
+    context.addExtension(LoadListSensor.class);
   }
 }

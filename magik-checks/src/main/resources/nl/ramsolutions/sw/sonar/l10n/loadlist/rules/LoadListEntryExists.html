@@ -1,0 +1,23 @@
+<p>load_list.txt or patch_list.txt contains an entry that does not exist on the filesystem.</p>
+<h2>Description</h2>
+<p>All entries in a load list should reference existing files or directories. File entries should point to existing .magik files, and directory entries (ending with /) should point to existing directories that contain a load_list.txt file.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+# Load list with non-existent entries
+file1.magik
+missing_file.magik
+nonexistent_subdir/
+subdir_without_loadlist/
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+# Load list with valid entries
+file1.magik
+file2.magik
+subdir/
+</pre>
+<h2>Notes</h2>
+<ul>
+<li>File entries should reference existing .magik files relative to the load_list.txt directory</li>
+<li>Directory entries (ending with /) should reference existing directories that contain a load_list.txt file</li>
+</ul>

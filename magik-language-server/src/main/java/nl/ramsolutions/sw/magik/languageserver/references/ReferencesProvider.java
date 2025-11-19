@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -108,6 +109,19 @@ public class ReferencesProvider {
     final IDefinitionKeeper definitionKeeper = moduleDefFile.getDefinitionKeeper();
     final String moduleName = moduleNameNode.getTokenValue();
     return this.referencesToModuleName(definitionKeeper, moduleName);
+  }
+
+  /**
+   * Provide references.
+   *
+   * @param loadListFile LoadList file.
+   * @param position Position in file.
+   * @return Locations for references.
+   */
+  @SuppressWarnings("checkstyle:NestedIfDepth")
+  public List<Location> provideReferences(
+      final LoadListFile loadListFile, final Position position) {
+    return Collections.emptyList();
   }
 
   /**

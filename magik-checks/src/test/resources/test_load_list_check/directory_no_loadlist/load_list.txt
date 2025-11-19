@@ -1,0 +1,2 @@
+# Load list with directory that has no load_list.txt
+empty_subdir/
