@@ -19,7 +19,7 @@ import nl.ramsolutions.sw.magik.languageserver.callhierarchy.CallHierarchyProvid
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
 import nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider;
-import nl.ramsolutions.sw.magik.languageserver.diagnostics.MagikDiagnosticsProvider;
+import nl.ramsolutions.sw.magik.languageserver.diagnostics.DiagnosticsProvider;
 import nl.ramsolutions.sw.magik.languageserver.documentsymbols.DocumentSymbolProvider;
 import nl.ramsolutions.sw.magik.languageserver.folding.FoldingRangeProvider;
 import nl.ramsolutions.sw.magik.languageserver.formatting.FormattingProvider;
@@ -113,7 +113,7 @@ public class MagikTextDocumentService implements TextDocumentService {
   private final MagikLanguageServer languageServer;
   private final MagikToolsProperties properties;
   private final IDefinitionKeeper definitionKeeper;
-  private final MagikDiagnosticsProvider diagnosticsProvider;
+  private final DiagnosticsProvider diagnosticsProvider;
   private final HoverProvider hoverProvider;
   private final ImplementationProvider implementationProvider;
   private final SignatureHelpProvider signatureHelpProvider;
@@ -148,7 +148,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.properties = properties;
     this.definitionKeeper = definitionKeeper;
 
-    this.diagnosticsProvider = new MagikDiagnosticsProvider(this.properties);
+    this.diagnosticsProvider = new DiagnosticsProvider(this.properties);
     this.hoverProvider = new HoverProvider();
     this.implementationProvider = new ImplementationProvider();
     this.signatureHelpProvider = new SignatureHelpProvider();
