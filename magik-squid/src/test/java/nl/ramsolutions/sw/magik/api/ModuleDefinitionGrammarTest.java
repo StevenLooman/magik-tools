@@ -6,7 +6,7 @@ import com.sonar.sslr.api.Grammar;
 import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import org.junit.jupiter.api.Test;
 
-/** Tests for SwModuleDefinitionGrammar. */
+/** Tests for {@link ModuleDefinitionGrammar}. */
 class ModuleDefinitionGrammarTest {
   private final Grammar grammar = ModuleDefinitionGrammar.create();
 
@@ -208,18 +208,18 @@ class ModuleDefinitionGrammarTest {
         .matches("module 1")
         .matches(
             """
-        test_module_a 1
-        requires
-          test_module_b
-        end
-        """)
+            test_module_a 1
+            requires
+              test_module_b
+            end
+            """)
         .matches(
             """
-          test_module_a 1
-          reqs
-            test_module_b
-          end
-          """) // Syntax error.
+            test_module_a 1
+            reqs
+              test_module_b
+            end
+            """) // Syntax error.
         .matches(
             """
             test_module_a 1
@@ -228,6 +228,15 @@ class ModuleDefinitionGrammarTest {
             """
             test_module_a 1
             some extra line
+            """) // Syntax error.
+        .matches(
+            """
+            test_module_a 1
+            requires
+              test_module_b
+            end
+
+            end
             """); // Syntax error.
   }
 }
