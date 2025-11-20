@@ -30,6 +30,8 @@ public class ModuleDefParser {
         ModuleDefinitionGrammar.SYNTAX_ERROR_SECTION, ModuleDefinitionGrammar.SYNTAX_ERROR);
     RULE_MAPPING.put(
         ModuleDefinitionGrammar.SYNTAX_ERROR_LINE, ModuleDefinitionGrammar.SYNTAX_ERROR);
+    RULE_MAPPING.put(
+        ModuleDefinitionGrammar.SYNTAX_ERROR_END, ModuleDefinitionGrammar.SYNTAX_ERROR);
   }
 
   /** Constructor with default charset. */

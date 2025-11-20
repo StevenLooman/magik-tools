@@ -6,7 +6,7 @@ import com.sonar.sslr.api.Grammar;
 import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 import org.junit.jupiter.api.Test;
 
-/** Tests for SwProductDefinitionGrammar. */
+/** Tests for {@link ProductDefinitionGrammar}. */
 class ProductDefinitionGrammarTest {
   private final Grammar grammar = ProductDefinitionGrammar.create();
 
@@ -105,22 +105,31 @@ class ProductDefinitionGrammarTest {
             requires
               test_product_b
             end
-        """)
+            """)
         .matches(
             """
-          test_product_a layered_product
-          reqs
-            test_product_b
-          end
-        """) // Syntax error.
+            test_product_a layered_product
+            reqs
+              test_product_b
+            end
+            """) // Syntax error.
         .matches(
             """
             test_product_a layered_product
             some extra line""") // Syntax error.
         .matches(
             """
-              test_product_a layered_product
+            test_product_a layered_product
             some extra line
+            """) // Syntax error.
+        .matches(
+            """
+            test_product_a layered_product
+            requires
+              test_product_b
+            end
+
+            end
             """); // Syntax error.
   }
 }

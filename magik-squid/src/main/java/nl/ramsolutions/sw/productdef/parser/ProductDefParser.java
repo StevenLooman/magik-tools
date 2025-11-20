@@ -30,6 +30,8 @@ public class ProductDefParser {
         ProductDefinitionGrammar.SYNTAX_ERROR_SECTION, ProductDefinitionGrammar.SYNTAX_ERROR);
     RULE_MAPPING.put(
         ProductDefinitionGrammar.SYNTAX_ERROR_LINE, ProductDefinitionGrammar.SYNTAX_ERROR);
+    RULE_MAPPING.put(
+        ProductDefinitionGrammar.SYNTAX_ERROR_END, ProductDefinitionGrammar.SYNTAX_ERROR);
   }
 
   /** Constructor with default charset. */
