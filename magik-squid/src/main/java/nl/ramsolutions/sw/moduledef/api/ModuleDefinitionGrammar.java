@@ -58,6 +58,7 @@ public enum ModuleDefinitionGrammar implements GrammarRuleKey {
 
   SYNTAX_ERROR_SECTION,
   SYNTAX_ERROR_LINE,
+  SYNTAX_ERROR_END,
   SYNTAX_ERROR,
 
   IDENTIFIERS,
@@ -102,7 +103,8 @@ public enum ModuleDefinitionGrammar implements GrammarRuleKey {
                     SYSTEM_INSTALLATION,
                     SPACING,
                     SYNTAX_ERROR_SECTION,
-                    SYNTAX_ERROR_LINE)),
+                    SYNTAX_ERROR_LINE,
+                    SYNTAX_ERROR_END)),
             builder.token(GenericTokenType.EOF, builder.endOfInput()));
 
     builder
@@ -115,6 +117,7 @@ public enum ModuleDefinitionGrammar implements GrammarRuleKey {
         .is(
             builder.regexp("(?!" + ModuleDefinitionKeyword.END.getValue() + ").+"),
             builder.optional(builder.regexp("[\r\n]+")));
+    builder.rule(SYNTAX_ERROR_END).is(ModuleDefinitionKeyword.END);
 
     builder.rule(MODULE_IDENTIFICATION).is(MODULE_NAME, WHITESPACE, VERSION);
     builder.rule(MODULE_NAME).is(IDENTIFIER);

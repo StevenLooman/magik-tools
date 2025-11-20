@@ -30,6 +30,7 @@ public enum ProductDefinitionGrammar implements GrammarRuleKey {
 
   SYNTAX_ERROR_SECTION,
   SYNTAX_ERROR_LINE,
+  SYNTAX_ERROR_END,
   SYNTAX_ERROR,
 
   SPACING,
@@ -65,7 +66,8 @@ public enum ProductDefinitionGrammar implements GrammarRuleKey {
                     VERSION,
                     SPACING,
                     SYNTAX_ERROR_SECTION,
-                    SYNTAX_ERROR_LINE)),
+                    SYNTAX_ERROR_LINE,
+                    SYNTAX_ERROR_END)),
             builder.token(GenericTokenType.EOF, builder.endOfInput()));
 
     builder
@@ -79,6 +81,7 @@ public enum ProductDefinitionGrammar implements GrammarRuleKey {
         .is(
             builder.regexp("(?!" + ProductDefinitionKeyword.END.getValue() + ").+"),
             builder.optional(builder.regexp("[\r\n]+")));
+    builder.rule(SYNTAX_ERROR_END).is(ProductDefinitionKeyword.END);
 
     builder.rule(PRODUCT_IDENTIFICATION).is(PRODUCT_NAME, WHITESPACE, PRODUCT_TYPE);
     builder.rule(PRODUCT_NAME).is(IDENTIFIER);
