@@ -302,6 +302,33 @@ public class TypeDocParser {
                 this::getName, slotNode -> slotNode.getFirstChild(TypeDocGrammar.NAME)));
   }
 
+  /**
+   * Get @invokes_method method invocations (type.method or type[]).
+   *
+   * @return List with @invokes_method method call strings.
+   */
+  public List<String> getInvokesMethodCalls() {
+    final AstNode node = this.getTypeDocNode();
+    return node.getChildren(TypeDocGrammar.INVOKES_METHOD).stream()
+        .map(this::getMethodCall)
+        .filter(call -> !call.isBlank())
+        .toList();
+  }
+
+  private String getMethodCall(final AstNode node) {
+    final AstNode methodInvocationNode = node.getFirstChild(TypeDocGrammar.METHOD_INVOCATION);
+    if (methodInvocationNode == null) {
+      return "";
+    }
+
+    final String value =
+        methodInvocationNode.getTokens().stream()
+            .filter(token -> !token.getValue().equals("{") && !token.getValue().equals("}"))
+            .map(Token::getValue)
+            .collect(Collectors.joining());
+    return value.trim();
+  }
+
   private boolean noEmptyName(final AstNode node) {
     return !this.getName(node).isBlank();
   }

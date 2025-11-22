@@ -30,9 +30,9 @@ public class ProcedureDefinition extends MagikDefinition
   private final List<ParameterDefinition> parameters;
   private final ExpressionResultString returnTypes;
   private final ExpressionResultString loopTypes;
-  private final Set<GlobalUsage> usedGlobals;
-  private final Set<MethodUsage> usedMethods;
-  private final Set<ConditionUsage> usedConditions;
+  private final List<GlobalUsage> usedGlobals;
+  private final List<MethodUsage> usedMethods;
+  private final List<ConditionUsage> usedConditions;
   private final @Nullable Pragma pragma;
 
   /**
@@ -71,9 +71,9 @@ public class ProcedureDefinition extends MagikDefinition
     this.pragma = pragma;
     this.returnTypes = returnTypes;
     this.loopTypes = loopTypes;
-    this.usedGlobals = Collections.emptySet();
-    this.usedMethods = Collections.emptySet();
-    this.usedConditions = Collections.emptySet();
+    this.usedGlobals = Collections.emptyList();
+    this.usedMethods = Collections.emptyList();
+    this.usedConditions = Collections.emptyList();
   }
 
   /**
@@ -104,9 +104,9 @@ public class ProcedureDefinition extends MagikDefinition
       final @Nullable Pragma pragma,
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes,
-      final Set<GlobalUsage> usedGlobals,
-      final Set<MethodUsage> usedMethods,
-      final Set<ConditionUsage> usedConditions) {
+      final List<GlobalUsage> usedGlobals,
+      final List<MethodUsage> usedMethods,
+      final List<ConditionUsage> usedConditions) {
     super(location, timestamp, moduleName, doc, node);
     this.modifiers = Set.copyOf(modifiers);
     this.typeName = typeName;
@@ -115,9 +115,9 @@ public class ProcedureDefinition extends MagikDefinition
     this.pragma = pragma;
     this.returnTypes = returnTypes;
     this.loopTypes = loopTypes;
-    this.usedGlobals = Collections.unmodifiableSet(usedGlobals);
-    this.usedMethods = Collections.unmodifiableSet(usedMethods);
-    this.usedConditions = Collections.unmodifiableSet(usedConditions);
+    this.usedGlobals = Collections.unmodifiableList(usedGlobals);
+    this.usedMethods = Collections.unmodifiableList(usedMethods);
+    this.usedConditions = Collections.unmodifiableList(usedConditions);
   }
 
   public Set<Modifier> getModifiers() {
@@ -208,16 +208,16 @@ public class ProcedureDefinition extends MagikDefinition
     return Objects.requireNonNullElse(this.procedureName, ProcedureDefinition.DEFAULT_NAME);
   }
 
-  public Set<GlobalUsage> getUsedGlobals() {
-    return Collections.unmodifiableSet(this.usedGlobals);
+  public List<GlobalUsage> getUsedGlobals() {
+    return Collections.unmodifiableList(this.usedGlobals);
   }
 
-  public Set<MethodUsage> getUsedMethods() {
-    return Collections.unmodifiableSet(this.usedMethods);
+  public List<MethodUsage> getUsedMethods() {
+    return Collections.unmodifiableList(this.usedMethods);
   }
 
-  public Set<ConditionUsage> getUsedConditions() {
-    return Collections.unmodifiableSet(this.usedConditions);
+  public List<ConditionUsage> getUsedConditions() {
+    return Collections.unmodifiableList(this.usedConditions);
   }
 
   @Override

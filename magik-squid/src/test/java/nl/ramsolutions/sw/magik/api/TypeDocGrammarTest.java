@@ -70,6 +70,38 @@ class TypeDocGrammarTest {
   }
 
   @Test
+  void testMethodInvocation() {
+    Assertions.assertThat(g.rule(TypeDocGrammar.METHOD_INVOCATION))
+        .matches("{rope.new()}")
+        .matches("{rope.size}")
+        .matches("{sw:rope.new()}")
+        .matches("{sw:rope.fast_elements()}")
+        .matches("{user:my_class.method()}")
+        .matches("{rope[]}")
+        .matches("{vector[]}")
+        .matches("{sw:rope[]}")
+        .matches("{sw:vector_key_equality_table[,]}")
+        .matches("{user:table[,]}")
+        .notMatches("rope.new()")
+        .notMatches("{invalid}")
+        .notMatches("{.method()}")
+        .notMatches("{type.}")
+        .notMatches("{:}");
+  }
+
+  @Test
+  void testInvokesMethod() {
+    Assertions.assertThat(g.rule(TypeDocGrammar.INVOKES_METHOD))
+        .matches("## @invokes_method {rope.new()}")
+        .matches("## @invokes_method {rope.size}")
+        .matches("## @invokes_method {sw:rope.new()}")
+        .matches("## @invokes_method {sw:rope.fast_elements()}")
+        .matches("## @invokes_method {rope[]}")
+        .matches("## @invokes_method {sw:vector_key_equality_table[,]}")
+        .matches("## @invokes_method invalid_syntax"); // Falls back to SYNTAX_ERROR.
+  }
+
+  @Test
   void testType() {
     Assertions.assertThat(g.rule(TypeDocGrammar.TYPE))
         .matches("{integer}")
@@ -100,6 +132,14 @@ class TypeDocGrammarTest {
         .matches(
             """
             ## @param {user:thing} p1 Param1 description
+            ## @return {sw:rope}
+            """)
+        .matches(
+            """
+            ## Method with invokes_method annotation
+            ## @param {sw:rope} data The data to process
+            ## @invokes_method {sw:rope.new()}
+            ## @invokes_method {sw:integer.write()}
             ## @return {sw:rope}
             """);
   }

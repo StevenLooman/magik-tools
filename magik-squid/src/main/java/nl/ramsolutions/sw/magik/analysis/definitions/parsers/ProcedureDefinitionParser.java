@@ -12,12 +12,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
+import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
+import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
@@ -28,7 +34,7 @@ import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 
-/** {@code _proc() .. _endproc} parser. */
+/** {@code _proc() .. _endproc} parser, creating a {@link ProcedureDefinition}. */
 public class ProcedureDefinitionParser {
 
   private final MagikFile magikFile;
@@ -139,6 +145,34 @@ public class ProcedureDefinitionParser {
             .map(String::trim)
             .collect(Collectors.joining("\n"));
 
+    final MagikToolsProperties properties = this.magikFile.getProperties();
+    final MagikAnalysisSettings settings = new MagikAnalysisSettings(properties);
+
+    // Parse usages from code.
+    final DefinitionUsageParser usageParser = new DefinitionUsageParser(this.magikFile, this.node);
+    final List<GlobalUsage> usedGlobals =
+        settings.getTypingIndexGlobalUsages()
+            ? usageParser.getUsedGlobals()
+            : Collections.emptyList();
+    final List<MethodUsage> usedMethods =
+        settings.getTypingIndexMethodUsages()
+            ? usageParser.getUsedMethods()
+            : Collections.emptyList();
+    final List<ConditionUsage> usedConditions =
+        settings.getTypingIndexConditionUsages()
+            ? usageParser.getUsedConditions()
+            : Collections.emptyList();
+
+    // Parse @invokes_method annotations from TypeDoc.
+    final String currentPackage = new PackageNodeHelper(this.node).getCurrentPackage();
+    final List<String> invokesMethodAnnotations = typeDocParser.getInvokesMethodCalls();
+    final List<MethodUsage> invokesMethodUsages =
+        this.parseInvokesMethodAnnotations(invokesMethodAnnotations, location, currentPackage);
+
+    // Combine method usages from code analysis and @invokes_method annotations.
+    final List<MethodUsage> allUsedMethods = new ArrayList<>(usedMethods);
+    allUsedMethods.addAll(invokesMethodUsages);
+
     final TypeString typeString = AnonymousNamer.getNameForProcedure(this.node);
     return List.of(
         new ProcedureDefinition(
@@ -153,7 +187,10 @@ public class ProcedureDefinitionParser {
             parameters,
             pragma,
             callResult,
-            loopResult));
+            loopResult,
+            usedGlobals,
+            allUsedMethods,
+            usedConditions));
   }
 
   private List<ParameterDefinition> createParameterDefinitions(
@@ -187,5 +224,29 @@ public class ProcedureDefinitionParser {
     }
 
     return parameterDefinitions;
+  }
+
+  /**
+   * Parse @invokes_method annotations into MethodUsage objects.
+   *
+   * @param invokesAnnotations List of method invocation strings from @invokes_method annotations.
+   * @param location Location for the method usages.
+   * @param currentPackage Current package for parsing types without explicit package qualifiers.
+   * @return List of MethodUsage objects.
+   */
+  private List<MethodUsage> parseInvokesMethodAnnotations(
+      final List<String> invokesAnnotations, final Location location, final String currentPackage) {
+    final List<MethodUsage> methodUsages = new ArrayList<>();
+
+    for (final String invocationString : invokesAnnotations) {
+      final MethodUsage methodUsage =
+          MethodInvocationStringParser.parseInvocationString(
+              invocationString, location, currentPackage);
+      if (methodUsage != null) {
+        methodUsages.add(methodUsage);
+      }
+    }
+
+    return methodUsages;
   }
 }
