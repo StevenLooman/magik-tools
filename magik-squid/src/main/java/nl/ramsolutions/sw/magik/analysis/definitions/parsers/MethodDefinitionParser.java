@@ -26,6 +26,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -35,7 +36,7 @@ import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 
-/** Method definition parser. */
+/** Method definition parser, creating a {@link MethodDefinition}. */
 public class MethodDefinitionParser {
 
   private final MagikFile magikFile;
@@ -145,7 +146,8 @@ public class MethodDefinitionParser {
                 pragmaHelper.getUsages())
             : null;
 
-    final MethodDefinitionUsageParser usageParser = new MethodDefinitionUsageParser(this.node);
+    // Parse usages from code.
+    final DefinitionUsageParser usageParser = new DefinitionUsageParser(this.magikFile, this.node);
     final MagikToolsProperties properties = this.magikFile.getProperties();
     final MagikAnalysisSettings settings = new MagikAnalysisSettings(properties);
     final List<GlobalUsage> usedGlobals =
@@ -163,6 +165,16 @@ public class MethodDefinitionParser {
             ? usageParser.getUsedConditions()
             : Collections.emptyList();
 
+    // Parse @invokes_method annotations from TypeDoc.
+    final String currentPackage = new PackageNodeHelper(this.node).getCurrentPackage();
+    final List<String> invokesMethodAnnotations = typeDocParser.getInvokesMethodCalls();
+    final List<MethodUsage> invokesMethodUsages =
+        this.parseInvokesMethodAnnotations(invokesMethodAnnotations, location, currentPackage);
+
+    // Combine method usages from code analysis and @invokes_method annotations.
+    final List<MethodUsage> allUsedMethods = new ArrayList<>(usedMethods);
+    allUsedMethods.addAll(invokesMethodUsages);
+
     final MethodDefinition methodDefinition =
         new MethodDefinition(
             location,
@@ -179,7 +191,7 @@ public class MethodDefinitionParser {
             callResult,
             loopResult,
             usedGlobals,
-            usedMethods,
+            allUsedMethods,
             usedSlots,
             usedConditions);
     return List.of(methodDefinition);
@@ -246,5 +258,29 @@ public class MethodDefinitionParser {
         identifier,
         ParameterDefinition.Modifier.NONE,
         typeRef);
+  }
+
+  /**
+   * Parse @invokes_method annotations into MethodUsage objects.
+   *
+   * @param invokesAnnotations List of method invocation strings from @invokes_method annotations.
+   * @param location Location for the method usages.
+   * @param currentPackage Current package for parsing types without explicit package qualifiers.
+   * @return List of MethodUsage objects.
+   */
+  private List<MethodUsage> parseInvokesMethodAnnotations(
+      final List<String> invokesAnnotations, final Location location, final String currentPackage) {
+    final List<MethodUsage> methodUsages = new ArrayList<>();
+
+    for (final String invocationString : invokesAnnotations) {
+      final MethodUsage methodUsage =
+          MethodInvocationStringParser.parseInvocationString(
+              invocationString, location, currentPackage);
+      if (methodUsage != null) {
+        methodUsages.add(methodUsage);
+      }
+    }
+
+    return methodUsages;
   }
 }

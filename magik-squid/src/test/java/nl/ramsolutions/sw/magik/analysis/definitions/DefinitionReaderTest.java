@@ -975,4 +975,79 @@ class DefinitionReaderTest {
                 List.of("data1", "data2"),
                 null));
   }
+
+  @Test
+  void testMethodDefinitionWithInvokesMethod() {
+    final String code =
+        """
+        _method a.b()
+            ## @invokes_method {rope.size}
+            ## @invokes_method {sw:integer.write()}
+        _endmethod
+        """;
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    assertThat(definitions).hasSize(1);
+
+    final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
+    final List<MethodUsage> usedMethods = methodDef.getUsedMethods();
+    assertThat(usedMethods)
+        .containsExactly(
+            new MethodUsage(TypeString.ofIdentifier("rope", "user"), "size"),
+            new MethodUsage(TypeString.ofIdentifier("integer", "sw"), "write()"));
+  }
+
+  @Test
+  void testMethodDefinitionWithInvokesMethodSquareBrackets() {
+    final String code =
+        """
+        _method a.b()
+            ## @invokes_method {rope[]}
+            ## @invokes_method {sw:vector_key_equality_table[,]}
+        _endmethod
+        """;
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    assertThat(definitions).hasSize(1);
+
+    final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
+    final List<MethodUsage> usedMethods = methodDef.getUsedMethods();
+    assertThat(usedMethods)
+        .containsExactly(
+            new MethodUsage(TypeString.ofIdentifier("rope", "user"), "[]"),
+            new MethodUsage(TypeString.ofIdentifier("vector_key_equality_table", "sw"), "[,]"));
+  }
+
+  @Test
+  void testProcedureDefinitionWithInvokesMethod() {
+    final String code =
+        """
+        _proc()
+            ## @invokes_method {rope.size}
+            ## @invokes_method {sw:integer.write()}
+        _endproc
+        """;
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    assertThat(definitions).hasSize(1);
+
+    final ProcedureDefinition procDef = (ProcedureDefinition) definitions.get(0);
+    final List<MethodUsage> usedMethods = procDef.getUsedMethods();
+    assertThat(usedMethods)
+        .containsExactly(
+            new MethodUsage(TypeString.ofIdentifier("rope", "user"), "size"),
+            new MethodUsage(TypeString.ofIdentifier("integer", "sw"), "write()"));
+  }
 }
