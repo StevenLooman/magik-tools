@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
@@ -15,31 +16,32 @@ import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
-import nl.ramsolutions.sw.magik.analysis.scope.ScopeBuilderVisitor;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
-/** Method Definition usages parser. */
-public class MethodDefinitionUsageParser {
+/** Definition usages parser for methods and procedures. */
+public class DefinitionUsageParser {
 
   private static final String CONDITION = "condition";
   private static final String SW_CONDITION = "sw:condition";
   private static final String NEW_CALL = "new()";
   private static final String RAISE_CALL = "raise()";
 
+  private final MagikFile magikFile;
   private final AstNode node;
 
   /**
    * Constructor.
    *
-   * @param node Method definition node.
+   * @param node Method or procedure definition node.
    */
-  public MethodDefinitionUsageParser(final AstNode node) {
-    if (node.isNot(MagikGrammar.METHOD_DEFINITION)) {
+  public DefinitionUsageParser(final MagikFile magikFile, final AstNode node) {
+    if (node.isNot(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION)) {
       throw new IllegalArgumentException();
     }
 
+    this.magikFile = magikFile;
     this.node = node;
   }
 
@@ -49,15 +51,12 @@ public class MethodDefinitionUsageParser {
    * @return Used globals.
    */
   public List<GlobalUsage> getUsedGlobals() {
-    final ScopeBuilderVisitor scopeBuilderVisitor = new ScopeBuilderVisitor();
-    scopeBuilderVisitor.createGlobalScope(this.node);
-    scopeBuilderVisitor.walkAst(this.node);
-    final GlobalScope globalScope = scopeBuilderVisitor.getGlobalScope();
+    final GlobalScope globalScope = this.magikFile.getGlobalScope();
     final AstNode bodyNode = this.node.getFirstChild(MagikGrammar.BODY);
     final Scope bodyScope = globalScope.getScopeForNode(bodyNode);
     Objects.requireNonNull(bodyScope);
 
-    final PackageNodeHelper packageNodeHelper = new PackageNodeHelper(node);
+    final PackageNodeHelper packageNodeHelper = new PackageNodeHelper(this.node);
     final String currentPakkage = packageNodeHelper.getCurrentPackage();
     return bodyScope.getSelfAndDescendantScopes().stream()
         .flatMap(scope -> scope.getScopeEntriesInScope().stream())
@@ -92,7 +91,7 @@ public class MethodDefinitionUsageParser {
             methodInvocationNode -> {
               final MethodInvocationNodeHelper helper =
                   new MethodInvocationNodeHelper(methodInvocationNode);
-              // TODO: This can only get the TypeString of method invocations on globals,
+              // This can only get the TypeString of method invocations on globals,
               // as this doesn't do any deep reasoning.
               final TypeString ref = TypeString.UNDEFINED;
               final String methodName = helper.getMethodName();

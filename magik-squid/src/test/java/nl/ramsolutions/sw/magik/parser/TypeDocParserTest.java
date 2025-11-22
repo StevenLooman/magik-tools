@@ -220,4 +220,50 @@ class TypeDocParserTest {
     final List<TypeString> returnTypes = docParser.getReturnTypes();
     assertThat(returnTypes).containsExactly(TypeString.ofParameterRef("p1"));
   }
+
+  @Test
+  void testInvokesMethod() throws IOException {
+    final String code =
+        """
+        _method a.b()
+            ## @invokes_method {rope.new()}
+            ## @invokes_method {sw:rope.fast_elements()}
+        _endmethod
+        """;
+    final AstNode topNode = this.parseMagik(code);
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final TypeDocParser docParser = new TypeDocParser(methodNode);
+    final List<String> calls = docParser.getInvokesMethodCalls();
+    assertThat(calls).containsExactly("rope.new()", "sw:rope.fast_elements()");
+  }
+
+  @Test
+  void testInvokesMethodEmpty() throws IOException {
+    final String code =
+        """
+        _method a.b()
+            ## @invokes_method\s
+        _endmethod
+        """;
+    final AstNode topNode = this.parseMagik(code);
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final TypeDocParser docParser = new TypeDocParser(methodNode);
+    final List<String> calls = docParser.getInvokesMethodCalls();
+    assertThat(calls).isEmpty();
+  }
+
+  @Test
+  void testInvokesMethodWithoutParentheses() throws IOException {
+    final String code =
+        """
+        _method a.b()
+            ## @invokes_method {rope.size}
+        _endmethod
+        """;
+    final AstNode topNode = this.parseMagik(code);
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final TypeDocParser docParser = new TypeDocParser(methodNode);
+    final List<String> calls = docParser.getInvokesMethodCalls();
+    assertThat(calls).containsExactly("rope.size");
+  }
 }

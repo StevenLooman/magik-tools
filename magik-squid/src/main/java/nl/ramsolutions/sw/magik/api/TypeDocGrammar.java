@@ -29,12 +29,18 @@ public enum TypeDocGrammar implements GrammarRuleKey {
   LOOP,
   SLOT,
   GENERIC,
+  INVOKES_METHOD,
 
   // parts
   NAME,
   TYPE,
   TYPE_VALUE,
   DESCRIPTION,
+  METHOD_INVOCATION,
+  METHOD_INVOCATION_TYPE,
+  METHOD_INVOCATION_PACKAGE,
+  METHOD_INVOCATION_TYPE_NAME,
+  METHOD_INVOCATION_METHOD_NAME,
 
   // root
   TYPE_DOC;
@@ -45,7 +51,8 @@ public enum TypeDocGrammar implements GrammarRuleKey {
     RETURN,
     LOOP,
     SLOT,
-    GENERIC;
+    GENERIC,
+    INVOKES_METHOD;
 
     static final String START_CHAR = "@";
 
@@ -99,6 +106,13 @@ public enum TypeDocGrammar implements GrammarRuleKey {
   private static final String SIMPLE_IDENTIFIER_REGEXP =
       "([a-zA-Z!?]|\\\\.)([a-zA-Z0-9_!?]|\\\\.)*";
 
+  // Method call component patterns.
+  private static final String PACKAGE_NAME_REGEXP = "[a-z_][a-z0-9_]*";
+  private static final String TYPE_NAME_REGEXP = "([a-zA-Z!?]|\\\\.)([a-zA-Z0-9_!?]|\\\\.)*";
+  private static final String DOT_METHOD_NAME_REGEXP =
+      "([a-zA-Z!?]|\\\\.)([a-zA-Z0-9_!?]|\\\\.|\\(|\\))*";
+  private static final String BRACKET_METHOD_REGEXP = "\\[[^\\]]*\\]";
+
   /**
    * Create a new LexerlessGrammar for TypeDoc.
    *
@@ -119,7 +133,7 @@ public enum TypeDocGrammar implements GrammarRuleKey {
     b.rule(TYPE_DOC)
         .is(
             b.optional(FUNCTION),
-            b.zeroOrMore(b.firstOf(PARAM, RETURN, LOOP, SLOT, GENERIC)),
+            b.zeroOrMore(b.firstOf(PARAM, RETURN, LOOP, SLOT, GENERIC, INVOKES_METHOD)),
             SPACING,
             b.token(GenericTokenType.EOF, b.endOfInput()));
 
@@ -135,11 +149,30 @@ public enum TypeDocGrammar implements GrammarRuleKey {
             b.zeroOrMore(
                 DOC_START, SPACING_NO_LB, b.nextNot(ANY_ELEMENT), b.regexp(DESCRIPTION_REGEXP)));
 
+    b.rule(SYNTAX_ERROR).is(SPACING_NO_LB, b.regexp(".*"));
     b.rule(PARAM).is(DOC_START, Element.PARAM, b.optional(TYPE), NAME, DESCRIPTION);
     b.rule(RETURN).is(DOC_START, Element.RETURN, b.optional(TYPE), DESCRIPTION);
     b.rule(LOOP).is(DOC_START, Element.LOOP, b.optional(TYPE), DESCRIPTION);
     b.rule(SLOT).is(DOC_START, Element.SLOT, b.optional(TYPE), NAME, DESCRIPTION);
     b.rule(GENERIC).is(DOC_START, Element.GENERIC, NAME, DESCRIPTION);
+
+    b.rule(METHOD_INVOCATION_PACKAGE).is(b.regexp(PACKAGE_NAME_REGEXP), ":");
+    b.rule(METHOD_INVOCATION_TYPE_NAME).is(b.regexp(TYPE_NAME_REGEXP));
+    b.rule(METHOD_INVOCATION_METHOD_NAME)
+        .is(
+            b.firstOf(
+                b.sequence(".", b.regexp(DOT_METHOD_NAME_REGEXP)), // dot notation: .method()
+                b.regexp(BRACKET_METHOD_REGEXP))); // bracket notation: []
+    b.rule(METHOD_INVOCATION_TYPE)
+        .is(
+            b.optional(METHOD_INVOCATION_PACKAGE),
+            METHOD_INVOCATION_TYPE_NAME,
+            METHOD_INVOCATION_METHOD_NAME);
+    b.rule(METHOD_INVOCATION)
+        .is(SPACING_NO_LB, Punctuator.TYPE_OPEN, METHOD_INVOCATION_TYPE, Punctuator.TYPE_CLOSE);
+
+    b.rule(INVOKES_METHOD)
+        .is(DOC_START, Element.INVOKES_METHOD, b.firstOf(METHOD_INVOCATION, SYNTAX_ERROR));
 
     b.rule(TYPE_VALUE).is(b.regexp(TypeDocGrammar.anythingButPunctuator(Punctuator.TYPE_CLOSE)));
     b.rule(TYPE).is(Punctuator.TYPE_OPEN, TYPE_VALUE, Punctuator.TYPE_CLOSE);
