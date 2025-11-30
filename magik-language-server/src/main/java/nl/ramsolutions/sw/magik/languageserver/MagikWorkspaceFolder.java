@@ -114,9 +114,15 @@ public class MagikWorkspaceFolder {
     LOGGER.debug("Done on shutdown: {}", this);
   }
 
+  public void clean() throws IOException {
+    LOGGER.debug("Cleaning workspace: {}", this);
+    this.removeExistingTypesDatabase();
+    LOGGER.debug("Done cleaning workspace: {}", this);
+  }
+
   private void readExistingTypesDatabase() throws IOException {
     final Path workspacePath = this.getWorkspacePath();
-    final Path typesDbPath = workspacePath.resolve(TYPES_DB_FILENAME);
+    final Path typesDbPath = workspacePath.resolve(MagikWorkspaceFolder.TYPES_DB_FILENAME);
     if (Files.exists(typesDbPath)) {
       LOGGER.debug("Reading types database for workspace: {}, path: {}", this, typesDbPath);
       JsonDefinitionReader.readTypes(typesDbPath, this.definitionKeeper);
@@ -174,16 +180,24 @@ public class MagikWorkspaceFolder {
         filteredDefinitionKeeper.getMagikFileDefinitions();
     final Collection<FileEvent> fileEvents =
         this.buildFileEventsForDifferences(indexableFiles, indexedMagikFileDefinitions);
-
     LOGGER.debug("Magik file event count: {}", fileEvents.size());
     for (final FileEvent fileEvent : fileEvents) {
       this.magikIndexer.handleFileEvent(fileEvent);
     }
   }
 
+  private void removeExistingTypesDatabase() throws IOException {
+    final Path workspacePath = this.getWorkspacePath();
+    final Path typesDbPath = workspacePath.resolve(MagikWorkspaceFolder.TYPES_DB_FILENAME);
+    if (Files.exists(typesDbPath)) {
+      LOGGER.debug("Removing types database for workspace: {}, path: {}", this, typesDbPath);
+      Files.delete(typesDbPath);
+    }
+  }
+
   private void writeTypesDatabase() throws IOException {
     final Path workspacePath = this.getWorkspacePath();
-    final Path typesDbPath = workspacePath.resolve(TYPES_DB_FILENAME);
+    final Path typesDbPath = workspacePath.resolve(MagikWorkspaceFolder.TYPES_DB_FILENAME);
     if (Files.exists(typesDbPath)) {
       Files.delete(typesDbPath);
     }
