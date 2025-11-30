@@ -136,7 +136,15 @@ public final class JsonDefinitionReader {
       // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
       // even if these were not set in the source JSON.
       return new ModuleDefinition(
-          null, null, null, null, null, null, null, Collections.emptyList());
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          Collections.emptyList(),
+          Collections.emptyList());
     }
   }
 

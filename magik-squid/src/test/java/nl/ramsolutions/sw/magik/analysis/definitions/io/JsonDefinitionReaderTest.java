@@ -79,6 +79,7 @@ class JsonDefinitionReaderTest {
                 "1",
                 "2",
                 "test_module",
+                Collections.emptyList(),
                 Collections.emptyList()));
   }
 

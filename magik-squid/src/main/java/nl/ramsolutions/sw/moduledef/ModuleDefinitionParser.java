@@ -64,7 +64,7 @@ public class ModuleDefinitionParser {
             : null;
 
     final AstNode requiresNode = node.getFirstChild(ModuleDefinitionGrammar.REQUIRES);
-    final List<ModuleUsage> usages =
+    final List<ModuleUsage> requiredModules =
         requiresNode != null
             ? requiresNode.getDescendants(ModuleDefinitionGrammar.MODULE_REF).stream()
                 .map(
@@ -75,6 +75,17 @@ public class ModuleDefinitionParser {
                     })
                 .toList()
             : Collections.emptyList();
+    final List<ModuleUsage> testsModules =
+        node.getChildren(ModuleDefinitionGrammar.TESTS_MODULES).stream()
+            .flatMap(
+                testsNode -> testsNode.getDescendants(ModuleDefinitionGrammar.MODULE_REF).stream())
+            .map(
+                moduleRefNode -> {
+                  final String moduleRefName = moduleRefNode.getTokenValue();
+                  final Location usageLocation = new Location(uri, moduleRefNode);
+                  return new ModuleUsage(moduleRefName, usageLocation);
+                })
+            .toList();
 
     final Location location =
         moduleIdentNode != null ? new Location(uri, moduleIdentNode) : new Location(uri);
@@ -87,6 +98,7 @@ public class ModuleDefinitionParser {
         baseVersion,
         currentVersion,
         description,
-        usages);
+        requiredModules,
+        testsModules);
   }
 }

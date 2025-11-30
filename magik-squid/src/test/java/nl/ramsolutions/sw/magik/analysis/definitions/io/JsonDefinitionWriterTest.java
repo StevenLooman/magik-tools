@@ -83,7 +83,8 @@ class JsonDefinitionWriterTest {
             "1",
             null,
             "Test module",
-            List.of(new ModuleUsage("used_module", null))));
+            List.of(new ModuleUsage("used_module", null)),
+            List.of(new ModuleUsage("test_used_module", null))));
 
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
