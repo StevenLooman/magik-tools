@@ -235,9 +235,9 @@ public class ProcedureDefinition extends MagikDefinition
         this.pragma != null ? this.pragma.getBarePragma() : null,
         this.returnTypes,
         this.loopTypes,
-        this.usedGlobals,
-        this.usedMethods,
-        this.usedConditions);
+        this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).toList(),
+        this.usedMethods.stream().map(MethodUsage::getWithoutNode).toList(),
+        this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList());
   }
 
   @Override
