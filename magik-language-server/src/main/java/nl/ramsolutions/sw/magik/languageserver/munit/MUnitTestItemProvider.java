@@ -167,7 +167,15 @@ public class MUnitTestItemProvider {
       final Path parentPath = path.getParent();
       if (parentPath == null) {
         return new ModuleDefinition(
-            null, null, "<no_module>", null, "", "1", null, Collections.emptyList());
+            null,
+            null,
+            "<no_module>",
+            null,
+            "",
+            "1",
+            null,
+            Collections.emptyList(),
+            Collections.emptyList());
       }
 
       return this.getSwModule(parentPath);

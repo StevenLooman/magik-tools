@@ -21,8 +21,6 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.moduledef.ModuleUsage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 
@@ -33,8 +31,6 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "ModuleRequiredForGlobal";
 
-  private static final Logger LOGGER =
-      LoggerFactory.getLogger(ModuleRequiredForGlobalTypedCheck.class);
   private static final String MESSAGE = "Module '%s' defining global '%s' is not required";
   // Create from base session:
   // ```
@@ -121,7 +117,9 @@ public class ModuleRequiredForGlobalTypedCheck extends MagikTypedCheck {
 
       seen.add(moduleName);
 
-      currentModuleDefinition.getUsages().stream()
+      Stream.concat(
+              currentModuleDefinition.getRequiredModules().stream(),
+              currentModuleDefinition.getTestModules().stream())
           .map(ModuleUsage::getName)
           .map(definitionKeeper::getModuleDefinitions)
           .flatMap(Collection::stream)
