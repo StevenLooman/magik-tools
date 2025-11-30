@@ -525,11 +525,12 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     }
   }
 
-  /** Clear any contained {@link MagikDefinition}s. */
+  /** Clear any contained {@link Definition}s. */
   @Override
   public void clear() {
     this.productDefinitions.clear();
     this.moduleDefinitions.clear();
+    this.magikFileDefinitions.clear();
     this.packageDefinitions.clear();
     this.binaryOperatorDefinitions.clear();
     this.conditionDefinitions.clear();
@@ -537,5 +538,6 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     this.methodDefinitions.clear();
     this.globalDefinitions.clear();
     this.procedureDefinitions.clear();
+    this.uriDefinitions.clear();
   }
 }

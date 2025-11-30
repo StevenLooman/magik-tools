@@ -47,11 +47,22 @@ public abstract class OpenedFile {
    * @param path File to read.
    * @throws IOException -
    */
+  protected OpenedFile(final Path path) throws IOException {
+    this(MagikToolsProperties.DEFAULT_PROPERTIES, path);
+  }
+
+  /**
+   * Constructor. Read file at path.
+   *
+   * @param properties Properties.
+   * @param path File to read.
+   * @throws IOException -
+   */
   protected OpenedFile(final MagikToolsProperties properties, final Path path) throws IOException {
-    this.uri = path.toUri();
-    this.source = Files.readString(path, FileCharsetDeterminer.determineCharset(path));
     this.timestamp = Files.getLastModifiedTime(path).toInstant();
     this.properties = properties;
+    this.uri = path.toUri();
+    this.source = Files.readString(path, FileCharsetDeterminer.determineCharset(path));
   }
 
   /**

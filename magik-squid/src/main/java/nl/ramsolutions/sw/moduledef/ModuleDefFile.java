@@ -5,9 +5,7 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.SourceFileScanner;
@@ -79,7 +77,7 @@ public class ModuleDefFile extends OpenedFile {
       final IDefinitionKeeper definitionKeeper,
       final @Nullable ProductDefFile parentProductDefFile)
       throws IOException {
-    super(path.toUri(), Files.readString(path, FileCharsetDeterminer.determineCharset(path)));
+    super(path);
     this.definitionKeeper = definitionKeeper;
     this.parentProductDefFile = parentProductDefFile;
   }
