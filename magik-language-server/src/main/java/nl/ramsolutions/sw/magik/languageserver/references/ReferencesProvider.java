@@ -296,7 +296,8 @@ public class ReferencesProvider {
     LOGGER.debug("Finding references to product: {}", moduleName);
     final ModuleUsage searchedModuleUsage = new ModuleUsage(moduleName, null);
     return definitionKeeper.getModuleDefinitions().stream()
-        .flatMap(def -> def.getUsages().stream())
+        .flatMap(
+            def -> Stream.concat(def.getRequiredModules().stream(), def.getTestModules().stream()))
         .filter(moduleUsage -> moduleUsage.equals(searchedModuleUsage))
         .map(ModuleUsage::getLocation)
         .toList();

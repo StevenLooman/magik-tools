@@ -19,7 +19,8 @@ public class ModuleDefinition implements IDefinition {
   private final String baseVersion;
   private final @Nullable String currentVersion;
   private final @Nullable String description;
-  private final List<ModuleUsage> usages;
+  private final List<ModuleUsage> requiredModules;
+  private final List<ModuleUsage> testModules;
 
   /**
    * Constructor.
@@ -30,7 +31,8 @@ public class ModuleDefinition implements IDefinition {
    * @param baseVersion Base version.
    * @param currentVersion Current version.
    * @param description Description.
-   * @param usages List of required modules.
+   * @param requiredModules List of required modules.
+   * @param testsModules List of test modules.
    */
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public ModuleDefinition(
@@ -41,7 +43,8 @@ public class ModuleDefinition implements IDefinition {
       final String baseVersion,
       final @Nullable String currentVersion,
       final @Nullable String description,
-      final List<ModuleUsage> usages) {
+      final List<ModuleUsage> requiredModules,
+      final List<ModuleUsage> testModules) {
     this.location = location;
     this.timestamp = timestamp;
     this.name = name;
@@ -49,7 +52,8 @@ public class ModuleDefinition implements IDefinition {
     this.baseVersion = baseVersion;
     this.currentVersion = currentVersion;
     this.description = description;
-    this.usages = List.copyOf(usages);
+    this.requiredModules = List.copyOf(requiredModules);
+    this.testModules = List.copyOf(testModules);
   }
 
   public String getName() {
@@ -89,8 +93,12 @@ public class ModuleDefinition implements IDefinition {
     return this.description;
   }
 
-  public List<ModuleUsage> getUsages() {
-    return Collections.unmodifiableList(this.usages);
+  public List<ModuleUsage> getRequiredModules() {
+    return Collections.unmodifiableList(this.requiredModules);
+  }
+
+  public List<ModuleUsage> getTestModules() {
+    return Collections.unmodifiableList(this.testModules);
   }
 
   @Override

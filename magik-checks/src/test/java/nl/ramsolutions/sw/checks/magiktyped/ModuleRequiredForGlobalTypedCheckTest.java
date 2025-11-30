@@ -49,7 +49,15 @@ class ModuleRequiredForGlobalTypedCheckTest {
 
     definitionKeeper.add(
         new ModuleDefinition(
-            null, null, "super_test_module", null, null, null, null, Collections.emptyList()));
+            null,
+            null,
+            "super_test_module",
+            null,
+            null,
+            null,
+            null,
+            Collections.emptyList(),
+            Collections.emptyList()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -77,7 +85,15 @@ class ModuleRequiredForGlobalTypedCheckTest {
 
     definitionKeeper.add(
         new ModuleDefinition(
-            null, null, "another_module", null, null, null, null, Collections.emptyList()));
+            null,
+            null,
+            "another_module",
+            null,
+            null,
+            null,
+            null,
+            Collections.emptyList(),
+            Collections.emptyList()));
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
