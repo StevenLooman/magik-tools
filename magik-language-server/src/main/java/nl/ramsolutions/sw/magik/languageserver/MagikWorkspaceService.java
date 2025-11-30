@@ -105,12 +105,17 @@ public class MagikWorkspaceService implements WorkspaceService {
     this.languageServerProperties.putAll(props);
 
     // Only reindex if settings changed that require reindexing.
+    // Assume that if there were no old settings, we are starting up/this is the first time settings
+    // are set, so no reindexing is required as settings are the same as last session, and we can
+    // use any caches.
     final MagikAnalysisSettings oldSettings = new MagikAnalysisSettings(oldProperties);
     final MagikAnalysisSettings newSettings =
         new MagikAnalysisSettings(this.languageServerProperties);
-    if (newSettings.requiresReindexing(oldSettings)) {
-      LOGGER.info("Settings changed that require reindexing");
-      this.reIndex();
+    if (oldSettings.isEmpty()) {
+      this.runIndexersInBackground(false, true);
+    } else if (newSettings.requiresReindexing(oldSettings)) {
+      LOGGER.info("Settings changed that require full reindexing");
+      this.runIndexersInBackground(true, false);
     }
   }
 
@@ -215,7 +220,7 @@ public class MagikWorkspaceService implements WorkspaceService {
 
   // region: Additional commands.
   /**
-   * Re-index all magik files.
+   * Re-index all files.
    *
    * @return CompletableFuture.
    */
@@ -223,9 +228,7 @@ public class MagikWorkspaceService implements WorkspaceService {
   public CompletableFuture<Void> reIndex() {
     return CompletableFuture.runAsync(
         () -> {
-          this.definitionKeeper.clear();
-
-          this.runIndexersInBackground();
+          this.runIndexersInBackground(true, true);
         });
   }
 
@@ -254,32 +257,9 @@ public class MagikWorkspaceService implements WorkspaceService {
 
   // endregion
 
-  private void runIndexers() {
-    LOGGER.trace("Run indexers");
-
-    // Read types dbs.
-    final MagikLanguageServerSettings settings =
-        new MagikLanguageServerSettings(this.languageServerProperties);
-    final List<String> typesDbPaths = settings.getTypingTypeDatabasePaths();
-    this.readTypesDbs(typesDbPaths);
-
-    // Read class_infos from product dirs.
-    final List<String> productDirs = settings.getProductDirs();
-    this.readProductsClassInfos(productDirs);
-
-    // Update workspace folders.
-    for (final MagikWorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
-      try {
-        workspaceFolder.onInit();
-      } catch (final IOException exception) {
-        LOGGER.error(
-            "Caught error when initializing workspacefolder: " + workspaceFolder, exception);
-      }
-    }
-  }
-
   @SuppressWarnings("IllegalCatch")
-  private void runIndexersInBackground() {
+  private void runIndexersInBackground(
+      final boolean doCleanTypeDatabases, final boolean readTypesDbs) {
     LOGGER.trace("Run background indexer");
 
     final LanguageClient languageClient = this.languageServer.getLanguageClient();
@@ -300,7 +280,11 @@ public class MagikWorkspaceService implements WorkspaceService {
           languageClient.notifyProgress(progressParams);
 
           try {
-            this.runIndexers();
+            if (doCleanTypeDatabases) {
+              this.cleanTypeDatabases();
+            }
+
+            this.runIndexers(doCleanTypeDatabases || readTypesDbs);
           } catch (final Exception exception) {
             LOGGER.error(exception.getMessage(), exception);
           }
@@ -311,6 +295,47 @@ public class MagikWorkspaceService implements WorkspaceService {
           languageClient.notifyProgress(progressParams);
           LOGGER.trace("Done indexing workspace in background");
         });
+  }
+
+  private void cleanTypeDatabases() {
+    LOGGER.trace("Clean type databases");
+
+    this.definitionKeeper.clear();
+
+    // Clean workspace folders of cached data.
+    for (final MagikWorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
+      try {
+        workspaceFolder.clean();
+      } catch (final IOException exception) {
+        LOGGER.error("Caught error when cleaning workspacefolder: " + workspaceFolder, exception);
+      }
+    }
+  }
+
+  private void runIndexers(final boolean readTypesDbs) {
+    LOGGER.trace("Run indexers");
+
+    if (readTypesDbs) {
+      // Read types dbs.
+      final MagikLanguageServerSettings settings =
+          new MagikLanguageServerSettings(this.languageServerProperties);
+      final List<String> typesDbPaths = settings.getTypingTypeDatabasePaths();
+      this.readTypesDbs(typesDbPaths);
+
+      // Read class_infos from product dirs.
+      final List<String> productDirs = settings.getProductDirs();
+      this.readProductsClassInfos(productDirs);
+    }
+
+    // Update workspace folders.
+    for (final MagikWorkspaceFolder workspaceFolder : this.languageServer.getWorkspaceFolders()) {
+      try {
+        workspaceFolder.onInit();
+      } catch (final IOException exception) {
+        LOGGER.error(
+            "Caught error when initializing workspacefolder: " + workspaceFolder, exception);
+      }
+    }
   }
 
   /** Handle shutdown. */

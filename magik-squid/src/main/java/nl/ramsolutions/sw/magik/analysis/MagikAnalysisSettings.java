@@ -84,4 +84,16 @@ public class MagikAnalysisSettings {
         || this.getTypingIndexConditionUsages() != other.getTypingIndexConditionUsages()
         || this.getTypingCacheIndexedDefinitions() != other.getTypingCacheIndexedDefinitions();
   }
+
+  /**
+   * Determine if no settings are set.
+   *
+   * @return True if no settings are set, false otherwise.
+   */
+  public boolean isEmpty() {
+    return this.properties.getPropertyBoolean(INDEX_METHOD_USAGES) == null
+        && this.properties.getPropertyBoolean(INDEX_SLOT_USAGES) == null
+        && this.properties.getPropertyBoolean(INDEX_CONDITION_USAGES) == null
+        && this.properties.getPropertyBoolean(CACHE_INDEXED_DEFINITIONS) == null;
+  }
 }
