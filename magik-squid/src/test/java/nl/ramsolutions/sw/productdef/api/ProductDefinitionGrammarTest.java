@@ -1,9 +1,8 @@
-package nl.ramsolutions.sw.magik.api;
+package nl.ramsolutions.sw.productdef.api;
 
 import static org.sonar.sslr.tests.Assertions.assertThat;
 
 import com.sonar.sslr.api.Grammar;
-import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 import org.junit.jupiter.api.Test;
 
 /** Tests for {@link ProductDefinitionGrammar}. */
