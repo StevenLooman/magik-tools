@@ -55,7 +55,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <junit.version>6.0.1</junit.version>
-    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+    <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
     <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <checkstyle.version>10.20.2</checkstyle.version>
@@ -69,7 +69,7 @@
     <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
     <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
     <spotbugs-maven-plugin.version>4.8.3.1</spotbugs-maven-plugin.version>
-    <spotbugs.version>4.9.4</spotbugs.version>
+    <spotbugs.version>4.9.8</spotbugs.version>
     <com.github.marschall-memoryfilesystem.version>2.8.1</com.github.marschall-memoryfilesystem.version>
     <openrewrite.rewrite-maven-plugin.version>6.22.1</openrewrite.rewrite-maven-plugin.version>
 
@@ -82,15 +82,15 @@
     <sonar.version>9.4.0.54424</sonar.version>
     <sonar-analyzer-commons.version>2.18.0.3393</sonar-analyzer-commons.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
-    <sonar-impl.version>25.10.0.114319</sonar-impl.version>
+    <sonar-impl.version>25.11.0.114957</sonar-impl.version>
     <sonar-maven.version>5.2.0.4988</sonar-maven.version>
-    <sonar-maven-packaging-plugin.version>1.23.0.740</sonar-maven-packaging-plugin.version>
+    <sonar-maven-packaging-plugin.version>1.24.0.2621</sonar-maven-packaging-plugin.version>
     <sslr-squid-bridge.version>2.7.1.392</sslr-squid-bridge.version>
     <sslr.version>1.24.0.633</sslr.version>
     <slf4j.version>2.0.17</slf4j.version>
     <logback.version>1.0.13</logback.version>
     <lsp4j.version>0.24.0</lsp4j.version>
-    <commons-cli.version>1.10.0</commons-cli.version>
+    <commons-cli.version>1.11.0</commons-cli.version>
     <gson.version>2.13.2</gson.version>
     <jline.version>3.30.5</jline.version>
 
