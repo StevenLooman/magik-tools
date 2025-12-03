@@ -17,7 +17,6 @@ public enum ProductDefinitionGrammar implements GrammarRuleKey {
   DESCRIPTION,
   DO_NOT_TRANSLATE,
   REQUIRES,
-  OPTIONAL,
   TITLE,
   VERSION,
 
@@ -61,7 +60,6 @@ public enum ProductDefinitionGrammar implements GrammarRuleKey {
                     DESCRIPTION,
                     DO_NOT_TRANSLATE,
                     REQUIRES,
-                    OPTIONAL,
                     TITLE,
                     VERSION,
                     SPACING,
@@ -96,9 +94,6 @@ public enum ProductDefinitionGrammar implements GrammarRuleKey {
     builder
         .rule(REQUIRES)
         .is(ProductDefinitionKeyword.REQUIRES, SPACING, PRODUCT_REFS, ProductDefinitionKeyword.END);
-    builder
-        .rule(OPTIONAL)
-        .is(ProductDefinitionKeyword.OPTIONAL, SPACING, PRODUCT_REFS, ProductDefinitionKeyword.END);
     builder
         .rule(TITLE)
         .is(ProductDefinitionKeyword.TITLE, SPACING, FREE_LINES, ProductDefinitionKeyword.END);

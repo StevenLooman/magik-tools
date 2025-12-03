@@ -83,12 +83,6 @@ public abstract class ProductDefAstWalker {
         this.walkPostRequires(node);
         break;
 
-      case OPTIONAL:
-        this.walkPreOptional(node);
-        this.walkChildren(node);
-        this.walkPostOptional(node);
-        break;
-
       case TITLE:
         this.walkPreTitle(node);
         this.walkChildren(node);
@@ -228,14 +222,6 @@ public abstract class ProductDefAstWalker {
   }
 
   protected void walkPostRequires(final AstNode node) {
-    this.walkPostDefault(node);
-  }
-
-  protected void walkPreOptional(final AstNode node) {
-    this.walkPreDefault(node);
-  }
-
-  protected void walkPostOptional(final AstNode node) {
     this.walkPostDefault(node);
   }
 
