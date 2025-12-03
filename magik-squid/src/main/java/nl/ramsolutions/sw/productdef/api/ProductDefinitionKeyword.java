@@ -8,7 +8,6 @@ public enum ProductDefinitionKeyword implements GrammarRuleKey {
   DESCRIPTION,
   DO_NOT_TRANSLATE,
   REQUIRES,
-  OPTIONAL,
   TITLE,
   VERSION,
   LAYERED_PRODUCT,
