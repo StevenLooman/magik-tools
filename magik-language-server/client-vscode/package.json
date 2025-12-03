@@ -407,7 +407,7 @@
     "@types/node": "^24.9.2",
     "@typescript-eslint/parser": "^8.46.2",
     "@vscode/vsce": "^3.7.1",
-    "eslint": "^9.36.0",
+    "eslint": "^9.39.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.48.0"
   }
