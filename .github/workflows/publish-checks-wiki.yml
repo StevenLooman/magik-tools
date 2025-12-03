@@ -24,7 +24,7 @@ jobs:
       - run: |
           pip install -r .github/scripts/requirements.txt
           python3 .github/scripts/generate-checks-pages.py
-      - uses: DavidAnson/markdownlint-cli2-action@v20
+      - uses: DavidAnson/markdownlint-cli2-action@v21
         with:
           globs: 'wiki/checks/*.md'
           fix: true
