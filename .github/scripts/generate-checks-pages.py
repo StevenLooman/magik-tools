@@ -7,7 +7,9 @@ import json
 
 FOOTER_NOTE = """\n> [!NOTE]\n> This page is generated. Any changes made to this page through the wiki will be lost in the future.\n"""
 
-TABLE_HEADER = """\n## Options\n\n| Option | Default value | Description |\n|--------|---------------|-------------|"""
+TABLE_HEADER = (
+    """\n## Options\n\n| Option | Default value | Description |\n| --- | --- | --- |"""
+)
 
 
 def write_file(file_path: Path, content: str):
@@ -62,9 +64,9 @@ def extract_rule_properties(java_file: Path) -> list[str]:
         description = desc_match.group(1)
         default_value = extract_default_value(java_content, text)
 
-        props.append(
-            f"| {kebab_case}.{option_name} | {default_value} | {description} |"
-        )
+        default_value = f"| {default_value} |" if default_value != "" else "| |"
+
+        props.append(f"| {kebab_case}.{option_name} {default_value} {description} |")
 
     return props
 
