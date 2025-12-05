@@ -114,7 +114,9 @@ public enum ProductDefinitionGrammar implements GrammarRuleKey {
                 ProductDefinitionKeyword.CONFIG_PRODUCT));
     builder.rule(PRODUCT_REFS).is(builder.zeroOrMore(PRODUCT_REF, SPACING));
     builder.rule(PRODUCT_REF).is(PRODUCT_NAME, builder.optional(WHITESPACE, VERSION));
-    builder.rule(VERSION_NUMBER).is(NUMBER, builder.zeroOrMore(".", NUMBER));
+    builder
+        .rule(VERSION_NUMBER)
+        .is(NUMBER, builder.zeroOrMore(".", NUMBER), builder.optional("-", NUMBER));
     builder.rule(FREE_LINES).is(builder.zeroOrMore(FREE_LINE));
     builder
         .rule(FREE_LINE)
