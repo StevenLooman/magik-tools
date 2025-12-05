@@ -77,7 +77,9 @@ class ProductDefinitionGrammarTest {
         .matches("version 1.0")
         .matches("version 1.0.1")
         .matches("version 1.0.1 RC1")
-        .matches("version 1.0 RC1");
+        .matches("version 1.0 RC1")
+        .matches("version 1.1.0.1-1 Beta")
+        .matches("version 1.2.3.4-5");
   }
 
   @Test
