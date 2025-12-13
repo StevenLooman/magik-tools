@@ -161,4 +161,30 @@ public class VariableRenamerTest {
                     new TextEdit(new Range(new Position(1, 22), new Position(1, 28)), "new"),
                     new TextEdit(new Range(new Position(2, 10), new Position(2, 16)), "new"))));
   }
+
+  @Test
+  void testRenameParameterInTypeDoc() throws IOException {
+    final String code =
+        """
+        _method a.b(param1, param2)
+            ## Example method.
+            ## @param {sw:integer} param1 First parameter
+            ## @param {sw:rope} param2 Second parameter
+            write(param1, param2)
+        _endmethod
+        """;
+    final Position position = new Position(5, 12); // On `param1` in write call.
+
+    final VariableRenamer renamer = this.getRenamer(code, position);
+    final Map<URI, List<TextEdit>> renames = renamer.provideRename("newParam");
+    assertThat(renames)
+        .isEqualTo(
+            Map.of(
+                URI.create("memory:///source.magik"),
+                List.of(
+                    new TextEdit(new Range(new Position(1, 12), new Position(1, 18)), "newParam"),
+                    new TextEdit(new Range(new Position(3, 27), new Position(3, 33)), "newParam"),
+                    new TextEdit(
+                        new Range(new Position(5, 10), new Position(5, 16)), "newParam"))));
+  }
 }
