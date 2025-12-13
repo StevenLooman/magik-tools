@@ -372,10 +372,34 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     final String typeAnnotation =
         this.instructionReader.getInstructionForNode(node, TYPE_INSTRUCTION);
     if (typeAnnotation != null) {
-      final String currentPackage = this.getCurrentPackage(node);
-      final ExpressionResultString overrideResultStr =
-          TypeStringParser.parseExpressionResultString(typeAnnotation, currentPackage);
-      this.state.setNodeType(node, overrideResultStr);
+      // Only apply type override to the outermost EXPRESSION on this line.
+      // This prevents nested expressions (like method arguments) from being overridden.
+      // The type annotation should only apply to:
+      // 1. The top-level expression in RETURN/EMIT statements (handled by StatementHandler).
+      // 2. The top-level expression in VARIABLE_DEFINITION (handled by StatementHandler).
+      // 3. Other expressions that are the outermost on their line.
+      final AstNode parent = node.getParent();
+      final boolean isPartOfReturnEmitOrAssign =
+          parent != null
+              && (parent.is(MagikGrammar.TUPLE)
+                      && (parent.getParent().is(MagikGrammar.RETURN_STATEMENT)
+                          || parent.getParent().is(MagikGrammar.EMIT_STATEMENT))
+                  || parent.is(
+                      MagikGrammar.ASSIGNMENT_EXPRESSION,
+                      MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION)
+                  || parent.is(MagikGrammar.VARIABLE_DEFINITION));
+
+      // Also check if there's an ancestor EXPRESSION on the same line
+      final AstNode ancestorExpression = node.getFirstAncestor(MagikGrammar.EXPRESSION);
+      final boolean hasAncestorExpressionOnSameLine =
+          ancestorExpression != null && ancestorExpression.getTokenLine() == node.getTokenLine();
+
+      if (!isPartOfReturnEmitOrAssign && !hasAncestorExpressionOnSameLine) {
+        final String currentPackage = this.getCurrentPackage(node);
+        final ExpressionResultString overrideResultStr =
+            TypeStringParser.parseExpressionResultString(typeAnnotation, currentPackage);
+        this.state.setNodeType(node, overrideResultStr);
+      }
     }
 
     // Check for iter type annotations, those overrule normal operations.
