@@ -21,6 +21,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
@@ -148,8 +149,9 @@ public class ReferencesProvider {
             MagikGrammar.METHOD_INVOCATION,
             MagikGrammar.METHOD_NAME,
             MagikGrammar.EXEMPLAR_NAME,
-            MagikGrammar.ATOM,
-            MagikGrammar.CONDITION_NAME);
+            MagikGrammar.CONDITION_NAME,
+            MagikGrammar.SLOT,
+            MagikGrammar.ATOM);
     LOGGER.trace("Wanted node: {}", wantedNode);
     final PackageNodeHelper packageHelper = new PackageNodeHelper(wantedNode);
     if (wantedNode == null) {
@@ -198,9 +200,11 @@ public class ReferencesProvider {
       final String conditionName = currentNode.getTokenValue();
       LOGGER.debug("Getting references to condition: {}", conditionName);
       return this.referencesToCondition(definitionKeeper, conditionName);
+    } else if (wantedNode.is(MagikGrammar.SLOT)) {
+      final String slotName = currentNode.getTokenValue();
+      LOGGER.debug("Getting references to slot: {}", slotName);
+      return this.referencesToSlot(definitionKeeper, slotName);
     }
-
-    // TODO: Slot references.
 
     return Collections.emptyList();
   }
@@ -276,6 +280,17 @@ public class ReferencesProvider {
         .flatMap(def -> def.getUsedConditions().stream())
         .filter(conditionUsage -> conditionUsage.getConditionName().equals(conditionName))
         .map(ConditionUsage::getLocation)
+        .map(Location::validLocation)
+        .toList();
+  }
+
+  private List<Location> referencesToSlot(
+      final IDefinitionKeeper definitionKeeper, final String slotName) {
+    LOGGER.debug("Finding references to slot: {}", slotName);
+    return definitionKeeper.getMethodDefinitions().stream()
+        .flatMap(def -> def.getUsedSlots().stream())
+        .filter(slotUsage -> slotUsage.getSlotName().equals(slotName))
+        .map(SlotUsage::getLocation)
         .map(Location::validLocation)
         .toList();
   }

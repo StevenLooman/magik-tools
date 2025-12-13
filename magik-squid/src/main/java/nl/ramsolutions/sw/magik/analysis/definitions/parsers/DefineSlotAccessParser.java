@@ -15,6 +15,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
@@ -303,7 +304,11 @@ public class DefineSlotAccessParser {
               null,
               pragma,
               new ExpressionResultString(TypeString.UNDEFINED),
-              ExpressionResultString.EMPTY);
+              ExpressionResultString.EMPTY,
+              Collections.emptyList(),
+              Collections.emptyList(),
+              List.of(new SlotUsage(slotName, location, definitionNode)),
+              Collections.emptyList());
       methodDefinitions.add(getMethod);
     } else if (flag.equals(FLAG_WRITE) || flag.equals(FLAG_WRITABLE)) {
       // get
@@ -326,7 +331,11 @@ public class DefineSlotAccessParser {
               null,
               pragma,
               new ExpressionResultString(TypeString.UNDEFINED),
-              ExpressionResultString.EMPTY);
+              ExpressionResultString.EMPTY,
+              Collections.emptyList(),
+              Collections.emptyList(),
+              List.of(new SlotUsage(slotName, location, definitionNode)),
+              Collections.emptyList());
       methodDefinitions.add(getMethod);
 
       // set
@@ -360,7 +369,11 @@ public class DefineSlotAccessParser {
               assignmentParam,
               pragma,
               new ExpressionResultString(TypeString.ofParameterRef("val")),
-              ExpressionResultString.EMPTY);
+              ExpressionResultString.EMPTY,
+              Collections.emptyList(),
+              Collections.emptyList(),
+              List.of(new SlotUsage(slotName, location, definitionNode)),
+              Collections.emptyList());
       methodDefinitions.add(setMethod);
 
       // boot
@@ -379,7 +392,11 @@ public class DefineSlotAccessParser {
               assignmentParam,
               pragma,
               new ExpressionResultString(TypeString.UNDEFINED),
-              ExpressionResultString.EMPTY);
+              ExpressionResultString.EMPTY,
+              Collections.emptyList(),
+              Collections.emptyList(),
+              List.of(new SlotUsage(slotName, location, definitionNode)),
+              Collections.emptyList());
       methodDefinitions.add(bootMethod);
     }
     return methodDefinitions;
