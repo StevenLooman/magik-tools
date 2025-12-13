@@ -957,6 +957,106 @@ class LocalTypeReasonerTest {
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final ExpressionResultString result = state.getNodeType(methodNode);
     assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+
+    // Ensure symbol type is not overwritten.
+    final AstNode symbolNode = topNode.getFirstDescendant(MagikGrammar.SYMBOL);
+    final AstNode symbolExpressionNode = symbolNode.getFirstAncestor(MagikGrammar.EXPRESSION);
+    final ExpressionResultString symbolResult = state.getNodeType(symbolExpressionNode);
+    assertThat(symbolResult).isEqualTo(new ExpressionResultString(TypeString.SW_SYMBOL));
+  }
+
+  @Test
+  void testAssignmentTypeAnnotation() throws IOException {
+    final String code =
+        """
+        _method object.test
+            _local a << :a  # type: sw:integer
+            _return a
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert variable 'a' type is sw:integer due to type annotation.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode variableDefNode = topNode.getFirstDescendant(MagikGrammar.VARIABLE_DEFINITION);
+    final AstNode aIdentifierNode = variableDefNode.getFirstChild(MagikGrammar.IDENTIFIER);
+    final ExpressionResultString aResult = state.getNodeType(aIdentifierNode);
+    assertThat(aResult).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+
+    // Ensure symbol type is not overwritten.
+    final AstNode symbolNode = topNode.getFirstDescendant(MagikGrammar.SYMBOL);
+    final AstNode symbolExpressionNode = symbolNode.getFirstAncestor(MagikGrammar.EXPRESSION);
+    final ExpressionResultString symbolResult = state.getNodeType(symbolExpressionNode);
+    assertThat(symbolResult).isEqualTo(new ExpressionResultString(TypeString.SW_SYMBOL));
+  }
+
+  @Test
+  void testAssignmentWithInvocationTypeAnnotation() throws IOException {
+    final String code =
+        """
+        _method object.test
+            _local a << _self.method(:a)  # type: sw:integer
+            _return a
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert variable 'a' type is sw:integer due to type annotation.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode variableDefNode = topNode.getFirstDescendant(MagikGrammar.VARIABLE_DEFINITION);
+    final AstNode aIdentifierNode = variableDefNode.getFirstChild(MagikGrammar.IDENTIFIER);
+    final ExpressionResultString aResult = state.getNodeType(aIdentifierNode);
+    assertThat(aResult).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+
+    // Ensure symbol type is not overwritten.
+    final AstNode symbolNode = topNode.getFirstDescendant(MagikGrammar.SYMBOL);
+    final AstNode symbolExpressionNode = symbolNode.getFirstAncestor(MagikGrammar.EXPRESSION);
+    final ExpressionResultString symbolResult = state.getNodeType(symbolExpressionNode);
+    assertThat(symbolResult).isEqualTo(new ExpressionResultString(TypeString.SW_SYMBOL));
+  }
+
+  @Test
+  void testEmitTypeAnnotation() throws IOException {
+    final String code =
+        """
+        _method object.test
+            _block
+                >> :a  # type: sw:integer
+            _endblock
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert block expression type is sw:integer due to emit type annotation.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode blockNode = topNode.getFirstDescendant(MagikGrammar.BLOCK);
+    final AstNode blockExpressionNode = blockNode.getFirstAncestor(MagikGrammar.EXPRESSION);
+    final ExpressionResultString blockResult = state.getNodeType(blockExpressionNode);
+    assertThat(blockResult).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+
+    // Ensure symbol type is not overwritten.
+    final AstNode symbolNode = topNode.getFirstDescendant(MagikGrammar.SYMBOL);
+    final AstNode symbolExpressionNode = symbolNode.getFirstAncestor(MagikGrammar.EXPRESSION);
+    final ExpressionResultString symbolResult = state.getNodeType(symbolExpressionNode);
+    assertThat(symbolResult).isEqualTo(new ExpressionResultString(TypeString.SW_SYMBOL));
   }
 
   @Test

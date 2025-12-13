@@ -444,6 +444,7 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader.parseClassInfo(java.lang.String, java.io.InputStreamReader)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ConditionalBodyHandler.handleConditionalExpression(com.sonar.sslr.api.AstNode)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ExpressionHandler.handleExpression(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.api.MagikNumberParser.parseMagikNumber(java.lang.String)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.stackTrace(long)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>
