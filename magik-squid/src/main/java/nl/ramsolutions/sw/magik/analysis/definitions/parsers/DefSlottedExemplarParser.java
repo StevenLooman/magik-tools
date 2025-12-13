@@ -19,6 +19,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
@@ -249,7 +250,11 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               null,
               pragma,
               new ExpressionResultString(slotTypeRef),
-              ExpressionResultString.EMPTY);
+              ExpressionResultString.EMPTY,
+              Collections.emptyList(),
+              Collections.emptyList(),
+              List.of(new SlotUsage(slotName, location, node)),
+              Collections.emptyList());
       methodDefinitions.add(getMethod);
     } else if (flag.equals(FLAG_WRITE) || flag.equals(FLAG_WRITABLE)) {
       // get
@@ -272,7 +277,11 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               null,
               pragma,
               new ExpressionResultString(slotTypeRef),
-              ExpressionResultString.EMPTY);
+              ExpressionResultString.EMPTY,
+              Collections.emptyList(),
+              Collections.emptyList(),
+              List.of(new SlotUsage(slotName, location, node)),
+              Collections.emptyList());
       methodDefinitions.add(getMethod);
 
       // set
@@ -306,7 +315,11 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               assignmentParam,
               pragma,
               new ExpressionResultString(TypeString.ofParameterRef("val")),
-              ExpressionResultString.EMPTY);
+              ExpressionResultString.EMPTY,
+              Collections.emptyList(),
+              Collections.emptyList(),
+              List.of(new SlotUsage(slotName, location, node)),
+              Collections.emptyList());
       methodDefinitions.add(setMethod);
 
       // boot
@@ -325,7 +338,11 @@ public class DefSlottedExemplarParser extends BaseDefParser {
               assignmentParam,
               pragma,
               new ExpressionResultString(slotTypeRef),
-              ExpressionResultString.EMPTY);
+              ExpressionResultString.EMPTY,
+              Collections.emptyList(),
+              Collections.emptyList(),
+              List.of(new SlotUsage(slotName, location, node)),
+              Collections.emptyList());
       methodDefinitions.add(bootMethod);
     }
     return methodDefinitions;
