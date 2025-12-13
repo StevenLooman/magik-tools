@@ -3,6 +3,8 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.helpers.ContinueLeaveStatementNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -10,9 +12,17 @@ import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
+import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 
 /** Statement handler. */
 class StatementHandler extends LocalTypeReasonerHandler {
+
+  private static final CommentInstructionReader.Instruction TYPE_INSTRUCTION =
+      new CommentInstructionReader.Instruction(
+          "type", CommentInstructionReader.Instruction.Sort.STATEMENT);
+
+  private final CommentInstructionReader instructionReader;
 
   /**
    * Constructor.
@@ -21,6 +31,8 @@ class StatementHandler extends LocalTypeReasonerHandler {
    */
   StatementHandler(final LocalTypeReasonerState state) {
     super(state);
+    final MagikFile magikFile = state.getMagikFile();
+    this.instructionReader = new CommentInstructionReader(magikFile, Set.of(TYPE_INSTRUCTION));
   }
 
   /**
@@ -41,10 +53,18 @@ class StatementHandler extends LocalTypeReasonerHandler {
         || scopeEntry.isType(ScopeEntry.Type.DEFINITION)
         || scopeEntry.isType(ScopeEntry.Type.CONSTANT)) {
       final AstNode expressionNode = node.getFirstChild(MagikGrammar.EXPRESSION);
-      final ExpressionResultString result =
+      ExpressionResultString result =
           expressionNode == null
               ? new ExpressionResultString(TypeString.SW_UNSET)
               : this.state.getNodeType(expressionNode);
+
+      // Check for type annotation to override the result type.
+      final String typeAnnotation =
+          this.instructionReader.getInstructionForNode(node, TYPE_INSTRUCTION);
+      if (typeAnnotation != null) {
+        final String currentPackage = this.getCurrentPackage(node);
+        result = TypeStringParser.parseExpressionResultString(typeAnnotation, currentPackage);
+      }
 
       final AstNode scopeEntryNode = scopeEntry.getDefinitionNode();
       this.state.setNodeType(scopeEntryNode, result);
@@ -103,7 +123,15 @@ class StatementHandler extends LocalTypeReasonerHandler {
   void handleEmit(final AstNode node) {
     // Get results.
     final AstNode tupleNode = node.getFirstChild(MagikGrammar.TUPLE);
-    final ExpressionResultString result = this.state.getNodeType(tupleNode);
+    ExpressionResultString result = this.state.getNodeType(tupleNode);
+
+    // Check for type annotation to override the result type.
+    final String typeAnnotation =
+        this.instructionReader.getInstructionForNode(node, TYPE_INSTRUCTION);
+    if (typeAnnotation != null) {
+      final String currentPackage = this.getCurrentPackage(node);
+      result = TypeStringParser.parseExpressionResultString(typeAnnotation, currentPackage);
+    }
 
     // Find related node.
     final AstNode bodyNode = node.getFirstAncestor(MagikGrammar.BODY);
@@ -145,8 +173,16 @@ class StatementHandler extends LocalTypeReasonerHandler {
   void handleReturn(final AstNode node) {
     // Get results.
     final AstNode tupleNode = node.getFirstChild(MagikGrammar.TUPLE);
-    final ExpressionResultString result =
+    ExpressionResultString result =
         tupleNode != null ? this.state.getNodeType(tupleNode) : ExpressionResultString.EMPTY;
+
+    // Check for type annotation to override the result type.
+    final String typeAnnotation =
+        this.instructionReader.getInstructionForNode(node, TYPE_INSTRUCTION);
+    if (typeAnnotation != null) {
+      final String currentPackage = this.getCurrentPackage(node);
+      result = TypeStringParser.parseExpressionResultString(typeAnnotation, currentPackage);
+    }
 
     // Find related node to store on.
     final AstNode definitionNode =
