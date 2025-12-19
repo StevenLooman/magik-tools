@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+/** Tests for {@link FormattingWalker}. */
 class FormattingWalkerTest {
 
   private List<TextEdit> getEdits(final String code) {
@@ -244,7 +245,7 @@ class FormattingWalkerTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(new TextEdit(new Range(new Position(1, 1), new Position(3, 1)), "\n\n\n"));
+        .containsExactly(new TextEdit(new Range(new Position(3, 0), new Position(3, 1)), "\n"));
   }
 
   // endregion
@@ -264,7 +265,7 @@ class FormattingWalkerTest {
     final FormattingOptions options = new FormattingOptions(8, false, false, true, false);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits)
-        .containsExactly(new TextEdit(new Range(new Position(1, 1), new Position(2, 0)), "\n"));
+        .containsExactly(new TextEdit(new Range(new Position(1, 1), new Position(1, 3)), ""));
   }
 
   @Test
@@ -281,8 +282,7 @@ class FormattingWalkerTest {
     final FormattingOptions options = new FormattingOptions(8, false, false, true, false);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits)
-        .containsExactly(
-            new TextEdit(new Range(new Position(1, 0), new Position(2, 0)), "# comment\n"));
+        .containsExactly(new TextEdit(new Range(new Position(1, 9), new Position(1, 11)), ""));
   }
 
   // endregion
@@ -298,7 +298,7 @@ class FormattingWalkerTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(new TextEdit(new Range(new Position(2, 1), new Position(3, 0)), "\n\n"));
+        .containsExactly(new TextEdit(new Range(new Position(3, 0), new Position(3, 0)), "\n"));
   }
 
   @Test
@@ -311,7 +311,7 @@ class FormattingWalkerTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(new TextEdit(new Range(new Position(2, 1), new Position(3, 0)), "\n\n"));
+        .containsExactly(new TextEdit(new Range(new Position(3, 0), new Position(3, 0)), "\n"));
   }
 
   @Test
@@ -326,7 +326,7 @@ class FormattingWalkerTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(new TextEdit(new Range(new Position(1, 13), new Position(4, 0)), "\n\n"));
+        .containsExactly(new TextEdit(new Range(new Position(3, 0), new Position(4, 0)), ""));
   }
 
   @Test
@@ -343,7 +343,7 @@ class FormattingWalkerTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(new TextEdit(new Range(new Position(1, 1), new Position(5, 0)), "\n\n"));
+        .containsExactly(new TextEdit(new Range(new Position(3, 0), new Position(5, 0)), ""));
   }
 
   @Test
@@ -361,7 +361,7 @@ class FormattingWalkerTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(new TextEdit(new Range(new Position(1, 1), new Position(5, 0)), "\n\n"));
+        .containsExactly(new TextEdit(new Range(new Position(3, 0), new Position(5, 0)), ""));
   }
 
   @Test
@@ -434,8 +434,7 @@ class FormattingWalkerTest {
     final FormattingOptions options = new FormattingOptions(8, false, false, true, false);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits)
-        .containsExactly(
-            new TextEdit(new Range(new Position(1, 0), new Position(2, 0)), "# comment\r\n"));
+        .containsExactly(new TextEdit(new Range(new Position(1, 9), new Position(1, 11)), ""));
   }
 
   // region: Pragma

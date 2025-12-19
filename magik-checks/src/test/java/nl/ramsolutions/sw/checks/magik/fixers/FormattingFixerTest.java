@@ -94,6 +94,6 @@ class FormattingFixerTest {
         .containsOnly(
             new CodeAction(
                 "Fix formatting",
-                new TextEdit(new Range(new Position(1, 7), new Position(2, 0)), "\n")));
+                new TextEdit(new Range(new Position(1, 7), new Position(1, 9)), "")));
   }
 }
