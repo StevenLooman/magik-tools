@@ -159,7 +159,7 @@ class FormattingProviderTest {
     assertThat(edits)
         .containsOnly(
             new TextEdit(new Range(new Position(1, 6), new Position(1, 6)), " "),
-            new TextEdit(new Range(new Position(1, 8), new Position(1, 10)), " "));
+            new TextEdit(new Range(new Position(1, 9), new Position(1, 10)), ""));
   }
 
   @Test
@@ -177,6 +177,6 @@ class FormattingProviderTest {
     final List<TextEdit> edits = this.getEdits(code);
 
     assertThat(edits)
-        .containsOnly(new TextEdit(new Range(new Position(1, 7), new Position(2, 0)), "\n"));
+        .containsOnly(new TextEdit(new Range(new Position(1, 7), new Position(1, 9)), ""));
   }
 }

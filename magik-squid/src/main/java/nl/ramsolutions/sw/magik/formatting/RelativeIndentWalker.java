@@ -217,7 +217,7 @@ public class RelativeIndentWalker extends FormattingWalker {
   private void handleTokenNode(final Token token, final AstNode node) {
     // Determine what we are, and dispatch.
     final AstNode interestNode =
-        AstQuery.getSelfOrAncestorUpTo(node, MagikGrammar.MAGIK, RelativeIndentWalker.NODE_TYPES);
+        AstQuery.getFirstAncestorOrSelf(node, RelativeIndentWalker.NODE_TYPES);
     if (interestNode.is(RelativeIndentWalker.BACKSTOP_NODE_TYPES)) {
       this.ensureIndent(token, 0);
     } else if (interestNode.is(RelativeIndentWalker.HANDLING_NODE_TYPES)) {
@@ -515,9 +515,11 @@ public class RelativeIndentWalker extends FormattingWalker {
 
     // Find parent construct to indent from.
     final AstNode parentConstruct =
-        AstQuery.getSelfOrAncestorUpTo(
-            usedNode, MagikGrammar.MAGIK, RelativeIndentWalker.ALL_CONSTRUCT_NODE_TYPES);
-    if (parentConstruct == null) {
+        AstQuery.getFirstAncestorOrSelf(
+            usedNode,
+            RelativeIndentWalker.ALL_CONSTRUCT_NODE_TYPES,
+            RelativeIndentWalker.BACKSTOP_NODE_TYPES);
+    if (parentConstruct.is(MagikGrammar.MAGIK)) {
       // No parent construct, so no indent.
       this.ensureIndent(commentToken, 0);
     } else {
