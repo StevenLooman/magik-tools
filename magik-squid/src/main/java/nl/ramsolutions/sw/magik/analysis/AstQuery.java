@@ -114,36 +114,6 @@ public final class AstQuery {
   }
 
   /**
-   * Get self or any ancestor of {@link AstNode} which are of one of the given types, up to the
-   * given stop type.
-   *
-   * <p>If node is of any of the given types, it is returned.
-   *
-   * @param node {@link AstNode} to query
-   * @param stopType {@link AstNodeType} to stop at.
-   * @param nodeTypes {@link AstNodeType}s to match
-   * @return {@link AstNode} which matches query, {@code null} if not found.
-   */
-  @CheckForNull
-  public static AstNode getSelfOrAncestorUpTo(
-      final AstNode node, final AstNodeType stopType, final AstNodeType... nodeTypes) {
-    AstNode current = node;
-    while (current != null) {
-      if (current.is(nodeTypes)) {
-        return current;
-      }
-
-      if (current.is(stopType)) {
-        return null;
-      }
-
-      current = current.getParent();
-    }
-
-    return null;
-  }
-
-  /**
    * Get the first ancestor of {@link AstNode} which is of one of the given types.
    *
    * @param node {@link AstNode} to query

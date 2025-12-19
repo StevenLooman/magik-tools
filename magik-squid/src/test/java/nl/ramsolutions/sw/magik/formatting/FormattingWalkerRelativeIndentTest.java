@@ -47,7 +47,7 @@ class FormattingWalkerRelativeIndentTest {
   void testIndentBlockStatement(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(new TextEdit(new Range(new Position(1, 6), new Position(2, 0)), "\n\t"));
+        .containsExactly(new TextEdit(new Range(new Position(2, 0), new Position(2, 0)), "\t"));
   }
 
   @Test
@@ -60,8 +60,7 @@ class FormattingWalkerRelativeIndentTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(
-            new TextEdit(new Range(new Position(1, 6), new Position(3, 0)), "\n\t# comment\n"));
+        .containsExactly(new TextEdit(new Range(new Position(2, 0), new Position(2, 0)), "\t"));
   }
 
   @Test
@@ -77,8 +76,8 @@ class FormattingWalkerRelativeIndentTest {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
         .containsExactly(
-            new TextEdit(new Range(new Position(1, 14), new Position(2, 0)), "\n    "),
-            new TextEdit(new Range(new Position(3, 5), new Position(4, 0)), "\n\t"));
+            new TextEdit(new Range(new Position(2, 0), new Position(2, 0)), "    "),
+            new TextEdit(new Range(new Position(4, 0), new Position(4, 0)), "\t"));
   }
 
   @Test
@@ -107,11 +106,11 @@ class FormattingWalkerRelativeIndentTest {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
         .containsExactly(
-            new TextEdit(new Range(new Position(1, 11), new Position(2, 0)), "\n     "),
-            new TextEdit(new Range(new Position(2, 5), new Position(3, 2)), "\n\t     "),
-            new TextEdit(new Range(new Position(3, 6), new Position(4, 0)), "\n     "),
-            new TextEdit(new Range(new Position(4, 5), new Position(5, 2)), "\n\t     "),
-            new TextEdit(new Range(new Position(5, 6), new Position(6, 0)), "\n     "));
+            new TextEdit(new Range(new Position(2, 0), new Position(2, 0)), "     "),
+            new TextEdit(new Range(new Position(3, 0), new Position(3, 0)), "\t   "),
+            new TextEdit(new Range(new Position(4, 0), new Position(4, 0)), "     "),
+            new TextEdit(new Range(new Position(5, 0), new Position(5, 0)), "\t   "),
+            new TextEdit(new Range(new Position(6, 0), new Position(6, 0)), "     "));
   }
 
   @ParameterizedTest
@@ -333,7 +332,7 @@ class FormattingWalkerRelativeIndentTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(new TextEdit(new Range(new Position(1, 4), new Position(2, 0)), "\n\t"));
+        .containsExactly(new TextEdit(new Range(new Position(2, 0), new Position(2, 0)), "\t"));
   }
 
   @Test
@@ -357,8 +356,7 @@ class FormattingWalkerRelativeIndentTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(
-            new TextEdit(new Range(new Position(1, 0), new Position(2, 0)), "# comment 1\n"));
+        .containsExactly(new TextEdit(new Range(new Position(1, 0), new Position(1, 1)), ""));
   }
 
   @Test
@@ -370,8 +368,7 @@ class FormattingWalkerRelativeIndentTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(
-            new TextEdit(new Range(new Position(1, 1), new Position(3, 0)), "\n# comment 1\n"));
+        .containsExactly(new TextEdit(new Range(new Position(2, 0), new Position(2, 1)), ""));
   }
 
   @Test
@@ -423,7 +420,7 @@ class FormattingWalkerRelativeIndentTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(new TextEdit(new Range(new Position(1, 3), new Position(2, 1)), "\n"));
+        .containsExactly(new TextEdit(new Range(new Position(2, 0), new Position(2, 1)), ""));
   }
 
   @Test
@@ -476,7 +473,7 @@ class FormattingWalkerRelativeIndentTest {
     final FormattingOptions options = new FormattingOptions(8, false, false, true, false);
     final List<TextEdit> edits = this.getEdits(code, options);
     assertThat(edits)
-        .containsExactly(new TextEdit(new Range(new Position(1, 6), new Position(2, 0)), "\r\n\t"));
+        .containsExactly(new TextEdit(new Range(new Position(2, 0), new Position(2, 0)), "\t"));
   }
 
   @Test
