@@ -351,7 +351,7 @@ class FormattingWalkerRelativeIndentTest {
   void testCommentsLineBefore() {
     final String code =
         """
-         # comment 1
+        	# comment 1
         a
         """;
     final List<TextEdit> edits = this.getEdits(code);
@@ -364,7 +364,7 @@ class FormattingWalkerRelativeIndentTest {
     final String code =
         """
         a
-         # comment 1
+        	# comment 1
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)

@@ -128,6 +128,25 @@ public final class AstQuery {
   }
 
   /**
+   * Get the first ancestor of {@link AstNode}, or self, which is of one of the given types.
+   *
+   * @param node {@link AstNode} to query
+   * @param nodeTypes {@link AstNodeType}s to match
+   * @return {@link AstNode} which matches query, {@code null} if not found.
+   */
+  @CheckForNull
+  public static AstNode getFirstAncestorOrSelf(
+      final AstNode node, final AstNodeType[]... nodeTypes) {
+    final AstNodeType[] flattenedNodeTypes =
+        Arrays.stream(nodeTypes).flatMap(Arrays::stream).distinct().toArray(AstNodeType[]::new);
+    if (node.is(flattenedNodeTypes)) {
+      return node;
+    }
+
+    return node.getFirstAncestor(flattenedNodeTypes);
+  }
+
+  /**
    * Get the first child {@link Token} which is any of the given values (case ignored).
    *
    * @param node Node to check.
