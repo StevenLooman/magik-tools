@@ -14,6 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+/**
+ * Test cases for {@link RelativeIndentWalker}.
+ *
+ * <p>Note that the tab width is set to 8 spaces (default) in these tests, to match the Magik
+ * default.
+ */
 class FormattingWalkerRelativeIndentTest {
 
   private List<TextEdit> getEdits(final String code) {
@@ -81,7 +87,7 @@ class FormattingWalkerRelativeIndentTest {
   }
 
   @Test
-  void testIndentCommentsAfterStatement() { // NOSONAR: Don't group tests.
+  void testIndentCommentsAfterStatement() {
     final String code =
         """
         _method a.b(a, b, c)
@@ -139,6 +145,29 @@ class FormattingWalkerRelativeIndentTest {
         		y,
         		z)
         """,
+        """
+        a[
+        	x,
+        	y,
+        	z]
+        """,
+        """
+        a[x,
+          y,
+          z]
+        """,
+        """
+        a[x
+          , y
+          , z]
+        """,
+        """
+        a <<
+        	b[
+        		x,
+        		y,
+        		z]
+        """,
       })
   void testIndentArguments(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
@@ -159,9 +188,9 @@ class FormattingWalkerRelativeIndentTest {
     assertThat(edits).isEmpty();
   }
 
-  @Test
-  void testIndentIfElif() {
-    final String code =
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         """
         _if a
         _then
@@ -172,7 +201,24 @@ class FormattingWalkerRelativeIndentTest {
         _else
         	show(:c)
         _endif
-        """;
+        """,
+        """
+        _if a
+        _then
+        	_if b
+        	_then
+        		show(:b)
+        	_endif
+        _endif
+        """,
+        """
+        _if a _then show(:a)
+        _elif b _then show(:b)
+        _else show(:c)
+        _endif
+        """,
+      })
+  void testIndentIfElif(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
@@ -194,6 +240,18 @@ class FormattingWalkerRelativeIndentTest {
         	a <<
         	10
         """,
+        """
+        _constant a <<
+        	10
+        """,
+        """
+        _global a <<
+        	10
+        """,
+        """
+        _dynamic a <<
+        	10
+        """,
       })
   void testIndentVariableDefinitionAssignment(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
@@ -206,21 +264,96 @@ class FormattingWalkerRelativeIndentTest {
         """
         _local a << {
         		    10
-        	    }
+        }
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
 
-  @Test
-  void testIndentFluentInterface() {
-    final String code =
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         """
         obj.
         	method1().
         	method2().
         	method3()
-        """;
+        """,
+        """
+        obj.method1(
+        	a,
+        	b).
+        	method2()
+        """,
+        """
+        a <<
+        	obj.
+        	method1().
+        	method2()
+        """,
+      })
+  void testIndentFluentInterface(final String code) {
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        a << obj.method(
+        	x,
+        	y)
+        """,
+        """
+        _local a << obj.method(
+        	x,
+        	y)
+        """,
+        """
+        a << obj.
+        	method()
+        """,
+        """
+        (a, b) << obj.method(
+        	x,
+        	y)
+        """,
+      })
+  void testIndentMethodInvocationWithAssignment(final String code) {
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        a.call(10) << 20
+        """,
+        """
+        a.call(10) <<
+        	20
+        """,
+        """
+        a.call(
+        	10) <<
+        	20
+        """,
+        """
+        a[1] << 20
+        """,
+        """
+        a[1] <<
+        	20
+        """,
+        """
+        a[
+        	1] <<
+        	20
+        """,
+      })
+  void testIndentAssignmentToMethodInvocation(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
@@ -264,8 +397,12 @@ class FormattingWalkerRelativeIndentTest {
         _local a << _loop
         	    _endloop
         """,
+        """
+        _local a << _for i _over 1.upto(20) _loop
+        	    _endloop
+        """,
       })
-  void testIndentAssignmentConstructSingleLine(final String code) {
+  void testIndentAssignmentConstructSameLine(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
@@ -318,7 +455,7 @@ class FormattingWalkerRelativeIndentTest {
         	_endloop
         """,
       })
-  void testIndentAssignmentConstructMultiLine(final String code) {
+  void testIndentAssignmentConstructNextLine(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
@@ -371,9 +508,9 @@ class FormattingWalkerRelativeIndentTest {
         .containsExactly(new TextEdit(new Range(new Position(2, 0), new Position(2, 1)), ""));
   }
 
-  @Test
-  void testBinaryExpressionMultiple() {
-    final String code =
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         """
         _if a? _andif
             b? _andif
@@ -381,13 +518,38 @@ class FormattingWalkerRelativeIndentTest {
         _then
         	do()
         _endif
-        """;
+        """,
+        """
+        _if a? _orif
+            b? _orif
+            c?
+        _then
+        	do()
+        _endif
+        """,
+        """
+        _if a? _andif
+            b? _orif
+            c?
+        _then
+        	do()
+        _endif
+        """,
+        """
+        _if a? _xor
+            b?
+        _then
+        	do()
+        _endif
+        """,
+      })
+  void testBinaryExpressionMultiple(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
 
   @Test
-  void testLineUpConditionalExpression() { // NOSONAR
+  void testLineUpConditionalExpression() {
     final String code =
         """
         _if a? _is _false _andif
@@ -400,7 +562,7 @@ class FormattingWalkerRelativeIndentTest {
   }
 
   @Test
-  void testLineUpAndExpression() { // NOSONAR
+  void testLineUpAndExpression() {
     final String code =
         """
         x? <<
@@ -435,7 +597,7 @@ class FormattingWalkerRelativeIndentTest {
   }
 
   @Test
-  void testForFinally() { // NOSONAR
+  void testForFinally() {
     final String code =
         """
         _for i _over 1.upto(10)
@@ -448,16 +610,44 @@ class FormattingWalkerRelativeIndentTest {
     assertThat(edits).isEmpty();
   }
 
-  @Test
-  void testProtect() { // NOSONAR
-    final String code =
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         """
         _protect
         	1
         _protection
         	2
         _endprotect
-        """;
+        """,
+        """
+        _try
+        	do_something()
+        _when error
+        	handle_error()
+        _endtry
+        """,
+        """
+        _try _with cond
+        	do_something()
+        _when warning
+        	handle_warning()
+        _when error
+        	handle_error()
+        _endtry
+        """,
+        """
+        _catch :tag
+        	do_something()
+        _endcatch
+        """,
+        """
+        _lock _self
+        	do_something()
+        _endlock
+        """,
+      })
+  void testProtect(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
@@ -477,7 +667,7 @@ class FormattingWalkerRelativeIndentTest {
   }
 
   @Test
-  void testProcDefinitionAsArgument() { // NOSONAR
+  void testProcDefinitionAsArgument() {
     final String code =
         """
         coll.select(predicate.using(
@@ -487,8 +677,34 @@ class FormattingWalkerRelativeIndentTest {
     assertThat(edits).isEmpty();
   }
 
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _proc(param)
+        	## @param {sw:integer} param Test param.
+        _endproc
+        """,
+        """
+        _local prc <<
+        	_proc(param)
+        		## @param {sw:integer} param Test param.
+        	_endproc
+        """,
+        """
+        _self.do(
+        	_proc(param)
+        		## @param {sw:integer} param Test param.
+        	_endproc)
+        """,
+      })
+  void testProcDefinitionWithComment(final String code) {
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
   @Test
-  void testMethodIf() { // NOSONAR
+  void testMethodIf() {
     final String code =
         """
         _method a.a
@@ -497,6 +713,167 @@ class FormattingWalkerRelativeIndentTest {
         	_endif
         _endmethod
         """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testNestingForIf() {
+    final String code =
+        """
+        _for i _over 1.upto(20)
+        _loop
+        	_if a?
+        	_then
+        	_endif
+        _endloop
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testAssignSimpleVectorWithExpression() {
+    final String code =
+        """
+        _local a << {
+        	b + 1
+        }
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _method a.b
+        	_block
+        		do_something()
+        	_endblock
+        _endmethod
+        """,
+        """
+        _method a.b
+        	_try
+        		do_something()
+        	_when error
+        		handle_error()
+        	_endtry
+        _endmethod
+        """,
+      })
+  void testNestedConstructsInMethod(final String code) {
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _loop
+        	_leave
+        _endloop
+        """,
+        """
+        _loop @outer
+        	_loop
+        		_leave @outer
+        	_endloop
+        _endloop
+        """,
+        """
+        _loop
+        	_continue
+        _endloop
+        """,
+        """
+        _loop @outer
+        	_loop
+        		_continue @outer
+        	_endloop
+        _endloop
+        """,
+        """
+        _loop
+        	_leave _with result
+        _endloop
+        """,
+      })
+  void testLeaveAndContinue(final String code) {
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _handling error _with _default
+        _block
+        	do_something()
+        _endblock
+        """,
+        """
+        _handling warning, error _with
+        	_proc(cond)
+        		write(cond)
+        	_endproc
+        _block
+        	do_something()
+        _endblock
+        """,
+        """
+        _handling error
+        	_with _default
+        _block
+        	do_something()
+        _endblock
+        """,
+      })
+  void testHandling(final String code) {
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        (a, b, c) << (1, 2, 3)
+        """,
+        """
+        _local (a, b) << obj.method()
+        """,
+      })
+  void testMultiValueAssignment(final String code) {
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _throw :error
+        """,
+        """
+        _throw :error _with details
+        """,
+        """
+        _block
+        	_throw :error
+        _endblock
+        """,
+        """
+        _catch :error
+        	_throw :error _with "message"
+        _endcatch
+        """,
+      })
+  void testThrow(final String code) {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits).isEmpty();
   }
