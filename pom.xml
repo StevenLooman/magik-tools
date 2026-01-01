@@ -411,6 +411,7 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.AstQuery</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.MagikAstWalker</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.RelativeIndentWalker</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.MagikTextDocumentService</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider</exclude>
                     <exclude>nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker</exclude>
@@ -453,7 +454,8 @@
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.stackTrace(long)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.slap.SlapProtocol.handleReplyMessage(java.nio.ByteBuffer)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.formatting.RelativeIndentWalker.handleTokenNode(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.RelativeIndentWalker.getParentNode(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.RelativeIndentWalker.indentTokenNode(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.MagikTextDocumentService.didSave(org.eclipse.lsp4j.DidSaveTextDocumentParams)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider.provideDefinitions(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider.provideHover(nl.ramsolutions.sw.magik.MagikTypedFile, org.eclipse.lsp4j.Position)</exclude>
