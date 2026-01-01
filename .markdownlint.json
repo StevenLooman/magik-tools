@@ -1,4 +1,9 @@
 {
   "default": true,
+  "MD010": {
+    "code_blocks": true,
+    "ignore_code_languages": ["magik"],
+    "spaces_per_tab": 8
+  },
   "MD013": { "line_length": 250 }
 }

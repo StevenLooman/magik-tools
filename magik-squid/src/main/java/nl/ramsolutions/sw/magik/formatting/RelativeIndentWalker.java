@@ -483,7 +483,7 @@ public class RelativeIndentWalker extends FormattingWalker {
     // Choose indent anchor: within argument/parameter lists, indent from the brace (align like
     // first argument). Otherwise, indent from the start of the line (assignment/standalone).
     final boolean inArguments =
-      parentNode.getFirstAncestor(MagikGrammar.ARGUMENTS, MagikGrammar.PARAMETERS) != null;
+        parentNode.getFirstAncestor(MagikGrammar.ARGUMENTS, MagikGrammar.PARAMETERS) != null;
     final Token indentFromToken = inArguments ? referenceToken : firstTextTokenOnLine;
 
     // Closing braces should line up with the start of the line, not the opening brace
