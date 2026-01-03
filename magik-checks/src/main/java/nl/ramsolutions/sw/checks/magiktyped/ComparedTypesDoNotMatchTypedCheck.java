@@ -61,7 +61,7 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
       final AstNode receiverNode = helper.getReceiverNode();
       final TypeString receiverTypeStr =
           state.getNodeType(receiverNode).get(0, TypeString.UNDEFINED);
-      if (receiverTypeStr.isUndefined()) {
+      if (receiverTypeStr.isUndefined() || receiverTypeStr.equals(TypeString.SW_OBJECT)) {
         return;
       }
 
