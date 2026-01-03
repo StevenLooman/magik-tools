@@ -65,7 +65,10 @@ public class AssignedTypeDoesNotMatchSlotTypeTypedCheck extends MagikTypedCheck 
                   return;
                 }
 
-                final String message = MESSAGE.formatted(slotType, assignedType);
+                final String slotTypeFullString = slotType.getFullString();
+                final String assignedTypeFullString = assignedType.getFullString();
+                final String message =
+                    MESSAGE.formatted(slotTypeFullString, assignedTypeFullString);
                 this.addIssue(slotNode, message);
               });
     }
