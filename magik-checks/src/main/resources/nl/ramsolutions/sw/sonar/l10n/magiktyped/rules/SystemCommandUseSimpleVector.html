@@ -1,0 +1,17 @@
+<p>Use simple_vector for sw:system.do_command() and friends</p>
+<h2>Explanation</h2>
+<p>When using <code>sw:system.do_command()</code>, <code>sw:system.start_command()</code>, <code>sw:system.start_command_with_io()</code> or similar functions to execute system commands, it is recommended to use a <code>simple_vector</code> to pass the command. This helps to avoid command injection vulnerabilities, as the command and its arguments are clearly separated.</p>
+<p>An example where malicious user input leads to command injection:</p>
+<pre>
+_local user_input << "file.txt /etc/passwd" # Something a mailcious user entered.
+_local command << write_string("/bin/cat ", user_input)
+system.do_command(command)
+</pre>
+<p>In this example, the user input contains multiple space-separated values that will be interpreted as separate command arguments. When the command string <code>"/bin/cat file.txt /etc/passwd"</code> is executed, it will read both <code>file.txt</code> and <code>/etc/passwd</code>, allowing the malicious user to access sensitive system files.</p>
+<p>To mitigate this risk, use a <code>simple_vector</code> to pass the command and its arguments separately:</p>
+<pre>
+_local user_input << "file.txt /etc/passwd" # Something a mailcious user entered.
+_local command << {"/bin/cat", user_input}
+system.do_command(command)
+</pre>
+<p>In this corrected example, the entire user input is treated as a single argument to the command. The system will attempt to open a file literally named <code>"file.txt /etc/passwd"</code> (including the space), which prevents the injection attack. By using a <code>simple_vector</code>, each element is passed as a distinct, separate argument that cannot be further split or interpreted.</p>
