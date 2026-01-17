@@ -1,0 +1,16 @@
+{
+  "title": "Use simple_vector for sw:system.do_command() and friends",
+  "type": "VULNERABILITY",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "typing",
+    "vulnerability"
+  ],
+  "defaultSeverity": "Critical",
+  "ruleSpecification": "SystemCommandUseSimpleVector",
+  "sqKey": "system-command-use-simple-vector"
+}
