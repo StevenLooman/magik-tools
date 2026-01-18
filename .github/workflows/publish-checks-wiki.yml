@@ -5,8 +5,8 @@ on:
     paths:
       - .github/workflows/publish-checks-wiki.yml
       - .github/scripts/generate-checks-pages.py
-      - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules/*.html
-      - magik-checks/src/main/java/nl/ramsolutions/sw/magik/checks/checks/*Check.java
+      - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/*/rules/*.html
+      - magik-checks/src/main/java/nl/ramsolutions/sw/checks/*/*Check.java
 concurrency:
   group: publish-checks-wiki
   cancel-in-progress: true
