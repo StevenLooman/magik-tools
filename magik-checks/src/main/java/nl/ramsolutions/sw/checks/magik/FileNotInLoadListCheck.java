@@ -41,10 +41,12 @@ public class FileNotInLoadListCheck extends MagikCheck {
       return;
     }
 
-    // strip .extension
-    final String filename = path.getFileName().toString().replaceFirst("[.][^.]+$", "");
+    final String filename = path.getFileName().toString();
+    final String filenameWithoutExtension =
+        filename.replaceFirst("[.][^.]+$", ""); // strip .extension
     for (final String line : lines) {
-      if (line.trim().equals(filename)) {
+      final String strippedLine = line.split("#")[0].trim();
+      if (strippedLine.equals(filename) || strippedLine.equals(filenameWithoutExtension)) {
         return;
       }
     }

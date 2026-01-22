@@ -1,2 +1,4 @@
 in_load_list
 test_exemplar
+also_in_load_list # This is a comment
+this_is_also_in_load_list.magik
