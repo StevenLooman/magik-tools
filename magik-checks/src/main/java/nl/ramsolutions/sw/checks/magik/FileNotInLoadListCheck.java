@@ -1,13 +1,12 @@
 package nl.ramsolutions.sw.checks.magik;
 
 import com.sonar.sslr.api.AstNode;
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import nl.ramsolutions.sw.checks.MagikCheck;
+import nl.ramsolutions.sw.loadlist.LoadListDefinition;
+import nl.ramsolutions.sw.loadlist.LoadListFile;
 import org.sonar.check.Rule;
 
 /** Check if file is in load_list.txt. */
@@ -22,29 +21,22 @@ public class FileNotInLoadListCheck extends MagikCheck {
   @Override
   protected void walkPreMagik(final AstNode node) {
     final URI uri = this.getMagikFile().getUri();
+    final LoadListFile loadListFile = LoadListFile.getLoadListFileForUri(uri);
+    if (loadListFile == null) {
+      return;
+    }
+
+    final LoadListDefinition loadListDefinition = loadListFile.getLoadListDefinition();
+    final List<String> entries = loadListDefinition.getFilePaths();
+
+    // Get the actual filename, with extension.
     final Path path = Path.of(uri);
-    if (path == null) {
-      return;
-    }
+    final String filename = path.getFileName().toString();
+    for (final String entry : entries) {
+      // Resolve the entry: if no '.', append '.magik', otherwise use as-is.
+      final String resolvedFilename = entry.contains(".") ? entry : entry + ".magik";
 
-    final Path loadListPath = path.resolveSibling("load_list.txt");
-    final File loadListFile = loadListPath.toFile();
-    if (!loadListFile.exists()) {
-      return;
-    }
-
-    final List<String> lines;
-    try {
-      lines = Files.readAllLines(loadListPath);
-    } catch (IOException ex) {
-      // silently ignore this
-      return;
-    }
-
-    // strip .extension
-    final String filename = path.getFileName().toString().replaceFirst("[.][^.]+$", "");
-    for (final String line : lines) {
-      if (line.trim().equals(filename)) {
+      if (resolvedFilename.equals(filename)) {
         return;
       }
     }
