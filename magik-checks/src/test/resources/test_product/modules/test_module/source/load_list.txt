@@ -1,2 +1,4 @@
 in_load_list
+in_load_list_2 # Comment
+in_load_list_3.magik
 test_exemplar
