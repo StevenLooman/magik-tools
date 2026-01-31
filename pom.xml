@@ -92,7 +92,7 @@
     <gson.version>2.13.2</gson.version>
     <jline.version>3.30.5</jline.version>
 
-    <assertj-core.version>3.27.6</assertj-core.version>
+    <assertj-core.version>3.27.7</assertj-core.version>
 
     <sonar.organization>stevenlooman</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
