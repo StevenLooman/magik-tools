@@ -146,7 +146,7 @@ function getCommandLine(runAliasPath: fs.PathLike, aliasesPath: fs.PathLike, ent
 	if (useWrapper) {
 		const javaExec = getJavaExec();
 		if (javaExec == null) {
-			const errorMessage = 'Could locate java executable, either set Java Home setting ("magik.javaHome") or JAVA_HOME environment variable.'
+			const errorMessage = 'Could not locate java executable, either set Java Home setting ("magik.javaHome") or JAVA_HOME environment variable.'
 			vscode.window.showWarningMessage(errorMessage);
 			throw new Error(errorMessage);
 		}

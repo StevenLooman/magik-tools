@@ -39,7 +39,7 @@ export class MagikLanguageClient implements vscode.Disposable {
 	public start() {
 		const javaExec = getJavaExec();
 		if (javaExec == null) {
-			vscode.window.showWarningMessage('Could locate java executable, either set Java Home setting ("magik.javaHome") or JAVA_HOME environment variable.');
+			vscode.window.showWarningMessage('Could not locate java executable, either set Java Home setting ("magik.javaHome") or JAVA_HOME environment variable.');
 			return;
 		}
 

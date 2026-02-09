@@ -29,7 +29,7 @@ class DebugAdapterExecutableFactory implements vscode.DebugAdapterDescriptorFact
 	createDebugAdapterDescriptor(_session: vscode.DebugSession, _executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
 		const javaExec = getJavaExec();
 		if (javaExec == null) {
-			vscode.window.showWarningMessage('Could locate java executable, either set Java Home setting ("magik.javaHome") or JAVA_HOME environment variable.');
+			vscode.window.showWarningMessage('Could not locate java executable, either set Java Home setting ("magik.javaHome") or JAVA_HOME environment variable.');
 			return;
 		}
 		const jar = path.join(__dirname, '..', '..', 'server', 'magik-debug-adapter-' + MAGIK_TOOLS_VERSION + '.jar');
