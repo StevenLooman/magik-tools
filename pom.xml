@@ -54,7 +54,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <junit.version>6.0.1</junit.version>
+    <junit.version>6.0.2</junit.version>
     <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
     <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
     <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
@@ -68,8 +68,8 @@
     <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
     <spotbugs-maven-plugin.version>4.8.3.1</spotbugs-maven-plugin.version>
     <spotbugs.version>4.9.8</spotbugs.version>
-    <com.github.marschall-memoryfilesystem.version>2.8.1</com.github.marschall-memoryfilesystem.version>
-    <openrewrite.rewrite-maven-plugin.version>6.22.1</openrewrite.rewrite-maven-plugin.version>
+    <com.github.marschall-memoryfilesystem.version>2.8.2</com.github.marschall-memoryfilesystem.version>
+    <openrewrite.rewrite-maven-plugin.version>6.28.1</openrewrite.rewrite-maven-plugin.version>
 
     <!-- JaCoCo thresholds. Increase gradually as you add tests. -->
     <jacoco.unit-tests.limit.instruction-ratio>0%</jacoco.unit-tests.limit.instruction-ratio>
@@ -80,11 +80,11 @@
     <sonar.version>9.4.0.54424</sonar.version>
     <sonar-analyzer-commons.version>2.21.0.4626</sonar-analyzer-commons.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
-    <sonar-impl.version>25.12.0.117093</sonar-impl.version>
+    <sonar-impl.version>26.1.0.118079</sonar-impl.version>
     <sonar-maven.version>5.5.0.6356</sonar-maven.version>
     <sonar-maven-packaging-plugin.version>1.25.1.3002</sonar-maven-packaging-plugin.version>
     <sslr-squid-bridge.version>2.7.1.392</sslr-squid-bridge.version>
-    <sslr.version>1.24.0.633</sslr.version>
+    <sslr.version>1.25.1.3886</sslr.version>
     <slf4j.version>2.0.17</slf4j.version>
     <logback.version>1.0.13</logback.version>
     <lsp4j.version>0.24.0</lsp4j.version>
@@ -92,7 +92,7 @@
     <gson.version>2.13.2</gson.version>
     <jline.version>3.30.5</jline.version>
 
-    <assertj-core.version>3.27.6</assertj-core.version>
+    <assertj-core.version>3.27.7</assertj-core.version>
 
     <sonar.organization>stevenlooman</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>

@@ -97,12 +97,18 @@ public class LoadListFile extends OpenedFile {
       return null;
     }
 
-    final Path path = Path.of(uri);
-    // Try to find load_list.txt first
-    Path loadListPath = SourceFileScanner.searchFileUpwards(path, "load_list.txt");
-    if (loadListPath == null) {
-      // Try to find patch_list.txt as fallback
-      loadListPath = SourceFileScanner.searchFileUpwards(path, "patch_list.txt");
+    // Try to find load_list.txt first in the current directory,
+    // then try patch_list.txt as fallback.
+    final Path parentPath = Path.of(uri).getParent();
+    final Path swLoadListPath = parentPath.resolve(SourceFileScanner.SW_LOAD_LIST);
+    final Path swPatchListPath = parentPath.resolve(SourceFileScanner.SW_PATCH_LIST);
+    final Path loadListPath;
+    if (Files.exists(swLoadListPath)) {
+      loadListPath = swLoadListPath;
+    } else if (Files.exists(swPatchListPath)) {
+      loadListPath = swPatchListPath;
+    } else {
+      loadListPath = null;
     }
 
     if (loadListPath == null) {
