@@ -145,11 +145,6 @@ function getCommandLine(runAliasPath: fs.PathLike, aliasesPath: fs.PathLike, ent
 	const useWrapper = vscode.workspace.getConfiguration().get('magik.useSessionWrapper', true);
 	if (useWrapper) {
 		const javaExec = getJavaExec();
-		if (javaExec == null) {
-			const errorMessage = 'Could locate java executable, either set Java Home setting ("magik.javaHome") or JAVA_HOME environment variable.'
-			vscode.window.showWarningMessage(errorMessage);
-			throw new Error(errorMessage);
-		}
 
 		const javaDebuggerOptions = '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,quiet=y,address=127.0.0.1:5008';
 		const jar = path.join(__dirname, '..', '..', 'server', 'magik-session-wrapper-' + MAGIK_TOOLS_VERSION + '.jar');
