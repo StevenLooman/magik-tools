@@ -58,7 +58,7 @@
     <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
     <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
     <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
-    <spotless.version>3.0.0</spotless.version>
+    <spotless.version>3.2.1</spotless.version>
     <google-java-format.version>1.22.0</google-java-format.version>
     <cleanthat.version>2.18</cleanthat.version>
     <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
