@@ -106,8 +106,8 @@
       "preLaunchTask": {
         "type": "npm",
         "script": "watch",
-        "path": "magik-language-server/client-vscode",
+        "path": "magik-language-server/client-vscode"
       }
     }
-  ],
+  ]
 }
