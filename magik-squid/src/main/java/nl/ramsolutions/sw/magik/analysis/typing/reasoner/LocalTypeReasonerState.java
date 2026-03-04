@@ -113,6 +113,7 @@ public class LocalTypeReasonerState {
    * @param result Type.
    */
   void setNodeIterType(final AstNode node, final ExpressionResultString result) {
+    LOGGER.trace("{} is of iter type: {}", node, result);
     this.nodeIterTypes.put(node, result);
   }
 
