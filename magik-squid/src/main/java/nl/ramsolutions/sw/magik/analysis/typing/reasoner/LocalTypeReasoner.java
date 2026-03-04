@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
+import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 
 /**
  * Reason over types in Magik code.
@@ -80,11 +81,6 @@ public class LocalTypeReasoner extends MagikAstWalker {
   protected void walkPostMethodDefinition(final AstNode node) {
     // TODO: Move this to somewhere else.
     this.expressionHandler.handleMethodDefinition(node);
-  }
-
-  @Override
-  protected void walkPostBody(final AstNode node) {
-    this.expressionHandler.handleBody(node);
   }
 
   @Override
@@ -198,6 +194,46 @@ public class LocalTypeReasoner extends MagikAstWalker {
     this.atomHandler.handleThread(node);
   }
 
+  @Override
+  protected void walkPostProcedureDefinition(final AstNode node) {
+    this.procedureDefinitionHandler.handleProcedureDefinition(node);
+  }
+
+  @Override
+  protected void walkPostBlock(AstNode node) {
+    this.atomHandler.handleBlock(node);
+  }
+
+  @Override
+  protected void walkPostLoop(AstNode node) {
+    this.atomHandler.handleLoop(node);
+  }
+
+  @Override
+  protected void walkPostIf(final AstNode node) {
+    this.atomHandler.handleIf(node);
+  }
+
+  @Override
+  protected void walkPostProtect(final AstNode node) {
+    this.atomHandler.handleProtect(node);
+  }
+
+  @Override
+  protected void walkPostTry(final AstNode node) {
+    this.atomHandler.handleTry(node);
+  }
+
+  @Override
+  protected void walkPostCatch(final AstNode node) {
+    this.atomHandler.handleCatch(node);
+  }
+
+  @Override
+  protected void walkPostLock(final AstNode node) {
+    this.atomHandler.handleLock(node);
+  }
+
   // endregion
 
   // region: Statements
@@ -229,11 +265,6 @@ public class LocalTypeReasoner extends MagikAstWalker {
   @Override
   protected void walkPostLoopbody(final AstNode node) {
     this.expressionHandler.handleLoopbody(node);
-  }
-
-  @Override
-  protected void walkPostProcedureDefinition(final AstNode node) {
-    this.procedureDefinitionHandler.handleProcedureDefinition(node);
   }
 
   @Override

@@ -6,10 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
-import nl.ramsolutions.sw.magik.analysis.helpers.ForNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -244,40 +242,19 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
 
     // Bind to identifiers, if any.
     final AstNode overNode = node.getParent();
+    final AstNode loopNode = overNode.getFirstChild(MagikGrammar.LOOP);
+    final AstNode bodyNode = loopNode.getFirstChild(MagikGrammar.BODY);
     final AstNode forNode = overNode.getParent();
     if (forNode.is(MagikGrammar.FOR)) {
-      final AstNode loopNode = overNode.getFirstChild(MagikGrammar.LOOP);
-      final AstNode bodyNode = loopNode.getFirstChild(MagikGrammar.BODY);
       if (bodyNode == null) {
         // Don't error on syntax error.
         return;
       }
 
-      final ForNodeHelper helper = new ForNodeHelper(forNode);
-      final List<AstNode> identifierNodes = helper.getLoopIdentifierNodes();
-      for (int i = 0; i < identifierNodes.size(); ++i) {
-        final AstNode identifierNode = identifierNodes.get(i);
-        final AstNode identifierPreviousNode = identifierNode.getPreviousSibling();
-        final TypeString typeStr;
-        if (identifierPreviousNode != null
-            && identifierPreviousNode.getTokenValue().equalsIgnoreCase("_gather")) {
-          typeStr = TypeString.SW_SIMPLE_VECTOR;
-        } else if (iteratorResult != null) {
-          typeStr = iteratorResult.get(i, TypeString.SW_UNSET);
-        } else {
-          typeStr = TypeString.UNDEFINED;
-        }
-
-        final ExpressionResultString result = new ExpressionResultString(typeStr);
-        this.state.setNodeType(identifierNode, result);
-
-        final GlobalScope globalScope = this.getGlobalScope();
-        final Scope scope = globalScope.getScopeForNode(bodyNode);
-        Objects.requireNonNull(scope);
-        final ScopeEntry scopeEntry = scope.getScopeEntry(identifierNode);
-        Objects.requireNonNull(scopeEntry);
-        this.state.setCurrentScopeEntryNode(scopeEntry, identifierNode);
-      }
+      final AstNode forVariablesNode = forNode.getFirstChild(MagikGrammar.FOR_VARIABLES);
+      final AstNode identifiersNode =
+          forVariablesNode.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER);
+      this.assignIdentifiersWithGatherTypes(bodyNode, identifiersNode, iteratorResult);
     }
   }
 
@@ -291,60 +268,8 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     final AstNode multiValueExprNode = node.getFirstChild(MagikGrammar.TUPLE);
     final ExpressionResultString result = this.state.getNodeType(multiValueExprNode);
 
-    // Find related node to store at.
-    final AstNode procMethodDefNode =
-        node.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION, MagikGrammar.METHOD_DEFINITION);
-
-    // Save results.
-    if (this.state.hasNodeType(procMethodDefNode)) {
-      // Combine types.
-      final ExpressionResultString existingResult = this.state.getNodeType(procMethodDefNode);
-      final ExpressionResultString combinedResult =
-          new ExpressionResultString(existingResult, result);
-      this.state.setNodeIterType(procMethodDefNode, combinedResult);
-    } else {
-      this.state.setNodeIterType(procMethodDefNode, result);
-    }
-  }
-
-  /**
-   * Handle body.
-   *
-   * @param node BODY node.
-   */
-  void handleBody(final AstNode node) {
-    // Get result from upper EXPRESSION.
-    final AstNode expressionNode = node.getFirstAncestor(MagikGrammar.EXPRESSION);
-    if (expressionNode == null) {
-      // Happens with a return, don't do anything.
-      return;
-    }
-
-    ExpressionResultString result = this.state.getNodeType(expressionNode);
-
-    // BODYs don't always have to result in something.
-    // Find STATEMENT -> RETURN/EMIT/LEAVE
-    AstNode resultingNode =
-        AstQuery.getFirstChildFromChain(
-            node, MagikGrammar.STATEMENT, MagikGrammar.RETURN_STATEMENT);
-    if (resultingNode == null) {
-      resultingNode =
-          AstQuery.getFirstChildFromChain(
-              node, MagikGrammar.STATEMENT, MagikGrammar.EMIT_STATEMENT);
-    }
-    if (resultingNode == null) {
-      resultingNode =
-          AstQuery.getFirstChildFromChain(
-              node, MagikGrammar.STATEMENT, MagikGrammar.LEAVE_STATEMENT);
-    }
-    if (resultingNode == null) {
-      // Result can also be an unset, as no resulting statement was found.
-      // TODO: but... "_block _block _return 1 _endblock _endblock"
-      result = new ExpressionResultString(result, ExpressionResultString.EMPTY);
-    }
-
-    // Set parent EXPRESSION result.
-    this.state.setNodeType(expressionNode, result);
+    // Store result on this node; the enclosing method/proc handler will collect it.
+    this.state.setNodeType(node, result);
   }
 
   /**
@@ -421,6 +346,8 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
   void handlePostfixExpression(final AstNode node) {
     final AstNode rightNode = node.getLastChild();
 
+    // TODO: Is this needed?
+
     // Copy type of child node to POSTFIX_EXPRESSION node.
     final ExpressionResultString callResult = this.state.getNodeType(rightNode);
     this.state.setNodeType(node, callResult);
@@ -436,11 +363,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
    * @param node METHOD_DEFINITION node.
    */
   void handleMethodDefinition(final AstNode node) {
-    // Technically, a method definition is not an expression... but this has to live
-    // somewhere.
-    if (!this.state.hasNodeType(node)) {
-      // Nothing was assigned to this node, so it must be empty.
-      this.state.setNodeType(node, ExpressionResultString.EMPTY);
-    }
+    // Collect return and iter types from descendant statements.
+    this.collectReturnAndIterTypes(node);
   }
 }
