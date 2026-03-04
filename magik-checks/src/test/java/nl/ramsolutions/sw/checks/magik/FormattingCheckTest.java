@@ -17,7 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 class FormattingCheckTest {
 
-  private static final String RELATIVE_INDENT_STRATEGY = "relative";
+  private static final String RELATIVE_INDENT_STRATEGY = "tab";
 
   @ParameterizedTest
   @ValueSource(
