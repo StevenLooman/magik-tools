@@ -265,6 +265,10 @@
           "environmentPath": {
             "type": "path",
             "description": "Override environment path"
+          },
+          "useSessionWrapper": {
+            "type": "boolean",
+            "description": "Override use session wrapper"
           }
         }
       }
