@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.analysis.helpers.ContinueLeaveStatementNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -133,16 +132,8 @@ class StatementHandler extends LocalTypeReasonerHandler {
       result = TypeStringParser.parseExpressionResultString(typeAnnotation, currentPackage);
     }
 
-    // Find related node.
-    final AstNode bodyNode = node.getFirstAncestor(MagikGrammar.BODY);
-    final AstNode expressionNode =
-        bodyNode.getFirstAncestor(
-            MagikGrammar.EXPRESSION, // for BLOCK etc
-            MagikGrammar.METHOD_DEFINITION, // for METHOD_DEFINITION
-            MagikGrammar.PROCEDURE_DEFINITION); // for PROC_DEFINITION
-
-    // Save results.
-    this.addNodeType(expressionNode, result);
+    // Store result on this node; the enclosing block/method/proc handler will collect it.
+    this.state.setNodeType(node, result);
   }
 
   /**
@@ -152,17 +143,20 @@ class StatementHandler extends LocalTypeReasonerHandler {
    */
   void handleLeave(final AstNode node) {
     // Get results.
-    final AstNode multiValueExprNode = node.getFirstChild(MagikGrammar.TUPLE);
-    final ExpressionResultString result =
-        multiValueExprNode != null
-            ? this.state.getNodeType(multiValueExprNode)
-            : ExpressionResultString.EMPTY;
+    final AstNode tupleNode = node.getFirstChild(MagikGrammar.TUPLE);
+    ExpressionResultString result =
+        tupleNode != null ? this.state.getNodeType(tupleNode) : ExpressionResultString.EMPTY;
 
-    // Find related BODY/EXPRESSION nodes.
-    final ContinueLeaveStatementNodeHelper helper = new ContinueLeaveStatementNodeHelper(node);
-    final AstNode bodyNode = helper.getRelatedBodyNode();
-    final AstNode expressionNode = bodyNode.getFirstAncestor(MagikGrammar.EXPRESSION);
-    this.addNodeType(expressionNode, result);
+    // Check for type annotation to override the result type.
+    final String typeAnnotation =
+        this.instructionReader.getInstructionForNode(node, TYPE_INSTRUCTION);
+    if (typeAnnotation != null) {
+      final String currentPackage = this.getCurrentPackage(node);
+      result = TypeStringParser.parseExpressionResultString(typeAnnotation, currentPackage);
+    }
+
+    // Store result on this node; the enclosing block/loop handler will collect it.
+    this.state.setNodeType(node, result);
   }
 
   /**
@@ -184,11 +178,7 @@ class StatementHandler extends LocalTypeReasonerHandler {
       result = TypeStringParser.parseExpressionResultString(typeAnnotation, currentPackage);
     }
 
-    // Find related node to store on.
-    final AstNode definitionNode =
-        node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
-
-    // Save results at returned node.
-    this.addNodeType(definitionNode, result);
+    // Store result on this node; the enclosing method/proc handler will collect it.
+    this.state.setNodeType(node, result);
   }
 }
