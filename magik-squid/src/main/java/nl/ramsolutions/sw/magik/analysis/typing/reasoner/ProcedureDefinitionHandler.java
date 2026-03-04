@@ -38,6 +38,9 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
 
     final ProcedureDefinition procDef = (ProcedureDefinition) definitions.iterator().next();
 
+    // Collect return and iter types from descendant statements.
+    this.collectReturnAndIterTypes(node);
+
     // Try to determine result if none was given via type-doc.
     final ProcedureDefinition finalProcDef =
         procDef.getReturnTypes().equals(ExpressionResultString.UNDEFINED)

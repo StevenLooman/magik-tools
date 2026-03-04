@@ -588,7 +588,7 @@ class LocalTypeReasonerTest {
   }
 
   @Test
-  void testLoopStatementUseIterator() {
+  void testLoopExpressionLeaveWithResult() {
     final String code =
         """
         _method object.test
@@ -658,7 +658,7 @@ class LocalTypeReasonerTest {
             Collections.emptyList(),
             null,
             null,
-            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY,
             new ExpressionResultString(TypeString.SW_INTEGER)));
 
     // Do analysis.
@@ -673,6 +673,87 @@ class LocalTypeReasonerTest {
         .isEqualTo(
             new ExpressionResultString(
                 TypeString.combine(TypeString.SW_INTEGER, TypeString.SW_UNSET)));
+  }
+
+  @Test
+  void testLoopExpressionIteratorReturnResult() {
+    final String code =
+        """
+        _method object.test
+            _return _for i _over 10.test_iter()
+                    _loop
+                    _endloop
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_INTEGER,
+            "test_iter()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_FLOAT),
+            ExpressionResultString.UNDEFINED));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert user:object.test type determined.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_FLOAT));
+  }
+
+  @Test
+  void testLoopExpressionIteratorFinallyResult() {
+    final String code =
+        """
+        _method object.test
+            _return _for i _over 10.test_iter()
+                    _loop
+                    _finally
+                    _endloop
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_INTEGER,
+            "test_iter()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_FLOAT),
+            ExpressionResultString.UNDEFINED));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert user:object.test type determined.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    assertThat(result).isEqualTo(ExpressionResultString.EMPTY);
   }
 
   @Test

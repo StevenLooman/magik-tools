@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.helpers.ContinueLeaveStatementNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -60,6 +61,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
    */
   void handlePrivate(final AstNode node) {
     final ExpressionResultString resultStr = new ExpressionResultString(TypeString.PRIVATE);
+    // TODO: Should use assignAtom?
     this.state.setNodeType(node, resultStr);
   }
 
@@ -205,5 +207,192 @@ class AtomHandler extends LocalTypeReasonerHandler {
             .findAny()
             .orElse(TypeString.UNDEFINED);
     this.assignAtom(node, slotTypeStr);
+  }
+
+  /**
+   * Handle block.
+   *
+   * @param node BLOCK node.
+   */
+  void handleBlock(final AstNode node) {
+    final AstNode bodyNode = node.getFirstChild(MagikGrammar.BODY);
+    if (bodyNode == null) {
+      return;
+    }
+
+    // Collect types from EMIT_STATEMENT nodes directly in this block's body.
+    node.getDescendants(MagikGrammar.EMIT_STATEMENT).stream()
+        .filter(emitNode -> emitNode.getFirstAncestor(MagikGrammar.BODY).equals(bodyNode))
+        .map(this.state::getNodeType)
+        .forEach(result -> this.addNodeType(node, result));
+
+    // Collect types from LEAVE_STATEMENT nodes targeting this block.
+    node.getDescendants(MagikGrammar.LEAVE_STATEMENT).stream()
+        .filter(
+            leaveNode -> {
+              final ContinueLeaveStatementNodeHelper helper =
+                  new ContinueLeaveStatementNodeHelper(leaveNode);
+              return helper.getRelatedBodyNode().equals(bodyNode);
+            })
+        .map(this.state::getNodeType)
+        .forEach(result -> this.addNodeType(node, result));
+
+    // Propagate to parent ATOM node.
+    if (this.state.hasNodeType(node)) {
+      this.assignAtom(node, this.state.getNodeType(node));
+    }
+  }
+
+  /**
+   * Handle loop.
+   *
+   * @param node LOOP node.
+   */
+  void handleLoop(final AstNode node) {
+    final AstNode atomNode = node.getFirstAncestor(MagikGrammar.ATOM);
+
+    // no leave, no finally, then 1: Assign iter call result to loop
+    //    leave,          *, then 2: Assign leave tuple to loop
+    // no leave,    finally, no leave, then 3: Assign empty to loop
+    // no leave,    finally,    leave, then 4: Assign leave tuple to loop
+
+    final AstNode loopBodyNode = node.getFirstChild(MagikGrammar.BODY);
+    if (loopBodyNode == null) {
+      return;
+    }
+
+    // Collect leave statements targeting this loop's body.
+    final List<AstNode> loopLeaveStatements =
+        loopBodyNode.getDescendants(MagikGrammar.LEAVE_STATEMENT).stream()
+            .filter(
+                leaveNode -> {
+                  final ContinueLeaveStatementNodeHelper helper =
+                      new ContinueLeaveStatementNodeHelper(leaveNode);
+                  return helper.getRelatedBodyNode().equals(loopBodyNode);
+                })
+            .toList();
+    final AstNode finallyNode = node.getFirstChild(MagikGrammar.FINALLY);
+    if (loopLeaveStatements.isEmpty() && finallyNode == null) {
+      // 1: No leaves and no finally: assign iter call result.
+      final AstNode overNode = node.getParent();
+      if (overNode.is(MagikGrammar.OVER)) {
+        final AstNode iterableExpressionNode =
+            overNode.getFirstChild(MagikGrammar.ITERABLE_EXPRESSION);
+        final AstNode iterableExpressionExpressionNode =
+            iterableExpressionNode.getFirstChild(MagikGrammar.EXPRESSION);
+        final ExpressionResultString callResult =
+            this.state.getNodeType(iterableExpressionExpressionNode);
+        this.addNodeType(atomNode, callResult);
+      }
+    } else if (!loopLeaveStatements.isEmpty()) {
+      // 2: Has leaves: collect leave types.
+      loopLeaveStatements.stream()
+          .map(this.state::getNodeType)
+          .forEach(result -> this.addNodeType(atomNode, result));
+
+      // Check if any leaves are guaranteed to execute (direct children of the loop body).
+      // If all leaves are inside nested constructs (e.g., _if), the loop might complete
+      // without hitting a leave, so include EMPTY to account for the sw:unset possibility.
+      final boolean hasGuaranteedLeave =
+          loopLeaveStatements.stream()
+              .anyMatch(
+                  leaveNode -> leaveNode.getFirstAncestor(MagikGrammar.BODY).equals(loopBodyNode));
+      if (!hasGuaranteedLeave) {
+        this.addNodeType(atomNode, ExpressionResultString.EMPTY);
+      }
+    } else if (finallyNode != null) {
+      final AstNode finallyBodyNode = finallyNode.getFirstChild(MagikGrammar.BODY);
+      // Collect leave statements targeting this loop from within the finally block.
+      final List<AstNode> finallyLeaveStatements =
+          finallyBodyNode.getDescendants(MagikGrammar.LEAVE_STATEMENT).stream()
+              .filter(
+                  leaveNode -> {
+                    final ContinueLeaveStatementNodeHelper helper =
+                        new ContinueLeaveStatementNodeHelper(leaveNode);
+                    return helper.getRelatedBodyNode().equals(loopBodyNode);
+                  })
+              .toList();
+      if (finallyLeaveStatements.isEmpty()) {
+        // 3: Finally without leaves: assign empty.
+        this.addNodeType(atomNode, ExpressionResultString.EMPTY);
+      } else {
+        // 4: Finally with leaves: collect leave types.
+        finallyLeaveStatements.stream()
+            .map(this.state::getNodeType)
+            .forEach(result -> this.addNodeType(atomNode, result));
+      }
+    }
+  }
+
+  /**
+   * Handle if expression.
+   *
+   * @param node IF node.
+   */
+  void handleIf(final AstNode node) {
+    this.collectBodyEmits(node);
+  }
+
+  /**
+   * Handle protect expression.
+   *
+   * @param node PROTECT node.
+   */
+  void handleProtect(final AstNode node) {
+    this.collectBodyEmits(node);
+  }
+
+  /**
+   * Handle try expression.
+   *
+   * @param node TRY node.
+   */
+  void handleTry(final AstNode node) {
+    this.collectBodyEmits(node);
+  }
+
+  /**
+   * Handle catch expression.
+   *
+   * @param node CATCH node.
+   */
+  void handleCatch(final AstNode node) {
+    this.collectBodyEmits(node);
+  }
+
+  /**
+   * Handle lock expression.
+   *
+   * @param node LOCK node.
+   */
+  void handleLock(final AstNode node) {
+    this.collectBodyEmits(node);
+  }
+
+  /**
+   * Collect emit results from body descendants of a body-containing atom (IF, PROTECT, TRY, CATCH,
+   * LOCK). Emits in nested blocks/loops are excluded as those constructs handle their own emits.
+   *
+   * <p>The filter checks that the emit's first ancestor BODY belongs directly to this node (at most
+   * one intermediate node like ELIF, ELSE, PROTECTION, WHEN between the BODY and this node).
+   *
+   * @param node The body-containing atom node.
+   */
+  private void collectBodyEmits(final AstNode node) {
+    node.getDescendants(MagikGrammar.EMIT_STATEMENT).stream()
+        .filter(
+            emitNode -> {
+              final AstNode bodyNode = emitNode.getFirstAncestor(MagikGrammar.BODY);
+              final AstNode bodyParent = bodyNode.getParent();
+              return bodyParent.equals(node)
+                  || (bodyParent.getParent() != null && bodyParent.getParent().equals(node));
+            })
+        .map(this.state::getNodeType)
+        .forEach(result -> this.addNodeType(node, result));
+
+    // Propagate to parent ATOM node.
+    if (this.state.hasNodeType(node)) {
+      this.assignAtom(node, this.state.getNodeType(node));
+    }
   }
 }
