@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -28,6 +26,8 @@ import org.slf4j.LoggerFactory;
 public class SymbolProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SymbolProvider.class);
+
+  private static final int MAX_RESULTS = 200;
 
   private final IDefinitionKeeper definitionKeeper;
 
@@ -58,27 +58,22 @@ public class SymbolProvider {
     }
 
     final List<WorkspaceSymbol> workspaceSymbols = new ArrayList<>();
-    try {
-      this.gatherProducts(query, workspaceSymbols);
-      this.gatherModules(query, workspaceSymbols);
-      this.gatherTypes(query, workspaceSymbols);
-      this.gatherMethods(query, workspaceSymbols);
-      this.gatherConditions(query, workspaceSymbols);
-    } catch (final PatternSyntaxException exception) {
-      LOGGER.info("Ignoring caught exception: {}", exception.getMessage());
-      return Collections.emptyList();
-    }
+    this.gatherProducts(query, workspaceSymbols);
+    this.gatherModules(query, workspaceSymbols);
+    this.gatherTypes(query, workspaceSymbols);
+    this.gatherMethods(query, workspaceSymbols);
+    this.gatherConditions(query, workspaceSymbols);
 
     LOGGER.debug("Finished searching for: '{}', result count: {}", query, workspaceSymbols.size());
     return workspaceSymbols;
   }
 
   private void gatherProducts(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
-    final Pattern pattern = Pattern.compile(".*" + query + ".*");
-    final Predicate<ProductDefinition> predicate =
-        definition -> pattern.matcher(definition.getName()).matches();
     for (final ProductDefinition definition : this.definitionKeeper.getProductDefinitions()) {
-      if (predicate.test(definition)) {
+      if (workspaceSymbols.size() >= MAX_RESULTS) {
+        return;
+      }
+      if (definition.getName().contains(query)) {
         final Location conditionLocation = definition.getLocation();
         final Location location = Location.validLocation(conditionLocation);
         final WorkspaceSymbol symbol =
@@ -92,11 +87,11 @@ public class SymbolProvider {
   }
 
   private void gatherModules(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
-    final Pattern pattern = Pattern.compile(".*" + query + ".*");
-    final Predicate<ModuleDefinition> predicate =
-        definition -> pattern.matcher(definition.getName()).matches();
     for (final ModuleDefinition definition : this.definitionKeeper.getModuleDefinitions()) {
-      if (predicate.test(definition)) {
+      if (workspaceSymbols.size() >= MAX_RESULTS) {
+        return;
+      }
+      if (definition.getName().contains(query)) {
         final Location conditionLocation = definition.getLocation();
         final Location location = Location.validLocation(conditionLocation);
         final WorkspaceSymbol symbol =
@@ -112,6 +107,9 @@ public class SymbolProvider {
   private void gatherTypes(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
     final Predicate<ITypeStringDefinition> predicate = this.buildTypePredicate(query);
     for (final ExemplarDefinition definition : this.definitionKeeper.getExemplarDefinitions()) {
+      if (workspaceSymbols.size() >= MAX_RESULTS) {
+        return;
+      }
       if (predicate.test(definition)) {
         final Location typeLocation = definition.getLocation();
         final Location location = Location.validLocation(typeLocation);
@@ -128,6 +126,9 @@ public class SymbolProvider {
   private void gatherMethods(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
     final Predicate<MethodDefinition> predicate = this.buildMethodPredicate(query);
     for (final MethodDefinition definition : this.definitionKeeper.getMethodDefinitions()) {
+      if (workspaceSymbols.size() >= MAX_RESULTS) {
+        return;
+      }
       if (predicate.test(definition)) {
         final Location methodLocation = definition.getLocation();
         final Location location = Location.validLocation(methodLocation);
@@ -150,6 +151,9 @@ public class SymbolProvider {
   private void gatherConditions(final String query, final List<WorkspaceSymbol> workspaceSymbols) {
     final Predicate<ConditionDefinition> predicate = this.buildConditionPredicate(query);
     for (final ConditionDefinition definition : this.definitionKeeper.getConditionDefinitions()) {
+      if (workspaceSymbols.size() >= MAX_RESULTS) {
+        return;
+      }
       if (predicate.test(definition)) {
         final Location conditionLocation = definition.getLocation();
         final Location location = Location.validLocation(conditionLocation);
@@ -178,8 +182,7 @@ public class SymbolProvider {
       return type -> false;
     }
 
-    final Pattern pattern = Pattern.compile(".*" + query + ".*");
-    return definition -> pattern.matcher(definition.getTypeString().getFullString()).matches();
+    return definition -> definition.getTypeString().getFullString().contains(query);
   }
 
   /**
@@ -193,21 +196,18 @@ public class SymbolProvider {
     final int dotIndex = query.indexOf('.');
     if (dotIndex == -1) {
       // No `.`, match only based on method name.
-      final Pattern pattern = Pattern.compile(".*" + query + ".*");
-      return definition -> pattern.matcher(definition.getMethodName()).matches();
+      return definition -> definition.getMethodName().contains(query);
     }
 
     final String typeQuery = query.substring(0, dotIndex);
     LOGGER.trace("Type query: {}", typeQuery);
-    final Pattern typePattern = Pattern.compile(".*" + Pattern.quote(typeQuery) + ".*");
 
     final String methodQuery = query.substring(dotIndex + 1);
     LOGGER.trace("Method query: {}", methodQuery);
-    final Pattern methodPattern = Pattern.compile(".*" + Pattern.quote(methodQuery) + ".*");
 
     return definition ->
-        typePattern.matcher(definition.getTypeName().getFullString()).matches()
-            && methodPattern.matcher(definition.getMethodName()).matches();
+        definition.getTypeName().getFullString().contains(typeQuery)
+            && definition.getMethodName().contains(methodQuery);
   }
 
   /**
@@ -223,7 +223,6 @@ public class SymbolProvider {
       return type -> false;
     }
 
-    final Pattern pattern = Pattern.compile(".*" + query + ".*");
-    return definition -> pattern.matcher(definition.getName()).matches();
+    return definition -> definition.getName().contains(query);
   }
 }
