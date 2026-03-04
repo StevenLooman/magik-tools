@@ -75,6 +75,7 @@ public class GenericHelper {
 
   private Map<TypeString, TypeString> getGenericReferenceTypeMapping() {
     return this.typeStr.getGenerics().stream()
+        .filter(TypeString::isGenericDefinition)
         .collect(Collectors.toMap(TypeString::getGenericReference, TypeString::getGenericType));
   }
 }
