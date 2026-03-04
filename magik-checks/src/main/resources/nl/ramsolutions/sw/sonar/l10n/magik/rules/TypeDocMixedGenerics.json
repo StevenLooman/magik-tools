@@ -1,0 +1,15 @@
+{
+  "title": "Type annotation contains mixed generic definitions and references",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "documentation"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "TypeDocMixedGenerics",
+  "sqKey": "type-doc-mixed-generics"
+}

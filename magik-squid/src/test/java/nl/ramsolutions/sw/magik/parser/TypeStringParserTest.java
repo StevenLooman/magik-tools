@@ -88,6 +88,19 @@ class TypeStringParserTest {
   }
 
   @Test
+  void testMixedGenericDefinitionsAndReferences() {
+    final String typeStr = "sw:property_list<K=sw:symbol,object>";
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    assertThat(typeString)
+        .isEqualTo(
+            TypeString.ofIdentifier(
+                "property_list",
+                SW_PACKAGE,
+                TypeString.ofGenericDefinition("K", TypeString.SW_SYMBOL),
+                TypeString.ofGenericReference("object")));
+  }
+
+  @Test
   void testCombined() {
     final String typeStr = "sw:integer|sw:float";
     final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
