@@ -13,9 +13,20 @@ import java.util.stream.Stream;
 public class ScopeEntry {
 
   /**
-   * Type of ScopeEntry. Types: LOCAL: _local GLOBAL: _global DYNAMIC: _dynamic IMPORT: _import
-   * RECURSIVE: _recursive CONSTANT: _constant PARAMETER: procedure parameter DEFINITION: direct
-   * assignment
+   * Type of ScopeEntry.
+   *
+   * <p>Types:
+   *
+   * <ul>
+   *   <li>LOCAL: _local
+   *   <li>GLOBAL: _global
+   *   <li>DYNAMIC: _dynamic
+   *   <li>IMPORT: _import
+   *   <li>RECURSIVE: _recursive
+   *   <li>CONSTANT: _constant
+   *   <li>PARAMETER: procedure parameter
+   *   <li>DEFINITION: direct assignment
+   * </ul>
    */
   @SuppressWarnings("checkstyle:JavadocVariable")
   public enum Type {
