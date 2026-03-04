@@ -1,0 +1,16 @@
+<p>Type annotation contains mixed generic definitions and references in a single generic parameter list.</p>
+<p>A generic parameter list should contain either all definitions (e.g., <code>&lt;K=sw:symbol, V=sw:object&gt;</code>) or all references (e.g., <code>&lt;E&gt;</code>), but not a mix of both.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_method object.do_something()
+  ## @return {sw:property_list&lt;K=sw:symbol,object&gt;} Result.
+  _return sw:property_list.new()
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method object.do_something()
+  ## @return {sw:property_list&lt;K=sw:symbol, V=sw:object&gt;} Result.
+  _return sw:property_list.new()
+_endmethod
+</pre>

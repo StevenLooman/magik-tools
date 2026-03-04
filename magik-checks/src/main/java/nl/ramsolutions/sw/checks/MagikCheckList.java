@@ -38,6 +38,7 @@ import nl.ramsolutions.sw.checks.magik.SyntaxErrorCheck;
 import nl.ramsolutions.sw.checks.magik.TodoCommentCheck;
 import nl.ramsolutions.sw.checks.magik.TrailingWhitespaceCheck;
 import nl.ramsolutions.sw.checks.magik.TypeDocCheck;
+import nl.ramsolutions.sw.checks.magik.TypeDocMixedGenericsCheck;
 import nl.ramsolutions.sw.checks.magik.UndefinedVariableCheck;
 import nl.ramsolutions.sw.checks.magik.UnsafeEvaluateInvocationCheck;
 import nl.ramsolutions.sw.checks.magik.UnusedVariableCheck;
@@ -107,6 +108,7 @@ public final class MagikCheckList extends CheckList<MagikCheck, MagikCodeActionS
         TodoCommentCheck.class,
         TrailingWhitespaceCheck.class,
         TypeDocCheck.class,
+        TypeDocMixedGenericsCheck.class,
         UndefinedVariableCheck.class,
         UnsafeEvaluateInvocationCheck.class,
         UnusedVariableCheck.class,
