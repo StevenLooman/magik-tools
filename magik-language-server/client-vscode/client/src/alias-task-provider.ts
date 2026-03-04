@@ -52,7 +52,7 @@ export class MagikAliasTaskProvider implements vscode.TaskProvider, vscode.Dispo
 			const runAliasPath = getRunAliasPath();
 			const aliasesPath = getAliasesPath(definition.aliasesPath);
 			const environmentFile = getEnvironmentPath(definition.environmentPath);
-			const commandLine = getCommandLine(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.args);
+			const commandLine = getCommandLine(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.args, definition.useSessionWrapper);
 			const shellExecutionOptions: vscode.ShellExecutionOptions = {
 				env: definition.env,
 			};
@@ -93,6 +93,11 @@ interface AliasTaskDefinition extends vscode.TaskDefinition {
 	 * Override environment path.
 	 */
 	environmentPath?: fs.PathLike;
+
+	/**
+	 * Override use session wrapper?
+	 */
+	useSessionWrapper?: boolean;
 }
 
 let _channel: vscode.OutputChannel;
@@ -129,7 +134,7 @@ function getAliasesPath(aliasesPath?: fs.PathLike): fs.PathLike {
 	return vscode.workspace.getConfiguration().get('magik.aliases');
 }
 
-function getCommandLine(runAliasPath: fs.PathLike, aliasesPath: fs.PathLike, entryName: string, environmentFile?: fs.PathLike, additionalArgs?: string[]): string {
+function getCommandLine(runAliasPath: fs.PathLike, aliasesPath: fs.PathLike, entryName: string, environmentFile?: fs.PathLike, additionalArgs?: string[], useSessionWrapper?: boolean): string {
 	let commandLine = `${runAliasPath}`;
 	if (aliasesPath != null) {
 		commandLine =  `${commandLine} -a ${aliasesPath}`;
@@ -142,7 +147,7 @@ function getCommandLine(runAliasPath: fs.PathLike, aliasesPath: fs.PathLike, ent
 	}
 	commandLine = `${commandLine} ${entryName}`;
 
-	const useWrapper = vscode.workspace.getConfiguration().get('magik.useSessionWrapper', true);
+	const useWrapper = useSessionWrapper ?? vscode.workspace.getConfiguration().get('magik.useSessionWrapper', true);
 	if (useWrapper) {
 		const javaExec = getJavaExec();
 
@@ -186,8 +191,9 @@ async function getAliasesTasks(aliasesPath: fs.PathLike): Promise<vscode.Task[]>
 					entry: entryName,
 					additionalArguments: [],
 					env: {},
+					useSessionWrapper: undefined,
 				};
-				const commandLine = getCommandLine(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.additionalArguments);
+				const commandLine = getCommandLine(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.additionalArguments, definition.useSessionWrapper);
 				const shellExecutionOptions: vscode.ShellExecutionOptions = {
 					env: definition.env,
 				};
@@ -203,7 +209,7 @@ async function getAliasesTasks(aliasesPath: fs.PathLike): Promise<vscode.Task[]>
 		}
 	} catch (err) {
 		const channel = getOutputChannel();
-		channel.appendLine('Auto detecting run_alias tasts failed:');
+		channel.appendLine('Auto detecting run_alias tasks failed:');
 		channel.appendLine(err);
 		channel.show(true);
 		return emptyTasks;
