@@ -61,6 +61,11 @@ class VariableNamingCheckTest {
         """
         result +<< str << _self.a
         """,
+        """
+        _block
+          _local a
+        _endblock
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new VariableNamingCheck();
