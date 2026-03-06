@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.debugadapter;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.logging.LogManager;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -9,6 +10,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.eclipse.lsp4j.debug.launch.DSPLauncher;
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
@@ -19,13 +21,23 @@ public final class Main {
   private static final Options OPTIONS;
   private static final Option OPTION_DEBUG =
       Option.builder().longOpt("debug").desc("Show debug messages").get();
+  private static final Option OPTION_VERSION =
+      Option.builder().longOpt("version").desc("Show version and exit").get();
+  private static final Option OPTION_HELP =
+      Option.builder().longOpt("help").desc("Show this help and exit").get();
 
   static {
     OPTIONS = new Options();
     OPTIONS.addOption(OPTION_DEBUG);
+    OPTIONS.addOption(OPTION_VERSION);
+    OPTIONS.addOption(OPTION_HELP);
   }
 
   private Main() {}
+
+  private static PrintStream getErrStream() {
+    return System.err; // NOSONAR
+  }
 
   /**
    * Initialize logger from logging.properties.
@@ -76,6 +88,23 @@ public final class Main {
       Main.initDebugLogger();
     } else {
       Main.initLogger();
+    }
+
+    // Version.
+    if (commandLine.hasOption(OPTION_VERSION)) {
+      final String version = Main.class.getPackage().getImplementationVersion();
+      final PrintStream errStream = Main.getErrStream();
+      errStream.println("Version: " + version);
+      System.exit(0);
+    }
+
+    // Help.
+    if (commandLine.hasOption(OPTION_HELP) || commandLine.getArgs().length == 0) {
+      final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
+      helpFormatter.printHelp(
+          "java -jar magik-debug-adapter.jar", "magik-debug-adapter", Main.OPTIONS, "", true);
+
+      System.exit(0);
     }
 
     final MagikDebugAdapter server = new MagikDebugAdapter();

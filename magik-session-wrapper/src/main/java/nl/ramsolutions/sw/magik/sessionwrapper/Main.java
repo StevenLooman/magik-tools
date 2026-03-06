@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.sessionwrapper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.jline.reader.Completer;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.Highlighter;
@@ -52,6 +54,10 @@ public class Main {
           .hasArg()
           .type(PatternOptionBuilder.STRING_VALUE)
           .get();
+  private static final Option OPTION_VERSION =
+      Option.builder().longOpt("version").desc("Show version and exit").get();
+  private static final Option OPTION_HELP =
+      Option.builder().longOpt("help").desc("Show this help and exit").get();
 
   static {
     OPTIONS = new Options();
@@ -59,9 +65,15 @@ public class Main {
     OPTIONS.addOption(OPTION_HISTORY_FILE);
     OPTIONS.addOption(OPTION_DO_NOT_WAIT_FOR_PROMPT);
     OPTIONS.addOption(OPTION_PROMPT_PATTERN);
+    OPTIONS.addOption(OPTION_VERSION);
+    OPTIONS.addOption(OPTION_HELP);
   }
 
   private Main() {}
+
+  private static PrintStream getErrStream() {
+    return System.err; // NOSONAR
+  }
 
   /**
    * Initialize logger from logging.properties.
@@ -110,6 +122,23 @@ public class Main {
       Main.initDebugLogger();
     } else {
       Main.initLogger();
+    }
+
+    // Version.
+    if (commandLine.hasOption(OPTION_VERSION)) {
+      final String version = Main.class.getPackage().getImplementationVersion();
+      final PrintStream errStream = Main.getErrStream();
+      errStream.println("Version: " + version);
+      System.exit(0);
+    }
+
+    // Help.
+    if (commandLine.hasOption(OPTION_HELP) || commandLine.getArgs().length == 0) {
+      final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
+      helpFormatter.printHelp(
+          "java -jar magik-session-wrapper.jar", "magik-session-wrapper", Main.OPTIONS, "", true);
+
+      System.exit(0);
     }
 
     // History file.

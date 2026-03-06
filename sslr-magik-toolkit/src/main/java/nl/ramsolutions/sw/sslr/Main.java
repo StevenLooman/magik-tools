@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.sslr;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import nl.ramsolutions.sw.sslr.loadlist.SwLoadListConfigurationModel;
 import nl.ramsolutions.sw.sslr.magik.MagikConfigurationModel;
 import nl.ramsolutions.sw.sslr.moduledef.SwModuleDefConfigurationModel;
@@ -30,13 +31,23 @@ public final class Main {
           .required()
           .type(PatternOptionBuilder.STRING_VALUE)
           .get();
+  private static final Option OPTION_VERSION =
+      Option.builder().longOpt("version").desc("Show version and exit").get();
+  private static final Option OPTION_HELP =
+      Option.builder().longOpt("help").desc("Show this help and exit").get();
 
   static {
     OPTIONS = new Options();
     OPTIONS.addOption(OPTION_GRAMMAR);
+    OPTIONS.addOption(OPTION_VERSION);
+    OPTIONS.addOption(OPTION_HELP);
   }
 
   private Main() {}
+
+  private static PrintStream getErrStream() {
+    return System.err; // NOSONAR
+  }
 
   /**
    * Parse the command line.
@@ -62,12 +73,27 @@ public final class Main {
     try {
       commandLine = Main.parseCommandline(args);
     } catch (final MissingOptionException | UnrecognizedOptionException exception) {
-      System.err.println("Missing required option: " + exception.getMessage());
+      final PrintStream errStream = Main.getErrStream();
+      errStream.println("Missing required option: " + exception.getMessage());
 
       Main.showHelp();
 
       System.exit(1);
       return; // Keep inferer happy.
+    }
+
+    // Version.
+    if (commandLine.hasOption(OPTION_VERSION)) {
+      final String version = Main.class.getPackage().getImplementationVersion();
+      final PrintStream errStream = Main.getErrStream();
+      errStream.println("Version: " + version);
+      System.exit(0);
+    }
+
+    // Help.
+    if (commandLine.hasOption(OPTION_HELP)) {
+      Main.showHelp();
+      System.exit(0);
     }
 
     final String grammar = commandLine.getOptionValue(OPTION_GRAMMAR);
@@ -82,7 +108,8 @@ public final class Main {
       configurationModel = new SwLoadListConfigurationModel();
     } else {
       // This should never happen because of the earlier check.
-      System.err.println("Unknown grammar: " + grammar);
+      final PrintStream errStream = Main.getErrStream();
+      errStream.println("Unknown grammar: " + grammar);
 
       Main.showHelp();
 
