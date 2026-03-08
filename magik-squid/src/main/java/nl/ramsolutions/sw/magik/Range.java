@@ -41,6 +41,17 @@ public class Range {
   }
 
   /**
+   * Test if this Range fully contains the other Range.
+   *
+   * @param other Other range.
+   * @return True if this range fully contains the other range, false otherwise.
+   */
+  public boolean contains(final Range other) {
+    return this.startPosition.compareTo(other.startPosition) <= 0
+        && this.endPosition.compareTo(other.endPosition) >= 0;
+  }
+
+  /**
    * Test if this Range overlaps with other Range.
    *
    * @param other Other range.
