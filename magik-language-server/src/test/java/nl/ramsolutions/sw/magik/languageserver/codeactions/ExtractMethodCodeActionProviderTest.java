@@ -503,11 +503,13 @@ class ExtractMethodCodeActionProviderTest {
     final TextEdit insertEdit =
         new TextEdit(
             new Range(new Position(4, 0), new Position(4, 0)),
-            "        _local extracted_proc << _proc(a)\n"
-                + "          ## @param {sw:integer} a\n"
-                + "            _local b << a + 2\n"
-                + "            _return b\n"
-                + "          _endproc\n");
+            """
+                    _local extracted_proc << _proc(a)
+                      ## @param {sw:integer} a
+                        _local b << a + 2
+                        _return b
+                      _endproc
+            """);
     final CodeAction.Command renameCommand =
         new CodeAction.Command(
             "magik.triggerRename",
@@ -552,11 +554,13 @@ class ExtractMethodCodeActionProviderTest {
     final TextEdit insertEdit =
         new TextEdit(
             new Range(new Position(4, 0), new Position(4, 0)),
-            "        _local extracted_proc << _proc(a)\n"
-                + "          ## @param {sw:integer} a\n"
-                + "            _local b << a + 2\n"
-                + "            _return b\n"
-                + "          _endproc\n");
+            """
+                    _local extracted_proc << _proc(a)
+                      ## @param {sw:integer} a
+                        _local b << a + 2
+                        _return b
+                      _endproc
+            """);
     final CodeAction.Command renameCommand =
         new CodeAction.Command(
             "magik.triggerRename",
@@ -595,11 +599,13 @@ class ExtractMethodCodeActionProviderTest {
     final TextEdit insertEdit =
         new TextEdit(
             new Range(new Position(3, 0), new Position(3, 0)),
-            "    _local extracted_proc << _proc(a)\n"
-                + "      ## @param {sw:integer} a\n"
-                + "        _local b << a + 2\n"
-                + "        _return b\n"
-                + "      _endproc\n");
+            """
+                _local extracted_proc << _proc(a)
+                  ## @param {sw:integer} a
+                    _local b << a + 2
+                    _return b
+                  _endproc
+            """);
     // renameLineNumber = 3 + 5 inserted lines = 8; "b << ".length() = 5 → col = 4 + 5 + 1 = 10
     final CodeAction.Command renameCommand =
         new CodeAction.Command(
