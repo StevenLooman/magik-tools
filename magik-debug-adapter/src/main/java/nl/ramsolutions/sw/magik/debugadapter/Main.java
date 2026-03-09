@@ -35,8 +35,24 @@ public final class Main {
 
   private Main() {}
 
-  private static PrintStream getErrStream() {
-    return System.err; // NOSONAR
+  private static PrintStream getOutStream() {
+    return System.out; // NOSONAR
+  }
+
+  private static InputStream getInStream() {
+    return System.in; // NOSONAR
+  }
+
+  private static String getName() {
+    return "magik-debug-adapter";
+  }
+
+  private static String getArtifactName() {
+    return Main.getName() + ".jar";
+  }
+
+  private static String getVersion() {
+    return Main.class.getPackage().getImplementationVersion();
   }
 
   /**
@@ -90,30 +106,41 @@ public final class Main {
       Main.initLogger();
     }
 
-    // Version.
-    if (commandLine.hasOption(OPTION_VERSION)) {
-      final String version = Main.class.getPackage().getImplementationVersion();
-      final PrintStream errStream = Main.getErrStream();
-      errStream.println("Version: " + version);
+    if (commandLine.hasOption(OPTION_HELP)) {
+      Main.showHelp();
+
       System.exit(0);
     }
 
-    // Help.
-    if (commandLine.hasOption(OPTION_HELP) || commandLine.getArgs().length == 0) {
-      final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
-      helpFormatter.printHelp(
-          "java -jar magik-debug-adapter.jar", "magik-debug-adapter", Main.OPTIONS, "", true);
+    if (commandLine.hasOption(OPTION_VERSION)) {
+      Main.showVersion();
 
       System.exit(0);
     }
 
     final MagikDebugAdapter server = new MagikDebugAdapter();
+    final InputStream inStream = Main.getInStream();
+    final PrintStream outStream = Main.getOutStream();
     final Launcher<IDebugProtocolClient> launcher =
-        DSPLauncher.createServerLauncher(server, System.in, System.out); // NOSONAR
+        DSPLauncher.createServerLauncher(server, inStream, outStream);
 
     final IDebugProtocolClient remoteProxy = launcher.getRemoteProxy();
     server.connect(remoteProxy);
 
     launcher.startListening();
+  }
+
+  private static void showHelp() throws IOException {
+    final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
+    final String artifactName = Main.getArtifactName();
+    final String name = Main.getName();
+    helpFormatter.printHelp(
+        "java -jar " + artifactName, name + "\s" + Main.getVersion(), Main.OPTIONS, "", true);
+  }
+
+  private static void showVersion() {
+    final String version = Main.getVersion();
+    final PrintStream outStream = Main.getOutStream();
+    outStream.println(version);
   }
 }

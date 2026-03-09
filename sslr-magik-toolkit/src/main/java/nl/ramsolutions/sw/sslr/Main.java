@@ -45,8 +45,24 @@ public final class Main {
 
   private Main() {}
 
+  private static PrintStream getOutStream() {
+    return System.out; // NOSONAR
+  }
+
   private static PrintStream getErrStream() {
     return System.err; // NOSONAR
+  }
+
+  private static String getName() {
+    return "sslr-magik-toolkit";
+  }
+
+  private static String getArtifactName() {
+    return Main.getName() + ".jar";
+  }
+
+  private static String getVersion() {
+    return Main.class.getPackage().getImplementationVersion();
   }
 
   /**
@@ -74,25 +90,26 @@ public final class Main {
       commandLine = Main.parseCommandline(args);
     } catch (final MissingOptionException | UnrecognizedOptionException exception) {
       final PrintStream errStream = Main.getErrStream();
-      errStream.println("Missing required option: " + exception.getMessage());
-
-      Main.showHelp();
+      final String artifactName = Main.getArtifactName();
+      errStream.println(
+          exception.getMessage()
+              + "\nTry 'java -jar "
+              + artifactName
+              + " --help' for more information.");
 
       System.exit(1);
       return; // Keep inferer happy.
     }
 
-    // Version.
-    if (commandLine.hasOption(OPTION_VERSION)) {
-      final String version = Main.class.getPackage().getImplementationVersion();
-      final PrintStream errStream = Main.getErrStream();
-      errStream.println("Version: " + version);
+    if (commandLine.hasOption(OPTION_HELP)) {
+      Main.showHelp();
+
       System.exit(0);
     }
 
-    // Help.
-    if (commandLine.hasOption(OPTION_HELP)) {
-      Main.showHelp();
+    if (commandLine.hasOption(OPTION_VERSION)) {
+      Main.showVersion();
+
       System.exit(0);
     }
 
@@ -124,7 +141,15 @@ public final class Main {
 
   private static void showHelp() throws IOException {
     final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
+    final String artifactName = Main.getArtifactName();
+    final String name = Main.getName();
     helpFormatter.printHelp(
-        "java -jar sslr-magik-toolkit.jar", "sslr-magik-toolkit", Main.OPTIONS, "", true);
+        "java -jar " + artifactName, name + "\s" + Main.getVersion(), Main.OPTIONS, "", true);
+  }
+
+  private static void showVersion() {
+    final String version = Main.getVersion();
+    final PrintStream outStream = Main.getOutStream();
+    outStream.println(version);
   }
 }
