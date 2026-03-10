@@ -143,6 +143,11 @@ class UnusedVariableCheckTest {
           sw:x << 10
         _endmethod
         """,
+        """
+        _method a.b(c)
+          _self.do_something()
+        _endmethod
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new UnusedVariableCheck();
