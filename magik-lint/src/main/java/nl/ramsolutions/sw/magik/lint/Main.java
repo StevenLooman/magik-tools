@@ -10,16 +10,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.LogManager;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.SourceFileScanner;
+import nl.ramsolutions.sw.checks.Check;
+import nl.ramsolutions.sw.checks.CheckHolder;
+import nl.ramsolutions.sw.checks.ChecksConfiguration;
+import nl.ramsolutions.sw.checks.MagikCheckList;
+import nl.ramsolutions.sw.checks.ModuleDefCheckList;
+import nl.ramsolutions.sw.checks.ProductDefCheckList;
+import nl.ramsolutions.sw.checks.output.Reporter;
+import nl.ramsolutions.sw.checks.output.SarifReporter;
 import nl.ramsolutions.sw.magik.lint.output.MessageFormatReporter;
 import nl.ramsolutions.sw.magik.lint.output.NullReporter;
-import nl.ramsolutions.sw.magik.lint.output.Reporter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -72,6 +81,13 @@ public final class Main {
       Option.builder().longOpt("help").desc("Show this help and exit").get();
   private static final Option OPTION_APPLY_FIXES =
       Option.builder().longOpt("apply-fixes").desc("Apply fixes automatically").get();
+  private static final Option OPTION_FORMAT =
+      Option.builder()
+          .longOpt("format")
+          .desc("Output format: text (default), sarif")
+          .hasArg()
+          .type(PatternOptionBuilder.STRING_VALUE)
+          .get();
 
   static {
     OPTIONS = new Options();
@@ -84,6 +100,7 @@ public final class Main {
     OPTIONS.addOption(OPTION_DEBUG);
     OPTIONS.addOption(OPTION_VERSION);
     OPTIONS.addOption(OPTION_APPLY_FIXES);
+    OPTIONS.addOption(OPTION_FORMAT);
   }
 
   private static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING =
@@ -124,16 +141,37 @@ public final class Main {
   /**
    * Create the reporter.
    *
-   * @param configuration Configuration.
+   * @param commandLine Parsed command line.
+   * @param properties Configuration.
    * @return Reporter.
    */
-  private static Reporter createReporter(final MagikToolsProperties properties) {
+  private static Reporter createReporter(
+      final CommandLine commandLine, final MagikToolsProperties properties) {
+    final PrintStream outStream = Main.getOutStream();
+    final String outputFormat = commandLine.getOptionValue(OPTION_FORMAT, "text");
+    if ("sarif".equalsIgnoreCase(outputFormat)) {
+      final List<Class<? extends Check>> checkClasses = getAllCheckClasses();
+      final ChecksConfiguration checksConfig = new ChecksConfiguration(checkClasses, properties);
+      final List<CheckHolder> checkHolders = checksConfig.getAllChecks();
+      final String version = Main.class.getPackage().getImplementationVersion();
+      return new SarifReporter(
+          outStream, "magik-lint", version != null ? version : "dev", checkHolders);
+    }
     final String configReporterFormat = properties.getPropertyString(MagikLint.KEY_MSG_TEMPLATE);
     final String format =
         configReporterFormat != null ? configReporterFormat : MessageFormatReporter.DEFAULT_FORMAT;
     final long columnOffset = properties.getPropertyLong(MagikLint.KEY_COLUMN_OFFSET, 0L);
-    final PrintStream outStream = Main.getOutStream();
     return new MessageFormatReporter(outStream, format, columnOffset);
+  }
+
+  private static List<Class<? extends Check>> getAllCheckClasses() {
+    return Stream.of(
+            ProductDefCheckList.INSTANCE.getBaseChecks().stream(),
+            ModuleDefCheckList.INSTANCE.getBaseChecks().stream(),
+            MagikCheckList.INSTANCE.getBaseChecks().stream())
+        .flatMap(stream -> stream)
+        .sorted(Comparator.comparing(Class::getSimpleName))
+        .toList();
   }
 
   private static Collection<Path> getFilesFromArgs(final String[] args) throws IOException {
@@ -236,9 +274,10 @@ public final class Main {
     }
 
     // Actual linting.
-    final Reporter reporter = Main.createReporter(properties);
+    final Reporter reporter = Main.createReporter(commandLine, properties);
     final MagikLint lint = new MagikLint(properties, reporter);
     lint.run(paths);
+    reporter.finish();
 
     final int exitCode =
         reporter.reportedSeverities().stream()
