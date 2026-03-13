@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.lint.output;
+package nl.ramsolutions.sw.checks.output;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -95,10 +95,10 @@ public class MessageFormatReporter implements Reporter {
   }
 
   @Override
-  public void reportIssue(final Issue magikIssue) {
+  public void reportIssue(final Issue issue) {
     // Create map for find/replace.
-    final Path path = magikIssue.location().getPath();
-    final Map<String, String> map = this.createMapForIssue(path, magikIssue);
+    final Path path = issue.location().getPath();
+    final Map<String, String> map = this.createMapForIssue(path, issue);
 
     // Save severity.
     final String severity = map.get("severity");
