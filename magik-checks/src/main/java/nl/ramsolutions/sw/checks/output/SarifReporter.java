@@ -62,7 +62,8 @@ public class SarifReporter implements Reporter {
 
     for (int i = 0; i < checkHolders.size(); i++) {
       final CheckHolder holder = checkHolders.get(i);
-      this.ruleIndexMap.put(holder.getCheckKeyKebabCase(), i);
+      final String checkKeyKebabCase = holder.getCheckKeyKebabCase();
+      this.ruleIndexMap.put(checkKeyKebabCase, i);
     }
   }
 
@@ -74,7 +75,8 @@ public class SarifReporter implements Reporter {
     if (holder != null) {
       try {
         final CheckMetadata metadata = holder.getMetadata();
-        this.reportedSeverities.add(metadata.getDefaultSeverity());
+        final String defaultSeverity = metadata.getDefaultSeverity();
+        this.reportedSeverities.add(defaultSeverity);
       } catch (final IOException exception) {
         LOGGER.error("Could not read metadata: {}", exception.getMessage(), exception);
       }
@@ -93,23 +95,28 @@ public class SarifReporter implements Reporter {
     sarif.addProperty("version", SARIF_VERSION);
 
     final JsonArray runs = new JsonArray();
-    runs.add(this.buildRun());
+    final JsonObject run = this.buildRun();
+    runs.add(run);
     sarif.add("runs", runs);
 
     final Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    this.outStream.println(gson.toJson(sarif));
+    final String json = gson.toJson(sarif);
+    this.outStream.println(json);
   }
 
   private JsonObject buildRun() {
     final JsonObject run = new JsonObject();
-    run.add("tool", this.buildTool());
-    run.add("results", this.buildResults());
+    final JsonObject tool = this.buildTool();
+    run.add("tool", tool);
+    final JsonArray results = this.buildResults();
+    run.add("results", results);
     return run;
   }
 
   private JsonObject buildTool() {
     final JsonObject tool = new JsonObject();
-    tool.add("driver", this.buildDriver());
+    final JsonObject driver = this.buildDriver();
+    tool.add("driver", driver);
     return tool;
   }
 
@@ -118,7 +125,8 @@ public class SarifReporter implements Reporter {
     driver.addProperty("name", this.toolName);
     driver.addProperty("version", this.toolVersion);
     driver.addProperty("informationUri", INFORMATION_URI);
-    driver.add("rules", this.buildRules());
+    final JsonArray rules = this.buildRules();
+    driver.add("rules", rules);
     return driver;
   }
 
@@ -126,7 +134,8 @@ public class SarifReporter implements Reporter {
     final JsonArray rules = new JsonArray();
     for (final CheckHolder holder : this.checkHolders) {
       try {
-        rules.add(this.buildRule(holder));
+        final JsonObject rule = this.buildRule(holder);
+        rules.add(rule);
       } catch (final IOException exception) {
         LOGGER.error("Could not read metadata for rule: {}", exception.getMessage(), exception);
       }
@@ -137,15 +146,20 @@ public class SarifReporter implements Reporter {
   private JsonObject buildRule(final CheckHolder holder) throws IOException {
     final CheckMetadata metadata = holder.getMetadata();
     final JsonObject rule = new JsonObject();
-    rule.addProperty("id", metadata.getSqKey());
-    rule.addProperty("name", metadata.getRuleSpecification());
+    final String sqKey = metadata.getSqKey();
+    rule.addProperty("id", sqKey);
+    final String ruleSpecification = metadata.getRuleSpecification();
+    rule.addProperty("name", ruleSpecification);
 
     final JsonObject shortDescription = new JsonObject();
-    shortDescription.addProperty("text", metadata.getTitle());
+    final String title = metadata.getTitle();
+    shortDescription.addProperty("text", title);
     rule.add("shortDescription", shortDescription);
 
     final JsonObject defaultConfiguration = new JsonObject();
-    defaultConfiguration.addProperty("level", mapSeverityToLevel(metadata.getDefaultSeverity()));
+    final String defaultSeverity = metadata.getDefaultSeverity();
+    final String level = SarifReporter.mapSeverityToLevel(defaultSeverity);
+    defaultConfiguration.addProperty("level", level);
     rule.add("defaultConfiguration", defaultConfiguration);
 
     final List<String> tags = metadata.getTags();
@@ -164,7 +178,8 @@ public class SarifReporter implements Reporter {
     final Path cwd = Path.of("").toAbsolutePath();
     final JsonArray results = new JsonArray();
     for (final Issue issue : this.bufferedIssues) {
-      results.add(this.buildResult(issue, cwd));
+      final JsonObject result = this.buildResult(issue, cwd);
+      results.add(result);
     }
     return results;
   }
@@ -184,7 +199,9 @@ public class SarifReporter implements Reporter {
 
       try {
         final CheckMetadata metadata = holder.getMetadata();
-        result.addProperty("level", mapSeverityToLevel(metadata.getDefaultSeverity()));
+        final String defaultSeverity = metadata.getDefaultSeverity();
+        final String level = SarifReporter.mapSeverityToLevel(defaultSeverity);
+        result.addProperty("level", level);
       } catch (final IOException exception) {
         LOGGER.error("Could not read metadata: {}", exception.getMessage(), exception);
         result.addProperty("level", "warning");
@@ -192,10 +209,12 @@ public class SarifReporter implements Reporter {
     }
 
     final JsonObject message = new JsonObject();
-    message.addProperty("text", issue.message());
+    final String issueMessage = issue.message();
+    message.addProperty("text", issueMessage);
     result.add("message", message);
 
-    result.add("locations", this.buildLocations(issue, cwd));
+    final JsonArray locations = this.buildLocations(issue, cwd);
+    result.add("locations", locations);
 
     return result;
   }
@@ -208,18 +227,24 @@ public class SarifReporter implements Reporter {
     // Artifact location with relative URI.
     final JsonObject artifactLocation = new JsonObject();
     final Path filePath = issue.location().getPath();
-    final Path relativePath = cwd.relativize(filePath.toAbsolutePath());
-    artifactLocation.addProperty("uri", relativePath.toString().replace('\\', '/'));
+    final Path filePathAbsolute = filePath.toAbsolutePath();
+    final Path relativePath = cwd.relativize(filePathAbsolute);
+    final String uri = relativePath.toString().replace('\\', '/');
+    artifactLocation.addProperty("uri", uri);
     artifactLocation.addProperty("uriBaseId", "%SRCROOT%");
     physicalLocation.add("artifactLocation", artifactLocation);
 
     // Region with 1-based lines and columns.
     final Range range = issue.range();
     final JsonObject region = new JsonObject();
-    region.addProperty("startLine", range.getStartPosition().getLine());
-    region.addProperty("startColumn", range.getStartPosition().getColumn() + 1);
-    region.addProperty("endLine", range.getEndPosition().getLine());
-    region.addProperty("endColumn", range.getEndPosition().getColumn() + 1);
+    final int startLine = range.getStartPosition().getLine();
+    final int startColumn = range.getStartPosition().getColumn() + 1;
+    final int endLine = range.getEndPosition().getLine();
+    final int endColumn = range.getEndPosition().getColumn() + 1;
+    region.addProperty("startLine", startLine);
+    region.addProperty("startColumn", startColumn);
+    region.addProperty("endLine", endLine);
+    region.addProperty("endColumn", endColumn);
     physicalLocation.add("region", region);
 
     location.add("physicalLocation", physicalLocation);
