@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.typedlint.output;
+package nl.ramsolutions.sw.checks.output;
 
 import java.util.Collections;
 import java.util.Set;
@@ -8,7 +8,7 @@ import nl.ramsolutions.sw.checks.Issue;
 public class NullReporter implements Reporter {
 
   @Override
-  public void reportIssue(final Issue magikIssue) {
+  public void reportIssue(final Issue issue) {
     // Do nothing.
   }
 

@@ -1,4 +1,4 @@
-package nl.ramsolutions.sw.magik.lint.output;
+package nl.ramsolutions.sw.checks.output;
 
 import java.util.Set;
 import nl.ramsolutions.sw.checks.Issue;
@@ -7,8 +7,11 @@ import nl.ramsolutions.sw.checks.Issue;
 public interface Reporter {
 
   /** Report the issue. */
-  void reportIssue(Issue magikIssue);
+  void reportIssue(Issue issue);
 
   /** Get the reported severities. */
   Set<String> reportedSeverities();
+
+  /** Finish reporting. Called after all issues have been reported. */
+  default void finish() {}
 }
