@@ -79,7 +79,7 @@ class ExtractExpressionCodeActionProviderTest {
     assertThat(actions.get(0))
         .isEqualTo(
             new CodeAction(
-                "Extract expression to method",
+                "Extract to method",
                 List.of(replaceEdit, insertEdit),
                 CodeAction.KIND_REFACTOR_EXTRACT,
                 renameCommand));
@@ -132,7 +132,7 @@ class ExtractExpressionCodeActionProviderTest {
     assertThat(actions.get(0))
         .isEqualTo(
             new CodeAction(
-                "Extract expression to method",
+                "Extract to method",
                 List.of(replaceEdit, insertEdit),
                 CodeAction.KIND_REFACTOR_EXTRACT,
                 renameCommand));
@@ -181,7 +181,7 @@ class ExtractExpressionCodeActionProviderTest {
     assertThat(actions.get(0))
         .isEqualTo(
             new CodeAction(
-                "Extract expression to method",
+                "Extract to method",
                 List.of(replaceEdit, insertEdit),
                 CodeAction.KIND_REFACTOR_EXTRACT,
                 renameCommand));
@@ -315,7 +315,7 @@ class ExtractExpressionCodeActionProviderTest {
     assertThat(actions.get(0))
         .isEqualTo(
             new CodeAction(
-                "Extract expression to method",
+                "Extract to method",
                 List.of(replaceEdit, insertEdit),
                 CodeAction.KIND_REFACTOR_EXTRACT,
                 renameCommand));

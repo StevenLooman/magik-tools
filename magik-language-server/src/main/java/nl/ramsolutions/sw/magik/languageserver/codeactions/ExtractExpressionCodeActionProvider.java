@@ -26,9 +26,7 @@ import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Provides "Extract expression to method" / "Extract expression to proc" refactoring code actions.
- */
+/** Provides "Extract to method" / "Extract expression to proc" refactoring code actions. */
 public class ExtractExpressionCodeActionProvider {
 
   private static final Logger LOGGER =
@@ -286,7 +284,7 @@ public class ExtractExpressionCodeActionProvider {
             List.of(magikFile.getUri().toString(), renameLineNumber, renameColumn));
 
     return new CodeAction(
-        "Extract expression to method",
+        "Extract to method",
         List.of(replaceEdit, insertEdit),
         CodeAction.KIND_REFACTOR_EXTRACT,
         renameCommand);
