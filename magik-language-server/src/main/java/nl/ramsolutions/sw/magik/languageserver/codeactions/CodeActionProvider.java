@@ -36,6 +36,7 @@ public class CodeActionProvider {
   private final ChecksCodeActionProvider magikTypedChecksCodeActionProvider;
   private final ExtractMethodCodeActionProvider extractMethodCodeActionProvider;
   private final ExtractExpressionCodeActionProvider extractExpressionCodeActionProvider;
+  private final ExtractLocalVariableCodeActionProvider extractLocalVariableCodeActionProvider;
 
   /**
    * Constructor.
@@ -55,6 +56,7 @@ public class CodeActionProvider {
         new ChecksCodeActionProvider(MagikTypedCheckList.INSTANCE, properties);
     this.extractMethodCodeActionProvider = new ExtractMethodCodeActionProvider();
     this.extractExpressionCodeActionProvider = new ExtractExpressionCodeActionProvider();
+    this.extractLocalVariableCodeActionProvider = new ExtractLocalVariableCodeActionProvider();
   }
 
   /**
@@ -196,8 +198,14 @@ public class CodeActionProvider {
 
       final Stream<CodeAction> extractStream =
           Stream.concat(
-              this.extractMethodCodeActionProvider.provideCodeActions(magikFile, range).stream(),
-              this.extractExpressionCodeActionProvider
+              Stream.concat(
+                  this.extractMethodCodeActionProvider
+                      .provideCodeActions(magikFile, range)
+                      .stream(),
+                  this.extractExpressionCodeActionProvider
+                      .provideCodeActions(magikFile, range)
+                      .stream()),
+              this.extractLocalVariableCodeActionProvider
                   .provideCodeActions(magikFile, range)
                   .stream());
 
