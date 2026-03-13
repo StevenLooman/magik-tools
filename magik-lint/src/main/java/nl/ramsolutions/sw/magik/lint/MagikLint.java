@@ -19,8 +19,8 @@ import nl.ramsolutions.sw.checks.IssueDisabledChecker;
 import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.checks.ModuleDefCheckList;
 import nl.ramsolutions.sw.checks.ProductDefCheckList;
+import nl.ramsolutions.sw.checks.output.Reporter;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.lint.output.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
