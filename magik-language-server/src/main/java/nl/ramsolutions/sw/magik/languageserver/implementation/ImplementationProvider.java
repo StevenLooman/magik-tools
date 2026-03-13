@@ -28,7 +28,7 @@ public class ImplementationProvider {
   }
 
   /**
-   * Provide implementations for {@code position} in {@code path}.
+   * Provide implementations at {@link Position} in {@link MagikTypedFile}.
    *
    * @param magikFile Magik file.
    * @param position Location in file.
@@ -47,12 +47,13 @@ public class ImplementationProvider {
       return Collections.emptyList();
     }
 
-    return this.implementionsForMethod(magikFile, wantedNode);
+    return this.implementationsForMethod(magikFile, wantedNode);
   }
 
-  private List<Location> implementionsForMethod(
+  private List<Location> implementationsForMethod(
       final MagikTypedFile magikFile, final AstNode wantedNode) {
-    final AstNode methodDefinitionNode = wantedNode.getParent();
+    final AstNode methodDefinitionNode =
+        wantedNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefinitionNode);
     final TypeString typeStr = helper.getTypeString();
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
