@@ -313,8 +313,7 @@ public final class Main {
 
     // Lint files from command line.
     final Collection<Path> paths = Main.getFilesFromArgs(leftOverArgs);
-    final String outputFormat =
-        commandLine.hasOption(OPTION_FORMAT) ? commandLine.getOptionValue(OPTION_FORMAT) : "text";
+    final String outputFormat = commandLine.getOptionValue(OPTION_FORMAT, "text");
     final Reporter reporter = Main.createReporter(properties, outputFormat);
     final MagikTypedLint lint = new MagikTypedLint(definitionKeeper, properties, reporter);
     lint.run(paths);
