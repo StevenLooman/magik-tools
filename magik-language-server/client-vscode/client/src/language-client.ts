@@ -84,6 +84,24 @@ export class MagikLanguageClient implements vscode.Disposable {
 	private registerCommands() {
 		const reIndex = vscode.commands.registerCommand('magik.custom.reIndex', () => this.command_custom_re_index());
 		this._context.subscriptions.push(reIndex);
+
+		// Used by the server's "Extract to method/proc" code action to position the cursor
+		// on the placeholder name and trigger an inline rename.
+		const triggerRename = vscode.commands.registerCommand(
+			'magik.triggerRename',
+			async (uriString: string, lineNumber: number, column: number) => {
+				const uri = vscode.Uri.parse(uriString);
+				// lineNumber and column are 1-based (as sent by the server).
+				const position = new vscode.Position(lineNumber - 1, column - 1);
+				const editor = await vscode.window.showTextDocument(uri);
+				// Save so the language server re-parses the file and indexes the
+				// newly extracted method/proc before the rename request is sent.
+				await editor.document.save();
+				editor.selection = new vscode.Selection(position, position);
+				await vscode.commands.executeCommand('editor.action.rename');
+			}
+		);
+		this._context.subscriptions.push(triggerRename);
 	}
 
 	public stop(): Thenable<void> {

@@ -1258,10 +1258,7 @@ public class MagikTextDocumentService implements TextDocumentService {
               this.codeActionProvider.provideCodeActions(openedFile, magikRange, context);
           final List<Either<Command, CodeAction>> codeActionsLsp4j =
               codeActions.stream()
-                  .map(
-                      codeAction ->
-                          Lsp4jUtils.createCodeAction(
-                              openedFile, codeAction.getTitle(), codeAction.getEdits()))
+                  .map(codeAction -> Lsp4jUtils.createCodeAction(openedFile, codeAction))
                   .map(Either::<Command, CodeAction>forRight)
                   .toList();
           if (LOGGER_DURATION.isTraceEnabled()) {
