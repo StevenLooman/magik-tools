@@ -492,6 +492,7 @@
                     <exclude>nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider.provideHover(nl.ramsolutions.sw.magik.MagikTypedFile, org.eclipse.lsp4j.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider.provideReferences(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.semantictokens.MagikSemanticTokenWalker.walkPostIdentifier(com.sonar.sslr.api.AstNode)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.sessionwrapper.Main.main(java.lang.String[])</exclude>
                     <exclude>nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.productdef.ProductDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.productdef.analysis.ProductDefAstWalker.*</exclude>

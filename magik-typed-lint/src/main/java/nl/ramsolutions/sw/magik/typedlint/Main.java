@@ -134,6 +134,18 @@ public final class Main {
     return System.err; // NOSONAR
   }
 
+  private static String getName() {
+    return "magik-typed-lint";
+  }
+
+  private static String getArtifactName() {
+    return Main.getName() + ".jar";
+  }
+
+  private static String getVersion() {
+    return Main.class.getPackage().getImplementationVersion();
+  }
+
   /**
    * Parse the command line.
    *
@@ -234,7 +246,12 @@ public final class Main {
       commandLine = Main.parseCommandline(args);
     } catch (final UnrecognizedOptionException exception) {
       final PrintStream errStream = Main.getErrStream();
-      errStream.println("Unrecognized option: " + exception.getMessage());
+      final String artifactName = Main.getArtifactName();
+      errStream.println(
+          exception.getMessage()
+              + "\nTry 'java -jar "
+              + artifactName
+              + " --help' for more information.");
 
       System.exit(1);
       return; // Keep inferer happy.
@@ -244,10 +261,15 @@ public final class Main {
       Main.initDebugLogger();
     }
 
+    if (commandLine.hasOption(OPTION_HELP)) {
+      Main.showHelp();
+
+      System.exit(0);
+    }
+
     if (commandLine.hasOption(OPTION_VERSION)) {
-      final String version = Main.class.getPackage().getImplementationVersion();
-      final PrintStream errStream = Main.getErrStream();
-      errStream.println("Version: " + version);
+      Main.showVersion();
+
       System.exit(0);
     }
 
@@ -283,15 +305,6 @@ public final class Main {
       lint.showEnabledChecks(writer);
       lint.showDisabledChecks(writer);
       writer.flush();
-      System.exit(0);
-    }
-
-    // Help.
-    if (commandLine.hasOption(OPTION_HELP) || commandLine.getArgs().length == 0) {
-      final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
-      helpFormatter.printHelp(
-          "java -jar magik-typed-lint.jar", "magik-typed-lint", Main.OPTIONS, "", true);
-
       System.exit(0);
     }
 
@@ -349,5 +362,19 @@ public final class Main {
       final String value = commandLine.getOptionValue(OPTION_RCFILE);
       properties.setProperty(MagikTypedLint.KEY_OVERRIDE_CONFIG, value);
     }
+  }
+
+  private static void showHelp() throws IOException {
+    final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
+    final String artifactName = Main.getArtifactName();
+    final String name = Main.getName();
+    helpFormatter.printHelp(
+        "java -jar " + artifactName, name + "\s" + Main.getVersion(), Main.OPTIONS, "", true);
+  }
+
+  private static void showVersion() {
+    final String version = Main.getVersion();
+    final PrintStream outStream = Main.getOutStream();
+    outStream.println(version);
   }
 }
