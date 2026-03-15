@@ -526,7 +526,7 @@
         <executions>
           <execution>
             <goals>
-              <goal>dryRun</goal>
+              <goal>dryRunNoFork</goal>
             </goals>
             <phase>verify</phase>
           </execution>
