@@ -143,6 +143,18 @@ class UnusedVariableCheckTest {
           sw:x << 10
         _endmethod
         """,
+        """
+        _for x _over 1.upto(10)
+        _loop
+          write(x)
+        _endloop
+        """,
+        """
+        _for key, element _over rope.new_with(:a, :b, :c).fast_keys_and_elements()
+        _loop
+          write(element)
+        _endloop
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new UnusedVariableCheck();
@@ -195,6 +207,18 @@ class UnusedVariableCheckTest {
             _import l_me
           _endproc()
         _endmethod
+        """,
+        """
+        _for x _over 1.upto(10)
+        _loop
+          write(1)
+        _endloop
+        """,
+        """
+        _for key, element _over rope.new_with(:a, :b, :c).fast_keys_and_elements()
+        _loop
+          write(key)
+        _endloop
         """,
       })
   void testVariableNotUsed(final String code) {
