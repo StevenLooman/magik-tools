@@ -14,7 +14,7 @@ on:
       - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/*/rules/*.html
       - magik-checks/src/main/java/nl/ramsolutions/sw/checks/*/*Check.java
 concurrency:
-  group: publish-checks-wiki
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 permissions:
   contents: write
