@@ -7,6 +7,12 @@ on:
       - .github/scripts/generate-checks-pages.py
       - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/*/rules/*.html
       - magik-checks/src/main/java/nl/ramsolutions/sw/checks/*/*Check.java
+  pull_request:
+    paths:
+      - .github/workflows/publish-checks-wiki.yml
+      - .github/scripts/generate-checks-pages.py
+      - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/*/rules/*.html
+      - magik-checks/src/main/java/nl/ramsolutions/sw/checks/*/*Check.java
 concurrency:
   group: publish-checks-wiki
   cancel-in-progress: true
@@ -22,6 +28,9 @@ jobs:
           python-version: '3.13'
           cache: 'pip'
       - run: |
+          git clone https://github.com/StevenLooman/magik-tools.wiki.git wiki
+          rm -rf wiki/checks
+      - run: |
           pip install -r .github/scripts/requirements.txt
           python3 .github/scripts/generate-checks-pages.py
       - uses: DavidAnson/markdownlint-cli2-action@v22
@@ -29,7 +38,7 @@ jobs:
           globs: 'wiki/checks/*.md'
           fix: true
       - uses: Andrew-Chen-Wang/github-wiki-action@v5
+        if: ${{ github.event_name == 'push' && github.repository_owner == 'StevenLooman' }}
         with:
           path: wiki
           #dry-run: true
-        if: ${{ github.repository_owner == 'StevenLooman' }}
