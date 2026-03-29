@@ -5,6 +5,9 @@ on:
       - develop
   pull_request:
     types: [opened, synchronize, reopened]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 defaults:
   run:
