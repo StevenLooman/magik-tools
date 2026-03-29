@@ -32,7 +32,7 @@ jobs:
           rm -rf wiki/checks
       - run: |
           pip install -r .github/scripts/requirements.txt
-          python3 .github/scripts/generate-checks-pages.py
+          python3 .github/scripts/generate_checks_pages.py
       - uses: DavidAnson/markdownlint-cli2-action@v22
         with:
           globs: 'wiki/checks/*.md'
