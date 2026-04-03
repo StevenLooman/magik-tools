@@ -15,8 +15,11 @@ import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.SlotNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -138,7 +141,8 @@ public class DefinitionsProvider {
             MagikGrammar.METHOD_INVOCATION,
             MagikGrammar.METHOD_DEFINITION,
             MagikGrammar.ATOM,
-            MagikGrammar.CONDITION_NAME);
+            MagikGrammar.CONDITION_NAME,
+            MagikGrammar.SLOT);
     if (wantedNode == null) {
       return Collections.emptyList();
     } else if (wantedNode.is(MagikGrammar.METHOD_INVOCATION)) {
@@ -148,11 +152,28 @@ public class DefinitionsProvider {
       return this.locationsForAtom(magikFile, positionNode);
     } else if (wantedNode.is(MagikGrammar.CONDITION_NAME)) {
       return this.locationsForCondition(magikFile, positionNode);
+    } else if (wantedNode.is(MagikGrammar.SLOT)) {
+      return this.locationsForSlot(magikFile, wantedNode);
     }
 
-    // TODO: Slot definitions.
-
     return Collections.emptyList();
+  }
+
+  private List<Location> locationsForSlot(final MagikTypedFile magikFile, final AstNode slotNode) {
+    final String slotName = new SlotNodeHelper(slotNode).getSlotName();
+
+    final AstNode methodDefNode = slotNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
+    if (methodDefNode == null) {
+      return Collections.emptyList();
+    }
+
+    final TypeString ownerTypeStr = new MethodDefinitionNodeHelper(methodDefNode).getTypeString();
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    return resolver.getSlotDefinitions(ownerTypeStr).stream()
+        .filter(slot -> slot.getName().equals(slotName))
+        .map(SlotDefinition::getLocation)
+        .map(Location::validLocation)
+        .toList();
   }
 
   private List<Location> locationsForCondition(

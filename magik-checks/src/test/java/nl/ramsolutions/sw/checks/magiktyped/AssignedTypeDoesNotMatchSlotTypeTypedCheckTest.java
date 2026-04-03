@@ -47,6 +47,18 @@ class AssignedTypeDoesNotMatchSlotTypeTypedCheckTest {
   @ParameterizedTest
   @ValueSource(
       strings = {
+        // Slot assignment outside a method definition should not crash.
+        ".slot << 10",
+      })
+  void testSlotAssignmentOutsideMethod(final String code) {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new AssignedTypeDoesNotMatchSlotTypeTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
         """
           _method ex.m()
             .slot << {}

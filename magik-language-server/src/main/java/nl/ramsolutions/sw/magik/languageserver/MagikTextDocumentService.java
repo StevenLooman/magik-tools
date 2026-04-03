@@ -18,15 +18,21 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.languageserver.callhierarchy.CallHierarchyProvider;
 import nl.ramsolutions.sw.magik.languageserver.codeactions.CodeActionProvider;
+import nl.ramsolutions.sw.magik.languageserver.codelens.CodeLensProvider;
 import nl.ramsolutions.sw.magik.languageserver.completion.CompletionProvider;
 import nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider;
 import nl.ramsolutions.sw.magik.languageserver.diagnostics.DiagnosticsProvider;
+import nl.ramsolutions.sw.magik.languageserver.diagnostics.PullDiagnosticsProvider;
+import nl.ramsolutions.sw.magik.languageserver.documenthighlight.DocumentHighlightProvider;
+import nl.ramsolutions.sw.magik.languageserver.documentlink.DocumentLinkProvider;
 import nl.ramsolutions.sw.magik.languageserver.documentsymbols.DocumentSymbolProvider;
 import nl.ramsolutions.sw.magik.languageserver.folding.FoldingRangeProvider;
 import nl.ramsolutions.sw.magik.languageserver.formatting.FormattingProvider;
+import nl.ramsolutions.sw.magik.languageserver.formatting.OnTypeFormattingProvider;
 import nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider;
 import nl.ramsolutions.sw.magik.languageserver.implementation.ImplementationProvider;
 import nl.ramsolutions.sw.magik.languageserver.inlayhint.InlayHintProvider;
+import nl.ramsolutions.sw.magik.languageserver.linkededitingrange.LinkedEditingRangeProvider;
 import nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider;
 import nl.ramsolutions.sw.magik.languageserver.rename.RenameProvider;
 import nl.ramsolutions.sw.magik.languageserver.selectionrange.SelectionRangeProvider;
@@ -41,9 +47,12 @@ import org.eclipse.lsp4j.CallHierarchyItem;
 import org.eclipse.lsp4j.CallHierarchyOutgoingCall;
 import org.eclipse.lsp4j.CallHierarchyOutgoingCallsParams;
 import org.eclipse.lsp4j.CallHierarchyPrepareParams;
+import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.CodeLens;
+import org.eclipse.lsp4j.CodeLensParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
@@ -54,7 +63,14 @@ import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.DocumentDiagnosticParams;
+import org.eclipse.lsp4j.DocumentDiagnosticReport;
 import org.eclipse.lsp4j.DocumentFormattingParams;
+import org.eclipse.lsp4j.DocumentHighlight;
+import org.eclipse.lsp4j.DocumentHighlightParams;
+import org.eclipse.lsp4j.DocumentLink;
+import org.eclipse.lsp4j.DocumentLinkParams;
+import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
 import org.eclipse.lsp4j.DocumentRangeFormattingParams;
 import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.DocumentSymbolParams;
@@ -66,6 +82,8 @@ import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.ImplementationParams;
 import org.eclipse.lsp4j.InlayHint;
 import org.eclipse.lsp4j.InlayHintParams;
+import org.eclipse.lsp4j.LinkedEditingRangeParams;
+import org.eclipse.lsp4j.LinkedEditingRanges;
 import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.MessageParams;
@@ -122,6 +140,8 @@ public class MagikTextDocumentService implements TextDocumentService {
   private final ReferencesProvider referencesProvider;
   private final CompletionProvider completionProvider;
   private final FormattingProvider formattingProvider;
+  private final OnTypeFormattingProvider onTypeFormattingProvider;
+  private final PullDiagnosticsProvider pullDiagnosticsProvider;
   private final FoldingRangeProvider foldingRangeProvider;
   private final SemanticTokenProvider semanticTokenProver;
   private final RenameProvider renameProvider;
@@ -131,7 +151,12 @@ public class MagikTextDocumentService implements TextDocumentService {
   private final CodeActionProvider codeActionProvider;
   private final SelectionRangeProvider selectionRangeProvider;
   private final CallHierarchyProvider callHierarchyProvider;
+  private final DocumentLinkProvider documentLinkProvider;
+  private final CodeLensProvider codeLensProvider;
+  private final LinkedEditingRangeProvider linkedEditingRangeProvider;
+  private final DocumentHighlightProvider documentHighlightProvider;
   private final Map<TextDocumentIdentifier, OpenedFile> openedFiles = new ConcurrentHashMap<>();
+  @Nullable private ClientCapabilities clientCapabilities;
   private final Map<TextDocumentIdentifier, CompletableFuture<?>> pendingTasks =
       new ConcurrentHashMap<>();
 
@@ -157,6 +182,8 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.referencesProvider = new ReferencesProvider();
     this.completionProvider = new CompletionProvider();
     this.formattingProvider = new FormattingProvider();
+    this.onTypeFormattingProvider = new OnTypeFormattingProvider(this.formattingProvider);
+    this.pullDiagnosticsProvider = new PullDiagnosticsProvider(this.diagnosticsProvider);
     this.foldingRangeProvider = new FoldingRangeProvider();
     this.semanticTokenProver = new SemanticTokenProvider();
     this.renameProvider = new RenameProvider();
@@ -166,6 +193,10 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.codeActionProvider = new CodeActionProvider(this.properties);
     this.selectionRangeProvider = new SelectionRangeProvider();
     this.callHierarchyProvider = new CallHierarchyProvider(this.definitionKeeper);
+    this.documentLinkProvider = new DocumentLinkProvider();
+    this.codeLensProvider = new CodeLensProvider(this.definitionKeeper);
+    this.linkedEditingRangeProvider = new LinkedEditingRangeProvider();
+    this.documentHighlightProvider = new DocumentHighlightProvider();
   }
 
   /**
@@ -184,6 +215,8 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.referencesProvider.setCapabilities(capabilities);
     this.completionProvider.setCapabilities(capabilities);
     this.formattingProvider.setCapabilities(capabilities);
+    this.onTypeFormattingProvider.setCapabilities(capabilities);
+    this.pullDiagnosticsProvider.setCapabilities(capabilities);
     this.foldingRangeProvider.setCapabilities(capabilities);
     this.semanticTokenProver.setCapabilities(capabilities);
     this.renameProvider.setCapabilities(capabilities);
@@ -193,6 +226,31 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.codeActionProvider.setCapabilities(capabilities);
     this.selectionRangeProvider.setCapabilities(capabilities);
     this.callHierarchyProvider.setCapabilities(capabilities);
+    this.documentLinkProvider.setCapabilities(capabilities);
+    this.codeLensProvider.setCapabilities(capabilities);
+    this.linkedEditingRangeProvider.setCapabilities(capabilities);
+    this.documentHighlightProvider.setCapabilities(capabilities);
+  }
+
+  /**
+   * Set client capabilities, used to determine which diagnostic model to use.
+   *
+   * @param clientCapabilities Client capabilities.
+   */
+  public void setClientCapabilities(final ClientCapabilities clientCapabilities) {
+    this.clientCapabilities = clientCapabilities;
+  }
+
+  /**
+   * Returns {@code true} if the client supports the pull diagnostic model ({@code
+   * textDocument/diagnostic}), in which case push diagnostics should be suppressed.
+   */
+  private boolean clientSupportsPullDiagnostics() {
+    if (this.clientCapabilities == null) {
+      return false;
+    }
+    final var textDoc = this.clientCapabilities.getTextDocument();
+    return textDoc != null && textDoc.getDiagnostic() != null;
   }
 
   @Override
@@ -345,7 +403,12 @@ public class MagikTextDocumentService implements TextDocumentService {
           openedFile = magikFile;
 
           this.runDelayedTaskForTextDocument(
-              () -> this.publishDiagnostics(magikFile), realTextDocumentIdentifier, null);
+              () -> {
+                this.languageServer.refreshMagikDefinitions(uri, text);
+                this.publishDiagnostics(magikFile);
+              },
+              realTextDocumentIdentifier,
+              null);
           break;
         }
 
@@ -389,6 +452,17 @@ public class MagikTextDocumentService implements TextDocumentService {
     this.pendingTasks.put(textDocumentIdentifier, future);
   }
 
+  /**
+   * Returns {@code true} if the given URI is currently open as a Magik file in the editor.
+   *
+   * @param uri URI to check.
+   * @return Whether the URI is an open Magik file.
+   */
+  public boolean isOpenMagikFile(final URI uri) {
+    final TextDocumentIdentifier tdi = new TextDocumentIdentifier(uri.toString());
+    return this.openedFiles.get(tdi) instanceof MagikTypedFile;
+  }
+
   @Override
   public void didClose(final DidCloseTextDocumentParams params) {
     final long start = System.nanoTime();
@@ -406,12 +480,14 @@ public class MagikTextDocumentService implements TextDocumentService {
       this.pendingTasks.remove(realTextDocumentIdentifier);
     }
 
-    // Clear published diagnostics.
-    final List<Diagnostic> diagnostics = Collections.emptyList();
-    final PublishDiagnosticsParams publishParams =
-        new PublishDiagnosticsParams(uriStr, diagnostics);
-    final LanguageClient languageClient = this.languageServer.getLanguageClient();
-    languageClient.publishDiagnostics(publishParams);
+    // Clear published diagnostics (push model only).
+    if (!this.clientSupportsPullDiagnostics()) {
+      final List<Diagnostic> diagnostics = Collections.emptyList();
+      final PublishDiagnosticsParams publishParams =
+          new PublishDiagnosticsParams(uriStr, diagnostics);
+      final LanguageClient languageClient = this.languageServer.getLanguageClient();
+      languageClient.publishDiagnostics(publishParams);
+    }
 
     if (LOGGER_DURATION.isTraceEnabled()) {
       LOGGER_DURATION.trace(
@@ -518,6 +594,10 @@ public class MagikTextDocumentService implements TextDocumentService {
   }
 
   private void publishDiagnostics(final ProductDefFile productDefFile) {
+    if (this.clientSupportsPullDiagnostics()) {
+      return;
+    }
+
     final long start = System.nanoTime();
 
     LOGGER.debug("publishDiagnostics, uri: {}", productDefFile.getUri());
@@ -539,6 +619,10 @@ public class MagikTextDocumentService implements TextDocumentService {
   }
 
   private void publishDiagnostics(final ModuleDefFile moduleDefFile) {
+    if (this.clientSupportsPullDiagnostics()) {
+      return;
+    }
+
     final long start = System.nanoTime();
 
     LOGGER.debug("publishDiagnostics, uri: {}", moduleDefFile.getUri());
@@ -559,6 +643,10 @@ public class MagikTextDocumentService implements TextDocumentService {
   }
 
   private void publishDiagnostics(final MagikTypedFile magikFile) {
+    if (this.clientSupportsPullDiagnostics()) {
+      return;
+    }
+
     final long start = System.nanoTime();
 
     LOGGER.debug("publishDiagnostics, uri: {}", magikFile.getUri());
@@ -579,6 +667,10 @@ public class MagikTextDocumentService implements TextDocumentService {
   }
 
   private void publishDiagnostics(final LoadListFile loadListFile) {
+    if (this.clientSupportsPullDiagnostics()) {
+      return;
+    }
+
     final long start = System.nanoTime();
 
     LOGGER.debug("publishDiagnostics, uri: {}", loadListFile.getUri());
@@ -952,6 +1044,62 @@ public class MagikTextDocumentService implements TextDocumentService {
                 textDocument.getUri());
           }
           return textEdits;
+        });
+  }
+
+  @Override
+  public CompletableFuture<List<? extends TextEdit>> onTypeFormatting(
+      final DocumentOnTypeFormattingParams params) {
+    final long start = System.nanoTime();
+
+    final TextDocumentIdentifier textDocument = params.getTextDocument();
+    LOGGER.debug("onTypeFormatting, uri: {}", textDocument.getUri());
+
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    if (!(openedFile instanceof MagikTypedFile)) {
+      return CompletableFuture.supplyAsync(Collections::emptyList);
+    }
+
+    final MagikTypedFile magikFile = (MagikTypedFile) openedFile;
+    final FormattingOptions options = params.getOptions();
+    final Position position = params.getPosition();
+    final String ch = params.getCh();
+    return CompletableFuture.supplyAsync(
+        () -> {
+          final List<TextEdit> textEdits =
+              this.onTypeFormattingProvider.provideOnTypeFormatting(
+                  magikFile, options, position, ch);
+          if (LOGGER_DURATION.isTraceEnabled()) {
+            LOGGER_DURATION.trace(
+                "Duration: {} onTypeFormatting, uri: {}, trigger: {}",
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
+                textDocument.getUri(),
+                ch);
+          }
+          return textEdits;
+        });
+  }
+
+  @Override
+  public CompletableFuture<DocumentDiagnosticReport> diagnostic(
+      final DocumentDiagnosticParams params) {
+    final long start = System.nanoTime();
+
+    final TextDocumentIdentifier textDocument = params.getTextDocument();
+    LOGGER.debug("diagnostic (pull), uri: {}", textDocument.getUri());
+
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    return CompletableFuture.supplyAsync(
+        () -> {
+          final DocumentDiagnosticReport report =
+              this.pullDiagnosticsProvider.provideDiagnostics(openedFile);
+          if (LOGGER_DURATION.isTraceEnabled()) {
+            LOGGER_DURATION.trace(
+                "Duration: {} diagnostic (pull), uri: {}",
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
+                textDocument.getUri());
+          }
+          return report;
         });
   }
 
@@ -1351,6 +1499,128 @@ public class MagikTextDocumentService implements TextDocumentService {
                 item.getName());
           }
           return items;
+        });
+  }
+
+  @Override
+  public CompletableFuture<List<DocumentLink>> documentLink(final DocumentLinkParams params) {
+    final long start = System.nanoTime();
+
+    final TextDocumentIdentifier textDocument = params.getTextDocument();
+    LOGGER.debug("documentLink, uri: {}", textDocument.getUri());
+
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    return CompletableFuture.supplyAsync(
+        () -> {
+          final List<DocumentLink> links;
+          if (openedFile instanceof LoadListFile loadListFile) {
+            links = this.documentLinkProvider.provideDocumentLinks(loadListFile);
+          } else {
+            links = Collections.emptyList();
+          }
+          if (LOGGER_DURATION.isTraceEnabled()) {
+            LOGGER_DURATION.trace(
+                "Duration: {} documentLink, uri: {}",
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
+                textDocument.getUri());
+          }
+          return links;
+        });
+  }
+
+  @Override
+  public CompletableFuture<List<? extends CodeLens>> codeLens(final CodeLensParams params) {
+    final long start = System.nanoTime();
+
+    final TextDocumentIdentifier textDocument = params.getTextDocument();
+    LOGGER.debug("codeLens, uri: {}", textDocument.getUri());
+
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    return CompletableFuture.supplyAsync(
+        () -> {
+          final List<CodeLens> lenses;
+          if (openedFile instanceof MagikTypedFile magikFile) {
+            lenses = this.codeLensProvider.provideCodeLenses(magikFile);
+          } else if (openedFile instanceof ProductDefFile productDefFile) {
+            lenses = this.codeLensProvider.provideProductDefCodeLenses(productDefFile);
+          } else if (openedFile instanceof ModuleDefFile moduleDefFile) {
+            lenses = this.codeLensProvider.provideModuleDefCodeLenses(moduleDefFile);
+          } else {
+            lenses = Collections.emptyList();
+          }
+          if (LOGGER_DURATION.isTraceEnabled()) {
+            LOGGER_DURATION.trace(
+                "Duration: {} codeLens, uri: {}",
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
+                textDocument.getUri());
+          }
+          return lenses;
+        });
+  }
+
+  @Override
+  public CompletableFuture<List<? extends DocumentHighlight>> documentHighlight(
+      final DocumentHighlightParams params) {
+    final long start = System.nanoTime();
+
+    final TextDocumentIdentifier textDocument = params.getTextDocument();
+    LOGGER.debug(
+        "documentHighlight, uri: {}, position: {},{}",
+        textDocument.getUri(),
+        params.getPosition().getLine(),
+        params.getPosition().getCharacter());
+
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    return CompletableFuture.supplyAsync(
+        () -> {
+          final List<DocumentHighlight> highlights;
+          if (openedFile instanceof MagikTypedFile magikFile) {
+            highlights =
+                this.documentHighlightProvider.provideDocumentHighlights(
+                    magikFile, params.getPosition());
+          } else {
+            highlights = Collections.emptyList();
+          }
+          if (LOGGER_DURATION.isTraceEnabled()) {
+            LOGGER_DURATION.trace(
+                "Duration: {} documentHighlight, uri: {}",
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
+                textDocument.getUri());
+          }
+          return highlights;
+        });
+  }
+
+  @Override
+  public CompletableFuture<LinkedEditingRanges> linkedEditingRange(
+      final LinkedEditingRangeParams params) {
+    final long start = System.nanoTime();
+
+    final TextDocumentIdentifier textDocument = params.getTextDocument();
+    LOGGER.debug(
+        "linkedEditingRange, uri: {}, position: {},{}",
+        textDocument.getUri(),
+        params.getPosition().getLine(),
+        params.getPosition().getCharacter());
+
+    final OpenedFile openedFile = this.openedFiles.get(textDocument);
+    return CompletableFuture.supplyAsync(
+        () -> {
+          final LinkedEditingRanges ranges;
+          if (openedFile instanceof MagikTypedFile magikFile) {
+            ranges =
+                this.linkedEditingRangeProvider.provideLinkedEditingRanges(
+                    magikFile, params.getPosition());
+          } else {
+            ranges = null;
+          }
+          if (LOGGER_DURATION.isTraceEnabled()) {
+            LOGGER_DURATION.trace(
+                "Duration: {} linkedEditingRange, uri: {}",
+                "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
+                textDocument.getUri());
+          }
+          return ranges;
         });
   }
 }

@@ -29,9 +29,9 @@ import org.slf4j.LoggerFactory;
 public class MUnitTestItemProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MUnitTestItemProvider.class);
-  private static final TypeString MUNIT_TEST_CASE_EXEMPLAR_NAME =
+  public static final TypeString MUNIT_TEST_CASE_EXEMPLAR_NAME =
       TypeString.ofIdentifier("test_case", "sw");
-  private static final String MUNIT_TEST_METHOD_PREFIX = "test";
+  public static final String MUNIT_TEST_METHOD_PREFIX = "test";
 
   private final IDefinitionKeeper definitionKeeper;
 
@@ -114,7 +114,7 @@ public class MUnitTestItemProvider {
     typeTestItem.addChild(methodTestItem);
   }
 
-  private Stream<ExemplarDefinition> getTestCaseExemplars() {
+  public Stream<ExemplarDefinition> getTestCaseExemplars() {
     final ExemplarDefinition testCaseDefinition =
         this.definitionKeeper.getExemplarDefinitions(MUNIT_TEST_CASE_EXEMPLAR_NAME).stream()
             .findAny()
@@ -128,7 +128,7 @@ public class MUnitTestItemProvider {
         .filter(definition -> resolver.isKindOf(definition, testCaseDefinition));
   }
 
-  private Stream<MethodDefinition> getTestMethods() {
+  public Stream<MethodDefinition> getTestMethods() {
     return this.getTestCaseExemplars()
         .flatMap(
             testExemplarDefinition ->
