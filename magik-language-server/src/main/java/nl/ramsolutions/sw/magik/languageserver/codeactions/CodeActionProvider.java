@@ -18,6 +18,8 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
 import org.eclipse.lsp4j.CodeActionContext;
+import org.eclipse.lsp4j.CodeActionKind;
+import org.eclipse.lsp4j.CodeActionOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,9 @@ public class CodeActionProvider {
   private final ChecksCodeActionProvider loadListCodeActionProvider;
   private final ChecksCodeActionProvider magikChecksCodeActionProvider;
   private final ChecksCodeActionProvider magikTypedChecksCodeActionProvider;
+  private final ExtractMethodCodeActionProvider extractMethodCodeActionProvider;
+  private final ExtractExpressionCodeActionProvider extractExpressionCodeActionProvider;
+  private final ExtractLocalVariableCodeActionProvider extractLocalVariableCodeActionProvider;
 
   /**
    * Constructor.
@@ -49,6 +54,9 @@ public class CodeActionProvider {
         new ChecksCodeActionProvider(MagikCheckList.INSTANCE, properties);
     this.magikTypedChecksCodeActionProvider =
         new ChecksCodeActionProvider(MagikTypedCheckList.INSTANCE, properties);
+    this.extractMethodCodeActionProvider = new ExtractMethodCodeActionProvider();
+    this.extractExpressionCodeActionProvider = new ExtractExpressionCodeActionProvider();
+    this.extractLocalVariableCodeActionProvider = new ExtractLocalVariableCodeActionProvider();
   }
 
   /**
@@ -57,7 +65,9 @@ public class CodeActionProvider {
    * @param capabilities Server capabilities.
    */
   public void setCapabilities(final ServerCapabilities capabilities) {
-    capabilities.setCodeActionProvider(true);
+    final CodeActionOptions options = new CodeActionOptions();
+    options.setCodeActionKinds(List.of(CodeActionKind.QuickFix, CodeActionKind.RefactorExtract));
+    capabilities.setCodeActionProvider(options);
   }
 
   /**
@@ -175,13 +185,48 @@ public class CodeActionProvider {
   public List<CodeAction> provideCodeActions(
       final MagikTypedFile magikFile, final Range range, final CodeActionContext context) {
     try {
-      return Stream.concat(
-              this.magikChecksCodeActionProvider.provideCodeActions(magikFile, range).stream(),
-              this.magikTypedChecksCodeActionProvider.provideCodeActions(magikFile, range).stream())
+      final Stream<CodeAction> checksStream =
+          Stream.concat(
+                  this.magikChecksCodeActionProvider.provideCodeActions(magikFile, range).stream(),
+                  this.magikTypedChecksCodeActionProvider
+                      .provideCodeActions(magikFile, range)
+                      .stream())
+              .filter(
+                  codeAction ->
+                      codeAction.getEdits().stream()
+                          .anyMatch(edit -> edit.getRange().overlapsWith(range)));
+
+      final Stream<CodeAction> extractStream =
+          Stream.concat(
+              Stream.concat(
+                  this.extractMethodCodeActionProvider
+                      .provideCodeActions(magikFile, range)
+                      .stream(),
+                  this.extractExpressionCodeActionProvider
+                      .provideCodeActions(magikFile, range)
+                      .stream()),
+              this.extractLocalVariableCodeActionProvider
+                  .provideCodeActions(magikFile, range)
+                  .stream());
+
+      final List<String> requestedKinds =
+          context.getOnly() != null ? context.getOnly() : Collections.emptyList();
+
+      return Stream.concat(checksStream, extractStream)
           .filter(
-              codeAction ->
-                  codeAction.getEdits().stream()
-                      .anyMatch(edit -> edit.getRange().overlapsWith(range)))
+              codeAction -> {
+                if (requestedKinds.isEmpty()) {
+                  return true;
+                }
+                final String kind = codeAction.getKind();
+                // Check-based actions have null kind (treated as quickfix).
+                final String effectiveKind = kind != null ? kind : CodeActionKind.QuickFix;
+                return requestedKinds.stream()
+                    .anyMatch(
+                        requested ->
+                            effectiveKind.equals(requested)
+                                || effectiveKind.startsWith(requested + "."));
+              })
           .toList();
     } catch (final IOException | ReflectiveOperationException exception) {
       LOGGER.error(exception.getMessage(), exception);

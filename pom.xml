@@ -54,18 +54,18 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <junit.version>6.0.2</junit.version>
+    <junit.version>6.0.3</junit.version>
     <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
     <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
-    <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
-    <spotless.version>3.0.0</spotless.version>
+    <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
+    <spotless.version>3.2.1</spotless.version>
     <google-java-format.version>1.22.0</google-java-format.version>
     <cleanthat.version>2.18</cleanthat.version>
-    <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
     <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
     <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
-    <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
+    <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
     <spotbugs-maven-plugin.version>4.8.3.1</spotbugs-maven-plugin.version>
     <spotbugs.version>4.9.8</spotbugs.version>
     <com.github.marschall-memoryfilesystem.version>2.8.2</com.github.marschall-memoryfilesystem.version>
@@ -80,7 +80,7 @@
     <sonar.version>9.4.0.54424</sonar.version>
     <sonar-analyzer-commons.version>2.21.0.4626</sonar-analyzer-commons.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
-    <sonar-impl.version>26.1.0.118079</sonar-impl.version>
+    <sonar-impl.version>26.3.0.120487</sonar-impl.version>
     <sonar-maven.version>5.5.0.6356</sonar-maven.version>
     <sonar-maven-packaging-plugin.version>1.25.1.3002</sonar-maven-packaging-plugin.version>
     <sslr-squid-bridge.version>2.7.1.392</sslr-squid-bridge.version>
@@ -251,6 +251,36 @@
   </dependencyManagement>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <!-- This plugin's configuration is used to store Eclipse m2e settings only. -->
+        <!-- It has no influence on the Maven build itself. -->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <versionRange>[3.0.0,)</versionRange>
+                    <goals>
+                      <goal>check</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -409,7 +439,9 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.AstQuery</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.MagikAstWalker</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.formatting.RelativeIndentWalker</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.typing.TypeString</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.MagikTextDocumentService</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider</exclude>
                     <exclude>nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker</exclude>
@@ -439,29 +471,27 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper.remove(nl.ramsolutions.sw.IDefinition)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition.equals(java.lang.Object)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader.processLine(java.lang.String)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefineSlotAccessParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader.parseClassInfo(java.lang.String, java.io.InputStreamReader)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ConditionalBodyHandler.handleConditionalExpression(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ExpressionHandler.handleExpression(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.api.MagikNumberParser.parseMagikNumber(java.lang.String)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.stackTrace(long)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.slap.SlapProtocol.handleReplyMessage(java.nio.ByteBuffer)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.formatting.RelativeIndentWalker.getParentNode(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.formatting.RelativeIndentWalker.indentTokenNode(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker.getParentNode(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker.indentArgumentOrParameter(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode, nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker.IndentStrategy)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker.indentAssignmentRhs(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker.indentCollection(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker.indentExpressionWithPrecedence(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker.indentTokenNode(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.MagikTextDocumentService.didSave(org.eclipse.lsp4j.DidSaveTextDocumentParams)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.languageserver.definitions.DefinitionsProvider.provideDefinitions(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider.provideHover(nl.ramsolutions.sw.magik.MagikTypedFile, org.eclipse.lsp4j.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider.provideReferences(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.semantictokens.MagikSemanticTokenWalker.walkPostIdentifier(com.sonar.sslr.api.AstNode)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider.getSymbols(java.lang.String)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.lint.ConfigurationLocator.locateConfiguration()</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.parser.MagikWhitespaceTriviaAdder.createWhitespaceTokens(com.sonar.sslr.api.Token, com.sonar.sslr.api.Token)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.sessionwrapper.Main.main(java.lang.String[])</exclude>
                     <exclude>nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.productdef.ProductDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.productdef.analysis.ProductDefAstWalker.*</exclude>
@@ -495,7 +525,7 @@
         <executions>
           <execution>
             <goals>
-              <goal>dryRun</goal>
+              <goal>dryRunNoFork</goal>
             </goals>
             <phase>verify</phase>
           </execution>

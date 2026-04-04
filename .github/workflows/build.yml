@@ -5,6 +5,9 @@ on:
       - develop
   pull_request:
     types: [opened, synchronize, reopened]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 defaults:
   run:
@@ -41,7 +44,7 @@ jobs:
       - run: npm install . && npm run package
         working-directory: magik-language-server/client-vscode
       - run: cp -v magik-language-server/client-vscode/magik-language-server-*.vsix staging
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: Package-${{ matrix.os }}
           path: staging
@@ -51,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: DavidAnson/markdownlint-cli2-action@v22
+      - uses: DavidAnson/markdownlint-cli2-action@v23
         with:
           globs: '**/*.md'
 

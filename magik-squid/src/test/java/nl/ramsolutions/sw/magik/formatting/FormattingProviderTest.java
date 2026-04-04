@@ -20,7 +20,7 @@ class FormattingProviderTest {
 
   private List<TextEdit> getEdits(final String code, final FormattingOptions options) {
     final MagikFile magikFile = new MagikFile(MagikTypedFile.DEFAULT_URI, code);
-    final FormattingProvider provider = new FormattingProvider(options, RelativeIndentWalker.class);
+    final FormattingProvider provider = new FormattingProvider(options, BlockIndentWalker.class);
     final AstNode topNode = magikFile.getTopNode();
     return provider.format(topNode);
   }

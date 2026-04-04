@@ -24,6 +24,12 @@ public class MagikFormattingSettings {
   /** Alias for {@link NullIndentWalker}. */
   private static final String STRATEGY_BLANK = "";
 
+  /** Backward compatibility alias for {@link BlockIndentWalker}. */
+  private static final String STRATEGY_TAB = "tab";
+
+  /** Backward compatibility alias for {@link VisualIndentWalker}. */
+  private static final String STRATEGY_ALIGNMENT = "alignment";
+
   private static final Map<String, Class<? extends FormattingWalker>> INDENT_STRATEGIES =
       Map.of(
           STRATEGY_BLANK,
@@ -32,8 +38,14 @@ public class MagikFormattingSettings {
           NullIndentWalker.class,
           NullIndentWalker.STRATEGY_NAME,
           NullIndentWalker.class,
-          RelativeIndentWalker.STRATEGY_NAME,
-          RelativeIndentWalker.class);
+          STRATEGY_TAB,
+          BlockIndentWalker.class,
+          STRATEGY_ALIGNMENT,
+          VisualIndentWalker.class,
+          BlockIndentWalker.STRATEGY_NAME,
+          BlockIndentWalker.class,
+          VisualIndentWalker.STRATEGY_NAME,
+          VisualIndentWalker.class);
 
   private final MagikToolsProperties properties;
 

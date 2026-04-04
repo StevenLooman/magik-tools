@@ -145,7 +145,7 @@ public final class TypeString implements Comparable<TypeString> {
     this.combinedTypes = Collections.emptyList();
     this.generics = Arrays.asList(generics);
     this.generics.stream()
-        .filter(gen -> !gen.isGenericDefinition())
+        .filter(gen -> !gen.isGenericDefinition() && !gen.isGenericReference())
         .forEach(
             typeStr -> {
               throw new IllegalStateException();

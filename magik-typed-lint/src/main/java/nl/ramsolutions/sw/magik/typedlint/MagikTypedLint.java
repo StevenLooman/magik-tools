@@ -21,11 +21,11 @@ import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.IssueDisabledChecker;
 import nl.ramsolutions.sw.checks.MagikTypedCheckList;
+import nl.ramsolutions.sw.checks.output.Reporter;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.typedlint.output.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

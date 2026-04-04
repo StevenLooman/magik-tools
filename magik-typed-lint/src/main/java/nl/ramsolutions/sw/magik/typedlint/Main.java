@@ -18,14 +18,19 @@ import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.SourceFileScanner;
+import nl.ramsolutions.sw.checks.Check;
+import nl.ramsolutions.sw.checks.CheckHolder;
+import nl.ramsolutions.sw.checks.ChecksConfiguration;
+import nl.ramsolutions.sw.checks.MagikTypedCheckList;
+import nl.ramsolutions.sw.checks.output.MessageFormatReporter;
+import nl.ramsolutions.sw.checks.output.NullReporter;
+import nl.ramsolutions.sw.checks.output.Reporter;
+import nl.ramsolutions.sw.checks.output.SarifReporter;
 import nl.ramsolutions.sw.magik.FileEvent;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
-import nl.ramsolutions.sw.magik.typedlint.output.MessageFormatReporter;
-import nl.ramsolutions.sw.magik.typedlint.output.NullReporter;
-import nl.ramsolutions.sw.magik.typedlint.output.Reporter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -90,6 +95,13 @@ public final class Main {
       Option.builder().longOpt("version").desc("Show version and exit").get();
   private static final Option OPTION_HELP =
       Option.builder().longOpt("help").desc("Show this help and exit").get();
+  private static final Option OPTION_FORMAT =
+      Option.builder()
+          .longOpt("format")
+          .desc("Output format: text (default), sarif")
+          .hasArg()
+          .type(PatternOptionBuilder.STRING_VALUE)
+          .get();
 
   static {
     OPTIONS = new Options();
@@ -103,6 +115,7 @@ public final class Main {
     OPTIONS.addOption(OPTION_PRE_INDEX_DIR);
     OPTIONS.addOption(OPTION_DEBUG);
     OPTIONS.addOption(OPTION_VERSION);
+    OPTIONS.addOption(OPTION_FORMAT);
   }
 
   private static final Map<String, Integer> SEVERITY_EXIT_CODE_MAPPING =
@@ -119,6 +132,18 @@ public final class Main {
 
   private static PrintStream getErrStream() {
     return System.err; // NOSONAR
+  }
+
+  private static String getName() {
+    return "magik-typed-lint";
+  }
+
+  private static String getArtifactName() {
+    return Main.getName() + ".jar";
+  }
+
+  private static String getVersion() {
+    return Main.class.getPackage().getImplementationVersion();
   }
 
   /**
@@ -143,16 +168,27 @@ public final class Main {
   /**
    * Create the reporter.
    *
-   * @param configuration Configuration.
+   * @param properties Configuration.
+   * @param outputFormat Output format ("text" or "sarif").
    * @return Reporter.
    */
-  private static Reporter createReporter(final MagikToolsProperties properties) {
+  private static Reporter createReporter(
+      final MagikToolsProperties properties, final String outputFormat) {
+    final PrintStream outStream = Main.getOutStream();
+    if ("sarif".equalsIgnoreCase(outputFormat)) {
+      final List<Class<? extends Check>> checkClasses =
+          MagikTypedCheckList.INSTANCE.getBaseChecks();
+      final ChecksConfiguration checksConfig = new ChecksConfiguration(checkClasses, properties);
+      final List<CheckHolder> checkHolders = checksConfig.getAllChecks();
+      final String version = Main.class.getPackage().getImplementationVersion();
+      return new SarifReporter(
+          outStream, "magik-typed-lint", version != null ? version : "dev", checkHolders);
+    }
     final String configReporterFormat =
         properties.getPropertyString(MagikTypedLint.KEY_MSG_TEMPLATE);
     final String format =
         configReporterFormat != null ? configReporterFormat : MessageFormatReporter.DEFAULT_FORMAT;
     final long columnOffset = properties.getPropertyLong(MagikTypedLint.KEY_COLUMN_OFFSET, 0L);
-    final PrintStream outStream = Main.getOutStream();
     return new MessageFormatReporter(outStream, format, columnOffset);
   }
 
@@ -210,7 +246,12 @@ public final class Main {
       commandLine = Main.parseCommandline(args);
     } catch (final UnrecognizedOptionException exception) {
       final PrintStream errStream = Main.getErrStream();
-      errStream.println("Unrecognized option: " + exception.getMessage());
+      final String artifactName = Main.getArtifactName();
+      errStream.println(
+          exception.getMessage()
+              + "\nTry 'java -jar "
+              + artifactName
+              + " --help' for more information.");
 
       System.exit(1);
       return; // Keep inferer happy.
@@ -220,10 +261,15 @@ public final class Main {
       Main.initDebugLogger();
     }
 
+    if (commandLine.hasOption(OPTION_HELP)) {
+      Main.showHelp();
+
+      System.exit(0);
+    }
+
     if (commandLine.hasOption(OPTION_VERSION)) {
-      final String version = Main.class.getPackage().getImplementationVersion();
-      final PrintStream errStream = Main.getErrStream();
-      errStream.println("Version: " + version);
+      Main.showVersion();
+
       System.exit(0);
     }
 
@@ -262,15 +308,6 @@ public final class Main {
       System.exit(0);
     }
 
-    // Help.
-    if (commandLine.hasOption(OPTION_HELP) || commandLine.getArgs().length == 0) {
-      final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
-      helpFormatter.printHelp(
-          "java -jar magik-typed-lint.jar", "magik-typed-lint", Main.OPTIONS, "", true);
-
-      System.exit(0);
-    }
-
     // Read type database(s).
     if (commandLine.hasOption(OPTION_TYPE_DATABASE)) {
       final String[] typeDatabasePaths = commandLine.getOptionValues(OPTION_TYPE_DATABASE);
@@ -289,9 +326,11 @@ public final class Main {
 
     // Lint files from command line.
     final Collection<Path> paths = Main.getFilesFromArgs(leftOverArgs);
-    final Reporter reporter = Main.createReporter(properties);
+    final String outputFormat = commandLine.getOptionValue(OPTION_FORMAT, "text");
+    final Reporter reporter = Main.createReporter(properties, outputFormat);
     final MagikTypedLint lint = new MagikTypedLint(definitionKeeper, properties, reporter);
     lint.run(paths);
+    reporter.finish();
 
     final int exitCode =
         reporter.reportedSeverities().stream()
@@ -323,5 +362,19 @@ public final class Main {
       final String value = commandLine.getOptionValue(OPTION_RCFILE);
       properties.setProperty(MagikTypedLint.KEY_OVERRIDE_CONFIG, value);
     }
+  }
+
+  private static void showHelp() throws IOException {
+    final HelpFormatter helpFormatter = HelpFormatter.builder().setShowSince(false).get();
+    final String artifactName = Main.getArtifactName();
+    final String name = Main.getName();
+    helpFormatter.printHelp(
+        "java -jar " + artifactName, name + "\s" + Main.getVersion(), Main.OPTIONS, "", true);
+  }
+
+  private static void showVersion() {
+    final String version = Main.getVersion();
+    final PrintStream outStream = Main.getOutStream();
+    outStream.println(version);
   }
 }
