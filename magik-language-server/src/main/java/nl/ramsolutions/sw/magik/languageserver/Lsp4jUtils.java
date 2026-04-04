@@ -7,6 +7,7 @@ import nl.ramsolutions.sw.OpenedFile;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.SnippetTextEdit;
 import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
@@ -47,8 +48,11 @@ public final class Lsp4jUtils {
       final OpenedFile openedFile,
       final String description,
       final List<nl.ramsolutions.sw.magik.TextEdit> textEdits) {
-    final List<org.eclipse.lsp4j.TextEdit> lsp4jTextEdits =
-        textEdits.stream().map(Lsp4jConversion::textEditToLsp4j).toList();
+    final List<Either<TextEdit, SnippetTextEdit>> lsp4jTextEdits =
+        textEdits.stream()
+            .map(Lsp4jConversion::textEditToLsp4j)
+            .map(Either::<TextEdit, SnippetTextEdit>forLeft)
+            .toList();
     final VersionedTextDocumentIdentifier versionedTextDocumentIdentifier =
         new VersionedTextDocumentIdentifier(openedFile.getUri().toString(), TEXT_DOCUMENT_VERSION);
     final TextDocumentEdit textDocumentEdit =
