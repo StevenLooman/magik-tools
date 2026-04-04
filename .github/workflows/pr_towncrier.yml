@@ -2,6 +2,9 @@ name: Pull Request requires towncrier file
 
 on:
   - pull_request
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   pr_require_towncrier_file:

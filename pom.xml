@@ -57,7 +57,7 @@
     <junit.version>6.0.3</junit.version>
     <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
     <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
-    <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
+    <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
     <spotless.version>3.2.1</spotless.version>
     <google-java-format.version>1.22.0</google-java-format.version>
     <cleanthat.version>2.18</cleanthat.version>
@@ -65,7 +65,7 @@
     <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
     <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
     <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
-    <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
+    <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
     <spotbugs-maven-plugin.version>4.8.3.1</spotbugs-maven-plugin.version>
     <spotbugs.version>4.9.8</spotbugs.version>
     <com.github.marschall-memoryfilesystem.version>2.8.2</com.github.marschall-memoryfilesystem.version>
@@ -80,7 +80,7 @@
     <sonar.version>9.4.0.54424</sonar.version>
     <sonar-analyzer-commons.version>2.21.0.4626</sonar-analyzer-commons.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
-    <sonar-impl.version>26.2.0.119303</sonar-impl.version>
+    <sonar-impl.version>26.3.0.120487</sonar-impl.version>
     <sonar-maven.version>5.5.0.6356</sonar-maven.version>
     <sonar-maven-packaging-plugin.version>1.25.1.3002</sonar-maven-packaging-plugin.version>
     <sslr-squid-bridge.version>2.7.1.392</sslr-squid-bridge.version>
@@ -477,7 +477,6 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader.parseClassInfo(java.lang.String, java.io.InputStreamReader)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ConditionalBodyHandler.handleConditionalExpression(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ExpressionHandler.handleExpression(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.api.MagikNumberParser.parseMagikNumber(java.lang.String)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>

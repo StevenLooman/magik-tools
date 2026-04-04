@@ -27,7 +27,6 @@ public class LocalTypeReasoner extends MagikAstWalker {
   private final LocalTypeReasonerState state;
   private final AssignmentHandler assignmentHandler;
   private final AtomHandler atomHandler;
-  private final ConditionalBodyHandler conditionalBodyHandler;
   private final ExpressionHandler expressionHandler;
   private final IdentifierHandler identifierHandler;
   private final InvocationHandler invocationHandler;
@@ -46,7 +45,6 @@ public class LocalTypeReasoner extends MagikAstWalker {
 
     this.assignmentHandler = new AssignmentHandler(this.state);
     this.atomHandler = new AtomHandler(this.state);
-    this.conditionalBodyHandler = new ConditionalBodyHandler(this.state);
     this.expressionHandler = new ExpressionHandler(this.state);
     this.identifierHandler = new IdentifierHandler(this.state);
     this.invocationHandler = new InvocationHandler(this.state);
@@ -81,11 +79,6 @@ public class LocalTypeReasoner extends MagikAstWalker {
   protected void walkPostMethodDefinition(final AstNode node) {
     // TODO: Move this to somewhere else.
     this.expressionHandler.handleMethodDefinition(node);
-  }
-
-  @Override
-  protected void walkPostConditionalExpression(final AstNode node) {
-    this.conditionalBodyHandler.handleConditionalExpression(node);
   }
 
   @Override

@@ -1,0 +1,91 @@
+name: CLA Check
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  statuses: write
+
+jobs:
+  cla-check:
+    runs-on: ubuntu-latest
+    if: ${{ !endsWith(github.event.pull_request.user.login, '[bot]') }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - name: Check CLA signature
+        id: cla
+        env:
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          echo "Checking CLA for user: $PR_AUTHOR"
+
+          if [ ! -f "CLA-SIGNERS" ]; then
+            echo "CLA-SIGNERS file not found"
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Case-insensitive fixed-string grep for the GitHub username in the signers table
+          if grep -qiF "| ${PR_AUTHOR} |" CLA-SIGNERS; then
+            echo "CLA signed by $PR_AUTHOR"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "CLA not signed by $PR_AUTHOR"
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post comment if CLA not signed
+        if: steps.cla.outputs.signed == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const author = context.payload.pull_request.user.login;
+            const repoUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
+
+            // Check if we already posted a CLA reminder
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.data.find(
+              (c) => c.user.type === "Bot" && c.body.includes("Contributor License Agreement")
+            );
+
+            if (!botComment) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `### 📝 CLA Signature Required\n\nHi @${author}, thank you for your contribution!\n\nBefore we can merge this pull request, you need to sign our [Contributor License Agreement](${repoUrl}/blob/main/CLA.md).\n\n**How to sign:**\n1. Read the [CLA](${repoUrl}/blob/main/CLA.md)\n2. Add your entry to the [CLA-SIGNERS](${repoUrl}/blob/main/CLA-SIGNERS) file\n3. Submit a separate PR with your signature, or add it to this PR\n\nOnce the CLA-SIGNERS file includes your GitHub username, this check will pass automatically on the next update.\n\nIf you have any questions, feel free to ask!`,
+              });
+            }
+
+      - name: Set check status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const signed = "${{ steps.cla.outputs.signed }}" === "true";
+
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.payload.pull_request.head.sha,
+              state: signed ? "success" : "failure",
+              description: signed
+                ? "CLA has been signed"
+                : "CLA signature required — see PR comment for instructions",
+              context: "CLA Check",
+            });
+
+            if (!signed) {
+              core.setFailed("CLA not signed by " + context.payload.pull_request.user.login);
+            }

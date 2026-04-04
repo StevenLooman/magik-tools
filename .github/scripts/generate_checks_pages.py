@@ -1,12 +1,49 @@
 #!/usr/bin/env python3
+"""Generate Markdown pages for checks based on Java and JSON files."""
 
-import html2text
 from pathlib import Path
 import re
 import json
 
-FOOTER_NOTE = """\n> [!NOTE]\n> This page is generated. Any changes made to this page through the wiki will be lost in the future.\n"""
+import html2text
 
+OUTPUT_FOLDER = Path("wiki/checks")
+INDEX_FILE = OUTPUT_FOLDER / "Checks-Index.md"
+CHECK_TYPES = {
+    "Magik checks": (
+        Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/magik"),
+        Path(
+            "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules"
+        ),
+    ),
+    "Magik typed checks": (
+        Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/magiktyped"),
+        Path(
+            "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magiktyped/rules"
+        ),
+    ),
+    "module.def checks": (
+        Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/moduledef"),
+        Path(
+            "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/moduledef/rules"
+        ),
+    ),
+    "product.def checks": (
+        Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/productdef"),
+        Path(
+            "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/productdef/rules"
+        ),
+    ),
+    "Load list checks": (
+        Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/loadlist"),
+        Path(
+            "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/loadlist/rules"
+        ),
+    ),
+}
+FOOTER_NOTE = \
+    """\n> [!NOTE]\n> This page is generated. """ \
+    """Any changes made to this page through the wiki will be lost in the future.\n"""
 TABLE_HEADER = (
     """\n## Options\n\n| Option | Default value | Description |\n| --- | --- | --- |"""
 )
@@ -14,7 +51,6 @@ TABLE_HEADER = (
 
 def write_file(file_path: Path, content: str):
     """Write (overwrite) content to a file."""
-    file_path.parent.mkdir(parents=True, exist_ok=True)
     file_path.write_text(content, encoding="utf-8")
 
 
@@ -50,7 +86,7 @@ def extract_rule_properties(java_file: Path) -> list[str]:
     check_name = java_file.stem.replace("Check", "")
     kebab_case = re.sub(r"(?<!^)(?=[A-Z])", "-", check_name).lower()
 
-    props = []
+    props: list[str] = []
     for prop in re.finditer(
         r"@RuleProperty\s*\(((?:[^()]|\([^()]*\))*?)\)", java_content, re.DOTALL
     ):
@@ -63,7 +99,6 @@ def extract_rule_properties(java_file: Path) -> list[str]:
         option_name = key_match.group(1).replace(" ", "-")
         description = desc_match.group(1)
         default_value = extract_default_value(java_content, text)
-
         default_value = f"| {default_value} |" if default_value != "" else "| |"
 
         props.append(f"| {kebab_case}.{option_name} {default_value} {description} |")
@@ -80,50 +115,17 @@ def java_to_markdown(java_file: Path) -> str:
 
 
 def generate_markdown_pages():
-    output_folder = Path("wiki/checks")
-    output_folder.mkdir(parents=True, exist_ok=True)
-    index_file = output_folder / "Checks-Index.md"
+    """Generate Markdown pages for all checks and an index page."""
+    # pylint: disable=too-many-locals
+    OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+
     index_content = ["# Available checks\n"]
-
-    CHECK_TYPES = {
-        "Magik checks": (
-            Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/magik"),
-            Path(
-                "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magik/rules"
-            ),
-        ),
-        "Magik typed checks": (
-            Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/magiktyped"),
-            Path(
-                "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/magiktyped/rules"
-            ),
-        ),
-        "module.def checks": (
-            Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/moduledef"),
-            Path(
-                "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/moduledef/rules"
-            ),
-        ),
-        "product.def checks": (
-            Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/productdef"),
-            Path(
-                "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/productdef/rules"
-            ),
-        ),
-        "Load list checks": (
-            Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/loadlist"),
-            Path(
-                "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/loadlist/rules"
-            ),
-        ),
-    }
-
     for check_type, (java_folder, sonar_folder) in CHECK_TYPES.items():
         index_content.append(f"\n## {check_type}\n\n")
 
         for json_file in sorted(sonar_folder.glob("*.json")):
             file_name = json_file.stem
-            output_file = output_folder / f"Check-{file_name}.md"
+            output_file = OUTPUT_FOLDER / f"Check-{file_name}.md"
             print(f"Generating {output_file}.")
 
             json_content = json_file.read_text(encoding="utf-8")
@@ -153,7 +155,7 @@ def generate_markdown_pages():
             index_content.append(f"- **[{title}](Check-{file_name})**\n")
 
     index_content.append(FOOTER_NOTE)
-    write_file(index_file, "".join(index_content))
+    write_file(INDEX_FILE, "".join(index_content))
 
 
 if __name__ == "__main__":
