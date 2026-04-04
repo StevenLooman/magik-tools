@@ -1,5 +1,4 @@
-Contributing
-============
+# Contributing
 
 `magik-tools` is a work in progress and currently developed in my spare time. I cannot guarantee this project is bug-free and/or will work according to your expectations. You can contribute by using this software and report results.
 
