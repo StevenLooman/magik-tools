@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.languageserver;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
@@ -87,6 +89,9 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
           workspaceFolder -> LOGGER.debug("Workspace folder: {}", workspaceFolder));
     }
 
+    final ClientCapabilities clientCapabilities = params.getCapabilities();
+    this.magikTextDocumentService.setClientCapabilities(clientCapabilities);
+
     return CompletableFuture.supplyAsync(
         () -> {
           // Set capabilities.
@@ -156,6 +161,39 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
    */
   public LanguageClient getLanguageClient() {
     return this.languageClient;
+  }
+
+  /**
+   * Get the {@link MagikTextDocumentService}.
+   *
+   * @return The {@link MagikTextDocumentService}.
+   */
+  public MagikTextDocumentService getMagikTextDocumentService() {
+    return this.magikTextDocumentService;
+  }
+
+  /**
+   * Get the {@link MagikWorkspaceService}.
+   *
+   * @return The {@link MagikWorkspaceService}.
+   */
+  public MagikWorkspaceService getMagikWorkspaceService() {
+    return this.magikWorkspaceService;
+  }
+
+  /**
+   * Re-index definitions for an open magik file from in-memory text, then ask the client to refresh
+   * its code lenses.
+   *
+   * @param uri URI of the magik file.
+   * @param text Current in-memory text of the file.
+   */
+  public void refreshMagikDefinitions(final URI uri, final String text) {
+    this.magikWorkspaceService.indexMagikFileContent(uri, text);
+    final LanguageClient client = this.getLanguageClient();
+    if (client != null) {
+      client.refreshCodeLenses();
+    }
   }
 
   /**

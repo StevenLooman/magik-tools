@@ -120,7 +120,36 @@ export class MagikTestProvider implements vscode.Disposable {
 			(request: vscode.TestRunRequest, token: vscode.CancellationToken) => this.runHandler(request, token),
 			true);
 
+		const runTestCommand = vscode.commands.registerCommand(
+			'magik.munit.runTest',
+			(testItemId: string) => this.runTestById(testItemId));
+		this.context.subscriptions.push(runTestCommand);
+
 		this.registerFileWatchers();
+	}
+
+	private runTestById(testItemId: string) {
+		const testItem = this.findTestItem(testItemId, this.controller.items);
+		if (!testItem) {
+			vscode.window.showErrorMessage(`Could not find test item: ${testItemId}`);
+			return;
+		}
+
+		const request = new vscode.TestRunRequest([testItem]);
+		this.runHandler(request, new vscode.CancellationTokenSource().token);
+	}
+
+	private findTestItem(testItemId: string, items: vscode.TestItemCollection): vscode.TestItem | undefined {
+		for (const [, item] of items) {
+			if (item.id === testItemId) {
+				return item;
+			}
+			const found = this.findTestItem(testItemId, item.children);
+			if (found) {
+				return found;
+			}
+		}
+		return undefined;
 	}
 
 	dispose() {
@@ -159,7 +188,7 @@ export class MagikTestProvider implements vscode.Disposable {
 	}
 
 	private getTestItems() {
-		this.client.sendRequest("custom/munit/getTestItems")
+		this.client.sendRequest("workspace/executeCommand", { command: "magik.munit.getTestItems" })
 			.then((munitTestItems: MUnitTestItem[]) => this.parseTestItems(munitTestItems))
 			.catch((err) => vscode.window.showErrorMessage(`Error getting test items: ${err}`));
 	}

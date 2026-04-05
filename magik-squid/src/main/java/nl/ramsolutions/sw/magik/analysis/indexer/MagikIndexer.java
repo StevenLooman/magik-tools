@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.indexer;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
@@ -77,6 +78,27 @@ public class MagikIndexer {
     } catch (final Exception exception) {
       LOGGER.error("Error indexing created file: " + path, exception);
     }
+  }
+
+  /**
+   * Index the content of a single magik file from an in-memory text string.
+   *
+   * <p>Used when the file is open in the editor: the in-memory text takes priority over the on-disk
+   * content.
+   *
+   * @param uri URI of the magik file.
+   * @param text Current text content of the file.
+   */
+  public synchronized void indexFileContent(final URI uri, final String text) {
+    LOGGER.debug("Indexing file content for: {}", uri);
+
+    final Path path = Path.of(uri);
+    this.definitionKeeper.getDefinitionsByPath(path).forEach(this.definitionKeeper::remove);
+
+    final MagikFile magikFile = new MagikFile(this.properties, uri, text);
+    magikFile.getDefinitions().stream()
+        .map(IDefinition::getBareDefinition)
+        .forEach(this.definitionKeeper::add);
   }
 
   /**

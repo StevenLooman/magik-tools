@@ -12,6 +12,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.junit.jupiter.api.Test;
 
@@ -91,6 +92,39 @@ class DefinitionsProviderTest {
         .containsExactly(
             new Location(
                 MagikTypedFile.DEFAULT_URI, new Range(new Position(2, 11), new Position(2, 17))));
+  }
+
+  @Test
+  void testProvideDefinitionsFromSlot() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString exemplarRef = TypeString.ofIdentifier("my_exemplar", "user");
+    final Location slotLocation =
+        new Location(
+            MagikTypedFile.DEFAULT_URI, new Range(new Position(5, 0), new Position(5, 10)));
+    final SlotDefinition slotDef =
+        new SlotDefinition(slotLocation, null, null, null, null, "my_slot", TypeString.UNDEFINED);
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            EMPTY_LOCATION,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            exemplarRef,
+            List.of(slotDef),
+            Collections.emptyList(),
+            null));
+
+    final String code =
+        """
+        _method my_exemplar.method
+            _return .my_slot
+        _endmethod
+        """;
+    final Position position = new Position(2, 13); // On `my_slot`.
+    final List<Location> locations = this.getDefinitions(code, position, definitionKeeper);
+    assertThat(locations).containsExactly(slotLocation);
   }
 
   @Test
