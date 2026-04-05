@@ -4,12 +4,13 @@ The following people have signed the [Contributor License Agreement](CLA.md) for
 
 To sign the CLA, add your entry below in the following format and submit a pull request:
 
-```
+```md
 | GitHub Username | Full Name | Date (YYYY-MM-DD) |
 ```
 
 ## Signers
 
 | GitHub Username | Full Name | Date (YYYY-MM-DD) |
-|---|---|---|
+| --- | --- | --- |
 | StevenLooman | Steven Looman | 2019-03-05 |
+| sebastiaanspeck | Sebastiaan Speck | 2026-04-05 |
