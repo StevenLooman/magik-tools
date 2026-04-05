@@ -82,9 +82,6 @@ export class MagikLanguageClient implements vscode.Disposable {
 	}
 
 	private registerCommands() {
-		const reIndex = vscode.commands.registerCommand('magik.custom.reIndex', () => this.command_custom_re_index());
-		this._context.subscriptions.push(reIndex);
-
 		// Used by the server's "Extract to method/proc" code action to position the cursor
 		// on the placeholder name and trigger an inline rename.
 		const triggerRename = vscode.commands.registerCommand(
@@ -102,24 +99,34 @@ export class MagikLanguageClient implements vscode.Disposable {
 			}
 		);
 		this._context.subscriptions.push(triggerRename);
+
+		const addProduct = vscode.commands.registerCommand(
+			'magik.session.addProduct',
+			(productDir: string) => {
+				this.sendToSession(`smallworld_product.add_product("${productDir}")\n$`, undefined);
+			}
+		);
+		this._context.subscriptions.push(addProduct);
+
+		const loadModule = vscode.commands.registerCommand(
+			'magik.session.loadModule',
+			(moduleName: string) => {
+				this.sendToSession(`sw_module_manager.load_module(:${moduleName})\n$`, undefined);
+			}
+		);
+		this._context.subscriptions.push(loadModule);
 	}
 
 	public stop(): Thenable<void> {
 		return this._client.stop();
 	}
 
-	public sendRequest<R>(request: string): Promise<R> {
-		return this._client.sendRequest(request);
+	public sendRequest<R>(request: string, params?: unknown): Promise<R> {
+		return this._client.sendRequest(request, params);
 	}
 
 	public sendToSession(text: string, sourcePath: fs.PathLike | undefined) {
 		this._magikSessionProvider.sendToSession(text, sourcePath);
 	}
-
-	//#region: Commands
-	private command_custom_re_index() {
-		this._client.sendRequest('custom/reIndex');
-	}
-	//#endregion
 
 }

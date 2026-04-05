@@ -25,10 +25,11 @@ public class AssignedTypeDoesNotMatchSlotTypeTypedCheck extends MagikTypedCheck 
   protected void walkPostAssignmentExpression(final AstNode node) {
     // Ensure we are in a method definition.
     final AstNode methodDefinitionNode = node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefinitionNode);
     if (methodDefinitionNode == null) {
       return;
     }
+
+    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefinitionNode);
 
     // Get assigned type.
     final LocalTypeReasonerState state = this.getTypeReasonerState();
