@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -19,11 +18,12 @@ import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ModuleIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ProductIndexer;
 import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader;
-import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItem;
 import nl.ramsolutions.sw.magik.languageserver.munit.MUnitTestItemProvider;
 import nl.ramsolutions.sw.magik.languageserver.symbol.SymbolProvider;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
+import org.eclipse.lsp4j.ExecuteCommandOptions;
+import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.ProgressParams;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -34,7 +34,6 @@ import org.eclipse.lsp4j.WorkDoneProgressEnd;
 import org.eclipse.lsp4j.WorkspaceSymbol;
 import org.eclipse.lsp4j.WorkspaceSymbolParams;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.WorkspaceService;
 import org.slf4j.Logger;
@@ -82,6 +81,16 @@ public class MagikWorkspaceService implements WorkspaceService {
   }
 
   /**
+   * Index the content of a magik file from an in-memory text string.
+   *
+   * @param uri URI of the magik file.
+   * @param text Current in-memory text of the file.
+   */
+  public void indexMagikFileContent(final URI uri, final String text) {
+    this.magikIndexer.indexFileContent(uri, text);
+  }
+
+  /**
    * Set capabilities.
    *
    * @param capabilities Server capabilities to set.
@@ -89,6 +98,8 @@ public class MagikWorkspaceService implements WorkspaceService {
   public void setCapabilities(final ServerCapabilities capabilities) {
     this.symbolProvider.setCapabilities(capabilities);
     this.testItemProvider.setCapabilities(capabilities);
+    capabilities.setExecuteCommandProvider(
+        new ExecuteCommandOptions(List.of("magik.reIndex", "magik.munit.getTestItems")));
   }
 
   @Override
@@ -186,11 +197,19 @@ public class MagikWorkspaceService implements WorkspaceService {
               try {
                 this.productIndexer.handleFileEvent(magikFileEvent);
                 this.moduleIndexer.handleFileEvent(magikFileEvent);
-                this.magikIndexer.handleFileEvent(magikFileEvent);
+                // Skip .magik files open in the editor — didChange() handles those.
+                if (!this.languageServer.getMagikTextDocumentService().isOpenMagikFile(uri)) {
+                  this.magikIndexer.handleFileEvent(magikFileEvent);
+                }
               } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
               }
             });
+
+    final LanguageClient client = this.languageServer.getLanguageClient();
+    if (client != null) {
+      client.refreshCodeLenses();
+    }
   }
 
   @Override
@@ -218,44 +237,29 @@ public class MagikWorkspaceService implements WorkspaceService {
         });
   }
 
-  // region: Additional commands.
-  /**
-   * Re-index all files.
-   *
-   * @return CompletableFuture.
-   */
-  @JsonRequest(value = "custom/reIndex")
-  public CompletableFuture<Void> reIndex() {
-    return CompletableFuture.runAsync(
-        () -> {
-          this.runIndexersInBackground(true, true);
-        });
+  @Override
+  public CompletableFuture<Object> executeCommand(final ExecuteCommandParams params) {
+    LOGGER.trace("executeCommand, command: {}", params.getCommand());
+
+    if (params.getCommand() == null) {
+      return CompletableFuture.completedFuture(null);
+    }
+
+    return switch (params.getCommand()) {
+      case "magik.reIndex" ->
+          CompletableFuture.supplyAsync(
+              () -> {
+                this.runIndexersInBackground(true, true);
+                return null;
+              });
+      case "magik.munit.getTestItems" ->
+          CompletableFuture.supplyAsync(() -> (Object) this.testItemProvider.getTestItems());
+      default -> {
+        LOGGER.warn("Unknown command: {}", params.getCommand());
+        yield CompletableFuture.completedFuture(null);
+      }
+    };
   }
-
-  /**
-   * Get test items.
-   *
-   * @return Test items.
-   */
-  @JsonRequest(value = "custom/munit/getTestItems")
-  public CompletableFuture<Collection<MUnitTestItem>> getTestItems() {
-    // TODO: Rewrite this to generic queries on types. Such as:
-    //       - Get type by name
-    //         - doc
-    //         - location
-    //         - parents
-    //         - children
-    //         - ...
-    //         - methods?
-    //       - Get methods from type name
-    //       - Get method by name
-    //       In fact, maybe we can use LSP typeHierarchy support?
-    LOGGER.trace("munit/getTestItems");
-
-    return CompletableFuture.supplyAsync(this.testItemProvider::getTestItems);
-  }
-
-  // endregion
 
   @SuppressWarnings("IllegalCatch")
   private void runIndexersInBackground(

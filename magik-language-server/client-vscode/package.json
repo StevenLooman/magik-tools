@@ -197,8 +197,18 @@
     ],
     "commands": [
       {
-        "command": "magik.custom.reIndex",
-        "title": "Reindex files",
+        "command": "magik.munit.runTest",
+        "title": "Run MUnit test",
+        "category": "Magik"
+      },
+      {
+        "command": "magik.session.addProduct",
+        "title": "Add product to session",
+        "category": "Magik"
+      },
+      {
+        "command": "magik.session.loadModule",
+        "title": "Load module in session",
         "category": "Magik"
       },
       {
