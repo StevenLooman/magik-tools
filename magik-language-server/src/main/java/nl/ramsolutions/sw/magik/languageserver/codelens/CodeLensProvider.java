@@ -91,9 +91,12 @@ public class CodeLensProvider {
   }
 
   private CodeLens createMethodCodeLens(final MethodDefinition method) {
+    final String typeName = method.getTypeName().getFullString();
     final Command command =
         new Command(
-            "Run test", MUNIT_RUN_TEST_COMMAND, List.of("method:" + method.getMethodName()));
+            "Run test",
+            MUNIT_RUN_TEST_COMMAND,
+            List.of("method:" + typeName + "." + method.getMethodName()));
     final org.eclipse.lsp4j.Range range = this.locationToRange(method.getLocation());
     return new CodeLens(range, command, null);
   }
