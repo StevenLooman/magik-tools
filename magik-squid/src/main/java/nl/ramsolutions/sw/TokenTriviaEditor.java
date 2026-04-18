@@ -16,7 +16,13 @@ import java.util.stream.Stream;
 /** A utility class for editing {@link Trivia} of {@link Token}s in an {@link AstNode}. */
 public class TokenTriviaEditor {
 
+  /** Map of line number to list of {@link Token}s on that line, including trivia tokens. */
   private final Map<Integer, List<Token>> lineTokens;
+
+  /**
+   * Map of trivia {@link Token} to the parent {@link Token} that has this trivia. Only contains
+   * entries for trivia tokens that are actually present in the AST.
+   */
   private final Map<Token, Token> triviaTokenTokens;
 
   /**
