@@ -132,6 +132,10 @@ public class CheckHolder {
         final String filename = this.getFileForCheck("json");
         final Gson gson = new Gson();
         try (final InputStream inputStream = this.getClass().getResourceAsStream(filename)) {
+          if (inputStream == null) {
+            throw new IOException("Metadata file not found: %s".formatted(filename));
+          }
+
           final InputStreamReader reader = new InputStreamReader(inputStream);
           final JsonReader jsonReader = gson.newJsonReader(reader);
           this.metadata = gson.fromJson(jsonReader, CheckMetadata.class);
