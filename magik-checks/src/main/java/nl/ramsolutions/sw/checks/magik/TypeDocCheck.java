@@ -12,6 +12,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefSlottedExemplarParser;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import org.sonar.check.Rule;
@@ -25,6 +26,7 @@ public class TypeDocCheck extends MagikCheck {
 
   private static final String MESSAGE_PARAM_MISSING = "Missing parameter: %s.";
   private static final String MESSAGE_PARAM_UNKNOWN = "Unknown parameter: %s.";
+  private static final String MESSAGE_RETURN_MISSING = "Missing return documentation.";
   private static final String MESSAGE_SLOT_MISSING = "Missing slot: %s.";
   private static final String MESSAGE_SLOT_UNKNOWN = "Unknown slot: %s.";
 
@@ -64,6 +66,13 @@ public class TypeDocCheck extends MagikCheck {
               final String message = MESSAGE_PARAM_MISSING.formatted(docName);
               this.addIssue(docNode, message);
             });
+
+    // Check return documentation.
+    final List<TypeString> docReturnTypes = typeDocParser.getReturnTypes();
+    if (this.returnsAnything(node) && docReturnTypes.isEmpty()) {
+      final AstNode definitionNameNode = this.getDefinitionNameNode(node);
+      this.addIssue(definitionNameNode, MESSAGE_RETURN_MISSING);
+    }
   }
 
   private Map<String, AstNode> getParameterNodes(final AstNode node) {
@@ -74,6 +83,26 @@ public class TypeDocCheck extends MagikCheck {
 
     final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
     return helper.getParameterNodes();
+  }
+
+  private boolean returnsAnything(final AstNode node) {
+    if (node.is(MagikGrammar.METHOD_DEFINITION)) {
+      final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
+      return helper.returnsAnything();
+    }
+
+    final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
+    return helper.returnsAnything();
+  }
+
+  private AstNode getDefinitionNameNode(final AstNode node) {
+    if (node.is(MagikGrammar.METHOD_DEFINITION)) {
+      final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
+      return helper.getMethodNameNode();
+    }
+
+    final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
+    return helper.getProcedureNode();
   }
 
   @Override

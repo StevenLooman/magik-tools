@@ -23,6 +23,69 @@ class TypeDocCheckTest {
           :test_exemplar,
           {{:slot1, _unset}})
         """,
+        """
+        _method a.m1()
+          ## @return {sw:integer} Result.
+          _return 1
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          ## @return {sw:integer} Result.
+          >> 1
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          ## @return {sw:integer} Result.
+          >> _if _true
+             _then >> 1
+             _endif
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          ## @return {sw:integer} Result.
+          >> _if _true
+             _then _return 1
+             _endif
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          ## @return {sw:integer} Result.
+          _if _true
+          _then _return 1
+          _endif
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          a << _if b = c
+               _then >> 1
+               _endif
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          _proc()
+            ## @return {sw:integer} Result.
+            _return 1
+          _endproc
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          ## @return {sw:unset} Result.
+          _return _unset
+        _endmethod
+        """,
+        """
+        _proc()
+          ## @return {sw:integer} Result.
+          >> 1
+        _endproc
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new TypeDocCheck();
@@ -51,6 +114,54 @@ class TypeDocCheckTest {
         def_slotted_exemplar(
           :test_exemplar,
           {})
+        """,
+        """
+        _method a.m1()
+          _return 1
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          >> 1
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          >> _if _true
+             _then >> 1
+             _endif
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          >> _if _true
+             _then _return 1
+             _endif
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          _if _true
+          _then _return 1
+          _endif
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          _proc()
+            _return 1
+          _endproc
+        _endmethod
+        """,
+        """
+        _method a.m1()
+          _return _unset
+        _endmethod
+        """,
+        """
+        _proc()
+          >> 1
+        _endproc
         """,
       })
   void testInvalid(final String code) {
