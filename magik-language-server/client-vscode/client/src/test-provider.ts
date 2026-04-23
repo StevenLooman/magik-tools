@@ -128,8 +128,13 @@ export class MagikTestProvider implements vscode.Disposable {
 		this.registerFileWatchers();
 	}
 
-	private runTestById(testItemId: string) {
-		const testItem = this.findTestItem(testItemId, this.controller.items);
+	private async runTestById(testItemId: string) {
+		let testItem = this.findTestItem(testItemId, this.controller.items);
+		if (!testItem) {
+			// Test items may not have been loaded yet; refresh and retry.
+			await this.getTestItems();
+			testItem = this.findTestItem(testItemId, this.controller.items);
+		}
 		if (!testItem) {
 			vscode.window.showErrorMessage(`Could not find test item: ${testItemId}`);
 			return;
@@ -187,10 +192,10 @@ export class MagikTestProvider implements vscode.Disposable {
 		this.getTestItems();
 	}
 
-	private getTestItems() {
-		this.client.sendRequest("workspace/executeCommand", { command: "magik.munit.getTestItems" })
+	private getTestItems(): Promise<void> {
+		return this.client.sendRequest("workspace/executeCommand", { command: "magik.munit.getTestItems" })
 			.then((munitTestItems: MUnitTestItem[]) => this.parseTestItems(munitTestItems))
-			.catch((err) => vscode.window.showErrorMessage(`Error getting test items: ${err}`));
+			.catch((err) => { vscode.window.showErrorMessage(`Error getting test items: ${err}`); });
 	}
 
 	private parseTestItems(munitTestItems: MUnitTestItem[]) {
@@ -378,10 +383,14 @@ $
 		// Parse test cases.
 		const testcases = (munitTestSuite.testcase || []) as [MUnitTestCase];
 		testcases.forEach(testcase => {
-			const id = `method:${testcase.$.name}`;
-			const matchedTestItem = testItem
-				? testItem.children.get(id)
-				: request.include.filter((value) => value.id == id)[0];
+			let matchedTestItem: vscode.TestItem | undefined;
+			if (testItem) {
+				testItem.children.forEach(child => {
+					if (child.label === testcase.$.name) matchedTestItem = child;
+				});
+			} else {
+				matchedTestItem = request.include.find(v => v.label === testcase.$.name);
+			}
 			const duration = testcase.$.time ? parseFloat(testcase.$.time) * 1000 : undefined;
 			if (testcase.error) {
 				const error = testcase.error[0];
@@ -482,8 +491,8 @@ ${indentStr}_endblock`;
 		}
 
 		// Actual test case.
-		const exemplarName = testItem.parent.id.substring('test_case:'.length);
-		const testMethodName = testItem.id.substring('method:'.length);
+		const exemplarName = testItem.parent.label;
+		const testMethodName = testItem.label;
 		return `
 ${indentStr}	${parentId}.add_test(sw:get_global_value(:|${exemplarName}|).new(:|${testMethodName}|))`;
 	}

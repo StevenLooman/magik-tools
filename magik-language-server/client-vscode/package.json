@@ -215,6 +215,11 @@
         "command": "magik.traceStatement",
         "title": "Trace statement",
         "category": "Magik"
+      },
+      {
+        "command": "magik.reIndex",
+        "title": "Re-index workspace",
+        "category": "Magik"
       }
     ],
     "keybindings": [

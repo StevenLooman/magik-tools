@@ -211,10 +211,13 @@ public class MUnitTestItemProvider {
   }
 
   private MUnitTestItem createTestItem(final MethodDefinition definition) {
+    final String typeName = definition.getTypeName().getFullString();
     final String methodName = definition.getMethodName();
     final Location definitionLocation = definition.getLocation();
     final Location location = Location.validLocation(definitionLocation);
     return new MUnitTestItem(
-        "method:" + methodName, methodName, Lsp4jConversion.locationToLsp4j(location));
+        "method:" + typeName + "." + methodName,
+        methodName,
+        Lsp4jConversion.locationToLsp4j(location));
   }
 }

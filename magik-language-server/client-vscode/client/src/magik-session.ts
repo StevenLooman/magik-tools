@@ -38,16 +38,14 @@ export class MagikSessionProvider implements vscode.Disposable {
 	}
 
 	private registerWindowHandlers() {
+		// Pick an already open Smallworld session terminal if extension activates late.
+		const existingSessionTerminal = vscode.window.terminals.find(terminal => this.isSessionTerminal(terminal));
+		if (existingSessionTerminal) {
+			this.currentSession = new MagikSession(existingSessionTerminal);
+		}
+
 		vscode.window.onDidOpenTerminal((terminal: vscode.Terminal) => {
-			const creationOptions = terminal.creationOptions;
-
-			// Check if creationOptions has shellArgs and handle it appropriately
-			const shellArgs = (creationOptions as vscode.TerminalOptions).shellArgs;
-
-			if ((creationOptions.name ?? '').startsWith(MagikAliasTaskProvider.AliasType) ||
-				(Array.isArray(shellArgs) && shellArgs.some(arg => arg.includes("runalias.exe "))) ||
-				(Array.isArray(shellArgs) && shellArgs.some(arg => arg.includes("runalias ")))
-			) {
+			if (this.isSessionTerminal(terminal)) {
 				this.currentSession = new MagikSession(terminal);
 			}
 		});
@@ -55,9 +53,20 @@ export class MagikSessionProvider implements vscode.Disposable {
 		vscode.window.onDidCloseTerminal((terminal: vscode.Terminal) => {
 			if (this.currentSession != null && this.currentSession.terminal == terminal) {
 				this.currentSession.dispose();
-				this.currentSession = null;
+				this.currentSession = undefined;
 			}
 		});
+	}
+
+	private isSessionTerminal(terminal: vscode.Terminal): boolean {
+		const creationOptions = terminal.creationOptions;
+
+		// Check if creationOptions has shellArgs and handle it appropriately.
+		const shellArgs = (creationOptions as vscode.TerminalOptions).shellArgs;
+
+		return (creationOptions.name ?? '').startsWith(MagikAliasTaskProvider.AliasType) ||
+			(Array.isArray(shellArgs) && shellArgs.some(arg => arg.includes("runalias.exe "))) ||
+			(Array.isArray(shellArgs) && shellArgs.some(arg => arg.includes("runalias ")));
 	}
 
 	private command_transmit_file() {
@@ -65,8 +74,13 @@ export class MagikSessionProvider implements vscode.Disposable {
 			vscode.window.showErrorMessage("No active Smallworld session.");
 			return;
 		}
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) {
+			vscode.window.showErrorMessage("No active editor.");
+			return;
+		}
 
-		this.currentSession.transmitMagik(vscode.window.activeTextEditor);
+		this.currentSession.transmitMagik(editor);
 	}
 
 	private command_transmit_current_region() {
@@ -74,8 +88,13 @@ export class MagikSessionProvider implements vscode.Disposable {
 			vscode.window.showErrorMessage("No active Smallworld session.");
 			return;
 		}
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) {
+			vscode.window.showErrorMessage("No active editor.");
+			return;
+		}
 
-		this.currentSession.transmitEditorRegion(vscode.window.activeTextEditor);
+		this.currentSession.transmitEditorRegion(editor);
 	}
 
 	private command_transmit_load_list() {
@@ -83,8 +102,13 @@ export class MagikSessionProvider implements vscode.Disposable {
 			vscode.window.showErrorMessage("No active Smallworld session.");
 			return;
 		}
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) {
+			vscode.window.showErrorMessage("No active editor.");
+			return;
+		}
 
-		this.currentSession.transmitLoadList(vscode.window.activeTextEditor);
+		this.currentSession.transmitLoadList(editor);
 	}
 
 	private command_transmit_product_def() {
@@ -92,8 +116,13 @@ export class MagikSessionProvider implements vscode.Disposable {
 			vscode.window.showErrorMessage("No active Smallworld session.");
 			return;
 		}
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) {
+			vscode.window.showErrorMessage("No active editor.");
+			return;
+		}
 
-		this.currentSession.transmitProductDef(vscode.window.activeTextEditor);
+		this.currentSession.transmitProductDef(editor);
 	}
 
 	private command_transmit_module_def() {
@@ -101,8 +130,13 @@ export class MagikSessionProvider implements vscode.Disposable {
 			vscode.window.showErrorMessage("No active Smallworld session.");
 			return;
 		}
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) {
+			vscode.window.showErrorMessage("No active editor.");
+			return;
+		}
 
-		this.currentSession.transmitModuleDef(vscode.window.activeTextEditor);
+		this.currentSession.transmitModuleDef(editor);
 	}
 
 	public sendToSession(text: string, sourcePath: fs.PathLike | undefined) {
@@ -111,6 +145,7 @@ export class MagikSessionProvider implements vscode.Disposable {
 			return;
 		}
 
+		this.currentSession.terminal.show(true);
 		this.currentSession.sendToSession(text, sourcePath);
 	}
 
@@ -119,7 +154,7 @@ export class MagikSessionProvider implements vscode.Disposable {
 
 class MagikSession implements vscode.Disposable {
 
-	private _workdir: fs.PathLike;
+	private _workdir: fs.PathLike | undefined;
 	private readonly _terminal: vscode.Terminal;
 
 	constructor(terminal: vscode.Terminal) {
@@ -133,9 +168,9 @@ class MagikSession implements vscode.Disposable {
 	}
 
 	public dispose() {
-		if (this._workdir !== null) {
+		if (this._workdir !== undefined) {
 			fs.rmSync(this._workdir, {recursive: true});
-			this._workdir = null;
+			this._workdir = undefined;
 		}
 	}
 
@@ -279,6 +314,10 @@ $`;
 	}
 
 	private getTempFile(): fs.PathLike {
+		if (this._workdir === undefined) {
+			throw new Error('Session working directory is not initialized.');
+		}
+
 		let tempPath: fs.PathLike;
 		let index = 0;
 		do {
