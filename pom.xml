@@ -78,7 +78,7 @@
     <jacoco.unit-tests.limit.method-complexity>10</jacoco.unit-tests.limit.method-complexity> <!-- Preferred/future: 5 -->
 
     <sonar.version>9.4.0.54424</sonar.version>
-    <sonar-analyzer-commons.version>2.21.0.4626</sonar-analyzer-commons.version>
+    <sonar-analyzer-commons.version>2.22.0.4796</sonar-analyzer-commons.version>
     <sonar-checkapi.version>7.0</sonar-checkapi.version>
     <sonar-impl.version>26.4.0.121862</sonar-impl.version>
     <sonar-maven.version>5.5.0.6356</sonar-maven.version>
