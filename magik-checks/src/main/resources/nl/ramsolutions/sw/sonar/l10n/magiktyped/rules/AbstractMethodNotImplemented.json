@@ -1,0 +1,16 @@
+{
+  "title": "Abstract method not implemented",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "AbstractMethodNotImplemented",
+  "sqKey": "abstract-method-not-implemented"
+}

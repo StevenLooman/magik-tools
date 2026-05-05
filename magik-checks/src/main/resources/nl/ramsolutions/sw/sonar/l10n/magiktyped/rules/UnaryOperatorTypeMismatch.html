@@ -1,0 +1,9 @@
+<p>Unary operator type mismatch</p>
+<h2>Explanation</h2>
+<pre>
+_method a.b
+    _local x &lt;&lt; :symbol
+    _local y &lt;&lt; +x
+_endmethod
+</pre>
+<p>In the above example, <pre>+x</pre> maps to the unary method <pre>unary_plus</pre>. When that method is not available for <pre>sw:symbol</pre>, the result type is undefined and can cause runtime failures.</p>

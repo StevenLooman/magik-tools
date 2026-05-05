@@ -134,7 +134,7 @@ public class ExpressionResultString {
    * @return Type names of items of the result.
    */
   public String getTypeNames(final String separator) {
-    if (this == ExpressionResultString.UNDEFINED) {
+    if (this.equals(ExpressionResultString.UNDEFINED)) {
       return "UNDEFINED...";
     }
 
