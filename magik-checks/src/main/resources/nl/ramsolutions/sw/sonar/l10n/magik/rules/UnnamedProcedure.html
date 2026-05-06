@@ -1,0 +1,14 @@
+<p>Procedures should have a name.</p>
+<p>A name makes a procedure identifiable in tracebacks and other output. Add a name using the <code>@name</code> syntax: <code>_proc@name()</code>.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_proc(string)
+  >> string.uppercase
+_endproc
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_proc@uppercase(name)
+  >> name.uppercase
+_endproc
+</pre>
