@@ -12,8 +12,8 @@ class UnnamedProcedureCheckTest {
   @ParameterizedTest
   @ValueSource(
       strings = {
-        "_proc@name() _endproc",
-        "_iter _proc@items() _loopbody(_unset) _endproc",
+        "_proc @name() _endproc",
+        "_iter _proc @items() _loopbody(_unset) _endproc",
       })
   void testValid(final String code) {
     final MagikCheck check = new UnnamedProcedureCheck();

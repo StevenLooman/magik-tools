@@ -1,11 +1,13 @@
 package nl.ramsolutions.sw.checks.magik;
 
 import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.checks.DisabledByDefault;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import org.sonar.check.Rule;
 
-/** Check if a procedure has a label (@name). */
+/** Check if a procedure has a name (@name). */
+@DisabledByDefault
 @Rule(key = UnnamedProcedureCheck.CHECK_KEY)
 public class UnnamedProcedureCheck extends MagikCheck {
 

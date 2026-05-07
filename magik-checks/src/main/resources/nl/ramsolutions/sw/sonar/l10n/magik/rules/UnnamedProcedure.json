@@ -1,10 +1,10 @@
 {
-  "title": "Procedure has no label",
+  "title": "Procedure has no name",
   "type": "CODE_SMELL",
   "status": "ready",
   "remediation": {
     "func": "Constant/Issue",
-    "constantCost": "2min"
+    "constantCost": "5min"
   },
   "tags": [
     "convention"
