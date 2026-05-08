@@ -1,0 +1,16 @@
+{
+  "title": "Invocation argument count matches parameter count",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "InvocationArgumentCountMatchesParameterCount",
+  "sqKey": "invocation-argument-count-matches-parameter-count"
+}

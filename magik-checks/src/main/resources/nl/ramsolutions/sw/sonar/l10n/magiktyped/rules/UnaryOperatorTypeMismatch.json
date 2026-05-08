@@ -1,0 +1,16 @@
+{
+  "title": "Unary operator type mismatch",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "UnaryOperatorTypeMismatch",
+  "sqKey": "unary-operator-type-mismatch"
+}

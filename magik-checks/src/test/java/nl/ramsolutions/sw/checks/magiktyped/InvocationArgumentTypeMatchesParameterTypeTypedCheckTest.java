@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** Test {@link MethodArgumentTypeMatchesParameterTypeTypedCheck}. */
-class MethodArgumentTypeMatchesParameterTypeTypedCheckTest {
+/** Test {@link InvocationArgumentTypeMatchesParameterTypeTypedCheck}. */
+class InvocationArgumentTypeMatchesParameterTypeTypedCheckTest {
 
   private void addTestMethods(final IDefinitionKeeper definitionKeeper) {
     definitionKeeper.add(
@@ -83,7 +83,7 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     this.addTestMethods(definitionKeeper);
 
-    final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
+    final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
@@ -97,7 +97,7 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     this.addTestMethods(definitionKeeper);
 
-    final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
+    final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 
@@ -145,11 +145,41 @@ class MethodArgumentTypeMatchesParameterTypeTypedCheckTest {
     final String code =
         """
         _block
-          _local ints << rope  # type sw:rope<E=sw:integer>
+          _local ints << rope  # type: sw:rope<E=sw:integer>
           ints.add(10)
         _endblock
         """;
-    final MagikTypedCheck check = new MethodArgumentTypeMatchesParameterTypeTypedCheck();
+    final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testProcedureArgumentTypeMatches() {
+    final String code =
+        """
+        _block
+          (_proc(p1)
+            ## @param {sw:symbol} p1
+          _endproc)(:symbol)
+        _endblock
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testProcedureArgumentTypeNotMatches() {
+    final String code =
+        """
+        _block
+          (_proc(p1)
+            ## @param {sw:symbol} p1
+          _endproc)(1)
+        _endblock
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 }

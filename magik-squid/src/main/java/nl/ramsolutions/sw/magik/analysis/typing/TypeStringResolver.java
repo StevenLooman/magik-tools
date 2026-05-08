@@ -29,6 +29,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 public class TypeStringResolver {
 
   private static final String ALL_METHODS = "_all_methods";
+  private static final String ALL_PROCEDURES = "_all_procedures";
 
   private static final Map<ExemplarDefinition.Sort, TypeString> IMPLICIT_PARENTS =
       Map.of(
@@ -39,6 +40,8 @@ public class TypeStringResolver {
   private final Map<TypeString, Set<ITypeStringDefinition>> typeCache = new HashMap<>();
   private final Map<Map.Entry<TypeString, String>, Collection<MethodDefinition>> methodsCache =
       new HashMap<>();
+  private final Map<Map.Entry<TypeString, String>, Collection<ProcedureDefinition>>
+      proceduresCache = new HashMap<>();
 
   public TypeStringResolver(final IDefinitionKeeper definitionKeeper) {
     this.definitionKeeper = definitionKeeper;
@@ -266,6 +269,40 @@ public class TypeStringResolver {
   }
 
   /**
+   * Get the {@link ProcedureDefinition}s the {@link TypeString} responds to, including from its
+   * super types.
+   *
+   * @param typeString {@link TypeString} to resolve.
+   * @return {@link ProcedureDefinition}s the {@link TypeString} responds to.
+   */
+  public synchronized Collection<ProcedureDefinition> getRespondingProcedureDefinitions(
+      final TypeString typeString) {
+    return typeString.getCombinedTypes().stream()
+        .map(
+            typeStr -> {
+              final Entry<TypeString, String> cacheKey = Map.entry(typeStr, ALL_PROCEDURES);
+              return this.proceduresCache.computeIfAbsent(
+                  cacheKey,
+                  entry -> {
+                    // Try to resolve the typeString to an actual type.
+                    final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeStr);
+                    final TypeString actualTypeStr =
+                        resolvedTypes.isEmpty()
+                            ? typeStr
+                            : resolvedTypes.iterator().next().getTypeString();
+
+                    final Map<TypeString, ProcedureDefinition> procedureDefinitionsByType =
+                        new HashMap<>();
+                    this.fillRespondingProcedureDefinitions(
+                        actualTypeStr, procedureDefinitionsByType);
+                    return procedureDefinitionsByType.values().stream().collect(Collectors.toSet());
+                  });
+            })
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
+  }
+
+  /**
    * Get the {@link MethodDefinition} that responds to the given {@link TypeString} and {@link
    * methodName}.
    *
@@ -326,6 +363,27 @@ public class TypeStringResolver {
                           }
 
                           methodDefinitions.put(methodName, methodDefinition);
+                        }));
+  }
+
+  private void fillRespondingProcedureDefinitions(
+      final TypeString typeString,
+      final Map<TypeString, ProcedureDefinition> procedureDefinitions) {
+    // TODO: This doesn't handle any conflicts.
+    this.getSelfAndAncestors(typeString)
+        .forEach(
+            typeStr ->
+                this.definitionKeeper
+                    .getProcedureDefinitions(typeStr)
+                    .forEach(
+                        procedureDefinition -> {
+                          final TypeString procedureType = procedureDefinition.getTypeString();
+                          if (procedureDefinitions.containsKey(procedureType)) {
+                            // Don't overwrite.
+                            return;
+                          }
+
+                          procedureDefinitions.put(procedureType, procedureDefinition);
                         }));
   }
 

@@ -1,0 +1,16 @@
+{
+  "title": "Iter callable yield types match doc",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "documentation",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "IterCallableYieldTypesMatchDoc",
+  "sqKey": "iter-callable-yield-types-match-doc"
+}

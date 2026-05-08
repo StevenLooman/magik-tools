@@ -13,8 +13,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.junit.jupiter.api.Test;
 
-/** Test {@link MethodArgumentCountMatchesParameterCountTypedCheck}. */
-class MethodArgumentCountMatchesParameterCountTypedCheckTest {
+/** Test {@link InvocationArgumentCountMatchesParameterCountTypedCheck}. */
+class InvocationArgumentCountMatchesParameterCountTypedCheckTest {
 
   @Test
   void testMethodUnknown() {
@@ -24,7 +24,7 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest {
           object.m()
         _endblock""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-    final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
+    final MagikTypedCheck check = new InvocationArgumentCountMatchesParameterCountTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
@@ -70,7 +70,7 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest {
         _block
           object.m(object, object)
         _endblock""";
-    final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
+    final MagikTypedCheck check = new InvocationArgumentCountMatchesParameterCountTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
@@ -116,7 +116,35 @@ class MethodArgumentCountMatchesParameterCountTypedCheckTest {
         _block
           object.m(object)
         _endblock""";
-    final MagikTypedCheck check = new MethodArgumentCountMatchesParameterCountTypedCheck();
+    final MagikTypedCheck check = new InvocationArgumentCountMatchesParameterCountTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
+  void testProcedureArgumentCountMatches() {
+    final String code =
+        """
+        _block
+          (_proc(p1, p2)
+          _endproc)(object, object)
+        _endblock
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new InvocationArgumentCountMatchesParameterCountTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testProcedureArgumentMissing() {
+    final String code =
+        """
+        _block
+          (_proc(p1, p2)
+          _endproc)(object)
+        _endblock
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new InvocationArgumentCountMatchesParameterCountTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 }
