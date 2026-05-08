@@ -1,0 +1,39 @@
+<p>Callable return types match doc</p>
+<h2>Explanation</h2>
+<p>Verifies that the <code>@return</code> type annotations in a callable's documentation match its
+reasoned return types. Issues are raised in the following situations:</p>
+<ul>
+  <li>A <code>@return</code> annotation is missing for a return value.</li>
+  <li>A <code>@return</code> annotation is present but the callable returns no value.</li>
+  <li>A <code>@return</code> type does not match the reasoned return type.</li>
+  <li>A <code>@return</code> annotation is present but cannot be verified because the return value
+      comes from a callable with unknown return types.</li>
+</ul>
+<p>Return values whose type is unknown (e.g. from an unresolved method call) are skipped for
+mismatch reporting; those are covered by <em>UndefinedMethodCallResultTypedCheck</em>.</p>
+<h2>Examples</h2>
+<h3>Type mismatch</h3>
+<pre>
+_method example_exemplar.example_method()
+    ## @return {sw:integer} Returned value.
+    _return :symbol
+_endmethod
+</pre>
+<p>Raises an issue because the callable is documented to return <code>sw:integer</code> but
+actually returns <code>sw:symbol</code>.</p>
+<h3>Missing @return</h3>
+<pre>
+_method example_exemplar.example_method()
+    _return 42
+_endmethod
+</pre>
+<p>Raises an issue because the callable returns a value but has no <code>@return</code> annotation.</p>
+<h3>Unverifiable @return</h3>
+<pre>
+_method example_exemplar.example_method()
+    ## @return {sw:integer} Returned value.
+    _return other_exemplar.unknown_method()
+_endmethod
+</pre>
+<p>Raises an issue on the <code>@return</code> annotation because the return type cannot be
+verified: <code>unknown_method()</code> has no known return type.</p>

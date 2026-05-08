@@ -1,0 +1,16 @@
+{
+  "title": "Invocation argument type does not match parameter type",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "InvocationArgumentTypeMatchesParameterType",
+  "sqKey": "invocation-argument-type-matches-parameter-type"
+}

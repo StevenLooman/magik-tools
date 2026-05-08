@@ -57,7 +57,7 @@ public final class JsonDefinitionWriter {
         final ExpressionResultString src,
         final Type typeOfSrc,
         final JsonSerializationContext context) {
-      if (src == ExpressionResultString.UNDEFINED) {
+      if (src.equals(ExpressionResultString.UNDEFINED)) {
         return new JsonPrimitive(ExpressionResultString.UNDEFINED_SERIALIZED_NAME);
       }
 

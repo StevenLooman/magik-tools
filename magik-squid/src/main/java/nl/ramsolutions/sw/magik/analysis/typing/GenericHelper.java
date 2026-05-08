@@ -25,7 +25,7 @@ public class GenericHelper {
    */
   public ExpressionResultString substituteGenerics(
       final ExpressionResultString expressionResultString) {
-    if (expressionResultString == ExpressionResultString.UNDEFINED) {
+    if (expressionResultString.equals(ExpressionResultString.UNDEFINED)) {
       // Nothing to substitute.
       return ExpressionResultString.UNDEFINED;
     }
