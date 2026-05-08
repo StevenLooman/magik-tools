@@ -3,32 +3,22 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.helpers.UnaryOperatorHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
-import nl.ramsolutions.sw.magik.api.MagikKeyword;
-import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 
 /** Expression handler. */
 class ExpressionHandler extends LocalTypeReasonerHandler {
-
-  private static final Map<String, String> UNARY_OPERATOR_METHODS =
-      Map.of(
-          MagikOperator.NOT.getValue(), "not",
-          MagikKeyword.NOT.getValue(), "not",
-          MagikOperator.MINUS.getValue(), "negated",
-          MagikOperator.PLUS.getValue(), "unary_plus",
-          MagikKeyword.SCATTER.getValue(), "for_scatter()");
   private static final CommentInstructionReader.Instruction TYPE_INSTRUCTION =
       new CommentInstructionReader.Instruction(
           "type", CommentInstructionReader.Instruction.Sort.STATEMENT);
@@ -187,7 +177,8 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
    * @param node UNARY_EXPRESSION node.
    */
   void handleUnaryExpression(final AstNode node) {
-    if (node.getTokenValue().equalsIgnoreCase(MagikKeyword.ALLRESULTS.getValue())) {
+    final UnaryOperatorHelper helper = new UnaryOperatorHelper(node);
+    if (helper.isAllResults()) {
       this.assignAtom(node, TypeString.SW_SIMPLE_VECTOR); // TODO: Generics?
       return;
     }
@@ -198,8 +189,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     final TypeString typeStr = operatedResult.get(0, TypeString.SW_UNSET);
 
     // Get operator.
-    final String operatorStr = node.getTokenValue().toLowerCase();
-    final String operatorMethod = UNARY_OPERATOR_METHODS.get(operatorStr);
+    final String operatorMethod = helper.getUnaryOperatorMethod();
 
     // Apply operator to operand and store result.
     final ExpressionResultString result =

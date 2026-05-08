@@ -1,0 +1,12 @@
+<p>Abstract method not implemented</p>
+<h2>Explanation</h2>
+<pre>
+_abstract _method parent.do_something()
+    ## @return {integer}
+_endmethod
+
+_method child.other_method()
+    _return 1
+_endmethod
+</pre>
+<p>In the above example, <pre>child</pre> inherits from <pre>parent</pre> which defines an abstract method <pre>do_something()</pre>. Since <pre>child</pre> does not implement this method, calling it will result in a runtime error.</p>
