@@ -270,4 +270,34 @@ class CallableReturnTypesMatchDocTypedCheckTest {
     final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @Test
+  void testEmitReturnTypeMatches() {
+    final String code =
+        """
+        _method a.b
+          ## @return {integer}
+          >> 1
+        _endmethod
+        """;
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testEmitReturnTypeDiffer() {
+    final String code =
+        """
+        _method a.b
+          ## @return {float}
+          >> 1
+        _endmethod
+        """;
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
 }
