@@ -9,9 +9,12 @@ import { MagikSessionProvider } from './magik-session';
 
 
 export class MagikLanguageClient implements vscode.Disposable {
+	private static readonly STOP_TIMEOUT_MS = 5 * 60 * 1000;
 
 	private readonly _context: vscode.ExtensionContext;
-	private _client: vscodeLanguageClient.LanguageClient;
+	private _client!: vscodeLanguageClient.LanguageClient;
+	private _isStarted = false;
+	private _outputSessionCounter = 0;
 	private _magikSessionProvider: MagikSessionProvider | undefined;
 
 	constructor(context: vscode.ExtensionContext) {
@@ -20,7 +23,18 @@ export class MagikLanguageClient implements vscode.Disposable {
 		this.registerCommands();
 	}
 
-	public get magikSessionProvider() {
+	private createSessionOutputChannel(): vscode.OutputChannel {
+		this._outputSessionCounter += 1;
+		const channelName =
+			this._outputSessionCounter === 1
+				? 'Magik Language Server'
+				: `Magik Language Server #${this._outputSessionCounter}`;
+		const outputChannel = vscode.window.createOutputChannel(channelName);
+		this._context.subscriptions.push(outputChannel);
+		return outputChannel;
+	}
+
+	public get magikSessionProvider(): MagikSessionProvider | undefined {
 		return this._magikSessionProvider;
 	}
 
@@ -36,7 +50,16 @@ export class MagikLanguageClient implements vscode.Disposable {
 		// Nop.
 	}
 
-	public start() {
+	public start(notify = true) {
+		if (this._isStarted) {
+			if (notify) {
+				vscode.window.showInformationMessage('Magik Language Server is already running.');
+			}
+			return;
+		}
+
+		const outputChannel = this.createSessionOutputChannel();
+
 		const javaExec = getJavaExec();
 
 		const jar = path.join(__dirname, '..', '..', 'server', 'magik-language-server-' + MAGIK_TOOLS_VERSION + '.jar');
@@ -56,6 +79,7 @@ export class MagikLanguageClient implements vscode.Disposable {
 		};
 
 		const clientOptions: vscodeLanguageClient.LanguageClientOptions = {
+			outputChannel,
 			documentSelector: [
 				{ scheme: 'file', language: 'sw-product-def' },
 				{ scheme: 'file', language: 'sw-module-def' },
@@ -79,6 +103,7 @@ export class MagikLanguageClient implements vscode.Disposable {
 		);
 
 		this._client.start();
+		this._isStarted = true;
 	}
 
 	private registerCommands() {
@@ -115,10 +140,38 @@ export class MagikLanguageClient implements vscode.Disposable {
 			}
 		);
 		this._context.subscriptions.push(loadModule);
+
+		const startLanguageServer = vscode.commands.registerCommand(
+			'magik.startLanguageServer',
+			() => this.start(true)
+		);
+		this._context.subscriptions.push(startLanguageServer);
+
+		const stopLanguageServer = vscode.commands.registerCommand(
+			'magik.stopLanguageServer',
+			() => this.stop(true)
+		);
+		this._context.subscriptions.push(stopLanguageServer);
+
 	}
 
-	public stop(): Thenable<void> {
-		return this._client.stop();
+	public stop(notify = true): Thenable<void> {
+		if (!this._isStarted) {
+			if (notify) {
+				vscode.window.showInformationMessage('Magik Language Server is not running.');
+			}
+			return Promise.resolve();
+		}
+
+		const result = this._client.stop(MagikLanguageClient.STOP_TIMEOUT_MS);
+		return result
+			.then(() => {
+				this._isStarted = false;
+			})
+			.catch((error) => {
+				this._isStarted = false;
+				console.warn('Language server stop failed:', error);
+			});
 	}
 
 	public sendRequest<R>(request: string, params?: unknown): Promise<R> {
@@ -126,6 +179,10 @@ export class MagikLanguageClient implements vscode.Disposable {
 	}
 
 	public sendToSession(text: string, sourcePath: fs.PathLike | undefined) {
+		if (!this._magikSessionProvider) {
+			throw new Error('MagikSessionProvider is not initialized');
+		}
+
 		this._magikSessionProvider.sendToSession(text, sourcePath);
 	}
 

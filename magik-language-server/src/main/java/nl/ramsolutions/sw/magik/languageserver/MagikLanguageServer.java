@@ -54,7 +54,6 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     this.magikNotebookDocumentService = new MagikNotebookDocumentService(this);
   }
 
-  @SuppressWarnings("deprecation")
   @Override
   public CompletableFuture<InitializeResult> initialize(final InitializeParams params) {
     LOGGER.trace("initialize");
