@@ -131,7 +131,15 @@ public final class Main {
     final LanguageClient remoteProxy = launcher.getRemoteProxy();
     server.connect(remoteProxy);
 
-    launcher.startListening();
+    try {
+      launcher.startListening().get();
+    } catch (final InterruptedException exception) {
+      Thread.currentThread().interrupt();
+    } catch (final java.util.concurrent.ExecutionException exception) {
+      // Client disconnected with an error; treat as normal exit.
+    }
+
+    System.exit(0);
   }
 
   private static void showHelp() throws IOException {
