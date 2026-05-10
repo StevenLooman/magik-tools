@@ -203,13 +203,21 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
       }
 
       final Integer statementReturnCount = this.extractReturnCountFromReturnStatement(returnNode);
-      if (statementReturnCount == null) {
+      returnCount = this.mergeReturnCounts(returnCount, statementReturnCount);
+      if (returnCount == null) {
         return null;
       }
+    }
 
+    final AstNode callableBody = methodNode.getFirstChild(MagikGrammar.BODY);
+    for (final AstNode emitNode : methodNode.getDescendants(MagikGrammar.EMIT_STATEMENT)) {
+      if (!this.isEmitInCallableBody(callableBody, emitNode)) {
+        continue;
+      }
+
+      final Integer statementReturnCount = this.extractReturnCountFromEmitStatement(emitNode);
+      returnCount = this.mergeReturnCounts(returnCount, statementReturnCount);
       if (returnCount == null) {
-        returnCount = statementReturnCount;
-      } else if (!returnCount.equals(statementReturnCount)) {
         return null;
       }
     }
@@ -217,11 +225,42 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
     return returnCount != null ? returnCount : 0;
   }
 
+  private boolean isEmitInCallableBody(final AstNode callableBody, final AstNode emitNode) {
+    return callableBody != null
+        && callableBody.equals(emitNode.getFirstAncestor(MagikGrammar.BODY));
+  }
+
+  private Integer mergeReturnCounts(final Integer currentCount, final Integer statementCount) {
+    if (statementCount == null) {
+      return null;
+    }
+
+    if (currentCount == null) {
+      return statementCount;
+    }
+
+    return currentCount.equals(statementCount) ? currentCount : null;
+  }
+
   private Integer extractReturnCountFromReturnStatement(final AstNode returnNode) {
     final AstNode tupleNode = returnNode.getFirstChild(MagikGrammar.TUPLE);
     if (tupleNode == null) {
       return 0;
     }
+
+    return this.extractReturnCountFromTuple(tupleNode);
+  }
+
+  private Integer extractReturnCountFromEmitStatement(final AstNode emitNode) {
+    final AstNode tupleNode = emitNode.getFirstChild(MagikGrammar.TUPLE);
+    if (tupleNode == null) {
+      return 0;
+    }
+
+    return this.extractReturnCountFromTuple(tupleNode);
+  }
+
+  private Integer extractReturnCountFromTuple(final AstNode tupleNode) {
 
     final List<AstNode> expressionNodes = tupleNode.getChildren(MagikGrammar.EXPRESSION);
     if (expressionNodes.size() != 1) {
