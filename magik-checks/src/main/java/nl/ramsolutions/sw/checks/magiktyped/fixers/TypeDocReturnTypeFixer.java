@@ -23,7 +23,7 @@ import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.magik.utils.StreamUtils;
 
-/** TypeDoc return type fixer. */
+/** TypeDoc @return type fixer. */
 public class TypeDocReturnTypeFixer extends MagikTypedCodeActionSupplier {
 
   /**

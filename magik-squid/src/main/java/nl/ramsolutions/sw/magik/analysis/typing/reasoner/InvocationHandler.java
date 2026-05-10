@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationDefinitionHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.GenericHelper;
@@ -114,23 +114,16 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     final ExpressionResultString calledNodeResult = this.state.getNodeType(calledNode);
     final TypeString originalCalledTypeStr = calledNodeResult.get(0, TypeString.SW_UNSET);
     final TypeString calledTypeStr =
-        originalCalledTypeStr == TypeString.SELF
-            ? TypeString.SW_PROCEDURE
-            : this.typeResolver.resolve(originalCalledTypeStr).stream()
-                .map(ITypeStringDefinition::getTypeString)
-                .findAny()
-                .orElse(TypeString.UNDEFINED);
-    final Collection<ITypeStringDefinition> typeDefs = this.typeResolver.resolve(calledTypeStr);
+        ProcedureInvocationDefinitionHelper.getProcedureTypeInvokedOn(
+            node, this.state, this.typeResolver);
+    final Collection<ProcedureDefinition> procedureDefs =
+        ProcedureInvocationDefinitionHelper.getRespondingProcedureDefinitions(
+            node, this.state, this.typeResolver, this.state.getMagikFile());
 
     // Perform procedure call.
     ExpressionResultString callResult = null;
     ExpressionResultString iterResult = null;
-    for (final ITypeStringDefinition typeDef : typeDefs) {
-      if (!(typeDef instanceof ProcedureDefinition)) {
-        continue;
-      }
-
-      final ProcedureDefinition procDef = (ProcedureDefinition) typeDef;
+    for (final ProcedureDefinition procDef : procedureDefs) {
 
       // Figure argument types.
       final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);

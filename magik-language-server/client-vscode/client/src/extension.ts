@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
 	testProvider = new MagikTestProvider(context, languageClient);
 	editorCommandsProvider = new MagikEditorCommandsProvider(context);
 
-	languageClient.start();
+	languageClient.start(false);
 }
 
 export function deactivate(): Thenable<void> | undefined {
@@ -57,7 +57,7 @@ export function deactivate(): Thenable<void> | undefined {
 
 	let thenable: Thenable<void> | undefined;
 	if (languageClient) {
-		thenable = languageClient.stop();
+		thenable = languageClient.stop(false);
 
 		languageClient.dispose();
 		languageClient = null;

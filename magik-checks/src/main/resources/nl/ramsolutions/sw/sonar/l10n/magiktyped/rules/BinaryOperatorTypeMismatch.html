@@ -1,0 +1,10 @@
+<p>Binary operator type mismatch</p>
+<h2>Explanation</h2>
+<pre>
+_method a.b
+    _local x &lt;&lt; :symbol
+    _local y &lt;&lt; :symbol + 1
+    x +&lt;&lt; 1
+_endmethod
+</pre>
+<p>In the above example, both <pre>:symbol + 1</pre> and <pre>x +&lt;&lt; 1</pre> apply <pre>+</pre> to <pre>sw:symbol</pre> and <pre>sw:integer</pre>, which is not a defined binary operation. This will result in a runtime error.</p>
