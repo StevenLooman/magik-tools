@@ -50,7 +50,7 @@ export class MagikLanguageClient implements vscode.Disposable {
 		// Nop.
 	}
 
-	public start(notify: boolean = true) {
+	public start(notify = true) {
 		if (this._isStarted) {
 			if (notify) {
 				vscode.window.showInformationMessage('Magik Language Server is already running.');
@@ -155,7 +155,7 @@ export class MagikLanguageClient implements vscode.Disposable {
 
 	}
 
-	public stop(notify: boolean = true): Thenable<void> {
+	public stop(notify = true): Thenable<void> {
 		if (!this._isStarted) {
 			if (notify) {
 				vscode.window.showInformationMessage('Magik Language Server is not running.');
