@@ -193,7 +193,8 @@ public class Main {
     final SmallworldSession session =
         new SmallworldSessionLauncher(runAliasCommand, wrapperWriter, promptPattern).launch();
 
-    try {
+    try (wrapperWriter;
+        terminal) {
       final PrintWriter sessionWriter = session.getSessionWriter();
       while (session.isAlive()) {
         // Wait for prompt from Smallworld session.
@@ -217,8 +218,6 @@ public class Main {
       history.save();
 
       session.destroy();
-      wrapperWriter.close();
-      terminal.close();
     }
   }
 
