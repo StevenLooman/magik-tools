@@ -90,6 +90,15 @@ _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
+_method definition.instruction
+	## Instruction for this definition.
+	## @return {sw:symbol}
+	_local class_name << _self.class_name
+	_return class_name.subseq(1, class_name.size - :_definition.size)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
 _method definition.as_properties()
 	## Get slots as hash table.
 	## @return {sw:equality_property_list<K=sw:char16_vector, E=sw:object>}
@@ -108,7 +117,7 @@ _method definition.generate_json_string()
 	## Generate a json string from self.
 	## @return {sw:char16_vector}
 	_local instruction << _self.as_properties()
-	instruction[:instruction] << _self.class_name.write_string.split_by(%_)[1]
+	instruction[:instruction] << _self.instruction
 	_local backstop_encoder <<
 		_proc@backstop_encoder(value)
 			## @param {sw:object} value
