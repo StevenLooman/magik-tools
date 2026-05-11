@@ -83,6 +83,15 @@ _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
+_method definition.instruction
+	## Get the instruction.
+	## By default the first word of the class_name.
+	## @return {sw:char16_vector}
+	_return _self.class_name.write_string.split_by(%_)[1]
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
 _abstract _method definition.sort_value
 	## Sort value.
 	## @return {sw:char16_vector}
@@ -108,7 +117,7 @@ _method definition.generate_json_string()
 	## Generate a json string from self.
 	## @return {sw:char16_vector}
 	_local instruction << _self.as_properties()
-	instruction[:instruction] << _self.class_name.write_string.split_by(%_)[1]
+	instruction[:instruction] << _self.instruction
 	_local backstop_encoder <<
 		_proc@backstop_encoder(value)
 			## @param {sw:object} value

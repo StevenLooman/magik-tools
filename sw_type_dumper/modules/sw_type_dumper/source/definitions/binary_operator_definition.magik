@@ -47,6 +47,11 @@ _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
+## @return {sw:char16_vector}
+binary_operator_definition.define_shared_constant(:instruction, "binary_operator", :public)
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
 _method binary_operator_definition.sort_value
 	## Sort value.
 	## @return {sw:char16_vector}
