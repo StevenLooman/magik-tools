@@ -220,6 +220,16 @@
         "command": "magik.reIndex",
         "title": "Re-index workspace",
         "category": "Magik"
+      },
+      {
+        "command": "magik.startLanguageServer",
+        "title": "Start Language Server",
+        "category": "Magik"
+      },
+      {
+        "command": "magik.stopLanguageServer",
+        "title": "Stop Language Server",
+        "category": "Magik"
       }
     ],
     "keybindings": [

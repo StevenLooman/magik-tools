@@ -1,0 +1,16 @@
+{
+  "title": "Multiple assignment count mismatch",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "MultipleAssignmentCountMismatch",
+  "sqKey": "multiple-assignment-count-mismatch"
+}

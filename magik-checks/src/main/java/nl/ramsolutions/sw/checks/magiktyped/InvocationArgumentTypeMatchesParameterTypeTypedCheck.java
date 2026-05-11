@@ -8,7 +8,9 @@ import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationDefinitionHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.GenericHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
@@ -19,11 +21,11 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.sonar.check.Rule;
 
 /** Check if argument types match parameter types. */
-@Rule(key = MethodArgumentTypeMatchesParameterTypeTypedCheck.CHECK_KEY)
-public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTypedCheck {
+@Rule(key = InvocationArgumentTypeMatchesParameterTypeTypedCheck.CHECK_KEY)
+public class InvocationArgumentTypeMatchesParameterTypeTypedCheck extends MagikTypedCheck {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
-  public static final String CHECK_KEY = "MethodArgumentTypeMatchesParameterType";
+  public static final String CHECK_KEY = "InvocationArgumentTypeMatchesParameterType";
 
   private static final String MESSAGE = "Argument type (%s) does not match parameter type (%s)";
 
@@ -95,6 +97,99 @@ public class MethodArgumentTypeMatchesParameterTypeTypedCheck extends MagikTyped
 
                 // Substitute generics.
                 final GenericHelper genericHelper = new GenericHelper(typeStrInvokedOn);
+                final TypeString substitutedParameterTypeStr =
+                    genericHelper.substituteGenerics(parameterTypeStr);
+
+                // Don't test undefined arguments.
+                final TypeString argumentTypeStr =
+                    argumentTypes.get(index).get(0, TypeString.UNDEFINED);
+                if (argumentTypeStr.isUndefined()) {
+                  // Don't test undefined arguments.
+                  return;
+                }
+
+                // Test if argument type matches parameter type.
+                if (!resolver.isKindOf(argumentTypeStr, substitutedParameterTypeStr)) {
+                  final AstNode argumentNode = argumentNodes.get(index);
+                  final String message =
+                      MESSAGE.formatted(
+                          argumentTypeStr.getFullString(),
+                          substitutedParameterTypeStr.getFullString());
+                  this.addIssue(argumentNode, message);
+                }
+              });
+    }
+  }
+
+  @SuppressWarnings("java:S3776")
+  @Override
+  protected void walkPostProcedureInvocation(final AstNode node) {
+    // Ensure there are arguments to check.
+    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+    if (argumentsNode == null) {
+      return;
+    }
+
+    // Get type.
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    final TypeString typeStrInvokedOn =
+        ProcedureInvocationDefinitionHelper.getProcedureTypeInvokedOn(
+            node, this.getTypeReasonerState(), this.getTypeStringResolver());
+    final TypeString effectiveInvokedOnTypeStr =
+        typeStrInvokedOn.isUndefined() ? TypeString.SW_PROCEDURE : typeStrInvokedOn;
+
+    // Get types for arguments.
+    final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
+    final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT);
+    final List<ExpressionResultString> argumentTypes =
+        argumentNodes.stream()
+            .map(argumentNode -> argumentNode.getFirstChild(MagikGrammar.EXPRESSION))
+            .map(reasonerState::getNodeType)
+            .map(resultString -> SelfHelper.substituteSelf(resultString, node))
+            .toList();
+
+    final Collection<ProcedureDefinition> procedureDefs =
+        ProcedureInvocationDefinitionHelper.getRespondingProcedureDefinitions(
+            node, this.getTypeReasonerState(), this.getTypeStringResolver(), this.getMagikFile());
+    if (procedureDefs.isEmpty()) {
+      // Cannot give any useful information, so abort.
+      return;
+    }
+    for (final ProcedureDefinition procedure : procedureDefs) {
+      final List<ParameterDefinition> parameterDefs = procedure.getParameters();
+      if (parameterDefs.isEmpty()) {
+        continue;
+      }
+
+      final List<TypeString> parameterTypes =
+          parameterDefs.stream()
+              .sequential()
+              .filter(
+                  parameterDef -> parameterDef.getModifier() != ParameterDefinition.Modifier.GATHER)
+              .map(
+                  parameterDef -> {
+                    final TypeString paramTypeStr = parameterDef.getTypeName();
+                    if (parameterDef.getModifier() == ParameterDefinition.Modifier.OPTIONAL) {
+                      return TypeString.combine(paramTypeStr, TypeString.SW_UNSET);
+                    }
+
+                    return paramTypeStr;
+                  })
+              .toList();
+
+      // Test parameter type against argument type.
+      final int size = Math.min(parameterTypes.size(), argumentTypes.size());
+      IntStream.range(0, size)
+          .forEach(
+              index -> {
+                // Don't test undefined parameters.
+                final TypeString parameterTypeStr = parameterTypes.get(index);
+                if (parameterTypeStr.containsUndefined()) {
+                  return;
+                }
+
+                // Substitute generics.
+                final GenericHelper genericHelper = new GenericHelper(effectiveInvokedOnTypeStr);
                 final TypeString substitutedParameterTypeStr =
                     genericHelper.substituteGenerics(parameterTypeStr);
 

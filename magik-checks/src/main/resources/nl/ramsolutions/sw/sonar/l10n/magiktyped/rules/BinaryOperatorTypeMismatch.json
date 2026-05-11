@@ -1,0 +1,16 @@
+{
+  "title": "Binary operator type mismatch",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "15min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "BinaryOperatorTypeMismatch",
+  "sqKey": "binary-operator-type-mismatch"
+}

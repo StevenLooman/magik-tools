@@ -23,7 +23,7 @@ import nl.ramsolutions.sw.magik.formatting.MagikFormattingSettings;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 
-/** TypeDoc parameter fixer. */
+/** TypeDoc @parameter fixer. */
 public class TypeDocParameterFixer extends MagikTypedCodeActionSupplier {
 
   /**

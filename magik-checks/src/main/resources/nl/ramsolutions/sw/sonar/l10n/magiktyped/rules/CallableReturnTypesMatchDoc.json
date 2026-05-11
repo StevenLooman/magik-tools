@@ -1,5 +1,5 @@
 {
-  "title": "Method argument count matches parameter count",
+  "title": "Callable return types match doc",
   "type": "BUG",
   "status": "ready",
   "remediation": {
@@ -11,6 +11,6 @@
     "typing"
   ],
   "defaultSeverity": "Major",
-  "ruleSpecification": "MethodArgumentCountMatchesParameterCount",
-  "sqKey": "method-argument-count-matches-parameter-count"
+  "ruleSpecification": "CallableReturnTypesMatchDoc",
+  "sqKey": "callable-return-types-match-doc"
 }

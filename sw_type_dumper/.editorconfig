@@ -1,0 +1,41 @@
+root = true
+
+[*.java]
+charset = utf-8
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.xml]
+charset = utf-8
+indent_size = 2
+indent_style = space
+
+[*.md]
+charset = utf-8
+indent_size = 4
+
+[*.magik]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = tab
+indent_size = 8
+trim_trailing_whitespace = true
+
+[{module.def,product.def}]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = tab
+indent_size = 8
+trim_trailing_whitespace = true
+
+[gis_aliases]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 8
+trim_trailing_whitespace = true
