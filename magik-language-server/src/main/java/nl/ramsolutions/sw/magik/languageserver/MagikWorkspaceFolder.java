@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -231,12 +232,19 @@ public class MagikWorkspaceFolder {
   @SafeVarargs
   private Collection<FileEvent> buildFileEventsForDifferences(
       final Stream<Path> filePaths, final Collection<? extends IDefinition>... definitions) {
-    final Map<URI, Instant> definitionUris =
-        Stream.of(definitions)
-            .flatMap(Collection::stream)
-            .map(def -> Map.entry(def.getLocation().getUri(), def.getTimestamp()))
-            .collect(
-                Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (val0, val1) -> val0));
+    final Map<URI, Instant> definitionUris = new HashMap<>();
+    Stream.of(definitions)
+        .flatMap(Collection::stream)
+        .forEach(
+            def -> {
+              if (def.getLocation() == null || def.getLocation().getUri() == null) {
+                return;
+              }
+
+              final URI uri = def.getLocation().getUri();
+              final Instant timestamp = def.getTimestamp();
+              definitionUris.putIfAbsent(uri, timestamp);
+            });
 
     // Get updates/deletes.
     final Set<FileEvent> updateDeleteFileEvents =
@@ -249,6 +257,12 @@ public class MagikWorkspaceFolder {
                   try {
                     if (!Files.exists(path)) {
                       return new FileEvent(uri, FileChangeType.DELETED);
+                    }
+
+                    if (defTime == null) {
+                      LOGGER.debug(
+                          "Missing timestamp for indexed definition, forcing re-index: {}", uri);
+                      return new FileEvent(uri, FileChangeType.CHANGED);
                     }
 
                     final FileTime fileTime = Files.getLastModifiedTime(path);
