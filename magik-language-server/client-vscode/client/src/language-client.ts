@@ -11,7 +11,7 @@ import { MagikSessionProvider } from './magik-session';
 export class MagikLanguageClient implements vscode.Disposable {
 
 	private readonly _context: vscode.ExtensionContext;
-	private _client: vscodeLanguageClient.LanguageClient;
+	private _client: vscodeLanguageClient.LanguageClient | undefined;
 	private _magikSessionProvider: MagikSessionProvider | undefined;
 
 	constructor(context: vscode.ExtensionContext) {
@@ -20,7 +20,7 @@ export class MagikLanguageClient implements vscode.Disposable {
 		this.registerCommands();
 	}
 
-	public get magikSessionProvider() {
+	public get magikSessionProvider(): MagikSessionProvider | undefined {
 		return this._magikSessionProvider;
 	}
 
@@ -118,14 +118,23 @@ export class MagikLanguageClient implements vscode.Disposable {
 	}
 
 	public stop(): Thenable<void> {
+		if (!this._client) {
+			return Promise.resolve();
+		}
 		return this._client.stop();
 	}
 
 	public sendRequest<R>(request: string, params?: unknown): Promise<R> {
+		if (!this._client) {
+			return Promise.reject(new Error('Language client is not started'));
+		}
 		return this._client.sendRequest(request, params);
 	}
 
 	public sendToSession(text: string, sourcePath: fs.PathLike | undefined) {
+		if (!this._magikSessionProvider) {
+			throw new Error('Magik session provider is not configured');
+		}
 		this._magikSessionProvider.sendToSession(text, sourcePath);
 	}
 

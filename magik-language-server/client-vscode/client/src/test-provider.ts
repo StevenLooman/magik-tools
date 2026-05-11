@@ -3,7 +3,6 @@ import * as os from 'os';
 import * as path from 'path';
 import * as xml2js from 'xml2js';
 import * as vscode from 'vscode';
-import { integer } from 'vscode-languageserver-types';
 import { MagikLanguageClient } from './language-client';
 
 interface MUnitTestItem {
@@ -13,12 +12,12 @@ interface MUnitTestItem {
 	location?: {
 		range: {
 			start: {
-				line: integer,
-				character: integer;
+				line: number,
+				character: number;
 			},
 			end: {
-				line: integer,
-				character: integer;
+				line: number,
+				character: number;
 			}
 		}
 		uri: string;
@@ -59,7 +58,7 @@ class TestItemCollection implements vscode.TestItemCollection {
 		this._items.delete(itemId);
 	}
 
-	get(itemId: string): vscode.TestItem {
+	get(itemId: string): vscode.TestItem | undefined {
 		return this._items.get(itemId);
 	}
 
@@ -86,13 +85,13 @@ interface MUnitRootNode extends Xml2JsObject {
 }
 
 interface MUnitTestSuite extends Xml2JsObject {
-	testsuite: [MUnitTestSuite];
-	testcase: [MUnitTestCase];
+	testsuite: MUnitTestSuite[];
+	testcase: MUnitTestCase[];
 }
 
 interface MUnitTestCase extends Xml2JsObject {
-	error: [Xml2JsObject];
-	failure: [Xml2JsObject];
+	error: Xml2JsObject[];
+	failure: Xml2JsObject[];
 }
 
 
@@ -101,7 +100,7 @@ export class MagikTestProvider implements vscode.Disposable {
 	private readonly context: vscode.ExtensionContext;
 	private readonly controller: vscode.TestController;
 	private readonly client: MagikLanguageClient;
-	private workdir: fs.PathLike;
+	private workdir: string | undefined;
 	private currentRun: vscode.TestRun | undefined;
 
 	constructor(context: vscode.ExtensionContext, client: MagikLanguageClient) {
@@ -158,14 +157,15 @@ export class MagikTestProvider implements vscode.Disposable {
 	}
 
 	dispose() {
-		if (this.workdir !== null) {
+		if (this.workdir) {
 			fs.rmSync(this.workdir, {recursive: true});
-			this.workdir = null;
+			this.workdir = undefined;
 		}
 	}
 
 	private registerFileWatchers() {
-		const watchers = vscode.workspace.workspaceFolders.map(workspaceFolder => {
+		const workspaceFolders = vscode.workspace.workspaceFolders || [];
+		const watchers = workspaceFolders.map(workspaceFolder => {
 			const pattern = new vscode.RelativePattern(workspaceFolder, '**/*.magik');
 			const watcher = vscode.workspace.createFileSystemWatcher(pattern);
 
@@ -193,8 +193,8 @@ export class MagikTestProvider implements vscode.Disposable {
 	}
 
 	private getTestItems(): Promise<void> {
-		return this.client.sendRequest("workspace/executeCommand", { command: "magik.munit.getTestItems" })
-			.then((munitTestItems: MUnitTestItem[]) => this.parseTestItems(munitTestItems))
+		return this.client.sendRequest<MUnitTestItem[]>("workspace/executeCommand", { command: "magik.munit.getTestItems" })
+			.then((munitTestItems) => this.parseTestItems(munitTestItems))
 			.catch((err) => { vscode.window.showErrorMessage(`Error getting test items: ${err}`); });
 	}
 
@@ -208,13 +208,13 @@ export class MagikTestProvider implements vscode.Disposable {
 	}
 
 	private createTestItem(munitTestItem: MUnitTestItem, parent?: vscode.TestItem): vscode.TestItem {
-		const uri = munitTestItem.location ? vscode.Uri.parse(munitTestItem.location.uri) : null;
+		const uri = munitTestItem.location ? vscode.Uri.parse(munitTestItem.location.uri) : undefined;
 		const testItem = this.controller.createTestItem(munitTestItem.id, munitTestItem.label, uri);
 		testItem.range = munitTestItem.location
 			? new vscode.Range(
 				munitTestItem.location.range.start.line, munitTestItem.location.range.start.character,
 				munitTestItem.location.range.end.line, munitTestItem.location.range.end.character)
-			: null;
+			: undefined;
 
 		if (parent) {
 			parent.children.add(testItem);
@@ -231,10 +231,11 @@ export class MagikTestProvider implements vscode.Disposable {
 		}
 
 		this.currentRun = this.controller.createTestRun(request);
+		const run = this.currentRun;
 
 		// Mark all as enqueued.
 		(request.include || []).forEach(testItem => {
-			this.currentRun.enqueued(testItem);
+			run.enqueued(testItem);
 		});
 
 		// Build test runner script and execute.
@@ -252,12 +253,12 @@ export class MagikTestProvider implements vscode.Disposable {
 			}
 
 			// Parse test runner results while marking TestItems.
-			this.parseTestRunnerResults(request, this.currentRun, outputPath);
+			this.parseTestRunnerResults(request, run, outputPath);
 
 			// Delete XML result file.
 			fs.unlinkSync(outputPath);
 
-			this.currentRun.end();
+			run.end();
 
 			fs.unwatchFile(outputPath);
 		});
@@ -364,24 +365,25 @@ $
 		channel.append(testRunnerResults.toString("utf8"));
 		channel.appendLine("");
 
-		xml2js.parseString(testRunnerResults, (_err: Error, munitRootNode: MUnitRootNode) => {
+		xml2js.parseString(testRunnerResults, (_err: Error | null, munitRootNode: MUnitRootNode) => {
 			// Parse test suites.
 			this.parseTestRunnerSuites(request, run, munitRootNode.testsuite);
 		});
 	}
 
 	private parseTestRunnerSuites(request: vscode.TestRunRequest, run: vscode.TestRun, munitTestSuite: MUnitTestSuite, testItem?: vscode.TestItem) {
-		const testsuites = (munitTestSuite.testsuite || []) as [MUnitTestSuite];
+		const testsuites = (munitTestSuite.testsuite || []) as MUnitTestSuite[];
+		const includedItems = request.include || [];
 		testsuites.forEach(testsuite => {
 			const id = testsuite.$.name;
 			const matchedTestItem = testItem
 				? testItem.children.get(id)
-				: request.include.filter((value) => value.id == id)[0];
+				: includedItems.find((value) => value.id === id);
 			this.parseTestRunnerSuites(request, run, testsuite, matchedTestItem);
 		});
 
 		// Parse test cases.
-		const testcases = (munitTestSuite.testcase || []) as [MUnitTestCase];
+		const testcases = (munitTestSuite.testcase || []) as MUnitTestCase[];
 		testcases.forEach(testcase => {
 			let matchedTestItem: vscode.TestItem | undefined;
 			if (testItem) {
@@ -389,7 +391,10 @@ $
 					if (child.label === testcase.$.name) matchedTestItem = child;
 				});
 			} else {
-				matchedTestItem = request.include.find(v => v.label === testcase.$.name);
+				matchedTestItem = includedItems.find(v => v.label === testcase.$.name);
+			}
+			if (!matchedTestItem) {
+				return;
 			}
 			const duration = testcase.$.time ? parseFloat(testcase.$.time) * 1000 : undefined;
 			if (testcase.error) {
@@ -407,6 +412,10 @@ $
 	}
 
 	private getTempFile(filename: string): fs.PathLike {
+		if (!this.workdir) {
+			throw new Error('Working directory is not available');
+		}
+
 		// Get base filename + extension
 		const dotIndex = filename.lastIndexOf('.');
 		const extension = dotIndex != -1 ? filename.substring(dotIndex + 1, filename.length) : undefined;
@@ -425,7 +434,7 @@ $
 		const filter = filterType ? filterType + ":" : undefined;
 
 		// Try testItems.
-		const items = [];
+		const items: vscode.TestItem[] = [];
 		testItems.forEach(testItem => {
 			if (filter) {
 				if (testItem.id.startsWith(filter)) {
@@ -450,7 +459,7 @@ $
 		const filter = filterType ? filterType + ":" : undefined;
 
 		// Try testItems.
-		const items = [];
+		const items: vscode.TestItem[] = [];
 		testItems.forEach(testItem => {
 			if (filter) {
 				if (testItem.id.startsWith(filter)) {
@@ -471,9 +480,9 @@ $
 		return items;
 	}
 
-	private generateTestCase(testItem: vscode.TestItem, parentId: string, indent?: integer): string {
-		const indentStr = "	".repeat(indent | 1);
-		const newIndent = (indent | 1) + 1;
+	private generateTestCase(testItem: vscode.TestItem, parentId: string, indent = 1): string {
+		const indentStr = "	".repeat(indent);
+		const newIndent = indent + 1;
 		if (testItem.children.size) {
 			// This is a container test case, generate case and recurse.
 			const type = testItem.id.split(":")[0];
@@ -491,7 +500,7 @@ ${indentStr}_endblock`;
 		}
 
 		// Actual test case.
-		const exemplarName = testItem.parent.label;
+		const exemplarName = testItem.parent?.label ?? testItem.label;
 		const testMethodName = testItem.label;
 		return `
 ${indentStr}	${parentId}.add_test(sw:get_global_value(:|${exemplarName}|).new(:|${testMethodName}|))`;

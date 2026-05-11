@@ -32,27 +32,27 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate(): Thenable<void> | undefined {
 	if (editorCommandsProvider != null) {
 		editorCommandsProvider.dispose();
-		editorCommandsProvider = null;
+		editorCommandsProvider = undefined;
 	}
 
 	if (testProvider != null) {
 		testProvider.dispose();
-		testProvider = null;
+		testProvider = undefined;
 	}
 
 	if (debugProvider != null) {
 		debugProvider.dispose();
-		debugProvider = null;
+		debugProvider = undefined;
 	}
 
 	if (magikSessionProvider != null) {
 		magikSessionProvider.dispose();
-		magikSessionProvider = null;
+		magikSessionProvider = undefined;
 	}
 
 	if (aliasTaskProvider) {
 		aliasTaskProvider.dispose();
-		aliasTaskProvider = null;
+		aliasTaskProvider = undefined;
 	}
 
 	let thenable: Thenable<void> | undefined;
@@ -60,7 +60,7 @@ export function deactivate(): Thenable<void> | undefined {
 		thenable = languageClient.stop();
 
 		languageClient.dispose();
-		languageClient = null;
+		languageClient = undefined;
 	}
 
 	return thenable
