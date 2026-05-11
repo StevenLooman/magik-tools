@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
