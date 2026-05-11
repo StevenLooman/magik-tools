@@ -5,12 +5,13 @@ import com.google.gson.JsonObject;
 import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -20,6 +21,7 @@ import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.AnonymousNamer;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
@@ -75,39 +77,55 @@ public class CallHierarchyProvider {
   public List<CallHierarchyItem> prepareCallHierarchy(
       final MagikTypedFile magikFile, final Position position) {
     final AstNode node = magikFile.getTopNode();
-    final AstNode positionTokenNode = AstQuery.nodeSurrounding(node, position);
-    if (positionTokenNode == null) {
-      return Collections.emptyList();
-    }
-
     final AstNode wantedNode =
-        positionTokenNode.is(MagikGrammar.METHOD_DEFINITION)
-            ? positionTokenNode
-            : positionTokenNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
+        AstQuery.nodeSurrounding(
+            node, position, MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
     LOGGER.trace("Wanted node: {}", wantedNode);
     if (wantedNode == null) {
       return null; // NOSONAR: LSP requires null.
     }
 
-    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(wantedNode);
-    final String fullMethodName = helper.getFullExemplarMethodName();
     final URI uri = magikFile.getUri();
     final Location location = new Location(uri);
+    final String uriStr = location.getUri().toString();
     final Range range = new Range(wantedNode);
-    final CallHierarchyItem item =
-        new CallHierarchyItem(
-            fullMethodName,
-            SymbolKind.Method,
-            location.getUri().toString(),
-            Lsp4jConversion.rangeToLsp4j(range),
-            Lsp4jConversion.rangeToLsp4j(range));
-    final Map<String, String> data =
-        Map.of(
-            DATA_TYPE_STRING, helper.getTypeString().getFullString(),
-            DATA_METHOD_NAME, helper.getMethodName(),
-            DATA_URI, location.getUri().toString());
-    item.setData(data);
-    return List.of(item);
+    if (wantedNode.is(MagikGrammar.METHOD_DEFINITION)) {
+      final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(wantedNode);
+      final String fullMethodName = helper.getFullExemplarMethodName();
+      final CallHierarchyItem item =
+          new CallHierarchyItem(
+              fullMethodName,
+              SymbolKind.Method,
+              uriStr,
+              Lsp4jConversion.rangeToLsp4j(range),
+              Lsp4jConversion.rangeToLsp4j(range));
+      final Map<String, String> data =
+          Map.of(
+              DATA_TYPE_STRING, helper.getTypeString().getFullString(),
+              DATA_METHOD_NAME, helper.getMethodName(),
+              DATA_URI, uriStr);
+      item.setData(data);
+      return List.of(item);
+    } else {
+      // PROCEDURE_DEFINITION
+      final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(wantedNode);
+      final String procName = helper.getProcedureName();
+      final String displayName = procName != null ? procName : "<anonymous>";
+      final String typeStrStr = AnonymousNamer.getNameForProcedure(wantedNode).getFullString();
+      final CallHierarchyItem item =
+          new CallHierarchyItem(
+              displayName,
+              SymbolKind.Function,
+              uriStr,
+              Lsp4jConversion.rangeToLsp4j(range),
+              Lsp4jConversion.rangeToLsp4j(range));
+      final Map<String, String> data =
+          Map.of(
+              DATA_TYPE_STRING, typeStrStr,
+              DATA_URI, uriStr);
+      item.setData(data);
+      return List.of(item);
+    }
   }
 
   /**
@@ -224,13 +242,30 @@ public class CallHierarchyProvider {
     }
 
     final MagikTypedFile magikFile = new MagikTypedFile(uri, text, this.definitionKeeper);
-    final String itemName = item.getName();
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-    return magikFile.getMagikDefinitions().stream()
-        .filter(MethodDefinition.class::isInstance)
-        .map(MethodDefinition.class::cast)
-        .filter(methodDef -> methodDef.getName().equals(itemName))
-        .map(MethodDefinition::getNode)
+
+    final Stream<AstNode> definitionNodes;
+    if (object.has(DATA_METHOD_NAME)) {
+      // Method item.
+      final String itemName = item.getName();
+      definitionNodes =
+          magikFile.getMagikDefinitions().stream()
+              .filter(MethodDefinition.class::isInstance)
+              .map(MethodDefinition.class::cast)
+              .filter(methodDef -> methodDef.getName().equals(itemName))
+              .map(MethodDefinition::getNode);
+    } else {
+      // Procedure item.
+      final String typeStringStr = object.getAsJsonPrimitive(DATA_TYPE_STRING).getAsString();
+      definitionNodes =
+          magikFile.getMagikDefinitions().stream()
+              .filter(ProcedureDefinition.class::isInstance)
+              .map(ProcedureDefinition.class::cast)
+              .filter(procDef -> procDef.getTypeString().getFullString().equals(typeStringStr))
+              .map(ProcedureDefinition::getNode);
+    }
+
+    return definitionNodes
         .flatMap(node -> node.getDescendants(MagikGrammar.METHOD_INVOCATION).stream())
         .flatMap(
             methodInvocationNode -> {
@@ -242,7 +277,7 @@ public class CallHierarchyProvider {
               final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
               final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, receiverNode);
               if (typeStr.isUndefined()) {
-                return null;
+                return Stream.empty();
               }
 
               // Construct the CallHierarchyItem/CallHierarchyOutgoingCall for method
