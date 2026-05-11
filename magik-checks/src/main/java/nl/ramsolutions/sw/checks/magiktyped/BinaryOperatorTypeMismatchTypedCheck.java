@@ -6,6 +6,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
+import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import org.sonar.check.Rule;
 
 /** Check if binary operator types are compatible. */
@@ -127,12 +128,10 @@ public class BinaryOperatorTypeMismatchTypedCheck extends MagikTypedCheck {
   }
 
   private boolean isIgnoredOperator(final String operatorStr) {
-    return "_is".equals(operatorStr)
-        || "_isnt".equals(operatorStr)
-        || "_andif".equals(operatorStr)
-        || "_orif".equals(operatorStr)
-        || "_and".equals(operatorStr)
-        || "_or".equals(operatorStr);
+    return MagikKeyword.IS.getValue().equals(operatorStr)
+        || MagikKeyword.ISNT.getValue().equals(operatorStr)
+        || MagikKeyword.ANDIF.getValue().equals(operatorStr)
+        || MagikKeyword.ORIF.getValue().equals(operatorStr);
   }
 
   private TypeString resolveBinaryResultType(
