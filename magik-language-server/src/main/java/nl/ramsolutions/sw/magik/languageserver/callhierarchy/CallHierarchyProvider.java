@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -232,7 +233,13 @@ public class CallHierarchyProvider {
     final URI uri = URI.create(uriStr);
 
     // TODO: This can give multiple files! Should we store path in data as well?
-    final Path path = Path.of(uri); // TODO: What about memory:// URIs? These should blackhole.
+    final Path path;
+    try {
+      path = Path.of(uri);
+    } catch (final FileSystemNotFoundException exception) {
+      // URI scheme has no installed filesystem provider (e.g. memory:// from types DB).
+      return List.of();
+    }
     final String text;
     try {
       text = Files.readString(path, FileCharsetDeterminer.determineCharset(path));
