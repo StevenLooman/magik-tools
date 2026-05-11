@@ -12,7 +12,7 @@ export class MagikLanguageClient implements vscode.Disposable {
 	private static readonly STOP_TIMEOUT_MS = 5 * 60 * 1000;
 
 	private readonly _context: vscode.ExtensionContext;
-	private _client!: vscodeLanguageClient.LanguageClient;
+	private _client: vscodeLanguageClient.LanguageClient | undefined;
 	private _isStarted = false;
 	private _outputSessionCounter = 0;
 	private _magikSessionProvider: MagikSessionProvider | undefined;
@@ -156,10 +156,11 @@ export class MagikLanguageClient implements vscode.Disposable {
 	}
 
 	public stop(notify = true): Thenable<void> {
-		if (!this._isStarted) {
+		if (!this._isStarted || !this._client) {
 			if (notify) {
 				vscode.window.showInformationMessage('Magik Language Server is not running.');
 			}
+			this._isStarted = false;
 			return Promise.resolve();
 		}
 
@@ -175,6 +176,9 @@ export class MagikLanguageClient implements vscode.Disposable {
 	}
 
 	public sendRequest<R>(request: string, params?: unknown): Promise<R> {
+		if (!this._client) {
+			return Promise.reject(new Error('Language client is not started'));
+		}
 		return this._client.sendRequest(request, params);
 	}
 
@@ -182,7 +186,6 @@ export class MagikLanguageClient implements vscode.Disposable {
 		if (!this._magikSessionProvider) {
 			throw new Error('MagikSessionProvider is not initialized');
 		}
-
 		this._magikSessionProvider.sendToSession(text, sourcePath);
 	}
 

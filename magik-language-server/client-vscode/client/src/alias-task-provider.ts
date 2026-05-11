@@ -12,7 +12,7 @@ export class MagikAliasTaskProvider implements vscode.TaskProvider, vscode.Dispo
 	private readonly context: vscode.ExtensionContext;
 	private readonly provider: vscode.Disposable;
 	private promise: Thenable<vscode.Task[]> | undefined = undefined;
-	private fileWatcher: vscode.FileSystemWatcher = undefined;
+	private fileWatcher: vscode.FileSystemWatcher | undefined;
 
 	constructor(context: vscode.ExtensionContext) {
 		this.context = context;
@@ -51,6 +51,9 @@ export class MagikAliasTaskProvider implements vscode.TaskProvider, vscode.Dispo
 			const definition: AliasTaskDefinition = task.definition as AliasTaskDefinition;
 			const runAliasPath = getRunAliasPath();
 			const aliasesPath = getAliasesPath(definition.aliasesPath);
+			if (!runAliasPath || !aliasesPath) {
+				return undefined;
+			}
 			const environmentFile = getEnvironmentPath(definition.environmentPath);
 			const commandLine = getCommandLine(runAliasPath, aliasesPath, definition.entry, environmentFile, definition.args, definition.useSessionWrapper);
 			const shellExecutionOptions: vscode.ShellExecutionOptions = {
@@ -109,8 +112,11 @@ function getOutputChannel(): vscode.OutputChannel {
 	return _channel;
 }
 
-function getRunAliasPath(): fs.PathLike {
-	const smallworldGisPath: fs.PathLike = vscode.workspace.getConfiguration().get('magik.smallworldGis');
+function getRunAliasPath(): fs.PathLike | undefined {
+	const smallworldGisPath = vscode.workspace.getConfiguration().get<string>('magik.smallworldGis');
+	if (!smallworldGisPath) {
+		return undefined;
+	}
 	if (process.platform === "win32") {
 		return path.join(smallworldGisPath.toString(), 'bin', 'x86', 'runalias.exe');
 	}
@@ -118,20 +124,20 @@ function getRunAliasPath(): fs.PathLike {
 	return path.join(smallworldGisPath.toString(), 'bin', 'share', 'runalias');
 }
 
-function getEnvironmentPath(environmentPath?: fs.PathLike): fs.PathLike {
+function getEnvironmentPath(environmentPath?: fs.PathLike): fs.PathLike | undefined {
 	if (environmentPath) {
 		return environmentPath;
 	}
 
-	return vscode.workspace.getConfiguration().get('magik.environment');
+	return vscode.workspace.getConfiguration().get<string>('magik.environment');
 }
 
-function getAliasesPath(aliasesPath?: fs.PathLike): fs.PathLike {
+function getAliasesPath(aliasesPath?: fs.PathLike): fs.PathLike | undefined {
 	if (aliasesPath) {
 		return aliasesPath;
 	}
 
-	return vscode.workspace.getConfiguration().get('magik.aliases');
+	return vscode.workspace.getConfiguration().get<string>('magik.aliases');
 }
 
 function getCommandLine(runAliasPath: fs.PathLike, aliasesPath: fs.PathLike, entryName: string, environmentFile?: fs.PathLike, additionalArgs?: string[], useSessionWrapper?: boolean): string {
@@ -166,12 +172,15 @@ async function getAliasesTasks(aliasesPath: fs.PathLike): Promise<vscode.Task[]>
 		return emptyTasks;
 	}
 
-	const runAliasPath: fs.PathLike = getRunAliasPath();
+	const runAliasPath = getRunAliasPath();
+	if (!runAliasPath) {
+		return emptyTasks;
+	}
 	if (!fs.existsSync(runAliasPath)) {
 		return emptyTasks;
 	}
 
-	const environmentFile: fs.PathLike = getEnvironmentPath();
+	const environmentFile = getEnvironmentPath();
 
 	const tasks: vscode.Task[] = [];
 	try {
@@ -210,7 +219,7 @@ async function getAliasesTasks(aliasesPath: fs.PathLike): Promise<vscode.Task[]>
 	} catch (err) {
 		const channel = getOutputChannel();
 		channel.appendLine('Auto detecting run_alias tasks failed:');
-		channel.appendLine(err);
+		channel.appendLine(String(err));
 		channel.show(true);
 		return emptyTasks;
 	}
