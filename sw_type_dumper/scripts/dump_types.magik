@@ -7,13 +7,6 @@ _block
 _endblock
 $
 
-_if smallworld_product.product(:sw5_java_object_wrapper) _isnt _unset
-_then
-	smallworld_product.add_product(:sw5_java_object_wrapper)
-	sw_module_manager.load_module(:sw5_java_object_wrapper)
-_endif
-$
-
 _block
 	_local filepath << sw:system.create_temp_file("sw_types.jsonl")
 	write_with_spaces(date_time.now(), "Start writing to:", filepath)
