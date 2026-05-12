@@ -1,0 +1,15 @@
+{
+  "title": "Procedure has no name",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "convention"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "UnnamedProcedure",
+  "sqKey": "unnamed-procedure"
+}
