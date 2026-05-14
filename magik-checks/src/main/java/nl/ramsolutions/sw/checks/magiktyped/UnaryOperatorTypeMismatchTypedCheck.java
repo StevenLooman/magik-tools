@@ -14,7 +14,7 @@ public class UnaryOperatorTypeMismatchTypedCheck extends MagikTypedCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "UnaryOperatorTypeMismatch";
 
-  private static final String MESSAGE = "Unary operator '%s' results in an undefined type.";
+  private static final String MESSAGE = "Unary operator '%s' ('%s.%s') has no return type defined.";
 
   @Override
   protected void walkPostUnaryExpression(final AstNode node) {
@@ -39,7 +39,9 @@ public class UnaryOperatorTypeMismatchTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    final String message = MESSAGE.formatted(node.getTokenValue());
+    final String methodName = helper.getUnaryOperatorMethod();
+    final String message =
+        MESSAGE.formatted(node.getTokenValue(), operandTypeStr.getFullString(), methodName);
     this.addIssue(node, message);
   }
 }
