@@ -46,8 +46,28 @@ public class GenericHelper {
       return TypeString.UNDEFINED;
     }
 
+    if (typeString.isVariadic()) {
+      final TypeString substitutedInner = this.substituteGenerics(typeString.getVariadicInner());
+      // If the substituted inner is itself variadic (because a generic ref was bound to
+      // a variadic, e.g. simple_vector<E=variadic(T)> from a misused @param), don't
+      // re-wrap — that would violate the variadic-cannot-wrap-variadic invariant.
+      if (substitutedInner.isVariadic()) {
+        return substitutedInner;
+      }
+
+      return TypeString.ofVariadic(substitutedInner);
+    }
+
     final Map<TypeString, TypeString> genericTypeMapping = this.getGenericReferenceTypeMapping();
     final TypeString newTypeString = genericTypeMapping.getOrDefault(typeString, typeString);
+    // If a generic reference resolves to a variadic — possible when a _gather parameter
+    // was declared with a variadic @param doc, producing simple_vector<E=variadic(T)> —
+    // propagate the variadic as-is rather than falling through to ofIdentifier which
+    // would call getIdentifier() and throw.
+    if (newTypeString.isVariadic()) {
+      return newTypeString;
+    }
+
     if (newTypeString.isCombined()) {
       final TypeString[] newTypeStrings =
           newTypeString.getCombinedTypes().stream()

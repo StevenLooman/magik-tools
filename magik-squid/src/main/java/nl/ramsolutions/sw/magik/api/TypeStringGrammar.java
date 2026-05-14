@@ -40,6 +40,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
   /** TypeString Punctuators. */
   public enum Punctuator implements GrammarRuleKey {
     TYPE_SEPARATOR(","),
+    TYPE_VARIADIC("..."),
     TYPE_COMBINATOR("|"),
     TYPE_ARG_OPEN("("),
     TYPE_ARG_CLOSE(")"),
@@ -166,7 +167,10 @@ public enum TypeStringGrammar implements GrammarRuleKey {
         .is(
             b.firstOf(
                 EXPRESSION_RESULT_STRING_UNDEFINED,
-                b.sequence(TYPE_STRING, b.zeroOrMore(Punctuator.TYPE_SEPARATOR, TYPE_STRING))));
+                b.sequence(
+                    TYPE_STRING,
+                    b.zeroOrMore(Punctuator.TYPE_SEPARATOR, TYPE_STRING),
+                    b.optional(Punctuator.TYPE_VARIADIC))));
 
     b.rule(EXPRESSION_RESULT_STRING_UNDEFINED).is(Keyword.EXPRESSION_RESULT_UNDEFINED);
 
@@ -179,7 +183,11 @@ public enum TypeStringGrammar implements GrammarRuleKey {
 
   private static void punctuators(final LexerlessGrammarBuilder b) {
     for (final Punctuator p : Punctuator.values()) {
-      b.rule(p).is(SPACING_NO_LB, p.getValue()).skip();
+      if (p == Punctuator.TYPE_VARIADIC) {
+        b.rule(p).is(SPACING_NO_LB, p.getValue());
+      } else {
+        b.rule(p).is(SPACING_NO_LB, p.getValue()).skip();
+      }
     }
   }
 

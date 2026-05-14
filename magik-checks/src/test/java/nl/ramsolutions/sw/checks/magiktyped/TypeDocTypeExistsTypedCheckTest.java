@@ -49,6 +49,17 @@ class TypeDocTypeExistsTypedCheckTest {
           ## @return {sw:float|sw:integer}
         _endmethod
         """,
+        """
+        _method a.b()
+          ## @return {sw:integer...}
+        _endmethod
+        """,
+        """
+        _method a.b()
+          ## @return {sw:symbol}
+          ## @return {sw:integer|sw:unset...}
+        _endmethod
+        """,
       })
   void testValid(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();

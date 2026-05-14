@@ -77,13 +77,20 @@ public class IterCallableYieldTypesMatchDocTypedCheck extends MagikTypedCheck {
                 return;
               }
 
-              final ExemplarDefinition iterExemplarDef =
-                  resolver.getExemplarDefinition(iterTypeString);
+              // Variadics don't resolve to an exemplar themselves; compare the inner type
+              // when either side is variadic so e.g. variadic(int) vs variadic(symbol)
+              // is reported as a mismatch rather than equal-by-virtue-of-both-being-null.
+              final TypeString iterLookup =
+                  iterTypeString.isVariadic() ? iterTypeString.getVariadicInner() : iterTypeString;
+              final ExemplarDefinition iterExemplarDef = resolver.getExemplarDefinition(iterLookup);
 
               final Map.Entry<AstNode, TypeString> typeDocEntry = entry.getValue();
               final TypeString docLoopTypeString = typeDocEntry.getValue();
-              final ExemplarDefinition docExemplarDef =
-                  resolver.getExemplarDefinition(docLoopTypeString);
+              final TypeString docLookup =
+                  docLoopTypeString.isVariadic()
+                      ? docLoopTypeString.getVariadicInner()
+                      : docLoopTypeString;
+              final ExemplarDefinition docExemplarDef = resolver.getExemplarDefinition(docLookup);
 
               if (Objects.equals(iterExemplarDef, docExemplarDef)) {
                 return;

@@ -33,7 +33,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** Tests for JsonDefinitionWriter. */
+/** Tests for {@link JsonDefinitionWriter}. */
 class JsonDefinitionWriterTest {
 
   private Path tempPath;
@@ -240,6 +240,122 @@ class JsonDefinitionWriterTest {
 
     assertThat(Files.exists(this.tempPath)).isTrue();
     assertThat(Files.size(this.tempPath)).isNotZero();
+  }
+
+  @Test
+  void testWriteAndReadVariadicMethodResult() throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString bRef = TypeString.ofIdentifier("user:b", "user");
+    final ExpressionResultString variadicResult =
+        new ExpressionResultString(TypeString.ofVariadic(TypeString.SW_INTEGER));
+    final MethodDefinition original =
+        new MethodDefinition(
+            new Location(URI.create("file:///file.magik")),
+            Instant.now(),
+            null,
+            "Variadic",
+            null,
+            bRef,
+            "m_variadic()",
+            Collections.emptySet(),
+            Collections.emptyList(),
+            null,
+            null,
+            variadicResult,
+            ExpressionResultString.EMPTY);
+    definitionKeeper.add(original);
+
+    JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
+
+    final IDefinitionKeeper readBack = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(this.tempPath, readBack);
+
+    final MethodDefinition roundTripped =
+        readBack.getMethodDefinitions(bRef).stream().findAny().orElseThrow();
+    assertThat(roundTripped.getReturnTypes()).isEqualTo(variadicResult);
+    assertThat(roundTripped.getReturnTypes().getTypes().get(0).isVariadic()).isTrue();
+    assertThat(roundTripped.getReturnTypes().getTypes().get(0).getVariadicInner())
+        .isEqualTo(TypeString.SW_INTEGER);
+  }
+
+  @Test
+  void testWriteAndReadLeadingPlusVariadicMethodResult() throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString bRef = TypeString.ofIdentifier("user:b", "user");
+    final ExpressionResultString leadingPlusVariadic =
+        new ExpressionResultString(
+            TypeString.SW_SYMBOL,
+            TypeString.SW_CHAR16_VECTOR,
+            TypeString.ofVariadic(TypeString.SW_INTEGER));
+    final MethodDefinition original =
+        new MethodDefinition(
+            new Location(URI.create("file:///file.magik")),
+            Instant.now(),
+            null,
+            "LeadingPlusVariadic",
+            null,
+            bRef,
+            "m_leading_variadic()",
+            Collections.emptySet(),
+            Collections.emptyList(),
+            null,
+            null,
+            leadingPlusVariadic,
+            ExpressionResultString.EMPTY);
+    definitionKeeper.add(original);
+
+    JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
+
+    final IDefinitionKeeper readBack = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(this.tempPath, readBack);
+
+    final MethodDefinition roundTripped =
+        readBack.getMethodDefinitions(bRef).stream().findAny().orElseThrow();
+    assertThat(roundTripped.getReturnTypes()).isEqualTo(leadingPlusVariadic);
+    assertThat(roundTripped.getReturnTypes().getTypes().get(0)).isEqualTo(TypeString.SW_SYMBOL);
+    assertThat(roundTripped.getReturnTypes().getTypes().get(1))
+        .isEqualTo(TypeString.SW_CHAR16_VECTOR);
+    assertThat(roundTripped.getReturnTypes().getTypes().get(2).isVariadic()).isTrue();
+    assertThat(roundTripped.getReturnTypes().getTypes().get(2).getVariadicInner())
+        .isEqualTo(TypeString.SW_INTEGER);
+  }
+
+  @Test
+  void testWriteAndReadVariadicCombinedInnerMethodResult() throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString bRef = TypeString.ofIdentifier("user:b", "user");
+    final TypeString integerOrUnset =
+        TypeString.combine(TypeString.SW_INTEGER, TypeString.SW_UNSET);
+    final ExpressionResultString combinedVariadic =
+        new ExpressionResultString(TypeString.ofVariadic(integerOrUnset));
+    final MethodDefinition original =
+        new MethodDefinition(
+            new Location(URI.create("file:///file.magik")),
+            Instant.now(),
+            null,
+            "VariadicCombined",
+            null,
+            bRef,
+            "m_variadic_combined()",
+            Collections.emptySet(),
+            Collections.emptyList(),
+            null,
+            null,
+            combinedVariadic,
+            ExpressionResultString.EMPTY);
+    definitionKeeper.add(original);
+
+    JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
+
+    final IDefinitionKeeper readBack = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(this.tempPath, readBack);
+
+    final MethodDefinition roundTripped =
+        readBack.getMethodDefinitions(bRef).stream().findAny().orElseThrow();
+    assertThat(roundTripped.getReturnTypes()).isEqualTo(combinedVariadic);
+    assertThat(roundTripped.getReturnTypes().getTypes().get(0).isVariadic()).isTrue();
+    assertThat(roundTripped.getReturnTypes().getTypes().get(0).getVariadicInner())
+        .isEqualTo(integerOrUnset);
   }
 
   @Test

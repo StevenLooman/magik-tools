@@ -51,6 +51,11 @@ class TypeDocMixedGenericsCheckTest {
           ## @param {sw:property_list<K=sw:symbol,object>} p1 Param.
         _endmethod
         """,
+        """
+        _method a.m1()
+          ## @return {sw:property_list<K=sw:symbol,object>...} Result.
+        _endmethod
+        """,
       })
   void testInvalid(final String code) {
     final MagikCheck check = new TypeDocMixedGenericsCheck();

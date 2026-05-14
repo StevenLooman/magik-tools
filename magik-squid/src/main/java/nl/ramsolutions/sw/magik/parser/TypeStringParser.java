@@ -7,6 +7,8 @@ import com.sonar.sslr.impl.ast.AstWalker;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.TypeStringGrammar;
@@ -116,11 +118,20 @@ public final class TypeStringParser {
       return ExpressionResultString.UNDEFINED;
     }
 
-    return node.getChildren(TypeStringGrammar.TYPE_STRING).stream()
-        .map(
-            typeStringNode ->
-                TypeStringParser.typeStringNodeToTypeString(typeStringNode, currentPakkage))
-        .collect(ExpressionResultString.COLLECTOR);
+    final List<AstNode> typeNodes = node.getChildren(TypeStringGrammar.TYPE_STRING);
+    final boolean isVariadic =
+        node.getFirstChild(TypeStringGrammar.Punctuator.TYPE_VARIADIC) != null;
+
+    final List<TypeString> types = new ArrayList<>(typeNodes.size());
+    for (int i = 0; i < typeNodes.size(); ++i) {
+      TypeString typeString =
+          TypeStringParser.typeStringNodeToTypeString(typeNodes.get(i), currentPakkage);
+      if (isVariadic && i == typeNodes.size() - 1) {
+        typeString = TypeString.ofVariadic(typeString);
+      }
+      types.add(typeString);
+    }
+    return new ExpressionResultString(types);
   }
 
   private static TypeString typeStringNodeToTypeString(

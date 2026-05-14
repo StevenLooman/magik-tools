@@ -65,11 +65,18 @@ public final class JsonDefinitionReader {
           && json.getAsString().equals(ExpressionResultString.UNDEFINED_SERIALIZED_NAME)) {
         return ExpressionResultString.UNDEFINED;
       } else if (json.isJsonArray()) {
-        final List<TypeString> types =
-            json.getAsJsonArray().asList().stream()
-                .map(JsonElement::getAsString)
-                .map(TypeStringParser::parseTypeString)
-                .toList();
+        final List<JsonElement> elements = json.getAsJsonArray().asList();
+        final List<TypeString> types = new java.util.ArrayList<>(elements.size());
+        for (int i = 0; i < elements.size(); ++i) {
+          final String raw = elements.get(i).getAsString();
+          final boolean variadic = i == elements.size() - 1 && raw.endsWith("...");
+          final String inner = variadic ? raw.substring(0, raw.length() - 3) : raw;
+          TypeString typeString = TypeStringParser.parseTypeString(inner);
+          if (variadic) {
+            typeString = TypeString.ofVariadic(typeString);
+          }
+          types.add(typeString);
+        }
         return new ExpressionResultString(types);
       }
 

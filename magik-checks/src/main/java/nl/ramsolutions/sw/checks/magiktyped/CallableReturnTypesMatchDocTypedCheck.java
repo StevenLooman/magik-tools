@@ -75,32 +75,96 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
     }
 
     final TypeStringResolver resolver = this.getTypeStringResolver();
-    final int entryCount = Math.max(returnCount, typeDocEntries.size());
+    final int docSize = typeDocEntries.size();
+    final boolean tailVariadic =
+        docSize > 0 && typeDocEntries.get(docSize - 1).getValue().isVariadic();
+    final int leadingDocCount = tailVariadic ? docSize - 1 : docSize;
+    final int effectiveDocCount = tailVariadic ? Math.max(leadingDocCount, returnCount) : docSize;
+    final int entryCount = Math.max(returnCount, effectiveDocCount);
     for (int index = 0; index < entryCount; ++index) {
-      final TypeString callableReturnTypeString =
-          index < returnCount ? reasonedResult.get(index, null) : null;
-      // When arity came from the reasoned result, skip UNDEFINED slots to prevent false positives
-      // from inflated result sizes. UndefinedMethodCallResultTypedCheck covers those calls.
-      if (syntaxReturnCount == null
-          && callableReturnTypeString != null
-          && callableReturnTypeString.containsUndefined()) {
-        continue;
-      }
-
-      final Map.Entry<AstNode, TypeString> typeDocEntry =
-          index < typeDocEntries.size() ? typeDocEntries.get(index) : null;
-      this.handleReturnTypeEntry(callableReturnTypeString, typeDocEntry, node, resolver);
+      this.checkReturnPosition(
+          node,
+          resolver,
+          typeDocEntries,
+          reasonedResult,
+          returnCount,
+          syntaxReturnCount,
+          tailVariadic,
+          leadingDocCount,
+          index);
     }
+  }
+
+  @SuppressWarnings("checkstyle:ParameterNumber")
+  private void checkReturnPosition(
+      final AstNode node,
+      final TypeStringResolver resolver,
+      final List<Map.Entry<AstNode, TypeString>> typeDocEntries,
+      final ExpressionResultString reasonedResult,
+      final int returnCount,
+      final Integer syntaxReturnCount,
+      final boolean tailVariadic,
+      final int leadingDocCount,
+      final int index) {
+    final TypeString callableReturnTypeString =
+        index < returnCount ? reasonedResult.get(index, null) : null;
+    // When arity came from the reasoned result, skip UNDEFINED return positions to prevent
+    // false positives from inflated result sizes. UndefinedMethodCallResultTypedCheck covers
+    // those calls.
+    if (syntaxReturnCount == null
+        && callableReturnTypeString != null
+        && callableReturnTypeString.containsUndefined()) {
+      return;
+    }
+
+    final Map.Entry<AstNode, TypeString> typeDocEntry =
+        this.selectDocEntry(typeDocEntries, index, tailVariadic, leadingDocCount);
+    final TypeString effectiveDocType =
+        this.effectiveDocType(
+            typeDocEntry, callableReturnTypeString, tailVariadic, index, leadingDocCount);
+    this.handleReturnTypeEntry(
+        callableReturnTypeString, typeDocEntry, effectiveDocType, node, resolver);
+  }
+
+  private Map.Entry<AstNode, TypeString> selectDocEntry(
+      final List<Map.Entry<AstNode, TypeString>> typeDocEntries,
+      final int index,
+      final boolean tailVariadic,
+      final int leadingDocCount) {
+    if (tailVariadic && index >= leadingDocCount) {
+      return typeDocEntries.get(typeDocEntries.size() - 1);
+    }
+    return index < typeDocEntries.size() ? typeDocEntries.get(index) : null;
+  }
+
+  private TypeString effectiveDocType(
+      final Map.Entry<AstNode, TypeString> typeDocEntry,
+      final TypeString callableReturnTypeString,
+      final boolean tailVariadic,
+      final int index,
+      final int leadingDocCount) {
+    if (typeDocEntry == null) {
+      return null;
+    }
+    final TypeString docType = typeDocEntry.getValue();
+    if (!tailVariadic || index < leadingDocCount) {
+      return docType;
+    }
+    // Absorbed into the trailing variadic. If the reasoned position is itself variadic
+    // compare against the full variadic; otherwise compare against its inner.
+    if (callableReturnTypeString != null && callableReturnTypeString.isVariadic()) {
+      return docType;
+    }
+    return docType.getVariadicInner();
   }
 
   private void handleReturnTypeEntry(
       final TypeString callableReturnTypeString,
       final Map.Entry<AstNode, TypeString> typeDocEntry,
+      final TypeString effectiveDocType,
       final AstNode definitionNode,
       final TypeStringResolver resolver) {
-    final TypeString docReturnTypeString = typeDocEntry != null ? typeDocEntry.getValue() : null;
-
-    if (this.reportMissingTypeDoc(callableReturnTypeString, docReturnTypeString, definitionNode)) {
+    if (this.reportMissingTypeDoc(callableReturnTypeString, effectiveDocType, definitionNode)) {
       return;
     }
 
@@ -109,7 +173,7 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
     }
 
     this.reportUnexpectedOrMismatchedTypeDoc(
-        callableReturnTypeString, docReturnTypeString, typeDocEntry, resolver);
+        callableReturnTypeString, effectiveDocType, typeDocEntry, resolver);
   }
 
   private boolean reportMissingTypeDoc(

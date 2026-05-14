@@ -25,6 +25,33 @@ class AtomHandler extends LocalTypeReasonerHandler {
   }
 
   /**
+   * Handle ATOM. For the parens-wrapped form {@code (EXPRESSION)} the ATOM has no dedicated
+   * child-kind handler that would set its type, so propagate the inner expression's type up to the
+   * ATOM here. Other ATOM forms (NUMBER, SYMBOL, BLOCK, LOOP, ...) have their own walkPost handlers
+   * that already set the ATOM's type via {@code assignAtom}; for those the inner EXPRESSION lookup
+   * is null and this method is a no-op.
+   *
+   * @param node ATOM node.
+   */
+  void handleAtom(final AstNode node) {
+    final AstNode expressionNode = node.getFirstChild(MagikGrammar.EXPRESSION);
+    if (expressionNode == null) {
+      return;
+    }
+
+    final ExpressionResultString innerResult = this.state.getNodeType(expressionNode);
+    if (this.state.hasNodeType(expressionNode) && innerResult != ExpressionResultString.UNDEFINED) {
+      this.state.setNodeType(node, innerResult);
+    }
+
+    final ExpressionResultString innerIterResult = this.state.getNodeIterType(expressionNode);
+    if (this.state.hasNodeIterType(expressionNode)
+        && innerIterResult != ExpressionResultString.UNDEFINED) {
+      this.state.setNodeIterType(node, innerIterResult);
+    }
+  }
+
+  /**
    * Handle number.
    *
    * @param node NUMBER node.

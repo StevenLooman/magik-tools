@@ -120,7 +120,7 @@ public class ProcedureDefinitionParser {
             : null;
 
     // Get return types from method docs.
-    final List<TypeString> callResultDocs = typeDocParser.getReturnTypes();
+    final List<TypeString> callResultDocs = normalizeVariadicTail(typeDocParser.getReturnTypes());
     // Ensure we can believe the docs, sort of.
     final boolean returnsAnything = helper.returnsAnything();
     final ExpressionResultString callResult =
@@ -129,7 +129,7 @@ public class ProcedureDefinitionParser {
             : ExpressionResultString.UNDEFINED;
 
     // Get iterator types from method docs.
-    final List<TypeString> loopResultDocs = typeDocParser.getLoopTypes();
+    final List<TypeString> loopResultDocs = normalizeVariadicTail(typeDocParser.getLoopTypes());
     // Ensure method docs match actual loopbody, sort of.
     final boolean hasLoopbody = helper.hasLoopbody();
     final ExpressionResultString loopResult =
@@ -191,6 +191,19 @@ public class ProcedureDefinitionParser {
             usedGlobals,
             allUsedMethods,
             usedConditions));
+  }
+
+  private static List<TypeString> normalizeVariadicTail(final List<TypeString> types) {
+    if (types.size() < 2) {
+      return types;
+    }
+    final List<TypeString> result = new ArrayList<>(types.size());
+    for (int i = 0; i < types.size() - 1; ++i) {
+      final TypeString t = types.get(i);
+      result.add(t.isVariadic() ? t.getVariadicInner() : t);
+    }
+    result.add(types.get(types.size() - 1));
+    return result;
   }
 
   private List<ParameterDefinition> createParameterDefinitions(

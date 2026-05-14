@@ -55,8 +55,14 @@ public class ExpressionResultString {
    * List constructor.
    *
    * @param types Types this {@link ExpressionResult} represents.
+   * @throws IllegalArgumentException if {@code types.size() > MAX_ITEMS}.
    */
   public ExpressionResultString(final List<TypeString> types) {
+    if (types.size() > MAX_ITEMS) {
+      throw new IllegalArgumentException(
+          "ExpressionResultString cannot hold more than %d types".formatted(MAX_ITEMS));
+    }
+
     this.types = Collections.unmodifiableList(types);
   }
 
@@ -116,6 +122,44 @@ public class ExpressionResultString {
   }
 
   /**
+   * Materialize this result into exactly {@code n} per-position types. A trailing variadic (if any)
+   * is expanded into its inner type unioned with {@link TypeString#SW_UNSET}, variadic declares
+   * 0..N values, so any position may be unfilled. Positions beyond the declared (non-variadic) size
+   * are filled with {@link TypeString#SW_UNSET}.
+   *
+   * <p>Note: {@link ExpressionResultString#UNDEFINED} is the flat {@code nCopies(MAX_ITEMS,
+   * UNDEFINED)} form (no variadic tail), so it materializes to bare {@code UNDEFINED} per position.
+   * The variadic form {@code _undefined...} (a distinct value) materializes per the uniform rule
+   * above to {@code UNDEFINED | sw:unset} per position.
+   *
+   * @param n Number of positions to produce.
+   * @return List of {@code n} types.
+   */
+  public List<TypeString> materialize(final int n) {
+    final int capped = Math.min(n, MAX_ITEMS);
+    final List<TypeString> result = new ArrayList<>(capped);
+    final int lastIdx = this.types.size() - 1;
+    final boolean tailVariadic = !this.types.isEmpty() && this.types.get(lastIdx).isVariadic();
+    final int leadingCount = tailVariadic ? lastIdx : this.types.size();
+    final TypeString variadicPositionType =
+        tailVariadic
+            ? TypeString.combine(this.types.get(lastIdx).getVariadicInner(), TypeString.SW_UNSET)
+            : null;
+
+    for (int i = 0; i < capped; ++i) {
+      if (i < leadingCount) {
+        result.add(this.types.get(i));
+      } else if (tailVariadic) {
+        result.add(variadicPositionType);
+      } else {
+        result.add(TypeString.SW_UNSET);
+      }
+    }
+
+    return Collections.unmodifiableList(result);
+  }
+
+  /**
    * Substitute {@code from} by {@code to} in a copy of self.
    *
    * @param from From type.
@@ -135,41 +179,11 @@ public class ExpressionResultString {
    */
   public String getTypeNames(final String separator) {
     if (this.equals(ExpressionResultString.UNDEFINED)) {
-      return "UNDEFINED...";
+      return ExpressionResultString.UNDEFINED_SERIALIZED_NAME;
     }
-
-    // Determine first index of trailing homogeneous sequence.
-    int firstRepeatingIndex = MAX_ITEMS;
-    TypeString lastType = null;
-    if (this.types.size() == MAX_ITEMS) {
-      lastType = this.get(firstRepeatingIndex - 1, null);
-      for (int i = this.types.size() - 1; i > -1; --i) {
-        final TypeString type = this.types.get(i);
-        if (type.equals(lastType)) {
-          firstRepeatingIndex = i;
-        } else {
-          break;
-        }
-      }
-    }
-
-    final StringBuilder builder = new StringBuilder();
-    final String typesStr =
-        this.types.stream()
-            .limit(firstRepeatingIndex)
-            .map(TypeString::getFullString)
-            .collect(Collectors.joining(separator));
-    builder.append(typesStr);
-
-    // If a trailing sequence was found, append one with three dots.
-    if (lastType != null) {
-      if (!typesStr.isEmpty()) {
-        builder.append(separator);
-      }
-
-      builder.append(lastType).append("...");
-    }
-    return builder.toString();
+    return this.types.stream()
+        .map(TypeString::getFullString)
+        .collect(Collectors.joining(separator));
   }
 
   /**

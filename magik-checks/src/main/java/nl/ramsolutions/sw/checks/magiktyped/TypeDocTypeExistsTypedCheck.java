@@ -100,7 +100,10 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
   }
 
   private boolean unknownExemplarDefinitionEntry(final Map.Entry<AstNode, TypeString> entry) {
-    final TypeString typeStr = entry.getValue();
+    final TypeString rawTypeStr = entry.getValue();
+    // For variadic types (e.g. {sw:integer...}) check the inner type, not the variadic
+    // wrapper itself.
+    final TypeString typeStr = rawTypeStr.isVariadic() ? rawTypeStr.getVariadicInner() : rawTypeStr;
     if (typeStr.isSelf() || typeStr.isPrivate()) {
       return false;
     }

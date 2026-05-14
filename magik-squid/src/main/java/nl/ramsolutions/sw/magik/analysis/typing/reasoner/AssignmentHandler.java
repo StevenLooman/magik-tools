@@ -97,10 +97,11 @@ class AssignmentHandler extends LocalTypeReasonerHandler {
     final AstNode assignablesNode =
         node.getFirstChild(MagikGrammar.MULTIPLE_ASSIGNMENT_ASSIGNABLES);
     final List<AstNode> expressionNodes = assignablesNode.getChildren(MagikGrammar.EXPRESSION);
+    final int size = expressionNodes.size();
+    final List<TypeString> positionTypes = result.materialize(size);
     for (int i = 0; i < expressionNodes.size(); ++i) {
       final AstNode expressionNode = expressionNodes.get(i);
-      final ExpressionResultString partialResult =
-          new ExpressionResultString(result.get(i, TypeString.SW_UNSET));
+      final ExpressionResultString partialResult = new ExpressionResultString(positionTypes.get(i));
       this.state.setNodeType(expressionNode, partialResult);
 
       final AstNode identifierNode =

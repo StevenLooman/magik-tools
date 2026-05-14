@@ -105,6 +105,23 @@ class TypeDocParserTest {
   }
 
   @Test
+  void testReturnTypeIsVariadic() throws IOException {
+    final String code =
+        """
+        _method a.b
+            ## @return {sw:integer...} variadic tail
+        _endmethod
+        """;
+    final AstNode topNode = this.parseMagik(code);
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final TypeDocParser docParser = new TypeDocParser(methodNode);
+    final List<TypeString> returnTypes = docParser.getReturnTypes();
+    assertThat(returnTypes).hasSize(1);
+    assertThat(returnTypes.get(0).isVariadic()).isTrue();
+    assertThat(returnTypes.get(0).getVariadicInner()).isEqualTo(TypeString.SW_INTEGER);
+  }
+
+  @Test
   void testReturnEmpty() throws IOException {
     final String code =
         """

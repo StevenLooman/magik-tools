@@ -96,11 +96,12 @@ class StatementHandler extends LocalTypeReasonerHandler {
     final List<AstNode> identifierNodes =
         node.getFirstChild(MagikGrammar.IDENTIFIERS_WITH_GATHER)
             .getChildren(MagikGrammar.IDENTIFIER);
+    final List<TypeString> positionTypes = result.materialize(identifierNodes.size());
     for (int i = 0; i < identifierNodes.size(); ++i) {
       // TODO: Does this work with gather?
       final AstNode identifierNode = identifierNodes.get(i);
-      final ExpressionResultString partialResult =
-          new ExpressionResultString(result.get(i, TypeString.SW_UNSET));
+      final TypeString positionTypeStr = positionTypes.get(i);
+      final ExpressionResultString partialResult = new ExpressionResultString(positionTypeStr);
       this.state.setNodeType(identifierNode, partialResult);
 
       // Store 'active' type for future reference.
