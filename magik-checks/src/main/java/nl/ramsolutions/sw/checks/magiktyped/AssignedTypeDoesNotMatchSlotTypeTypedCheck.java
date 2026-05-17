@@ -50,7 +50,12 @@ public class AssignedTypeDoesNotMatchSlotTypeTypedCheck extends MagikTypedCheck 
         return;
       }
 
-      final String slotName = slotNode.getFirstChild(MagikGrammar.IDENTIFIER).getTokenValue();
+      final AstNode slotIdentifierNode = slotNode.getFirstChild(MagikGrammar.IDENTIFIER);
+      if (slotIdentifierNode == null) {
+        return; // Handle malformed slot definition
+      }
+
+      final String slotName = slotIdentifierNode.getTokenValue();
       resolver.getSlotDefinitions(exemplarTypeStr).stream()
           .filter(slotDef -> slotDef.getName().equals(slotName))
           .forEach(

@@ -112,6 +112,7 @@ public class DefinitionUsageParser {
    */
   public List<SlotUsage> getUsedSlots() {
     return this.node.getDescendants(MagikGrammar.SLOT).stream()
+        .filter(slotNode -> slotNode.getFirstChild(MagikGrammar.IDENTIFIER) != null)
         .map(
             slotNode -> {
               final String slotName =

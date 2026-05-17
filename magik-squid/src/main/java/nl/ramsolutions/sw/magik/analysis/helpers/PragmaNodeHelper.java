@@ -72,6 +72,10 @@ public class PragmaNodeHelper {
     return this.node.getDescendants(MagikGrammar.PRAGMA_PARAMS).stream()
         .map(paramsNode -> paramsNode.getChildren(MagikGrammar.PRAGMA_PARAM))
         .flatMap(Collection::stream)
+        .filter(
+            paramNode ->
+                paramNode.getFirstChild(MagikGrammar.IDENTIFIER) != null
+                    && paramNode.getFirstChild(MagikGrammar.PRAGMA_VALUE) != null)
         .collect(
             Collectors.toMap(
                 paramNode ->

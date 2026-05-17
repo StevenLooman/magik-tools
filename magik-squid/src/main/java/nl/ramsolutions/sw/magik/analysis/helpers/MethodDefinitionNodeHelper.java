@@ -103,9 +103,14 @@ public class MethodDefinitionNodeHelper {
    * @return TypeString to type.
    */
   public TypeString getTypeString() {
+    final AstNode exemplarNameNode = this.node.getFirstChild(MagikGrammar.EXEMPLAR_NAME);
+    if (exemplarNameNode == null) {
+      // Handle malformed method definitions without an exemplar name
+      return TypeString.UNDEFINED;
+    }
+
     final PackageNodeHelper packageHelper = new PackageNodeHelper(this.node);
     final String pakkage = packageHelper.getCurrentPackage();
-    final AstNode exemplarNameNode = this.node.getFirstChild(MagikGrammar.EXEMPLAR_NAME);
     final String exemplarName = exemplarNameNode.getTokenValue();
     return TypeString.ofIdentifier(exemplarName, pakkage);
   }
@@ -132,6 +137,7 @@ public class MethodDefinitionNodeHelper {
                 .flatMap(
                     parametersNode -> parametersNode.getChildren(MagikGrammar.PARAMETER).stream()),
             this.node.getChildren(MagikGrammar.ASSIGNMENT_PARAMETER).stream())
+        .filter(parameterNode -> parameterNode.getFirstDescendant(MagikGrammar.IDENTIFIER) != null)
         .collect(
             Collectors.toMap(
                 parameterNode ->

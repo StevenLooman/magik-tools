@@ -23,6 +23,11 @@ public class SlotNodeHelper {
 
   public String getSlotName() {
     final AstNode identifierNode = node.getFirstDescendant(MagikGrammar.IDENTIFIER);
+    if (identifierNode == null) {
+      // Handle malformed slot definitions without an identifier
+      return "";
+    }
+
     return identifierNode.getTokenValue();
   }
 }

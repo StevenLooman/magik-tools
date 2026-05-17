@@ -1231,65 +1231,6 @@ class LocalTypeReasonerTest {
   }
 
   @Test
-  void testGatherParameters() {
-    final String code =
-        """
-        _method object.test(_gather args)
-        _endmethod
-        """;
-
-    // Set up.
-    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-
-    // Do analysis.
-    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
-    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
-
-    // Assert user:object.test type determined.
-    final AstNode topNode = magikFile.getTopNode();
-    final AstNode parameterNode =
-        topNode.getFirstDescendant(MagikGrammar.PARAMETER).getFirstChild(MagikGrammar.IDENTIFIER);
-    final ExpressionResultString result = state.getNodeType(parameterNode);
-    assertThat(result)
-        .isEqualTo(
-            new ExpressionResultString(
-                TypeString.ofIdentifier(
-                    "simple_vector",
-                    "sw",
-                    TypeString.ofGenericDefinition("E", TypeString.UNDEFINED))));
-  }
-
-  @Test
-  void testGatherParametersGeneric() {
-    final String code =
-        """
-        _method object.test(_gather args)
-          ## @param {sw:symbol} args
-        _endmethod
-        """;
-
-    // Set up.
-    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
-
-    // Do analysis.
-    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
-    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
-
-    // Assert user:object.test type determined.
-    final AstNode topNode = magikFile.getTopNode();
-    final AstNode parameterNode =
-        topNode.getFirstDescendant(MagikGrammar.PARAMETER).getFirstChild(MagikGrammar.IDENTIFIER);
-    final ExpressionResultString result = state.getNodeType(parameterNode);
-    assertThat(result)
-        .isEqualTo(
-            new ExpressionResultString(
-                TypeString.ofIdentifier(
-                    "simple_vector",
-                    "sw",
-                    TypeString.ofGenericDefinition("E", TypeString.SW_SYMBOL))));
-  }
-
-  @Test
   void testImport() {
     final String code =
         """

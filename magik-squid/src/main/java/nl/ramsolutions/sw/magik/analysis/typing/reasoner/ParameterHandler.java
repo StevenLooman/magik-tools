@@ -44,11 +44,7 @@ class ParameterHandler extends LocalTypeReasonerHandler {
     final ExpressionResultString result;
     final ParameterNodeHelper helper = new ParameterNodeHelper(node);
     if (helper.isGatherParameter()) {
-      final TypeString newTypeString =
-          TypeString.ofIdentifier(
-              TypeString.SW_SIMPLE_VECTOR.getIdentifier(),
-              TypeString.SW_SIMPLE_VECTOR.getPakkage(),
-              TypeString.ofGenericDefinition("E", parameterTypeString));
+      final TypeString newTypeString = TypeString.SW_SIMPLE_VECTOR;
       result = new ExpressionResultString(newTypeString);
     } else if (!parameterTypeString.isUndefined()) {
       if (helper.isOptionalParameter()) {

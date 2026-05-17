@@ -40,6 +40,7 @@ public class ProcedureDefinitionNodeHelper {
     }
 
     return parametersNode.getChildren(MagikGrammar.PARAMETER).stream()
+        .filter(parameterNode -> parameterNode.getFirstChild(MagikGrammar.IDENTIFIER) != null)
         .collect(
             Collectors.toMap(
                 parameterNode ->
