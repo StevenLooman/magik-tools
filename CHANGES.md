@@ -1,3 +1,492 @@
+## [0.12.0](https://github.com/StevenLooman/magik-tools/tree/0.12.0) - 2026-05-17
+
+### Features
+
+- Add delayed running of checks after last update, or directly on save.
+
+  Setting `magik.lint.runChecksOnChangeDelay` to any value greater than 0 specifies
+  that the checks run after the given delay, in milliseconds. If there is a run-checks-task
+  pending from the last change (i.e., you have typed another character), then that
+  task is cancelled and another delayed task is scheduled. This prevents running
+  checks unnecessarily on an old version of the file.
+
+  Setting `magik.lint.runChecksOnSave` can be used to specify that checks should
+  run when the file is saved. Set this to `true`, together with a large value
+  of `magik.lint.runChecksOnChangeDelay`, to only run the checks when the file
+  is saved. ([#335](https://github.com/StevenLooman/magik-tools/issues/335))
+- Only re-index workspace when analysis settings are changed.
+
+  This includes these settings:
+
+  * `magik.typing.indexGlobalUsages`
+  * `magik.typing.indexMethodUsages`
+  * `magik.typing.indexSlotUsages`
+  * `magik.typing.indexConditionUsages`
+
+  ([#337](https://github.com/StevenLooman/magik-tools/issues/337))
+- `product.def` and `module.def` are now checked, like magik files. Issues will be
+  raised dependent on the quality of these files on your codebase and your configuration.
+
+  magik-lint, magik-language-server, and SonarQube plugin all support checking
+  `product.def` and `module.def` files.
+
+  Note that in SonarQube, both `product.def` and `module.def` are considered to be
+  of the same language as SonarQube differentiates languages based on the file extension.
+  Therefore, the profiles for both these languages are merged into one profile.
+
+  The following checks have been added for `product.def` files:
+
+  - `ProductDefMissingDescription`/`product-def-missing-description`
+  - `ProductDefMissingTitle`/`product-def-missing-title`
+  - `ProductDefNameDoesNotMatchDirectoryNameCheck`/`product-def-name-does-not-match-directory-name`
+  - `ProductDefSyntaxError`/`product-def-syntax-error`
+
+  The following checks have been added for `module.def` files:
+
+  - `ModuleDefMissingDescription`/`module-def-missing-description`
+  - `ModuleDefNameDoesNotMatchDirectoryName`/`module-def-name-does-not-match-directory-name`
+  - `ModuleDefSyntaxError`/`module-def-syntax-error`
+
+  ## Breaking changes
+
+  This change includes a major refactoring, such as moving classes to different
+  namespaces, and rebuilding support classes. Any code dependent on this code will
+  have to follow these changes.
+
+  Furthermore, `product.def` and `module.def` files are now checked as well. This
+  might result in new issues in your codebase.
+
+  ([#362](https://github.com/StevenLooman/magik-tools/issues/362))
+- Renamed language identifiers:
+
+  * `product.def` --> `sw-product-def`
+  * `module.def` --> `sw-module-def`
+  * `load_list.txt` --> `sw-load-list`
+
+  ## Breaking changes
+
+  This might cause a breaking change for any library using the language identifiers
+  for `product.def`, `module.def`, and `load_list.txt` files.
+
+  ([#366](https://github.com/StevenLooman/magik-tools/issues/366))
+- Add a `module.def` check to verify there are no overlapping required modules
+  in `tests_modules` and `requires`.
+
+  The following check has been added for `module.def` files:
+
+  - `ModuleDefRequiredModuleAlreadyInTestsModules`/`module-def-required-module-already-in-tests-modules`.
+
+  The check is activated for SonarQube.
+
+  ([#370](https://github.com/StevenLooman/magik-tools/issues/370))
+- Add name of the check as code to the Diagnostic to provide more information.
+
+  This information is used for example
+  in Emacs for Flycheck when listing all errors in a file. ([#372](https://github.com/StevenLooman/magik-tools/issues/372))
+- Add fixer for `UseValueCompare` check.
+
+  This fixer automatically replaces `_is`/`_isnt` by `=`/`<>` when check
+  `UseValueCompare` detects an comparison of strings/bignums/floats. ([#374](https://github.com/StevenLooman/magik-tools/issues/374))
+- Add support for `sw-product-def` and `sw-module-def` grammars in sslr-magik-toolkit.
+
+  Via the command line option `-g`/`--grammar` one can specify the wanted grammar.
+  For example:
+
+  ```shell
+  $ java -jar sslr-magik-toolkit.jar --grammar sw-module-def
+  ...
+  ``` ([#378](https://github.com/StevenLooman/magik-tools/issues/378))
+- Add the MagikTypedChecks, ModuleDefChecks and ProductDefChecks to the Wiki.
+
+  Also improved the Markdown itself to have a better index if someone is searching
+  for a specific check (based on the key). ([#379](https://github.com/StevenLooman/magik-tools/issues/379))
+- The following checks have been added for `magik` files:
+
+  - `PragmaDoesNotIncludeModuleNameInTopics`/`pragma-does-not-include-module-name-in-topics`
+  - `PragmaDoesNotIncludeProductNameInTopics`/`pragma-does-not-include-product-name-in-topics`
+  - `PragmaDoesNotIncludeTopicInTopics`/`pragma-does-not-include-topic-in-topics`
+
+  The checks are disabled by default.
+  After enabling `pragma-does-not-include-topic-in-topics`,
+  you need to supply the list of topics.
+
+  ([#384](https://github.com/StevenLooman/magik-tools/issues/384))
+- Format label of proc as `_proc @label() _endproc`.
+
+  Previously, labels for procedures were formatted as `_proc@label() _endproc`.
+  This change makes it consistent with other labels. ([#409](https://github.com/StevenLooman/magik-tools/issues/409))
+- `load_list.txt` and `pach_list.txt` are now checked, like magik files. Issues
+  will be raised dependent on the quality of these files on your codebase and your
+  configuration.
+
+  magik-lint, magik-language-server, and SonarQube plugin all support checking
+  `load_list.txt` and `patch_list.txt` files. The sslr-magik-toolkit supports the
+  new `sw-load-list` grammar as well.
+
+  The following checks have been added for `load_list.txt`/`patch_list.txt` files:
+
+  * `LoadListEntryExists`/`load-list-entry-exists`
+  * `LoadListSyntaxError`/`load-list-syntax-error`
+
+  ## Breaking changes
+
+  `load_list.txt` and `patch_list.txt` files are now checked as well. This
+  might result in new issues in your codebase.
+
+  ([#413](https://github.com/StevenLooman/magik-tools/issues/413))
+- Add the LoadListChecks to the Wiki.
+
+  Also removed duplicated information from the HTML itself. ([#414](https://github.com/StevenLooman/magik-tools/issues/414))
+- Add `@invokes_method` instruction to TypeDoc.
+
+  Use this for the cases where, for example, `object.perform()` is used, to record
+  uses of methods which cannot be derived automatically. Example:
+
+  ```magik
+  _method object.example()
+      ## Example method.
+      _local thing << do_something()
+      _local method_name << :|example_method()|
+      ## @invokes_method {user:other_object.example_method()}
+      _local result << thing.perform(method_name)
+  _endmethod
+  $
+  ``` ([#417](https://github.com/StevenLooman/magik-tools/issues/417))
+- Better handle tests_modules, regard these as required modules. ([#419](https://github.com/StevenLooman/magik-tools/issues/419))
+- Better handle re-indexing workspaces. Only clear existing type information
+  when needed. ([#420](https://github.com/StevenLooman/magik-tools/issues/420))
+- Support getting references to slots.
+
+  This includes generated slot accessor methods. ([#440](https://github.com/StevenLooman/magik-tools/issues/440))
+- Implement Myers diff algorithm to provide better suggested text edits. ([#442](https://github.com/StevenLooman/magik-tools/issues/442))
+- Rewrite RelativeIndentWalker
+
+  RelativeIndentWalker is rewritten to make it more understandable.
+
+  A change in the indenting of a simple_vector being assigned to a variable
+  is also introduced, to make it more consistent with other indenting rules:
+
+  ```magik
+  # Indenting simple_vector from assignment, was:
+  _local a << {
+  		    10
+  	    }
+
+  # Becomes:
+  _local a << {
+  	10
+  }
+  ``` ([#457](https://github.com/StevenLooman/magik-tools/issues/457))
+- Add check SystemCommandUseSimpleVector.
+
+  This checks enforces that a `simple_vector` is used for
+  `sw:system.do_command()` and friends. ([#458](https://github.com/StevenLooman/magik-tools/issues/458))
+- Improve indenting strategy, add visual and block indenters.
+
+  Refactor the indenter to make it rule based.
+
+  Split the indenter into two strategies, whrer the visual indenter
+  derived from the previous relative indenter. ([#493](https://github.com/StevenLooman/magik-tools/issues/493))
+- Improve symbol lookup speed by doing only simple contains matching. ([#494](https://github.com/StevenLooman/magik-tools/issues/494))
+- Make use of magik-session-wrapper configurable per task.
+
+  Set `useSessionWrapper` to `false` to not start task (session) using
+  the magik-session-wrapper. ([#495](https://github.com/StevenLooman/magik-tools/issues/495))
+- Improve loop result gathering.
+
+  Now the result of the iterator method (i.e. `_return`/`>>` ...) is handled
+  properly in the `_over`-loop.
+
+  Also refactor reasoner to let statement handlers store state on own node,
+  collect in parents. ([#496](https://github.com/StevenLooman/magik-tools/issues/496))
+- Allow parsing of a TypeString with mixed generic definitions and references.
+
+  Also add a check to verify the mixing is intended. ([#497](https://github.com/StevenLooman/magik-tools/issues/497))
+- Add and align `--version/--help` options to all applicable modules. ([#498](https://github.com/StevenLooman/magik-tools/issues/498))
+- Add "Extract to method/local procedure/local variable" code actions.
+
+  Selecting one or more statements, or a sub-expression, inside a `_method`
+  body and invoking the code action replaces the selection with a call and
+  inserts the extracted code below. Three variants are offered:
+
+  - **Extract to method** — inserts `_self.extracted_method(...)` and a new
+    `_private _method` below the current method.
+  - **Extract to local procedure** — inserts `extracted_proc(...)` and a
+    `_local extracted_proc << _proc(...)` immediately before the selection,
+    keeping the helper local to the current method.
+  - **Extract to local variable** — inserts a `_local extracted_variable << <expression>`
+    immediately before the enclosing statement and replaces the selected expression
+    with the variable reference.
+
+  Parameters and return values are inferred automatically. If the enclosing
+  method carries a `_pragma`, a copy is added to the extracted method with
+  `classify_level` downgraded to `restricted`.
+
+  **Limitations:**
+
+  - Statements containing `_return`, `_throw`, or `>>` are rejected,
+    as these would alter the control flow of the enclosing method.
+  - A `_leave` or `_continue` is only allowed when the entire enclosing
+    `_loop … _endloop` is included in the selection. Selecting only the body
+    of a loop (without the `_loop`/`_endloop` keywords) is rejected because
+    the extracted method would contain an orphaned `_leave`.
+
+  ([#500](https://github.com/StevenLooman/magik-tools/issues/500))
+- Add several new LSP features to the language server.
+
+  **On-type formatting** (`textDocument/onTypeFormatting`) automatically
+  applies formatting edits as you type:
+
+  - Triggered by `\n` (newline) — indents the new blank line based on the keyword
+    that ended the previous line (`_then`, `_loop`, `_block`, `_protect`,
+    `_protection`, `_try`, `_when`, `_catch`, etc.), using the configured indent
+    character and width. When the file is syntactically valid, spacing on the
+    previous line is corrected.
+  - Triggered by `$` (Magik statement separator) — formats the current line only.
+
+  **Diagnostic pull model** (`textDocument/diagnostic`) allows clients to request
+  diagnostics on demand rather than waiting for the server to push them. The
+  server always returns a full `RelatedFullDocumentDiagnosticReport`. The push
+  model (`publishDiagnostics`) is suppressed when the client advertises
+  pull-diagnostic support; it continues to run for older clients that do not.
+
+  **Execute command** (`workspace/executeCommand`) exposes standard LSP command
+  dispatch with two commands:
+
+  - `magik.reIndex` — triggers a full workspace reindex, replacing the former `custom/reIndex`.
+  - `magik.munit.getTestItems` — returns the full MUnit test-item tree,
+    replacing the former `custom/munit/getTestItems` JSON-RPC endpoint
+    (breaking change for clients that called it directly).
+
+  **Document highlight** (`textDocument/documentHighlight`) highlights all
+  occurrences of the symbol under the cursor in the current file. Local
+  variables, parameters, and constants are distinguished as Write (definition
+  site) or Read (usage site) highlights; method names, slot accesses, and
+  globals use the Text kind.
+
+  **Document link** (`textDocument/documentLink`) turns each file path entry
+  in a load-list file into a clickable link that opens the corresponding
+  `.magik` source file directly in the editor.
+
+  **Code lens** (`textDocument/codeLens`) shows inline "Run all tests in …"
+  and "Run test" actions above MUnit test exemplars and test methods
+  respectively. Clicking a lens triggers the `magik.munit.runTest` command.
+  Product definition files show an "Add product …" action that runs
+  `smallworld_product.add_product()` in the active session, and module
+  definition files show a "Load module …" action that runs
+  `sw_module_manager.load_module()`. Code lens positions are kept in sync
+  with editor and external file changes via definition re-indexing on
+  `didChange` and `workspace/codeLens/refresh` notifications.
+
+  **Linked editing range** (`textDocument/linkedEditingRange`) lets editors
+  rename a local variable at all its occurrences simultaneously. Applies to
+  local variables, parameters, and constants; global, dynamic, and imported
+  names are excluded.
+
+  **Slot go-to-definition** — go-to-definition now resolves slot access
+  expressions (`.slot_name`) to the slot declaration in the exemplar
+  definition, in addition to the existing method and variable targets.
+
+  ([#523](https://github.com/StevenLooman/magik-tools/issues/523))
+- Add typed-analysis coverage and call-hierarchy improvements across checks,
+  resolver, and language-server support.
+
+  **Typed checks** (`magik-checks`) add several new rule implementations and documentation:
+
+  - `AbstractMethodNotImplemented` detects concrete exemplars that inherit
+    abstract methods without providing a concrete implementation.
+  - `BinaryOperatorTypeMismatch` and `UnaryOperatorTypeMismatch` report operator usages
+    that reason to undefined result types.
+  - `InvocationArgumentCountMatchesParameterCount` and
+    `InvocationArgumentTypeMatchesParameterType` validate invocation signatures
+    for both method and procedure calls.
+  - `CallableReturnTypesMatchDoc` replaces method-only return-doc validation and
+    now checks both methods and procedures, including multi-return arity and
+    missing/extra `@return` entries.
+  - `IterCallableYieldTypesMatchDoc` validates `@loop` docs for iter
+    methods/procedures and reports `@loop` usage on non-iter callables.
+  - `TypeDocLoopFixer` now provides `@loop` code actions to add missing loop
+    docs, update mismatched loop types, and remove invalid/non-applicable
+    `@loop` entries.
+  - `MultipleAssignmentCountMismatch` checks tuple/multi assignment arity mismatches.
+  - `SuperMethodExists` validates `_super.method()` targets.
+
+  Legacy method-specific argument/return-doc checks are replaced by invocation/callable-oriented
+  rules, with matching Sonar rule metadata and test coverage updates.
+
+  **Call hierarchy** (`magik-language-server`) gains broader symbol coverage
+  and safer URI handling:
+
+  - `prepareCallHierarchy` now supports both method and procedure definitions
+    (`SymbolKind.Method`/`SymbolKind.Function`).
+  - Outgoing-call resolution distinguishes method/procedure items and avoids
+    filesystem exceptions for unsupported URI schemes (for example `memory://`).
+
+  ## Breaking changes
+
+  Several typed checks were renamed/replaced. Any tooling, quality profiles, suppressions,
+  or automation referencing the old rule keys/names must be updated:
+
+  - `MethodArgumentCountMatchesParameterCount` /
+    `method-argument-count-matches-parameter-count`
+    -> `InvocationArgumentCountMatchesParameterCount` /
+    `invocation-argument-count-matches-parameter-count`
+  - `MethodArgumentTypeMatchesParameterType` /
+    `method-argument-type-matches-parameter-type`
+    -> `InvocationArgumentTypeMatchesParameterType` /
+    `invocation-argument-type-matches-parameter-type`
+  - `MethodReturnTypesMatchDoc` / `method-return-types-match-doc`
+    -> `CallableReturnTypesMatchDoc` / `callable-return-types-match-doc`
+
+  ([#545](https://github.com/StevenLooman/magik-tools/issues/545))
+- Add `UnnamedProcedure`/`unnamed-procedure` check for `magik` files.
+
+  The new check reports an issue when
+  a procedure (`_proc() _endproc`) has no name.
+
+  The check is disabled by default. ([#546](https://github.com/StevenLooman/magik-tools/issues/546))
+- Add procedure support to call hierarchy provider ([#558](https://github.com/StevenLooman/magik-tools/issues/558))
+- Add support for variadic return and loop types.
+
+  A trailing `...` on a `@return` or `@loop` type declares 0..1024 values of that
+  type can be returned (`@return`) or yielded per iteration (`@loop`), matching
+  `_scatter` / iterator semantics in Magik, used in methods such as
+  `basic_collection_mixin.for_scatter()`:
+
+  ```magik
+  _method my_collection.for_scatter()
+      ## @return {<E>...}
+      ...
+  _endmethod
+  ```
+
+  At a `_scatter` / multi-assignment call site the reasoner expands the variadic
+  into per-assignee types. Each slot is `inner | sw:unset` because the runtime
+  collection may be shorter than the LHS count:
+
+  ```magik
+  _block
+    _local r << rope.new()  # type: sw:rope<E=sw:integer>
+    # Add any number of integers to r.
+    _local (a, b, c) << (_scatter r) # a, b, c are each typed sw:integer | sw:unset
+  _endblock
+  ```
+
+  A `_for ... _over iter() ...` whose iterator method declares `@loop {Type...}`
+  likewise expands per for-variable to `Type | sw:unset`. The gather position (when
+  present) is overridden to `sw:simple_vector` as before.
+
+  `@return {<E>|sw:unset...}` (with an explicit `sw:unset`) is idempotent, the
+  materializer deduplicates and won't double-add.
+
+  Only the last `@return` and the last `@loop` can have a variadic type. Any
+  other use of variadic types is flagged by the checks:
+
+  - `VariadicLastPosition`/`variadic-last-position`: flags a variadic
+    `@return` that is not the last `@return`, or a variadic `@loop` that is
+    not the last `@loop`.
+  - `VariadicOnlyOnReturnOrLoop`/`variadic-only-on-return-or-loop`: flags
+    variadic syntax on `@param` or `@slot`.
+
+  ([#563](https://github.com/StevenLooman/magik-tools/issues/563))
+
+### Bugfixes
+
+- Fix products not being indexed. ([#338](https://github.com/StevenLooman/magik-tools/issues/338))
+- Gracefully handle a duplicate parameter specification in the type doc.
+
+  For example, this resulted in an error:
+
+  ```magik
+  _method a.b(p1)
+      ## @param {sw:integer} p1 First parameter.
+      ## @param {sw:integer} p1 First parameter, again.
+  _endmethod
+  ```
+
+  Now, only the first parameter specification is used of a parameter.
+  Any other parameter specification for the same parameter is ignored. ([#341](https://github.com/StevenLooman/magik-tools/issues/341))
+- Better handle `_scatter` in simple_vectors and arguments.
+
+  Now something like `{_scatter b, _scatter v}` is marked as a syntax error. ([#343](https://github.com/StevenLooman/magik-tools/issues/343))
+- Fix administration of the following checks:
+
+  * `MethodIsPublic`
+  * `ProductDefNameDoesNotMatchDirectoryName`
+  * `AssignedTypeDoesNotMatchSlotType`
+  * `ComparedTypesDoNotMatch`
+  * `SwChar16VectorEvaluateInvocation`
+
+  ([#371](https://github.com/StevenLooman/magik-tools/issues/371))
+- Fix splitting line when adding EOL trivia.
+
+  This caused an error on subsequent actions when modifying the AST. ([#388](https://github.com/StevenLooman/magik-tools/issues/388))
+- Fix `magik-lint --apply-fixes` not properly recognizing the current
+  file as anything other than a Magik file.
+
+  Also refactor the use of the `CheckList`s and provide better structure. ([#389](https://github.com/StevenLooman/magik-tools/issues/389))
+- Fix diagnostics source.
+
+  Changes the source, in VSCode, from:
+
+  ```text
+  mlint (undefined-method-call-result)(undefined-method-call-result)
+  ```
+
+  To:
+
+  ```text
+  mlint (undefined-method-call-result)
+  ``` ([#410](https://github.com/StevenLooman/magik-tools/issues/410))
+- Fix parsing loose end in `product.def` and `module.def`. ([#416](https://github.com/StevenLooman/magik-tools/issues/416))
+- Miscellaneous fixes:
+
+  * Fix ModuleDefFile missing timestamp
+  * Fix DefinitionKeeper not properly clearing
+  * Fix ProcedureDefinition not properly getting bare definition
+
+  ([#421](https://github.com/StevenLooman/magik-tools/issues/421))
+- Remove `optional` keyword from `ProductDef` since it is not a valid keyword. ([#434](https://github.com/StevenLooman/magik-tools/issues/434))
+- Fix Markdown rule MD060 by using compact table column style correctly. ([#436](https://github.com/StevenLooman/magik-tools/issues/436))
+- Fix parsing of version numbers in `ProductDefinitionGrammar`.
+
+  For example, `1.1.0.1-1 Beta` now parses properly. ([#438](https://github.com/StevenLooman/magik-tools/issues/438))
+- Improve \# type: ... handling.
+
+  In the following code snippet, the symbol `:a` is no longer overridden by the
+  `# type: ...` instruction. The type override instruction now targets the following:
+
+  * Returns (`_return`)/emits (`>>`)
+  * Assignments
+  * Other expressions that are the outermost on their line
+
+  ([#439](https://github.com/StevenLooman/magik-tools/issues/439))
+- Rename parameter names in type doc.
+
+  In the following example, when the parameter `param1` is ranamed, the
+  type doc is now also updated.
+
+  ```magik
+  _method a.b(param1, param2)
+      ## Example method.
+      ## @param {sw:integer} param1 First parameter
+      ## @param {sw:rope} param2 Second parameter
+      write(param1, param2)
+  _endmethod
+  ``` ([#441](https://github.com/StevenLooman/magik-tools/issues/441))
+- Handle load_list comments in `FileNotInLoadListCheck`. ([#463](https://github.com/StevenLooman/magik-tools/issues/463))
+- Fix message when java cannot be located
+
+  The message was missing the word "not", causing confusion.
+  With a minor refactoring to remove duplication. ([#477](https://github.com/StevenLooman/magik-tools/issues/477))
+- Use `maven-shade-plugin` instead of `jarjar` for `sslr-magik-toolkit`. ([#501](https://github.com/StevenLooman/magik-tools/issues/501))
+- Fix instruction for binary_operator_definition ([#557](https://github.com/StevenLooman/magik-tools/issues/557))
+
+### Misc
+
+- [#339](https://github.com/StevenLooman/magik-tools/issues/339), [#376](https://github.com/StevenLooman/magik-tools/issues/376), [#380](https://github.com/StevenLooman/magik-tools/issues/380), [#381](https://github.com/StevenLooman/magik-tools/issues/381), [#408](https://github.com/StevenLooman/magik-tools/issues/408), [#459](https://github.com/StevenLooman/magik-tools/issues/459), [#503](https://github.com/StevenLooman/magik-tools/issues/503), [#504](https://github.com/StevenLooman/magik-tools/issues/504), [#510](https://github.com/StevenLooman/magik-tools/issues/510), [#512](https://github.com/StevenLooman/magik-tools/issues/512), [#548](https://github.com/StevenLooman/magik-tools/issues/548), [#553](https://github.com/StevenLooman/magik-tools/issues/553)
+
+
 # Changes
 
 ## 0.11.0 (2025-08-28)
