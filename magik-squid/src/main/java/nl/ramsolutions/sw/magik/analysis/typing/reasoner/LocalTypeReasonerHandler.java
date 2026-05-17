@@ -198,6 +198,10 @@ abstract class LocalTypeReasonerHandler {
   protected void assignIdentifiersWithGatherTypes(
       final AstNode bodyNode, final AstNode identifiersNode, final ExpressionResultString result) {
     final List<AstNode> identifierNodes = identifiersNode.getDescendants(MagikGrammar.IDENTIFIER);
+    // Materialize so a trailing variadic loop type (e.g. @loop {sw:integer...}) expands to
+    // (inner | sw:unset) per position for the non-gather positions. The gather position, if
+    // any, is overridden below to sw:simple_vector.
+    final List<TypeString> positionTypes = result.materialize(identifierNodes.size());
     for (int i = 0; i < identifierNodes.size(); ++i) {
       final AstNode identifierNode = identifierNodes.get(i);
       final AstNode identifierPreviousNode = identifierNode.getPreviousSibling();
@@ -209,7 +213,7 @@ abstract class LocalTypeReasonerHandler {
         // TODO: Template this based on the type of the iterable, if possible.
         typeStr = TypeString.SW_SIMPLE_VECTOR;
       } else {
-        typeStr = result.get(i, TypeString.SW_UNSET);
+        typeStr = positionTypes.get(i);
       }
 
       final ExpressionResultString resultStr = new ExpressionResultString(typeStr);

@@ -2214,4 +2214,180 @@ class LocalTypeReasonerTest {
                     TypeString.ofGenericDefinition(
                         "E", TypeString.combine(TypeString.SW_INTEGER, TypeString.SW_SYMBOL)))));
   }
+
+  @Test
+  void testMultipleAssignmentFromVariadicReturn() {
+    final String code =
+        """
+        _method object.test
+            (a, b, c) << _self.scatter_ints()
+            _return a, b, c
+        _endmethod
+        """;
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            objectRef,
+            "scatter_ints()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.ofVariadic(TypeString.SW_INTEGER)),
+            ExpressionResultString.EMPTY));
+
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final TypeString integerOrUnset =
+        TypeString.combine(TypeString.SW_INTEGER, TypeString.SW_UNSET);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    assertThat(result)
+        .isEqualTo(new ExpressionResultString(integerOrUnset, integerOrUnset, integerOrUnset));
+  }
+
+  @Test
+  void testParenthesizedExpressionPropagatesAtomType() {
+    final String code =
+        """
+        _method object.test
+            _return (42)
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+  }
+
+  @Test
+  void testScatterFromGenericVariadicReturn() {
+    final String code =
+        """
+        _method object.test
+            (x, y, z) << (_scatter _self.get_my_vec())
+            _return x, y, z
+        _endmethod
+        """;
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString myVecRef = TypeString.ofIdentifier("my_vec", "user");
+    final TypeString myVecIntegerRef =
+        TypeString.ofIdentifier(
+            myVecRef.getIdentifier(),
+            myVecRef.getPakkage(),
+            TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
+    final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            myVecRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            objectRef,
+            "get_my_vec()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(myVecIntegerRef),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            myVecRef,
+            "for_scatter()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.ofVariadic(TypeString.ofGenericReference("E"))),
+            ExpressionResultString.EMPTY));
+
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    final TypeString integerOrUnset =
+        TypeString.combine(TypeString.SW_INTEGER, TypeString.SW_UNSET);
+    assertThat(result)
+        .isEqualTo(new ExpressionResultString(integerOrUnset, integerOrUnset, integerOrUnset));
+  }
+
+  @Test
+  void testForLoopFromVariadicLoopType() {
+    final String code =
+        """
+        _method object.test
+            _for a, b, c _over _self.iter()
+            _loop
+            _endloop
+        _endmethod
+        """;
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString objectRef = TypeString.ofIdentifier("object", "sw");
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            objectRef,
+            "iter()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            ExpressionResultString.EMPTY,
+            new ExpressionResultString(TypeString.ofVariadic(TypeString.SW_INTEGER))));
+
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    // Find for-variable IDENTIFIER nodes (a, b, c) and check each type.
+    final java.util.List<AstNode> forVariables =
+        topNode
+            .getFirstDescendant(MagikGrammar.FOR_VARIABLES)
+            .getDescendants(MagikGrammar.IDENTIFIER);
+    final TypeString integerOrUnset =
+        TypeString.combine(TypeString.SW_INTEGER, TypeString.SW_UNSET);
+    assertThat(forVariables).hasSize(3);
+    for (final AstNode varNode : forVariables) {
+      assertThat(state.getNodeType(varNode)).isEqualTo(new ExpressionResultString(integerOrUnset));
+    }
+  }
 }

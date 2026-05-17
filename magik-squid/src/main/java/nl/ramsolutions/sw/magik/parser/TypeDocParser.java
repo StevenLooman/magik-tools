@@ -15,6 +15,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.TypeDocGrammar;
@@ -257,7 +258,9 @@ public class TypeDocParser {
     final AstNode node = this.getTypeDocNode();
     return node.getChildren(TypeDocGrammar.LOOP).stream()
         .filter(this::hasTypeNode)
-        .collect(Collectors.toMap(this::getTypeNode, this::getTypeString));
+        .collect(
+            Collectors.toMap(
+                this::getTypeNode, this::getTypeString, (a, b) -> a, LinkedHashMap::new));
   }
 
   /**
@@ -358,7 +361,36 @@ public class TypeDocParser {
             .filter(token -> !token.getValue().equals("{") && !token.getValue().equals("}"))
             .map(Token::getValue)
             .collect(Collectors.joining());
-    return TypeStringParser.parseTypeString(value, this.pakkage);
+    // Use EXPRESSION_RESULT_STRING so trailing `...` is recognised. @return / @param /
+    // etc. each carry a single type, so we extract the first position.
+    final ExpressionResultString result =
+        TypeStringParser.parseExpressionResultString(value, this.pakkage);
+    if (result.isEmpty() || result.equals(ExpressionResultString.UNDEFINED)) {
+      return TypeString.UNDEFINED;
+    }
+
+    return result.get(0, TypeString.UNDEFINED);
+  }
+
+  /**
+   * Get all non-{@code @return} tag TYPE nodes paired with their parsed {@link TypeString}. Useful
+   * for lint checks that inspect tags collectively (e.g. detecting an incorrectly-placed variadic
+   * marker like {@code @param {Type...}}).
+   *
+   * @return Map from TYPE AstNode to TypeString, ordered.
+   */
+  public Map<AstNode, TypeString> getNonReturnTagTypeNodes() {
+    final AstNode node = this.getTypeDocNode();
+    final List<TypeDocGrammar> nonReturnTags =
+        List.of(
+            TypeDocGrammar.PARAM, TypeDocGrammar.LOOP, TypeDocGrammar.SLOT, TypeDocGrammar.GENERIC);
+    final Map<AstNode, TypeString> result = new LinkedHashMap<>();
+    for (final TypeDocGrammar tagKind : nonReturnTags) {
+      node.getChildren(tagKind).stream()
+          .filter(this::hasTypeNode)
+          .forEach(tag -> result.put(this.getTypeNode(tag), this.getTypeString(tag)));
+    }
+    return result;
   }
 
   private AstNode getTypeNode(final AstNode node) {

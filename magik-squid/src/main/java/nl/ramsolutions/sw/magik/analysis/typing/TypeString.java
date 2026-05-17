@@ -120,6 +120,7 @@ public final class TypeString implements Comparable<TypeString> {
   private static final String GENERIC_REFERENCE = "_generic_ref";
   private static final String PARAMETER = "_parameter";
   private static final String COMBINED = "_combined";
+  private static final String VARIADIC = "_variadic";
 
   private final @Nullable String string;
   private final String currentPackage;
@@ -234,6 +235,21 @@ public final class TypeString implements Comparable<TypeString> {
   }
 
   /**
+   * Create a variadic {@link TypeString} wrapping an inner type. Variadic only makes sense as the
+   * tail of an {@link ExpressionResultString}.
+   *
+   * @param inner Inner type. Must not itself be variadic.
+   * @return Variadic {@link TypeString}.
+   */
+  public static TypeString ofVariadic(final TypeString inner) {
+    if (inner.isVariadic()) {
+      throw new IllegalArgumentException("Variadic cannot wrap another variadic");
+    }
+
+    return new TypeString(TypeString.VARIADIC, inner);
+  }
+
+  /**
    * Get package of type string, otherwise package it was defined in.
    *
    * @return Package.
@@ -276,6 +292,11 @@ public final class TypeString implements Comparable<TypeString> {
    * @return Full string.
    */
   public String getFullString() {
+    if (this.isVariadic()) {
+      return this.getVariadicInner().getFullString()
+          + TypeStringGrammar.Punctuator.TYPE_VARIADIC.getValue();
+    }
+
     if (this.isCombined()) {
       return this.combinedTypes.stream()
           .map(TypeString::getFullString)
@@ -349,6 +370,10 @@ public final class TypeString implements Comparable<TypeString> {
    * @return {@code true} if this type contains an undefined type.
    */
   public boolean containsUndefined() {
+    if (this.isVariadic()) {
+      return this.getVariadicInner().containsUndefined();
+    }
+
     if (this.isCombined()) {
       return this.combinedTypes.stream().anyMatch(TypeString::containsUndefined);
     }
@@ -369,7 +394,25 @@ public final class TypeString implements Comparable<TypeString> {
   }
 
   public boolean isCombined() {
-    return !this.combinedTypes.isEmpty();
+    return !this.combinedTypes.isEmpty() && !this.isVariadic();
+  }
+
+  public boolean isVariadic() {
+    return TypeString.VARIADIC.equalsIgnoreCase(this.currentPackage);
+  }
+
+  /**
+   * Get the inner type wrapped by this variadic.
+   *
+   * @return Inner type.
+   * @throws IllegalStateException if this is not variadic.
+   */
+  public TypeString getVariadicInner() {
+    if (!this.isVariadic()) {
+      throw new IllegalStateException();
+    }
+
+    return this.combinedTypes.get(0);
   }
 
   public boolean isGenericDefinition() {
@@ -449,7 +492,7 @@ public final class TypeString implements Comparable<TypeString> {
 
   /** Get parts of (combined) string. */
   public List<TypeString> getCombinedTypes() {
-    if (this.combinedTypes.isEmpty()) {
+    if (this.combinedTypes.isEmpty() || this.isVariadic()) {
       return List.of(this);
     }
 
@@ -466,6 +509,10 @@ public final class TypeString implements Comparable<TypeString> {
   public TypeString substituteType(final TypeString from, final TypeString to) {
     if (from.equals(this)) {
       return to;
+    }
+
+    if (this.isVariadic()) {
+      return TypeString.ofVariadic(this.getVariadicInner().substituteType(from, to));
     }
 
     if (this.isCombined()) {

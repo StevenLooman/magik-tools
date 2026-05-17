@@ -110,7 +110,9 @@ public class MethodDefinitionParser {
             timestamp, moduleName, assignmentParameterNode, parameterTypes);
 
     // Get return types from method docs.
-    final List<TypeString> callResultDocs = typeDocParser.getReturnTypes();
+    final List<TypeString> returnTypes = typeDocParser.getReturnTypes();
+    final List<TypeString> callResultDocs =
+        MethodDefinitionParser.normalizeVariadicTail(returnTypes);
     // Ensure we can believe the docs, sort of.
     final boolean returnsAnything = helper.returnsAnything();
     final ExpressionResultString callResult =
@@ -119,7 +121,8 @@ public class MethodDefinitionParser {
             : ExpressionResultString.UNDEFINED;
 
     // Get iterator types from method docs.
-    final List<TypeString> loopResultDocs = typeDocParser.getLoopTypes();
+    final List<TypeString> loopTypes = typeDocParser.getLoopTypes();
+    final List<TypeString> loopResultDocs = MethodDefinitionParser.normalizeVariadicTail(loopTypes);
     // Ensure method docs match actual loopbody, sort of.
     final boolean hasLoopbody = helper.hasLoopbody();
     final ExpressionResultString loopResult =
@@ -195,6 +198,25 @@ public class MethodDefinitionParser {
             usedSlots,
             usedConditions);
     return List.of(methodDefinition);
+  }
+
+  private static List<TypeString> normalizeVariadicTail(final List<TypeString> types) {
+    if (types.size() < 2) {
+      return types;
+    }
+
+    final List<TypeString> result = new ArrayList<>(types.size());
+    for (int i = 0; i < types.size() - 1; ++i) {
+      final TypeString typeStr = types.get(i);
+      final TypeString realTypeStr = typeStr.isVariadic() ? typeStr.getVariadicInner() : typeStr;
+      result.add(realTypeStr);
+    }
+
+    final int lastIdx = types.size() - 1;
+    final TypeString lastTypeStr = types.get(lastIdx);
+    result.add(lastTypeStr);
+
+    return result;
   }
 
   private List<ParameterDefinition> createParameterDefinitions(

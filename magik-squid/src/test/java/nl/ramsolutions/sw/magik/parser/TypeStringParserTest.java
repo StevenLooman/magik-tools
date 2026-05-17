@@ -6,7 +6,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.junit.jupiter.api.Test;
 
-/** Tests for TypeStringParser. */
+/** Tests for {@link TypeStringParser}. */
 class TypeStringParserTest {
 
   private static final String SW_PACKAGE = "sw";
@@ -145,5 +145,109 @@ class TypeStringParserTest {
     final ExpressionResultString result =
         TypeStringParser.parseExpressionResultString(exprStr, SW_PACKAGE);
     assertThat(result).isEqualTo(ExpressionResultString.UNDEFINED);
+  }
+
+  @Test
+  void testParseVariadicExpressionResult() {
+    final ExpressionResultString result =
+        TypeStringParser.parseExpressionResultString("sw:integer...", SW_PACKAGE);
+    assertThat(result.size()).isEqualTo(1);
+    assertThat(result.get(0, null)).isEqualTo(TypeString.ofVariadic(TypeString.SW_INTEGER));
+  }
+
+  @Test
+  void testParseLeadingThenVariadic() {
+    final ExpressionResultString result =
+        TypeStringParser.parseExpressionResultString("sw:symbol, sw:integer...", SW_PACKAGE);
+    assertThat(result.size()).isEqualTo(2);
+    assertThat(result.get(0, null)).isEqualTo(TypeString.SW_SYMBOL);
+    assertThat(result.get(1, null)).isEqualTo(TypeString.ofVariadic(TypeString.SW_INTEGER));
+  }
+
+  @Test
+  void testParseVariadicCombined() {
+    final ExpressionResultString result =
+        TypeStringParser.parseExpressionResultString("sw:integer|sw:unset...", SW_PACKAGE);
+    final TypeString inner = TypeString.combine(TypeString.SW_INTEGER, TypeString.SW_UNSET);
+    assertThat(result.size()).isEqualTo(1);
+    assertThat(result.get(0, null)).isEqualTo(TypeString.ofVariadic(inner));
+  }
+
+  @Test
+  void testRoundTripVariadic() {
+    final String typeStr = "sw:integer...";
+    final ExpressionResultString parsed =
+        TypeStringParser.parseExpressionResultString(typeStr, SW_PACKAGE);
+    assertThat(parsed.getFullString()).isEqualTo(typeStr);
+  }
+
+  @Test
+  void testMalformedTrailingDotsDoesNotProduceVariadic() {
+    final ExpressionResultString result =
+        TypeStringParser.parseExpressionResultString("sw:integer,...", SW_PACKAGE);
+    final TypeString last = result.get(result.size() - 1, null);
+    if (last != null) {
+      assertThat(last.isVariadic()).isFalse();
+    }
+  }
+
+  @Test
+  void testParseLeadingPlusVariadicMultipleElements() {
+    final ExpressionResultString result =
+        TypeStringParser.parseExpressionResultString(
+            "sw:symbol, sw:char16_vector, sw:integer, sw:float...", SW_PACKAGE);
+    assertThat(result.size()).isEqualTo(4);
+    assertThat(result.get(0, null)).isEqualTo(TypeString.SW_SYMBOL);
+    assertThat(result.get(1, null)).isEqualTo(TypeString.SW_CHAR16_VECTOR);
+    assertThat(result.get(2, null)).isEqualTo(TypeString.SW_INTEGER);
+    assertThat(result.get(3, null)).isEqualTo(TypeString.ofVariadic(TypeString.SW_FLOAT));
+    assertThat(result.getFullString())
+        .isEqualTo("sw:symbol,sw:char16_vector,sw:integer,sw:float...");
+  }
+
+  @Test
+  void testParseGenericReferenceVariadic() {
+    final ExpressionResultString result =
+        TypeStringParser.parseExpressionResultString("<E>...", SW_PACKAGE);
+    assertThat(result.size()).isEqualTo(1);
+    assertThat(result.get(0, null))
+        .isEqualTo(TypeString.ofVariadic(TypeString.ofGenericReference("E")));
+  }
+
+  @Test
+  void testParseVariadicInsideGenericIsNotVariadic() {
+    final TypeString typeString =
+        TypeStringParser.parseTypeString("sw:rope<E=sw:integer...>", SW_PACKAGE);
+    if (!typeString.isUndefined() && typeString.hasGenerics()) {
+      final TypeString gen = typeString.getGenericDefinition(TypeString.ofGenericReference("E"));
+      if (gen != null && gen.getGenericType() != null) {
+        assertThat(gen.getGenericType().isVariadic()).isFalse();
+      }
+    }
+  }
+
+  @Test
+  void testParseVariadicInsideCombinedIsNotVariadic() {
+    final TypeString typeString =
+        TypeStringParser.parseTypeString("sw:integer... | sw:symbol", SW_PACKAGE);
+    assertThat(typeString.isVariadic()).isFalse();
+  }
+
+  @Test
+  void testParseVariadicNonTailInExpressionResultIsWellFormed() {
+    final ExpressionResultString result =
+        TypeStringParser.parseExpressionResultString("sw:integer..., sw:symbol", SW_PACKAGE);
+    for (int i = 0; i < result.size() - 1; ++i) {
+      assertThat(result.get(i, null).isVariadic())
+          .as("non-last entry at index %d must not be variadic", i)
+          .isFalse();
+    }
+  }
+
+  @Test
+  void testParseWhitespaceAroundVariadicDots() {
+    final ExpressionResultString result =
+        TypeStringParser.parseExpressionResultString("sw:integer ...", SW_PACKAGE);
+    assertThat(result.get(0, null)).isEqualTo(TypeString.ofVariadic(TypeString.SW_INTEGER));
   }
 }

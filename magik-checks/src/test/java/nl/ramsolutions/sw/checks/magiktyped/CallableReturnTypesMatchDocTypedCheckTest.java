@@ -300,4 +300,138 @@ class CallableReturnTypesMatchDocTypedCheckTest {
     final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @Test
+  void testAbstractMethodWithVariadicReturnDoc() {
+    // Abstract methods are exempt — variadic @return on an abstract method must
+    // not trigger this check.
+    final String code =
+        """
+        _abstract _method a.b
+          ## @return {sw:integer...}
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testVariadicDocMatchesVariadicReasonedReturn() {
+    // Method delegates to another method whose return is declared variadic.
+    // Both doc and reasoned result end up as variadic(sw:integer). No mismatch.
+    final String code =
+        """
+        _method a.b
+          ## @return {sw:integer...}
+          _return _self.scatter_ints()
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString aRef = TypeString.ofIdentifier("a", "user");
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            aRef,
+            "scatter_ints()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.ofVariadic(TypeString.SW_INTEGER)),
+            ExpressionResultString.EMPTY));
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testLeadingPlusVariadicDocWithScatterReturn() {
+    final String code =
+        """
+        _method object.test
+          ## @return {sw:symbol}
+          ## @return {sw:integer...}
+          _local aaa << sw:rope.new_with(1, 2)  # type: sw:rope<E=sw:integer>
+          _return :aaa, _scatter aaa
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
+    final TypeString basicCollectionMixinRef =
+        TypeString.ofIdentifier("basic_collection_mixin", "sw");
+    definitionKeeper.add(
+        new nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.Sort.INTRINSIC,
+            basicCollectionMixinRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.Sort.SLOTTED,
+            ropeRef,
+            Collections.emptyList(),
+            java.util.List.of(basicCollectionMixinRef),
+            null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ropeRef,
+            "new_with()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SELF),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            basicCollectionMixinRef,
+            "for_scatter()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.ofVariadic(TypeString.ofGenericReference("E"))),
+            ExpressionResultString.EMPTY));
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testVariadicDocVsLiteralReturnCount() {
+    final String code =
+        """
+        _method a.b
+          ## @return {sw:integer...}
+          _return 1, 2, 3
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
 }

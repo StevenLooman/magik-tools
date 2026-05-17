@@ -26,6 +26,8 @@ import nl.ramsolutions.sw.checks.magiktyped.SystemCommandUseSimpleVectorTypedChe
 import nl.ramsolutions.sw.checks.magiktyped.TypeDocTypeExistsTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.UnaryOperatorTypeMismatchTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.UndefinedMethodCallResultTypedCheck;
+import nl.ramsolutions.sw.checks.magiktyped.VariadicLastPositionTypedCheck;
+import nl.ramsolutions.sw.checks.magiktyped.VariadicOnlyOnReturnOrLoopTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.fixers.TypeDocLoopFixer;
 import nl.ramsolutions.sw.checks.magiktyped.fixers.TypeDocParameterFixer;
 import nl.ramsolutions.sw.checks.magiktyped.fixers.TypeDocReturnTypeFixer;
@@ -72,7 +74,9 @@ public final class MagikTypedCheckList extends CheckList<MagikCheck, MagikTypedC
         SystemCommandUseSimpleVectorTypedCheck.class,
         TypeDocTypeExistsTypedCheck.class,
         UnaryOperatorTypeMismatchTypedCheck.class,
-        UndefinedMethodCallResultTypedCheck.class);
+        UndefinedMethodCallResultTypedCheck.class,
+        VariadicOnlyOnReturnOrLoopTypedCheck.class,
+        VariadicLastPositionTypedCheck.class);
   }
 
   /**

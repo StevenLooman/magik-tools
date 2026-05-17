@@ -144,4 +144,73 @@ class IterCallableYieldTypesMatchDocTypedCheckTest {
     final MagikTypedCheck check = new IterCallableYieldTypesMatchDocTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @Test
+  void testVariadicLoopDocMatchingVariadicYield() {
+    final String code =
+        """
+        _iter _method a.b()
+          ## @loop {sw:integer...}
+          _local vec << {1, 2, 3}
+          _loopbody(_scatter vec)
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = withSimpleVectorForScatter();
+    final MagikTypedCheck check = new IterCallableYieldTypesMatchDocTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testVariadicLoopDocMismatchedVariadicYield() {
+    final String code =
+        """
+        _iter _method a.b()
+          ## @loop {sw:integer...}
+          _local vec << {:a, :b, :c}
+          _loopbody(_scatter vec)
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = withSimpleVectorForScatter();
+    final MagikTypedCheck check = new IterCallableYieldTypesMatchDocTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
+  void testLeadingPlusVariadicLoopDocMatchesLoopbody() {
+    final String code =
+        """
+        _iter _method a.b()
+          ## @loop {sw:integer}
+          ## @loop {sw:symbol...}
+          _local vec << {:a, :b}
+          _loopbody(10, _scatter vec)
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = withSimpleVectorForScatter();
+    final MagikTypedCheck check = new IterCallableYieldTypesMatchDocTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  private IDefinitionKeeper withSimpleVectorForScatter() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            nl.ramsolutions.sw.magik.analysis.typing.TypeString.SW_SIMPLE_VECTOR,
+            "for_scatter()",
+            java.util.EnumSet.noneOf(
+                nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition.Modifier.class),
+            java.util.Collections.emptyList(),
+            null,
+            null,
+            new nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString(
+                nl.ramsolutions.sw.magik.analysis.typing.TypeString.ofVariadic(
+                    nl.ramsolutions.sw.magik.analysis.typing.TypeString.ofGenericReference("E"))),
+            nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString.EMPTY));
+    return definitionKeeper;
+  }
 }

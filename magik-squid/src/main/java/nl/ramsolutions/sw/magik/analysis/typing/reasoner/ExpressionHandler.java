@@ -12,6 +12,7 @@ import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.GenericHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
@@ -192,8 +193,11 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     final String operatorMethod = helper.getUnaryOperatorMethod();
 
     // Apply operator to operand and store result.
+    final ExpressionResultString invocationResult =
+        this.getMethodInvocationResult(typeStr, operatorMethod);
     final ExpressionResultString result =
-        this.getMethodInvocationResult(typeStr, operatorMethod)
+        new GenericHelper(typeStr)
+            .substituteGenerics(invocationResult)
             .substituteType(TypeString.SELF, typeStr)
             .substituteType(TypeString.PRIVATE, typeStr);
 

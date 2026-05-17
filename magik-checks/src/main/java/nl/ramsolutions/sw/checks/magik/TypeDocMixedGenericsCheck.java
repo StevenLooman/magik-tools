@@ -45,6 +45,11 @@ public class TypeDocMixedGenericsCheck extends MagikCheck {
   }
 
   private void checkTypeString(final AstNode node, final TypeString typeString) {
+    if (typeString.isVariadic()) {
+      this.checkTypeString(node, typeString.getVariadicInner());
+      return;
+    }
+
     if (typeString.isCombined()) {
       typeString
           .getCombinedTypes()

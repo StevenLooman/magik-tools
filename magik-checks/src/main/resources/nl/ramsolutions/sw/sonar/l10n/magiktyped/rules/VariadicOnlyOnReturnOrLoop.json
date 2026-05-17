@@ -1,0 +1,16 @@
+{
+  "title": "Variadic ('Type...') is only valid on @return or @loop",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "VariadicOnlyOnReturnOrLoop",
+  "sqKey": "variadic-only-on-return-or-loop"
+}

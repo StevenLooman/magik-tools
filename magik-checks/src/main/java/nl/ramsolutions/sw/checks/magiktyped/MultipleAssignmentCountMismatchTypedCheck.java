@@ -65,6 +65,19 @@ public class MultipleAssignmentCountMismatchTypedCheck extends MagikTypedCheck {
       return;
     }
 
+    // If the right-hand side ends with a variadic, it produces 0..MAX_ITEMS values.
+    // Any variable count >= leadingCount is valid.
+    if (resultCount > 0 && result.get(resultCount - 1, null).isVariadic()) {
+      final int leadingCount = resultCount - 1;
+      if (variableCount >= leadingCount) {
+        return;
+      }
+
+      final String message = MESSAGE.formatted(variableCount, leadingCount);
+      this.addIssue(assignablesNode, message);
+      return;
+    }
+
     if (variableCount != resultCount) {
       final String message = MESSAGE.formatted(variableCount, resultCount);
       this.addIssue(assignablesNode, message);

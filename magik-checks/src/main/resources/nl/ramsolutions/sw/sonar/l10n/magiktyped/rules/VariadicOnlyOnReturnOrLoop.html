@@ -1,0 +1,26 @@
+<p>Variadic ('Type...') is only valid on @return or @loop</p>
+<h2>Explanation</h2>
+<p>The variadic marker <code>...</code> describes "zero or more values of T". It is meaningful
+on <code>@return</code> (a method returning 0..N values) and on <code>@loop</code> (a
+<code>_loopbody</code> emitting 0..N values per iteration), but not on <code>@param</code> or
+<code>@slot</code>.</p>
+<h2>Examples</h2>
+<h3>Variadic on @param (raises an issue)</h3>
+<pre>
+_method example_exemplar.example_method(_gather args)
+    ## @param {sw:integer...} args
+_endmethod
+</pre>
+<h3>Correct: declare the element type (no issue)</h3>
+<pre>
+_method example_exemplar.example_method(_gather args)
+    ## @param {sw:integer} args
+_endmethod
+</pre>
+<h3>Variadic on @return or @loop (no issue)</h3>
+<pre>
+_iter _method example_exemplar.example_iter()
+    ## @loop {sw:integer...}
+    _loopbody(1)
+_endmethod
+</pre>

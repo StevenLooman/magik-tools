@@ -1,0 +1,28 @@
+<p>Variadic @return / @loop must be the last entry of its kind</p>
+<h2>Explanation</h2>
+<p>A variadic <code>@return</code> or <code>@loop</code> annotation (a type ending in
+<code>...</code>) represents zero or more trailing values. Only the last entry of each kind may
+be variadic; any earlier entry must specify a single non-variadic type.</p>
+<h2>Examples</h2>
+<h3>Variadic @return in non-last position (raises an issue)</h3>
+<pre>
+_method example_exemplar.example_method()
+    ## @return {sw:integer...} variadic, but not last
+    ## @return {sw:symbol} after variadic
+_endmethod
+</pre>
+<h3>Variadic @return as the last (no issue)</h3>
+<pre>
+_method example_exemplar.example_method()
+    ## @return {sw:symbol} a fixed value
+    ## @return {sw:integer...} variadic tail
+_endmethod
+</pre>
+<h3>Variadic @loop in non-last position (raises an issue)</h3>
+<pre>
+_iter _method example_exemplar.example_iter()
+    ## @loop {sw:integer...} variadic, but not last
+    ## @loop {sw:symbol} after variadic
+    _loopbody(1, :a)
+_endmethod
+</pre>
