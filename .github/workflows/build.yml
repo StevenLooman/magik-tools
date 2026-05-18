@@ -54,6 +54,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install Towncrier
+        run: python -m pip install --disable-pip-version-check -r .github/scripts/requirements.txt
+      - name: Render draft changelog for linting
+        run: |
+          printf '# Changes\n\n<!-- towncrier release notes start -->\n\n' > CHANGES.preview.md
+          towncrier build --draft --version 0.0.0 | perl -0pe 's/\n+\z/\n/' >> CHANGES.preview.md
       - uses: DavidAnson/markdownlint-cli2-action@v23
         with:
           globs: '**/*.md'

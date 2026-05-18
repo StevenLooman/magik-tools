@@ -111,10 +111,20 @@ A change type can be one of:
 * `removal`: Signifying a deprecation or removal of public API.
 * `misc`: A ticket has been closed, but it is not of interest to users.
 
-Please add the following fragment before the changelog entry when a breaking change is introduced:
+Do not add Markdown headings to Towncrier fragments.
+
+When a breaking change is introduced, start the fragment text with plain text such as:
 
 ```markdown
-**Breaking change**
+Breaking change: `load_list.txt` and `patch_list.txt` files are now checked as well.
+```
+
+If multiple breaking changes are listed in a single fragment, use plain text followed by a list:
+
+```markdown
+Breaking changes:
+- Renamed `foo` to `bar`.
+- Removed support for `baz`.
 ```
 
 A new file is then created in the ``changes`` directory. Add a short description of the change to that file.

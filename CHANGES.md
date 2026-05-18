@@ -1,3 +1,7 @@
+# Changes
+
+<!-- towncrier release notes start -->
+
 ## [0.12.0](https://github.com/StevenLooman/magik-tools/tree/0.12.0) - 2026-05-17
 
 ### Features
@@ -18,10 +22,10 @@
 
   This includes these settings:
 
-  * `magik.typing.indexGlobalUsages`
-  * `magik.typing.indexMethodUsages`
-  * `magik.typing.indexSlotUsages`
-  * `magik.typing.indexConditionUsages`
+  - `magik.typing.indexGlobalUsages`
+  - `magik.typing.indexMethodUsages`
+  - `magik.typing.indexSlotUsages`
+  - `magik.typing.indexConditionUsages`
 
   ([#337](https://github.com/StevenLooman/magik-tools/issues/337))
 - `product.def` and `module.def` are now checked, like magik files. Issues will be
@@ -47,7 +51,7 @@
   - `ModuleDefNameDoesNotMatchDirectoryName`/`module-def-name-does-not-match-directory-name`
   - `ModuleDefSyntaxError`/`module-def-syntax-error`
 
-  ## Breaking changes
+  Breaking changes:
 
   This change includes a major refactoring, such as moving classes to different
   namespaces, and rebuilding support classes. Any code dependent on this code will
@@ -57,18 +61,20 @@
   might result in new issues in your codebase.
 
   ([#362](https://github.com/StevenLooman/magik-tools/issues/362))
+
 - Renamed language identifiers:
 
-  * `product.def` --> `sw-product-def`
-  * `module.def` --> `sw-module-def`
-  * `load_list.txt` --> `sw-load-list`
+  - `product.def` --> `sw-product-def`
+  - `module.def` --> `sw-module-def`
+  - `load_list.txt` --> `sw-load-list`
 
-  ## Breaking changes
+  Breaking changes:
 
   This might cause a breaking change for any library using the language identifiers
   for `product.def`, `module.def`, and `load_list.txt` files.
 
   ([#366](https://github.com/StevenLooman/magik-tools/issues/366))
+
 - Add a `module.def` check to verify there are no overlapping required modules
   in `tests_modules` and `requires`.
 
@@ -96,6 +102,7 @@
   $ java -jar sslr-magik-toolkit.jar --grammar sw-module-def
   ...
   ``` ([#378](https://github.com/StevenLooman/magik-tools/issues/378))
+
 - Add the MagikTypedChecks, ModuleDefChecks and ProductDefChecks to the Wiki.
 
   Also improved the Markdown itself to have a better index if someone is searching
@@ -125,15 +132,16 @@
 
   The following checks have been added for `load_list.txt`/`patch_list.txt` files:
 
-  * `LoadListEntryExists`/`load-list-entry-exists`
-  * `LoadListSyntaxError`/`load-list-syntax-error`
+  - `LoadListEntryExists`/`load-list-entry-exists`
+  - `LoadListSyntaxError`/`load-list-syntax-error`
 
-  ## Breaking changes
+  Breaking changes:
 
   `load_list.txt` and `patch_list.txt` files are now checked as well. This
   might result in new issues in your codebase.
 
   ([#413](https://github.com/StevenLooman/magik-tools/issues/413))
+
 - Add the LoadListChecks to the Wiki.
 
   Also removed duplicated information from the HTML itself. ([#414](https://github.com/StevenLooman/magik-tools/issues/414))
@@ -144,14 +152,17 @@
 
   ```magik
   _method object.example()
-      ## Example method.
-      _local thing << do_something()
-      _local method_name << :|example_method()|
-      ## @invokes_method {user:other_object.example_method()}
-      _local result << thing.perform(method_name)
+    ## Example method.
+    _local thing << do_something()
+    _local method_name << :|example_method()|
+    ## @invokes_method {user:other_object.example_method()}
+    _local result << thing.perform(method_name)
   _endmethod
   $
-  ``` ([#417](https://github.com/StevenLooman/magik-tools/issues/417))
+  ```
+
+  ([#417](https://github.com/StevenLooman/magik-tools/issues/417))
+
 - Better handle tests_modules, regard these as required modules. ([#419](https://github.com/StevenLooman/magik-tools/issues/419))
 - Better handle re-indexing workspaces. Only clear existing type information
   when needed. ([#420](https://github.com/StevenLooman/magik-tools/issues/420))
@@ -177,6 +188,7 @@
   	10
   }
   ``` ([#457](https://github.com/StevenLooman/magik-tools/issues/457))
+
 - Add check SystemCommandUseSimpleVector.
 
   This checks enforces that a `simple_vector` is used for
@@ -322,7 +334,7 @@
   - Outgoing-call resolution distinguishes method/procedure items and avoids
     filesystem exceptions for unsupported URI schemes (for example `memory://`).
 
-  ## Breaking changes
+  Breaking changes:
 
   Several typed checks were renamed/replaced. Any tooling, quality profiles, suppressions,
   or automation referencing the old rule keys/names must be updated:
@@ -339,6 +351,7 @@
     -> `CallableReturnTypesMatchDoc` / `callable-return-types-match-doc`
 
   ([#545](https://github.com/StevenLooman/magik-tools/issues/545))
+
 - Add `UnnamedProcedure`/`unnamed-procedure` check for `magik` files.
 
   The new check reports an issue when
@@ -411,11 +424,11 @@
   Now something like `{_scatter b, _scatter v}` is marked as a syntax error. ([#343](https://github.com/StevenLooman/magik-tools/issues/343))
 - Fix administration of the following checks:
 
-  * `MethodIsPublic`
-  * `ProductDefNameDoesNotMatchDirectoryName`
-  * `AssignedTypeDoesNotMatchSlotType`
-  * `ComparedTypesDoNotMatch`
-  * `SwChar16VectorEvaluateInvocation`
+  - `MethodIsPublic`
+  - `ProductDefNameDoesNotMatchDirectoryName`
+  - `AssignedTypeDoesNotMatchSlotType`
+  - `ComparedTypesDoNotMatch`
+  - `SwChar16VectorEvaluateInvocation`
 
   ([#371](https://github.com/StevenLooman/magik-tools/issues/371))
 - Fix splitting line when adding EOL trivia.
@@ -437,13 +450,16 @@
 
   ```text
   mlint (undefined-method-call-result)
-  ``` ([#410](https://github.com/StevenLooman/magik-tools/issues/410))
+  ```
+
+  ([#410](https://github.com/StevenLooman/magik-tools/issues/410))
+
 - Fix parsing loose end in `product.def` and `module.def`. ([#416](https://github.com/StevenLooman/magik-tools/issues/416))
 - Miscellaneous fixes:
 
-  * Fix ModuleDefFile missing timestamp
-  * Fix DefinitionKeeper not properly clearing
-  * Fix ProcedureDefinition not properly getting bare definition
+  - Fix ModuleDefFile missing timestamp
+  - Fix DefinitionKeeper not properly clearing
+  - Fix ProcedureDefinition not properly getting bare definition
 
   ([#421](https://github.com/StevenLooman/magik-tools/issues/421))
 - Remove `optional` keyword from `ProductDef` since it is not a valid keyword. ([#434](https://github.com/StevenLooman/magik-tools/issues/434))
@@ -456,9 +472,9 @@
   In the following code snippet, the symbol `:a` is no longer overridden by the
   `# type: ...` instruction. The type override instruction now targets the following:
 
-  * Returns (`_return`)/emits (`>>`)
-  * Assignments
-  * Other expressions that are the outermost on their line
+  - Returns (`_return`)/emits (`>>`)
+  - Assignments
+  - Other expressions that are the outermost on their line
 
   ([#439](https://github.com/StevenLooman/magik-tools/issues/439))
 - Rename parameter names in type doc.
@@ -473,7 +489,10 @@
       ## @param {sw:rope} param2 Second parameter
       write(param1, param2)
   _endmethod
-  ``` ([#441](https://github.com/StevenLooman/magik-tools/issues/441))
+  ```
+
+  ([#441](https://github.com/StevenLooman/magik-tools/issues/441))
+
 - Handle load_list comments in `FileNotInLoadListCheck`. ([#463](https://github.com/StevenLooman/magik-tools/issues/463))
 - Fix message when java cannot be located
 
@@ -484,10 +503,18 @@
 
 ### Misc
 
-- [#339](https://github.com/StevenLooman/magik-tools/issues/339), [#376](https://github.com/StevenLooman/magik-tools/issues/376), [#380](https://github.com/StevenLooman/magik-tools/issues/380), [#381](https://github.com/StevenLooman/magik-tools/issues/381), [#408](https://github.com/StevenLooman/magik-tools/issues/408), [#459](https://github.com/StevenLooman/magik-tools/issues/459), [#503](https://github.com/StevenLooman/magik-tools/issues/503), [#504](https://github.com/StevenLooman/magik-tools/issues/504), [#510](https://github.com/StevenLooman/magik-tools/issues/510), [#512](https://github.com/StevenLooman/magik-tools/issues/512), [#548](https://github.com/StevenLooman/magik-tools/issues/548), [#553](https://github.com/StevenLooman/magik-tools/issues/553)
-
-
-# Changes
+- [#339](https://github.com/StevenLooman/magik-tools/issues/339),
+  [#376](https://github.com/StevenLooman/magik-tools/issues/376),
+  [#380](https://github.com/StevenLooman/magik-tools/issues/380),
+  [#381](https://github.com/StevenLooman/magik-tools/issues/381),
+  [#408](https://github.com/StevenLooman/magik-tools/issues/408),
+  [#459](https://github.com/StevenLooman/magik-tools/issues/459),
+  [#503](https://github.com/StevenLooman/magik-tools/issues/503),
+  [#504](https://github.com/StevenLooman/magik-tools/issues/504),
+  [#510](https://github.com/StevenLooman/magik-tools/issues/510),
+  [#512](https://github.com/StevenLooman/magik-tools/issues/512),
+  [#548](https://github.com/StevenLooman/magik-tools/issues/548),
+  [#553](https://github.com/StevenLooman/magik-tools/issues/553)
 
 ## 0.11.0 (2025-08-28)
 
@@ -544,7 +571,7 @@
 - Fix Magik grammar not supporting special characters like `ß`.
 - Several fixes.
 
-### Breaking changes (reiterated from above)
+Breaking changes:
 
 - Extend VariableNamingCheck to also check for a maximum of chars and make minLength/maxLength configurable. This might result in more issues.
 - Add NestingDepthCheck to test if a method/procedure/if-statement/loop-statement does not exceed the maximum nesting depth. This might result in more issues.
