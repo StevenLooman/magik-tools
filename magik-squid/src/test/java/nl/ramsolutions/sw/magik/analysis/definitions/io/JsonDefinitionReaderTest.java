@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /** Tests for JsonDefinitionReader. */
 class JsonDefinitionReaderTest {
@@ -270,6 +272,32 @@ class JsonDefinitionReaderTest {
         .isEqualTo(
             new GlobalDefinition(
                 null, null, null, null, null, printFloatPrecisionRef, TypeString.SW_INTEGER, null));
+  }
+
+  @Test
+  void testReadMethodWithParameterReferenceReturnType(@TempDir final Path tempDir)
+      throws IOException {
+    final Path path = tempDir.resolve("type_database.jsonl");
+    final String line =
+        """
+        {"type_name":"sw:hash_table","method_name":"[]<<","modifiers":[],\
+        "parameters":[{"name":"key","modifier":"none","type_name":"sw:symbol"}],\
+        "assignment_parameter":{"name":"value","modifier":"none","type_name":"sw:object"},\
+        "return_types":["_parameter(value)"],"loop_types":[],"source_file":null,\
+        "doc":"","hash":0,"module_name":null,\
+        "pragma":{"classify_levels":["basic"],"topics":[],"usages":["external","internal"]},\
+        "instruction":"method"}
+        """;
+    Files.writeString(path, line);
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, definitionKeeper);
+
+    final TypeString hashTableRef = TypeString.ofIdentifier("sw:hash_table", "sw");
+    final MethodDefinition methodDef =
+        definitionKeeper.getMethodDefinitions(hashTableRef).iterator().next();
+    assertThat(methodDef.getReturnTypes().getTypes())
+        .containsExactly(TypeString.ofParameterRef("value"));
   }
 
   @Test

@@ -2390,4 +2390,301 @@ class LocalTypeReasonerTest {
       assertThat(state.getNodeType(varNode)).isEqualTo(new ExpressionResultString(integerOrUnset));
     }
   }
+
+  @Test
+  void testParameterReferenceOnAssignmentMethodRegularParam() {
+    final String code =
+        """
+        _method a.b
+          _local h << _self.get_table()
+          h[:key] << 10
+          _return h[:key]
+        _endmethod""";
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString aRef = TypeString.ofIdentifier("a", "user");
+    final TypeString tRef = TypeString.ofIdentifier("t", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            aRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            tRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            aRef,
+            "get_table()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(tRef),
+            ExpressionResultString.EMPTY));
+    final TypeString keyRef = TypeString.ofParameterRef("key");
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            tRef,
+            "[]<<",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "key",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED)),
+            new ParameterDefinition(
+                null,
+                null,
+                null,
+                null,
+                null,
+                "val",
+                ParameterDefinition.Modifier.NONE,
+                TypeString.UNDEFINED),
+            null,
+            new ExpressionResultString(keyRef),
+            ExpressionResultString.EMPTY));
+
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final List<AstNode> invocationNodes = topNode.getDescendants(MagikGrammar.METHOD_INVOCATION);
+    final AstNode assignmentInvocation =
+        invocationNodes.stream()
+            .filter(n -> n.getFirstChild(MagikGrammar.ASSIGNMENT_ARGUMENT) != null)
+            .findFirst()
+            .orElseThrow();
+    final ExpressionResultString assignResult = state.getNodeType(assignmentInvocation);
+    assertThat(assignResult).isEqualTo(new ExpressionResultString(TypeString.SW_SYMBOL));
+  }
+
+  @Test
+  void testParameterReferenceOnAssignmentMethodAssignmentParam() {
+    final String code =
+        """
+        _method a.b
+          _local h << _self.get_table()
+          h[:key] << 10
+        _endmethod""";
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString aRef = TypeString.ofIdentifier("a", "user");
+    final TypeString tRef = TypeString.ofIdentifier("t", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            aRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            tRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            aRef,
+            "get_table()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(tRef),
+            ExpressionResultString.EMPTY));
+    final TypeString valRef = TypeString.ofParameterRef("val");
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            tRef,
+            "[]<<",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "key",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED)),
+            new ParameterDefinition(
+                null,
+                null,
+                null,
+                null,
+                null,
+                "val",
+                ParameterDefinition.Modifier.NONE,
+                TypeString.UNDEFINED),
+            null,
+            new ExpressionResultString(valRef),
+            ExpressionResultString.EMPTY));
+
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final List<AstNode> invocationNodes = topNode.getDescendants(MagikGrammar.METHOD_INVOCATION);
+    final AstNode assignmentInvocation =
+        invocationNodes.stream()
+            .filter(n -> n.getFirstChild(MagikGrammar.ASSIGNMENT_ARGUMENT) != null)
+            .findFirst()
+            .orElseThrow();
+    final ExpressionResultString assignResult = state.getNodeType(assignmentInvocation);
+    assertThat(assignResult).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+  }
+
+  @Test
+  void testGenericReturnTypeOnAssignmentMethod() {
+    final String code =
+        """
+        _method a.b
+          _local h << _self.get_table()  # type: user:t<E=sw:integer>
+          h[:key] << 10
+        _endmethod""";
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString aRef = TypeString.ofIdentifier("a", "user");
+    final TypeString tRef = TypeString.ofIdentifier("t", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            aRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            tRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            aRef,
+            "get_table()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(tRef),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            tRef,
+            "[]<<",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "key",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED)),
+            new ParameterDefinition(
+                null,
+                null,
+                null,
+                null,
+                null,
+                "val",
+                ParameterDefinition.Modifier.NONE,
+                TypeString.UNDEFINED),
+            null,
+            new ExpressionResultString(TypeString.ofGenericReference("E")),
+            ExpressionResultString.EMPTY));
+
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final List<AstNode> invocationNodes = topNode.getDescendants(MagikGrammar.METHOD_INVOCATION);
+    final AstNode assignmentInvocation =
+        invocationNodes.stream()
+            .filter(n -> n.getFirstChild(MagikGrammar.ASSIGNMENT_ARGUMENT) != null)
+            .findFirst()
+            .orElseThrow();
+    final ExpressionResultString assignResult = state.getNodeType(assignmentInvocation);
+    assertThat(assignResult).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+  }
 }

@@ -1,8 +1,10 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,6 +19,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.GenericHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /** Invocation handler. */
 class InvocationHandler extends LocalTypeReasonerHandler {
@@ -69,7 +72,12 @@ class InvocationHandler extends LocalTypeReasonerHandler {
           argumentExpressionNodes.stream()
               .map(exprNode -> this.state.getNodeType(exprNode).get(0, TypeString.SW_UNSET))
               .toList();
+      // For assignment-methods (`[]<<` / `foo<<`), capture the RHS type so a
+      // `_parameter(<param>)` ref in the declared return/loop types can be substituted.
+      final TypeString assignmentArgType = this.extractAssignmentArgType(node);
       for (final MethodDefinition methodDef : methodDefs) {
+        final ParameterDefinition assignmentParamDef =
+            assignmentArgType != null ? methodDef.getAssignmentParameter() : null;
         // Handle call result.
         final ExpressionResultString callResultStr = methodDef.getReturnTypes();
         final ExpressionResultString processedCallResultStr =
@@ -77,8 +85,10 @@ class InvocationHandler extends LocalTypeReasonerHandler {
                 originalCalledTypeStr,
                 calledTypeStr,
                 methodDef.getParameters(),
+                assignmentParamDef,
                 callResultStr,
-                argumentTypeStrs);
+                argumentTypeStrs,
+                assignmentParamDef != null ? assignmentArgType : null);
         callResult = new ExpressionResultString(processedCallResultStr, callResult);
 
         // Handle iter result.
@@ -88,8 +98,10 @@ class InvocationHandler extends LocalTypeReasonerHandler {
                 originalCalledTypeStr,
                 calledTypeStr,
                 methodDef.getParameters(),
+                assignmentParamDef,
                 iterResultStr,
-                argumentTypeStrs);
+                argumentTypeStrs,
+                assignmentParamDef != null ? assignmentArgType : null);
         iterResult = new ExpressionResultString(processedIterResultStr, iterResult);
       }
     }
@@ -99,6 +111,24 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     Objects.requireNonNull(iterResult);
     this.state.setNodeType(node, callResult);
     this.state.setNodeIterType(node, iterResult);
+  }
+
+  /**
+   * Extract the RHS expression type for an assignment-method invocation, or {@code null} if the
+   * node is not an assignment-method invocation.
+   */
+  @Nullable
+  private TypeString extractAssignmentArgType(final AstNode node) {
+    final AstNode assignmentArgumentNode = node.getFirstChild(MagikGrammar.ASSIGNMENT_ARGUMENT);
+    if (assignmentArgumentNode == null) {
+      return null;
+    }
+    final AstNode argNode = assignmentArgumentNode.getFirstChild(MagikGrammar.ARGUMENT);
+    final AstNode exprNode =
+        argNode != null ? argNode.getFirstChild(MagikGrammar.EXPRESSION) : null;
+    return exprNode != null
+        ? this.state.getNodeType(exprNode).get(0, TypeString.SW_UNSET)
+        : TypeString.SW_UNSET;
   }
 
   /**
@@ -140,8 +170,10 @@ class InvocationHandler extends LocalTypeReasonerHandler {
               originalCalledTypeStr,
               calledTypeStr,
               procDef.getParameters(),
+              null,
               callResultStr,
-              argumentTypeStrs);
+              argumentTypeStrs,
+              null);
       callResult = new ExpressionResultString(processedCallResultStr, callResult);
 
       // Handle iter result.
@@ -151,8 +183,10 @@ class InvocationHandler extends LocalTypeReasonerHandler {
               originalCalledTypeStr,
               calledTypeStr,
               procDef.getParameters(),
+              null,
               iterResultStr,
-              argumentTypeStrs);
+              argumentTypeStrs,
+              null);
       iterResult = new ExpressionResultString(processedIterResultStr, iterResult);
     }
 
@@ -169,22 +203,34 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     this.state.setNodeIterType(node, iterResult);
   }
 
+  /**
+   * Substitute parameter references. {@code assignmentParamDef} and {@code assignmentArgType} are
+   * always both {@code null} or both non-{@code null}.
+   */
   private ExpressionResultString substituteParameterRefs(
       final List<ParameterDefinition> paramDefs,
+      final @Nullable ParameterDefinition assignmentParamDef,
       final List<TypeString> argumentTypes,
+      final @Nullable TypeString assignmentArgType,
       final ExpressionResultString resultString) {
     final Map<TypeString, TypeString> paramRefArgTypeRefMap =
-        IntStream.range(0, paramDefs.size())
-            .mapToObj(
-                i -> {
-                  final ParameterDefinition paramDef = paramDefs.get(i);
-                  final String paramName = paramDef.getName();
-                  final TypeString paramRef = TypeString.ofParameterRef(paramName);
-                  final TypeString argTypeRef =
-                      i < argumentTypes.size() ? argumentTypes.get(i) : TypeString.SW_UNSET;
-                  return new AbstractMap.SimpleEntry<>(paramRef, argTypeRef);
-                })
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        new HashMap<>(
+            IntStream.range(0, paramDefs.size())
+                .mapToObj(
+                    i -> {
+                      final ParameterDefinition paramDef = paramDefs.get(i);
+                      final String paramName = paramDef.getName();
+                      final TypeString paramRef = TypeString.ofParameterRef(paramName);
+                      final TypeString argTypeRef =
+                          i < argumentTypes.size() ? argumentTypes.get(i) : TypeString.SW_UNSET;
+                      return new AbstractMap.SimpleEntry<>(paramRef, argTypeRef);
+                    })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+    if (assignmentParamDef != null) {
+      final TypeString assignParamRef = TypeString.ofParameterRef(assignmentParamDef.getName());
+      paramRefArgTypeRefMap.put(assignParamRef, assignmentArgType);
+    }
 
     ExpressionResultString newResultString = resultString;
     for (final Map.Entry<TypeString, TypeString> entry : paramRefArgTypeRefMap.entrySet()) {
@@ -199,8 +245,10 @@ class InvocationHandler extends LocalTypeReasonerHandler {
       final TypeString originalCalledTypeStr,
       final TypeString calledTypeStr,
       final List<ParameterDefinition> paramDefs,
+      final @Nullable ParameterDefinition assignmentParamDef,
       final ExpressionResultString expressionResultString,
-      final List<TypeString> argumentTypeStrs) {
+      final List<TypeString> argumentTypeStrs,
+      final @Nullable TypeString assignmentArgType) {
     ExpressionResultString newExpressionResultString = expressionResultString;
 
     // Substitute generics.
@@ -215,9 +263,14 @@ class InvocationHandler extends LocalTypeReasonerHandler {
                 .substituteType(TypeString.PRIVATE, calledTypeStr)
             : newExpressionResultString;
 
-    // Substitute parameters.
+    // Substitute parameters (including assignment parameter when present).
     newExpressionResultString =
-        this.substituteParameterRefs(paramDefs, argumentTypeStrs, newExpressionResultString);
+        this.substituteParameterRefs(
+            paramDefs,
+            assignmentParamDef,
+            argumentTypeStrs,
+            assignmentArgType,
+            newExpressionResultString);
 
     return newExpressionResultString;
   }
