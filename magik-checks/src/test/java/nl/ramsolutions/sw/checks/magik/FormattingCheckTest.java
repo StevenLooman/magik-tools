@@ -225,4 +225,16 @@ class FormattingCheckTest {
         """;
     assertThat(check).reportsNoIssues(code);
   }
+
+  @Test
+  void testUnknownIndentStrategyReportsIssue() {
+    final FormattingCheck check = new FormattingCheck();
+    check.indentStrategy = "visua";
+    final String code =
+        """
+        a << b
+        """;
+    // A misconfigured indent strategy is reported as a single issue instead of throwing.
+    assertThat(check).reportsIssueCount(code, 1);
+  }
 }
