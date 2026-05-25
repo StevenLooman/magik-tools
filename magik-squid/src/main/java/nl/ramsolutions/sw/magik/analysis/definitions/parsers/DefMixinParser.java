@@ -120,7 +120,7 @@ public class DefMixinParser extends BaseDefParser {
             moduleName,
             doc,
             statementNode,
-            ExemplarDefinition.Sort.INTRINSIC,
+            ExemplarDefinition.Sort.MIXIN,
             name,
             Collections.emptyList(),
             parents,

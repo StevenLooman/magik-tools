@@ -89,6 +89,9 @@ _method type_definition.new_from(package, name, method_table)
 		_if metadata[:exemplar] _is sw:object
 		_then
 			>> "object"
+		_elif metadata[:exemplar].is_class_of?(sw:mixin)
+		_then
+			>> "mixin"
 		_else
 			>> metadata[:instance_format]
 		_endif
