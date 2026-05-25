@@ -46,6 +46,35 @@ VSCode integration is achieved by adding a task with a `problemMatcher`, for exa
 }
 ```
 
+### GitHub Actions
+
+Use the reusable action from the dedicated repository:
+
+```yaml
+name: Magik lint
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+jobs:
+    magik_lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+            - name: Run magik-lint
+              uses: StevenLooman/magik-lint-github-action@v0.1.0
+              with:
+                version: ${{ vars.MAGIK_LINT_VERSION || '0.12.0' }}
+                options: --format text
+                paths: modules/ scripts/
+```
+
+Set `MAGIK_LINT_VERSION` as a repository variable to control this centrally.
+
+See the action repository README for the complete, current input reference.
+
 ## Configuration
 
 Magik-lint can use a configuration file.
