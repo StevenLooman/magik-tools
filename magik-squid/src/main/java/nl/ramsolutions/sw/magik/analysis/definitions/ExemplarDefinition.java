@@ -19,6 +19,7 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
     UNDEFINED,
     SLOTTED,
     INDEXED,
+    MIXIN,
     INTRINSIC,
     OBJECT;
   }

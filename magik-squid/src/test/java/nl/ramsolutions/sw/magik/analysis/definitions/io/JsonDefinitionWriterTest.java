@@ -147,6 +147,33 @@ class JsonDefinitionWriterTest {
   }
 
   @Test
+  void testWriteAndReadMixinType() throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString mixinRef = TypeString.ofIdentifier("user:my_mixin", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            new Location(URI.create("file:///file.magik")),
+            Instant.now(),
+            "test_module",
+            null,
+            null,
+            ExemplarDefinition.Sort.MIXIN,
+            mixinRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+
+    JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
+    assertThat(Files.readString(this.tempPath)).contains("\"mixin\"");
+
+    final IDefinitionKeeper readBack = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(this.tempPath, readBack);
+    final ExemplarDefinition roundTripped =
+        readBack.getExemplarDefinitions(mixinRef).stream().findAny().orElseThrow();
+    assertThat(roundTripped.getSort()).isEqualTo(ExemplarDefinition.Sort.MIXIN);
+  }
+
+  @Test
   void testWriteMethod() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(

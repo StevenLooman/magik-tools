@@ -658,7 +658,7 @@ public final class ClassInfoDefinitionReader {
             moduleName,
             doc,
             null,
-            ExemplarDefinition.Sort.INTRINSIC,
+            ExemplarDefinition.Sort.MIXIN,
             typeString,
             Collections.emptyList(),
             Collections.emptyList(),

@@ -370,7 +370,7 @@ class DefinitionReaderTest {
                 null,
                 "",
                 null,
-                ExemplarDefinition.Sort.INTRINSIC,
+                ExemplarDefinition.Sort.MIXIN,
                 TypeString.ofIdentifier("test_mixin", "user"),
                 Collections.emptyList(),
                 List.of(TypeString.ofIdentifier("mixin1", "user")),

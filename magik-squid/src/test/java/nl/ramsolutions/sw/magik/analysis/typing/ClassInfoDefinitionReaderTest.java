@@ -129,7 +129,7 @@ class ClassInfoDefinitionReaderTest {
 
             """,
                 null,
-                ExemplarDefinition.Sort.INTRINSIC,
+                ExemplarDefinition.Sort.MIXIN,
                 exampleMixinRef,
                 Collections.emptyList(),
                 Collections.emptyList(),
