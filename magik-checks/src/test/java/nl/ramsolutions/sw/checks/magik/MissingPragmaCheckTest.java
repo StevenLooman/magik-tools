@@ -50,13 +50,25 @@ class MissingPragmaCheckTest {
         def_slotted_exemplar(:test_exemplar, {})
         """,
         """
+        def_indexed_exemplar(:test_exemplar, {})
+        """,
+        """
+        def_mixin(:test_mixin)
+        """,
+        """
+        def_enumeration(:test_enum, _false, :a, :b)
+        """,
+        """
         _method a.b _endmethod
         """,
         """
         a.define_shared_constant(:test_constant, 1, :private)
         """,
         """
-        a.define_shared_variable(:test_constant, 1, :private)
+        a.define_shared_variable(:test_variable, 1, :private)
+        """,
+        """
+        my_mixin.add_child(my_child)
         """,
         """
         _global prc << _proc() _endproc
@@ -68,6 +80,46 @@ class MissingPragmaCheckTest {
   void testInvalid(final String code) {
     final MagikCheck check = new MissingPragmaCheck();
     assertThat(check).reportsIssueCount(code, 1);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _pragma(classify_level=basic,topic={test},usage=subclassable)
+        _method a.m
+          tree.add_child(node)
+        _endmethod
+        """,
+        """
+        _pragma(classify_level=basic,topic={test},usage=subclassable)
+        _method a.m
+          obj.define_shared_constant(:k, 1, :private)
+        _endmethod
+        """,
+        """
+        _pragma(classify_level=basic,topic={test},usage=subclassable)
+        _method a.m
+          _block
+            tree.add_child(node)
+          _endblock
+        _endmethod
+        """,
+        """
+        _pragma(classify_level=basic,topic={test},usage=subclassable)
+        _block
+          a_mixin.add_child(b)
+        _endblock
+        """,
+        """
+        _block
+          a_mixin.add_child(b)
+        _endblock
+        """,
+      })
+  void testNestedInvocationsNotFlagged(final String code) {
+    final MagikCheck check = new MissingPragmaCheck();
+    assertThat(check).reportsNoIssues(code);
   }
 
   @Test

@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.checks.magik;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Set;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
@@ -11,6 +12,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.sonar.check.Rule;
@@ -27,9 +29,23 @@ import org.sonar.check.Rule;
 @Rule(key = MissingPragmaCheck.CHECK_KEY)
 public class MissingPragmaCheck extends MagikCheck {
 
-  private static final String DEF_SLOTTED_EXEMPLAR = "def_slotted_exemplar";
-  private static final String SW_DEF_SLOTTED_EXEMPLAR = "sw:def_slotted_exemplar";
+  private static final Set<String> EXEMPLAR_DEFINITION_PROCEDURES =
+      Set.of(
+          "def_slotted_exemplar",
+          "sw:def_slotted_exemplar",
+          "def_indexed_exemplar",
+          "sw:def_indexed_exemplar",
+          "def_mixin",
+          "sw:def_mixin",
+          "def_enumeration",
+          "sw:def_enumeration",
+          "def_enumeration_from",
+          "sw:def_enumeration_from");
   private static final String DEFINE_SHARED_VARIABLE = "define_shared_variable()";
+  private static final String DEFINE_SHARED_CONSTANT = "define_shared_constant()";
+  private static final String ADD_CHILD = "add_child()";
+  private static final Set<String> DEFINITIONAL_METHOD_INVOCATIONS =
+      Set.of(ADD_CHILD, DEFINE_SHARED_CONSTANT, DEFINE_SHARED_VARIABLE);
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "MissingPragma";
@@ -70,11 +86,10 @@ public class MissingPragmaCheck extends MagikCheck {
     final AstNode node = methodDefinition.getNode();
 
     if (node.is(MagikGrammar.PROCEDURE_INVOCATION)) {
-      // Skip methods which were generated via a exemplar definition.
-      // The exemplar definition itself will get flagged in this case.
+      // Methods synthesized by a def_*_exemplar/def_enumeration/def_mixin call (e.g., slot
+      // accessors) are reported in addition to the exemplar definition itself.
       final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
-      return helper.isProcedureInvocationOf(DEF_SLOTTED_EXEMPLAR)
-          || helper.isProcedureInvocationOf(SW_DEF_SLOTTED_EXEMPLAR);
+      return EXEMPLAR_DEFINITION_PROCEDURES.stream().anyMatch(helper::isProcedureInvocationOf);
     } else if (node.is(MagikGrammar.STATEMENT)) {
       final AstNode invocationNode =
           AstQuery.getFirstChildFromChain(
@@ -87,16 +102,37 @@ public class MissingPragmaCheck extends MagikCheck {
         return true;
       }
 
-      // Keep only one method generated via a shared variable.
-      // The shared variable definition itself will get flagged in this case.
+      // Skip methods synthesized by define_shared_variable()/define_shared_constant();
+      // these are flagged at the invocation site by walkPostMethodInvocation.
       final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(invocationNode);
       if (helper.isMethodInvocationOf(DEFINE_SHARED_VARIABLE)
-          && (methodDefinition.getMethodName().endsWith("<<")
-              || methodDefinition.getMethodName().endsWith("^<<"))) {
+          || helper.isMethodInvocationOf(DEFINE_SHARED_CONSTANT)) {
         return false;
       }
     }
     return true;
+  }
+
+  @Override
+  protected void walkPostMethodInvocation(final AstNode node) {
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
+    final String methodName = helper.getMethodName();
+    if (!DEFINITIONAL_METHOD_INVOCATIONS.contains(methodName)) {
+      return;
+    }
+
+    // Only flag top-level invocations; nested calls (e.g. `tree.add_child(node)` inside a method
+    // body) are regular method calls, not definitions.
+    final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
+    if (statementNode == null || !statementNode.getParent().is(MagikGrammar.MAGIK)) {
+      return;
+    }
+
+    if (PragmaNodeHelper.getPragmaNode(node) != null) {
+      return;
+    }
+
+    this.addIssue(helper.getMethodNameNode(), MESSAGE);
   }
 
   private boolean isPrimaryGlobalDefinition(GlobalDefinition globalDefinition) {
