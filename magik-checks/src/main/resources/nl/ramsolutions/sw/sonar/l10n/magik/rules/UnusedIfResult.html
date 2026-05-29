@@ -1,0 +1,20 @@
+<p>When an <code>_if</code>-expression uses <code>>></code> in one or more of its branches, it produces a value.</p>
+<p>Discarding that value without consuming it is almost certainly a bug. Assign it, emit it, or return it.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_if condition
+_then
+    >> _true
+_else
+    >> _false
+_endif
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+result << _if condition
+_then
+    >> _true
+_else
+    >> _false
+_endif
+</pre>

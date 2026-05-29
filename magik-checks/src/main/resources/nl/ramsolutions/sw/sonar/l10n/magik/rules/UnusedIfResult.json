@@ -1,0 +1,15 @@
+{
+  "title": "Result of _if expression with >> is not consumed",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "correctness"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "UnusedIfResult",
+  "sqKey": "unused-if-result"
+}
