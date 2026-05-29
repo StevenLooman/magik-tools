@@ -1,5 +1,5 @@
 {
-  "title": "Result of _if expression with >> is not consumed",
+  "title": "Result of block-like expression with >> is not consumed",
   "type": "BUG",
   "status": "ready",
   "remediation": {
@@ -10,6 +10,6 @@
     "correctness"
   ],
   "defaultSeverity": "Major",
-  "ruleSpecification": "UnusedIfResult",
-  "sqKey": "unused-if-result"
+  "ruleSpecification": "UnusedExpressionResult",
+  "sqKey": "unused-expression-result"
 }

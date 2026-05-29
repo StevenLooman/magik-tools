@@ -1,0 +1,28 @@
+<p>When a block-like expression (<code>_if</code>, <code>_try</code>, <code>_block</code>, <code>_loop</code>, <code>_for</code>, <code>_over</code>, <code>_while</code>, <code>_protect</code>, <code>_catch</code>, <code>_lock</code>) uses <code>>></code> in one or more of its bodies, it produces a value.</p>
+<p>Discarding that value without consuming it is almost certainly a bug. Assign it, emit it, or return it.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_if condition
+_then
+    >> _true
+_else
+    >> _false
+_endif
+
+_try >> _true _when error >> _false _endtry
+
+_block >> computed_value _endblock
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+result << _if condition
+_then
+    >> _true
+_else
+    >> _false
+_endif
+
+result << _try >> _true _when error >> _false _endtry
+
+result << _block >> computed_value _endblock
+</pre>

@@ -42,7 +42,7 @@ import nl.ramsolutions.sw.checks.magik.TypeDocMixedGenericsCheck;
 import nl.ramsolutions.sw.checks.magik.UndefinedVariableCheck;
 import nl.ramsolutions.sw.checks.magik.UnnamedProcedureCheck;
 import nl.ramsolutions.sw.checks.magik.UnsafeEvaluateInvocationCheck;
-import nl.ramsolutions.sw.checks.magik.UnusedIfResultCheck;
+import nl.ramsolutions.sw.checks.magik.UnusedExpressionResultCheck;
 import nl.ramsolutions.sw.checks.magik.UnusedVariableCheck;
 import nl.ramsolutions.sw.checks.magik.UseValueCompareCheck;
 import nl.ramsolutions.sw.checks.magik.VariableCountCheck;
@@ -87,7 +87,7 @@ public final class MagikCheckList extends CheckList<MagikCheck, MagikCodeActionS
         FormattingCheck.class,
         MissingPragmaCheck.class,
         HidesVariableCheck.class,
-        UnusedIfResultCheck.class,
+        UnusedExpressionResultCheck.class,
         ImportMissingDefinitionCheck.class,
         LhsRhsComparatorEqualCheck.class,
         LineLengthCheck.class,
