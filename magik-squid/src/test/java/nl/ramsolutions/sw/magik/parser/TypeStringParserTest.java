@@ -29,14 +29,24 @@ class TypeStringParserTest {
   void testParameterRef() {
     final String typeStr = "_parameter(p1)";
     final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
-    assertThat(typeString).isEqualTo(TypeString.ofParameterRef("p1"));
+    final TypeString paramRef = TypeString.ofParameterRef("p1");
+    assertThat(typeString).isEqualTo(paramRef);
+  }
+
+  @Test
+  void testSlotRef() {
+    final String typeStr = "_slot(my_slot)";
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    final TypeString slotRef = TypeString.ofSlotRef("my_slot");
+    assertThat(typeString).isEqualTo(slotRef);
   }
 
   @Test
   void testGenericReference() {
     final String typeStr = "<E>";
     final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
-    assertThat(typeString).isEqualTo(TypeString.ofGenericReference("E"));
+    final TypeString genericRef = TypeString.ofGenericReference("E");
+    assertThat(typeString).isEqualTo(genericRef);
   }
 
   @Test

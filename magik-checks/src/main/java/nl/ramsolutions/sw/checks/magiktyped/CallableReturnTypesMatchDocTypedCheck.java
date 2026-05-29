@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -173,7 +174,7 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
     }
 
     this.reportUnexpectedOrMismatchedTypeDoc(
-        callableReturnTypeString, effectiveDocType, typeDocEntry, resolver);
+        callableReturnTypeString, effectiveDocType, typeDocEntry, definitionNode, resolver);
   }
 
   private boolean reportMissingTypeDoc(
@@ -200,6 +201,7 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
       final TypeString callableReturnTypeString,
       final TypeString docReturnTypeString,
       final Map.Entry<AstNode, TypeString> typeDocEntry,
+      final AstNode definitionNode,
       final TypeStringResolver resolver) {
     final AstNode returnTypeNode = typeDocEntry.getKey();
     final AstNode typeValueNode = returnTypeNode.getFirstChild(TypeDocGrammar.TYPE_VALUE);
@@ -216,8 +218,10 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
       return;
     }
 
+    final TypeString resolvedDocType =
+        this.resolveSlotRefs(docReturnTypeString, definitionNode, resolver);
     if (Objects.equals(
-        resolver.resolve(callableReturnTypeString), resolver.resolve(docReturnTypeString))) {
+        resolver.resolve(callableReturnTypeString), resolver.resolve(resolvedDocType))) {
       return;
     }
 
@@ -225,6 +229,23 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
         MESSAGE_MISMATCH.formatted(
             docReturnTypeString.getFullString(), callableReturnTypeString.getFullString());
     this.addIssue(typeValueNode, message);
+  }
+
+  private TypeString resolveSlotRefs(
+      final TypeString docType, final AstNode definitionNode, final TypeStringResolver resolver) {
+    if (!definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
+      return docType;
+    }
+
+    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
+    final TypeString receiverType = helper.getTypeString();
+
+    TypeString result = docType;
+    for (final SlotDefinition slotDef : resolver.getSlotDefinitions(receiverType)) {
+      result =
+          result.substituteType(TypeString.ofSlotRef(slotDef.getName()), slotDef.getTypeName());
+    }
+    return result;
   }
 
   private ExpressionResultString extractReasonedResult(final AstNode node) {

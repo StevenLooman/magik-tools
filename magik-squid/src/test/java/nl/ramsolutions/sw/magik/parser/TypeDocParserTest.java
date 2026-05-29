@@ -235,7 +235,24 @@ class TypeDocParserTest {
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final TypeDocParser docParser = new TypeDocParser(methodNode);
     final List<TypeString> returnTypes = docParser.getReturnTypes();
-    assertThat(returnTypes).containsExactly(TypeString.ofParameterRef("p1"));
+    final TypeString paramRef = TypeString.ofParameterRef("p1");
+    assertThat(returnTypes).containsExactly(paramRef);
+  }
+
+  @Test
+  void testReturnSlotReference() throws IOException {
+    final String code =
+        """
+        _method a.b()
+                ## @return {_slot(my_slot)} Slot type.
+        _endmethod
+        """;
+    final AstNode topNode = this.parseMagik(code);
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final TypeDocParser docParser = new TypeDocParser(methodNode);
+    final List<TypeString> returnTypes = docParser.getReturnTypes();
+    final TypeString slotRef = TypeString.ofSlotRef("my_slot");
+    assertThat(returnTypes).containsExactly(slotRef);
   }
 
   @Test

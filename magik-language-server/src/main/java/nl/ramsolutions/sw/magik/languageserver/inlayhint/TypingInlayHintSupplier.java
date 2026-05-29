@@ -60,7 +60,7 @@ class TypingInlayHintSupplier {
     }
 
     final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
-    if (typeStr.isUndefined() || typeStr.isParameterReference()) {
+    if (typeStr.isUndefined() || typeStr.isParameterReference() || typeStr.isSlotReference()) {
       return Stream.empty();
     }
 
@@ -80,7 +80,7 @@ class TypingInlayHintSupplier {
     }
 
     final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
-    if (typeStr.isUndefined() || typeStr.isParameterReference()) {
+    if (typeStr.isUndefined() || typeStr.isParameterReference() || typeStr.isSlotReference()) {
       return Stream.empty();
     }
 
