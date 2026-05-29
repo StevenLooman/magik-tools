@@ -75,7 +75,6 @@ public class UnusedIfResultCheck extends MagikCheck {
       return false;
     }
     final AstNode expressionStatement = expression.getParent();
-    return expressionStatement != null
-        && expressionStatement.is(MagikGrammar.EXPRESSION_STATEMENT);
+    return expressionStatement != null && expressionStatement.is(MagikGrammar.EXPRESSION_STATEMENT);
   }
 }
