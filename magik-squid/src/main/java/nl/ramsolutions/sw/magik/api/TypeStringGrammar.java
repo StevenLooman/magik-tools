@@ -25,6 +25,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
   TYPE_SELF,
   TYPE_CLONE,
   TYPE_PARAMETER_REFERENCE,
+  TYPE_SLOT_REFERENCE,
   TYPE_IDENTIFIER,
 
   TYPE_GENERICS,
@@ -64,6 +65,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
   public enum Keyword implements GrammarRuleKey {
     TYPE_STRING_UNDEFINED("_undefined"),
     TYPE_STRING_PARAMETER("_parameter"),
+    TYPE_STRING_SLOT("_slot"),
     TYPE_STRING_GENERIC("_generic"),
     TYPE_STRING_SELF("_self"),
     TYPE_STRING_CLONE("_clone"),
@@ -115,6 +117,12 @@ public enum TypeStringGrammar implements GrammarRuleKey {
             Punctuator.TYPE_ARG_OPEN,
             SIMPLE_IDENTIFIER,
             Punctuator.TYPE_ARG_CLOSE);
+    b.rule(TYPE_SLOT_REFERENCE)
+        .is(
+            Keyword.TYPE_STRING_SLOT,
+            Punctuator.TYPE_ARG_OPEN,
+            SIMPLE_IDENTIFIER,
+            Punctuator.TYPE_ARG_CLOSE);
 
     b.rule(TYPE_GENERIC_DEFINITION_SINGLE)
         .is(Punctuator.TYPE_GENERIC_OPEN, TYPE_GENERIC_DEFINITION, Punctuator.TYPE_GENERIC_CLOSE)
@@ -150,6 +158,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
                         TYPE_GENERIC_DEFINITION_SINGLE,
                         TYPE_GENERIC_REFERENCE_SINGLE,
                         TYPE_PARAMETER_REFERENCE,
+                        TYPE_SLOT_REFERENCE,
                         TYPE_IDENTIFIER),
                     b.zeroOrMore(
                         Punctuator.TYPE_COMBINATOR,
@@ -160,6 +169,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
                             TYPE_GENERIC_DEFINITION_SINGLE,
                             TYPE_GENERIC_REFERENCE_SINGLE,
                             TYPE_PARAMETER_REFERENCE,
+                            TYPE_SLOT_REFERENCE,
                             TYPE_IDENTIFIER))),
                 SYNTAX_ERROR));
 

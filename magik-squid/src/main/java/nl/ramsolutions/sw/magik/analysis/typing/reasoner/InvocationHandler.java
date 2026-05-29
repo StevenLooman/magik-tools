@@ -13,6 +13,7 @@ import java.util.stream.IntStream;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationDefinitionHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
@@ -241,6 +242,24 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     return newResultString;
   }
 
+  private ExpressionResultString substituteSlotRefs(
+      final TypeString calledTypeStr, final ExpressionResultString resultString) {
+    final Map<TypeString, TypeString> slotRefTypeMap =
+        calledTypeStr.getCombinedTypes().stream()
+            .flatMap(typeStr -> this.typeResolver.getSlotDefinitions(typeStr).stream())
+            .collect(
+                Collectors.toMap(
+                    slotDef -> TypeString.ofSlotRef(slotDef.getName()),
+                    SlotDefinition::getTypeName,
+                    TypeString::combine));
+
+    ExpressionResultString newResultString = resultString;
+    for (final Map.Entry<TypeString, TypeString> entry : slotRefTypeMap.entrySet()) {
+      newResultString = newResultString.substituteType(entry.getKey(), entry.getValue());
+    }
+    return newResultString;
+  }
+
   private ExpressionResultString processExpressionResultString(
       final TypeString originalCalledTypeStr,
       final TypeString calledTypeStr,
@@ -271,6 +290,8 @@ class InvocationHandler extends LocalTypeReasonerHandler {
             argumentTypeStrs,
             assignmentArgType,
             newExpressionResultString);
+
+    newExpressionResultString = this.substituteSlotRefs(calledTypeStr, newExpressionResultString);
 
     return newExpressionResultString;
   }

@@ -191,7 +191,7 @@ class DefinitionReaderTest {
                 Collections.emptyList(),
                 null,
                 null,
-                new ExpressionResultString(TypeString.UNDEFINED),
+                new ExpressionResultString(TypeString.ofSlotRef("slot1")),
                 ExpressionResultString.EMPTY),
             new MethodDefinition(
                 new Location(
@@ -239,7 +239,7 @@ class DefinitionReaderTest {
                     ParameterDefinition.Modifier.NONE,
                     TypeString.UNDEFINED),
                 null,
-                new ExpressionResultString(TypeString.UNDEFINED),
+                new ExpressionResultString(TypeString.ofSlotRef("slot1")),
                 ExpressionResultString.EMPTY));
   }
 
@@ -620,7 +620,7 @@ class DefinitionReaderTest {
                 Collections.emptyList(),
                 null,
                 null,
-                new ExpressionResultString(TypeString.UNDEFINED),
+                new ExpressionResultString(TypeString.ofSlotRef("slot1")),
                 ExpressionResultString.EMPTY));
   }
 
@@ -649,7 +649,7 @@ class DefinitionReaderTest {
                 Collections.emptyList(),
                 null,
                 null,
-                new ExpressionResultString(TypeString.UNDEFINED),
+                new ExpressionResultString(TypeString.ofSlotRef("slot1")),
                 ExpressionResultString.EMPTY));
   }
 
@@ -678,7 +678,7 @@ class DefinitionReaderTest {
                 Collections.emptyList(),
                 null,
                 null,
-                new ExpressionResultString(TypeString.UNDEFINED),
+                new ExpressionResultString(TypeString.ofSlotRef("slot1")),
                 ExpressionResultString.EMPTY));
   }
 
@@ -707,7 +707,7 @@ class DefinitionReaderTest {
                 Collections.emptyList(),
                 null,
                 null,
-                new ExpressionResultString(TypeString.UNDEFINED),
+                new ExpressionResultString(TypeString.ofSlotRef("slot1")),
                 ExpressionResultString.EMPTY),
             new MethodDefinition(
                 new Location(
@@ -755,7 +755,7 @@ class DefinitionReaderTest {
                     ParameterDefinition.Modifier.NONE,
                     TypeString.UNDEFINED),
                 null,
-                new ExpressionResultString(TypeString.UNDEFINED),
+                new ExpressionResultString(TypeString.ofSlotRef("slot1")),
                 ExpressionResultString.EMPTY));
   }
 

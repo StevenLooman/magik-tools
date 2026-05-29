@@ -2591,6 +2591,159 @@ class LocalTypeReasonerTest {
   }
 
   @Test
+  void testSlotReferenceReturnTypeSubstitutesFromCalledType() {
+    final String code =
+        """
+                _method a.b
+                    _local h << _self.get_table()
+                    _return h.peek_slot()
+                _endmethod""";
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString aRef = TypeString.ofIdentifier("a", "user");
+    final TypeString tRef = TypeString.ofIdentifier("t", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            aRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            tRef,
+            List.of(
+                new SlotDefinition(null, null, null, null, null, "value", TypeString.SW_INTEGER)),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            aRef,
+            "get_table()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(tRef),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            tRef,
+            "peek_slot()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.ofSlotRef("value")),
+            ExpressionResultString.EMPTY));
+
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+  }
+
+  @Test
+  void testSlotReferenceReturnTypeUnresolvableSlotLeftAsIs() {
+    final String code =
+        """
+                _method a.b
+                    _local h << _self.get_table()
+                    _return h.peek_slot()
+                _endmethod""";
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString aRef = TypeString.ofIdentifier("a", "user");
+    final TypeString tRef = TypeString.ofIdentifier("t", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            aRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            tRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            aRef,
+            "get_table()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(tRef),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            tRef,
+            "peek_slot()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.ofSlotRef("nonexistent")),
+            ExpressionResultString.EMPTY));
+
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.ofSlotRef("nonexistent")));
+  }
+
+  @Test
   void testGenericReturnTypeOnAssignmentMethod() {
     final String code =
         """

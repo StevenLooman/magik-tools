@@ -201,6 +201,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
               TypeStringGrammar.TYPE_CLONE,
               TypeStringGrammar.TYPE_SELF,
               TypeStringGrammar.TYPE_PARAMETER_REFERENCE,
+              TypeStringGrammar.TYPE_SLOT_REFERENCE,
               TypeStringGrammar.TYPE_GENERIC_DEFINITION,
               TypeStringGrammar.TYPE_GENERIC_REFERENCE);
       typeNodes.forEach(
@@ -215,6 +216,12 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
               // Color the parameter name.
               final AstNode refNode = typeTypeNode.getChildren().get(2);
               this.addSemanticToken(refNode, SemanticToken.Type.PARAMETER, docModifier);
+            } else if (typeTypeNode.is(TypeStringGrammar.TYPE_SLOT_REFERENCE)) {
+              this.addSemanticToken(typeTypeNode, SemanticToken.Type.KEYWORD, docModifier);
+
+              // Color the slot name.
+              final AstNode refNode = typeTypeNode.getChildren().get(2);
+              this.addSemanticToken(refNode, SemanticToken.Type.PROPERTY, docModifier);
             } else if (typeTypeNode.is(TypeStringGrammar.TYPE_GENERIC_DEFINITION)) {
               final AstNode nameNode = typeTypeNode.getChildren().get(0);
               this.addSemanticToken(nameNode, SemanticToken.Type.TYPE_PARAMETER, docModifier);

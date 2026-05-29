@@ -119,6 +119,7 @@ public final class TypeString implements Comparable<TypeString> {
   private static final String GENERIC_DEFINITION = "_generic_def";
   private static final String GENERIC_REFERENCE = "_generic_ref";
   private static final String PARAMETER = "_parameter";
+  private static final String SLOT = "_slot";
   private static final String COMBINED = "_combined";
   private static final String VARIADIC = "_variadic";
 
@@ -201,7 +202,17 @@ public final class TypeString implements Comparable<TypeString> {
    * @return {@link TypeString}.
    */
   public static TypeString ofParameterRef(final String identifier) {
-    return new TypeString(identifier, PARAMETER, null);
+    return new TypeString(identifier, TypeString.PARAMETER, null);
+  }
+
+  /**
+   * Create a {@link TypeString} of a slot reference.
+   *
+   * @param identifier Name of slot.
+   * @return {@link TypeString}.
+   */
+  public static TypeString ofSlotRef(final String identifier) {
+    return new TypeString(identifier, TypeString.SLOT, null);
   }
 
   /**
@@ -308,6 +319,10 @@ public final class TypeString implements Comparable<TypeString> {
       return this.string;
     }
 
+    if (this.isParameterReference() || this.isSlotReference()) {
+      return this.getReferenceFullString();
+    }
+
     if (this.isGenericDefinition()) {
       return TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue()
           + this.string
@@ -322,33 +337,48 @@ public final class TypeString implements Comparable<TypeString> {
           + TypeStringGrammar.Punctuator.TYPE_GENERIC_CLOSE.getValue();
     }
 
-    final String genericDefs =
-        !this.generics.isEmpty()
-            ? this.generics.stream()
-                .map(
-                    typeStr -> {
-                      if (typeStr.isGenericReference()) {
-                        return typeStr.getIdentifier();
-                      } else if (typeStr.isGenericDefinition()) {
-                        return typeStr.string
-                            + TypeStringGrammar.Punctuator.TYPE_GENERIC_ASSIGN.getValue()
-                            + typeStr.genericType.getFullString();
-                      }
-
-                      throw new IllegalStateException();
-                    })
-                .collect(
-                    Collectors.joining(
-                        TypeStringGrammar.Punctuator.TYPE_GENERIC_SEPARATOR.getValue(),
-                        TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue(),
-                        TypeStringGrammar.Punctuator.TYPE_GENERIC_CLOSE.getValue()))
-            : "";
+    final String genericDefs = this.getGenericDefinitionsFullString();
 
     if (this.string.contains(":")) {
       return this.string + genericDefs;
     }
 
     return this.currentPackage + ":" + this.string + genericDefs;
+  }
+
+  private String getReferenceFullString() {
+    return this.currentPackage
+        + TypeStringGrammar.Punctuator.TYPE_ARG_OPEN.getValue()
+        + this.string
+        + TypeStringGrammar.Punctuator.TYPE_ARG_CLOSE.getValue();
+  }
+
+  private String getGenericDefinitionsFullString() {
+    if (this.generics.isEmpty()) {
+      return "";
+    }
+
+    return this.generics.stream()
+        .map(TypeString::getSingleGenericFullString)
+        .collect(
+            Collectors.joining(
+                TypeStringGrammar.Punctuator.TYPE_GENERIC_SEPARATOR.getValue(),
+                TypeStringGrammar.Punctuator.TYPE_GENERIC_OPEN.getValue(),
+                TypeStringGrammar.Punctuator.TYPE_GENERIC_CLOSE.getValue()));
+  }
+
+  private String getSingleGenericFullString() {
+    if (this.isGenericReference()) {
+      return this.getIdentifier();
+    }
+
+    if (this.isGenericDefinition()) {
+      return this.string
+          + TypeStringGrammar.Punctuator.TYPE_GENERIC_ASSIGN.getValue()
+          + this.genericType.getFullString();
+    }
+
+    throw new IllegalStateException();
   }
 
   /**
@@ -429,6 +459,10 @@ public final class TypeString implements Comparable<TypeString> {
 
   public boolean isParameterReference() {
     return TypeString.PARAMETER.equalsIgnoreCase(this.currentPackage);
+  }
+
+  public boolean isSlotReference() {
+    return TypeString.SLOT.equalsIgnoreCase(this.currentPackage);
   }
 
   /**

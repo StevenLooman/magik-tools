@@ -40,6 +40,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
         TypeStringGrammar.TYPE_CLONE,
         TypeStringGrammar.TYPE_SELF,
         TypeStringGrammar.TYPE_PARAMETER_REFERENCE,
+        TypeStringGrammar.TYPE_SLOT_REFERENCE,
         TypeStringGrammar.TYPE_GENERIC_DEFINITION,
         TypeStringGrammar.TYPE_GENERIC_REFERENCE,
         TypeStringGrammar.TYPE_IDENTIFIER,
@@ -70,6 +71,8 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
       this.buildSelf(node);
     } else if (node.is(TypeStringGrammar.TYPE_PARAMETER_REFERENCE)) {
       this.buildParameterRef(node);
+    } else if (node.is(TypeStringGrammar.TYPE_SLOT_REFERENCE)) {
+      this.buildSlotRef(node);
     } else if (node.is(TypeStringGrammar.TYPE_GENERIC_DEFINITION)) {
       this.buildGenericDefinition(node);
     } else if (node.is(TypeStringGrammar.TYPE_GENERIC_REFERENCE)) {
@@ -102,6 +105,15 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
     final AstNode identifierAst = childAsts.get(2);
     final String refStr = identifierAst.getTokenValue();
     final TypeString part = TypeString.ofParameterRef(refStr);
+
+    this.mapping.put(node, part);
+  }
+
+  private void buildSlotRef(final AstNode node) {
+    final List<AstNode> childAsts = node.getChildren();
+    final AstNode identifierAst = childAsts.get(2);
+    final String refStr = identifierAst.getTokenValue();
+    final TypeString part = TypeString.ofSlotRef(refStr);
 
     this.mapping.put(node, part);
   }
@@ -143,6 +155,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
             TypeStringGrammar.TYPE_CLONE,
             TypeStringGrammar.TYPE_SELF,
             TypeStringGrammar.TYPE_PARAMETER_REFERENCE,
+            TypeStringGrammar.TYPE_SLOT_REFERENCE,
             TypeStringGrammar.TYPE_GENERIC_DEFINITION,
             TypeStringGrammar.TYPE_GENERIC_REFERENCE,
             TypeStringGrammar.TYPE_IDENTIFIER,

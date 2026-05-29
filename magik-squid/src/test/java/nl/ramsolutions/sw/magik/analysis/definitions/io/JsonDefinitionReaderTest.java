@@ -301,6 +301,29 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
+  void testReadMethodWithSlotReferenceReturnType(@TempDir final Path tempDir) throws IOException {
+    final Path path = tempDir.resolve("type_database.jsonl");
+    final String line =
+        """
+                {"type_name":"sw:rope","method_name":"peek_slot()","modifiers":[],\
+                "parameters":[],"assignment_parameter":null,\
+                "return_types":["_slot(size)"],"loop_types":[],"source_file":null,\
+                "doc":"","hash":0,"module_name":null,\
+                "pragma":{"classify_levels":["basic"],"topics":[],"usages":["external","internal"]},\
+                "instruction":"method"}
+                """;
+    Files.writeString(path, line);
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, definitionKeeper);
+
+    final TypeString ropeRef = TypeString.ofIdentifier("sw:rope", "sw");
+    final MethodDefinition methodDef =
+        definitionKeeper.getMethodDefinitions(ropeRef).iterator().next();
+    assertThat(methodDef.getReturnTypes().getTypes()).containsExactly(TypeString.ofSlotRef("size"));
+  }
+
+  @Test
   void testReadBinaryOperator() throws IOException {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 
