@@ -4,17 +4,21 @@ import java.util.List;
 import java.util.Map;
 import nl.ramsolutions.sw.checks.magik.CommentedCodeCheck;
 import nl.ramsolutions.sw.checks.magik.DuplicateMethodInFileCheck;
+import nl.ramsolutions.sw.checks.magik.EmitInLoopCheck;
+import nl.ramsolutions.sw.checks.magik.EmitOrLeaveResultUnusedCheck;
 import nl.ramsolutions.sw.checks.magik.EmptyBlockCheck;
 import nl.ramsolutions.sw.checks.magik.ExemplarSlotCountCheck;
 import nl.ramsolutions.sw.checks.magik.FileMethodCountCheck;
 import nl.ramsolutions.sw.checks.magik.FileMustStartWithPackageStatementCheck;
 import nl.ramsolutions.sw.checks.magik.FileNotInLoadListCheck;
+import nl.ramsolutions.sw.checks.magik.FinallyWithRequiresOverCheck;
 import nl.ramsolutions.sw.checks.magik.ForbiddenCallCheck;
 import nl.ramsolutions.sw.checks.magik.ForbiddenGlobalUsageCheck;
 import nl.ramsolutions.sw.checks.magik.ForbiddenInheritanceCheck;
 import nl.ramsolutions.sw.checks.magik.FormattingCheck;
 import nl.ramsolutions.sw.checks.magik.HidesVariableCheck;
 import nl.ramsolutions.sw.checks.magik.ImportMissingDefinitionCheck;
+import nl.ramsolutions.sw.checks.magik.LeaveInProtectionCheck;
 import nl.ramsolutions.sw.checks.magik.LhsRhsComparatorEqualCheck;
 import nl.ramsolutions.sw.checks.magik.LineLengthCheck;
 import nl.ramsolutions.sw.checks.magik.LocalImportProcedureCheck;
@@ -76,10 +80,12 @@ public final class MagikCheckList extends CheckList<MagikCheck, MagikCodeActionS
         CommentedCodeCheck.class,
         DuplicateMethodInFileCheck.class,
         EmptyBlockCheck.class,
+        EmitInLoopCheck.class,
         ExemplarSlotCountCheck.class,
         FileMethodCountCheck.class,
         FileMustStartWithPackageStatementCheck.class,
         FileNotInLoadListCheck.class,
+        FinallyWithRequiresOverCheck.class,
         ForbiddenCallCheck.class,
         ForbiddenGlobalUsageCheck.class,
         ForbiddenInheritanceCheck.class,
@@ -87,6 +93,7 @@ public final class MagikCheckList extends CheckList<MagikCheck, MagikCodeActionS
         MissingPragmaCheck.class,
         HidesVariableCheck.class,
         ImportMissingDefinitionCheck.class,
+        LeaveInProtectionCheck.class,
         LhsRhsComparatorEqualCheck.class,
         LineLengthCheck.class,
         LocalImportProcedureCheck.class,
@@ -113,6 +120,7 @@ public final class MagikCheckList extends CheckList<MagikCheck, MagikCodeActionS
         UndefinedVariableCheck.class,
         UnnamedProcedureCheck.class,
         UnsafeEvaluateInvocationCheck.class,
+        EmitOrLeaveResultUnusedCheck.class,
         UnusedVariableCheck.class,
         UseValueCompareCheck.class,
         VariableCountCheck.class,

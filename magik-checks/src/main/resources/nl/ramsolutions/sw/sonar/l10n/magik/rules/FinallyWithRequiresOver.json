@@ -1,0 +1,15 @@
+{
+  "title": "Finally with requires over",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "FinallyWithRequiresOver",
+  "sqKey": "finally-with-requires-over"
+}

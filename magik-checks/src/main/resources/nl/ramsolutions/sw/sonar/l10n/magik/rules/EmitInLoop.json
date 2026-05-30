@@ -1,0 +1,16 @@
+{
+  "title": "Emit in loop body",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "10min"
+  },
+  "tags": [
+    "confusing",
+    "pitfall"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "EmitInLoop",
+  "sqKey": "emit-in-loop"
+}

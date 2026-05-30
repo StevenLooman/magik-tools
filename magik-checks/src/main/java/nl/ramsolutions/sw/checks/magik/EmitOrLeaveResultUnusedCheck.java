@@ -1,0 +1,121 @@
+package nl.ramsolutions.sw.checks.magik;
+
+import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.checks.MagikCheck;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import org.sonar.check.Rule;
+
+/** Check for emit or leave-with statements whose value is discarded. */
+@Rule(key = EmitOrLeaveResultUnusedCheck.CHECK_KEY)
+public class EmitOrLeaveResultUnusedCheck extends MagikCheck {
+
+  @SuppressWarnings("checkstyle:JavadocVariable")
+  public static final String CHECK_KEY = "EmitOrLeaveResultUnused";
+
+  private static final String MESSAGE = "Result is not used.";
+
+  @Override
+  protected void walkPreEmitStatement(final AstNode node) {
+    final AstNode bodyNode = node.getFirstAncestor(MagikGrammar.BODY);
+    if (bodyNode == null) {
+      return;
+    }
+
+    final AstNode bodyParent = bodyNode.getParent();
+    if (bodyParent.is(
+        MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION, MagikGrammar.LOOP)) {
+      return;
+    }
+
+    final AstNode rootNode = EmitOrLeaveResultUnusedCheck.getRoot(bodyParent);
+    if (EmitOrLeaveResultUnusedCheck.isStandaloneStatement(rootNode)) {
+      this.addIssue(node, MESSAGE);
+    }
+  }
+
+  @Override
+  protected void walkPreLeaveStatement(final AstNode node) {
+    // Only flag _leave _with val.
+    if (node.getFirstChild(MagikGrammar.TUPLE) == null) {
+      return;
+    }
+
+    // Skip labeled _leave.
+    if (node.getFirstChild(MagikGrammar.LABEL) != null) {
+      return;
+    }
+
+    final AstNode bodyNode = node.getFirstAncestor(MagikGrammar.BODY);
+    if (bodyNode == null) {
+      return;
+    }
+
+    final AstNode bodyParent = bodyNode.getParent();
+    if (bodyParent.is(
+        MagikGrammar.METHOD_DEFINITION,
+        MagikGrammar.PROCEDURE_DEFINITION,
+        MagikGrammar.IF,
+        MagikGrammar.ELIF,
+        MagikGrammar.ELSE,
+        MagikGrammar.TRY,
+        MagikGrammar.WHEN,
+        MagikGrammar.PROTECT,
+        MagikGrammar.CATCH,
+        MagikGrammar.LOCK)) {
+      return;
+    }
+
+    final AstNode rootNode = EmitOrLeaveResultUnusedCheck.getRoot(bodyParent);
+    if (EmitOrLeaveResultUnusedCheck.isStandaloneStatement(rootNode)) {
+      this.addIssue(node, MESSAGE);
+    }
+  }
+
+  /**
+   * Walk up through sub-nodes to find the root control structure node.
+   *
+   * <p>ELIF/ELSE are sub-nodes of IF; WHEN is a sub-node of TRY; PROTECTION is a sub-node of
+   * PROTECT; FINALLY is a sub-node of LOOP which is itself inside OVER/WHILE/FOR.
+   *
+   * @param bodyParentNode The parent node of the BODY containing the emit/leave statement.
+   * @return The root control structure node.
+   */
+  private static AstNode getRoot(final AstNode bodyParentNode) {
+    if (bodyParentNode.is(MagikGrammar.ELIF, MagikGrammar.ELSE)) {
+      return bodyParentNode.getParent();
+    }
+
+    if (bodyParentNode.is(MagikGrammar.WHEN)) {
+      return bodyParentNode.getParent();
+    }
+
+    if (bodyParentNode.is(MagikGrammar.PROTECTION)) {
+      return bodyParentNode.getParent();
+    }
+
+    if (bodyParentNode.is(MagikGrammar.FINALLY)) {
+      final AstNode loopNode = bodyParentNode.getParent();
+      return loopNode.getParent();
+    }
+
+    return bodyParentNode;
+  }
+
+  /**
+   * Check if the control structure is used as a standalone expression statement.
+   *
+   * @param rootNode The root control structure node.
+   * @return True if the control structure is a standalone statement, false otherwise.
+   */
+  private static boolean isStandaloneStatement(final AstNode rootNode) {
+    final AstNode contextNode =
+        rootNode.getFirstAncestor(
+            MagikGrammar.EXPRESSION_STATEMENT,
+            MagikGrammar.EMIT_STATEMENT,
+            MagikGrammar.VARIABLE_DEFINITION_STATEMENT,
+            MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT,
+            MagikGrammar.ASSIGNMENT_EXPRESSION,
+            MagikGrammar.ARGUMENT);
+    return contextNode != null && contextNode.is(MagikGrammar.EXPRESSION_STATEMENT);
+  }
+}

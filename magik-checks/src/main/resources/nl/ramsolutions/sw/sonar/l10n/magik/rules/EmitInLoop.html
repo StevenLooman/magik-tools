@@ -1,0 +1,23 @@
+<p>An emit statement (<code>>></code>) inside a loop body has no effect.</p>
+<h2>Non-compliant Code Example</h2>
+<pre>
+_method a.b
+  _local loop_val &lt;&lt;
+    _for element _over collection.fast_elements()
+    _loop
+      >> element
+    _endloop
+  show(loop_val)  # loop_val is always _unset, emits have no effect.
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre>
+_method a.b
+  _local loop_val &lt;&lt;
+    _for element _over collection.fast_elements()
+    _loop
+      _leave _with element
+    _endloop
+  show(loop_val)  # loop_val has a value from the first iteration of the loop.
+_endmethod
+</pre>

@@ -1,0 +1,18 @@
+<p>A <code>_leave</code> or <code>_leave _with</code> statement inside a <code>_protection</code> block is a runtime error in Magik. The Magik compiler raises: <em>Cannot leave from protection</em>.</p>
+<p>Use <code>_leave</code> only inside <code>_protect</code> body, <code>_loop</code>, or other constructs that support it. The <code>_protection</code> block is a cleanup/finally clause and does not support early exit via <code>_leave</code>.</p>
+<h2>Non-compliant Code Example</h2>
+<pre>
+_protect
+  do_something()
+_protection
+  _leave  # Compiler error: Cannot leave from protection
+_endprotect
+</pre>
+<h2>Compliant Code Example</h2>
+<pre>
+_protect
+  _leave  # valid: _leave in the protect body
+_protection
+  cleanup()
+_endprotect
+</pre>
