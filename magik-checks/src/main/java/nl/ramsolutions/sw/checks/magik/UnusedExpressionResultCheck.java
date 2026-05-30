@@ -28,8 +28,7 @@ public class UnusedExpressionResultCheck extends MagikCheck {
       return;
     }
     final AstNode expressionStatement = expression.getParent();
-    if (expressionStatement == null
-        || !expressionStatement.is(MagikGrammar.EXPRESSION_STATEMENT)) {
+    if (expressionStatement == null || !expressionStatement.is(MagikGrammar.EXPRESSION_STATEMENT)) {
       return;
     }
     final AstNode construct = node.getFirstChild();
@@ -57,8 +56,8 @@ public class UnusedExpressionResultCheck extends MagikCheck {
 
   /**
    * Returns true when any directly-reachable body of the construct contains an emit statement.
-   * Recurses through structural connector nodes (ELIF, ELSE, WHEN, PROTECTION, LOOP, FINALLY,
-   * OVER) but stops at nested constructs so inner expressions are not traversed.
+   * Recurses through structural connector nodes (ELIF, ELSE, WHEN, PROTECTION, LOOP, FINALLY, OVER)
+   * but stops at nested constructs so inner expressions are not traversed.
    */
   private boolean constructProducesValue(final AstNode node) {
     for (final AstNode child : node.getChildren()) {
