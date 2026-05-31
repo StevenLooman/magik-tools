@@ -32,10 +32,10 @@ public class UnusedExpressionResultCheck extends MagikCheck {
       return;
     }
     final AstNode construct = node.getFirstChild();
-    if (construct == null || !isBlockLikeConstruct(construct)) {
+    if (construct == null || !this.isBlockLikeConstruct(construct)) {
       return;
     }
-    if (constructProducesValue(construct)) {
+    if (this.constructProducesValue(construct)) {
       this.addIssue(construct, MESSAGE);
     }
   }
@@ -62,7 +62,7 @@ public class UnusedExpressionResultCheck extends MagikCheck {
   private boolean constructProducesValue(final AstNode node) {
     for (final AstNode child : node.getChildren()) {
       if (child.is(MagikGrammar.BODY)) {
-        if (bodyHasEmit(child)) {
+        if (this.bodyHasEmit(child)) {
           return true;
         }
       } else if (child.is(
@@ -73,7 +73,7 @@ public class UnusedExpressionResultCheck extends MagikCheck {
           MagikGrammar.LOOP,
           MagikGrammar.FINALLY,
           MagikGrammar.OVER)) {
-        if (constructProducesValue(child)) {
+        if (this.constructProducesValue(child)) {
           return true;
         }
       }

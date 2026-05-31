@@ -16,11 +16,11 @@ _block >> computed_value _endblock
 <h2>Compliant Code Example</h2>
 <pre data-diff-id="1" data-diff-type="compliant">
 result << _if condition
-_then
-    >> _true
-_else
-    >> _false
-_endif
+          _then
+              >> _true
+          _else
+              >> _false
+          _endif
 
 result << _try >> _true _when error >> _false _endtry
 
