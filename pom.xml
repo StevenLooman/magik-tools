@@ -69,7 +69,7 @@
     <spotbugs-maven-plugin.version>4.8.3.1</spotbugs-maven-plugin.version>
     <spotbugs.version>4.9.8</spotbugs.version>
     <com.github.marschall-memoryfilesystem.version>2.8.2</com.github.marschall-memoryfilesystem.version>
-    <openrewrite.rewrite-maven-plugin.version>6.36.0</openrewrite.rewrite-maven-plugin.version>
+    <openrewrite.rewrite-maven-plugin.version>6.40.0</openrewrite.rewrite-maven-plugin.version>
 
     <!-- JaCoCo thresholds. Increase gradually as you add tests. -->
     <jacoco.unit-tests.limit.instruction-ratio>0%</jacoco.unit-tests.limit.instruction-ratio>
