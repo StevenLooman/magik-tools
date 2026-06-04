@@ -115,6 +115,7 @@ public class EmitOrLeaveResultUnusedCheck extends MagikCheck {
             MagikGrammar.VARIABLE_DEFINITION_STATEMENT,
             MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT,
             MagikGrammar.ASSIGNMENT_EXPRESSION,
+            MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION,
             MagikGrammar.ARGUMENT);
     return contextNode != null && contextNode.is(MagikGrammar.EXPRESSION_STATEMENT);
   }
