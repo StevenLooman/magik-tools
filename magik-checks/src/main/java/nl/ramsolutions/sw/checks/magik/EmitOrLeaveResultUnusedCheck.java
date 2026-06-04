@@ -40,33 +40,19 @@ public class EmitOrLeaveResultUnusedCheck extends MagikCheck {
       return;
     }
 
-    // Skip labeled _leave.
+    // Skip labeled _leave; it may target an outer loop that cannot be resolved here.
     if (node.getFirstChild(MagikGrammar.LABEL) != null) {
       return;
     }
 
-    final AstNode bodyNode = node.getFirstAncestor(MagikGrammar.BODY);
-    if (bodyNode == null) {
+    // A _leave targets the nearest enclosing loop or block; its _with value becomes that
+    // construct's value. Flag only when that construct's value is itself discarded.
+    final AstNode targetNode = node.getFirstAncestor(MagikGrammar.LOOP, MagikGrammar.BLOCK);
+    if (targetNode == null) {
       return;
     }
 
-    final AstNode bodyParent = bodyNode.getParent();
-    if (bodyParent.is(
-        MagikGrammar.METHOD_DEFINITION,
-        MagikGrammar.PROCEDURE_DEFINITION,
-        MagikGrammar.IF,
-        MagikGrammar.ELIF,
-        MagikGrammar.ELSE,
-        MagikGrammar.TRY,
-        MagikGrammar.WHEN,
-        MagikGrammar.PROTECT,
-        MagikGrammar.CATCH,
-        MagikGrammar.LOCK)) {
-      return;
-    }
-
-    final AstNode rootNode = EmitOrLeaveResultUnusedCheck.getRoot(bodyParent);
-    if (EmitOrLeaveResultUnusedCheck.isStandaloneStatement(rootNode)) {
+    if (EmitOrLeaveResultUnusedCheck.isStandaloneStatement(targetNode)) {
       this.addIssue(node, MESSAGE);
     }
   }

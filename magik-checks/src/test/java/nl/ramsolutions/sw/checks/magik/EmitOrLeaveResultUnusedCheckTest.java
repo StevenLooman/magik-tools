@@ -267,6 +267,16 @@ class EmitOrLeaveResultUnusedCheckTest {
           >> _block _leave _with 10 _endblock
         _endmethod
         """,
+        """
+        _method a.b
+          z << _loop
+                 _if a?
+                 _then
+                   _leave _with 10
+                 _endif
+               _endloop
+        _endmethod
+        """,
       })
   void testLeaveWithValid(final String code) {
     final MagikCheck check = new EmitOrLeaveResultUnusedCheck();
@@ -291,6 +301,27 @@ class EmitOrLeaveResultUnusedCheckTest {
           _over 1.upto(3)
           _loop
             _leave _with 10
+          _endloop
+        _endmethod
+        """,
+        """
+        _method a.b
+          _loop
+            _if a?
+            _then
+              _leave _with 10
+            _endif
+          _endloop
+        _endmethod
+        """,
+        """
+        _method a.b
+          _over 1.upto(3)
+          _loop
+            _if a?
+            _then
+              _leave _with 10
+            _endif
           _endloop
         _endmethod
         """,
