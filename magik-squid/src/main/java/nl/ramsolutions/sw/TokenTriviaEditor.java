@@ -53,6 +53,13 @@ public class TokenTriviaEditor {
                         .map(Trivia::getToken)
                         .map(triviaToken -> Map.entry(triviaToken, token)))
             .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+
+    // Ensure every physical line from 1 up to the highest line has an entry, even lines whose
+    // tokens are absent from the AST caused by a syntax error.
+    final int maxLine = this.lineTokens.keySet().stream().max(Integer::compareTo).orElse(0);
+    for (int line = 1; line <= maxLine; ++line) {
+      this.lineTokens.computeIfAbsent(line, key -> new ArrayList<>());
+    }
   }
 
   /**
