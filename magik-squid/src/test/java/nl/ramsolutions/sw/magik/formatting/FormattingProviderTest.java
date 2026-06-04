@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.formatting;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
@@ -178,5 +179,31 @@ class FormattingProviderTest {
 
     assertThat(edits)
         .containsOnly(new TextEdit(new Range(new Position(1, 7), new Position(1, 9)), ""));
+  }
+
+  @Test
+  void testFormatFileWithSyntaxErrorAndTrailingNewlines() {
+    final String code =
+        """
+        $
+
+        #---
+        #---
+        _pragma(classify_level=basic)
+        a.b(
+        \t:c,
+        \t:d,
+        \t_false)
+        $
+
+        :e f
+        :g h
+
+        $
+
+
+        """;
+    final FormattingOptions options = new FormattingOptions(8, false, true, true, true);
+    assertThatCode(() -> this.getEdits(code, options)).doesNotThrowAnyException();
   }
 }
