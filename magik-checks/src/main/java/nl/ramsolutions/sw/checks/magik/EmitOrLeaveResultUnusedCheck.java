@@ -108,15 +108,16 @@ public class EmitOrLeaveResultUnusedCheck extends MagikCheck {
    * @return True if the control structure is a standalone statement, false otherwise.
    */
   private static boolean isStandaloneStatement(final AstNode rootNode) {
-    final AstNode contextNode =
-        rootNode.getFirstAncestor(
-            MagikGrammar.EXPRESSION_STATEMENT,
-            MagikGrammar.EMIT_STATEMENT,
-            MagikGrammar.VARIABLE_DEFINITION_STATEMENT,
-            MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT,
-            MagikGrammar.ASSIGNMENT_EXPRESSION,
-            MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION,
-            MagikGrammar.ARGUMENT);
-    return contextNode != null && contextNode.is(MagikGrammar.EXPRESSION_STATEMENT);
+    final AstNode atomNode =
+        rootNode.is(MagikGrammar.ATOM) ? rootNode : rootNode.getFirstAncestor(MagikGrammar.ATOM);
+    if (atomNode == null) {
+      return false;
+    }
+
+    AstNode parentNode = atomNode.getParent();
+    while (parentNode != null && parentNode.is(MagikGrammar.ATOM, MagikGrammar.EXPRESSION)) {
+      parentNode = parentNode.getParent();
+    }
+    return parentNode != null && parentNode.is(MagikGrammar.EXPRESSION_STATEMENT);
   }
 }

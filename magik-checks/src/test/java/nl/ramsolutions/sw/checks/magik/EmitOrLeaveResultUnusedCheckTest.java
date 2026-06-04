@@ -80,6 +80,14 @@ class EmitOrLeaveResultUnusedCheckTest {
                      _endif.default(" b")
         _endmethod
         """,
+        """
+        _method object.result_called?(a?)
+          _if a?
+          _then
+            >> :a
+          _endif.default(:b)
+        _endmethod
+        """,
       })
   void testEmitValid(final String code) {
     final MagikCheck check = new EmitOrLeaveResultUnusedCheck();
