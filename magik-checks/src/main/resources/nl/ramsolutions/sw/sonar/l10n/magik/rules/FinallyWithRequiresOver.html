@@ -1,0 +1,17 @@
+<p>The <code>_with</code> clause of a <code>_finally</code> block is only supported when the loop has an <code>_over</code> parent. The variable in <code>_with</code> receives the value returned by the iterator call, so it has no meaning on a bare <code>_loop</code>.</p>
+<p>Use a plain <code>_finally</code> (without <code>_with</code>) on loops that have no <code>_over</code>.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_loop
+  _if done?() _then _leave _endif
+_finally _with x  # No _over: x has no value to receive
+_endloop
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_over example.iterator_method()
+_loop
+  write(:a)
+_finally _with x  # valid: x receives the returned value of example.iterator_method() result
+_endloop
+</pre>

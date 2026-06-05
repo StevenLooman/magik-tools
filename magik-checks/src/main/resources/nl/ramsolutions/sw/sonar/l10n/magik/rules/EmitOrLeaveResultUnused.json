@@ -1,0 +1,16 @@
+{
+  "title": "Unused result from construct",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "10min"
+  },
+  "tags": [
+    "confusing",
+    "pitfall"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "EmitOrLeaveResultUnused",
+  "sqKey": "emit-or-leave-result-unused"
+}
