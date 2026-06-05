@@ -2,7 +2,7 @@
 <p><code>>></code> emits a value from the current scope to the parent scope. If that scope is a control structure used as a statement, the emitted value is discarded.</p>
 <p><code>_leave _with val</code> provides a value from a loop or block expression. If the loop or block is a standalone statement, the value is discarded.</p>
 <h2>Non-compliant Code Example</h2>
-<pre>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method a.b
   _if condition?
   _then
@@ -15,7 +15,7 @@ _method a.b
 _endmethod
 </pre>
 <h2>Compliant Code Example</h2>
-<pre>
+<pre data-diff-id="1" data-diff-type="compliant">
 _method a.b
   >> _if condition?
   _then

@@ -1,6 +1,6 @@
 <p>An emit statement (<code>>></code>) inside a loop body has no effect.</p>
 <h2>Non-compliant Code Example</h2>
-<pre>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method a.b
   _local loop_val &lt;&lt;
     _for element _over collection.fast_elements()
@@ -11,7 +11,7 @@ _method a.b
 _endmethod
 </pre>
 <h2>Compliant Code Example</h2>
-<pre>
+<pre data-diff-id="1" data-diff-type="compliant">
 _method a.b
   _local loop_val &lt;&lt;
     _for element _over collection.fast_elements()
