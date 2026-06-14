@@ -1,3 +1,10 @@
+## [0.12.1](https://github.com/StevenLooman/magik-tools/tree/0.12.1) - 2026-06-14
+
+### Bugfixes
+
+- Fix error on trimming newlines caused by syntax errors. ([#582](https://github.com/StevenLooman/magik-tools/issues/582))
+
+
 ## [0.12.0](https://github.com/StevenLooman/magik-tools/tree/0.12.0) - 2026-05-17
 
 ### Features
