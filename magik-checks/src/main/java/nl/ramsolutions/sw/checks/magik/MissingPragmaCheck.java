@@ -56,6 +56,7 @@ public class MissingPragmaCheck extends MagikCheck {
   protected void walkPostMagik(final AstNode node) {
     this.getMagikFile().getMagikDefinitions().stream()
         .filter(this::requiresPragma)
+        .filter(this::isTopLevelDefinition)
         .filter(this::isPrimaryDefinition)
         .filter(this::missingPragma)
         .map(this::getIssueNode)
@@ -63,6 +64,21 @@ public class MissingPragmaCheck extends MagikCheck {
             issueNode -> {
               this.addIssue(issueNode, MESSAGE);
             });
+  }
+
+  private boolean isTopLevelDefinition(final MagikDefinition definition) {
+    final AstNode node = definition.getNode();
+
+    // Method definitions can only occur at the top level.
+    if (node.is(MagikGrammar.METHOD_DEFINITION)) {
+      return true;
+    }
+
+    // Any other definition only requires a pragma when its statement is a direct child of the
+    // file root; definitions nested in a `_block`/`_if`/etc are not top level.
+    final AstNode statementNode =
+        node.is(MagikGrammar.STATEMENT) ? node : node.getFirstAncestor(MagikGrammar.STATEMENT);
+    return statementNode != null && statementNode.getParent().is(MagikGrammar.MAGIK);
   }
 
   private boolean requiresPragma(final MagikDefinition definition) {
@@ -135,7 +151,7 @@ public class MissingPragmaCheck extends MagikCheck {
     this.addIssue(helper.getMethodNameNode(), MESSAGE);
   }
 
-  private boolean isPrimaryGlobalDefinition(GlobalDefinition globalDefinition) {
+  private boolean isPrimaryGlobalDefinition(final GlobalDefinition globalDefinition) {
     final AstNode node = globalDefinition.getNode();
     if (!node.is(MagikGrammar.VARIABLE_DEFINITION_STATEMENT)) {
       return false;

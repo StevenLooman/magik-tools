@@ -122,6 +122,25 @@ class MissingPragmaCheckTest {
     assertThat(check).reportsNoIssues(code);
   }
 
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _block
+          def_slotted_exemplar(:example, {})
+        _endblock
+        """,
+        """
+        _block
+          condition.define_condition(:cond, :information, {:data})
+        _endblock
+        """,
+      })
+  void testNonTopLevelDefinitionsNotFlagged(final String code) {
+    final MagikCheck check = new MissingPragmaCheck();
+    assertThat(check).reportsNoIssues(code);
+  }
+
   @Test
   void testGlobalDefinitionInBlock() {
     final String code =
