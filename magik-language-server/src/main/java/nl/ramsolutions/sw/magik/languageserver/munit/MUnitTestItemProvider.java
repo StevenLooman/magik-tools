@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.magik.Location;
@@ -32,6 +33,8 @@ public class MUnitTestItemProvider {
   public static final TypeString MUNIT_TEST_CASE_EXEMPLAR_NAME =
       TypeString.ofIdentifier("test_case", "sw");
   public static final String MUNIT_TEST_METHOD_PREFIX = "test";
+  private static final Set<String> MUNIT_TEST_METHOD_EXCLUSIONS =
+      Set.of("tests()", "test_aspects", "test_aspects_keys", "test_result");
 
   private final IDefinitionKeeper definitionKeeper;
 
@@ -116,7 +119,9 @@ public class MUnitTestItemProvider {
 
   public Stream<ExemplarDefinition> getTestCaseExemplars() {
     final ExemplarDefinition testCaseDefinition =
-        this.definitionKeeper.getExemplarDefinitions(MUNIT_TEST_CASE_EXEMPLAR_NAME).stream()
+        this.definitionKeeper
+            .getExemplarDefinitions(MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME)
+            .stream()
             .findAny()
             .orElse(null);
     if (testCaseDefinition == null) {
@@ -135,12 +140,13 @@ public class MUnitTestItemProvider {
                 this.definitionKeeper
                     .getMethodDefinitions(testExemplarDefinition.getTypeString())
                     .stream())
-        .filter(
-            methodDefinition ->
-                methodDefinition
-                    .getMethodName()
-                    .toLowerCase()
-                    .startsWith(MUNIT_TEST_METHOD_PREFIX));
+        .filter(this::isTestMethod);
+  }
+
+  private boolean isTestMethod(final MethodDefinition methodDefinition) {
+    final String methodName = methodDefinition.getMethodName().toLowerCase();
+    return methodName.startsWith(MUnitTestItemProvider.MUNIT_TEST_METHOD_PREFIX)
+        && !MUnitTestItemProvider.MUNIT_TEST_METHOD_EXCLUSIONS.contains(methodName);
   }
 
   private ProductDefinition getSwProduct(final Path path) throws IOException {
