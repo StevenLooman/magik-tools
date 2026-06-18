@@ -31,6 +31,7 @@
     "onTaskType:run_alias",
     "workspaceContains:**/product.def"
   ],
+  "extensionKind": ["workspace"],
   "main": "./client/out/extension",
   "contributes": {
     "languages": [
