@@ -28,6 +28,7 @@
     "onDebug",
     "onDebugInitialConfigurations",
     "onDebugResolve:magik",
+    "onTaskType:run_alias",
     "workspaceContains:**/product.def"
   ],
   "main": "./client/out/extension",
