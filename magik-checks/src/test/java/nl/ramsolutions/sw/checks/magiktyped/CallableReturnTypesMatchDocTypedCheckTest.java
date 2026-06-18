@@ -4,8 +4,10 @@ import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertT
 
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -14,6 +16,34 @@ import org.junit.jupiter.api.Test;
 
 /** Tests for {@link CallableReturnTypesMatchDocTypedCheck}. */
 class CallableReturnTypesMatchDocTypedCheckTest {
+
+  private MethodDefinition createMethod(
+      final TypeString typeName,
+      final String methodName,
+      final ExpressionResultString returnTypes) {
+    return new MethodDefinition(
+        null,
+        null,
+        null,
+        null,
+        null,
+        typeName,
+        methodName,
+        EnumSet.noneOf(MethodDefinition.Modifier.class),
+        Collections.emptyList(),
+        null,
+        null,
+        returnTypes,
+        ExpressionResultString.EMPTY);
+  }
+
+  private ExemplarDefinition createExemplar(
+      final ExemplarDefinition.Sort sort,
+      final TypeString typeName,
+      final List<TypeString> parents) {
+    return new ExemplarDefinition(
+        null, null, null, null, null, sort, typeName, Collections.emptyList(), parents, null);
+  }
 
   @Test
   void testTypesMatches() {
@@ -192,20 +222,7 @@ class CallableReturnTypesMatchDocTypedCheckTest {
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
-        new MethodDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            TypeString.SW_OBJECT,
-            "m()",
-            EnumSet.noneOf(MethodDefinition.Modifier.class),
-            Collections.emptyList(),
-            null,
-            null,
-            ExpressionResultString.UNDEFINED,
-            ExpressionResultString.EMPTY));
+        this.createMethod(TypeString.SW_OBJECT, "m()", ExpressionResultString.UNDEFINED));
 
     final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
@@ -222,20 +239,7 @@ class CallableReturnTypesMatchDocTypedCheckTest {
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
-        new MethodDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            TypeString.SW_OBJECT,
-            "m()",
-            EnumSet.noneOf(MethodDefinition.Modifier.class),
-            Collections.emptyList(),
-            null,
-            null,
-            ExpressionResultString.UNDEFINED,
-            ExpressionResultString.EMPTY));
+        this.createMethod(TypeString.SW_OBJECT, "m()", ExpressionResultString.UNDEFINED));
 
     final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 2);
@@ -330,20 +334,10 @@ class CallableReturnTypesMatchDocTypedCheckTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString aRef = TypeString.ofIdentifier("a", "user");
     definitionKeeper.add(
-        new MethodDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
+        this.createMethod(
             aRef,
             "scatter_ints()",
-            EnumSet.noneOf(MethodDefinition.Modifier.class),
-            Collections.emptyList(),
-            null,
-            null,
-            new ExpressionResultString(TypeString.ofVariadic(TypeString.SW_INTEGER)),
-            ExpressionResultString.EMPTY));
+            new ExpressionResultString(TypeString.ofVariadic(TypeString.SW_INTEGER))));
     final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
@@ -364,59 +358,18 @@ class CallableReturnTypesMatchDocTypedCheckTest {
     final TypeString basicCollectionMixinRef =
         TypeString.ofIdentifier("basic_collection_mixin", "sw");
     definitionKeeper.add(
-        new nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.Sort.INTRINSIC,
-            basicCollectionMixinRef,
-            Collections.emptyList(),
-            Collections.emptyList(),
-            null));
+        this.createExemplar(
+            ExemplarDefinition.Sort.INTRINSIC, basicCollectionMixinRef, Collections.emptyList()));
     definitionKeeper.add(
-        new nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.Sort.SLOTTED,
-            ropeRef,
-            Collections.emptyList(),
-            java.util.List.of(basicCollectionMixinRef),
-            null));
+        this.createExemplar(
+            ExemplarDefinition.Sort.SLOTTED, ropeRef, List.of(basicCollectionMixinRef)));
     definitionKeeper.add(
-        new MethodDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ropeRef,
-            "new_with()",
-            EnumSet.noneOf(MethodDefinition.Modifier.class),
-            Collections.emptyList(),
-            null,
-            null,
-            new ExpressionResultString(TypeString.SELF),
-            ExpressionResultString.EMPTY));
+        this.createMethod(ropeRef, "new_with()", new ExpressionResultString(TypeString.SELF)));
     definitionKeeper.add(
-        new MethodDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
+        this.createMethod(
             basicCollectionMixinRef,
             "for_scatter()",
-            EnumSet.noneOf(MethodDefinition.Modifier.class),
-            Collections.emptyList(),
-            null,
-            null,
-            new ExpressionResultString(TypeString.ofVariadic(TypeString.ofGenericReference("E"))),
-            ExpressionResultString.EMPTY));
+            new ExpressionResultString(TypeString.ofVariadic(TypeString.ofGenericReference("E")))));
     final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
@@ -429,6 +382,41 @@ class CallableReturnTypesMatchDocTypedCheckTest {
           ## @return {sw:integer...}
           _return 1, 2, 3
         _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testDefineSharedConstantMissingReturnDoc() {
+    final String code =
+        """
+        object.define_shared_constant(:something, 1 + 2, :public)
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
+  void testDefineSharedConstantReturnDocMismatch() {
+    final String code =
+        """
+        ## @return {sw:char16_vector}
+        object.define_shared_constant(:something, 123, :public)
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
+  void testDefineSharedVariableReturnDocMatchesReasonedExpression() {
+    final String code =
+        """
+        ## @return {sw:integer}
+        object.define_shared_variable(:something_else, 100 + 23, :public)
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();

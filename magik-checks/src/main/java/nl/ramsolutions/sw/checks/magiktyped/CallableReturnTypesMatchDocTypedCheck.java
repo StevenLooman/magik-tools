@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.Objects;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -23,6 +25,9 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
 
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "CallableReturnTypesMatchDoc";
+
+  private static final String DEFINE_SHARED_CONSTANT = "define_shared_constant()";
+  private static final String DEFINE_SHARED_VARIABLE = "define_shared_variable()";
 
   private static final String MESSAGE_MISMATCH =
       "@return type(s) (%s) do not match callable return type(s) (%s).";
@@ -43,6 +48,59 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
   @Override
   protected void walkPostProcedureDefinition(final AstNode node) {
     this.checkCallableReturnDoc(node);
+  }
+
+  @Override
+  protected void walkPostMethodInvocation(final AstNode node) {
+    if (!this.isSharedDefinitionInvocation(node) || !this.isTopLevelInvocation(node)) {
+      return;
+    }
+
+    this.checkSharedDefinitionReturnDoc(node);
+  }
+
+  private boolean isSharedDefinitionInvocation(final AstNode node) {
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
+    return helper.isMethodInvocationOf(DEFINE_SHARED_CONSTANT)
+        || helper.isMethodInvocationOf(DEFINE_SHARED_VARIABLE);
+  }
+
+  private boolean isTopLevelInvocation(final AstNode node) {
+    final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
+    return statementNode != null && statementNode.getParent().is(MagikGrammar.MAGIK);
+  }
+
+  private void checkSharedDefinitionReturnDoc(final AstNode node) {
+    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+    if (argumentsNode == null) {
+      return;
+    }
+
+    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final AstNode valueExpressionNode = argumentsHelper.getArgument(1);
+    if (valueExpressionNode == null) {
+      return;
+    }
+
+    final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
+    final TypeString sharedType =
+        reasonerState.getNodeType(valueExpressionNode).get(0, TypeString.UNDEFINED);
+    final List<Map.Entry<AstNode, TypeString>> typeDocEntries = this.extractSharedDocResult(node);
+    final Map.Entry<AstNode, TypeString> typeDocEntry =
+        typeDocEntries.isEmpty() ? null : typeDocEntries.get(0);
+
+    this.handleReturnTypeEntry(
+        sharedType,
+        typeDocEntry,
+        typeDocEntry != null ? typeDocEntry.getValue() : null,
+        node,
+        this.getTypeStringResolver());
+
+    for (int index = 1; index < typeDocEntries.size(); ++index) {
+      final AstNode returnTypeNode = typeDocEntries.get(index).getKey();
+      final AstNode typeValueNode = returnTypeNode.getFirstChild(TypeDocGrammar.TYPE_VALUE);
+      this.addIssue(typeValueNode, MESSAGE_UNEXPECTED_RETURN_DOC);
+    }
   }
 
   private void checkCallableReturnDoc(final AstNode node) {
@@ -258,6 +316,13 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
     return List.copyOf(docParser.getReturnTypeNodes().entrySet());
   }
 
+  private List<Map.Entry<AstNode, TypeString>> extractSharedDocResult(final AstNode methodNode) {
+    final AstNode statementNode = methodNode.getFirstAncestor(MagikGrammar.STATEMENT);
+    final AstNode docNode = Objects.requireNonNullElse(statementNode, methodNode);
+    final TypeDocParser docParser = new TypeDocParser(docNode);
+    return List.copyOf(docParser.getReturnTypeNodes().entrySet());
+  }
+
   private boolean isAbstractCallable(final AstNode node) {
     if (node.is(MagikGrammar.METHOD_DEFINITION)) {
       final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
@@ -270,6 +335,11 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
   private AstNode getCallableNameNode(final AstNode node) {
     if (node.is(MagikGrammar.METHOD_DEFINITION)) {
       final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
+      return helper.getMethodNameNode();
+    }
+
+    if (node.is(MagikGrammar.METHOD_INVOCATION)) {
+      final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
       return helper.getMethodNameNode();
     }
 
