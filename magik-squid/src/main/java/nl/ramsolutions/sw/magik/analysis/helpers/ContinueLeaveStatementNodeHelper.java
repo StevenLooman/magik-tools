@@ -53,15 +53,17 @@ public class ContinueLeaveStatementNodeHelper {
 
     // If no BODY node was found and statement is a LEAVE, then find nearest _loop.
     // Find nearest LOOP or BLOCK statement.
-    final AstNode loopOrBlockNode = node.getFirstAncestor(MagikGrammar.LOOP, MagikGrammar.BLOCK);
+    final AstNode loopOrBlockNode =
+        this.node.getFirstAncestor(MagikGrammar.LOOP, MagikGrammar.BLOCK);
     if (loopOrBlockNode != null) {
       return loopOrBlockNode.getFirstChild(MagikGrammar.BODY);
     }
 
-    if (node.is(MagikGrammar.RETURN_STATEMENT)) {
+    if (this.node.is(MagikGrammar.RETURN_STATEMENT)) {
       // Find the nearest procedure or method definition.
       final AstNode procedureNode =
-          node.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION, MagikGrammar.METHOD_DEFINITION);
+          this.node.getFirstAncestor(
+              MagikGrammar.PROCEDURE_DEFINITION, MagikGrammar.METHOD_DEFINITION);
       final AstNode bodyNode = procedureNode.getFirstChild(MagikGrammar.BODY);
       if (bodyNode != null) {
         return bodyNode;
@@ -69,7 +71,7 @@ public class ContinueLeaveStatementNodeHelper {
     }
 
     // Last resort, use nearest body.
-    return node.getFirstAncestor(MagikGrammar.BODY);
+    return this.node.getFirstAncestor(MagikGrammar.BODY);
   }
 
   public AstNode getRelatedLoopNode() {
