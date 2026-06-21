@@ -19,6 +19,7 @@ import nl.ramsolutions.sw.checks.magiktyped.MethodExistsTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.MethodIsPublicTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.ModuleRequiredForGlobalTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.MultipleAssignmentCountMismatchTypedCheck;
+import nl.ramsolutions.sw.checks.magiktyped.SlotDefaultValueMatchesTypeDocTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.SlotExistsTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.SuperMethodExistsTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.SwChar16VectorEvaluateInvocationTypedCheck;
@@ -68,6 +69,7 @@ public final class MagikTypedCheckList extends CheckList<MagikCheck, MagikTypedC
         MultipleAssignmentCountMismatchTypedCheck.class,
         CallableReturnTypesMatchDocTypedCheck.class,
         ModuleRequiredForGlobalTypedCheck.class,
+        SlotDefaultValueMatchesTypeDocTypedCheck.class,
         SlotExistsTypedCheck.class,
         SuperMethodExistsTypedCheck.class,
         SwChar16VectorEvaluateInvocationTypedCheck.class,

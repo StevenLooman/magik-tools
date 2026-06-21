@@ -1,0 +1,16 @@
+{
+  "title": "Slot default value matches type doc",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "SlotDefaultValueMatchesTypeDoc",
+  "sqKey": "slot-default-value-matches-type-doc"
+}
