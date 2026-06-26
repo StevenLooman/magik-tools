@@ -130,7 +130,7 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
 
   private boolean slotExists(final String name, final AstNode definitionNode) {
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
-    final TypeString receiverType = helper.getTypeString();
+    final TypeString receiverType = helper.getExemplarTypeString();
     final TypeStringResolver resolver = this.getTypeStringResolver();
     final Collection<SlotDefinition> slots = resolver.getSlotDefinitions(receiverType);
     return slots.stream().anyMatch(slot -> slot.getName().equals(name));

@@ -132,7 +132,7 @@ class MethodRenamer extends Renamer {
     if (methodNameParentNode.is(MagikGrammar.METHOD_DEFINITION)) {
       final MethodDefinitionNodeHelper helper =
           new MethodDefinitionNodeHelper(methodNameParentNode);
-      return helper.getTypeString();
+      return helper.getExemplarTypeString();
     } else if (methodNameParentNode.is(MagikGrammar.METHOD_INVOCATION)) {
       final MethodInvocationNodeHelper helper =
           new MethodInvocationNodeHelper(methodNameParentNode);

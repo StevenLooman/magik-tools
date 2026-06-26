@@ -167,7 +167,8 @@ public class DefinitionsProvider {
       return Collections.emptyList();
     }
 
-    final TypeString ownerTypeStr = new MethodDefinitionNodeHelper(methodDefNode).getTypeString();
+    final TypeString ownerTypeStr =
+        new MethodDefinitionNodeHelper(methodDefNode).getExemplarTypeString();
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     return resolver.getSlotDefinitions(ownerTypeStr).stream()
         .filter(slot -> slot.getName().equals(slotName))

@@ -83,7 +83,7 @@ public class MethodDefinitionParser {
         moduleDefFile != null ? moduleDefFile.getModuleDefinition().getName() : null;
 
     // Figure exemplar name & method name.
-    final TypeString exemplarName = helper.getTypeString();
+    final TypeString exemplarName = helper.getExemplarTypeString();
     final String methodName = helper.getMethodName();
 
     // Figure modifiers.

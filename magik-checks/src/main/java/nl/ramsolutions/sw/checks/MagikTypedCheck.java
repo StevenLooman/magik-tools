@@ -112,6 +112,6 @@ public class MagikTypedCheck extends MagikCheck {
     }
 
     final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(node);
-    return methodDefHelper.getTypeString();
+    return methodDefHelper.getExemplarTypeString();
   }
 }

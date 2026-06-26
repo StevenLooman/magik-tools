@@ -55,7 +55,7 @@ public class ImplementationProvider {
     final AstNode methodDefinitionNode =
         wantedNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefinitionNode);
-    final TypeString typeStr = helper.getTypeString();
+    final TypeString typeStr = helper.getExemplarTypeString();
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     final boolean isAbstractMethod =
         resolver.getRespondingMethodDefinitions(typeStr).stream()

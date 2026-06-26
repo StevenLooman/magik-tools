@@ -185,7 +185,7 @@ abstract class LocalTypeReasonerHandler {
 
     // Method definition.
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(defNode);
-    return helper.getTypeString();
+    return helper.getExemplarTypeString();
   }
 
   /**

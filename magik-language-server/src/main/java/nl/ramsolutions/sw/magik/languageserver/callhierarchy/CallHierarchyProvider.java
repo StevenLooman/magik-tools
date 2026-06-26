@@ -101,7 +101,7 @@ public class CallHierarchyProvider {
               Lsp4jConversion.rangeToLsp4j(range));
       final Map<String, String> data =
           Map.of(
-              DATA_TYPE_STRING, helper.getTypeString().getFullString(),
+              DATA_TYPE_STRING, helper.getExemplarTypeString().getFullString(),
               DATA_METHOD_NAME, helper.getMethodName(),
               DATA_URI, uriStr);
       item.setData(data);
@@ -188,7 +188,7 @@ public class CallHierarchyProvider {
             Lsp4jConversion.rangeToLsp4j(range));
     final Map<String, String> data =
         Map.of(
-            DATA_TYPE_STRING, helper.getTypeString().getFullString(),
+            DATA_TYPE_STRING, helper.getExemplarTypeString().getFullString(),
             DATA_METHOD_NAME, helper.getMethodName(),
             DATA_URI, uriStr);
     fromItem.setData(data);

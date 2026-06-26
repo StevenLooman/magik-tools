@@ -76,6 +76,16 @@ public class Location {
   }
 
   /**
+   * Constructor from {@link AstNode}, deriving the URI from the node's token.
+   *
+   * @param node {@link AstNode} to create {@link Location} from.
+   */
+  public Location(final AstNode node) {
+    this.uri = node.getToken().getURI();
+    this.range = new Range(node);
+  }
+
+  /**
    * Constructor, only providing a path.
    *
    * @param uri Path to file.

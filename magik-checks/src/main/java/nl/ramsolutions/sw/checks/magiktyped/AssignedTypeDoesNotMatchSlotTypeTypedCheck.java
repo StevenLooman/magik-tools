@@ -38,7 +38,7 @@ public class AssignedTypeDoesNotMatchSlotTypeTypedCheck extends MagikTypedCheck 
     final TypeString assignedType = assignedResult.get(0, TypeString.UNDEFINED);
 
     // Check all assigned nodes.
-    final TypeString exemplarTypeStr = helper.getTypeString();
+    final TypeString exemplarTypeStr = helper.getExemplarTypeString();
     final TypeStringResolver resolver = this.getTypeStringResolver();
     final List<AstNode> assignedNodes = node.getChildren(MagikGrammar.values());
     assignedNodes.remove(rightNode);

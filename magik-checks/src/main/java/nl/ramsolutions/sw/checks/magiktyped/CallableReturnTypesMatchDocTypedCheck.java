@@ -296,7 +296,7 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
     }
 
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
-    final TypeString receiverType = helper.getTypeString();
+    final TypeString receiverType = helper.getExemplarTypeString();
 
     TypeString result = docType;
     for (final SlotDefinition slotDef : resolver.getSlotDefinitions(receiverType)) {
