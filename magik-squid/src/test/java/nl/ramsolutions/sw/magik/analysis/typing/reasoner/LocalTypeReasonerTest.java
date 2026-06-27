@@ -11,6 +11,7 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
@@ -2839,5 +2840,34 @@ class LocalTypeReasonerTest {
             .orElseThrow();
     final ExpressionResultString assignResult = state.getNodeType(assignmentInvocation);
     assertThat(assignResult).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+  }
+
+  @Test
+  void testReasonGlobalResolvesToAliasedType() {
+    final String code =
+        """
+        _package user
+        _method object.test
+            _return conn_man
+        _endmethod
+        """;
+
+    // Set up: a _global with a `# type:` doc declaring a combined type.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString connManRef = TypeString.ofIdentifier("conn_man", "user");
+    final TypeString connectionManagerRef = TypeString.ofIdentifier("connection_manager", "rs");
+    final TypeString aliasedRef = TypeString.combine(connectionManagerRef, TypeString.SW_UNSET);
+    definitionKeeper.add(
+        new GlobalDefinition(null, null, null, null, null, connManRef, aliasedRef, null));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // A reference to the global resolves to its aliased type, not the global's own name.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(aliasedRef));
   }
 }

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 /** Tests for {@link TypeStringResolver}. */
 class TypeStringResolverTest {
 
-  private static ExemplarDefinition exemplar(final TypeString typeString) {
+  private static ExemplarDefinition createExemplar(final TypeString typeString) {
     return new ExemplarDefinition(
         null,
         null,
@@ -37,9 +37,9 @@ class TypeStringResolverTest {
     // The same identifier is defined in both `rs` and the used package `sw`.
     final TypeString rsFoo = TypeString.ofIdentifier("foo", "rs");
     final TypeString swFoo = TypeString.ofIdentifier("foo", "sw");
-    final ExemplarDefinition exemplarRsFoo = TypeStringResolverTest.exemplar(rsFoo);
+    final ExemplarDefinition exemplarRsFoo = TypeStringResolverTest.createExemplar(rsFoo);
     definitionKeeper.add(exemplarRsFoo);
-    final ExemplarDefinition exemplarSwFoo = TypeStringResolverTest.exemplar(swFoo);
+    final ExemplarDefinition exemplarSwFoo = TypeStringResolverTest.createExemplar(swFoo);
     definitionKeeper.add(exemplarSwFoo);
 
     // A reference to `rs:foo` must resolve to the nearest package's definition only,

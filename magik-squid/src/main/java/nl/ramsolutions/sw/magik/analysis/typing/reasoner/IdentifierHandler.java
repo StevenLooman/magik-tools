@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Objects;
+import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -50,10 +51,11 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
       final String currentPackage = this.getCurrentPackage(node);
       final TypeString typeString = TypeString.ofIdentifier(identifier, currentPackage);
 
-      // Resolve TypeString.
+      // Resolve TypeString. A global is an alias, so use its aliased type (e.g. its `# type:`
+      // doc) instead of the global's own name; otherwise the reference has no resolvable methods.
       final TypeString resolvedTypeStr =
           this.typeResolver.resolve(typeString).stream()
-              .map(ITypeStringDefinition::getTypeString)
+              .map(IdentifierHandler::getDefinitionTypeString)
               .reduce(TypeString::combine)
               .orElse(TypeString.UNDEFINED);
 
@@ -81,6 +83,21 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
         this.assignAtom(node, result);
       }
     }
+  }
+
+  /**
+   * Get the effective {@link TypeString} of a resolved definition. A {@link GlobalDefinition} is an
+   * alias, so its aliased type is used; any other definition uses its own type.
+   *
+   * @param definition Resolved definition.
+   * @return The type the reference evaluates to.
+   */
+  private static TypeString getDefinitionTypeString(final ITypeStringDefinition definition) {
+    if (definition instanceof GlobalDefinition globalDefinition) {
+      return globalDefinition.getAliasedTypeName();
+    }
+
+    return definition.getTypeString();
   }
 
   /**
