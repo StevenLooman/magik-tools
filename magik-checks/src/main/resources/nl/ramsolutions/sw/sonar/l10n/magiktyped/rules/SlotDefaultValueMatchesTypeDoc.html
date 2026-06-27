@@ -1,0 +1,16 @@
+<p>
+  Checks that the default value given to a slot in <code>def_slotted_exemplar()</code> matches
+  the type declared for that slot in its <code>@slot</code> type documentation. A mismatch means
+  the slot is initialized with a value the documentation says it cannot hold. When a slot may be
+  unset, declare <code>sw:unset</code> as one of its types.
+</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+## @slot {sw:integer} slot1
+def_slotted_exemplar(:test_exemplar, {{:slot1, _unset}})
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+## @slot {sw:integer|sw:unset} slot1
+def_slotted_exemplar(:test_exemplar, {{:slot1, _unset}})
+</pre>
