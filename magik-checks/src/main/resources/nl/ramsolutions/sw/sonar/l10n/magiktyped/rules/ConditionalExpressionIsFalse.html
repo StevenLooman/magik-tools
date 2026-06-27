@@ -6,3 +6,4 @@ _then
 _endif
 </pre>
 <p>In the above Magik code snippet, the conditional expression <pre>:a</pre> does not explicitly evaluate to <pre>sw:true</pre> or <pre>sw:false</pre>. In Magik, conditional expressions should result in a boolean value (true or false), otherwise this will result in an error.</p>
+<p>A type that responds to <pre>should_be_boolean()</pre> is also accepted, as Magik will use that method to coerce the value to a boolean.</p>

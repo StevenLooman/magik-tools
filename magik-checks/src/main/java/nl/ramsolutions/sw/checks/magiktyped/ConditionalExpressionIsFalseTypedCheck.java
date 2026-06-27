@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.sonar.check.Rule;
@@ -18,6 +19,8 @@ public class ConditionalExpressionIsFalseTypedCheck extends MagikTypedCheck {
   private static final String MESSAGE =
       "Conditional expression does not result in true/false, but '%s'";
 
+  private static final String SHOULD_BE_BOOLEAN_METHOD = "should_be_boolean()";
+
   @Override
   protected void walkPostConditionalExpression(final AstNode node) {
     final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
@@ -29,10 +32,18 @@ public class ConditionalExpressionIsFalseTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    if (!typeStr.equals(TypeString.SW_FALSE)) {
-      final String typeStringStr = typeStr.getFullString();
-      final String message = MESSAGE.formatted(typeStringStr);
-      this.addIssue(node, message);
+    if (typeStr.equals(TypeString.SW_FALSE)) {
+      return;
     }
+
+    // A type that responds to `should_be_boolean()` can be used in a conditional expression.
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    if (!resolver.getRespondingMethodDefinitions(typeStr, SHOULD_BE_BOOLEAN_METHOD).isEmpty()) {
+      return;
+    }
+
+    final String typeStringStr = typeStr.getFullString();
+    final String message = MESSAGE.formatted(typeStringStr);
+    this.addIssue(node, message);
   }
 }
