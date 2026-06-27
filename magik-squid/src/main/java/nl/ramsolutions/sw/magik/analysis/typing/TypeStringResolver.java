@@ -84,34 +84,6 @@ public class TypeStringResolver {
         .collect(Collectors.toSet());
   }
 
-  private Collection<ProcedureDefinition> findProcedureDefinitions(final TypeString typeString) {
-    return this.getPackageHierarchy(typeString).stream()
-        .sequential()
-        .flatMap(
-            def -> {
-              final String packageName = def.getName();
-              final TypeString pkgTypeString =
-                  TypeString.ofIdentifier(typeString.getIdentifier(), packageName);
-              return this.definitionKeeper.getProcedureDefinitions(pkgTypeString).stream();
-            })
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet());
-  }
-
-  private Collection<GlobalDefinition> findGlobalDefinitions(final TypeString typeString) {
-    return this.getPackageHierarchy(typeString).stream()
-        .sequential()
-        .flatMap(
-            def -> {
-              final String packageName = def.getName();
-              final TypeString pkgTypeString =
-                  TypeString.ofIdentifier(typeString.getIdentifier(), packageName);
-              return this.definitionKeeper.getGlobalDefinitions(pkgTypeString).stream();
-            })
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet());
-  }
-
   /**
    * Test if the {@link TypeString} is known.
    *
@@ -129,22 +101,36 @@ public class TypeStringResolver {
    * @return A {@link ExemplarDefinition}/{@link ProcedureDefinition}/{@link GlobalDefinition}.
    */
   public synchronized Collection<ITypeStringDefinition> resolve(final TypeString typeString) {
-    return this.typeCache.computeIfAbsent(
-        typeString,
-        typeStr -> {
-          final Collection<ExemplarDefinition> exemplarDefinitions =
-              this.findExemplarDefinitions(typeStr);
-          final Collection<ProcedureDefinition> procedureDefinitions =
-              this.findProcedureDefinitions(typeStr);
-          final Collection<GlobalDefinition> globalDefinitions =
-              this.findGlobalDefinitions(typeStr);
-          return Stream.of(
-                  exemplarDefinitions.stream(),
-                  procedureDefinitions.stream(),
-                  globalDefinitions.stream())
+    return this.typeCache.computeIfAbsent(typeString, this::resolveInPackageHierarchy);
+  }
+
+  private Set<ITypeStringDefinition> resolveInPackageHierarchy(final TypeString typeString) {
+    // Only a single type reference can resolve to a definition; a combined/variadic type
+    // has no identifier to look up.
+    if (!typeString.isSingle()) {
+      return Set.of();
+    }
+
+    // Walk the package-use hierarchy nearest-first. The first package that defines the
+    // identifier shadows definitions of the same name in packages it uses, so a reference
+    // resolves to a single type instead of a union of same-named types across the hierarchy.
+    final String identifier = typeString.getIdentifier();
+    for (final PackageDefinition packageDef : this.getPackageHierarchy(typeString)) {
+      final TypeString pkgTypeString = TypeString.ofIdentifier(identifier, packageDef.getName());
+      final Set<ITypeStringDefinition> definitions =
+          Stream.of(
+                  this.definitionKeeper.getExemplarDefinitions(pkgTypeString).stream(),
+                  this.definitionKeeper.getProcedureDefinitions(pkgTypeString).stream(),
+                  this.definitionKeeper.getGlobalDefinitions(pkgTypeString).stream())
               .flatMap(stream -> stream)
+              .filter(Objects::nonNull)
               .collect(Collectors.toSet());
-        });
+      if (!definitions.isEmpty()) {
+        return definitions;
+      }
+    }
+
+    return Set.of();
   }
 
   /**
