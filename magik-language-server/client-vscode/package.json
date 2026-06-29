@@ -393,8 +393,10 @@
           "type": "string",
           "enum": [
             "null",
-            "relative"
-          ]
+            "visual",
+            "block"
+          ],
+          "default": "null"
         },
         "magik.formatting.indentChar": {
           "description": "Indent character, 'tab' or 'space'",
