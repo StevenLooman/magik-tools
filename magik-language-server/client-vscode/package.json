@@ -392,9 +392,10 @@
           "description": "Indent strategy to use",
           "type": "string",
           "enum": [
+            "block",
             "null",
-            "visual",
-            "block"
+            "relative",
+            "visual"
           ],
           "default": "null"
         },
