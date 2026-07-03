@@ -397,7 +397,7 @@
             "relative",
             "visual"
           ],
-          "default": "null"
+          "default": "visual"
         },
         "magik.formatting.indentChar": {
           "description": "Indent character, 'tab' or 'space'",
