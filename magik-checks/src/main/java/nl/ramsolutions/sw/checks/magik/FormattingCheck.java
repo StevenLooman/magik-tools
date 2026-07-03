@@ -89,6 +89,14 @@ public class FormattingCheck extends MagikCheck {
     final MagikFormattingSettings formattingSettings = new MagikFormattingSettings(properties);
     final FormattingOptions formattingOptions = formattingSettings.getFormattingOptions();
 
+    // A misconfigured indent strategy is a configuration problem, not a source problem: surface it
+    // as an issue at the start of the file instead of formatting with a fallback strategy (which
+    // would produce misleading formatting issues).
+    if (!formattingSettings.isIndentStrategyValid()) {
+      this.addIssue(1, 0, 1, 0, formattingSettings.getIndentStrategyErrorMessage());
+      return;
+    }
+
     final Class<? extends FormattingWalker> indentWalker =
         formattingSettings.getIndentStrategyClass();
     final FormattingProvider formattingProvider =

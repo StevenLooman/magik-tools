@@ -1,10 +1,17 @@
 package nl.ramsolutions.sw.magik.formatting;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.magik.utils.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Settings for magik formatting. */
 public class MagikFormattingSettings {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(MagikFormattingSettings.class);
 
   public static final String KEY_MAGIK_FORMATTING_INDENT_STRATEGY =
       "magik.formatting.indentStrategy";
@@ -30,22 +37,31 @@ public class MagikFormattingSettings {
   /** Backward compatibility alias for {@link VisualIndentWalker}. */
   private static final String STRATEGY_ALIGNMENT = "alignment";
 
+  /** Backward compatibility alias for {@link VisualIndentWalker}. */
+  private static final String STRATEGY_RELATIVE = "relative";
+
   private static final Map<String, Class<? extends FormattingWalker>> INDENT_STRATEGIES =
       Map.of(
-          STRATEGY_BLANK,
+          MagikFormattingSettings.STRATEGY_BLANK,
           NullIndentWalker.class,
-          STRATEGY_NONE,
+          MagikFormattingSettings.STRATEGY_NONE,
           NullIndentWalker.class,
           NullIndentWalker.STRATEGY_NAME,
           NullIndentWalker.class,
-          STRATEGY_TAB,
+          MagikFormattingSettings.STRATEGY_TAB,
           BlockIndentWalker.class,
-          STRATEGY_ALIGNMENT,
+          MagikFormattingSettings.STRATEGY_ALIGNMENT,
           VisualIndentWalker.class,
           BlockIndentWalker.STRATEGY_NAME,
           BlockIndentWalker.class,
           VisualIndentWalker.STRATEGY_NAME,
+          VisualIndentWalker.class,
+          MagikFormattingSettings.STRATEGY_RELATIVE,
           VisualIndentWalker.class);
+
+  /** Walker used when the configured indent strategy is unknown. */
+  private static final Class<? extends FormattingWalker> DEFAULT_INDENT_WALKER =
+      NullIndentWalker.class;
 
   private final MagikToolsProperties properties;
 
@@ -64,19 +80,117 @@ public class MagikFormattingSettings {
   }
 
   /**
-   * Creates a list of formatting walkers based on the indent strategy.
+   * Check whether the configured indent strategy is known.
    *
-   * @return A list of formatting walker classes.
+   * @return {@code true} if the configured indent strategy resolves to a formatting walker.
+   */
+  public boolean isIndentStrategyValid() {
+    return MagikFormattingSettings.INDENT_STRATEGIES.containsKey(this.getIndentStrategy());
+  }
+
+  /**
+   * Build a human-readable message describing why the configured indent strategy is unknown,
+   * including a suggestion for the closest known value and the list of allowed values.
+   *
+   * @return The message describing the misconfiguration.
+   */
+  public String getIndentStrategyErrorMessage() {
+    final String indentStrategy = this.getIndentStrategy();
+    final List<String> canonicalStrategies = MagikFormattingSettings.getCanonicalStrategyNames();
+    final String allowedStrategies =
+        canonicalStrategies.stream()
+            .map(strategy -> "\"" + strategy + "\"")
+            .collect(Collectors.joining(", "));
+
+    final String suggestion =
+        MagikFormattingSettings.findClosestStrategy(indentStrategy, canonicalStrategies);
+    final String didYouMean = suggestion != null ? " Did you mean \"" + suggestion + "\"?" : "";
+
+    return "Unknown indent strategy: \""
+        + indentStrategy
+        + "\" for setting "
+        + MagikFormattingSettings.KEY_MAGIK_FORMATTING_INDENT_STRATEGY
+        + "."
+        + didYouMean
+        + " Allowed values are: "
+        + allowedStrategies
+        + ".";
+  }
+
+  /**
+   * Get the formatting walker for the configured indent strategy. When the configured strategy is
+   * unknown, a warning is logged and the default walker is returned so formatting degrades
+   * gracefully instead of failing.
+   *
+   * @return The formatting walker class.
    */
   public Class<? extends FormattingWalker> getIndentStrategyClass() {
     final String indentStrategy = this.getIndentStrategy();
-    if (!MagikFormattingSettings.INDENT_STRATEGIES.containsKey(indentStrategy)) {
-      throw new IllegalArgumentException("Unknown indent strategy: " + indentStrategy);
-    }
-
     final Class<? extends FormattingWalker> walkerClass =
         MagikFormattingSettings.INDENT_STRATEGIES.get(indentStrategy);
+    if (walkerClass == null) {
+      LOGGER.warn(this.getIndentStrategyErrorMessage());
+      return MagikFormattingSettings.DEFAULT_INDENT_WALKER;
+    }
+
     return walkerClass;
+  }
+
+  /**
+   * Get the sorted, distinct canonical strategy names, as declared by each formatting walker's
+   * {@code STRATEGY_NAME} constant.
+   *
+   * @return The canonical strategy names.
+   */
+  private static List<String> getCanonicalStrategyNames() {
+    return MagikFormattingSettings.INDENT_STRATEGIES.values().stream()
+        .distinct()
+        .map(MagikFormattingSettings::getStrategyName)
+        .sorted()
+        .toList();
+  }
+
+  /**
+   * Get the canonical strategy name for a {@link FormattingWalker} class, as declared by its {@code
+   * STRATEGY_NAME} constant.
+   *
+   * @param walkerClass The formatting walker class.
+   * @return The canonical strategy name.
+   */
+  private static String getStrategyName(final Class<? extends FormattingWalker> walkerClass) {
+    try {
+      return (String) walkerClass.getField("STRATEGY_NAME").get(null);
+    } catch (final NoSuchFieldException | IllegalAccessException exception) {
+      throw new IllegalStateException(
+          "Formatting walker "
+              + walkerClass.getName()
+              + " does not declare a public static STRATEGY_NAME field",
+          exception);
+    }
+  }
+
+  /**
+   * Find the known strategy closest to the given (unknown) value, if one is close enough to be a
+   * likely typo.
+   *
+   * @param value The unknown strategy value.
+   * @param candidates The known strategy names.
+   * @return The closest candidate, or {@code null} if none is close enough.
+   */
+  private static String findClosestStrategy(final String value, final List<String> candidates) {
+    String closest = null;
+    int closestDistance = Integer.MAX_VALUE;
+    for (final String candidate : candidates) {
+      final int distance = StringUtils.levenshteinDistance(value, candidate);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closest = candidate;
+      }
+    }
+
+    // Only suggest when the value is a plausible typo of the candidate.
+    final int threshold = Math.max(2, value.length() / 2);
+    return closestDistance <= threshold ? closest : null;
   }
 
   /**

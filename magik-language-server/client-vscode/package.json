@@ -392,8 +392,10 @@
           "description": "Indent strategy to use",
           "type": "string",
           "enum": [
+            "block",
             "null",
-            "relative"
+            "relative",
+            "visual"
           ]
         },
         "magik.formatting.indentChar": {
