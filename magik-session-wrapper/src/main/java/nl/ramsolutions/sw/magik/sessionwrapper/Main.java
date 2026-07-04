@@ -76,6 +76,16 @@ public class Main {
     return System.out; // NOSONAR
   }
 
+  /**
+   * Detect whether the wrapper is running inside VSCode's integrated terminal, which VSCode marks
+   * by setting {@code TERM_PROGRAM=vscode}.
+   *
+   * @return {@code true} when running in VSCode's terminal.
+   */
+  private static boolean isRunningInVsCode() {
+    return "vscode".equals(System.getenv("TERM_PROGRAM"));
+  }
+
   private static String getName() {
     return "magik-session-wrapper";
   }
@@ -170,12 +180,17 @@ public class Main {
       promptPattern = SmallworldSession.DEFAULT_PROMPT_PATTERN;
     }
 
-    // VSCode's integrated terminal always decodes output as UTF-8, independent of the session's
-    // locale, so pin JLine to UTF-8. The wrapper thus translates between the session's
-    // (locale-derived) SESSION_CHARSET and the terminal's UTF-8. Note this assumes a UTF-8
-    // terminal; running the wrapper by-hand in a non-UTF-8 terminal would need a different value.
-    final Terminal terminal =
-        TerminalBuilder.builder().system(true).encoding(StandardCharsets.UTF_8).build();
+    // When running in VSCode's integrated terminal, apply VSCode-specific workarounds. Its terminal
+    // always decodes as UTF-8 (regardless of the session locale), so pin the encoding; the wrapper
+    // then translates between the session's locale-derived SESSION_CHARSET and the terminal's
+    // UTF-8.
+    final TerminalBuilder terminalBuilder = TerminalBuilder.builder().system(true);
+    if (Main.isRunningInVsCode()) {
+      terminalBuilder
+          .encoding(StandardCharsets.UTF_8)
+          .graphemeCluster(false); // Skip grapheme-cluster probe in VSCode's terminal.
+    }
+    final Terminal terminal = terminalBuilder.build();
     final DefaultHistory history = new DefaultHistory();
     final Parser parser = new MagikJlineParser();
     final Completer completer = new MagikJlineCompleter();

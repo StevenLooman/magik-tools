@@ -44,6 +44,11 @@ class SmallworldSession {
     this.process = process;
     this.promptPattern = promptPattern;
 
+    LOGGER.debug(
+        "Session charset: {} (native.encoding={})",
+        SESSION_CHARSET,
+        System.getProperty("native.encoding"));
+
     this.ioThread =
         new Thread(() -> this.sessionOutputThread(outputWriter), SESSION_OUTPUT_THREAD_NAME);
     this.ioThread.start();
