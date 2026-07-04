@@ -3,6 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { MagikAliasTaskProvider } from './alias-task-provider';
+import { encodeMagikSource } from './encoding';
 
 
 export class MagikSessionProvider implements vscode.Disposable {
@@ -174,10 +175,19 @@ class MagikSession implements vscode.Disposable {
 		}
 	}
 
+	/**
+	 * Send Magik text to the active session.
+	 * Will save the text to a temporary file, and send a `load_file(..)` command to the session.
+	 * @param text Magik text to send.
+	 * @param sourcePath (Original) source path of file.
+	 */
 	public sendToSession(text: string, sourcePath: fs.PathLike | undefined) {
-		// Save contents to temp file.
+		// Save contents to temp file, and send to active session.
+		const defaultEncoding = vscode.workspace
+			.getConfiguration("magik")
+			.get<string>("session.encoding") ?? "utf8";
 		const tempPath = this.getTempFile();
-		fs.writeFileSync(tempPath, text);
+		fs.writeFileSync(tempPath, encodeMagikSource(text, defaultEncoding));
 
 		// Clear current input in session.
 		if (process.platform === "win32") {

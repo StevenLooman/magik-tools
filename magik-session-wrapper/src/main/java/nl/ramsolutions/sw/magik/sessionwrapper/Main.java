@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.LogManager;
@@ -73,6 +74,16 @@ public class Main {
 
   private static PrintStream getOutStream() {
     return System.out; // NOSONAR
+  }
+
+  /**
+   * Detect whether the wrapper is running inside VSCode's integrated terminal, which VSCode marks
+   * by setting {@code TERM_PROGRAM=vscode}.
+   *
+   * @return {@code true} when running in VSCode's terminal.
+   */
+  private static boolean isRunningInVsCode() {
+    return "vscode".equals(System.getenv("TERM_PROGRAM"));
   }
 
   private static String getName() {
@@ -169,7 +180,17 @@ public class Main {
       promptPattern = SmallworldSession.DEFAULT_PROMPT_PATTERN;
     }
 
-    final Terminal terminal = TerminalBuilder.builder().system(true).build();
+    // When running in VSCode's integrated terminal, apply VSCode-specific workarounds. Its terminal
+    // always decodes as UTF-8 (regardless of the session locale), so pin the encoding; the wrapper
+    // then translates between the session's locale-derived SESSION_CHARSET and the terminal's
+    // UTF-8.
+    final TerminalBuilder terminalBuilder = TerminalBuilder.builder().system(true);
+    if (Main.isRunningInVsCode()) {
+      terminalBuilder
+          .encoding(StandardCharsets.UTF_8)
+          .graphemeCluster(false); // Skip grapheme-cluster probe in VSCode's terminal.
+    }
+    final Terminal terminal = terminalBuilder.build();
     final DefaultHistory history = new DefaultHistory();
     final Parser parser = new MagikJlineParser();
     final Completer completer = new MagikJlineCompleter();

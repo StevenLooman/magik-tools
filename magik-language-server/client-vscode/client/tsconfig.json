@@ -8,6 +8,8 @@
 		"sourceMap": true,
 		"skipLibCheck": true
 	},
-	"include": ["src"],
-	"exclude": ["node_modules", ".vscode-test"]
+	// Production build: compile the extension entry point and everything it imports.
+	// Test files (`*.test.ts`) are not reachable from here, so they are naturally kept
+	// out of the shipped output; they are type-checked and run via `tsconfig.test.json`.
+	"files": ["src/extension.ts"]
 }

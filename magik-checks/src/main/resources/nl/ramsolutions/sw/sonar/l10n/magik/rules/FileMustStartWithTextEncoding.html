@@ -1,0 +1,19 @@
+<p>
+Magik determines a source file's character encoding from a
+<code>#% text_encoding = ...</code> comment on its first line. When it is
+missing, the file is read using the session's default encoding, which depends on
+the locale and can mangle non-ASCII characters such as umlauts. Declaring the
+encoding on the first line makes the file decode consistently everywhere. Note
+that the comment is only honoured on the very first line.
+</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_package user
+_method a.foo() _endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+#% text_encoding = utf8
+_package user
+_method a.foo() _endmethod
+</pre>
