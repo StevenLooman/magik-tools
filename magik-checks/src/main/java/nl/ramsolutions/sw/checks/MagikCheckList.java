@@ -10,6 +10,7 @@ import nl.ramsolutions.sw.checks.magik.EmptyBlockCheck;
 import nl.ramsolutions.sw.checks.magik.ExemplarSlotCountCheck;
 import nl.ramsolutions.sw.checks.magik.FileMethodCountCheck;
 import nl.ramsolutions.sw.checks.magik.FileMustStartWithPackageStatementCheck;
+import nl.ramsolutions.sw.checks.magik.FileMustStartWithTextEncodingCheck;
 import nl.ramsolutions.sw.checks.magik.FileNotInLoadListCheck;
 import nl.ramsolutions.sw.checks.magik.FinallyWithRequiresOverCheck;
 import nl.ramsolutions.sw.checks.magik.ForbiddenCallCheck;
@@ -84,6 +85,7 @@ public final class MagikCheckList extends CheckList<MagikCheck, MagikCodeActionS
         ExemplarSlotCountCheck.class,
         FileMethodCountCheck.class,
         FileMustStartWithPackageStatementCheck.class,
+        FileMustStartWithTextEncodingCheck.class,
         FileNotInLoadListCheck.class,
         FinallyWithRequiresOverCheck.class,
         ForbiddenCallCheck.class,
