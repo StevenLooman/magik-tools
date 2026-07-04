@@ -33,7 +33,7 @@ public final class AnonymousNamer {
     final String filenamePart =
         DEFAULT_URI.equals(uri)
             ? "in_memory"
-            : Path.of(uri).toString().replace("/", "_").replace("\\", "_");
+            : Path.of(uri).toString().replaceAll("[^A-Za-z0-9_]", "_"); // Safe for TypeString.
 
     // Get procedure counter.
     AstNode rootNode = node;
