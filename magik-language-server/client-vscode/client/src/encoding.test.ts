@@ -1,11 +1,16 @@
 import * as assert from 'node:assert';
-import { determineEncoding, encodeMagikSource } from './encoding';
+import {
+	determineEncoding,
+	encodeMagikSource,
+	magikToVscodeEncoding,
+	readDeclaredEncoding,
+} from './encoding';
 
 const hex = (bytes: Uint8Array): string => Buffer.from(bytes).toString('hex');
 
 describe('determineEncoding', () => {
-	it('defaults to ISO 8859-1 when no encoding is declared', () => {
-		assert.strictEqual(determineEncoding('write("hi")'), 'iso8859_1');
+	it('defaults to UTF-8 when no encoding is declared', () => {
+		assert.strictEqual(determineEncoding('write("hi")'), 'utf8');
 	});
 
 	it('reads the declared encoding from the first line', () => {
@@ -28,20 +33,32 @@ describe('determineEncoding', () => {
 		assert.strictEqual(determineEncoding('#% text_encoding = utf16\n_block'), 'utf16');
 	});
 
-	it('falls back to ISO 8859-1 for an unrecognised encoding', () => {
-		assert.strictEqual(determineEncoding('#% text_encoding = klingon-9\n_block'), 'iso8859_1');
+	it('falls back to the default (UTF-8) for an unrecognised encoding', () => {
+		assert.strictEqual(determineEncoding('#% text_encoding = klingon-9\n_block'), 'utf8');
 	});
 
 	it('only inspects the first line', () => {
-		assert.strictEqual(determineEncoding('_block\n#% text_encoding = utf8'), 'iso8859_1');
+		assert.strictEqual(determineEncoding('_block\n#% text_encoding = iso8859_1'), 'utf8');
+	});
+
+	it('uses the supplied default when no encoding is declared', () => {
+		assert.strictEqual(determineEncoding('write("hi")', 'iso8859_1'), 'iso8859_1');
+	});
+
+	it('lets a declaration override the supplied default', () => {
+		assert.strictEqual(determineEncoding('#% text_encoding = utf8\nx', 'iso8859_1'), 'utf8');
+	});
+
+	it('falls back to UTF-8 when the supplied default is not a real encoding', () => {
+		assert.strictEqual(determineEncoding('write("hi")', 'klingon-9'), 'utf8');
 	});
 });
 
 describe('encodeMagikSource', () => {
-	it('encodes undeclared source as ISO 8859-1 (e.g. umlauts as single bytes)', () => {
-		// ö ä ü -> f6 e4 fc in Latin-1.
+	it('encodes undeclared source as UTF-8 (e.g. umlauts as multi-byte sequences)', () => {
+		// ö ä ü -> c3 b6 c3 a4 c3 bc in UTF-8.
 		const bytes = encodeMagikSource('"öäü"');
-		assert.strictEqual(hex(bytes), '22f6e4fc22');
+		assert.strictEqual(hex(bytes), '22c3b6c3a4c3bc22');
 	});
 
 	it('encodes declared UTF-8 as multi-byte sequences', () => {
@@ -62,5 +79,44 @@ describe('encodeMagikSource', () => {
 		const bytes = encodeMagikSource('#% text_encoding = iso8859_2\n"łąřů"');
 		assert.ok(hex(bytes).includes('b3b1f8f9'), `unexpected bytes: ${hex(bytes)}`);
 		assert.ok(!hex(bytes).includes('3f3f3f3f'), 'Latin-2 text was mangled to "????"');
+	});
+});
+
+describe('readDeclaredEncoding', () => {
+	it('reads the declared encoding', () => {
+		assert.strictEqual(readDeclaredEncoding('#% text_encoding = iso8859_1'), 'iso8859_1');
+	});
+
+	it('lower-cases and trims the value', () => {
+		assert.strictEqual(readDeclaredEncoding('#% text_encoding =   UTF8  '), 'utf8');
+	});
+
+	it('returns undefined when there is no declaration', () => {
+		assert.strictEqual(readDeclaredEncoding('_package user'), undefined);
+	});
+});
+
+describe('magikToVscodeEncoding', () => {
+	it('maps Magik ISO names onto VSCode ids by stripping separators', () => {
+		assert.strictEqual(magikToVscodeEncoding('iso8859_1'), 'iso88591');
+		assert.strictEqual(magikToVscodeEncoding('iso8859_2'), 'iso88592');
+		assert.strictEqual(magikToVscodeEncoding('iso8859_15'), 'iso885915');
+	});
+
+	it('passes through matching ids such as utf8', () => {
+		assert.strictEqual(magikToVscodeEncoding('utf8'), 'utf8');
+	});
+
+	it('applies aliases (latin1 -> iso88591, utf16 -> utf16le)', () => {
+		assert.strictEqual(magikToVscodeEncoding('latin1'), 'iso88591');
+		assert.strictEqual(magikToVscodeEncoding('utf16'), 'utf16le');
+	});
+
+	it('is case- and separator-insensitive', () => {
+		assert.strictEqual(magikToVscodeEncoding('ISO-8859-2'), 'iso88592');
+	});
+
+	it('returns undefined for unsupported encodings', () => {
+		assert.strictEqual(magikToVscodeEncoding('klingon-9'), undefined);
 	});
 });

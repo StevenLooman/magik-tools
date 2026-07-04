@@ -1,1 +1,1 @@
-{"root":["./src/alias-task-provider.ts","./src/common.ts","./src/const.ts","./src/debug-provider.ts","./src/editor-commands-provider.ts","./src/encoding.test.ts","./src/encoding.ts","./src/extension.ts","./src/language-client.ts","./src/magik-session.ts","./src/test-provider.ts"],"errors":true,"version":"6.0.3"}
+{"root":["./src/extension.ts"],"version":"6.0.3"}
