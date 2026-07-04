@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.LogManager;
@@ -169,7 +170,12 @@ public class Main {
       promptPattern = SmallworldSession.DEFAULT_PROMPT_PATTERN;
     }
 
-    final Terminal terminal = TerminalBuilder.builder().system(true).build();
+    // VSCode's integrated terminal always decodes output as UTF-8, independent of the session's
+    // locale, so pin JLine to UTF-8. The wrapper thus translates between the session's
+    // (locale-derived) SESSION_CHARSET and the terminal's UTF-8. Note this assumes a UTF-8
+    // terminal; running the wrapper by-hand in a non-UTF-8 terminal would need a different value.
+    final Terminal terminal =
+        TerminalBuilder.builder().system(true).encoding(StandardCharsets.UTF_8).build();
     final DefaultHistory history = new DefaultHistory();
     final Parser parser = new MagikJlineParser();
     final Completer completer = new MagikJlineCompleter();

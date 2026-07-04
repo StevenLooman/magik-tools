@@ -24,7 +24,7 @@ class SmallworldSession {
   static final Pattern DEFAULT_PROMPT_PATTERN = Pattern.compile("^(Magik|MagikSF)> $");
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SmallworldSession.class);
-  private static final Charset SESSION_CHARSET = StandardCharsets.ISO_8859_1;
+  private static final Charset SESSION_CHARSET = SmallworldSession.determineSessionCharset();
 
   private final Process process;
   private final Pattern promptPattern;
@@ -122,15 +122,38 @@ class SmallworldSession {
         || PLEASE_ANSWER_Y_OR_N.matcher(str).matches();
   }
 
+  /**
+   * Determine the charset for communicating with the Smallworld session. We use JVM's {@code
+   * native.encoding}, which uses {@code LANG}/{@code LC_*}. The wrapper and the session process
+   * share this environment, so their encodings match.
+   *
+   * @return The session charset.
+   */
+  private static Charset determineSessionCharset() {
+    final String nativeEncoding = System.getProperty("native.encoding");
+    if (nativeEncoding != null && !nativeEncoding.isBlank()) {
+      try {
+        return Charset.forName(nativeEncoding);
+      } catch (final IllegalArgumentException exception) {
+        LOGGER.warn(
+            "Unrecognised native.encoding '{}', falling back to UTF-8 for the session charset.",
+            nativeEncoding);
+      }
+    }
+
+    return StandardCharsets.UTF_8;
+  }
+
   BufferedReader getSessionReader() {
     final InputStream inputStream = this.process.getInputStream();
-    final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, SESSION_CHARSET);
+    final InputStreamReader inputStreamReader =
+        new InputStreamReader(inputStream, SmallworldSession.SESSION_CHARSET);
     return new BufferedReader(inputStreamReader);
   }
 
   PrintWriter getSessionWriter() {
     final OutputStream outputStream = this.process.getOutputStream();
-    return new PrintWriter(outputStream, true, SESSION_CHARSET);
+    return new PrintWriter(outputStream, true, SmallworldSession.SESSION_CHARSET);
   }
 
   long getPid() {
