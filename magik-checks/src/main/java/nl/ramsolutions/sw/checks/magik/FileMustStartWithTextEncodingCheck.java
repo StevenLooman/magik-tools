@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.checks.magik;
 
 import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import org.sonar.check.Rule;
 
@@ -13,7 +14,6 @@ public class FileMustStartWithTextEncodingCheck extends MagikCheck {
 
   private static final String MESSAGE =
       "File must start with a text encoding comment (#% text_encoding = ...).";
-  private static final String ENCODING_LINE = "#% text_encoding =";
 
   @Override
   protected void walkPreMagik(final AstNode node) {
@@ -29,6 +29,6 @@ public class FileMustStartWithTextEncodingCheck extends MagikCheck {
     }
 
     // The encoding comment is only honoured on the first line (see FileCharsetDeterminer).
-    return sourceLines[0].startsWith(ENCODING_LINE);
+    return FileCharsetDeterminer.hasEncodingDeclaration(sourceLines[0]);
   }
 }

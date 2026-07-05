@@ -22,6 +22,10 @@ class FileMustStartWithTextEncodingCheckTest {
 
         _method a.m1 _endmethod
         """,
+        """
+        #%text_encoding=utf8
+        _method a.m1 _endmethod
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new FileMustStartWithTextEncodingCheck();

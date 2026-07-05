@@ -1,7 +1,10 @@
 import * as iconv from 'iconv-lite';
 
-/** Prefix of Magik's source-encoding declaration, e.g. `#% text_encoding = utf8`. */
-export const ENCODING_LINE = "#% text_encoding =";
+/**
+ * Pattern for Magik's source-encoding declaration, tolerant of the spacing
+ * Smallworld accepts: `#% text_encoding = utf8` as well as `#%text_encoding=utf8`.
+ */
+const ENCODING_DECLARATION = /^#%\s*text_encoding\s*=\s*(\S+)/;
 
 /**
  * Default encoding used when a file declares none. Follows VSCode's default
@@ -28,10 +31,7 @@ const DEFAULT_ENCODING = "utf8";
 export function determineEncoding(text: string, defaultEncoding: string = DEFAULT_ENCODING): string {
 	const fallback = iconv.encodingExists(defaultEncoding) ? defaultEncoding : DEFAULT_ENCODING;
 	const firstLine = text.split(/\r?\n/, 1)[0] ?? "";
-	let encoding = fallback;
-	if (firstLine.startsWith(ENCODING_LINE)) {
-		encoding = firstLine.substring(ENCODING_LINE.length).trim().toLowerCase();
-	}
+	const encoding = readDeclaredEncoding(firstLine) ?? fallback;
 
 	return iconv.encodingExists(encoding) ? encoding : fallback;
 }
@@ -73,11 +73,8 @@ const VSCODE_ENCODING_ALIASES: Record<string, string> = {
  * @returns The declared encoding label, lower-cased, or `undefined`.
  */
 export function readDeclaredEncoding(firstLine: string): string | undefined {
-	if (!firstLine.startsWith(ENCODING_LINE)) {
-		return undefined;
-	}
-
-	return firstLine.substring(ENCODING_LINE.length).trim().toLowerCase();
+	const match = ENCODING_DECLARATION.exec(firstLine);
+	return match ? match[1].toLowerCase() : undefined;
 }
 
 /**

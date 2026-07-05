@@ -52,6 +52,10 @@ describe('determineEncoding', () => {
 	it('falls back to UTF-8 when the supplied default is not a real encoding', () => {
 		assert.strictEqual(determineEncoding('write("hi")', 'klingon-9'), 'utf8');
 	});
+
+	it('accepts the no-space declaration form', () => {
+		assert.strictEqual(determineEncoding('#%text_encoding=iso8859_1\nx'), 'iso8859_1');
+	});
 });
 
 describe('encodeMagikSource', () => {
@@ -93,6 +97,11 @@ describe('readDeclaredEncoding', () => {
 
 	it('returns undefined when there is no declaration', () => {
 		assert.strictEqual(readDeclaredEncoding('_package user'), undefined);
+	});
+
+	it('accepts the no-space and mixed-spacing forms', () => {
+		assert.strictEqual(readDeclaredEncoding('#%text_encoding=utf8'), 'utf8');
+		assert.strictEqual(readDeclaredEncoding('#% text_encoding=iso8859_1'), 'iso8859_1');
 	});
 });
 

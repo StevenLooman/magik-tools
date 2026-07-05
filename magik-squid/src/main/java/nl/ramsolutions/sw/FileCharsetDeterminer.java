@@ -7,6 +7,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * File charset determiner.
@@ -16,7 +18,13 @@ import java.nio.file.Path;
 public final class FileCharsetDeterminer {
 
   private static final Charset DEFAULT_CHARSET = StandardCharsets.ISO_8859_1;
-  private static final String ENCODING_LINE = "#% text_encoding =";
+
+  /**
+   * Pattern for the source-encoding declaration, tolerant of the spacing Smallworld accepts: {@code
+   * #% text_encoding = utf8} as well as {@code #%text_encoding=utf8}.
+   */
+  private static final Pattern ENCODING_PATTERN =
+      Pattern.compile("#%\\s*text_encoding\\s*=\\s*(\\S+)");
 
   private FileCharsetDeterminer() {}
 
@@ -58,10 +66,23 @@ public final class FileCharsetDeterminer {
     return DEFAULT_CHARSET;
   }
 
+  /**
+   * Check whether a line is a Magik source-encoding declaration ({@code #% text_encoding = ...}),
+   * tolerating the optional whitespace Smallworld accepts around the tokens.
+   *
+   * @param line Line to check (may be {@code null}).
+   * @return {@code true} if the line declares a text encoding.
+   */
+  public static boolean hasEncodingDeclaration(final String line) {
+    return line != null && FileCharsetDeterminer.ENCODING_PATTERN.matcher(line).lookingAt();
+  }
+
   private static Charset readCharsetFromLine(final String line) {
-    if (line != null && line.startsWith(ENCODING_LINE)) {
-      final String encoding = line.substring(ENCODING_LINE.length()).trim();
-      return Charset.forName(encoding);
+    if (line != null) {
+      final Matcher matcher = FileCharsetDeterminer.ENCODING_PATTERN.matcher(line);
+      if (matcher.lookingAt()) {
+        return Charset.forName(matcher.group(1));
+      }
     }
     return DEFAULT_CHARSET;
   }
