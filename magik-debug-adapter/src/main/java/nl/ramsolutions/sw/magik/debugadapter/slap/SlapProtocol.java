@@ -129,10 +129,10 @@ public class SlapProtocol implements ISlapProtocol {
                   }
 
                   protocol.handleData();
-                } catch (IOException exception) {
+                } catch (final IOException exception) {
                   LOGGER.error(exception.getMessage(), exception);
                   break;
-                } catch (Exception exception) {
+                } catch (final Exception exception) {
                   LOGGER.error(exception.getMessage(), exception);
                 }
               }

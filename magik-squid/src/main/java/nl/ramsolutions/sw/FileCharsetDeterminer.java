@@ -32,7 +32,7 @@ public final class FileCharsetDeterminer {
         Files.newBufferedReader(path, StandardCharsets.ISO_8859_1)) {
       final String line = bufferedReader.readLine();
       return FileCharsetDeterminer.readCharsetFromLine(line);
-    } catch (IllegalArgumentException | IOException exception) {
+    } catch (final IllegalArgumentException | IOException exception) {
       // do nothing
     }
 
@@ -51,7 +51,7 @@ public final class FileCharsetDeterminer {
     try (BufferedReader bufferedReader = new BufferedReader(stringReader)) {
       final String line = bufferedReader.readLine();
       return FileCharsetDeterminer.readCharsetFromLine(line);
-    } catch (IllegalArgumentException | IOException exception) {
+    } catch (final IllegalArgumentException | IOException exception) {
       // do nothing
     }
 

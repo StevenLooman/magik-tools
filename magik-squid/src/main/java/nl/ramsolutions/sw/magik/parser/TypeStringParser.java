@@ -86,7 +86,7 @@ public final class TypeStringParser {
                 final Field columnField = Token.class.getDeclaredField("column");
                 columnField.setAccessible(true); // NOSONAR
                 columnField.set(token, newColumn); // NOSONAR
-              } catch (ReflectiveOperationException exception) {
+              } catch (final ReflectiveOperationException exception) {
                 LOGGER.error(exception.getMessage(), exception);
               }
             });

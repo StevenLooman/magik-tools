@@ -100,7 +100,7 @@ public class MagikSensor implements Sensor {
     final String fileContent;
     try {
       fileContent = inputFile.contents();
-    } catch (IOException ex) {
+    } catch (final IOException ex) {
       throw new IllegalStateException("Cannot read " + inputFile, ex);
     }
 
