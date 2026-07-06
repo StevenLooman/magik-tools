@@ -21,7 +21,7 @@
     "magik"
   ],
   "engines": {
-    "vscode": "^1.59.0"
+    "vscode": "^1.100.0"
   },
   "activationEvents": [
     "onCommand:magik.startSession",
@@ -325,6 +325,16 @@
           "type": "boolean",
           "default": true
         },
+        "magik.session.encoding": {
+          "description": "Character encoding of the Magik session, used when transmitting a file or region that has no `#% text_encoding =` declaration. Should match the session's locale (e.g. `utf8`, `iso8859_1`). Only used by the VS Code extension.",
+          "type": "string",
+          "default": "utf8"
+        },
+        "magik.editor.matchDeclaredEncoding": {
+          "description": "Automatically set the editor's character encoding to the one declared in a Magik file's `#% text_encoding = ...` line when opening it. Note: an EditorConfig `charset` for `*.magik` will override this. Only used by the VS Code extension.",
+          "type": "boolean",
+          "default": true
+        },
         "magik.productDirs": {
           "description": "Paths to (compiled, containing a `libs/` directory) products.",
           "type": "array"
@@ -429,9 +439,11 @@
   },
   "scripts": {
     "eslint": "eslint .",
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run rebuild",
     "compile": "tsc -b",
+    "rebuild": "tsc -b --clean && tsc -b",
     "watch": "tsc -b -w",
+    "test": "TS_NODE_PROJECT=client/tsconfig.test.json mocha",
     "postinstall": "cd client && npm install && cd .. && cd server && rm -rf ./* && cp ../../../magik-language-server/target/magik-language-server-*.jar . && cp ../../../magik-debug-adapter/target/magik-debug-adapter-*.jar . && cp ../../../magik-session-wrapper/target/magik-session-wrapper-*.jar . && cd ..",
     "package": "vsce package"
   },

@@ -127,7 +127,7 @@ public class TypeDocParser {
                 final Field columnField = Token.class.getDeclaredField("column");
                 columnField.setAccessible(true);
                 columnField.set(token, newColumn);
-              } catch (ReflectiveOperationException exception) {
+              } catch (final ReflectiveOperationException exception) {
                 LOGGER.error(exception.getMessage(), exception);
               }
             });

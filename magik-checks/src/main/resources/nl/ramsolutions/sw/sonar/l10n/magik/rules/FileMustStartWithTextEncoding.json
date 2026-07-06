@@ -1,0 +1,16 @@
+{
+  "title": "File must start with a text encoding comment",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bad-practice",
+    "confusing"
+  ],
+  "defaultSeverity": "Minor",
+  "ruleSpecification": "FileMustStartWithTextEncoding",
+  "sqKey": "file-must-start-with-text-encoding"
+}

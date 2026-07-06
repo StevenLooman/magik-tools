@@ -6,6 +6,8 @@ import { MagikDebugProvider } from './debug-provider';
 import { MagikSessionProvider } from './magik-session';
 import { MagikTestProvider } from './test-provider';
 import { MagikEditorCommandsProvider } from './editor-commands-provider';
+import { registerEditorEncodingMatcher } from './editor-encoding';
+import { registerLogger } from './logging';
 
 
 let languageClient: MagikLanguageClient | undefined;
@@ -18,6 +20,7 @@ let editorCommandsProvider: MagikEditorCommandsProvider | undefined;
 
 //#region Start/stop
 export function activate(context: vscode.ExtensionContext) {
+	registerLogger(context);
 	languageClient = new MagikLanguageClient(context);
 	aliasTaskProvider = new MagikAliasTaskProvider(context);
 	magikSessionProvider = new MagikSessionProvider(context);
@@ -25,6 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 	debugProvider = new MagikDebugProvider(context);
 	testProvider = new MagikTestProvider(context, languageClient);
 	editorCommandsProvider = new MagikEditorCommandsProvider(context);
+	registerEditorEncodingMatcher(context);
 
 	languageClient.start(false);
 }

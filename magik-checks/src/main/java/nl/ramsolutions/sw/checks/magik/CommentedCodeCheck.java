@@ -110,7 +110,7 @@ public class CommentedCodeCheck extends MagikCheck {
     try {
       final AstNode magikNode = parser.parseSafe(bareComment);
       return magikNode.getChildren().stream().allMatch(node -> !node.is(MagikGrammar.SYNTAX_ERROR));
-    } catch (RecognitionException exception) {
+    } catch (final RecognitionException exception) {
       return false;
     }
   }

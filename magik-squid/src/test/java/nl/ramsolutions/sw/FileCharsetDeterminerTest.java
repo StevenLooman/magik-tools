@@ -49,4 +49,26 @@ class FileCharsetDeterminerTest {
 
     assertThat(result).isEqualTo(StandardCharsets.ISO_8859_1);
   }
+
+  @Test
+  void testParseNoSpaces() {
+    final Charset result = FileCharsetDeterminer.determineCharset("#%text_encoding=utf8\n");
+
+    assertThat(result).isEqualTo(StandardCharsets.UTF_8);
+  }
+
+  @Test
+  void testParseMixedSpacing() {
+    final Charset result = FileCharsetDeterminer.determineCharset("#% text_encoding=iso8859_1\n");
+
+    assertThat(result).isEqualTo(StandardCharsets.ISO_8859_1);
+  }
+
+  @Test
+  void testHasEncodingDeclarationVariants() {
+    assertThat(FileCharsetDeterminer.hasEncodingDeclaration("#% text_encoding = utf8")).isTrue();
+    assertThat(FileCharsetDeterminer.hasEncodingDeclaration("#%text_encoding=utf8")).isTrue();
+    assertThat(FileCharsetDeterminer.hasEncodingDeclaration("_package user")).isFalse();
+    assertThat(FileCharsetDeterminer.hasEncodingDeclaration(null)).isFalse();
+  }
 }

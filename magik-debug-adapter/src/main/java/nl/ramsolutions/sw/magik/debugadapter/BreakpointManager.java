@@ -381,10 +381,10 @@ class BreakpointManager {
           this.slapProtocol.resumeThread(threadId).get();
           return;
         }
-      } catch (InterruptedException exception) {
+      } catch (final InterruptedException exception) {
         LOGGER.warn("Interrupted!", exception);
         Thread.currentThread().interrupt();
-      } catch (ExecutionException | IOException exception) {
+      } catch (final ExecutionException | IOException exception) {
         // Could not execute, pretend nothing happened.
       }
     }
@@ -443,7 +443,7 @@ class BreakpointManager {
       magikBreakpoint.setBreakpointId(breakpointId);
 
       LOGGER.trace("Created breakpoint: {}", magikBreakpoint);
-    } catch (ExecutionException exception) {
+    } catch (final ExecutionException exception) {
       final Throwable cause = exception.getCause();
       if (cause instanceof SlapErrorException slapErrorException) {
         // Do nothing, verified will become false, error will be shown to user.

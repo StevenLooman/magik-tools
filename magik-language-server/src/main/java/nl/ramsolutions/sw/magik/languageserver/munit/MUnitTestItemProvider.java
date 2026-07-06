@@ -69,7 +69,7 @@ public class MUnitTestItemProvider {
             definition -> {
               try {
                 this.createTestItems(definition, swProductTestItems);
-              } catch (IOException exception) {
+              } catch (final IOException exception) {
                 LOGGER.error(exception.getMessage(), exception);
               }
             });

@@ -202,7 +202,7 @@ class ThreadManager {
   void pause(final long threadId) throws IOException, InterruptedException, ExecutionException {
     try {
       this.slapProtocol.suspendThread(threadId).get();
-    } catch (ExecutionException exception) {
+    } catch (final ExecutionException exception) {
       if (exception.getCause() instanceof SlapErrorException exception2) {
         final ErrorResponse error = exception2.getError();
         final ErrorMessage errorMessage = error.getErrorMessage();
@@ -418,7 +418,7 @@ class ThreadManager {
       while (!this.stepCompletedEventReceived) {
         try {
           this.wait();
-        } catch (InterruptedException exception) {
+        } catch (final InterruptedException exception) {
           // pass; account for spurious wakeups
           java.lang.Thread.currentThread().interrupt();
         }
