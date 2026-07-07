@@ -98,8 +98,6 @@ public class GenericHelper {
         .filter(TypeString::isGenericDefinition)
         .collect(
             Collectors.toMap(
-                TypeString::getGenericReference,
-                TypeString::getGenericType,
-                (a, b) -> a));
+                TypeString::getGenericReference, TypeString::getGenericType, (a, b) -> a));
   }
 }

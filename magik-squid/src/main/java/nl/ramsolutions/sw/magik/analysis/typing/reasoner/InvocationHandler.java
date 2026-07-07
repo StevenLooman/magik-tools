@@ -226,11 +226,7 @@ class InvocationHandler extends LocalTypeReasonerHandler {
                           i < argumentTypes.size() ? argumentTypes.get(i) : TypeString.SW_UNSET;
                       return new AbstractMap.SimpleEntry<>(paramRef, argTypeRef);
                     })
-                .collect(
-                    Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (a, b) -> a)));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a)));
 
     if (assignmentParamDef != null) {
       final TypeString assignParamRef = TypeString.ofParameterRef(assignmentParamDef.getName());
