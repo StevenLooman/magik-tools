@@ -142,7 +142,8 @@ public class MethodDefinitionNodeHelper {
             Collectors.toMap(
                 parameterNode ->
                     parameterNode.getFirstDescendant(MagikGrammar.IDENTIFIER).getTokenValue(),
-                parameterNode -> parameterNode));
+                parameterNode -> parameterNode,
+                (a, b) -> a));
   }
 
   private Collection<AstNode> getMethodModifiers() {

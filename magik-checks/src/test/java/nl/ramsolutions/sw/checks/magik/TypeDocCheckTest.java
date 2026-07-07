@@ -23,6 +23,19 @@ class TypeDocCheckTest {
           :test_exemplar,
           {{:slot1, _unset}})
         """,
+        """
+        ## @slot {sw:rope} slot1 Slot 1.
+        ## @slot {sw:rope} slot1 Slot 1, again.
+        def_slotted_exemplar(
+          :test_exemplar,
+          {{:slot1, _unset}})
+        """,
+        """
+        ## @slot {sw:rope} slot1 Slot 1.
+        def_slotted_exemplar(
+          :test_exemplar,
+          {{:slot1, _unset}, {:slot1, _unset}})
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new TypeDocCheck();

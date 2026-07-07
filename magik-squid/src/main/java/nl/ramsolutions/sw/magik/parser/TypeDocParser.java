@@ -302,7 +302,9 @@ public class TypeDocParser {
         .filter(this::noEmptyName)
         .collect(
             Collectors.toMap(
-                this::getName, slotNode -> slotNode.getFirstChild(TypeDocGrammar.NAME)));
+                this::getName,
+                slotNode -> slotNode.getFirstChild(TypeDocGrammar.NAME),
+                (a, b) -> a));
   }
 
   /**

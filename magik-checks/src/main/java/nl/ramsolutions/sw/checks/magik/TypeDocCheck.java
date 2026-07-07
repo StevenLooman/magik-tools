@@ -93,7 +93,8 @@ public class TypeDocCheck extends MagikCheck {
     final ExemplarDefinition exemplarDefinition = (ExemplarDefinition) definitions.get(0);
     final List<SlotDefinition> slots = exemplarDefinition.getSlots();
     final Map<String, SlotDefinition> slotNames =
-        slots.stream().collect(Collectors.toMap(SlotDefinition::getName, slot -> slot));
+        slots.stream()
+            .collect(Collectors.toMap(SlotDefinition::getName, slot -> slot, (a, b) -> a));
 
     // Compare slots.
     docSlotNameNodes.entrySet().stream()

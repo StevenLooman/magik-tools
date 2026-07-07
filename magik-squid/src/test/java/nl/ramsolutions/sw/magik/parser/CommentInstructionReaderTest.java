@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.parser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
@@ -102,5 +103,26 @@ class CommentInstructionReaderTest {
     final String instructionAtLine4 =
         instructionReader.getInstructionsAtLine(4, MLINT_STATEMENT_INSTRUCTION);
     assertThat(instructionAtLine4).isNull();
+  }
+
+  @Test
+  void testReadScopeInstructionDuplicateKey() {
+    final String code =
+        """
+        _proc()
+          # mlint: disable=no-self-use
+          # mlint: disable=forbidden-call
+          print(10)
+        _endproc""";
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
+
+    final Map<Scope, Map<String, String>> scopeInstructions =
+        magikFile.getScopeInstructions(MLINT_SCOPE_INSTRUCTION);
+
+    // Both disables in the same scope are retained.
+    final GlobalScope globalScope = magikFile.getGlobalScope();
+    final Scope procScope = globalScope.getChildScopes().get(0);
+    assertThat(scopeInstructions.get(procScope))
+        .containsEntry("disable", "no-self-use,forbidden-call");
   }
 }

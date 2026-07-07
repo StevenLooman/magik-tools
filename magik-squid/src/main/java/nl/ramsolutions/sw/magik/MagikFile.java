@@ -287,7 +287,9 @@ public class MagikFile extends OpenedFile {
                       .map(instr -> Objects.requireNonNullElse(instr, ""))
                       .map(CommentInstructionReader::parseInstructions)
                       .flatMap(instrs -> instrs.entrySet().stream())
-                      .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                      .collect(
+                          Collectors.toMap(
+                              Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a + "," + b));
               instructions.put(scope, scopeInstrs);
             });
 

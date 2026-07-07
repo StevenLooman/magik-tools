@@ -45,7 +45,8 @@ public class ProcedureDefinitionNodeHelper {
             Collectors.toMap(
                 parameterNode ->
                     parameterNode.getFirstChild(MagikGrammar.IDENTIFIER).getTokenValue(),
-                parameterNode -> parameterNode));
+                parameterNode -> parameterNode,
+                (a, b) -> a));
   }
 
   /**
