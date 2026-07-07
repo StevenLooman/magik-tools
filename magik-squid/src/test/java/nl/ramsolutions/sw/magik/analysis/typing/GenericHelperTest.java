@@ -58,4 +58,19 @@ class GenericHelperTest {
     assertThat(result.isVariadic()).isTrue();
     assertThat(result.getVariadicInner()).isEqualTo(TypeString.SW_INTEGER);
   }
+
+  @Test
+  void testSubstituteGenericsDuplicateGenericDefinitions() {
+    final TypeString boundType =
+        TypeString.ofIdentifier(
+            "rope",
+            "sw",
+            TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER),
+            TypeString.ofGenericDefinition("E", TypeString.SW_FLOAT));
+    final GenericHelper helper = new GenericHelper(boundType);
+
+    final TypeString result = helper.substituteGenerics(TypeString.ofGenericReference("E"));
+
+    assertThat(result).isEqualTo(TypeString.SW_INTEGER);
+  }
 }

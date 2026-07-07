@@ -1578,6 +1578,75 @@ class LocalTypeReasonerTest {
   }
 
   @Test
+  void testParameterReferenceDuplicateParameterNames() {
+    final String code =
+        """
+        _method a.b
+          _return _self.returns_param(10, "str")
+        _endmethod""";
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString aRef = TypeString.ofIdentifier("a", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            aRef,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            null));
+    final TypeString param1Ref = TypeString.ofParameterRef("p1");
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            aRef,
+            "returns_param()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p1",
+                    ParameterDefinition.Modifier.NONE,
+                    param1Ref),
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p1",
+                    ParameterDefinition.Modifier.NONE,
+                    param1Ref)),
+            null,
+            null,
+            new ExpressionResultString(param1Ref),
+            ExpressionResultString.EMPTY));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // In case of duplicate parameter names, the first parameter/argument wins.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodDefinitionNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+  }
+
+  @Test
   void testParameterReferenceNested() {
     final String code =
         """

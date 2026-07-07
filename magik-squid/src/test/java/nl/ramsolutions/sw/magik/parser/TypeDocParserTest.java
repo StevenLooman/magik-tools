@@ -205,6 +205,25 @@ class TypeDocParserTest {
   }
 
   @Test
+  void testSlotNameNodesDuplicate() throws IOException {
+    final String code =
+        """
+        ## @slot {user:object} a Slot a.
+        ## @slot {user:object} a Slot a, again.
+        def_slotted_exemplar(:example,
+            {
+                {:a, _unset}
+            })
+        """;
+    final AstNode topNode = this.parseMagik(code);
+    final AstNode definitionNode = topNode.getFirstChild(MagikGrammar.STATEMENT);
+    final TypeDocParser docParser = new TypeDocParser(definitionNode);
+    final Map<String, AstNode> slotNameNodes = docParser.getSlotNameNodes();
+    assertThat(slotNameNodes).containsOnlyKeys("a");
+    assertThat(slotNameNodes.get("a").getTokenLine()).isEqualTo(1);
+  }
+
+  @Test
   void testTokenLines() throws IOException {
     final String code =
         """
