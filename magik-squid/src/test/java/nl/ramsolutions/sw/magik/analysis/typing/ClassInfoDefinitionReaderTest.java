@@ -275,7 +275,7 @@ class ClassInfoDefinitionReaderTest {
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/example_mixin.magik")),
                 null,
                 "class_definition_reader_test",
-                """
+"""
 
 This is a longer method doc
 to be tested.
