@@ -12,6 +12,10 @@ updates:
     directory: "/"
     schedule:
       interval: monthly
+    ignore:
+      # 1.28.0 is the last google-java-format release supporting Java 17.
+      - dependency-name: "com.google.googlejavaformat:google-java-format"
+        versions: [">=1.29.0"]
   - package-ecosystem: "npm"
     directory: "magik-language-server/client-vscode"
     schedule:

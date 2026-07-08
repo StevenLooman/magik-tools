@@ -247,6 +247,18 @@
         <version>${com.github.marschall-memoryfilesystem.version}</version>
         <scope>test</scope>
       </dependency>
+
+      <!-- Not a build dependency; here only so Dependabot sees the spotless formatter versions. -->
+      <dependency>
+        <groupId>com.google.googlejavaformat</groupId>
+        <artifactId>google-java-format</artifactId>
+        <version>${google-java-format.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.solven-eu.cleanthat</groupId>
+        <artifactId>java</artifactId>
+        <version>${cleanthat.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
