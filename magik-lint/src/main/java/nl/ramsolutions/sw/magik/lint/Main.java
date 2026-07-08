@@ -24,6 +24,7 @@ import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.CheckHolder;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
+import nl.ramsolutions.sw.checks.LoadListCheckList;
 import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.checks.ModuleDefCheckList;
 import nl.ramsolutions.sw.checks.ProductDefCheckList;
@@ -216,6 +217,7 @@ public final class Main {
     return Stream.of(
             ProductDefCheckList.INSTANCE.getBaseChecks().stream(),
             ModuleDefCheckList.INSTANCE.getBaseChecks().stream(),
+            LoadListCheckList.INSTANCE.getBaseChecks().stream(),
             MagikCheckList.INSTANCE.getBaseChecks().stream())
         .flatMap(stream -> stream)
         .sorted(Comparator.comparing(Class::getSimpleName))

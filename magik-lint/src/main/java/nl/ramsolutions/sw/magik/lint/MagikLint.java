@@ -17,6 +17,7 @@ import nl.ramsolutions.sw.checks.CheckMetadata;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.IssueDisabledChecker;
+import nl.ramsolutions.sw.checks.LoadListCheckList;
 import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.checks.ModuleDefCheckList;
 import nl.ramsolutions.sw.checks.ProductDefCheckList;
@@ -185,6 +186,7 @@ public class MagikLint {
     return Stream.of(
             ProductDefCheckList.INSTANCE.getBaseChecks().stream(),
             ModuleDefCheckList.INSTANCE.getBaseChecks().stream(),
+            LoadListCheckList.INSTANCE.getBaseChecks().stream(),
             MagikCheckList.INSTANCE.getBaseChecks().stream())
         .flatMap(stream -> stream)
         .sorted(Comparator.comparing(Class::getSimpleName))
