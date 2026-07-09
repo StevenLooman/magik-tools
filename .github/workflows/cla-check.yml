@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
+  contents: read
   pull-requests: write
   statuses: write
 
@@ -13,28 +14,26 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !endsWith(github.event.pull_request.user.login, '[bot]') }}
     steps:
-      - name: Checkout PR head
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          path: head
-
-      - name: Checkout base branch
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.base_ref }}
-          path: base
-
       - name: Check CLA signature
         id: cla
         env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
           echo "Checking CLA for user: $PR_AUTHOR"
 
+          fetch_signers() {
+            gh api "repos/${REPO}/contents/CLA-SIGNERS?ref=$1" \
+              --jq '.content' 2>/dev/null | base64 -d 2>/dev/null
+          }
+
           signed=false
-          for dir in head base; do
-            if [ -f "$dir/CLA-SIGNERS" ] && grep -qiF "| ${PR_AUTHOR} |" "$dir/CLA-SIGNERS"; then
+          for ref in "$HEAD_SHA" "$BASE_REF"; do
+            content="$(fetch_signers "$ref")"
+            if [ -n "$content" ] && echo "$content" | grep -qiF "| ${PR_AUTHOR} |"; then
               signed=true
               break
             fi
