@@ -7,4 +7,4 @@ $
 def_slotted_exemplar(:parent, {}, :child)
 $
 </pre>
-<p>In the above example, <pre>child</pre> inherits from <pre>parent</pre>, and <pre>parent</pre> inherits from <pre>child</pre>. This cycle can be spread across separate files/modules, so neither file necessarily looks wrong on its own. A type cannot legitimately inherit from itself, directly or indirectly; resolving methods/slots for either type is undefined.</p>
+<p>In the above example, <code>child</code> inherits from <code>parent</code>, and <code>parent</code> inherits from <code>child</code>. This cycle can be spread across separate files/modules, so neither file necessarily looks wrong on its own. A type cannot legitimately inherit from itself, directly or indirectly; resolving methods/slots for either type is undefined.</p>

@@ -1,5 +1,5 @@
-<p>Ensure that no module listed in <code>tests_modules</code> also appears in <code>requires</code>.
-If a module is listed as <code>tests_modules</code>, it is already required implicitly. Adding it to <code>requires</code> is redundant.</p>
+<p>Module already listed in <code>tests_modules</code> should not also be in <code>requires</code>.</p>
+<p>If a module is listed as <code>tests_modules</code>, it is already required implicitly. Adding it to <code>requires</code> is redundant.</p>
 
 <h2>Non-compliant Code Example</h2>
 <pre data-diff-id="1" data-diff-type="noncompliant">
