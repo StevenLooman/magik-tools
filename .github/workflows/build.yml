@@ -64,7 +64,7 @@ jobs:
         run: |
           printf '# Changes\n\n<!-- towncrier release notes start -->\n\n' > CHANGES.preview.md
           towncrier build --draft --version 0.0.0 | perl -0pe 's/\n+\z/\n/' >> CHANGES.preview.md
-      - uses: DavidAnson/markdownlint-cli2-action@v23
+      - uses: DavidAnson/markdownlint-cli2-action@v24
         with:
           globs: '**/*.md'
 
