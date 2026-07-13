@@ -7,7 +7,9 @@ If you report an issue, please report what is happening, expected result, actual
 
 ## AI-generated content
 
-Pull request descriptions and replies in discussions must be written by you, not by an AI. This is to ensure that you, as the creator of the pull request, fully understand what you are making, and to prevent low-effort contributions. Pull requests containing AI-generated text will either be ignored, or picked up with a very low priority.
+Pull request descriptions and replies in discussions must be written by you, not by an AI. This is to ensure that you, as the creator of the pull request, fully understand what you are making, and to prevent low-effort contributions.
+
+Pull requests containing AI-generated text will either be ignored, or picked up with a very low priority.
 
 It is okay to use an AI to make changes to code, or to have an AI perform analysis. However, you must still fully understand the changes you are proposing.
 
