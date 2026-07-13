@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.LogManager;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.IgnoreHandler;
@@ -169,6 +170,27 @@ public final class Main {
   }
 
   /**
+   * Ensure the output format is known, otherwise report and exit.
+   *
+   * @param outputFormat Output format.
+   */
+  private static void ensureKnownFormat(final String outputFormat) {
+    if (ReporterRegistry.hasFormat(outputFormat)) {
+      return;
+    }
+
+    final PrintStream errStream = Main.getErrStream();
+    final String validFormats =
+        ReporterRegistry.getFormats().stream()
+            .filter(format -> !"null".equals(format))
+            .collect(Collectors.joining(", "));
+    errStream.println(
+        "Unknown output format: " + outputFormat + ". Valid formats: " + validFormats);
+
+    System.exit(1);
+  }
+
+  /**
    * Create the reporter.
    *
    * @param commandLine Parsed command line.
@@ -277,6 +299,9 @@ public final class Main {
 
     // Copy configuration from command line.
     Main.copyOptionsToConfig(commandLine, properties);
+
+    // Validate output format.
+    Main.ensureKnownFormat(commandLine.getOptionValue(OPTION_FORMAT, "text"));
 
     // Show checks.
     if (commandLine.hasOption(OPTION_SHOW_CHECKS)) {

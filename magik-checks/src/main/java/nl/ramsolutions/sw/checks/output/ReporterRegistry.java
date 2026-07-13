@@ -1,8 +1,11 @@
 package nl.ramsolutions.sw.checks.output;
 
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import nl.ramsolutions.sw.MagikToolsProperties;
 
@@ -21,6 +24,15 @@ public final class ReporterRegistry {
   public static void register(final String format, final ReporterFactory factory) {
     final String normalizedFormat = normalize(format);
     FACTORIES.put(normalizedFormat, Objects.requireNonNull(factory, "factory"));
+  }
+
+  public static Set<String> getFormats() {
+    return Collections.unmodifiableSet(new TreeSet<>(FACTORIES.keySet()));
+  }
+
+  public static boolean hasFormat(final String format) {
+    final String normalizedFormat = normalize(format);
+    return FACTORIES.containsKey(normalizedFormat);
   }
 
   public static Reporter createReporter(
