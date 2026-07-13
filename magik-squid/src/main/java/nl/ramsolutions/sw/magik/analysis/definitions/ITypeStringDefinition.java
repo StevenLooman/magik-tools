@@ -6,7 +6,7 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 /** A resolvable type definition. */
 public interface ITypeStringDefinition extends IDefinition {
 
-  public TypeString getTypeString();
+  TypeString getTypeString();
 
   // TODO: Parents.
 
