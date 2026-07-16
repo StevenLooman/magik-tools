@@ -325,7 +325,9 @@ public final class Main {
     final String[] leftOverArgs = commandLine.getArgs();
     final Collection<Path> paths = Main.getFilesFromArgs(leftOverArgs);
     if (commandLine.hasOption(OPTION_APPLY_FIXES)) {
-      final MagikLintFixApplier fixer = new MagikLintFixApplier(properties);
+      final PrintStream outStream = Main.getOutStream();
+      final Writer writer = new PrintWriter(outStream);
+      final MagikLintFixApplier fixer = new MagikLintFixApplier(properties, writer);
       fixer.run(paths);
 
       System.exit(0);
