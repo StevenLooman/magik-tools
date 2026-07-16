@@ -1,10 +1,12 @@
 package nl.ramsolutions.sw.magik.lint;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -31,12 +33,14 @@ import org.slf4j.LoggerFactory;
 /** Apply {@link CodeAction}s using the registered {@link CodeActionSupplier}s. */
 public class MagikLintFixApplier {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(MagikLint.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MagikLintFixApplier.class);
 
   private final MagikToolsProperties properties;
+  private final Writer writer;
 
-  public MagikLintFixApplier(final MagikToolsProperties properties) {
+  public MagikLintFixApplier(final MagikToolsProperties properties, final Writer writer) {
     this.properties = properties;
+    this.writer = writer;
   }
 
   /**
@@ -46,17 +50,33 @@ public class MagikLintFixApplier {
    * @throws IOException -
    */
   public void run(final Collection<Path> paths) throws IOException {
+    final List<Path> changedPaths = new ArrayList<>();
+
     for (final Path path : paths) {
       final OpenedFile openedFile = Utils.buildOpenedFile(path, this.properties);
       if (Utils.isFileIgnored(openedFile)) {
         continue;
       }
 
-      this.runOnFile(openedFile);
+      final boolean changed = this.runOnFile(openedFile);
+      if (changed) {
+        changedPaths.add(path);
+      }
     }
+
+    final String changeReport =
+        changedPaths.stream()
+            .sorted(Comparator.naturalOrder())
+            .map(changedPath -> "File changed: %s%n".formatted(changedPath))
+            .collect(Collectors.joining());
+    this.writer.write(changeReport);
+
+    final int changedCount = changedPaths.size();
+    this.writer.write("%d file(s) changed%n".formatted(changedCount));
+    this.writer.flush();
   }
 
-  private void runOnFile(final OpenedFile originalOpenedFile) throws IOException {
+  private boolean runOnFile(final OpenedFile originalOpenedFile) throws IOException {
     LOGGER.trace("Applying fixers to file: {}", originalOpenedFile);
 
     OpenedFile openedFile = originalOpenedFile;
@@ -70,13 +90,15 @@ public class MagikLintFixApplier {
     // Write file, if changed.
     final String newSource = openedFile.getSource();
     if (originalOpenedFile.getSource().equals(newSource)) {
-      return;
+      return false;
     }
 
     LOGGER.debug("Saving file: {}", openedFile);
     final Charset charset = FileCharsetDeterminer.determineCharset(newSource);
     final Path path = Path.of(uri);
     Files.writeString(path, newSource, charset);
+
+    return true;
   }
 
   private String applyCodeActionSupplier(
