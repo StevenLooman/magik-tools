@@ -72,6 +72,7 @@ The standard Smallworld type data (types, methods, ...) can be exported using th
 
 - Package definitions
 - Type definitions (exemplars, etc)
+- Slot definitions (tied to their owning type)
 - Global definitions
 - Method definitions
 - Procedure definitions

@@ -83,7 +83,6 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
   public int hashCode() {
     return Objects.hash(
         this.getLocation(),
-        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
         this.typeName,

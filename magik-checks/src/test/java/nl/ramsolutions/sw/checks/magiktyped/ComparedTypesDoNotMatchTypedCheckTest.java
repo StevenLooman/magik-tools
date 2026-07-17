@@ -104,7 +104,6 @@ class ComparedTypesDoNotMatchTypedCheckTest {
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.ofIdentifier("parent", "user"),
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new ExemplarDefinition(
@@ -115,7 +114,6 @@ class ComparedTypesDoNotMatchTypedCheckTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.ofIdentifier("child", "user"),
-            Collections.emptyList(),
             List.of(TypeString.ofIdentifier("parent", "user")),
             null));
     final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();

@@ -406,7 +406,14 @@ public final class ClassInfoDefinitionReader {
               .map(
                   slotName ->
                       new SlotDefinition(
-                          null, null, moduleName, null, null, slotName, TypeString.UNDEFINED))
+                          null,
+                          null,
+                          moduleName,
+                          null,
+                          null,
+                          typeString,
+                          slotName,
+                          TypeString.UNDEFINED))
               .toList();
     }
 
@@ -455,10 +462,10 @@ public final class ClassInfoDefinitionReader {
             null,
             ExemplarDefinition.Sort.UNDEFINED,
             typeString,
-            slots,
             parents,
             pragma);
     this.definitionKeeper.add(definition);
+    slots.forEach(this.definitionKeeper::add);
   }
 
   private void readIndexedClass(
@@ -521,7 +528,6 @@ public final class ClassInfoDefinitionReader {
             null,
             ExemplarDefinition.Sort.UNDEFINED,
             typeString,
-            Collections.emptyList(),
             parents,
             pragma);
     this.definitionKeeper.add(definition);
@@ -589,7 +595,6 @@ public final class ClassInfoDefinitionReader {
             null,
             ExemplarDefinition.Sort.UNDEFINED,
             typeString,
-            Collections.emptyList(),
             parents,
             pragma);
     this.definitionKeeper.add(definition);
@@ -660,7 +665,6 @@ public final class ClassInfoDefinitionReader {
             null,
             ExemplarDefinition.Sort.MIXIN,
             typeString,
-            Collections.emptyList(),
             Collections.emptyList(),
             pragma);
     this.definitionKeeper.add(definition);

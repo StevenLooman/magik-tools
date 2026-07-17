@@ -77,7 +77,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(
@@ -208,7 +207,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(
@@ -275,7 +273,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     definitionKeeper.add(
@@ -854,7 +851,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.INDEXED,
             propertyListRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(
@@ -944,7 +940,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     definitionKeeper.add(
@@ -1355,7 +1350,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             sRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     final TypeString tRef = TypeString.ofIdentifier("t", "sw");
     definitionKeeper.add(
@@ -1367,7 +1361,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             tRef,
-            Collections.emptyList(),
             List.of(sRef),
             null));
 
@@ -1402,7 +1395,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             rRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
 
     final TypeString tRef = TypeString.ofIdentifier("t", "sw");
@@ -1415,7 +1407,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             tRef,
-            Collections.emptyList(),
             List.of(rRef),
             null));
 
@@ -1539,7 +1530,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     final TypeString param1Ref = TypeString.ofParameterRef("p1");
     definitionKeeper.add(
@@ -1597,7 +1587,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     final TypeString param1Ref = TypeString.ofParameterRef("p1");
@@ -1666,7 +1655,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     final TypeString param1Ref = TypeString.ofParameterRef("p1");
@@ -1750,7 +1738,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     final TypeString param1Ref = TypeString.ofParameterRef("p1");
     definitionKeeper.add(
@@ -1810,7 +1797,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     definitionKeeper.add(
@@ -1878,7 +1864,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.INDEXED,
             propertyListRef,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     definitionKeeper.add(
@@ -1965,7 +1950,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(
@@ -2046,7 +2030,6 @@ class LocalTypeReasonerTest {
                 TypeString.SW_CHAR16_VECTOR.getPakkage(),
                 TypeString.ofGenericDefinition("K", TypeString.SW_INTEGER),
                 TypeString.ofGenericDefinition("E", TypeString.SW_CHARACTER)),
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     definitionKeeper.add(
@@ -2133,7 +2116,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.INDEXED,
             propertyListRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(
@@ -2207,7 +2189,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             stackRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(
@@ -2232,7 +2213,7 @@ class LocalTypeReasonerTest {
         TypeString.ofIdentifier(
             "stack", "sw", TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
     final SlotDefinition slotDefinition =
-        new SlotDefinition(null, null, null, null, null, "stack", slotTypeRef);
+        new SlotDefinition(null, null, null, null, null, exemplarRef, "stack", slotTypeRef);
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -2242,9 +2223,9 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             exemplarRef,
-            List.of(slotDefinition),
             Collections.emptyList(),
             null));
+    definitionKeeper.add(slotDefinition);
 
     // Do analysis.
     final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
@@ -2370,7 +2351,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             myVecRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(
@@ -2484,7 +2464,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new ExemplarDefinition(
@@ -2495,7 +2474,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             tRef,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     definitionKeeper.add(
@@ -2583,7 +2561,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new ExemplarDefinition(
@@ -2594,7 +2571,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             tRef,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     definitionKeeper.add(
@@ -2682,8 +2658,9 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
+    final SlotDefinition valueSlotDefinition =
+        new SlotDefinition(null, null, null, null, null, tRef, "value", TypeString.SW_INTEGER);
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
@@ -2693,10 +2670,9 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             tRef,
-            List.of(
-                new SlotDefinition(null, null, null, null, null, "value", TypeString.SW_INTEGER)),
             Collections.emptyList(),
             null));
+    definitionKeeper.add(valueSlotDefinition);
     definitionKeeper.add(
         new MethodDefinition(
             null,
@@ -2759,7 +2735,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new ExemplarDefinition(
@@ -2770,7 +2745,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             tRef,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     definitionKeeper.add(
@@ -2835,7 +2809,6 @@ class LocalTypeReasonerTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new ExemplarDefinition(
@@ -2846,7 +2819,6 @@ class LocalTypeReasonerTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             tRef,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     definitionKeeper.add(

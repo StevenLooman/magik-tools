@@ -30,7 +30,6 @@ class DeprecatedTypeUsageTypedCheckTest {
             ExemplarDefinition.Sort.SLOTTED,
             typeName,
             Collections.emptyList(),
-            Collections.emptyList(),
             new Pragma(null, Arrays.asList(classifyLevel), Set.of(), Set.of())));
   }
 

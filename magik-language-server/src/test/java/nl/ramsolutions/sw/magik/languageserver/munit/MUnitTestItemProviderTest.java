@@ -41,7 +41,6 @@ class MUnitTestItemProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
 
     return definitionKeeper;
@@ -58,7 +57,6 @@ class MUnitTestItemProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             MY_TEST_REF,
-            Collections.emptyList(),
             List.of(MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME),
             null));
   }

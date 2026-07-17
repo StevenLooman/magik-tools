@@ -27,8 +27,7 @@ class AbstractMethodNotImplementedTypedCheckTest {
       final ExemplarDefinition.Sort sort,
       final List<TypeString> parents) {
     definitionKeeper.add(
-        new ExemplarDefinition(
-            null, null, null, null, null, sort, typeStr, Collections.emptyList(), parents, null));
+        new ExemplarDefinition(null, null, null, null, null, sort, typeStr, parents, null));
   }
 
   private void addMethod(

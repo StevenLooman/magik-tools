@@ -1,12 +1,14 @@
 package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +25,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
@@ -137,7 +140,6 @@ class JsonDefinitionWriterTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
 
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
@@ -160,7 +162,6 @@ class JsonDefinitionWriterTest {
             ExemplarDefinition.Sort.MIXIN,
             mixinRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
 
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
@@ -171,6 +172,35 @@ class JsonDefinitionWriterTest {
     final ExemplarDefinition roundTripped =
         readBack.getExemplarDefinitions(mixinRef).stream().findAny().orElseThrow();
     assertThat(roundTripped.getSort()).isEqualTo(ExemplarDefinition.Sort.MIXIN);
+  }
+
+  @Test
+  void testWriteAndReadSlot() throws IOException {
+    final TypeString typeA = TypeString.ofIdentifier("a", "user");
+    final IDefinitionKeeper writeKeeper = new DefinitionKeeper();
+    writeKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            typeA,
+            Collections.emptyList(),
+            null));
+    writeKeeper.add(
+        new SlotDefinition(null, null, null, null, null, typeA, "slot1", TypeString.SW_INTEGER));
+
+    JsonDefinitionWriter.write(this.tempPath, writeKeeper);
+
+    final IDefinitionKeeper readKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(this.tempPath, readKeeper);
+
+    final Collection<SlotDefinition> slotDefs = readKeeper.getSlotDefinitions(typeA);
+    assertThat(slotDefs)
+        .extracting(SlotDefinition::getName, SlotDefinition::getTypeName)
+        .containsExactly(tuple("slot1", TypeString.SW_INTEGER));
   }
 
   @Test

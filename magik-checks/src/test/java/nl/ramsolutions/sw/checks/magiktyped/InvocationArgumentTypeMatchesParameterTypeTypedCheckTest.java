@@ -115,7 +115,6 @@ class InvocationArgumentTypeMatchesParameterTypeTypedCheckTest {
             TypeString.ofIdentifier(
                 "rope", "sw", TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER)),
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(

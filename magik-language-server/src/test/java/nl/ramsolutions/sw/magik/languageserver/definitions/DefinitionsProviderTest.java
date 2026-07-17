@@ -45,7 +45,6 @@ class DefinitionsProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
 
     final String code =
@@ -101,8 +100,6 @@ class DefinitionsProviderTest {
     final Location slotLocation =
         new Location(
             MagikTypedFile.DEFAULT_URI, new Range(new Position(5, 0), new Position(5, 10)));
-    final SlotDefinition slotDef =
-        new SlotDefinition(slotLocation, null, null, null, null, "my_slot", TypeString.UNDEFINED);
     definitionKeeper.add(
         new ExemplarDefinition(
             EMPTY_LOCATION,
@@ -112,9 +109,11 @@ class DefinitionsProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             exemplarRef,
-            List.of(slotDef),
             Collections.emptyList(),
             null));
+    definitionKeeper.add(
+        new SlotDefinition(
+            slotLocation, null, null, null, null, exemplarRef, "my_slot", TypeString.UNDEFINED));
 
     final String code =
         """

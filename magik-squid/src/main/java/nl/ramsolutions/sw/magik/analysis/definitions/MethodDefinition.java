@@ -337,7 +337,6 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
   public int hashCode() {
     return Objects.hash(
         this.getLocation(),
-        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
         this.modifiers,

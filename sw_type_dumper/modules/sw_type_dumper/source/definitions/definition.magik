@@ -68,8 +68,12 @@ _private _method definition.init_from_json(instruction)
 		_local fixed_name << name.write_string.split_by(%!)[2].as_symbol()
 		_local value << instruction[fixed_name]
 		_local fixed_value <<
-			_if value.is_kind_of?(sw:simple_vector) _orif
-			    value.is_kind_of?(sw:rope)
+			_if fixed_name _is :pragma _andif
+			    value _isnt _unset
+			_then
+				>> pragma.new_from_json(value)
+			_elif value.is_kind_of?(sw:simple_vector) _orif
+			      value.is_kind_of?(sw:rope)
 			_then
 				>> value.as_simple_vector()
 			_else

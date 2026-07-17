@@ -593,7 +593,8 @@ public class HoverProvider {
       builder.append(typeDocMd).append(SECTION_END);
     }
 
-    final Collection<SlotDefinition> slots = exemplarDef.getSlots();
+    final Collection<SlotDefinition> slots =
+        magikFile.getDefinitionKeeper().getSlotDefinitions(typeStr);
     if (!slots.isEmpty()) {
       builder.append("## Slots\n");
       slots.stream()

@@ -65,12 +65,7 @@ public class PackageDefinition extends MagikDefinition {
   @Override
   public int hashCode() {
     return Objects.hash(
-        this.getLocation(),
-        this.getTimestamp(),
-        this.getModuleName(),
-        this.getDoc(),
-        this.name,
-        this.uses);
+        this.getLocation(), this.getModuleName(), this.getDoc(), this.name, this.uses);
   }
 
   @Override
@@ -89,7 +84,7 @@ public class PackageDefinition extends MagikDefinition {
 
     final PackageDefinition other = (PackageDefinition) obj;
     return Objects.equals(other.getLocation(), this.getLocation())
-        && Objects.equals(other.getName(), this.getName())
+        && Objects.equals(other.getModuleName(), this.getModuleName())
         && Objects.equals(other.getDoc(), this.getDoc())
         && Objects.equals(other.name, this.name)
         && Objects.equals(other.uses, this.uses);

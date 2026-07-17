@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
@@ -122,7 +121,6 @@ public class DefMixinParser extends BaseDefParser {
             statementNode,
             ExemplarDefinition.Sort.MIXIN,
             name,
-            Collections.emptyList(),
             parents,
             pragma);
     return List.of(mixinDefinition);

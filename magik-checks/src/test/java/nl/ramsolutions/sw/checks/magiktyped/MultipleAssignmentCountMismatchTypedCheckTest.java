@@ -233,7 +233,6 @@ class MultipleAssignmentCountMismatchTypedCheckTest {
             ExemplarDefinition.Sort.SLOTTED,
             myVecRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(

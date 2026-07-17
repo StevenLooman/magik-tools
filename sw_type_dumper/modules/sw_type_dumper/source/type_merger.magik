@@ -120,6 +120,7 @@ _private _method type_merger.int!run()
 		"modules",
 		"packages",
 		"types",
+		"slots",
 		"globals",
 		"methods",
 		"procedures",

@@ -38,7 +38,6 @@ class ImplementationProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(
@@ -66,7 +65,6 @@ class ImplementationProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             bRef,
-            Collections.emptyList(),
             List.of(aRef),
             null));
     definitionKeeper.add(

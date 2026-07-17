@@ -29,6 +29,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
@@ -111,6 +112,7 @@ public final class JsonDefinitionWriter {
       this.writeMagikFiles(bufferedWriter);
       this.writePackages(bufferedWriter);
       this.writeExemplars(bufferedWriter);
+      this.writeSlots(bufferedWriter);
       this.writeGlobals(bufferedWriter);
       this.writeMethods(bufferedWriter);
       this.writeProcedures(bufferedWriter);
@@ -217,6 +219,23 @@ public final class JsonDefinitionWriter {
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
               instruction.addProperty(
                   Instruction.INSTRUCTION.getValue(), Instruction.TYPE.getValue());
+              this.writeInstruction(writer, instruction);
+            });
+  }
+
+  private void writeSlots(final Writer writer) {
+    final Comparator<SlotDefinition> ownerComparer =
+        Comparator.comparing(SlotDefinition::getOwnerTypeName);
+    final Comparator<SlotDefinition> nameComparer = Comparator.comparing(SlotDefinition::getName);
+    final Comparator<SlotDefinition> sorter = ownerComparer.thenComparing(nameComparer);
+    this.definitionKeeper.getSlotDefinitions().stream()
+        .sorted(sorter)
+        .forEach(
+            definition -> {
+              final Gson gson = this.buildGson();
+              final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
+              instruction.addProperty(
+                  Instruction.INSTRUCTION.getValue(), Instruction.SLOT.getValue());
               this.writeInstruction(writer, instruction);
             });
   }

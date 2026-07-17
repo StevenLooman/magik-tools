@@ -137,6 +137,7 @@ public class DefSlottedExemplarParser extends BaseDefParser {
     final Map<String, TypeString> slotTypes = docParser.getSlotTypes();
 
     // Figure slots.
+    final TypeString exemplarName = TypeString.ofIdentifier(identifier, packageName);
     final List<SlotDefinition> slots = new ArrayList<>();
     final List<MethodDefinition> methodDefinitions = new ArrayList<>();
     for (final AstNode slotDefNode : // NOSONAR
@@ -160,7 +161,14 @@ public class DefSlottedExemplarParser extends BaseDefParser {
           Objects.requireNonNullElse(slotTypes.get(slotName), TypeString.UNDEFINED);
       final SlotDefinition slot =
           new SlotDefinition(
-              slotLocation, timestamp, moduleName, null, slotDefNode, slotName, slotTypeRef);
+              slotLocation,
+              timestamp,
+              moduleName,
+              null,
+              slotDefNode,
+              exemplarName,
+              slotName,
+              slotTypeRef);
       slots.add(slot);
 
       // Method definitions.
@@ -169,7 +177,6 @@ public class DefSlottedExemplarParser extends BaseDefParser {
       if (flagNode != null && flavorNode != null) {
         final String flag = flagNode.getTokenValue();
         final String flavor = flavorNode.getTokenValue();
-        final TypeString exemplarName = TypeString.ofIdentifier(identifier, packageName);
         final List<MethodDefinition> slotMethodDefinitions =
             this.generateSlotMethods(
                 timestamp,
@@ -201,12 +208,12 @@ public class DefSlottedExemplarParser extends BaseDefParser {
             statementNode,
             ExemplarDefinition.Sort.SLOTTED,
             name,
-            slots,
             parents,
             pragma);
 
     final List<MagikDefinition> definitions = new ArrayList<>();
     definitions.add(slottedExemplarDefinition);
+    definitions.addAll(slots);
     definitions.addAll(methodDefinitions);
     return definitions;
   }

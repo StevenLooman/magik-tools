@@ -103,7 +103,6 @@ class MethodIsPublicTypedCheckTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.ofIdentifier("rope", "sw"),
-            Collections.emptyList(),
             List.of(TypeString.SW_OBJECT),
             null));
     definitionKeeper.add(

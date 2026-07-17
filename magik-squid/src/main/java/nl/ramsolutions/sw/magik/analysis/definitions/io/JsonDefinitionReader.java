@@ -32,6 +32,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
@@ -194,7 +195,6 @@ public final class JsonDefinitionReader {
           ExemplarDefinition.Sort.UNDEFINED,
           TypeString.UNDEFINED,
           Collections.emptyList(),
-          Collections.emptyList(),
           null);
     }
   }
@@ -290,6 +290,10 @@ public final class JsonDefinitionReader {
         this.handleType(obj);
         break;
 
+      case SLOT:
+        this.handleSlot(obj);
+        break;
+
       case METHOD:
         this.handleMethod(obj);
         break;
@@ -374,7 +378,12 @@ public final class JsonDefinitionReader {
     this.definitionKeeper.getExemplarDefinitions(typeString).stream()
         .filter(def -> def.getLocation() == null)
         .forEach(this.definitionKeeper::remove);
+    this.definitionKeeper.add(definition);
+  }
 
+  private void handleSlot(final JsonObject instruction) {
+    final Gson gson = this.buildGson();
+    final SlotDefinition definition = gson.fromJson(instruction, SlotDefinition.class);
     this.definitionKeeper.add(definition);
   }
 

@@ -82,6 +82,18 @@ _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
+_method pragma.new_from_json(instruction)
+	## Construct self from JSON.
+	## @param {sw:equality_hash_table} instruction
+	## @return {_self}
+	_return _clone.init(
+		sw:equality_set.new_from(instruction[:classify_levels].default({})),
+		sw:equality_set.new_from(instruction[:topics].default({})),
+		sw:equality_set.new_from(instruction[:usages].default({})))
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
 _method pragma.equals?(other)
 	## Equals?
 	## @param {mt:pragma} other

@@ -132,7 +132,6 @@ class ClassInfoDefinitionReaderTest {
                 ExemplarDefinition.Sort.MIXIN,
                 exampleMixinRef,
                 Collections.emptyList(),
-                Collections.emptyList(),
                 new Pragma(null, Set.of("restricted"), Set.of("example"), Set.of())));
 
     // Classes.
@@ -151,33 +150,41 @@ class ClassInfoDefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.UNDEFINED,
                 exampleClassRef,
-                List.of(
-                    new SlotDefinition(
-                        null,
-                        null,
-                        "class_definition_reader_test",
-                        null,
-                        null,
-                        "slot1",
-                        TypeString.UNDEFINED),
-                    new SlotDefinition(
-                        null,
-                        null,
-                        "class_definition_reader_test",
-                        null,
-                        null,
-                        "slot2",
-                        TypeString.UNDEFINED),
-                    new SlotDefinition(
-                        null,
-                        null,
-                        "class_definition_reader_test",
-                        null,
-                        null,
-                        "slot3",
-                        TypeString.UNDEFINED)),
                 List.of(TypeString.ofIdentifier("model", "sw")),
                 new Pragma(null, Set.of("restricted"), Set.of("example"), Set.of())));
+
+    // Slots of the class are registered with the keeper, keyed on their owner.
+    final Collection<SlotDefinition> exampleClassSlots =
+        definitionKeeper.getSlotDefinitions(exampleClassRef);
+    assertThat(exampleClassSlots)
+        .containsExactlyInAnyOrder(
+            new SlotDefinition(
+                null,
+                null,
+                "class_definition_reader_test",
+                null,
+                null,
+                exampleClassRef,
+                "slot1",
+                TypeString.UNDEFINED),
+            new SlotDefinition(
+                null,
+                null,
+                "class_definition_reader_test",
+                null,
+                null,
+                exampleClassRef,
+                "slot2",
+                TypeString.UNDEFINED),
+            new SlotDefinition(
+                null,
+                null,
+                "class_definition_reader_test",
+                null,
+                null,
+                exampleClassRef,
+                "slot3",
+                TypeString.UNDEFINED));
 
     // Enumerations.
     final TypeString enumerationRef = TypeString.ofIdentifier("example_enumeration", "sw");
@@ -195,7 +202,6 @@ class ClassInfoDefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.UNDEFINED,
                 enumerationRef,
-                Collections.emptyList(),
                 List.of(TypeString.ofIdentifier("enumerated_format_mixin", "sw")),
                 new Pragma(null, Set.of("restricted"), Set.of(), Set.of())));
 
@@ -216,7 +222,6 @@ class ClassInfoDefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.UNDEFINED,
                 exampleIndexedClassRef,
-                Collections.emptyList(),
                 List.of(TypeString.ofIdentifier("simple_index_mixin", "sw")),
                 new Pragma(null, Set.of("advanced"), Set.of(), Set.of())));
 

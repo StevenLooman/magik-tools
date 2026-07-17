@@ -70,20 +70,6 @@ public class TypeStringResolver {
     return seen;
   }
 
-  private Collection<ExemplarDefinition> findExemplarDefinitions(final TypeString typeString) {
-    return this.getPackageHierarchy(typeString).stream()
-        .sequential()
-        .flatMap(
-            def -> {
-              final String packageName = def.getName();
-              final TypeString pkgTypeString =
-                  TypeString.ofIdentifier(typeString.getIdentifier(), packageName);
-              return this.definitionKeeper.getExemplarDefinitions(pkgTypeString).stream();
-            })
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet());
-  }
-
   /**
    * Test if the {@link TypeString} is known.
    *
@@ -376,12 +362,33 @@ public class TypeStringResolver {
   /**
    * Get all the {@link SlotDefinition}s for the given {@link TypeString}.
    *
-   * @param typeString {@link TypeString} to resolve.
+   * @param typeString {@link TypeString} to get the slots for.
    * @return All {@link SlotDefinition}s for the given type.
    */
   public Collection<SlotDefinition> getSlotDefinitions(final TypeString typeString) {
-    return this.findExemplarDefinitions(typeString).stream()
-        .flatMap(exemplarDefinition -> exemplarDefinition.getSlots().stream())
+    return this.getPackageHierarchy(typeString).stream()
+        .sequential()
+        .flatMap(
+            def -> {
+              final String packageName = def.getName();
+              final TypeString pkgTypeString =
+                  TypeString.ofIdentifier(typeString.getIdentifier(), packageName);
+              return this.definitionKeeper.getSlotDefinitions(pkgTypeString).stream();
+            })
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Get the {@link SlotDefinition}s with the given name for the given {@link TypeString}.
+   *
+   * @param typeString {@link TypeString} to get the slots for.
+   * @param name Name of the slot.
+   * @return Matching {@link SlotDefinition}s.
+   */
+  public Collection<SlotDefinition> getSlotDefinitions(
+      final TypeString typeString, final String name) {
+    return this.getSlotDefinitions(typeString).stream()
+        .filter(definition -> definition.getName().equals(name))
         .collect(Collectors.toSet());
   }
 

@@ -99,7 +99,6 @@ class MethodExistsTypedCheckTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             rsFoo,
-            List.of(),
             List.of(TypeString.SW_OBJECT),
             null));
 
@@ -114,7 +113,6 @@ class MethodExistsTypedCheckTest {
             null,
             ExemplarDefinition.Sort.UNDEFINED,
             swFoo,
-            List.of(),
             List.of(),
             null));
 

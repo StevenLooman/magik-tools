@@ -41,8 +41,7 @@ class CallableReturnTypesMatchDocTypedCheckTest {
       final ExemplarDefinition.Sort sort,
       final TypeString typeName,
       final List<TypeString> parents) {
-    return new ExemplarDefinition(
-        null, null, null, null, null, sort, typeName, Collections.emptyList(), parents, null);
+    return new ExemplarDefinition(null, null, null, null, null, sort, typeName, parents, null);
   }
 
   @Test

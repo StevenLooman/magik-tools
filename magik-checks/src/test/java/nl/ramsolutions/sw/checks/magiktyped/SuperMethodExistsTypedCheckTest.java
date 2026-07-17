@@ -39,7 +39,6 @@ class SuperMethodExistsTypedCheckTest {
             ExemplarDefinition.Sort.SLOTTED,
             TYPE_PARENT,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(
@@ -65,7 +64,6 @@ class SuperMethodExistsTypedCheckTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             TYPE_CHILD,
-            Collections.emptyList(),
             List.of(TYPE_PARENT),
             null));
     final MagikTypedCheck check = new SuperMethodExistsTypedCheck();
@@ -91,7 +89,6 @@ class SuperMethodExistsTypedCheckTest {
             ExemplarDefinition.Sort.SLOTTED,
             TYPE_PARENT,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new ExemplarDefinition(
@@ -102,7 +99,6 @@ class SuperMethodExistsTypedCheckTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             TYPE_CHILD,
-            Collections.emptyList(),
             List.of(TYPE_PARENT),
             null));
     final MagikTypedCheck check = new SuperMethodExistsTypedCheck();
@@ -127,7 +123,6 @@ class SuperMethodExistsTypedCheckTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             TYPE_CHILD,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
     definitionKeeper.add(

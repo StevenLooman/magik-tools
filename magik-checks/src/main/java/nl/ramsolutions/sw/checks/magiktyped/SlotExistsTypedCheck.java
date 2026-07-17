@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.checks.magiktyped;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Collection;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
@@ -36,8 +37,8 @@ public class SlotExistsTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    final SlotDefinition slotDef = exemplarDefinition.getSlot(slotName);
-    if (slotDef == null) {
+    final Collection<SlotDefinition> slotDefs = resolver.getSlotDefinitions(typeStr, slotName);
+    if (slotDefs.isEmpty()) {
       final String message = MESSAGE.formatted(slotName);
       final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
       this.addIssue(identifierNode, message);

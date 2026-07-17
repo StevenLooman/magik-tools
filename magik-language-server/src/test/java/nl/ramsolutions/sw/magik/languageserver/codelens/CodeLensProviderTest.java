@@ -52,7 +52,6 @@ class CodeLensProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
 
     return definitionKeeper;
@@ -74,7 +73,6 @@ class CodeLensProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             myTestRef,
-            Collections.emptyList(),
             List.of(MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME),
             null));
 
@@ -119,7 +117,6 @@ class CodeLensProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             myTestRef,
-            Collections.emptyList(),
             List.of(MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME),
             null));
 
@@ -163,7 +160,6 @@ class CodeLensProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             myTestRef,
-            Collections.emptyList(),
             List.of(MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME),
             null));
 

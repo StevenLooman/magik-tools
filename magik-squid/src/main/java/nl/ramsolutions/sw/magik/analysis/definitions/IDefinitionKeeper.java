@@ -23,6 +23,13 @@ public interface IDefinitionKeeper {
 
   void add(MethodDefinition definition);
 
+  /**
+   * Add a {@link SlotDefinition}.
+   *
+   * @param definition {@link SlotDefinition} to add.
+   */
+  void add(SlotDefinition definition);
+
   void add(GlobalDefinition definition);
 
   void add(BinaryOperatorDefinition definition);
@@ -44,6 +51,13 @@ public interface IDefinitionKeeper {
   void remove(ExemplarDefinition definition);
 
   void remove(MethodDefinition definition);
+
+  /**
+   * Remove a {@link SlotDefinition}.
+   *
+   * @param definition {@link SlotDefinition} to remove.
+   */
+  void remove(SlotDefinition definition);
 
   void remove(GlobalDefinition definition);
 
@@ -78,6 +92,21 @@ public interface IDefinitionKeeper {
   Collection<MethodDefinition> getMethodDefinitions(TypeString typeName);
 
   Collection<MethodDefinition> getMethodDefinitions();
+
+  /**
+   * Get {@link SlotDefinition}s for the given owner {@link TypeString}.
+   *
+   * @param typeString Owner of the slots.
+   * @return {@link SlotDefinition}s owned by the given type.
+   */
+  Collection<SlotDefinition> getSlotDefinitions(TypeString typeString);
+
+  /**
+   * Get all {@link SlotDefinition}s.
+   *
+   * @return All {@link SlotDefinition}s.
+   */
+  Collection<SlotDefinition> getSlotDefinitions();
 
   Collection<GlobalDefinition> getGlobalDefinitions(TypeString typeName);
 

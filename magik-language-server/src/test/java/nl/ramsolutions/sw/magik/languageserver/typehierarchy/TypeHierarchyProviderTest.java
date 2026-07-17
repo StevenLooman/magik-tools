@@ -40,7 +40,6 @@ class TypeHierarchyProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             exemplarRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
 
     final String code =
@@ -68,7 +67,6 @@ class TypeHierarchyProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
-            Collections.emptyList(),
             Collections.emptyList(),
             null));
 
@@ -99,7 +97,6 @@ class TypeHierarchyProviderTest {
             ExemplarDefinition.Sort.SLOTTED,
             exemplarRef,
             Collections.emptyList(),
-            Collections.emptyList(),
             null));
     final TypeString subExemplarRef = TypeString.ofIdentifier("sub_exemplar", "user");
     definitionKeeper.add(
@@ -111,7 +108,6 @@ class TypeHierarchyProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             subExemplarRef,
-            Collections.emptyList(),
             List.of(exemplarRef),
             null));
 
@@ -144,7 +140,6 @@ class TypeHierarchyProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             exemplarRef,
-            Collections.emptyList(),
             List.of(TypeString.ofIdentifier("slotted_format_mixin", "sw")),
             null));
 

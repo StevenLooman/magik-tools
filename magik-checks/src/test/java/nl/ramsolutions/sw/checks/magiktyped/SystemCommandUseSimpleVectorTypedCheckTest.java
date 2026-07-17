@@ -24,7 +24,6 @@ class SystemCommandUseSimpleVectorTypedCheckTest {
           ExemplarDefinition.Sort.SLOTTED,
           TypeString.ofIdentifier("system", "sw"),
           Collections.emptyList(),
-          Collections.emptyList(),
           null);
 
   private IDefinitionKeeper getDefinitionKeeper() {

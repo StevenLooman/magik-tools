@@ -450,7 +450,7 @@
                   <excludes>
                     <exclude>nl.ramsolutions.sw.magik.analysis.AstQuery</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.MagikAstWalker</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionReader</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.TypeString</exclude>
                     <exclude>nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker</exclude>
                     <exclude>nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker</exclude>
