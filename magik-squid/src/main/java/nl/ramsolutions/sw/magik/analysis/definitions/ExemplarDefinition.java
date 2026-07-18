@@ -4,8 +4,6 @@ import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -26,7 +24,6 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
 
   private final Sort sort;
   private final TypeString typeName;
-  private final List<TypeString> parents;
   private final @Nullable Pragma pragma;
 
   /**
@@ -36,7 +33,6 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
    * @param node Node for definition.
    * @param sort Type of exemplar.
    * @param typeName Name of slotted exemplar.
-   * @param parents Parents of slotted exemplar.
    * @param pragma Pragma.
    */
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
@@ -48,7 +44,6 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
       final @Nullable AstNode node,
       final Sort sort,
       final TypeString typeName,
-      final List<TypeString> parents,
       final @Nullable Pragma pragma) {
     super(location, timestamp, moduleName, doc, node);
 
@@ -58,12 +53,7 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
 
     this.sort = sort;
     this.typeName = typeName;
-    this.parents = List.copyOf(parents);
     this.pragma = pragma;
-  }
-
-  public List<TypeString> getParents() {
-    return Collections.unmodifiableList(this.parents);
   }
 
   @CheckForNull
@@ -95,7 +85,6 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
         null,
         this.sort,
         this.typeName,
-        this.parents,
         this.pragma != null ? this.pragma.getBarePragma() : null);
   }
 
@@ -116,7 +105,6 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
         this.getDoc(),
         this.sort,
         this.typeName,
-        this.parents,
         this.pragma);
   }
 
@@ -140,7 +128,6 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
         && Objects.equals(this.getDoc(), other.getDoc())
         && Objects.equals(this.sort, other.sort)
         && Objects.equals(this.typeName, other.typeName)
-        && Objects.equals(this.parents, other.parents)
         && Objects.equals(this.pragma, other.pragma);
   }
 }

@@ -9,6 +9,7 @@ enum Instruction {
   MAGIK_FILE("magik_file"),
   PACKAGE("package"),
   TYPE("type"),
+  INHERITANCE("inheritance"),
   SLOT("slot"),
   GLOBAL("global"),
   METHOD("method"),

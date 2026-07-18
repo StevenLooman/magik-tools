@@ -9,6 +9,7 @@ import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -92,29 +93,15 @@ class MethodExistsTypedCheckTest {
     final TypeString rsFoo = TypeString.ofIdentifier("foo", "rs");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            rsFoo,
-            List.of(TypeString.SW_OBJECT),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, rsFoo, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, rsFoo, TypeString.SW_OBJECT));
 
     // A same-named phantom in the used package sw, with no useful parents.
     final TypeString swFoo = TypeString.ofIdentifier("foo", "sw");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.UNDEFINED,
-            swFoo,
-            List.of(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.UNDEFINED, swFoo, null));
 
     final MagikTypedCheck check = new MethodExistsTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);

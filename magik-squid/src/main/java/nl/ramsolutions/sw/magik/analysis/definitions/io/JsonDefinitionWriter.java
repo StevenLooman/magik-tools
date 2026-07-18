@@ -24,6 +24,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
@@ -112,6 +113,7 @@ public final class JsonDefinitionWriter {
       this.writeMagikFiles(bufferedWriter);
       this.writePackages(bufferedWriter);
       this.writeExemplars(bufferedWriter);
+      this.writeInheritance(bufferedWriter);
       this.writeSlots(bufferedWriter);
       this.writeGlobals(bufferedWriter);
       this.writeMethods(bufferedWriter);
@@ -219,6 +221,24 @@ public final class JsonDefinitionWriter {
               final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
               instruction.addProperty(
                   Instruction.INSTRUCTION.getValue(), Instruction.TYPE.getValue());
+              this.writeInstruction(writer, instruction);
+            });
+  }
+
+  private void writeInheritance(final Writer writer) {
+    final Comparator<InheritanceDefinition> childComparer =
+        Comparator.comparing(InheritanceDefinition::getChildTypeName);
+    final Comparator<InheritanceDefinition> parentComparer =
+        Comparator.comparing(InheritanceDefinition::getParentTypeName);
+    final Comparator<InheritanceDefinition> sorter = childComparer.thenComparing(parentComparer);
+    this.definitionKeeper.getInheritanceDefinitions().stream()
+        .sorted(sorter)
+        .forEach(
+            definition -> {
+              final Gson gson = this.buildGson();
+              final JsonObject instruction = (JsonObject) gson.toJsonTree(definition);
+              instruction.addProperty(
+                  Instruction.INSTRUCTION.getValue(), Instruction.INHERITANCE.getValue());
               this.writeInstruction(writer, instruction);
             });
   }

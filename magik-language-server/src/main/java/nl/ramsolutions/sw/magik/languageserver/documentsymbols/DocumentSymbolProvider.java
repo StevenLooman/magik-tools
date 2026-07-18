@@ -8,6 +8,7 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
@@ -41,6 +42,7 @@ public class DocumentSymbolProvider {
     // Convert definitions to DocumentSymbols.
     return magikFile.getMagikDefinitions().stream()
         .filter(definition -> !(definition instanceof SlotDefinition))
+        .filter(definition -> !(definition instanceof InheritanceDefinition))
         .map(definition -> this.convertDefinition(magikFile, definition))
         .map(Either::<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>forRight)
         .toList();

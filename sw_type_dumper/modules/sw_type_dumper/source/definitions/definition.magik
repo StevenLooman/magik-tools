@@ -28,6 +28,14 @@ $
 _pragma(classify_level=basic, topic=type_dumper, usage=external)
 ## @return {sw:char16_vector}
 definition.define_shared_constant(
+	:parameter_ref_type,
+	"_parameter(...)",
+	:public)
+$
+
+_pragma(classify_level=basic, topic=type_dumper, usage=external)
+## @return {sw:char16_vector}
+definition.define_shared_constant(
 	:undefined_type,
 	"_undefined",
 	:public)
@@ -127,7 +135,7 @@ _method definition.generate_json_string()
 			## @param {sw:object} value
 			_if value.is_kind_of?(mt:definition) _orif
 			    value.is_kind_of?(mt:usage) _orif
-			    value.is_kind_of?(pragma)
+			    value.is_kind_of?(mt:pragma)
 			_then
 				_return _true, value.as_properties()
 			_elif value.is_kind_of?(sw:set)

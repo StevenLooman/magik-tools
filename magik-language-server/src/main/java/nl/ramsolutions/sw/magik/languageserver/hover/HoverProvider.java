@@ -594,7 +594,7 @@ public class HoverProvider {
     }
 
     final Collection<SlotDefinition> slots =
-        magikFile.getDefinitionKeeper().getSlotDefinitions(typeStr);
+        magikFile.getTypeStringResolver().getSlotDefinitions(typeStr);
     if (!slots.isEmpty()) {
       builder.append("## Slots\n");
       slots.stream()
@@ -606,8 +606,14 @@ public class HoverProvider {
                     .append("* ")
                     .append(slot.getName())
                     .append(": ")
-                    .append(this.formatTypeString(slotType))
-                    .append("\n");
+                    .append(this.formatTypeString(slotType));
+                if (!slot.getOwnerTypeName().equals(typeStr)) {
+                  builder
+                      .append(" _(from ")
+                      .append(this.formatTypeString(slot.getOwnerTypeName()))
+                      .append(")_");
+                }
+                builder.append("\n");
               });
       builder.append(SECTION_END);
     }

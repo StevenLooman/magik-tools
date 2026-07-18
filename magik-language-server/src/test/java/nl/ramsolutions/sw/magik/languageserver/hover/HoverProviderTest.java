@@ -8,7 +8,9 @@ import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.eclipse.lsp4j.Hover;
@@ -77,7 +79,6 @@ class HoverProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             hoverMeTypeRef,
-            Collections.emptyList(),
             null));
 
     final String code =
@@ -92,6 +93,48 @@ class HoverProviderTest {
     assertThat(content.getKind()).isEqualTo(MarkupKind.MARKDOWN);
     assertThat(content.getValue()).contains("hover_me_type");
     assertThat(content.getValue()).contains("type_doc");
+  }
+
+  @Test
+  void testProvideHoverExemplarShowsInheritedSlotWithOwnerAnnotation() {
+    // Set up a parent exemplar with a slot, and a child exemplar with its own slot,
+    // linked by an inheritance edge.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString parentTypeRef = TypeString.ofIdentifier("hover_parent_type", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, parentTypeRef, null));
+    definitionKeeper.add(
+        new SlotDefinition(
+            null, null, null, null, null, parentTypeRef, "parent_slot", TypeString.SW_SYMBOL));
+
+    final TypeString childTypeRef = TypeString.ofIdentifier("hover_child_type", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, childTypeRef, null));
+    definitionKeeper.add(
+        new SlotDefinition(
+            null, null, null, null, null, childTypeRef, "child_slot", TypeString.SW_INTEGER));
+
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, childTypeRef, parentTypeRef));
+
+    final String code =
+        """
+        _method hover_child_type.method()
+        _endmethod""";
+    final Position position = new Position(0, 10); // On 'hover_child_type'.
+
+    // Hover and test.
+    final Hover hover = this.provideHover(code, position, definitionKeeper);
+    final MarkupContent content = hover.getContents().getRight();
+    assertThat(content.getKind()).isEqualTo(MarkupKind.MARKDOWN);
+
+    // The child's own slot is not annotated with an owner.
+    assertThat(content.getValue()).contains("* child_slot: sw:integer\n");
+    // The inherited slot is annotated with its owning type.
+    assertThat(content.getValue())
+        .contains("* parent_slot: sw:symbol _(from user:hover_parent_type)_\n");
   }
 
   @Test

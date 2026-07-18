@@ -97,6 +97,7 @@ _private _method type_dumper.int!run()
 	_self.write_line("// Smallworld version: ", system.sw!version_string)
 	_self.write_line("// Smallworld session: ", smallworld_product.magik_session().properties[:name])
 	_self.write_line("// self type: ", mt:definition.self_type)
+	_self.write_line("// parameter ref type: ", mt:definition.parameter_ref_type)
 	_self.write_line("// undefined type: ", mt:definition.undefined_type)
 	_self.write_line("// undefined result: ", mt:definition.undefined_result)
 
@@ -135,6 +136,16 @@ _private _method type_dumper.int!run()
 		_loop
 			_local def << type_definition.new_from(pkg, key, method_table)
 			_self.write_definition(def)
+		_endloop
+	_endloop
+
+	# Write inheritance.
+	_self.write_line("// inheritance")
+	_for pkg _over sorted_pkgs.fast_elements()
+	_loop
+		_for key, method_table _over _self.pkg_types(pkg)
+		_loop
+			_self.write_type_inheritance(pkg, key, method_table)
 		_endloop
 	_endloop
 
@@ -213,6 +224,41 @@ _private _method type_dumper.pre_process()
 	_then
 		sw:sw_regexp.define_method_target.metadata[:exemplar_global] << @sw:sw_regexp
 	_endif
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_dumper.write_type_inheritance(pkg, name, method_table)
+	## Write type inheritance edges, as first class definitions.
+	## @param {sw:package} pkg
+	## @param {sw:symbol} name
+	## @param {sw:method_table} method_table
+	_local child_type_name << mt:definition.name_from_type(pkg, name)
+	_local metadata << method_table.metadata
+	_local behaviour_sources << metadata[:behaviour_sources].default(property_list)  # type: sw:property_list
+	_local behaviour_sources_keys << behaviour_sources.keys.as_sorted_collection()
+
+	_local definitions << rope.new()
+	_for source_name _over behaviour_sources_keys.fast_elements()
+	_loop
+		_local source_method_table << behaviour_sources[source_name]  # type: sw:method_table
+		_local source_metadata << source_method_table.metadata
+		_local source_global_var <<
+			_if source_metadata[:exemplar_global] _isnt _unset
+			_then
+				>> source_metadata[:exemplar_global]
+			_else
+				>> write_string("@sw:", source_metadata[:exemplar_name]).evaluate()
+			_endif
+		_local parent_type_name << mt:definition.name_from_type(source_global_var.package, source_global_var.key)
+		definitions.add_last(inheritance_definition.new_from(child_type_name, parent_type_name))
+	_endloop
+
+	_local definitions_sorted << definitions.as_sorted_collection({:method_result, :sort_value})
+	_for definition _over definitions_sorted.fast_elements()
+	_loop
+		_self.write_definition(definition)
+	_endloop
 _endmethod
 $
 

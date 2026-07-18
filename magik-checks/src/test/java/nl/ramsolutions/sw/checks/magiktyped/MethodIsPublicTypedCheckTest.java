@@ -4,12 +4,12 @@ import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertT
 
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -94,17 +94,12 @@ class MethodIsPublicTypedCheckTest {
       })
   void testMethodIsPrivateOnSelfOrSuper(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            TypeString.ofIdentifier("rope", "sw"),
-            List.of(TypeString.SW_OBJECT),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, ropeRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, ropeRef, TypeString.SW_OBJECT));
     definitionKeeper.add(
         new MethodDefinition(
             null,

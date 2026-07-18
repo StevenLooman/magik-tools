@@ -102,15 +102,7 @@ class CompletionProviderTest {
     final TypeString aRef = TypeString.ofIdentifier("a", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            aRef,
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, aRef, null));
     definitionKeeper.add(
         new MethodDefinition(
             null,
@@ -225,15 +217,7 @@ class CompletionProviderTest {
     final TypeString aRef = TypeString.ofIdentifier("a", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            aRef,
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, aRef, null));
     definitionKeeper.add(new SlotDefinition(null, null, code, code, null, aRef, code, aRef));
 
     final Position position = new Position(1, 2); // On ''.

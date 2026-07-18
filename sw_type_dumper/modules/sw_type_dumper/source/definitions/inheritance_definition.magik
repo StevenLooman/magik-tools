@@ -1,0 +1,102 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Inheritance definition.
+## @slot {sw:char16_vector} child_type_name
+## @slot {sw:char16_vector} parent_type_name
+def_slotted_exemplar(
+	:inheritance_definition,
+	{
+		{:child_type_name, _unset, :readable, :public},
+		{:parent_type_name, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method inheritance_definition.new(child_type_name, parent_type_name)
+	## Constructor.
+	## @param {sw:char16_vector} child_type_name
+	## @param {sw:char16_vector} parent_type_name
+	## @return {_self}
+	_return _clone.init(child_type_name, parent_type_name)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method inheritance_definition.init(child_type_name, parent_type_name)
+	## Initializer.
+	## @param {sw:char16_vector} child_type_name
+	## @param {sw:char16_vector} parent_type_name
+	## @return {_self}
+	.child_type_name << child_type_name
+	.parent_type_name << parent_type_name
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method inheritance_definition.new_from(child_type_name, parent_type_name)
+	## Construct self from the child and parent type names.
+	## @param {sw:char16_vector} child_type_name
+	## @param {sw:char16_vector} parent_type_name
+	## @return {_self}
+	_return _self.new(
+		child_type_name,
+		parent_type_name)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method inheritance_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	_return .child_type_name + "." + .parent_type_name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method inheritance_definition.equals?(other)
+	## Equals?
+	## @param {mt:inheritance_definition} other
+	## @return {sw:false}
+	_return _self.child_type_name = other.child_type_name _andif
+		_self.parent_type_name = other.parent_type_name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method inheritance_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:inheritance_definition} other
+	## @return {sw:false}
+	_return _self.child_type_name = other.child_type_name _andif
+		_self.parent_type_name = other.parent_type_name
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, inheritance_definition, inheritance_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:inheritance_definition} definition_a
+		## @param {mt:inheritance_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.sort_value _cf definition_b.sort_value
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, inheritance_definition, inheritance_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:inheritance_definition} definition_a
+		## @param {mt:inheritance_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+inheritance_definition.define_show_attributes(
+	:child_type_name,
+	:parent_type_name)
+$

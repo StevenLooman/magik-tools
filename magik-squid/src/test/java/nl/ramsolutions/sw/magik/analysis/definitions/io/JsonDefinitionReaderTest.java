@@ -18,6 +18,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
@@ -131,8 +132,11 @@ class JsonDefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 aRef,
-                List.of(TypeString.SW_OBJECT),
                 null));
+
+    assertThat(definitionKeeper.getInheritanceDefinitions(aRef))
+        .extracting(InheritanceDefinition::getParentTypeName)
+        .containsExactly(TypeString.SW_OBJECT);
 
     final Collection<SlotDefinition> aSlotDefs = definitionKeeper.getSlotDefinitions(aRef);
     assertThat(aSlotDefs).hasSize(2);
@@ -140,6 +144,23 @@ class JsonDefinitionReaderTest {
         .extracting(SlotDefinition::getName, SlotDefinition::getTypeName)
         .containsExactlyInAnyOrder(
             tuple("slot1", TypeString.SW_INTEGER), tuple("slot2", TypeString.SW_FLOAT));
+  }
+
+  @Test
+  void testReadInheritance(@TempDir final Path tempDir) throws IOException {
+    final String jsonl =
+        "{\"instruction\":\"inheritance\",\"child_type_name\":\"user:a\","
+            + "\"parent_type_name\":\"sw:object\"}\n";
+    final Path path = tempDir.resolve("inheritance.jsonl");
+    Files.writeString(path, jsonl);
+
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, keeper);
+
+    final TypeString child = TypeString.ofIdentifier("a", "user");
+    assertThat(keeper.getInheritanceDefinitions(child))
+        .extracting(InheritanceDefinition::getParentTypeName)
+        .containsOnly(TypeString.ofIdentifier("object", "sw"));
   }
 
   @Test

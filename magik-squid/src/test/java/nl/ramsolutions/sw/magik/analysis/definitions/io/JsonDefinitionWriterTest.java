@@ -19,6 +19,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
@@ -139,7 +140,6 @@ class JsonDefinitionWriterTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             aRef,
-            Collections.emptyList(),
             null));
 
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
@@ -161,7 +161,6 @@ class JsonDefinitionWriterTest {
             null,
             ExemplarDefinition.Sort.MIXIN,
             mixinRef,
-            Collections.emptyList(),
             null));
 
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
@@ -180,15 +179,7 @@ class JsonDefinitionWriterTest {
     final IDefinitionKeeper writeKeeper = new DefinitionKeeper();
     writeKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            typeA,
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, typeA, null));
     writeKeeper.add(
         new SlotDefinition(null, null, null, null, null, typeA, "slot1", TypeString.SW_INTEGER));
 
@@ -201,6 +192,31 @@ class JsonDefinitionWriterTest {
     assertThat(slotDefs)
         .extracting(SlotDefinition::getName, SlotDefinition::getTypeName)
         .containsExactly(tuple("slot1", TypeString.SW_INTEGER));
+  }
+
+  @Test
+  void testWriteAndReadInheritance() throws IOException {
+    final TypeString typeA = TypeString.ofIdentifier("a", "user");
+    final IDefinitionKeeper writeKeeper = new DefinitionKeeper();
+    writeKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, typeA, null));
+    writeKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, typeA, TypeString.SW_OBJECT));
+
+    JsonDefinitionWriter.write(this.tempPath, writeKeeper);
+
+    assertThat(Files.readString(this.tempPath))
+        .contains(
+            "{\"child_type_name\":\"user:a\",\"parent_type_name\":\"sw:object\","
+                + "\"instruction\":\"inheritance\"}");
+
+    final IDefinitionKeeper readKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(this.tempPath, readKeeper);
+
+    assertThat(readKeeper.getInheritanceDefinitions(typeA))
+        .extracting(InheritanceDefinition::getParentTypeName)
+        .containsExactly(TypeString.SW_OBJECT);
   }
 
   @Test

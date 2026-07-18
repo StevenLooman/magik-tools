@@ -40,4 +40,19 @@ class DocumentSymbolProviderTest {
         .extracting(DocumentSymbol::getName)
         .containsExactly("slot1");
   }
+
+  @Test
+  void testInheritanceEdgesDoNotAppearAsSymbols() {
+    final String code = "def_slotted_exemplar(:a, {}, :parent1)\n$\n";
+    final MagikTypedFile magikFile = this.createMagikTypedFile(code);
+    final DocumentSymbolProvider provider = new DocumentSymbolProvider();
+
+    final List<Either<SymbolInformation, DocumentSymbol>> symbols =
+        provider.provideDocumentSymbols(magikFile);
+
+    assertThat(symbols)
+        .map(Either::getRight)
+        .extracting(DocumentSymbol::getName)
+        .containsExactly("user:a");
+  }
 }

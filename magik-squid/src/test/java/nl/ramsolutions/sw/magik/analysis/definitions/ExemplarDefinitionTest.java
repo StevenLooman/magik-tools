@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.List;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
@@ -29,7 +28,6 @@ class ExemplarDefinitionTest {
         null,
         ExemplarDefinition.Sort.SLOTTED,
         TYPE_STR_A,
-        List.of(TypeString.SW_OBJECT),
         null);
   }
 

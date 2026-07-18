@@ -132,4 +132,59 @@ class DefinitionKeeperTest {
     assertThat(keeper.getDefinitionsByPath(java.nio.file.Path.of("/tmp/a.magik")))
         .contains(slotDef);
   }
+
+  @Test
+  void testAddInheritanceDefinition() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString child = TypeString.ofIdentifier("child", "user");
+    final TypeString parent = TypeString.ofIdentifier("parent", "user");
+    final InheritanceDefinition def =
+        new InheritanceDefinition(null, null, null, null, null, child, parent);
+    keeper.add(def);
+    assertThat(keeper.getInheritanceDefinitions(child)).containsOnly(def);
+  }
+
+  @Test
+  void testRemoveInheritanceDefinition() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString child = TypeString.ofIdentifier("child", "user");
+    final TypeString parent = TypeString.ofIdentifier("parent", "user");
+    final InheritanceDefinition def =
+        new InheritanceDefinition(null, null, null, null, null, child, parent);
+    keeper.add(def);
+    keeper.remove(def);
+    assertThat(keeper.getInheritanceDefinitions(child)).isEmpty();
+  }
+
+  @Test
+  void testGetInheritanceDefinitionsUnknownChildEmpty() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString child = TypeString.ofIdentifier("nope", "user");
+    assertThat(keeper.getInheritanceDefinitions(child)).isEmpty();
+  }
+
+  @Test
+  void testInheritanceDefinitionDedup() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString child = TypeString.ofIdentifier("child", "user");
+    final TypeString parent = TypeString.ofIdentifier("parent", "user");
+    final InheritanceDefinition def1 =
+        new InheritanceDefinition(null, Instant.EPOCH, "m", null, null, child, parent);
+    final InheritanceDefinition def2 =
+        new InheritanceDefinition(
+            null, Instant.parse("2020-01-01T00:00:00Z"), "m", null, null, child, parent);
+    keeper.add(def1);
+    keeper.add(def2);
+    assertThat(keeper.getInheritanceDefinitions(child)).hasSize(1);
+  }
+
+  @Test
+  void testClearEmptiesInheritance() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString child = TypeString.ofIdentifier("child", "user");
+    final TypeString parent = TypeString.ofIdentifier("parent", "user");
+    keeper.add(new InheritanceDefinition(null, null, null, null, null, child, parent));
+    keeper.clear();
+    assertThat(keeper.getInheritanceDefinitions(child)).isEmpty();
+  }
 }

@@ -24,6 +24,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
@@ -76,7 +77,6 @@ class MagikIndexerTest {
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 typeString,
-                List.of(TypeString.ofIdentifier("sw_regexp", "sw")),
                 new Pragma(null, Set.of("basic"), Set.of("test", "test2", "test4"), Set.of())));
 
     // Test slots.
@@ -92,6 +92,11 @@ class MagikIndexerTest {
                 "slot_b",
                 TypeString.UNDEFINED,
                 new Location(uri, new Range(new Position(9, 8), new Position(9, 9)))));
+
+    // Test inheritance.
+    assertThat(definitionKeeper.getInheritanceDefinitions(typeString))
+        .extracting(InheritanceDefinition::getParentTypeName)
+        .containsExactly(TypeString.ofIdentifier("sw_regexp", "sw"));
 
     // Test methods.
     final Collection<MethodDefinition> newMethodDefs =
@@ -232,7 +237,6 @@ class MagikIndexerTest {
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 typeString,
-                Collections.emptyList(),
                 new Pragma(null, Set.of("basic"), Set.of("test", "test2"), Set.of())));
 
     // Test slots.
@@ -412,5 +416,60 @@ class MagikIndexerTest {
     assertThat(definitionKeeper.getSlotDefinitions(typeA))
         .extracting(SlotDefinition::getName)
         .containsExactlyInAnyOrder("slot1_renamed", "slot2");
+  }
+
+  @Test
+  void testInheritanceEdgesAggregateAcrossFiles(@TempDir final Path tempDir) throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final IgnoreHandler ignoreHandler = new IgnoreHandler();
+    final MagikIndexer indexer =
+        new MagikIndexer(definitionKeeper, MagikToolsProperties.DEFAULT_PROPERTIES, ignoreHandler);
+
+    final Path pathA = tempDir.resolve("a.magik");
+    final String contentA = "def_slotted_exemplar(:child, {}, :parent_a)\n$\n";
+    Files.writeString(pathA, contentA);
+    indexer.indexFileContent(pathA.toUri(), contentA);
+
+    final Path pathB = tempDir.resolve("b.magik");
+    final String contentB = "def_slotted_exemplar(:child, {}, :parent_b)\n$\n";
+    Files.writeString(pathB, contentB);
+    indexer.indexFileContent(pathB.toUri(), contentB);
+
+    final TypeString child = TypeString.ofIdentifier("child", "user");
+    assertThat(definitionKeeper.getInheritanceDefinitions(child))
+        .extracting(InheritanceDefinition::getParentTypeName)
+        .containsExactlyInAnyOrder(
+            TypeString.ofIdentifier("parent_a", "user"),
+            TypeString.ofIdentifier("parent_b", "user"));
+  }
+
+  @Test
+  void testReindexRemovesOnlyThatFilesInheritanceEdges(@TempDir final Path tempDir)
+      throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final IgnoreHandler ignoreHandler = new IgnoreHandler();
+    final MagikIndexer indexer =
+        new MagikIndexer(definitionKeeper, MagikToolsProperties.DEFAULT_PROPERTIES, ignoreHandler);
+    final TypeString child = TypeString.ofIdentifier("child", "user");
+
+    final Path pathA = tempDir.resolve("a.magik");
+    final String contentA = "def_slotted_exemplar(:child, {}, :parent_a)\n$\n";
+    Files.writeString(pathA, contentA);
+    indexer.indexFileContent(pathA.toUri(), contentA);
+
+    final Path pathB = tempDir.resolve("b.magik");
+    final String contentB = "def_slotted_exemplar(:child, {}, :parent_b)\n$\n";
+    Files.writeString(pathB, contentB);
+    indexer.indexFileContent(pathB.toUri(), contentB);
+
+    final String contentARenamed = "def_slotted_exemplar(:child, {}, :parent_a_renamed)\n$\n";
+    Files.writeString(pathA, contentARenamed);
+    indexer.indexFileContent(pathA.toUri(), contentARenamed);
+
+    assertThat(definitionKeeper.getInheritanceDefinitions(child))
+        .extracting(InheritanceDefinition::getParentTypeName)
+        .containsExactlyInAnyOrder(
+            TypeString.ofIdentifier("parent_a_renamed", "user"),
+            TypeString.ofIdentifier("parent_b", "user"));
   }
 }

@@ -20,6 +20,7 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   final Predicate<PackageDefinition> packageDefinitionPredicate;
   final Predicate<ExemplarDefinition> exemplarDefinitionPredicate;
   final Predicate<SlotDefinition> slotDefinitionPredicate;
+  final Predicate<InheritanceDefinition> inheritanceDefinitionPredicate;
   final Predicate<MethodDefinition> methodDefinitionPredicate;
   final Predicate<GlobalDefinition> globalDefinitionPredicate;
   final Predicate<BinaryOperatorDefinition> binaryOperatorDefinitionPredicate;
@@ -36,6 +37,8 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
    * @param packageDefinitionPredicate {@link Predicate} to filter {@link PackageDefinition}s.
    * @param exemplarDefinitionPredicate {@link Predicate} to filter {@link ExemplarDefinition}s.
    * @param slotDefinitionPredicate {@link Predicate} to filter {@link SlotDefinition}s.
+   * @param inheritanceDefinitionPredicate {@link Predicate} to filter {@link
+   *     InheritanceDefinition}s.
    * @param methodDefinitionPredicate {@link Predicate} to filter {@link MethodDefinition}s.
    * @param globalDefinitionPredicate {@link Predicate} to filter {@link GlobalDefinition}s.
    * @param binaryOperatorDefinitionPredicate {@link Predicate} to filter {@link
@@ -52,6 +55,7 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
       final Predicate<PackageDefinition> packageDefinitionPredicate,
       final Predicate<ExemplarDefinition> exemplarDefinitionPredicate,
       final Predicate<SlotDefinition> slotDefinitionPredicate,
+      final Predicate<InheritanceDefinition> inheritanceDefinitionPredicate,
       final Predicate<MethodDefinition> methodDefinitionPredicate,
       final Predicate<GlobalDefinition> globalDefinitionPredicate,
       final Predicate<BinaryOperatorDefinition> binaryOperatorDefinitionPredicate,
@@ -64,6 +68,7 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
     this.packageDefinitionPredicate = packageDefinitionPredicate;
     this.exemplarDefinitionPredicate = exemplarDefinitionPredicate;
     this.slotDefinitionPredicate = slotDefinitionPredicate;
+    this.inheritanceDefinitionPredicate = inheritanceDefinitionPredicate;
     this.methodDefinitionPredicate = methodDefinitionPredicate;
     this.globalDefinitionPredicate = globalDefinitionPredicate;
     this.binaryOperatorDefinitionPredicate = binaryOperatorDefinitionPredicate;
@@ -103,6 +108,11 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
 
   @Override
   public void add(final SlotDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void add(final InheritanceDefinition definition) {
     throw new UnsupportedOperationException();
   }
 
@@ -163,6 +173,11 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
 
   @Override
   public void remove(final SlotDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void remove(final InheritanceDefinition definition) {
     throw new UnsupportedOperationException();
   }
 
@@ -286,6 +301,20 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   public Collection<SlotDefinition> getSlotDefinitions() {
     return this.definitionKeeper.getSlotDefinitions().stream()
         .filter(this.slotDefinitionPredicate)
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  public Collection<InheritanceDefinition> getInheritanceDefinitions(final TypeString typeName) {
+    return this.getInheritanceDefinitions().stream()
+        .filter(definition -> definition.getChildTypeName().equals(typeName))
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  public Collection<InheritanceDefinition> getInheritanceDefinitions() {
+    return this.definitionKeeper.getInheritanceDefinitions().stream()
+        .filter(this.inheritanceDefinitionPredicate)
         .collect(Collectors.toSet());
   }
 

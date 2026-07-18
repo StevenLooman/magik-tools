@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,6 +21,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition.Sort;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
@@ -360,12 +362,13 @@ public class TypeStringResolver {
   }
 
   /**
-   * Get all the {@link SlotDefinition}s for the given {@link TypeString}.
+   * Get the {@link SlotDefinition}s defined directly on the given {@link TypeString}, following
+   * package uses.
    *
    * @param typeString {@link TypeString} to get the slots for.
-   * @return All {@link SlotDefinition}s for the given type.
+   * @return Own {@link SlotDefinition}s for the given type.
    */
-  public Collection<SlotDefinition> getSlotDefinitions(final TypeString typeString) {
+  private Collection<SlotDefinition> getOwnSlotDefinitions(final TypeString typeString) {
     return this.getPackageHierarchy(typeString).stream()
         .sequential()
         .flatMap(
@@ -376,6 +379,37 @@ public class TypeStringResolver {
               return this.definitionKeeper.getSlotDefinitions(pkgTypeString).stream();
             })
         .collect(Collectors.toSet());
+  }
+
+  /**
+   * Get all the {@link SlotDefinition}s for the given {@link TypeString}, including inherited
+   * slots.
+   *
+   * <p>Walks the hierarchy level by level, nearest-first: a slot name found at a shallower level
+   * shadows a same-named slot from an ancestor. Slots sharing a name at the same level (e.g., two
+   * files contributing the same slot name to one type) all survive, so that conflict surfaces
+   * instead of being silently resolved.
+   *
+   * @param typeString {@link TypeString} to get the slots for.
+   * @return All {@link SlotDefinition}s for the given type, own and inherited.
+   */
+  public Collection<SlotDefinition> getSlotDefinitions(final TypeString typeString) {
+    final Map<String, Set<SlotDefinition>> byName = new HashMap<>();
+    final Set<TypeString> seen = new HashSet<>();
+    Set<TypeString> level = Set.of(typeString);
+    while (!level.isEmpty()) {
+      level.stream()
+          .flatMap(typeStr -> this.getOwnSlotDefinitions(typeStr).stream())
+          .collect(Collectors.groupingBy(SlotDefinition::getName, Collectors.toSet()))
+          .forEach(byName::putIfAbsent);
+      seen.addAll(level);
+      level =
+          level.stream()
+              .flatMap(typeStr -> this.getParents(typeStr).stream())
+              .filter(typeStr -> !seen.contains(typeStr))
+              .collect(Collectors.toSet());
+    }
+    return byName.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
   }
 
   /**
@@ -394,7 +428,11 @@ public class TypeStringResolver {
 
   private Collection<TypeString> getParents(final ITypeStringDefinition definition) {
     if (definition instanceof ExemplarDefinition exemplarDefinition) {
-      return exemplarDefinition.getParents();
+      return this.definitionKeeper
+          .getInheritanceDefinitions(exemplarDefinition.getTypeString())
+          .stream()
+          .map(InheritanceDefinition::getParentTypeName)
+          .collect(Collectors.toSet());
     } else if (definition instanceof ProcedureDefinition) {
       // TODO: Is this right?
       return Set.of(TypeString.SW_PROCEDURE);
@@ -418,6 +456,13 @@ public class TypeStringResolver {
    * <p>This adds the implicit parents, where {@link ExemplarDefinition} only returns its explicitly
    * defined parents.
    *
+   * <p>The returned parents are UNORDERED: this returns a {@link Set}, and the order in which
+   * multiple parents are visited during resolution (e.g., which parent wins in {@code
+   * fillRespondingMethodDefinitions}'s first-wins lookup) is unspecified. This predates the move to
+   * first-class {@link InheritanceDefinition} edges -- the resolver already returned an unordered
+   * set of parents before that change, so method-resolution order among competing parents was
+   * already nondeterministic and remains so.
+   *
    * @param typeString {@link TypeString} to get parents from.
    * @return Parents of the given type.
    */
@@ -433,7 +478,10 @@ public class TypeStringResolver {
     // sw:serial_structure_indexed_mixin does not do so. Most mixins do not inherit from
     // sw:slotted_format_mixin. As such, we assume that a parent mixin does not provide
     // a default mixin.
-    final List<TypeString> parents = exemplarDefinition.getParents();
+    final List<TypeString> parents =
+        this.definitionKeeper.getInheritanceDefinitions(exemplarDefinition.getTypeString()).stream()
+            .map(InheritanceDefinition::getParentTypeName)
+            .toList();
     final Collection<TypeString> nonMixinParents =
         parents.stream()
             .filter(
@@ -469,20 +517,29 @@ public class TypeStringResolver {
    */
   public Collection<TypeString> getAllAncestors(final TypeString typeString) {
     final List<TypeString> ancestors = new ArrayList<>();
-    this.getAllAncestors(typeString, ancestors);
+    this.getAllAncestors(typeString, ancestors, new HashSet<>());
     return ancestors;
   }
 
-  private void getAllAncestors(final TypeString typeString, final List<TypeString> ancestors) {
+  private void getAllAncestors(
+      final TypeString typeString, final List<TypeString> ancestors, final Set<TypeString> seen) {
+    if (!seen.add(typeString)) {
+      return;
+    }
     final Collection<TypeString> typeStringParents = this.getParents(typeString);
     ancestors.addAll(typeStringParents);
 
-    // Recurse.
+    // Recurse over the resolved exemplar's edges. NB: this intentionally recurses over the raw
+    // edge parents (no implicit parents), preserving pre-refactor behaviour. See the
+    // getallancestors prompt under docs/superpowers/prompts/ for the deliberately-untouched quirk.
     this.resolve(typeString).stream()
         .filter(ExemplarDefinition.class::isInstance)
         .map(ExemplarDefinition.class::cast)
-        .flatMap(def -> def.getParents().stream())
-        .forEach(parentTypeStr -> this.getAllAncestors(parentTypeStr, ancestors));
+        .flatMap(
+            def ->
+                this.definitionKeeper.getInheritanceDefinitions(def.getTypeString()).stream()
+                    .map(InheritanceDefinition::getParentTypeName))
+        .forEach(parentTypeStr -> this.getAllAncestors(parentTypeStr, ancestors, seen));
   }
 
   public Collection<TypeString> getSelfAndAncestors(final TypeString typeString) {

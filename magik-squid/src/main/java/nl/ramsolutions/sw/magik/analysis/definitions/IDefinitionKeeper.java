@@ -30,6 +30,13 @@ public interface IDefinitionKeeper {
    */
   void add(SlotDefinition definition);
 
+  /**
+   * Add an {@link InheritanceDefinition}.
+   *
+   * @param definition {@link InheritanceDefinition} to add.
+   */
+  void add(InheritanceDefinition definition);
+
   void add(GlobalDefinition definition);
 
   void add(BinaryOperatorDefinition definition);
@@ -58,6 +65,13 @@ public interface IDefinitionKeeper {
    * @param definition {@link SlotDefinition} to remove.
    */
   void remove(SlotDefinition definition);
+
+  /**
+   * Remove an {@link InheritanceDefinition}.
+   *
+   * @param definition {@link InheritanceDefinition} to remove.
+   */
+  void remove(InheritanceDefinition definition);
 
   void remove(GlobalDefinition definition);
 
@@ -107,6 +121,21 @@ public interface IDefinitionKeeper {
    * @return All {@link SlotDefinition}s.
    */
   Collection<SlotDefinition> getSlotDefinitions();
+
+  /**
+   * Get {@link InheritanceDefinition}s for the given child {@link TypeString}.
+   *
+   * @param typeString Child type.
+   * @return {@link InheritanceDefinition}s whose child is the given type.
+   */
+  Collection<InheritanceDefinition> getInheritanceDefinitions(TypeString typeString);
+
+  /**
+   * Get all {@link InheritanceDefinition}s.
+   *
+   * @return All {@link InheritanceDefinition}s.
+   */
+  Collection<InheritanceDefinition> getInheritanceDefinitions();
 
   Collection<GlobalDefinition> getGlobalDefinitions(TypeString typeName);
 

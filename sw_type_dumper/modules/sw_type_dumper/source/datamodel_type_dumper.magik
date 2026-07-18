@@ -84,9 +84,11 @@ _private _method datamodel_type_dumper.int!run()
 	## Note that order of export is important when reading this file!
 	# Write intro.
 	_self.write_line("// Smallworld version: ", system.sw!version_string)
-	_self.write_line("// self type: ", _self.self_type)
-	_self.write_line("// undefined type: ", _self.undefined_type)
-	_self.write_line("// undefined result: ", _self.undefined_result)
+	_self.write_line("// Smallworld session: ", smallworld_product.magik_session().properties[:name])
+	_self.write_line("// self type: ", mt:definition.self_type)
+	_self.write_line("// parameter ref type: ", mt:definition.parameter_ref_type)
+	_self.write_line("// undefined type: ", mt:definition.undefined_type)
+	_self.write_line("// undefined result: ", mt:definition.undefined_result)
 	_self.write_line("// view: ", .view.original_dataset_name)
 
 	# Keep same structure as type_dumper as the type_merger depends on this.
@@ -94,6 +96,8 @@ _private _method datamodel_type_dumper.int!run()
 	_self.write_line("// modules")
 	_self.write_line("// packages")
 	_self.write_line("// types")
+	_self.write_line("// inheritance")
+	_self.write_line("// slots")
 	_self.write_line("// globals")
 
 	_local colls << rope.new_from_iter(.view, :user_tables|()|)
@@ -129,6 +133,9 @@ _private _method datamodel_type_dumper.int!run()
 			_self.write_definition(definition)
 		_endloop
 	_endloop
+
+	_self.write_line("// procedures")
+	_self.write_line("// conditions")
 _endmethod
 $
 
@@ -196,7 +203,7 @@ _private _method datamodel_type_dumper.field_type_name(field)
 	## Get the type name of a field.
 	## @param {sw:ds_field} field
 	## @return {sw:simple_vector<sw:char16_vector>|sw:char16_vector}
-	_local type_name << _self.undefined_type
+	_local type_name << mt:definition.undefined_type
 	_if field.is_physical?
 	_then
 		_local type << field.type.class.class_name
@@ -233,7 +240,7 @@ _private _method datamodel_type_dumper.field_type_name(field)
 		condition.raise(:not_implemented)
 	_endif
 
-	_if type_name = _self.undefined_result
+	_if type_name = mt:definition.undefined_result
 	_then
 		_return type_name
 	_endif
@@ -258,6 +265,6 @@ _private _method datamodel_type_dumper.join_result_type_names(join_field)
 		_local result_type_name << _self.get_type_name_for_collection(result_table)
 		result_type_names.add(result_type_name)
 	_endloop
-	_return result_type_names.join_as_strings(_self.value_combinator)
+	_return result_type_names.join_as_strings(mt:definition.value_combinator)
 _endmethod
 $

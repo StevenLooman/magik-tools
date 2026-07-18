@@ -12,6 +12,7 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -40,7 +41,6 @@ class MUnitTestItemProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME,
-            Collections.emptyList(),
             null));
 
     return definitionKeeper;
@@ -57,8 +57,16 @@ class MUnitTestItemProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             MY_TEST_REF,
-            List.of(MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME),
             null));
+    definitionKeeper.add(
+        new InheritanceDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            MY_TEST_REF,
+            MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME));
   }
 
   /** Add a method with the given name to the test exemplar. */

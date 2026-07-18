@@ -20,7 +20,7 @@ $
 
 _pragma(classify_level=basic, topic=type_dumper)
 _private _method usage.init_from_json(instruction)
-	## usage self from JSON.
+	## Initialize self from JSON.
 	## @param {sw:equality_hash_table} instruction
 	## @return {_self}
 	_for name _over _self.sys!all_slot_names().fast_elements()

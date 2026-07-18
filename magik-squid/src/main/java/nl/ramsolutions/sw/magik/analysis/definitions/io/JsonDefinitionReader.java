@@ -27,6 +27,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
@@ -194,7 +195,6 @@ public final class JsonDefinitionReader {
           null,
           ExemplarDefinition.Sort.UNDEFINED,
           TypeString.UNDEFINED,
-          Collections.emptyList(),
           null);
     }
   }
@@ -290,6 +290,10 @@ public final class JsonDefinitionReader {
         this.handleType(obj);
         break;
 
+      case INHERITANCE:
+        this.handleInheritance(obj);
+        break;
+
       case SLOT:
         this.handleSlot(obj);
         break;
@@ -378,6 +382,13 @@ public final class JsonDefinitionReader {
     this.definitionKeeper.getExemplarDefinitions(typeString).stream()
         .filter(def -> def.getLocation() == null)
         .forEach(this.definitionKeeper::remove);
+    this.definitionKeeper.add(definition);
+  }
+
+  private void handleInheritance(final JsonObject instruction) {
+    final Gson gson = this.buildGson();
+    final InheritanceDefinition definition =
+        gson.fromJson(instruction, InheritanceDefinition.class);
     this.definitionKeeper.add(definition);
   }
 

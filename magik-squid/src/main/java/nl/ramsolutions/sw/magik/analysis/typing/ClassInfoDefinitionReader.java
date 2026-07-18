@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
@@ -453,18 +453,23 @@ public final class ClassInfoDefinitionReader {
     final String doc = commentBuilder.toString();
 
     // TODO: What if type is already defined?
+    final Instant timestamp = this.getTimestamp();
     final ExemplarDefinition definition =
         new ExemplarDefinition(
             location,
-            this.getTimestamp(),
+            timestamp,
             moduleName,
             doc,
             null,
             ExemplarDefinition.Sort.UNDEFINED,
             typeString,
-            parents,
             pragma);
     this.definitionKeeper.add(definition);
+    parents.forEach(
+        parentTypeString ->
+            this.definitionKeeper.add(
+                new InheritanceDefinition(
+                    location, timestamp, moduleName, null, null, typeString, parentTypeString)));
     slots.forEach(this.definitionKeeper::add);
   }
 
@@ -519,18 +524,23 @@ public final class ClassInfoDefinitionReader {
     final String doc = commentBuilder.toString();
 
     // TODO: What if type is already defined?
+    final Instant timestamp = this.getTimestamp();
     final ExemplarDefinition definition =
         new ExemplarDefinition(
             location,
-            this.getTimestamp(),
+            timestamp,
             moduleName,
             doc,
             null,
             ExemplarDefinition.Sort.UNDEFINED,
             typeString,
-            parents,
             pragma);
     this.definitionKeeper.add(definition);
+    parents.forEach(
+        parentTypeString ->
+            this.definitionKeeper.add(
+                new InheritanceDefinition(
+                    location, timestamp, moduleName, null, null, typeString, parentTypeString)));
   }
 
   @SuppressWarnings("java:S4144")
@@ -586,18 +596,23 @@ public final class ClassInfoDefinitionReader {
     final String doc = commentBuilder.toString();
 
     // TODO: What if type is already defined?
+    final Instant timestamp = this.getTimestamp();
     final ExemplarDefinition definition =
         new ExemplarDefinition(
             location,
-            this.getTimestamp(),
+            timestamp,
             moduleName,
             doc,
             null,
             ExemplarDefinition.Sort.UNDEFINED,
             typeString,
-            parents,
             pragma);
     this.definitionKeeper.add(definition);
+    parents.forEach(
+        parentTypeString ->
+            this.definitionKeeper.add(
+                new InheritanceDefinition(
+                    location, timestamp, moduleName, null, null, typeString, parentTypeString)));
   }
 
   @SuppressWarnings("java:S1172")
@@ -665,7 +680,6 @@ public final class ClassInfoDefinitionReader {
             null,
             ExemplarDefinition.Sort.MIXIN,
             typeString,
-            Collections.emptyList(),
             pragma);
     this.definitionKeeper.add(definition);
   }

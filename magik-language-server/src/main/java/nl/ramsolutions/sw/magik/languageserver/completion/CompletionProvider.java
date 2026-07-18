@@ -231,7 +231,7 @@ public class CompletionProvider {
         final MethodDefinitionNodeHelper helper =
             new MethodDefinitionNodeHelper(methodDefinitionNode);
         final TypeString typeString = helper.getExemplarTypeString();
-        definitionKeeper.getSlotDefinitions(typeString).stream()
+        magikFile.getTypeStringResolver().getSlotDefinitions(typeString).stream()
             .map(
                 slot -> {
                   final String slotName = slot.getName();

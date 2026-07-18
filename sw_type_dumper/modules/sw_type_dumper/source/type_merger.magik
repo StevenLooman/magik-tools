@@ -120,6 +120,7 @@ _private _method type_merger.int!run()
 		"modules",
 		"packages",
 		"types",
+		"inheritance",
 		"slots",
 		"globals",
 		"methods",
@@ -196,7 +197,10 @@ _private _method type_merger.int!run()
 		# Sync to next section on left side.
 		_while _not _self.peek_line(:left).default("").trim_spaces().matches?(next_section_marker)
 		_loop
-			_self.read_line(:left)
+			_if _self.read_line(:left) _is _unset
+			_then
+				_leave
+			_endif
 		_endloop
 	_endloop
 _endmethod

@@ -14,6 +14,7 @@ import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
@@ -208,14 +209,34 @@ public class DefSlottedExemplarParser extends BaseDefParser {
             statementNode,
             ExemplarDefinition.Sort.SLOTTED,
             name,
-            parents,
             pragma);
+
+    final List<InheritanceDefinition> inheritanceDefinitions =
+        this.buildInheritanceDefinitions(
+            location, timestamp, moduleName, statementNode, name, parents);
 
     final List<MagikDefinition> definitions = new ArrayList<>();
     definitions.add(slottedExemplarDefinition);
     definitions.addAll(slots);
     definitions.addAll(methodDefinitions);
+    definitions.addAll(inheritanceDefinitions);
     return definitions;
+  }
+
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  private List<InheritanceDefinition> buildInheritanceDefinitions(
+      final Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final AstNode statementNode,
+      final TypeString name,
+      final List<TypeString> parents) {
+    return parents.stream()
+        .map(
+            parentTypeString ->
+                new InheritanceDefinition(
+                    location, timestamp, moduleName, null, statementNode, name, parentTypeString))
+        .toList();
   }
 
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})

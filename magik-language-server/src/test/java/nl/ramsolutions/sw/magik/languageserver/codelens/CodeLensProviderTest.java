@@ -11,6 +11,7 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -51,7 +52,6 @@ class CodeLensProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME,
-            Collections.emptyList(),
             null));
 
     return definitionKeeper;
@@ -73,8 +73,16 @@ class CodeLensProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             myTestRef,
-            List.of(MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME),
             null));
+    definitionKeeper.add(
+        new InheritanceDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            myTestRef,
+            MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME));
 
     // Add a test_* method on the test exemplar.
     definitionKeeper.add(
@@ -117,8 +125,16 @@ class CodeLensProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             myTestRef,
-            List.of(MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME),
             null));
+    definitionKeeper.add(
+        new InheritanceDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            myTestRef,
+            MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME));
 
     // Method without "test" prefix — should not get a code lens.
     definitionKeeper.add(
@@ -160,8 +176,16 @@ class CodeLensProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             myTestRef,
-            List.of(MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME),
             null));
+    definitionKeeper.add(
+        new InheritanceDefinition(
+            OTHER_FILE_LOCATION,
+            null,
+            null,
+            null,
+            null,
+            myTestRef,
+            MUnitTestItemProvider.MUNIT_TEST_CASE_EXEMPLAR_NAME));
 
     definitionKeeper.add(
         new MethodDefinition(

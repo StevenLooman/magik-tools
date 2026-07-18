@@ -1,0 +1,16 @@
+{
+  "title": "Inheritance cycle",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant/Issue",
+    "constantCost": "30min"
+  },
+  "tags": [
+    "bug",
+    "typing"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "InheritanceCycle",
+  "sqKey": "inheritance-cycle"
+}

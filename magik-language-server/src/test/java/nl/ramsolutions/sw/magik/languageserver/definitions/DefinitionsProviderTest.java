@@ -44,7 +44,6 @@ class DefinitionsProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             ropeRef,
-            Collections.emptyList(),
             null));
 
     final String code =
@@ -109,7 +108,6 @@ class DefinitionsProviderTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             exemplarRef,
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new SlotDefinition(

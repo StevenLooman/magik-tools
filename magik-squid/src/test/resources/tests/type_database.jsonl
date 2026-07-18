@@ -13,10 +13,14 @@
 {"instruction":"package","name":"user","uses":["sw"]}
 {"instruction":"package","name":"test_package","uses":["user"]}
 // types
-{"instruction":"type","type_name":"user:a","sort":"slotted","doc":"Test exemplar a","parents":["sw:object"],"module_name":"test_module"}
+{"instruction":"type","type_name":"user:a","sort":"slotted","doc":"Test exemplar a","module_name":"test_module"}
+{"instruction":"type","type_name":"user:b","sort":"indexed","doc":"Test exemplar b","module_name":null}
+// inheritance
+{"child_type_name":"user:a","parent_type_name":"sw:object","instruction":"inheritance"}
+{"child_type_name":"user:b","parent_type_name":"sw:object","instruction":"inheritance"}
+// slots
 {"instruction":"slot","owner_type_name":"user:a","name":"slot1","type_name":"sw:integer","module_name":"test_module"}
 {"instruction":"slot","owner_type_name":"user:a","name":"slot2","type_name":"sw:float","module_name":"test_module"}
-{"instruction":"type","type_name":"user:b","sort":"indexed","doc":"Test exemplar b","parents":["sw:object"],"module_name":null}
 // globals
 {"instruction":"global","type_name":"sw:!print_float_precision!","aliased_type_name":"sw:integer"}
 {"instruction":"global","type_name":"sw:tab_char","aliased_type_name":"sw:character"}

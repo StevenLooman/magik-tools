@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.checks.magiktyped;
 
 import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertThat;
 
-import java.util.Collections;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -52,15 +51,7 @@ class SlotExistsTypedCheckTest {
     final TypeString aRef = TypeString.ofIdentifier("a", "sw");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            aRef,
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, aRef, null));
     definitionKeeper.add(
         new SlotDefinition(null, null, null, null, null, aRef, "slot", TypeString.UNDEFINED));
     final MagikTypedCheck check = new SlotExistsTypedCheck();

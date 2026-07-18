@@ -12,6 +12,7 @@ import nl.ramsolutions.sw.checks.magiktyped.ConditionalExpressionIsFalseTypedChe
 import nl.ramsolutions.sw.checks.magiktyped.DeprecatedMethodUsageTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.DeprecatedTypeUsageTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.GlobalExistsTypedCheck;
+import nl.ramsolutions.sw.checks.magiktyped.InheritanceCycleTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.InvocationArgumentCountMatchesParameterCountTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.InvocationArgumentTypeMatchesParameterTypeTypedCheck;
 import nl.ramsolutions.sw.checks.magiktyped.IterCallableYieldTypesMatchDocTypedCheck;
@@ -61,6 +62,7 @@ public final class MagikTypedCheckList extends CheckList<MagikCheck, MagikTypedC
         DeprecatedMethodUsageTypedCheck.class,
         DeprecatedTypeUsageTypedCheck.class,
         GlobalExistsTypedCheck.class,
+        InheritanceCycleTypedCheck.class,
         IterCallableYieldTypesMatchDocTypedCheck.class,
         InvocationArgumentCountMatchesParameterCountTypedCheck.class,
         InvocationArgumentTypeMatchesParameterTypeTypedCheck.class,
