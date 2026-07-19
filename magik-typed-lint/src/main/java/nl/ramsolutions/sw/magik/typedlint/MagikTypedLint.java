@@ -70,7 +70,7 @@ public class MagikTypedLint {
     try {
       final MagikToolsProperties fileProperties =
           ConfigurationReader.readProperties(path, this.properties);
-      final URI uri = path.toUri();
+      final URI uri = path.toAbsolutePath().normalize().toUri();
       final Charset charset = FileCharsetDeterminer.determineCharset(path);
       final String fileContents = Files.readString(path, charset);
       return new MagikTypedFile(fileProperties, uri, fileContents, this.definitionKeeper);

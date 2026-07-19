@@ -250,6 +250,22 @@ public final class Main {
     }
   }
 
+  private static void populateDefinitionKeeper(
+      final CommandLine commandLine,
+      final MagikToolsProperties properties,
+      final IDefinitionKeeper definitionKeeper)
+      throws IOException {
+    if (commandLine.hasOption(OPTION_TYPE_DATABASE)) {
+      final String[] typeDatabasePaths = commandLine.getOptionValues(OPTION_TYPE_DATABASE);
+      Main.readTypeDatabases(typeDatabasePaths, definitionKeeper);
+    }
+
+    if (commandLine.hasOption(OPTION_PRE_INDEX_DIR)) {
+      final String[] indexDirs = commandLine.getOptionValues(OPTION_PRE_INDEX_DIR);
+      Main.indexPaths(indexDirs, properties, definitionKeeper);
+    }
+  }
+
   private static void indexPaths(
       final String[] indexDirs,
       final MagikToolsProperties properties,
@@ -258,7 +274,7 @@ public final class Main {
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
     final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper, properties, ignoreHandler);
     for (final String indexDir : indexDirs) {
-      final Path path = Path.of(indexDir).toAbsolutePath();
+      final Path path = Path.of(indexDir).toAbsolutePath().normalize();
       final URI uri = path.toUri();
       final FileEvent fileEvent = new FileEvent(uri, FileEvent.FileChangeType.CREATED);
       magikIndexer.handleFileEvent(fileEvent);
@@ -352,17 +368,8 @@ public final class Main {
       System.exit(0);
     }
 
-    // Read type database(s).
-    if (commandLine.hasOption(OPTION_TYPE_DATABASE)) {
-      final String[] typeDatabasePaths = commandLine.getOptionValues(OPTION_TYPE_DATABASE);
-      Main.readTypeDatabases(typeDatabasePaths, definitionKeeper);
-    }
-
-    // Pre-index directory/directories.
-    if (commandLine.hasOption(OPTION_PRE_INDEX_DIR)) {
-      final String[] indexDirs = commandLine.getOptionValues(OPTION_PRE_INDEX_DIR);
-      Main.indexPaths(indexDirs, properties, definitionKeeper);
-    }
+    // Read type database(s) and pre-index directory/directories.
+    Main.populateDefinitionKeeper(commandLine, properties, definitionKeeper);
 
     // Index files from command line.
     final String[] leftOverArgs = commandLine.getArgs();
