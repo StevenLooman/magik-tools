@@ -10,32 +10,45 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 /** Slot definition. */
 public class SlotDefinition extends MagikDefinition {
 
+  private final TypeString ownerTypeName;
   private final String name;
   private final TypeString typeName;
 
   /**
    * Constructor.
    *
-   * @param location
-   * @param node
-   * @param name
-   * @param typeName
+   * @param location Location of definition.
+   * @param timestamp Timestamp of definition.
+   * @param moduleName Name of module this slot is defined in.
+   * @param doc Slot doc.
+   * @param node Node for definition.
+   * @param ownerTypeName Name of the exemplar owning this slot.
+   * @param name Name of slot.
+   * @param typeName Type of slot.
    */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public SlotDefinition(
       final @Nullable Location location,
       final @Nullable Instant timestamp,
       final @Nullable String moduleName,
       final @Nullable String doc,
       final @Nullable AstNode node,
+      final TypeString ownerTypeName,
       final String name,
       final TypeString typeName) {
     super(location, timestamp, moduleName, doc, node);
+    this.ownerTypeName = ownerTypeName;
     this.name = name;
     this.typeName = typeName;
   }
 
+  public TypeString getOwnerTypeName() {
+    return this.ownerTypeName;
+  }
+
+  @Override
   public String getName() {
-    return name;
+    return this.name;
   }
 
   public TypeString getTypeName() {
@@ -50,17 +63,28 @@ public class SlotDefinition extends MagikDefinition {
         this.getModuleName(),
         this.getDoc(),
         null,
+        this.ownerTypeName,
         this.name,
         this.typeName);
+  }
+
+  @Override
+  public String toString() {
+    return "%s@%s(%s.%s)"
+        .formatted(
+            this.getClass().getName(),
+            Integer.toHexString(this.hashCode()),
+            this.ownerTypeName.getFullString(),
+            this.name);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
         this.getLocation(),
-        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
+        this.ownerTypeName,
         this.name,
         this.typeName);
   }
@@ -81,8 +105,9 @@ public class SlotDefinition extends MagikDefinition {
 
     final SlotDefinition other = (SlotDefinition) obj;
     return Objects.equals(other.getLocation(), this.getLocation())
-        && Objects.equals(other.getName(), this.getName())
+        && Objects.equals(other.getModuleName(), this.getModuleName())
         && Objects.equals(other.getDoc(), this.getDoc())
+        && Objects.equals(other.ownerTypeName, this.ownerTypeName)
         && Objects.equals(other.name, this.name)
         && Objects.equals(other.typeName, this.typeName);
   }

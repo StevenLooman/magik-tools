@@ -6,8 +6,6 @@ _pragma(classify_level=basic, topic=type_dumper)
 ## @slot {sw:char16_vector} type_name
 ## @slot {sw:char16_vector} sort
 ## @slot {sw:char16_vector|sw:unset} doc
-## @slot {sw:simple_vector<E=sw:char16_vector>} parents
-## @slot {sw:simple_vector<E=mt:slot_definition>} slots
 ## @slot {pragma|sw:unset} pragma
 ## @slot {sw:char16_vector|sw:unset} module_name
 def_slotted_exemplar(
@@ -16,8 +14,6 @@ def_slotted_exemplar(
 		{:type_name, _unset, :readable, :public},
 		{:sort, _unset, :readable, :public},
 		{:doc, _unset, :readable, :public},
-		{:parents, _unset, :readable, :public},
-		{:slots, _unset, :readable, :public},
 		{:pragma, _unset, :readable, :public},
 		{:module_name, _unset, :readable, :public}
 	},
@@ -25,53 +21,30 @@ def_slotted_exemplar(
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_method type_definition.new(type_name, sort, doc, parents, slots, pragma, module_name)
+_method type_definition.new(type_name, sort, doc, pragma, module_name)
 	## Constructor.
 	## @param {sw:char16_vector} type_name
 	## @param {sw:char16_vector} sort
 	## @param {sw:char16_vector|sw:unset} doc
-	## @param {sw:simple_vector<E=sw:char16_vector>} parents
-	## @param {sw:simple_vector<E=mt:slot_definition>} slots
 	## @param {pragma|sw:unset} pragma
 	## @param {sw:char16_vector|sw:unset} module_name
-	_return _clone.init(type_name, sort, doc, parents, slots, pragma, module_name)
+	_return _clone.init(type_name, sort, doc, pragma, module_name)
 _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_private _method type_definition.init(type_name, sort, doc, parents, slots, pragma, module_name)
+_private _method type_definition.init(type_name, sort, doc, pragma, module_name)
 	## Initializer.
 	## @param {sw:char16_vector} type_name
 	## @param {sw:char16_vector} sort
 	## @param {sw:char16_vector|sw:unset} doc
-	## @param {sw:simple_vector<E=sw:char16_vector>} parents
-	## @param {sw:simple_vector<E=mt:slot_definition>} slots
 	## @param {pragma|sw:unset} pragma
 	## @param {sw:char16_vector|sw:unset} module_name
 	.type_name << type_name
 	.sort << sort
 	.doc << doc
-	.parents << parents
-	.slots << slots
 	.pragma << pragma
 	.module_name << module_name
-	_return _self
-_endmethod
-$
-
-_pragma(classify_level=basic, topic=type_dumper)
-_private _method type_definition.init_from_json(instruction)
-	## Initialize self from JSON.
-	## @param {sw:equality_hash_table} instruction
-	## @return {_self}
-	_super.init_from_json(instruction)
-
-	# Fix slots.
-	.slots << .slots.map(
-		_proc(slot)
-			_return slot_definition.sys!perform(:|new_from_json()|, slot)
-		_endproc)
-
 	_return _self
 _endmethod
 $
@@ -95,23 +68,6 @@ _method type_definition.new_from(package, name, method_table)
 		_else
 			>> metadata[:instance_format]
 		_endif
-	_local parents << sw:rope.new()
-	_local behaviour_sources << metadata[:behaviour_sources].default(property_list)  # type: sw:property_list
-	_local behaviour_sources_keys << behaviour_sources.keys.as_sorted_collection()
-	_for source_name _over behaviour_sources_keys.fast_elements()
-	_loop
-		_local source_method_table << behaviour_sources[source_name]  # type: sw:method_table
-		_local source_metadata << source_method_table.metadata
-		_local source_global_var <<
-			_if source_metadata[:exemplar_global] _isnt _unset
-			_then
-				>> source_metadata[:exemplar_global]
-			_else
-				>> write_string("@sw:", source_metadata[:exemplar_name]).evaluate()
-			_endif
-		_local source_type_name << _self.name_from_type(source_global_var.package, source_global_var.key)
-		parents.add_last(source_type_name)
-	_endloop
 	_local topics <<
 		_try
 			>> method_finder.get_class_topics(type_name)
@@ -122,8 +78,6 @@ _method type_definition.new_from(package, name, method_table)
 		type_name,
 		sort,
 		method_finder.get_class_comment(type_name),
-		parents,
-		_self.build_slot_definitions(method_table),
 		_if _not topics.empty?
 		_then
 			>> pragma.new_from_topics(topics)
@@ -132,30 +86,6 @@ _method type_definition.new_from(package, name, method_table)
 		_then
 			>> metadata[:exemplar].module_name
 		_endif)
-_endmethod
-$
-
-_pragma(condition_definition=basic, topic=type_dumper)
-_private _method type_definition.build_slot_definitions(method_table)
-	## Build slot definitions to dump.
-	## @param {sw:method_table} method_table
-	## @return {sw:simple_vector<E=mt:slot_definition>} Slots definitions.
-	_local slot_definitions << sw:rope.new()
-
-	_local metadata << method_table.metadata
-	_local instance_slot_data << metadata[:instance_slot_data].default({})
-	_for slot_desc _over instance_slot_data.fast_elements()
-	_loop
-		_if slot_desc.owner _isnt method_table
-		_then
-			_continue
-		_endif
-
-		_local definition << slot_definition.new_from(slot_desc)
-		slot_definitions.add_last(definition)
-	_endloop
-
-	_return slot_definitions.as_simple_vector()
 _endmethod
 $
 
@@ -175,8 +105,6 @@ _method type_definition.equals?(other)
 	_return _self.type_name = other.type_name _andif
 		_self.sort = other.sort _andif
 		_self.doc = other.doc _andif
-		_self.parents.eq?(other.parents) _andif
-		_self.slots.eq?(other.slots) _andif
 		_self.pragma = other.pragma _andif
 		_self.module_name = other.module_name
 _endmethod
@@ -190,8 +118,6 @@ _method type_definition.equals_disregarding_typing?(other)
 	_return _self.type_name = other.type_name _andif
 		_self.sort = other.sort _andif
 		_self.doc = other.doc _andif
-		_self.parents.eq?(other.parents) _andif
-		_self.slots.eq?(other.slots, :|equals_disregarding_typing?()|) _andif
 		_self.pragma = other.pragma _andif
 		_self.module_name = other.module_name
 _endmethod

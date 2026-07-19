@@ -9,6 +9,7 @@ import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -37,12 +38,17 @@ class CallableReturnTypesMatchDocTypedCheckTest {
         ExpressionResultString.EMPTY);
   }
 
-  private ExemplarDefinition createExemplar(
+  private void createExemplar(
+      final IDefinitionKeeper definitionKeeper,
       final ExemplarDefinition.Sort sort,
       final TypeString typeName,
       final List<TypeString> parents) {
-    return new ExemplarDefinition(
-        null, null, null, null, null, sort, typeName, Collections.emptyList(), parents, null);
+    definitionKeeper.add(
+        new ExemplarDefinition(null, null, null, null, null, sort, typeName, null));
+    parents.forEach(
+        parentTypeName ->
+            definitionKeeper.add(
+                new InheritanceDefinition(null, null, null, null, null, typeName, parentTypeName)));
   }
 
   @Test
@@ -357,12 +363,16 @@ class CallableReturnTypesMatchDocTypedCheckTest {
     final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
     final TypeString basicCollectionMixinRef =
         TypeString.ofIdentifier("basic_collection_mixin", "sw");
-    definitionKeeper.add(
-        this.createExemplar(
-            ExemplarDefinition.Sort.INTRINSIC, basicCollectionMixinRef, Collections.emptyList()));
-    definitionKeeper.add(
-        this.createExemplar(
-            ExemplarDefinition.Sort.SLOTTED, ropeRef, List.of(basicCollectionMixinRef)));
+    this.createExemplar(
+        definitionKeeper,
+        ExemplarDefinition.Sort.INTRINSIC,
+        basicCollectionMixinRef,
+        Collections.emptyList());
+    this.createExemplar(
+        definitionKeeper,
+        ExemplarDefinition.Sort.SLOTTED,
+        ropeRef,
+        List.of(basicCollectionMixinRef));
     definitionKeeper.add(
         this.createMethod(ropeRef, "new_with()", new ExpressionResultString(TypeString.SELF)));
     definitionKeeper.add(

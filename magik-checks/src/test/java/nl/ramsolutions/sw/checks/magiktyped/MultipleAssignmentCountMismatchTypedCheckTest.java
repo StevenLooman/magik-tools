@@ -225,16 +225,7 @@ class MultipleAssignmentCountMismatchTypedCheckTest {
             TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            myVecRef,
-            Collections.emptyList(),
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, myVecRef, null));
     definitionKeeper.add(
         new MethodDefinition(
             null,

@@ -226,6 +226,8 @@ public class MagikWorkspaceFolder {
         locationPred::test,
         locationPred::test,
         locationPred::test,
+        locationPred::test,
+        locationPred::test,
         locationPred::test);
   }
 

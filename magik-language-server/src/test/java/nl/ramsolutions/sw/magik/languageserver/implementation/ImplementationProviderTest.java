@@ -12,6 +12,7 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -30,16 +31,7 @@ class ImplementationProviderTest {
     final TypeString aRef = TypeString.ofIdentifier("a", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
-            EMPTY_LOCATION,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            aRef,
-            Collections.emptyList(),
-            Collections.emptyList(),
-            null));
+            EMPTY_LOCATION, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, aRef, null));
     definitionKeeper.add(
         new MethodDefinition(
             new Location(
@@ -59,16 +51,8 @@ class ImplementationProviderTest {
     final TypeString bRef = TypeString.ofIdentifier("b", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
-            EMPTY_LOCATION,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            bRef,
-            Collections.emptyList(),
-            List.of(aRef),
-            null));
+            EMPTY_LOCATION, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, bRef, null));
+    definitionKeeper.add(new InheritanceDefinition(null, null, null, null, null, bRef, aRef));
     definitionKeeper.add(
         new MethodDefinition(
             new Location(

@@ -4,8 +4,8 @@ import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefSlottedExemplarParser;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
@@ -38,8 +38,8 @@ public class ExemplarSlotCountCheck extends MagikCheck {
     final MagikFile magikFile = this.getMagikFile();
     final DefSlottedExemplarParser parser = new DefSlottedExemplarParser(magikFile, node);
     final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
-    final ExemplarDefinition definition = (ExemplarDefinition) parsedDefinitions.get(0);
-    final int slotCount = definition.getSlots().size();
+    final long slotCount =
+        parsedDefinitions.stream().filter(SlotDefinition.class::isInstance).count();
     if (slotCount > this.maxSlotCount) {
       final String message = MESSAGE.formatted(slotCount, this.maxSlotCount);
       this.addIssue(node, message);

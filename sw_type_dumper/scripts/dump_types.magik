@@ -17,6 +17,7 @@ _block
 		:|mt:datamodel_type_dumper|,
 		:|mt:definition|,
 		:|mt:global_definition|,
+		:|mt:inheritance_definition|,
 		:|mt:method_definition|,
 		:|mt:module_definition|,
 		:|mt:module_usage|,

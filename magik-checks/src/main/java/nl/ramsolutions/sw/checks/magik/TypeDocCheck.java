@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefSlottedExemplarParser;
@@ -90,8 +89,11 @@ public class TypeDocCheck extends MagikCheck {
     final MagikFile magikFile = this.getMagikFile();
     final DefSlottedExemplarParser parser = new DefSlottedExemplarParser(magikFile, node);
     final List<MagikDefinition> definitions = parser.parseDefinitions();
-    final ExemplarDefinition exemplarDefinition = (ExemplarDefinition) definitions.get(0);
-    final List<SlotDefinition> slots = exemplarDefinition.getSlots();
+    final List<SlotDefinition> slots =
+        definitions.stream()
+            .filter(SlotDefinition.class::isInstance)
+            .map(SlotDefinition.class::cast)
+            .toList();
     final Map<String, SlotDefinition> slotNames =
         slots.stream()
             .collect(Collectors.toMap(SlotDefinition::getName, slot -> slot, (a, b) -> a));

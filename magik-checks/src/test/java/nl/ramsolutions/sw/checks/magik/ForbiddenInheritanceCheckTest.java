@@ -44,4 +44,17 @@ class ForbiddenInheritanceCheckTest {
           {@sw:rwo_record})""";
     assertThat(check).reportsIssueCount(code, 1);
   }
+
+  @Test
+  void testTwoForbiddenParentsReportTwice() {
+    final ForbiddenInheritanceCheck check = new ForbiddenInheritanceCheck();
+    check.forbiddenParents = "sw:bad_a,sw:bad_b";
+    final String code =
+        """
+        def_slotted_exemplar(
+          :test_exemplar,
+          {},
+          {@sw:bad_a, @sw:bad_b})""";
+    assertThat(check).reportsIssueCount(code, 2);
+  }
 }

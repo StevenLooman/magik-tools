@@ -2,12 +2,12 @@ package nl.ramsolutions.sw.magik.languageserver.typehierarchy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
@@ -32,16 +32,7 @@ class TypeHierarchyProviderTest {
     final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            exemplarRef,
-            Collections.emptyList(),
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, exemplarRef, null));
 
     final String code =
         """
@@ -61,16 +52,7 @@ class TypeHierarchyProviderTest {
     final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            ropeRef,
-            Collections.emptyList(),
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, ropeRef, null));
 
     final String code =
         """
@@ -91,29 +73,13 @@ class TypeHierarchyProviderTest {
     final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            exemplarRef,
-            Collections.emptyList(),
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, exemplarRef, null));
     final TypeString subExemplarRef = TypeString.ofIdentifier("sub_exemplar", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            subExemplarRef,
-            Collections.emptyList(),
-            List.of(exemplarRef),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, subExemplarRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, subExemplarRef, exemplarRef));
 
     final TypeHierarchyItem item =
         new TypeHierarchyItem(
@@ -137,16 +103,10 @@ class TypeHierarchyProviderTest {
     final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            exemplarRef,
-            Collections.emptyList(),
-            List.of(TypeString.ofIdentifier("slotted_format_mixin", "sw")),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, exemplarRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(
+            null, null, null, null, null, exemplarRef, TypeString.SW_SLOTTED_FORMAT_MIXIN));
 
     final TypeHierarchyItem item =
         new TypeHierarchyItem(

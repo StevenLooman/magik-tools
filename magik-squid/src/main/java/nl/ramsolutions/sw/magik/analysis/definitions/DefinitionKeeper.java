@@ -32,6 +32,9 @@ public class DefinitionKeeper implements IDefinitionKeeper {
       new ConcurrentHashMap<>();
   private final Map<TypeString, Set<MethodDefinition>> methodDefinitions =
       new ConcurrentHashMap<>();
+  private final Map<TypeString, Set<SlotDefinition>> slotDefinitions = new ConcurrentHashMap<>();
+  private final Map<TypeString, Set<InheritanceDefinition>> inheritanceDefinitions =
+      new ConcurrentHashMap<>();
   private final Map<TypeString, Set<GlobalDefinition>> globalDefinitions =
       new ConcurrentHashMap<>();
   private final Map<TypeString, Set<ProcedureDefinition>> procedureDefinitions =
@@ -121,6 +124,26 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   }
 
   @Override
+  public void add(final SlotDefinition definition) {
+    final TypeString bareTypeString = definition.getOwnerTypeName().getWithoutGenerics();
+    final Set<SlotDefinition> definitions =
+        this.slotDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
+    definitions.add(definition);
+
+    this.addToPathIndex(definition);
+  }
+
+  @Override
+  public void add(final InheritanceDefinition definition) {
+    final TypeString bareTypeString = definition.getChildTypeName().getWithoutGenerics();
+    final Set<InheritanceDefinition> definitions =
+        this.inheritanceDefinitions.computeIfAbsent(
+            bareTypeString, k -> ConcurrentHashMap.newKeySet());
+    definitions.add(definition);
+    this.addToPathIndex(definition);
+  }
+
+  @Override
   public void add(final GlobalDefinition definition) {
     final TypeString bareTypeString = definition.getTypeString().getWithoutGenerics();
     final Set<GlobalDefinition> definitions =
@@ -176,6 +199,10 @@ public class DefinitionKeeper implements IDefinitionKeeper {
       this.add(packageDefinition);
     } else if (definition instanceof final ExemplarDefinition exemplarDefinition) {
       this.add(exemplarDefinition);
+    } else if (definition instanceof final SlotDefinition slotDefinition) {
+      this.add(slotDefinition);
+    } else if (definition instanceof final InheritanceDefinition inheritanceDefinition) {
+      this.add(inheritanceDefinition);
     } else if (definition instanceof final MethodDefinition methodDefinition) {
       this.add(methodDefinition);
     } else if (definition instanceof final GlobalDefinition globalDefinition) {
@@ -253,6 +280,26 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   }
 
   @Override
+  public void remove(final SlotDefinition definition) {
+    final TypeString bareTypeString = definition.getOwnerTypeName().getWithoutGenerics();
+    final Set<SlotDefinition> definitions =
+        this.slotDefinitions.computeIfAbsent(bareTypeString, k -> ConcurrentHashMap.newKeySet());
+    definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
+  }
+
+  @Override
+  public void remove(final InheritanceDefinition definition) {
+    final TypeString bareTypeString = definition.getChildTypeName().getWithoutGenerics();
+    final Set<InheritanceDefinition> definitions =
+        this.inheritanceDefinitions.computeIfAbsent(
+            bareTypeString, k -> ConcurrentHashMap.newKeySet());
+    definitions.remove(definition);
+    this.removeFromPathIndex(definition);
+  }
+
+  @Override
   public void remove(final GlobalDefinition definition) {
     final TypeString bareTypeString = definition.getTypeString().getWithoutGenerics();
     final Set<GlobalDefinition> definitions =
@@ -307,6 +354,10 @@ public class DefinitionKeeper implements IDefinitionKeeper {
       this.remove(packageDefinition);
     } else if (definition instanceof final ExemplarDefinition exemplarDefinition) {
       this.remove(exemplarDefinition);
+    } else if (definition instanceof final SlotDefinition slotDefinition) {
+      this.remove(slotDefinition);
+    } else if (definition instanceof final InheritanceDefinition inheritanceDefinition) {
+      this.remove(inheritanceDefinition);
     } else if (definition instanceof final MethodDefinition methodDefinition) {
       this.remove(methodDefinition);
     } else if (definition instanceof final GlobalDefinition globalDefinition) {
@@ -405,6 +456,34 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   @Override
   public Collection<MethodDefinition> getMethodDefinitions() {
     return this.methodDefinitions.values().stream()
+        .flatMap(Set::stream)
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  public Collection<SlotDefinition> getSlotDefinitions(final TypeString typeString) {
+    final TypeString bareTypeString = typeString.getWithoutGenerics();
+    final Collection<SlotDefinition> definitions =
+        this.slotDefinitions.getOrDefault(bareTypeString, Collections.emptySet());
+    return Collections.unmodifiableCollection(definitions);
+  }
+
+  @Override
+  public Collection<SlotDefinition> getSlotDefinitions() {
+    return this.slotDefinitions.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
+  }
+
+  @Override
+  public Collection<InheritanceDefinition> getInheritanceDefinitions(final TypeString typeString) {
+    final TypeString bareTypeString = typeString.getWithoutGenerics();
+    final Collection<InheritanceDefinition> definitions =
+        this.inheritanceDefinitions.getOrDefault(bareTypeString, Collections.emptySet());
+    return Collections.unmodifiableCollection(definitions);
+  }
+
+  @Override
+  public Collection<InheritanceDefinition> getInheritanceDefinitions() {
+    return this.inheritanceDefinitions.values().stream()
         .flatMap(Set::stream)
         .collect(Collectors.toSet());
   }
@@ -536,6 +615,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     this.conditionDefinitions.clear();
     this.exemplarDefinitions.clear();
     this.methodDefinitions.clear();
+    this.slotDefinitions.clear();
+    this.inheritanceDefinitions.clear();
     this.globalDefinitions.clear();
     this.procedureDefinitions.clear();
     this.uriDefinitions.clear();

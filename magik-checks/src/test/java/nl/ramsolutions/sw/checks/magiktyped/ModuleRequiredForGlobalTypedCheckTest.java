@@ -67,8 +67,6 @@ class ModuleRequiredForGlobalTypedCheckTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.ofIdentifier("rope", "sw"),
-            Collections.emptyList(),
-            Collections.emptyList(),
             null));
 
     final MagikTypedCheck check = new ModuleRequiredForGlobalTypedCheck();
@@ -103,8 +101,6 @@ class ModuleRequiredForGlobalTypedCheckTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.ofIdentifier("rope", "sw"),
-            Collections.emptyList(),
-            Collections.emptyList(),
             null));
 
     final MagikTypedCheck check = new ModuleRequiredForGlobalTypedCheck();

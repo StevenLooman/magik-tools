@@ -3,11 +3,12 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.time.Instant;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
@@ -122,9 +123,15 @@ public class DefMixinParser extends BaseDefParser {
             statementNode,
             ExemplarDefinition.Sort.MIXIN,
             name,
-            Collections.emptyList(),
-            parents,
             pragma);
-    return List.of(mixinDefinition);
+
+    final List<MagikDefinition> definitions = new ArrayList<>();
+    definitions.add(mixinDefinition);
+    for (final TypeString parentTypeString : parents) {
+      definitions.add(
+          new InheritanceDefinition(
+              location, timestamp, moduleName, null, statementNode, name, parentTypeString));
+    }
+    return definitions;
   }
 }

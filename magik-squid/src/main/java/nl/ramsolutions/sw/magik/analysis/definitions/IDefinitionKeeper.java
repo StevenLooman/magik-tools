@@ -23,6 +23,20 @@ public interface IDefinitionKeeper {
 
   void add(MethodDefinition definition);
 
+  /**
+   * Add a {@link SlotDefinition}.
+   *
+   * @param definition {@link SlotDefinition} to add.
+   */
+  void add(SlotDefinition definition);
+
+  /**
+   * Add an {@link InheritanceDefinition}.
+   *
+   * @param definition {@link InheritanceDefinition} to add.
+   */
+  void add(InheritanceDefinition definition);
+
   void add(GlobalDefinition definition);
 
   void add(BinaryOperatorDefinition definition);
@@ -44,6 +58,20 @@ public interface IDefinitionKeeper {
   void remove(ExemplarDefinition definition);
 
   void remove(MethodDefinition definition);
+
+  /**
+   * Remove a {@link SlotDefinition}.
+   *
+   * @param definition {@link SlotDefinition} to remove.
+   */
+  void remove(SlotDefinition definition);
+
+  /**
+   * Remove an {@link InheritanceDefinition}.
+   *
+   * @param definition {@link InheritanceDefinition} to remove.
+   */
+  void remove(InheritanceDefinition definition);
 
   void remove(GlobalDefinition definition);
 
@@ -78,6 +106,36 @@ public interface IDefinitionKeeper {
   Collection<MethodDefinition> getMethodDefinitions(TypeString typeName);
 
   Collection<MethodDefinition> getMethodDefinitions();
+
+  /**
+   * Get {@link SlotDefinition}s for the given owner {@link TypeString}.
+   *
+   * @param typeString Owner of the slots.
+   * @return {@link SlotDefinition}s owned by the given type.
+   */
+  Collection<SlotDefinition> getSlotDefinitions(TypeString typeString);
+
+  /**
+   * Get all {@link SlotDefinition}s.
+   *
+   * @return All {@link SlotDefinition}s.
+   */
+  Collection<SlotDefinition> getSlotDefinitions();
+
+  /**
+   * Get {@link InheritanceDefinition}s for the given child {@link TypeString}.
+   *
+   * @param typeString Child type.
+   * @return {@link InheritanceDefinition}s whose child is the given type.
+   */
+  Collection<InheritanceDefinition> getInheritanceDefinitions(TypeString typeString);
+
+  /**
+   * Get all {@link InheritanceDefinition}s.
+   *
+   * @return All {@link InheritanceDefinition}s.
+   */
+  Collection<InheritanceDefinition> getInheritanceDefinitions();
 
   Collection<GlobalDefinition> getGlobalDefinitions(TypeString typeName);
 

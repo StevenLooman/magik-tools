@@ -2,8 +2,6 @@ package nl.ramsolutions.sw.checks.magiktyped;
 
 import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertThat;
 
-import java.util.Collections;
-import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -117,10 +115,17 @@ class TypeDocTypeExistsTypedCheckTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.ofIdentifier("a", "user"),
-            List.of(
-                new SlotDefinition(null, null, null, null, null, "my_slot", TypeString.SW_INTEGER)),
-            Collections.emptyList(),
             null));
+    definitionKeeper.add(
+        new SlotDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.ofIdentifier("a", "user"),
+            "my_slot",
+            TypeString.SW_INTEGER));
     final MagikTypedCheck check = new TypeDocTypeExistsTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
@@ -143,8 +148,6 @@ class TypeDocTypeExistsTypedCheckTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.ofIdentifier("a", "user"),
-            Collections.emptyList(),
-            Collections.emptyList(),
             null));
     final MagikTypedCheck check = new TypeDocTypeExistsTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);

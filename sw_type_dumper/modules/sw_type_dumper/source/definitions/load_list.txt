@@ -8,6 +8,7 @@ module_definition
 package_definition
 slot_definition
 type_definition
+inheritance_definition
 parameter_definition
 method_definition
 procedure_definition

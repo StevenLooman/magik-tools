@@ -231,22 +231,18 @@ public class CompletionProvider {
         final MethodDefinitionNodeHelper helper =
             new MethodDefinitionNodeHelper(methodDefinitionNode);
         final TypeString typeString = helper.getExemplarTypeString();
-        definitionKeeper.getExemplarDefinitions(typeString).stream()
-            .forEach(
-                exemplarDef ->
-                    exemplarDef.getSlots().stream()
-                        .map(
-                            slot -> {
-                              final String slotName = slot.getName();
-                              final String fullSlotName =
-                                  typeString.getFullString() + "." + slot.getName();
-                              final CompletionItem item = new CompletionItem(slotName);
-                              item.setInsertText(slotName);
-                              item.setDetail(fullSlotName);
-                              item.setKind(CompletionItemKind.Property);
-                              return item;
-                            })
-                        .forEach(items::add));
+        magikFile.getTypeStringResolver().getSlotDefinitions(typeString).stream()
+            .map(
+                slot -> {
+                  final String slotName = slot.getName();
+                  final String fullSlotName = typeString.getFullString() + "." + slot.getName();
+                  final CompletionItem item = new CompletionItem(slotName);
+                  item.setInsertText(slotName);
+                  item.setDetail(fullSlotName);
+                  item.setKind(CompletionItemKind.Property);
+                  return item;
+                })
+            .forEach(items::add);
       }
     }
 

@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.checks.magiktyped;
 import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertThat;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Set;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
@@ -29,8 +28,6 @@ class DeprecatedTypeUsageTypedCheckTest {
             null,
             ExemplarDefinition.Sort.SLOTTED,
             typeName,
-            Collections.emptyList(),
-            Collections.emptyList(),
             new Pragma(null, Arrays.asList(classifyLevel), Set.of(), Set.of())));
   }
 

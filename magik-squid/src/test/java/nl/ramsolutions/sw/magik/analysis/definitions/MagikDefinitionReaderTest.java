@@ -15,9 +15,9 @@ import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.junit.jupiter.api.Test;
 
-/** Test DefinitionReader. */
+/** Test {@link MagikDefinitionReader}. */
 @SuppressWarnings("checkstyle:MagicNumber")
-class DefinitionReaderTest {
+class MagikDefinitionReaderTest {
 
   private MagikFile createMagikFile(final String code) {
     return new MagikFile(MagikFile.DEFAULT_URI, code);
@@ -77,22 +77,25 @@ class DefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
+    final Location location =
+        new Location(
+            URI.create("memory:///source.magik"),
+            new Range(new Position(1, 19), new Position(1, 29)));
+    final TypeString exemplarName = TypeString.ofIdentifier("test_enum", "user");
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
-                new Location(
-                    URI.create("memory:///source.magik"),
-                    new Range(new Position(1, 19), new Position(1, 29))),
+                location,
                 null,
                 null,
                 "",
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
-                TypeString.ofIdentifier("test_enum", "user"),
-                Collections.emptyList(),
-                List.of(TypeString.ofIdentifier("enumeration_value", "sw")),
-                null));
+                exemplarName,
+                null),
+            new InheritanceDefinition(
+                location, null, null, null, null, exemplarName, TypeString.SW_ENUMERATION_VALUE));
   }
 
   @Test
@@ -117,29 +120,29 @@ class DefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 TypeString.ofIdentifier("test_exemplar", "user"),
-                List.of(
-                    new SlotDefinition(
-                        new Location(
-                            URI.create("memory:///source.magik"),
-                            new Range(new Position(1, 38), new Position(1, 39))),
-                        null,
-                        null,
-                        null,
-                        null,
-                        "slot1",
-                        TypeString.UNDEFINED),
-                    new SlotDefinition(
-                        new Location(
-                            URI.create("memory:///source.magik"),
-                            new Range(new Position(1, 56), new Position(1, 57))),
-                        null,
-                        null,
-                        null,
-                        null,
-                        "slot2",
-                        TypeString.UNDEFINED)),
-                Collections.emptyList(),
-                null));
+                null),
+            new SlotDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 38), new Position(1, 39))),
+                null,
+                null,
+                null,
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot1",
+                TypeString.UNDEFINED),
+            new SlotDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 56), new Position(1, 57))),
+                null,
+                null,
+                null,
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot2",
+                TypeString.UNDEFINED));
   }
 
   @Test
@@ -164,19 +167,18 @@ class DefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 TypeString.ofIdentifier("test_exemplar", "user"),
-                List.of(
-                    new SlotDefinition(
-                        new Location(
-                            URI.create("memory:///source.magik"),
-                            new Range(new Position(1, 38), new Position(1, 39))),
-                        null,
-                        null,
-                        null,
-                        null,
-                        "slot1",
-                        TypeString.UNDEFINED)),
-                Collections.emptyList(),
                 null),
+            new SlotDefinition(
+                new Location(
+                    URI.create("memory:///source.magik"),
+                    new Range(new Position(1, 38), new Position(1, 39))),
+                null,
+                null,
+                null,
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                "slot1",
+                TypeString.UNDEFINED),
             new MethodDefinition(
                 new Location(
                     URI.create("memory:///source.magik"),
@@ -251,22 +253,30 @@ class DefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
+    final Location location =
+        new Location(
+            URI.create("memory:///source.magik"),
+            new Range(new Position(1, 21), new Position(1, 35)));
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
-                new Location(
-                    URI.create("memory:///source.magik"),
-                    new Range(new Position(1, 21), new Position(1, 35))),
+                location,
                 null,
                 null,
                 "",
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 TypeString.ofIdentifier("test_exemplar", "user"),
-                Collections.emptyList(),
-                List.of(TypeString.ofIdentifier("rope", "sw")),
-                null));
+                null),
+            new InheritanceDefinition(
+                location,
+                null,
+                null,
+                null,
+                null,
+                TypeString.ofIdentifier("test_exemplar", "user"),
+                TypeString.ofIdentifier("rope", "sw")));
   }
 
   @Test
@@ -277,24 +287,39 @@ class DefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
+    final Location location =
+        new Location(
+            URI.create("memory:///source.magik"),
+            new Range(new Position(1, 21), new Position(1, 35)));
+    final TypeString exemplarName = TypeString.ofIdentifier("test_exemplar", "user");
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
-                new Location(
-                    URI.create("memory:///source.magik"),
-                    new Range(new Position(1, 21), new Position(1, 35))),
+                location,
                 null,
                 null,
                 "",
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
-                TypeString.ofIdentifier("test_exemplar", "user"),
-                Collections.emptyList(),
-                List.of(
-                    TypeString.ofIdentifier("mixin1", "user"),
-                    TypeString.ofIdentifier("rope", "user")),
-                null));
+                exemplarName,
+                null),
+            new InheritanceDefinition(
+                location,
+                null,
+                null,
+                null,
+                null,
+                exemplarName,
+                TypeString.ofIdentifier("mixin1", "user")),
+            new InheritanceDefinition(
+                location,
+                null,
+                null,
+                null,
+                null,
+                exemplarName,
+                TypeString.ofIdentifier("rope", "user")));
   }
 
   @Test
@@ -305,24 +330,39 @@ class DefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
+    final Location location =
+        new Location(
+            URI.create("memory:///source.magik"),
+            new Range(new Position(1, 21), new Position(1, 35)));
+    final TypeString exemplarName = TypeString.ofIdentifier("test_exemplar", "user");
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
-                new Location(
-                    URI.create("memory:///source.magik"),
-                    new Range(new Position(1, 21), new Position(1, 35))),
+                location,
                 null,
                 null,
                 "",
                 null,
                 ExemplarDefinition.Sort.INDEXED,
-                TypeString.ofIdentifier("test_exemplar", "user"),
-                Collections.emptyList(),
-                List.of(
-                    TypeString.ofIdentifier("mixin1", "user"),
-                    TypeString.ofIdentifier("integer", "user")),
-                null));
+                exemplarName,
+                null),
+            new InheritanceDefinition(
+                location,
+                null,
+                null,
+                null,
+                null,
+                exemplarName,
+                TypeString.ofIdentifier("mixin1", "user")),
+            new InheritanceDefinition(
+                location,
+                null,
+                null,
+                null,
+                null,
+                exemplarName,
+                TypeString.ofIdentifier("integer", "user")));
   }
 
   @Test
@@ -346,8 +386,6 @@ class DefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.INDEXED,
                 TypeString.ofIdentifier("test_exemplar", "user"),
-                Collections.emptyList(),
-                Collections.emptyList(),
                 null));
   }
 
@@ -359,22 +397,24 @@ class DefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
+    final Location location =
+        new Location(
+            URI.create("memory:///source.magik"),
+            new Range(new Position(1, 10), new Position(1, 21)));
+    final TypeString mixinName = TypeString.ofIdentifier("test_mixin", "user");
     final List<MagikDefinition> definitions = reader.getDefinitions();
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
-                new Location(
-                    URI.create("memory:///source.magik"),
-                    new Range(new Position(1, 10), new Position(1, 21))),
+                location, null, null, "", null, ExemplarDefinition.Sort.MIXIN, mixinName, null),
+            new InheritanceDefinition(
+                location,
                 null,
                 null,
-                "",
                 null,
-                ExemplarDefinition.Sort.MIXIN,
-                TypeString.ofIdentifier("test_mixin", "user"),
-                Collections.emptyList(),
-                List.of(TypeString.ofIdentifier("mixin1", "user")),
-                null));
+                null,
+                mixinName,
+                TypeString.ofIdentifier("mixin1", "user")));
   }
 
   @Test

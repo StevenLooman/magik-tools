@@ -244,7 +244,6 @@ public class ProcedureDefinition extends MagikDefinition
   public int hashCode() {
     return Objects.hash(
         this.getLocation(),
-        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
         this.modifiers,
@@ -272,7 +271,7 @@ public class ProcedureDefinition extends MagikDefinition
 
     final ProcedureDefinition other = (ProcedureDefinition) obj;
     return Objects.equals(other.getLocation(), this.getLocation())
-        && Objects.equals(other.getName(), this.getName())
+        && Objects.equals(other.getModuleName(), this.getModuleName())
         && Objects.equals(other.getDoc(), this.getDoc())
         && Objects.equals(this.modifiers, other.modifiers)
         && Objects.equals(this.typeName, other.typeName)

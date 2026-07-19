@@ -2,7 +2,6 @@ package nl.ramsolutions.sw.checks.magiktyped;
 
 import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertThat;
 
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
@@ -114,8 +113,6 @@ class InvocationArgumentTypeMatchesParameterTypeTypedCheckTest {
             ExemplarDefinition.Sort.SLOTTED,
             TypeString.ofIdentifier(
                 "rope", "sw", TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER)),
-            Collections.emptyList(),
-            Collections.emptyList(),
             null));
     definitionKeeper.add(
         new MethodDefinition(

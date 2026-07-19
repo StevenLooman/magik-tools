@@ -3,11 +3,12 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.time.Instant;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
@@ -25,7 +26,6 @@ public class DefEnumerationParser extends BaseDefParser {
   private static final String DEF_ENUMERATION = "def_enumeration";
   private static final String SW_DEF_ENUMERATION_FROM = "sw:def_enumeration_from";
   private static final String SW_DEF_ENUMERATION = "sw:def_enumeration";
-  private static final List<TypeString> ENUM_PARENTS = List.of(TypeString.SW_ENUMERATION_VALUE);
 
   /**
    * Constructor.
@@ -123,9 +123,20 @@ public class DefEnumerationParser extends BaseDefParser {
             statementNode,
             ExemplarDefinition.Sort.SLOTTED,
             name,
-            Collections.emptyList(),
-            DefEnumerationParser.ENUM_PARENTS,
             pragma);
-    return List.of(definition);
+    final InheritanceDefinition inheritanceDefinition =
+        new InheritanceDefinition(
+            location,
+            timestamp,
+            moduleName,
+            null,
+            statementNode,
+            name,
+            TypeString.SW_ENUMERATION_VALUE);
+
+    final List<MagikDefinition> definitions = new ArrayList<>();
+    definitions.add(definition);
+    definitions.add(inheritanceDefinition);
+    return definitions;
   }
 }

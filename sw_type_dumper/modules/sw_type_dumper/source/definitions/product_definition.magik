@@ -75,6 +75,25 @@ _method product_definition.new_from(product)
 _endmethod
 $
 
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method product_definition.init_from_json(instruction)
+	## Initialize self from JSON.
+	## @param {sw:equality_hash_table} instruction
+	## @return {_self}
+	_super.init_from_json(instruction)
+
+	# Fix usages.
+	.usages << .usages.map(
+		_proc(usage)
+			## @param {sw:equality_hash_table} usage
+			## @return {mt:product_usage}
+			_return product_usage.new_from_json(usage)
+		_endproc)
+
+	_return _self
+_endmethod
+$
+
 _pragma(condition_definition=basic, topic=type_dumper)
 _method product_definition.sort_value
 	## Sort value.

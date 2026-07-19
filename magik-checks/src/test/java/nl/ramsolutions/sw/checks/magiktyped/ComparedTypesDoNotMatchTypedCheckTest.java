@@ -2,12 +2,11 @@ package nl.ramsolutions.sw.checks.magiktyped;
 
 import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertThat;
 
-import java.util.Collections;
-import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -94,30 +93,16 @@ class ComparedTypesDoNotMatchTypedCheckTest {
       })
   void testTypeMatchable(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString parentRef = TypeString.ofIdentifier("parent", "user");
+    final TypeString childRef = TypeString.ofIdentifier("child", "user");
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            TypeString.ofIdentifier("parent", "user"),
-            Collections.emptyList(),
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, parentRef, null));
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            TypeString.ofIdentifier("child", "user"),
-            Collections.emptyList(),
-            List.of(TypeString.ofIdentifier("parent", "user")),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, childRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, childRef, parentRef));
     final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }

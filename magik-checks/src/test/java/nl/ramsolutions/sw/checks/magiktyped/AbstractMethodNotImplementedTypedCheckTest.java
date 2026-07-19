@@ -10,6 +10,7 @@ import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -26,9 +27,11 @@ class AbstractMethodNotImplementedTypedCheckTest {
       final TypeString typeStr,
       final ExemplarDefinition.Sort sort,
       final List<TypeString> parents) {
-    definitionKeeper.add(
-        new ExemplarDefinition(
-            null, null, null, null, null, sort, typeStr, Collections.emptyList(), parents, null));
+    definitionKeeper.add(new ExemplarDefinition(null, null, null, null, null, sort, typeStr, null));
+    parents.forEach(
+        parentTypeStr ->
+            definitionKeeper.add(
+                new InheritanceDefinition(null, null, null, null, null, typeStr, parentTypeStr)));
   }
 
   private void addMethod(

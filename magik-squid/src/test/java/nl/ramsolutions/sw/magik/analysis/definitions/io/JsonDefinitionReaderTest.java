@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.io.IOException;
 import java.net.URI;
@@ -17,6 +18,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
@@ -130,12 +132,54 @@ class JsonDefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.SLOTTED,
                 aRef,
-                List.of(
-                    new SlotDefinition(
-                        null, null, null, null, null, "slot1", TypeString.SW_INTEGER),
-                    new SlotDefinition(null, null, null, null, null, "slot2", TypeString.SW_FLOAT)),
-                List.of(TypeString.SW_OBJECT),
                 null));
+
+    assertThat(definitionKeeper.getInheritanceDefinitions(aRef))
+        .extracting(InheritanceDefinition::getParentTypeName)
+        .containsExactly(TypeString.SW_OBJECT);
+
+    final Collection<SlotDefinition> aSlotDefs = definitionKeeper.getSlotDefinitions(aRef);
+    assertThat(aSlotDefs).hasSize(2);
+    assertThat(aSlotDefs)
+        .extracting(SlotDefinition::getName, SlotDefinition::getTypeName)
+        .containsExactlyInAnyOrder(
+            tuple("slot1", TypeString.SW_INTEGER), tuple("slot2", TypeString.SW_FLOAT));
+  }
+
+  @Test
+  void testReadInheritance(@TempDir final Path tempDir) throws IOException {
+    final String jsonl =
+        "{\"instruction\":\"inheritance\",\"child_type_name\":\"user:a\","
+            + "\"parent_type_name\":\"sw:object\"}\n";
+    final Path path = tempDir.resolve("inheritance.jsonl");
+    Files.writeString(path, jsonl);
+
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, keeper);
+
+    final TypeString child = TypeString.ofIdentifier("a", "user");
+    assertThat(keeper.getInheritanceDefinitions(child))
+        .extracting(InheritanceDefinition::getParentTypeName)
+        .containsOnly(TypeString.ofIdentifier("object", "sw"));
+  }
+
+  @Test
+  void testReadSlot(@TempDir final Path tempDir) throws IOException {
+    final String jsonl =
+        "{\"instruction\":\"slot\",\"owner_type_name\":\"user:a\","
+            + "\"name\":\"slot1\",\"type_name\":\"sw:integer\"}\n";
+    final Path path = tempDir.resolve("slot.jsonl");
+    Files.writeString(path, jsonl);
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, definitionKeeper);
+
+    final TypeString typeA = TypeString.ofIdentifier("a", "user");
+    final Collection<SlotDefinition> slotDefs = definitionKeeper.getSlotDefinitions(typeA);
+    assertThat(slotDefs)
+        .extracting(
+            SlotDefinition::getName, SlotDefinition::getTypeName, SlotDefinition::getOwnerTypeName)
+        .containsExactly(tuple("slot1", TypeString.SW_INTEGER, typeA));
   }
 
   @Test

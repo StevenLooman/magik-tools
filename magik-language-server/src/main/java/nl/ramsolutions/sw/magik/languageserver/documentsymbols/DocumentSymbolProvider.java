@@ -8,8 +8,11 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -38,12 +41,15 @@ public class DocumentSymbolProvider {
       final MagikTypedFile magikFile) {
     // Convert definitions to DocumentSymbols.
     return magikFile.getMagikDefinitions().stream()
-        .map(this::convertDefinition)
+        .filter(definition -> !(definition instanceof SlotDefinition))
+        .filter(definition -> !(definition instanceof InheritanceDefinition))
+        .map(definition -> this.convertDefinition(magikFile, definition))
         .map(Either::<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>forRight)
         .toList();
   }
 
-  private DocumentSymbol convertDefinition(final MagikDefinition definition) {
+  private DocumentSymbol convertDefinition(
+      final MagikTypedFile magikFile, final MagikDefinition definition) {
     final SymbolKind symbolKind = this.symbolKindForDefinition(definition);
     final AstNode definitionNode = definition.getNode();
     Objects.requireNonNull(definitionNode);
@@ -56,7 +62,7 @@ public class DocumentSymbolProvider {
             Lsp4jConversion.rangeToLsp4j(range));
     if (definition instanceof ExemplarDefinition exemplarDefinition) {
       final List<DocumentSymbol> slotSymbols =
-          this.convertedSlotsFromDefinition(exemplarDefinition);
+          this.convertedSlotsFromDefinition(magikFile, exemplarDefinition);
       documentSymbol.setChildren(slotSymbols);
     }
     return documentSymbol;
@@ -76,15 +82,23 @@ public class DocumentSymbolProvider {
   }
 
   private List<DocumentSymbol> convertedSlotsFromDefinition(
-      final ExemplarDefinition exemplarDefinition) {
-    return exemplarDefinition.getSlots().stream()
+      final MagikTypedFile magikFile, final ExemplarDefinition exemplarDefinition) {
+    final TypeString typeString = exemplarDefinition.getTypeString();
+    return magikFile.getMagikDefinitions().stream()
+        .filter(SlotDefinition.class::isInstance)
+        .map(SlotDefinition.class::cast)
+        .filter(slotDefinition -> slotDefinition.getOwnerTypeName().equals(typeString))
         .map(
-            slotDefinition ->
-                new DocumentSymbol(
-                    slotDefinition.getName(),
-                    SymbolKind.Field,
-                    Lsp4jConversion.rangeToLsp4j(new Range(slotDefinition.getNode())),
-                    Lsp4jConversion.rangeToLsp4j(new Range(slotDefinition.getNode()))))
+            slotDefinition -> {
+              final AstNode slotDefinitionNode = slotDefinition.getNode();
+              Objects.requireNonNull(slotDefinitionNode);
+              final Range range = new Range(slotDefinitionNode);
+              return new DocumentSymbol(
+                  slotDefinition.getName(),
+                  SymbolKind.Field,
+                  Lsp4jConversion.rangeToLsp4j(range),
+                  Lsp4jConversion.rangeToLsp4j(range));
+            })
         .toList();
   }
 }

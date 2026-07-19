@@ -16,6 +16,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
@@ -131,8 +132,6 @@ class ClassInfoDefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.MIXIN,
                 exampleMixinRef,
-                Collections.emptyList(),
-                Collections.emptyList(),
                 new Pragma(null, Set.of("restricted"), Set.of("example"), Set.of())));
 
     // Classes.
@@ -151,33 +150,43 @@ class ClassInfoDefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.UNDEFINED,
                 exampleClassRef,
-                List.of(
-                    new SlotDefinition(
-                        null,
-                        null,
-                        "class_definition_reader_test",
-                        null,
-                        null,
-                        "slot1",
-                        TypeString.UNDEFINED),
-                    new SlotDefinition(
-                        null,
-                        null,
-                        "class_definition_reader_test",
-                        null,
-                        null,
-                        "slot2",
-                        TypeString.UNDEFINED),
-                    new SlotDefinition(
-                        null,
-                        null,
-                        "class_definition_reader_test",
-                        null,
-                        null,
-                        "slot3",
-                        TypeString.UNDEFINED)),
-                List.of(TypeString.ofIdentifier("model", "sw")),
                 new Pragma(null, Set.of("restricted"), Set.of("example"), Set.of())));
+    assertThat(definitionKeeper.getInheritanceDefinitions(exampleClassRef))
+        .extracting(InheritanceDefinition::getParentTypeName)
+        .containsExactly(TypeString.ofIdentifier("model", "sw"));
+
+    // Slots of the class are registered with the keeper, keyed on their owner.
+    final Collection<SlotDefinition> exampleClassSlots =
+        definitionKeeper.getSlotDefinitions(exampleClassRef);
+    assertThat(exampleClassSlots)
+        .containsExactlyInAnyOrder(
+            new SlotDefinition(
+                null,
+                null,
+                "class_definition_reader_test",
+                null,
+                null,
+                exampleClassRef,
+                "slot1",
+                TypeString.UNDEFINED),
+            new SlotDefinition(
+                null,
+                null,
+                "class_definition_reader_test",
+                null,
+                null,
+                exampleClassRef,
+                "slot2",
+                TypeString.UNDEFINED),
+            new SlotDefinition(
+                null,
+                null,
+                "class_definition_reader_test",
+                null,
+                null,
+                exampleClassRef,
+                "slot3",
+                TypeString.UNDEFINED));
 
     // Enumerations.
     final TypeString enumerationRef = TypeString.ofIdentifier("example_enumeration", "sw");
@@ -195,9 +204,10 @@ class ClassInfoDefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.UNDEFINED,
                 enumerationRef,
-                Collections.emptyList(),
-                List.of(TypeString.ofIdentifier("enumerated_format_mixin", "sw")),
                 new Pragma(null, Set.of("restricted"), Set.of(), Set.of())));
+    assertThat(definitionKeeper.getInheritanceDefinitions(enumerationRef))
+        .extracting(InheritanceDefinition::getParentTypeName)
+        .containsExactly(TypeString.ofIdentifier("enumerated_format_mixin", "sw"));
 
     // Enumerations.
     final TypeString exampleIndexedClassRef =
@@ -216,9 +226,10 @@ class ClassInfoDefinitionReaderTest {
                 null,
                 ExemplarDefinition.Sort.UNDEFINED,
                 exampleIndexedClassRef,
-                Collections.emptyList(),
-                List.of(TypeString.ofIdentifier("simple_index_mixin", "sw")),
                 new Pragma(null, Set.of("advanced"), Set.of(), Set.of())));
+    assertThat(definitionKeeper.getInheritanceDefinitions(exampleIndexedClassRef))
+        .extracting(InheritanceDefinition::getParentTypeName)
+        .containsExactly(TypeString.ofIdentifier("simple_index_mixin", "sw"));
 
     // Methods.
     final Collection<MethodDefinition> doSomethingMethodDefs =

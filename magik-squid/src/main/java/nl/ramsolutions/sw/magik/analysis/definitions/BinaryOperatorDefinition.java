@@ -95,7 +95,6 @@ public class BinaryOperatorDefinition extends MagikDefinition {
   public int hashCode() {
     return Objects.hash(
         this.getLocation(),
-        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
         this.operator,

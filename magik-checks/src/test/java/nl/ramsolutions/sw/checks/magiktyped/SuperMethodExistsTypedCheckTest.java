@@ -4,11 +4,11 @@ import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertT
 
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -31,16 +31,7 @@ class SuperMethodExistsTypedCheckTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            TYPE_PARENT,
-            Collections.emptyList(),
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, TYPE_PARENT, null));
     definitionKeeper.add(
         new MethodDefinition(
             null,
@@ -58,16 +49,9 @@ class SuperMethodExistsTypedCheckTest {
             ExpressionResultString.EMPTY));
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            TYPE_CHILD,
-            Collections.emptyList(),
-            List.of(TYPE_PARENT),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, TYPE_CHILD, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, TYPE_CHILD, TYPE_PARENT));
     final MagikTypedCheck check = new SuperMethodExistsTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
@@ -83,28 +67,12 @@ class SuperMethodExistsTypedCheckTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            TYPE_PARENT,
-            Collections.emptyList(),
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, TYPE_PARENT, null));
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            TYPE_CHILD,
-            Collections.emptyList(),
-            List.of(TYPE_PARENT),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, TYPE_CHILD, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, TYPE_CHILD, TYPE_PARENT));
     final MagikTypedCheck check = new SuperMethodExistsTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
@@ -120,16 +88,7 @@ class SuperMethodExistsTypedCheckTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
         new ExemplarDefinition(
-            null,
-            null,
-            null,
-            null,
-            null,
-            ExemplarDefinition.Sort.SLOTTED,
-            TYPE_CHILD,
-            Collections.emptyList(),
-            Collections.emptyList(),
-            null));
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, TYPE_CHILD, null));
     definitionKeeper.add(
         new MethodDefinition(
             null,

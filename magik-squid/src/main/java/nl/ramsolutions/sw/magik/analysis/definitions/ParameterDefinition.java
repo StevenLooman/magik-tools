@@ -76,7 +76,6 @@ public class ParameterDefinition extends MagikDefinition {
   public int hashCode() {
     return Objects.hash(
         this.getLocation(),
-        this.getTimestamp(),
         this.getModuleName(),
         this.getDoc(),
         this.name,
@@ -100,7 +99,7 @@ public class ParameterDefinition extends MagikDefinition {
 
     final ParameterDefinition other = (ParameterDefinition) obj;
     return Objects.equals(other.getLocation(), this.getLocation())
-        && Objects.equals(other.getName(), this.getName())
+        && Objects.equals(other.getModuleName(), this.getModuleName())
         && Objects.equals(other.getDoc(), this.getDoc())
         && Objects.equals(other.name, this.name)
         && Objects.equals(other.modifier, this.modifier)
