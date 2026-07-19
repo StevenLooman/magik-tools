@@ -73,11 +73,11 @@ public class MagikFormattingSettings {
   /**
    * Get the indent strategy.
    *
-   * @return The indent strategy, defaults to "default".
+   * @return The indent strategy, defaults to "null".
    */
   public String getIndentStrategy() {
     return this.properties.getPropertyString(
-        KEY_MAGIK_FORMATTING_INDENT_STRATEGY, VisualIndentWalker.STRATEGY_NAME);
+        KEY_MAGIK_FORMATTING_INDENT_STRATEGY, "null");
   }
 
   /**
@@ -86,7 +86,8 @@ public class MagikFormattingSettings {
    * @return {@code true} if the configured indent strategy resolves to a formatting walker.
    */
   public boolean isIndentStrategyValid() {
-    return MagikFormattingSettings.INDENT_STRATEGIES.containsKey(this.getIndentStrategy());
+    final String indentStrategy = this.getIndentStrategy();
+    return MagikFormattingSettings.INDENT_STRATEGIES.containsKey(indentStrategy);
   }
 
   /**
@@ -130,7 +131,8 @@ public class MagikFormattingSettings {
     final Class<? extends FormattingWalker> walkerClass =
         MagikFormattingSettings.INDENT_STRATEGIES.get(indentStrategy);
     if (walkerClass == null) {
-      LOGGER.warn(this.getIndentStrategyErrorMessage());
+      final String message = this.getIndentStrategyErrorMessage();
+      LOGGER.warn(message);
       return MagikFormattingSettings.DEFAULT_INDENT_WALKER;
     }
 
