@@ -209,21 +209,26 @@ public final class Main {
   /**
    * Create the reporter.
    *
+   * @param commandLine Parsed command line.
    * @param properties Configuration.
-   * @param outputFormat Output format ("text").
    * @return Reporter.
    */
   private static Reporter createReporter(
-      final MagikToolsProperties properties, final String outputFormat) {
+      final CommandLine commandLine, final MagikToolsProperties properties) {
+    final String outputFormat = commandLine.getOptionValue(OPTION_FORMAT, "text");
     final String normalizedFormat = outputFormat != null ? outputFormat : "text";
     final PrintStream outStream = Main.getOutStream();
     final String toolVersion = Main.getVersion() != null ? Main.getVersion() : "dev";
-    final List<Class<? extends Check>> checkClasses = MagikTypedCheckList.INSTANCE.getBaseChecks();
+    final List<Class<? extends Check>> checkClasses = Main.getAllCheckClasses();
     final ChecksConfiguration checksConfig = new ChecksConfiguration(checkClasses, properties);
     final List<CheckHolder> checkHolders = checksConfig.getAllChecks();
     final ReporterContext context =
         new ReporterContext(outStream, Main.getName(), toolVersion, checkHolders);
     return ReporterRegistry.createReporter(normalizedFormat, properties, context);
+  }
+
+  private static List<Class<? extends Check>> getAllCheckClasses() {
+    return MagikTypedCheckList.INSTANCE.getBaseChecks();
   }
 
   private static Collection<Path> getFilesFromArgs(final String[] args) throws IOException {
@@ -351,12 +356,11 @@ public final class Main {
     // Show checks.
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     if (commandLine.hasOption(OPTION_SHOW_CHECKS)) {
+      final PrintStream outStream = Main.getOutStream();
       final String toolVersion = Main.getVersion() != null ? Main.getVersion() : "dev";
-      final List<Class<? extends Check>> checkClasses =
-          MagikTypedCheckList.INSTANCE.getBaseChecks();
+      final List<Class<? extends Check>> checkClasses = Main.getAllCheckClasses();
       final ChecksConfiguration checksConfig = new ChecksConfiguration(checkClasses, properties);
       final List<CheckHolder> checkHolders = checksConfig.getAllChecks();
-      final PrintStream outStream = Main.getOutStream();
       final ReporterContext context =
           new ReporterContext(outStream, Main.getName(), toolVersion, checkHolders);
       final Reporter reporter = ReporterRegistry.createReporter("null", properties, context);
@@ -373,13 +377,11 @@ public final class Main {
 
     // Index files from command line.
     final String[] leftOverArgs = commandLine.getArgs();
+    final Collection<Path> paths = Main.getFilesFromArgs(leftOverArgs);
     Main.indexPaths(leftOverArgs, properties, definitionKeeper);
 
-    // Lint files from command line.
-    final Collection<Path> paths = Main.getFilesFromArgs(leftOverArgs);
-    final String outputFormat =
-        commandLine.hasOption(OPTION_FORMAT) ? commandLine.getOptionValue(OPTION_FORMAT) : "text";
-    final Reporter reporter = Main.createReporter(properties, outputFormat);
+    // Actual linting.
+    final Reporter reporter = Main.createReporter(commandLine, properties);
     final MagikTypedLint lint = new MagikTypedLint(definitionKeeper, properties, reporter);
     lint.run(paths);
     reporter.finish();

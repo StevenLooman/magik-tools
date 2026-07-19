@@ -2,18 +2,12 @@ package nl.ramsolutions.sw.magik.typedlint;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import nl.ramsolutions.sw.ConfigurationReader;
-import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.CheckHolder;
 import nl.ramsolutions.sw.checks.CheckMetadata;
@@ -23,7 +17,6 @@ import nl.ramsolutions.sw.checks.IssueDisabledChecker;
 import nl.ramsolutions.sw.checks.MagikTypedCheckList;
 import nl.ramsolutions.sw.checks.output.Reporter;
 import nl.ramsolutions.sw.magik.Location;
-import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.slf4j.Logger;
@@ -60,37 +53,17 @@ public class MagikTypedLint {
   }
 
   /**
-   * Build context for a file.
-   *
-   * @param path Path to file
-   * @return Visitor context for file.
-   * @throws IOException -
-   */
-  private MagikTypedFile buildMagikFile(final Path path) {
-    try {
-      final MagikToolsProperties fileProperties =
-          ConfigurationReader.readProperties(path, this.properties);
-      final URI uri = path.toAbsolutePath().normalize().toUri();
-      final Charset charset = FileCharsetDeterminer.determineCharset(path);
-      final String fileContents = Files.readString(path, charset);
-      return new MagikTypedFile(fileProperties, uri, fileContents, this.definitionKeeper);
-    } catch (final IOException exception) {
-      throw new IllegalStateException(exception);
-    }
-  }
-
-  /**
    * Run a single check on context.
    *
-   * @param magikFile File to run check on.
+   * @param openedFile File to run check on.
    * @param holder {@link CheckHolder} Check to run.
    * @return {@link Issue}s/infractions found.
    * @throws ReflectiveOperationException -
    */
-  private List<Issue> runCheckOnFile(final MagikTypedFile magikFile, final CheckHolder holder)
+  private List<Issue> runCheckOnFile(final MagikTypedFile openedFile, final CheckHolder holder)
       throws ReflectiveOperationException {
     final Check check = holder.createCheck();
-    return check.scanFileForIssues(magikFile);
+    return check.scanFileForIssues(openedFile);
   }
 
   /**
@@ -103,7 +76,7 @@ public class MagikTypedLint {
    */
   void showChecks(final Writer writer, final boolean showDisabled)
       throws ReflectiveOperationException, IOException {
-    final List<Class<? extends Check>> checks = MagikTypedCheckList.INSTANCE.getBaseChecks();
+    final List<Class<? extends Check>> checks = this.getAllChecks();
     final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, this.properties);
     final Iterable<CheckHolder> holders = checksConfig.getAllChecks();
     for (final CheckHolder holder : holders) {
@@ -167,8 +140,8 @@ public class MagikTypedLint {
     final Location.LocationRangeComparator locationCompare = new Location.LocationRangeComparator();
     paths.stream()
         .parallel()
-        .map(this::buildMagikFile)
-        .filter(magikFile -> !this.isFileIgnored(magikFile))
+        .map(path -> Utils.buildOpenedFile(path, this.properties, this.definitionKeeper))
+        .filter(openedFile -> !Utils.isFileIgnored(openedFile))
         .map(this::runChecksOnFile)
         .flatMap(List::stream)
         .sorted((issue0, issue1) -> locationCompare.compare(issue0.location(), issue1.location()))
@@ -177,39 +150,21 @@ public class MagikTypedLint {
         .forEach(this.reporter::reportIssue);
   }
 
-  private boolean isFileIgnored(final MagikFile magikFile) {
-    // TODO: Is this still current?
-    final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final List<Class<? extends Check>> checks = MagikTypedCheckList.INSTANCE.getBaseChecks();
-    final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, fileProperties);
-    final URI uri = magikFile.getUri();
-    final Path path = Path.of(uri);
-    final FileSystem fs = FileSystems.getDefault();
-    final boolean isIgnored =
-        checksConfig.getIgnores().stream()
-            .map(fs::getPathMatcher)
-            .anyMatch(matcher -> matcher.matches(path));
-    if (isIgnored) {
-      LOGGER.trace("Thread: {}, ignoring file: {}", Thread.currentThread().getName(), path);
-    }
-    return isIgnored;
-  }
-
   /**
    * Run {@link CheckHolder}s on {@link MagikTypedFile}.
    *
-   * @param magikFile File to run on.
+   * @param openedFile File to run on.
    * @param holders {@link CheckHolder}s to run.
    * @return List of {@link Issue}s for the given file.
    */
-  private List<Issue> runChecksOnFile(final MagikTypedFile magikFile) {
-    LOGGER.trace("Thread: {}, checking file: {}", Thread.currentThread().getName(), magikFile);
+  private List<Issue> runChecksOnFile(final MagikTypedFile openedFile) {
+    LOGGER.trace("Thread: {}, checking file: {}", Thread.currentThread().getName(), openedFile);
 
     final List<Issue> allIssues = new ArrayList<>();
 
     // Run checks on files.
-    final MagikToolsProperties fileProperties = magikFile.getProperties();
-    final List<Class<? extends Check>> checks = MagikTypedCheckList.INSTANCE.getBaseChecks();
+    final MagikToolsProperties fileProperties = openedFile.getProperties();
+    final List<Class<? extends Check>> checks = this.getChecksForOpenedFile(openedFile);
     final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, fileProperties);
     final Iterable<CheckHolder> holders = checksConfig.getAllChecks();
     for (final CheckHolder holder : holders) {
@@ -219,8 +174,8 @@ public class MagikTypedLint {
 
       try {
         final List<Issue> issues =
-            this.runCheckOnFile(magikFile, holder).stream()
-                .filter(issue -> !IssueDisabledChecker.issueDisabled(magikFile, issue))
+            this.runCheckOnFile(openedFile, holder).stream()
+                .filter(magikIssue -> !IssueDisabledChecker.issueDisabled(openedFile, magikIssue))
                 .toList();
         allIssues.addAll(issues);
       } catch (final ReflectiveOperationException exception) {
@@ -229,5 +184,13 @@ public class MagikTypedLint {
     }
 
     return allIssues;
+  }
+
+  private List<Class<? extends Check>> getChecksForOpenedFile(final OpenedFile openedFile) {
+    return Utils.getCheckListForOpenedFile(openedFile).getBaseChecks();
+  }
+
+  private List<Class<? extends Check>> getAllChecks() {
+    return MagikTypedCheckList.INSTANCE.getBaseChecks();
   }
 }

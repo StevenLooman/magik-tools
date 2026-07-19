@@ -203,7 +203,7 @@ public final class Main {
     final String normalizedFormat = outputFormat != null ? outputFormat : "text";
     final PrintStream outStream = Main.getOutStream();
     final String toolVersion = Main.getVersion() != null ? Main.getVersion() : "dev";
-    final List<Class<? extends Check>> checkClasses = getAllCheckClasses();
+    final List<Class<? extends Check>> checkClasses = Main.getAllCheckClasses();
     final ChecksConfiguration checksConfig = new ChecksConfiguration(checkClasses, properties);
     final List<CheckHolder> checkHolders = checksConfig.getAllChecks();
     final ReporterContext context =
