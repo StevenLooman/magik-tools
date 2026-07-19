@@ -76,8 +76,7 @@ public class MagikFormattingSettings {
    * @return The indent strategy, defaults to "null".
    */
   public String getIndentStrategy() {
-    return this.properties.getPropertyString(
-        KEY_MAGIK_FORMATTING_INDENT_STRATEGY, "null");
+    return this.properties.getPropertyString(KEY_MAGIK_FORMATTING_INDENT_STRATEGY, "null");
   }
 
   /**
