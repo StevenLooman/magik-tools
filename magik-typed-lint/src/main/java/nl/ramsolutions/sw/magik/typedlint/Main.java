@@ -17,6 +17,7 @@ import java.util.logging.LogManager;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.MagikLintSettings;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.checks.Check;
@@ -109,14 +110,13 @@ public final class Main {
     ReporterRegistry.register(
         "text",
         (final MagikToolsProperties properties, final ReporterContext context) -> {
-          final String configReporterFormat =
-              properties.getPropertyString(MagikTypedLint.KEY_MSG_TEMPLATE);
+          final MagikLintSettings settings = new MagikLintSettings(properties);
+          final String configReporterFormat = settings.getMsgTemplate();
           final String format =
               configReporterFormat != null
                   ? configReporterFormat
                   : MessageFormatReporter.DEFAULT_FORMAT;
-          final long columnOffset =
-              properties.getPropertyLong(MagikTypedLint.KEY_COLUMN_OFFSET, 0L);
+          final long columnOffset = settings.getColumnOffset();
           return new MessageFormatReporter(context.getOutStream(), format, columnOffset);
         });
     ReporterRegistry.register(
@@ -209,21 +209,26 @@ public final class Main {
   /**
    * Create the reporter.
    *
+   * @param commandLine Parsed command line.
    * @param properties Configuration.
-   * @param outputFormat Output format ("text").
    * @return Reporter.
    */
   private static Reporter createReporter(
-      final MagikToolsProperties properties, final String outputFormat) {
+      final CommandLine commandLine, final MagikToolsProperties properties) {
+    final String outputFormat = commandLine.getOptionValue(OPTION_FORMAT, "text");
     final String normalizedFormat = outputFormat != null ? outputFormat : "text";
     final PrintStream outStream = Main.getOutStream();
     final String toolVersion = Main.getVersion() != null ? Main.getVersion() : "dev";
-    final List<Class<? extends Check>> checkClasses = MagikTypedCheckList.INSTANCE.getBaseChecks();
+    final List<Class<? extends Check>> checkClasses = Main.getAllCheckClasses();
     final ChecksConfiguration checksConfig = new ChecksConfiguration(checkClasses, properties);
     final List<CheckHolder> checkHolders = checksConfig.getAllChecks();
     final ReporterContext context =
         new ReporterContext(outStream, Main.getName(), toolVersion, checkHolders);
     return ReporterRegistry.createReporter(normalizedFormat, properties, context);
+  }
+
+  private static List<Class<? extends Check>> getAllCheckClasses() {
+    return MagikTypedCheckList.INSTANCE.getBaseChecks();
   }
 
   private static Collection<Path> getFilesFromArgs(final String[] args) throws IOException {
@@ -351,12 +356,11 @@ public final class Main {
     // Show checks.
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     if (commandLine.hasOption(OPTION_SHOW_CHECKS)) {
+      final PrintStream outStream = Main.getOutStream();
       final String toolVersion = Main.getVersion() != null ? Main.getVersion() : "dev";
-      final List<Class<? extends Check>> checkClasses =
-          MagikTypedCheckList.INSTANCE.getBaseChecks();
+      final List<Class<? extends Check>> checkClasses = Main.getAllCheckClasses();
       final ChecksConfiguration checksConfig = new ChecksConfiguration(checkClasses, properties);
       final List<CheckHolder> checkHolders = checksConfig.getAllChecks();
-      final PrintStream outStream = Main.getOutStream();
       final ReporterContext context =
           new ReporterContext(outStream, Main.getName(), toolVersion, checkHolders);
       final Reporter reporter = ReporterRegistry.createReporter("null", properties, context);
@@ -373,13 +377,11 @@ public final class Main {
 
     // Index files from command line.
     final String[] leftOverArgs = commandLine.getArgs();
+    final Collection<Path> paths = Main.getFilesFromArgs(leftOverArgs);
     Main.indexPaths(leftOverArgs, properties, definitionKeeper);
 
-    // Lint files from command line.
-    final Collection<Path> paths = Main.getFilesFromArgs(leftOverArgs);
-    final String outputFormat =
-        commandLine.hasOption(OPTION_FORMAT) ? commandLine.getOptionValue(OPTION_FORMAT) : "text";
-    final Reporter reporter = Main.createReporter(properties, outputFormat);
+    // Actual linting.
+    final Reporter reporter = Main.createReporter(commandLine, properties);
     final MagikTypedLint lint = new MagikTypedLint(definitionKeeper, properties, reporter);
     lint.run(paths);
     reporter.finish();
@@ -396,23 +398,23 @@ public final class Main {
     if (commandLine.hasOption(OPTION_MAX_INFRACTIONS)) {
       final String value = commandLine.getOptionValue(OPTION_MAX_INFRACTIONS);
       final Long maxInfractions = Long.parseLong(value);
-      properties.setProperty(MagikTypedLint.KEY_MAX_INFRACTIONS, maxInfractions);
+      properties.setProperty(MagikLintSettings.KEY_MAX_INFRACTIONS, maxInfractions);
     }
 
     if (commandLine.hasOption(OPTION_COLUMN_OFFSET)) {
       final String value = commandLine.getOptionValue(OPTION_COLUMN_OFFSET);
       final Long maxInfractions = Long.parseLong(value);
-      properties.setProperty(MagikTypedLint.KEY_COLUMN_OFFSET, maxInfractions);
+      properties.setProperty(MagikLintSettings.KEY_COLUMN_OFFSET, maxInfractions);
     }
 
     if (commandLine.hasOption(OPTION_MSG_TEMPLATE)) {
       final String value = commandLine.getOptionValue(OPTION_MSG_TEMPLATE);
-      properties.setProperty(MagikTypedLint.KEY_MSG_TEMPLATE, value);
+      properties.setProperty(MagikLintSettings.KEY_MSG_TEMPLATE, value);
     }
 
     if (commandLine.hasOption(OPTION_RCFILE)) {
       final String value = commandLine.getOptionValue(OPTION_RCFILE);
-      properties.setProperty(MagikTypedLint.KEY_OVERRIDE_CONFIG, value);
+      properties.setProperty(MagikLintSettings.KEY_OVERRIDE_CONFIG, value);
     }
   }
 

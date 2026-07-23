@@ -1,0 +1,4 @@
+_method integer.test_method
+	_return 1
+_endmethod
+$
