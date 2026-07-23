@@ -3,13 +3,14 @@ package nl.ramsolutions.sw.magik.languageserver;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.nio.file.Path;
 import java.util.List;
+import nl.ramsolutions.sw.MagikLintSettings;
 import nl.ramsolutions.sw.MagikToolsProperties;
 
 /** Magik settings. */
 public final class MagikLanguageServerSettings {
 
   private static final String PRODUCT_DIRS = "magik.productDirs";
-  private static final String OVERRIDE_CONFIG_FILE = "magik.lint.overrideConfigFile";
+  private static final String OVERRIDE_CONFIG_FILE = MagikLintSettings.KEY_OVERRIDE_CONFIG;
   private static final String TYPE_DATABASE_PATHS = "magik.typing.typeDatabasePaths";
   private static final String SHOW_TYPING_INLAY_HINTS = "magik.typing.showTypingInlayHints";
   private static final String SHOW_ARGUMENT_INLAY_HINTS = "magik.typing.showArgumentInlayHints";

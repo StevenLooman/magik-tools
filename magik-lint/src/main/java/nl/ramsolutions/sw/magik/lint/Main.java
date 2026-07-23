@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.ConfigurationLocator;
 import nl.ramsolutions.sw.IgnoreHandler;
+import nl.ramsolutions.sw.MagikLintSettings;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.SourceFileScanner;
 import nl.ramsolutions.sw.checks.Check;
@@ -95,13 +96,13 @@ public final class Main {
     ReporterRegistry.register(
         "text",
         (final MagikToolsProperties properties, final ReporterContext context) -> {
-          final String configReporterFormat =
-              properties.getPropertyString(MagikLint.KEY_MSG_TEMPLATE);
+          final MagikLintSettings settings = new MagikLintSettings(properties);
+          final String configReporterFormat = settings.getMsgTemplate();
           final String format =
               configReporterFormat != null
                   ? configReporterFormat
                   : MessageFormatReporter.DEFAULT_FORMAT;
-          final long columnOffset = properties.getPropertyLong(MagikLint.KEY_COLUMN_OFFSET, 0L);
+          final long columnOffset = settings.getColumnOffset();
           return new MessageFormatReporter(context.getOutStream(), format, columnOffset);
         });
     ReporterRegistry.register(
@@ -351,23 +352,23 @@ public final class Main {
     if (commandLine.hasOption(OPTION_MAX_INFRACTIONS)) {
       final String value = commandLine.getOptionValue(OPTION_MAX_INFRACTIONS);
       final Long maxInfractions = Long.parseLong(value);
-      properties.setProperty(MagikLint.KEY_MAX_INFRACTIONS, maxInfractions);
+      properties.setProperty(MagikLintSettings.KEY_MAX_INFRACTIONS, maxInfractions);
     }
 
     if (commandLine.hasOption(OPTION_COLUMN_OFFSET)) {
       final String value = commandLine.getOptionValue(OPTION_COLUMN_OFFSET);
       final Long maxInfractions = Long.parseLong(value);
-      properties.setProperty(MagikLint.KEY_COLUMN_OFFSET, maxInfractions);
+      properties.setProperty(MagikLintSettings.KEY_COLUMN_OFFSET, maxInfractions);
     }
 
     if (commandLine.hasOption(OPTION_MSG_TEMPLATE)) {
       final String value = commandLine.getOptionValue(OPTION_MSG_TEMPLATE);
-      properties.setProperty(MagikLint.KEY_MSG_TEMPLATE, value);
+      properties.setProperty(MagikLintSettings.KEY_MSG_TEMPLATE, value);
     }
 
     if (commandLine.hasOption(OPTION_RCFILE)) {
       final String value = commandLine.getOptionValue(OPTION_RCFILE);
-      properties.setProperty(MagikLint.KEY_OVERRIDE_CONFIG, value);
+      properties.setProperty(MagikLintSettings.KEY_OVERRIDE_CONFIG, value);
     }
   }
 

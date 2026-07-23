@@ -1,5 +1,11 @@
 package nl.ramsolutions.sw.checks;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -7,6 +13,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.OpenedFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 
@@ -16,6 +25,8 @@ public class ChecksConfiguration {
   private static final String KEY_DISABLED_CHECKS = "disabled";
   private static final String KEY_ENABLED_CHECKS = "enabled";
   private static final String KEY_IGNORED_PATHS = "ignore";
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(ChecksConfiguration.class);
 
   private final MagikToolsProperties properties;
   private final List<Class<? extends Check>> checkClasses;
@@ -34,6 +45,51 @@ public class ChecksConfiguration {
 
   public List<String> getIgnores() {
     return this.properties.getPropertyList(KEY_IGNORED_PATHS);
+  }
+
+  /**
+   * Test whether {@code openedFile} is ignored, according to its own properties.
+   *
+   * @param openedFile {@link OpenedFile} to test.
+   * @return True if the file is ignored, false otherwise.
+   */
+  public static boolean isFileIgnored(final OpenedFile openedFile) {
+    final MagikToolsProperties fileProperties = openedFile.getProperties();
+    final List<String> ignores = fileProperties.getPropertyList(KEY_IGNORED_PATHS);
+    final URI uri = openedFile.getUri();
+    final Path path = Path.of(uri);
+    final boolean isIgnored =
+        ignores.stream()
+            .map(ChecksConfiguration::createPathMatcher)
+            .filter(Objects::nonNull)
+            .anyMatch(matcher -> matcher.matches(path));
+    if (isIgnored) {
+      LOGGER.trace("Thread: {}, ignoring file: {}", Thread.currentThread().getName(), path);
+    }
+    return isIgnored;
+  }
+
+  /**
+   * Build a {@link PathMatcher} for {@code ignore}, or null if {@code ignore} is not a usable
+   * pattern.
+   *
+   * @param ignore Pattern to build a {@link PathMatcher} for.
+   * @return {@link PathMatcher}, or null if the pattern is unusable.
+   */
+  @CheckForNull
+  private static PathMatcher createPathMatcher(final String ignore) {
+    final FileSystem fs = FileSystems.getDefault();
+    try {
+      return fs.getPathMatcher(ignore);
+    } catch (final IllegalArgumentException | UnsupportedOperationException exception) {
+      LOGGER.warn(
+          "Ignoring invalid '{}' pattern: '{}'."
+              + " Patterns must start with 'glob:' or 'regex:', for example 'glob:{}'.",
+          KEY_IGNORED_PATHS,
+          ignore,
+          ignore);
+      return null;
+    }
   }
 
   /**

@@ -3,28 +3,19 @@ package nl.ramsolutions.sw.magik.typedlint;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
-import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.CheckList;
-import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.MagikTypedCheckList;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Utility class for {@link MagikTypedLint}. */
 final class Utils {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
   private Utils() {
     // Utility class
@@ -52,25 +43,6 @@ final class Utils {
     } catch (final IOException exception) {
       throw new IllegalStateException(exception);
     }
-  }
-
-  static boolean isFileIgnored(final OpenedFile openedFile) {
-    // TODO: Is this still current?
-    final MagikToolsProperties fileProperties = openedFile.getProperties();
-    final List<Class<? extends Check>> checks =
-        Utils.getCheckListForOpenedFile(openedFile).getBaseChecks();
-    final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, fileProperties);
-    final URI uri = openedFile.getUri();
-    final Path path = Path.of(uri);
-    final FileSystem fs = FileSystems.getDefault();
-    final boolean isIgnored =
-        checksConfig.getIgnores().stream()
-            .map(fs::getPathMatcher)
-            .anyMatch(matcher -> matcher.matches(path));
-    if (isIgnored) {
-      LOGGER.trace("Thread: {}, ignoring file: {}", Thread.currentThread().getName(), path);
-    }
-    return isIgnored;
   }
 
   static CheckList<?, ?> getCheckListForOpenedFile(final OpenedFile openedFile) {

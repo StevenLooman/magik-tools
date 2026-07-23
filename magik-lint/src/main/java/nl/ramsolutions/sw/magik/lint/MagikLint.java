@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.MagikLintSettings;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.checks.Check;
@@ -26,11 +27,6 @@ import org.slf4j.LoggerFactory;
 
 /** Magik Lint main class. */
 public class MagikLint {
-
-  public static final String KEY_MAX_INFRACTIONS = "magik.lint.max-infractions";
-  public static final String KEY_COLUMN_OFFSET = "magik.lint.column-offset";
-  public static final String KEY_MSG_TEMPLATE = "magik.lint.msg-template";
-  public static final String KEY_OVERRIDE_CONFIG = "magik.lint.overrideConfigFile";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MagikLint.class);
 
@@ -72,7 +68,7 @@ public class MagikLint {
    */
   void showChecks(final Writer writer, final boolean showDisabled)
       throws ReflectiveOperationException, IOException {
-    final List<Class<? extends Check>> checks = this.getAllChecks();
+    final List<Class<? extends Check>> checks = this.getAllCheckClasses();
     final ChecksConfiguration checksConfig = new ChecksConfiguration(checks, this.properties);
     final Iterable<CheckHolder> holders = checksConfig.getAllChecks();
     for (final CheckHolder holder : holders) {
@@ -131,13 +127,12 @@ public class MagikLint {
    * @throws ReflectiveOperationException -
    */
   public void run(final Collection<Path> paths) throws IOException, ReflectiveOperationException {
-    final long maxInfractions =
-        this.properties.getPropertyLong(MagikLint.KEY_MAX_INFRACTIONS, Long.MAX_VALUE);
+    final long maxInfractions = new MagikLintSettings(this.properties).getMaxInfractions();
     final Location.LocationRangeComparator locationCompare = new Location.LocationRangeComparator();
     paths.stream()
         .parallel()
         .map(path -> Utils.buildOpenedFile(path, this.properties))
-        .filter(openedFile -> !Utils.isFileIgnored(openedFile))
+        .filter(openedFile -> !ChecksConfiguration.isFileIgnored(openedFile))
         .map(this::runChecksOnFile)
         .flatMap(List::stream)
         .sorted((issue0, issue1) -> locationCompare.compare(issue0.location(), issue1.location()))
@@ -186,7 +181,7 @@ public class MagikLint {
     return Utils.getCheckListForOpenedFile(openedFile).getBaseChecks();
   }
 
-  private List<Class<? extends Check>> getAllChecks() {
+  private List<Class<? extends Check>> getAllCheckClasses() {
     return Stream.of(
             ProductDefCheckList.INSTANCE.getBaseChecks().stream(),
             ModuleDefCheckList.INSTANCE.getBaseChecks().stream(),

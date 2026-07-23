@@ -47,8 +47,7 @@ public final class ConfigurationReader {
   /**
    * Read properties from a URI, and merges it with the given properties.
    *
-   * <p>Uses {@link nl.ramsolutions.sw.magik.lint.MagikLint.KEY_OVERRIDE_CONFIG} in case the
-   * settings file is overridden.
+   * <p>Uses {@link MagikLintSettings#KEY_OVERRIDE_CONFIG} in case the settings file is overridden.
    *
    * @param path Path to read properties from.
    * @param properties Properties to use as base.
@@ -56,7 +55,7 @@ public final class ConfigurationReader {
    */
   public static MagikToolsProperties readProperties(
       final Path path, final MagikToolsProperties properties) throws IOException {
-    final String overrideConfigFile = properties.getPropertyString("magik.lint.overrideConfigFile");
+    final String overrideConfigFile = new MagikLintSettings(properties).getOverrideConfigFile();
     final Path propertiesPath = ConfigurationReader.determinePath(path, overrideConfigFile);
     if (propertiesPath != null) {
       LOGGER.debug("Reading properties from: {}", propertiesPath);
@@ -74,8 +73,7 @@ public final class ConfigurationReader {
   /**
    * Read properties from a URI, and merges it with the given properties.
    *
-   * <p>Uses {@link nl.ramsolutions.sw.magik.lint.MagikLint.KEY_OVERRIDE_CONFIG} in case the
-   * settings file is overridden.
+   * <p>Uses {@link MagikLintSettings#KEY_OVERRIDE_CONFIG} in case the settings file is overridden.
    *
    * @param uri URI to read properties from.
    * @param properties Properties to override.

@@ -29,7 +29,7 @@ VSCode integration is achieved by adding a task with a `problemMatcher`, for exa
 {
     "label": "magik-lint",
     "type": "shell",
-    "command": "java -jar /path/to/magik-lint-LATEST.jar --msg-template \"\\${path}:\\${line}:\\${column}:\\${severity}:\\${symbol}:\\${msg}\" --watch .",
+    "command": "java -jar /path/to/magik-lint-LATEST.jar --msg-template \"\\${path}:\\${line}:\\${column}:\\${severity}:\\${symbol}:\\${msg}\" .",
     "problemMatcher": {
         "owner": "magik",
         "fileLocation": "relative",

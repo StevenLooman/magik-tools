@@ -54,7 +54,7 @@ public class MagikLintFixApplier {
 
     for (final Path path : paths) {
       final OpenedFile openedFile = Utils.buildOpenedFile(path, this.properties);
-      if (Utils.isFileIgnored(openedFile)) {
+      if (ChecksConfiguration.isFileIgnored(openedFile)) {
         continue;
       }
 

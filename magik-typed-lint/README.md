@@ -20,6 +20,35 @@ Magik-typed-lint takes the following command line options:
   - If a file is given, only this file is checked.
   - If a directory is given, all files in this directory and any sub-directories, are checked.
 
+## Integration
+
+The [emacs magik-mode](https://github.com/roadrunner1776/magik) readily supports integration of magik-tools through [flycheck](https://www.flycheck.org/).
+
+VSCode integration is achieved by adding a task with a `problemMatcher`, for example:
+
+```json
+{
+    "label": "magik-typed-lint",
+    "type": "shell",
+    "command": "java -jar /path/to/magik-typed-lint-LATEST.jar --msg-template \"\\${path}:\\${line}:\\${column}:\\${severity}:\\${symbol}:\\${msg}\" --types-db /path/to/types.jsonl .",
+    "problemMatcher": {
+        "owner": "magik",
+        "fileLocation": "relative",
+        "pattern": {
+            "regexp": "^(.*):(\\d+):(\\d+):(.*):(.*):(.*)$",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "severity": 4,
+            "code": 5,
+            "message": 6
+        }
+    }
+}
+```
+
+Note that magik-typed-lint needs type information to be useful: pass a types database with `--types-db`, and/or index sources up front with `--pre-index-dir`.
+
 ## Configuration
 
 Magik-typed-lint can use a configuration file.
