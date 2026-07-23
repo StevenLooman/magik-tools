@@ -2,12 +2,9 @@ package nl.ramsolutions.sw.magik.languageserver.completion;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import edu.umd.cs.findbugs.annotations.Nullable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,38 +13,24 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
-import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
-import nl.ramsolutions.sw.magik.analysis.scope.Scope;
-import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
-import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
-import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import org.eclipse.lsp4j.CompletionItem;
-import org.eclipse.lsp4j.CompletionItemKind;
-import org.eclipse.lsp4j.CompletionItemTag;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ServerCapabilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/** Completion provider. */
+/** Completion provider. Runs a set of {@link CompletionModule}s and aggregates their items. */
 public class CompletionProvider {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CompletionProvider.class);
   private static final Set<Character> REMOVAL_STOP_CHARS = new HashSet<>();
-  private static final String TOPIC_DEPRECATED = "deprecated";
+
+  private final List<CompletionModule> modules;
+  private final CompletionModule fallbackModule;
 
   static {
     REMOVAL_STOP_CHARS.add(' ');
@@ -70,14 +53,44 @@ public class CompletionProvider {
     REMOVAL_STOP_CHARS.addAll(operatorChars);
   }
 
+  /** Constructor. */
+  public CompletionProvider() {
+    this.modules = this.createModules();
+    this.fallbackModule = this.createFallbackModule();
+  }
+
+  /**
+   * Create the ordered contributor modules. Override to add or remove completion modules.
+   *
+   * @return Ordered contributor modules.
+   */
+  protected List<CompletionModule> createModules() {
+    return List.of(new KeywordCompletionModule(), new MethodInvocationCompletionModule());
+  }
+
+  /**
+   * Create the fallback module, used when no contributor module claims the context.
+   *
+   * @return Fallback module.
+   */
+  protected CompletionModule createFallbackModule() {
+    return new GlobalCompletionModule();
+  }
+
   /**
    * Set server capabilities.
    *
    * @param capabilities Server capabilities.
    */
   public void setCapabilities(final ServerCapabilities capabilities) {
+    final List<String> triggerCharacters =
+        Stream.concat(this.modules.stream(), Stream.of(this.fallbackModule))
+            .flatMap(module -> module.getTriggerCharacters().stream())
+            .distinct()
+            .sorted()
+            .toList();
     final CompletionOptions completionOptions = new CompletionOptions();
-    completionOptions.setTriggerCharacters(List.of("."));
+    completionOptions.setTriggerCharacters(triggerCharacters);
     capabilities.setCompletionProvider(completionOptions);
   }
 
@@ -94,17 +107,7 @@ public class CompletionProvider {
     final Map.Entry<MagikTypedFile, String> usables = this.getUsableMagikFile(magikFile, position);
     final MagikTypedFile newMagikFile = usables.getKey();
     final AstNode newNode = newMagikFile.getTopNode();
-    if (this.inComment(newNode, position)) {
-      // Nothing to complete when in comment.
-      return Collections.emptyList();
-    }
-
     final String removedPart = usables.getValue();
-    if (removedPart.startsWith("_")) {
-      // Keyword completion: '_'.
-      LOGGER.debug("Providing keyword completions");
-      return this.provideKeywordCompletions();
-    }
 
     // Find token node at position in cleaned source.
     final Position newPositionLsp4j =
@@ -113,20 +116,35 @@ public class CompletionProvider {
         Lsp4jConversion.positionFromLsp4j(newPositionLsp4j);
     final AstNode tokenNode = this.getTokenNode(newNode, newPosition);
 
-    // Method completion: METHOD_INVOCATION or '.'.
-    if (tokenNode != null) {
-      final AstNode methodInvocationNode =
-          AstQuery.getParentFromChain(
-              tokenNode,
-              MagikGrammar.IDENTIFIER,
-              MagikGrammar.METHOD_NAME,
-              MagikGrammar.METHOD_INVOCATION);
-      if (removedPart.startsWith(".") || methodInvocationNode != null) {
-        return this.provideMethodInvocationCompletion(newMagikFile, tokenNode, removedPart);
+    // The range of the identifier being completed, from the ORIGINAL (un-cleaned) source, so that
+    // completions can replace a package prefix like 'sw:' instead of duplicating it.
+    final String[] sourceLines = magikFile.getSource().split("\n", -1);
+    final String cursorLine =
+        position.getLine() < sourceLines.length ? sourceLines[position.getLine()] : "";
+    final CompletionContext context =
+        new CompletionContext(
+            newMagikFile,
+            position,
+            removedPart,
+            tokenNode,
+            CompletionUtils.identifierReplaceRange(cursorLine, position));
+
+    // Run every contributor module; aggregate the items of those that claim the context.
+    final List<CompletionItem> items = new ArrayList<>();
+    boolean claimed = false;
+    for (final CompletionModule module : this.modules) {
+      final Optional<List<CompletionItem>> result = module.tryComplete(context);
+      if (result.isPresent()) {
+        claimed = true;
+        items.addAll(result.get());
       }
     }
+    if (claimed) {
+      return items;
+    }
 
-    return this.provideGlobalCompletion(newMagikFile, position, tokenNode);
+    // Nothing claimed: fall back to the default (global) completion.
+    return this.fallbackModule.tryComplete(context).orElseGet(List::of);
   }
 
   private AstNode getTokenNode(
@@ -148,196 +166,9 @@ public class CompletionProvider {
   }
 
   /**
-   * Test if position is in comment.
-   *
-   * @param node Top node.
-   * @param position Position in file.
-   * @return Returns
-   */
-  private boolean inComment(final AstNode node, final Position position) {
-    final nl.ramsolutions.sw.magik.Position nativePosition =
-        Lsp4jConversion.positionFromLsp4j(position);
-    return MagikCommentExtractor.extractComments(node)
-        .anyMatch(
-            token ->
-                nativePosition.getLine() == token.getLine()
-                    && nativePosition.getColumn() >= token.getColumn());
-  }
-
-  /**
-   * Provide global completion.
-   *
-   * @param magikFile MagikFile.
-   * @param position Position in source.
-   * @param tokenNode Current node.
-   * @return Completions items.
-   */
-  @SuppressWarnings("checkstyle:NestedIfDepth")
-  private List<CompletionItem> provideGlobalCompletion(
-      final MagikTypedFile magikFile, final Position position, final @Nullable AstNode tokenNode) {
-    final List<CompletionItem> items = new ArrayList<>();
-
-    // Keyword entries.
-    Stream.of(MagikKeyword.values())
-        .map(
-            magikKeyword -> {
-              final String name = magikKeyword.toString().toLowerCase();
-              final CompletionItem item = new CompletionItem(name);
-              item.setKind(CompletionItemKind.Keyword);
-              item.setInsertText(magikKeyword.getValue());
-              return item;
-            })
-        .forEach(items::add);
-
-    // Scope entries.
-    final AstNode topNode = magikFile.getTopNode();
-    AstNode scopeNode =
-        AstQuery.nodeSurrounding(topNode, Lsp4jConversion.positionFromLsp4j(position));
-    if (scopeNode != null) {
-      if (scopeNode.getFirstChild(MagikGrammar.BODY) != null) {
-        scopeNode = scopeNode.getFirstChild(MagikGrammar.BODY);
-      }
-      final GlobalScope globalScope = magikFile.getGlobalScope();
-      final Scope scopeForNode = globalScope.getScopeForNode(scopeNode);
-      if (scopeForNode != null) {
-        scopeForNode.getSelfAndAncestorScopes().stream()
-            .flatMap(scope -> scope.getScopeEntriesInScope().stream())
-            .filter(
-                scopeEntry -> {
-                  final AstNode definingNode = scopeEntry.getDefinitionNode();
-                  final Range range = new Range(definingNode);
-                  final nl.ramsolutions.sw.magik.Position magikPosition =
-                      Lsp4jConversion.positionFromLsp4j(position);
-                  return range.positionIsAfterSelf(magikPosition);
-                })
-            .map(
-                scopeEntry -> {
-                  final CompletionItem item = new CompletionItem(scopeEntry.getIdentifier());
-                  item.setInsertText(scopeEntry.getIdentifier());
-                  item.setDetail(scopeEntry.getIdentifier());
-                  item.setKind(CompletionItemKind.Variable);
-                  return item;
-                })
-            .forEach(items::add);
-      }
-    }
-
-    // Slots.
-    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
-    if (scopeNode != null) {
-      final AstNode methodDefinitionNode =
-          scopeNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-      if (methodDefinitionNode != null) {
-        final MethodDefinitionNodeHelper helper =
-            new MethodDefinitionNodeHelper(methodDefinitionNode);
-        final TypeString typeString = helper.getExemplarTypeString();
-        magikFile.getTypeStringResolver().getSlotDefinitions(typeString).stream()
-            .map(
-                slot -> {
-                  final String slotName = slot.getName();
-                  final String fullSlotName = typeString.getFullString() + "." + slot.getName();
-                  final CompletionItem item = new CompletionItem(slotName);
-                  item.setInsertText(slotName);
-                  item.setDetail(fullSlotName);
-                  item.setKind(CompletionItemKind.Property);
-                  return item;
-                })
-            .forEach(items::add);
-      }
-    }
-
-    // Global types.
-    final String identifierPart = tokenNode != null ? tokenNode.getTokenValue() : "";
-    definitionKeeper.getExemplarDefinitions().stream()
-        .filter(
-            exemplarDef ->
-                exemplarDef.getTypeString().getFullString().indexOf(identifierPart) != -1)
-        .map(
-            exemplarDef -> {
-              final CompletionItem item =
-                  new CompletionItem(exemplarDef.getTypeString().getFullString());
-              item.setInsertText(exemplarDef.getTypeString().getFullString());
-              item.setDetail(exemplarDef.getTypeString().getFullString());
-              item.setDocumentation(exemplarDef.getDoc());
-              item.setKind(CompletionItemKind.Class);
-              if (exemplarDef.getPragma() != null
-                  && exemplarDef.getPragma().getTopics().contains(TOPIC_DEPRECATED)) {
-                item.setTags(List.of(CompletionItemTag.Deprecated));
-              }
-              return item;
-            })
-        .forEach(items::add);
-
-    return items;
-  }
-
-  /**
-   * Provide method invocation completions.
-   *
-   * @param magikFile MagikFile.
-   * @param tokenNode Token node.
-   * @param tokenValue Token value.
-   * @return List with {@link CompletionItem}s.
-   */
-  private List<CompletionItem> provideMethodInvocationCompletion(
-      final MagikTypedFile magikFile, final AstNode tokenNode, final String tokenValue) {
-    // Token -->
-    // - parent: any --> parent: ATOM
-    // - parent: IDENTIFIER --> parent: METHOD_INVOCATION --> previous sibling: ATOM
-    // - parent: IDENTIFIER --> parent: METHOD_INVOCATION --> previous sibling: METHOD_INVOCATION
-    final AstNode node = tokenNode.getParent();
-    final AstNode parentNode = node.getParent();
-    final AstNode parentParentNode = parentNode.getParent();
-    final AstNode wantedNode;
-    if (parentNode != null && parentNode.is(MagikGrammar.ATOM)) {
-      // Asking the ATOM node.
-      wantedNode = parentNode;
-    } else if (parentParentNode != null
-        && (parentParentNode.is(MagikGrammar.METHOD_INVOCATION)
-            || parentParentNode.is(MagikGrammar.PROCEDURE_INVOCATION))) {
-      // Asking the previous invocation.
-      wantedNode = parentParentNode.getPreviousSibling();
-    } else {
-      return Collections.emptyList();
-    }
-
-    final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-    final ExpressionResultString result = reasonerState.getNodeType(wantedNode);
-    final TypeString typeStrSelf = result.get(0, TypeString.UNDEFINED);
-    final TypeString typeStr = SelfHelper.substituteSelf(typeStrSelf, wantedNode);
-
-    // Convert all known methods to CompletionItems.
-    LOGGER.debug("Providing method completions for type: {}", typeStr.getFullString());
-    final String methodNamePart = tokenValue.startsWith(".") ? tokenValue.substring(1) : tokenValue;
-    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-    return resolver.getRespondingMethodDefinitions(typeStr).stream()
-        .filter(methodDef -> methodDef.getMethodName().contains(methodNamePart))
-        .map(
-            methodDef -> {
-              final String label = methodDef.getMethodNameWithParameters();
-              final String insertText =
-                  methodDef
-                      .getMethodNameWithParameters()
-                      .replaceAll("\\b_optional \\b", "")
-                      .replaceAll("\\b_gather \\b", "");
-              final CompletionItem item = new CompletionItem(label);
-              item.setInsertText(insertText);
-              item.setDetail(methodDef.getTypeName().getFullString());
-              item.setDocumentation(methodDef.getDoc());
-              item.setKind(CompletionItemKind.Method);
-              if (methodDef.getPragma() != null
-                  && methodDef.getPragma().getTopics().contains(TOPIC_DEPRECATED)) {
-                item.setTags(List.of(CompletionItemTag.Deprecated));
-              }
-              return item;
-            })
-        .toList();
-  }
-
-  /**
    * Strip the current token at position.
    *
-   * @param text Text to strip from.
+   * @param source Text to strip from.
    * @param position Position to strip.
    * @return Cleared source, removed token.
    */
@@ -376,45 +207,6 @@ public class CompletionProvider {
             + " ".repeat(stripped.length())
             + line.substring(endIndex);
     return new String[] {Arrays.stream(lines).collect(Collectors.joining("\n")), stripped.trim()};
-  }
-
-  /**
-   * Provide keyword {@link CompletionItem}s.
-   *
-   * @return {@link CompletionItem}s.
-   */
-  private List<CompletionItem> provideKeywordCompletions() {
-    return Arrays.stream(MagikKeyword.values())
-        .map(MagikKeyword::getValue)
-        .map(
-            value -> {
-              final CompletionItem item = new CompletionItem(value);
-              item.setKind(CompletionItemKind.Keyword);
-              return item;
-            })
-        .toList();
-  }
-
-  /**
-   * Get the current character at {@code position} in {@code text}.
-   *
-   * @param text Text to use.
-   * @param position Position to get character from.
-   * @return Character at {@code position}.
-   */
-  @CheckForNull
-  private Character getCurrentChar(final String text, final Position position) {
-    final int line = position.getLine();
-    int character = position.getCharacter();
-    final Optional<String> optionalLineStr = text.lines().skip(line).findFirst();
-    if (optionalLineStr.isEmpty()) {
-      return null;
-    }
-    final String lineStr = optionalLineStr.get();
-    if (character >= lineStr.length()) {
-      character = lineStr.length() - 1;
-    }
-    return lineStr.charAt(character);
   }
 
   private Map.Entry<MagikTypedFile, String> getUsableMagikFile(
