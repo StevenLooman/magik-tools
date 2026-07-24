@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.definitions.io;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.io.IOException;
@@ -429,6 +430,61 @@ class JsonDefinitionWriterTest {
     assertThat(roundTripped.getReturnTypes().getTypes().get(0).isVariadic()).isTrue();
     assertThat(roundTripped.getReturnTypes().getTypes().get(0).getVariadicInner())
         .isEqualTo(integerOrUnset);
+  }
+
+  @Test
+  void testWriteAndReadNonLatin1Doc() throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString typeRef = TypeString.ofIdentifier("user:a", "user");
+    final String doc = "Price in € — greeting 你好";
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            new Location(URI.create("file:///file.magik")),
+            Instant.now(),
+            null,
+            doc,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            typeRef,
+            null));
+
+    JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
+
+    final IDefinitionKeeper readBack = new DefinitionKeeper(false);
+    JsonDefinitionReader.readTypes(this.tempPath, readBack);
+    final ExemplarDefinition roundTripped =
+        readBack.getExemplarDefinitions(typeRef).stream().findAny().orElseThrow();
+    assertThat(roundTripped.getDoc()).isEqualTo(doc);
+  }
+
+  @Test
+  void testWriteFailureLeavesExistingFilePreserved() throws IOException {
+    final String existingContent = "existing complete database\n";
+    Files.writeString(this.tempPath, existingContent);
+
+    final DefinitionKeeper failingKeeper =
+        new DefinitionKeeper() {
+          @Override
+          public Collection<MethodDefinition> getMethodDefinitions() {
+            throw new IllegalStateException("Simulated failure mid-write");
+          }
+        };
+    failingKeeper.add(
+        new ProductDefinition(
+            new Location(URI.create("file:///product.def")),
+            Instant.now(),
+            "test_product",
+            null,
+            "1",
+            "p1",
+            "Test product",
+            "Test product for testing",
+            List.of()));
+
+    assertThatThrownBy(() -> JsonDefinitionWriter.write(this.tempPath, failingKeeper))
+        .isInstanceOf(IllegalStateException.class);
+
+    assertThat(Files.readString(this.tempPath)).isEqualTo(existingContent);
   }
 
   @Test

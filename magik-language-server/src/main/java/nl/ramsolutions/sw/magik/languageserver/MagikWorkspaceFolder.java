@@ -199,10 +199,6 @@ public class MagikWorkspaceFolder {
   private void writeTypesDatabase() throws IOException {
     final Path workspacePath = this.getWorkspacePath();
     final Path typesDbPath = workspacePath.resolve(MagikWorkspaceFolder.TYPES_DB_FILENAME);
-    if (Files.exists(typesDbPath)) {
-      Files.delete(typesDbPath);
-    }
-
     LOGGER.debug("Writing types database for workspace: {}, path: {}", this, typesDbPath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();

@@ -45,6 +45,7 @@ _private _method type_dumper.init(filename, _optional ignore_vars)
 	## @return {_self}
 	.ignore_vars << set.new_from(ignore_vars.default({}))
 	.ignore_vars.add(:|user:| + _self.class_name)
+	_dynamic !text_encoding! << :utf8
 	.out_stream << external_text_output_stream.new(filename)
 	_return _self
 _endmethod
