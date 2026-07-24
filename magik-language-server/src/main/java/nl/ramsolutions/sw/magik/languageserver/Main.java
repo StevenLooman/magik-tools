@@ -123,6 +123,8 @@ public final class Main {
     }
 
     final MagikLanguageServer server = new MagikLanguageServer();
+    Runtime.getRuntime()
+        .addShutdownHook(new Thread(server::shutdownWorkspaces, "magik-persist-shutdown-hook"));
     final InputStream inStream = Main.getInStream();
     final PrintStream outStream = Main.getOutStream();
     final Launcher<LanguageClient> launcher =

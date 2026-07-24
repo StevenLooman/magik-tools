@@ -16,7 +16,10 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.Comparator;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
@@ -105,21 +108,45 @@ public final class JsonDefinitionWriter {
   private void run(final Path path) throws IOException {
     LOGGER.debug("Writing type database to path: {}", path);
 
-    final File file = path.toFile();
-    try (final FileWriter fileReader = new FileWriter(file, StandardCharsets.ISO_8859_1);
-        final BufferedWriter bufferedWriter = new BufferedWriter(fileReader)) {
-      this.writeProducts(bufferedWriter);
-      this.writeModules(bufferedWriter);
-      this.writeMagikFiles(bufferedWriter);
-      this.writePackages(bufferedWriter);
-      this.writeExemplars(bufferedWriter);
-      this.writeInheritance(bufferedWriter);
-      this.writeSlots(bufferedWriter);
-      this.writeGlobals(bufferedWriter);
-      this.writeMethods(bufferedWriter);
-      this.writeProcedures(bufferedWriter);
-      this.writeConditions(bufferedWriter);
-      this.writeBinaryOperators(bufferedWriter);
+    // Write to a temporary file first, then move it into place.
+    // This guarantees a reader never sees a partially-written file.
+    final Path tempPath = path.resolveSibling(path.getFileName().toString() + ".tmp");
+    try {
+      final File tempFile = tempPath.toFile();
+      try (final FileWriter fileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
+          final BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+        this.writeProducts(bufferedWriter);
+        this.writeModules(bufferedWriter);
+        this.writeMagikFiles(bufferedWriter);
+        this.writePackages(bufferedWriter);
+        this.writeExemplars(bufferedWriter);
+        this.writeInheritance(bufferedWriter);
+        this.writeSlots(bufferedWriter);
+        this.writeGlobals(bufferedWriter);
+        this.writeMethods(bufferedWriter);
+        this.writeProcedures(bufferedWriter);
+        this.writeConditions(bufferedWriter);
+        this.writeBinaryOperators(bufferedWriter);
+      }
+
+      JsonDefinitionWriter.moveIntoPlace(tempPath, path);
+    } catch (final RuntimeException | IOException exception) {
+      try {
+        Files.deleteIfExists(tempPath);
+      } catch (final IOException deleteException) {
+        exception.addSuppressed(deleteException);
+      }
+      throw exception;
+    }
+  }
+
+  private static void moveIntoPlace(final Path source, final Path target) throws IOException {
+    try {
+      Files.move(
+          source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    } catch (final AtomicMoveNotSupportedException exception) {
+      LOGGER.debug("Atomic move not supported, falling back to non-atomic replace", exception);
+      Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
     }
   }
 
