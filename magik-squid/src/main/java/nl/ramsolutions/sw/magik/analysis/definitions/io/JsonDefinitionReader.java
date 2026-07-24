@@ -235,7 +235,7 @@ public final class JsonDefinitionReader {
 
     final File file = path.toFile();
     int lineNo = 1;
-    try (FileReader fileReader = new FileReader(file, StandardCharsets.ISO_8859_1);
+    try (FileReader fileReader = new FileReader(file, StandardCharsets.UTF_8);
         BufferedReader bufferedReader = new BufferedReader(fileReader)) {
       String line = bufferedReader.readLine();
       while (line != null) {

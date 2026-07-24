@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -36,6 +37,7 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
   private final MagikTextDocumentService magikTextDocumentService;
   private final MagikWorkspaceService magikWorkspaceService;
   private final MagikNotebookDocumentService magikNotebookDocumentService;
+  private final AtomicBoolean persisted = new AtomicBoolean(false);
   private LanguageClient languageClient;
 
   /**
@@ -118,12 +120,22 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
   public CompletableFuture<Object> shutdown() {
     LOGGER.trace("shutdown");
 
-    return CompletableFuture.supplyAsync(
-        () -> {
-          this.magikWorkspaceService.shutdown();
+    this.shutdownWorkspaces();
 
-          return null;
-        });
+    return CompletableFuture.completedFuture(null);
+  }
+
+  /**
+   * Shutdown workspaces (persist workspace state/the types database) to disk.
+   *
+   * <p>Idempotent: only the first invocation has an effect, so it can safely be triggered from both
+   * the LSP {@code shutdown} request and a JVM shutdown hook.
+   */
+  void shutdownWorkspaces() {
+    if (this.persisted.compareAndSet(false, true)) {
+      LOGGER.debug("Persisting workspace state");
+      this.magikWorkspaceService.shutdown();
+    }
   }
 
   @Override
