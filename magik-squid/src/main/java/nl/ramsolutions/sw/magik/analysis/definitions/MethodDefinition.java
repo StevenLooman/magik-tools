@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -24,7 +26,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     ITER,
   }
 
-  private final Set<Modifier> modifiers;
+  private final SortedSet<Modifier> modifiers;
   private final TypeString typeName;
   private final String methodName;
   private final List<ParameterDefinition> parameters;
@@ -70,7 +72,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     super(location, timestamp, moduleName, doc, node);
     this.typeName = typeName;
     this.methodName = methodName;
-    this.modifiers = Set.copyOf(modifiers);
+    this.modifiers = MethodDefinition.createModifiersSet(modifiers);
     this.parameters = List.copyOf(parameters);
     this.assignmentParameter = assignmentParameter;
     this.pragma = pragma;
@@ -119,7 +121,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     super(location, timestamp, moduleName, doc, node);
     this.typeName = typeName;
     this.methodName = methodName;
-    this.modifiers = Set.copyOf(modifiers);
+    this.modifiers = MethodDefinition.createModifiersSet(modifiers);
     this.parameters = List.copyOf(parameters);
     this.assignmentParameter = assignmentParameter;
     this.pragma = pragma;
@@ -129,6 +131,10 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     this.usedMethods = Collections.unmodifiableList(usedMethods);
     this.usedSlots = Collections.unmodifiableList(usedSlots);
     this.usedConditions = Collections.unmodifiableList(usedConditions);
+  }
+
+  private static SortedSet<Modifier> createModifiersSet(final Set<Modifier> modifiers) {
+    return Collections.unmodifiableSortedSet(new TreeSet<>(modifiers));
   }
 
   /**

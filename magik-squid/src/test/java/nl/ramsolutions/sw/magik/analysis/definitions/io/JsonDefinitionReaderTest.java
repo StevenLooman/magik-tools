@@ -23,6 +23,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -149,8 +150,9 @@ class JsonDefinitionReaderTest {
   @Test
   void testReadInheritance(@TempDir final Path tempDir) throws IOException {
     final String jsonl =
-        "{\"instruction\":\"inheritance\",\"child_type_name\":\"user:a\","
-            + "\"parent_type_name\":\"sw:object\"}\n";
+        """
+        {"instruction":"inheritance","child_type_name":"user:a","parent_type_name":"sw:object"}
+        """;
     final Path path = tempDir.resolve("inheritance.jsonl");
     Files.writeString(path, jsonl);
 
@@ -164,10 +166,60 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
+  void testReadPragmaSortsUnsortedSets(@TempDir final Path tempDir) throws IOException {
+    final String jsonl =
+        """
+        {"instruction":"method","type_name":"user:a","method_name":"m1()",\
+        "pragma":{"classify_levels":["basic","advanced"],\
+        "topics":["zebra","yak","walrus","vole","unicorn","tapir"],\
+        "usages":["redefinable","internal","external"]}}
+        """;
+    final Path path = tempDir.resolve("unsorted_pragma.jsonl");
+    Files.writeString(path, jsonl);
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, definitionKeeper);
+
+    final TypeString typeA = TypeString.ofIdentifier("a", "user");
+    final MethodDefinition methodDef =
+        definitionKeeper.getMethodDefinitions(typeA).stream().findAny().orElseThrow();
+    final Pragma pragma = methodDef.getPragma();
+    assertThat(pragma).isNotNull();
+    assertThat(pragma.getClassifyLevels()).containsExactly("advanced", "basic");
+    assertThat(pragma.getTopics())
+        .containsExactly("tapir", "unicorn", "vole", "walrus", "yak", "zebra");
+    assertThat(pragma.getUsages()).containsExactly("external", "internal", "redefinable");
+  }
+
+  @Test
+  void testReadMethodSortsUnsortedModifiers(@TempDir final Path tempDir) throws IOException {
+    final String jsonl =
+        """
+        {"instruction":"method","type_name":"user:a","method_name":"m1()",\
+        "modifiers":["iter","abstract","private"]}
+        """;
+    final Path path = tempDir.resolve("unsorted_modifiers.jsonl");
+    Files.writeString(path, jsonl);
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, definitionKeeper);
+
+    final TypeString typeA = TypeString.ofIdentifier("a", "user");
+    final MethodDefinition methodDef =
+        definitionKeeper.getMethodDefinitions(typeA).stream().findAny().orElseThrow();
+    assertThat(methodDef.getModifiers())
+        .containsExactly(
+            MethodDefinition.Modifier.PRIVATE,
+            MethodDefinition.Modifier.ABSTRACT,
+            MethodDefinition.Modifier.ITER);
+  }
+
+  @Test
   void testReadSlot(@TempDir final Path tempDir) throws IOException {
     final String jsonl =
-        "{\"instruction\":\"slot\",\"owner_type_name\":\"user:a\","
-            + "\"name\":\"slot1\",\"type_name\":\"sw:integer\"}\n";
+        """
+        {"instruction":"slot","owner_type_name":"user:a","name":"slot1","type_name":"sw:integer"}
+        """;
     final Path path = tempDir.resolve("slot.jsonl");
     Files.writeString(path, jsonl);
 

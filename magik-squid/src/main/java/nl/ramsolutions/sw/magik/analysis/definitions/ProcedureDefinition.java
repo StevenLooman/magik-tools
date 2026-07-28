@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -24,7 +26,7 @@ public class ProcedureDefinition extends MagikDefinition
     ITER,
   }
 
-  private final Set<Modifier> modifiers;
+  private final SortedSet<Modifier> modifiers;
   private final TypeString typeName;
   private final @Nullable String procedureName;
   private final List<ParameterDefinition> parameters;
@@ -64,7 +66,7 @@ public class ProcedureDefinition extends MagikDefinition
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes) {
     super(location, timestamp, moduleName, doc, node);
-    this.modifiers = Set.copyOf(modifiers);
+    this.modifiers = ProcedureDefinition.createModifiersSet(modifiers);
     this.typeName = typeName;
     this.procedureName = procedureName;
     this.parameters = List.copyOf(parameters);
@@ -108,7 +110,7 @@ public class ProcedureDefinition extends MagikDefinition
       final List<MethodUsage> usedMethods,
       final List<ConditionUsage> usedConditions) {
     super(location, timestamp, moduleName, doc, node);
-    this.modifiers = Set.copyOf(modifiers);
+    this.modifiers = ProcedureDefinition.createModifiersSet(modifiers);
     this.typeName = typeName;
     this.procedureName = procedureName;
     this.parameters = List.copyOf(parameters);
@@ -118,6 +120,10 @@ public class ProcedureDefinition extends MagikDefinition
     this.usedGlobals = Collections.unmodifiableList(usedGlobals);
     this.usedMethods = Collections.unmodifiableList(usedMethods);
     this.usedConditions = Collections.unmodifiableList(usedConditions);
+  }
+
+  private static SortedSet<Modifier> createModifiersSet(final Set<Modifier> modifiers) {
+    return Collections.unmodifiableSortedSet(new TreeSet<>(modifiers));
   }
 
   public Set<Modifier> getModifiers() {

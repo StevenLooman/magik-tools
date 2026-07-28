@@ -6,7 +6,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /** Pragma. */
 public class Pragma {
@@ -35,9 +36,9 @@ public class Pragma {
       Set.of(USAGE_SUBCLASSABLE, USAGE_SUBCLASS, USAGE_REDEFINABLE, USAGE_EXTERNAL, USAGE_INTERNAL);
 
   private final @Nullable AstNode node;
-  private final Set<String> classifyLevels;
-  private final Set<String> topics;
-  private final Set<String> usages;
+  private final SortedSet<String> classifyLevels;
+  private final SortedSet<String> topics;
+  private final SortedSet<String> usages;
 
   /**
    * Constructor.
@@ -53,29 +54,32 @@ public class Pragma {
       final Collection<String> topics,
       final Collection<String> usages) {
     this.node = node;
-    this.classifyLevels = Set.copyOf(classifyLevel);
-    this.topics = Set.copyOf(topics);
-    this.usages = Set.copyOf(usages);
+    this.classifyLevels = Pragma.createSortedSet(classifyLevel);
+    this.topics = Pragma.createSortedSet(topics);
+    this.usages = Pragma.createSortedSet(usages);
   }
 
   /**
    * Constructor.
    *
-   * <p>Use Pragma.CLASSIFY_LEVELS/Pragma.USAGE_TYPES to parse the pragmas. The rest of the pragmas
+   * <p>Use {@link #CLASSIFY_LEVELS}/{@link #USAGES} to parse the pragmas. The rest of the pragmas
    * are considered topics.
    *
    * @param node Node to encapsulate.
    * @param items Items.
    */
   public Pragma(final @Nullable AstNode node, final Collection<String> items) {
-    this.node = node;
-    this.classifyLevels =
-        items.stream().filter(Pragma.CLASSIFY_LEVELS::contains).collect(Collectors.toSet());
-    this.usages = items.stream().filter(Pragma.USAGES::contains).collect(Collectors.toSet());
-    this.topics =
+    this(
+        node,
+        items.stream().filter(Pragma.CLASSIFY_LEVELS::contains).toList(),
         items.stream()
             .filter(item -> !Pragma.CLASSIFY_LEVELS.contains(item) && !Pragma.USAGES.contains(item))
-            .collect(Collectors.toSet());
+            .toList(),
+        items.stream().filter(Pragma.USAGES::contains).toList());
+  }
+
+  private static SortedSet<String> createSortedSet(final Collection<String> items) {
+    return Collections.unmodifiableSortedSet(new TreeSet<>(items));
   }
 
   /**
