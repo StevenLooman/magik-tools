@@ -8,6 +8,8 @@ reasoned return types. Issues are raised in the following situations:</p>
   <li>A <code>@return</code> type does not match the reasoned return type.</li>
   <li>A <code>@return</code> annotation is present but cannot be verified because the return value
       comes from a callable with unknown return types.</li>
+  <li>A <code>@return</code> annotation carries no type, and would therefore be discarded without
+      ever being checked.</li>
 </ul>
 <p>Return values whose type is unknown (e.g. from an unresolved method call) are skipped for
 mismatch reporting; those are covered by <em>UndefinedMethodCallResultTypedCheck</em>.</p>
@@ -37,3 +39,15 @@ _endmethod
 </pre>
 <p>Raises an issue on the <code>@return</code> annotation because the return type cannot be
 verified: <code>unknown_method()</code> has no known return type.</p>
+<h3>@return without a type</h3>
+<pre>
+_method example_exemplar.example_method()
+    ## Returns a symbol. The declared
+    ## @return must survive reasoning.
+    ## @return {sw:symbol} Returned value.
+    _return :symbol
+_endmethod
+</pre>
+<p>Raises an issue on the second documentation line. The type is optional in the documentation
+grammar, so a wrapped description line that begins with a tag name parses as a second, untyped
+<code>@return</code> -- which is then discarded, leaving the mistake invisible.</p>

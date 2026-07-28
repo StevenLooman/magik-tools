@@ -6,6 +6,7 @@ its reasoned <code>_loopbody</code> yield types. Issues are raised in the follow
   <li>A <code>@loop</code> annotation is missing on an iter callable that yields values.</li>
   <li>A <code>@loop</code> annotation is present on a non-iter callable.</li>
   <li>A <code>@loop</code> type does not match the reasoned yield type.</li>
+  <li>A <code>@loop</code> annotation carries no type at all.</li>
 </ul>
 <p>Yield slots whose type is unknown (e.g. from an unresolved method call) are skipped for
 mismatch reporting; those are covered by <em>UndefinedMethodCallResultTypedCheck</em>.</p>
@@ -34,3 +35,15 @@ _method example_exemplar.example_method()
 _endmethod
 </pre>
 <p>Raises an issue because <code>@loop</code> is only valid on iter callables.</p>
+<h3>@loop without a type</h3>
+<pre>
+_iter _method example_exemplar.example_method()
+    ## @loop {integer} the value, which
+    ## @loop must be yielded one at a time
+    _loopbody(1)
+_endmethod
+</pre>
+<p>Raises an issue because the type in a <code>@loop</code> annotation is optional in the grammar:
+the wrapped description line parses as a second, untyped <code>@loop</code> declaration. Untyped
+annotations are discarded before any type comparison, so without this check the mistake goes
+unnoticed while the callable is recorded as yielding two values.</p>
