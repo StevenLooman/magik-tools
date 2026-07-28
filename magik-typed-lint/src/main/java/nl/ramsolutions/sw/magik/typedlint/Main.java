@@ -44,7 +44,7 @@ import org.apache.commons.cli.PatternOptionBuilder;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.cli.help.HelpFormatter;
 
-/** Main entry point for magik linter. */
+/** Main entry point for magik typed linter. */
 public final class Main {
 
   private static final Options OPTIONS;
