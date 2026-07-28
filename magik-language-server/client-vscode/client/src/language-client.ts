@@ -23,13 +23,13 @@ export class MagikLanguageClient implements vscode.Disposable {
 		this.registerCommands();
 	}
 
-	private createSessionOutputChannel(): vscode.OutputChannel {
+	private createSessionOutputChannel(): vscode.LogOutputChannel {
 		this._outputSessionCounter += 1;
 		const channelName =
 			this._outputSessionCounter === 1
 				? 'Magik Language Server'
 				: `Magik Language Server #${this._outputSessionCounter}`;
-		const outputChannel = vscode.window.createOutputChannel(channelName);
+		const outputChannel = vscode.window.createOutputChannel(channelName, { log: true });
 		this._context.subscriptions.push(outputChannel);
 		return outputChannel;
 	}

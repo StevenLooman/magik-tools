@@ -255,6 +255,157 @@ class JsonDefinitionWriterTest {
   }
 
   @Test
+  void testWriteMethodSetsInCanonicalOrder() throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "m1()",
+            Set.of(
+                MethodDefinition.Modifier.ITER,
+                MethodDefinition.Modifier.PRIVATE,
+                MethodDefinition.Modifier.ABSTRACT),
+            List.of(),
+            null,
+            new Pragma(
+                null,
+                Set.of("advanced", "basic"),
+                Set.of("zebra", "yak", "walrus", "vole", "unicorn", "tapir"),
+                Set.of("internal", "external", "redefinable")),
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+
+    JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
+
+    assertThat(Files.readString(this.tempPath))
+        .contains("\"modifiers\":[\"private\",\"abstract\",\"iter\"]")
+        .contains("\"classify_levels\":[\"advanced\",\"basic\"]")
+        .contains("\"topics\":[\"tapir\",\"unicorn\",\"vole\",\"walrus\",\"yak\",\"zebra\"]")
+        .contains("\"usages\":[\"external\",\"internal\",\"redefinable\"]");
+  }
+
+  @Test
+  void testWriteProcedureSetsInCanonicalOrder() throws IOException {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new ProcedureDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            Set.of(ProcedureDefinition.Modifier.ITER),
+            TypeString.ofIdentifier("prc", "user"),
+            "test_proc",
+            List.of(),
+            new Pragma(null, List.of("basic", "external", "quux", "qux", "quuz", "corge")),
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+
+    JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
+
+    assertThat(Files.readString(this.tempPath))
+        .contains("\"modifiers\":[\"iter\"]")
+        .contains("\"classify_levels\":[\"basic\"]")
+        .contains("\"topics\":[\"corge\",\"quux\",\"quuz\",\"qux\"]")
+        .contains("\"usages\":[\"external\"]");
+  }
+
+  private MethodDefinition createTiedMethod(final String uri) {
+    return new MethodDefinition(
+        new Location(URI.create(uri)),
+        null,
+        null,
+        null,
+        null,
+        TypeString.ofIdentifier("dup_exemplar", "user"),
+        "m_same()",
+        Set.of(MethodDefinition.Modifier.PRIVATE),
+        List.of(),
+        null,
+        null,
+        ExpressionResultString.UNDEFINED,
+        ExpressionResultString.EMPTY);
+  }
+
+  private ExemplarDefinition createTiedExemplar(final String uri) {
+    return new ExemplarDefinition(
+        new Location(URI.create(uri)),
+        null,
+        null,
+        null,
+        null,
+        ExemplarDefinition.Sort.SLOTTED,
+        TypeString.ofIdentifier("dup_exemplar", "user"),
+        null);
+  }
+
+  private String writeToNewFile(final IDefinitionKeeper definitionKeeper) throws IOException {
+    final Path path = Files.createTempFile("type_database_order", ".jsonl");
+    try {
+      JsonDefinitionWriter.write(path, definitionKeeper);
+      return Files.readString(path);
+    } finally {
+      Files.deleteIfExists(path);
+    }
+  }
+
+  @Test
+  void testWriteTiedMethodsIndependentOfEncounterOrder() throws IOException {
+    final MethodDefinition first = this.createTiedMethod("file:///a.magik");
+    final MethodDefinition second = this.createTiedMethod("file:///b.magik");
+
+    final String forwards =
+        this.writeToNewFile(
+            new DefinitionKeeper() {
+              @Override
+              public Collection<MethodDefinition> getMethodDefinitions() {
+                return List.of(first, second);
+              }
+            });
+    final String backwards =
+        this.writeToNewFile(
+            new DefinitionKeeper() {
+              @Override
+              public Collection<MethodDefinition> getMethodDefinitions() {
+                return List.of(second, first);
+              }
+            });
+
+    assertThat(forwards).isEqualTo(backwards);
+  }
+
+  @Test
+  void testWriteTiedExemplarsIndependentOfEncounterOrder() throws IOException {
+    final ExemplarDefinition first = this.createTiedExemplar("file:///a.magik");
+    final ExemplarDefinition second = this.createTiedExemplar("file:///b.magik");
+
+    final String forwards =
+        this.writeToNewFile(
+            new DefinitionKeeper() {
+              @Override
+              public Collection<ExemplarDefinition> getExemplarDefinitions() {
+                return List.of(first, second);
+              }
+            });
+    final String backwards =
+        this.writeToNewFile(
+            new DefinitionKeeper() {
+              @Override
+              public Collection<ExemplarDefinition> getExemplarDefinitions() {
+                return List.of(second, first);
+              }
+            });
+
+    assertThat(forwards).isEqualTo(backwards);
+  }
+
+  @Test
   void testWriteCondition() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     definitionKeeper.add(
