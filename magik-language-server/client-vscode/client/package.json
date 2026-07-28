@@ -10,7 +10,7 @@
 		"url": "https://github.com/StevenLooman/magik-tools"
 	},
 	"engines": {
-		"vscode": "^1.75.0"
+		"vscode": "^1.91.0"
 	},
 	"dependencies": {
 		"@vscode/debugadapter": "^1.59.0",
