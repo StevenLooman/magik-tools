@@ -39,6 +39,8 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
       "@return type(s) cannot be verified: callable returns values of unknown type.";
   private static final String MESSAGE_UNEXPECTED_RETURN_DOC =
       "@return specified, but callable returns no value.";
+  private static final String MESSAGE_UNTYPED_RETURN_DOC =
+      "@return without a type; specify a type, or the tag is silently ignored.";
 
   @Override
   protected void walkPostMethodDefinition(final AstNode node) {
@@ -89,6 +91,10 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
     final Map.Entry<AstNode, TypeString> typeDocEntry =
         typeDocEntries.isEmpty() ? null : typeDocEntries.get(0);
 
+    if (this.reportUntypedReturnDoc(this.getDocNode(node))) {
+      return;
+    }
+
     this.handleReturnTypeEntry(
         sharedType,
         typeDocEntry,
@@ -104,6 +110,13 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
   }
 
   private void checkCallableReturnDoc(final AstNode node) {
+    // Deliberately ahead of the abstract check below: that exemption exists because an abstract
+    // callable has no body to reason about, but an untyped @return is a defect in the doc alone
+    // and needs no reasoned result to detect.
+    if (this.reportUntypedReturnDoc(node)) {
+      return;
+    }
+
     if (this.isAbstractCallable(node)) {
       return;
     }
@@ -317,10 +330,23 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
   }
 
   private List<Map.Entry<AstNode, TypeString>> extractSharedDocResult(final AstNode methodNode) {
-    final AstNode statementNode = methodNode.getFirstAncestor(MagikGrammar.STATEMENT);
-    final AstNode docNode = Objects.requireNonNullElse(statementNode, methodNode);
-    final TypeDocParser docParser = new TypeDocParser(docNode);
+    final TypeDocParser docParser = new TypeDocParser(this.getDocNode(methodNode));
     return List.copyOf(docParser.getReturnTypeNodes().entrySet());
+  }
+
+  private AstNode getDocNode(final AstNode methodNode) {
+    final AstNode statementNode = methodNode.getFirstAncestor(MagikGrammar.STATEMENT);
+    return Objects.requireNonNullElse(statementNode, methodNode);
+  }
+
+  private boolean reportUntypedReturnDoc(final AstNode node) {
+    final TypeDocParser docParser = new TypeDocParser(node);
+    final List<AstNode> untypedNodes =
+        docParser.getTypeDocNode().getChildren(TypeDocGrammar.RETURN).stream()
+            .filter(returnNode -> returnNode.getFirstChild(TypeDocGrammar.TYPE) == null)
+            .toList();
+    untypedNodes.forEach(untypedNode -> this.addIssue(untypedNode, MESSAGE_UNTYPED_RETURN_DOC));
+    return !untypedNodes.isEmpty();
   }
 
   private boolean isAbstractCallable(final AstNode node) {

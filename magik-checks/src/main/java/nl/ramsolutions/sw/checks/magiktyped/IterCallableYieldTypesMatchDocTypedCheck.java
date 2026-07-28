@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.checks.magiktyped;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
@@ -31,6 +32,8 @@ public class IterCallableYieldTypesMatchDocTypedCheck extends MagikTypedCheck {
       "@loop type annotation missing for iter callable yielding type(s) (%s).";
   private static final String MISSING_LOOP_MESSAGE_UNKNOWN =
       "@loop type annotation missing for iter callable with unknown yield type(s).";
+  private static final String MESSAGE_UNTYPED_LOOP_DOC =
+      "@loop without a type; specify a type, or the tag is silently ignored.";
 
   @Override
   protected void walkPostMethodDefinition(final AstNode node) {
@@ -43,6 +46,13 @@ public class IterCallableYieldTypesMatchDocTypedCheck extends MagikTypedCheck {
   }
 
   private void checkIterCallableYieldDoc(final AstNode node) {
+    // Deliberately ahead of the abstract check below: that exemption exists because an abstract
+    // callable has no loopbody to reason about, but an untyped @loop is a defect in the doc alone
+    // and needs no reasoned result to detect.
+    if (this.reportUntypedLoopDoc(node)) {
+      return;
+    }
+
     final Map<AstNode, TypeString> typeDocNodes = this.extractCallableDocLoopResult(node);
     if (typeDocNodes.isEmpty()) {
       if (this.isIterCallable(node) && !this.isAbstractCallable(node)) {
@@ -142,6 +152,16 @@ public class IterCallableYieldTypesMatchDocTypedCheck extends MagikTypedCheck {
   private Map<AstNode, TypeString> extractCallableDocLoopResult(final AstNode node) {
     final TypeDocParser docParser = new TypeDocParser(node);
     return docParser.getLoopTypeNodes();
+  }
+
+  private boolean reportUntypedLoopDoc(final AstNode node) {
+    final TypeDocParser docParser = new TypeDocParser(node);
+    final List<AstNode> untypedNodes =
+        docParser.getTypeDocNode().getChildren(TypeDocGrammar.LOOP).stream()
+            .filter(loopNode -> loopNode.getFirstChild(TypeDocGrammar.TYPE) == null)
+            .toList();
+    untypedNodes.forEach(untypedNode -> this.addIssue(untypedNode, MESSAGE_UNTYPED_LOOP_DOC));
+    return !untypedNodes.isEmpty();
   }
 
   private boolean isIterCallable(final AstNode node) {

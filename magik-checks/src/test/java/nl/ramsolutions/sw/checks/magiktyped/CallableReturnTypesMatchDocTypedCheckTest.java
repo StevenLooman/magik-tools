@@ -432,4 +432,63 @@ class CallableReturnTypesMatchDocTypedCheckTest {
     final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
+
+  @Test
+  void testUntypedReturnDocAlongsideTypedReturnDoc() {
+    final String code =
+        """
+        _method a.b
+          ## Returns a symbol. The declared
+          ## @return must survive reasoning.
+          ## @return {sw:symbol}
+          _return :sym
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
+  void testUntypedReturnDocOnAbstractMethod() {
+    final String code =
+        """
+        _abstract _method a.b
+          ## Returns a symbol. The declared
+          ## @return must survive reasoning.
+          ## @return {sw:symbol}
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
+  void testUntypedReturnDocOnly() {
+    final String code =
+        """
+        _method a.b
+          ## @return Description, but no type.
+          _return 1
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
+  void testUntypedReturnDocOnSharedConstant() {
+    final String code =
+        """
+        ## Holds a number. The declared
+        ## @return must survive reasoning.
+        ## @return {sw:integer}
+        object.define_shared_constant(:something, 123, :public)
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
 }
