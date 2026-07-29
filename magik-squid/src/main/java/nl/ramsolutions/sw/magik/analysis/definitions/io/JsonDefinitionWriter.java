@@ -284,7 +284,7 @@ public final class JsonDefinitionWriter {
         writer,
         this.definitionKeeper.getProcedureDefinitions(),
         Comparator.comparing(ProcedureDefinition::getTypeString),
-        Instruction.METHOD);
+        Instruction.PROCEDURE);
   }
 
   private void writeConditions(final Writer writer) {
