@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
+  contents: read
   pull-requests: write
   statuses: write
 
@@ -13,39 +14,46 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !endsWith(github.event.pull_request.user.login, '[bot]') }}
     steps:
-      - name: Checkout PR head
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          path: head
-
-      - name: Checkout base branch
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.base_ref }}
-          path: base
-
       - name: Check CLA signature
         id: cla
-        env:
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-        run: |
-          echo "Checking CLA for user: $PR_AUTHOR"
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const author = context.payload.pull_request.user.login;
+            const needle = `| ${author} |`.toLowerCase();
 
-          signed=false
-          for dir in head base; do
-            if [ -f "$dir/CLA-SIGNERS" ] && grep -qiF "| ${PR_AUTHOR} |" "$dir/CLA-SIGNERS"; then
-              signed=true
-              break
-            fi
-          done
+            // Read CLA-SIGNERS through the API rather than checking out the pull request. This
+            // workflow runs as `pull_request_target`, where checking out a fork's code is refused
+            // by actions/checkout.
+            const readSigners = async (ref) => {
+              try {
+                const response = await github.rest.repos.getContent({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  path: "CLA-SIGNERS",
+                  ref,
+                });
+                return Buffer.from(response.data.content, "base64").toString("utf8");
+              } catch (error) {
+                if (error.status === 404) {
+                  return "";
+                }
+                throw error;
+              }
+            };
 
-          if [ "$signed" = "true" ]; then
-            echo "CLA signed by $PR_AUTHOR"
-          else
-            echo "CLA not signed by $PR_AUTHOR"
-          fi
-          echo "signed=$signed" >> "$GITHUB_OUTPUT"
+            console.log(`Checking CLA for user: ${author}`);
+
+            let signed = false;
+            for (const ref of [context.payload.pull_request.head.sha, context.payload.pull_request.base.ref]) {
+              if ((await readSigners(ref)).toLowerCase().includes(needle)) {
+                signed = true;
+                break;
+              }
+            }
+
+            console.log(signed ? `CLA signed by ${author}` : `CLA not signed by ${author}`);
+            core.setOutput("signed", String(signed));
 
       - name: Post comment if CLA not signed
         if: steps.cla.outputs.signed == 'false'
@@ -78,21 +86,30 @@ jobs:
       - name: Set check status
         if: always()
         uses: actions/github-script@v9
+        env:
+          CLA_SIGNED: ${{ steps.cla.outputs.signed }}
         with:
           script: |
-            const signed = "${{ steps.cla.outputs.signed }}" === "true";
+            // An empty output means the check itself never produced a verdict, which is an error in
+            // this workflow rather than a missing signature.
+            const outcome = process.env.CLA_SIGNED || "errored";
+            const signed = outcome === "true";
 
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: context.payload.pull_request.head.sha,
-              state: signed ? "success" : "failure",
+              state: signed ? "success" : outcome === "false" ? "failure" : "error",
               description: signed
                 ? "CLA has been signed"
-                : "CLA signature required — see PR comment for instructions",
+                : outcome === "false"
+                  ? "CLA signature required — see PR comment for instructions"
+                  : "CLA check failed to run",
               context: "CLA Check",
             });
 
-            if (!signed) {
+            if (outcome === "false") {
               core.setFailed("CLA not signed by " + context.payload.pull_request.user.login);
+            } else if (!signed) {
+              core.setFailed("CLA check failed to run — see the failing step above");
             }
