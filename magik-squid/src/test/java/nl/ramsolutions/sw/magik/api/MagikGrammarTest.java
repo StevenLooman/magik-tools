@@ -376,6 +376,11 @@ class MagikGrammarTest {
         .matches("x +^<< 1")
         .matches("a _or b")
         .matches("(a) _or b")
+        .matches("(a, b)")
+        .matches("(a, b, c)")
+        .matches("(a, b).m()")
+        .matches("(a, b) + 1")
+        .matches("x << (a, b)")
         .matches("_allresults a()");
   }
 
@@ -503,7 +508,10 @@ class MagikGrammarTest {
         .matches("1")
         .matches("10")
         .matches("1.0")
-        .matches("16r10");
+        .matches("16r10")
+        .matches("20rK")
+        .matches("36rZ")
+        .matches("36rZZZZ");
   }
 
   @Test

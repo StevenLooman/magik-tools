@@ -170,8 +170,8 @@ public enum MagikGrammar implements GrammarRuleKey {
       "(?s)(" + STRING_DOUBLE_REGEXP + "|" + STRING_SINGLE_REGEXP + ")";
 
   private static final String DIGITS_REGEXP = "[0-9]+";
-  private static final String HEX_DIGITS_REGEXP = "[0-9a-f]+";
-  private static final String RADIX_REGEXP = "(?is)r" + HEX_DIGITS_REGEXP;
+  private static final String RADIX_DIGITS_REGEXP = "[0-9a-z]+";
+  private static final String RADIX_REGEXP = "(?is)r" + RADIX_DIGITS_REGEXP;
   private static final String EXPONENT_REGEXP = "(?is)(e|&)[+-]?" + DIGITS_REGEXP;
   private static final String DECIMAL_REGEXP = "\\." + DIGITS_REGEXP;
   private static final String NUMBER_REGEXP =
@@ -444,7 +444,11 @@ public enum MagikGrammar implements GrammarRuleKey {
     b.rule(ATOM)
         .is(
             b.firstOf(
-                b.sequence(MagikPunctuator.PAREN_L, EXPRESSION, MagikPunctuator.PAREN_R),
+                b.sequence(
+                    MagikPunctuator.PAREN_L,
+                    EXPRESSION,
+                    b.zeroOrMore(MagikPunctuator.COMMA, EXPRESSION),
+                    MagikPunctuator.PAREN_R),
                 NUMBER,
                 STRING,
                 SYMBOL,
@@ -859,12 +863,12 @@ public enum MagikGrammar implements GrammarRuleKey {
         .is(
             b.firstOf(
                 b.sequence(
-                    EXPRESSION, b.zeroOrMore(SPACING_NO_LB_2, MagikPunctuator.COMMA, EXPRESSION)),
-                b.sequence(
                     MagikPunctuator.PAREN_L,
                     EXPRESSION,
-                    b.zeroOrMore(MagikPunctuator.COMMA, EXPRESSION),
-                    MagikPunctuator.PAREN_R)));
+                    b.oneOrMore(MagikPunctuator.COMMA, EXPRESSION),
+                    MagikPunctuator.PAREN_R),
+                b.sequence(
+                    EXPRESSION, b.zeroOrMore(SPACING_NO_LB_2, MagikPunctuator.COMMA, EXPRESSION))));
 
     b.rule(IDENTIFIERS).is(IDENTIFIER, b.zeroOrMore(MagikPunctuator.COMMA, IDENTIFIER));
     b.rule(IDENTIFIERS_WITH_GATHER)
