@@ -77,6 +77,14 @@ public final class ClassInfoDefinitionReader {
     return Files.getLastModifiedTime(this.path).toInstant();
   }
 
+  static Location locationFromSourceFile(final String sourceFile) {
+    if (sourceFile.isBlank()) {
+      return null;
+    }
+
+    return new Location(URI.create(FILE_URI_PREFIX + "/" + sourceFile));
+  }
+
   @SuppressWarnings("checkstyle:MagicNumber")
   private void run() throws IOException {
     final String[] parts = this.path.getFileName().toString().split("\\.");
@@ -195,9 +203,7 @@ public final class ClassInfoDefinitionReader {
       }
 
       // Source file.
-      final String sourceFile = scanner.nextLine().trim();
-      final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
-      location = new Location(uri);
+      location = ClassInfoDefinitionReader.locationFromSourceFile(scanner.nextLine().trim());
     }
     final Pragma pragma = new Pragma(null, pragmas);
 
@@ -273,9 +279,7 @@ public final class ClassInfoDefinitionReader {
       }
 
       // Source file.
-      final String sourceFile = scanner.nextLine().trim();
-      final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
-      location = new Location(uri);
+      location = ClassInfoDefinitionReader.locationFromSourceFile(scanner.nextLine().trim());
     }
     final Pragma pragma = new Pragma(null, pragmas);
 
@@ -349,9 +353,7 @@ public final class ClassInfoDefinitionReader {
       }
 
       // Source file.
-      final String sourceFile = scanner.nextLine().trim();
-      final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
-      location = new Location(uri);
+      location = ClassInfoDefinitionReader.locationFromSourceFile(scanner.nextLine().trim());
     }
     final Pragma pragma = new Pragma(null, pragmas);
 
@@ -437,9 +439,7 @@ public final class ClassInfoDefinitionReader {
       }
 
       // Source file.
-      final String sourceFile = scanner.nextLine().trim();
-      final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
-      location = new Location(uri);
+      location = ClassInfoDefinitionReader.locationFromSourceFile(scanner.nextLine().trim());
     }
     final Pragma pragma = new Pragma(null, pragmas);
 
@@ -508,9 +508,7 @@ public final class ClassInfoDefinitionReader {
       }
 
       // Source file.
-      final String sourceFile = scanner.nextLine().trim();
-      final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
-      location = new Location(uri);
+      location = ClassInfoDefinitionReader.locationFromSourceFile(scanner.nextLine().trim());
     }
     final Pragma pragma = new Pragma(null, pragmas);
 
@@ -580,9 +578,7 @@ public final class ClassInfoDefinitionReader {
       }
 
       // Source file.
-      final String sourceFile = scanner.nextLine().trim();
-      final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
-      location = new Location(uri);
+      location = ClassInfoDefinitionReader.locationFromSourceFile(scanner.nextLine().trim());
     }
     final Pragma pragma = new Pragma(null, pragmas);
 
@@ -656,9 +652,7 @@ public final class ClassInfoDefinitionReader {
       }
 
       // Source file.
-      final String sourceFile = scanner.nextLine().trim();
-      final URI uri = URI.create(FILE_URI_PREFIX + "/" + sourceFile);
-      location = new Location(uri);
+      location = ClassInfoDefinitionReader.locationFromSourceFile(scanner.nextLine().trim());
     }
     final Pragma pragma = new Pragma(null, pragmas);
 

@@ -317,4 +317,18 @@ for examples.
                 ExpressionResultString.UNDEFINED,
                 ExpressionResultString.UNDEFINED));
   }
+
+  @Test
+  void testLocationFromSourceFileWithPath() {
+    final Location location =
+        ClassInfoDefinitionReader.locationFromSourceFile("$SMALLWORLD_GIS/a/b.magik");
+    assertThat(location).isNotNull();
+    assertThat(location.getUri()).isEqualTo(URI.create("file:///$SMALLWORLD_GIS/a/b.magik"));
+  }
+
+  @Test
+  void testLocationFromBlankSourceFileIsNull() {
+    assertThat(ClassInfoDefinitionReader.locationFromSourceFile("")).isNull();
+    assertThat(ClassInfoDefinitionReader.locationFromSourceFile("   ")).isNull();
+  }
 }
