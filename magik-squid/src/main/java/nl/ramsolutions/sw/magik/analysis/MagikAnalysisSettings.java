@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.analysis;
 
+import java.util.function.Function;
 import nl.ramsolutions.sw.MagikToolsProperties;
 
 /**
@@ -15,6 +16,12 @@ public class MagikAnalysisSettings {
   private static final String INDEX_SLOT_USAGES = "magik.typing.indexSlotUsages";
   private static final String INDEX_CONDITION_USAGES = "magik.typing.indexConditionUsages";
   private static final String CACHE_INDEXED_DEFINITIONS = "magik.typing.cacheIndexedDefinitions";
+  private static final String SMALLWORLD_GIS = "magik.smallworldGis";
+
+  /**
+   * Name of the Smallworld logical, as it appears in dumped source paths ({@code $SMALLWORLD_GIS}).
+   */
+  private static final String SMALLWORLD_GIS_LOGICAL = "SMALLWORLD_GIS";
 
   private final MagikToolsProperties properties;
 
@@ -70,6 +77,32 @@ public class MagikAnalysisSettings {
    */
   public boolean getTypingCacheIndexedDefinitions() {
     return this.properties.getPropertyBoolean(CACHE_INDEXED_DEFINITIONS) != Boolean.FALSE;
+  }
+
+  /**
+   * Get the configured Smallworld gis (installation) directory, used to expand {@code
+   * $SMALLWORLD_GIS} in dumped definition source paths.
+   *
+   * @return The Smallworld gis directory, or {@code null} when not set.
+   */
+  public String getSmallworldGis() {
+    return this.properties.getPropertyString(SMALLWORLD_GIS);
+  }
+
+  /**
+   * Build an environment-variable resolver for expanding {@code $NAME} in dumped definition source
+   * paths. Overlays the {@code magik.smallworldGis} setting on the {@code SMALLWORLD_GIS} logical
+   * (setting wins when set), falling back to the process environment for it and every other name.
+   *
+   * @return Resolver mapping a variable name to its value (or {@code null} when unset).
+   */
+  public Function<String, String> getEnvironment() {
+    final String gis = this.getSmallworldGis();
+    if (gis == null) {
+      return System::getenv;
+    }
+
+    return name -> SMALLWORLD_GIS_LOGICAL.equals(name) ? gis : System.getenv(name);
   }
 
   /**
