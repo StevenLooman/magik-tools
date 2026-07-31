@@ -307,7 +307,8 @@ public class DefineSlotAccessParser {
               ExpressionResultString.EMPTY,
               Collections.emptyList(),
               Collections.emptyList(),
-              List.of(new SlotUsage(slotName, location, definitionNode)),
+              List.of(new SlotUsage(exemplarName, slotName, location, definitionNode)),
+              Collections.emptyList(),
               Collections.emptyList());
       methodDefinitions.add(getMethod);
     } else if (flag.equals(FLAG_WRITE) || flag.equals(FLAG_WRITABLE)) {
@@ -334,7 +335,8 @@ public class DefineSlotAccessParser {
               ExpressionResultString.EMPTY,
               Collections.emptyList(),
               Collections.emptyList(),
-              List.of(new SlotUsage(slotName, location, definitionNode)),
+              List.of(new SlotUsage(exemplarName, slotName, location, definitionNode)),
+              Collections.emptyList(),
               Collections.emptyList());
       methodDefinitions.add(getMethod);
 
@@ -372,7 +374,8 @@ public class DefineSlotAccessParser {
               ExpressionResultString.EMPTY,
               Collections.emptyList(),
               Collections.emptyList(),
-              List.of(new SlotUsage(slotName, location, definitionNode)),
+              List.of(new SlotUsage(exemplarName, slotName, location, definitionNode)),
+              Collections.emptyList(),
               Collections.emptyList());
       methodDefinitions.add(setMethod);
 
@@ -395,7 +398,8 @@ public class DefineSlotAccessParser {
               ExpressionResultString.EMPTY,
               Collections.emptyList(),
               Collections.emptyList(),
-              List.of(new SlotUsage(slotName, location, definitionNode)),
+              List.of(new SlotUsage(exemplarName, slotName, location, definitionNode)),
+              Collections.emptyList(),
               Collections.emptyList());
       methodDefinitions.add(bootMethod);
     }

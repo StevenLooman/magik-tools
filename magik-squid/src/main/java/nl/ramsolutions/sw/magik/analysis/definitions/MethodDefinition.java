@@ -38,6 +38,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
   private final List<MethodUsage> usedMethods;
   private final List<SlotUsage> usedSlots;
   private final List<ConditionUsage> usedConditions;
+  private final List<BinaryOperatorUsage> usedBinaryOperators;
 
   /**
    * Constructor.
@@ -82,6 +83,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     this.usedMethods = Collections.emptyList();
     this.usedSlots = Collections.emptyList();
     this.usedConditions = Collections.emptyList();
+    this.usedBinaryOperators = Collections.emptyList();
   }
 
   /**
@@ -96,6 +98,17 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
    * @param assignmentParameter Assignment parameter.
    * @param pragma Pragma.
    * @param doc Method doc.
+   * @param returnTypes Return types.
+   * @param loopTypes Loop types.
+   */
+  /**
+   * Constructor without used binary operators.
+   *
+   * @param typeName Name of exemplar this method is defined for.
+   * @param methodName Name of method.
+   * @param modifiers Modifiers.
+   * @param parameters Parameters.
+   * @param assignmentParameter Assignment parameter.
    * @param returnTypes Return types.
    * @param loopTypes Loop types.
    */
@@ -118,6 +131,47 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
       final List<MethodUsage> usedMethods,
       final List<SlotUsage> usedSlots,
       final List<ConditionUsage> usedConditions) {
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        typeName,
+        methodName,
+        modifiers,
+        parameters,
+        assignmentParameter,
+        pragma,
+        returnTypes,
+        loopTypes,
+        usedGlobals,
+        usedMethods,
+        usedSlots,
+        usedConditions,
+        Collections.emptyList());
+  }
+
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public MethodDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final TypeString typeName,
+      final String methodName,
+      final Set<Modifier> modifiers,
+      final List<ParameterDefinition> parameters,
+      final @Nullable ParameterDefinition assignmentParameter,
+      final @Nullable Pragma pragma,
+      final ExpressionResultString returnTypes,
+      final ExpressionResultString loopTypes,
+      final List<GlobalUsage> usedGlobals,
+      final List<MethodUsage> usedMethods,
+      final List<SlotUsage> usedSlots,
+      final List<ConditionUsage> usedConditions,
+      final List<BinaryOperatorUsage> usedBinaryOperators) {
     super(location, timestamp, moduleName, doc, node);
     this.typeName = typeName;
     this.methodName = methodName;
@@ -131,6 +185,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     this.usedMethods = Collections.unmodifiableList(usedMethods);
     this.usedSlots = Collections.unmodifiableList(usedSlots);
     this.usedConditions = Collections.unmodifiableList(usedConditions);
+    this.usedBinaryOperators = Collections.unmodifiableList(usedBinaryOperators);
   }
 
   private static SortedSet<Modifier> createModifiersSet(final Set<Modifier> modifiers) {
@@ -307,6 +362,10 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
     return Collections.unmodifiableList(this.usedConditions);
   }
 
+  public List<BinaryOperatorUsage> getUsedBinaryOperators() {
+    return Collections.unmodifiableList(this.usedBinaryOperators);
+  }
+
   @Override
   public MethodDefinition getBareDefinition() {
     return new MethodDefinition(
@@ -326,7 +385,8 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
         this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).toList(),
         this.usedMethods.stream().map(MethodUsage::getWithoutNode).toList(),
         this.usedSlots.stream().map(SlotUsage::getWithoutNode).toList(),
-        this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList());
+        this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList(),
+        this.usedBinaryOperators.stream().map(BinaryOperatorUsage::getWithoutNode).toList());
   }
 
   @Override

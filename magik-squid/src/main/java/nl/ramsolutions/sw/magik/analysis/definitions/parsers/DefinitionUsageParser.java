@@ -3,25 +3,40 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.BinaryExpressionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.UnaryExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.api.MagikKeyword;
+import nl.ramsolutions.sw.magik.api.MagikOperator;
 
 /** Definition usages parser for methods and procedures. */
 public class DefinitionUsageParser {
+
+  private static final Map<String, String> UNARY_OPERATOR_METHODS =
+      Map.of(
+          MagikOperator.NOT.getValue(), "not",
+          MagikKeyword.NOT.getValue(), "not",
+          MagikOperator.MINUS.getValue(), "negated",
+          MagikOperator.PLUS.getValue(), "unary_plus",
+          MagikKeyword.SCATTER.getValue(), "for_scatter()");
 
   private static final String CONDITION = "condition";
   private static final String SW_CONDITION = "sw:condition";
@@ -111,6 +126,10 @@ public class DefinitionUsageParser {
    * @return Used slots.
    */
   public List<SlotUsage> getUsedSlots() {
+    final TypeString typeName =
+        this.node.is(MagikGrammar.METHOD_DEFINITION)
+            ? new MethodDefinitionNodeHelper(this.node).getExemplarTypeString()
+            : TypeString.UNDEFINED;
     return this.node.getDescendants(MagikGrammar.SLOT).stream()
         .filter(slotNode -> slotNode.getFirstChild(MagikGrammar.IDENTIFIER) != null)
         .map(
@@ -120,7 +139,7 @@ public class DefinitionUsageParser {
               final URI uri = this.node.getToken().getURI();
               final Location location = new Location(uri, slotNode);
               final Location validLocation = Location.validLocation(location);
-              return new SlotUsage(slotName, validLocation, slotNode);
+              return new SlotUsage(typeName, slotName, validLocation, slotNode);
             })
         .toList();
   }
@@ -171,5 +190,92 @@ public class DefinitionUsageParser {
                 })
             .filter(Objects::nonNull);
     return Stream.concat(handledConditions, raisedConditions).toList();
+  }
+
+  /**
+   * Get the used unary operators.
+   *
+   * @return Used unary operators.
+   */
+  public List<MethodUsage> getUsedUnaryOperators() {
+    final URI uri = this.node.getToken().getURI();
+    return this.node.getDescendants(MagikGrammar.UNARY_EXPRESSION).stream()
+        .filter(
+            unaryExpressionNode -> !unaryExpressionNode.hasDirectChildren(MagikKeyword.ALLRESULTS))
+        .map(
+            unaryExpressionNode -> {
+              final UnaryExpressionNodeHelper helper =
+                  new UnaryExpressionNodeHelper(unaryExpressionNode);
+              final String operator = helper.getOperator();
+              final String methodName = DefinitionUsageParser.UNARY_OPERATOR_METHODS.get(operator);
+              final Location location = new Location(uri, unaryExpressionNode);
+              final Location validLocation = Location.validLocation(location);
+              return new MethodUsage(
+                  TypeString.UNDEFINED, methodName, validLocation, unaryExpressionNode);
+            })
+        .toList();
+  }
+
+  /**
+   * Get the used binary operators.
+   *
+   * @return Used binary operators.
+   */
+  public List<BinaryOperatorUsage> getUsedBinaryOperators() {
+    final URI uri = this.node.getToken().getURI();
+    return Stream.concat(this.getBinaryExpressionOperators(uri), this.getAugmentedOperators(uri))
+        .toList();
+  }
+
+  /** Augmented assignments (`x +<< y`) use the binary operator before the chevron. */
+  private Stream<BinaryOperatorUsage> getAugmentedOperators(final URI uri) {
+    return this.node.getDescendants(MagikGrammar.AUGMENTED_ASSIGNMENT_EXPRESSION).stream()
+        .map(
+            augmentedNode -> {
+              // Children: <lhs>, OPERATOR (e.g. `+`), CHEVRON, <rhs>.
+              final AstNode operatorNode = augmentedNode.getChildren().get(1);
+              final String operator = operatorNode.getTokenValue().toLowerCase();
+              final Location location = new Location(uri, augmentedNode);
+              final Location validLocation = Location.validLocation(location);
+              return new BinaryOperatorUsage(
+                  TypeString.UNDEFINED,
+                  TypeString.UNDEFINED,
+                  operator,
+                  validLocation,
+                  augmentedNode);
+            });
+  }
+
+  private Stream<BinaryOperatorUsage> getBinaryExpressionOperators(final URI uri) {
+    return this.node
+        .getDescendants(
+            MagikGrammar.OR_EXPRESSION,
+            MagikGrammar.XOR_EXPRESSION,
+            MagikGrammar.AND_EXPRESSION,
+            MagikGrammar.EQUALITY_EXPRESSION,
+            MagikGrammar.RELATIONAL_EXPRESSION,
+            MagikGrammar.ADDITIVE_EXPRESSION,
+            MagikGrammar.MULTIPLICATIVE_EXPRESSION,
+            MagikGrammar.EXPONENTIAL_EXPRESSION)
+        .stream()
+        .flatMap(
+            binaryExpressionNode -> {
+              final BinaryExpressionNodeHelper helper =
+                  new BinaryExpressionNodeHelper(binaryExpressionNode);
+              return helper.getTriplets().stream()
+                  .map(
+                      triplet -> {
+                        final AstNode operatorNode = triplet.getMiddle();
+                        final String operator = operatorNode.getTokenValue().toLowerCase();
+                        final Location location = new Location(uri, binaryExpressionNode);
+                        final Location validLocation = Location.validLocation(location);
+                        return new BinaryOperatorUsage(
+                            TypeString.UNDEFINED,
+                            TypeString.UNDEFINED,
+                            operator,
+                            validLocation,
+                            binaryExpressionNode);
+                      });
+            });
   }
 }

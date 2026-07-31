@@ -959,6 +959,40 @@ class MagikDefinitionReaderTest {
   }
 
   @Test
+  void testAssignGlobalRecordsUsedBinaryOperators() {
+    final String code = "_global g << 1 + 2";
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    assertThat(definitions).hasSize(1);
+
+    final GlobalDefinition globalDef = (GlobalDefinition) definitions.get(0);
+    assertThat(globalDef.getUsedBinaryOperators())
+        .extracting(BinaryOperatorUsage::getOperator)
+        .containsExactly("+");
+  }
+
+  @Test
+  void testAssignGlobalRecordsUsedGlobals() {
+    final String code = "_global g2 << g1";
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    assertThat(definitions).hasSize(1);
+
+    final GlobalDefinition globalDef = (GlobalDefinition) definitions.get(0);
+    assertThat(globalDef.getUsedGlobals())
+        .extracting(GlobalUsage::getTypeName)
+        .containsExactly(TypeString.ofIdentifier("g1", "user"));
+  }
+
+  @Test
   void testParseCondition() {
     final String code =
         """
