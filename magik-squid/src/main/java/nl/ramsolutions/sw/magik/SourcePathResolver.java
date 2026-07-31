@@ -17,8 +17,7 @@ public final class SourcePathResolver {
 
   private static final Pattern ENVIRONMENT_VARIABLE = Pattern.compile("\\$(\\w+)");
 
-  // A file URI's path is rooted ("/..."); on Windows an expanded logical is a drive-letter path, so
-  // the raw "/C:/..." (or "/C:\\...") must lose its leading slash to be a valid OS path.
+  // A rooted Windows drive path ("/C:/...") must drop its leading slash to be a valid OS path.
   private static final Pattern ROOTED_WINDOWS_DRIVE = Pattern.compile("^/([A-Za-z]:[\\\\/].*)$");
 
   private final Function<String, String> environment;
@@ -83,8 +82,7 @@ public final class SourcePathResolver {
     final String rewritten = SourcePathResolver.applyPrefixMappings(path, prefixMappings);
     final String expanded = SourcePathResolver.expandVariables(rewritten, environment);
     if (expanded.equals(path)) {
-      // Nothing changed: return the original URI so Path.of(uri) stays correct across platforms
-      // (a file URI's raw path -- e.g. "/C:/..." on Windows -- is not itself a valid OS path).
+      // Nothing changed: keep the original URI so Path.of(uri) stays correct across platforms.
       return uri;
     }
 
