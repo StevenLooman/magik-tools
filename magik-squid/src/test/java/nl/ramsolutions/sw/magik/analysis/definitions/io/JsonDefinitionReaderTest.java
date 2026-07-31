@@ -442,4 +442,32 @@ class JsonDefinitionReaderTest {
                 TypeString.SW_SYMBOL,
                 TypeString.SW_CHAR16_VECTOR));
   }
+
+  @Test
+  void testPackageUsesDefaultsToEmptyWhenAbsent(@TempDir final Path tempDir) throws IOException {
+    final Path path = tempDir.resolve("types.jsonl");
+    Files.writeString(path, "{\"instruction\":\"package\",\"name\":\"a_package\"}\n");
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, definitionKeeper);
+
+    final PackageDefinition packageDefinition =
+        definitionKeeper.getPackageDefinitions("a_package").stream().findFirst().orElseThrow();
+    assertThat(packageDefinition.getUses()).isEmpty();
+  }
+
+  @Test
+  void testConditionDataNamesDefaultsToEmptyWhenAbsent(@TempDir final Path tempDir)
+      throws IOException {
+    final Path path = tempDir.resolve("types.jsonl");
+    Files.writeString(
+        path, "{\"instruction\":\"condition\",\"name\":\"a_condition\",\"parent\":null}\n");
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, definitionKeeper);
+
+    final ConditionDefinition condition =
+        definitionKeeper.getConditionDefinitions("a_condition").stream().findFirst().orElseThrow();
+    assertThat(condition.getDataNames()).isEmpty();
+  }
 }

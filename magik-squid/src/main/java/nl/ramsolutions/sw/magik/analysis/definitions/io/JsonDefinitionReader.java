@@ -131,8 +131,6 @@ public final class JsonDefinitionReader {
 
     @Override
     public ProductDefinition createInstance(final Type type) {
-      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
-      // even if these were not set in the source JSON.
       return new ProductDefinition(
           null, null, null, null, null, null, null, null, Collections.emptyList());
     }
@@ -142,8 +140,6 @@ public final class JsonDefinitionReader {
 
     @Override
     public ModuleDefinition createInstance(final Type type) {
-      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
-      // even if these were not set in the source JSON.
       return new ModuleDefinition(
           null,
           null,
@@ -161,8 +157,6 @@ public final class JsonDefinitionReader {
 
     @Override
     public MethodDefinition createInstance(final Type type) {
-      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
-      // even if these were not set in the source JSON.
       return new MethodDefinition(
           null,
           null,
@@ -185,8 +179,6 @@ public final class JsonDefinitionReader {
 
     @Override
     public ExemplarDefinition createInstance(final Type type) {
-      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
-      // even if these were not set in the source JSON.
       return new ExemplarDefinition(
           null,
           null,
@@ -204,8 +196,6 @@ public final class JsonDefinitionReader {
 
     @Override
     public ProcedureDefinition createInstance(final Type type) {
-      // This ensures `MethodDefinition.usedGlobals` etc are initialized properly,
-      // even if these were not set in the source JSON.
       return new ProcedureDefinition(
           null,
           null,
@@ -219,6 +209,25 @@ public final class JsonDefinitionReader {
           null,
           ExpressionResultString.UNDEFINED,
           ExpressionResultString.UNDEFINED);
+    }
+  }
+
+  private static final class PackageDefinitionCreator
+      implements InstanceCreator<PackageDefinition> {
+
+    @Override
+    public PackageDefinition createInstance(final Type type) {
+      return new PackageDefinition(null, null, null, null, null, "dummy_package", List.of());
+    }
+  }
+
+  private static final class ConditionDefinitionCreator
+      implements InstanceCreator<ConditionDefinition> {
+
+    @Override
+    public ConditionDefinition createInstance(final Type type) {
+      return new ConditionDefinition(
+          null, null, null, null, null, "dummy_condition", null, List.of(), null);
     }
   }
 
@@ -345,6 +354,8 @@ public final class JsonDefinitionReader {
         .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionCreator())
         .registerTypeAdapter(ProcedureDefinition.class, new ProcedureDefinitionCreator())
         .registerTypeAdapter(ExemplarDefinition.class, new ExemplarDefinitionCreator())
+        .registerTypeAdapter(PackageDefinition.class, new PackageDefinitionCreator())
+        .registerTypeAdapter(ConditionDefinition.class, new ConditionDefinitionCreator())
         .create();
   }
 
