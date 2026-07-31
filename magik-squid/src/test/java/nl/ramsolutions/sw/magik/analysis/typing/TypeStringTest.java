@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
@@ -74,5 +75,34 @@ class TypeStringTest {
     final TypeString substituted = variadic.substituteType(genericRef, TypeString.SW_INTEGER);
     assertThat(substituted.isVariadic()).isTrue();
     assertThat(substituted.getVariadicInner()).isEqualTo(TypeString.SW_INTEGER);
+  }
+
+  @Test
+  void testEqualTypesWithReorderedUnionHaveEqualHashCode() {
+    final TypeString ab = TypeString.ofCombination(TypeString.UNDEFINED, TypeString.SW_SYMBOL);
+    final TypeString ba = TypeString.ofCombination(TypeString.SW_SYMBOL, TypeString.UNDEFINED);
+
+    assertThat(ab).isEqualTo(ba);
+    assertThat(ab.hashCode()).isEqualTo(ba.hashCode());
+  }
+
+  @Test
+  void testCombineToleratesEqualGenericTypesWithReorderedUnion() {
+    final TypeString svA =
+        TypeString.ofIdentifier(
+            "simple_vector",
+            "sw",
+            TypeString.ofGenericDefinition(
+                "E", TypeString.ofCombination(TypeString.UNDEFINED, TypeString.SW_SYMBOL)));
+    final TypeString svB =
+        TypeString.ofIdentifier(
+            "simple_vector",
+            "sw",
+            TypeString.ofGenericDefinition(
+                "E", TypeString.ofCombination(TypeString.SW_SYMBOL, TypeString.UNDEFINED)));
+
+    assertThat(svA).isEqualTo(svB);
+    assertThat(svA.hashCode()).isEqualTo(svB.hashCode());
+    assertThatCode(() -> TypeString.combine(svA, svB)).doesNotThrowAnyException();
   }
 }

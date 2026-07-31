@@ -581,11 +581,7 @@ public final class TypeString implements Comparable<TypeString> {
 
   @Override
   public int hashCode() {
-    // Hash the bare type, without a package.
-    final int index = this.string != null ? this.string.indexOf(':') : -1;
-    final String str =
-        this.string != null && index != -1 ? this.string.substring(index + 1) : this.string;
-    return Objects.hash(this.combinedTypes, str, this.generics, this.genericType);
+    return this.getFullString().hashCode();
   }
 
   @Override
