@@ -563,6 +563,36 @@ class JsonDefinitionWriterTest {
   }
 
   @Test
+  void testWriteAndReadProcedure() throws IOException {
+    final TypeString procedureRef = TypeString.ofIdentifier("prc", "user");
+    final IDefinitionKeeper writeKeeper = new DefinitionKeeper();
+    writeKeeper.add(
+        new ProcedureDefinition(
+            LOCATION,
+            TIMESTAMP,
+            "test_module",
+            "Test procedure",
+            null,
+            Set.of(ProcedureDefinition.Modifier.ITER),
+            procedureRef,
+            "test_proc",
+            List.of(),
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+
+    JsonDefinitionWriter.write(this.tempPath, writeKeeper);
+
+    final IDefinitionKeeper readKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(this.tempPath, readKeeper);
+
+    assertThat(readKeeper.getProcedureDefinitions(procedureRef))
+        .extracting(ProcedureDefinition::getProcedureName, ProcedureDefinition::getModifiers)
+        .containsExactly(tuple("test_proc", Set.of(ProcedureDefinition.Modifier.ITER)));
+    assertThat(readKeeper.getMethodDefinitions(procedureRef)).isEmpty();
+  }
+
+  @Test
   void testWriteGlobal() throws IOException {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString aliasedRef = TypeString.ofIdentifier("alias", "user");
