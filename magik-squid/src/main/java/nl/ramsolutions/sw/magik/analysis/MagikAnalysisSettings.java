@@ -1,7 +1,9 @@
 package nl.ramsolutions.sw.magik.analysis;
 
+import java.util.Map;
 import java.util.function.Function;
 import nl.ramsolutions.sw.MagikToolsProperties;
+import nl.ramsolutions.sw.magik.SourcePathResolver;
 
 /**
  * Settings for magik analysis.
@@ -20,6 +22,7 @@ public class MagikAnalysisSettings {
       "magik.typing.indexBinaryOperatorUsages";
   private static final String CACHE_INDEXED_DEFINITIONS = "magik.typing.cacheIndexedDefinitions";
   private static final String SMALLWORLD_GIS = "magik.smallworldGis";
+  private static final String SOURCE_PATH_MAPPINGS = "magik.sourcePathMappings";
 
   /**
    * Name of the Smallworld logical, as it appears in dumped source paths ({@code $SMALLWORLD_GIS}).
@@ -108,6 +111,28 @@ public class MagikAnalysisSettings {
    */
   public String getSmallworldGis() {
     return this.properties.getPropertyString(SMALLWORLD_GIS);
+  }
+
+  /**
+   * Get the configured source-path prefix mappings, used to rewrite a raw, installation-specific
+   * absolute source path (e.g. a {@code C:/projects/...} path baked into class-info) or a logical
+   * ({@code $SOMS_DIR}) to a resolvable path. Configured as an object {@code
+   * magik.sourcePathMappings: { "<from>": "<to>" }}.
+   *
+   * @return Map of recorded path prefix to replacement.
+   */
+  public Map<String, String> getSourcePathMappings() {
+    return this.properties.getPropertyMap(SOURCE_PATH_MAPPINGS);
+  }
+
+  /**
+   * Build a configured source-path resolver that owns the environment resolver and the prefix
+   * mappings, so consumers hold a single mapper rather than threading resolution config.
+   *
+   * @return The source-path resolver.
+   */
+  public SourcePathResolver getSourcePathResolver() {
+    return new SourcePathResolver(this.getEnvironment(), this.getSourcePathMappings());
   }
 
   /**

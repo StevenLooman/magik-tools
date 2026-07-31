@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -301,6 +302,26 @@ public class MagikToolsProperties {
 
     final String[] values = value.split(MagikToolsProperties.LIST_SEPARATOR);
     return Arrays.stream(values).map(String::trim).toList();
+  }
+
+  /**
+   * Get the properties under a key prefix as a map. A nested settings object ({@code prefix: {a: x,
+   * b: y}}) is flattened by the client converter to keys {@code prefix.a}/{@code prefix.b}; this
+   * reads them back as a map ({@code {a: x, b: y}}).
+   *
+   * @param prefix Key prefix (without trailing dot).
+   * @return Map of sub-key to value.
+   */
+  public Map<String, String> getPropertyMap(final String prefix) {
+    final String dottedPrefix = prefix + ".";
+    final Map<String, String> result = new HashMap<>();
+    for (final String name : this.properties.stringPropertyNames()) {
+      if (name.startsWith(dottedPrefix)) {
+        result.put(name.substring(dottedPrefix.length()), this.properties.getProperty(name));
+      }
+    }
+
+    return result;
   }
 
   /**

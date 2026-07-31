@@ -308,6 +308,13 @@
           "description": "Path to Smallworld Core -- only used by the VS Code extension.",
           "type": "string"
         },
+        "magik.sourcePathMappings": {
+          "description": "Rewrite recorded source-path prefixes so library definitions resolve on this host. Maps a prefix -- a logical (e.g. \"$SOMS_DIR\") or an absolute path (e.g. \"C:/projects/hg/gma\") -- to a local path or another logical, which is expanded in turn. The longest matching prefix wins.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
         "magik.javaHome": {
           "description": "Path to Java Runtime, Java 17 minimum -- only used by the VS Code extension.",
           "type": "string"
