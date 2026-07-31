@@ -15,6 +15,9 @@ public class MagikAnalysisSettings {
   private static final String INDEX_METHOD_USAGES = "magik.typing.indexMethodUsages";
   private static final String INDEX_SLOT_USAGES = "magik.typing.indexSlotUsages";
   private static final String INDEX_CONDITION_USAGES = "magik.typing.indexConditionUsages";
+  private static final String INDEX_UNARY_OPERATOR_USAGES = "magik.typing.indexUnaryOperatorUsages";
+  private static final String INDEX_BINARY_OPERATOR_USAGES =
+      "magik.typing.indexBinaryOperatorUsages";
   private static final String CACHE_INDEXED_DEFINITIONS = "magik.typing.cacheIndexedDefinitions";
   private static final String SMALLWORLD_GIS = "magik.smallworldGis";
 
@@ -68,6 +71,24 @@ public class MagikAnalysisSettings {
    */
   public boolean getTypingIndexConditionUsages() {
     return this.properties.getPropertyBoolean(INDEX_CONDITION_USAGES) != Boolean.FALSE;
+  }
+
+  /**
+   * Determine if unary operator usages should be indexed.
+   *
+   * @return True if unary operator usages should be indexed, false otherwise.
+   */
+  public boolean getTypingIndexUnaryOperatorUsages() {
+    return this.properties.getPropertyBoolean(INDEX_UNARY_OPERATOR_USAGES) != Boolean.FALSE;
+  }
+
+  /**
+   * Determine if binary operator usages should be indexed.
+   *
+   * @return True if binary operator usages should be indexed, false otherwise.
+   */
+  public boolean getTypingIndexBinaryOperatorUsages() {
+    return this.properties.getPropertyBoolean(INDEX_BINARY_OPERATOR_USAGES) != Boolean.FALSE;
   }
 
   /**

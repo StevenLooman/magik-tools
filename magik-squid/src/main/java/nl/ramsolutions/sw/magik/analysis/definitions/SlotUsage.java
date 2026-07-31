@@ -4,11 +4,14 @@ import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Objects;
+import nl.ramsolutions.sw.Usage;
 import nl.ramsolutions.sw.magik.Location;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 
 /** Slot usage. */
-public class SlotUsage {
+public class SlotUsage implements Usage {
 
+  private final TypeString typeName;
   private final String slotName;
   private final @Nullable Location location;
   private final @Nullable AstNode node;
@@ -16,11 +19,17 @@ public class SlotUsage {
   /**
    * Constructor.
    *
+   * @param typeName Type name.
    * @param slotName Name of slot.
    * @param location Location of use.
+   * @param node Node of use.
    */
   public SlotUsage(
-      final String slotName, final @Nullable Location location, final @Nullable AstNode node) {
+      final TypeString typeName,
+      final String slotName,
+      final @Nullable Location location,
+      final @Nullable AstNode node) {
+    this.typeName = typeName;
     this.slotName = slotName;
     this.location = location;
     this.node = node;
@@ -29,10 +38,39 @@ public class SlotUsage {
   /**
    * Constructor.
    *
+   * @param typeName Type name.
+   * @param slotName Name of slot.
+   */
+  public SlotUsage(final TypeString typeName, final String slotName) {
+    this(typeName, slotName, null, null);
+  }
+
+  /**
+   * Compatibility constructor without a type {@link TypeString} (defaults to {@link
+   * TypeString#UNDEFINED}). Keeps the pre-typeName upstream signature compiling when it is synced
+   * in.
+   *
+   * @param slotName Name of slot.
+   * @param location Location of use.
+   * @param node Node of use.
+   */
+  public SlotUsage(
+      final String slotName, final @Nullable Location location, final @Nullable AstNode node) {
+    this(TypeString.UNDEFINED, slotName, location, node);
+  }
+
+  /**
+   * Compatibility constructor without a type {@link TypeString} (defaults to {@link
+   * TypeString#UNDEFINED}).
+   *
    * @param slotName Name of slot.
    */
   public SlotUsage(final String slotName) {
-    this(slotName, null, null);
+    this(TypeString.UNDEFINED, slotName);
+  }
+
+  public TypeString getTypeName() {
+    return this.typeName;
   }
 
   public String getSlotName() {
@@ -50,7 +88,7 @@ public class SlotUsage {
   }
 
   public SlotUsage getWithoutNode() {
-    return new SlotUsage(this.slotName, this.location, null);
+    return new SlotUsage(this.typeName, this.slotName, this.location, null);
   }
 
   @Override
@@ -74,6 +112,7 @@ public class SlotUsage {
 
     final SlotUsage other = (SlotUsage) obj;
     // Location is not tested!
-    return Objects.equals(other.getSlotName(), this.getSlotName());
+    return Objects.equals(other.getTypeName(), this.getTypeName())
+        && Objects.equals(other.getSlotName(), this.getSlotName());
   }
 }

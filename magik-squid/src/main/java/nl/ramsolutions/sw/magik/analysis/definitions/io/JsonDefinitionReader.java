@@ -212,6 +212,23 @@ public final class JsonDefinitionReader {
     }
   }
 
+  private static final class GlobalDefinitionCreator implements InstanceCreator<GlobalDefinition> {
+
+    @Override
+    public GlobalDefinition createInstance(final Type type) {
+      return new GlobalDefinition(
+          null,
+          null,
+          null,
+          null,
+          null,
+          TypeString.UNDEFINED,
+          TypeString.UNDEFINED,
+          null,
+          Collections.emptyList());
+    }
+  }
+
   private static final class PackageDefinitionCreator
       implements InstanceCreator<PackageDefinition> {
 
@@ -354,6 +371,7 @@ public final class JsonDefinitionReader {
         .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionCreator())
         .registerTypeAdapter(ProcedureDefinition.class, new ProcedureDefinitionCreator())
         .registerTypeAdapter(ExemplarDefinition.class, new ExemplarDefinitionCreator())
+        .registerTypeAdapter(GlobalDefinition.class, new GlobalDefinitionCreator())
         .registerTypeAdapter(PackageDefinition.class, new PackageDefinitionCreator())
         .registerTypeAdapter(ConditionDefinition.class, new ConditionDefinitionCreator())
         .create();
