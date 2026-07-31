@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.SourcePathResolver;
@@ -27,19 +26,17 @@ public final class ClientLocationResolver {
    * Resolve and dedup locations for the client.
    *
    * @param locations The locations to prepare.
-   * @param environment Environment-variable resolver (e.g. {@code magik.smallworldGis} overlaid on
-   *     the process environment).
+   * @param sourcePathResolver Configured source-path resolver (env-variable expansion + prefix
+   *     rewrites).
    * @return Resolved, deduped locations in first-seen order.
    */
   public static List<Location> resolveAndDedup(
-      final List<Location> locations, final Function<String, String> environment) {
+      final List<Location> locations, final SourcePathResolver sourcePathResolver) {
     final List<Location> resolved =
         locations.stream()
             .map(
                 location ->
-                    new Location(
-                        SourcePathResolver.expand(location.getUri(), environment),
-                        location.getRange()))
+                    new Location(sourcePathResolver.expand(location.getUri()), location.getRange()))
             .toList();
 
     final Set<URI> urisWithRange =

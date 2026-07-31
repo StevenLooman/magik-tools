@@ -10,6 +10,7 @@ import java.util.function.Function;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.magik.SourcePathResolver;
 import org.junit.jupiter.api.Test;
 
 class ClientLocationResolverTest {
@@ -26,7 +27,8 @@ class ClientLocationResolverTest {
         new Location(concreteUri, new Range(new Position(3, 0), new Position(3, 5)));
 
     final List<Location> result =
-        ClientLocationResolver.resolveAndDedup(List.of(classInfo, indexed), env);
+        ClientLocationResolver.resolveAndDedup(
+            List.of(classInfo, indexed), new SourcePathResolver(env, Map.of()));
 
     assertThat(result).hasSize(1);
     assertThat(result.get(0).getUri()).isEqualTo(concreteUri);
@@ -39,7 +41,9 @@ class ClientLocationResolverTest {
     final Location a = new Location(URI.create("file:///proj/a.magik"));
     final Location b = new Location(URI.create("file:///proj/b.magik"));
 
-    final List<Location> result = ClientLocationResolver.resolveAndDedup(List.of(a, b), env);
+    final List<Location> result =
+        ClientLocationResolver.resolveAndDedup(
+            List.of(a, b), new SourcePathResolver(env, Map.of()));
 
     assertThat(result).hasSize(2);
   }
@@ -52,7 +56,9 @@ class ClientLocationResolverTest {
     final Location hit1 = new Location(uri, new Range(new Position(1, 0), new Position(1, 3)));
     final Location hit2 = new Location(uri, new Range(new Position(7, 0), new Position(7, 3)));
 
-    final List<Location> result = ClientLocationResolver.resolveAndDedup(List.of(hit1, hit2), env);
+    final List<Location> result =
+        ClientLocationResolver.resolveAndDedup(
+            List.of(hit1, hit2), new SourcePathResolver(env, Map.of()));
 
     assertThat(result).containsExactly(hit1, hit2);
   }

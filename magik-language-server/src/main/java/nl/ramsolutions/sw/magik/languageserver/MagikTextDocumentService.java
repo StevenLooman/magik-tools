@@ -10,12 +10,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.SourcePathResolver;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.languageserver.callhierarchy.CallHierarchyProvider;
@@ -1623,9 +1623,9 @@ public class MagikTextDocumentService implements TextDocumentService {
 
   private List<Location> toClientLocations(
       final List<nl.ramsolutions.sw.magik.Location> locations) {
-    final Function<String, String> environment =
-        new MagikAnalysisSettings(this.properties).getEnvironment();
-    return ClientLocationResolver.resolveAndDedup(locations, environment).stream()
+    final SourcePathResolver sourcePathResolver =
+        new MagikAnalysisSettings(this.properties).getSourcePathResolver();
+    return ClientLocationResolver.resolveAndDedup(locations, sourcePathResolver).stream()
         .map(Lsp4jConversion::locationToLsp4j)
         .toList();
   }
