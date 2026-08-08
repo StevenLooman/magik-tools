@@ -18,7 +18,8 @@ final class HoverUtils {
    * @return Formatted type string.
    */
   static String formatTypeString(final TypeString typeStr) {
-    return HoverUtils.formatTypeString(typeStr.getFullString());
+    final String fullString = typeStr.getFullString();
+    return HoverUtils.formatTypeString(fullString);
   }
 
   /**
