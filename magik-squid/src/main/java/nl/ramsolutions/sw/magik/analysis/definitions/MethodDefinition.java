@@ -278,7 +278,7 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
 
     // Method name.
     final String methodNameWithParameters = this.getMethodNameWithParameters();
-    if (this.methodName.startsWith("[]")) {
+    if (this.methodName.startsWith("[")) {
       builder.append(methodNameWithParameters);
     } else {
       builder.append(".");
