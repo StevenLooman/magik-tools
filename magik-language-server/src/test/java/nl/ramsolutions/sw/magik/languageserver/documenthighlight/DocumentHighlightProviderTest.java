@@ -134,4 +134,79 @@ class DocumentHighlightProviderTest {
     assertThat(highlights)
         .allSatisfy(h -> assertThat(h.getKind()).isEqualTo(DocumentHighlightKind.Text));
   }
+
+  @Test
+  void testExemplarNameHighlight() {
+    final String code =
+        """
+        _method object.m1()
+          _return 1
+        _endmethod
+
+        _method object.m2()
+          _return 2
+        _endmethod
+        """;
+    // Cursor on exemplar name of the first method definition (line 0, col 9).
+    final List<DocumentHighlight> highlights = this.provideHighlights(code, new Position(0, 9));
+    assertThat(highlights).hasSize(2);
+    assertThat(highlights)
+        .allSatisfy(h -> assertThat(h.getKind()).isEqualTo(DocumentHighlightKind.Text));
+  }
+
+  @Test
+  void testConditionNameHighlight() {
+    final String code =
+        """
+        _method object.m()
+          _try
+          _when error
+            _return 1
+          _endtry
+        _endmethod
+        """;
+    // Cursor on condition name in `_when` (line 2, col 9).
+    final List<DocumentHighlight> highlights = this.provideHighlights(code, new Position(2, 9));
+    assertThat(highlights).hasSize(1);
+    assertThat(highlights)
+        .allSatisfy(h -> assertThat(h.getKind()).isEqualTo(DocumentHighlightKind.Text));
+  }
+
+  @Test
+  void testGlobalVariableHighlight() {
+    final String code =
+        """
+        _global my_global << 1
+
+        _method object.m()
+          _return my_global
+        _endmethod
+        """;
+    // Cursor on usage of the global (line 3, col 11).
+    final List<DocumentHighlight> highlights = this.provideHighlights(code, new Position(3, 11));
+    assertThat(highlights).hasSize(1);
+    assertThat(highlights)
+        .allSatisfy(h -> assertThat(h.getKind()).isEqualTo(DocumentHighlightKind.Text));
+  }
+
+  @Test
+  void testScopeEntryPrecedesSlotAncestor() {
+    final String code =
+        """
+        _method object.m(p1)
+          .p1 << p1
+          _return .p1
+        _endmethod
+        """;
+    // Cursor on the slot identifier of `.p1 <<` (line 1, col 4), which shares its name with
+    // parameter `p1`.
+    final List<DocumentHighlight> highlights = this.provideHighlights(code, new Position(1, 4));
+    // Stage 1 (scope entry) pre-empts stage 2 (slot ancestor): resolves as the parameter, not
+    // the slot.
+    assertThat(highlights).hasSize(2);
+    assertThat(highlights)
+        .anySatisfy(h -> assertThat(h.getKind()).isEqualTo(DocumentHighlightKind.Write));
+    assertThat(highlights)
+        .anySatisfy(h -> assertThat(h.getKind()).isEqualTo(DocumentHighlightKind.Read));
+  }
 }
