@@ -1,43 +1,79 @@
 package nl.ramsolutions.sw.magik.languageserver.definitions;
 
 import com.sonar.sslr.api.AstNode;
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import nl.ramsolutions.sw.IDefinition;
+import java.util.Optional;
+import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.loadlist.api.LoadListGrammar;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
-import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.SlotNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.scope.Scope;
-import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
-import nl.ramsolutions.sw.moduledef.ModuleDefinition;
-import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
-import nl.ramsolutions.sw.productdef.ProductDefinition;
-import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 import org.eclipse.lsp4j.ServerCapabilities;
 
-/** Definitions provider. */
+/**
+ * Definitions provider. Runs a set of {@link DefinitionModule}s and uses the first claimed result.
+ */
 public class DefinitionsProvider {
+
+  private final List<DefinitionModule<MagikTypedFile>> magikModules;
+  private final List<DefinitionModule<ProductDefFile>> productDefModules;
+  private final List<DefinitionModule<ModuleDefFile>> moduleDefModules;
+  private final List<DefinitionModule<LoadListFile>> loadListModules;
+
+  /** Constructor. */
+  public DefinitionsProvider() {
+    this.magikModules = this.createMagikModules();
+    this.productDefModules = this.createProductDefModules();
+    this.moduleDefModules = this.createModuleDefModules();
+    this.loadListModules = this.createLoadListModules();
+  }
+
+  /**
+   * Create the ordered modules for Magik files. Override to add or remove definition modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<DefinitionModule<MagikTypedFile>> createMagikModules() {
+    return List.of(
+        new MethodInvocationDefinitionModule(),
+        new AtomDefinitionModule(),
+        new ConditionDefinitionModule(),
+        new SlotDefinitionModule());
+  }
+
+  /**
+   * Create the ordered modules for product.def files. Override to add or remove definition modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<DefinitionModule<ProductDefFile>> createProductDefModules() {
+    return List.of(new ProductNameDefinitionModule());
+  }
+
+  /**
+   * Create the ordered modules for module.def files. Override to add or remove definition modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<DefinitionModule<ModuleDefFile>> createModuleDefModules() {
+    return List.of(new ModuleNameDefinitionModule());
+  }
+
+  /**
+   * Create the ordered modules for load_list.txt files. Override to add or remove definition
+   * modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<DefinitionModule<LoadListFile>> createLoadListModules() {
+    return List.of(new FileEntryDefinitionModule());
+  }
 
   /**
    * Set server capabilities.
@@ -58,21 +94,8 @@ public class DefinitionsProvider {
   public List<Location> provideDefinitions(
       final ProductDefFile productDefFile, final Position position) {
     final AstNode node = productDefFile.getTopNode();
-    final AstNode positionTokenNode = AstQuery.nodeAt(node, position);
-    if (positionTokenNode == null) {
-      return Collections.emptyList();
-    }
-
-    final AstNode productNameNode =
-        AstQuery.getParentFromChain(
-            positionTokenNode,
-            ProductDefinitionGrammar.IDENTIFIER,
-            ProductDefinitionGrammar.PRODUCT_NAME);
-    if (productNameNode == null) {
-      return Collections.emptyList();
-    }
-
-    return this.locationsForProductName(productDefFile, productNameNode);
+    final AstNode positionNode = AstQuery.nodeAt(node, position);
+    return this.provideDefinitions(this.productDefModules, productDefFile, positionNode);
   }
 
   /**
@@ -85,21 +108,8 @@ public class DefinitionsProvider {
   public List<Location> provideDefinitions(
       final ModuleDefFile moduleDefFile, final Position position) {
     final AstNode node = moduleDefFile.getTopNode();
-    final AstNode positionTokenNode = AstQuery.nodeAt(node, position);
-    if (positionTokenNode == null) {
-      return Collections.emptyList();
-    }
-
-    final AstNode moduleNameNode =
-        AstQuery.getParentFromChain(
-            positionTokenNode,
-            ModuleDefinitionGrammar.IDENTIFIER,
-            ModuleDefinitionGrammar.MODULE_NAME);
-    if (moduleNameNode == null) {
-      return Collections.emptyList();
-    }
-
-    return this.locationsForModuleName(moduleDefFile, moduleNameNode);
+    final AstNode positionNode = AstQuery.nodeAt(node, position);
+    return this.provideDefinitions(this.moduleDefModules, moduleDefFile, positionNode);
   }
 
   /**
@@ -113,11 +123,7 @@ public class DefinitionsProvider {
       final LoadListFile loadListFile, final Position position) {
     final AstNode node = loadListFile.getTopNode();
     final AstNode positionNode = AstQuery.nodeAt(node, position, LoadListGrammar.FILE_PATH);
-    if (positionNode == null) {
-      return Collections.emptyList();
-    }
-
-    return this.locationsForFileEntry(loadListFile, positionNode);
+    return this.provideDefinitions(this.loadListModules, loadListFile, positionNode);
   }
 
   /**
@@ -132,146 +138,24 @@ public class DefinitionsProvider {
     // Should always be on an identifier.
     final AstNode node = magikFile.getTopNode();
     final AstNode positionNode = AstQuery.nodeAt(node, position, MagikGrammar.IDENTIFIER);
+    return this.provideDefinitions(this.magikModules, magikFile, positionNode);
+  }
+
+  private <T extends OpenedFile> List<Location> provideDefinitions(
+      final List<DefinitionModule<T>> modules, final T file, final AstNode positionNode) {
     if (positionNode == null) {
       return Collections.emptyList();
     }
 
-    final AstNode wantedNode =
-        positionNode.getFirstAncestor(
-            MagikGrammar.METHOD_INVOCATION,
-            MagikGrammar.METHOD_DEFINITION,
-            MagikGrammar.ATOM,
-            MagikGrammar.CONDITION_NAME,
-            MagikGrammar.SLOT);
-    if (wantedNode == null) {
-      return Collections.emptyList();
-    } else if (wantedNode.is(MagikGrammar.METHOD_INVOCATION)) {
-      return this.locationsForMethodInvocation(magikFile, positionNode);
-    } else if (wantedNode.is(MagikGrammar.ATOM)
-        && wantedNode.getFirstChild().is(MagikGrammar.IDENTIFIER)) {
-      return this.locationsForAtom(magikFile, positionNode);
-    } else if (wantedNode.is(MagikGrammar.CONDITION_NAME)) {
-      return this.locationsForCondition(magikFile, positionNode);
-    } else if (wantedNode.is(MagikGrammar.SLOT)) {
-      return this.locationsForSlot(magikFile, wantedNode);
+    // Run the modules in order; the first module claiming the context provides the locations.
+    final DefinitionContext<T> context = new DefinitionContext<>(file, positionNode);
+    for (final DefinitionModule<T> module : modules) {
+      final Optional<List<Location>> result = module.tryDefinitions(context);
+      if (result.isPresent()) {
+        return result.get();
+      }
     }
 
     return Collections.emptyList();
-  }
-
-  private List<Location> locationsForSlot(final MagikTypedFile magikFile, final AstNode slotNode) {
-    final String slotName = new SlotNodeHelper(slotNode).getSlotName();
-
-    final AstNode methodDefNode = slotNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-    if (methodDefNode == null) {
-      return Collections.emptyList();
-    }
-
-    final TypeString ownerTypeStr =
-        new MethodDefinitionNodeHelper(methodDefNode).getExemplarTypeString();
-    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-    return resolver.getSlotDefinitions(ownerTypeStr).stream()
-        .filter(slot -> slot.getName().equals(slotName))
-        .map(SlotDefinition::getLocation)
-        .map(Location::validLocation)
-        .toList();
-  }
-
-  private List<Location> locationsForCondition(
-      final MagikTypedFile magikFile, final AstNode wantedNode) {
-    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
-    final String conditionName = wantedNode.getTokenValue();
-    return definitionKeeper.getConditionDefinitions(conditionName).stream()
-        .map(ConditionDefinition::getLocation)
-        .map(Location::validLocation)
-        .toList();
-  }
-
-  private List<Location> locationsForAtom(
-      final MagikTypedFile magikFile, final AstNode wantedNode) {
-    final Scope scope = magikFile.getGlobalScope().getScopeForNode(wantedNode);
-    Objects.requireNonNull(scope);
-    final String identifier = wantedNode.getTokenValue();
-    final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
-    if (scopeEntry == null) {
-      return Collections.emptyList();
-    }
-
-    if (scopeEntry.isType(
-        ScopeEntry.Type.DEFINITION,
-        ScopeEntry.Type.LOCAL,
-        ScopeEntry.Type.IMPORT,
-        ScopeEntry.Type.CONSTANT,
-        ScopeEntry.Type.PARAMETER)) {
-      final AstNode definitionNode = scopeEntry.getDefinitionNode();
-      final Location definitionLocation = new Location(magikFile.getUri(), definitionNode);
-      return List.of(definitionLocation);
-    }
-
-    // Assume type.
-    final PackageNodeHelper packageHelper = new PackageNodeHelper(wantedNode);
-    final String pakkage = packageHelper.getCurrentPackage();
-    final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
-    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-    return resolver.resolve(typeString).stream()
-        .map(IDefinition::getLocation)
-        .map(Location::validLocation)
-        .toList();
-  }
-
-  @SuppressWarnings("checkstyle:NestedIfDepth")
-  private List<Location> locationsForMethodInvocation(
-      final MagikTypedFile magikFile, final AstNode wantedNode) {
-    final AstNode methodInvocationNode =
-        wantedNode.getFirstAncestor(MagikGrammar.METHOD_INVOCATION);
-    final MethodInvocationNodeHelper invocationHelper =
-        new MethodInvocationNodeHelper(methodInvocationNode);
-    final String methodName = invocationHelper.getMethodName();
-
-    final AstNode previousSiblingNode = methodInvocationNode.getPreviousSibling();
-    final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-    final ExpressionResultString result = reasonerState.getNodeType(previousSiblingNode);
-    final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
-    final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, methodInvocationNode);
-
-    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-    return resolver.getRespondingMethodDefinitions(typeStr, methodName).stream()
-        .map(MethodDefinition::getLocation)
-        .map(Location::validLocation)
-        .toList();
-  }
-
-  private List<Location> locationsForProductName(
-      final ProductDefFile productDefFile, final AstNode productNameNode) {
-    final String productName = productNameNode.getTokenValue();
-    final IDefinitionKeeper definitionKeeper = productDefFile.getDefinitionKeeper();
-    return definitionKeeper.getProductDefinitions(productName).stream()
-        .map(ProductDefinition::getLocation)
-        .toList();
-  }
-
-  private List<Location> locationsForModuleName(
-      final ModuleDefFile moduleDefFile, final AstNode moduleNameNode) {
-    final String moduleName = moduleNameNode.getTokenValue();
-    final IDefinitionKeeper definitionKeeper = moduleDefFile.getDefinitionKeeper();
-    return definitionKeeper.getModuleDefinitions(moduleName).stream()
-        .map(ModuleDefinition::getLocation)
-        .filter(Objects::nonNull)
-        .toList();
-  }
-
-  private List<Location> locationsForFileEntry(
-      final LoadListFile loadListFile, final AstNode fileEntryNode) {
-    final String fileEntryValue = fileEntryNode.getTokenValue().strip();
-    if (fileEntryValue.endsWith("/")) {
-      // Don't do anything for directory entries.
-      return Collections.emptyList();
-    }
-
-    final URI uri = loadListFile.getUri();
-    final String appendExtension = fileEntryValue.endsWith(".magik") ? "" : ".magik";
-    final URI fileEntryUri = uri.resolve(fileEntryValue + appendExtension);
-    final Location location = new Location(fileEntryUri);
-    return List.of(location);
   }
 }
