@@ -201,7 +201,7 @@ class DocumentHighlightProviderTest {
     // Cursor on the slot identifier of `.p1 <<` (line 1, col 4), which shares its name with
     // parameter `p1`.
     final List<DocumentHighlight> highlights = this.provideHighlights(code, new Position(1, 4));
-    // Stage 1 (scope entry) pre-empts stage 2 (slot ancestor): resolves as the parameter, not
+    // Stage 1 (scope entry) preempts stage 2 (slot ancestor): resolves as the parameter, not
     // the slot.
     assertThat(highlights).hasSize(2);
     assertThat(highlights)

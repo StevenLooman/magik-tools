@@ -29,7 +29,7 @@ public class DocumentHighlightProvider {
    * Create the ordered modules. Override to add or remove document highlight modules.
    *
    * <p>The first module is the stage-1 scope lookup, which must run before the stage-2
-   * ancestor-based modules so it can pre-empt them.
+   * ancestor-based modules so it can preempt them.
    *
    * @return Ordered modules.
    */

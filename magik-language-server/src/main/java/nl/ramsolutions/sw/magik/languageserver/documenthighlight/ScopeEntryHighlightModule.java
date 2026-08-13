@@ -15,7 +15,7 @@ import org.eclipse.lsp4j.DocumentHighlightKind;
 
 /**
  * Stage-1 module: resolves the identifier against its enclosing scope. Covers locals, parameters,
- * globals, dynamics — anything the scope knows. Pre-empts the stage-2 (ancestor-based) modules.
+ * globals, dynamics. Preempts the stage-2 (ancestor-based) modules.
  */
 public class ScopeEntryHighlightModule implements DocumentHighlightModule {
 
