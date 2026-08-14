@@ -52,19 +52,7 @@ public class FoldingRangeProvider {
    */
   public List<FoldingRange> provideFoldingRanges(final ModuleDefFile moduleDefFile) {
     final AstNode topNode = moduleDefFile.getTopNode();
-    return topNode.getChildren().stream()
-        .filter(
-            node ->
-                node.getLastChild() != null
-                    && node.getLastChild().getTokenValue() != null
-                    && node.getLastChild().getTokenValue().equalsIgnoreCase("end"))
-        .map(
-            node -> {
-              final int startLine = node.getTokenLine() - 1;
-              final int endLine = node.getLastToken().getLine() - 1;
-              return new FoldingRange(startLine, endLine);
-            })
-        .toList();
+    return this.provideFoldingRangesForEndTerminatedBlocks(topNode);
   }
 
   /**
@@ -85,6 +73,10 @@ public class FoldingRangeProvider {
    */
   public List<FoldingRange> provideFoldingRanges(final ProductDefFile productDefFile) {
     final AstNode topNode = productDefFile.getTopNode();
+    return this.provideFoldingRangesForEndTerminatedBlocks(topNode);
+  }
+
+  private List<FoldingRange> provideFoldingRangesForEndTerminatedBlocks(final AstNode topNode) {
     return topNode.getChildren().stream()
         .filter(
             node ->
