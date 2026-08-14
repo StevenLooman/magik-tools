@@ -23,28 +23,24 @@ import nl.ramsolutions.sw.magik.languageserver.MagikLanguageServerSettings;
 import org.eclipse.lsp4j.InlayHint;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
-/** Method invocation argument name {@link InlayHint} provider. */
-class ArgumentNameInlayHintSupplier {
+/** Method invocation argument name {@link InlayHint} module. */
+class ArgumentNameInlayHintModule implements InlayHintModule {
 
   private final MagikToolsProperties properties;
 
-  ArgumentNameInlayHintSupplier(final MagikToolsProperties properties) {
+  ArgumentNameInlayHintModule(final MagikToolsProperties properties) {
     this.properties = properties;
   }
 
-  /**
-   * Get method invocation argument {@link InlayHint}s.
-   *
-   * @param magikFile Magik file.
-   * @param range Range to get {@link InlayHint}s for.
-   * @return {@link InlayHint}s.
-   */
-  Stream<InlayHint> getArgumentNameInlayHints(final MagikTypedFile magikFile, final Range range) {
+  @Override
+  public Stream<InlayHint> provideInlayHints(final InlayHintContext context) {
     final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
     if (!settings.getTypingShowArgumentInlayHints()) {
       return Stream.empty();
     }
 
+    final MagikTypedFile magikFile = context.file();
+    final Range range = context.range();
     final AstNode topNode = magikFile.getTopNode();
     return topNode.getDescendants(MagikGrammar.METHOD_INVOCATION).stream()
         .filter(node -> Range.fromTree(node).overlapsWith(range))

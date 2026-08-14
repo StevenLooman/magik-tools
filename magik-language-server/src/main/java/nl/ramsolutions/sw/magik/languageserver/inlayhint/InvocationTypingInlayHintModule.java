@@ -15,60 +15,30 @@ import nl.ramsolutions.sw.magik.languageserver.MagikLanguageServerSettings;
 import org.eclipse.lsp4j.InlayHint;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
-/** Typing {@link InlayHint} provider. */
-class TypingInlayHintSupplier {
+/** Method/procedure invocation return type {@link InlayHint} module. */
+class InvocationTypingInlayHintModule implements InlayHintModule {
 
-  final MagikToolsProperties properties;
+  private final MagikToolsProperties properties;
 
-  TypingInlayHintSupplier(final MagikToolsProperties properties) {
+  InvocationTypingInlayHintModule(final MagikToolsProperties properties) {
     this.properties = properties;
   }
 
-  /**
-   * Get atom {@link InlayHint}s.
-   *
-   * @param magikFile Magik file.
-   * @param range Range to get {@link InlayHint}s for.
-   * @return {@link InlayHint}s.
-   */
-  Stream<InlayHint> getTypingInlayHints(final MagikTypedFile magikFile, final Range range) {
+  @Override
+  public Stream<InlayHint> provideInlayHints(final InlayHintContext context) {
     final MagikLanguageServerSettings settings = new MagikLanguageServerSettings(this.properties);
     if (!settings.getTypingShowTypingInlayHints()) {
       return Stream.empty();
     }
 
+    final MagikTypedFile magikFile = context.file();
+    final Range range = context.range();
     final AstNode topNode = magikFile.getTopNode();
-    return Stream.concat(
-        topNode.getDescendants(MagikGrammar.ATOM).stream()
-            .filter(node -> Range.fromTree(node).overlapsWith(range))
-            .flatMap(node -> this.getInlayHintsForAtoms(magikFile, node)),
-        topNode
-            .getDescendants(MagikGrammar.METHOD_INVOCATION, MagikGrammar.PROCEDURE_INVOCATION)
-            .stream()
-            .filter(node -> Range.fromTree(node).overlapsWith(range))
-            .flatMap(node -> this.getInlayHintsForInvocations(magikFile, node)));
-    // TODO: Unary operators
-    // TODO: Binary operators
-  }
-
-  private Stream<InlayHint> getInlayHintsForAtoms(
-      final MagikTypedFile magikFile, final AstNode atomNode) {
-    final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-    final ExpressionResultString result = reasonerState.getNodeTypeSilent(atomNode);
-    if (result == null || result.stream().anyMatch(TypeString::isUndefined)) {
-      return Stream.empty();
-    }
-
-    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
-    if (typeStr.isUndefined() || typeStr.isParameterReference() || typeStr.isSlotReference()) {
-      return Stream.empty();
-    }
-
-    final Position position = Position.fromTokenStart(atomNode.getToken());
-    final String label = result.getTypeNames(",");
-    final InlayHint inlayHint =
-        new InlayHint(Lsp4jConversion.positionToLsp4j(position), Either.forLeft(label));
-    return Stream.of(inlayHint);
+    return topNode
+        .getDescendants(MagikGrammar.METHOD_INVOCATION, MagikGrammar.PROCEDURE_INVOCATION)
+        .stream()
+        .filter(node -> Range.fromTree(node).overlapsWith(range))
+        .flatMap(node -> this.getInlayHintsForInvocations(magikFile, node));
   }
 
   private Stream<InlayHint> getInlayHintsForInvocations(
