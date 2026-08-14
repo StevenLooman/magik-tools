@@ -68,6 +68,55 @@ class TypeHierarchyProviderTest {
   }
 
   @Test
+  void testPrepareTypeHierarchyNoIdentifier() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    final String code =
+        """
+        _method exemplar.method
+        _endmethod
+        """;
+    final Position position = new Position(0, 0); // On '_method', not an identifier.
+
+    final List<TypeHierarchyItem> items =
+        this.getPrepareTypeHierarchy(code, position, definitionKeeper);
+    assertThat(items).isNull();
+  }
+
+  @Test
+  void testPrepareTypeHierarchyMethodDefinitionExemplarNameUnknown() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    final String code =
+        """
+        _method unknown_exemplar.method
+        _endmethod
+        """;
+    final Position position = new Position(0, 8); // On 'unknown_exemplar'.
+
+    final List<TypeHierarchyItem> items =
+        this.getPrepareTypeHierarchy(code, position, definitionKeeper);
+    assertThat(items).isNull();
+  }
+
+  @Test
+  void testPrepareTypeHierarchyAtomUndefined() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    final String code =
+        """
+        _method exemplar.method
+          _return some_undeclared_thing
+        _endmethod
+        """;
+    final Position position = new Position(1, 10); // On 'some_undeclared_thing'.
+
+    final List<TypeHierarchyItem> items =
+        this.getPrepareTypeHierarchy(code, position, definitionKeeper);
+    assertThat(items).isNull();
+  }
+
+  @Test
   void testGetSubtypes() {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");

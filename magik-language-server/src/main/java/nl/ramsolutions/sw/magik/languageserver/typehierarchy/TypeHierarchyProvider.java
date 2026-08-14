@@ -5,17 +5,15 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
-import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.Position;
@@ -25,12 +23,16 @@ import org.eclipse.lsp4j.TypeHierarchyItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Type Hierarchy Provider. */
+/**
+ * Type hierarchy provider. Runs a set of {@link TypeHierarchyModule}s and uses the first claimed
+ * result.
+ */
 public class TypeHierarchyProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(TypeHierarchyProvider.class);
 
   private final IDefinitionKeeper definitionKeeper;
+  private final List<TypeHierarchyModule> modules;
 
   /**
    * Constructor.
@@ -39,6 +41,18 @@ public class TypeHierarchyProvider {
    */
   public TypeHierarchyProvider(final IDefinitionKeeper definitionKeeper) {
     this.definitionKeeper = definitionKeeper;
+    this.modules = this.createModules();
+  }
+
+  /**
+   * Create the ordered modules. Override to add or remove type hierarchy modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<TypeHierarchyModule> createModules() {
+    return List.of(
+        new ExemplarNameTypeHierarchyModule(this.definitionKeeper),
+        new AtomTypeHierarchyModule(this.definitionKeeper));
   }
 
   /**
@@ -64,44 +78,25 @@ public class TypeHierarchyProvider {
     final AstNode topNode = magikFile.getTopNode();
 
     // Should always be on an identifier.
-    final AstNode tokenNode =
+    final AstNode positionNode =
         AstQuery.nodeAt(
             topNode, Lsp4jConversion.positionFromLsp4j(position), MagikGrammar.IDENTIFIER);
-    if (tokenNode == null) {
+    if (positionNode == null) {
       return null; // NOSONAR: LSP requires null.
     }
 
-    // Ensure it is on a class identifier, or a variable.
-    final TypeStringResolver resolver = new TypeStringResolver(this.definitionKeeper);
-    final AstNode methodDefinitionNode =
-        AstQuery.getParentFromChain(
-            tokenNode,
-            MagikGrammar.IDENTIFIER,
-            MagikGrammar.EXEMPLAR_NAME,
-            MagikGrammar.METHOD_DEFINITION);
-    final AstNode atomNode =
-        AstQuery.getParentFromChain(tokenNode, MagikGrammar.IDENTIFIER, MagikGrammar.ATOM);
-    if (methodDefinitionNode != null) {
-      final MethodDefinitionNodeHelper methodDefinitionNodeHelper =
-          new MethodDefinitionNodeHelper(methodDefinitionNode);
-      final TypeString typeStr = methodDefinitionNodeHelper.getExemplarTypeString();
-      final ExemplarDefinition definition = resolver.getExemplarDefinition(typeStr);
-      if (definition == null) {
-        return null; // NOSONAR: LSP requires null.
-      }
+    // Run the modules in order; the first module claiming the context provides the definitions.
+    final TypeHierarchyContext context = new TypeHierarchyContext(magikFile, positionNode);
+    for (final TypeHierarchyModule module : this.modules) {
+      final Optional<List<ExemplarDefinition>> result = module.tryPrepareTypeHierarchy(context);
+      if (result.isPresent()) {
+        final List<ExemplarDefinition> exemplarDefs = result.get();
+        // LSP requires null, not an empty list, when nothing is found.
+        if (exemplarDefs.isEmpty()) {
+          return null; // NOSONAR: LSP requires null.
+        }
 
-      final TypeHierarchyItem item = this.toTypeHierarchyItem(definition);
-      return List.of(item);
-    } else if (atomNode != null) {
-      // Get type from node.
-      final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-      final ExpressionResultString result = reasonerState.getNodeType(atomNode);
-      final TypeString typeStr = result.get(0, null);
-      if (typeStr != null && !typeStr.isUndefined()) {
-        final ExemplarDefinition definition = resolver.getExemplarDefinition(typeStr);
-        Objects.requireNonNull(definition);
-        final TypeHierarchyItem item = this.toTypeHierarchyItem(definition);
-        return List.of(item);
+        return exemplarDefs.stream().map(this::toTypeHierarchyItem).toList();
       }
     }
 
