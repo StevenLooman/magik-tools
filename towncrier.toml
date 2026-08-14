@@ -3,5 +3,6 @@ directory = "changes"
 filename = "CHANGES.md"
 start_string = "<!-- towncrier release notes start -->\n"
 underlines = ["", "", ""]
+wrap = true
 title_format = "## [{version}](https://github.com/StevenLooman/magik-tools/tree/{version}) - {project_date}"
 issue_format = "[#{issue}](https://github.com/StevenLooman/magik-tools/issues/{issue})"
