@@ -5,6 +5,7 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
@@ -19,8 +20,24 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either3;
 
-/** Rename provider. */
+/** Rename provider. Runs a set of {@link RenameModule}s and uses the first claimed renamer. */
 public class RenameProvider {
+
+  private final List<RenameModule> modules;
+
+  /** Constructor. */
+  public RenameProvider() {
+    this.modules = this.createModules();
+  }
+
+  /**
+   * Create the ordered modules. Override to add or remove rename modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<RenameModule> createModules() {
+    return List.of(new VariableRenamerModule(), new MethodRenamerModule());
+  }
 
   /**
    * Set server capabilities.
@@ -42,13 +59,7 @@ public class RenameProvider {
    */
   public Either3<org.eclipse.lsp4j.Range, PrepareRenameResult, PrepareRenameDefaultBehavior>
       providePrepareRename(final MagikTypedFile magikFile, final Position position) {
-    // Parse magik.
-    final AstNode topNode = magikFile.getTopNode();
-
-    // Should always be on an identifier.
-    final AstNode node =
-        AstQuery.nodeAt(
-            topNode, Lsp4jConversion.positionFromLsp4j(position), MagikGrammar.IDENTIFIER);
+    final AstNode node = this.resolveIdentifierNode(magikFile, position);
     if (node == null) {
       return null;
     }
@@ -76,13 +87,7 @@ public class RenameProvider {
    */
   public WorkspaceEdit provideRename(
       final MagikTypedFile magikFile, final Position position, final String newName) {
-    // Parse magik.
-    final AstNode topNode = magikFile.getTopNode();
-
-    // Should always be on an identifier.
-    final AstNode node =
-        AstQuery.nodeAt(
-            topNode, Lsp4jConversion.positionFromLsp4j(position), MagikGrammar.IDENTIFIER);
+    final AstNode node = this.resolveIdentifierNode(magikFile, position);
     if (node == null) {
       return null;
     }
@@ -108,11 +113,21 @@ public class RenameProvider {
   }
 
   @CheckForNull
+  private AstNode resolveIdentifierNode(final MagikTypedFile magikFile, final Position position) {
+    // Should always be on an identifier.
+    final AstNode topNode = magikFile.getTopNode();
+    return AstQuery.nodeAt(
+        topNode, Lsp4jConversion.positionFromLsp4j(position), MagikGrammar.IDENTIFIER);
+  }
+
+  @CheckForNull
   private Renamer getRenamerForNode(final MagikTypedFile magikFile, final AstNode node) {
-    if (VariableRenamer.canHandleRename(magikFile, node)) {
-      return new VariableRenamer(magikFile, node);
-    } else if (MethodRenamer.canHandleRename(magikFile, node)) {
-      return new MethodRenamer(magikFile, node);
+    final RenameContext context = new RenameContext(magikFile, node);
+    for (final RenameModule module : this.modules) {
+      final Optional<Renamer> result = module.tryRenamer(context);
+      if (result.isPresent()) {
+        return result.get();
+      }
     }
 
     return null;
