@@ -1,9 +1,9 @@
 package nl.ramsolutions.sw.magik.languageserver.codeactions;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.checks.LoadListCheckList;
@@ -24,19 +24,20 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Code action provider. */
+/**
+ * Code action provider. Runs a set of {@link CodeActionModule}s for {@link MagikTypedFile}s and
+ * combines all of their results, unlike {@code HoverProvider}/{@code DefinitionsProvider}/{@code
+ * ReferencesProvider}, which use only the first module that claims the context.
+ */
 public class CodeActionProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CodeActionProvider.class);
 
+  private final MagikToolsProperties properties;
   private final ChecksCodeActionProvider productCodeActionProvider;
   private final ChecksCodeActionProvider moduleDefCodeActionProvider;
   private final ChecksCodeActionProvider loadListCodeActionProvider;
-  private final ChecksCodeActionProvider magikChecksCodeActionProvider;
-  private final ChecksCodeActionProvider magikTypedChecksCodeActionProvider;
-  private final ExtractMethodCodeActionProvider extractMethodCodeActionProvider;
-  private final ExtractExpressionCodeActionProvider extractExpressionCodeActionProvider;
-  private final ExtractLocalVariableCodeActionProvider extractLocalVariableCodeActionProvider;
+  private final List<CodeActionModule> modules;
 
   /**
    * Constructor.
@@ -44,19 +45,29 @@ public class CodeActionProvider {
    * @param properties {@link MagikToolsProperties} properties.
    */
   public CodeActionProvider(final MagikToolsProperties properties) {
+    this.properties = properties;
     this.productCodeActionProvider =
         new ChecksCodeActionProvider(ProductDefCheckList.INSTANCE, properties);
     this.moduleDefCodeActionProvider =
         new ChecksCodeActionProvider(ModuleDefCheckList.INSTANCE, properties);
     this.loadListCodeActionProvider =
         new ChecksCodeActionProvider(LoadListCheckList.INSTANCE, properties);
-    this.magikChecksCodeActionProvider =
-        new ChecksCodeActionProvider(MagikCheckList.INSTANCE, properties);
-    this.magikTypedChecksCodeActionProvider =
-        new ChecksCodeActionProvider(MagikTypedCheckList.INSTANCE, properties);
-    this.extractMethodCodeActionProvider = new ExtractMethodCodeActionProvider();
-    this.extractExpressionCodeActionProvider = new ExtractExpressionCodeActionProvider();
-    this.extractLocalVariableCodeActionProvider = new ExtractLocalVariableCodeActionProvider();
+    this.modules = this.createModules();
+  }
+
+  /**
+   * Create the code action modules for {@link MagikTypedFile}s. Override to add or remove code
+   * action modules.
+   *
+   * @return Code action modules.
+   */
+  protected List<CodeActionModule> createModules() {
+    return List.of(
+        new ChecksCodeActionModule(MagikCheckList.INSTANCE, this.properties),
+        new ChecksCodeActionModule(MagikTypedCheckList.INSTANCE, this.properties),
+        new ExtractMethodCodeActionModule(),
+        new ExtractExpressionCodeActionModule(),
+        new ExtractLocalVariableCodeActionModule());
   }
 
   /**
@@ -185,34 +196,16 @@ public class CodeActionProvider {
   public List<CodeAction> provideCodeActions(
       final MagikTypedFile magikFile, final Range range, final CodeActionContext context) {
     try {
-      final Stream<CodeAction> checksStream =
-          Stream.concat(
-                  this.magikChecksCodeActionProvider.provideCodeActions(magikFile, range).stream(),
-                  this.magikTypedChecksCodeActionProvider
-                      .provideCodeActions(magikFile, range)
-                      .stream())
-              .filter(
-                  codeAction ->
-                      codeAction.getEdits().stream()
-                          .anyMatch(edit -> edit.getRange().overlapsWith(range)));
-
-      final Stream<CodeAction> extractStream =
-          Stream.concat(
-              Stream.concat(
-                  this.extractMethodCodeActionProvider
-                      .provideCodeActions(magikFile, range)
-                      .stream(),
-                  this.extractExpressionCodeActionProvider
-                      .provideCodeActions(magikFile, range)
-                      .stream()),
-              this.extractLocalVariableCodeActionProvider
-                  .provideCodeActions(magikFile, range)
-                  .stream());
+      final CodeActionModuleContext moduleContext = new CodeActionModuleContext(magikFile, range);
+      final List<CodeAction> codeActions = new ArrayList<>();
+      for (final CodeActionModule module : this.modules) {
+        module.provideCodeActions(moduleContext).forEach(codeActions::add);
+      }
 
       final List<String> requestedKinds =
           context.getOnly() != null ? context.getOnly() : Collections.emptyList();
 
-      return Stream.concat(checksStream, extractStream)
+      return codeActions.stream()
           .filter(
               codeAction -> {
                 if (requestedKinds.isEmpty()) {
