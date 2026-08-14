@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.Location;
@@ -46,16 +47,28 @@ import org.slf4j.LoggerFactory;
 /** Call hierarchy provider. */
 public class CallHierarchyProvider {
 
-  private static final String DATA_URI = "uri";
-  private static final String DATA_METHOD_NAME = "methodName";
-  private static final String DATA_TYPE_STRING = "typeString";
+  static final String DATA_URI = "uri";
+  static final String DATA_METHOD_NAME = "methodName";
+  static final String DATA_TYPE_STRING = "typeString";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CallHierarchyProvider.class);
 
   private final IDefinitionKeeper definitionKeeper;
+  private final List<CallHierarchyModule> modules;
 
   public CallHierarchyProvider(final IDefinitionKeeper definitionKeeper) {
     this.definitionKeeper = definitionKeeper;
+    this.modules = this.createModules();
+  }
+
+  /**
+   * Create the ordered modules. Override to add or remove call hierarchy modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<CallHierarchyModule> createModules() {
+    return List.of(
+        new MethodDefinitionCallHierarchyModule(), new ProcedureDefinitionCallHierarchyModule());
   }
 
   /**
@@ -85,47 +98,15 @@ public class CallHierarchyProvider {
       return null; // NOSONAR: LSP requires null.
     }
 
-    final URI uri = magikFile.getUri();
-    final Location location = new Location(uri);
-    final String uriStr = location.getUri().toString();
-    final Range range = new Range(wantedNode);
-    if (wantedNode.is(MagikGrammar.METHOD_DEFINITION)) {
-      final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(wantedNode);
-      final String fullMethodName = helper.getFullExemplarMethodName();
-      final CallHierarchyItem item =
-          new CallHierarchyItem(
-              fullMethodName,
-              SymbolKind.Method,
-              uriStr,
-              Lsp4jConversion.rangeToLsp4j(range),
-              Lsp4jConversion.rangeToLsp4j(range));
-      final Map<String, String> data =
-          Map.of(
-              DATA_TYPE_STRING, helper.getExemplarTypeString().getFullString(),
-              DATA_METHOD_NAME, helper.getMethodName(),
-              DATA_URI, uriStr);
-      item.setData(data);
-      return List.of(item);
-    } else {
-      // PROCEDURE_DEFINITION
-      final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(wantedNode);
-      final String procName = helper.getProcedureName();
-      final String displayName = procName != null ? procName : "<anonymous>";
-      final String typeStrStr = AnonymousNamer.getNameForProcedure(wantedNode).getFullString();
-      final CallHierarchyItem item =
-          new CallHierarchyItem(
-              displayName,
-              SymbolKind.Function,
-              uriStr,
-              Lsp4jConversion.rangeToLsp4j(range),
-              Lsp4jConversion.rangeToLsp4j(range));
-      final Map<String, String> data =
-          Map.of(
-              DATA_TYPE_STRING, typeStrStr,
-              DATA_URI, uriStr);
-      item.setData(data);
-      return List.of(item);
+    final CallHierarchyContext context = new CallHierarchyContext(magikFile, wantedNode);
+    for (final CallHierarchyModule module : this.modules) {
+      final Optional<List<CallHierarchyItem>> result = module.tryCallHierarchy(context);
+      if (result.isPresent()) {
+        return result.get();
+      }
     }
+
+    return null; // NOSONAR: LSP requires null.
   }
 
   /**
