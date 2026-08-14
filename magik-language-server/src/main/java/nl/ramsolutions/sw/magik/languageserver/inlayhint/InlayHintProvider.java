@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw.magik.languageserver.inlayhint;
 
 import java.util.List;
-import java.util.stream.Stream;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
@@ -9,13 +8,36 @@ import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.InlayHint;
 import org.eclipse.lsp4j.ServerCapabilities;
 
-/** Provider for inlay hints. */
+/**
+ * Inlay hint provider. Runs a set of {@link InlayHintModule}s and combines all of their results,
+ * unlike {@code HoverProvider}/{@code DefinitionsProvider}/{@code ReferencesProvider}, which use
+ * only the first module that claims the context.
+ */
 public class InlayHintProvider {
 
   private final MagikToolsProperties properties;
+  private final List<InlayHintModule> modules;
 
+  /**
+   * Constructor.
+   *
+   * @param properties Properties.
+   */
   public InlayHintProvider(final MagikToolsProperties properties) {
     this.properties = properties;
+    this.modules = this.createModules();
+  }
+
+  /**
+   * Create the ordered modules for Magik files. Override to add or remove inlay hint modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<InlayHintModule> createModules() {
+    return List.of(
+        new ArgumentNameInlayHintModule(this.properties),
+        new AtomTypingInlayHintModule(this.properties),
+        new InvocationTypingInlayHintModule(this.properties));
   }
 
   /**
@@ -36,16 +58,8 @@ public class InlayHintProvider {
    */
   public List<InlayHint> provideInlayHints(
       final MagikTypedFile magikFile, final org.eclipse.lsp4j.Range lsp4jrange) {
-    // Get argument hints from method invocations.
     final Range range = Lsp4jConversion.rangeFromLsp4j(lsp4jrange);
-    final ArgumentNameInlayHintSupplier argumentNameInlayHintSupplier =
-        new ArgumentNameInlayHintSupplier(this.properties);
-    final TypingInlayHintSupplier typingInlayHintSupplier =
-        new TypingInlayHintSupplier(this.properties);
-    return Stream.of(
-            argumentNameInlayHintSupplier.getArgumentNameInlayHints(magikFile, range),
-            typingInlayHintSupplier.getTypingInlayHints(magikFile, range))
-        .flatMap(stream -> stream)
-        .toList();
+    final InlayHintContext context = new InlayHintContext(magikFile, range);
+    return this.modules.stream().flatMap(module -> module.provideInlayHints(context)).toList();
   }
 }

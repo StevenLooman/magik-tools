@@ -84,4 +84,89 @@ class InlayHintProviderTest {
                 new InlayHint(new Position(0, 14), Either.forLeft("param1:")),
                 new InlayHint(new Position(0, 22), Either.forLeft("param2:"))));
   }
+
+  @SuppressWarnings("checkstyle:MagicNumber")
+  @Test
+  void testProvideAtomTypingHint() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final String code =
+        """
+        _method a.b
+            :symbol
+        _endmethod
+        """;
+    final MagikToolsProperties properties =
+        new MagikToolsProperties(Map.of("magik.typing.showTypingInlayHints", "true"));
+    final InlayHintProvider provider = new InlayHintProvider(properties);
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
+
+    final List<InlayHint> inlayHints =
+        provider.provideInlayHints(magikFile, new Range(new Position(0, 0), new Position(3, 0)));
+    assertThat(inlayHints)
+        .isEqualTo(List.of(new InlayHint(new Position(1, 4), Either.forLeft("sw:symbol"))));
+  }
+
+  @SuppressWarnings("checkstyle:MagicNumber")
+  @Test
+  void testProvideAtomAndInvocationTypingHints() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_INTEGER,
+            "hover_me()",
+            Collections.emptySet(),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_SYMBOL),
+            ExpressionResultString.EMPTY));
+
+    final String code =
+        """
+        _method a.b
+            _local var << 1
+            var.hover_me()
+        _endmethod
+        """;
+    final MagikToolsProperties properties =
+        new MagikToolsProperties(Map.of("magik.typing.showTypingInlayHints", "true"));
+    final InlayHintProvider provider = new InlayHintProvider(properties);
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
+
+    final List<InlayHint> inlayHints =
+        provider.provideInlayHints(magikFile, new Range(new Position(0, 0), new Position(4, 0)));
+    assertThat(inlayHints)
+        .isEqualTo(
+            List.of(
+                new InlayHint(new Position(1, 18), Either.forLeft("sw:integer")),
+                new InlayHint(new Position(2, 4), Either.forLeft("sw:integer")),
+                new InlayHint(new Position(2, 18), Either.forLeft("->sw:symbol"))));
+  }
+
+  @SuppressWarnings("checkstyle:MagicNumber")
+  @Test
+  void testProvideTypingHintsDisabledByDefault() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final String code =
+        """
+        _method a.b
+            :symbol
+        _endmethod
+        """;
+    final MagikToolsProperties properties = new MagikToolsProperties(Collections.emptyMap());
+    final InlayHintProvider provider = new InlayHintProvider(properties);
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
+
+    final List<InlayHint> inlayHints =
+        provider.provideInlayHints(magikFile, new Range(new Position(0, 0), new Position(3, 0)));
+    assertThat(inlayHints).isEmpty();
+  }
 }
