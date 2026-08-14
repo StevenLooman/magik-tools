@@ -1,49 +1,67 @@
 package nl.ramsolutions.sw.magik.languageserver.references;
 
 import com.sonar.sslr.api.AstNode;
-import java.net.URI;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Optional;
+import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
-import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
-import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
-import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
-import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.scope.Scope;
-import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
-import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
-import nl.ramsolutions.sw.moduledef.ModuleUsage;
-import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
-import nl.ramsolutions.sw.productdef.ProductUsage;
-import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
 import org.eclipse.lsp4j.ServerCapabilities;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/** References provider. */
+/**
+ * References provider. Runs a set of {@link ReferencesModule}s and uses the first claimed result.
+ */
 public class ReferencesProvider {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ReferencesProvider.class);
+  private final List<ReferencesModule<MagikTypedFile>> magikModules;
+  private final List<ReferencesModule<ProductDefFile>> productDefModules;
+  private final List<ReferencesModule<ModuleDefFile>> moduleDefModules;
+
+  /** Constructor. */
+  public ReferencesProvider() {
+    this.magikModules = this.createMagikModules();
+    this.productDefModules = this.createProductDefModules();
+    this.moduleDefModules = this.createModuleDefModules();
+  }
+
+  /**
+   * Create the ordered modules for Magik files. Override to add or remove references modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<ReferencesModule<MagikTypedFile>> createMagikModules() {
+    return List.of(
+        new MethodNameReferencesModule(),
+        new ExemplarNameReferencesModule(),
+        new AtomReferencesModule(),
+        new ConditionNameReferencesModule(),
+        new SlotReferencesModule());
+  }
+
+  /**
+   * Create the ordered modules for product.def files. Override to add or remove references modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<ReferencesModule<ProductDefFile>> createProductDefModules() {
+    return List.of(new ProductNameReferencesModule());
+  }
+
+  /**
+   * Create the ordered modules for module.def files. Override to add or remove references modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<ReferencesModule<ModuleDefFile>> createModuleDefModules() {
+    return List.of(new ModuleNameReferencesModule());
+  }
 
   /**
    * Set server capabilities.
@@ -61,27 +79,11 @@ public class ReferencesProvider {
    * @param position Position in file.
    * @return Locations for references.
    */
-  @SuppressWarnings("checkstyle:NestedIfDepth")
   public List<Location> provideReferences(
       final ProductDefFile productDefFile, final Position position) {
     final AstNode node = productDefFile.getTopNode();
-    final AstNode hoveredTokenNode = AstQuery.nodeAt(node, position);
-    if (hoveredTokenNode == null) {
-      return Collections.emptyList();
-    }
-
-    final AstNode productNameNode =
-        AstQuery.getParentFromChain(
-            hoveredTokenNode,
-            ProductDefinitionGrammar.IDENTIFIER,
-            ProductDefinitionGrammar.PRODUCT_NAME);
-    if (productNameNode == null) {
-      return Collections.emptyList();
-    }
-
-    final IDefinitionKeeper definitionKeeper = productDefFile.getDefinitionKeeper();
-    final String productName = productNameNode.getTokenValue();
-    return this.referencesToProductName(definitionKeeper, productName);
+    final AstNode positionNode = AstQuery.nodeAt(node, position);
+    return this.provideReferences(this.productDefModules, productDefFile, positionNode);
   }
 
   /**
@@ -91,25 +93,11 @@ public class ReferencesProvider {
    * @param position Position in file.
    * @return Locations for references.
    */
-  @SuppressWarnings("checkstyle:NestedIfDepth")
   public List<Location> provideReferences(
       final ModuleDefFile moduleDefFile, final Position position) {
     final AstNode node = moduleDefFile.getTopNode();
-    final AstNode tokenNode = AstQuery.nodeAt(node, position);
-    if (tokenNode == null) {
-      return Collections.emptyList();
-    }
-
-    final AstNode moduleNameNode =
-        AstQuery.getParentFromChain(
-            tokenNode, ModuleDefinitionGrammar.IDENTIFIER, ModuleDefinitionGrammar.MODULE_NAME);
-    if (moduleNameNode == null) {
-      return Collections.emptyList();
-    }
-
-    final IDefinitionKeeper definitionKeeper = moduleDefFile.getDefinitionKeeper();
-    final String moduleName = moduleNameNode.getTokenValue();
-    return this.referencesToModuleName(definitionKeeper, moduleName);
+    final AstNode positionNode = AstQuery.nodeAt(node, position);
+    return this.provideReferences(this.moduleDefModules, moduleDefFile, positionNode);
   }
 
   /**
@@ -119,7 +107,6 @@ public class ReferencesProvider {
    * @param position Position in file.
    * @return Locations for references.
    */
-  @SuppressWarnings("checkstyle:NestedIfDepth")
   public List<Location> provideReferences(
       final LoadListFile loadListFile, final Position position) {
     return Collections.emptyList();
@@ -132,189 +119,28 @@ public class ReferencesProvider {
    * @param position Position in file.
    * @return Locations for references.
    */
-  @SuppressWarnings("checkstyle:NestedIfDepth")
   public List<Location> provideReferences(final MagikTypedFile magikFile, final Position position) {
-    // Parse magik.
-    final AstNode node = magikFile.getTopNode();
-    final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
-
     // Should always be on an identifier.
-    final AstNode currentNode = AstQuery.nodeAt(node, position, MagikGrammar.IDENTIFIER);
-    if (currentNode == null) {
+    final AstNode node = magikFile.getTopNode();
+    final AstNode positionNode = AstQuery.nodeAt(node, position, MagikGrammar.IDENTIFIER);
+    return this.provideReferences(this.magikModules, magikFile, positionNode);
+  }
+
+  private <T extends OpenedFile> List<Location> provideReferences(
+      final List<ReferencesModule<T>> modules, final T file, final AstNode positionNode) {
+    if (positionNode == null) {
       return Collections.emptyList();
     }
 
-    final AstNode wantedNode =
-        currentNode.getFirstAncestor(
-            MagikGrammar.METHOD_INVOCATION,
-            MagikGrammar.METHOD_NAME,
-            MagikGrammar.EXEMPLAR_NAME,
-            MagikGrammar.CONDITION_NAME,
-            MagikGrammar.SLOT,
-            MagikGrammar.ATOM);
-    LOGGER.trace("Wanted node: {}", wantedNode);
-    final PackageNodeHelper packageHelper = new PackageNodeHelper(wantedNode);
-    if (wantedNode == null) {
-      return Collections.emptyList();
-    } else if (wantedNode.is(MagikGrammar.METHOD_NAME)) {
-      final AstNode parentNode = wantedNode.getParent();
-      if (parentNode.is(MagikGrammar.METHOD_DEFINITION)) {
-        final AstNode methodDefinitionNode = wantedNode.getParent();
-        final MethodDefinitionNodeHelper helper =
-            new MethodDefinitionNodeHelper(methodDefinitionNode);
-        final String methodName = helper.getMethodName();
-        return this.referencesToMethod(definitionKeeper, TypeString.UNDEFINED, methodName);
-      } else if (parentNode.is(MagikGrammar.METHOD_INVOCATION)) {
-        final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(parentNode);
-        final String methodName = helper.getMethodName();
-        return this.referencesToMethod(definitionKeeper, TypeString.UNDEFINED, methodName);
+    // Run the modules in order; the first module claiming the context provides the locations.
+    final ReferencesContext<T> context = new ReferencesContext<>(file, positionNode);
+    for (final ReferencesModule<T> module : modules) {
+      final Optional<List<Location>> result = module.tryReferences(context);
+      if (result.isPresent()) {
+        return result.get();
       }
-    } else if (wantedNode.is(MagikGrammar.EXEMPLAR_NAME)) {
-      final String identifier = currentNode.getTokenValue();
-      final String pakkage = packageHelper.getCurrentPackage();
-      final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
-      return this.referencesToType(definitionKeeper, typeString);
-    } else if (wantedNode.is(MagikGrammar.ATOM)
-        && wantedNode.getFirstChild().is(MagikGrammar.IDENTIFIER)) {
-      final Scope scope = magikFile.getGlobalScope().getScopeForNode(wantedNode);
-      Objects.requireNonNull(scope);
-      final String identifier = currentNode.getTokenValue();
-      final ScopeEntry scopeEntry = scope.getScopeEntry(identifier);
-      if (scopeEntry == null) {
-        return Collections.emptyList();
-      } else if (scopeEntry.isType(
-          ScopeEntry.Type.DEFINITION,
-          ScopeEntry.Type.LOCAL,
-          ScopeEntry.Type.IMPORT,
-          ScopeEntry.Type.CONSTANT,
-          ScopeEntry.Type.PARAMETER)) {
-        final List<AstNode> usages = scopeEntry.getUsages();
-        final URI uri = magikFile.getUri();
-        return usages.stream().map(usageNode -> new Location(uri, usageNode)).toList();
-      } else if (scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC)) {
-        final String pakkage = packageHelper.getCurrentPackage();
-        final TypeString typeString = TypeString.ofIdentifier(identifier, pakkage);
-        return this.referencesToType(definitionKeeper, typeString);
-      }
-    } else if (wantedNode.is(MagikGrammar.CONDITION_NAME)) {
-      final String conditionName = currentNode.getTokenValue();
-      LOGGER.debug("Getting references to condition: {}", conditionName);
-      return this.referencesToCondition(definitionKeeper, conditionName);
-    } else if (wantedNode.is(MagikGrammar.SLOT)) {
-      final String slotName = currentNode.getTokenValue();
-      LOGGER.debug("Getting references to slot: {}", slotName);
-      return this.referencesToSlot(definitionKeeper, slotName);
     }
 
     return Collections.emptyList();
-  }
-
-  private List<Location> referencesToMethod(
-      final IDefinitionKeeper definitionKeeper,
-      final TypeString typeName,
-      final String methodName) {
-    LOGGER.debug("Finding references to method: {}", methodName);
-
-    // Build set of types which may contain this method: type + ancestors.
-    final Set<TypeString> wantedTypeRefs = new HashSet<>();
-    wantedTypeRefs.add(TypeString.UNDEFINED); // For unreasoned/undetermined calls.
-    wantedTypeRefs.add(typeName);
-    // TODO: Add all ancestors too?
-
-    final Collection<MethodUsage> searchedMethodUsages =
-        wantedTypeRefs.stream()
-            .map(wantedTypeRef -> new MethodUsage(wantedTypeRef, methodName))
-            .collect(Collectors.toSet());
-    final Predicate<MethodUsage> filterPredicate = searchedMethodUsages::contains;
-
-    // Find references.
-    return definitionKeeper.getMethodDefinitions().stream()
-        .flatMap(def -> def.getUsedMethods().stream())
-        .filter(filterPredicate::test)
-        .map(MethodUsage::getLocation)
-        .map(Location::validLocation)
-        .toList();
-  }
-
-  private List<Location> referencesToType(
-      final IDefinitionKeeper definitionKeeper, final TypeString typeString) {
-    LOGGER.debug("Finding references to type: {}", typeString);
-
-    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
-    final ExemplarDefinition exemplarDefinition = resolver.getExemplarDefinition(typeString);
-    if (exemplarDefinition == null) {
-      return Collections.emptyList();
-    }
-
-    // TODO: We need to resolve the referenced types, as the indexed globals might not have the
-    // right (unresolved) package. I.e., We might need to match only on identifier, as the
-    // usedGlobal might have a different package? This is because the ref might be stored with the
-    // current package.
-    final TypeString exemplarTypeString = exemplarDefinition.getTypeString();
-    final Set<TypeString> searchedTypes = Set.of(exemplarTypeString);
-    final Collection<GlobalUsage> wantedGlobalUsages =
-        searchedTypes.stream()
-            .map(wantedTypeRef -> new GlobalUsage(wantedTypeRef, null, null))
-            .collect(Collectors.toSet());
-    final Predicate<GlobalUsage> filterPredicate = wantedGlobalUsages::contains;
-
-    // Find references.
-    // TODO: Also parameters, return types of methods/procedures.
-    // TODO: Also slots of methods.
-    return Stream.of(
-            definitionKeeper.getMethodDefinitions().stream()
-                .flatMap(def -> def.getUsedGlobals().stream()),
-            definitionKeeper.getProcedureDefinitions().stream()
-                .flatMap(def -> def.getUsedGlobals().stream()))
-        .flatMap(stream -> stream)
-        .filter(filterPredicate::test)
-        .map(GlobalUsage::getLocation)
-        .map(Location::validLocation)
-        .toList();
-  }
-
-  private List<Location> referencesToCondition(
-      final IDefinitionKeeper definitionKeeper, final String conditionName) {
-    LOGGER.debug("Finding references to condition: {}", conditionName);
-    return definitionKeeper.getMethodDefinitions().stream()
-        .flatMap(def -> def.getUsedConditions().stream())
-        .filter(conditionUsage -> conditionUsage.getConditionName().equals(conditionName))
-        .map(ConditionUsage::getLocation)
-        .map(Location::validLocation)
-        .toList();
-  }
-
-  private List<Location> referencesToSlot(
-      final IDefinitionKeeper definitionKeeper, final String slotName) {
-    LOGGER.debug("Finding references to slot: {}", slotName);
-    return definitionKeeper.getMethodDefinitions().stream()
-        .flatMap(def -> def.getUsedSlots().stream())
-        .filter(slotUsage -> slotUsage.getSlotName().equals(slotName))
-        .map(SlotUsage::getLocation)
-        .map(Location::validLocation)
-        .toList();
-  }
-
-  private List<Location> referencesToProductName(
-      final IDefinitionKeeper definitionKeeper, final String productName) {
-    LOGGER.debug("Finding references to product: {}", productName);
-    final ProductUsage searchedProductUsage = new ProductUsage(productName, null);
-    return definitionKeeper.getProductDefinitions().stream()
-        .flatMap(def -> def.getUsages().stream())
-        .filter(productUsage -> productUsage.equals(searchedProductUsage))
-        .map(ProductUsage::getLocation)
-        .toList();
-  }
-
-  private List<Location> referencesToModuleName(
-      final IDefinitionKeeper definitionKeeper, final String moduleName) {
-    LOGGER.debug("Finding references to product: {}", moduleName);
-    final ModuleUsage searchedModuleUsage = new ModuleUsage(moduleName, null);
-    return definitionKeeper.getModuleDefinitions().stream()
-        .flatMap(
-            def -> Stream.concat(def.getRequiredModules().stream(), def.getTestModules().stream()))
-        .filter(moduleUsage -> moduleUsage.equals(searchedModuleUsage))
-        .map(ModuleUsage::getLocation)
-        .toList();
   }
 }
