@@ -1,0 +1,6 @@
+# Check text files out with LF on every platform. Windows' core.autocrlf
+# otherwise hands CRLF to tests that match literal source text.
+* text=auto eol=lf
+
+*.png binary
+*.jar binary
