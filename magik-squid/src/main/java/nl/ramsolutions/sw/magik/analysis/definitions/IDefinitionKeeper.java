@@ -165,5 +165,19 @@ public interface IDefinitionKeeper {
    */
   Collection<IDefinition> getDefinitionsByPath(Path path);
 
+  /**
+   * Atomically replace all definitions for {@code path} with {@code definitions}.
+   *
+   * <p>A definition that survives the replacement is never momentarily absent to a concurrent
+   * reader, unlike removing the old definitions and then adding the new ones. Used when re-indexing
+   * an edited file.
+   *
+   * @param path Path whose definitions to replace.
+   * @param definitions New definitions for the path.
+   */
+  default void replaceDefinitionsForPath(Path path, Collection<IDefinition> definitions) {
+    throw new UnsupportedOperationException();
+  }
+
   void clear();
 }

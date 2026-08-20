@@ -4,6 +4,8 @@ import com.sonar.sslr.api.RecognitionException;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.SourceFileScanner;
@@ -41,7 +43,15 @@ public class ProductIndexer {
     final FileChangeType fileChangeType = fileEvent.getFileChangeType();
     final Path path = fileEvent.getPath();
     if (fileChangeType == FileChangeType.CHANGED || fileChangeType == FileChangeType.DELETED) {
-      this.definitionKeeper.getDefinitionsByPath(path).forEach(this.definitionKeeper::remove);
+      // Only drop what this indexer owns: every watched-file event reaches all indexers, and only
+      // the owning one puts its definitions back.
+      final Collection<IDefinition> definitions = this.definitionKeeper.getDefinitionsByPath(path);
+      final List<ProductDefinition> ownDefinitions =
+          definitions.stream()
+              .filter(ProductDefinition.class::isInstance)
+              .map(ProductDefinition.class::cast)
+              .toList();
+      ownDefinitions.forEach(this.definitionKeeper::remove);
     }
 
     if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
