@@ -33,6 +33,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Provenance;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -191,6 +192,56 @@ public final class JsonDefinitionReader {
     }
   }
 
+  private static final class MagikFileDefinitionCreator
+      implements InstanceCreator<MagikFileDefinition> {
+
+    @Override
+    public MagikFileDefinition createInstance(final Type type) {
+      // Defaults provenance to REASONED, even if not set in the source JSON.
+      return new MagikFileDefinition(null, null);
+    }
+  }
+
+  private static final class InheritanceDefinitionCreator
+      implements InstanceCreator<InheritanceDefinition> {
+
+    @Override
+    public InheritanceDefinition createInstance(final Type type) {
+      // Defaults provenance to REASONED, even if not set in the source JSON.
+      return new InheritanceDefinition(
+          null, null, null, null, null, TypeString.UNDEFINED, TypeString.UNDEFINED);
+    }
+  }
+
+  private static final class SlotDefinitionCreator implements InstanceCreator<SlotDefinition> {
+
+    @Override
+    public SlotDefinition createInstance(final Type type) {
+      // Defaults provenance to REASONED, even if not set in the source JSON.
+      return new SlotDefinition(
+          null, null, null, null, null, TypeString.UNDEFINED, "dummy_slot", TypeString.UNDEFINED);
+    }
+  }
+
+  private static final class BinaryOperatorDefinitionCreator
+      implements InstanceCreator<BinaryOperatorDefinition> {
+
+    @Override
+    public BinaryOperatorDefinition createInstance(final Type type) {
+      // Defaults provenance to REASONED, even if not set in the source JSON.
+      return new BinaryOperatorDefinition(
+          null,
+          null,
+          null,
+          null,
+          null,
+          "dummy_operator",
+          TypeString.UNDEFINED,
+          TypeString.UNDEFINED,
+          TypeString.UNDEFINED);
+    }
+  }
+
   private static final class ProcedureDefinitionCreator
       implements InstanceCreator<ProcedureDefinition> {
 
@@ -251,9 +302,18 @@ public final class JsonDefinitionReader {
   private static final Logger LOGGER = LoggerFactory.getLogger(JsonDefinitionReader.class);
 
   private final IDefinitionKeeper definitionKeeper;
+  private Provenance defaultProvenance = Provenance.DUMPED;
 
   private JsonDefinitionReader(final IDefinitionKeeper definitionKeeper) {
     this.definitionKeeper = definitionKeeper;
+  }
+
+  private Provenance provenanceOf(final String stored) {
+    return stored != null ? Provenance.valueOf(stored) : this.defaultProvenance;
+  }
+
+  private String provenanceRawOf(final JsonObject instruction) {
+    return instruction.has("provenance") ? instruction.get("provenance").getAsString() : null;
   }
 
   private void run(final Path path) throws IOException {
@@ -374,6 +434,10 @@ public final class JsonDefinitionReader {
         .registerTypeAdapter(GlobalDefinition.class, new GlobalDefinitionCreator())
         .registerTypeAdapter(PackageDefinition.class, new PackageDefinitionCreator())
         .registerTypeAdapter(ConditionDefinition.class, new ConditionDefinitionCreator())
+        .registerTypeAdapter(MagikFileDefinition.class, new MagikFileDefinitionCreator())
+        .registerTypeAdapter(InheritanceDefinition.class, new InheritanceDefinitionCreator())
+        .registerTypeAdapter(SlotDefinition.class, new SlotDefinitionCreator())
+        .registerTypeAdapter(BinaryOperatorDefinition.class, new BinaryOperatorDefinitionCreator())
         .create();
   }
 
@@ -392,13 +456,19 @@ public final class JsonDefinitionReader {
   private void handleMagikFile(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final MagikFileDefinition definition = gson.fromJson(instruction, MagikFileDefinition.class);
-    this.definitionKeeper.add(definition);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final MagikFileDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
   }
 
   private void handlePackage(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final PackageDefinition definition = gson.fromJson(instruction, PackageDefinition.class);
-    this.definitionKeeper.add(definition);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final PackageDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
   }
 
   private void handleType(final JsonObject instruction) {
@@ -411,55 +481,79 @@ public final class JsonDefinitionReader {
     this.definitionKeeper.getExemplarDefinitions(typeString).stream()
         .filter(def -> def.getLocation() == null)
         .forEach(this.definitionKeeper::remove);
-    this.definitionKeeper.add(definition);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final ExemplarDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
   }
 
   private void handleInheritance(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final InheritanceDefinition definition =
         gson.fromJson(instruction, InheritanceDefinition.class);
-    this.definitionKeeper.add(definition);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final InheritanceDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
   }
 
   private void handleSlot(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final SlotDefinition definition = gson.fromJson(instruction, SlotDefinition.class);
-    this.definitionKeeper.add(definition);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final SlotDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
   }
 
   private void handleMethod(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final MethodDefinition definition = gson.fromJson(instruction, MethodDefinition.class);
-    this.definitionKeeper.add(definition);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final MethodDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
   }
 
   private void handleCondition(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final ConditionDefinition definition = gson.fromJson(instruction, ConditionDefinition.class);
-    this.definitionKeeper.add(definition);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final ConditionDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
   }
 
   private void handleBinaryOperator(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final BinaryOperatorDefinition definition =
         gson.fromJson(instruction, BinaryOperatorDefinition.class);
-    this.definitionKeeper.add(definition);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final BinaryOperatorDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
   }
 
   private void handleProcedure(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final ProcedureDefinition definition = gson.fromJson(instruction, ProcedureDefinition.class);
-    this.definitionKeeper.add(definition);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final ProcedureDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
   }
 
   private void handleGlobal(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final GlobalDefinition definition = gson.fromJson(instruction, GlobalDefinition.class);
-    this.definitionKeeper.add(definition);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final GlobalDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
   }
 
   /**
-   * Read types from a JSON-line file.
+   * Read types from a JSON-line file, defaulting provenance-less rows to {@link Provenance#DUMPED}.
    *
    * @param path Path to JSON-line file.
    * @param definitionKeeper {@link IDefinitionKeeper} to fill.
@@ -467,7 +561,24 @@ public final class JsonDefinitionReader {
    */
   public static void readTypes(final Path path, final IDefinitionKeeper definitionKeeper)
       throws IOException {
+    readTypes(path, definitionKeeper, Provenance.DUMPED);
+  }
+
+  /**
+   * Read types from a JSON-line file, defaulting the provenance of instructions with no {@code
+   * provenance} property to {@code defaultProvenance}.
+   *
+   * @param path Path to JSON-line file.
+   * @param definitionKeeper {@link IDefinitionKeeper} to fill.
+   * @param defaultProvenance Provenance to use for instructions with no {@code provenance}
+   *     property.
+   * @throws IOException -
+   */
+  public static void readTypes(
+      final Path path, final IDefinitionKeeper definitionKeeper, final Provenance defaultProvenance)
+      throws IOException {
     final JsonDefinitionReader reader = new JsonDefinitionReader(definitionKeeper);
+    reader.defaultProvenance = defaultProvenance;
     reader.run(path);
   }
 }

@@ -15,6 +15,7 @@ public abstract class MagikDefinition implements IDefinition {
   private final @Nullable String moduleName;
   private final @Nullable String doc;
   private final @Nullable AstNode node;
+  private final Provenance provenance;
 
   /**
    * Constructor.
@@ -30,11 +31,31 @@ public abstract class MagikDefinition implements IDefinition {
       final @Nullable String moduleName,
       final @Nullable String doc,
       final @Nullable AstNode node) {
+    this(location, timestamp, moduleName, doc, node, Provenance.UNKNOWN);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param location Location.
+   * @param moduleName Name of the module this definition resides in.
+   * @param doc Doc.
+   * @param node Node.
+   * @param provenance Provenance (origin) of this definition.
+   */
+  protected MagikDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final Provenance provenance) {
     this.location = location;
     this.timestamp = timestamp;
     this.moduleName = moduleName;
     this.doc = doc;
     this.node = node;
+    this.provenance = provenance;
   }
 
   /**
@@ -88,4 +109,21 @@ public abstract class MagikDefinition implements IDefinition {
    * @return Name of definition.
    */
   public abstract String getName();
+
+  /**
+   * Get the provenance (origin) of this definition.
+   *
+   * @return Provenance.
+   */
+  public Provenance getProvenance() {
+    return this.provenance;
+  }
+
+  /**
+   * Return a copy of this definition with the given provenance.
+   *
+   * @param provenance New provenance.
+   * @return Copy with provenance set (covariant return in subclasses).
+   */
+  public abstract MagikDefinition withProvenance(Provenance provenance);
 }

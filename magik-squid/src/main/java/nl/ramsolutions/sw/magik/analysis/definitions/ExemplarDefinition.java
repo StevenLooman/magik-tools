@@ -45,7 +45,31 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
       final Sort sort,
       final TypeString typeName,
       final @Nullable Pragma pragma) {
-    super(location, timestamp, moduleName, doc, node);
+    this(location, timestamp, moduleName, doc, node, sort, typeName, pragma, Provenance.UNKNOWN);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param moduleName Name of module where this is defined.
+   * @param node Node for definition.
+   * @param sort Type of exemplar.
+   * @param typeName Name of slotted exemplar.
+   * @param pragma Pragma.
+   * @param provenance Provenance.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public ExemplarDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final Sort sort,
+      final TypeString typeName,
+      final @Nullable Pragma pragma,
+      final Provenance provenance) {
+    super(location, timestamp, moduleName, doc, node, provenance);
 
     if (!typeName.isSingle()) {
       throw new IllegalStateException();
@@ -76,6 +100,20 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
   }
 
   @Override
+  public ExemplarDefinition withProvenance(final Provenance provenance) {
+    return new ExemplarDefinition(
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.getNode(),
+        this.sort,
+        this.typeName,
+        this.pragma,
+        provenance);
+  }
+
+  @Override
   public ExemplarDefinition getBareDefinition() {
     return new ExemplarDefinition(
         this.getLocation(),
@@ -85,7 +123,8 @@ public class ExemplarDefinition extends MagikDefinition implements ITypeStringDe
         null,
         this.sort,
         this.typeName,
-        this.pragma != null ? this.pragma.getBarePragma() : null);
+        this.pragma != null ? this.pragma.getBarePragma() : null,
+        this.getProvenance());
   }
 
   @Override

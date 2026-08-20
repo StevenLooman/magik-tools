@@ -36,7 +36,43 @@ public class BinaryOperatorDefinition extends MagikDefinition {
       final TypeString lhsTypeName,
       final TypeString rhsTypeName,
       final TypeString resultTypeName) {
-    super(location, timestamp, moduleName, doc, node);
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        operator,
+        lhsTypeName,
+        rhsTypeName,
+        resultTypeName,
+        Provenance.UNKNOWN);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param moduleName Module name.
+   * @param node Node for definition.
+   * @param operator Operator name.
+   * @param lhsTypeName Left Hand Side type.
+   * @param rhsTypeName Right Hand Side type.
+   * @param resultTypeName Result type.
+   * @param provenance Provenance.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public BinaryOperatorDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final String operator,
+      final TypeString lhsTypeName,
+      final TypeString rhsTypeName,
+      final TypeString resultTypeName,
+      final Provenance provenance) {
+    super(location, timestamp, moduleName, doc, node, provenance);
 
     if (!lhsTypeName.isSingle()) {
       throw new IllegalStateException();
@@ -88,7 +124,23 @@ public class BinaryOperatorDefinition extends MagikDefinition {
         this.operator,
         this.lhsTypeName,
         this.rhsTypeName,
-        this.resultTypeName);
+        this.resultTypeName,
+        this.getProvenance());
+  }
+
+  @Override
+  public BinaryOperatorDefinition withProvenance(final Provenance provenance) {
+    return new BinaryOperatorDefinition(
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.getNode(),
+        this.operator,
+        this.lhsTypeName,
+        this.rhsTypeName,
+        this.resultTypeName,
+        provenance);
   }
 
   @Override

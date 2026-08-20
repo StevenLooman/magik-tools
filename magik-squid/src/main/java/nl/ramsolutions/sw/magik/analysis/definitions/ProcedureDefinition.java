@@ -65,17 +65,23 @@ public class ProcedureDefinition extends MagikDefinition
       final @Nullable Pragma pragma,
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes) {
-    super(location, timestamp, moduleName, doc, node);
-    this.modifiers = ProcedureDefinition.createModifiersSet(modifiers);
-    this.typeName = typeName;
-    this.procedureName = procedureName;
-    this.parameters = List.copyOf(parameters);
-    this.pragma = pragma;
-    this.returnTypes = returnTypes;
-    this.loopTypes = loopTypes;
-    this.usedGlobals = Collections.emptyList();
-    this.usedMethods = Collections.emptyList();
-    this.usedConditions = Collections.emptyList();
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        modifiers,
+        typeName,
+        procedureName,
+        parameters,
+        pragma,
+        returnTypes,
+        loopTypes,
+        Collections.emptyList(),
+        Collections.emptyList(),
+        Collections.emptyList(),
+        Provenance.UNKNOWN);
   }
 
   /**
@@ -109,7 +115,62 @@ public class ProcedureDefinition extends MagikDefinition
       final List<GlobalUsage> usedGlobals,
       final List<MethodUsage> usedMethods,
       final List<ConditionUsage> usedConditions) {
-    super(location, timestamp, moduleName, doc, node);
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        modifiers,
+        typeName,
+        procedureName,
+        parameters,
+        pragma,
+        returnTypes,
+        loopTypes,
+        usedGlobals,
+        usedMethods,
+        usedConditions,
+        Provenance.UNKNOWN);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param moduleName Module name.
+   * @param node Node.
+   * @param modifiers Modifiers.
+   * @param typeName Type name.
+   * @param procedureName Procedure name.
+   * @param parameters Parameters.
+   * @param pragma Pragma.
+   * @param doc Doc.
+   * @param returnTypes Return types.
+   * @param loopTypes Loop types.
+   * @param usedGlobals Globals used.
+   * @param usedMethods Methods used.
+   * @param usedConditions Conditions used.
+   * @param provenance Provenance.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public ProcedureDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final Set<Modifier> modifiers,
+      final TypeString typeName,
+      final @Nullable String procedureName,
+      final List<ParameterDefinition> parameters,
+      final @Nullable Pragma pragma,
+      final ExpressionResultString returnTypes,
+      final ExpressionResultString loopTypes,
+      final List<GlobalUsage> usedGlobals,
+      final List<MethodUsage> usedMethods,
+      final List<ConditionUsage> usedConditions,
+      final Provenance provenance) {
+    super(location, timestamp, moduleName, doc, node, provenance);
     this.modifiers = ProcedureDefinition.createModifiersSet(modifiers);
     this.typeName = typeName;
     this.procedureName = procedureName;
@@ -243,7 +304,29 @@ public class ProcedureDefinition extends MagikDefinition
         this.loopTypes,
         this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).toList(),
         this.usedMethods.stream().map(MethodUsage::getWithoutNode).toList(),
-        this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList());
+        this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList(),
+        this.getProvenance());
+  }
+
+  @Override
+  public ProcedureDefinition withProvenance(final Provenance provenance) {
+    return new ProcedureDefinition(
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.getNode(),
+        this.modifiers,
+        this.typeName,
+        this.procedureName,
+        this.parameters,
+        this.pragma,
+        this.returnTypes,
+        this.loopTypes,
+        this.usedGlobals,
+        this.usedMethods,
+        this.usedConditions,
+        provenance);
   }
 
   @Override

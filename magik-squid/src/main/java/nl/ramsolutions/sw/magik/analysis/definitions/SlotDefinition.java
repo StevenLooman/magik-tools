@@ -36,7 +36,43 @@ public class SlotDefinition extends MagikDefinition {
       final TypeString ownerTypeName,
       final String name,
       final TypeString typeName) {
-    super(location, timestamp, moduleName, doc, node);
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        ownerTypeName,
+        name,
+        typeName,
+        Provenance.UNKNOWN);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param location Location of definition.
+   * @param timestamp Timestamp of definition.
+   * @param moduleName Name of module this slot is defined in.
+   * @param doc Slot doc.
+   * @param node Node for definition.
+   * @param ownerTypeName Name of the exemplar owning this slot.
+   * @param name Name of slot.
+   * @param typeName Type of slot.
+   * @param provenance Provenance.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public SlotDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final TypeString ownerTypeName,
+      final String name,
+      final TypeString typeName,
+      final Provenance provenance) {
+    super(location, timestamp, moduleName, doc, node, provenance);
     this.ownerTypeName = ownerTypeName;
     this.name = name;
     this.typeName = typeName;
@@ -65,7 +101,22 @@ public class SlotDefinition extends MagikDefinition {
         null,
         this.ownerTypeName,
         this.name,
-        this.typeName);
+        this.typeName,
+        this.getProvenance());
+  }
+
+  @Override
+  public SlotDefinition withProvenance(final Provenance provenance) {
+    return new SlotDefinition(
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.getNode(),
+        this.ownerTypeName,
+        this.name,
+        this.typeName,
+        provenance);
   }
 
   @Override

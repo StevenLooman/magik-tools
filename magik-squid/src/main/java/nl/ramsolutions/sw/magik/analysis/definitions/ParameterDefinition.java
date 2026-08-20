@@ -40,7 +40,30 @@ public class ParameterDefinition extends MagikDefinition {
       final String name,
       final Modifier modifier,
       final TypeString typeName) {
-    super(location, timestamp, moduleName, doc, node);
+    this(location, timestamp, moduleName, doc, node, name, modifier, typeName, Provenance.UNKNOWN);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param moduleName Name of module where this is defined.
+   * @param node Node of parameter.
+   * @param name Name of parameter.
+   * @param modifier Modifier of parameter.
+   * @param provenance Provenance.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public ParameterDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final String name,
+      final Modifier modifier,
+      final TypeString typeName,
+      final Provenance provenance) {
+    super(location, timestamp, moduleName, doc, node, provenance);
     this.name = name;
     this.modifier = modifier;
     this.typeName = typeName;
@@ -69,7 +92,22 @@ public class ParameterDefinition extends MagikDefinition {
         null,
         this.name,
         this.modifier,
-        this.typeName);
+        this.typeName,
+        this.getProvenance());
+  }
+
+  @Override
+  public ParameterDefinition withProvenance(final Provenance provenance) {
+    return new ParameterDefinition(
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.getNode(),
+        this.name,
+        this.modifier,
+        this.typeName,
+        provenance);
   }
 
   @Override
