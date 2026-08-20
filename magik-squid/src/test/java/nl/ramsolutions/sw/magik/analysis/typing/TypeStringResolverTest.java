@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
@@ -13,6 +15,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import org.junit.jupiter.api.Test;
@@ -240,5 +243,128 @@ class TypeStringResolverTest {
     assertThat(resolver.getSlotDefinitions(typeA))
         .extracting(SlotDefinition::getName)
         .containsExactlyInAnyOrder("slot_a", "slot_b");
+  }
+
+  private static void addExemplarWithParents(
+      final IDefinitionKeeper definitionKeeper,
+      final TypeString typeString,
+      final TypeString... parents) {
+    definitionKeeper.add(TypeStringResolverTest.createExemplar(typeString));
+    for (final TypeString parent : parents) {
+      definitionKeeper.add(
+          new InheritanceDefinition(null, null, null, null, null, typeString, parent));
+    }
+  }
+
+  private static MethodDefinition createMethodDefinition(
+      final TypeString typeName,
+      final String methodName,
+      final TypeString returnType,
+      final MethodDefinition.Modifier... modifiers) {
+    return new MethodDefinition(
+        null,
+        null,
+        null,
+        null,
+        null,
+        typeName,
+        methodName,
+        Set.of(modifiers),
+        Collections.emptyList(),
+        null,
+        null,
+        new ExpressionResultString(returnType),
+        ExpressionResultString.EMPTY);
+  }
+
+  @Test
+  void testRespondingMethodFromTwoConcreteParentsReturnsBoth() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString base1 = TypeString.ofIdentifier("base_1", "sw");
+    final TypeString base2 = TypeString.ofIdentifier("base_2", "sw");
+    final TypeString concrete = TypeString.ofIdentifier("concrete", "sw");
+    TypeStringResolverTest.addExemplarWithParents(keeper, base1);
+    TypeStringResolverTest.addExemplarWithParents(keeper, base2);
+    TypeStringResolverTest.addExemplarWithParents(keeper, concrete, base1, base2);
+    final MethodDefinition method1 =
+        TypeStringResolverTest.createMethodDefinition(base1, "nnn()", TypeString.SW_INTEGER);
+    keeper.add(method1);
+    final MethodDefinition method2 =
+        TypeStringResolverTest.createMethodDefinition(base2, "nnn()", TypeString.SW_SYMBOL);
+    keeper.add(method2);
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final Collection<MethodDefinition> definitions =
+        resolver.getRespondingMethodDefinitions(concrete, "nnn()");
+    assertThat(definitions)
+        .extracting(MethodDefinition::getTypeName)
+        .containsExactlyInAnyOrder(base1, base2);
+  }
+
+  @Test
+  void testRespondingMethodPrefersConcreteOverAbstractParent() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString base1 = TypeString.ofIdentifier("base_1", "sw");
+    final TypeString base2 = TypeString.ofIdentifier("base_2", "sw");
+    final TypeString concrete = TypeString.ofIdentifier("concrete", "sw");
+    TypeStringResolverTest.addExemplarWithParents(keeper, base1);
+    TypeStringResolverTest.addExemplarWithParents(keeper, base2);
+    TypeStringResolverTest.addExemplarWithParents(keeper, concrete, base1, base2);
+    final MethodDefinition abstractMethod =
+        TypeStringResolverTest.createMethodDefinition(
+            base1, "mmm()", TypeString.SW_INTEGER, MethodDefinition.Modifier.ABSTRACT);
+    keeper.add(abstractMethod);
+    final MethodDefinition concreteMethod =
+        TypeStringResolverTest.createMethodDefinition(base2, "mmm()", TypeString.SW_SYMBOL);
+    keeper.add(concreteMethod);
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final Collection<MethodDefinition> definitions =
+        resolver.getRespondingMethodDefinitions(concrete, "mmm()");
+    assertThat(definitions).extracting(MethodDefinition::getTypeName).containsExactly(base2);
+  }
+
+  @Test
+  void testRespondingMethodKeepsAbstractWhenNoConcreteResponder() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString base1 = TypeString.ofIdentifier("base_1", "sw");
+    final TypeString concrete = TypeString.ofIdentifier("concrete", "sw");
+    TypeStringResolverTest.addExemplarWithParents(keeper, base1);
+    TypeStringResolverTest.addExemplarWithParents(keeper, concrete, base1);
+    final MethodDefinition abstractMethod =
+        TypeStringResolverTest.createMethodDefinition(
+            base1, "mmm()", TypeString.SW_INTEGER, MethodDefinition.Modifier.ABSTRACT);
+    keeper.add(abstractMethod);
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final Collection<MethodDefinition> definitions =
+        resolver.getRespondingMethodDefinitions(concrete, "mmm()");
+    assertThat(definitions).extracting(MethodDefinition::getTypeName).containsExactly(base1);
+  }
+
+  @Test
+  void testRespondingMethodOwnConcreteShadowsParents() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString base1 = TypeString.ofIdentifier("base_1", "sw");
+    final TypeString base2 = TypeString.ofIdentifier("base_2", "sw");
+    final TypeString concrete = TypeString.ofIdentifier("concrete", "sw");
+    TypeStringResolverTest.addExemplarWithParents(keeper, base1);
+    TypeStringResolverTest.addExemplarWithParents(keeper, base2);
+    TypeStringResolverTest.addExemplarWithParents(keeper, concrete, base1, base2);
+    final MethodDefinition method1 =
+        TypeStringResolverTest.createMethodDefinition(base1, "nnn()", TypeString.SW_INTEGER);
+    keeper.add(method1);
+    final MethodDefinition method2 =
+        TypeStringResolverTest.createMethodDefinition(base2, "nnn()", TypeString.SW_SYMBOL);
+    keeper.add(method2);
+    final MethodDefinition ownMethod =
+        TypeStringResolverTest.createMethodDefinition(
+            concrete, "nnn()", TypeString.SW_CHAR16_VECTOR);
+    keeper.add(ownMethod);
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final Collection<MethodDefinition> definitions =
+        resolver.getRespondingMethodDefinitions(concrete, "nnn()");
+    assertThat(definitions).extracting(MethodDefinition::getTypeName).containsExactly(concrete);
   }
 }

@@ -287,37 +287,53 @@ public class TypeStringResolver {
   public synchronized Collection<MethodDefinition> getRespondingMethodDefinitions(
       final TypeString typeString, final String methodName) {
     return typeString.getCombinedTypes().stream()
-        .map(
-            typeStr -> {
-              // Resolve typeString.
-              final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeStr);
-              final TypeString actualTypeStr =
-                  resolvedTypes.isEmpty()
-                      ? typeStr
-                      : resolvedTypes.iterator().next().getTypeString();
-
-              // Find first method to respond.
-              final Collection<MethodDefinition> methodDefinitions =
-                  this.definitionKeeper.getMethodDefinitions(actualTypeStr).stream()
-                      .filter(def -> def.getMethodName().equals(methodName))
-                      .collect(Collectors.toSet());
-              if (!methodDefinitions.isEmpty()) {
-                return methodDefinitions;
-              }
-
-              // Iterate through parents, breadth first search.
-              for (final TypeString parentTypeString : this.getParents(typeStr)) {
-                final Collection<MethodDefinition> parentDefinitions =
-                    this.getRespondingMethodDefinitions(parentTypeString, methodName);
-                if (!parentDefinitions.isEmpty()) {
-                  return parentDefinitions;
-                }
-              }
-
-              return methodDefinitions;
-            })
+        .map(typeStr -> this.getRespondingMethodDefinitionsForType(typeStr, methodName))
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
+  }
+
+  /** Resolve {@link methodName} against a single (non-combined) {@link TypeString}. */
+  private Collection<MethodDefinition> getRespondingMethodDefinitionsForType(
+      final TypeString typeStr, final String methodName) {
+    // Resolve typeString.
+    final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeStr);
+    final TypeString actualTypeStr =
+        resolvedTypes.isEmpty() ? typeStr : resolvedTypes.iterator().next().getTypeString();
+
+    // The type's own methods shadow every parent.
+    final Collection<MethodDefinition> ownDefinitions =
+        this.definitionKeeper.getMethodDefinitions(actualTypeStr).stream()
+            .filter(def -> def.getMethodName().equals(methodName))
+            .collect(Collectors.toSet());
+    if (!ownDefinitions.isEmpty()) {
+      return ownDefinitions;
+    }
+
+    // Gather every responding branch: the parent set is unordered, so first-wins was a coin flip.
+    final Collection<MethodDefinition> parentDefinitions =
+        this.getParents(typeStr).stream()
+            .map(parentTypeStr -> this.getRespondingMethodDefinitions(parentTypeStr, methodName))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+    if (!parentDefinitions.isEmpty()) {
+      return this.preferConcreteMethodDefinitions(parentDefinitions);
+    }
+
+    return ownDefinitions;
+  }
+
+  /** Prefer concrete implementations over {@code _abstract} ones, unless none are concrete. */
+  private Collection<MethodDefinition> preferConcreteMethodDefinitions(
+      final Collection<MethodDefinition> methodDefinitions) {
+    final Collection<MethodDefinition> concreteDefinitions =
+        methodDefinitions.stream()
+            .filter(
+                methodDefinition -> {
+                  final Set<MethodDefinition.Modifier> modifiers = methodDefinition.getModifiers();
+                  return !modifiers.contains(MethodDefinition.Modifier.ABSTRACT);
+                })
+            .collect(Collectors.toSet());
+    return concreteDefinitions.isEmpty() ? methodDefinitions : concreteDefinitions;
   }
 
   private void fillRespondingMethodDefinitions(
