@@ -116,6 +116,7 @@ public final class JsonDefinitionWriter {
       final File tempFile = tempPath.toFile();
       try (final FileWriter fileWriter = new FileWriter(tempFile, StandardCharsets.UTF_8);
           final BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+        this.writeSchemaVersion(bufferedWriter);
         this.writeProducts(bufferedWriter);
         this.writeModules(bufferedWriter);
         this.writeMagikFiles(bufferedWriter);
@@ -169,6 +170,14 @@ public final class JsonDefinitionWriter {
             ParameterDefinition.Modifier.class,
             new LowerCaseEnumSerializer<ParameterDefinition.Modifier>())
         .create();
+  }
+
+  private void writeSchemaVersion(final Writer writer) {
+    final JsonObject versionObject = new JsonObject();
+    versionObject.addProperty(
+        Instruction.INSTRUCTION.getValue(), Instruction.SCHEMA_VERSION.getValue());
+    versionObject.addProperty("value", JsonDefinitionReader.SCHEMA_VERSION);
+    this.writeInstruction(writer, versionObject.toString());
   }
 
   private void writeInstruction(final Writer writer, final String instruction) {

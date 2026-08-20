@@ -743,6 +743,7 @@ class JsonDefinitionWriterTest {
     assertThat(countPerInstruction)
         .containsExactlyInAnyOrderEntriesOf(
             Map.ofEntries(
+                Map.entry("schema_version", 1L),
                 Map.entry("product", 1L),
                 Map.entry("module", 1L),
                 Map.entry("magik_file", 1L),

@@ -4,6 +4,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions.io;
 @SuppressWarnings("checkstyle:JavadocVariable")
 enum Instruction {
   INSTRUCTION("instruction"),
+  SCHEMA_VERSION("schema_version"),
   PRODUCT("product"),
   MODULE("module"),
   MAGIK_FILE("magik_file"),

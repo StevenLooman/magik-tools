@@ -301,6 +301,8 @@ public final class JsonDefinitionReader {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JsonDefinitionReader.class);
 
+  static final int SCHEMA_VERSION = 1;
+
   private final IDefinitionKeeper definitionKeeper;
   private Provenance defaultProvenance = Provenance.DUMPED;
 
@@ -337,16 +339,20 @@ public final class JsonDefinitionReader {
   }
 
   @SuppressWarnings("checkstyle:IllegalCatch")
-  private void processLineSafe(final int lineNo, final String line) {
+  private void processLineSafe(final int lineNo, final String line)
+      throws IncompatibleCacheException {
     try {
       this.processLine(line);
+    } catch (final IncompatibleCacheException exception) {
+      // A rejected cache must abort the whole read; do not swallow it as a per-line parse error.
+      throw exception;
     } catch (final RuntimeException exception) {
       LOGGER.error("Error parsing line {}, line data: {}", lineNo, line);
       LOGGER.error(exception.getMessage(), exception);
     }
   }
 
-  private void processLine(final String line) {
+  private void processLine(final String line) throws IncompatibleCacheException {
     if (line.trim().startsWith("//")) {
       // Ignore comments.
       return;
@@ -356,6 +362,10 @@ public final class JsonDefinitionReader {
     final String instructionStr = obj.get(Instruction.INSTRUCTION.getValue()).getAsString();
     final Instruction instruction = Instruction.fromValue(instructionStr);
     switch (instruction) {
+      case SCHEMA_VERSION:
+        this.verifySchemaVersion(obj);
+        break;
+
       case PRODUCT:
         this.handleProduct(obj);
         break;
@@ -406,6 +416,17 @@ public final class JsonDefinitionReader {
 
       default:
         break;
+    }
+  }
+
+  private void verifySchemaVersion(final JsonObject instruction) throws IncompatibleCacheException {
+    final int found = instruction.get("value").getAsInt();
+    if (found != JsonDefinitionReader.SCHEMA_VERSION) {
+      throw new IncompatibleCacheException(
+          "types cache has schema version "
+              + found
+              + ", expected "
+              + JsonDefinitionReader.SCHEMA_VERSION);
     }
   }
 
