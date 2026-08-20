@@ -555,6 +555,27 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         .collect(Collectors.toSet());
   }
 
+  public void replaceDefinitionsForPath(
+      final Path path, final Collection<IDefinition> definitions) {
+    final Collection<IDefinition> current = this.getDefinitionsByPath(path);
+    final Set<IDefinition> currentSet = new HashSet<>(current);
+    final Set<IDefinition> replacementSet = new HashSet<>(definitions);
+
+    final Set<IDefinition> added =
+        definitions.stream()
+            .filter(definition -> !currentSet.contains(definition))
+            .collect(Collectors.toSet());
+    final Set<IDefinition> removed =
+        current.stream()
+            .filter(definition -> !replacementSet.contains(definition))
+            .collect(Collectors.toSet());
+
+    // Add new definitions before removing stale ones, so a surviving definition is never
+    // momentarily absent to a concurrent reader.
+    added.forEach(this::add);
+    removed.forEach(this::remove);
+  }
+
   @Override
   public Collection<IDefinition> getDefinitionsByPath(final Path path) {
     final URI uri = path.toUri();

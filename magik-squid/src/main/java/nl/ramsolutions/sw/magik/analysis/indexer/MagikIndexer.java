@@ -3,6 +3,8 @@ package nl.ramsolutions.sw.magik.analysis.indexer;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikToolsProperties;
@@ -12,6 +14,8 @@ import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.moduledef.ModuleDefinition;
+import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +56,13 @@ public class MagikIndexer {
     final Path path = fileEvent.getPath();
     final FileChangeType fileChangeType = fileEvent.getFileChangeType();
     if (fileChangeType == FileChangeType.CHANGED || fileChangeType == FileChangeType.DELETED) {
-      this.definitionKeeper.getDefinitionsByPath(path).forEach(this.definitionKeeper::remove);
+      // Only drop what this indexer owns: every watched-file event reaches all indexers, and only
+      // the owning one puts its definitions back. Product/module definitions come from
+      // product.def/module.def, which this indexer never reads.
+      final Collection<IDefinition> definitions = this.definitionKeeper.getDefinitionsByPath(path);
+      final List<IDefinition> ownDefinitions =
+          definitions.stream().filter(MagikIndexer::isMagikOwned).toList();
+      ownDefinitions.forEach(this.definitionKeeper::remove);
     }
 
     if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
@@ -62,6 +72,11 @@ public class MagikIndexer {
     }
 
     LOGGER.debug("Handled file event: {}", fileEvent);
+  }
+
+  /** Whether {@code definition} is one this indexer produces, and so may remove. */
+  private static boolean isMagikOwned(final IDefinition definition) {
+    return !(definition instanceof ProductDefinition) && !(definition instanceof ModuleDefinition);
   }
 
   /**
@@ -93,12 +108,14 @@ public class MagikIndexer {
     LOGGER.debug("Indexing file content for: {}", uri);
 
     final Path path = Path.of(uri);
-    this.definitionKeeper.getDefinitionsByPath(path).forEach(this.definitionKeeper::remove);
 
+    // Parse before touching the keeper: the parse is by far the longest part of a re-index, and
+    // removing first would leave the file's definitions absent for its whole duration.
     final MagikFile magikFile = new MagikFile(this.properties, uri, text);
-    magikFile.getDefinitions().stream()
-        .map(IDefinition::getBareDefinition)
-        .forEach(this.definitionKeeper::add);
+    final List<IDefinition> definitions =
+        magikFile.getDefinitions().stream().map(IDefinition::getBareDefinition).toList();
+
+    this.definitionKeeper.replaceDefinitionsForPath(path, definitions);
   }
 
   /**
