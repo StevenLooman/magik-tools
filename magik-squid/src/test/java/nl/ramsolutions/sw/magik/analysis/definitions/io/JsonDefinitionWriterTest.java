@@ -253,7 +253,7 @@ class JsonDefinitionWriterTest {
     assertThat(Files.readString(this.tempPath))
         .contains(
             "{\"owner_type_name\":\"user:a\",\"name\":\"slot1\",\"type_name\":\"sw:integer\","
-                + "\"instruction\":\"slot\"}");
+                + "\"provenance\":\"UNKNOWN\",\"instruction\":\"slot\"}");
 
     final IDefinitionKeeper readKeeper = new DefinitionKeeper();
     JsonDefinitionReader.readTypes(this.tempPath, readKeeper);
@@ -279,7 +279,7 @@ class JsonDefinitionWriterTest {
     assertThat(Files.readString(this.tempPath))
         .contains(
             "{\"child_type_name\":\"user:a\",\"parent_type_name\":\"sw:object\","
-                + "\"instruction\":\"inheritance\"}");
+                + "\"provenance\":\"UNKNOWN\",\"instruction\":\"inheritance\"}");
 
     final IDefinitionKeeper readKeeper = new DefinitionKeeper();
     JsonDefinitionReader.readTypes(this.tempPath, readKeeper);
@@ -606,7 +606,7 @@ class JsonDefinitionWriterTest {
         .contains(
             "{\"type_name\":\"user:alias\",\"aliased_type_name\":\"sw:integer\","
                 + "\"used_methods\":[],\"used_globals\":[],\"used_binary_operators\":[],"
-                + "\"instruction\":\"global\"}");
+                + "\"provenance\":\"UNKNOWN\",\"instruction\":\"global\"}");
   }
 
   @Test

@@ -70,20 +70,26 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
       final @Nullable Pragma pragma,
       final ExpressionResultString returnTypes,
       final ExpressionResultString loopTypes) {
-    super(location, timestamp, moduleName, doc, node);
-    this.typeName = typeName;
-    this.methodName = methodName;
-    this.modifiers = MethodDefinition.createModifiersSet(modifiers);
-    this.parameters = List.copyOf(parameters);
-    this.assignmentParameter = assignmentParameter;
-    this.pragma = pragma;
-    this.returnTypes = returnTypes;
-    this.loopTypes = loopTypes;
-    this.usedGlobals = Collections.emptyList();
-    this.usedMethods = Collections.emptyList();
-    this.usedSlots = Collections.emptyList();
-    this.usedConditions = Collections.emptyList();
-    this.usedBinaryOperators = Collections.emptyList();
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        typeName,
+        methodName,
+        modifiers,
+        parameters,
+        assignmentParameter,
+        pragma,
+        returnTypes,
+        loopTypes,
+        Collections.emptyList(),
+        Collections.emptyList(),
+        Collections.emptyList(),
+        Collections.emptyList(),
+        Collections.emptyList(),
+        Provenance.UNKNOWN);
   }
 
   /**
@@ -172,7 +178,66 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
       final List<SlotUsage> usedSlots,
       final List<ConditionUsage> usedConditions,
       final List<BinaryOperatorUsage> usedBinaryOperators) {
-    super(location, timestamp, moduleName, doc, node);
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        typeName,
+        methodName,
+        modifiers,
+        parameters,
+        assignmentParameter,
+        pragma,
+        returnTypes,
+        loopTypes,
+        usedGlobals,
+        usedMethods,
+        usedSlots,
+        usedConditions,
+        usedBinaryOperators,
+        Provenance.UNKNOWN);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param moduleName Name of module this method is defined in.
+   * @param node Node for definition.
+   * @param typeName Name of exemplar.
+   * @param methodName Name of method.
+   * @param modifiers Modifiers for method.
+   * @param parameters Parameters for method.
+   * @param assignmentParameter Assignment parameter.
+   * @param pragma Pragma.
+   * @param doc Method doc.
+   * @param returnTypes Return types.
+   * @param loopTypes Loop types.
+   * @param provenance Provenance.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public MethodDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final TypeString typeName,
+      final String methodName,
+      final Set<Modifier> modifiers,
+      final List<ParameterDefinition> parameters,
+      final @Nullable ParameterDefinition assignmentParameter,
+      final @Nullable Pragma pragma,
+      final ExpressionResultString returnTypes,
+      final ExpressionResultString loopTypes,
+      final List<GlobalUsage> usedGlobals,
+      final List<MethodUsage> usedMethods,
+      final List<SlotUsage> usedSlots,
+      final List<ConditionUsage> usedConditions,
+      final List<BinaryOperatorUsage> usedBinaryOperators,
+      final Provenance provenance) {
+    super(location, timestamp, moduleName, doc, node, provenance);
     this.typeName = typeName;
     this.methodName = methodName;
     this.modifiers = MethodDefinition.createModifiersSet(modifiers);
@@ -386,7 +451,32 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
         this.usedMethods.stream().map(MethodUsage::getWithoutNode).toList(),
         this.usedSlots.stream().map(SlotUsage::getWithoutNode).toList(),
         this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList(),
-        this.usedBinaryOperators.stream().map(BinaryOperatorUsage::getWithoutNode).toList());
+        this.usedBinaryOperators.stream().map(BinaryOperatorUsage::getWithoutNode).toList(),
+        this.getProvenance());
+  }
+
+  @Override
+  public MethodDefinition withProvenance(final Provenance provenance) {
+    return new MethodDefinition(
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.getNode(),
+        this.typeName,
+        this.methodName,
+        this.modifiers,
+        this.parameters,
+        this.assignmentParameter,
+        this.pragma,
+        this.returnTypes,
+        this.loopTypes,
+        this.usedGlobals,
+        this.usedMethods,
+        this.usedSlots,
+        this.usedConditions,
+        this.usedBinaryOperators,
+        provenance);
   }
 
   @Override

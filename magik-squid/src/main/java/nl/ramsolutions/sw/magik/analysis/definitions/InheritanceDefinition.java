@@ -33,7 +33,40 @@ public class InheritanceDefinition extends MagikDefinition {
       final @Nullable AstNode node,
       final TypeString childTypeName,
       final TypeString parentTypeName) {
-    super(location, timestamp, moduleName, doc, node);
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        childTypeName,
+        parentTypeName,
+        Provenance.UNKNOWN);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param location Location of definition.
+   * @param timestamp Timestamp of definition.
+   * @param moduleName Name of module this edge is defined in.
+   * @param doc Doc.
+   * @param node Node for definition.
+   * @param childTypeName Child (owner) type.
+   * @param parentTypeName Parent type the child extends.
+   * @param provenance Provenance.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public InheritanceDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final TypeString childTypeName,
+      final TypeString parentTypeName,
+      final Provenance provenance) {
+    super(location, timestamp, moduleName, doc, node, provenance);
     this.childTypeName = childTypeName;
     this.parentTypeName = parentTypeName;
   }
@@ -60,7 +93,21 @@ public class InheritanceDefinition extends MagikDefinition {
         this.getDoc(),
         null,
         this.childTypeName,
-        this.parentTypeName);
+        this.parentTypeName,
+        this.getProvenance());
+  }
+
+  @Override
+  public InheritanceDefinition withProvenance(final Provenance provenance) {
+    return new InheritanceDefinition(
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.getNode(),
+        this.childTypeName,
+        this.parentTypeName,
+        provenance);
   }
 
   @Override

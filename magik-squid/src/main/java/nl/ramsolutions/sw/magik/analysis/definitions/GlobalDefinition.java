@@ -56,6 +56,25 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
    * @param node Node.
    * @param typeName Type name.
    * @param aliasedTypeName Aliased type name.
+   */
+  public GlobalDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final TypeString typeName,
+      final TypeString aliasedTypeName) {
+    this(location, timestamp, moduleName, doc, node, typeName, aliasedTypeName, null);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param moduleName Module name.
+   * @param node Node.
+   * @param typeName Type name.
+   * @param aliasedTypeName Aliased type name.
    * @param usedMethods Methods used by the global's initializing expression.
    */
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
@@ -105,7 +124,46 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
       final List<MethodUsage> usedMethods,
       final List<GlobalUsage> usedGlobals,
       final List<BinaryOperatorUsage> usedBinaryOperators) {
-    super(location, timestamp, moduleName, doc, node);
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        typeName,
+        aliasedTypeName,
+        pragma,
+        usedMethods,
+        usedGlobals,
+        usedBinaryOperators,
+        Provenance.UNKNOWN);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param typeName Type name.
+   * @param aliasedTypeName Aliased type name.
+   * @param usedMethods Methods used by the global's initializing expression.
+   * @param usedGlobals Globals used by the global's initializing expression.
+   * @param usedBinaryOperators Binary operators used by the global's initializing expression.
+   * @param provenance Provenance.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public GlobalDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final TypeString typeName,
+      final TypeString aliasedTypeName,
+      final @Nullable Pragma pragma,
+      final List<MethodUsage> usedMethods,
+      final List<GlobalUsage> usedGlobals,
+      final List<BinaryOperatorUsage> usedBinaryOperators,
+      final Provenance provenance) {
+    super(location, timestamp, moduleName, doc, node, provenance);
     this.typeName = typeName;
     this.aliasedTypeName = aliasedTypeName;
     this.pragma = pragma;
@@ -157,7 +215,25 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
         this.pragma != null ? this.pragma.getBarePragma() : null,
         this.usedMethods.stream().map(MethodUsage::getWithoutNode).toList(),
         this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).toList(),
-        this.usedBinaryOperators.stream().map(BinaryOperatorUsage::getWithoutNode).toList());
+        this.usedBinaryOperators.stream().map(BinaryOperatorUsage::getWithoutNode).toList(),
+        this.getProvenance());
+  }
+
+  @Override
+  public GlobalDefinition withProvenance(final Provenance provenance) {
+    return new GlobalDefinition(
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.getNode(),
+        this.typeName,
+        this.aliasedTypeName,
+        this.pragma,
+        this.usedMethods,
+        this.usedGlobals,
+        this.usedBinaryOperators,
+        provenance);
   }
 
   @Override

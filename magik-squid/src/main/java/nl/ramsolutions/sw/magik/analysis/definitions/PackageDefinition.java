@@ -30,7 +30,29 @@ public class PackageDefinition extends MagikDefinition {
       final @Nullable AstNode node,
       final String name,
       final List<String> uses) {
-    super(location, timestamp, moduleName, doc, node);
+    this(location, timestamp, moduleName, doc, node, name, uses, Provenance.UNKNOWN);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param moduleName Module where this package is defined.
+   * @param node Node of package definition.
+   * @param name Name of package.
+   * @param uses Uses by package.
+   * @param provenance Provenance.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public PackageDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final String name,
+      final List<String> uses,
+      final Provenance provenance) {
+    super(location, timestamp, moduleName, doc, node, provenance);
     this.name = name;
     this.uses = List.copyOf(uses);
   }
@@ -52,8 +74,22 @@ public class PackageDefinition extends MagikDefinition {
         this.getModuleName(),
         this.getDoc(),
         null,
-        name,
-        uses);
+        this.name,
+        this.uses,
+        this.getProvenance());
+  }
+
+  @Override
+  public PackageDefinition withProvenance(final Provenance provenance) {
+    return new PackageDefinition(
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.getNode(),
+        this.name,
+        this.uses,
+        provenance);
   }
 
   @Override

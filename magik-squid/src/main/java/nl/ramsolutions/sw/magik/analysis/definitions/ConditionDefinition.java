@@ -38,7 +38,43 @@ public class ConditionDefinition extends MagikDefinition {
       final @Nullable String parent,
       final List<String> dataNames,
       final @Nullable Pragma pragma) {
-    super(location, timestamp, moduleName, doc, node);
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        name,
+        parent,
+        dataNames,
+        pragma,
+        Provenance.UNKNOWN);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param moduleName Module name.
+   * @param node Node.
+   * @param name Name.
+   * @param parent Parent.
+   * @param dataNames Data name list.
+   * @param doc Doc.
+   * @param provenance Provenance.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public ConditionDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final String name,
+      final @Nullable String parent,
+      final List<String> dataNames,
+      final @Nullable Pragma pragma,
+      final Provenance provenance) {
+    super(location, timestamp, moduleName, doc, node, provenance);
     this.name = name;
     this.parent = parent;
     this.dataNames = List.copyOf(dataNames);
@@ -75,7 +111,23 @@ public class ConditionDefinition extends MagikDefinition {
         this.name,
         this.parent,
         this.dataNames,
-        this.pragma != null ? this.pragma.getBarePragma() : null);
+        this.pragma != null ? this.pragma.getBarePragma() : null,
+        this.getProvenance());
+  }
+
+  @Override
+  public ConditionDefinition withProvenance(final Provenance provenance) {
+    return new ConditionDefinition(
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.getNode(),
+        this.name,
+        this.parent,
+        this.dataNames,
+        this.pragma,
+        provenance);
   }
 
   @Override
