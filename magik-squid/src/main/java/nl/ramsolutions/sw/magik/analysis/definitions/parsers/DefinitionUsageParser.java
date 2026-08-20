@@ -2,8 +2,8 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.Location;
@@ -18,25 +18,15 @@ import nl.ramsolutions.sw.magik.analysis.helpers.BinaryExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.UnaryExpressionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.UnaryOperatorHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
-import nl.ramsolutions.sw.magik.api.MagikKeyword;
-import nl.ramsolutions.sw.magik.api.MagikOperator;
 
 /** Definition usages parser for methods and procedures. */
 public class DefinitionUsageParser {
-
-  private static final Map<String, String> UNARY_OPERATOR_METHODS =
-      Map.of(
-          MagikOperator.NOT.getValue(), "not",
-          MagikKeyword.NOT.getValue(), "not",
-          MagikOperator.MINUS.getValue(), "negated",
-          MagikOperator.PLUS.getValue(), "unary_plus",
-          MagikKeyword.SCATTER.getValue(), "for_scatter()");
 
   private static final String CONDITION = "condition";
   private static final String SW_CONDITION = "sw:condition";
@@ -199,21 +189,25 @@ public class DefinitionUsageParser {
    */
   public List<MethodUsage> getUsedUnaryOperators() {
     final URI uri = this.node.getToken().getURI();
-    return this.node.getDescendants(MagikGrammar.UNARY_EXPRESSION).stream()
-        .filter(
-            unaryExpressionNode -> !unaryExpressionNode.hasDirectChildren(MagikKeyword.ALLRESULTS))
-        .map(
-            unaryExpressionNode -> {
-              final UnaryExpressionNodeHelper helper =
-                  new UnaryExpressionNodeHelper(unaryExpressionNode);
-              final String operator = helper.getOperator();
-              final String methodName = DefinitionUsageParser.UNARY_OPERATOR_METHODS.get(operator);
-              final Location location = new Location(uri, unaryExpressionNode);
-              final Location validLocation = Location.validLocation(location);
-              return new MethodUsage(
-                  TypeString.UNDEFINED, methodName, validLocation, unaryExpressionNode);
-            })
-        .toList();
+    final List<AstNode> unaryExpressionNodes =
+        this.node.getDescendants(MagikGrammar.UNARY_EXPRESSION);
+    final List<MethodUsage> usages = new ArrayList<>();
+    for (final AstNode unaryExpressionNode : unaryExpressionNodes) {
+      // `_allresults` has no method equivalent; an unmapped operator is not a usage.
+      final UnaryOperatorHelper helper = new UnaryOperatorHelper(unaryExpressionNode);
+      final String methodName = helper.getUnaryOperatorMethod();
+      if (methodName == null) {
+        continue;
+      }
+
+      final Location location = new Location(uri, unaryExpressionNode);
+      final Location validLocation = Location.validLocation(location);
+      final MethodUsage usage =
+          new MethodUsage(TypeString.UNDEFINED, methodName, validLocation, unaryExpressionNode);
+      usages.add(usage);
+    }
+
+    return usages;
   }
 
   /**
