@@ -1,224 +1,332 @@
 {
-	"scopeName": "source.magik",
-	"patterns": [
-		{ "include": "#keyword" },
-		{ "include": "#operator" },
-		{ "include": "#comment" },
-		{ "include": "#string" },
-		{ "include": "#symbol" },
-		{ "include": "#slot" },
-		{ "include": "#method_definition" },
-		{ "include": "#method_invocation" },
-		{ "include": "#proc_invocation" },
-		{ "include": "#object" }
-	],
-	"repository": {
-	    "keyword": {
-		    "patterns": [
-				{
-					"name": "keyword.other.magik",
-					"match": "(?i)\\b(_package)\\b"
-				},
-				{
-					"name": "keyword.other.magik",
-					"match": "(?i)\\b(_pragma)\\b"
-				},
-				{
-					"name": "variable.language.magik",
-					"match": "(?i)\\b(_self|_clone|_super|_thisthread)\\b"
-				},
-				{
-					"name": "constant.language.magik",
-					"match": "(?i)\\b(_true|_false|_maybe|_unset)\\b"
-				},
-				{
-					"name": "keyword.other.magik",
-					"match": "(?i)\\b(_if|_then|_elif|_else|_endif)\\b"
-				},
-				{
-					"name": "keyword.operator.magik",
-					"match": "(?i)\\b(_not|_is|_isnt|_and|_andif|_or|_orif|_xor|_cf|_div|_mod|_divmod)\\b"
-				},
-				{
-					"name": "storage.modifier.magik",
-					"match": "(?i)\\b(_iter|_private|_abstract)\\b"
-				},
-				{
-					"name": "keyword.control.magik",
-					"match": "(?i)\\b(_while|_for|_over|_loop|_loopbody|_finally|_endloop)\\b"
-				},
-				{
-					"name": "keyword.control.magik",
-					"match": "(?i)\\b(_try|_with|_when|_endtry)\\b"
-				},
-				{
-					"name": "keyword.control.magik",
-					"match": "(?i)\\b(_throw|_catch|_endcatch)\\b"
-				},
-				{
-					"name": "keyword.control.magik",
-					"match": "(?i)\\b(_protect|_protection|_endprotect)\\b"
-				},
-				{
-					"name": "keyword.control.magik",
-					"match": "(?i)\\b(_lock|_locking|_endlock)\\b"
-				},
-				{
-					"name": "keyword.control.magik",
-					"match": "(?i)\\b(_block|_endblock|_handling|_default)\\b"
-				},
-				{
-					"name": "keyword.control.magik",
-					"match": "(?i)\\b(_return|_leave|_continue|>>)\\b"
-				},
-				{
-					"name": "storage.type.magik",
-					"match": "(?i)\\b(_local|_global|_constant|_import|_dynamic)\\b"
-				},
-				{
-					"name": "keyword.operator.magik",
-					"match": "(?i)\\b(_scatter|_gather|_allresults)\\b"
-				}
-			]
-	  	},
-		"operator": {
-			"patterns": [
-				{
-					"name": "keyword.operator.assignment.magik",
-					"match": "(<<)"
-				},
-				{
-					"name": "keyword.operator.magik",
-					"match": "(=|<>|<|>|<=|>=|<>)"
-				},
-				{
-					"name": "keyword.operator.arithmetic.magik",
-					"match": "(\\-|\\+|\\*|\\/|\\*\\*)"
-				}
-			]
-		},
-		"comments": {
-			"patterns": [
-				{
-					"begin": "##",
-					"beginCaptures": {
-							"0": {"name": "comment.block.documentation.magik"}
-					},
-					"end": "\\n",
-					"name": "comment.block.documentation.magik"
-				},
-				{
-					"begin": "#",
-					"beginCaptures": {
-							"0": {"name": "comment.line.magik"}
-					},
-					"end": "\\n",
-					"name": "comment.line.magik"
-				}
-			]
-		},
-		"strings": {
-			"patterns": [
-				{
-					"begin": "(?:^|[^%])(\")",
-					"beginCaptures": {
-						"1": {"name": "string.quoted.double.magik"}
-					},
-					"end": "\"",
-					"endCaptures": {
-						"0": {"name": "string.quoted.double.magik"}
-					},
-					"contentName": "string.quoted.double.magik"
-				},
-				{
-					"begin": "(?:^|[^%])(')",
-					"beginCaptures": {
-						"1": {"name": "string.quoted.single.magik"}
-					},
-					"end": "'",
-					"endCaptures": {
-						"0": {"name": "string.quoted.single.magik"}
-					},
-					"contentName": "string.quoted.single.magik"
-				}
-			]
-		},
-		"symbol": {
-			"patterns": [
-				{
-					"match": "(?:\\s*[^#\"\\w!?])((?:\\:[\\w!?]*\\|[^|]+\\|)|(?:\\:[\\w!?]+))(?=\\s*[^\\w!?])",
-					"captures": {
-						"1": {"name": "string.other.magik"}
-					}
-				}
-			]
-		},
-		"method_definition": {
-			"patterns": [
-				{
-					"match": "(_method)\\s+([\\w!?]+)\\s*(?:\\.)\\s*([\\w!?]+)\\s*",
-					"captures": {
-						"1": {"name": "storage.type.function.magik"},
-						"2": {"name": "entity.name.type.class.magik"},
-						"3": {"name": "entity.name.function.magik"}
-					}
-				},
-				{
-					"match": "(_method)\\s+([\\w!?]+)\\s*(?:\\.)",
-					"captures": {
-						"1": {"name": "storage.type.function.magik"},
-						"2": {"name": "entity.name.type.class.magik"}
-					}
-				},
-				{
-					"name": "storage.type.function.magik",
-					"match": "\\b(_endmethod)\\b"
-				}
-			]
-		},
-		"proc_definition": {
-			"patterns": [
-				{
-					"match": "(_proc)\\s*",
-					"captures": {
-						"1": {"name": "storage.type.function.magik"}
-					}
-				},
-				{
-					"match": "(_endproc)",
-					"name": "storage.type.function.magik"
-				}
-			]
-		},
-		"slot": {
-			"patterns": [
-				{
-					"match": "(?:\\s*[^#\"\\w!?)\\]])(\\.[\\w!?]+)(?=\\s*[^\\w!?])",
-					"captures": {
-						"1": {"name": "variable.other.object.property.magik"}
-					}
-				}
-			]
-		},
-		"method_invocation": {
-			"patterns": [
-				{
-					"match": "(?:[^\"]\\.)([\\w!?]+)",
-					"captures": {
-						"1": {"name": "entity.name.function.magik"}
-					}
-				}
-			]
-		},
-		"proc_invocation": {
-			"patterns": [
-				{
-					"match": "(?:\\s*[^#\"\\w!?])([A-Za-z0-9!?]+[\\w!?]*)\\s*(?=\\()",
-					"captures": {
-						"1": {"name": "entity.name.function.magik"}
-					}
-				}
-			]
-		}
-	}
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Smallworld Magik",
+  "scopeName": "source.magik",
+
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#characters" },
+    { "include": "#numbers" },
+
+    { "include": "#keywords" },
+    { "include": "#operators" },
+
+    { "include": "#globals" },
+    { "include": "#symbols" },
+    { "include": "#labels" },
+    { "include": "#global_ref" },
+
+
+    { "include": "#method_definitions" },
+    { "include": "#proc_definitions" },
+
+    { "include": "#method_calls" },
+
+    { "include": "#slots" },
+    { "include": "#proc_calls" }
+  ],
+
+  "repository": {
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.other.magik",
+          "match": "(?i)\\b(_package|_pragma)\\b"
+        },
+        {
+          "name": "variable.language.magik",
+          "match": "(?i)\\b(_self|_clone|_super|_thisthread)\\b"
+        },
+        {
+          "name": "constant.language.boolean.magik",
+          "match": "(?i)\\b(_true|_false|_maybe)\\b"
+        },
+        {
+          "name": "constant.language.unset.magik",
+          "match": "(?i)\\b(_unset)\\b"
+        },
+        {
+          "name": "keyword.control.conditional.magik",
+          "match": "(?i)\\b(_if|_then|_elif|_else|_endif)\\b"
+        },
+        {
+          "name": "keyword.control.loop.magik",
+          "match": "(?i)\\b(_while|_for|_over|_loop|_loopbody|_finally|_endloop)\\b"
+        },
+        {
+          "name": "keyword.control.exception.magik",
+          "match": "(?i)\\b(_try|_with|_when|_endtry|_throw|_catch|_endcatch|_protect|_protection|_endprotect|_lock|_locking|_endlock|_block|_handling|_default|_endblock)\\b"
+        },
+        {
+          "name": "keyword.control.flow.magik",
+          "match": "(?i)\\b(_return|_leave|_continue)\\b"
+        },
+        {
+          "name": "storage.type.magik",
+          "match": "(?i)\\b(_local|_global|_constant|_dynamic|_import)\\b"
+        },
+        {
+          "name": "storage.modifier.magik",
+          "match": "(?i)\\b(_private|_iter|_abstract)\\b"
+        },
+        {
+          "name": "storage.modifier.parameter.magik",
+          "match": "(?i)\\b(_optional|_scatter|_gather|_allresults)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.magik",
+          "match": "(?i)\\b(_not|_is|_isnt|_and|_andif|_or|_orif|_xor|_cf)\\b"
+        },
+        {
+          "name": "keyword.operator.arithmetic.magik",
+          "match": "(?i)\\b(_div|_mod|_divmod)\\b"
+        }
+      ]
+    },
+
+    "comments": {
+      "patterns": [
+        {
+          "begin": "##?\\s*(FIXME|TODO|DEBUG)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.todo.magik"
+            }
+          },
+          "end": "$",
+          "name": "comment.line.magik"
+        },
+        {
+          "begin": "##",
+          "end": "$",
+          "name": "comment.block.documentation.magik",
+          "patterns": [
+            { "include": "#typedoc" }
+          ]
+        },
+        {
+          "begin": "#",
+          "end": "$",
+          "name": "comment.line.number-sign.magik"
+        }
+      ]
+    },
+
+    "typedoc": {
+      "comment": "magik-tools TypeDoc annotations. Elements per TypeDocGrammar.Element: @param, @return, @loop, @slot, @generic, @invokes_method. A TYPE is { anything-but-} }, which covers unions (a|b) and generics (a<K=b,E=c>).",
+      "patterns": [
+        {
+          "comment": "Elements taking an optional type followed by a name.",
+          "match": "(?i)(@(?:param|slot|generic))\\b\\s*(?:\\{([^}]*)\\})?\\s*([A-Za-z!?][A-Za-z0-9_!?]*)?",
+          "captures": {
+            "1": { "name": "keyword.other.documentation.magik" },
+            "2": { "name": "entity.name.type.documentation.magik" },
+            "3": { "name": "variable.parameter.documentation.magik" }
+          }
+        },
+        {
+          "comment": "Elements taking an optional type and no name.",
+          "match": "(?i)(@(?:return|loop|invokes_method))\\b\\s*(?:\\{([^}]*)\\})?",
+          "captures": {
+            "1": { "name": "keyword.other.documentation.magik" },
+            "2": { "name": "entity.name.type.documentation.magik" }
+          }
+        }
+      ]
+    },
+
+    "strings": {
+      "patterns": [
+        {
+          "comment": "Magik strings have no escape mechanism. STRING_DOUBLE_REGEXP is (\"[^\"]*\"), so the literal ends at the very next quote; a % inside a string is an ordinary character.",
+          "name": "string.quoted.double.magik",
+          "begin": "\"",
+          "end": "\""
+        },
+        {
+          "name": "string.quoted.single.magik",
+          "begin": "'",
+          "end": "'"
+        }
+      ]
+    },
+
+    "characters": {
+      "patterns": [
+        {
+          "comment": "CHARACTER_REGEXP: %(\\W|\\w+) -- e.g. %a, %space, %tab, %, and %\".",
+          "match": "%(?:\\W|\\w+)",
+          "name": "constant.character.magik"
+        }
+      ]
+    },
+
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.magik",
+          "match": "\\b(([0-9]+\\.?[0-9]*)|(\\.[0-9]+))\\b"
+        }
+      ]
+    },
+
+    "globals": {
+      "patterns": [
+        {
+          "name": "variable.language.global.magik",
+          "match": "![A-Za-z0-9_!?]+!"
+        }
+      ]
+    },
+
+    "symbols": {
+      "patterns": [
+        {
+          "name": "constant.other.symbol.magik",
+          "match": "(?<![A-Za-z0-9_!?|]):\\|[^|]*\\|"
+        },
+        {
+          "name": "constant.other.symbol.magik",
+          "match": "(?<![A-Za-z0-9_!?|]):[A-Za-z0-9_!?]+"
+        }
+      ]
+    },
+
+    "labels": {
+      "patterns": [
+        {
+          "comment": "Labels. Per MagikGrammar, LABEL is accepted after _leave, _continue, _block, _loop, (trailing) _endloop, and _proc, where PROCEDURE_NAME is defined as a LABEL. A procedure name is not referenceable in Magik -- it exists for tracebacks -- so it is a label rather than a function name. _catch/_throw take an expression, so an @name there is a GLOBAL_REF, not a label.",
+          "match": "(?i)(?:(?<=_leave)|(?<=_continue)|(?<=_block)|(?<=_loop)|(?<=_endloop)|(?<=_proc))\\s*(@(?:\\|[^|]*\\||[A-Za-z0-9_!?]+))",
+          "captures": {
+            "1": {
+              "name": "entity.name.label.magik"
+            }
+          }
+        }
+      ]
+    },
+
+    "global_ref": {
+      "patterns": [
+        {
+          "comment": "GLOBAL_REF: @ + optional package qualifier + identifier. Lexically identical to LABEL, so this must be included AFTER #labels, which claims the positions where MagikGrammar accepts a label.",
+          "match": "(@\\s*(?:(?:\\|[^|]*\\||[A-Za-z0-9_!?]+)\\s*:\\s*)?(?:\\|[^|]*\\||[A-Za-z0-9_!?]+))",
+          "captures": {
+            "1": {
+              "name": "variable.other.global.magik"
+            }
+          }
+        }
+      ]
+    },
+
+    "method_definitions": {
+      "patterns": [
+        {
+          "comment": "METHOD_DEFINITION, dot form: _method exemplar.name(...). A trailing << or ^<< assignment is left to the operators rule.",
+          "match": "(?i)\\b(_method)\\s+((?:\\|[^|]*\\||[A-Za-z0-9_!?]+))\\s*\\.\\s*((?:\\|[^|]*\\||[A-Za-z0-9_!?]+))",
+          "captures": {
+            "1": {
+              "name": "storage.type.function.magik"
+            },
+            "2": {
+              "name": "entity.name.type.class.magik"
+            },
+            "3": {
+              "name": "entity.name.function.definition.magik"
+            }
+          }
+        },
+        {
+          "comment": "METHOD_DEFINITION, indexed form: _method exemplar[params]. MagikGrammar offers EXEMPLAR_NAME followed by either DOT METHOD_NAME or PARAMETERS_SQUARE; there is no .[] spelling. The bracket is left unconsumed so its contents scope normally.",
+          "match": "(?i)\\b(_method)\\s+((?:\\|[^|]*\\||[A-Za-z0-9_!?]+))\\s*(?=\\[)",
+          "captures": {
+            "1": {
+              "name": "storage.type.function.magik"
+            },
+            "2": {
+              "name": "entity.name.type.class.magik"
+            }
+          }
+        },
+        {
+          "match": "(?i)\\b(_endmethod)\\b",
+          "name": "storage.type.function.magik"
+        }
+      ]
+    },
+
+    "proc_definitions": {
+      "patterns": [
+        {
+          "match": "(?i)\\b(_proc)\\b",
+          "name": "storage.type.function.magik"
+        },
+        {
+          "match": "(?i)\\b(_endproc)\\b",
+          "name": "storage.type.function.magik"
+        }
+      ]
+    },
+
+    "slots": {
+      "patterns": [
+        {
+          "match": "\\.(?:\\|[^|]*\\||[A-Za-z_!?][A-Za-z0-9_!?]*)",
+          "name": "variable.other.property.magik"
+        }
+      ]
+    },
+
+    "method_calls": {
+      "patterns": [
+        {
+          "match": "(?<=[A-Za-z0-9_!?|\\])}\"'])\\s*\\.\\s*(\\|[^|]*\\||[A-Za-z_!?][A-Za-z0-9_!?]*|\\[\\]<<|\\[\\])",
+          "captures": {
+            "1": {
+              "name": "entity.name.function.magik"
+            }
+          }
+        }
+      ]
+    },
+
+    "proc_calls": {
+      "patterns": [
+        {
+          "match": "(?<![A-Za-z0-9_!?|])(?:(?:\\|[^|]*\\||[A-Za-z][A-Za-z0-9_!?]*)\\s*:\\s*)?(?:\\|[^|]*\\||[A-Za-z][A-Za-z0-9_!?]*)(?=\\s*\\()",
+          "name": "entity.name.function.magik"
+        }
+      ]
+    },
+
+    "operators": {
+      "patterns": [
+        {
+          "comment": "EMIT. Not an assignment -- it yields a value out of the method -- but not control flow either: unlike _return it does not transfer control. Listed first so it beats the comparison rule on >.",
+          "name": "keyword.other.emit.magik",
+          "match": ">>"
+        },
+        {
+          "comment": "CHEVRON and BOOT_CHEVRON only. AUGMENTED_ASSIGNMENT_EXPRESSION is OPERATOR followed by a chevron, so a compound assignment is two tokens, not one: the operator keeps its own scope and the chevron is the assignment. That also makes the spelling irrelevant -- +<< and + << render alike, as _orif<< and _orif << already did.",
+          "name": "keyword.operator.assignment.magik",
+          "match": "(\\^<<|<<)"
+        },
+        {
+          "name": "keyword.operator.comparison.magik",
+          "match": "(~=|<>|<=|>=|=|<|>)"
+        },
+        {
+          "comment": "MagikOperator.NOT. Listed after comparison so ~= is not split.",
+          "name": "keyword.operator.logical.magik",
+          "match": "~"
+        },
+        {
+          "name": "keyword.operator.arithmetic.magik",
+          "match": "(\\*\\*|\\+|-|\\*|/)"
+        }
+      ]
+    }
+  }
 }
