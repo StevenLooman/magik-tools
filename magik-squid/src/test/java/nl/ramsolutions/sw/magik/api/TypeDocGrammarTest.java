@@ -63,10 +63,10 @@ class TypeDocGrammarTest {
   @Test
   void testGeneric() {
     Assertions.assertThat(g.rule(TypeDocGrammar.GENERIC))
-        .matches("## @generic slot1")
-        .matches("## @generic slot1 Aaaaa aaa.")
-        .matches("## @generic {sw:rope} slot1")
-        .matches("## @generic {user:thing} slot1 Aaaaa aaa.");
+        .matches("## @generic E")
+        .matches("## @generic E Elements elements.")
+        .matches("## @generic {sw:rope} E")
+        .matches("## @generic {user:thing} E Elements elements.");
   }
 
   @Test

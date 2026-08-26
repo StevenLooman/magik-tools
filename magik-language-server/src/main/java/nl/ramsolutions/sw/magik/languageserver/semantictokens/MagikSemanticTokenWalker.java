@@ -45,7 +45,8 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
       Map.of(
           TypeDocGrammar.PARAM, SemanticToken.Type.PARAMETER,
           TypeDocGrammar.LOOP, SemanticToken.Type.VARIABLE,
-          TypeDocGrammar.SLOT, SemanticToken.Type.PROPERTY);
+          TypeDocGrammar.SLOT, SemanticToken.Type.PROPERTY,
+          TypeDocGrammar.GENERIC, SemanticToken.Type.TYPE_PARAMETER);
 
   private static final Set<String> MAGIK_KEYWORD_VALUES =
       Arrays.stream(MagikKeyword.values())
@@ -149,7 +150,8 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
               TypeDocGrammar.PARAM,
               TypeDocGrammar.RETURN,
               TypeDocGrammar.LOOP,
-              TypeDocGrammar.SLOT);
+              TypeDocGrammar.SLOT,
+              TypeDocGrammar.GENERIC);
       elementNodes.forEach(
           elementNode -> {
             // DOC_START

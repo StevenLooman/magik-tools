@@ -309,6 +309,74 @@ class SemanticTokenProviderTest {
   }
 
   @Test
+  void testDocCommentGeneric() {
+    final String code = " ## @generic E Elements of the vector";
+    final SemanticTokens semanticTokens = this.getSemanticTokens(code);
+    final int docModifier = SemanticToken.Modifier.DOCUMENTATION.getModifierType();
+    assertThat(semanticTokens.getData())
+        .containsExactly(
+            0,
+            1,
+            "##".length(),
+            SemanticToken.Type.COMMENT.getTokenType(),
+            docModifier,
+            0,
+            3,
+            "@generic".length(),
+            SemanticToken.Type.KEYWORD.getTokenType(),
+            docModifier,
+            0,
+            9,
+            "E".length(),
+            SemanticToken.Type.TYPE_PARAMETER.getTokenType(),
+            docModifier,
+            0,
+            2,
+            "Elements of the vector".length(),
+            SemanticToken.Type.COMMENT.getTokenType(),
+            docModifier);
+  }
+
+  @Test
+  void testDocCommentGenericWithType() {
+    final String code = " ## @generic {sw:simple_vector<E>} E Elements of the vector";
+    final SemanticTokens semanticTokens = this.getSemanticTokens(code);
+    final int docModifier = SemanticToken.Modifier.DOCUMENTATION.getModifierType();
+    assertThat(semanticTokens.getData())
+        .containsExactly(
+            0,
+            1,
+            "##".length(),
+            SemanticToken.Type.COMMENT.getTokenType(),
+            docModifier,
+            0,
+            3,
+            "@generic".length(),
+            SemanticToken.Type.KEYWORD.getTokenType(),
+            docModifier,
+            0,
+            10,
+            "sw:simple_vector".length(),
+            SemanticToken.Type.CLASS.getTokenType(),
+            docModifier,
+            0,
+            17,
+            "E".length(),
+            SemanticToken.Type.TYPE_PARAMETER.getTokenType(),
+            docModifier,
+            0,
+            4,
+            "E".length(),
+            SemanticToken.Type.TYPE_PARAMETER.getTokenType(),
+            docModifier,
+            0,
+            2,
+            "Elements of the vector".length(),
+            SemanticToken.Type.COMMENT.getTokenType(),
+            docModifier);
+  }
+
+  @Test
   void testMethodAndSlot() {
     final String code = "_method aaa.bbb .slot _endmethod";
     final SemanticTokens semanticTokens = this.getSemanticTokens(code);
