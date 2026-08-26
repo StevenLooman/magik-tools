@@ -154,7 +154,7 @@ public enum TypeDocGrammar implements GrammarRuleKey {
     b.rule(RETURN).is(DOC_START, Element.RETURN, b.optional(TYPE), DESCRIPTION);
     b.rule(LOOP).is(DOC_START, Element.LOOP, b.optional(TYPE), DESCRIPTION);
     b.rule(SLOT).is(DOC_START, Element.SLOT, b.optional(TYPE), NAME, DESCRIPTION);
-    b.rule(GENERIC).is(DOC_START, Element.GENERIC, NAME, DESCRIPTION);
+    b.rule(GENERIC).is(DOC_START, Element.GENERIC, b.optional(TYPE), NAME, DESCRIPTION);
 
     b.rule(METHOD_INVOCATION_PACKAGE).is(b.regexp(PACKAGE_NAME_REGEXP), ":");
     b.rule(METHOD_INVOCATION_TYPE_NAME).is(b.regexp(TYPE_NAME_REGEXP));
