@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
 		"module": "commonjs",
+		"composite": true,
 		"target": "es2019",
 		"lib": ["ES2019"],
 		"outDir": "out",
@@ -9,7 +10,8 @@
 		"skipLibCheck": true
 	},
 	// Production build: compile the extension entry point and everything it imports.
-	// Test files (`*.test.ts`) are not reachable from here, so they are naturally kept
-	// out of the shipped output; they are type-checked and run via `tsconfig.test.json`.
-	"files": ["src/extension.ts"]
+	// Test files (`*.test.ts`) are excluded, so they are kept out of the shipped output;
+	// they are type-checked and run via `tsconfig.test.json`.
+	"include": ["src"],
+	"exclude": ["src/**/*.test.ts"]
 }
