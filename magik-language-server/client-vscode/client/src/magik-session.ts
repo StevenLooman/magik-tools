@@ -4,25 +4,51 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { MagikAliasTaskProvider } from './alias-task-provider';
 import { encodeMagikSource } from './encoding';
+import { stripDebugStatements } from './magik-debug';
+
+
+/** `magik.` configuration key persisting whether `#DEBUG` lines are transmitted. */
+const TRANSMIT_DEBUG_SETTING = 'session.transmitDebug';
+
+/** Command that toggles {@link TRANSMIT_DEBUG_SETTING}. */
+const TOGGLE_TRANSMIT_DEBUG_COMMAND = 'magik.toggleTransmitDebug';
 
 
 export class MagikSessionProvider implements vscode.Disposable {
 
 	private readonly context: vscode.ExtensionContext;
+	private readonly statusBarItem: vscode.StatusBarItem;
 	private currentSession: MagikSession | undefined;
+	private transmitDebug = false;
 
 	constructor(context: vscode.ExtensionContext) {
 		this.context = context;
+		this.statusBarItem = this.createStatusBarItem();
 
 		this.registerCommands();
+		this.registerConfigurationHandler();
 		this.registerWindowHandlers();
+
+		// Seed the flag, session, and status bar from the persisted setting.
+		this.reflectTransmitDebugState();
 	}
 
 	dispose() {
-		// Nop.
+		this.statusBarItem.dispose();
+	}
+
+	private createStatusBarItem(): vscode.StatusBarItem {
+		const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+		item.text = '$(bug) #DEBUG';
+		item.tooltip = 'Magik: #DEBUG statements are transmitted to the session. Click to toggle.';
+		item.command = TOGGLE_TRANSMIT_DEBUG_COMMAND;
+		return item;
 	}
 
 	private registerCommands() {
+		const toggleTransmitDebugCommand = vscode.commands.registerCommand(TOGGLE_TRANSMIT_DEBUG_COMMAND, () => this.command_toggle_transmit_debug());
+		this.context.subscriptions.push(toggleTransmitDebugCommand);
+
 		const transmitFileCommand = vscode.commands.registerTextEditorCommand('magik.transmitFile', () => this.command_transmit_file());
 		this.context.subscriptions.push(transmitFileCommand);
 		const transmitMethodCommand = vscode.commands.registerTextEditorCommand('magik.transmitCurrentRegion', () => this.command_transmit_current_region());
@@ -38,16 +64,26 @@ export class MagikSessionProvider implements vscode.Disposable {
 		this.context.subscriptions.push(transmitModuleDefCommand);
 	}
 
+	private registerConfigurationHandler() {
+		// Single writer for the toggle state: the setting change drives the flag, session, and status bar.
+		const handler = vscode.workspace.onDidChangeConfiguration((event) => {
+			if (event.affectsConfiguration(`magik.${TRANSMIT_DEBUG_SETTING}`)) {
+				this.reflectTransmitDebugState();
+			}
+		});
+		this.context.subscriptions.push(handler);
+	}
+
 	private registerWindowHandlers() {
 		// Pick an already open Smallworld session terminal if extension activates late.
 		const existingSessionTerminal = vscode.window.terminals.find(terminal => this.isSessionTerminal(terminal));
 		if (existingSessionTerminal) {
-			this.currentSession = new MagikSession(existingSessionTerminal);
+			this.currentSession = this.createSession(existingSessionTerminal);
 		}
 
 		vscode.window.onDidOpenTerminal((terminal: vscode.Terminal) => {
 			if (this.isSessionTerminal(terminal)) {
-				this.currentSession = new MagikSession(terminal);
+				this.currentSession = this.createSession(terminal);
 			}
 		});
 
@@ -57,6 +93,36 @@ export class MagikSessionProvider implements vscode.Disposable {
 				this.currentSession = undefined;
 			}
 		});
+	}
+
+	/** Create a session for a terminal, seeded with the current #DEBUG toggle. */
+	private createSession(terminal: vscode.Terminal): MagikSession {
+		const session = new MagikSession(terminal);
+		session.transmitDebug = this.transmitDebug;
+		return session;
+	}
+
+	private command_toggle_transmit_debug() {
+		const config = vscode.workspace.getConfiguration("magik");
+		const current = config.get<boolean>(TRANSMIT_DEBUG_SETTING, false);
+		const next = !current;
+		config.update(TRANSMIT_DEBUG_SETTING, next, vscode.ConfigurationTarget.Global);
+		const message = next ? "Magik #DEBUG transmit enabled" : "Magik #DEBUG transmit disabled";
+		vscode.window.setStatusBarMessage(message, 2000);
+	}
+
+	/** Reflect the persisted setting onto the flag, current session, and status bar. */
+	private reflectTransmitDebugState() {
+		const config = vscode.workspace.getConfiguration("magik");
+		this.transmitDebug = config.get<boolean>(TRANSMIT_DEBUG_SETTING, false);
+		if (this.currentSession != null) {
+			this.currentSession.transmitDebug = this.transmitDebug;
+		}
+		if (this.transmitDebug) {
+			this.statusBarItem.show();
+		} else {
+			this.statusBarItem.hide();
+		}
 	}
 
 	private isSessionTerminal(terminal: vscode.Terminal): boolean {
@@ -158,6 +224,8 @@ class MagikSession implements vscode.Disposable {
 	private _workdir: fs.PathLike | undefined;
 	private readonly _terminal: vscode.Terminal;
 
+	public transmitDebug = false;
+
 	constructor(terminal: vscode.Terminal) {
 		const dir = path.join(os.tmpdir(), "vscode-magik-");
 		this._workdir = fs.mkdtempSync(dir);
@@ -182,12 +250,14 @@ class MagikSession implements vscode.Disposable {
 	 * @param sourcePath (Original) source path of file.
 	 */
 	public sendToSession(text: string, sourcePath: fs.PathLike | undefined) {
+		const source = this.transmitDebug ? stripDebugStatements(text) : text;
+
 		// Save contents to temp file, and send to active session.
 		const defaultEncoding = vscode.workspace
 			.getConfiguration("magik")
 			.get<string>("session.encoding") ?? "utf8";
 		const tempPath = this.getTempFile();
-		fs.writeFileSync(tempPath, encodeMagikSource(text, defaultEncoding));
+		fs.writeFileSync(tempPath, encodeMagikSource(source, defaultEncoding));
 
 		// Clear current input in session.
 		if (process.platform === "win32") {

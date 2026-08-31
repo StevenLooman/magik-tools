@@ -232,6 +232,11 @@
         "command": "magik.stopLanguageServer",
         "title": "Stop Language Server",
         "category": "Magik"
+      },
+      {
+        "command": "magik.toggleTransmitDebug",
+        "title": "Toggle #DEBUG transmit",
+        "category": "Magik"
       }
     ],
     "keybindings": [
@@ -263,6 +268,11 @@
       {
         "command": "magik.traceStatement",
         "key": "f4 t",
+        "when": "editorTextFocus && editorLangId == magik"
+      },
+      {
+        "command": "magik.toggleTransmitDebug",
+        "key": "f4 d",
         "when": "editorTextFocus && editorLangId == magik"
       }
     ],
@@ -336,6 +346,11 @@
           "description": "Character encoding of the Magik session, used when transmitting a file or region that has no `#% text_encoding =` declaration. Should match the session's locale (e.g. `utf8`, `iso8859_1`). Only used by the VS Code extension.",
           "type": "string",
           "default": "utf8"
+        },
+        "magik.session.transmitDebug": {
+          "description": "Transmit `#DEBUG` lines to the session as live code. When on, a line whose first non-whitespace is `#DEBUG` has that marker stripped before transmitting, so the line is compiled instead of staying a comment. Toggle with the `Magik: Toggle #DEBUG transmit` command (`f4 d`). Only used by the VS Code extension.",
+          "type": "boolean",
+          "default": false
         },
         "magik.editor.matchDeclaredEncoding": {
           "description": "Automatically set the editor's character encoding to the one declared in a Magik file's `#% text_encoding = ...` line when opening it. Note: an EditorConfig `charset` for `*.magik` will override this. Only used by the VS Code extension.",
@@ -461,6 +476,8 @@
     "@typescript-eslint/parser": "^8.65.0",
     "@vscode/vsce": "^3.9.2",
     "eslint": "^10.8.0",
+    "mocha": "^11.8.0",
+    "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.65.0"
   }
