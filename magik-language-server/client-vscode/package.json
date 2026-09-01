@@ -475,7 +475,7 @@
     "@types/node": "^26.4.0",
     "@typescript-eslint/parser": "^8.65.0",
     "@vscode/vsce": "^3.9.2",
-    "eslint": "^10.8.0",
+    "eslint": "^10.9.1",
     "mocha": "^11.8.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
