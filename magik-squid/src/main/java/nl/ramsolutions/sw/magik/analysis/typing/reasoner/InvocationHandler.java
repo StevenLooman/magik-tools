@@ -51,67 +51,104 @@ class InvocationHandler extends LocalTypeReasonerHandler {
             .substituteType(TypeString.PRIVATE, methodOwnerTypeStr)
             .get(0, TypeString.SW_UNSET);
 
-    // Store the method definition(s) on the node.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
+    final List<AstNode> argumentExpressionNodes = helper.getArgumentExpressionNodes();
+    // For assignment-methods (`[]<<` / `foo<<`), capture the RHS type so a
+    // `_parameter(<param>)` ref in the declared return/loop types can be substituted.
+    final TypeString assignmentArgType = this.extractAssignmentArgType(node);
+    final InvocationResult invocationResult =
+        this.invokeMethod(
+            originalCalledTypeStr,
+            calledTypeStr,
+            methodName,
+            argumentExpressionNodes,
+            assignmentArgType);
+
+    // Store it!
+    final ExpressionResultString callResult = invocationResult.callResult();
+    final ExpressionResultString iterResult = invocationResult.iterResult();
+    this.state.setNodeType(node, callResult);
+    this.state.setNodeIterType(node, iterResult);
+  }
+
+  /**
+   * Result of invoking a method: the call result and the iteration result.
+   *
+   * @param callResult Result of the call itself.
+   * @param iterResult Result the method iterates ({@code _loopbody}) with.
+   */
+  record InvocationResult(ExpressionResultString callResult, ExpressionResultString iterResult) {}
+
+  /**
+   * Invoke a method on a type, without reading the invocation itself from the AST. Shared with the
+   * unary operator handling, a unary operator being a method invocation without arguments.
+   *
+   * @param originalCalledTypeStr Called type before {@code _self}/{@code _private} substitution.
+   * @param calledTypeStr Type the method is invoked on.
+   * @param methodName Name of the invoked method.
+   * @param argumentExpressionNodes Argument expression nodes, empty when there are no arguments.
+   * @param assignmentArgType Type assigned by an assignment-method, {@code null} otherwise.
+   * @return Result of the invocation.
+   */
+  InvocationResult invokeMethod(
+      final TypeString originalCalledTypeStr,
+      final TypeString calledTypeStr,
+      final String methodName,
+      final List<AstNode> argumentExpressionNodes,
+      final @Nullable TypeString assignmentArgType) {
     final Collection<MethodDefinition> methodDefs =
         calledTypeStr.getCombinedTypes().stream()
             .map(typeStr -> this.typeResolver.getRespondingMethodDefinitions(typeStr, methodName))
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    // Perform method call and store iterator result(s).
-    ExpressionResultString callResult = null;
-    ExpressionResultString iterResult = null;
     if (methodDefs.isEmpty()) {
       // Method not found, we cannot known what the results will be.
-      callResult = ExpressionResultString.UNDEFINED;
-      iterResult = ExpressionResultString.UNDEFINED;
-    } else {
-      final List<AstNode> argumentExpressionNodes = helper.getArgumentExpressionNodes();
-      final List<TypeString> argumentTypeStrs =
-          argumentExpressionNodes.stream()
-              .map(exprNode -> this.state.getNodeType(exprNode).get(0, TypeString.SW_UNSET))
-              .toList();
-      // For assignment-methods (`[]<<` / `foo<<`), capture the RHS type so a
-      // `_parameter(<param>)` ref in the declared return/loop types can be substituted.
-      final TypeString assignmentArgType = this.extractAssignmentArgType(node);
-      for (final MethodDefinition methodDef : methodDefs) {
-        final ParameterDefinition assignmentParamDef =
-            assignmentArgType != null ? methodDef.getAssignmentParameter() : null;
-        // Handle call result.
-        final ExpressionResultString callResultStr = methodDef.getReturnTypes();
-        final ExpressionResultString processedCallResultStr =
-            this.processExpressionResultString(
-                originalCalledTypeStr,
-                calledTypeStr,
-                methodDef.getParameters(),
-                assignmentParamDef,
-                callResultStr,
-                argumentTypeStrs,
-                assignmentParamDef != null ? assignmentArgType : null);
-        callResult = new ExpressionResultString(processedCallResultStr, callResult);
-
-        // Handle iter result.
-        final ExpressionResultString iterResultStr = methodDef.getLoopTypes();
-        final ExpressionResultString processedIterResultStr =
-            this.processExpressionResultString(
-                originalCalledTypeStr,
-                calledTypeStr,
-                methodDef.getParameters(),
-                assignmentParamDef,
-                iterResultStr,
-                argumentTypeStrs,
-                assignmentParamDef != null ? assignmentArgType : null);
-        iterResult = new ExpressionResultString(processedIterResultStr, iterResult);
-      }
+      return new InvocationResult(
+          ExpressionResultString.UNDEFINED, ExpressionResultString.UNDEFINED);
     }
 
-    // Store it!
+    // Perform method call and gather iterator result(s).
+    ExpressionResultString callResult = null;
+    ExpressionResultString iterResult = null;
+    final List<TypeString> argumentTypeStrs =
+        argumentExpressionNodes.stream()
+            .map(exprNode -> this.state.getNodeType(exprNode).get(0, TypeString.SW_UNSET))
+            .toList();
+    for (final MethodDefinition methodDef : methodDefs) {
+      final ParameterDefinition assignmentParamDef =
+          assignmentArgType != null ? methodDef.getAssignmentParameter() : null;
+      // Handle call result.
+      final ExpressionResultString callResultStr = methodDef.getReturnTypes();
+      final ExpressionResultString processedCallResultStr =
+          this.processExpressionResultString(
+              originalCalledTypeStr,
+              calledTypeStr,
+              methodDef.getParameters(),
+              assignmentParamDef,
+              callResultStr,
+              argumentTypeStrs,
+              assignmentParamDef != null ? assignmentArgType : null);
+      callResult = new ExpressionResultString(processedCallResultStr, callResult);
+
+      // Handle iter result.
+      final ExpressionResultString iterResultStr = methodDef.getLoopTypes();
+      final ExpressionResultString processedIterResultStr =
+          this.processExpressionResultString(
+              originalCalledTypeStr,
+              calledTypeStr,
+              methodDef.getParameters(),
+              assignmentParamDef,
+              iterResultStr,
+              argumentTypeStrs,
+              assignmentParamDef != null ? assignmentArgType : null);
+      iterResult = new ExpressionResultString(processedIterResultStr, iterResult);
+    }
+
     Objects.requireNonNull(callResult);
     Objects.requireNonNull(iterResult);
-    this.state.setNodeType(node, callResult);
-    this.state.setNodeIterType(node, iterResult);
+    return new InvocationResult(callResult, iterResult);
   }
 
   /**

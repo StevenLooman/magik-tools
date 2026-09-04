@@ -333,6 +333,80 @@ class LocalTypeReasonerTest {
   }
 
   @Test
+  void testUnaryOperatorSelfOperand() {
+    final String code =
+        """
+        _method object.test
+            _return -_self
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "negated",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_CHAR16_VECTOR),
+            ExpressionResultString.EMPTY));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodDefinitionNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_CHAR16_VECTOR));
+  }
+
+  @Test
+  void testUnaryOperatorSelfOperandKeepsSelfResult() {
+    final String code =
+        """
+        _method object.test
+            _return -_self
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "negated",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SELF),
+            ExpressionResultString.EMPTY));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodDefinitionNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SELF));
+  }
+
+  @Test
   void testBinaryOperator() {
     final String code =
         """
@@ -364,6 +438,138 @@ class LocalTypeReasonerTest {
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final ExpressionResultString result = state.getNodeType(methodNode);
     assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_CHAR16_VECTOR));
+  }
+
+  @Test
+  void testBinaryOperatorSelfOperand() {
+    final String code =
+        """
+        _method object.test
+            _return _self + 1
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString objectRef = TypeString.ofIdentifier("object", "user");
+    definitionKeeper.add(
+        new BinaryOperatorDefinition(
+            null,
+            null,
+            null,
+            code,
+            null,
+            "+",
+            objectRef,
+            TypeString.SW_INTEGER,
+            TypeString.SW_CHAR16_VECTOR));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodDefinitionNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_CHAR16_VECTOR));
+  }
+
+  @Test
+  void testAugmentedAssignmentSelfOperand() {
+    final String code =
+        """
+        _method object.test
+            _local x << 1
+            x +<< _self
+            _return x
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString objectRef = TypeString.ofIdentifier("object", "user");
+    definitionKeeper.add(
+        new BinaryOperatorDefinition(
+            null,
+            null,
+            null,
+            code,
+            null,
+            "+",
+            TypeString.SW_INTEGER,
+            objectRef,
+            TypeString.SW_CHAR16_VECTOR));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodDefinitionNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_CHAR16_VECTOR));
+  }
+
+  @Test
+  void testBinaryOperatorSpeciesWithoutExemplarGeneric() {
+    final String code =
+        """
+        _method object.test
+            _return _self.get_a() + _self.get_a()
+        _endmethod
+        """;
+
+    // Set up. `species` answers a method_table carrying a bare <E> reference, so it names no
+    // exemplar to resolve the operand to.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString aRef = TypeString.ofIdentifier("a", "user");
+    final TypeString methodTableRef =
+        TypeString.ofIdentifier("method_table", "sw", TypeString.ofGenericReference("E"));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, aRef, null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "get_a()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(aRef),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            aRef,
+            "species",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(methodTableRef),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new BinaryOperatorDefinition(
+            null, null, null, code, null, "+", aRef, aRef, TypeString.SW_INTEGER));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodDefinitionNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodDefinitionNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
   }
 
   @Test

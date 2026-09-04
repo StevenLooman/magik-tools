@@ -42,6 +42,15 @@ public class UnaryOperatorHelper {
   }
 
   /**
+   * Test if encapsulated node is _scatter.
+   *
+   * @return {@code true} when _scatter.
+   */
+  public boolean isScatter() {
+    return this.node.getTokenValue().equalsIgnoreCase(MagikKeyword.SCATTER.getValue());
+  }
+
+  /**
    * Get unary operator token as lowercase.
    *
    * @return Operator token.

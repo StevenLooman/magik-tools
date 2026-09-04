@@ -45,9 +45,9 @@ public class LocalTypeReasoner extends MagikAstWalker {
 
     this.assignmentHandler = new AssignmentHandler(this.state);
     this.atomHandler = new AtomHandler(this.state);
-    this.expressionHandler = new ExpressionHandler(this.state);
-    this.identifierHandler = new IdentifierHandler(this.state);
     this.invocationHandler = new InvocationHandler(this.state);
+    this.expressionHandler = new ExpressionHandler(this.state, this.invocationHandler);
+    this.identifierHandler = new IdentifierHandler(this.state);
     this.parameterHandler = new ParameterHandler(this.state);
     this.procedureDefinitionHandler = new ProcedureDefinitionHandler(this.state);
     this.statementHandler = new StatementHandler(this.state);

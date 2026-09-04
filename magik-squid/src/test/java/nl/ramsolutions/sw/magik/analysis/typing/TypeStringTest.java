@@ -105,4 +105,39 @@ class TypeStringTest {
     assertThat(svA.hashCode()).isEqualTo(svB.hashCode());
     assertThatCode(() -> TypeString.combine(svA, svB)).doesNotThrowAnyException();
   }
+
+  @Test
+  void testGetGenericValueBound() {
+    final TypeString eDefTypeStr = TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER);
+    final TypeString ropeTypeStr = TypeString.ofIdentifier("rope", "sw", eDefTypeStr);
+    final TypeString eRefTypeStr = TypeString.ofGenericReference("E");
+    final TypeString value = ropeTypeStr.getGenericValue(eRefTypeStr, TypeString.UNDEFINED);
+    assertThat(value).isEqualTo(TypeString.SW_INTEGER);
+  }
+
+  @Test
+  void testGetGenericValueUndeclaredGeneric() {
+    final TypeString ropeTypeStr = TypeString.ofIdentifier("rope", "sw");
+    final TypeString eRefTypeStr = TypeString.ofGenericReference("E");
+    final TypeString value = ropeTypeStr.getGenericValue(eRefTypeStr, TypeString.UNDEFINED);
+    assertThat(value).isEqualTo(TypeString.UNDEFINED);
+  }
+
+  @Test
+  void testGetGenericValueUnboundGeneric() {
+    // A bare `<E>` reference declares the generic but binds no value to it.
+    final TypeString eRefTypeStr = TypeString.ofGenericReference("E");
+    final TypeString methodTableTypeStr =
+        TypeString.ofIdentifier("method_table", "sw", eRefTypeStr);
+    final TypeString value = methodTableTypeStr.getGenericValue(eRefTypeStr, TypeString.UNDEFINED);
+    assertThat(value).isEqualTo(TypeString.UNDEFINED);
+  }
+
+  @Test
+  void testGetGenericValueNullFallback() {
+    final TypeString ropeTypeStr = TypeString.ofIdentifier("rope", "sw");
+    final TypeString eRefTypeStr = TypeString.ofGenericReference("E");
+    final TypeString value = ropeTypeStr.getGenericValue(eRefTypeStr, null);
+    assertThat(value).isNull();
+  }
 }

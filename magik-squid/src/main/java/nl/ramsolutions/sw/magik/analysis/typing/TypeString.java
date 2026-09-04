@@ -502,6 +502,27 @@ public final class TypeString implements Comparable<TypeString> {
   }
 
   /**
+   * Get the type bound to the given generic reference, or {@code fallbackTypeStr} when this type
+   * binds none: it either declares no such generic, or declares it as a bare reference ({@code
+   * <E>}), which binds no type.
+   *
+   * @param genericReference The generic reference to search for.
+   * @param fallbackTypeStr Type to return when no type is bound to the reference.
+   * @return The bound type, or {@code fallbackTypeStr}.
+   */
+  @CheckForNull
+  public TypeString getGenericValue(
+      final TypeString genericReference, final @Nullable TypeString fallbackTypeStr) {
+    final TypeString genericDefinition = this.getGenericDefinition(genericReference);
+    if (genericDefinition == null) {
+      return fallbackTypeStr;
+    }
+
+    final TypeString genericTypeStr = genericDefinition.getGenericType();
+    return genericTypeStr != null ? genericTypeStr : fallbackTypeStr;
+  }
+
+  /**
    * Get the reference of the generic.
    *
    * @return Generic reference.

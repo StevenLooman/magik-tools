@@ -12,7 +12,6 @@ import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
-import nl.ramsolutions.sw.magik.analysis.typing.GenericHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.CommentInstructionReader;
@@ -28,14 +27,17 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
           "iter-type", CommentInstructionReader.Instruction.Sort.STATEMENT);
 
   private final CommentInstructionReader instructionReader;
+  private final InvocationHandler invocationHandler;
 
   /**
    * Constructor.
    *
    * @param state Reasoner state.
+   * @param invocationHandler Handler to invoke the unary operator methods with.
    */
-  ExpressionHandler(final LocalTypeReasonerState state) {
+  ExpressionHandler(final LocalTypeReasonerState state, final InvocationHandler invocationHandler) {
     super(state);
+    this.invocationHandler = invocationHandler;
     this.instructionReader =
         new CommentInstructionReader(
             this.state.getMagikFile(), Set.of(TYPE_INSTRUCTION, ITER_TYPE_INSTRUCTION));
@@ -47,6 +49,8 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
    * @param node BINARY_EXPRESSION node.
    */
   void handleBinaryExpression(final AstNode node) {
+    final TypeString ownerTypeStr = this.getMethodOwnerType(node);
+
     // Take left hand side as current.
     final AstNode currentNode = node.getFirstChild();
     ExpressionResultString result = this.state.getNodeType(currentNode);
@@ -63,8 +67,8 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
       final ExpressionResultString rightResult = this.state.getNodeType(rightNode);
 
       // Evaluate binary operator.
-      final TypeString leftTypeStr = result.get(0, TypeString.SW_UNSET);
-      final TypeString rightTypeStr = rightResult.get(0, TypeString.SW_UNSET);
+      final TypeString leftTypeStr = this.getBinaryOperandType(result, ownerTypeStr);
+      final TypeString rightTypeStr = this.getBinaryOperandType(rightResult, ownerTypeStr);
       result = this.getBinaryOperatorDefinition(operatorStr, leftTypeStr, rightTypeStr);
     }
 
@@ -91,8 +95,9 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
     final String operatorStr = operatorNode.getTokenValue();
 
     // Evaluate binary operator.
-    final TypeString leftTypeStr = leftResult.get(0, TypeString.SW_UNSET);
-    final TypeString rightTypeStr = rightResult.get(0, TypeString.SW_UNSET);
+    final TypeString ownerTypeStr = this.getMethodOwnerType(node);
+    final TypeString leftTypeStr = this.getBinaryOperandType(leftResult, ownerTypeStr);
+    final TypeString rightTypeStr = this.getBinaryOperandType(rightResult, ownerTypeStr);
     final ExpressionResultString result =
         this.getBinaryOperatorDefinition(operatorStr, leftTypeStr, rightTypeStr);
 
@@ -114,6 +119,23 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
         this.state.setCurrentScopeEntryNode(scopeEntry, assignedNode);
       }
     }
+  }
+
+  /**
+   * Get the type of a binary operator operand, with {@code _self}/{@code _private} resolved to the
+   * type owning the enclosing method definition. A binary operator case is declared for actual
+   * exemplars, so an unresolved {@code _self} never matches one.
+   *
+   * @param operandResult Result of the operand.
+   * @param ownerTypeStr Type owning the enclosing method definition.
+   * @return Type to look up the binary operator definition with.
+   */
+  private TypeString getBinaryOperandType(
+      final ExpressionResultString operandResult, final TypeString ownerTypeStr) {
+    return operandResult
+        .substituteType(TypeString.SELF, ownerTypeStr)
+        .substituteType(TypeString.PRIVATE, ownerTypeStr)
+        .get(0, TypeString.SW_UNSET);
   }
 
   private ExpressionResultString getBinaryOperatorDefinition(
@@ -143,9 +165,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 .reduce(TypeString::combine)
                 .orElse(TypeString.UNDEFINED);
         final TypeString resolvedLhsTypeStr =
-            lhsMethodTableTypeStr.getGenericDefinition(exemplarRef) != null
-                ? lhsMethodTableTypeStr.getGenericDefinition(exemplarRef).getGenericType()
-                : lhsTypeStr;
+            lhsMethodTableTypeStr.getGenericValue(exemplarRef, lhsTypeStr);
         final TypeString rhsMethodTableTypeStr =
             this.typeResolver.getRespondingMethodDefinitions(rhsTypeStr, "species").stream()
                 .map(MethodDefinition::getReturnTypes)
@@ -153,9 +173,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
                 .reduce(TypeString::combine)
                 .orElse(TypeString.UNDEFINED);
         final TypeString resolvedRhsTypeStr =
-            rhsMethodTableTypeStr.getGenericDefinition(exemplarRef) != null
-                ? rhsMethodTableTypeStr.getGenericDefinition(exemplarRef).getGenericType()
-                : rhsTypeStr;
+            rhsMethodTableTypeStr.getGenericValue(exemplarRef, rhsTypeStr);
 
         final BinaryOperatorDefinition binOpDef =
             this.definitionKeeper
@@ -179,29 +197,64 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
    */
   void handleUnaryExpression(final AstNode node) {
     final UnaryOperatorHelper helper = new UnaryOperatorHelper(node);
+
+    // Get operand.
+    final AstNode operandNode = node.getLastChild();
+    final ExpressionResultString operandResult = this.state.getNodeType(operandNode);
+    final TypeString originalOperandTypeStr = operandResult.get(0, TypeString.SW_UNSET);
+    final TypeString ownerTypeStr = this.getMethodOwnerType(node);
+    final TypeString operandTypeStr =
+        operandResult
+            .substituteType(TypeString.SELF, ownerTypeStr)
+            .substituteType(TypeString.PRIVATE, ownerTypeStr)
+            .get(0, TypeString.SW_UNSET);
+
     if (helper.isAllResults()) {
-      this.assignAtom(node, TypeString.SW_SIMPLE_VECTOR); // TODO: Generics?
+      final ExpressionResultString allResultsResult = this.getAllResultsResult(operandResult);
+      this.assignAtom(node, allResultsResult);
       return;
     }
 
-    // Get operand.
-    final AstNode operatedNode = node.getLastChild();
-    final ExpressionResultString operatedResult = this.state.getNodeType(operatedNode);
-    final TypeString typeStr = operatedResult.get(0, TypeString.SW_UNSET);
-
-    // Get operator.
+    // A unary operator is a method invocation without arguments.
     final String operatorMethod = helper.getUnaryOperatorMethod();
+    final InvocationHandler.InvocationResult invocationResult =
+        this.invocationHandler.invokeMethod(
+            originalOperandTypeStr, operandTypeStr, operatorMethod, List.of(), null);
+    final ExpressionResultString result = invocationResult.callResult();
 
-    // Apply operator to operand and store result.
-    final ExpressionResultString invocationResult =
-        this.getMethodInvocationResult(typeStr, operatorMethod);
-    final ExpressionResultString result =
-        new GenericHelper(typeStr)
-            .substituteGenerics(invocationResult)
-            .substituteType(TypeString.SELF, typeStr)
-            .substituteType(TypeString.PRIVATE, typeStr);
+    if (helper.isScatter()) {
+      final ExpressionResultString scatterResult = this.getScatterResult(result);
+      this.state.setNodeType(node, scatterResult);
+    } else {
+      this.state.setNodeType(node, result);
+    }
+  }
 
-    this.state.setNodeType(node, result);
+  /**
+   * Get the result for an {@code _allresults} expression.
+   *
+   * <p>The element type of the {@code sw:simple_vector} is left undeclared; a reasoner which tracks
+   * generics can derive the {@code E} generic definition from the operand result.
+   *
+   * @param operandResult Result of the operand.
+   * @return Result for the {@code _allresults} expression.
+   */
+  @SuppressWarnings("java:S1172")
+  private ExpressionResultString getAllResultsResult(final ExpressionResultString operandResult) {
+    return new ExpressionResultString(TypeString.SW_SIMPLE_VECTOR);
+  }
+
+  /**
+   * Get the result for a {@code _scatter} expression.
+   *
+   * <p>The result of {@code for_scatter()} is taken as is; a reasoner which tracks generics can
+   * return the element type of the scattered collection as a variadic result.
+   *
+   * @param result Result of the {@code for_scatter()} invocation.
+   * @return Result for the {@code _scatter} expression.
+   */
+  private ExpressionResultString getScatterResult(final ExpressionResultString result) {
+    return result;
   }
 
   /**
