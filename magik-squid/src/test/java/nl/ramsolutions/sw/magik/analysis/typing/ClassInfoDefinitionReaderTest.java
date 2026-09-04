@@ -20,6 +20,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -54,12 +55,17 @@ class ClassInfoDefinitionReaderTest {
                 doAnotherThingRef,
                 TypeString.UNDEFINED,
                 new Pragma(null, Set.of("restricted"), Set.of(), Set.of())));
+    // A `method <global>` record with parameters is a procedure bound to the global; the
+    // procedure claims the global's name and no GlobalDefinition sits beside it.
     final TypeString reportRef = TypeString.ofIdentifier("!report!", "sw");
     final Collection<GlobalDefinition> reportGlobalDefs =
         definitionKeeper.getGlobalDefinitions(reportRef);
-    assertThat(reportGlobalDefs)
+    assertThat(reportGlobalDefs).isEmpty();
+    final Collection<ProcedureDefinition> reportProcedureDefs =
+        definitionKeeper.getProcedureDefinitions(reportRef);
+    assertThat(reportProcedureDefs)
         .containsExactly(
-            new GlobalDefinition(
+            new ProcedureDefinition(
                 new Location(
                     URI.create(
                         "file:///$SMALLWORLD_GIS/sw_core/modules/sw_core/example_module/source/globals.magik")),
@@ -73,9 +79,31 @@ class ClassInfoDefinitionReaderTest {
             See also: !do_another_thing!
             """,
                 null,
+                Collections.emptySet(),
                 reportRef,
-                TypeString.UNDEFINED,
-                new Pragma(null, Set.of("advanced"), Set.of(), Set.of("external"))));
+                "!report!",
+                List.of(
+                    new ParameterDefinition(
+                        null,
+                        null,
+                        "class_definition_reader_test",
+                        null,
+                        null,
+                        "param1",
+                        ParameterDefinition.Modifier.NONE,
+                        TypeString.UNDEFINED),
+                    new ParameterDefinition(
+                        null,
+                        null,
+                        "class_definition_reader_test",
+                        null,
+                        null,
+                        "param2",
+                        ParameterDefinition.Modifier.NONE,
+                        TypeString.UNDEFINED)),
+                new Pragma(null, Set.of("advanced"), Set.of(), Set.of("external")),
+                ExpressionResultString.UNDEFINED,
+                ExpressionResultString.UNDEFINED));
 
     // Conditions.
     final Collection<ConditionDefinition> condition1Defs =

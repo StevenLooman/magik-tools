@@ -3,7 +3,11 @@ package nl.ramsolutions.sw.magik.parser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.GenericTokenType;
+import com.sonar.sslr.api.Token;
 import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -16,6 +20,23 @@ class TypeDocParserTest {
   private AstNode parseMagik(final String code) {
     final MagikParser parser = new MagikParser();
     return parser.parseSafe(code);
+  }
+
+  private List<Token> createDocTokens(final List<String> lines) {
+    final List<Token> docTokens = new ArrayList<>(lines.size());
+    for (int index = 0; index < lines.size(); ++index) {
+      final String line = lines.get(index);
+      final Token token =
+          Token.builder()
+              .setType(GenericTokenType.COMMENT)
+              .setValueAndOriginalValue(line)
+              .setLine(index + 1)
+              .setColumn(0)
+              .setURI(URI.create("magik://test"))
+              .build();
+      docTokens.add(token);
+    }
+    return docTokens;
   }
 
   @Test
@@ -318,5 +339,25 @@ class TypeDocParserTest {
     final TypeDocParser docParser = new TypeDocParser(methodNode);
     final List<String> calls = docParser.getInvokesMethodCalls();
     assertThat(calls).containsExactly("rope.size");
+  }
+
+  @Test
+  void testDocTokensAreParsed() {
+    // Callers without an AST -- ClassInfoDefinitionReader -- supply doc tokens, one per line.
+    final List<String> lines =
+        List.of("## Does something.", "## @param {sw:symbol} param1 Test parameter 1.");
+    final List<Token> docTokens = this.createDocTokens(lines);
+    final TypeDocParser docParser = new TypeDocParser(docTokens, TypeString.SW_PACKAGE);
+
+    final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
+    assertThat(parameterTypes).containsOnly(Map.entry("param1", TypeString.SW_SYMBOL));
+  }
+
+  @Test
+  void testEmptyDocTokensYieldNoTypes() {
+    final TypeDocParser docParser = new TypeDocParser(List.of(), TypeString.SW_PACKAGE);
+
+    final List<TypeString> returnTypes = docParser.getReturnTypes();
+    assertThat(returnTypes).isEmpty();
   }
 }

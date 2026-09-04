@@ -1,5 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
+import com.sonar.sslr.api.GenericTokenType;
+import com.sonar.sslr.api.Token;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +35,9 @@ import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,10 +50,15 @@ public final class ClassInfoDefinitionReader {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClassInfoDefinitionReader.class);
 
+  private static final String DOC_PREFIX = "## ";
+  private static final URI TYPE_DOC_URI = URI.create("magik://type-doc");
+
   private static final Map<String, MethodDefinition.Modifier> METHOD_MODIFIER_MAPPING =
       Map.of(
           "private", MethodDefinition.Modifier.PRIVATE,
           "iter", MethodDefinition.Modifier.ITER);
+  private static final Map<String, ProcedureDefinition.Modifier> GLOBAL_MODIFIER_MAPPING =
+      Map.of("iter", ProcedureDefinition.Modifier.ITER);
   private static final Map<String, ParameterDefinition.Modifier> PARAMETER_MODIFIER_MAPPING =
       Map.of(
           "", ParameterDefinition.Modifier.NONE,
@@ -170,35 +179,41 @@ public final class ClassInfoDefinitionReader {
   private void readGlobal(final String moduleName, final String line, final BufferedReader reader)
       throws IOException {
     // 1 : "method" "<global>" <global_name> <parameters>
-    // 2 : n ["basic"/"restricted"/"internal"/pragma]* source_file
+    // 2 : n ["iter"]* ["basic"/"restricted"/"internal"/pragma]* source_file
     // 3+: <n lines of comments>
     // Line 1
+    final String globalName;
     final TypeString typeString;
+    final List<ParameterDefinition> parameters;
     try (Scanner scanner = new Scanner(line)) {
       scanner.next(); // "method"
 
       scanner.next(); // "<global>"
 
-      final String globalName = scanner.next();
+      globalName = scanner.next();
       typeString = TypeString.ofIdentifier(globalName, "sw");
 
-      // Parameters!
-      this.readParameterDefinitions(moduleName, scanner); // NOSONAR: Unused.
-
-      // TODO: Is it always a procedure when it has parameters?
+      parameters = this.readParameterDefinitions(moduleName, scanner);
     }
 
     // Line 2
     final String line2 = reader.readLine();
+    final Set<ProcedureDefinition.Modifier> modifiers = new HashSet<>();
     final List<String> pragmas = new ArrayList<>();
     final int commentLineCount;
     final Location location;
     try (Scanner scanner = new Scanner(line2)) {
       commentLineCount = scanner.nextInt();
 
-      // Read pragmas.
+      // Read modifiers/pragmas.
       while (scanner.hasNext(ClassInfoDefinitionReader.NEXT_NOT_SLASH_PATTERN)) {
         final String item = scanner.next();
+        final ProcedureDefinition.Modifier modifier =
+            ClassInfoDefinitionReader.GLOBAL_MODIFIER_MAPPING.get(item);
+        if (modifier != null) {
+          modifiers.add(modifier);
+        }
+
         pragmas.add(item);
       }
 
@@ -217,9 +232,39 @@ public final class ClassInfoDefinitionReader {
     final String doc = docBuilder.toString();
 
     final Instant timestamp = this.getTimestamp();
+
+    // A record carries parameters or an iter marker only when the global is bound to a procedure
+    // (a global cannot iterate), so index it as one; the procedure claims the global's name, so no
+    // GlobalDefinition may sit beside it.
+    if (!parameters.isEmpty() || !modifiers.isEmpty()) {
+      final ProcedureDefinition procedureDefinition =
+          new ProcedureDefinition(
+              location,
+              timestamp,
+              moduleName,
+              doc,
+              null,
+              modifiers,
+              typeString,
+              globalName,
+              parameters,
+              pragma,
+              ExpressionResultString.UNDEFINED,
+              ExpressionResultString.UNDEFINED);
+      final ProcedureDefinition typedProcedure =
+          ClassInfoDefinitionReader.applyTypeDoc(procedureDefinition);
+      this.definitionKeeper.add(typedProcedure);
+      return;
+    }
+
+    final TypeDocParser docParser = ClassInfoDefinitionReader.createTypeDocParser(doc);
+    final List<TypeString> returnTypes = docParser.getReturnTypes();
+    final TypeString aliasedTypeName =
+        returnTypes.stream().findFirst().orElse(TypeString.UNDEFINED);
+
     final GlobalDefinition definition =
         new GlobalDefinition(
-            location, timestamp, moduleName, doc, null, typeString, TypeString.UNDEFINED, pragma);
+            location, timestamp, moduleName, doc, null, typeString, aliasedTypeName, pragma);
     this.definitionKeeper.add(definition);
   }
 
@@ -381,7 +426,147 @@ public final class ClassInfoDefinitionReader {
             pragma,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.UNDEFINED);
-    this.definitionKeeper.add(definition);
+    final MethodDefinition typedDefinition = ClassInfoDefinitionReader.applyTypeDoc(definition);
+    this.definitionKeeper.add(typedDefinition);
+  }
+
+  private static MethodDefinition applyTypeDoc(final MethodDefinition definition) {
+    final String doc = definition.getDoc();
+    final TypeDocParser docParser = ClassInfoDefinitionReader.createTypeDocParser(doc);
+    final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
+    final List<ParameterDefinition> parameters = definition.getParameters();
+    final List<ParameterDefinition> typedParameters =
+        parameters.stream()
+            .map(parameter -> ClassInfoDefinitionReader.applyTypeDoc(parameter, parameterTypes))
+            .toList();
+    final ParameterDefinition assignmentParameter = definition.getAssignmentParameter();
+    final ParameterDefinition typedAssignmentParameter =
+        assignmentParameter != null
+            ? ClassInfoDefinitionReader.applyTypeDoc(assignmentParameter, parameterTypes)
+            : null;
+    // An empty list means the doc declared nothing, which is not the same as an empty result.
+    final List<TypeString> returnTypes = docParser.getReturnTypes();
+    final ExpressionResultString returnResult =
+        returnTypes.isEmpty()
+            ? ExpressionResultString.UNDEFINED
+            : new ExpressionResultString(returnTypes);
+    final List<TypeString> loopTypes = docParser.getLoopTypes();
+    final ExpressionResultString loopResult =
+        loopTypes.isEmpty()
+            ? ExpressionResultString.UNDEFINED
+            : new ExpressionResultString(loopTypes);
+
+    return new MethodDefinition(
+        definition.getLocation(),
+        definition.getTimestamp(),
+        definition.getModuleName(),
+        doc,
+        definition.getNode(),
+        definition.getTypeName(),
+        definition.getMethodName(),
+        definition.getModifiers(),
+        typedParameters,
+        typedAssignmentParameter,
+        definition.getPragma(),
+        returnResult,
+        loopResult);
+  }
+
+  private static ProcedureDefinition applyTypeDoc(final ProcedureDefinition definition) {
+    final String doc = definition.getDoc();
+    final TypeDocParser docParser = ClassInfoDefinitionReader.createTypeDocParser(doc);
+    final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
+    final List<ParameterDefinition> parameters = definition.getParameters();
+    final List<ParameterDefinition> typedParameters =
+        parameters.stream()
+            .map(parameter -> ClassInfoDefinitionReader.applyTypeDoc(parameter, parameterTypes))
+            .toList();
+    // An empty list means the doc declared nothing, which is not the same as an empty result.
+    final List<TypeString> returnTypes = docParser.getReturnTypes();
+    final ExpressionResultString returnResult =
+        returnTypes.isEmpty()
+            ? ExpressionResultString.UNDEFINED
+            : new ExpressionResultString(returnTypes);
+    final List<TypeString> loopTypes = docParser.getLoopTypes();
+    final ExpressionResultString loopResult =
+        loopTypes.isEmpty()
+            ? ExpressionResultString.UNDEFINED
+            : new ExpressionResultString(loopTypes);
+
+    return new ProcedureDefinition(
+        definition.getLocation(),
+        definition.getTimestamp(),
+        definition.getModuleName(),
+        doc,
+        definition.getNode(),
+        definition.getModifiers(),
+        definition.getTypeString(),
+        definition.getProcedureName(),
+        typedParameters,
+        definition.getPragma(),
+        returnResult,
+        loopResult);
+  }
+
+  private static ParameterDefinition applyTypeDoc(
+      final ParameterDefinition definition, final Map<String, TypeString> parameterTypes) {
+    final String name = definition.getName();
+    final TypeString typeString = parameterTypes.get(name);
+    if (typeString == null) {
+      return definition;
+    }
+
+    return new ParameterDefinition(
+        definition.getLocation(),
+        definition.getTimestamp(),
+        definition.getModuleName(),
+        definition.getDoc(),
+        definition.getNode(),
+        name,
+        definition.getModifier(),
+        typeString);
+  }
+
+  private static SlotDefinition applyTypeDoc(
+      final SlotDefinition definition, final Map<String, TypeString> slotTypes) {
+    final String name = definition.getName();
+    final TypeString typeString = slotTypes.get(name);
+    if (typeString == null) {
+      return definition;
+    }
+
+    return new SlotDefinition(
+        definition.getLocation(),
+        definition.getTimestamp(),
+        definition.getModuleName(),
+        definition.getDoc(),
+        definition.getNode(),
+        definition.getOwnerTypeName(),
+        name,
+        typeString);
+  }
+
+  /** Create a {@link TypeDocParser} over a doc whose {@code ##} prefixes were already stripped. */
+  private static TypeDocParser createTypeDocParser(final String doc) {
+    if (doc == null) {
+      return new TypeDocParser(List.of(), TypeString.DEFAULT_PACKAGE);
+    }
+
+    // One token per line: TypeDocParser remaps token positions by line index.
+    final String[] lines = doc.split("\n", -1);
+    final List<Token> docTokens = new ArrayList<>(lines.length);
+    for (int index = 0; index < lines.length; ++index) {
+      final Token token =
+          Token.builder()
+              .setType(GenericTokenType.COMMENT)
+              .setValueAndOriginalValue(ClassInfoDefinitionReader.DOC_PREFIX + lines[index])
+              .setLine(index + 1)
+              .setColumn(0)
+              .setURI(ClassInfoDefinitionReader.TYPE_DOC_URI)
+              .build();
+      docTokens.add(token);
+    }
+    return new TypeDocParser(docTokens, TypeString.DEFAULT_PACKAGE);
   }
 
   private void readSlottedClass(
@@ -470,7 +655,10 @@ public final class ClassInfoDefinitionReader {
             this.definitionKeeper.add(
                 new InheritanceDefinition(
                     location, timestamp, moduleName, null, null, typeString, parentTypeString)));
-    slots.forEach(this.definitionKeeper::add);
+    final TypeDocParser docParser = ClassInfoDefinitionReader.createTypeDocParser(doc);
+    final Map<String, TypeString> slotTypes = docParser.getSlotTypes();
+    slots.forEach(
+        slot -> this.definitionKeeper.add(ClassInfoDefinitionReader.applyTypeDoc(slot, slotTypes)));
   }
 
   private void readIndexedClass(
