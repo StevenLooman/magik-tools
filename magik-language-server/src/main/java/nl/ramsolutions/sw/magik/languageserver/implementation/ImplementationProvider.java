@@ -42,31 +42,34 @@ public class ImplementationProvider {
       return Collections.emptyList();
     }
 
-    final AstNode wantedNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_NAME);
-    if (wantedNode == null) {
+    final AstNode methodNameNode = currentNode.getFirstAncestor(MagikGrammar.METHOD_NAME);
+    if (methodNameNode == null) {
       return Collections.emptyList();
     }
 
-    return this.implementationsForMethod(magikFile, wantedNode);
+    // `METHOD_NAME` also occurs in a `METHOD_INVOCATION`; only a definition is answerable here.
+    final AstNode parentNode = methodNameNode.getParent();
+    if (parentNode == null || !parentNode.is(MagikGrammar.METHOD_DEFINITION)) {
+      return Collections.emptyList();
+    }
+
+    return this.implementationsForMethod(magikFile, parentNode);
   }
 
   private List<Location> implementationsForMethod(
-      final MagikTypedFile magikFile, final AstNode wantedNode) {
-    final AstNode methodDefinitionNode =
-        wantedNode.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
+      final MagikTypedFile magikFile, final AstNode methodDefinitionNode) {
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(methodDefinitionNode);
-    final TypeString typeStr = helper.getExemplarTypeString();
-    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-    final boolean isAbstractMethod =
-        resolver.getRespondingMethodDefinitions(typeStr).stream()
-            .anyMatch(
-                methodDef -> methodDef.getModifiers().contains(MethodDefinition.Modifier.ABSTRACT));
+    final boolean isAbstractMethod = helper.isAbstractMethod();
     if (!isAbstractMethod) {
       return Collections.emptyList();
     }
 
+    final TypeString typeStr = helper.getExemplarTypeString();
+    final String methodName = helper.getMethodName();
+    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
     return definitionKeeper.getMethodDefinitions().stream()
+        .filter(methodDef -> methodName.equals(methodDef.getMethodName()))
         .filter(methodDef -> !typeStr.equals(methodDef.getTypeName()))
         .filter(methodDef -> resolver.isKindOf(methodDef.getTypeName(), typeStr))
         .map(MethodDefinition::getLocation)
