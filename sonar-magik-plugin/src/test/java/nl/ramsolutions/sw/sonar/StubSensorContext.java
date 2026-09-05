@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.sonar;
 
+import java.io.InputStream;
 import java.io.Serializable;
 import org.sonar.api.SonarRuntime;
 import org.sonar.api.batch.fs.FileSystem;
@@ -16,6 +17,7 @@ import org.sonar.api.batch.sensor.error.NewAnalysisError;
 import org.sonar.api.batch.sensor.highlighting.NewHighlighting;
 import org.sonar.api.batch.sensor.issue.NewExternalIssue;
 import org.sonar.api.batch.sensor.issue.NewIssue;
+import org.sonar.api.batch.sensor.issue.NewIssueResolution;
 import org.sonar.api.batch.sensor.measure.NewMeasure;
 import org.sonar.api.batch.sensor.rule.NewAdHocRule;
 import org.sonar.api.batch.sensor.symbol.NewSymbolTable;
@@ -114,6 +116,11 @@ public class StubSensorContext implements SensorContext {
   }
 
   @Override
+  public NewIssueResolution newIssueResolution() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public NewAdHocRule newAdHocRule() {
     throw new UnsupportedOperationException();
   }
@@ -165,6 +172,26 @@ public class StubSensorContext implements SensorContext {
 
   @Override
   public boolean isCacheEnabled() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void markAsUnchanged(final InputFile inputFile) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public boolean isFeatureAvailable(final String feature) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void addTelemetryProperty(final String key, final String value) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void addAnalysisData(final String key, final String contentType, final InputStream data) {
     throw new UnsupportedOperationException();
   }
 }

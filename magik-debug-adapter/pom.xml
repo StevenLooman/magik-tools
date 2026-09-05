@@ -76,7 +76,7 @@
               <minimizeJar>true</minimizeJar>
               <artifactSet>
                 <excludes>
-                  <exclude>org.sonarsource.sonarqube:sonar-plugin-api</exclude>
+                  <exclude>org.sonarsource.api.plugin:sonar-plugin-api</exclude>
                 </excludes>
               </artifactSet>
               <filters>

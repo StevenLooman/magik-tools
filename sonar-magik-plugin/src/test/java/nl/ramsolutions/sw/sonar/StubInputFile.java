@@ -145,4 +145,9 @@ public class StubInputFile implements InputFile {
   public TextRange selectLine(final int line) {
     throw new UnsupportedOperationException();
   }
+
+  @Override
+  public String md5Hash() {
+    throw new UnsupportedOperationException();
+  }
 }
