@@ -1,3 +1,4 @@
+<p>The result of an emit or <code>_leave _with</code> statement is discarded.</p>
 <p>An emit (<code>>></code>) or <code>_leave _with val</code> statement produces a value, but the value is discarded because the containing construct is used as a standalone statement rather than an expression.</p>
 <p><code>>></code> emits a value from the current scope to the parent scope. If that scope is a control structure used as a statement, the emitted value is discarded.</p>
 <p><code>_leave _with val</code> provides a value from a loop or block expression. If the loop or block is a standalone statement, the value is discarded.</p>

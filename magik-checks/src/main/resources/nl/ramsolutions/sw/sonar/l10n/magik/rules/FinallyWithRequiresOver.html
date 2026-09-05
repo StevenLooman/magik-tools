@@ -1,3 +1,4 @@
+<p><code>_finally _with</code> requires the loop to have an <code>_over</code> parent.</p>
 <p>The <code>_with</code> clause of a <code>_finally</code> block is only supported when the loop has an <code>_over</code> parent. The variable in <code>_with</code> receives the value returned by the iterator call, so it has no meaning on a bare <code>_loop</code>.</p>
 <p>Use a plain <code>_finally</code> (without <code>_with</code>) on loops that have no <code>_over</code>.</p>
 <h2>Non-compliant Code Example</h2>
