@@ -13,7 +13,7 @@ Magik-lint takes the following command line options:
 - `--max-infractions`: Maximum number of issues to report.
 - `--msg-template`: Template for output, defaults to: `${path}:${line}:${column}: ${msg} (${symbol})`
 - `--rcfile`: Path to configuration file
-- `--show-checks`: Show a list of all checks and whether it is disabled
+- `--show-checks`: Show the used configuration file, and a list of all checks and whether it is disabled
 - `--version`: Show version and quit.
 - A file or directory to check (can be multiple).
   - If a file is given, only this file is checked.

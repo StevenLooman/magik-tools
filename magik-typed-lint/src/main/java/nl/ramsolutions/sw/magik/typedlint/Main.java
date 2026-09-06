@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.LogManager;
 import java.util.stream.Collectors;
-import nl.ramsolutions.sw.ConfigurationLocator;
+import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikLintSettings;
 import nl.ramsolutions.sw.MagikToolsProperties;
@@ -329,7 +329,6 @@ public final class Main {
     }
 
     // Read configuration.
-    final MagikToolsProperties properties;
     if (commandLine.hasOption(OPTION_RCFILE)) {
       final File rcfile = (File) commandLine.getParsedOptionValue(OPTION_RCFILE);
       final Path path = rcfile.toPath();
@@ -339,13 +338,16 @@ public final class Main {
 
         System.exit(1);
       }
-      properties = new MagikToolsProperties(path);
-    } else {
-      final Path currentWorkingPath = Path.of(".");
-      final Path path = ConfigurationLocator.locateConfiguration(currentWorkingPath);
-      properties =
-          path != null ? new MagikToolsProperties(path) : MagikToolsProperties.DEFAULT_PROPERTIES;
     }
+
+    final Path currentWorkingPath = Path.of(".");
+    final String overrideConfigFile = commandLine.getOptionValue(OPTION_RCFILE);
+    final Path configurationPath =
+        ConfigurationReader.determinePath(currentWorkingPath, overrideConfigFile);
+    final MagikToolsProperties properties =
+        configurationPath != null
+            ? new MagikToolsProperties(configurationPath)
+            : MagikToolsProperties.DEFAULT_PROPERTIES;
 
     // Copy configuration from command line.
     Main.copyOptionsToConfig(commandLine, properties);
@@ -366,6 +368,7 @@ public final class Main {
       final Reporter reporter = ReporterRegistry.createReporter("null", properties, context);
       final MagikTypedLint lint = new MagikTypedLint(definitionKeeper, properties, reporter);
       final Writer writer = new PrintWriter(outStream);
+      lint.showConfiguration(writer, configurationPath);
       lint.showEnabledChecks(writer);
       lint.showDisabledChecks(writer);
       writer.flush();

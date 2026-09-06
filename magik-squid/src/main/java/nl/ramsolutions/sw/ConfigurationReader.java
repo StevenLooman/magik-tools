@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.net.URI;
@@ -17,15 +18,21 @@ public final class ConfigurationReader {
   /**
    * Determine the path of the `magik-lint.properties` file to read.
    *
+   * @param path Path to determine the configuration for.
    * @param overridePath Override path.
-   * @return Determined path.
+   * @return Determined path, or null if no configuration was found.
    */
+  @CheckForNull
   public static Path determinePath(final Path path, final @Nullable String overridePath) {
-    if (overridePath != null && !overridePath.isBlank()) {
-      return Path.of(overridePath);
-    }
+    final Path configurationPath =
+        overridePath != null && !overridePath.isBlank()
+            ? Path.of(overridePath)
+            : ConfigurationLocator.locateConfiguration(path);
+    final Path absolutePath =
+        configurationPath != null ? configurationPath.toAbsolutePath().normalize() : null;
+    LOGGER.debug("Using configuration: {}", absolutePath);
 
-    return ConfigurationLocator.locateConfiguration(path);
+    return configurationPath;
   }
 
   /**
@@ -57,9 +64,6 @@ public final class ConfigurationReader {
       final Path path, final MagikToolsProperties properties) throws IOException {
     final String overrideConfigFile = new MagikLintSettings(properties).getOverrideConfigFile();
     final Path propertiesPath = ConfigurationReader.determinePath(path, overrideConfigFile);
-    if (propertiesPath != null) {
-      LOGGER.debug("Reading properties from: {}", propertiesPath);
-    }
 
     // Copy properties, but override all from propertiesPath.
     final MagikToolsProperties fileProperties =

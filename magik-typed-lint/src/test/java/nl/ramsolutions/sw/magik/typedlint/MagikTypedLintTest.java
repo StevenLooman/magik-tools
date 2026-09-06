@@ -2,12 +2,14 @@ package nl.ramsolutions.sw.magik.typedlint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.checks.Issue;
+import nl.ramsolutions.sw.checks.output.NullReporter;
 import nl.ramsolutions.sw.checks.output.Reporter;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -50,5 +52,33 @@ class MagikTypedLintTest {
     assertThat(reporter.getIssues())
         .isNotEmpty()
         .allSatisfy(issue -> assertThat(issue.location().getPath()).isEqualTo(expectedPath));
+  }
+
+  @Test
+  void testShowConfigurationWithPath() throws Exception {
+    final MagikTypedLint lint = this.createLint();
+    final StringWriter writer = new StringWriter();
+    final Path path = Path.of("./magik-lint.properties");
+
+    lint.showConfiguration(writer, path);
+
+    assertThat(writer.toString())
+        .isEqualTo("Configuration file: " + path.toAbsolutePath().normalize() + "\n\n");
+  }
+
+  @Test
+  void testShowConfigurationWithoutPath() throws Exception {
+    final MagikTypedLint lint = this.createLint();
+    final StringWriter writer = new StringWriter();
+
+    lint.showConfiguration(writer, null);
+
+    assertThat(writer.toString()).isEqualTo("Configuration file: (none found, using defaults)\n\n");
+  }
+
+  private MagikTypedLint createLint() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    return new MagikTypedLint(
+        definitionKeeper, MagikToolsProperties.DEFAULT_PROPERTIES, new NullReporter());
   }
 }

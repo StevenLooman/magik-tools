@@ -12,7 +12,7 @@ Magik-typed-lint takes the following command line options:
 - `--max-infractions`: Maximum number of issues to report.
 - `--msg-template`: Template for output, defaults to: `${path}:${line}:${column}: ${msg} (${symbol})`
 - `--rcfile`: Path to configuration file
-- `--show-checks`: Show a list of all checks and whether it is disabled
+- `--show-checks`: Show the used configuration file, and a list of all checks and whether it is disabled
 - `--types-db`: Types database to read before checking (can be multiple)
 - `--pre-index-dir`: Index directory before checking (can be multiple)
 - `--version`: Show version and quit.

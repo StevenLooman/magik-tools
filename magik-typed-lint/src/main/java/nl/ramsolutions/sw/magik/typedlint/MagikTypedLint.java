@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.typedlint;
 
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Path;
@@ -98,6 +99,21 @@ public class MagikTypedLint {
                 + ")\n");
       }
     }
+  }
+
+  /**
+   * Show the used configuration file.
+   *
+   * @param writer Writer Write to write output to.
+   * @param path Path to the used configuration file, if any.
+   * @throws IOException -
+   */
+  void showConfiguration(final Writer writer, final @Nullable Path path) throws IOException {
+    final String location =
+        path != null
+            ? path.toAbsolutePath().normalize().toString()
+            : "(none found, using defaults)";
+    writer.write("Configuration file: " + location + "\n\n");
   }
 
   /**
