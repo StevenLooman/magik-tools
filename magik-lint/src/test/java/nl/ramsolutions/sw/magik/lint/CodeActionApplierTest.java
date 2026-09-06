@@ -51,4 +51,26 @@ class CodeActionApplierTest {
     final String newSource = codeActionApplier.getSource();
     assertThat(newSource).isEqualTo("New line!\nHello, world!\nNew line!\n");
   }
+
+  @Test
+  void testApplyCodeActionSourceStartingWithNewline() {
+    final String source = "\nHello,\nworld!\n";
+    final CodeActionApplier codeActionApplier = new CodeActionApplier(source);
+    codeActionApplier.apply(
+        new CodeAction(
+            "test fix", new TextEdit(new Range(new Position(3, 0), new Position(3, 5)), "there")));
+    final String newSource = codeActionApplier.getSource();
+    assertThat(newSource).isEqualTo("\nHello,\nthere!\n");
+  }
+
+  @Test
+  void testApplyCodeActionSourceWithEmptyLines() {
+    final String source = "line1\n\n\nline4\n";
+    final CodeActionApplier codeActionApplier = new CodeActionApplier(source);
+    codeActionApplier.apply(
+        new CodeAction(
+            "test fix", new TextEdit(new Range(new Position(4, 0), new Position(4, 5)), "line!")));
+    final String newSource = codeActionApplier.getSource();
+    assertThat(newSource).isEqualTo("line1\n\n\nline!\n");
+  }
 }

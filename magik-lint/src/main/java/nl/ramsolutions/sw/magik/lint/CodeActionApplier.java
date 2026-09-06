@@ -63,29 +63,17 @@ public class CodeActionApplier {
     final int line = position.getLine();
     final int column = position.getColumn();
 
-    int currentLine = 1;
-    int index = 0;
-    // Find first line index.
-    while (index < source.length()) {
-      if (currentLine == line) {
-        break;
-      }
-
-      // Find next newline character.
-      final int nextIndex = source.indexOf("\n", index == 0 ? 0 : index + 1);
-      if (nextIndex == -1) {
+    int lineStartIndex = 0;
+    for (int currentLine = 1; currentLine < line; ++currentLine) {
+      final int newLineIndex = source.indexOf('\n', lineStartIndex);
+      if (newLineIndex == -1) {
         // Apparently at EOF, lets not crash and just take the end of the string.
         return source.length();
       }
 
-      index = nextIndex;
-      currentLine += 1;
+      lineStartIndex = newLineIndex + 1;
     }
 
-    if (currentLine == 1) {
-      return column;
-    }
-
-    return Integer.min(index + 1 + column, source.length());
+    return Integer.min(lineStartIndex + column, source.length());
   }
 }
