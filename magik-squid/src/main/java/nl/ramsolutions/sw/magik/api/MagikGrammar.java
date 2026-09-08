@@ -904,7 +904,11 @@ public enum MagikGrammar implements GrammarRuleKey {
 
     b.rule(PRAGMA)
         .is(MagikKeyword.PRAGMA, MagikPunctuator.PAREN_L, PRAGMA_PARAMS, MagikPunctuator.PAREN_R);
-    b.rule(PRAGMA_PARAMS).is(PRAGMA_PARAM, b.zeroOrMore(MagikPunctuator.COMMA, PRAGMA_PARAM));
+    b.rule(PRAGMA_PARAMS)
+        .is(
+            PRAGMA_PARAM,
+            b.zeroOrMore(MagikPunctuator.COMMA, PRAGMA_PARAM),
+            b.optional(MagikPunctuator.COMMA));
     b.rule(PRAGMA_PARAM)
         .is(IDENTIFIER, MagikOperator.EQ, PRAGMA_VALUE); // TODO: SIMPLE_IDENTIFIER_REGEXP?
     b.rule(PRAGMA_VALUE)

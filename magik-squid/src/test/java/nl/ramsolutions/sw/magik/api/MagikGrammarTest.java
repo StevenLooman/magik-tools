@@ -15,7 +15,14 @@ class MagikGrammarTest {
     Assertions.assertThat(grammar.rule(MagikGrammar.PRAGMA))
         .matches("_pragma(a=b)")
         .matches("_pragma(a=b,c=d)")
-        .matches("_pragma(a={b,c})");
+        .matches("_pragma(a={b,c})")
+        .matches("_pragma(a=b,)")
+        .matches("_pragma(a=b,c=d,)")
+        .matches("_pragma(a={b,c},)")
+        .notMatches("_pragma(a={b,c,})")
+        .notMatches("_pragma()")
+        .notMatches("_pragma(,)")
+        .notMatches("_pragma(a=b,,c=d)");
   }
 
   @Test
