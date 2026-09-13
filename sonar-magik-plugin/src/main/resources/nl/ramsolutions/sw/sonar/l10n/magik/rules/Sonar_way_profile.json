@@ -5,6 +5,7 @@
     "DuplicateMethodInFile",
     "EmptyBlock",
     "EmitInLoop",
+    "ExemplarFileNameMismatch",
     "ExemplarSlotCount",
     "FileMustStartWithPackageStatement",
     "FileMustStartWithTextEncoding",
