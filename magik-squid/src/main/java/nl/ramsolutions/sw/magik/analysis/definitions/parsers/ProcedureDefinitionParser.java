@@ -43,7 +43,8 @@ public class ProcedureDefinitionParser {
   /**
    * Constructor.
    *
-   * @param node {@code define_shared_constant()} node.
+   * @param magikFile The {@link MagikFile} to read from.
+   * @param node {@link MagikGrammar.PROCEDURE_DEFINITION} node.
    */
   public ProcedureDefinitionParser(final MagikFile magikFile, final AstNode node) {
     if (node.isNot(MagikGrammar.PROCEDURE_DEFINITION)) {
@@ -55,9 +56,9 @@ public class ProcedureDefinitionParser {
   }
 
   /**
-   * Test if node is a {@code define_shared_constant()}.
+   * Test if node is a {@link MagikGrammar.PROCEDURE_DEFINITION} node.
    *
-   * @param node Node to test
+   * @param node {@link MagikGrammar} node node.
    * @return True if node is a {@code define_shared_variable()}, false otherwise.
    */
   public static boolean isProcedureDefinition(final AstNode node) {
