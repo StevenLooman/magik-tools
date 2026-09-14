@@ -4,13 +4,13 @@ on:
     branches: [develop]
     paths:
       - .github/workflows/publish-checks-wiki.yml
-      - .github/scripts/generate-checks-pages.py
+      - .github/scripts/generate_checks_pages.py
       - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/*/rules/*.html
       - magik-checks/src/main/java/nl/ramsolutions/sw/checks/*/*Check.java
   pull_request:
     paths:
       - .github/workflows/publish-checks-wiki.yml
-      - .github/scripts/generate-checks-pages.py
+      - .github/scripts/generate_checks_pages.py
       - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/*/rules/*.html
       - magik-checks/src/main/java/nl/ramsolutions/sw/checks/*/*Check.java
 concurrency:
