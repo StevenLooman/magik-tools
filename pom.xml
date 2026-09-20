@@ -55,7 +55,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <junit.version>6.1.2</junit.version>
-    <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+    <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
     <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
     <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
     <spotless.version>3.8.0</spotless.version>
