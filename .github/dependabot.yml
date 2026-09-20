@@ -16,6 +16,9 @@ updates:
       # 1.28.0 is the last google-java-format release supporting Java 17.
       - dependency-name: "com.google.googlejavaformat:google-java-format"
         versions: [">=1.29.0"]
+      # 2.30.0.5193 is the last sonar-analyzer-commons release built for Java 17.
+      - dependency-name: "org.sonarsource.analyzer-commons:*"
+        versions: [">=2.31.0"]
   - package-ecosystem: "npm"
     directory: "magik-language-server/client-vscode"
     schedule:
