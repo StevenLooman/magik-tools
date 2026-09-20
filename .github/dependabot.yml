@@ -3,15 +3,15 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: monthly
+      interval: weekly
   - package-ecosystem: "devcontainers"
     directory: "/"
     schedule:
-      interval: monthly
+      interval: weekly
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
-      interval: monthly
+      interval: weekly
     ignore:
       # 1.28.0 is the last google-java-format release supporting Java 17.
       - dependency-name: "com.google.googlejavaformat:google-java-format"
@@ -19,8 +19,8 @@ updates:
   - package-ecosystem: "npm"
     directory: "magik-language-server/client-vscode"
     schedule:
-      interval: monthly
+      interval: weekly
   - package-ecosystem: "pip"
     directory: ".github/scripts"
     schedule:
-      interval: "monthly"
+      interval: weekly
