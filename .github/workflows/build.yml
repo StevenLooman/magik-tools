@@ -44,7 +44,7 @@ jobs:
           mkdir -v staging
           cp -v **/target/*.jar staging
           rm -fv staging/original-*.jar
-      - run: npm install . && npm run package
+      - run: npm ci && npm run package
         working-directory: magik-language-server/client-vscode
       - run: cp -v magik-language-server/client-vscode/magik-language-server-*.vsix staging
       - uses: actions/upload-artifact@v7
@@ -62,7 +62,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install Towncrier
-        run: python -m pip install --disable-pip-version-check -r .github/scripts/requirements.txt
+        run: 'python -m pip install --disable-pip-version-check --only-binary :all: --require-hashes -r .github/scripts/requirements.txt'
       - name: Render draft changelog for linting
         run: |
           printf '# Changes\n\n<!-- towncrier release notes start -->\n\n' > CHANGES.preview.md
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - run: npm install --ignore-scripts . && npm run eslint
+      - run: npm ci --ignore-scripts && npm run eslint
         working-directory: magik-language-server/client-vscode
 
   codespell:

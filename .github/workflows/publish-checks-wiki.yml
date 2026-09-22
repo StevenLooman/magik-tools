@@ -31,7 +31,7 @@ jobs:
           git clone https://github.com/StevenLooman/magik-tools.wiki.git wiki
           rm -rf wiki/checks
       - run: |
-          pip install -r .github/scripts/requirements.txt
+          pip install --only-binary :all: --require-hashes -r .github/scripts/requirements.txt
           python3 .github/scripts/generate_checks_pages.py
       - uses: DavidAnson/markdownlint-cli2-action@v24
         with:
