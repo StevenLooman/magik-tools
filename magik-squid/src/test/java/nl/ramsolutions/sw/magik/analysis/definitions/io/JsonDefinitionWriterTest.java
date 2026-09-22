@@ -8,7 +8,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -66,7 +65,7 @@ class JsonDefinitionWriterTest {
 
   /** Read the written definitions carrying the given instruction. */
   private List<JsonObject> readWritten(final String instruction) throws IOException {
-    return Files.readAllLines(this.tempPath, StandardCharsets.UTF_8).stream()
+    return Files.readAllLines(this.tempPath).stream()
         .map(line -> JsonParser.parseString(line).getAsJsonObject())
         .filter(object -> object.get(INSTRUCTION).getAsString().equals(instruction))
         .toList();
@@ -733,7 +732,7 @@ class JsonDefinitionWriterTest {
     JsonDefinitionWriter.write(this.tempPath, definitionKeeper);
 
     final Map<String, Long> countPerInstruction =
-        Files.readAllLines(this.tempPath, StandardCharsets.UTF_8).stream()
+        Files.readAllLines(this.tempPath).stream()
             .map(line -> JsonParser.parseString(line).getAsJsonObject())
             .collect(
                 Collectors.groupingBy(
