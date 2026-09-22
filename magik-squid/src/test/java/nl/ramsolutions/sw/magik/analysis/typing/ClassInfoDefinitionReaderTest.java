@@ -316,16 +316,16 @@ class ClassInfoDefinitionReaderTest {
                 "class_definition_reader_test",
                 """
 
-This is a longer method doc
-to be tested.
-And then some more
-( things ).
+                This is a longer method doc
+                to be tested.
+                And then some more
+                ( things ).
 
-PARAM1 is a rope with
-{ value1, value2, value3, ... }
-for examples.
+                PARAM1 is a rope with
+                { value1, value2, value3, ... }
+                for examples.
 
-""",
+                """,
                 null,
                 exampleMixinRef,
                 "do_something_else()",
