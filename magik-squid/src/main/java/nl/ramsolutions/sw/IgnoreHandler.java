@@ -1,7 +1,6 @@
 package nl.ramsolutions.sw;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -52,7 +51,7 @@ public final class IgnoreHandler {
     }
 
     final Path basePath = parentPath.toAbsolutePath();
-    try (Stream<String> lines = Files.lines(path, StandardCharsets.UTF_8)) {
+    try (Stream<String> lines = Files.lines(path)) {
       return lines
           .map(String::trim)
           .filter(line -> !line.isBlank())
