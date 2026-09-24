@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.checks;
 
 import java.util.List;
 import java.util.Map;
+import nl.ramsolutions.sw.checks.magik.CommentRatioCheck;
 import nl.ramsolutions.sw.checks.magik.CommentedCodeCheck;
 import nl.ramsolutions.sw.checks.magik.DuplicateMethodInFileCheck;
 import nl.ramsolutions.sw.checks.magik.EmitInLoopCheck;
@@ -79,6 +80,7 @@ public final class MagikCheckList extends CheckList<MagikCheck, MagikCodeActionS
   public List<Class<? extends MagikCheck>> getChecks() {
     return List.of(
         CommentedCodeCheck.class,
+        CommentRatioCheck.class,
         DuplicateMethodInFileCheck.class,
         EmptyBlockCheck.class,
         EmitInLoopCheck.class,

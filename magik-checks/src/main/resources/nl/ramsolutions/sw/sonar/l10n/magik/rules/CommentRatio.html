@@ -1,0 +1,25 @@
+<p>The source code should have enough comments to explain the logic.</p>
+<p>The comment density is computed as: <code>comment_lines / (lines_of_code + comment_lines)</code>.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+# only 10% comments
+_method a.b()
+    _local x << 1
+    _local y << 2
+    _local z << 3
+    _local w << 4
+    _return x + y + z + w
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+# This method sums up the values
+# and returns the result.
+_method a.b()
+    _local x << 1  # first value
+    _local y << 2  # second value
+    _local z << 3  # third value
+    _local w << 4  # fourth value
+    _return x + y + z + w
+_endmethod
+</pre>
