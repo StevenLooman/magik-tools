@@ -23,6 +23,7 @@ import nl.ramsolutions.sw.checks.magik.LeaveInProtectionCheck;
 import nl.ramsolutions.sw.checks.magik.LhsRhsComparatorEqualCheck;
 import nl.ramsolutions.sw.checks.magik.LineLengthCheck;
 import nl.ramsolutions.sw.checks.magik.LocalImportProcedureCheck;
+import nl.ramsolutions.sw.checks.magik.MagicNumberCheck;
 import nl.ramsolutions.sw.checks.magik.MethodComplexityCheck;
 import nl.ramsolutions.sw.checks.magik.MethodLineCountCheck;
 import nl.ramsolutions.sw.checks.magik.MissingPragmaCheck;
@@ -99,6 +100,7 @@ public final class MagikCheckList extends CheckList<MagikCheck, MagikCodeActionS
         LhsRhsComparatorEqualCheck.class,
         LineLengthCheck.class,
         LocalImportProcedureCheck.class,
+        MagicNumberCheck.class,
         MethodComplexityCheck.class,
         MethodLineCountCheck.class,
         NestingDepthCheck.class,

@@ -1,0 +1,17 @@
+<p>A magic number is a numeric literal that is used in code without being declared as a constant.</p>
+<p>Magic numbers can make code difficult to read and maintain because their meaning and purpose are not explicit. Declare magic numbers as constants or named variables to give them meaningful names.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_method my_exemplar.calculate_total(price)
+    _return price * 1.21  # magic number
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+my_exemplar.define_shared_constant(:vat_rate, 1.21, :private)
+$
+
+_method my_exemplar.calculate_total(price)
+    _return price * _self.vat_rate
+_endmethod
+</pre>
