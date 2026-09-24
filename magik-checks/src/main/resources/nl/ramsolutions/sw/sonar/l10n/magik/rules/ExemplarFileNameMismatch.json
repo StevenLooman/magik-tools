@@ -1,0 +1,15 @@
+{
+  "title": "Exemplar related definition is not in the correct file",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "convention"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "ExemplarFileNameMismatch",
+  "sqKey": "exemplar-file-name-mismatch"
+}
