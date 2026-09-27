@@ -21,17 +21,17 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
         with:
           fetch-depth: 0
       - name: Set up JDK 17
-        uses: actions/setup-java@v6.0.1
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6  # v6.0.1
         with:
           java-version: 17
           distribution: 'zulu'
           cache: 'maven'
       - name: Cache Maven packages
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -47,7 +47,7 @@ jobs:
       - run: npm ci && npm run package
         working-directory: magik-language-server/client-vscode
       - run: cp -v magik-language-server/client-vscode/magik-language-server-*.vsix staging
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: Package-${{ matrix.os }}
           path: staging
@@ -56,9 +56,9 @@ jobs:
     name: Markdown Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
         with:
           python-version: '3.12'
       - name: Install Towncrier
@@ -67,7 +67,7 @@ jobs:
         run: |
           printf '# Changes\n\n<!-- towncrier release notes start -->\n\n' > CHANGES.preview.md
           towncrier build --draft --version 0.0.0 | perl -0pe 's/\n+\z/\n/' >> CHANGES.preview.md
-      - uses: DavidAnson/markdownlint-cli2-action@v24
+      - uses: DavidAnson/markdownlint-cli2-action@21c1be1b93ad9ed58fa840aacc3f279cde2a72ff  # v24
         with:
           globs: '**/*.md'
 
@@ -75,7 +75,7 @@ jobs:
     name: ESLint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
       - run: npm ci --ignore-scripts && npm run eslint
         working-directory: magik-language-server/client-vscode
 
@@ -83,8 +83,8 @@ jobs:
     name: Codespell
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: codespell-project/actions-codespell@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+      - uses: codespell-project/actions-codespell@8f01853be192eb0f849a5c7d721450e7a467c579  # v2
         with:
           ignore_words_list: Datas,invokable,isnt,notIn,trivias
           skip: package-lock.json

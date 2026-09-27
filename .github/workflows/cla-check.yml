@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Check CLA signature
         id: cla
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         with:
           script: |
             const author = context.payload.pull_request.user.login;
@@ -57,7 +57,7 @@ jobs:
 
       - name: Post comment if CLA not signed
         if: steps.cla.outputs.signed == 'false'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         with:
           script: |
             const author = context.payload.pull_request.user.login;
@@ -85,7 +85,7 @@ jobs:
 
       - name: Set check status
         if: always()
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9
         env:
           CLA_SIGNED: ${{ steps.cla.outputs.signed }}
         with:
