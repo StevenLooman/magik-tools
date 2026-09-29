@@ -36,6 +36,7 @@ public class ProcedureDefinition extends MagikDefinition
   private final List<MethodUsage> usedMethods;
   private final List<ConditionUsage> usedConditions;
   private final @Nullable Pragma pragma;
+  private final @Nullable TypeString selfType;
 
   /**
    * Constructor.
@@ -170,6 +171,64 @@ public class ProcedureDefinition extends MagikDefinition
       final List<MethodUsage> usedMethods,
       final List<ConditionUsage> usedConditions,
       final Provenance provenance) {
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        modifiers,
+        typeName,
+        procedureName,
+        parameters,
+        pragma,
+        returnTypes,
+        loopTypes,
+        usedGlobals,
+        usedMethods,
+        usedConditions,
+        provenance,
+        null);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param moduleName Module name.
+   * @param node Node.
+   * @param modifiers Modifiers.
+   * @param typeName Type name.
+   * @param procedureName Procedure name.
+   * @param parameters Parameters.
+   * @param pragma Pragma.
+   * @param doc Doc.
+   * @param returnTypes Return types.
+   * @param loopTypes Loop types.
+   * @param usedGlobals Globals used.
+   * @param usedMethods Methods used.
+   * @param usedConditions Conditions used.
+   * @param provenance Provenance.
+   * @param selfType Type {@code _self} takes inside the procedure, or null when not annotated.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public ProcedureDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final Set<Modifier> modifiers,
+      final TypeString typeName,
+      final @Nullable String procedureName,
+      final List<ParameterDefinition> parameters,
+      final @Nullable Pragma pragma,
+      final ExpressionResultString returnTypes,
+      final ExpressionResultString loopTypes,
+      final List<GlobalUsage> usedGlobals,
+      final List<MethodUsage> usedMethods,
+      final List<ConditionUsage> usedConditions,
+      final Provenance provenance,
+      final @Nullable TypeString selfType) {
     super(location, timestamp, moduleName, doc, node, provenance);
     this.modifiers = ProcedureDefinition.createModifiersSet(modifiers);
     this.typeName = typeName;
@@ -181,6 +240,7 @@ public class ProcedureDefinition extends MagikDefinition
     this.usedGlobals = Collections.unmodifiableList(usedGlobals);
     this.usedMethods = Collections.unmodifiableList(usedMethods);
     this.usedConditions = Collections.unmodifiableList(usedConditions);
+    this.selfType = selfType;
   }
 
   private static SortedSet<Modifier> createModifiersSet(final Set<Modifier> modifiers) {
@@ -275,6 +335,16 @@ public class ProcedureDefinition extends MagikDefinition
     return Objects.requireNonNullElse(this.procedureName, ProcedureDefinition.DEFAULT_NAME);
   }
 
+  /**
+   * Get the type {@code _self} takes inside the procedure, as annotated.
+   *
+   * @return Annotated type, or null when not annotated.
+   */
+  @CheckForNull
+  public TypeString getSelfType() {
+    return this.selfType;
+  }
+
   public List<GlobalUsage> getUsedGlobals() {
     return Collections.unmodifiableList(this.usedGlobals);
   }
@@ -305,7 +375,8 @@ public class ProcedureDefinition extends MagikDefinition
         this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).toList(),
         this.usedMethods.stream().map(MethodUsage::getWithoutNode).toList(),
         this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList(),
-        this.getProvenance());
+        this.getProvenance(),
+        this.selfType);
   }
 
   @Override
@@ -326,7 +397,35 @@ public class ProcedureDefinition extends MagikDefinition
         this.usedGlobals,
         this.usedMethods,
         this.usedConditions,
-        provenance);
+        provenance,
+        this.selfType);
+  }
+
+  /**
+   * Copy with the type {@code _self} takes inside the procedure replaced.
+   *
+   * @param newSelfType The replacement type, or null to drop the annotation.
+   * @return Copy with the replaced self type.
+   */
+  public ProcedureDefinition withSelfType(final @Nullable TypeString newSelfType) {
+    return new ProcedureDefinition(
+        this.getLocation(),
+        this.getTimestamp(),
+        this.getModuleName(),
+        this.getDoc(),
+        this.getNode(),
+        this.modifiers,
+        this.typeName,
+        this.procedureName,
+        this.parameters,
+        this.pragma,
+        this.returnTypes,
+        this.loopTypes,
+        this.usedGlobals,
+        this.usedMethods,
+        this.usedConditions,
+        this.getProvenance(),
+        newSelfType);
   }
 
   @Override
@@ -341,7 +440,8 @@ public class ProcedureDefinition extends MagikDefinition
         this.parameters,
         this.pragma,
         this.returnTypes,
-        this.loopTypes);
+        this.loopTypes,
+        this.selfType);
   }
 
   @Override
@@ -368,6 +468,7 @@ public class ProcedureDefinition extends MagikDefinition
         && Objects.equals(this.parameters, other.parameters)
         && Objects.equals(this.pragma, other.pragma)
         && Objects.equals(this.returnTypes, other.returnTypes)
-        && Objects.equals(this.loopTypes, other.loopTypes);
+        && Objects.equals(this.loopTypes, other.loopTypes)
+        && Objects.equals(this.selfType, other.selfType);
   }
 }

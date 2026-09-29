@@ -73,6 +73,39 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
+  void testReadProcedureSelfType(@TempDir final Path tempDir) throws IOException {
+    final TypeString name =
+        TypeString.ofIdentifier("_proc__sw__object__method____0", TypeString.ANONYMOUS_PACKAGE);
+    final TypeString selfType = TypeString.ofIdentifier("a_test", "sw");
+    final ProcedureDefinition definition =
+        new ProcedureDefinition(
+            new Location(URI.create("file:///a.magik")),
+            null,
+            null,
+            null,
+            null,
+            Collections.emptySet(),
+            name,
+            null,
+            Collections.emptyList(),
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY);
+    final IDefinitionKeeper writtenKeeper = new DefinitionKeeper(false);
+    writtenKeeper.add(definition.withSelfType(selfType));
+    final Path path = tempDir.resolve("types.jsonl");
+    JsonDefinitionWriter.write(path, writtenKeeper);
+
+    final IDefinitionKeeper readKeeper = new DefinitionKeeper(false);
+    JsonDefinitionReader.readTypes(path, readKeeper);
+
+    final Collection<ProcedureDefinition> definitions = readKeeper.getProcedureDefinitions(name);
+    final ProcedureDefinition readDefinition = definitions.iterator().next();
+    final TypeString readSelfType = readDefinition.getSelfType();
+    assertThat(readSelfType).isEqualTo(selfType);
+  }
+
+  @Test
   void testReadProduct() throws IOException {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 

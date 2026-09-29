@@ -1219,4 +1219,55 @@ class MagikDefinitionReaderTest {
         definitions.stream().filter(GlobalDefinition.class::isInstance).toList();
     assertThat(globalDefinitions).hasSize(1);
   }
+
+  private ProcedureDefinition readProcedureDefinition(final String code) {
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    return definitions.stream()
+        .filter(ProcedureDefinition.class::isInstance)
+        .map(ProcedureDefinition.class::cast)
+        .findFirst()
+        .orElseThrow();
+  }
+
+  @Test
+  void testProcedureSelfInstruction() {
+    final String code =
+        """
+        _package user
+        _block
+            _local p << _proc()
+                # self: my_exemplar
+                _return _self.a_method()
+            _endproc
+        _endblock
+        """;
+
+    final ProcedureDefinition definition = this.readProcedureDefinition(code);
+
+    final TypeString selfType = definition.getSelfType();
+    final TypeString expected = TypeString.ofIdentifier("my_exemplar", "user");
+    assertThat(selfType).isEqualTo(expected);
+  }
+
+  @Test
+  void testProcedureWithoutSelfInstruction() {
+    final String code =
+        """
+        _package user
+        _block
+            _local p << _proc()
+                _return _self.a_method()
+            _endproc
+        _endblock
+        """;
+
+    final ProcedureDefinition definition = this.readProcedureDefinition(code);
+
+    final TypeString selfType = definition.getSelfType();
+    assertThat(selfType).isNull();
+  }
 }

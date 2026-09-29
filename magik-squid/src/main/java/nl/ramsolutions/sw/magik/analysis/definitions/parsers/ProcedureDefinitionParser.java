@@ -23,6 +23,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Provenance;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
@@ -175,6 +176,7 @@ public class ProcedureDefinitionParser {
     allUsedMethods.addAll(invokesMethodUsages);
 
     final TypeString typeString = ProcedureNamer.getNameForProcedure(this.node);
+    final TypeString selfType = ProcedureSelfInstruction.read(this.magikFile, this.node);
     return List.of(
         new ProcedureDefinition(
             location,
@@ -191,7 +193,9 @@ public class ProcedureDefinitionParser {
             loopResult,
             usedGlobals,
             allUsedMethods,
-            usedConditions));
+            usedConditions,
+            Provenance.UNKNOWN,
+            selfType));
   }
 
   private static List<TypeString> normalizeVariadicTail(final List<TypeString> types) {
