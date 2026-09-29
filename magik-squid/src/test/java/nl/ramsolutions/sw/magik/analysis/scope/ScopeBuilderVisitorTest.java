@@ -2,6 +2,8 @@ package nl.ramsolutions.sw.magik.analysis.scope;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.sonar.sslr.api.AstNode;
+import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
 import org.junit.jupiter.api.Test;
 
@@ -69,6 +71,119 @@ class ScopeBuilderVisitorTest {
 
     final ScopeEntry entryB = methodScope.getScopeEntry("l_b");
     assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "l_b", null, null));
+  }
+
+  @Test
+  void testDefinitionSerialAssigmentKnownFirstTarget() {
+    final String code =
+        """
+        _method a.b()
+            l_a << 1
+            l_a << l_b << x.y
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry entryB = methodScope.getScopeEntry("l_b");
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "l_b", null, null));
+  }
+
+  @Test
+  void testDefinitionSerialAssigmentLocalFirstTarget() {
+    final String code =
+        """
+        _method a.b()
+            _local l_a
+            l_a << l_b << x.y
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry entryB = methodScope.getScopeEntry("l_b");
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "l_b", null, null));
+  }
+
+  @Test
+  void testDefinitionSerialAssigmentKnownFirstTargetInBlock() {
+    final String code =
+        """
+        _method a.b()
+            l_a << 1
+            _block
+                l_a << l_b << x.y
+            _endblock
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+    final Scope blockScope = globalScope.getSelfAndDescendantScopes().get(2);
+
+    // A DEFINITION is hoisted to the procedure scope, a GLOBAL would sit on the block scope.
+    final ScopeEntry entryB = methodScope.getScopeEntry("l_b");
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.DEFINITION, "l_b", null, null));
+
+    final ScopeEntry blockEntryB = blockScope.getLocalScopeEntry("l_b");
+    assertThat(blockEntryB).isNull();
+  }
+
+  @Test
+  void testDefinitionSerialAssigmentPackageSecondTarget() {
+    final String code =
+        """
+        _method a.b()
+            l_a << 1
+            l_a << sw:l_b << x.y
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    // Same as when it is the first target, see testAssignmentPackage.
+    final ScopeEntry entryB = methodScope.getScopeEntry("l_b");
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.GLOBAL, "l_b", null, null));
+  }
+
+  @Test
+  void testGlobalSerialAssigmentKnownFirstTarget() {
+    final String code =
+        """
+        a << 1
+        a << b << 2
+        """;
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+
+    // Same as when it is the first target, see testGlobalDefinition: a GLOBAL without a usage.
+    final ScopeEntry entryB = globalScope.getScopeEntry("b");
+    assertThat(entryB).isEqualTo(new ScopeEntry(ScopeEntry.Type.GLOBAL, "b", null, null));
+
+    final List<AstNode> usagesB = entryB.getUsages();
+    assertThat(usagesB).isEmpty();
+  }
+
+  @Test
+  void testReadBeforeAssigmentStaysGlobal() {
+    final String code =
+        """
+        _method a.b()
+            show(l_z)
+            l_z << 1
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    // A name whose first mention is a read resolves outside the method.
+    final ScopeEntry entryZ = methodScope.getScopeEntry("l_z");
+    assertThat(entryZ).isEqualTo(new ScopeEntry(ScopeEntry.Type.GLOBAL, "l_z", null, null));
   }
 
   @Test

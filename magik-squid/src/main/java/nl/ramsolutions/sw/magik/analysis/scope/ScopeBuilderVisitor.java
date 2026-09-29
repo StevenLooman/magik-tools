@@ -265,13 +265,13 @@ public class ScopeBuilderVisitor extends MagikVisitor {
 
       final AstNode identifierNode = childNode.getFirstChild(MagikGrammar.IDENTIFIER);
       if (identifierNode == null) {
-        return;
+        continue;
       }
 
       final String tokenValue = identifierNode.getTokenValue();
       if (this.currentScope.getScopeEntry(tokenValue) != null) {
         // Don't overwrite entries.
-        return;
+        continue;
       }
 
       final int index = tokenValue.indexOf(':');
