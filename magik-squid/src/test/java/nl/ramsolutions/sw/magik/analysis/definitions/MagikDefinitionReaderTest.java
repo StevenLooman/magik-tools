@@ -636,6 +636,35 @@ class MagikDefinitionReaderTest {
   }
 
   @Test
+  void testMethodDefinitionCallbackContract() {
+    final String code =
+        """
+        _method a.when_not_unset(a_proc)
+            ## @param {_invokable<P=[_self]>} a_proc A callback.
+            ## @return {_parameter(a_proc)<R>} Whatever the callback returns.
+        _endmethod
+        """;
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final MagikDefinition definition = definitions.get(0);
+    final MethodDefinition methodDefinition = (MethodDefinition) definition;
+
+    final List<ParameterDefinition> parameterDefinitions = methodDefinition.getParameters();
+    final ParameterDefinition parameterDefinition = parameterDefinitions.get(0);
+    final TypeString parameterTypeString = parameterDefinition.getTypeName();
+    final String parameterTypeStr = parameterTypeString.getFullString();
+    assertThat(parameterTypeStr).isEqualTo("_invokable<P=[_self]>");
+
+    final ExpressionResultString returnTypes = methodDefinition.getReturnTypes();
+    final String returnTypeStr = returnTypes.getTypeNames(", ");
+    assertThat(returnTypeStr).isEqualTo("_parameter(a_proc)<R>");
+  }
+
+  @Test
   void testDefineSlotAccess() { // NOSONAR
     final String code = "test_exemplar.define_slot_access(:slot1, :readable, :public)";
     final MagikFile magikFile = this.createMagikFile(code);

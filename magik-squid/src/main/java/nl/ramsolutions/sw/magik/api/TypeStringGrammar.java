@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.api;
 
+import com.sonar.sslr.api.GenericTokenType;
 import org.sonar.sslr.grammar.GrammarRuleKey;
 import org.sonar.sslr.grammar.LexerlessGrammarBuilder;
 import org.sonar.sslr.parser.LexerlessGrammar;
@@ -17,6 +18,8 @@ public enum TypeStringGrammar implements GrammarRuleKey {
   SYNTAX_ERROR,
 
   // Root.
+  TYPE_STRING_INPUT,
+  EXPRESSION_RESULT_STRING_INPUT,
   TYPE_STRING,
   EXPRESSION_RESULT_STRING,
 
@@ -28,7 +31,10 @@ public enum TypeStringGrammar implements GrammarRuleKey {
   TYPE_SLOT_REFERENCE,
   TYPE_IDENTIFIER,
 
+  TYPE_INVOKABLE,
+
   TYPE_GENERICS,
+  TYPE_TUPLE,
   TYPE_GENERIC_DEFINITION_SINGLE,
   TYPE_GENERIC_REFERENCE_SINGLE,
   TYPE_GENERIC_DEFINITION,
@@ -48,7 +54,9 @@ public enum TypeStringGrammar implements GrammarRuleKey {
     TYPE_GENERIC_OPEN("<"),
     TYPE_GENERIC_CLOSE(">"),
     TYPE_GENERIC_SEPARATOR(","),
-    TYPE_GENERIC_ASSIGN("=");
+    TYPE_GENERIC_ASSIGN("="),
+    TYPE_TUPLE_OPEN("["),
+    TYPE_TUPLE_CLOSE("]");
 
     private final String value;
 
@@ -69,6 +77,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
     TYPE_STRING_GENERIC("_generic"),
     TYPE_STRING_SELF("_self"),
     TYPE_STRING_CLONE("_clone"),
+    TYPE_STRING_INVOKABLE("_invokable"),
     EXPRESSION_RESULT_UNDEFINED("__undefined_result__");
 
     private final String value;
@@ -93,7 +102,9 @@ public enum TypeStringGrammar implements GrammarRuleKey {
   /**
    * Create a new LexerlessGrammar for TypeDoc.
    *
-   * @param rootRule Root rules. Either {@code TYPE_STRING} or {@code EXPRESSION_RESULT_STRING}.
+   * @param rootRule Root rule. Production uses the end-of-input-anchored {@code TYPE_STRING_INPUT}
+   *     / {@code EXPRESSION_RESULT_STRING_INPUT}; the bare {@code TYPE_STRING} / {@code
+   *     EXPRESSION_RESULT_STRING} are available for rule-level tests.
    * @return TypeDoc grammar.
    */
   public static LexerlessGrammar create(final TypeStringGrammar rootRule) {
@@ -108,21 +119,24 @@ public enum TypeStringGrammar implements GrammarRuleKey {
 
     b.rule(SIMPLE_IDENTIFIER).is(SPACING_NO_LB, b.regexp(SIMPLE_IDENTIFIER_REGEXP));
     b.rule(TYPE_UNDEFINED).is(Keyword.TYPE_STRING_UNDEFINED);
-    b.rule(TYPE_SELF).is(Keyword.TYPE_STRING_SELF);
+    b.rule(TYPE_SELF).is(Keyword.TYPE_STRING_SELF, b.optional(TYPE_GENERICS));
     b.rule(TYPE_CLONE).is(Keyword.TYPE_STRING_CLONE);
+    b.rule(TYPE_INVOKABLE).is(Keyword.TYPE_STRING_INVOKABLE, b.optional(TYPE_GENERICS));
 
     b.rule(TYPE_PARAMETER_REFERENCE)
         .is(
             Keyword.TYPE_STRING_PARAMETER,
             Punctuator.TYPE_ARG_OPEN,
             SIMPLE_IDENTIFIER,
-            Punctuator.TYPE_ARG_CLOSE);
+            Punctuator.TYPE_ARG_CLOSE,
+            b.optional(TYPE_GENERIC_REFERENCE_SINGLE));
     b.rule(TYPE_SLOT_REFERENCE)
         .is(
             Keyword.TYPE_STRING_SLOT,
             Punctuator.TYPE_ARG_OPEN,
             SIMPLE_IDENTIFIER,
-            Punctuator.TYPE_ARG_CLOSE);
+            Punctuator.TYPE_ARG_CLOSE,
+            b.optional(TYPE_GENERIC_REFERENCE_SINGLE));
 
     b.rule(TYPE_GENERIC_DEFINITION_SINGLE)
         .is(Punctuator.TYPE_GENERIC_OPEN, TYPE_GENERIC_DEFINITION, Punctuator.TYPE_GENERIC_CLOSE)
@@ -131,11 +145,21 @@ public enum TypeStringGrammar implements GrammarRuleKey {
         .is(Punctuator.TYPE_GENERIC_OPEN, TYPE_GENERIC_REFERENCE, Punctuator.TYPE_GENERIC_CLOSE)
         .skip();
     b.rule(TYPE_GENERIC_DEFINITION)
-        .is(TYPE_IDENTIFIER, Punctuator.TYPE_GENERIC_ASSIGN, TYPE_STRING);
+        .is(TYPE_IDENTIFIER, Punctuator.TYPE_GENERIC_ASSIGN, b.firstOf(TYPE_TUPLE, TYPE_STRING));
     b.rule(TYPE_GENERIC_REFERENCE).is(SIMPLE_IDENTIFIER);
 
     b.rule(TYPE_IDENTIFIER)
         .is(SPACING_NO_LB, b.regexp(TYPE_IDENTIFIER_REGEXP), b.optional(TYPE_GENERICS));
+
+    b.rule(TYPE_TUPLE)
+        .is(
+            Punctuator.TYPE_TUPLE_OPEN,
+            b.optional(
+                b.nextNot(Punctuator.TYPE_TUPLE_CLOSE),
+                TYPE_STRING,
+                b.zeroOrMore(Punctuator.TYPE_SEPARATOR, TYPE_STRING),
+                b.optional(Punctuator.TYPE_VARIADIC)),
+            Punctuator.TYPE_TUPLE_CLOSE);
 
     b.rule(TYPE_GENERICS)
         .is(
@@ -155,6 +179,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
                         TYPE_UNDEFINED,
                         TYPE_SELF,
                         TYPE_CLONE,
+                        TYPE_INVOKABLE,
                         TYPE_GENERIC_DEFINITION_SINGLE,
                         TYPE_GENERIC_REFERENCE_SINGLE,
                         TYPE_PARAMETER_REFERENCE,
@@ -166,6 +191,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
                             TYPE_UNDEFINED,
                             TYPE_SELF,
                             TYPE_CLONE,
+                            TYPE_INVOKABLE,
                             TYPE_GENERIC_DEFINITION_SINGLE,
                             TYPE_GENERIC_REFERENCE_SINGLE,
                             TYPE_PARAMETER_REFERENCE,
@@ -185,6 +211,21 @@ public enum TypeStringGrammar implements GrammarRuleKey {
     b.rule(EXPRESSION_RESULT_STRING_UNDEFINED).is(Keyword.EXPRESSION_RESULT_UNDEFINED);
 
     b.rule(SYNTAX_ERROR).is(b.regexp(".*"));
+
+    b.rule(TYPE_STRING_INPUT)
+        .is(
+            b.firstOf(
+                b.sequence(TYPE_STRING, SPACING, b.token(GenericTokenType.EOF, b.endOfInput())),
+                SYNTAX_ERROR));
+
+    b.rule(EXPRESSION_RESULT_STRING_INPUT)
+        .is(
+            b.firstOf(
+                b.sequence(
+                    EXPRESSION_RESULT_STRING,
+                    SPACING,
+                    b.token(GenericTokenType.EOF, b.endOfInput())),
+                SYNTAX_ERROR));
 
     b.setRootRule(rootRule);
 

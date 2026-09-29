@@ -5,6 +5,7 @@ import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.AstVisitor;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,12 +40,14 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
         TypeStringGrammar.TYPE_UNDEFINED,
         TypeStringGrammar.TYPE_CLONE,
         TypeStringGrammar.TYPE_SELF,
+        TypeStringGrammar.TYPE_INVOKABLE,
         TypeStringGrammar.TYPE_PARAMETER_REFERENCE,
         TypeStringGrammar.TYPE_SLOT_REFERENCE,
         TypeStringGrammar.TYPE_GENERIC_DEFINITION,
         TypeStringGrammar.TYPE_GENERIC_REFERENCE,
         TypeStringGrammar.TYPE_IDENTIFIER,
         TypeStringGrammar.TYPE_STRING,
+        TypeStringGrammar.TYPE_TUPLE,
         TypeStringGrammar.SYNTAX_ERROR);
   }
 
@@ -69,6 +72,8 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
       this.buildUndefined(node);
     } else if (node.is(TypeStringGrammar.TYPE_CLONE, TypeStringGrammar.TYPE_SELF)) {
       this.buildSelf(node);
+    } else if (node.is(TypeStringGrammar.TYPE_INVOKABLE)) {
+      this.buildInvokable(node);
     } else if (node.is(TypeStringGrammar.TYPE_PARAMETER_REFERENCE)) {
       this.buildParameterRef(node);
     } else if (node.is(TypeStringGrammar.TYPE_SLOT_REFERENCE)) {
@@ -81,6 +86,8 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
       this.buildIdentifier(node);
     } else if (node.is(TypeStringGrammar.TYPE_STRING)) {
       this.buildTypeString(node);
+    } else if (node.is(TypeStringGrammar.TYPE_TUPLE)) {
+      this.buildTuple(node);
     } else if (node.is(TypeStringGrammar.SYNTAX_ERROR)) {
       this.buildUndefined(node);
     } else {
@@ -95,8 +102,33 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
   }
 
   private void buildSelf(final AstNode node) {
-    final TypeString part = TypeString.SELF;
+    final List<AstNode> genericNodes =
+        node.getChildren(
+            TypeStringGrammar.TYPE_GENERIC_DEFINITION, TypeStringGrammar.TYPE_GENERIC_REFERENCE);
+    if (genericNodes.isEmpty()) {
+      this.mapping.put(node, TypeString.SELF);
+      return;
+    }
 
+    final List<TypeString> genericsList = genericNodes.stream().map(this.mapping::get).toList();
+    final TypeString[] genericsArr = genericsList.toArray(TypeString[]::new);
+    final TypeString part =
+        TypeString.ofIdentifier("_self", TypeString.ANONYMOUS_PACKAGE, genericsArr);
+    this.mapping.put(node, part);
+  }
+
+  private void buildInvokable(final AstNode node) {
+    final List<AstNode> genericNodes =
+        node.getChildren(
+            TypeStringGrammar.TYPE_GENERIC_DEFINITION, TypeStringGrammar.TYPE_GENERIC_REFERENCE);
+    if (genericNodes.isEmpty()) {
+      this.mapping.put(node, TypeString.INVOKABLE);
+      return;
+    }
+
+    final List<TypeString> genericsList = genericNodes.stream().map(this.mapping::get).toList();
+    final TypeString[] genericsArr = genericsList.toArray(TypeString[]::new);
+    final TypeString part = TypeString.ofInvokable(genericsArr);
     this.mapping.put(node, part);
   }
 
@@ -104,7 +136,11 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
     final List<AstNode> childAsts = node.getChildren();
     final AstNode identifierAst = childAsts.get(2);
     final String refStr = identifierAst.getTokenValue();
-    final TypeString part = TypeString.ofParameterRef(refStr);
+    final AstNode genericRefNode = node.getFirstChild(TypeStringGrammar.TYPE_GENERIC_REFERENCE);
+    final TypeString part =
+        genericRefNode == null
+            ? TypeString.ofParameterRef(refStr)
+            : TypeString.ofParameterRef(refStr, this.mapping.get(genericRefNode));
 
     this.mapping.put(node, part);
   }
@@ -113,7 +149,11 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
     final List<AstNode> childAsts = node.getChildren();
     final AstNode identifierAst = childAsts.get(2);
     final String refStr = identifierAst.getTokenValue();
-    final TypeString part = TypeString.ofSlotRef(refStr);
+    final AstNode genericRefNode = node.getFirstChild(TypeStringGrammar.TYPE_GENERIC_REFERENCE);
+    final TypeString part =
+        genericRefNode == null
+            ? TypeString.ofSlotRef(refStr)
+            : TypeString.ofSlotRef(refStr, this.mapping.get(genericRefNode));
 
     this.mapping.put(node, part);
   }
@@ -121,9 +161,32 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
   private void buildGenericDefinition(final AstNode node) {
     final AstNode identifierNode = node.getFirstChild(TypeStringGrammar.TYPE_IDENTIFIER);
     final String identifier = identifierNode.getTokenValue();
-    final AstNode typeStringNode = node.getFirstChild(TypeStringGrammar.TYPE_STRING);
-    final TypeString typeString = this.mapping.get(typeStringNode);
+    AstNode valueNode = node.getFirstChild(TypeStringGrammar.TYPE_STRING);
+    if (valueNode == null) {
+      valueNode = node.getFirstChild(TypeStringGrammar.TYPE_TUPLE);
+    }
+    final TypeString typeString = this.mapping.get(valueNode);
     final TypeString part = TypeString.ofGenericDefinition(identifier, typeString);
+
+    this.mapping.put(node, part);
+  }
+
+  private void buildTuple(final AstNode node) {
+    final List<AstNode> typeStringNodes = node.getChildren(TypeStringGrammar.TYPE_STRING);
+    final List<TypeString> elements = new ArrayList<>();
+    for (final AstNode typeStringNode : typeStringNodes) {
+      final TypeString element = this.mapping.get(typeStringNode);
+      elements.add(element);
+    }
+    final AstNode variadicNode = node.getFirstChild(TypeStringGrammar.Punctuator.TYPE_VARIADIC);
+    if (variadicNode != null && !elements.isEmpty()) {
+      final int lastIndex = elements.size() - 1;
+      final TypeString last = elements.get(lastIndex);
+      final TypeString variadicLast = TypeString.ofVariadic(last);
+      elements.set(lastIndex, variadicLast);
+    }
+    final TypeString[] elementsArr = elements.toArray(TypeString[]::new);
+    final TypeString part = TypeString.ofTuple(elementsArr);
 
     this.mapping.put(node, part);
   }
@@ -143,9 +206,8 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
             TypeStringGrammar.TYPE_GENERIC_DEFINITION, TypeStringGrammar.TYPE_GENERIC_REFERENCE);
     final TypeString[] genericsArr =
         genericNodes.stream().map(this.mapping::get).toList().toArray(TypeString[]::new);
-    final TypeString part = TypeString.ofIdentifier(str, this.currentPakkage, genericsArr);
-
-    this.mapping.put(node, part);
+    final TypeString base = TypeString.ofIdentifier(str, this.currentPakkage, genericsArr);
+    this.mapping.put(node, base);
   }
 
   private void buildTypeString(final AstNode node) {
@@ -154,6 +216,7 @@ public final class TypeStringBuilderVisitor implements AstVisitor {
             TypeStringGrammar.TYPE_UNDEFINED,
             TypeStringGrammar.TYPE_CLONE,
             TypeStringGrammar.TYPE_SELF,
+            TypeStringGrammar.TYPE_INVOKABLE,
             TypeStringGrammar.TYPE_PARAMETER_REFERENCE,
             TypeStringGrammar.TYPE_SLOT_REFERENCE,
             TypeStringGrammar.TYPE_GENERIC_DEFINITION,
