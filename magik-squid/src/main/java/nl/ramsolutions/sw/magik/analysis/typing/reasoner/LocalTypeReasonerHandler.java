@@ -189,6 +189,26 @@ abstract class LocalTypeReasonerHandler {
   }
 
   /**
+   * Get the type of an {@code _import}ed variable. A {@code _self} captured into the imported
+   * variable is resolved against the definition the variable was declared in, as within the
+   * importing proc {@code _self} would be the proc.
+   *
+   * @param importedScopeEntry Scope entry the {@code _import} refers to.
+   * @return Type of the imported variable.
+   */
+  protected ExpressionResultString getImportedType(final ScopeEntry importedScopeEntry) {
+    final AstNode activeImportedNode = this.state.getCurrentScopeEntryNode(importedScopeEntry);
+    final ExpressionResultString result = this.state.getNodeType(activeImportedNode);
+    final AstNode definitionNode = importedScopeEntry.getDefinitionNode();
+    final TypeString ownerTypeStr = this.getMethodOwnerType(definitionNode);
+    if (ownerTypeStr.isUndefined()) {
+      return result;
+    }
+
+    return result.substituteType(TypeString.SELF, ownerTypeStr);
+  }
+
+  /**
    * Assign types to identifiers with an optional gather clause. Also set the scope variables
    *
    * @param bodyNode Body node of the for loop.

@@ -75,8 +75,7 @@ class StatementHandler extends LocalTypeReasonerHandler {
       final ScopeEntry importedScopeEntry = scopeEntry.getImportedEntry();
       // Can only set type when the imported entry is found.
       if (importedScopeEntry != null) {
-        final AstNode activeImportedNode = this.state.getCurrentScopeEntryNode(importedScopeEntry);
-        final ExpressionResultString result = this.state.getNodeType(activeImportedNode);
+        final ExpressionResultString result = this.getImportedType(importedScopeEntry);
         this.state.setNodeType(node, result);
       }
     }

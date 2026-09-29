@@ -68,8 +68,7 @@ class IdentifierHandler extends LocalTypeReasonerHandler {
       }
 
       Objects.requireNonNull(parentScopeEntry);
-      final AstNode lastNodeType = this.state.getCurrentScopeEntryNode(parentScopeEntry);
-      final ExpressionResultString result = this.state.getNodeType(lastNodeType);
+      final ExpressionResultString result = this.getImportedType(parentScopeEntry);
       this.assignAtom(node, result);
     } else if (scopeEntry.isType(ScopeEntry.Type.PARAMETER)) {
       // TODO: This does not handle assigning to parameter properly!
