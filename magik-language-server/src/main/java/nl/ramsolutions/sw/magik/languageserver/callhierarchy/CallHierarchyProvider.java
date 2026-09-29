@@ -23,7 +23,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
-import nl.ramsolutions.sw.magik.analysis.definitions.parsers.AnonymousNamer;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureNamer;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
@@ -190,7 +190,7 @@ public class CallHierarchyProvider {
             uriStr,
             Lsp4jConversion.rangeToLsp4j(range),
             Lsp4jConversion.rangeToLsp4j(range));
-    final String typeStrStr = AnonymousNamer.getNameForProcedure(definitionNode).getFullString();
+    final String typeStrStr = ProcedureNamer.getNameForProcedure(definitionNode).getFullString();
     final Map<String, String> data =
         Map.of(
             DATA_TYPE_STRING, typeStrStr,

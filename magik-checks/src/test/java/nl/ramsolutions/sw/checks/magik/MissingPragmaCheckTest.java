@@ -126,6 +126,21 @@ class MissingPragmaCheckTest {
   @ValueSource(
       strings = {
         """
+        define_binary_operator_case(:|>|, integer, float, _proc(a, b) _endproc)
+        """,
+        """
+        _local prc << _proc() _endproc
+        """,
+      })
+  void testAnonymousProceduresNotFlagged(final String code) {
+    final MagikCheck check = new MissingPragmaCheck();
+    assertThat(check).reportsNoIssues(code);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
         _block
           def_slotted_exemplar(:example, {})
         _endblock

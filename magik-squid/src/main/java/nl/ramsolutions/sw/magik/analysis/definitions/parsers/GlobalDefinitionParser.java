@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.net.URI;
 import java.time.Instant;
 import java.util.List;
@@ -85,12 +86,18 @@ public class GlobalDefinitionParser {
     final String packageName = this.getCurrentPakkage();
     final AstNode variableDefinitionNode =
         this.node.getFirstChild(MagikGrammar.VARIABLE_DEFINITION);
+    final AstNode valueNode = variableDefinitionNode.getFirstChild(MagikGrammar.EXPRESSION);
+    if (GlobalDefinitionParser.isNamedProcedureValue(valueNode)) {
+      // The procedure is indexed under this very name; a global alias would duplicate it and
+      // `resolveInPackageHierarchy` would combine both into `_undefined|<procedure>`.
+      return List.of();
+    }
+
     final AstNode identifierNode = variableDefinitionNode.getFirstChild(MagikGrammar.IDENTIFIER);
     final String identifier = identifierNode.getTokenValue();
     final TypeString typeName = TypeString.ofIdentifier(identifier, packageName);
 
     // Figure type.
-    // TODO: Handle procedure, if procedure.
     final TypeDocParser docParser = new TypeDocParser(node);
     final TypeString aliasedTypeRef =
         docParser.getReturnTypes().stream().findFirst().orElse(TypeString.UNDEFINED);
@@ -110,7 +117,6 @@ public class GlobalDefinitionParser {
                 pragmaHelper.getUsages())
             : null;
 
-    final AstNode valueNode = variableDefinitionNode.getFirstChild(MagikGrammar.EXPRESSION);
     final MagikToolsProperties properties = this.magikFile.getProperties();
     final MagikAnalysisSettings settings = new MagikAnalysisSettings(properties);
     final List<MethodUsage> usedMethods = this.getUsedMethods(valueNode, settings);
@@ -225,5 +231,24 @@ public class GlobalDefinitionParser {
   private String getCurrentPakkage() {
     final PackageNodeHelper helper = new PackageNodeHelper(this.node);
     return helper.getCurrentPackage();
+  }
+
+  private static boolean isNamedProcedureValue(final @Nullable AstNode valueNode) {
+    if (valueNode == null) {
+      return false;
+    }
+
+    final AstNode procedureNode = valueNode.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
+    if (procedureNode == null) {
+      return false;
+    }
+
+    if (procedureNode.getFirstChild(MagikGrammar.SYNTAX_ERROR) != null
+        || procedureNode.getFirstChild(MagikGrammar.PARAMETERS) == null) {
+      return false;
+    }
+
+    final TypeString typeString = ProcedureNamer.getNameForProcedure(procedureNode);
+    return !typeString.isAnonymous();
   }
 }

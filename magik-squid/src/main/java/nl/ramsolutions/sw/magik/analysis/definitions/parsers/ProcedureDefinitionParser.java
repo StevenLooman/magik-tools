@@ -174,7 +174,7 @@ public class ProcedureDefinitionParser {
     final List<MethodUsage> allUsedMethods = new ArrayList<>(usedMethods);
     allUsedMethods.addAll(invokesMethodUsages);
 
-    final TypeString typeString = AnonymousNamer.getNameForProcedure(this.node);
+    final TypeString typeString = ProcedureNamer.getNameForProcedure(this.node);
     return List.of(
         new ProcedureDefinition(
             location,

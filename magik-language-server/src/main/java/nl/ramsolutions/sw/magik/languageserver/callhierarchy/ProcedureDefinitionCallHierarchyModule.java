@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
-import nl.ramsolutions.sw.magik.analysis.definitions.parsers.AnonymousNamer;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureNamer;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
@@ -30,7 +30,7 @@ public class ProcedureDefinitionCallHierarchyModule implements CallHierarchyModu
     final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(wantedNode);
     final String procName = helper.getProcedureName();
     final String displayName = procName != null ? procName : "<anonymous>";
-    final String typeStrStr = AnonymousNamer.getNameForProcedure(wantedNode).getFullString();
+    final String typeStrStr = ProcedureNamer.getNameForProcedure(wantedNode).getFullString();
     final CallHierarchyItem item =
         new CallHierarchyItem(
             displayName,

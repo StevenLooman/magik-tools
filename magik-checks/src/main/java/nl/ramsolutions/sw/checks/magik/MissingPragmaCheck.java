@@ -9,11 +9,13 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PragmaNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.sonar.check.Rule;
 
@@ -24,6 +26,7 @@ import org.sonar.check.Rule;
  *   <li>exemplars
  *   <li>method definition (including slot accessors, shared constants, shared variables)
  *   <li>globals
+ *   <li>procedures
  * </ul>
  */
 @Rule(key = MissingPragmaCheck.CHECK_KEY)
@@ -85,6 +88,7 @@ public class MissingPragmaCheck extends MagikCheck {
     return ExemplarDefinition.class.isInstance(definition)
         || MethodDefinition.class.isInstance(definition)
         || GlobalDefinition.class.isInstance(definition)
+        || ProcedureDefinition.class.isInstance(definition)
         || ConditionDefinition.class.isInstance(definition);
   }
 
@@ -93,9 +97,17 @@ public class MissingPragmaCheck extends MagikCheck {
       return isPrimaryMethodDefinition(methodDefinition);
     } else if (definition instanceof GlobalDefinition globalDefinition) {
       return isPrimaryGlobalDefinition(globalDefinition);
+    } else if (definition instanceof ProcedureDefinition procedureDefinition) {
+      return MissingPragmaCheck.isPrimaryProcedureDefinition(procedureDefinition);
     }
 
     return true;
+  }
+
+  private static boolean isPrimaryProcedureDefinition(
+      final ProcedureDefinition procedureDefinition) {
+    final TypeString typeString = procedureDefinition.getTypeString();
+    return !typeString.isAnonymous();
   }
 
   private boolean isPrimaryMethodDefinition(MethodDefinition methodDefinition) {
@@ -174,6 +186,14 @@ public class MissingPragmaCheck extends MagikCheck {
       return conditionDefinition.getPragma() == null;
     }
 
+    return MissingPragmaCheck.missingPragmaForProcedure(definition);
+  }
+
+  private static boolean missingPragmaForProcedure(final MagikDefinition definition) {
+    if (definition instanceof ProcedureDefinition procedureDefinition) {
+      return procedureDefinition.getPragma() == null;
+    }
+
     throw new IllegalStateException();
   }
 
@@ -184,17 +204,7 @@ public class MissingPragmaCheck extends MagikCheck {
       final ArgumentsNodeHelper helper = new ArgumentsNodeHelper(argumentsNode);
       return helper.getArgument(0);
     } else if (definition instanceof MethodDefinition methodDefinition) {
-      final AstNode definitionNode = methodDefinition.getNode();
-      final AstNode argumentsNode = definitionNode.getFirstDescendant(MagikGrammar.ARGUMENTS);
-      if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
-        final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
-        return helper.getMethodNameNode();
-      } else if (argumentsNode != null) {
-        final ArgumentsNodeHelper helper = new ArgumentsNodeHelper(argumentsNode);
-        return helper.getArgument(0);
-      } else {
-        return definitionNode;
-      }
+      return this.getIssueNodeForMethod(methodDefinition);
     } else if (definition instanceof GlobalDefinition globalDefinition) {
       final AstNode definitionNode = globalDefinition.getNode();
       if (definitionNode.is(MagikGrammar.VARIABLE_DEFINITION_STATEMENT)) {
@@ -202,6 +212,8 @@ public class MissingPragmaCheck extends MagikCheck {
       }
 
       return definitionNode;
+    } else if (definition instanceof ProcedureDefinition procedureDefinition) {
+      return MissingPragmaCheck.getIssueNodeForProcedure(procedureDefinition);
     } else if (definition instanceof ConditionDefinition conditionDefinition) {
       final AstNode definitionNode = conditionDefinition.getNode();
       final AstNode argumentsNode = definitionNode.getFirstDescendant(MagikGrammar.ARGUMENTS);
@@ -210,5 +222,27 @@ public class MissingPragmaCheck extends MagikCheck {
     }
 
     throw new IllegalStateException();
+  }
+
+  private AstNode getIssueNodeForMethod(final MethodDefinition methodDefinition) {
+    final AstNode definitionNode = methodDefinition.getNode();
+    final AstNode argumentsNode = definitionNode.getFirstDescendant(MagikGrammar.ARGUMENTS);
+    if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
+      final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
+      return helper.getMethodNameNode();
+    } else if (argumentsNode != null) {
+      final ArgumentsNodeHelper helper = new ArgumentsNodeHelper(argumentsNode);
+      return helper.getArgument(0);
+    } else {
+      return definitionNode;
+    }
+  }
+
+  private static AstNode getIssueNodeForProcedure(final ProcedureDefinition procedureDefinition) {
+    final AstNode definitionNode = procedureDefinition.getNode();
+    final AstNode statementNode = definitionNode.getFirstAncestor(MagikGrammar.STATEMENT);
+    final AstNode identifierNode =
+        statementNode != null ? statementNode.getFirstDescendant(MagikGrammar.IDENTIFIER) : null;
+    return identifierNode != null ? identifierNode : definitionNode;
   }
 }
