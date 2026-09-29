@@ -39,7 +39,7 @@ public final class ProcedureNamer {
   }
 
   @CheckForNull
-  private static String getTopLevelAssignedName(final AstNode node) {
+  static String getTopLevelAssignedName(final AstNode node) {
     final AstNode atomNode = node.getParent();
     if (atomNode == null || atomNode.isNot(MagikGrammar.ATOM)) {
       return null;

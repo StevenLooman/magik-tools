@@ -983,7 +983,8 @@ class LocalTypeReasonerTest {
     assertThat(result)
         .isEqualTo(
             new ExpressionResultString(
-                TypeString.ofIdentifier("_proc_in_memory_0", TypeString.ANONYMOUS_PACKAGE)));
+                TypeString.ofIdentifier(
+                    "_proc__user__object__test__0", TypeString.ANONYMOUS_PACKAGE)));
   }
 
   @Test

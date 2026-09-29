@@ -437,7 +437,7 @@ class MagikDefinitionReaderTest {
                 "",
                 null,
                 Collections.emptySet(),
-                TypeString.ofIdentifier("_proc_in_memory_0", TypeString.ANONYMOUS_PACKAGE),
+                TypeString.ofIdentifier("_proc__in_memory__0", TypeString.ANONYMOUS_PACKAGE),
                 null,
                 List.of(
                     new ParameterDefinition(
