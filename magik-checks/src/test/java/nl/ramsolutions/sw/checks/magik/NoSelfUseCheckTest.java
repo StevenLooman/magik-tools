@@ -54,4 +54,16 @@ class NoSelfUseCheckTest {
         """;
     assertThat(check).reportsIssueCount(code, 1);
   }
+
+  @Test
+  void testAbstractByConvention() {
+    final MagikCheck check = new NoSelfUseCheck();
+    final String code =
+        """
+        _method a.b
+          condition.raise(:subclass_should_implement)
+        _endmethod
+        """;
+    assertThat(check).reportsNoIssues(code);
+  }
 }

@@ -269,4 +269,17 @@ class IterCallableYieldTypesMatchDocTypedCheckTest {
     final MagikTypedCheck check = new IterCallableYieldTypesMatchDocTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @Test
+  void testAbstractByConventionIterMethod() {
+    final String code =
+        """
+        _iter _method a.b()
+          condition.raise(:subclass_should_implement)
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new IterCallableYieldTypesMatchDocTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
 }

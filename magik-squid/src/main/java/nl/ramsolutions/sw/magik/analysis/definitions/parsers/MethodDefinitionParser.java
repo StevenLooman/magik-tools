@@ -95,7 +95,8 @@ public class MethodDefinitionParser {
     if (helper.isIterMethod()) {
       modifiers.add(MethodDefinition.Modifier.ITER);
     }
-    if (helper.isAbstractMethod()) {
+    final boolean isAbstract = helper.isAbstractMethod();
+    if (isAbstract) {
       modifiers.add(MethodDefinition.Modifier.ABSTRACT);
     }
 
@@ -117,7 +118,7 @@ public class MethodDefinitionParser {
     // Ensure we can believe the docs, sort of. An `_abstract` method has no body to believe:
     // undocumented, its result is unknown rather than nothing.
     final boolean returnsAnything = helper.returnsAnything();
-    final boolean bodyStatesNothing = !returnsAnything && !helper.isAbstractMethod();
+    final boolean bodyStatesNothing = !returnsAnything && !isAbstract;
     final ExpressionResultString callResult =
         !callResultDocs.isEmpty() || bodyStatesNothing
             ? new ExpressionResultString(callResultDocs)

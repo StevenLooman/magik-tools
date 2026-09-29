@@ -90,4 +90,17 @@ class TypeDocLoopFixerTest {
     final List<CodeAction> codeActions = this.getCodeActions(code);
     assertThat(codeActions).isEmpty();
   }
+
+  @Test
+  void testAbstractByConventionIterMethod() {
+    final String code =
+        """
+        _iter _method obj.method()
+          ## @loop {sw:float} Test
+          condition.raise(:subclass_should_implement)
+        _endmethod
+        """;
+    final List<CodeAction> codeActions = this.getCodeActions(code);
+    assertThat(codeActions).isEmpty();
+  }
 }

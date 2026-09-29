@@ -1,10 +1,12 @@
 package nl.ramsolutions.sw.magik.analysis.helpers;
 
 import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.Token;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
@@ -16,6 +18,12 @@ import nl.ramsolutions.sw.magik.api.MagikPunctuator;
 
 /** Helper for METHOD_DEFINITION nodes. */
 public class MethodDefinitionNodeHelper {
+
+  private static final Set<String> ABSTRACT_CONDITIONS = Set.of("subclass_should_implement");
+  private static final String CONDITION = "condition";
+  private static final String SW_CONDITION = "sw:condition";
+  private static final String RAISE_CALL = "raise()";
+  private static final String NAME_KEY = ":name";
 
   private final AstNode node;
 
@@ -156,14 +164,156 @@ public class MethodDefinitionNodeHelper {
   }
 
   /**
-   * Test if method is an `_abstract` method.
+   * Test if method is abstract: declared `_abstract`, or abstract by convention (see {@link
+   * #isAbstractByConvention()}).
    *
-   * @return
+   * @return True if method is abstract.
    */
   public boolean isAbstractMethod() {
+    return this.hasAbstractModifier() || this.isAbstractByConvention();
+  }
+
+  private boolean hasAbstractModifier() {
     final String modifier = MagikKeyword.ABSTRACT.getValue();
     return this.getMethodModifiers().stream()
         .anyMatch(modifierNode -> modifierNode.getTokenValue().equalsIgnoreCase(modifier));
+  }
+
+  /**
+   * Test if method is abstract by convention: its body only raises {@code
+   * :subclass_should_implement}.
+   *
+   * @return True if method is abstract by convention.
+   */
+  public boolean isAbstractByConvention() {
+    return this.raisesOnly(MethodDefinitionNodeHelper.ABSTRACT_CONDITIONS);
+  }
+
+  /**
+   * Test if the body of the method is exactly {@code condition.raise(:<name>)}, for one of the
+   * given condition names, optionally followed by a bare {@code _return} or {@code _return _unset},
+   * or is exactly {@code _return condition.raise(:<name>)}.
+   *
+   * @param conditionNames Names of the raised conditions to recognise, without the colon.
+   * @return True if the body only raises one of the conditions.
+   */
+  public boolean raisesOnly(final Set<String> conditionNames) {
+    final AstNode bodyNode = this.node.getFirstChild(MagikGrammar.BODY);
+    if (bodyNode == null) {
+      return false;
+    }
+
+    final List<AstNode> statementNodes = bodyNode.getChildren(MagikGrammar.STATEMENT);
+    final int statementCount = statementNodes.size();
+    if (statementCount == 0 || statementCount > 2) {
+      return false;
+    }
+
+    final AstNode firstStatementNode = statementNodes.get(0);
+    if (statementCount == 1
+        && MethodDefinitionNodeHelper.isReturnOfRaise(firstStatementNode, conditionNames)) {
+      return true;
+    }
+
+    final AstNode expressionNode =
+        AstQuery.getOnlyFromChain(
+            firstStatementNode, MagikGrammar.EXPRESSION_STATEMENT, MagikGrammar.EXPRESSION);
+    if (expressionNode == null
+        || !MethodDefinitionNodeHelper.isRaiseOf(expressionNode, conditionNames)) {
+      return false;
+    }
+
+    if (statementCount == 1) {
+      return true;
+    }
+
+    final AstNode secondStatementNode = statementNodes.get(1);
+    return MethodDefinitionNodeHelper.isReturnNothing(secondStatementNode);
+  }
+
+  private static boolean isReturnOfRaise(
+      final AstNode statementNode, final Set<String> conditionNames) {
+    final AstNode tupleNode =
+        AstQuery.getFirstChildFromChain(
+            statementNode, MagikGrammar.RETURN_STATEMENT, MagikGrammar.TUPLE);
+    if (tupleNode == null) {
+      return false;
+    }
+
+    final AstNode expressionNode = AstQuery.getOnlyFromChain(tupleNode, MagikGrammar.EXPRESSION);
+    return expressionNode != null
+        && MethodDefinitionNodeHelper.isRaiseOf(expressionNode, conditionNames);
+  }
+
+  private static boolean isRaiseOf(final AstNode expressionNode, final Set<String> conditionNames) {
+    final AstNode postfixExpressionNode =
+        AstQuery.getOnlyFromChain(expressionNode, MagikGrammar.POSTFIX_EXPRESSION);
+    if (postfixExpressionNode == null) {
+      return false;
+    }
+
+    final List<AstNode> invocationNodes =
+        postfixExpressionNode.getChildren(MagikGrammar.METHOD_INVOCATION);
+    if (invocationNodes.size() != 1) {
+      return false;
+    }
+
+    final AstNode invocationNode = invocationNodes.get(0);
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(invocationNode);
+    if (!helper.isMethodInvocationOf(CONDITION, RAISE_CALL)
+        && !helper.isMethodInvocationOf(SW_CONDITION, RAISE_CALL)) {
+      return false;
+    }
+
+    final AstNode argumentsNode = invocationNode.getFirstChild(MagikGrammar.ARGUMENTS);
+    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final AstNode symbolNode = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+    if (symbolNode == null) {
+      return false;
+    }
+
+    final String symbol = symbolNode.getTokenValue();
+    final String conditionName = symbol.substring(1);
+    return conditionNames.contains(conditionName)
+        && !MethodDefinitionNodeHelper.namesCaller(argumentsNode);
+  }
+
+  // A helper raising on behalf of its caller passes the caller's name in: `:name, a_variable`.
+  private static boolean namesCaller(final AstNode argumentsNode) {
+    final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT);
+    for (int index = 0; index < argumentNodes.size() - 1; ++index) {
+      final AstNode argumentNode = argumentNodes.get(index);
+      final AstNode symbolNode =
+          AstQuery.getOnlyFromChain(
+              argumentNode, MagikGrammar.EXPRESSION, MagikGrammar.ATOM, MagikGrammar.SYMBOL);
+      final AstNode valueNode = argumentNodes.get(index + 1);
+      final AstNode identifierNode =
+          AstQuery.getOnlyFromChain(
+              valueNode, MagikGrammar.EXPRESSION, MagikGrammar.ATOM, MagikGrammar.IDENTIFIER);
+      final String key = symbolNode != null ? symbolNode.getTokenValue() : null;
+      if (MethodDefinitionNodeHelper.NAME_KEY.equals(key) && identifierNode != null) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // The raise never returns, so a trailing `_return` / `_return _unset` is dead code.
+  private static boolean isReturnNothing(final AstNode statementNode) {
+    final AstNode returnNode = statementNode.getFirstChild(MagikGrammar.RETURN_STATEMENT);
+    if (returnNode == null) {
+      return false;
+    }
+
+    final AstNode tupleNode = returnNode.getFirstChild(MagikGrammar.TUPLE);
+    if (tupleNode == null) {
+      return true;
+    }
+
+    final String tupleValue = tupleNode.getTokenValue();
+    final List<Token> tupleTokens = tupleNode.getTokens();
+    final String unset = MagikKeyword.UNSET.getValue();
+    return tupleTokens.size() == 1 && unset.equalsIgnoreCase(tupleValue);
   }
 
   /**

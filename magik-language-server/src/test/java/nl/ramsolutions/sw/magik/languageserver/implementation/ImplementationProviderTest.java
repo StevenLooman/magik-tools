@@ -47,6 +47,25 @@ class ImplementationProviderTest {
   }
 
   @Test
+  void testProvideAbstractByConventionMethodImplementation() {
+    final IDefinitionKeeper definitionKeeper = this.createDefinitionKeeperWithHierarchy();
+    definitionKeeper.add(this.createMethodDefinition(A_REF, "m1()", true, 0));
+    definitionKeeper.add(this.createMethodDefinition(B_REF, "m1()", false, 50));
+
+    final String code =
+        """
+        _method a.m1()
+          condition.raise(:subclass_should_implement)
+        _endmethod""";
+    final Position position = new Position(1, 10); // On `m1()`.
+
+    final List<Location> implementations =
+        this.provideImplementations(definitionKeeper, code, position);
+    final Location expected = this.createMethodLocation(50);
+    assertThat(implementations).containsOnly(expected);
+  }
+
+  @Test
   void testProvideImplementationsOnlyForMethodUnderCursor() {
     final IDefinitionKeeper definitionKeeper = this.createDefinitionKeeperWithHierarchy();
     definitionKeeper.add(this.createMethodDefinition(A_REF, "m1()", true, 0));

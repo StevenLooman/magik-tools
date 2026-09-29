@@ -491,4 +491,19 @@ class CallableReturnTypesMatchDocTypedCheckTest {
     final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @Test
+  void testAbstractByConventionMethod() {
+    final String code =
+        """
+        _method a.b
+          ## @return {integer}
+          condition.raise(:subclass_should_implement)
+          _return _unset
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new CallableReturnTypesMatchDocTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
 }

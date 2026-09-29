@@ -261,4 +261,17 @@ class UnusedVariableCheckTest {
         """;
     assertThat(check).reportsNoIssues(code);
   }
+
+  @Test
+  void testAbstractByConventionMethodParameter() {
+    final UnusedVariableCheck check = new UnusedVariableCheck();
+    check.checkParameters = true;
+    final String code =
+        """
+        _method a.b(p_param1)
+          condition.raise(:subclass_should_implement)
+        _endmethod
+        """;
+    assertThat(check).reportsNoIssues(code);
+  }
 }
