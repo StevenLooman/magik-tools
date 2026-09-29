@@ -8,6 +8,7 @@ import java.util.List;
 import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
+import nl.ramsolutions.sw.checks.TestPaths;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import org.assertj.core.api.AbstractAssert;
@@ -128,12 +129,7 @@ public class MagikTypedCheckAssert extends AbstractAssert<MagikTypedCheckAssert,
 
   private List<Issue> runCheck(final Path relativePath, final IDefinitionKeeper definitionKeeper)
       throws IllegalArgumentException, IOException {
-    // Ensure proper path.
-    final Path currentPath = Path.of(".").toAbsolutePath().getParent();
-    final Path fixedPath =
-        currentPath.endsWith("magik-checks")
-            ? Path.of("..").resolve(relativePath)
-            : Path.of(".").resolve(relativePath);
+    final Path fixedPath = TestPaths.createPath(relativePath);
 
     final URI uri = fixedPath.toUri();
     final String code = Files.readString(fixedPath);

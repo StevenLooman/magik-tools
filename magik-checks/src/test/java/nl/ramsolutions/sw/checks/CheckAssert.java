@@ -103,12 +103,7 @@ public abstract class CheckAssert extends AbstractAssert<CheckAssert, Check> {
 
   private List<Issue> runCheck(final Path relativePath)
       throws IllegalArgumentException, IOException {
-    // Ensure proper path.
-    final Path currentPath = Path.of(".").toAbsolutePath().getParent();
-    final Path fixedPath =
-        currentPath.endsWith("magik-checks")
-            ? Path.of("..").resolve(relativePath)
-            : Path.of(".").resolve(relativePath);
+    final Path fixedPath = TestPaths.createPath(relativePath);
 
     final URI uri = fixedPath.toUri();
     final String code = Files.readString(fixedPath);

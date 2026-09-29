@@ -10,6 +10,7 @@ import java.util.List;
 import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
+import nl.ramsolutions.sw.checks.TestPaths;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -36,21 +37,9 @@ class ModuleRequiredForGlobalTypedCheckTest {
       _endmethod
       """;
 
-  /**
-   * VSCode runs from module directory, mvn runs from project directory.
-   *
-   * @return Proper {@link Path} to file.
-   */
-  protected Path getPath(final Path path) {
-    final Path parentPath = Path.of(".").toAbsolutePath().getParent();
-    return parentPath.endsWith("magik-checks")
-        ? Path.of("..").resolve(path)
-        : Path.of(".").resolve(path);
-  }
-
   private void addModuleDefinitionToDefinitionKeeper(
       final Path path, final IDefinitionKeeper definitionKeeper) throws IOException {
-    final Path fixedPath = this.getPath(path);
+    final Path fixedPath = TestPaths.createPath(path);
     final URI fixedUri = fixedPath.toUri();
     ModuleDefFile moduleDefFile = ModuleDefFile.getModuleDefFileForUri(fixedUri, definitionKeeper);
     definitionKeeper.add(moduleDefFile.getModuleDefinition());
@@ -86,7 +75,7 @@ class ModuleRequiredForGlobalTypedCheckTest {
   }
 
   private List<Issue> runCheck(final String code, final IDefinitionKeeper definitionKeeper) {
-    final Path fixedPath = this.getPath(TEST_EXEMPLAR_PATH);
+    final Path fixedPath = TestPaths.createPath(TEST_EXEMPLAR_PATH);
     final URI uri = fixedPath.toUri();
     final MagikTypedFile magikFile = new MagikTypedFile(uri, code, definitionKeeper);
     final MagikCheck check = new ModuleRequiredForGlobalTypedCheck();
