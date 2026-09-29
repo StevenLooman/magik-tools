@@ -85,6 +85,3 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: codespell-project/actions-codespell@v2
-        with:
-          ignore_words_list: Datas,invokable,isnt,notIn,trivias
-          skip: package-lock.json

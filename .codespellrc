@@ -1,0 +1,5 @@
+# Read by codespell itself, so the Codespell CI job and a local run check the same thing.
+[codespell]
+ignore-words-list = allLocations,Datas,inferrable,invokable,isnt,notIn,trivias
+# The leading `*` also matches when files are passed as paths rather than found by a directory walk.
+skip = *package-lock.json
