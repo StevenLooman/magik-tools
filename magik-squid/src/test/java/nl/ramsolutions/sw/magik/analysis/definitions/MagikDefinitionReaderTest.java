@@ -548,7 +548,7 @@ class MagikDefinitionReaderTest {
                 Collections.emptyList(),
                 null,
                 null,
-                ExpressionResultString.EMPTY,
+                ExpressionResultString.UNDEFINED,
                 ExpressionResultString.EMPTY));
   }
 

@@ -114,10 +114,12 @@ public class MethodDefinitionParser {
     final List<TypeString> returnTypes = typeDocParser.getReturnTypes();
     final List<TypeString> callResultDocs =
         MethodDefinitionParser.normalizeVariadicTail(returnTypes);
-    // Ensure we can believe the docs, sort of.
+    // Ensure we can believe the docs, sort of. An `_abstract` method has no body to believe:
+    // undocumented, its result is unknown rather than nothing.
     final boolean returnsAnything = helper.returnsAnything();
+    final boolean bodyStatesNothing = !returnsAnything && !helper.isAbstractMethod();
     final ExpressionResultString callResult =
-        !callResultDocs.isEmpty() || callResultDocs.isEmpty() && !returnsAnything
+        !callResultDocs.isEmpty() || bodyStatesNothing
             ? new ExpressionResultString(callResultDocs)
             : ExpressionResultString.UNDEFINED;
 
