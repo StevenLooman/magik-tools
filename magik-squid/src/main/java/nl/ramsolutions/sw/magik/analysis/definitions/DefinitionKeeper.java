@@ -35,6 +35,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   private final Map<TypeString, Set<SlotDefinition>> slotDefinitions = new ConcurrentHashMap<>();
   private final Map<TypeString, Set<InheritanceDefinition>> inheritanceDefinitions =
       new ConcurrentHashMap<>();
+  private final Map<TypeString, Set<InheritanceDefinition>> inheritanceDefinitionsByParent =
+      new ConcurrentHashMap<>();
   private final Map<TypeString, Set<GlobalDefinition>> globalDefinitions =
       new ConcurrentHashMap<>();
   private final Map<TypeString, Set<ProcedureDefinition>> procedureDefinitions =
@@ -141,6 +143,11 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         this.inheritanceDefinitions.computeIfAbsent(
             bareTypeString, k -> ConcurrentHashMap.newKeySet());
     definitions.add(definition);
+    final TypeString bareParentTypeString = definition.getParentTypeName().getWithoutGenerics();
+    final Set<InheritanceDefinition> parentDefinitions =
+        this.inheritanceDefinitionsByParent.computeIfAbsent(
+            bareParentTypeString, k -> ConcurrentHashMap.newKeySet());
+    parentDefinitions.add(definition);
     this.addToPathIndex(definition);
   }
 
@@ -297,6 +304,11 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         this.inheritanceDefinitions.computeIfAbsent(
             bareTypeString, k -> ConcurrentHashMap.newKeySet());
     definitions.remove(definition);
+    final TypeString bareParentTypeString = definition.getParentTypeName().getWithoutGenerics();
+    final Set<InheritanceDefinition> parentDefinitions =
+        this.inheritanceDefinitionsByParent.computeIfAbsent(
+            bareParentTypeString, k -> ConcurrentHashMap.newKeySet());
+    parentDefinitions.remove(definition);
     this.removeFromPathIndex(definition);
   }
 
@@ -483,6 +495,15 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   }
 
   @Override
+  public Collection<InheritanceDefinition> getInheritanceDefinitionsByParent(
+      final TypeString typeString) {
+    final TypeString bareTypeString = typeString.getWithoutGenerics();
+    final Collection<InheritanceDefinition> definitions =
+        this.inheritanceDefinitionsByParent.getOrDefault(bareTypeString, Collections.emptySet());
+    return Collections.unmodifiableCollection(definitions);
+  }
+
+  @Override
   public Collection<InheritanceDefinition> getInheritanceDefinitions() {
     return this.inheritanceDefinitions.values().stream()
         .flatMap(Set::stream)
@@ -649,6 +670,7 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     this.methodDefinitions.clear();
     this.slotDefinitions.clear();
     this.inheritanceDefinitions.clear();
+    this.inheritanceDefinitionsByParent.clear();
     this.globalDefinitions.clear();
     this.procedureDefinitions.clear();
     this.uriDefinitions.clear();

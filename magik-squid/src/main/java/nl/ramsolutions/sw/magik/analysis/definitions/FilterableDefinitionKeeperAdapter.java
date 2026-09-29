@@ -313,6 +313,14 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   }
 
   @Override
+  public Collection<InheritanceDefinition> getInheritanceDefinitionsByParent(
+      final TypeString typeName) {
+    return this.getInheritanceDefinitions().stream()
+        .filter(definition -> definition.getParentTypeName().equals(typeName))
+        .collect(Collectors.toSet());
+  }
+
+  @Override
   public Collection<InheritanceDefinition> getInheritanceDefinitions() {
     return this.definitionKeeper.getInheritanceDefinitions().stream()
         .filter(this.inheritanceDefinitionPredicate)

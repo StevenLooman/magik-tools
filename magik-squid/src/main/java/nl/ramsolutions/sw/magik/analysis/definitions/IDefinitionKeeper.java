@@ -138,6 +138,22 @@ public interface IDefinitionKeeper {
    */
   Collection<InheritanceDefinition> getInheritanceDefinitions();
 
+  /**
+   * Get the {@link InheritanceDefinition}s whose <em>parent</em> is the given type -- the inverse
+   * of {@link #getInheritanceDefinitions(TypeString)}.
+   *
+   * <p>The default scans every edge; implementations holding an index answer directly.
+   *
+   * @param typeString Parent type.
+   * @return {@link InheritanceDefinition}s whose parent is the given type.
+   */
+  default Collection<InheritanceDefinition> getInheritanceDefinitionsByParent(
+      final TypeString typeString) {
+    return this.getInheritanceDefinitions().stream()
+        .filter(definition -> definition.getParentTypeName().equals(typeString))
+        .toList();
+  }
+
   Collection<GlobalDefinition> getGlobalDefinitions(TypeString typeName);
 
   Collection<GlobalDefinition> getGlobalDefinitions();

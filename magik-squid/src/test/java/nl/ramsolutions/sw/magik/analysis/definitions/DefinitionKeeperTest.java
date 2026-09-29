@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.Collection;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
@@ -131,6 +132,38 @@ class DefinitionKeeperTest {
 
     assertThat(keeper.getDefinitionsByPath(java.nio.file.Path.of("/tmp/a.magik")))
         .contains(slotDef);
+  }
+
+  @Test
+  void testGetInheritanceDefinitionsByParent() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString child = TypeString.ofIdentifier("child", "user");
+    final TypeString parent = TypeString.ofIdentifier("parent", "user");
+    final InheritanceDefinition def =
+        new InheritanceDefinition(null, null, null, null, null, child, parent);
+    keeper.add(def);
+
+    final Collection<InheritanceDefinition> byParent =
+        keeper.getInheritanceDefinitionsByParent(parent);
+    assertThat(byParent).containsOnly(def);
+    final Collection<InheritanceDefinition> byChild =
+        keeper.getInheritanceDefinitionsByParent(child);
+    assertThat(byChild).isEmpty();
+  }
+
+  @Test
+  void testGetInheritanceDefinitionsByParentAfterRemove() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString child = TypeString.ofIdentifier("child", "user");
+    final TypeString parent = TypeString.ofIdentifier("parent", "user");
+    final InheritanceDefinition def =
+        new InheritanceDefinition(null, null, null, null, null, child, parent);
+    keeper.add(def);
+    keeper.remove(def);
+
+    final Collection<InheritanceDefinition> byParent =
+        keeper.getInheritanceDefinitionsByParent(parent);
+    assertThat(byParent).isEmpty();
   }
 
   @Test
