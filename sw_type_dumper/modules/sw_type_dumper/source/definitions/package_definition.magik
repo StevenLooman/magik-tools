@@ -90,7 +90,7 @@ define_binary_operator_case(
 	_proc(definition_a, definition_b)
 		## @param {mt:package_definition} definition_a
 		## @param {mt:package_definition} definition_b
-		## @return {sw:false|sw:maybe}
+		## @return {sw:false}
 		_return definition_a.equals?(definition_b)
 	_endproc)
 $

@@ -55,7 +55,7 @@ define_binary_operator_case(
 	_proc(usage_a, usage_b)
 		## @param {mt:module_usage} usage_a
 		## @param {mt:module_usage} usage_b
-		## @return {sw:false|sw:maybe}
+		## @return {sw:false}
 		_return usage_a.equals?(usage_b)
 	_endproc)
 $

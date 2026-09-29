@@ -109,7 +109,7 @@ define_binary_operator_case(
 	_proc(pragma_a, pragma_b)
 		## @param {mt:pragma} pragma_a
 		## @param {mt:pragma} pragma_b
-		## @return {sw:false|sw:maybe}
+		## @return {sw:false}
 		_return pragma_a.equals?(pragma_b)
 	_endproc)
 $
