@@ -1124,4 +1124,70 @@ class MagikDefinitionReaderTest {
             new MethodUsage(TypeString.ofIdentifier("rope", "user"), "size"),
             new MethodUsage(TypeString.ofIdentifier("integer", "sw"), "write()"));
   }
+
+  @Test
+  void testGlobalProcedureIsIndexedAsProcedureOnly() {
+    final String code = "_global my_proc << _proc() _endproc";
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> globalDefinitions =
+        definitions.stream().filter(GlobalDefinition.class::isInstance).toList();
+    assertThat(globalDefinitions).isEmpty();
+
+    final ProcedureDefinition procedureDefinition =
+        definitions.stream()
+            .filter(ProcedureDefinition.class::isInstance)
+            .map(ProcedureDefinition.class::cast)
+            .findFirst()
+            .orElseThrow();
+    final TypeString typeString = procedureDefinition.getTypeString();
+    final TypeString expected = TypeString.ofIdentifier("my_proc", "user");
+    assertThat(typeString).isEqualTo(expected);
+  }
+
+  @Test
+  void testGlobalNonProcedureStillIndexedAsGlobal() {
+    final String code = "_global my_value << 1";
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> globalDefinitions =
+        definitions.stream().filter(GlobalDefinition.class::isInstance).toList();
+    assertThat(globalDefinitions).hasSize(1);
+  }
+
+  @Test
+  void testGlobalWithAnonymousProcedureValueStillIndexedAsGlobal() {
+    final String code = "_global my_value << make_wrapper(_proc() _endproc)";
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> globalDefinitions =
+        definitions.stream().filter(GlobalDefinition.class::isInstance).toList();
+    assertThat(globalDefinitions).hasSize(1);
+  }
+
+  @Test
+  void testGlobalWithSyntaxErrorProcedureBodyStillIndexedAsGlobal() {
+    final String code = "_global my_proc << _proc() bad syntax _endproc";
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> globalDefinitions =
+        definitions.stream().filter(GlobalDefinition.class::isInstance).toList();
+    assertThat(globalDefinitions).hasSize(1);
+  }
 }

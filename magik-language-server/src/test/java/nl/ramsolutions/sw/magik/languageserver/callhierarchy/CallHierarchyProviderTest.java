@@ -218,7 +218,12 @@ class CallHierarchyProviderTest {
     final JsonObject jsonData = GSON.toJsonTree(item.getData()).getAsJsonObject();
     item.setData(jsonData);
 
-    // Verify no exception is thrown scanning the procedure body for outgoing calls
+    // The item must carry the procedure's real name, not an anonymous positional name.
+    final String typeStringStr =
+        jsonData.getAsJsonPrimitive(CallHierarchyProvider.DATA_TYPE_STRING).getAsString();
+    assertThat(typeStringStr).isEqualTo("user:x");
+
+    // Verify the procedure body is scanned without error (type of receiver is unresolved here).
     final List<CallHierarchyOutgoingCall> calls = provider.callHierarchyOutgoingCalls(item);
     assertThat(calls).isNotNull();
   }
