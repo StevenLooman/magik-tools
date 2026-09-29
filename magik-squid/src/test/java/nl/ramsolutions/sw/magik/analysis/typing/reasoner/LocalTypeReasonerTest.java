@@ -2879,4 +2879,29 @@ class LocalTypeReasonerTest {
     final ExpressionResultString result = state.getNodeType(methodNode);
     assertThat(result).isEqualTo(new ExpressionResultString(aliasedRef));
   }
+
+  @Test
+  void testReasonMethodCallOnSelfAliasedGlobalIsUndefined() {
+    final String code =
+        """
+        _package user
+        _method object.test
+            _return conn_man.a_method()
+        _endmethod
+        """;
+
+    // A malformed alias cycle: the global is aliased to itself.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString connManRef = TypeString.ofIdentifier("conn_man", "user");
+    definitionKeeper.add(
+        new GlobalDefinition(null, null, null, null, null, connManRef, connManRef, null));
+
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    assertThat(result).isEqualTo(ExpressionResultString.UNDEFINED);
+  }
 }

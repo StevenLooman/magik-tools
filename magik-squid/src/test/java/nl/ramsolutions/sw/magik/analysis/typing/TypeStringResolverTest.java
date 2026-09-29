@@ -12,6 +12,7 @@ import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
@@ -366,5 +367,84 @@ class TypeStringResolverTest {
     final Collection<MethodDefinition> definitions =
         resolver.getRespondingMethodDefinitions(concrete, "nnn()");
     assertThat(definitions).extracting(MethodDefinition::getTypeName).containsExactly(concrete);
+  }
+
+  private static GlobalDefinition createGlobalDefinition(
+      final TypeString typeString, final TypeString aliasedTypeString) {
+    return new GlobalDefinition(null, null, null, null, null, typeString, aliasedTypeString);
+  }
+
+  @Test
+  void testGetExemplarDefinitionFollowsGlobalAliasChain() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString typeA = TypeString.ofIdentifier("a", "user");
+    final TypeString typeB = TypeString.ofIdentifier("b", "user");
+    final TypeString typeC = TypeString.ofIdentifier("c", "user");
+    final GlobalDefinition globalA = TypeStringResolverTest.createGlobalDefinition(typeA, typeB);
+    keeper.add(globalA);
+    final GlobalDefinition globalB = TypeStringResolverTest.createGlobalDefinition(typeB, typeC);
+    keeper.add(globalB);
+    final ExemplarDefinition exemplarC = TypeStringResolverTest.createExemplar(typeC);
+    keeper.add(exemplarC);
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final ExemplarDefinition definition = resolver.getExemplarDefinition(typeA);
+    assertThat(definition).isSameAs(exemplarC);
+  }
+
+  @Test
+  void testGetExemplarDefinitionSelfAliasedGlobalIsUnresolvable() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString typeFoo = TypeString.ofIdentifier("foo", "user");
+    final GlobalDefinition globalFoo =
+        TypeStringResolverTest.createGlobalDefinition(typeFoo, typeFoo);
+    keeper.add(globalFoo);
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final ExemplarDefinition definition = resolver.getExemplarDefinition(typeFoo);
+    assertThat(definition).isNull();
+  }
+
+  @Test
+  void testGetExemplarDefinitionGlobalAliasCycleIsUnresolvable() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString typeA = TypeString.ofIdentifier("a", "user");
+    final TypeString typeB = TypeString.ofIdentifier("b", "user");
+    final GlobalDefinition globalA = TypeStringResolverTest.createGlobalDefinition(typeA, typeB);
+    keeper.add(globalA);
+    final GlobalDefinition globalB = TypeStringResolverTest.createGlobalDefinition(typeB, typeA);
+    keeper.add(globalB);
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final ExemplarDefinition definition = resolver.getExemplarDefinition(typeA);
+    assertThat(definition).isNull();
+  }
+
+  @Test
+  void testIsKindOfSelfAliasedGlobalIsNotKindOfObject() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString typeFoo = TypeString.ofIdentifier("foo", "user");
+    final GlobalDefinition globalFoo =
+        TypeStringResolverTest.createGlobalDefinition(typeFoo, typeFoo);
+    keeper.add(globalFoo);
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final boolean isKindOf = resolver.isKindOf(typeFoo, TypeString.SW_OBJECT);
+    assertThat(isKindOf).isFalse();
+  }
+
+  @Test
+  void testIsKindOfGlobalAliasCycleIsNotKindOfObject() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString typeA = TypeString.ofIdentifier("a", "user");
+    final TypeString typeB = TypeString.ofIdentifier("b", "user");
+    final GlobalDefinition globalA = TypeStringResolverTest.createGlobalDefinition(typeA, typeB);
+    keeper.add(globalA);
+    final GlobalDefinition globalB = TypeStringResolverTest.createGlobalDefinition(typeB, typeA);
+    keeper.add(globalB);
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final boolean isKindOf = resolver.isKindOf(typeA, TypeString.SW_OBJECT);
+    assertThat(isKindOf).isFalse();
   }
 }

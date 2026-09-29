@@ -132,6 +132,12 @@ public class TypeStringResolver {
    */
   @CheckForNull
   public ExemplarDefinition getExemplarDefinition(final TypeString typeString) {
+    return this.getExemplarDefinition(typeString, new HashSet<>());
+  }
+
+  @CheckForNull
+  private ExemplarDefinition getExemplarDefinition(
+      final TypeString typeString, final Set<TypeString> visited) {
     // TODO: Return type should be Collection<ExemplarDefinition>
     final Collection<ITypeStringDefinition> definitions = this.resolve(typeString);
     if (definitions.isEmpty()) {
@@ -144,18 +150,24 @@ public class TypeStringResolver {
     final ITypeStringDefinition definition =
         exemplarDefefinition != null ? exemplarDefefinition : definitions.iterator().next();
 
-    // Resolve global first.
+    // Resolve global first; treat a procedure definition as the exemplar `procedure`.
+    final TypeString nextTypeString;
     if (definition instanceof GlobalDefinition globalDefinition0) {
-      final TypeString aliasedTypeString = globalDefinition0.getAliasedTypeName();
-      return this.getExemplarDefinition(aliasedTypeString);
+      nextTypeString = globalDefinition0.getAliasedTypeName();
+    } else if (definition instanceof ProcedureDefinition) {
+      nextTypeString = TypeString.SW_PROCEDURE;
+    } else {
+      return definition instanceof ExemplarDefinition exemplarDefinition
+          ? exemplarDefinition
+          : null;
     }
 
-    // Treat a procedure definition as the exemplar `procedure`.
-    if (definition instanceof ProcedureDefinition) {
-      return this.getExemplarDefinition(TypeString.SW_PROCEDURE);
+    // An alias cycle (e.g. a global aliased to itself) is unresolvable.
+    if (!visited.add(typeString)) {
+      return null;
     }
 
-    return definition instanceof ExemplarDefinition exemplarDefinition ? exemplarDefinition : null;
+    return this.getExemplarDefinition(nextTypeString, visited);
   }
 
   /**
@@ -443,6 +455,11 @@ public class TypeStringResolver {
   }
 
   private Collection<TypeString> getParents(final ITypeStringDefinition definition) {
+    return this.getParents(definition, new HashSet<>());
+  }
+
+  private Collection<TypeString> getParents(
+      final ITypeStringDefinition definition, final Set<TypeString> visited) {
     if (definition instanceof ExemplarDefinition exemplarDefinition) {
       return this.definitionKeeper
           .getInheritanceDefinitions(exemplarDefinition.getTypeString())
@@ -453,6 +470,12 @@ public class TypeStringResolver {
       // TODO: Is this right?
       return Set.of(TypeString.SW_PROCEDURE);
     } else if (definition instanceof GlobalDefinition globalDefinition) {
+      // An alias cycle (e.g. a global aliased to itself) has no parents.
+      final TypeString globalTypeString = globalDefinition.getTypeString();
+      if (!visited.add(globalTypeString)) {
+        return Collections.emptySet();
+      }
+
       final TypeString typeString = globalDefinition.getAliasedTypeName();
       final ITypeStringDefinition aliasedDefinition =
           this.resolve(typeString).stream().findAny().orElse(null);
@@ -460,7 +483,7 @@ public class TypeStringResolver {
         return Collections.emptySet();
       }
 
-      return this.getParents(aliasedDefinition);
+      return this.getParents(aliasedDefinition, visited);
     }
 
     throw new IllegalStateException();
