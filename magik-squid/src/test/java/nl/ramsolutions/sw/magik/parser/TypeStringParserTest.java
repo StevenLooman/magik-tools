@@ -27,6 +27,24 @@ class TypeStringParserTest {
   }
 
   @Test
+  void testAnonymousIdentifier() {
+    // An anonymous procedure is persisted by its full string, so it must parse back to itself.
+    final TypeString expected = TypeString.ofIdentifier("_proc__sw__a__b____0", "_anon");
+    final String typeStr = expected.getFullString();
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    assertThat(typeString).isEqualTo(expected);
+  }
+
+  @Test
+  void testAnonymousIdentifierInCombination() {
+    final TypeString anonymous = TypeString.ofIdentifier("_proc__sw__a__b____0", "_anon");
+    final TypeString expected = TypeString.ofCombination(anonymous, TypeString.SW_UNSET);
+    final String typeStr = expected.getFullString();
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    assertThat(typeString).isEqualTo(expected);
+  }
+
+  @Test
   void testParameterRef() {
     final String typeStr = "_parameter(p1)";
     final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);

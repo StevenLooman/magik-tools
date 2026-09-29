@@ -24,6 +24,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -40,6 +41,35 @@ class JsonDefinitionReaderTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     JsonDefinitionReader.readTypes(path, definitionKeeper);
     return definitionKeeper;
+  }
+
+  @Test
+  void testReadAnonymousProcedureName(@TempDir final Path tempDir) throws IOException {
+    final TypeString name =
+        TypeString.ofIdentifier("_proc__sw__object__method____0", TypeString.ANONYMOUS_PACKAGE);
+    final IDefinitionKeeper writtenKeeper = new DefinitionKeeper(false);
+    writtenKeeper.add(
+        new ProcedureDefinition(
+            new Location(URI.create("file:///a.magik")),
+            null,
+            null,
+            null,
+            null,
+            Collections.emptySet(),
+            name,
+            null,
+            Collections.emptyList(),
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+    final Path path = tempDir.resolve("types.jsonl");
+    JsonDefinitionWriter.write(path, writtenKeeper);
+
+    final IDefinitionKeeper readKeeper = new DefinitionKeeper(false);
+    JsonDefinitionReader.readTypes(path, readKeeper);
+
+    final Collection<ProcedureDefinition> definitions = readKeeper.getProcedureDefinitions(name);
+    assertThat(definitions).hasSize(1);
   }
 
   @Test

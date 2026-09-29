@@ -96,8 +96,15 @@ public enum TypeStringGrammar implements GrammarRuleKey {
 
   private static final String SIMPLE_IDENTIFIER_REGEXP =
       "([a-zA-Z!?]|\\\\.)([a-zA-Z0-9_!?]|\\\\.)*";
+  // Only an explicit `_anon:` package admits a leading `_`, so a mistyped marker stays an error.
+  private static final String ANONYMOUS_IDENTIFIER_REGEXP =
+      "_anon:([a-zA-Z_!?]|\\\\.)([a-zA-Z0-9_!?]|\\\\.)*";
   private static final String TYPE_IDENTIFIER_REGEXP =
-      "(" + SIMPLE_IDENTIFIER_REGEXP + ":)?" + SIMPLE_IDENTIFIER_REGEXP;
+      ANONYMOUS_IDENTIFIER_REGEXP
+          + "|("
+          + SIMPLE_IDENTIFIER_REGEXP
+          + ":)?"
+          + SIMPLE_IDENTIFIER_REGEXP;
 
   /**
    * Create a new LexerlessGrammar for TypeDoc.
