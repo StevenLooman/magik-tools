@@ -1,0 +1,95 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Loaded modules definition: the modules the dumping session had loaded.
+## @slot {sw:simple_vector<E=sw:char16_vector>} module_names
+def_slotted_exemplar(
+	:loaded_modules_definition,
+	{
+		{:module_names, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method loaded_modules_definition.new(module_names)
+	## Constructor.
+	## @param {sw:simple_vector<E=sw:char16_vector>} module_names
+	## @return {_self}
+	_return _clone.init(module_names)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method loaded_modules_definition.init(module_names)
+	## Initializer.
+	## @param {sw:simple_vector<E=sw:char16_vector>} module_names
+	## @return {_self}
+	.module_names << module_names
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method loaded_modules_definition.new_from_session()
+	## Construct self from the current session's loaded modules.
+	## @return {_self}
+	_local names << rope.new()
+	_for module _over sw_module_manager.loaded_modules.fast_elements()
+	_loop
+		names.add_last(module.name.write_string)
+	_endloop
+	_return _self.new(names.as_sorted_collection().as_simple_vector())
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method loaded_modules_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	_return "loaded_modules"
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method loaded_modules_definition.equals?(other)
+	## Equals?
+	## @param {mt:loaded_modules_definition} other
+	## @return {sw:false}
+	_return _self.module_names.eq?(other.module_names)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method loaded_modules_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:loaded_modules_definition} other
+	## @return {sw:false}
+	_return _self.equals?(other)
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, loaded_modules_definition, loaded_modules_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:loaded_modules_definition} definition_a
+		## @param {mt:loaded_modules_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.sort_value _cf definition_b.sort_value
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, loaded_modules_definition, loaded_modules_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:loaded_modules_definition} definition_a
+		## @param {mt:loaded_modules_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+loaded_modules_definition.define_show_attributes(
+	:module_names)
+$

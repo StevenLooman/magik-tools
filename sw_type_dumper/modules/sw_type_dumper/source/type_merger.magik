@@ -118,6 +118,7 @@ _private _method type_merger.int!run()
 	_local sections << {
 		"products",
 		"modules",
+		"loaded_modules",
 		"packages",
 		"types",
 		"inheritance",

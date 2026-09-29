@@ -18,6 +18,7 @@ _block
 		:|mt:definition|,
 		:|mt:global_definition|,
 		:|mt:inheritance_definition|,
+		:|mt:loaded_modules_definition|,
 		:|mt:method_definition|,
 		:|mt:module_definition|,
 		:|mt:module_usage|,

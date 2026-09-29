@@ -19,6 +19,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -374,6 +375,10 @@ public final class JsonDefinitionReader {
         this.handleModule(obj);
         break;
 
+      case LOADED_MODULES:
+        this.handleLoadedModules(obj);
+        break;
+
       case MAGIK_FILE:
         this.handleMagikFile(obj);
         break;
@@ -472,6 +477,16 @@ public final class JsonDefinitionReader {
     final Gson gson = this.buildGson();
     final ModuleDefinition definition = gson.fromJson(instruction, ModuleDefinition.class);
     this.definitionKeeper.add(definition);
+  }
+
+  private void handleLoadedModules(final JsonObject instruction) {
+    final JsonArray names = instruction.getAsJsonArray("module_names");
+    final List<String> moduleNames = new ArrayList<>(names.size());
+    for (final JsonElement name : names) {
+      final String moduleName = name.getAsString();
+      moduleNames.add(moduleName);
+    }
+    this.definitionKeeper.addLoadedModuleNames(moduleNames);
   }
 
   private void handleMagikFile(final JsonObject instruction) {

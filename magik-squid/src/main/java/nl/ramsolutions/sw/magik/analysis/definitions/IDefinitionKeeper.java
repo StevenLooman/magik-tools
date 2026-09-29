@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Set;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
@@ -177,6 +178,28 @@ public interface IDefinitionKeeper {
    */
   default void replaceDefinitionsForPath(Path path, Collection<IDefinition> definitions) {
     throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Get the names of the modules the session this database was dumped from had loaded.
+   *
+   * <p>An empty set means the question is unanswered (a database dumped before {@code
+   * sw_type_dumper} recorded it), not that no module was loaded. Callers must treat it as
+   * "unknown".
+   *
+   * @return Loaded module names; empty when the database carries no record.
+   */
+  default Set<String> getLoadedModuleNames() {
+    return Set.of();
+  }
+
+  /**
+   * Add loaded module names, unioning with any already held.
+   *
+   * @param names Names to add.
+   */
+  default void addLoadedModuleNames(final Collection<String> names) {
+    // Implementations that cannot carry the set ignore it.
   }
 
   void clear();

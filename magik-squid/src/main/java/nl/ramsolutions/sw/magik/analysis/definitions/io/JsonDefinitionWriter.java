@@ -23,6 +23,8 @@ import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -119,6 +121,7 @@ public final class JsonDefinitionWriter {
         this.writeSchemaVersion(bufferedWriter);
         this.writeProducts(bufferedWriter);
         this.writeModules(bufferedWriter);
+        this.writeLoadedModules(bufferedWriter);
         this.writeMagikFiles(bufferedWriter);
         this.writePackages(bufferedWriter);
         this.writeExemplars(bufferedWriter);
@@ -227,6 +230,26 @@ public final class JsonDefinitionWriter {
         this.definitionKeeper.getModuleDefinitions(),
         Comparator.comparing(ModuleDefinition::getName),
         Instruction.MODULE);
+  }
+
+  private void writeLoadedModules(final Writer writer) {
+    final Set<String> names = this.definitionKeeper.getLoadedModuleNames();
+    if (names.isEmpty()) {
+      // No record at all, so a reader can tell "not dumped" from "nothing was loaded".
+      return;
+    }
+
+    final JsonObject loadedObject = new JsonObject();
+    loadedObject.addProperty(
+        Instruction.INSTRUCTION.getValue(), Instruction.LOADED_MODULES.getValue());
+    final JsonArray namesArray = new JsonArray();
+    final List<String> sorted = names.stream().sorted().toList();
+    for (final String name : sorted) {
+      namesArray.add(name);
+    }
+    loadedObject.add("module_names", namesArray);
+    final String line = loadedObject.toString();
+    this.writeInstruction(writer, line);
   }
 
   private void writeMagikFiles(final Writer writer) {

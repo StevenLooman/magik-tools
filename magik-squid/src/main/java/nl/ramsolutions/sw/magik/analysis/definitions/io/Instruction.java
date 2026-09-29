@@ -7,6 +7,7 @@ enum Instruction {
   SCHEMA_VERSION("schema_version"),
   PRODUCT("product"),
   MODULE("module"),
+  LOADED_MODULES("loaded_modules"),
   MAGIK_FILE("magik_file"),
   PACKAGE("package"),
   TYPE("type"),

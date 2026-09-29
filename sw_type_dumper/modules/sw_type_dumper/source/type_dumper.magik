@@ -120,6 +120,11 @@ _private _method type_dumper.int!run()
 		_self.write_definition(def)
 	_endloop
 
+	# Write loaded modules.
+	_self.write_line("// loaded_modules")
+	_local loaded_modules_def << loaded_modules_definition.new_from_session()
+	_self.write_definition(loaded_modules_def)
+
 	# Write packages.
 	_self.write_line("// packages")
 	_local sorted_pkgs << sorted_collection.new_from(package.all_packages, {:method_result, :name})
