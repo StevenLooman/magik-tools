@@ -152,4 +152,34 @@ class TypeDocTypeExistsTypedCheckTest {
     final MagikTypedCheck check = new TypeDocTypeExistsTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @Test
+  void testValidResultReference() {
+    final String code =
+        """
+        _method object.when_not_unset(a_proc)
+          ## @param {_invokable<P=[_self]>} a_proc
+          ## @return {_parameter(a_proc)<R>}
+          _return a_proc.invoke(_self)
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new TypeDocTypeExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testInvalidResultReference() {
+    final String code =
+        """
+        _method object.when_not_unset(a_proc)
+          ## @param {_invokable<P=[_self]>} a_proc
+          ## @return {_parameter(no_such_param)<R>}
+          _return a_proc.invoke(_self)
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new TypeDocTypeExistsTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
 }

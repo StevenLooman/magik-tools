@@ -80,7 +80,7 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
     final TypeString rawTypeStr = entry.getValue();
     final TypeString typeStr = rawTypeStr.isVariadic() ? rawTypeStr.getVariadicInner() : rawTypeStr;
 
-    if (typeStr.isSelf() || typeStr.isPrivate()) {
+    if (typeStr.isSelf() || typeStr.isPrivate() || typeStr.isInvokable()) {
       return;
     }
 

@@ -49,9 +49,16 @@ public final class TypeStringParser {
 
     final Parser<LexerlessGrammar> parser =
         new ParserAdapter<>(
-            StandardCharsets.ISO_8859_1, TypeStringGrammar.create(TypeStringGrammar.TYPE_STRING));
+            StandardCharsets.ISO_8859_1,
+            TypeStringGrammar.create(TypeStringGrammar.TYPE_STRING_INPUT));
     final AstNode node = parser.parse(typeStr);
-    return TypeStringParser.typeStringNodeToTypeString(node, currentPakkage);
+    final AstNode typeStringNode = node.getFirstChild(TypeStringGrammar.TYPE_STRING);
+    if (typeStringNode == null) {
+      // Unparsable, or a trailing tail the grammar could not consume.
+      return TypeString.UNDEFINED;
+    }
+
+    return TypeStringParser.typeStringNodeToTypeString(typeStringNode, currentPakkage);
   }
 
   /**
@@ -65,7 +72,8 @@ public final class TypeStringParser {
     final String typeStr = typeDocToken.getOriginalValue();
     final Parser<LexerlessGrammar> parser =
         new ParserAdapter<>(
-            StandardCharsets.ISO_8859_1, TypeStringGrammar.create(TypeStringGrammar.TYPE_STRING));
+            StandardCharsets.ISO_8859_1,
+            TypeStringGrammar.create(TypeStringGrammar.TYPE_STRING_INPUT));
     final AstNode node = parser.parse(typeStr);
 
     // Update token location for easier handling in other parts.
@@ -112,15 +120,20 @@ public final class TypeStringParser {
     final Parser<LexerlessGrammar> parser =
         new ParserAdapter<>(
             StandardCharsets.ISO_8859_1,
-            TypeStringGrammar.create(TypeStringGrammar.EXPRESSION_RESULT_STRING));
+            TypeStringGrammar.create(TypeStringGrammar.EXPRESSION_RESULT_STRING_INPUT));
     final AstNode node = parser.parse(expressionResultStr);
     if (node.hasDescendant(TypeStringGrammar.EXPRESSION_RESULT_STRING_UNDEFINED)) {
       return ExpressionResultString.UNDEFINED;
     }
 
-    final List<AstNode> typeNodes = node.getChildren(TypeStringGrammar.TYPE_STRING);
+    final AstNode resultNode = node.getFirstChild(TypeStringGrammar.EXPRESSION_RESULT_STRING);
+    if (resultNode == null) {
+      return ExpressionResultString.UNDEFINED;
+    }
+
+    final List<AstNode> typeNodes = resultNode.getChildren(TypeStringGrammar.TYPE_STRING);
     final boolean isVariadic =
-        node.getFirstChild(TypeStringGrammar.Punctuator.TYPE_VARIADIC) != null;
+        resultNode.getFirstChild(TypeStringGrammar.Punctuator.TYPE_VARIADIC) != null;
 
     final List<TypeString> types = new ArrayList<>(typeNodes.size());
     for (int i = 0; i < typeNodes.size(); ++i) {

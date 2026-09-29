@@ -46,6 +46,12 @@ public class GenericHelper {
       return TypeString.UNDEFINED;
     }
 
+    // A reference's suffix is a projection resolved later, never a receiver generic to expand.
+    // No reference is ever a mapping key, the keys all being generic references.
+    if (typeString.isParameterReference() || typeString.isSlotReference()) {
+      return typeString;
+    }
+
     if (typeString.isVariadic()) {
       final TypeString substitutedInner = this.substituteGenerics(typeString.getVariadicInner());
       // If the substituted inner is itself variadic (because a generic ref was bound to
@@ -56,6 +62,14 @@ public class GenericHelper {
       }
 
       return TypeString.ofVariadic(substitutedInner);
+    }
+
+    if (typeString.isTuple()) {
+      final TypeString[] substitutedElements =
+          typeString.getTupleTypes().stream()
+              .map(this::substituteGenerics)
+              .toArray(TypeString[]::new);
+      return TypeString.ofTuple(substitutedElements);
     }
 
     final Map<TypeString, TypeString> genericTypeMapping = this.getGenericReferenceTypeMapping();
@@ -78,10 +92,7 @@ public class GenericHelper {
     }
 
     if (newTypeString.isGenericDefinition()) {
-      final TypeString genericTypeString = typeString.getGenericType();
-      final TypeString newGenericTypeString =
-          genericTypeMapping.getOrDefault(genericTypeString, genericTypeString);
-      return TypeString.ofGenericDefinition(newTypeString.getIdentifier(), newGenericTypeString);
+      return this.substituteGenericDefinition(typeString, newTypeString, genericTypeMapping);
     }
 
     final TypeString[] generics =
@@ -89,8 +100,23 @@ public class GenericHelper {
             .map(this::substituteGenerics)
             .toList()
             .toArray(TypeString[]::new);
-    return TypeString.ofIdentifier(
-        newTypeString.getIdentifier(), newTypeString.getPakkage(), generics);
+    final String identifier = newTypeString.getIdentifier();
+    final String pakkage = newTypeString.getPakkage();
+    return TypeString.ofIdentifier(identifier, pakkage, generics);
+  }
+
+  private TypeString substituteGenericDefinition(
+      final TypeString typeString,
+      final TypeString newTypeString,
+      final Map<TypeString, TypeString> genericTypeMapping) {
+    final TypeString genericTypeString = typeString.getGenericType();
+    final TypeString boundTypeString = genericTypeMapping.get(genericTypeString);
+    // A bound value is the receiver's own, already concrete; re-substituting it never terminates
+    // when it references the very generic it binds (sw:rope<E=sw:rope<E=<E>>>).
+    final TypeString newGenericTypeString =
+        boundTypeString != null ? boundTypeString : this.substituteGenerics(genericTypeString);
+    final String identifier = newTypeString.getIdentifier();
+    return TypeString.ofGenericDefinition(identifier, newGenericTypeString);
   }
 
   private Map<TypeString, TypeString> getGenericReferenceTypeMapping() {

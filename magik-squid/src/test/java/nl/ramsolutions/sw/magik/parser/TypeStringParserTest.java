@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.parser;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.junit.jupiter.api.Test;
@@ -237,6 +238,22 @@ class TypeStringParserTest {
   }
 
   @Test
+  void testParseParameterRefWithGenericReference() {
+    final TypeString parsed = TypeStringParser.parseTypeString("_parameter(values)<E>", "sw");
+    assertThat(parsed)
+        .isEqualTo(TypeString.ofParameterRef("values", TypeString.ofGenericReference("E")));
+    assertThat(parsed.getReferenceGeneric()).isEqualTo(TypeString.ofGenericReference("E"));
+  }
+
+  @Test
+  void testParseSlotRefWithGenericReference() {
+    final TypeString parsed = TypeStringParser.parseTypeString("_slot(a_slot)<E>", "sw");
+    assertThat(parsed)
+        .isEqualTo(TypeString.ofSlotRef("a_slot", TypeString.ofGenericReference("E")));
+    assertThat(parsed.getReferenceGeneric()).isEqualTo(TypeString.ofGenericReference("E"));
+  }
+
+  @Test
   void testParseVariadicInsideCombinedIsNotVariadic() {
     final TypeString typeString =
         TypeStringParser.parseTypeString("sw:integer... | sw:symbol", SW_PACKAGE);
@@ -259,5 +276,159 @@ class TypeStringParserTest {
     final ExpressionResultString result =
         TypeStringParser.parseExpressionResultString("sw:integer ...", SW_PACKAGE);
     assertThat(result.get(0, null)).isEqualTo(TypeString.ofVariadic(TypeString.SW_INTEGER));
+  }
+
+  @Test
+  void testDeclaredGenericsRoundTrip() {
+    final TypeString original =
+        TypeString.ofIdentifier(
+            "rope",
+            "sw",
+            TypeString.ofGenericReference("E"),
+            TypeString.ofGenericDefinition("K", TypeString.SW_INTEGER));
+    final TypeString roundTripped =
+        TypeStringParser.parseTypeString(original.getFullString(), SW_PACKAGE);
+    assertThat(roundTripped).isEqualTo(original);
+  }
+
+  @Test
+  void testParseSelfWithGeneric() {
+    final TypeString parsed = TypeStringParser.parseTypeString("_self<E=sw:integer>");
+    final TypeString expected = TypeString.SELF.withGenericDefinition("E", TypeString.SW_INTEGER);
+    assertThat(parsed).isEqualTo(expected);
+  }
+
+  @Test
+  void testTupleAsGenericValue() {
+    final String typeStr = "sw:procedure<P=[sw:integer, sw:float]>";
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    final List<TypeString> generics = typeString.getGenerics();
+    assertThat(generics).hasSize(1);
+    final TypeString genericDef = generics.get(0);
+    final TypeString value = genericDef.getGenericType();
+    final boolean isTuple = value.isTuple();
+    assertThat(isTuple).isTrue();
+    final List<TypeString> elements = value.getTupleTypes();
+    assertThat(elements).containsExactly(TypeString.SW_INTEGER, TypeString.SW_FLOAT);
+  }
+
+  @Test
+  void testEmptyTupleDistinctFromAbsent() {
+    final String typeStr = "sw:procedure<P=[]>";
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    final List<TypeString> generics = typeString.getGenerics();
+    final TypeString genericDef = generics.get(0);
+    final TypeString value = genericDef.getGenericType();
+    final boolean isTuple = value.isTuple();
+    assertThat(isTuple).isTrue();
+    final List<TypeString> elements = value.getTupleTypes();
+    assertThat(elements).isEmpty();
+  }
+
+  @Test
+  void testTupleVariadicTail() {
+    final String typeStr = "sw:procedure<P=[sw:symbol, sw:object...]>";
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    final List<TypeString> generics = typeString.getGenerics();
+    final TypeString genericDef = generics.get(0);
+    final TypeString value = genericDef.getGenericType();
+    final List<TypeString> elements = value.getTupleTypes();
+    assertThat(elements).hasSize(2);
+    final TypeString tail = elements.get(1);
+    final boolean tailVariadic = tail.isVariadic();
+    assertThat(tailVariadic).isTrue();
+  }
+
+  @Test
+  void testTupleVariadicTailRoundTrips() {
+    final String typeStr = "sw:procedure<P=[sw:symbol, sw:object...]>";
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    final String fullString = typeString.getFullString();
+    assertThat(fullString).isEqualTo("sw:procedure<P=[sw:symbol,sw:object...]>");
+    final TypeString reparsed = TypeStringParser.parseTypeString(fullString, SW_PACKAGE);
+    assertThat(reparsed).isEqualTo(typeString);
+  }
+
+  @Test
+  void testTupleRoundTripsOrdered() {
+    final String typeStr = "sw:procedure<P=[sw:integer, sw:float]>";
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    final String fullString = typeString.getFullString();
+    assertThat(fullString).isEqualTo("sw:procedure<P=[sw:integer,sw:float]>");
+    final TypeString reparsed = TypeStringParser.parseTypeString(fullString, SW_PACKAGE);
+    assertThat(reparsed).isEqualTo(typeString);
+  }
+
+  @Test
+  void testInvokableBare() {
+    final TypeString typeString = TypeStringParser.parseTypeString("_invokable", SW_PACKAGE);
+    final boolean isInvokable = typeString.isInvokable();
+    assertThat(isInvokable).isTrue();
+    final boolean hasGenerics = typeString.hasGenerics();
+    assertThat(hasGenerics).isFalse();
+  }
+
+  @Test
+  void testInvokableWithSignature() {
+    final String typeStr = "_invokable<P=[sw:integer], R=[sw:float]>";
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    final boolean isInvokable = typeString.isInvokable();
+    assertThat(isInvokable).isTrue();
+    final String fullString = typeString.getFullString();
+    assertThat(fullString).isEqualTo("_invokable<P=[sw:integer],R=[sw:float]>");
+  }
+
+  @Test
+  void testInvocableTypoFailsParse() {
+    final TypeString typeString = TypeStringParser.parseTypeString("_invocable", SW_PACKAGE);
+    assertThat(typeString).isEqualTo(TypeString.UNDEFINED);
+  }
+
+  @Test
+  void testInvokableAsTrailingUnionMember() {
+    final TypeString parsed = TypeStringParser.parseTypeString("sw:unset|_invokable", SW_PACKAGE);
+    final TypeString expected = TypeString.combine(TypeString.SW_UNSET, TypeString.INVOKABLE);
+    assertThat(parsed).isEqualTo(expected);
+  }
+
+  @Test
+  void testTrailingGarbageDoesNotSilentlyDropTheTail() {
+    final TypeString typeString = TypeStringParser.parseTypeString("sw:integer bogus", SW_PACKAGE);
+    assertThat(typeString).isEqualTo(TypeString.UNDEFINED);
+  }
+
+  @Test
+  void testExpressionResultTrailingGarbageDoesNotSilentlyDropTheTail() {
+    final ExpressionResultString result =
+        TypeStringParser.parseExpressionResultString("sw:integer bogus", SW_PACKAGE);
+    assertThat(result).isEqualTo(ExpressionResultString.UNDEFINED);
+  }
+
+  @Test
+  void testSurroundingWhitespaceStillParses() {
+    final TypeString typeString = TypeStringParser.parseTypeString(" sw:integer ", SW_PACKAGE);
+    assertThat(typeString).isEqualTo(TypeString.SW_INTEGER);
+  }
+
+  @Test
+  void testExpressionResultSurroundingWhitespaceStillParses() {
+    final ExpressionResultString result =
+        TypeStringParser.parseExpressionResultString(" sw:integer, sw:float ", SW_PACKAGE);
+    final ExpressionResultString expected =
+        new ExpressionResultString(TypeString.SW_INTEGER, TypeString.SW_FLOAT);
+    assertThat(result).isEqualTo(expected);
+  }
+
+  @Test
+  void testCallArgumentsNoLongerParse() {
+    final TypeString typeString =
+        TypeStringParser.parseTypeString("sw:procedure(_self)", SW_PACKAGE);
+    assertThat(typeString).isEqualTo(TypeString.UNDEFINED);
+  }
+
+  @Test
+  void testResultMarkerNoLongerParses() {
+    final TypeString typeString = TypeStringParser.parseTypeString("_result(a_proc)", SW_PACKAGE);
+    assertThat(typeString).isEqualTo(TypeString.UNDEFINED);
   }
 }

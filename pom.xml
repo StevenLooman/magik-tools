@@ -476,6 +476,8 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureDefinitionParser.parseDefinitions()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader.parseClassInfo(java.lang.String, java.io.InputStreamReader)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.typing.TypeString.getFullString()</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.analysis.typing.TypeString.substituteType(nl.ramsolutions.sw.magik.analysis.typing.TypeString, nl.ramsolutions.sw.magik.analysis.typing.TypeString)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ExpressionHandler.handleExpression(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.api.MagikNumberParser.parseMagikNumber(java.lang.String)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>
@@ -490,6 +492,7 @@
                     <exclude>nl.ramsolutions.sw.magik.languageserver.hover.HoverProvider.provideHover(nl.ramsolutions.sw.magik.MagikTypedFile, org.eclipse.lsp4j.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.references.ReferencesProvider.provideReferences(nl.ramsolutions.sw.magik.MagikTypedFile, nl.ramsolutions.sw.magik.Position)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.languageserver.semantictokens.MagikSemanticTokenWalker.walkPostIdentifier(com.sonar.sslr.api.AstNode)</exclude>
+                    <exclude>nl.ramsolutions.sw.magik.parser.TypeStringBuilderVisitor.leaveNode(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.sessionwrapper.Main.main(java.lang.String[])</exclude>
                     <exclude>nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.productdef.ProductDefinition.equals(java.lang.Object)</exclude>
