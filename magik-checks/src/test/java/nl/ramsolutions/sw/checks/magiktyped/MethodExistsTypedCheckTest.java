@@ -106,4 +106,92 @@ class MethodExistsTypedCheckTest {
     final MagikTypedCheck check = new MethodExistsTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
+
+  @Test
+  void testUndefinedUnionArmIsNotReported() {
+    final String code =
+        """
+        _method object.test()
+          _local a << _self.give_union()
+          a.m()
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString unionTypeStr = TypeString.combine(TypeString.SW_OBJECT, TypeString.UNDEFINED);
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "give_union()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(unionTypeStr),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "m()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_OBJECT),
+            ExpressionResultString.EMPTY));
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testUnsetUnionArmIsStillReported() {
+    final String code =
+        """
+        _method object.test()
+          _local a << _self.give_union()
+          a.m()
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString unionTypeStr = TypeString.combine(TypeString.SW_OBJECT, TypeString.SW_UNSET);
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "give_union()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(unionTypeStr),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "m()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_OBJECT),
+            ExpressionResultString.EMPTY));
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
 }

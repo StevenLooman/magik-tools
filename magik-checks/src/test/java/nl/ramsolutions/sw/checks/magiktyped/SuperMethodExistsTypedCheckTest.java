@@ -107,4 +107,42 @@ class SuperMethodExistsTypedCheckTest {
     final MagikTypedCheck check = new SuperMethodExistsTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
+
+  @Test
+  void testUndefinedSuperArmIsNotReported() {
+    final String code =
+        """
+        _method child.do_something()
+          _super.m()
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, TYPE_PARENT, null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TYPE_PARENT,
+            "m()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            ExpressionResultString.EMPTY,
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, TYPE_CHILD, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, TYPE_CHILD, TYPE_PARENT));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, TYPE_CHILD, TypeString.UNDEFINED));
+    final MagikTypedCheck check = new SuperMethodExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
 }

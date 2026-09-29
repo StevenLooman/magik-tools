@@ -37,6 +37,10 @@ public class MethodExistsTypedCheck extends MagikTypedCheck {
     Objects.requireNonNull(combinedTypeString);
     final TypeStringResolver resolver = this.getTypeStringResolver();
     for (final TypeString typeString : combinedTypeString.getCombinedTypes()) {
+      if (typeString.isUndefined()) {
+        continue;
+      }
+
       final Collection<MethodDefinition> methodDefs =
           resolver.getRespondingMethodDefinitions(typeString, methodName);
 
