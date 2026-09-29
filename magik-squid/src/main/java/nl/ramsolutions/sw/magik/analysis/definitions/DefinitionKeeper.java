@@ -41,6 +41,7 @@ public class DefinitionKeeper implements IDefinitionKeeper {
       new ConcurrentHashMap<>();
   private final SortedMap<URI, Set<IDefinition>> uriDefinitions =
       Collections.synchronizedSortedMap(new TreeMap<>());
+  private final Set<String> loadedModuleNames = ConcurrentHashMap.newKeySet();
 
   /** Constructor. */
   public DefinitionKeeper() {
@@ -627,6 +628,16 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
   /** Clear any contained {@link Definition}s. */
   @Override
+  public Set<String> getLoadedModuleNames() {
+    return Set.copyOf(this.loadedModuleNames);
+  }
+
+  @Override
+  public void addLoadedModuleNames(final Collection<String> names) {
+    this.loadedModuleNames.addAll(names);
+  }
+
+  @Override
   public void clear() {
     this.productDefinitions.clear();
     this.moduleDefinitions.clear();
@@ -641,5 +652,6 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     this.globalDefinitions.clear();
     this.procedureDefinitions.clear();
     this.uriDefinitions.clear();
+    this.loadedModuleNames.clear();
   }
 }

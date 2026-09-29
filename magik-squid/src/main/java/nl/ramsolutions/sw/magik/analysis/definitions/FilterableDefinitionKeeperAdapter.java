@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.IDefinition;
@@ -382,6 +383,16 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   @Override
   public Collection<IDefinition> getDefinitionsByPath(final Path path) {
     return this.definitionKeeper.getDefinitionsByPath(path);
+  }
+
+  @Override
+  public Set<String> getLoadedModuleNames() {
+    return this.definitionKeeper.getLoadedModuleNames();
+  }
+
+  @Override
+  public void addLoadedModuleNames(final Collection<String> names) {
+    this.definitionKeeper.addLoadedModuleNames(names);
   }
 
   @Override

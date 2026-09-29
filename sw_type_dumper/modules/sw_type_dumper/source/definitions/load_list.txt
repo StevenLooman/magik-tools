@@ -15,3 +15,4 @@ procedure_definition
 condition_definition
 binary_operator_definition
 global_definition
+loaded_modules_definition
