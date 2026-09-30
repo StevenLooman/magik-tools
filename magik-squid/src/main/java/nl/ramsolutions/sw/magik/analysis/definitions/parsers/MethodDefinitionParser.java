@@ -106,7 +106,8 @@ public class MethodDefinitionParser {
     final AstNode parametersNode = this.node.getFirstChild(MagikGrammar.PARAMETERS);
     final List<ParameterDefinition> parameters =
         this.createParameterDefinitions(timestamp, moduleName, parametersNode, parameterTypes);
-    final AstNode assignmentParameterNode = this.node.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
+    final AstNode assignmentParameterNode =
+        this.node.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
     final ParameterDefinition assignmentParameter =
         this.createAssignmentParameterDefinition(
             timestamp, moduleName, assignmentParameterNode, parameterTypes);

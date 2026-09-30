@@ -85,7 +85,8 @@ class BlockIndentWalkerTest {
         _endblock
         """;
     final List<TextEdit> edits = this.getEdits(code);
-    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(4, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(4, TAB));
   }
 
   @Test
@@ -132,7 +133,8 @@ class BlockIndentWalkerTest {
         _endif
         """;
     final List<TextEdit> edits = this.getEdits(code);
-    assertThat(edits).containsExactly(this.insertAt(3, TAB), this.insertAt(6, TAB), this.insertAt(8, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(3, TAB), this.insertAt(6, TAB), this.insertAt(8, TAB));
   }
 
   @Test
@@ -149,7 +151,11 @@ class BlockIndentWalkerTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
-        .containsExactly(this.insertAt(3, TAB), this.insertAt(4, TAB), this.insertAt(5, TAB2), this.insertAt(6, TAB));
+        .containsExactly(
+            this.insertAt(3, TAB),
+            this.insertAt(4, TAB),
+            this.insertAt(5, TAB2),
+            this.insertAt(6, TAB));
   }
 
   // ==========================================================================
@@ -196,7 +202,8 @@ class BlockIndentWalkerTest {
         _endif
         """;
     final List<TextEdit> edits = this.getEdits(code);
-    assertThat(edits).containsExactly(this.insertAt(2, "    "), this.insertAt(3, "    "), this.insertAt(5, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, "    "), this.insertAt(3, "    "), this.insertAt(5, TAB));
   }
 
   @Test
@@ -217,7 +224,10 @@ class BlockIndentWalkerTest {
     final List<TextEdit> edits = this.getEdits(code);
     assertThat(edits)
         .containsExactly(
-            this.insertAt(2, "    "), this.insertAt(3, "    "), this.insertAt(4, "    "), this.insertAt(6, TAB));
+            this.insertAt(2, "    "),
+            this.insertAt(3, "    "),
+            this.insertAt(4, "    "),
+            this.insertAt(6, TAB));
   }
 
   @Test
@@ -242,7 +252,10 @@ class BlockIndentWalkerTest {
     // Only lines 2, 4, 6 (no indent) and 8 (_then body) get edits.
     assertThat(edits)
         .containsExactly(
-            this.insertAt(2, "    "), this.insertAt(4, "    "), this.insertAt(6, "    "), this.insertAt(8, TAB));
+            this.insertAt(2, "    "),
+            this.insertAt(4, "    "),
+            this.insertAt(6, "    "),
+            this.insertAt(8, TAB));
   }
 
   @Test
@@ -268,7 +281,10 @@ class BlockIndentWalkerTest {
     // Line 8 needs tab for the _then body
     assertThat(edits)
         .containsExactly(
-            this.insertAt(2, "    "), this.insertAt(4, "    "), this.insertAt(6, "    "), this.insertAt(8, TAB));
+            this.insertAt(2, "    "),
+            this.insertAt(4, "    "),
+            this.insertAt(6, "    "),
+            this.insertAt(8, TAB));
   }
 
   // ==========================================================================
@@ -324,7 +340,8 @@ class BlockIndentWalkerTest {
         _endmethod
         """;
     final List<TextEdit> edits = this.getEdits(code);
-    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(5, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(5, TAB));
   }
 
   // ==========================================================================
@@ -367,7 +384,8 @@ class BlockIndentWalkerTest {
     final List<TextEdit> edits = this.getEdits(code);
     // _proc is indented from assignment, proc body is indented from _proc, _endproc aligns with
     // _proc
-    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB2), this.insertAt(4, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB2), this.insertAt(4, TAB));
   }
 
   @Test
@@ -545,7 +563,8 @@ class BlockIndentWalkerTest {
         z)
         """;
     final List<TextEdit> edits = this.getEdits(code);
-    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(4, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(4, TAB));
   }
 
   @Test
@@ -594,7 +613,8 @@ class BlockIndentWalkerTest {
         z]
         """;
     final List<TextEdit> edits = this.getEdits(code);
-    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(4, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(4, TAB));
   }
 
   // ==========================================================================
@@ -611,7 +631,8 @@ class BlockIndentWalkerTest {
         method3()
         """;
     final List<TextEdit> edits = this.getEdits(code);
-    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(4, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(4, TAB));
   }
 
   @Test
@@ -807,7 +828,8 @@ class BlockIndentWalkerTest {
         )
         """;
     final List<TextEdit> edits = this.getEdits(code);
-    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(4, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(4, TAB));
   }
 
   @Test
@@ -896,7 +918,8 @@ class BlockIndentWalkerTest {
         _endloop
         """;
     final List<TextEdit> edits = this.getEdits(code);
-    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB2), this.insertAt(4, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB2), this.insertAt(4, TAB));
   }
 
   // ==========================================================================
@@ -1301,7 +1324,8 @@ class BlockIndentWalkerTest {
         """;
     final List<TextEdit> edits = this.getEdits(code);
     // Vector content indented twice (once for method arg, once for vector)
-    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB2), this.insertAt(4, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB2), this.insertAt(4, TAB));
   }
 
   @Test
@@ -1374,7 +1398,8 @@ class BlockIndentWalkerTest {
         _endmethod
         """;
     final List<TextEdit> edits = this.getEdits(code);
-    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(5, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB), this.insertAt(5, TAB));
   }
 
   @Test
@@ -1535,7 +1560,8 @@ class BlockIndentWalkerTest {
         _endif
         """;
     final List<TextEdit> edits = this.getEdits(code);
-    assertThat(edits).containsExactly(this.insertAt(2, "    "), this.insertAt(3, "    "), this.insertAt(5, TAB));
+    assertThat(edits)
+        .containsExactly(this.insertAt(2, "    "), this.insertAt(3, "    "), this.insertAt(5, TAB));
   }
 
   // ==========================================================================
