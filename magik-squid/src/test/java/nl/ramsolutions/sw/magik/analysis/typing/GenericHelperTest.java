@@ -154,4 +154,62 @@ class GenericHelperTest {
 
     assertThat(result).isEqualTo(TypeString.SW_INTEGER);
   }
+
+  @Test
+  void testSubstituteGenericsKeepsBoundValueGenerics() {
+    final TypeString innerRope =
+        TypeString.ofIdentifier(
+            "rope", "sw", TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
+    final TypeString boundType =
+        TypeString.ofIdentifier("rope", "sw", TypeString.ofGenericDefinition("E", innerRope));
+    final GenericHelper helper = new GenericHelper(boundType);
+    final TypeString genericRef = TypeString.ofGenericReference("E");
+
+    final TypeString result = helper.substituteGenerics(genericRef);
+
+    assertThat(result).isEqualTo(innerRope);
+  }
+
+  @Test
+  void testSubstituteGenericsKeepsUnionBoundValueWhole() {
+    final TypeString genericRef = TypeString.ofGenericReference("E");
+    final TypeString innerRope = TypeString.ofIdentifier("rope", "sw", genericRef);
+    final TypeString boundValue = TypeString.combine(innerRope, TypeString.SW_UNSET);
+    final TypeString boundType =
+        TypeString.ofIdentifier("rope", "sw", TypeString.ofGenericDefinition("E", boundValue));
+    final GenericHelper helper = new GenericHelper(boundType);
+
+    final TypeString result = helper.substituteGenerics(genericRef);
+
+    assertThat(result).isEqualTo(boundValue);
+  }
+
+  @Test
+  void testSubstituteGenericsBindsNestedGenericReference() {
+    final TypeString boundType =
+        TypeString.ofIdentifier(
+            "rope", "sw", TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
+    final GenericHelper helper = new GenericHelper(boundType);
+    final TypeString genericRef = TypeString.ofGenericReference("E");
+    final TypeString simpleVector = TypeString.ofIdentifier("simple_vector", "sw", genericRef);
+
+    final TypeString result = helper.substituteGenerics(simpleVector);
+
+    final TypeString expected =
+        TypeString.ofIdentifier(
+            "simple_vector", "sw", TypeString.ofGenericDefinition("E", TypeString.SW_INTEGER));
+    assertThat(result).isEqualTo(expected);
+  }
+
+  @Test
+  void testSubstituteGenericsLeavesUnboundNestedGenericReference() {
+    final TypeString boundType = TypeString.ofIdentifier("rope", "sw");
+    final GenericHelper helper = new GenericHelper(boundType);
+    final TypeString genericRef = TypeString.ofGenericReference("E");
+    final TypeString simpleVector = TypeString.ofIdentifier("simple_vector", "sw", genericRef);
+
+    final TypeString result = helper.substituteGenerics(simpleVector);
+
+    assertThat(result).isEqualTo(simpleVector);
+  }
 }

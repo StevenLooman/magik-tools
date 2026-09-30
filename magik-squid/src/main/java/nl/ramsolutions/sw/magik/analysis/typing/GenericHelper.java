@@ -74,11 +74,8 @@ public class GenericHelper {
 
     final Map<TypeString, TypeString> genericTypeMapping = this.getGenericReferenceTypeMapping();
     final TypeString newTypeString = genericTypeMapping.getOrDefault(typeString, typeString);
-    // If a generic reference resolves to a variadic — possible when a _gather parameter
-    // was declared with a variadic @param doc, producing simple_vector<E=variadic(T)> —
-    // propagate the variadic as-is rather than falling through to ofIdentifier which
-    // would call getIdentifier() and throw.
-    if (newTypeString.isVariadic()) {
+    // A bound value is the receiver's own and already concrete: keep it whole, union or not.
+    if (typeString.isGenericReference()) {
       return newTypeString;
     }
 
@@ -97,7 +94,7 @@ public class GenericHelper {
 
     final TypeString[] generics =
         typeString.getGenerics().stream()
-            .map(this::substituteGenerics)
+            .map(generic -> this.substituteGenericEntry(generic, genericTypeMapping))
             .toList()
             .toArray(TypeString[]::new);
     final String identifier = newTypeString.getIdentifier();
@@ -117,6 +114,18 @@ public class GenericHelper {
         boundTypeString != null ? boundTypeString : this.substituteGenerics(genericTypeString);
     final String identifier = newTypeString.getIdentifier();
     return TypeString.ofGenericDefinition(identifier, newGenericTypeString);
+  }
+
+  private TypeString substituteGenericEntry(
+      final TypeString generic, final Map<TypeString, TypeString> genericTypeMapping) {
+    // A bound bare reference in a generics list becomes a binding, as an entry must be one.
+    final TypeString boundTypeString = genericTypeMapping.get(generic);
+    if (boundTypeString != null) {
+      final String identifier = generic.getIdentifier();
+      return TypeString.ofGenericDefinition(identifier, boundTypeString);
+    }
+
+    return this.substituteGenerics(generic);
   }
 
   private Map<TypeString, TypeString> getGenericReferenceTypeMapping() {
