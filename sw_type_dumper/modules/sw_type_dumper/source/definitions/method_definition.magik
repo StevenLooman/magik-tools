@@ -10,7 +10,7 @@ _pragma(classify_level=basic, topic=type_dumper)
 ## @slot {mt:parameter_definition|sw:unset} assignment_parameter
 ## @slot {sw:simple_vector<E=sw:char16_vector>} return_types
 ## @slot {sw:simple_vector<E=sw:char16_vector>} loop_types
-## @slot {sw:char16_vector|sw:unset} source_file
+## @slot {mt:location|sw:unset} location
 ## @slot {sw:char16_vector|sw:unset} doc
 ## @slot {sw:char16_vector|sw:unset} hash
 ## @slot {sw:char16_vector|sw:unset} module_name
@@ -25,7 +25,7 @@ def_slotted_exemplar(
 		{:assignment_parameter, _unset, :readable, :public},
 		{:return_types, _unset, :readable, :public},
 		{:loop_types, _unset, :readable, :public},
-		{:source_file, _unset, :readable, :public},
+		{:location, _unset, :readable, :public},
 		{:doc, _unset, :readable, :public},
 		{:hash, _unset, :readable, :public},
 		{:module_name, _unset, :readable, :public},
@@ -43,7 +43,7 @@ _method method_definition.new(
 	assignment_parameter,
 	return_types,
 	loop_types,
-	source_file,
+	location,
 	doc,
 	hash,
 	module_name,
@@ -56,7 +56,7 @@ _method method_definition.new(
 	## @param {mt:parameter_definition|sw:unset} assignment_parameter
 	## @param {sw:simple_vector<E=sw:char16_vector>} return_types
 	## @param {sw:simple_vector<E=sw:char16_vector>} loop_types
-	## @param {sw:char16_vector|sw:unset} source_file
+	## @param {mt:location|sw:unset} location
 	## @param {sw:char16_vector|sw:unset} doc
 	## @param {sw:char16_vector|sw:unset} hash
 	## @param {sw:char16_vector|sw:unset} module_name
@@ -70,7 +70,7 @@ _method method_definition.new(
 		assignment_parameter,
 		return_types,
 		loop_types,
-		source_file,
+		location,
 		doc,
 		hash,
 		module_name,
@@ -87,7 +87,7 @@ _private _method method_definition.init(
 	assignment_parameter,
 	return_types,
 	loop_types,
-	source_file,
+	location,
 	doc,
 	hash,
 	module_name,
@@ -100,7 +100,7 @@ _private _method method_definition.init(
 	## @param {mt:parameter_definition|sw:unset} assignment_parameter
 	## @param {sw:simple_vector<E=sw:char16_vector>} return_types
 	## @param {sw:simple_vector<E=sw:char16_vector>} loop_types
-	## @param {sw:char16_vector|sw:unset} source_file
+	## @param {mt:location|sw:unset} location
 	## @param {sw:char16_vector|sw:unset} doc
 	## @param {sw:char16_vector|sw:unset} hash
 	## @param {sw:char16_vector|sw:unset} module_name
@@ -113,7 +113,7 @@ _private _method method_definition.init(
 	.assignment_parameter << assignment_parameter
 	.return_types << return_types
 	.loop_types << loop_types
-	.source_file << source_file
+	.location << location
 	.doc << doc
 	.hash << hash
 	.module_name << module_name
@@ -190,11 +190,12 @@ _method method_definition.new_from(package, name, method)
 		_else
 			>> {}
 		_endif
-	_local source_file <<
+	_local location <<
 		_if _not method.slot_accessor?
 		_then
 			>> _try
-				   >> _self.normalized_source_file(method.source_file)
+				   _local source_file << _self.normalized_source_file(method.source_file)
+				   >> mt:location.new_from_path(source_file)
 			   _when error
 				   # pass
 			   _endtry
@@ -232,7 +233,7 @@ _method method_definition.new_from(package, name, method)
 		assignment_parameter,
 		return_types,
 		loop_types,
-		source_file,
+		location,
 		doc,
 		hash,
 		module_name,
@@ -298,7 +299,7 @@ _method method_definition.equals?(other)
 		_self.assignment_parameter = other.assignment_parameter _andif
 		_self.return_types.eq?(other.return_types) _andif
 		_self.loop_types.eq?(other.loop_types) _andif
-		_self.source_file = other.source_file _andif
+		_self.location = other.location _andif
 		_self.doc = other.doc _andif
 		_self.hash = other.hash _andif
 		_self.module_name = other.module_name _andif
@@ -317,7 +318,7 @@ _method method_definition.equals_disregarding_typing?(other)
 		_self.parameters.eq?(other.parameters, :|equals_disregarding_typing?()|) _andif (
 			_self.assignment_parameter _is _unset _andif other.assignment_parameter _is _unset _orif
 			_self.assignment_parameter.equals_disregarding_typing?(other.assignment_parameter)) _andif
-		_self.source_file = other.source_file _andif
+		_self.location = other.location _andif
 		_self.doc = other.doc _andif
 		_self.hash = other.hash _andif
 		_self.module_name = other.module_name _andif

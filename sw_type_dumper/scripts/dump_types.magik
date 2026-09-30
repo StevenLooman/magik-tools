@@ -19,6 +19,7 @@ _block
 		:|mt:global_definition|,
 		:|mt:inheritance_definition|,
 		:|mt:loaded_modules_definition|,
+		:|mt:location|,
 		:|mt:method_definition|,
 		:|mt:module_definition|,
 		:|mt:module_usage|,

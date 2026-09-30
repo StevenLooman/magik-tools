@@ -80,6 +80,10 @@ _private _method definition.init_from_json(instruction)
 			    value _isnt _unset
 			_then
 				>> pragma.new_from_json(value)
+			_elif fixed_name _is :location _andif
+			      value _isnt _unset
+			_then
+				>> location.new_from_json(value)
 			_elif value.is_kind_of?(sw:simple_vector) _orif
 			      value.is_kind_of?(sw:rope)
 			_then
@@ -135,7 +139,8 @@ _method definition.generate_json_string()
 			## @param {sw:object} value
 			_if value.is_kind_of?(mt:definition) _orif
 			    value.is_kind_of?(mt:usage) _orif
-			    value.is_kind_of?(mt:pragma)
+			    value.is_kind_of?(mt:pragma) _orif
+			    value.is_kind_of?(mt:location)
 			_then
 				_return _true, value.as_properties()
 			_elif value.is_kind_of?(sw:set)

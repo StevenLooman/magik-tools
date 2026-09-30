@@ -1,0 +1,165 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Location of a definition, as a `file://` URI.
+## @slot {sw:char16_vector} uri
+def_slotted_exemplar(
+	:location,
+	{
+		{:uri, _unset, :readable, :public}
+	})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Characters which may appear in a URI path unencoded: the unreserved set, the
+## sub-delimiters, and `:`, `@` and `/`. `$` is among them, so a `$SMALLWORLD_GIS`
+## logical survives intact.
+## @return {sw:equality_set<E=sw:character>}
+location.define_shared_constant(
+	:safe_characters,
+	sw:equality_set.new_from(
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~!$&'()*+,;=:@/"),
+	:private)
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+## @return {sw:char16_vector}
+location.define_shared_constant(
+	:hex_digits,
+	"0123456789ABCDEF",
+	:private)
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method location.new(uri)
+	## Constructor.
+	## @param {sw:char16_vector} uri
+	## @return {_self}
+	_return _clone.init(uri)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method location.init(uri)
+	## Initializer.
+	## @param {sw:char16_vector} uri
+	## @return {_self}
+	.uri << uri
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method location.new_from_path(path)
+	## Constructor from a source path, which may be a Windows path and may start
+	## with a `$SMALLWORLD_GIS` logical rather than a root.
+	## @param {sw:char16_vector} path
+	## @return {_self}
+	_local encoded << _self.encoded_path(path)
+	_local uri <<
+		_if encoded.index_of(%/) = 1
+		_then
+			>> "file://" + encoded
+		_else
+			>> "file:///" + encoded
+		_endif
+	_return _clone.init(uri)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method location.new_from_json(instruction)
+	## Construct self from JSON.
+	## @param {sw:equality_hash_table} instruction
+	## @return {_self}
+	_return _clone.init(instruction[:uri])
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method location.encoded_path(path)
+	## Percent-encode a path for use as the path of a `file://` URI, turning any
+	## Windows separator into a `/` first.
+	## @param {sw:char16_vector} path
+	## @return {sw:char16_vector}
+	_local stream << sw:internal_text_output_stream.new()
+	_for char _over path.elements()
+	_loop
+		_if char _is %\
+		_then
+			stream.write(%/)
+		_elif _self.safe_characters.includes?(char)
+		_then
+			stream.write(char)
+		_else
+			_local value << char.value
+			_for byte _over _self.utf8_bytes(value).elements()
+			_loop
+				_self.write_percent_encoded_byte(stream, byte)
+			_endloop
+		_endif
+	_endloop
+	_return stream.string
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method location.utf8_bytes(value)
+	## The UTF-8 bytes of a character value.
+	## @param {sw:integer} value
+	## @return {sw:simple_vector<E=sw:integer>}
+	_if value < 128
+	_then
+		_return {value}
+	_elif value < 2048
+	_then
+		_return {192 + (value _div 64), 128 + (value _mod 64)}
+	_endif
+
+	_return {224 + (value _div 4096), 128 + ((value _div 64) _mod 64), 128 + (value _mod 64)}
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method location.write_percent_encoded_byte(stream, byte)
+	## Write one byte as `%XX`.
+	## @param {sw:internal_text_output_stream} stream
+	## @param {sw:integer} byte
+	_local digits << _self.hex_digits
+	stream.write(%%, digits[(byte _div 16) + 1], digits[(byte _mod 16) + 1])
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method location.equals?(other)
+	## Equals?
+	## @param {mt:location} other
+	## @return {sw:false}
+	_return _self.uri = other.uri
+_endmethod
+$
+
+define_binary_operator_case(
+	:|=|, location, location,
+	_proc(location_a, location_b)
+		## @param {mt:location} location_a
+		## @param {mt:location} location_b
+		## @return {sw:false}
+		_return location_a.equals?(location_b)
+	_endproc)
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method location.as_properties()
+	## Get slots as hash table.
+	## @return {sw:equality_property_list<K=sw:char16_vector, E=sw:object>}
+	_local table << sw:equality_property_list.new()
+	_for name, value _over _self.sys!slot_names_and_values()
+	_loop
+		_local fixed_name << name.write_string.split_by(%!)[2]
+		table[fixed_name] << value
+	_endloop
+	_return table
+_endmethod
+$
