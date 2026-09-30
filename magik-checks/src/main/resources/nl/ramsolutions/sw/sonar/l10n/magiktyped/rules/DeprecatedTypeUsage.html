@@ -15,3 +15,6 @@ _endblock
 $
 </pre>
 <p>In the example, the use of <code>example_exemplar</code> is marked as deprecated, as the exemplar itself is marked as deprecated using the <code>_pragma(classify_level=deprecated)</code> directive.</p>
+<p>A reference to a deprecated procedure or global is reported the same way. The pragma read is that of the name written:
+a global which is not deprecated but holds an instance of a deprecated exemplar is not reported, and neither is a local
+variable holding one.</p>
