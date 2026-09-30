@@ -3,10 +3,13 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
@@ -18,6 +21,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -201,8 +205,6 @@ class TypeStringResolverTest {
 
   @Test
   void testSameNameSlotsAtDepthZeroBothSurvive() {
-    // Two files contribute a same-named slot to the SAME type (both depth 0): both kept, so the
-    // cross-file conflict surfaces rather than one silently winning. Pins the Stage 1 decision.
     final IDefinitionKeeper keeper = new DefinitionKeeper();
     final TypeString child = TypeString.ofIdentifier("child", "user");
     keeper.add(
@@ -375,7 +377,7 @@ class TypeStringResolverTest {
   }
 
   @Test
-  void testGetExemplarDefinitionFollowsGlobalAliasChain() {
+  void testGetExemplarDefinitionsFollowsGlobalAliasChain() {
     final IDefinitionKeeper keeper = new DefinitionKeeper();
     final TypeString typeA = TypeString.ofIdentifier("a", "user");
     final TypeString typeB = TypeString.ofIdentifier("b", "user");
@@ -388,12 +390,12 @@ class TypeStringResolverTest {
     keeper.add(exemplarC);
 
     final TypeStringResolver resolver = new TypeStringResolver(keeper);
-    final ExemplarDefinition definition = resolver.getExemplarDefinition(typeA);
-    assertThat(definition).isSameAs(exemplarC);
+    final Collection<ExemplarDefinition> definitions = resolver.getExemplarDefinitions(typeA);
+    assertThat(definitions).containsExactly(exemplarC);
   }
 
   @Test
-  void testGetExemplarDefinitionSelfAliasedGlobalIsUnresolvable() {
+  void testGetExemplarDefinitionsSelfAliasedGlobalIsUnresolvable() {
     final IDefinitionKeeper keeper = new DefinitionKeeper();
     final TypeString typeFoo = TypeString.ofIdentifier("foo", "user");
     final GlobalDefinition globalFoo =
@@ -401,12 +403,12 @@ class TypeStringResolverTest {
     keeper.add(globalFoo);
 
     final TypeStringResolver resolver = new TypeStringResolver(keeper);
-    final ExemplarDefinition definition = resolver.getExemplarDefinition(typeFoo);
-    assertThat(definition).isNull();
+    final Collection<ExemplarDefinition> definitions = resolver.getExemplarDefinitions(typeFoo);
+    assertThat(definitions).isEmpty();
   }
 
   @Test
-  void testGetExemplarDefinitionGlobalAliasCycleIsUnresolvable() {
+  void testGetExemplarDefinitionsGlobalAliasCycleIsUnresolvable() {
     final IDefinitionKeeper keeper = new DefinitionKeeper();
     final TypeString typeA = TypeString.ofIdentifier("a", "user");
     final TypeString typeB = TypeString.ofIdentifier("b", "user");
@@ -416,8 +418,8 @@ class TypeStringResolverTest {
     keeper.add(globalB);
 
     final TypeStringResolver resolver = new TypeStringResolver(keeper);
-    final ExemplarDefinition definition = resolver.getExemplarDefinition(typeA);
-    assertThat(definition).isNull();
+    final Collection<ExemplarDefinition> definitions = resolver.getExemplarDefinitions(typeA);
+    assertThat(definitions).isEmpty();
   }
 
   @Test
@@ -446,5 +448,360 @@ class TypeStringResolverTest {
     final TypeStringResolver resolver = new TypeStringResolver(keeper);
     final boolean isKindOf = resolver.isKindOf(typeA, TypeString.SW_OBJECT);
     assertThat(isKindOf).isFalse();
+  }
+
+  private static GlobalDefinition createUntypedGlobalDefinition(
+      final TypeString typeString, final String checkout, final int line) {
+    return TypeStringResolverTest.createGlobalDefinition(
+        typeString, TypeString.UNDEFINED, checkout, line);
+  }
+
+  private static GlobalDefinition createGlobalDefinition(
+      final TypeString typeString,
+      final TypeString aliasedTypeString,
+      final String checkout,
+      final int line) {
+    final URI uri = URI.create("file:///" + checkout + "/test_runner_model.magik");
+    final Position position = new Position(line, 0);
+    final Range range = new Range(position, position);
+    final Location location = new Location(uri, range);
+    return new GlobalDefinition(location, null, null, null, null, typeString, aliasedTypeString);
+  }
+
+  private static ProcedureDefinition createProcedureDefinition(
+      final TypeString typeString, final String moduleName) {
+    return new ProcedureDefinition(
+        null,
+        null,
+        moduleName,
+        null,
+        null,
+        EnumSet.noneOf(ProcedureDefinition.Modifier.class),
+        typeString,
+        typeString.getIdentifier(),
+        Collections.emptyList(),
+        null,
+        ExpressionResultString.UNDEFINED,
+        ExpressionResultString.UNDEFINED);
+  }
+
+  @Test
+  void testRespondingMethodOfAProcedureDoesNotDependOnWhereItsUntypedGlobalsSit() {
+    final TypeString loadFileRef = TypeString.ofIdentifier("load_file", "sw");
+    final MethodDefinition copyDefinition =
+        TypeStringResolverTest.createMethodDefinition(
+            TypeString.SW_OBJECT, "copy()", TypeString.SELF);
+    final List<String> unresolvedCheckouts = new ArrayList<>();
+    for (int checkout = 0; checkout < 32; checkout++) {
+      final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+      definitionKeeper.add(copyDefinition);
+      definitionKeeper.add(
+          new InheritanceDefinition(
+              null, null, null, null, null, TypeString.SW_PROCEDURE, TypeString.SW_OBJECT));
+      definitionKeeper.add(TypeStringResolverTest.createProcedureDefinition(loadFileRef, null));
+      final String checkoutPath = "checkout" + checkout;
+      for (final int line : List.of(149, 166, 178)) {
+        definitionKeeper.add(
+            TypeStringResolverTest.createUntypedGlobalDefinition(loadFileRef, checkoutPath, line));
+      }
+
+      final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+      final Collection<MethodDefinition> methodDefinitions =
+          resolver.getRespondingMethodDefinitions(loadFileRef, "copy()");
+      if (!methodDefinitions.equals(Set.of(copyDefinition))) {
+        unresolvedCheckouts.add(checkoutPath);
+      }
+    }
+    assertThat(unresolvedCheckouts).isEmpty();
+  }
+
+  @Test
+  void testExemplarOfAGlobalIsNotHiddenByAnUntypedGlobalOfTheSameName() {
+    final TypeString globalRef = TypeString.ofIdentifier("a_global", "sw");
+    final TypeString exemplarRef = TypeString.ofIdentifier("an_exemplar", "sw");
+    final ExemplarDefinition exemplarDefinition =
+        TypeStringResolverTest.createExemplar(exemplarRef);
+    final List<String> unresolvedCheckouts = new ArrayList<>();
+    for (int checkout = 0; checkout < 32; checkout++) {
+      final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+      definitionKeeper.add(exemplarDefinition);
+      final String checkoutPath = "checkout" + checkout;
+      definitionKeeper.add(
+          TypeStringResolverTest.createUntypedGlobalDefinition(globalRef, checkoutPath, 1));
+      definitionKeeper.add(
+          TypeStringResolverTest.createGlobalDefinition(globalRef, exemplarRef, checkoutPath, 2));
+
+      final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+      final Collection<ExemplarDefinition> resolved = resolver.getExemplarDefinitions(globalRef);
+      if (!resolved.equals(Set.of(exemplarDefinition))) {
+        unresolvedCheckouts.add(checkoutPath);
+      }
+    }
+    assertThat(unresolvedCheckouts).isEmpty();
+  }
+
+  /** A keeper where {@code sw:a_global} is assigned twice, once to each of two exemplars. */
+  private static IDefinitionKeeper createCollidingGlobalKeeper(final String checkoutPath) {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString globalRef = TypeString.ofIdentifier("a_global", "sw");
+    final TypeString firstRef = TypeString.ofIdentifier("a_first", "sw");
+    final TypeString secondRef = TypeString.ofIdentifier("a_second", "sw");
+    final TypeString firstParentRef = TypeString.ofIdentifier("a_first_parent", "sw");
+    final TypeString secondParentRef = TypeString.ofIdentifier("a_second_parent", "sw");
+    TypeStringResolverTest.addExemplarWithParents(definitionKeeper, firstParentRef);
+    TypeStringResolverTest.addExemplarWithParents(definitionKeeper, secondParentRef);
+    TypeStringResolverTest.addExemplarWithParents(definitionKeeper, firstRef, firstParentRef);
+    TypeStringResolverTest.addExemplarWithParents(definitionKeeper, secondRef, secondParentRef);
+    definitionKeeper.add(
+        TypeStringResolverTest.createMethodDefinition(
+            firstParentRef, "size", TypeString.SW_INTEGER));
+    definitionKeeper.add(
+        TypeStringResolverTest.createMethodDefinition(
+            secondParentRef, "size", TypeString.SW_SYMBOL));
+    definitionKeeper.add(
+        TypeStringResolverTest.createGlobalDefinition(globalRef, secondRef, checkoutPath, 1));
+    definitionKeeper.add(
+        TypeStringResolverTest.createGlobalDefinition(globalRef, firstRef, checkoutPath, 2));
+    return definitionKeeper;
+  }
+
+  @Test
+  void testExemplarsOfACollidingGlobalAreAllItsAliases() {
+    final TypeString globalRef = TypeString.ofIdentifier("a_global", "sw");
+    final TypeString firstRef = TypeString.ofIdentifier("a_first", "sw");
+    final TypeString secondRef = TypeString.ofIdentifier("a_second", "sw");
+    final List<String> otherCheckouts = new ArrayList<>();
+    for (int checkout = 0; checkout < 32; checkout++) {
+      final String checkoutPath = "checkout" + checkout;
+      final IDefinitionKeeper definitionKeeper =
+          TypeStringResolverTest.createCollidingGlobalKeeper(checkoutPath);
+
+      final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+      final Collection<ExemplarDefinition> exemplarDefinitions =
+          resolver.getExemplarDefinitions(globalRef);
+      final Set<TypeString> exemplarTypeStrings =
+          exemplarDefinitions.stream()
+              .map(ExemplarDefinition::getTypeString)
+              .collect(Collectors.toSet());
+      if (!exemplarTypeStrings.equals(Set.of(firstRef, secondRef))) {
+        otherCheckouts.add(checkoutPath);
+      }
+    }
+    assertThat(otherCheckouts).isEmpty();
+  }
+
+  @Test
+  void testParentsOfACollidingGlobalAreThoseOfAllItsAliases() {
+    final TypeString globalRef = TypeString.ofIdentifier("a_global", "sw");
+    final TypeString firstParentRef = TypeString.ofIdentifier("a_first_parent", "sw");
+    final TypeString secondParentRef = TypeString.ofIdentifier("a_second_parent", "sw");
+    final IDefinitionKeeper definitionKeeper =
+        TypeStringResolverTest.createCollidingGlobalKeeper("checkout");
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final Collection<TypeString> parents = resolver.getParents(globalRef);
+    assertThat(parents).contains(firstParentRef, secondParentRef);
+  }
+
+  @Test
+  void testCollidingGlobalIsKindOfWhatAnyOfItsAliasesIs() {
+    final TypeString globalRef = TypeString.ofIdentifier("a_global", "sw");
+    final TypeString firstParentRef = TypeString.ofIdentifier("a_first_parent", "sw");
+    final TypeString secondParentRef = TypeString.ofIdentifier("a_second_parent", "sw");
+    final IDefinitionKeeper definitionKeeper =
+        TypeStringResolverTest.createCollidingGlobalKeeper("checkout");
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final boolean kindOfFirst = resolver.isKindOf(globalRef, firstParentRef);
+    final boolean kindOfSecond = resolver.isKindOf(globalRef, secondParentRef);
+    assertThat(kindOfFirst).isTrue();
+    assertThat(kindOfSecond).isTrue();
+  }
+
+  @Test
+  void testCollidingGlobalRespondsWithTheMethodsOfAllItsAliases() {
+    final TypeString globalRef = TypeString.ofIdentifier("a_global", "sw");
+    final IDefinitionKeeper definitionKeeper =
+        TypeStringResolverTest.createCollidingGlobalKeeper("checkout");
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(globalRef, "size");
+    final Set<ExpressionResultString> returnTypes =
+        methodDefinitions.stream()
+            .map(MethodDefinition::getReturnTypes)
+            .collect(Collectors.toSet());
+    final ExpressionResultString integerResult = new ExpressionResultString(TypeString.SW_INTEGER);
+    final ExpressionResultString symbolResult = new ExpressionResultString(TypeString.SW_SYMBOL);
+    assertThat(returnTypes).containsExactlyInAnyOrder(integerResult, symbolResult);
+  }
+
+  private static MethodDefinition createModuleMethodDefinition(
+      final TypeString typeString,
+      final String methodName,
+      final String moduleName,
+      final TypeString returnType) {
+    return new MethodDefinition(
+        null,
+        null,
+        moduleName,
+        null,
+        null,
+        typeString,
+        methodName,
+        EnumSet.noneOf(MethodDefinition.Modifier.class),
+        Collections.emptyList(),
+        null,
+        null,
+        new ExpressionResultString(returnType),
+        ExpressionResultString.EMPTY);
+  }
+
+  @Test
+  void testAllRespondingMethodsIncludeEveryCollidingDefinition() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString thingRef = TypeString.ofIdentifier("thing", "sw");
+    TypeStringResolverTest.addExemplarWithParents(definitionKeeper, thingRef);
+    final MethodDefinition firstDefinition =
+        TypeStringResolverTest.createModuleMethodDefinition(
+            thingRef, "size", "module_a", TypeString.SW_INTEGER);
+    final MethodDefinition secondDefinition =
+        TypeStringResolverTest.createModuleMethodDefinition(
+            thingRef, "size", "module_b", TypeString.SW_SYMBOL);
+    definitionKeeper.add(firstDefinition);
+    definitionKeeper.add(secondDefinition);
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(thingRef);
+    assertThat(methodDefinitions).contains(firstDefinition, secondDefinition);
+  }
+
+  @Test
+  void testAllRespondingMethodsLetAnOwnMethodShadowItsParents() {
+    final List<String> shadowedTypes = new ArrayList<>();
+    for (int index = 0; index < 32; index++) {
+      // Vary the names, so the ancestor set iterates in a different order each time.
+      final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+      final TypeString parentRef = TypeString.ofIdentifier("parent" + index, "sw");
+      final TypeString childRef = TypeString.ofIdentifier("child" + index, "sw");
+      TypeStringResolverTest.addExemplarWithParents(definitionKeeper, parentRef);
+      TypeStringResolverTest.addExemplarWithParents(definitionKeeper, childRef, parentRef);
+      final MethodDefinition parentDefinition =
+          TypeStringResolverTest.createModuleMethodDefinition(
+              parentRef, "size", "module", TypeString.SW_SYMBOL);
+      final MethodDefinition childDefinition =
+          TypeStringResolverTest.createModuleMethodDefinition(
+              childRef, "size", "module", TypeString.SW_INTEGER);
+      definitionKeeper.add(parentDefinition);
+      definitionKeeper.add(childDefinition);
+
+      final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+      final Collection<MethodDefinition> respondingDefinitions =
+          resolver.getRespondingMethodDefinitions(childRef);
+      final List<MethodDefinition> sizeDefinitions =
+          respondingDefinitions.stream()
+              .filter(definition -> definition.getMethodName().equals("size"))
+              .toList();
+      if (!sizeDefinitions.equals(List.of(childDefinition))) {
+        shadowedTypes.add(childRef.getFullString());
+      }
+    }
+    assertThat(shadowedTypes).isEmpty();
+  }
+
+  @Test
+  void testRespondingProceduresIncludeEveryCollidingDefinition() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString procedureRef = TypeString.ofIdentifier("a_procedure", "sw");
+    final List<ProcedureDefinition> procedureDefinitions = new ArrayList<>();
+    for (final String moduleName : List.of("module_a", "module_b")) {
+      final ProcedureDefinition procedureDefinition =
+          TypeStringResolverTest.createProcedureDefinition(procedureRef, moduleName);
+      definitionKeeper.add(procedureDefinition);
+      procedureDefinitions.add(procedureDefinition);
+    }
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final Collection<ProcedureDefinition> respondingDefinitions =
+        resolver.getRespondingProcedureDefinitions(procedureRef);
+    assertThat(respondingDefinitions).containsExactlyInAnyOrderElementsOf(procedureDefinitions);
+  }
+
+  @Test
+  void testResolvedTypeStringOfDefinitionsDifferingInGenericsIsTheBareName() {
+    final TypeString elementRef = TypeString.ofGenericReference("E");
+    final List<String> otherNames = new ArrayList<>();
+    for (int index = 0; index < 16; index++) {
+      // Vary the name, so the resolved set iterates in a different order each time.
+      final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+      final String identifier = "box" + index;
+      final TypeString boxRef = TypeString.ofIdentifier(identifier, "sw");
+      final TypeString genericBoxRef = TypeString.ofIdentifier(identifier, "sw", elementRef);
+      definitionKeeper.add(TypeStringResolverTest.createModuleExemplar(genericBoxRef, "module_a"));
+      definitionKeeper.add(
+          new GlobalDefinition(null, null, "module_b", null, null, boxRef, boxRef));
+
+      final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+      final TypeString resolvedTypeString = resolver.getResolvedTypeString(boxRef);
+      if (!resolvedTypeString.equals(boxRef)) {
+        otherNames.add(identifier);
+      }
+    }
+    assertThat(otherNames).isEmpty();
+  }
+
+  private static ExemplarDefinition createModuleExemplar(
+      final TypeString typeString, final String moduleName) {
+    return new ExemplarDefinition(
+        null, null, moduleName, null, null, ExemplarDefinition.Sort.SLOTTED, typeString, null);
+  }
+
+  @Test
+  void testExemplarTypeStringOfAnAliasToATypeDefinedTwiceIsThatType() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString aliasRef = TypeString.ofIdentifier("an_alias", "user");
+    final TypeString thingRef = TypeString.ofIdentifier("thing", "user");
+    keeper.add(TypeStringResolverTest.createGlobalDefinition(aliasRef, thingRef));
+    keeper.add(TypeStringResolverTest.createModuleExemplar(thingRef, "module_a"));
+    keeper.add(TypeStringResolverTest.createModuleExemplar(thingRef, "module_b"));
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final TypeString exemplarTypeString = resolver.getExemplarTypeString(aliasRef);
+    assertThat(exemplarTypeString).isEqualTo(thingRef);
+  }
+
+  @Test
+  void testExemplarTypeStringOfATypeDefinedTwiceWithOtherGenericsIsTheBareName() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString thingRef = TypeString.ofIdentifier("thing", "user");
+    final TypeString elementRef = TypeString.ofGenericReference("E");
+    final TypeString genericThingRef = TypeString.ofIdentifier("thing", "user", elementRef);
+    keeper.add(TypeStringResolverTest.createModuleExemplar(thingRef, "module_a"));
+    keeper.add(TypeStringResolverTest.createModuleExemplar(genericThingRef, "module_b"));
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final TypeString exemplarTypeString = resolver.getExemplarTypeString(thingRef);
+    assertThat(exemplarTypeString).isEqualTo(thingRef);
+  }
+
+  @Test
+  void testExemplarTypeStringOfAGlobalAliasingTwoExemplarsIsTheReference() {
+    final IDefinitionKeeper keeper = TypeStringResolverTest.createCollidingGlobalKeeper("checkout");
+    final TypeString globalRef = TypeString.ofIdentifier("a_global", "sw");
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final TypeString exemplarTypeString = resolver.getExemplarTypeString(globalRef);
+    assertThat(exemplarTypeString).isEqualTo(globalRef);
+  }
+
+  @Test
+  void testExemplarTypeStringOfAnUnknownTypeIsTheReference() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final TypeString unknownRef = TypeString.ofIdentifier("unknown", "user");
+
+    final TypeStringResolver resolver = new TypeStringResolver(keeper);
+    final TypeString exemplarTypeString = resolver.getExemplarTypeString(unknownRef);
+    assertThat(exemplarTypeString).isEqualTo(unknownRef);
   }
 }

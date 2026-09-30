@@ -2,8 +2,10 @@ package nl.ramsolutions.sw.checks.magiktyped;
 
 import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertThat;
 
+import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -281,5 +283,34 @@ class IterCallableYieldTypesMatchDocTypedCheckTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new IterCallableYieldTypesMatchDocTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testLoopTypesDifferBetweenTypesDefinedTwice() {
+    final String code =
+        """
+        _iter _method a.b()
+          ## @loop {user:q}
+          _loopbody(p)
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    for (final String identifier : List.of("p", "q")) {
+      final TypeString typeRef = TypeString.ofIdentifier(identifier, "user");
+      for (final String moduleName : List.of("module_a", "module_b")) {
+        definitionKeeper.add(
+            new ExemplarDefinition(
+                null,
+                null,
+                moduleName,
+                null,
+                null,
+                ExemplarDefinition.Sort.SLOTTED,
+                typeRef,
+                null));
+      }
+    }
+    final MagikTypedCheck check = new IterCallableYieldTypesMatchDocTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 }

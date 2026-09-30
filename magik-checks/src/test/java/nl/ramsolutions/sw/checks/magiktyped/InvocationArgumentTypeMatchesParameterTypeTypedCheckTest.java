@@ -179,4 +179,23 @@ class InvocationArgumentTypeMatchesParameterTypeTypedCheckTest {
     final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @Test
+  void testArgumentTypeNotMatchesOnATypeDefinedTwice() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            "module_b",
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            TypeString.SW_INTEGER,
+            null));
+    this.addTestMethods(definitionKeeper);
+
+    final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
+    assertThat(check).reportsIssueCount("integer.m1(1)", definitionKeeper, 1);
+  }
 }

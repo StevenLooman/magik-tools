@@ -1,6 +1,5 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,6 +7,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -122,85 +122,149 @@ public class TypeStringResolver {
   }
 
   /**
-   * Get the {@link ExemplarDefinition} from a {@link TypeString}.
+   * Get every {@link ExemplarDefinition} a {@link TypeString} can stand for.
    *
-   * <p>Note that this gives only a singular {@link ExemplarDefinition}, even though there might be
-   * multiple known.
+   * <p>An exemplar stands for itself, a procedure for {@code procedure}, and a global for what its
+   * aliased type stands for. Colliding definitions give the union, as which one wins at runtime is
+   * unknown. An untyped global adds nothing.
    *
    * @param typeString {@link TypeString} to resolve.
-   * @return Found {@link ExemplarDefinition}, or null.
+   * @return The exemplars, empty when there are none.
    */
-  @CheckForNull
-  public ExemplarDefinition getExemplarDefinition(final TypeString typeString) {
-    return this.getExemplarDefinition(typeString, new HashSet<>());
+  public Collection<ExemplarDefinition> getExemplarDefinitions(final TypeString typeString) {
+    final Set<ExemplarDefinition> exemplarDefinitions =
+        this.collectExemplarDefinitions(typeString, new HashSet<>());
+    return Collections.unmodifiableSet(exemplarDefinitions);
   }
 
-  @CheckForNull
-  private ExemplarDefinition getExemplarDefinition(
+  private Set<ExemplarDefinition> collectExemplarDefinitions(
       final TypeString typeString, final Set<TypeString> visited) {
-    // TODO: Return type should be Collection<ExemplarDefinition>
-    final Collection<ITypeStringDefinition> definitions = this.resolve(typeString);
-    if (definitions.isEmpty()) {
-      return null;
-    }
-
-    // Prefer ExemplarDefinitions.
-    final ITypeStringDefinition exemplarDefefinition =
-        definitions.stream().filter(ExemplarDefinition.class::isInstance).findAny().orElse(null);
-    final ITypeStringDefinition definition =
-        exemplarDefefinition != null ? exemplarDefefinition : definitions.iterator().next();
-
-    // Resolve global first; treat a procedure definition as the exemplar `procedure`.
-    final TypeString nextTypeString;
-    if (definition instanceof GlobalDefinition globalDefinition0) {
-      nextTypeString = globalDefinition0.getAliasedTypeName();
-    } else if (definition instanceof ProcedureDefinition) {
-      nextTypeString = TypeString.SW_PROCEDURE;
-    } else {
-      return definition instanceof ExemplarDefinition exemplarDefinition
-          ? exemplarDefinition
-          : null;
-    }
-
     // An alias cycle (e.g. a global aliased to itself) is unresolvable.
     if (!visited.add(typeString)) {
-      return null;
+      return Collections.emptySet();
     }
 
-    return this.getExemplarDefinition(nextTypeString, visited);
+    final Set<ExemplarDefinition> exemplarDefinitions = new HashSet<>();
+    for (final ITypeStringDefinition definition : this.resolve(typeString)) {
+      if (definition instanceof final ExemplarDefinition exemplarDefinition) {
+        exemplarDefinitions.add(exemplarDefinition);
+        continue;
+      }
+
+      // Follow a global's alias; treat a procedure definition as the exemplar `procedure`.
+      final TypeString nextTypeString =
+          definition instanceof final GlobalDefinition globalDefinition
+              ? globalDefinition.getAliasedTypeName()
+              : TypeString.SW_PROCEDURE;
+      final Set<TypeString> branchVisited = new HashSet<>(visited);
+      final Set<ExemplarDefinition> branchDefinitions =
+          this.collectExemplarDefinitions(nextTypeString, branchVisited);
+      exemplarDefinitions.addAll(branchDefinitions);
+    }
+    return exemplarDefinitions;
   }
 
   /**
-   * Test if {@link typeString1} is kind of {@link typeString2}.
+   * The type string of the exemplars a {@link TypeString} stands for, e.g. to key a keeper lookup
+   * by the defining package.
+   *
+   * <p>Exemplars sharing a name give that name, bare when their generics differ. Exemplars with
+   * different names give {@code typeString}.
+   *
+   * @param typeString {@link TypeString} to resolve.
+   * @return The shared exemplar type string, or {@code typeString} when there is none.
+   */
+  public TypeString getExemplarTypeString(final TypeString typeString) {
+    final Collection<ExemplarDefinition> exemplarDefinitions =
+        this.getExemplarDefinitions(typeString);
+    final Set<TypeString> typeStrings =
+        exemplarDefinitions.stream()
+            .map(ExemplarDefinition::getTypeString)
+            .collect(Collectors.toSet());
+    return TypeStringResolver.getSharedTypeString(typeString, typeStrings);
+  }
+
+  /**
+   * Whether a {@link TypeString} stands for at least one {@link ExemplarDefinition}.
+   *
+   * @param typeString {@link TypeString} to resolve.
+   * @return True when it does.
+   */
+  public boolean hasExemplarDefinition(final TypeString typeString) {
+    final Collection<ExemplarDefinition> exemplarDefinitions =
+        this.getExemplarDefinitions(typeString);
+    return !exemplarDefinitions.isEmpty();
+  }
+
+  /**
+   * The type string all resolved definitions share, or their bare name when they differ only in
+   * generics.
+   *
+   * @param typeString The reference.
+   * @param resolvedTypes What it resolved to.
+   * @return The shared type string, or {@code typeString} when nothing resolved.
+   */
+  private static TypeString getSharedTypeString(
+      final TypeString typeString, final Collection<ITypeStringDefinition> resolvedTypes) {
+    final Set<TypeString> typeStrings =
+        resolvedTypes.stream()
+            .map(ITypeStringDefinition::getTypeString)
+            .collect(Collectors.toSet());
+    return TypeStringResolver.getSharedTypeString(typeString, typeStrings);
+  }
+
+  /** See {@link #getSharedTypeString(TypeString, Collection)}; over the type strings themselves. */
+  private static TypeString getSharedTypeString(
+      final TypeString typeString, final Set<TypeString> typeStrings) {
+    if (typeStrings.size() == 1) {
+      final Iterator<TypeString> iterator = typeStrings.iterator();
+      return iterator.next();
+    }
+
+    // Same name, differing only in generics.
+    final Set<TypeString> bareTypeStrings =
+        typeStrings.stream().map(TypeString::getWithoutGenerics).collect(Collectors.toSet());
+    if (bareTypeStrings.size() == 1) {
+      final Iterator<TypeString> iterator = bareTypeStrings.iterator();
+      return iterator.next();
+    }
+
+    return typeString;
+  }
+
+  /**
+   * The type string {@code typeString} resolves to; see {@link #getSharedTypeString}.
+   *
+   * @param typeString The reference.
+   * @return The resolved type string, or {@code typeString} when it resolves to nothing.
+   */
+  public TypeString getResolvedTypeString(final TypeString typeString) {
+    final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeString);
+    return TypeStringResolver.getSharedTypeString(typeString, resolvedTypes);
+  }
+
+  /**
+   * Test if any member of {@link typeString1}, through any of its definitions, is kind of any
+   * member of {@link typeString2}.
    *
    * @param typeString1 The thing to test.
    * @param typeString2 The kind to test for.
    * @return True if is kind of, false otherwise.
    */
   public boolean isKindOf(final TypeString typeString1, final TypeString typeString2) {
-    for (final TypeString typeStr1 : TypeString.combine(typeString1).getCombinedTypes()) {
-      final ITypeStringDefinition definition1 =
-          this.resolve(typeStr1).stream().findAny().orElse(null);
-      if (definition1 == null) {
-        continue;
-      }
-
-      final TypeString combinedTypeString2 = TypeString.combine(typeString2);
-      Objects.requireNonNull(combinedTypeString2);
-      for (final TypeString typeStr2 : combinedTypeString2.getCombinedTypes()) {
-        final ITypeStringDefinition definition2 =
-            this.resolve(typeStr2).stream().findAny().orElse(null);
-        if (definition2 == null) {
-          continue;
-        }
-
-        if (this.isKindOf(definition1, definition2)) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+    // Any member or colliding definition may be the runtime value.
+    final TypeString combinedTypeString2 = TypeString.combine(typeString2);
+    Objects.requireNonNull(combinedTypeString2);
+    final List<ITypeStringDefinition> definitions2 =
+        combinedTypeString2.getCombinedTypes().stream()
+            .flatMap(typeStr2 -> this.resolve(typeStr2).stream())
+            .toList();
+    return TypeString.combine(typeString1).getCombinedTypes().stream()
+        .flatMap(typeStr1 -> this.resolve(typeStr1).stream())
+        .anyMatch(
+            definition1 ->
+                definitions2.stream()
+                    .anyMatch(definition2 -> this.isKindOf(definition1, definition2)));
   }
 
   /**
@@ -241,13 +305,9 @@ public class TypeStringResolver {
                     // Try to resolve the typeString to an actual type.
                     final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeStr);
                     final TypeString actualTypeStr =
-                        resolvedTypes.isEmpty()
-                            ? typeStr
-                            : resolvedTypes.iterator().next().getTypeString();
+                        TypeStringResolver.getSharedTypeString(typeStr, resolvedTypes);
 
-                    final Map<String, MethodDefinition> methodDefinitionsByName = new HashMap<>();
-                    this.fillRespondingMethodDefinitions(actualTypeStr, methodDefinitionsByName);
-                    return methodDefinitionsByName.values().stream().collect(Collectors.toSet());
+                    return this.collectRespondingMethodDefinitions(actualTypeStr);
                   });
             })
         .flatMap(Collection::stream)
@@ -273,15 +333,9 @@ public class TypeStringResolver {
                     // Try to resolve the typeString to an actual type.
                     final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeStr);
                     final TypeString actualTypeStr =
-                        resolvedTypes.isEmpty()
-                            ? typeStr
-                            : resolvedTypes.iterator().next().getTypeString();
+                        TypeStringResolver.getSharedTypeString(typeStr, resolvedTypes);
 
-                    final Map<TypeString, ProcedureDefinition> procedureDefinitionsByType =
-                        new HashMap<>();
-                    this.fillRespondingProcedureDefinitions(
-                        actualTypeStr, procedureDefinitionsByType);
-                    return procedureDefinitionsByType.values().stream().collect(Collectors.toSet());
+                    return this.collectRespondingProcedureDefinitions(actualTypeStr);
                   });
             })
         .flatMap(Collection::stream)
@@ -309,8 +363,7 @@ public class TypeStringResolver {
       final TypeString typeStr, final String methodName) {
     // Resolve typeString.
     final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeStr);
-    final TypeString actualTypeStr =
-        resolvedTypes.isEmpty() ? typeStr : resolvedTypes.iterator().next().getTypeString();
+    final TypeString actualTypeStr = TypeStringResolver.getSharedTypeString(typeStr, resolvedTypes);
 
     // The type's own methods shadow every parent.
     final Collection<MethodDefinition> ownDefinitions =
@@ -348,45 +401,36 @@ public class TypeStringResolver {
     return concreteDefinitions.isEmpty() ? methodDefinitions : concreteDefinitions;
   }
 
-  private void fillRespondingMethodDefinitions(
-      final TypeString typeString, final Map<String, MethodDefinition> methodDefinitions) {
-    // TODO: This doesn't handle any conflicts.
-    this.getSelfAndAncestors(typeString)
-        .forEach(
-            typeStr ->
-                this.definitionKeeper
-                    .getMethodDefinitions(typeStr)
-                    .forEach(
-                        methodDefinition -> {
-                          final String methodName = methodDefinition.getMethodName();
-                          if (methodDefinitions.containsKey(methodName)) {
-                            // Don't overwrite.
-                            return;
-                          }
-
-                          methodDefinitions.put(methodName, methodDefinition);
-                        }));
+  /**
+   * Every method a type responds to, walking the hierarchy nearest level first. A nearer level
+   * shadows a farther one; same-named methods at one level all respond.
+   */
+  private Collection<MethodDefinition> collectRespondingMethodDefinitions(
+      final TypeString typeString) {
+    final Map<String, Set<MethodDefinition>> byName = new HashMap<>();
+    final Set<TypeString> seen = new HashSet<>();
+    Set<TypeString> level = Set.of(typeString);
+    while (!level.isEmpty()) {
+      level.stream()
+          .flatMap(typeStr -> this.definitionKeeper.getMethodDefinitions(typeStr).stream())
+          .collect(Collectors.groupingBy(MethodDefinition::getMethodName, Collectors.toSet()))
+          .forEach(byName::putIfAbsent);
+      seen.addAll(level);
+      level =
+          level.stream()
+              .flatMap(typeStr -> this.getParents(typeStr).stream())
+              .filter(typeStr -> !seen.contains(typeStr))
+              .collect(Collectors.toSet());
+    }
+    return byName.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
   }
 
-  private void fillRespondingProcedureDefinitions(
-      final TypeString typeString,
-      final Map<TypeString, ProcedureDefinition> procedureDefinitions) {
-    // TODO: This doesn't handle any conflicts.
-    this.getSelfAndAncestors(typeString)
-        .forEach(
-            typeStr ->
-                this.definitionKeeper
-                    .getProcedureDefinitions(typeStr)
-                    .forEach(
-                        procedureDefinition -> {
-                          final TypeString procedureType = procedureDefinition.getTypeString();
-                          if (procedureDefinitions.containsKey(procedureType)) {
-                            // Don't overwrite.
-                            return;
-                          }
-
-                          procedureDefinitions.put(procedureType, procedureDefinition);
-                        }));
+  /** Every procedure of a type and its ancestors; colliding definitions all respond. */
+  private Collection<ProcedureDefinition> collectRespondingProcedureDefinitions(
+      final TypeString typeString) {
+    return this.getSelfAndAncestors(typeString).stream()
+        .flatMap(typeStr -> this.definitionKeeper.getProcedureDefinitions(typeStr).stream())
+        .collect(Collectors.toSet());
   }
 
   /**
@@ -477,13 +521,10 @@ public class TypeStringResolver {
       }
 
       final TypeString typeString = globalDefinition.getAliasedTypeName();
-      final ITypeStringDefinition aliasedDefinition =
-          this.resolve(typeString).stream().findAny().orElse(null);
-      if (aliasedDefinition == null) {
-        return Collections.emptySet();
-      }
-
-      return this.getParents(aliasedDefinition, visited);
+      return this.resolve(typeString).stream()
+          .map(aliasedDefinition -> this.getParents(aliasedDefinition, new HashSet<>(visited)))
+          .flatMap(Collection::stream)
+          .collect(Collectors.toSet());
     }
 
     throw new IllegalStateException();
@@ -495,23 +536,26 @@ public class TypeStringResolver {
    * <p>This adds the implicit parents, where {@link ExemplarDefinition} only returns its explicitly
    * defined parents.
    *
-   * <p>The returned parents are UNORDERED: this returns a {@link Set}, and the order in which
-   * multiple parents are visited during resolution (e.g., which parent wins in {@code
-   * fillRespondingMethodDefinitions}'s first-wins lookup) is unspecified. This predates the move to
-   * first-class {@link InheritanceDefinition} edges -- the resolver already returned an unordered
-   * set of parents before that change, so method-resolution order among competing parents was
-   * already nondeterministic and remains so.
+   * <p>A type defined more than once gives the union of each definition's parents. The returned
+   * parents are unordered; callers that resolve methods over them consider every parent branch.
    *
    * @param typeString {@link TypeString} to get parents from.
    * @return Parents of the given type.
    */
   public Collection<TypeString> getParents(final TypeString typeString) {
-    // TODO: This can be multiple.
-    final ExemplarDefinition exemplarDefinition = this.getExemplarDefinition(typeString);
-    if (exemplarDefinition == null) {
-      return Collections.emptyList();
-    }
+    // Union over every exemplar the type stands for.
+    final TypeString[] thisGenDefs = typeString.getGenerics().toArray(TypeString[]::new);
+    return this.getExemplarDefinitions(typeString).stream()
+        .flatMap(exemplarDefinition -> this.getParents(exemplarDefinition).stream())
+        .map(
+            typeStr ->
+                // Let all parents inherit generic definitions.
+                typeStr.withGenerics(thisGenDefs))
+        .collect(Collectors.toUnmodifiableSet());
+  }
 
+  /** The explicit parents of one exemplar, plus its implicit parent when it has no other. */
+  private Collection<TypeString> getParents(final ExemplarDefinition exemplarDefinition) {
     // A parent mixin *can* provide a default mixin, but does not have to be the case. I.e.,
     // the sw:rope_mixin does inherit from sw:slotted_format_mixin, but
     // sw:serial_structure_indexed_mixin does not do so. Most mixins do not inherit from
@@ -521,31 +565,17 @@ public class TypeStringResolver {
         this.definitionKeeper.getInheritanceDefinitions(exemplarDefinition.getTypeString()).stream()
             .map(InheritanceDefinition::getParentTypeName)
             .toList();
-    final Collection<TypeString> nonMixinParents =
-        parents.stream()
-            .filter(
-                parentTypeString -> {
-                  final ExemplarDefinition parentExemplarDefinition =
-                      this.getExemplarDefinition(parentTypeString);
-                  final ExemplarDefinition.Sort parentExemplarSort =
-                      parentExemplarDefinition != null
-                          ? parentExemplarDefinition.getSort()
-                          : ExemplarDefinition.Sort.UNDEFINED;
-                  return parentExemplarSort == ExemplarDefinition.Sort.SLOTTED
-                      || parentExemplarSort == ExemplarDefinition.Sort.INDEXED;
-                })
-            .toList();
+    final boolean hasNonMixinParent = parents.stream().anyMatch(this::isSlottedOrIndexed);
     final Sort sort = exemplarDefinition.getSort();
-    final TypeString implicitParentTypeStr =
-        nonMixinParents.isEmpty() ? IMPLICIT_PARENTS.get(sort) : null;
-
-    final TypeString[] thisGenDefs = typeString.getGenerics().toArray(TypeString[]::new);
+    final TypeString implicitParentTypeStr = hasNonMixinParent ? null : IMPLICIT_PARENTS.get(sort);
     return Stream.concat(parents.stream(), Optional.ofNullable(implicitParentTypeStr).stream())
-        .map(
-            typeStr ->
-                // Let all parents inherit generic definitions.
-                typeStr.withGenerics(thisGenDefs))
-        .collect(Collectors.toUnmodifiableSet());
+        .toList();
+  }
+
+  private boolean isSlottedOrIndexed(final TypeString typeString) {
+    return this.getExemplarDefinitions(typeString).stream()
+        .map(ExemplarDefinition::getSort)
+        .anyMatch(sort -> sort == Sort.SLOTTED || sort == Sort.INDEXED);
   }
 
   /**

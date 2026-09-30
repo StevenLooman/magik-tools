@@ -1559,6 +1559,41 @@ class LocalTypeReasonerTest {
   }
 
   @Test
+  void testNamedSuperTypeOfACollidingGlobalIsEveryAlias() {
+    final String code =
+        """
+        _method t.m
+          _super(r).m
+        _endmethod""";
+
+    // Set up: two globals named r, each aliasing another exemplar.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString pRef = TypeString.ofIdentifier("p", "sw");
+    final TypeString qRef = TypeString.ofIdentifier("q", "sw");
+    final TypeString rRef = TypeString.ofIdentifier("r", "sw");
+    final TypeString tRef = TypeString.ofIdentifier("t", "sw");
+    for (final TypeString typeRef : List.of(pRef, qRef, tRef)) {
+      definitionKeeper.add(
+          new ExemplarDefinition(
+              null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, typeRef, null));
+    }
+    definitionKeeper.add(
+        new GlobalDefinition(null, null, "module_p", null, null, rRef, pRef, null));
+    definitionKeeper.add(
+        new GlobalDefinition(null, null, "module_q", null, null, rRef, qRef, null));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode superNode = topNode.getFirstDescendant(MagikGrammar.SUPER).getParent();
+    final ExpressionResultString result = state.getNodeType(superNode);
+    final TypeString bothRef = TypeString.combine(pRef, qRef);
+    assertThat(result).isEqualTo(new ExpressionResultString(bothRef));
+  }
+
+  @Test
   void testParameterType() {
     final String code =
         """

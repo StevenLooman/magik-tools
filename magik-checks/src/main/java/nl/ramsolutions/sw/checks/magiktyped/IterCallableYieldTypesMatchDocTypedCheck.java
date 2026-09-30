@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.checks.magiktyped;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -92,7 +93,8 @@ public class IterCallableYieldTypesMatchDocTypedCheck extends MagikTypedCheck {
               // is reported as a mismatch rather than equal-by-virtue-of-both-being-null.
               final TypeString iterLookup =
                   iterTypeString.isVariadic() ? iterTypeString.getVariadicInner() : iterTypeString;
-              final ExemplarDefinition iterExemplarDef = resolver.getExemplarDefinition(iterLookup);
+              final Collection<ExemplarDefinition> iterExemplarDefs =
+                  resolver.getExemplarDefinitions(iterLookup);
 
               final Map.Entry<AstNode, TypeString> typeDocEntry = entry.getValue();
               final TypeString docLoopTypeString = typeDocEntry.getValue();
@@ -100,9 +102,10 @@ public class IterCallableYieldTypesMatchDocTypedCheck extends MagikTypedCheck {
                   docLoopTypeString.isVariadic()
                       ? docLoopTypeString.getVariadicInner()
                       : docLoopTypeString;
-              final ExemplarDefinition docExemplarDef = resolver.getExemplarDefinition(docLookup);
+              final Collection<ExemplarDefinition> docExemplarDefs =
+                  resolver.getExemplarDefinitions(docLookup);
 
-              if (Objects.equals(iterExemplarDef, docExemplarDef)) {
+              if (iterExemplarDefs.equals(docExemplarDefs)) {
                 return;
               }
 

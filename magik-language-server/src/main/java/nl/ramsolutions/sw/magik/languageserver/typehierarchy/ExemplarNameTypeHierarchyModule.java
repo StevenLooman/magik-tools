@@ -1,7 +1,7 @@
 package nl.ramsolutions.sw.magik.languageserver.typehierarchy;
 
 import com.sonar.sslr.api.AstNode;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
@@ -39,11 +39,7 @@ class ExemplarNameTypeHierarchyModule implements TypeHierarchyModule {
         new MethodDefinitionNodeHelper(methodDefinitionNode);
     final TypeString typeStr = methodDefinitionNodeHelper.getExemplarTypeString();
     final TypeStringResolver resolver = new TypeStringResolver(this.definitionKeeper);
-    final ExemplarDefinition exemplarDef = resolver.getExemplarDefinition(typeStr);
-    if (exemplarDef == null) {
-      return Optional.of(Collections.emptyList());
-    }
-
-    return Optional.of(List.of(exemplarDef));
+    final Collection<ExemplarDefinition> exemplarDefs = resolver.getExemplarDefinitions(typeStr);
+    return Optional.of(List.copyOf(exemplarDefs));
   }
 }

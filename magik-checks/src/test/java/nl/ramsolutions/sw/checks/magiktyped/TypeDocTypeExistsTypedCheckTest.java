@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.checks.magiktyped;
 
 import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertThat;
 
+import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -67,6 +68,32 @@ class TypeDocTypeExistsTypedCheckTest {
       })
   void testValid(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new TypeDocTypeExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testTypeDefinedByTwoModulesExists() {
+    final String code =
+        """
+        _method a.b()
+          ## @return {user:twice_defined}
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString twiceDefinedRef = TypeString.ofIdentifier("twice_defined", "user");
+    for (final String moduleName : List.of("module_a", "module_b")) {
+      definitionKeeper.add(
+          new ExemplarDefinition(
+              null,
+              null,
+              moduleName,
+              null,
+              null,
+              ExemplarDefinition.Sort.SLOTTED,
+              twiceDefinedRef,
+              null));
+    }
     final MagikTypedCheck check = new TypeDocTypeExistsTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }

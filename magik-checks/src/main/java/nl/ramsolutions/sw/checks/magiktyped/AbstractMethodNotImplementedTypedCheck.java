@@ -95,8 +95,7 @@ public class AbstractMethodNotImplementedTypedCheck extends MagikTypedCheck {
   }
 
   private static TypeString resolve(final TypeStringResolver resolver, final TypeString typeStr) {
-    final ExemplarDefinition exemplarDefinition = resolver.getExemplarDefinition(typeStr);
-    return exemplarDefinition != null ? exemplarDefinition.getTypeString() : typeStr;
+    return resolver.getExemplarTypeString(typeStr);
   }
 
   private AstNode getIssueNode(final ExemplarDefinition exemplarDefinition) {

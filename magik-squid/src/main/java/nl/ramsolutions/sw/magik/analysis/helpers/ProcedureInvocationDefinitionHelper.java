@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import nl.ramsolutions.sw.magik.MagikFile;
-import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -35,10 +34,11 @@ public final class ProcedureInvocationDefinitionHelper {
       return TypeString.SW_PROCEDURE;
     }
 
-    return resolver.resolve(originalTypeStr).stream()
-        .map(ITypeStringDefinition::getTypeString)
-        .findAny()
-        .orElse(TypeString.UNDEFINED);
+    if (resolver.resolve(originalTypeStr).isEmpty()) {
+      return TypeString.UNDEFINED;
+    }
+
+    return resolver.getResolvedTypeString(originalTypeStr);
   }
 
   public static Collection<ProcedureDefinition> getRespondingProcedureDefinitions(

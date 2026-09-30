@@ -31,8 +31,12 @@ final class TypeReferencesFinder {
     LOGGER.debug("Finding references to type: {}", typeString);
 
     final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
-    final ExemplarDefinition exemplarDefinition = resolver.getExemplarDefinition(typeString);
-    if (exemplarDefinition == null) {
+    // A colliding type is referenced by its name, which covers every definition.
+    final Set<TypeString> searchedTypes =
+        resolver.getExemplarDefinitions(typeString).stream()
+            .map(ExemplarDefinition::getTypeString)
+            .collect(Collectors.toSet());
+    if (searchedTypes.isEmpty()) {
       return Collections.emptyList();
     }
 
@@ -40,8 +44,6 @@ final class TypeReferencesFinder {
     // right (unresolved) package. I.e., We might need to match only on identifier, as the
     // usedGlobal might have a different package? This is because the ref might be stored with the
     // current package.
-    final TypeString exemplarTypeString = exemplarDefinition.getTypeString();
-    final Set<TypeString> searchedTypes = Set.of(exemplarTypeString);
     final Collection<GlobalUsage> wantedGlobalUsages =
         searchedTypes.stream()
             .map(wantedTypeRef -> new GlobalUsage(wantedTypeRef, null, null))

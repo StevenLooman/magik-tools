@@ -46,6 +46,51 @@ class TypeHierarchyProviderTest {
     assertThat(items).isNotNull().hasSize(1);
   }
 
+  private IDefinitionKeeper createKeeperDefiningTwice(final TypeString typeRef) {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    for (final String moduleName : List.of("module_a", "module_b")) {
+      definitionKeeper.add(
+          new ExemplarDefinition(
+              null, null, moduleName, null, null, ExemplarDefinition.Sort.SLOTTED, typeRef, null));
+    }
+    return definitionKeeper;
+  }
+
+  @Test
+  void testPrepareTypeHierarchyMethodDefinitionExemplarNameDefinedTwice() {
+    final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
+    final IDefinitionKeeper definitionKeeper = this.createKeeperDefiningTwice(exemplarRef);
+
+    final String code =
+        """
+        _method exemplar.method
+        _endmethod
+        """;
+    final Position position = new Position(0, 10); // On 'exemplar'.
+
+    final List<TypeHierarchyItem> items =
+        this.getPrepareTypeHierarchy(code, position, definitionKeeper);
+    assertThat(items).hasSize(2);
+  }
+
+  @Test
+  void testPrepareTypeHierarchyGlobalDefinedTwice() {
+    final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
+    final IDefinitionKeeper definitionKeeper = this.createKeeperDefiningTwice(ropeRef);
+
+    final String code =
+        """
+        _method exemplar.method
+          rope.new()
+        _endmethod
+        """;
+    final Position position = new Position(1, 4); // On 'rope'.
+
+    final List<TypeHierarchyItem> items =
+        this.getPrepareTypeHierarchy(code, position, definitionKeeper);
+    assertThat(items).hasSize(2);
+  }
+
   @Test
   void testPrepareTypeHierarchyGlobal() {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
@@ -172,5 +217,50 @@ class TypeHierarchyProviderTest {
     assertThat(superType.getName()).isEqualTo("sw:slotted_format_mixin");
     assertThat(superType.getKind()).isEqualTo(SymbolKind.Class);
     assertThat(superType.getUri()).isEqualTo(MagikTypedFile.DEFAULT_URI.toString());
+  }
+
+  private TypeHierarchyItem createExemplarItem() {
+    return new TypeHierarchyItem(
+        "user:exemplar",
+        SymbolKind.Class,
+        MagikTypedFile.DEFAULT_URI.toString(),
+        new Range(),
+        new Range());
+  }
+
+  @Test
+  void testGetSubtypesOfATypeDefinedTwice() {
+    final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
+    final IDefinitionKeeper definitionKeeper = this.createKeeperDefiningTwice(exemplarRef);
+    final TypeString subExemplarRef = TypeString.ofIdentifier("sub_exemplar", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, subExemplarRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, subExemplarRef, exemplarRef));
+
+    final TypeHierarchyItem item = this.createExemplarItem();
+    final TypeHierarchyProvider provider = new TypeHierarchyProvider(definitionKeeper);
+    final List<TypeHierarchyItem> subTypes = provider.typeHierarchySubtypes(item);
+    assertThat(subTypes).hasSize(1);
+  }
+
+  @Test
+  void testGetSupertypesListEveryDefinitionOfAParentDefinedTwice() {
+    final TypeString exemplarRef = TypeString.ofIdentifier("exemplar", "user");
+    final TypeString baseRef = TypeString.ofIdentifier("base", "user");
+    final IDefinitionKeeper definitionKeeper = this.createKeeperDefiningTwice(exemplarRef);
+    for (final String moduleName : List.of("module_a", "module_b")) {
+      definitionKeeper.add(
+          new ExemplarDefinition(
+              null, null, moduleName, null, null, ExemplarDefinition.Sort.SLOTTED, baseRef, null));
+    }
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, exemplarRef, baseRef));
+
+    final TypeHierarchyItem item = this.createExemplarItem();
+    final TypeHierarchyProvider provider = new TypeHierarchyProvider(definitionKeeper);
+    final List<TypeHierarchyItem> superTypes = provider.typeHierarchySupertypes(item);
+    assertThat(superTypes).hasSize(2);
   }
 }
