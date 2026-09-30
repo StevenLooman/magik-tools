@@ -60,9 +60,6 @@ class MethodExistsTypedCheckTest {
 
   @Test
   void testMethodOnExemplarShadowingSameNameInUsedPackage() {
-    // A reference to an exemplar defined in the current package must resolve to that single
-    // exemplar, even when a same-named (e.g. stale) exemplar exists in a used package. Otherwise
-    // the reference resolves to a union and the check false-positives on the unrelated member.
     final String code =
         """
         _package rs
@@ -193,5 +190,92 @@ class MethodExistsTypedCheckTest {
             ExpressionResultString.EMPTY));
     final MagikTypedCheck check = new MethodExistsTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  private static final TypeString BASE_REF = TypeString.ofIdentifier("base", "user");
+
+  private void addExemplar(
+      final IDefinitionKeeper definitionKeeper,
+      final ExemplarDefinition.Sort sort,
+      final TypeString typeString) {
+    definitionKeeper.add(
+        new ExemplarDefinition(null, null, null, null, null, sort, typeString, null));
+  }
+
+  private void addPropsMethod(final IDefinitionKeeper definitionKeeper, final TypeString owner) {
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            owner,
+            "props",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_INTEGER),
+            ExpressionResultString.EMPTY));
+  }
+
+  private void addMethod(
+      final IDefinitionKeeper definitionKeeper,
+      final TypeString owner,
+      final String methodName,
+      final ExpressionResultString returnTypes) {
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            owner,
+            methodName,
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            returnTypes,
+            ExpressionResultString.EMPTY));
+  }
+
+  @Test
+  void testSelfUnionArmResolvesToTheMethodExemplar() {
+    final String code =
+        """
+        _package user
+        _method base.run()
+          _self.a().props
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, BASE_REF);
+    this.addMethod(definitionKeeper, BASE_REF, "a()", ExpressionResultString.UNDEFINED);
+    final ExpressionResultString selfResult = new ExpressionResultString(TypeString.SELF);
+    this.addMethod(definitionKeeper, BASE_REF, "a()", selfResult);
+    this.addPropsMethod(definitionKeeper, BASE_REF);
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testSelfInAProcResolvesToTheProcedure() {
+    final String code =
+        """
+        _package user
+        _method base.run()
+          _proc()
+            _self.invoke()
+          _endproc
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, BASE_REF);
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, TypeString.SW_PROCEDURE);
+    this.addMethod(
+        definitionKeeper, TypeString.SW_PROCEDURE, "invoke()", ExpressionResultString.EMPTY);
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 }

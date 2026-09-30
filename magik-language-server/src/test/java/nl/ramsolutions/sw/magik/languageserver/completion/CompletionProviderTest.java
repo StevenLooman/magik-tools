@@ -134,6 +134,48 @@ class CompletionProviderTest {
     assertThat(item.getDetail()).isEqualTo("user:a");
   }
 
+  private MethodDefinition createMethodDefinition(
+      final TypeString typeStr, final String methodName, final ExpressionResultString returnTypes) {
+    return new MethodDefinition(
+        null,
+        null,
+        null,
+        null,
+        null,
+        typeStr,
+        methodName,
+        Collections.emptySet(),
+        Collections.emptyList(),
+        null,
+        null,
+        returnTypes,
+        ExpressionResultString.EMPTY);
+  }
+
+  @Test
+  void testMethodCompletionSelfUnionMember() {
+    final String code =
+        """
+        _method a.b
+            _self.first().fi
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString aRef = TypeString.ofIdentifier("a", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, aRef, null));
+    definitionKeeper.add(
+        this.createMethodDefinition(aRef, "first()", ExpressionResultString.UNDEFINED));
+    final ExpressionResultString selfResult = new ExpressionResultString(TypeString.SELF);
+    definitionKeeper.add(this.createMethodDefinition(aRef, "first()", selfResult));
+    final Position position = new Position(1, 19); // On 'i'.
+
+    final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
+
+    final List<String> labels = completions.stream().map(CompletionItem::getLabel).toList();
+    assertThat(labels).contains("first()");
+  }
+
   @Test
   void testMethodCompletionExisting() {
     final String code =

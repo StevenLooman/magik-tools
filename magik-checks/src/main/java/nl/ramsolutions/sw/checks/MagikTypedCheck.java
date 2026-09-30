@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -14,6 +15,7 @@ import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasoner;
@@ -68,7 +70,8 @@ public class MagikTypedCheck extends MagikCheck {
   }
 
   /**
-   * Get type method invoked on.
+   * Get type method invoked on, with {@code _self}/{@code _private} resolved as {@link
+   * SelfHelper#getSelfOwnerType}, also as a union member.
    *
    * @param node METHOD_INVOCATION node.
    * @return Type method is invoked, or UNDEFINED_TYPE.
@@ -82,12 +85,21 @@ public class MagikTypedCheck extends MagikCheck {
     final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
     final ExpressionResultString result = reasonerState.getNodeType(previousSibling);
     final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
-    if (typeStr.equals(TypeString.SELF)) {
-      final AstNode methodDefNode = node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION);
-      return this.getTypeOfMethodDefinition(methodDefNode);
+    if (!MagikTypedCheck.hasSelfMember(typeStr)) {
+      return typeStr;
     }
 
-    return typeStr;
+    // As the reasoner resolves it: in a proc, `_self` is the procedure.
+    final TypeString selfOwnerTypeStr = SelfHelper.getSelfOwnerType(node);
+    final TypeString ownerTypeStr =
+        Objects.requireNonNullElse(selfOwnerTypeStr, TypeString.UNDEFINED);
+    final TypeString selfSubstitutedTypeStr = typeStr.substituteType(TypeString.SELF, ownerTypeStr);
+    return selfSubstitutedTypeStr.substituteType(TypeString.PRIVATE, ownerTypeStr);
+  }
+
+  private static boolean hasSelfMember(final TypeString typeStr) {
+    final List<TypeString> memberTypeStrs = typeStr.getCombinedTypes();
+    return memberTypeStrs.stream().anyMatch(member -> member.isSelf() || member.isPrivate());
   }
 
   /**
