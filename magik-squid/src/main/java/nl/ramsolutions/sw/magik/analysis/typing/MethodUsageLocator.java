@@ -6,6 +6,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +16,7 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
@@ -64,7 +66,14 @@ public class MethodUsageLocator {
 
               final TypeStringResolver resolver = magikFile.getTypeStringResolver();
               final TypeString wantedMethodUsageTypeStr = wantedMethodUsage.getTypeName();
-              if (!resolver.isKindOf(wantedMethodUsageTypeStr, typeStr)) {
+              final boolean isSuperReceiver =
+                  receiverNode.getFirstChild(MagikGrammar.SUPER) != null;
+              final boolean reachesWanted =
+                  isSuperReceiver
+                      ? MethodUsageLocator.isSuperDispatchTo(
+                          resolver, typeStr, wantedMethodUsageTypeStr, methodName)
+                      : resolver.isKindOf(wantedMethodUsageTypeStr, typeStr);
+              if (!reachesWanted) {
                 return null;
               }
 
@@ -74,6 +83,33 @@ public class MethodUsageLocator {
             })
         .filter(Objects::nonNull)
         .toList();
+  }
+
+  /**
+   * Test if a {@code _super} call dispatches to the wanted method. {@code _super} names a parent's
+   * implementation, so the call reaches the wanted method only when that is the one the parent
+   * responds with: never the enclosing method itself, a sibling's, or one a nearer parent shadows.
+   *
+   * @param resolver Resolver of the call site's file.
+   * @param superTypeStr Type of the {@code _super} receiver.
+   * @param wantedTypeStr Type owning the wanted method.
+   * @param methodName Name of the wanted method.
+   * @return True if the call dispatches to the wanted method.
+   */
+  private static boolean isSuperDispatchTo(
+      final TypeStringResolver resolver,
+      final TypeString superTypeStr,
+      final TypeString wantedTypeStr,
+      final String methodName) {
+    final TypeString resolvedWantedTypeStr = resolver.getResolvedTypeString(wantedTypeStr);
+    final TypeString bareWantedTypeStr = resolvedWantedTypeStr.getWithoutGenerics();
+    final Collection<MethodDefinition> respondingDefinitions =
+        resolver.getRespondingMethodDefinitions(superTypeStr, methodName);
+    return respondingDefinitions.stream()
+        .map(MethodDefinition::getTypeName)
+        .map(resolver::getResolvedTypeString)
+        .map(TypeString::getWithoutGenerics)
+        .anyMatch(bareWantedTypeStr::equals);
   }
 
   private MagikTypedFile getMagikFile(final Location location) {

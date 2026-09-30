@@ -144,4 +144,38 @@ class MethodRenamerTest {
                     new TextEdit(
                         new Range(new Position(2, 4), new Position(2, 15)), "new_method_name"))));
   }
+
+  @Test
+  void testRenameMethodLeavesSuperCallToParent() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:p, {})
+        def_slotted_exemplar(:t, {}, {:p})
+
+        _method p.method_name()
+        _endmethod
+
+        _method t.method_name()
+          _super.method_name()
+        _endmethod
+        """;
+    final Position position = new Position(7, 10); // On `method_name` of `t`.
+
+    final Path path = this.extension.pathOf("/source.magik");
+    final MagikTypedFile magikFile = this.extension.addMagikFile(path, code);
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode node = AstQuery.nodeAt(topNode, position, MagikGrammar.IDENTIFIER);
+
+    final MethodRenamer renamer = new MethodRenamer(magikFile, node);
+    final Map<URI, List<TextEdit>> renames = renamer.provideRename("new_method_name");
+
+    // `_super.method_name()` calls `p`'s method, which is not renamed.
+    assertThat(renames)
+        .isEqualTo(
+            Map.of(
+                URI.create("memory:test:///source.magik"),
+                List.of(
+                    new TextEdit(
+                        new Range(new Position(7, 10), new Position(7, 21)), "new_method_name"))));
+  }
 }

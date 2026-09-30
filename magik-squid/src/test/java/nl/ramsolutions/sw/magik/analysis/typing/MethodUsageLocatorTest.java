@@ -92,4 +92,163 @@ class MethodUsageLocatorTest {
             .collect(Collectors.toSet());
     assertThat(uris).isEqualTo(Set.of(magikFileA.getUri(), magikFileB.getUri()));
   }
+
+  @Test
+  void testSuperCallInsideMethodIsNotItsUsage() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:p, {})
+        def_slotted_exemplar(:t, {}, {:p})
+
+        _method p.m
+        _endmethod
+
+        _method t.m
+          _super.m
+        _endmethod
+        """;
+    this.addMagikFile(code);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages = this.locateMethodUsages("t", "m");
+
+    assertThat(usages).isEmpty();
+  }
+
+  @Test
+  void testSuperCallInsideSiblingIsNotUsage() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:p, {})
+        def_slotted_exemplar(:t, {}, {:p})
+        def_slotted_exemplar(:s, {}, {:p})
+
+        _method p.m
+        _endmethod
+
+        _method t.m
+        _endmethod
+
+        _method s.m
+          _super.m
+        _endmethod
+        """;
+    this.addMagikFile(code);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages = this.locateMethodUsages("t", "m");
+
+    assertThat(usages).isEmpty();
+  }
+
+  @Test
+  void testSuperCallShadowedByNearerParentIsNotUsage() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:t, {})
+        def_slotted_exemplar(:u, {}, {:t})
+        def_slotted_exemplar(:s, {}, {:u})
+
+        _method t.m
+        _endmethod
+
+        _method u.m
+        _endmethod
+
+        _method s.m
+          _super.m
+        _endmethod
+        """;
+    this.addMagikFile(code);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> tUsages = this.locateMethodUsages("t", "m");
+    final List<Entry<MethodUsage, MagikTypedFile>> uUsages = this.locateMethodUsages("u", "m");
+
+    assertThat(tUsages).isEmpty();
+    assertThat(uUsages).hasSize(1);
+  }
+
+  @Test
+  void testSuperCallInsideChildIsParentUsage() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:t, {})
+        def_slotted_exemplar(:s, {}, {:t})
+
+        _method t.m(p)
+        _endmethod
+
+        _method s.m(p)
+          _super.m(1)
+        _endmethod
+        """;
+    this.addMagikFile(code);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages = this.locateMethodUsages("t", "m()");
+
+    assertThat(usages).hasSize(1);
+  }
+
+  @Test
+  void testSuperCallThroughNonOverridingParentIsUsage() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:t, {})
+        def_slotted_exemplar(:u, {}, {:t})
+        def_slotted_exemplar(:s, {}, {:u})
+
+        _method t.m(p)
+        _endmethod
+
+        _method s.m(p)
+          _super.m(1)
+        _endmethod
+        """;
+    this.addMagikFile(code);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages = this.locateMethodUsages("t", "m()");
+
+    assertThat(usages).hasSize(1);
+  }
+
+  @Test
+  void testNamedSuperCallIsUsageOfNamedParentOnly() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:t, {})
+        def_slotted_exemplar(:q, {})
+        def_slotted_exemplar(:s, {}, {:t, :q})
+
+        _method t.m
+        _endmethod
+
+        _method q.m
+        _endmethod
+
+        _method s.m
+          _super(q).m
+        _endmethod
+        """;
+    this.addMagikFile(code);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> tUsages = this.locateMethodUsages("t", "m");
+    final List<Entry<MethodUsage, MagikTypedFile>> qUsages = this.locateMethodUsages("q", "m");
+    final List<Entry<MethodUsage, MagikTypedFile>> sUsages = this.locateMethodUsages("s", "m");
+
+    assertThat(tUsages).isEmpty();
+    assertThat(qUsages).hasSize(1);
+    assertThat(sUsages).isEmpty();
+  }
+
+  private void addMagikFile(final String code) throws IOException {
+    final Path path = this.smallworldProject.pathOf("/source.magik");
+    this.smallworldProject.addMagikFile(path, code);
+  }
+
+  private List<Entry<MethodUsage, MagikTypedFile>> locateMethodUsages(
+      final String exemplarName, final String methodName) {
+    final IDefinitionKeeper definitionKeeper = this.smallworldProject.getDefinitionKeeper();
+    final MethodUsageLocator methodUsageLocator = new MethodUsageLocator(definitionKeeper);
+    final TypeString typeStr = TypeString.ofIdentifier(exemplarName, "user");
+    final MethodUsage wantedMethodUsage = new MethodUsage(typeStr, methodName);
+    return methodUsageLocator.getMethodUsages(wantedMethodUsage);
+  }
 }
