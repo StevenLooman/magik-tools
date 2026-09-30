@@ -162,7 +162,8 @@ _method method_definition.new_from(package, name, method)
 	_then
 		modifiers.add_last("private")
 	_endif
-	_if method.iter?
+	_local iter? << method.iter? _orif _self.implementations_iter?(method)
+	_if iter?
 	_then
 		modifiers.add_last("iter")
 	_endif
@@ -183,7 +184,7 @@ _method method_definition.new_from(package, name, method)
 			>> _self.undefined_result
 		_endif
 	_local loop_types <<
-		_if method.iter?
+		_if iter?
 		_then
 			>> _self.undefined_result
 		_else
@@ -239,6 +240,41 @@ _method method_definition.new_from(package, name, method)
 		_then
 			>> pragma.new_from_topics(topics)
 		_endif)
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method method_definition.implementations_iter?(method)
+	## Test if the abstract `method` is an iterator, judged by its implementations.
+	## The image does not keep `_iter` on an `_abstract _iter _method`, so `method.iter?` is
+	## always false for one. Its concrete implementations, as resolved on the descendants of
+	## its owner, do keep it: `method` is taken to be an iterator if there is at least one
+	## and every one of them is an iterator.
+	## @param {sw:method} method
+	## @return {sw:false}
+	_if _not method.abstract?
+	_then
+		_return _false
+	_endif
+
+	_local implemented? << _false
+	_for child _over method.owner.all_children().fast_elements()
+	_loop
+		_local implementation << child.method_at(method.name)
+		_if implementation _is _unset _orif
+		    implementation.abstract?
+		_then
+			_continue
+		_endif
+
+		_if _not implementation.iter?
+		_then
+			_return _false
+		_endif
+
+		implemented? << _true
+	_endloop
+	_return implemented?
 _endmethod
 $
 
