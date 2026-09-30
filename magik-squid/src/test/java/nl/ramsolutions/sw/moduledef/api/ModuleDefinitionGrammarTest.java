@@ -50,7 +50,8 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testDoNotTranslate() {
-    assertThat(this.grammar.rule(ModuleDefinitionGrammar.DO_NOT_TRANSLATE)).matches("do_not_translate");
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.DO_NOT_TRANSLATE))
+        .matches("do_not_translate");
   }
 
   @Test

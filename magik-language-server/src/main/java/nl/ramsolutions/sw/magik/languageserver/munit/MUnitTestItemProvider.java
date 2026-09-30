@@ -188,7 +188,8 @@ public class MUnitTestItemProvider {
     }
 
     // Construct SwModule.
-    final ModuleDefFile moduleDefFile = new ModuleDefFile(moduleDefPath, this.definitionKeeper, null);
+    final ModuleDefFile moduleDefFile =
+        new ModuleDefFile(moduleDefPath, this.definitionKeeper, null);
     return moduleDefFile.getModuleDefinition();
   }
 

@@ -58,7 +58,8 @@ public abstract class MagikRuleAssert extends RuleAssert {
             new MutableParsingRule(new EndOfInput()).is(EndOfInputExpression.INSTANCE);
     final MutableParsingRule withEndOfInput =
         (MutableParsingRule)
-            new MutableParsingRule(new WithEndOfInput(rule.getRuleKey())).is(this.actual, endOfInput);
+            new MutableParsingRule(new WithEndOfInput(rule.getRuleKey()))
+                .is(this.actual, endOfInput);
     return new ParseRunner(withEndOfInput);
   }
 

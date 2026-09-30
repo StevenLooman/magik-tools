@@ -50,7 +50,8 @@ class ProductDefinitionGrammarTest {
 
   @Test
   void testDoNotTranslate() {
-    assertThat(this.grammar.rule(ProductDefinitionGrammar.DO_NOT_TRANSLATE)).matches("do_not_translate");
+    assertThat(this.grammar.rule(ProductDefinitionGrammar.DO_NOT_TRANSLATE))
+        .matches("do_not_translate");
   }
 
   @Test
@@ -90,7 +91,8 @@ class ProductDefinitionGrammarTest {
 
   @Test
   void testSyntaxError() {
-    assertThat(this.grammar.rule(ProductDefinitionGrammar.SYNTAX_ERROR_SECTION)).matches("abc\nend");
+    assertThat(this.grammar.rule(ProductDefinitionGrammar.SYNTAX_ERROR_SECTION))
+        .matches("abc\nend");
   }
 
   @Test

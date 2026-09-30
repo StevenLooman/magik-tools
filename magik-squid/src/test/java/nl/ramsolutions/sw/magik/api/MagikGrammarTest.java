@@ -267,13 +267,15 @@ class MagikGrammarTest {
 
   @Test
   void testIf() {
-    MagikRuleForbiddenAssert.assertThat(this.grammar.rule(MagikGrammar.IF), MagikGrammar.IF_SYNTAX_ERROR)
+    MagikRuleForbiddenAssert.assertThat(
+            this.grammar.rule(MagikGrammar.IF), MagikGrammar.IF_SYNTAX_ERROR)
         .matches("_if expr _then _endif")
         .matches("_if expr _then _else _endif")
         .matches("_if expr _then _elif expr _then _else _endif")
         .matches("_if expr _then >> 1 _endif")
         .matches("_if e _then _elif e _then _elif e _then _endif");
-    MagikRuleRequiredAssert.assertThat(this.grammar.rule(MagikGrammar.IF), MagikGrammar.IF_SYNTAX_ERROR)
+    MagikRuleRequiredAssert.assertThat(
+            this.grammar.rule(MagikGrammar.IF), MagikGrammar.IF_SYNTAX_ERROR)
         .matches("_if _a _endif");
   }
 
@@ -595,7 +597,8 @@ class MagikGrammarTest {
 
   @Test
   void testClass() {
-    Assertions.assertThat(this.grammar.rule(MagikGrammar.CLASS)).matches("_class |java.lang.Integer|");
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.CLASS))
+        .matches("_class |java.lang.Integer|");
   }
 
   @Test
@@ -608,12 +611,14 @@ class MagikGrammarTest {
         .matches("write(1)\nwrite(2)")
         .matches("write(1) ; write(2)");
 
-    MagikRuleForbiddenAssert.assertThat(this.grammar.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
+    MagikRuleForbiddenAssert.assertThat(
+            this.grammar.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
         .matches("_block\n _local x << 10  # type: integer\n write(x)\n _endblock\n")
         .matches("_package a\n:a")
         .matches("_block\n_loop\n_endloop@get_object\n_endblock\n");
 
-    MagikRuleRequiredAssert.assertThat(this.grammar.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
+    MagikRuleRequiredAssert.assertThat(
+            this.grammar.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
         .matches("_package a:a")
         .matches("_block _endblo")
         .matches("_blocki _endblock");
