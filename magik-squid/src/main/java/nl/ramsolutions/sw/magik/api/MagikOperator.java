@@ -43,6 +43,6 @@ public enum MagikOperator implements GrammarRuleKey {
   }
 
   public String getValue() {
-    return value;
+    return this.value;
   }
 }

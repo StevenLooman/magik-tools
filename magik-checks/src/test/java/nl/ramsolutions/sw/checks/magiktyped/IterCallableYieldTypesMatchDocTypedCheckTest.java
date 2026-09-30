@@ -158,7 +158,7 @@ class IterCallableYieldTypesMatchDocTypedCheckTest {
           _loopbody(_scatter vec)
         _endmethod
         """;
-    final IDefinitionKeeper definitionKeeper = withSimpleVectorForScatter();
+    final IDefinitionKeeper definitionKeeper = this.withSimpleVectorForScatter();
     final MagikTypedCheck check = new IterCallableYieldTypesMatchDocTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
@@ -173,7 +173,7 @@ class IterCallableYieldTypesMatchDocTypedCheckTest {
           _loopbody(_scatter vec)
         _endmethod
         """;
-    final IDefinitionKeeper definitionKeeper = withSimpleVectorForScatter();
+    final IDefinitionKeeper definitionKeeper = this.withSimpleVectorForScatter();
     final MagikTypedCheck check = new IterCallableYieldTypesMatchDocTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
@@ -189,7 +189,7 @@ class IterCallableYieldTypesMatchDocTypedCheckTest {
           _loopbody(10, _scatter vec)
         _endmethod
         """;
-    final IDefinitionKeeper definitionKeeper = withSimpleVectorForScatter();
+    final IDefinitionKeeper definitionKeeper = this.withSimpleVectorForScatter();
     final MagikTypedCheck check = new IterCallableYieldTypesMatchDocTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }

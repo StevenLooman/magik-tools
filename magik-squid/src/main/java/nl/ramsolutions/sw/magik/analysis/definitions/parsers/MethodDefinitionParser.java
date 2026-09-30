@@ -106,7 +106,7 @@ public class MethodDefinitionParser {
     final AstNode parametersNode = this.node.getFirstChild(MagikGrammar.PARAMETERS);
     final List<ParameterDefinition> parameters =
         this.createParameterDefinitions(timestamp, moduleName, parametersNode, parameterTypes);
-    final AstNode assignmentParameterNode = node.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
+    final AstNode assignmentParameterNode = this.node.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
     final ParameterDefinition assignmentParameter =
         this.createAssignmentParameterDefinition(
             timestamp, moduleName, assignmentParameterNode, parameterTypes);
@@ -136,7 +136,7 @@ public class MethodDefinitionParser {
 
     // Method doc.
     final String doc =
-        MagikCommentExtractor.extractDocCommentTokens(node)
+        MagikCommentExtractor.extractDocCommentTokens(this.node)
             .map(Token::getValue)
             .map(line -> line.substring(2)) // Strip '##'
             .map(String::trim)

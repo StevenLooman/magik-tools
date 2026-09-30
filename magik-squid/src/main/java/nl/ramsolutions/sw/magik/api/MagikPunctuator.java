@@ -41,6 +41,6 @@ public enum MagikPunctuator implements GrammarRuleKey {
   }
 
   public String getValue() {
-    return value;
+    return this.value;
   }
 }

@@ -13,11 +13,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 class FileNotInLoadListCheckTest {
 
   final Path TEST_PRODUCT_PATH = Path.of("magik-checks/src/test/resources/test_product");
-  final Path TEST_MODULE_PATH = TEST_PRODUCT_PATH.resolve("modules/test_module");
+  final Path TEST_MODULE_PATH = this.TEST_PRODUCT_PATH.resolve("modules/test_module");
 
   @Test
   void testNotInLoadList() throws IllegalArgumentException, IOException {
-    final Path path = TEST_MODULE_PATH.resolve("source/not_in_load_list.magik");
+    final Path path = this.TEST_MODULE_PATH.resolve("source/not_in_load_list.magik");
     final MagikCheck check = new FileNotInLoadListCheck();
     assertThat(check).reportsIssueCount(path, 1);
   }
@@ -30,7 +30,7 @@ class FileNotInLoadListCheckTest {
         "source/in_load_list_3.magik",
       })
   void testInLoadList(final String filename) throws IllegalArgumentException, IOException {
-    final Path path = TEST_MODULE_PATH.resolve(filename);
+    final Path path = this.TEST_MODULE_PATH.resolve(filename);
     final MagikCheck check = new FileNotInLoadListCheck();
     assertThat(check).reportsNoIssues(path);
   }

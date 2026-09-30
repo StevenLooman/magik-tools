@@ -11,35 +11,35 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testNumber() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.NUMBER)).matches("1");
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.NUMBER)).matches("1");
   }
 
   @Test
   void testIdentifier() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.IDENTIFIER)).matches("test_module");
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.IDENTIFIER)).matches("test_module");
   }
 
   @Test
   void testModuleIdentification() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.MODULE_IDENTIFICATION))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.MODULE_IDENTIFICATION))
         .matches("test_module 1")
         .matches("test_module 1 1");
   }
 
   @Test
   void testConditionMessageAccessor() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.CONDITION_MESSAGE_ACCESSOR))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.CONDITION_MESSAGE_ACCESSOR))
         .matches("condition_message_accessor x");
   }
 
   @Test
   void testDescription() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.FREE_LINE))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.FREE_LINE))
         .matches("abc\n")
         .matches("etc etc etc\n")
         .matches("this is the end\n")
         .notMatches("end\n");
-    assertThat(grammar.rule(ModuleDefinitionGrammar.DESCRIPTION))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.DESCRIPTION))
         .matches("description\nend")
         .matches("description\n\t\nend")
         .matches("description\nabc\nend")
@@ -50,29 +50,29 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testDoNotTranslate() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.DO_NOT_TRANSLATE)).matches("do_not_translate");
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.DO_NOT_TRANSLATE)).matches("do_not_translate");
   }
 
   @Test
   void testHidden() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.HIDDEN)).matches("hidden");
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.HIDDEN)).matches("hidden");
   }
 
   @Test
   void testLanguage() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.LANGUAGE)).matches("language en_gb");
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.LANGUAGE)).matches("language en_gb");
   }
 
   @Test
   void testMessages() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.MESSAGES))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.MESSAGES))
         .matches("messages a")
         .matches("messages a b c");
   }
 
   @Test
   void testOptional() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.OPTIONAL))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.OPTIONAL))
         .matches("optional\nend")
         .matches("optional\nx\nend")
         .matches("optional\nx 1\nend")
@@ -81,7 +81,7 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testRequiredBy() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.REQUIRED_BY))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.REQUIRED_BY))
         .matches("required_by\nend")
         .matches("required_by\nx\nend")
         .matches("required_by\nx 1\nend")
@@ -90,7 +90,7 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testRequires() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.REQUIRES))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.REQUIRES))
         .matches("requires\nend")
         .matches("requires\nx\nend")
         .matches("requires\nx 1\nend")
@@ -99,13 +99,13 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testRequiresJava() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.REQUIRES_JAVA))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.REQUIRES_JAVA))
         .matches("requires_java\n\tcom.gesmallworld.magik.http\nend");
   }
 
   @Test
   void testRequiresDatamodel() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.REQUIRES_DATAMODEL))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.REQUIRES_DATAMODEL))
         .matches("requires_datamodel\nend")
         .matches("requires_datamodel\ndb\nend")
         .matches("requires_datamodel\ndb1 gis\nend")
@@ -117,14 +117,14 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testTemplates() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.TEMPLATES))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.TEMPLATES))
         .matches("templates\nend")
         .matches("templates\ndb\nend");
   }
 
   @Test
   void testTest() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.TEST))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.TEST))
         .matches("test\nend")
         .matches("test\nname x_tests\nend")
         .matches("test\nframework munit\nend")
@@ -140,7 +140,7 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testTestsModules() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.TESTS_MODULES))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.TESTS_MODULES))
         .matches("tests_modules\nend")
         .matches("tests_modules\nx\nend")
         .matches("tests_modules\nx 1\nend")
@@ -149,7 +149,7 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testAceInstallation() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.ACE_INSTALLATION))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.ACE_INSTALLATION))
         .matches("ace_installation\nend")
         .matches("ace_installation\nx\nend")
         .matches("ace_installation\nx\ny\nz\nend")
@@ -158,7 +158,7 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testAuthInstallation() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.AUTH_INSTALLATION))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.AUTH_INSTALLATION))
         .matches("auth_installation\nend")
         .matches("auth_installation\nx\nend")
         .matches("auth_installation\nx\ny\nz\nend")
@@ -167,7 +167,7 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testCaseInstallation() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.CASE_INSTALLATION))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.CASE_INSTALLATION))
         .matches("case_installation\nend")
         .matches("case_installation\nx\nend")
         .matches("case_installation\nx\ny\nz\nend")
@@ -176,7 +176,7 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testStyleInstallation() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.STYLE_INSTALLATION))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.STYLE_INSTALLATION))
         .matches("style_installation\nend")
         .matches("style_installation\nx\nend")
         .matches("style_installation\nx\ny\nz\nend")
@@ -185,7 +185,7 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testSystemInstallation() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.SYSTEM_INSTALLATION))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.SYSTEM_INSTALLATION))
         .matches("system_installation\nend")
         .matches("system_installation\nx\nend")
         .matches("system_installation\nx\ny\nz\nend")
@@ -194,12 +194,12 @@ class ModuleDefinitionGrammarTest {
 
   @Test
   void testSyntaxError() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.SYNTAX_ERROR_SECTION)).matches("abc\nend");
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.SYNTAX_ERROR_SECTION)).matches("abc\nend");
   }
 
   @Test
   void testMethodDefinition() {
-    assertThat(grammar.rule(ModuleDefinitionGrammar.MODULE_DEFINITION))
+    assertThat(this.grammar.rule(ModuleDefinitionGrammar.MODULE_DEFINITION))
         .matches("")
         .matches("module")
         .matches("module 1 2 3 4 5")

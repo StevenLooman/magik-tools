@@ -58,7 +58,7 @@ class JsonDefinitionWriterTest {
 
   @AfterEach
   void unlinkTempFile() throws IOException {
-    if (Files.exists(tempPath)) {
+    if (Files.exists(this.tempPath)) {
       Files.delete(this.tempPath);
     }
   }

@@ -28,7 +28,7 @@ public abstract class MagikCheck extends MagikVisitor implements Check {
 
   @CheckForNull
   public CheckHolder getHolder() {
-    return holder;
+    return this.holder;
   }
 
   /**

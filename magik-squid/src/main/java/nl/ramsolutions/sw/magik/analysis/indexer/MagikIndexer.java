@@ -67,7 +67,7 @@ public class MagikIndexer {
 
     if (fileChangeType == FileChangeType.CREATED || fileChangeType == FileChangeType.CHANGED) {
       final SourceFileScanner scanner =
-          new SourceFileScanner(ignoreHandler, SourceFileScanner.MAGIK_FILE_FILTER);
+          new SourceFileScanner(this.ignoreHandler, SourceFileScanner.MAGIK_FILE_FILTER);
       scanner.getFiles(path).forEach(this::indexFile);
     }
 

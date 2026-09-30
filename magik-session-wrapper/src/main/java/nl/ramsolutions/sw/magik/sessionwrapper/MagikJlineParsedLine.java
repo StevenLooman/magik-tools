@@ -53,7 +53,7 @@ class MagikJlineParsedLine implements ParsedLine {
   @Override
   public int wordCursor() {
     final Position cursorPosition = this.getPositionFromCursor();
-    final AstNode node = AstQuery.nodeAt(topNode, cursorPosition);
+    final AstNode node = AstQuery.nodeAt(this.topNode, cursorPosition);
     if (node == null) {
       return 0;
     }

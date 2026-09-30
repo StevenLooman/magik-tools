@@ -31,7 +31,7 @@ public class ProcedureInvocationNodeHelper {
    */
   @CheckForNull
   public String getInvokedIdentifier() {
-    AstNode previousSibling = node.getPreviousSibling();
+    AstNode previousSibling = this.node.getPreviousSibling();
     if (previousSibling == null) {
       return null;
     }

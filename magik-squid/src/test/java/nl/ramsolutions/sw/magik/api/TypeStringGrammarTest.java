@@ -14,7 +14,7 @@ class TypeStringGrammarTest {
 
   @Test
   void testTypeString() {
-    Assertions.assertThat(grammarTypeString.rule(TypeStringGrammar.TYPE_STRING))
+    Assertions.assertThat(this.grammarTypeString.rule(TypeStringGrammar.TYPE_STRING))
         .matches("integer")
         .matches(" sw:integer")
         .matches("_self")
@@ -32,7 +32,7 @@ class TypeStringGrammarTest {
   @Test
   void testExpressionResultString() {
     Assertions.assertThat(
-            grammarExpressionResultString.rule(TypeStringGrammar.EXPRESSION_RESULT_STRING))
+            this.grammarExpressionResultString.rule(TypeStringGrammar.EXPRESSION_RESULT_STRING))
         .matches("integer")
         .matches("_self")
         .matches("_self|sw:unset")

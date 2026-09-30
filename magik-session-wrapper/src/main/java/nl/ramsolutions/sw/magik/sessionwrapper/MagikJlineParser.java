@@ -16,7 +16,7 @@ class MagikJlineParser implements Parser {
   @Override
   public ParsedLine parse(final String line, final int cursor, final ParseContext context)
       throws SyntaxError {
-    final AstNode topNode = magikParser.parse(line);
+    final AstNode topNode = this.magikParser.parse(line);
 
     switch (context) {
       case UNSPECIFIED:

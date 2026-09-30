@@ -86,7 +86,7 @@ public class ProductDefinition implements IDefinition {
 
   @CheckForNull
   public String getParent() {
-    return parent;
+    return this.parent;
   }
 
   @CheckForNull

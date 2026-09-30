@@ -39,7 +39,7 @@ public final class AstNodeTypePrinter {
 
   private void print(final int level, final AstNode node) throws IOException {
     if (level != 0) {
-      writer.append("\n");
+      this.writer.append("\n");
     }
 
     // Indent.

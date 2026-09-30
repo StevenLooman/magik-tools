@@ -44,7 +44,7 @@ public class SwMethodDocCheck extends MagikCheck {
     final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
     final AstNode methodNameNode = helper.getMethodNameNode();
     final String methodDoc = this.extractDoc(node);
-    if (methodDoc.isBlank() && !allowBlankMethodDoc) {
+    if (methodDoc.isBlank() && !this.allowBlankMethodDoc) {
       final String message = MESSAGE.formatted("all");
       this.addIssue(methodNameNode, message);
       return;

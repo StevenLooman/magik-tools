@@ -65,7 +65,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
     }
 
     public String getValue() {
-      return value;
+      return this.value;
     }
   }
 
@@ -87,7 +87,7 @@ public enum TypeStringGrammar implements GrammarRuleKey {
     }
 
     public String getValue() {
-      return value;
+      return this.value;
     }
   }
 

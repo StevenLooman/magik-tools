@@ -119,7 +119,7 @@ public class ModuleDefSensor implements Sensor {
     // Save issues.
     LOGGER.debug("Running checks");
     final Checks<ModuleDefCheck> checks =
-        checkFactory
+        this.checkFactory
             .<ModuleDefCheck>create(ProductModuleDefRulesDefinition.REPOSITORY_KEY)
             .addAnnotatedChecks(ModuleDefCheckList.INSTANCE.getChecks());
     for (final ModuleDefCheck check : checks.all()) {

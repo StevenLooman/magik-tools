@@ -335,7 +335,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
     final ExpressionResultString result = reasonerState.getNodeType(receiverNode);
     final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
     final String methodName = helper.getMethodName();
-    final TypeStringResolver resolver = magikFile.getTypeStringResolver();
+    final TypeStringResolver resolver = this.magikFile.getTypeStringResolver();
     final Set<SemanticToken.Modifier> modifiers =
         resolver.getRespondingMethodDefinitions(typeStr, methodName).stream()
                 .anyMatch(

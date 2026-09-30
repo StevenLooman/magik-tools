@@ -191,7 +191,7 @@ class VariableManager {
   private MagikVariable addVariable(final int frameId, final Local local) {
     final String name = local.getName();
     final String value = local.getValue();
-    return addVariable(frameId, name, value, name);
+    return this.addVariable(frameId, name, value, name);
   }
 
   /**

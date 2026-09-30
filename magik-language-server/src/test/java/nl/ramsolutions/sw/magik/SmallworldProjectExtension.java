@@ -52,7 +52,7 @@ public class SmallworldProjectExtension implements BeforeEachCallback, AfterEach
     final MagikTypedFile magikFile =
         new MagikTypedFile(SmallworldProjectExtension.PROPERTIES, uri, code, this.definitionKeeper);
     final IgnoreHandler ignoreHandler = new IgnoreHandler();
-    final MagikIndexer magikIndexer = new MagikIndexer(definitionKeeper, PROPERTIES, ignoreHandler);
+    final MagikIndexer magikIndexer = new MagikIndexer(this.definitionKeeper, PROPERTIES, ignoreHandler);
     final FileEvent fileEvent = new FileEvent(uri, FileEvent.FileChangeType.CREATED);
     magikIndexer.handleFileEvent(fileEvent);
     return magikFile;

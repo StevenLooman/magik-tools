@@ -12,7 +12,7 @@ class MagikGrammarTest {
 
   @Test
   void testPragma() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.PRAGMA))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.PRAGMA))
         .matches("_pragma(a=b)")
         .matches("_pragma(a=b,c=d)")
         .matches("_pragma(a={b,c})")
@@ -27,7 +27,7 @@ class MagikGrammarTest {
 
   @Test
   void testPackage() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.PACKAGE_SPECIFICATION))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.PACKAGE_SPECIFICATION))
         .matches("_package sw")
         .matches("_package user")
         .notMatches("_package p1:a");
@@ -35,7 +35,7 @@ class MagikGrammarTest {
 
   @Test
   void testHandling() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.HANDLING))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.HANDLING))
         .matches("_handling _default\n")
         .matches("_handling a _with _default\n")
         .matches("_handling a _with x\n")
@@ -46,7 +46,7 @@ class MagikGrammarTest {
   @Test
   void testBlock() {
     MagikRuleForbiddenAssert.assertThat(
-            grammar.rule(MagikGrammar.BLOCK), MagikGrammar.BLOCK_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.BLOCK), MagikGrammar.BLOCK_SYNTAX_ERROR)
         .matches("_block _endblock")
         .matches("_BLOCK _ENDBLOCK")
         .matches("_block \n _endblock")
@@ -80,7 +80,7 @@ class MagikGrammarTest {
         .matches("_block _block _endblock _endblock")
         .matches("_block @label _endblock");
     MagikRuleRequiredAssert.assertThat(
-            grammar.rule(MagikGrammar.BLOCK), MagikGrammar.BLOCK_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.BLOCK), MagikGrammar.BLOCK_SYNTAX_ERROR)
         .matches("_block _a _endblock")
         .matches("_block\n_a\n_endblock")
         .matches("_block write(1) write(2) _endblock")
@@ -92,14 +92,14 @@ class MagikGrammarTest {
   @Test
   void testTry() {
     MagikRuleForbiddenAssert.assertThat(
-            grammar.rule(MagikGrammar.TRY), MagikGrammar.TRY_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.TRY), MagikGrammar.TRY_SYNTAX_ERROR)
         .matches("_try _when error _endtry")
         .matches("_try _when information, warning _endtry")
         .matches("_try expr() _when error _endtry")
         .matches("_try _with e _when error _endtry")
         .matches("_try _with e expr() _when error _endtry");
     MagikRuleRequiredAssert.assertThat(
-            grammar.rule(MagikGrammar.TRY), MagikGrammar.TRY_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.TRY), MagikGrammar.TRY_SYNTAX_ERROR)
         .matches("_try _w _endtry")
         .matches("_try _when _endtry")
         .matches("_try _a _when error _endtry");
@@ -108,17 +108,17 @@ class MagikGrammarTest {
   @Test
   void testCatch() {
     MagikRuleForbiddenAssert.assertThat(
-            grammar.rule(MagikGrammar.CATCH), MagikGrammar.CATCH_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.CATCH), MagikGrammar.CATCH_SYNTAX_ERROR)
         .matches("_catch _endcatch")
         .matches("_catch :a\n_endcatch");
     MagikRuleRequiredAssert.assertThat(
-            grammar.rule(MagikGrammar.CATCH), MagikGrammar.CATCH_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.CATCH), MagikGrammar.CATCH_SYNTAX_ERROR)
         .matches("_catch _a _endcatch");
   }
 
   @Test
   void testArgumentsParen() {
-    final Rule rule = grammar.rule(MagikGrammar.ARGUMENTS_PAREN);
+    final Rule rule = this.grammar.rule(MagikGrammar.ARGUMENTS_PAREN);
     MagikRuleForbiddenAssert.assertThat(rule, MagikGrammar.ARGUMENTS_PAREN_SYNTAX_ERROR)
         .matches("()")
         .matches("(a, b)")
@@ -131,7 +131,7 @@ class MagikGrammarTest {
 
   @Test
   void testArgumentsSquare() {
-    final Rule rule = grammar.rule(MagikGrammar.ARGUMENTS_SQUARE);
+    final Rule rule = this.grammar.rule(MagikGrammar.ARGUMENTS_SQUARE);
     MagikRuleForbiddenAssert.assertThat(rule, MagikGrammar.ARGUMENTS_SQUARE_SYNTAX_ERROR)
         .matches("[a]")
         .matches("[a, b]")
@@ -144,7 +144,7 @@ class MagikGrammarTest {
 
   @Test
   void testLoopBodyStatement() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.LOOPBODY))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.LOOPBODY))
         .matches("_loopbody()")
         .matches("_loopbody(1)")
         .matches("_loopbody(1, 2)");
@@ -152,7 +152,7 @@ class MagikGrammarTest {
 
   @Test
   void testLeaveStatement() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.LEAVE_STATEMENT))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.LEAVE_STATEMENT))
         .matches("_leave")
         .matches("_leave @label")
         .matches("_leave _with a")
@@ -163,7 +163,7 @@ class MagikGrammarTest {
 
   @Test
   void testContinueStatement() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.CONTINUE_STATEMENT))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.CONTINUE_STATEMENT))
         .matches("_continue")
         .matches("_continue @label")
         .matches("_continue _with a")
@@ -173,7 +173,7 @@ class MagikGrammarTest {
 
   @Test
   void testThrow() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.THROW_STATEMENT))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.THROW_STATEMENT))
         .matches("_throw :test")
         .matches("_throw @error _with _false")
         .matches("_throw :a _with 1, 2, 3")
@@ -183,16 +183,16 @@ class MagikGrammarTest {
   @Test
   void testLock() {
     MagikRuleForbiddenAssert.assertThat(
-            grammar.rule(MagikGrammar.LOCK), MagikGrammar.LOCK_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.LOCK), MagikGrammar.LOCK_SYNTAX_ERROR)
         .matches("_lock x _endlock");
     MagikRuleRequiredAssert.assertThat(
-            grammar.rule(MagikGrammar.LOCK), MagikGrammar.LOCK_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.LOCK), MagikGrammar.LOCK_SYNTAX_ERROR)
         .matches("_lock x _a _endlock");
   }
 
   @Test
   void testProcedureDeclaration() {
-    final Rule rule = grammar.rule(MagikGrammar.PROCEDURE_DEFINITION);
+    final Rule rule = this.grammar.rule(MagikGrammar.PROCEDURE_DEFINITION);
     MagikRuleForbiddenAssert.assertThat(rule, MagikGrammar.PROCEDURE_DEFINITION_SYNTAX_ERROR)
         .matches("_proc() _endproc")
         .matches("_iter _proc() _endproc")
@@ -209,7 +209,7 @@ class MagikGrammarTest {
 
   @Test
   void testLabel() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.LABEL))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.LABEL))
         .matches("@label")
         .matches("@ label")
         .matches("@LABEL")
@@ -219,7 +219,7 @@ class MagikGrammarTest {
 
   @Test
   void testGlobalRef() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.GLOBAL_REF))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.GLOBAL_REF))
         .matches("@ref")
         .matches("@ ref")
         .matches("@REF")
@@ -232,7 +232,7 @@ class MagikGrammarTest {
 
   @Test
   void testFor() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.FOR))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.FOR))
         .matches("_for a _over a _loop _endloop")
         .matches("_for a, b _over a _loop _endloop")
         .matches("_for _gather x _over a _loop _endloop")
@@ -241,7 +241,7 @@ class MagikGrammarTest {
 
   @Test
   void testWhile() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.WHILE))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.WHILE))
         .matches("_while a _loop _endloop")
         .matches("_while a < 10 _loop _endloop")
         .matches("_while a _andif b _loop _endloop")
@@ -251,7 +251,7 @@ class MagikGrammarTest {
   @Test
   void testLoop() {
     MagikRuleForbiddenAssert.assertThat(
-            grammar.rule(MagikGrammar.LOOP), MagikGrammar.LOOP_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.LOOP), MagikGrammar.LOOP_SYNTAX_ERROR)
         .matches("_loop _endloop")
         .matches("_loop expr() _endloop")
         .matches("_loop _finally _endloop")
@@ -261,25 +261,25 @@ class MagikGrammarTest {
         .matches("_loop a << _loopbody(1) _endloop")
         .matches("_loop @start_label _endloop @end_label");
     MagikRuleRequiredAssert.assertThat(
-            grammar.rule(MagikGrammar.LOOP), MagikGrammar.LOOP_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.LOOP), MagikGrammar.LOOP_SYNTAX_ERROR)
         .matches("_loop _a _endloop");
   }
 
   @Test
   void testIf() {
-    MagikRuleForbiddenAssert.assertThat(grammar.rule(MagikGrammar.IF), MagikGrammar.IF_SYNTAX_ERROR)
+    MagikRuleForbiddenAssert.assertThat(this.grammar.rule(MagikGrammar.IF), MagikGrammar.IF_SYNTAX_ERROR)
         .matches("_if expr _then _endif")
         .matches("_if expr _then _else _endif")
         .matches("_if expr _then _elif expr _then _else _endif")
         .matches("_if expr _then >> 1 _endif")
         .matches("_if e _then _elif e _then _elif e _then _endif");
-    MagikRuleRequiredAssert.assertThat(grammar.rule(MagikGrammar.IF), MagikGrammar.IF_SYNTAX_ERROR)
+    MagikRuleRequiredAssert.assertThat(this.grammar.rule(MagikGrammar.IF), MagikGrammar.IF_SYNTAX_ERROR)
         .matches("_if _a _endif");
   }
 
   @Test
   void testEmitStatement() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.EMIT_STATEMENT))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.EMIT_STATEMENT))
         .matches(">> a")
         .matches(">> (a, b)")
         .matches(">> (\na, b)")
@@ -290,7 +290,7 @@ class MagikGrammarTest {
 
   @Test
   void testMethodInvocation() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.METHOD_INVOCATION))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.METHOD_INVOCATION))
         .matches(".method")
         .matches(".method()")
         .matches(".method(1)")
@@ -314,7 +314,7 @@ class MagikGrammarTest {
 
   @Test
   void testProcedureInvocation() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.PROCEDURE_INVOCATION))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.PROCEDURE_INVOCATION))
         .matches("()")
         .matches("(x _scatter y)")
         .matches("(x, y)")
@@ -324,7 +324,7 @@ class MagikGrammarTest {
 
   @Test
   void testReturnStatement() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.RETURN_STATEMENT))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.RETURN_STATEMENT))
         .matches("_return")
         .matches("_return a")
         .matches("_return (a)")
@@ -336,7 +336,7 @@ class MagikGrammarTest {
 
   @Test
   void testPrimitiveStatement() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.PRIMITIVE_STATEMENT))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.PRIMITIVE_STATEMENT))
         .matches("_primitive 1")
         .matches("_primitive 512")
         .notMatches("_primitive");
@@ -344,7 +344,7 @@ class MagikGrammarTest {
 
   @Test
   void testSimpleVector() {
-    final Rule rule = grammar.rule(MagikGrammar.SIMPLE_VECTOR);
+    final Rule rule = this.grammar.rule(MagikGrammar.SIMPLE_VECTOR);
     MagikRuleForbiddenAssert.assertThat(rule, MagikGrammar.SIMPLE_VECTOR_SYNTAX_ERROR)
         .matches("{}")
         .matches("{a}")
@@ -359,7 +359,7 @@ class MagikGrammarTest {
 
   @Test
   void testExpression() {
-    final Rule rule = grammar.rule(MagikGrammar.EXPRESSION);
+    final Rule rule = this.grammar.rule(MagikGrammar.EXPRESSION);
     Assertions.assertThat(rule)
         .matches("a()")
         .matches("a()()")
@@ -393,7 +393,7 @@ class MagikGrammarTest {
 
   @Test
   void testMethodDefinition() {
-    final Rule rule = grammar.rule(MagikGrammar.METHOD_DEFINITION);
+    final Rule rule = this.grammar.rule(MagikGrammar.METHOD_DEFINITION);
     MagikRuleForbiddenAssert.assertThat(rule, MagikGrammar.METHOD_DEFINITION_SYNTAX_ERROR)
         .matches("_method a.b _endmethod")
         .matches("_method a.b _return _endmethod")
@@ -445,7 +445,7 @@ class MagikGrammarTest {
 
   @Test
   void testVariableDefinition() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.VARIABLE_DEFINITION_STATEMENT))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.VARIABLE_DEFINITION_STATEMENT))
         .matches("_local a")
         .matches("_local a, b")
         .matches("_local a << 1")
@@ -473,7 +473,7 @@ class MagikGrammarTest {
 
   @Test
   void testMultipleAssignment() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.MULTIPLE_ASSIGNMENT_STATEMENT))
         .matches("(a, b) << (1, 2)")
         .matches("(a, b, c) << (1, 2, 3)")
         .matches("(a, b, c) << x()")
@@ -491,19 +491,19 @@ class MagikGrammarTest {
   @Test
   void testStatementSyntaxError() {
     MagikRuleForbiddenAssert.assertThat(
-            grammar.rule(MagikGrammar.STATEMENT), MagikGrammar.STATEMENT_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.STATEMENT), MagikGrammar.STATEMENT_SYNTAX_ERROR)
         .matches("a.b.c");
   }
 
   @Test
   void testProtect() {
     MagikRuleForbiddenAssert.assertThat(
-            grammar.rule(MagikGrammar.PROTECT), MagikGrammar.PROTECT_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.PROTECT), MagikGrammar.PROTECT_SYNTAX_ERROR)
         .matches("_protect _protection _endprotect")
         .matches("_protect a() _protection b() _endprotect")
         .matches("_protect _locking _self a() _protection _endprotect");
     MagikRuleRequiredAssert.assertThat(
-            grammar.rule(MagikGrammar.PROTECT), MagikGrammar.PROTECT_SYNTAX_ERROR)
+            this.grammar.rule(MagikGrammar.PROTECT), MagikGrammar.PROTECT_SYNTAX_ERROR)
         .matches("_protect _a _protection _endprotect")
         .matches("_protect _protection _a _endprotect")
         .matches("_protect _a _endprotect");
@@ -511,7 +511,7 @@ class MagikGrammarTest {
 
   @Test
   void testNumber() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.NUMBER))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.NUMBER))
         .matches("1")
         .matches("10")
         .matches("1.0")
@@ -523,14 +523,14 @@ class MagikGrammarTest {
 
   @Test
   void testString() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.STRING))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.STRING))
         .matches("\"test\"")
         .matches("\'test\'");
   }
 
   @Test
   void testSymbol() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.SYMBOL))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.SYMBOL))
         .matches(":test")
         .matches(":Test")
         .matches(":test?")
@@ -546,7 +546,7 @@ class MagikGrammarTest {
 
   @Test
   void testIdentifier() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.IDENTIFIER))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.IDENTIFIER))
         .matches("test")
         .matches("test_test")
         .matches("!test!")
@@ -570,7 +570,7 @@ class MagikGrammarTest {
 
   @Test
   void testCharacter() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.CHARACTER))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.CHARACTER))
         .matches("%a")
         .matches("%:")
         .matches("%newline")
@@ -579,7 +579,7 @@ class MagikGrammarTest {
 
   @Test
   void testRegexp() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.REGEXP))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.REGEXP))
         .matches("/a/")
         .matches("/\\n/")
         .matches("/a/i")
@@ -588,19 +588,19 @@ class MagikGrammarTest {
 
   @Test
   void testSuper() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.SUPER))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.SUPER))
         .matches("_super")
         .matches("_super(sw_component)");
   }
 
   @Test
   void testClass() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.CLASS)).matches("_class |java.lang.Integer|");
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.CLASS)).matches("_class |java.lang.Integer|");
   }
 
   @Test
   void testMagik() {
-    Assertions.assertThat(grammar.rule(MagikGrammar.MAGIK))
+    Assertions.assertThat(this.grammar.rule(MagikGrammar.MAGIK))
         .matches("")
         .matches(";")
         .matches("# comment")
@@ -608,12 +608,12 @@ class MagikGrammarTest {
         .matches("write(1)\nwrite(2)")
         .matches("write(1) ; write(2)");
 
-    MagikRuleForbiddenAssert.assertThat(grammar.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
+    MagikRuleForbiddenAssert.assertThat(this.grammar.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
         .matches("_block\n _local x << 10  # type: integer\n write(x)\n _endblock\n")
         .matches("_package a\n:a")
         .matches("_block\n_loop\n_endloop@get_object\n_endblock\n");
 
-    MagikRuleRequiredAssert.assertThat(grammar.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
+    MagikRuleRequiredAssert.assertThat(this.grammar.rule(MagikGrammar.MAGIK), MagikGrammar.SYNTAX_ERROR)
         .matches("_package a:a")
         .matches("_block _endblo")
         .matches("_blocki _endblock");

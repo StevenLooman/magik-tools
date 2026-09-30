@@ -12,7 +12,7 @@ class LoadListGrammarTest {
 
   @Test
   void testFilePath() {
-    assertThat(grammar.rule(LoadListGrammar.FILE_PATH))
+    assertThat(this.grammar.rule(LoadListGrammar.FILE_PATH))
         .matches("file")
         .matches("file1")
         .matches("subdir/file")
@@ -25,7 +25,7 @@ class LoadListGrammarTest {
 
   @Test
   void testFileEntry() {
-    assertThat(grammar.rule(LoadListGrammar.FILE_ENTRY))
+    assertThat(this.grammar.rule(LoadListGrammar.FILE_ENTRY))
         .matches("file")
         .matches("subdir/")
         .matches("subdir/file");
@@ -33,7 +33,7 @@ class LoadListGrammarTest {
 
   @Test
   void testComment() {
-    assertThat(grammar.rule(LoadListGrammar.COMMENT))
+    assertThat(this.grammar.rule(LoadListGrammar.COMMENT))
         .matches("# comment")
         .matches("# this is a comment")
         .matches("#")
@@ -42,7 +42,7 @@ class LoadListGrammarTest {
 
   @Test
   void testLoadList() {
-    assertThat(grammar.rule(LoadListGrammar.LOAD_LIST))
+    assertThat(this.grammar.rule(LoadListGrammar.LOAD_LIST))
         .matches("")
         .matches("file1")
         .matches("file1\nfile2")
@@ -77,7 +77,7 @@ class LoadListGrammarTest {
 
   @Test
   void testLoadListWithDirectories() {
-    assertThat(grammar.rule(LoadListGrammar.LOAD_LIST))
+    assertThat(this.grammar.rule(LoadListGrammar.LOAD_LIST))
         .matches("subdir/")
         .matches("subdir/\nanother_dir/")
         .matches(
@@ -90,7 +90,7 @@ class LoadListGrammarTest {
 
   @Test
   void testLoadListMixedContent() {
-    assertThat(grammar.rule(LoadListGrammar.LOAD_LIST))
+    assertThat(this.grammar.rule(LoadListGrammar.LOAD_LIST))
         .matches(
             """
             # Core files

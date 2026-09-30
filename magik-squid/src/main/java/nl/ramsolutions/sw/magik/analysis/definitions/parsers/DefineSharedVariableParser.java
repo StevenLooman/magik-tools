@@ -98,7 +98,7 @@ public class DefineSharedVariableParser {
       throw new IllegalStateException();
     }
 
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+    final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
     final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SYMBOL);
@@ -119,7 +119,7 @@ public class DefineSharedVariableParser {
         moduleDefFile != null ? moduleDefFile.getModuleDefinition().getName() : null;
 
     // Figure statement node.
-    final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
+    final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
 
     // Figure pakkage.
     final String pakkage = this.getCurrentPakkage();

@@ -52,13 +52,13 @@ public abstract class MagikRuleAssert extends RuleAssert {
   protected ParseRunner createParseRunnerWithEofMatcher() {
     this.isNotNull();
 
-    final MutableParsingRule rule = (MutableParsingRule) actual;
+    final MutableParsingRule rule = (MutableParsingRule) this.actual;
     final MutableParsingRule endOfInput =
         (MutableParsingRule)
             new MutableParsingRule(new EndOfInput()).is(EndOfInputExpression.INSTANCE);
     final MutableParsingRule withEndOfInput =
         (MutableParsingRule)
-            new MutableParsingRule(new WithEndOfInput(rule.getRuleKey())).is(actual, endOfInput);
+            new MutableParsingRule(new WithEndOfInput(rule.getRuleKey())).is(this.actual, endOfInput);
     return new ParseRunner(withEndOfInput);
   }
 
@@ -70,10 +70,10 @@ public abstract class MagikRuleAssert extends RuleAssert {
 
   /** Parse input. */
   protected ParsingResult parseInput(final String input) {
-    final ParseRunner parseRunner = createParseRunnerWithEofMatcher();
+    final ParseRunner parseRunner = this.createParseRunnerWithEofMatcher();
     final ParsingResult parsingResult = parseRunner.parse(input.toCharArray());
     if (!parsingResult.isMatched()) {
-      final String expected = "Rule '" + getRuleName() + "' should match:\n" + input;
+      final String expected = "Rule '" + this.getRuleName() + "' should match:\n" + input;
       final String actual = new ParseErrorFormatter().format(parsingResult.getParseError());
       throw new ParsingResultComparisonFailure(expected, actual);
     }

@@ -27,7 +27,7 @@ class ProcedureDefinitionHandler extends LocalTypeReasonerHandler {
    * @param node PROCEDURE_DEFINITION node.
    */
   void handleProcedureDefinition(final AstNode node) {
-    final MagikTypedFile magikFile = state.getMagikFile();
+    final MagikTypedFile magikFile = this.state.getMagikFile();
     final ProcedureDefinitionParser parser = new ProcedureDefinitionParser(magikFile, node);
     final List<MagikDefinition> definitions = parser.parseDefinitions();
     if (definitions.isEmpty()) {

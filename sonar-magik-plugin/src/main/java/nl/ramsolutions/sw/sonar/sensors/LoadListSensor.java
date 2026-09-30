@@ -117,7 +117,7 @@ public class LoadListSensor implements Sensor {
     // Save issues.
     LOGGER.debug("Running checks");
     final Checks<LoadListCheck> checks =
-        checkFactory
+        this.checkFactory
             .<LoadListCheck>create(LoadListRulesDefinition.REPOSITORY_KEY)
             .addAnnotatedChecks(LoadListCheckList.INSTANCE.getChecks());
     for (final LoadListCheck check : checks.all()) {

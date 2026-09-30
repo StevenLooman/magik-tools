@@ -74,7 +74,7 @@ public class MethodInvocationNodeHelper {
    */
   public String getMethodName() {
     // Get arguments
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+    final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
     final List<AstNode> argumentNodes =
         argumentsNode != null
             ? argumentsNode.getChildren(MagikGrammar.ARGUMENT)
@@ -82,7 +82,7 @@ public class MethodInvocationNodeHelper {
 
     // Construct name.
     String methodName = "";
-    final AstNode methodNameNode = node.getFirstChild(MagikGrammar.METHOD_NAME);
+    final AstNode methodNameNode = this.node.getFirstChild(MagikGrammar.METHOD_NAME);
     final AstNode identifierNode =
         methodNameNode != null ? methodNameNode.getFirstChild(MagikGrammar.IDENTIFIER) : null;
     methodName += identifierNode != null ? identifierNode.getTokenValue() : "";
@@ -97,10 +97,10 @@ public class MethodInvocationNodeHelper {
         methodName += MagikPunctuator.PAREN_L.getValue() + MagikPunctuator.PAREN_R.getValue();
       }
     }
-    if (AstQuery.anyChildTokenIs(node, MagikOperator.CHEVRON)) {
+    if (AstQuery.anyChildTokenIs(this.node, MagikOperator.CHEVRON)) {
       methodName += MagikOperator.CHEVRON.getValue();
     }
-    if (AstQuery.anyChildTokenIs(node, MagikOperator.BOOT_CHEVRON)) {
+    if (AstQuery.anyChildTokenIs(this.node, MagikOperator.BOOT_CHEVRON)) {
       methodName += MagikOperator.BOOT_CHEVRON.getValue();
     }
 

@@ -34,7 +34,7 @@ public abstract class LoadListCheck implements Check {
 
   @CheckForNull
   public CheckHolder getHolder() {
-    return holder;
+    return this.holder;
   }
 
   /**

@@ -94,9 +94,9 @@ public class MissingPragmaCheck extends MagikCheck {
 
   private boolean isPrimaryDefinition(final MagikDefinition definition) {
     if (definition instanceof MethodDefinition methodDefinition) {
-      return isPrimaryMethodDefinition(methodDefinition);
+      return this.isPrimaryMethodDefinition(methodDefinition);
     } else if (definition instanceof GlobalDefinition globalDefinition) {
-      return isPrimaryGlobalDefinition(globalDefinition);
+      return this.isPrimaryGlobalDefinition(globalDefinition);
     } else if (definition instanceof ProcedureDefinition procedureDefinition) {
       return MissingPragmaCheck.isPrimaryProcedureDefinition(procedureDefinition);
     }

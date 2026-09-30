@@ -45,7 +45,7 @@ public class CommentedCodeCheck extends MagikCheck {
                 tokens.stream()
                     .filter(token -> !token.getValue().trim().equals("#"))
                     .collect(Collectors.toList()))
-        .filter(tokens -> tokens.size() >= minLines)
+        .filter(tokens -> tokens.size() >= this.minLines)
         .filter(
             tokens -> {
               final String block =

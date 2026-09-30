@@ -49,7 +49,7 @@ class BreakpointManagerTest {
     final SourceBreakpoint sourceBreakpoint = new SourceBreakpoint();
     sourceBreakpoint.setLine(17);
     final Source source = new Source();
-    source.setPath(getPath("magik-debug-adapter/src/test/resources/bpt.magik").toString());
+    source.setPath(this.getPath("magik-debug-adapter/src/test/resources/bpt.magik").toString());
     final BreakpointManager.MagikBreakpoint breakpoint =
         manager.addBreakpoint(source, sourceBreakpoint);
     assertThat(breakpoint.getMethodName()).isEqualTo("user:bpt.t()");
@@ -78,7 +78,7 @@ class BreakpointManagerTest {
     final SourceBreakpoint sourceBreakpoint = new SourceBreakpoint();
     sourceBreakpoint.setLine(18);
     final Source source = new Source();
-    source.setPath(getPath("magik-debug-adapter/src/test/resources/bpt.magik").toString());
+    source.setPath(this.getPath("magik-debug-adapter/src/test/resources/bpt.magik").toString());
     final BreakpointManager.MagikBreakpoint breakpoint =
         manager.addBreakpoint(source, sourceBreakpoint);
     assertThat(breakpoint.getMethodName()).isEqualTo("user:bpt.t()");
@@ -109,7 +109,7 @@ class BreakpointManagerTest {
     final SourceBreakpoint sourceBreakpoint = new SourceBreakpoint();
     sourceBreakpoint.setLine(18);
     final Source source = new Source();
-    source.setPath(getPath("magik-debug-adapter/src/test/resources/bpt.magik").toString());
+    source.setPath(this.getPath("magik-debug-adapter/src/test/resources/bpt.magik").toString());
     final BreakpointManager.MagikBreakpoint breakpoint =
         manager.addBreakpoint(source, sourceBreakpoint);
     assertThat(breakpoint.getMethodName()).isEqualTo("user:bpt.t()");

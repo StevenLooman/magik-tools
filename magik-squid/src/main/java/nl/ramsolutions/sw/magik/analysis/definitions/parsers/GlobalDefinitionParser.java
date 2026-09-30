@@ -98,7 +98,7 @@ public class GlobalDefinitionParser {
     final TypeString typeName = TypeString.ofIdentifier(identifier, packageName);
 
     // Figure type.
-    final TypeDocParser docParser = new TypeDocParser(node);
+    final TypeDocParser docParser = new TypeDocParser(this.node);
     final TypeString aliasedTypeRef =
         docParser.getReturnTypes().stream().findFirst().orElse(TypeString.UNDEFINED);
 

@@ -214,7 +214,7 @@ public abstract class Scope {
       return this.scopeEntries.get(identifier);
     }
 
-    if (parentScope == null) {
+    if (this.parentScope == null) {
       return null;
     }
 

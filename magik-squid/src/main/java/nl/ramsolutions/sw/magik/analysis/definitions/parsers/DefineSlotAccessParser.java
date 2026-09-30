@@ -168,12 +168,12 @@ public class DefineSlotAccessParser {
    * @return List of parsed definitions.
    */
   public List<MagikDefinition> parseDefinitions() {
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
+    final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
     final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
-    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(this.node);
 
     // Some sanity.
-    final AstNode parentNode = node.getParent();
+    final AstNode parentNode = this.node.getParent();
     final AstNode atomNode = parentNode.getFirstChild();
     if (atomNode.isNot(MagikGrammar.ATOM)) {
       LOGGER.warn(
@@ -215,7 +215,7 @@ public class DefineSlotAccessParser {
         moduleDefFile != null ? moduleDefFile.getModuleDefinition().getName() : null;
 
     // Figure statement node.
-    final AstNode statementNode = node.getFirstAncestor(MagikGrammar.STATEMENT);
+    final AstNode statementNode = this.node.getFirstAncestor(MagikGrammar.STATEMENT);
 
     // Figure pakkage.
     final String pakkage = this.getCurrentPakkage();

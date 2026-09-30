@@ -126,7 +126,7 @@ public class ExtractMethodCodeActionProvider {
 
     final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
     if (ctx.enclosingDef().is(MagikGrammar.METHOD_DEFINITION)) {
-      return buildMethodDefActions(
+      return this.buildMethodDefActions(
           magikFile,
           ctx.enclosingDef(),
           ctx.selectedStatements(),

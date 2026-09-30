@@ -34,12 +34,12 @@ public enum GenericTokenType implements TokenType {
 
   @Override
   public String getName() {
-    return name();
+    return this.name();
   }
 
   @Override
   public String getValue() {
-    return name();
+    return this.name();
   }
 
   @Override

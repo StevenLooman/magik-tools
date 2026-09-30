@@ -521,6 +521,7 @@
           <activeRecipes>
             <recipe>org.openrewrite.java.RemoveUnusedImports</recipe>
             <recipe>org.openrewrite.java.migrate.UpgradeToJava17</recipe>
+            <recipe>org.openrewrite.staticanalysis.ExplicitThis</recipe>
           </activeRecipes>
           <failOnDryRunResults>true</failOnDryRunResults>
         </configuration>
@@ -537,6 +538,11 @@
             <groupId>org.openrewrite.recipe</groupId>
             <artifactId>rewrite-migrate-java</artifactId>
             <version>3.42.1</version>
+          </dependency>
+          <dependency>
+            <groupId>org.openrewrite.recipe</groupId>
+            <artifactId>rewrite-static-analysis</artifactId>
+            <version>2.41.1</version>
           </dependency>
         </dependencies>
       </plugin>

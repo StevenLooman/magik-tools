@@ -35,7 +35,7 @@ class ExtractMethodCodeActionProviderTest {
   }
 
   private List<CodeAction> provideCodeActions(final String code, final Range range) {
-    return provideCodeActions(code, range, new DefinitionKeeper());
+    return this.provideCodeActions(code, range, new DefinitionKeeper());
   }
 
   // --- Extract to method tests ---

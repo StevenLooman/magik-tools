@@ -95,7 +95,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
   }
 
   private void walkPreBodyWhen(final AstNode node, final AstNode whenNode) {
-    final BodyScope bodyScope = new BodyScope(currentScope, node);
+    final BodyScope bodyScope = new BodyScope(this.currentScope, node);
     this.currentScope = bodyScope;
 
     // Don't add identifierNode to scope index,

@@ -113,7 +113,7 @@ public class MagikSensor implements Sensor {
     // Save issues.
     LOGGER.debug("Running checks");
     final Checks<MagikCheck> checks =
-        checkFactory
+        this.checkFactory
             .<MagikCheck>create(MagikCheckList.REPOSITORY_KEY)
             .addAnnotatedChecks(MagikCheckList.INSTANCE.getChecks());
     for (final MagikCheck check : checks.all()) {

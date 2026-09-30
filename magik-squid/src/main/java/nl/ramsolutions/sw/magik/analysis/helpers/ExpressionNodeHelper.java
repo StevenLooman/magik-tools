@@ -31,7 +31,7 @@ public class ExpressionNodeHelper {
    */
   @CheckForNull
   public String getConstant() {
-    final AstNode atomNode = node.getFirstChild(MagikGrammar.ATOM);
+    final AstNode atomNode = this.node.getFirstChild(MagikGrammar.ATOM);
     if (atomNode == null) {
       return null;
     }

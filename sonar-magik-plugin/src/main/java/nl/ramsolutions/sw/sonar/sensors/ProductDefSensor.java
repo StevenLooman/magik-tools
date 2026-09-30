@@ -120,7 +120,7 @@ public class ProductDefSensor implements Sensor {
     // Save issues.
     LOGGER.debug("Running checks");
     final Checks<ProductDefCheck> checks =
-        checkFactory
+        this.checkFactory
             .<ProductDefCheck>create(ProductModuleDefRulesDefinition.REPOSITORY_KEY)
             .addAnnotatedChecks(ProductDefCheckList.INSTANCE.getChecks());
     for (final ProductDefCheck check : checks.all()) {

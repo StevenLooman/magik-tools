@@ -51,8 +51,8 @@ public class CodeActionApplier {
     final Range range = textEdit.getRange();
     final Position startPosition = range.getStartPosition();
     final Position endPosition = range.getEndPosition();
-    final int startPositionIndex = this.getIndexOfPosition(source, startPosition);
-    final int endPositionIndex = this.getIndexOfPosition(source, endPosition);
+    final int startPositionIndex = this.getIndexOfPosition(this.source, startPosition);
+    final int endPositionIndex = this.getIndexOfPosition(this.source, endPosition);
     this.source =
         this.source.substring(0, startPositionIndex)
             + textEdit.getNewText()

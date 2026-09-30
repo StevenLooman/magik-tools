@@ -77,7 +77,7 @@ public enum TypeDocGrammar implements GrammarRuleKey {
      * @return Value of keyword
      */
     public String getValue() {
-      return START_CHAR + toString().toLowerCase(Locale.ENGLISH);
+      return START_CHAR + this.toString().toLowerCase(Locale.ENGLISH);
     }
   }
 
@@ -93,7 +93,7 @@ public enum TypeDocGrammar implements GrammarRuleKey {
     }
 
     public String getValue() {
-      return value;
+      return this.value;
     }
   }
 

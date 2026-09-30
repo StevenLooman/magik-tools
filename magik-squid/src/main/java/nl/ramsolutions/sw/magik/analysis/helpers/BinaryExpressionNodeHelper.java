@@ -44,7 +44,7 @@ public class BinaryExpressionNodeHelper {
   public List<Triple<AstNode, AstNode, AstNode>> getTriplets() {
     final List<Triple<AstNode, AstNode, AstNode>> entries = new ArrayList<>();
 
-    final List<AstNode> chainNodes = node.getChildren();
+    final List<AstNode> chainNodes = this.node.getChildren();
     for (int i = 0; i < chainNodes.size() - 2; i += 2) {
       final AstNode leftNode = i == 0 ? chainNodes.get(i) : chainNodes.get(i - 1);
       final AstNode operatorNode = chainNodes.get(i + 1);

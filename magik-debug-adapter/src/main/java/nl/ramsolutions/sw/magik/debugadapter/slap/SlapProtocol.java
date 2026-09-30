@@ -415,7 +415,7 @@ public class SlapProtocol implements ISlapProtocol {
       case GET_FRAME_LOCALS:
         if (this.state == State.WAITING_FOR_MULTIPLE_RESPONSES) {
           // Currently receiving multiple responses.
-          response = handleMultiGetFrameLocals(buffer, isEndPacket);
+          response = this.handleMultiGetFrameLocals(buffer, isEndPacket);
         } else {
           // First packet sets state.
           response = null;

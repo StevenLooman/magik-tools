@@ -134,7 +134,7 @@ public class MagikWorkspaceFolder {
     LOGGER.debug("Running ProductIndexer for: {}", this);
 
     final SourceFileScanner scanner =
-        new SourceFileScanner(ignoreHandler, SourceFileScanner.PRODUCT_DEF_FILE_FILTER);
+        new SourceFileScanner(this.ignoreHandler, SourceFileScanner.PRODUCT_DEF_FILE_FILTER);
     final Path workspacePath = this.getWorkspacePath();
     final Stream<Path> indexableFiles = scanner.getFiles(workspacePath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
@@ -154,7 +154,7 @@ public class MagikWorkspaceFolder {
 
     final Path workspacePath = this.getWorkspacePath();
     final SourceFileScanner scanner =
-        new SourceFileScanner(ignoreHandler, SourceFileScanner.MODULE_DEF_FILE_FILTER);
+        new SourceFileScanner(this.ignoreHandler, SourceFileScanner.MODULE_DEF_FILE_FILTER);
     final Stream<Path> indexableFiles = scanner.getFiles(workspacePath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();
@@ -173,7 +173,7 @@ public class MagikWorkspaceFolder {
 
     final Path workspaceFolderPath = this.getWorkspacePath();
     final SourceFileScanner scanner =
-        new SourceFileScanner(ignoreHandler, SourceFileScanner.MAGIK_FILE_FILTER);
+        new SourceFileScanner(this.ignoreHandler, SourceFileScanner.MAGIK_FILE_FILTER);
     final Stream<Path> indexableFiles = scanner.getFiles(workspaceFolderPath);
     final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
         this.getWorkspaceFilteredDefinitionKeeper();

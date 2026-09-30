@@ -55,9 +55,9 @@ public final class AstCreator {
 
   private AstNode visit(ParseNode node) {
     if (node.getMatcher() instanceof MutableParsingRule) {
-      return visitNonTerminal(node);
+      return this.visitNonTerminal(node);
     } else {
-      return visitTerminal(node);
+      return this.visitTerminal(node);
     }
   }
 
@@ -65,32 +65,32 @@ public final class AstCreator {
     if (node.getMatcher() instanceof TriviaExpression) { // NOSONAR
       TriviaExpression ruleMatcher = (TriviaExpression) node.getMatcher();
       if (ruleMatcher.getTriviaKind() == TriviaKind.SKIPPED_TEXT) {
-        handleSkippedTextTrivia(node);
+        this.handleSkippedTextTrivia(node);
         return null;
       } else if (ruleMatcher.getTriviaKind() == TriviaKind.COMMENT) {
-        updateTokenPositionAndValue(node);
-        tokenBuilder.setTrivia(Collections.<Trivia>emptyList());
-        tokenBuilder.setType(GenericTokenType.COMMENT);
-        trivia.add(Trivia.createComment(tokenBuilder.build()));
+        this.updateTokenPositionAndValue(node);
+        this.tokenBuilder.setTrivia(Collections.<Trivia>emptyList());
+        this.tokenBuilder.setType(GenericTokenType.COMMENT);
+        this.trivia.add(Trivia.createComment(this.tokenBuilder.build()));
         return null;
       } else {
         throw new IllegalStateException("Unexpected trivia kind: " + ruleMatcher.getTriviaKind());
       }
     } else if (node.getMatcher() instanceof TokenExpression) { // NOSONAR
-      updateTokenPositionAndValue(node);
+      this.updateTokenPositionAndValue(node);
       TokenExpression ruleMatcher = (TokenExpression) node.getMatcher();
-      tokenBuilder.setType(ruleMatcher.getTokenType());
+      this.tokenBuilder.setType(ruleMatcher.getTokenType());
       if (ruleMatcher.getTokenType() == GenericTokenType.COMMENT) {
-        tokenBuilder.setTrivia(Collections.<Trivia>emptyList());
-        trivia.add(Trivia.createComment(tokenBuilder.build()));
+        this.tokenBuilder.setTrivia(Collections.<Trivia>emptyList());
+        this.trivia.add(Trivia.createComment(this.tokenBuilder.build()));
         return null;
       }
     } else {
-      updateTokenPositionAndValue(node);
-      tokenBuilder.setType(UNDEFINED_TOKEN_TYPE);
+      this.updateTokenPositionAndValue(node);
+      this.tokenBuilder.setType(UNDEFINED_TOKEN_TYPE);
     }
-    Token token = tokenBuilder.setTrivia(trivia).build();
-    trivia.clear();
+    Token token = this.tokenBuilder.setTrivia(this.trivia).build();
+    this.trivia.clear();
     AstNode astNode = new AstNode(token);
     astNode.setFromIndex(node.getStartIndex());
     astNode.setToIndex(node.getEndIndex());
@@ -98,32 +98,32 @@ public final class AstCreator {
   }
 
   private void updateTokenPositionAndValue(ParseNode node) {
-    TextLocation location = input.getLocation(node.getStartIndex());
+    TextLocation location = this.input.getLocation(node.getStartIndex());
     if (location == null) {
-      tokenBuilder.setGeneratedCode(true);
+      this.tokenBuilder.setGeneratedCode(true);
       // Godin: line, column and uri has no value for generated code, but we should bypass checks in
       // TokenBuilder
-      tokenBuilder.setLine(1);
-      tokenBuilder.setColumn(0);
-      tokenBuilder.setURI(MagikTypedFile.DEFAULT_URI);
+      this.tokenBuilder.setLine(1);
+      this.tokenBuilder.setColumn(0);
+      this.tokenBuilder.setURI(MagikTypedFile.DEFAULT_URI);
     } else {
-      tokenBuilder.setGeneratedCode(false);
-      tokenBuilder.setLine(location.getLine());
-      tokenBuilder.setColumn(location.getColumn() - 1);
-      tokenBuilder.setURI(
+      this.tokenBuilder.setGeneratedCode(false);
+      this.tokenBuilder.setLine(location.getLine());
+      this.tokenBuilder.setColumn(location.getColumn() - 1);
+      this.tokenBuilder.setURI(
           location.getFileURI() == null ? MagikTypedFile.DEFAULT_URI : location.getFileURI());
-      tokenBuilder.notCopyBook();
+      this.tokenBuilder.notCopyBook();
     }
 
-    String value = getValue(node);
-    tokenBuilder.setValueAndOriginalValue(value);
+    String value = this.getValue(node);
+    this.tokenBuilder.setValueAndOriginalValue(value);
   }
 
   private AstNode visitNonTerminal(ParseNode node) {
     MutableParsingRule ruleMatcher = (MutableParsingRule) node.getMatcher();
     List<AstNode> astNodes = new ArrayList<>();
     for (ParseNode child : node.getChildren()) {
-      AstNode astNode = visit(child);
+      AstNode astNode = this.visit(child);
       if (astNode != null) {
         if (astNode.hasToBeSkippedFromAst()) {
           astNodes.addAll(astNode.getChildren());
@@ -152,8 +152,8 @@ public final class AstCreator {
 
   private String getValue(ParseNode node) {
     StringBuilder result = new StringBuilder();
-    for (int i = node.getStartIndex(); i < Math.min(node.getEndIndex(), input.length()); i++) {
-      result.append(input.charAt(i));
+    for (int i = node.getStartIndex(); i < Math.min(node.getEndIndex(), this.input.length()); i++) {
+      result.append(this.input.charAt(i));
     }
     return result.toString();
   }
@@ -168,7 +168,7 @@ public final class AstCreator {
 
         @Override
         public String getValue() {
-          return getName();
+          return this.getName();
         }
 
         @Override
@@ -183,10 +183,10 @@ public final class AstCreator {
    * @param node Parse node.
    */
   private void handleSkippedTextTrivia(ParseNode node) {
-    updateTokenPositionAndValue(node);
-    tokenBuilder.setTrivia(Collections.<Trivia>emptyList());
+    this.updateTokenPositionAndValue(node);
+    this.tokenBuilder.setTrivia(Collections.<Trivia>emptyList());
 
-    final String nodeValue = getValue(node);
+    final String nodeValue = this.getValue(node);
     final GenericTokenType tokenType;
     if (nodeValue.startsWith("\r") || nodeValue.startsWith("\n")) {
       tokenType = GenericTokenType.EOL;
@@ -198,7 +198,7 @@ public final class AstCreator {
       tokenType = GenericTokenType.WHITESPACE;
     }
 
-    tokenBuilder.setType(tokenType);
-    trivia.add(Trivia.createSkippedText(tokenBuilder.build()));
+    this.tokenBuilder.setType(tokenType);
+    this.trivia.add(Trivia.createSkippedText(this.tokenBuilder.build()));
   }
 }

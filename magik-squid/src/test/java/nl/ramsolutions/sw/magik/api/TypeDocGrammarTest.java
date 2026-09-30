@@ -11,7 +11,7 @@ class TypeDocGrammarTest {
 
   @Test
   void testFunction() {
-    Assertions.assertThat(g.rule(TypeDocGrammar.FUNCTION))
+    Assertions.assertThat(this.g.rule(TypeDocGrammar.FUNCTION))
         .matches("## This is an example function")
         .matches("## This is spread\n## over multiple lines.")
         .matches("## This is spread\n## over multiple lines with a phony @param.")
@@ -20,7 +20,7 @@ class TypeDocGrammarTest {
 
   @Test
   void testParam() {
-    Assertions.assertThat(g.rule(TypeDocGrammar.PARAM))
+    Assertions.assertThat(this.g.rule(TypeDocGrammar.PARAM))
         .matches("## @param a")
         .matches("## @param a Aaaaa aaa.")
         .matches("## @param {sw:rope} p1")
@@ -32,7 +32,7 @@ class TypeDocGrammarTest {
 
   @Test
   void testReturn() {
-    Assertions.assertThat(g.rule(TypeDocGrammar.RETURN))
+    Assertions.assertThat(this.g.rule(TypeDocGrammar.RETURN))
         .matches("## @return Aaaaa aaa.")
         .matches("## @return {sw:rope}")
         .matches("## @return {sw:rope<sw:symbol>}")
@@ -43,7 +43,7 @@ class TypeDocGrammarTest {
 
   @Test
   void testLoop() {
-    Assertions.assertThat(g.rule(TypeDocGrammar.LOOP))
+    Assertions.assertThat(this.g.rule(TypeDocGrammar.LOOP))
         .matches("## @loop Aaaaa aaa.")
         .matches("## @loop {sw:rope}")
         .matches("## @loop {sw:rope<sw:symbol>}")
@@ -52,7 +52,7 @@ class TypeDocGrammarTest {
 
   @Test
   void testSlot() {
-    Assertions.assertThat(g.rule(TypeDocGrammar.SLOT))
+    Assertions.assertThat(this.g.rule(TypeDocGrammar.SLOT))
         .matches("## @slot slot1")
         .matches("## @slot slot1 Aaaaa aaa.")
         .matches("## @slot {sw:rope} slot1")
@@ -62,7 +62,7 @@ class TypeDocGrammarTest {
 
   @Test
   void testGeneric() {
-    Assertions.assertThat(g.rule(TypeDocGrammar.GENERIC))
+    Assertions.assertThat(this.g.rule(TypeDocGrammar.GENERIC))
         .matches("## @generic E")
         .matches("## @generic E Elements elements.")
         .matches("## @generic {sw:rope} E")
@@ -71,7 +71,7 @@ class TypeDocGrammarTest {
 
   @Test
   void testMethodInvocation() {
-    Assertions.assertThat(g.rule(TypeDocGrammar.METHOD_INVOCATION))
+    Assertions.assertThat(this.g.rule(TypeDocGrammar.METHOD_INVOCATION))
         .matches("{rope.new()}")
         .matches("{rope.size}")
         .matches("{sw:rope.new()}")
@@ -91,7 +91,7 @@ class TypeDocGrammarTest {
 
   @Test
   void testInvokesMethod() {
-    Assertions.assertThat(g.rule(TypeDocGrammar.INVOKES_METHOD))
+    Assertions.assertThat(this.g.rule(TypeDocGrammar.INVOKES_METHOD))
         .matches("## @invokes_method {rope.new()}")
         .matches("## @invokes_method {rope.size}")
         .matches("## @invokes_method {sw:rope.new()}")
@@ -103,7 +103,7 @@ class TypeDocGrammarTest {
 
   @Test
   void testType() {
-    Assertions.assertThat(g.rule(TypeDocGrammar.TYPE))
+    Assertions.assertThat(this.g.rule(TypeDocGrammar.TYPE))
         .matches("{integer}")
         .matches("{ integer}")
         .matches("{sw:integer}")
@@ -115,7 +115,7 @@ class TypeDocGrammarTest {
 
   @Test
   void testTypeDoc() {
-    Assertions.assertThat(g.rule(TypeDocGrammar.TYPE_DOC))
+    Assertions.assertThat(this.g.rule(TypeDocGrammar.TYPE_DOC))
         .matches(
             """
                 ## This is a method

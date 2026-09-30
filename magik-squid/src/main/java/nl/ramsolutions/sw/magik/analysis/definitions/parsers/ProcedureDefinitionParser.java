@@ -78,8 +78,8 @@ public class ProcedureDefinitionParser {
     }
 
     // Figure location.
-    final URI uri = node.getToken().getURI();
-    final Location location = new Location(uri, node);
+    final URI uri = this.node.getToken().getURI();
+    final Location location = new Location(uri, this.node);
 
     // Figure timestamp.
     final Instant timestamp = this.magikFile.getTimestamp();
@@ -90,7 +90,7 @@ public class ProcedureDefinitionParser {
         moduleDefFile != null ? moduleDefFile.getModuleDefinition().getName() : null;
 
     // Figure procedure name.
-    final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(node);
+    final ProcedureDefinitionNodeHelper helper = new ProcedureDefinitionNodeHelper(this.node);
     final String procedureName = helper.getProcedureName();
 
     // Figure modifiers.
@@ -141,7 +141,7 @@ public class ProcedureDefinitionParser {
 
     // Procedure doc.
     final String doc =
-        MagikCommentExtractor.extractDocCommentTokens(node)
+        MagikCommentExtractor.extractDocCommentTokens(this.node)
             .map(Token::getValue)
             .map(line -> line.substring(2)) // Strip '##'
             .map(String::trim)
@@ -183,7 +183,7 @@ public class ProcedureDefinitionParser {
             timestamp,
             moduleName,
             doc,
-            node,
+            this.node,
             modifiers,
             typeString,
             procedureName,

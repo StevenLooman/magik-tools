@@ -56,7 +56,7 @@ public class ProcedureDefinitionNodeHelper {
    */
   @CheckForNull
   public String getProcedureName() {
-    final AstNode nameNode = node.getFirstChild(MagikGrammar.PROCEDURE_NAME);
+    final AstNode nameNode = this.node.getFirstChild(MagikGrammar.PROCEDURE_NAME);
     if (nameNode == null) {
       return null;
     }
