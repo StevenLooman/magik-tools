@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.definitions.ArgumentRange;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
@@ -71,11 +72,8 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
 
       // Match arguments against method.parameters.
       final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT);
-      final List<ParameterDefinition> checkedParameterDefs =
-          parameterDefs.stream()
-              .filter(parameter -> parameter.getModifier() == ParameterDefinition.Modifier.NONE)
-              .toList();
-      if (checkedParameterDefs.size() > argumentNodes.size()) {
+      final ArgumentRange argumentRange = ArgumentRange.of(parameterDefs);
+      if (argumentRange.required() > argumentNodes.size()) {
         final String message = MESSAGE.formatted(calledTypeStr.getFullString() + "." + methodName);
         this.addIssue(node, message);
       }
@@ -113,11 +111,8 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
 
       // Match arguments against procedure parameters.
       final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT);
-      final List<ParameterDefinition> checkedParameterDefs =
-          parameterDefs.stream()
-              .filter(parameter -> parameter.getModifier() == ParameterDefinition.Modifier.NONE)
-              .toList();
-      if (checkedParameterDefs.size() > argumentNodes.size()) {
+      final ArgumentRange argumentRange = ArgumentRange.of(parameterDefs);
+      if (argumentRange.required() > argumentNodes.size()) {
         final String baseInvocationName =
             calledTypeStr.isUndefined() ? "procedure" : calledTypeStr.getFullString();
         final String invocationName =
