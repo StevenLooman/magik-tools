@@ -31,12 +31,7 @@ public class InheritanceCycleTypedCheck extends MagikTypedCheck {
     // TypeString may not carry the same package as the (already-resolved) TypeStrings the
     // ancestor walk yields, so compare against the resolved identity, not the raw one.
     final TypeString declaredTypeStr = exemplarDefinition.getTypeString();
-    final ExemplarDefinition resolvedExemplarDefinition =
-        resolver.getExemplarDefinition(declaredTypeStr);
-    final TypeString typeStr =
-        resolvedExemplarDefinition != null
-            ? resolvedExemplarDefinition.getTypeString()
-            : declaredTypeStr;
+    final TypeString typeStr = resolver.getExemplarTypeString(declaredTypeStr);
     // getAllAncestors is cycle-safe (bounded by a seen-set); a type in its own ancestor set is in
     // a cycle. Report on this file's node so a two-file cycle surfaces from both files, rather
     // than from neither.

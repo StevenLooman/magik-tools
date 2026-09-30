@@ -43,9 +43,12 @@ class SuperHandler extends LocalTypeReasonerHandler {
     if (identifier != null) {
       final String pakkage = methodOwnerTypeStr.getPakkage();
       final TypeString typeStr = TypeString.ofIdentifier(identifier, pakkage);
-      final ExemplarDefinition exemplarDefinition =
-          this.typeResolver.getExemplarDefinition(typeStr);
-      superTypeStr = exemplarDefinition != null ? exemplarDefinition.getTypeString() : null;
+      // Union of every exemplar the name stands for.
+      superTypeStr =
+          this.typeResolver.getExemplarDefinitions(typeStr).stream()
+              .map(ExemplarDefinition::getTypeString)
+              .reduce(TypeString::combine)
+              .orElse(null);
     } else {
       final Collection<TypeString> parents = this.typeResolver.getParents(methodOwnerTypeStr);
       superTypeStr = parents.stream().reduce(TypeString::combine).orElse(null);

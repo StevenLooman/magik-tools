@@ -11,6 +11,7 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
@@ -337,5 +338,52 @@ class ReferencesProviderTest {
     final Position position = new Position(1, 4);
     final List<Location> references = this.getLoadListReferences(code, position);
     assertThat(references).isEmpty();
+  }
+
+  @Test
+  void testProvideTypeReferenceToATypeDefinedTwice() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            "module_b",
+            null,
+            null,
+            ExemplarDefinition.Sort.INDEXED,
+            TypeString.SW_INTEGER,
+            null));
+    final List<GlobalUsage> usedGlobals =
+        List.of(new GlobalUsage(TypeString.SW_INTEGER, EMPTY_LOCATION, null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            EMPTY_LOCATION,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_INTEGER,
+            "referring",
+            Collections.emptySet(),
+            Collections.emptyList(),
+            null,
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY,
+            usedGlobals,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptyList()));
+
+    final String code =
+        """
+        _method integer.referring
+            integer
+        _endmethod
+        """;
+    final Position position = new Position(2, 4); // On `integer`.
+    final List<Location> references = this.getReferences(code, position, definitionKeeper);
+    assertThat(references).hasSize(1);
   }
 }

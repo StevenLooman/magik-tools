@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
-import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
@@ -41,8 +40,7 @@ public class InvocationArgumentTypeMatchesParameterTypeTypedCheck extends MagikT
     // Get type.
     final TypeStringResolver resolver = this.getTypeStringResolver();
     final TypeString typeStrInvokedOn = this.getTypeInvokedOn(node);
-    final ExemplarDefinition exemplarDefinition = resolver.getExemplarDefinition(typeStrInvokedOn);
-    if (exemplarDefinition == null) {
+    if (!resolver.hasExemplarDefinition(typeStrInvokedOn)) {
       // Cannot give any useful information, so abort.
       return;
     }

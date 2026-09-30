@@ -114,13 +114,12 @@ public class TypeHierarchyProvider {
     final TypeStringResolver resolver = new TypeStringResolver(this.definitionKeeper);
     final String itemName = item.getName();
     final TypeString typeString = TypeString.ofIdentifier(itemName, "sw");
-    final ExemplarDefinition definition = resolver.getExemplarDefinition(typeString);
-    if (definition == null) {
+    if (!resolver.hasExemplarDefinition(typeString)) {
       return null; // NOSONAR: LSP requires null.
     }
 
-    // Find children.
-    final TypeString searchedTypeString = definition.getTypeString();
+    // Find children of any definition of the type.
+    final TypeString searchedTypeString = resolver.getExemplarTypeString(typeString);
     final Comparator<TypeHierarchyItem> byName = Comparator.comparing(TypeHierarchyItem::getName);
     return this.definitionKeeper.getExemplarDefinitions().stream()
         .filter(def -> resolver.getParents(def.getTypeString()).contains(searchedTypeString))
@@ -140,15 +139,14 @@ public class TypeHierarchyProvider {
     final TypeStringResolver resolver = new TypeStringResolver(this.definitionKeeper);
     final String itemName = item.getName();
     final TypeString typeString = TypeString.ofIdentifier(itemName, "sw");
-    final ExemplarDefinition definition = resolver.getExemplarDefinition(typeString);
-    if (definition == null) {
+    if (!resolver.hasExemplarDefinition(typeString)) {
       return null; // NOSONAR: LSP requires null.
     }
 
+    // Show each definition of a colliding parent.
     final Comparator<TypeHierarchyItem> byName = Comparator.comparing(TypeHierarchyItem::getName);
     return resolver.getParents(typeString).stream()
-        .map(resolver::getExemplarDefinition)
-        .filter(Objects::nonNull)
+        .flatMap(parent -> resolver.getExemplarDefinitions(parent).stream())
         .map(this::toTypeHierarchyItem)
         .sorted(byName)
         .toList();

@@ -319,4 +319,31 @@ class AbstractMethodNotImplementedTypedCheckTest {
     final MagikTypedCheck check = new AbstractMethodNotImplementedTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @Test
+  void testAbstractMethodOfAParentDefinedTwiceNotImplemented() {
+    final String code = "def_slotted_exemplar(:child, {}, :parent)\n";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    for (final String moduleName : List.of("module_a", "module_b")) {
+      definitionKeeper.add(
+          new ExemplarDefinition(
+              null,
+              null,
+              moduleName,
+              null,
+              null,
+              ExemplarDefinition.Sort.SLOTTED,
+              TYPE_PARENT,
+              null));
+    }
+    this.addMethod(
+        definitionKeeper,
+        TYPE_PARENT,
+        "do_something()",
+        EnumSet.of(MethodDefinition.Modifier.ABSTRACT));
+    this.addExemplar(
+        definitionKeeper, TYPE_CHILD, ExemplarDefinition.Sort.SLOTTED, List.of(TYPE_PARENT));
+    final MagikTypedCheck check = new AbstractMethodNotImplementedTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
 }

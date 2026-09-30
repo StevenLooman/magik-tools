@@ -106,4 +106,27 @@ class InheritanceCycleTypedCheckTest {
     final MagikTypedCheck check = new InheritanceCycleTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
+
+  @Test
+  void testSelfCycleOfATypeDefinedTwiceInAUsedPackageReported() {
+    // Written in user, defined twice in the used package sw.
+    final String code = "def_slotted_exemplar(:child, {})\n";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    for (final String moduleName : List.of("module_a", "module_b")) {
+      definitionKeeper.add(
+          new ExemplarDefinition(
+              null,
+              null,
+              moduleName,
+              null,
+              null,
+              ExemplarDefinition.Sort.SLOTTED,
+              TYPE_CHILD,
+              null));
+    }
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, TYPE_CHILD, TYPE_CHILD));
+    final MagikTypedCheck check = new InheritanceCycleTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
 }

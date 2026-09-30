@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.checks.magiktyped;
 import com.sonar.sslr.api.AstNode;
 import java.util.Collection;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
-import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.SlotNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -32,8 +31,7 @@ public class SlotExistsTypedCheck extends MagikTypedCheck {
     final SlotNodeHelper helper = new SlotNodeHelper(node);
     final String slotName = helper.getSlotName();
     final TypeStringResolver resolver = this.getTypeStringResolver();
-    final ExemplarDefinition exemplarDefinition = resolver.getExemplarDefinition(typeStr);
-    if (exemplarDefinition == null) {
+    if (!resolver.hasExemplarDefinition(typeStr)) {
       return;
     }
 

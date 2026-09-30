@@ -98,7 +98,7 @@ public class TypeDocTypeExistsTypedCheck extends MagikTypedCheck {
     Objects.requireNonNull(combinedTypeStr);
     final TypeStringResolver resolver = this.getTypeStringResolver();
     for (final TypeString typeString : combinedTypeStr.getCombinedTypes()) {
-      if (resolver.getExemplarDefinition(typeString) == null) {
+      if (!resolver.hasExemplarDefinition(typeString)) {
         this.addIssue(typeNode, MESSAGE.formatted(typeString.getFullString()));
         return;
       }

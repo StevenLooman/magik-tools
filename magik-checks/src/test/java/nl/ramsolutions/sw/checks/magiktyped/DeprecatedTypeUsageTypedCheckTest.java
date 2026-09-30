@@ -19,11 +19,19 @@ class DeprecatedTypeUsageTypedCheckTest {
       final IDefinitionKeeper definitionKeeper,
       final TypeString typeName,
       final String classifyLevel) {
+    this.addExemplarDefinition(definitionKeeper, typeName, classifyLevel, null);
+  }
+
+  private void addExemplarDefinition(
+      final IDefinitionKeeper definitionKeeper,
+      final TypeString typeName,
+      final String classifyLevel,
+      final String moduleName) {
     definitionKeeper.add(
         new ExemplarDefinition(
             null,
             null,
-            null,
+            moduleName,
             null,
             null,
             ExemplarDefinition.Sort.SLOTTED,
@@ -50,6 +58,36 @@ class DeprecatedTypeUsageTypedCheckTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString typeStr = TypeString.ofIdentifier("test", "user");
     this.addExemplarDefinition(definitionKeeper, typeStr, "basic");
+    final String code =
+        """
+        _block
+          user:test.m()
+        _endblock""";
+    final MagikTypedCheck check = new DeprecatedTypeUsageTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testTypeDeprecatedByEveryDefinition() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString typeStr = TypeString.ofIdentifier("test", "user");
+    this.addExemplarDefinition(definitionKeeper, typeStr, "deprecated", "module_a");
+    this.addExemplarDefinition(definitionKeeper, typeStr, "deprecated", "module_b");
+    final String code =
+        """
+        _block
+          user:test.m()
+        _endblock""";
+    final MagikTypedCheck check = new DeprecatedTypeUsageTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
+  void testTypeDeprecatedByOneDefinitionOnly() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString typeStr = TypeString.ofIdentifier("test", "user");
+    this.addExemplarDefinition(definitionKeeper, typeStr, "deprecated", "module_a");
+    this.addExemplarDefinition(definitionKeeper, typeStr, "basic", "module_b");
     final String code =
         """
         _block

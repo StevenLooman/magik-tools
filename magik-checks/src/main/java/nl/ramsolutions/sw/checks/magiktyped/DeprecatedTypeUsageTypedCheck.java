@@ -1,6 +1,8 @@
 package nl.ramsolutions.sw.checks.magiktyped;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Collection;
+import java.util.Set;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
@@ -35,21 +37,25 @@ public class DeprecatedTypeUsageTypedCheck extends MagikTypedCheck {
     }
 
     final TypeStringResolver resolver = this.getTypeStringResolver();
-    final ExemplarDefinition exemplarDef = resolver.getExemplarDefinition(typeStr);
-    if (exemplarDef == null) {
-      return;
-    }
-    final Pragma pragma = exemplarDef.getPragma();
-    if (pragma == null) {
-      return;
-    }
-
-    if (!pragma.getClassifyLevels().contains(Pragma.CLASSIFY_LEVEL_DEPRECATED)) {
+    // On a collision, report only when every definition is deprecated.
+    final Collection<ExemplarDefinition> exemplarDefs = resolver.getExemplarDefinitions(typeStr);
+    if (exemplarDefs.isEmpty()
+        || !exemplarDefs.stream().allMatch(DeprecatedTypeUsageTypedCheck::isDeprecated)) {
       return;
     }
 
     final String typeStringStr = typeStr.getFullString();
     final String message = MESSAGE.formatted(typeStringStr);
     this.addIssue(node, message);
+  }
+
+  private static boolean isDeprecated(final ExemplarDefinition exemplarDefinition) {
+    final Pragma pragma = exemplarDefinition.getPragma();
+    if (pragma == null) {
+      return false;
+    }
+
+    final Set<String> classifyLevels = pragma.getClassifyLevels();
+    return classifyLevels.contains(Pragma.CLASSIFY_LEVEL_DEPRECATED);
   }
 }
