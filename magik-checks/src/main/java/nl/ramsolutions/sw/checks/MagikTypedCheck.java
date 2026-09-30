@@ -2,10 +2,17 @@ package nl.ramsolutions.sw.checks;
 
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import java.util.Collection;
+import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
+import nl.ramsolutions.sw.magik.analysis.scope.Scope;
+import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
@@ -113,5 +120,40 @@ public class MagikTypedCheck extends MagikCheck {
 
     final MethodDefinitionNodeHelper methodDefHelper = new MethodDefinitionNodeHelper(node);
     return methodDefHelper.getExemplarTypeString();
+  }
+
+  /**
+   * Get the definitions a global reference names: the exemplars, procedures and globals its
+   * identifier resolves to, not the type the reference evaluates to.
+   *
+   * @param node IDENTIFIER node.
+   * @return The definitions, empty when the identifier is not a global reference.
+   */
+  protected Collection<ITypeStringDefinition> getGlobalReferenceDefinitions(final AstNode node) {
+    final AstNode parent = node.getParent();
+    if (!parent.is(MagikGrammar.ATOM) || !this.isGlobalReference(node)) {
+      return List.of();
+    }
+
+    final PackageNodeHelper helper = new PackageNodeHelper(node);
+    final String currentPackage = helper.getCurrentPackage();
+    final String identifier = node.getTokenValue();
+    final TypeString typeStr = TypeString.ofIdentifier(identifier, currentPackage);
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    return resolver.resolve(typeStr);
+  }
+
+  private boolean isGlobalReference(final AstNode node) {
+    final MagikFile magikFile = this.getMagikFile();
+    final GlobalScope globalScope = magikFile.getGlobalScope();
+    final Scope scope = globalScope.getScopeForNode(node);
+    if (scope == null) {
+      return false;
+    }
+
+    final ScopeEntry scopeEntry = scope.getScopeEntry(node);
+    return scopeEntry != null
+        && (scopeEntry.isType(ScopeEntry.Type.GLOBAL)
+            || scopeEntry.isType(ScopeEntry.Type.DYNAMIC));
   }
 }
