@@ -7,6 +7,7 @@ import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefSlottedExemplarParser;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.SimpleVectorNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeCoverage;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
@@ -85,7 +86,10 @@ public class SlotDefaultValueMatchesTypeDocTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    if (resolver.isKindOf(defaultType, slotType)) {
+    // An unknown type is no mismatch.
+    final TypeCoverage coverage = new TypeCoverage(resolver, TypeCoverage.MemberRule.ANY);
+    final TypeCoverage.Result result = coverage.getCoverage(defaultType, slotType);
+    if (result != TypeCoverage.Result.NOT_COVERED) {
       return;
     }
 

@@ -13,3 +13,4 @@ _endblock
 $
 </pre>
 <p>The invocation <code>a.m()</code> uses arguments of type <code>sw:integer</code> and <code>sw:symbol</code>, while the callable expects <code>sw:integer</code> twice, as documented.</p>
+<p>A union argument matches when any of its types matches the parameter type. An argument or parameter whose type is not known is not reported: an undefined or unresolvable type, a generic reference, a callback contract, or a union with such a type. In a method invocation, <code>_self</code> stands for the receiver.</p>

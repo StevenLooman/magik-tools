@@ -73,4 +73,22 @@ class SlotDefaultValueMatchesTypeDocTypedCheckTest {
     final MagikTypedCheck check = new SlotDefaultValueMatchesTypeDocTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        ## @slot {user:no_such_type} slot1
+        def_slotted_exemplar(:test_exemplar, {{:slot1, 1}})
+        """,
+        """
+        ## @slot {sw:integer|user:no_such_type} slot1
+        def_slotted_exemplar(:test_exemplar, {{:slot1, "abc"}})
+        """,
+      })
+  void testSlotTypeUnknownReportsNothing(final String code) {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new SlotDefaultValueMatchesTypeDocTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
 }

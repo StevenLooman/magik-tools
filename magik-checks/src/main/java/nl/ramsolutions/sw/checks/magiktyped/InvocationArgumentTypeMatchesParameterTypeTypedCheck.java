@@ -13,6 +13,7 @@ import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationDefinitionHe
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.GenericHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeCoverage;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
@@ -54,6 +55,9 @@ public class InvocationArgumentTypeMatchesParameterTypeTypedCheck extends MagikT
             .map(reasonerState::getNodeType)
             .map(resultString -> SelfHelper.substituteSelf(resultString, node))
             .toList();
+
+    final TypeCoverage coverage =
+        new TypeCoverage(resolver, TypeCoverage.MemberRule.ANY, typeStrInvokedOn);
 
     // Get methods.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
@@ -106,8 +110,10 @@ public class InvocationArgumentTypeMatchesParameterTypeTypedCheck extends MagikT
                   return;
                 }
 
-                // Test if argument type matches parameter type.
-                if (!resolver.isKindOf(argumentTypeStr, substitutedParameterTypeStr)) {
+                // Test if argument type matches parameter type; an unknown type is no mismatch.
+                final TypeCoverage.Result result =
+                    coverage.getCoverage(argumentTypeStr, substitutedParameterTypeStr);
+                if (result == TypeCoverage.Result.NOT_COVERED) {
                   final AstNode argumentNode = argumentNodes.get(index);
                   final String message =
                       MESSAGE.formatted(
@@ -153,6 +159,8 @@ public class InvocationArgumentTypeMatchesParameterTypeTypedCheck extends MagikT
       // Cannot give any useful information, so abort.
       return;
     }
+
+    final TypeCoverage coverage = new TypeCoverage(resolver, TypeCoverage.MemberRule.ANY);
     for (final ProcedureDefinition procedure : procedureDefs) {
       final List<ParameterDefinition> parameterDefs = procedure.getParameters();
       if (parameterDefs.isEmpty()) {
@@ -199,8 +207,10 @@ public class InvocationArgumentTypeMatchesParameterTypeTypedCheck extends MagikT
                   return;
                 }
 
-                // Test if argument type matches parameter type.
-                if (!resolver.isKindOf(argumentTypeStr, substitutedParameterTypeStr)) {
+                // Test if argument type matches parameter type; an unknown type is no mismatch.
+                final TypeCoverage.Result result =
+                    coverage.getCoverage(argumentTypeStr, substitutedParameterTypeStr);
+                if (result == TypeCoverage.Result.NOT_COVERED) {
                   final AstNode argumentNode = argumentNodes.get(index);
                   final String message =
                       MESSAGE.formatted(

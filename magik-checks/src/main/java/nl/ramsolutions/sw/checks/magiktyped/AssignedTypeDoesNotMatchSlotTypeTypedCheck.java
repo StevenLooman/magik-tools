@@ -6,6 +6,7 @@ import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeCoverage;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
@@ -40,6 +41,8 @@ public class AssignedTypeDoesNotMatchSlotTypeTypedCheck extends MagikTypedCheck 
     // Check all assigned nodes.
     final TypeString exemplarTypeStr = helper.getExemplarTypeString();
     final TypeStringResolver resolver = this.getTypeStringResolver();
+    final TypeCoverage coverage =
+        new TypeCoverage(resolver, TypeCoverage.MemberRule.ANY, exemplarTypeStr);
     final List<AstNode> assignedNodes = node.getChildren(MagikGrammar.values());
     assignedNodes.remove(rightNode);
     Collections.reverse(assignedNodes);
@@ -66,8 +69,9 @@ public class AssignedTypeDoesNotMatchSlotTypeTypedCheck extends MagikTypedCheck 
                   return;
                 }
 
-                // Check if types match.
-                if (resolver.isKindOf(assignedType, slotType)) {
+                // Check if types match; an unknown type is no mismatch.
+                final TypeCoverage.Result result = coverage.getCoverage(assignedType, slotType);
+                if (result != TypeCoverage.Result.NOT_COVERED) {
                   return;
                 }
 

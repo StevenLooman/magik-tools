@@ -68,6 +68,80 @@ class InvocationArgumentTypeMatchesParameterTypeTypedCheckTest {
             null,
             ExpressionResultString.UNDEFINED,
             ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_INTEGER,
+            "m3()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p1",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.SELF)),
+            null,
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_INTEGER,
+            "m4()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p1",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.ofIdentifier("no_such_type", "user"))),
+            null,
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _block
+          _local x << a  # type: user:no_such_type
+          integer.m1(x)
+        _endblock
+        """,
+        """
+        _block
+          _local x << a  # type: sw:float|user:no_such_type
+          integer.m1(x)
+        _endblock
+        """,
+        "integer.m3(1)",
+        "integer.m4(1)",
+      })
+  void testArgumentTypeUnknownReportsNothing(final String code) {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addTestMethods(definitionKeeper);
+
+    final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
   @ParameterizedTest
@@ -146,6 +220,71 @@ class InvocationArgumentTypeMatchesParameterTypeTypedCheckTest {
           ints.add(10)
         _endblock
         """;
+    final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testUnboundGenericParameterReportsNothing() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.SLOTTED,
+            TypeString.ofIdentifier("rope", "sw", TypeString.ofGenericReference("E")),
+            null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.ofIdentifier("rope", "sw"),
+            "add()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "thing",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.ofGenericReference("E"))),
+            null,
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+
+    final String code =
+        """
+        _block
+          _local things << rope  # type: sw:rope
+          things.add(10)
+        _endblock
+        """;
+    final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testProcedureArgumentTypeUnknownReportsNothing() {
+    final String code =
+        """
+        _block
+          _local x << a  # type: user:no_such_type
+          (_proc(p1)
+            ## @param {sw:symbol} p1
+          _endproc)(x)
+        _endblock
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
