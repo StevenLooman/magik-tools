@@ -63,7 +63,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install Towncrier
-        run: 'python -m pip install --disable-pip-version-check --only-binary :all: --require-hashes -r .github/scripts/requirements.txt'
+        run: 'python -m pip install --disable-pip-version-check --only-binary :all: --require-hashes -r .github_tools/ci/requirements.txt'
       - name: Render draft changelog for linting
         run: |
           printf '# Changes\n\n<!-- towncrier release notes start -->\n\n' > CHANGES.preview.md
@@ -73,9 +73,9 @@ jobs:
         with:
           node-version: 22
       - name: Install markdownlint-cli2
-        run: npm ci --prefix .github/scripts --ignore-scripts --no-audit --no-fund
+        run: npm ci --prefix .github_tools/ci --ignore-scripts --no-audit --no-fund
       - name: Run markdownlint-cli2
-        run: .github/scripts/node_modules/.bin/markdownlint-cli2 '**/*.md' '#**/node_modules'
+        run: .github_tools/ci/node_modules/.bin/markdownlint-cli2 '**/*.md' '#**/node_modules'
 
   eslint:
     name: ESLint
@@ -103,6 +103,6 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install Codespell
-        run: 'python -m pip install --disable-pip-version-check --only-binary :all: --require-hashes -r .github/scripts/requirements.txt'
+        run: 'python -m pip install --disable-pip-version-check --only-binary :all: --require-hashes -r .github_tools/ci/requirements.txt'
       - name: Run Codespell
         run: codespell

@@ -95,4 +95,4 @@ buildNumber.properties
 jacoco.exec
 */dependency-reduced-pom.xml
 .venv
-.github/scripts/node_modules/
+.github_tools/ci/node_modules/

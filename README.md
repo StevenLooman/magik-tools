@@ -131,10 +131,10 @@ A new file is then created in the ``changes`` directory. Add a short description
 
 ### Releasing
 
-Call the script at `.github/scripts/release.sh`, with the new version as the argument. For example:
+Call the script at `.github_tools/release.sh`, with the new version as the argument. For example:
 
 ```shell
-$ .github/scripts/release.sh 0.12.0
+$ .github_tools/release.sh 0.12.0
 ...
 ```
 

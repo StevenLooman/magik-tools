@@ -4,13 +4,13 @@ on:
     branches: [develop]
     paths:
       - .github/workflows/publish-checks-wiki.yml
-      - .github/scripts/generate_checks_pages.py
+      - .github_tools/ci/**
       - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/*/rules/*.html
       - magik-checks/src/main/java/nl/ramsolutions/sw/checks/*/*Check.java
   pull_request:
     paths:
       - .github/workflows/publish-checks-wiki.yml
-      - .github/scripts/generate_checks_pages.py
+      - .github_tools/ci/**
       - magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/*/rules/*.html
       - magik-checks/src/main/java/nl/ramsolutions/sw/checks/*/*Check.java
 concurrency:
@@ -36,11 +36,11 @@ jobs:
         with:
           node-version: 22
       - run: |
-          pip install --only-binary :all: --require-hashes -r .github/scripts/requirements.txt
-          python3 .github/scripts/generate_checks_pages.py
+          pip install --only-binary :all: --require-hashes -r .github_tools/ci/requirements.txt
+          python3 .github_tools/ci/generate_checks_pages.py
       - run: |
-          npm ci --prefix .github/scripts --ignore-scripts --no-audit --no-fund
-          .github/scripts/node_modules/.bin/markdownlint-cli2 --fix 'wiki/checks/*.md'
+          npm ci --prefix .github_tools/ci --ignore-scripts --no-audit --no-fund
+          .github_tools/ci/node_modules/.bin/markdownlint-cli2 --fix 'wiki/checks/*.md'
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: wiki-checks
