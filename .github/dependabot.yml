@@ -4,10 +4,14 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
   - package-ecosystem: "devcontainers"
     directory: "/"
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
@@ -19,11 +23,23 @@ updates:
       # 2.30.0.5193 is the last sonar-analyzer-commons release built for Java 17.
       - dependency-name: "org.sonarsource.analyzer-commons:*"
         versions: [">=2.31.0"]
+    cooldown:
+      default-days: 7
   - package-ecosystem: "npm"
     directory: "magik-language-server/client-vscode"
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
+  - package-ecosystem: "npm"
+    directory: ".github/scripts"
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
   - package-ecosystem: "pip"
     directory: ".github/scripts"
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7

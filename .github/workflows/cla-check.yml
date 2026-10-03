@@ -1,22 +1,27 @@
 name: CLA Check
-
-on:
+# pull_request_target is needed to comment on and set a status for pull requests from forks. The
+# pull request's code is never checked out or run: CLA-SIGNERS is only read as data through the API.
+on:  # zizmor: ignore[dangerous-triggers]
   pull_request_target:
     types: [opened, synchronize, reopened]
-
-permissions:
-  contents: read
-  pull-requests: write
-  statuses: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+permissions: {}
 
 jobs:
   cla-check:
+    name: Check CLA signature
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write  # Post the CLA reminder comment.
+      statuses: write  # Set the CLA Check commit status.
     if: ${{ !endsWith(github.event.pull_request.user.login, '[bot]') }}
     steps:
       - name: Check CLA signature
         id: cla
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const author = context.payload.pull_request.user.login;
@@ -57,7 +62,7 @@ jobs:
 
       - name: Post comment if CLA not signed
         if: steps.cla.outputs.signed == 'false'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const author = context.payload.pull_request.user.login;
@@ -85,7 +90,7 @@ jobs:
 
       - name: Set check status
         if: always()
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           CLA_SIGNED: ${{ steps.cla.outputs.signed }}
         with:

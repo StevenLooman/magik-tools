@@ -1,0 +1,31 @@
+name: zizmor
+on:
+  push:
+    branches: ["develop"]
+  pull_request:
+    branches: ["**"]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions: {}
+
+jobs:
+  zizmor:
+    name: Run zizmor
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Pro divergence: Install and run Python/zizmor directly instead of using the action.
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - name: Install zizmor
+        run: 'python -m pip install --disable-pip-version-check --only-binary :all: --require-hashes -r .github/scripts/requirements.txt'
+      - name: Run zizmor
+        run: zizmor --persona=pedantic .github/workflows .github/dependabot.yml
