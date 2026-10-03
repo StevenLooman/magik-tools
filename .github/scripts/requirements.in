@@ -1,2 +1,4 @@
+codespell==2.4.3
 html2text==2025.4.15
 towncrier==26.9.0
+zizmor==1.30.1

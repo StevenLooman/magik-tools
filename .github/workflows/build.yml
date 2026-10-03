@@ -8,10 +8,10 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 defaults:
   run:
     shell: bash
+permissions: {}
 
 jobs:
   build:
@@ -20,22 +20,19 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Set up JDK 17
-        uses: actions/setup-java@v6.0.1
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           java-version: 17
           distribution: 'zulu'
           cache: 'maven'
-      - name: Cache Maven packages
-        uses: actions/cache@v6
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
       - name: Test and package
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,7 +44,7 @@ jobs:
       - run: npm ci && npm run package
         working-directory: magik-language-server/client-vscode
       - run: cp -v magik-language-server/client-vscode/magik-language-server-*.vsix staging
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: Package-${{ matrix.os }}
           path: staging
@@ -55,10 +52,14 @@ jobs:
   markdown_lint:
     name: Markdown Lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.12'
       - name: Install Towncrier
@@ -67,21 +68,41 @@ jobs:
         run: |
           printf '# Changes\n\n<!-- towncrier release notes start -->\n\n' > CHANGES.preview.md
           towncrier build --draft --version 0.0.0 | perl -0pe 's/\n+\z/\n/' >> CHANGES.preview.md
-      - uses: DavidAnson/markdownlint-cli2-action@v24
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          globs: '**/*.md'
+          node-version: 22
+      - name: Install markdownlint-cli2
+        run: npm ci --prefix .github/scripts --ignore-scripts --no-audit --no-fund
+      - name: Run markdownlint-cli2
+        run: .github/scripts/node_modules/.bin/markdownlint-cli2 '**/*.md' '#**/node_modules'
 
   eslint:
     name: ESLint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - run: npm ci --ignore-scripts && npm run eslint
         working-directory: magik-language-server/client-vscode
 
   codespell:
     name: Codespell
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v7
-      - uses: codespell-project/actions-codespell@v2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install Codespell
+        run: 'python -m pip install --disable-pip-version-check --only-binary :all: --require-hashes -r .github/scripts/requirements.txt'
+      - name: Run Codespell
+        run: codespell
