@@ -7,6 +7,7 @@ import nl.ramsolutions.sw.checks.magik.DuplicateMethodInFileCheck;
 import nl.ramsolutions.sw.checks.magik.EmitInLoopCheck;
 import nl.ramsolutions.sw.checks.magik.EmitOrLeaveResultUnusedCheck;
 import nl.ramsolutions.sw.checks.magik.EmptyBlockCheck;
+import nl.ramsolutions.sw.checks.magik.ExemplarFileNameMismatchCheck;
 import nl.ramsolutions.sw.checks.magik.ExemplarSlotCountCheck;
 import nl.ramsolutions.sw.checks.magik.FileMethodCountCheck;
 import nl.ramsolutions.sw.checks.magik.FileMustStartWithPackageStatementCheck;
@@ -82,6 +83,7 @@ public final class MagikCheckList extends CheckList<MagikCheck, MagikCodeActionS
         DuplicateMethodInFileCheck.class,
         EmptyBlockCheck.class,
         EmitInLoopCheck.class,
+        ExemplarFileNameMismatchCheck.class,
         ExemplarSlotCountCheck.class,
         FileMethodCountCheck.class,
         FileMustStartWithPackageStatementCheck.class,
