@@ -74,9 +74,13 @@ public class DefConditionParser {
       return false;
     }
 
-    final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
-    if (argument1Node == null) {
-      return false;
+    // define_top_condition takes a continuable flag in place of a parent.
+    final boolean isTopCondition = helper.isMethodInvocationOf(DEFINE_TOP_CONDITION);
+    if (!isTopCondition) {
+      final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
+      if (argument1Node == null) {
+        return false;
+      }
     }
 
     final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SIMPLE_VECTOR);
@@ -107,11 +111,14 @@ public class DefConditionParser {
     final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
     final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
-    final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
     final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SIMPLE_VECTOR);
-    if (argument0Node == null || argument1Node == null || argument2Node == null) {
+    if (argument0Node == null || argument2Node == null) {
       throw new IllegalStateException();
     }
+
+    final MethodInvocationNodeHelper invocationHelper = new MethodInvocationNodeHelper(this.node);
+    final boolean isTopCondition = invocationHelper.isMethodInvocationOf(DEFINE_TOP_CONDITION);
+    final String parent = isTopCondition ? null : this.readParent(argumentsHelper);
 
     // Figure location.
     final URI uri = this.node.getToken().getURI();
@@ -142,8 +149,6 @@ public class DefConditionParser {
     // Figure definition.
     final String nameSymbol = argument0Node.getTokenValue();
     final String name = nameSymbol.substring(1);
-    final String parentSymbol = argument1Node.getTokenValue();
-    final String parent = parentSymbol.substring(1);
     final List<String> dataNames =
         argument2Node.getChildren(MagikGrammar.EXPRESSION).stream()
             .map(
@@ -171,5 +176,15 @@ public class DefConditionParser {
         new ConditionDefinition(
             location, timestamp, moduleName, doc, statementNode, name, parent, dataNames, pragma);
     return List.of(definition);
+  }
+
+  private String readParent(final ArgumentsNodeHelper argumentsHelper) {
+    final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
+    if (argument1Node == null) {
+      throw new IllegalStateException();
+    }
+
+    final String parentSymbol = argument1Node.getTokenValue();
+    return parentSymbol.substring(1);
   }
 }
