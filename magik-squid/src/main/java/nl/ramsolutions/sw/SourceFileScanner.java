@@ -2,8 +2,19 @@ package nl.ramsolutions.sw;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
+import java.nio.file.FileSystemLoopException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
@@ -52,16 +63,59 @@ public class SourceFileScanner {
   /**
    * Get the filtered files from the given path.
    *
+   * <p>Symbolic links are followed: {@code fromPath} may itself be a link to a directory, and links
+   * to directories inside the tree are descended into. The returned paths are expressed through
+   * {@code fromPath} as given (and through the link names inside the tree), not as real paths.
+   *
+   * <p>A link that leads back into a directory it is being walked from (a link to one of its own
+   * ancestors, or one link of a mutual pair) is skipped with one warning for that link, and every
+   * other file is still returned; with a mutual pair, each file in the pair is returned once per
+   * route. A dangling link inside the tree, including a link to itself, is skipped silently. A file
+   * reachable by more than one route, such as through two links to one directory, is returned once
+   * per route. A directory inside the tree that cannot be read is skipped with a warning. A {@code
+   * fromPath} that does not exist (including a dangling link) or cannot be read raises an {@link
+   * IOException}.
+   *
    * @param fromPath Path to walk from, most likely a directory.
    * @return Stream of paths to filtered files.
    * @throws IOException -
    */
   public Stream<Path> getFiles(final Path fromPath) throws IOException {
-    return Files.walk(fromPath)
-        .filter(Files::isRegularFile)
-        .filter(this::notIgnored)
-        .filter(this::sizeOk)
-        .filter(this.filter);
+    if (!Files.exists(fromPath)) {
+      throw new NoSuchFileException(fromPath.toString());
+    }
+
+    final List<Path> files = new ArrayList<>();
+    final FileVisitor<Path> visitor =
+        new SimpleFileVisitor<>() {
+          @Override
+          public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
+            if (SourceFileScanner.this.isWantedFile(file)) {
+              files.add(file);
+            }
+            return FileVisitResult.CONTINUE;
+          }
+
+          @Override
+          public FileVisitResult visitFileFailed(final Path file, final IOException exception)
+              throws IOException {
+            if (exception instanceof FileSystemLoopException) {
+              LOGGER.warn("Ignoring link loop: {}", file);
+              return FileVisitResult.CONTINUE;
+            }
+            if (exception instanceof NoSuchFileException) {
+              return FileVisitResult.CONTINUE;
+            }
+            if (exception instanceof AccessDeniedException && !file.equals(fromPath)) {
+              LOGGER.warn("Ignoring unreadable path: {}", file);
+              return FileVisitResult.CONTINUE;
+            }
+            throw exception;
+          }
+        };
+    Files.walkFileTree(
+        fromPath, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, visitor);
+    return files.stream();
   }
 
   /**
@@ -84,6 +138,13 @@ public class SourceFileScanner {
     }
 
     return null;
+  }
+
+  private boolean isWantedFile(final Path path) {
+    return Files.isRegularFile(path)
+        && this.notIgnored(path)
+        && this.sizeOk(path)
+        && this.filter.test(path);
   }
 
   private boolean notIgnored(final Path path) {
