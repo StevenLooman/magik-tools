@@ -7,6 +7,8 @@ _pragma(classify_level=basic, topic=type_dumper)
 ## @slot {sw:simple_vector<E=sw:char16_vector>} data_names
 ## @slot {sw:char16_vector|sw:unset} parent
 ## @slot {sw:char16_vector|sw:unset} doc
+## @slot {pragma|sw:unset} pragma
+## @slot {sw:char16_vector|sw:unset} module_name
 def_slotted_exemplar(
 	:condition_definition,
 	{
@@ -14,38 +16,42 @@ def_slotted_exemplar(
 		{:data_names, _unset, :readable, :public},
 		{:parent, _unset, :readable, :public},
 		{:doc, _unset, :readable, :public},
-		{:pragma, _unset, :readable, :public}
+		{:pragma, _unset, :readable, :public},
+		{:module_name, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_method condition_definition.new(name, data_names, parent, doc, pragma)
+_method condition_definition.new(name, data_names, parent, doc, pragma, _optional module_name)
 	## Constructor.
 	## @param {sw:char16_vector} name
 	## @param {sw:simple_vector<E=sw:char16_vector>} data_names
 	## @param {sw:char16_vector|sw:unset} parent
 	## @param {sw:char16_vector|sw:unset} doc
 	## @param {pragma|sw:unset} pragma
+	## @param {sw:char16_vector|sw:unset} module_name
 	## @return {_self}
-	_return _clone.init(name, data_names, parent, doc, pragma)
+	_return _clone.init(name, data_names, parent, doc, pragma, module_name)
 _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_private _method condition_definition.init(name, data_names, parent, doc, pragma)
+_private _method condition_definition.init(name, data_names, parent, doc, pragma, _optional module_name)
 	## Initializer.
 	## @param {sw:char16_vector} name
 	## @param {sw:simple_vector<E=sw:char16_vector>} data_names
 	## @param {sw:char16_vector|sw:unset} parent
 	## @param {sw:char16_vector|sw:unset} doc
 	## @param {pragma|sw:unset} pragma
+	## @param {sw:char16_vector|sw:unset} module_name
 	## @return {_self}
 	.name << name
 	.data_names << data_names
 	.parent << parent
 	.doc << doc
 	.pragma << pragma
+	.module_name << module_name
 	_return _self
 _endmethod
 $
@@ -67,6 +73,13 @@ _method condition_definition.new_from(cond)
 		_when error
 			>> {}
 		_endtry
+	# A condition made before the module system is up has no source module.
+	_local module_name <<
+		_try
+			>> cond.source_module.name
+		_when error
+			# pass
+		_endtry
 	_return _self.new(
 		cond.name,
 		cond.data_name_list,
@@ -75,7 +88,8 @@ _method condition_definition.new_from(cond)
 		_if _not topics.empty?
 		_then
 			>> pragma.new_from_topics(topics)
-		_endif)
+		_endif,
+		module_name)
 _endmethod
 $
 
@@ -95,7 +109,8 @@ _method condition_definition.equals?(other)
 	_return _self.name = other.name _andif
 		_self.data_names.eq?(other.data_names) _andif
 		_self.parent = other.parent _andif
-		_self.doc = other.doc
+		_self.doc = other.doc _andif
+		_self.module_name = other.module_name
 _endmethod
 $
 

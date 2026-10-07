@@ -74,6 +74,21 @@ _method type_definition.new_from(package, name, method_table)
 		_when error
 			>> {}
 		_endtry
+	_local module_name <<
+		_if metadata[:exemplar] _isnt _unset
+		_then
+			>> metadata[:exemplar].module_name
+		_endif
+	# An exemplar can lack the module its method table has.
+	_if module_name _is _unset
+	_then
+		module_name <<
+			_try
+				>> method_table.source_module.name
+			_when error
+				# pass
+			_endtry
+	_endif
 	_return _self.new(
 		type_name,
 		sort,
@@ -82,10 +97,7 @@ _method type_definition.new_from(package, name, method_table)
 		_then
 			>> pragma.new_from_topics(topics)
 		_endif,
-		_if metadata[:exemplar] _isnt _unset
-		_then
-			>> metadata[:exemplar].module_name
-		_endif)
+		module_name)
 _endmethod
 $
 

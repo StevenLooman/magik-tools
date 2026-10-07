@@ -405,6 +405,59 @@ class JsonDefinitionReaderTest {
   }
 
   @Test
+  void testReadConditionWithModuleName(@TempDir final Path tempDir) throws IOException {
+    final String jsonl =
+        """
+        {"name":"with_module","data_names":[],"parent":"error","doc":null,"pragma":null,\
+        "module_name":"my_module","instruction":"condition"}
+        {"name":"with_null_module","data_names":[],"parent":"error","doc":null,"pragma":null,\
+        "module_name":null,"instruction":"condition"}
+        {"name":"without_module","data_names":[],"parent":"error","doc":null,"pragma":null,\
+        "instruction":"condition"}
+        """;
+    final Path path = tempDir.resolve("conditions.jsonl");
+    Files.writeString(path, jsonl);
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, definitionKeeper);
+
+    final Collection<ConditionDefinition> conditionDefs =
+        definitionKeeper.getConditionDefinitions();
+    assertThat(conditionDefs)
+        .extracting(ConditionDefinition::getName, ConditionDefinition::getModuleName)
+        .containsExactlyInAnyOrder(
+            tuple("with_module", "my_module"),
+            tuple("with_null_module", null),
+            tuple("without_module", null));
+  }
+
+  @Test
+  void testReadGlobalWithModuleName(@TempDir final Path tempDir) throws IOException {
+    final String jsonl =
+        """
+        {"type_name":"user:with_module","aliased_type_name":"sw:integer","pragma":null,\
+        "module_name":"my_module","instruction":"global"}
+        {"type_name":"user:with_null_module","aliased_type_name":"sw:integer","pragma":null,\
+        "module_name":null,"instruction":"global"}
+        {"type_name":"user:without_module","aliased_type_name":"sw:integer","pragma":null,\
+        "instruction":"global"}
+        """;
+    final Path path = tempDir.resolve("globals.jsonl");
+    Files.writeString(path, jsonl);
+
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, definitionKeeper);
+
+    final Collection<GlobalDefinition> globalDefs = definitionKeeper.getGlobalDefinitions();
+    assertThat(globalDefs)
+        .extracting(GlobalDefinition::getTypeString, GlobalDefinition::getModuleName)
+        .containsExactlyInAnyOrder(
+            tuple(TypeString.ofIdentifier("with_module", "user"), "my_module"),
+            tuple(TypeString.ofIdentifier("with_null_module", "user"), null),
+            tuple(TypeString.ofIdentifier("without_module", "user"), null));
+  }
+
+  @Test
   void testReadGlobal() throws IOException {
     final IDefinitionKeeper definitionKeeper = this.readTypes();
 

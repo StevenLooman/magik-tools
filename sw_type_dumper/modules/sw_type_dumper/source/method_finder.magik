@@ -97,5 +97,33 @@ _method method_finder.get_method_topics(method, class)
 _endmethod
 $
 
+_pragma(classify_level=basic, topic=type_dumper)
+_method method_finder.get_method_source_file(method, class)
+	## Get the answer to a source file request: the source file, or a message when there is none.
+	## @param {sw:char16_vector} method Method name, or the name of a condition or global.
+	## @param {sw:char16_vector} class Class name, e.g., "sw:rope", "<condition>" or "<global>".
+	## @return {sw:char16_vector|sw:unset} Answer without its leading control character.
+	_local command << write_string("pr_source_file ", method, " ", class)
+	_self.write(command, character.newline)
+	_self.flush()
+	_local answer << _self.read_line()
+	_if answer _is _unset
+	_then
+		_return _unset
+	_endif
+
+	_local start << 1
+	_loop
+		_if start > answer.size _orif
+		    answer[start].value >= 32
+		_then
+			_leave
+		_endif
+		start +<< 1
+	_endloop
+	_return answer.subseq(start)
+_endmethod
+$
+
 method_finder.auto_start? << _true
 $

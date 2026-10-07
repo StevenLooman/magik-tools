@@ -6,37 +6,42 @@ _pragma(classify_level=basic, topic=type_dumper)
 ## @slot {sw:char16_vector} type_name
 ## @slot {sw:char16_vector} aliased_type_name
 ## @slot {pragma|sw:unset} pragma
+## @slot {sw:char16_vector|sw:unset} module_name
 def_slotted_exemplar(
 	:global_definition,
 	{
 		{:type_name, _unset, :readable, :public},
 		{:aliased_type_name, _unset, :readable, :public},
-		{:pragma, _unset, :readable, :public}
+		{:pragma, _unset, :readable, :public},
+		{:module_name, _unset, :readable, :public}
 	},
 	{@mt:definition})
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_method global_definition.new(type_name, aliased_type_name, pragma)
+_method global_definition.new(type_name, aliased_type_name, pragma, _optional module_name)
 	## Constructor.
 	## @param {sw:char16_vector} type_name
 	## @param {sw:char16_vector} aliased_type_name
 	## @param {pragma|sw:unset} pragma
+	## @param {sw:char16_vector|sw:unset} module_name
 	## @return {_self}
-	_return _clone.init(type_name, aliased_type_name, pragma)
+	_return _clone.init(type_name, aliased_type_name, pragma, module_name)
 _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_private _method global_definition.init(type_name, aliased_type_name, pragma)
+_private _method global_definition.init(type_name, aliased_type_name, pragma, _optional module_name)
 	## Initializer.
 	## @param {sw:char16_vector} type_name
 	## @param {sw:char16_vector} aliased_type_name
 	## @param {pragma|sw:unset} pragma
+	## @param {sw:char16_vector|sw:unset} module_name
 	## @return {_self}
 	.type_name << type_name
 	.aliased_type_name << aliased_type_name
 	.pragma << pragma
+	.module_name << module_name
 	_return _self
 _endmethod
 $
@@ -64,13 +69,22 @@ _method global_definition.new_from(package, name, method_table)
 		_when error
 			>> {}
 		_endtry
+	# The global variable itself does not know its module; the method finder knows its source file.
+	_local module_name <<
+		_try
+			_local source_file << method_finder.get_method_source_file(name, "<global>")
+			>> _self.module_name_from_source_file(source_file)
+		_when error
+			# pass
+		_endtry
 	_return _self.new(
 		type_name,
 		aliased_type_name,
 		_if _not topics.empty?
 		_then
 			>> pragma.new_from_topics(topics)
-		_endif)
+		_endif,
+		module_name)
 _endmethod
 $
 
@@ -88,7 +102,8 @@ _method global_definition.equals?(other)
 	## @param {mt:global_definition} other
 	## @return {sw:false}
 	_return _self.type_name = other.type_name _andif
-		_self.aliased_type_name = other.aliased_type_name
+		_self.aliased_type_name = other.aliased_type_name _andif
+		_self.module_name = other.module_name
 _endmethod
 $
 

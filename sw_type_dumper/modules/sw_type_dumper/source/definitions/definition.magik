@@ -186,6 +186,92 @@ _endmethod
 $
 
 _pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_method definition.expanded_source_file(source_file)
+	## Get the canonical path of a source file, with a leading environment variable expanded.
+	## Only for comparing paths. Never write the result to the type database: a location is
+	## dumped as it is, environment variable included, so the database stays transportable.
+	## @param {sw:char16_vector} source_file Source file, e.g., "$SMALLWORLD_GIS/sw_core/x.magik".
+	## @return {sw:char16_vector|sw:unset} Canonical path, unset when it is not an absolute path.
+	_local path << source_file.substitute_character(%\, %/)
+	_if path.empty?
+	_then
+		_return _unset
+	_endif
+
+	_if path[1] _is %$
+	_then
+		_local slash_index << path.index_of(%/).default(path.size + 1)
+		_local value << system.getenv(path.slice(2, slash_index - 1))
+		_if value _is _unset
+		_then
+			_return _unset
+		_endif
+		path << value + path.subseq(slash_index)
+	_elif path[1] _isnt %/ _andif
+	      path.index_of(%:) _isnt 2
+	_then
+		_return _unset
+	_endif
+
+	_return system.canonicalise(path).substitute_character(%\, %/)
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_method definition.module_name_from_source_file(source_file)
+	## Get the name of the module whose directory holds the source file.
+	## Nothing is derived from the name of the file or of its directories: a file under no
+	## directory of a defined module has no module.
+	## @param {sw:char16_vector|sw:unset} source_file Source file.
+	## @return {sw:symbol|sw:unset} Module name, unset when no defined module holds the file.
+	_if source_file _is _unset
+	_then
+		_return _unset
+	_endif
+
+	_local path << _self.expanded_source_file(source_file)
+	_if path _is _unset
+	_then
+		_return _unset
+	_endif
+
+	_local module_name << _unset
+	_local longest << 0
+	_for directory, name _over _self.module_directories().fast_keys_and_elements()
+	_loop
+		_if directory.size > longest _andif
+		    path.index_of_seq(directory) = 1
+		_then
+			module_name << name
+			longest << directory.size
+		_endif
+	_endloop
+	_return module_name
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_method definition.module_directories()
+	## Get the directory of every defined module, as a canonical path ending in a separator.
+	## @return {sw:equality_hash_table<K=sw:char16_vector, E=sw:symbol>} Module name per directory.
+	_local directories << equality_hash_table.new()
+	_for module _over sw_module_manager.defined_modules.fast_elements()
+	_loop
+		_try
+			_local directory << _self.expanded_source_file(module.full_directory)
+			_if directory _isnt _unset
+			_then
+				directories[directory + %/] << module.name
+			_endif
+		_when error
+			# pass
+		_endtry
+	_endloop
+	_return directories
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
 _method definition.normalized_source_file(source_file)
 	## Get the normalized source_file.
 	## If the source_file starts with the value of `$SMALLWORLD_GIS`,
