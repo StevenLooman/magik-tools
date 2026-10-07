@@ -133,6 +133,78 @@ class UnaryOperatorTypeMismatchTypedCheckTest {
   }
 
   @Test
+  void testCompatibleScatterOnUntypedGatherParameter() {
+    final String code =
+        """
+        _method test.write_line(_gather parts)
+          _scatter parts
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = this.createSelfScatteringKeeper();
+
+    final MagikTypedCheck check = new UnaryOperatorTypeMismatchTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testCompatibleScatterOnUnknownGatherTarget() {
+    final String code =
+        """
+        _method test.write_line()
+          (first, _gather rest) << _self.unknown()
+          _scatter rest
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = this.createSelfScatteringKeeper();
+
+    final MagikTypedCheck check = new UnaryOperatorTypeMismatchTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testIncompatibleScatterWithUndefinedForScatterReturnType() {
+    final String code =
+        """
+        _method test.write_line(_gather parts)
+          _scatter parts
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MethodDefinition forScatter =
+        this.createForScatterDefinition(ExpressionResultString.UNDEFINED);
+    definitionKeeper.add(forScatter);
+
+    final MagikTypedCheck check = new UnaryOperatorTypeMismatchTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  /** Seed {@code sw:simple_vector.for_scatter()} returning {@code _self}. */
+  private IDefinitionKeeper createSelfScatteringKeeper() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final ExpressionResultString selfResult = new ExpressionResultString(TypeString.SELF);
+    final MethodDefinition forScatter = this.createForScatterDefinition(selfResult);
+    definitionKeeper.add(forScatter);
+    return definitionKeeper;
+  }
+
+  private MethodDefinition createForScatterDefinition(final ExpressionResultString returnTypes) {
+    return new MethodDefinition(
+        null,
+        null,
+        null,
+        null,
+        null,
+        TypeString.SW_SIMPLE_VECTOR,
+        "for_scatter()",
+        EnumSet.noneOf(MethodDefinition.Modifier.class),
+        Collections.emptyList(),
+        null,
+        null,
+        returnTypes,
+        ExpressionResultString.EMPTY);
+  }
+
+  @Test
   void testIncompatibleNegatedUnaryOperatorWithoutNegatedDefinition() {
     final String code =
         """

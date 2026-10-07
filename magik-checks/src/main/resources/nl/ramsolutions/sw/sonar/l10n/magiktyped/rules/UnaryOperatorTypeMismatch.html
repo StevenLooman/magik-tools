@@ -7,3 +7,4 @@ _method a.b
 _endmethod
 </pre>
 <p>In the above example, <code>+x</code> maps to the unary method <code>unary_plus</code>. When that method is not available for <code>sw:symbol</code>, the result type is undefined and can cause runtime failures.</p>
+<p><code>_scatter x</code> is not reported when <code>for_scatter()</code> of <code>x</code> declares a result: its values are then unknown only because the element type of <code>x</code> is.</p>
