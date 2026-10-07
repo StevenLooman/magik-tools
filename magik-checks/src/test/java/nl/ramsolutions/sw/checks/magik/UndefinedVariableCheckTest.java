@@ -40,6 +40,21 @@ class UndefinedVariableCheckTest {
           show(l_a, l_b)
         _endmethod
         """,
+        """
+        _method a.b()
+          (l_a, _gather l_b) << (1, 2)
+          show(l_a, l_b)
+        _endmethod
+        """,
+        """
+        _method a.b()
+          _over x.fast_elements()
+          _loop
+          _finally _with l_a, _gather l_b
+            show(l_a, l_b)
+          _endloop
+        _endmethod
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new UndefinedVariableCheck();

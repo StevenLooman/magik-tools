@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.scope;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,23 @@ class ScopeBuilderVisitorTest {
     final ScopeBuilderVisitor visitor = new ScopeBuilderVisitor();
     visitor.scanFile(magikFile);
     return visitor;
+  }
+
+  private void assertScopeEntry(
+      final ScopeEntry scopeEntry,
+      final ScopeEntry.Type type,
+      final String identifier,
+      @Nullable final ScopeEntry importedEntry) {
+    assertThat(scopeEntry).isNotNull();
+
+    final ScopeEntry.Type entryType = scopeEntry.getType();
+    assertThat(entryType).isEqualTo(type);
+
+    final String entryIdentifier = scopeEntry.getIdentifier();
+    assertThat(entryIdentifier).isEqualTo(identifier);
+
+    final ScopeEntry entryImportedEntry = scopeEntry.getImportedEntry();
+    assertThat(entryImportedEntry).isSameAs(importedEntry);
   }
 
   @Test
@@ -295,6 +313,23 @@ class ScopeBuilderVisitorTest {
   }
 
   @Test
+  void testMultipleAssignmentGather() {
+    final String code =
+        """
+        _method a.b
+            (a, _gather b) << (1, 2)
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+    final ScopeEntry entryA = methodScope.getScopeEntry("a");
+    this.assertScopeEntry(entryA, ScopeEntry.Type.DEFINITION, "a", null);
+    final ScopeEntry entryB = methodScope.getScopeEntry("b");
+    this.assertScopeEntry(entryB, ScopeEntry.Type.DEFINITION, "b", null);
+  }
+
+  @Test
   void testMultipleAssignmentPackage() {
     final String code =
         """
@@ -386,6 +421,36 @@ class ScopeBuilderVisitorTest {
 
     final ScopeEntry entryJ = loopScope.getScopeEntry("j");
     assertThat(entryJ).isEqualTo(new ScopeEntry(ScopeEntry.Type.LOCAL, "j", null, null));
+  }
+
+  @Test
+  void testFinallyWith() {
+    final String code =
+        """
+        _method a.b
+            _over a.fast_elements()
+            _loop
+            _finally _with i, _gather j
+                show(i, j)
+            _endloop
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final GlobalScope globalScope = visitor.getGlobalScope();
+    final List<Scope> scopes = globalScope.getSelfAndDescendantScopes();
+    final Scope methodScope = scopes.get(1);
+    final ScopeEntry entryMethodI = methodScope.getScopeEntry("i");
+    assertThat(entryMethodI).isNull();
+
+    final Scope finallyScope = scopes.get(3);
+    final ScopeEntry entryI = finallyScope.getScopeEntry("i");
+    this.assertScopeEntry(entryI, ScopeEntry.Type.LOCAL, "i", null);
+    final ScopeEntry entryJ = finallyScope.getScopeEntry("j");
+    this.assertScopeEntry(entryJ, ScopeEntry.Type.LOCAL, "j", null);
+
+    final AstNode identifierNode = entryI.getDefinitionNode();
+    final Scope identifierScope = globalScope.getScopeForNode(identifierNode);
+    assertThat(identifierScope).isSameAs(finallyScope);
   }
 
   @Test

@@ -600,7 +600,7 @@ public enum MagikGrammar implements GrammarRuleKey {
                 b.sequence(MagikKeyword.GATHER, EXPRESSION),
                 b.sequence(
                     EXPRESSION,
-                    b.zeroOrMore(MagikPunctuator.COMMA, EXPRESSION),
+                    b.zeroOrMore(MagikPunctuator.COMMA, b.nextNot(MagikKeyword.GATHER), EXPRESSION),
                     b.optional(MagikPunctuator.COMMA, MagikKeyword.GATHER, EXPRESSION))));
     b.rule(RETURN_STATEMENT).is(MagikKeyword.RETURN, b.optional(SPACING_NO_LB_2, TUPLE));
     b.rule(EMIT_STATEMENT).is(MagikPunctuator.EMIT, TUPLE);

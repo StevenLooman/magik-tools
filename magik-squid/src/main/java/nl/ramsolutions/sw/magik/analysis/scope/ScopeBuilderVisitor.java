@@ -62,6 +62,8 @@ public class ScopeBuilderVisitor extends MagikVisitor {
       this.walkPreBodyWhen(node, parentNode);
     } else if (parentNode.is(MagikGrammar.LOOP)) {
       this.walkPreBodyLoop(node);
+    } else if (parentNode.is(MagikGrammar.FINALLY)) {
+      this.walkPreBodyFinally(node, parentNode);
     } else {
       this.walkPreBodyRegular(node);
     }
@@ -91,6 +93,20 @@ public class ScopeBuilderVisitor extends MagikVisitor {
         final String identifier = identifierNode.getTokenValue();
         this.currentScope.addDeclaration(ScopeEntry.Type.LOCAL, identifier, identifierNode, null);
       }
+    }
+  }
+
+  private void walkPreBodyFinally(final AstNode node, final AstNode finallyNode) {
+    this.currentScope = new BodyScope(this.currentScope, node);
+
+    // Add _with items to scope.
+    final List<AstNode> identifierNodes =
+        AstQuery.getChildrenFromChain(
+            finallyNode, MagikGrammar.IDENTIFIERS_WITH_GATHER, MagikGrammar.IDENTIFIER);
+    for (final AstNode identifierNode : identifierNodes) {
+      final String identifier = identifierNode.getTokenValue();
+      this.currentScope.addDeclaration(ScopeEntry.Type.LOCAL, identifier, identifierNode, null);
+      this.scopeIndex.put(identifierNode, this.currentScope);
     }
   }
 

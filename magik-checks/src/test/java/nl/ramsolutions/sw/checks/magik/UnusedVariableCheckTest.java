@@ -155,6 +155,15 @@ class UnusedVariableCheckTest {
           write(element)
         _endloop
         """,
+        """
+        _method a.b
+          _over x.fast_elements()
+          _loop
+          _finally _with a, b
+            write(b)
+          _endloop
+        _endmethod
+        """,
       })
   void testValid(final String code) {
     final MagikCheck check = new UnusedVariableCheck();
@@ -219,6 +228,15 @@ class UnusedVariableCheckTest {
         _loop
           write(key)
         _endloop
+        """,
+        """
+        _method a.b
+          _over x.fast_elements()
+          _loop
+          _finally _with a
+            write(1)
+          _endloop
+        _endmethod
         """,
       })
   void testVariableNotUsed(final String code) {

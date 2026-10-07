@@ -67,7 +67,7 @@ public class UnusedVariableCheck extends MagikCheck {
   }
 
   private boolean isPartOfMultiVariableDefinition(final AstNode identifierNode) {
-    // Either part of a VARIABLE_DEFINITION_MULTI or FOR_VARIABLES.
+    // Either part of a VARIABLE_DEFINITION_MULTI, FOR_VARIABLES or `_finally _with`.
     final AstNode variableDefMultiNode =
         AstQuery.getParentFromChain(
             identifierNode,
@@ -76,7 +76,10 @@ public class UnusedVariableCheck extends MagikCheck {
     final AstNode forVariablesNode =
         AstQuery.getParentFromChain(
             identifierNode, MagikGrammar.IDENTIFIERS_WITH_GATHER, MagikGrammar.FOR_VARIABLES);
-    return variableDefMultiNode != null || forVariablesNode != null;
+    final AstNode finallyNode =
+        AstQuery.getParentFromChain(
+            identifierNode, MagikGrammar.IDENTIFIERS_WITH_GATHER, MagikGrammar.FINALLY);
+    return variableDefMultiNode != null || forVariablesNode != null || finallyNode != null;
   }
 
   private boolean isPartOfMultiAssignment(final AstNode identifierNode) {

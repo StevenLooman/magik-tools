@@ -296,6 +296,24 @@ class MagikParserTest {
   }
 
   @Test
+  void testMultipleAssignmentGatherTargetIsAnAssignable() {
+    final String code = "(a, _gather b) << (1, 2)";
+    final AstNode node = this.parseMagik(code);
+
+    final AstNode assignablesNode =
+        node.getFirstDescendant(MagikGrammar.MULTIPLE_ASSIGNMENT_ASSIGNABLES);
+    final List<AstNode> expressionNodes = assignablesNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(expressionNodes).hasSize(2);
+    final AstNode gatherTargetNode = expressionNodes.get(1);
+    final AstNode gatherTokenNode = gatherTargetNode.getPreviousSibling();
+    final String gatherTokenValue = gatherTokenNode.getTokenValue();
+    assertThat(gatherTokenValue).isEqualTo("_gather");
+    final AstNode gatherExpressionNode =
+        assignablesNode.getFirstDescendant(MagikGrammar.GATHER_EXPRESSION);
+    assertThat(gatherExpressionNode).isNull();
+  }
+
+  @Test
   void testWhitespaceTrivia() {
     final String code =
         """
