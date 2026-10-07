@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.productdef;
 
 import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.Token;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.net.URI;
 import java.time.Instant;
@@ -43,9 +44,7 @@ public class ProductDefinitionParser {
 
     final AstNode versionNode = node.getFirstChild(ProductDefinitionGrammar.VERSION);
     final String version =
-        versionNode != null
-            ? versionNode.getFirstChild(ProductDefinitionGrammar.VERSION_NUMBER).getTokenValue()
-            : null;
+        versionNode != null ? ProductDefinitionParser.readVersionNumber(versionNode) : null;
     final AstNode versionCommentNode =
         versionNode != null
             ? versionNode.getFirstChild(ProductDefinitionGrammar.REST_OF_LINE)
@@ -92,5 +91,13 @@ public class ProductDefinitionParser {
         title,
         description,
         usages);
+  }
+
+  private static String readVersionNumber(final AstNode versionNode) {
+    final AstNode versionNumberNode =
+        versionNode.getFirstChild(ProductDefinitionGrammar.VERSION_NUMBER);
+    return versionNumberNode.getTokens().stream()
+        .map(Token::getValue)
+        .collect(Collectors.joining());
   }
 }
