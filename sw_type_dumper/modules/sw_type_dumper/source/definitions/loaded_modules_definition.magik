@@ -32,12 +32,19 @@ _endmethod
 $
 
 _pragma(classify_level=basic, topic=type_dumper)
-_method loaded_modules_definition.new_from_session()
+_method loaded_modules_definition.new_from_session(_optional ignore_modules)
 	## Construct self from the current session's loaded modules.
+	## @param {sw:set<E=sw:symbol>} ignore_modules Module names to leave out.
 	## @return {_self}
+	_local skip << ignore_modules.default(set.new())
 	_local names << rope.new()
 	_for module _over sw_module_manager.loaded_modules.fast_elements()
 	_loop
+		_if skip.includes?(module.name)
+		_then
+			_continue
+		_endif
+
 		names.add_last(module.name.write_string)
 	_endloop
 	_return _self.new(names.as_sorted_collection().as_simple_vector())

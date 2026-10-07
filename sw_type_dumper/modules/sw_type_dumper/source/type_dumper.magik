@@ -6,9 +6,9 @@
 ##
 ## Usage:
 ## - Start a Smallworld session, for example a swaf session
-## - Update the target path at the bottom of this script
-## - Run this script
-## - Copy the type database (.jsonl file) to a location of your choosing (e.g., the workspace)
+## - Run `scripts/dump_types.magik` with `load_file()`
+##   It writes the type database (.jsonl file) to a temporary file and prints the path
+## - Copy the type database to a location of your choosing (e.g., the workspace)
 ## - Add the location of the type database to the magik-language-server config
 ## - Restart the magik-language-server
 ##
@@ -18,33 +18,38 @@ _package mt
 _pragma(classify_level=basic, topic=type_dumper)
 ## Type dumper.
 ## @slot {sw:set} ignore_vars
+## @slot {sw:set} ignore_modules
 ## @slot {sw:external_text_output_stream} out_stream
 def_slotted_exemplar(
 	:type_dumper,
 	{
 		{:ignore_vars, _unset},
+		{:ignore_modules, _unset},
 		{:out_stream, _unset}
 	})
 $
 
 _pragma(classify_level=basic, topic=type_dumper, usage=external)
-_method type_dumper.new(filename, _optional ignore_vars)
+_method type_dumper.new(filename, _optional ignore_vars, ignore_modules)
 	## Constructor.
 	## @param {sw:char16_vector} filename filename to dump to
 	## @param {sw:simple_vector} ignore_vars, types to ignore
+	## @param {sw:simple_vector} ignore_modules, module names to ignore
 	## @return {_clone}
-	_return _clone.init(filename, ignore_vars)
+	_return _clone.init(filename, ignore_vars, ignore_modules)
 _endmethod
 $
 
 _pragma(classify_level=restricted, topic=type_dumper, usage=internal)
-_private _method type_dumper.init(filename, _optional ignore_vars)
+_private _method type_dumper.init(filename, _optional ignore_vars, ignore_modules)
 	## Initializer.
 	## @param {sw:char16_vector} filename filename to dump to
 	## @param {sw:simple_vector} ignore_vars, types to ignore
+	## @param {sw:simple_vector} ignore_modules, module names to ignore
 	## @return {_self}
 	.ignore_vars << set.new_from(ignore_vars.default({}))
 	.ignore_vars.add(:|user:| + _self.class_name)
+	.ignore_modules << _self.skip_module_names(set.new_from(ignore_modules.default({})))
 	_dynamic !text_encoding! << :utf8
 	.out_stream << external_text_output_stream.new(filename)
 	_return _self
@@ -56,6 +61,55 @@ _private _method type_dumper.deinit()
 	## Deinitialize self, closes output stream.
 	.out_stream.close()
 	.out_stream << _unset
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_dumper.own_product()
+	## The product providing the type dumper itself.
+	## @return {sw:sw_product}
+	_return sw_module_manager.module(:sw_type_dumper).product
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_dumper.own_package()
+	## The package the type dumper itself lives in.
+	## @return {sw:package}
+	_return _self.exemplar_global.package
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_dumper.dumped_packages()
+	## The packages to dump, sorted by name, without the dumper's own package.
+	## @return {sw:sorted_collection<E=sw:package>}
+	_local own_package << _self.own_package()
+	_local packages << rope.new()
+	_for pkg _over package.all_packages.fast_elements()
+	_loop
+		_if pkg _isnt own_package
+		_then
+			packages.add_last(pkg)
+		_endif
+	_endloop
+	_return packages.as_sorted_collection({:method_result, :name})
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_dumper.skip_module_names(ignore_modules)
+	## Full set of module names to skip: `ignore_modules`, unioned with the names of the modules
+	## belonging to the dumper's own product, so loading the dumper to take the dump does not
+	## show up in the dump itself.
+	## @param {sw:set} ignore_modules
+	## @return {sw:set<E=sw:symbol>}
+	_local own_module_names << set.new()
+	_for module _over _self.own_product().defined_modules.fast_elements()
+	_loop
+		own_module_names.add(module.name)
+	_endloop
+	_return ignore_modules.union(own_module_names)
 _endmethod
 $
 
@@ -104,9 +158,16 @@ _private _method type_dumper.int!run()
 
 	# Write products.
 	_self.write_line("// products")
+	_local own_product_name << _self.own_product().name
 	_local sorted_products << sorted_collection.new_from(smallworld_product.products, {:method_result, :name})
 	_for product _over sorted_products.fast_elements()
 	_loop
+		# Skip the dumper's own product; loading it to take the dump should not appear in the dump.
+		_if product.name _is own_product_name
+		_then
+			_continue
+		_endif
+
 		_local def << product_definition.new_from(product)
 		_self.write_definition(def)
 	_endloop
@@ -116,18 +177,23 @@ _private _method type_dumper.int!run()
 	_local sorted_modules << sorted_collection.new_from(sw_module_manager.defined_modules, {:method_result, :name})
 	_for module _over sorted_modules.fast_elements()
 	_loop
+		_if .ignore_modules.includes?(module.name)
+		_then
+			_continue
+		_endif
+
 		_local def << module_definition.new_from(module)
 		_self.write_definition(def)
 	_endloop
 
 	# Write loaded modules.
 	_self.write_line("// loaded_modules")
-	_local loaded_modules_def << loaded_modules_definition.new_from_session()
+	_local loaded_modules_def << loaded_modules_definition.new_from_session(.ignore_modules)
 	_self.write_definition(loaded_modules_def)
 
 	# Write packages.
 	_self.write_line("// packages")
-	_local sorted_pkgs << sorted_collection.new_from(package.all_packages, {:method_result, :name})
+	_local sorted_pkgs << _self.dumped_packages()
 	_for pkg _over sorted_pkgs.fast_elements()
 	_loop
 		_local def << package_definition.new_from(pkg)
@@ -320,6 +386,13 @@ _private _method type_dumper.write_type_methods(pkg, name, method_table)
 		_endif
 
 		_local definition << method_definition.new_from(pkg, name, method)
+
+		# No methods from the dumper's own modules, also not on foreign exemplars.
+		_if .ignore_modules.includes?(definition.module_name)
+		_then
+			_continue
+		_endif
+
 		_self.write_definition(definition)
 	_endloop
 _endmethod
