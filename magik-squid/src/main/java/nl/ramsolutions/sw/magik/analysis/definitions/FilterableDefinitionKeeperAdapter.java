@@ -344,12 +344,8 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   @Override
   public Collection<BinaryOperatorDefinition> getBinaryOperatorDefinitions(
       final String operator, final TypeString lhs, final TypeString rhs) {
-    return this.getBinaryOperatorDefinitions().stream()
-        .filter(
-            binaryOperatorDef ->
-                binaryOperatorDef.getOperator().equals(operator)
-                    && binaryOperatorDef.getLhsTypeName().equals(lhs)
-                    && binaryOperatorDef.getRhsTypeName().equals(rhs))
+    return this.definitionKeeper.getBinaryOperatorDefinitions(operator, lhs, rhs).stream()
+        .filter(this.binaryOperatorDefinitionPredicate)
         .collect(Collectors.toSet());
   }
 

@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions;
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Objects;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -10,10 +11,26 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 /** Binary operator definition. */
 public class BinaryOperatorDefinition extends MagikDefinition {
 
+  private static final String KEYWORD_PREFIX = "_";
+
   private final String operator;
   private final TypeString lhsTypeName;
   private final TypeString rhsTypeName;
   private final TypeString resultTypeName;
+
+  /**
+   * Get the name an operator is defined under. A keyword operator is written {@code _and} but
+   * defined from the symbol {@code :and}, and keywords are case-insensitive.
+   *
+   * @param operator Operator, as written or as defined.
+   * @return Name the operator is defined under.
+   */
+  public static String getDefinedName(final String operator) {
+    final String lowered = operator.toLowerCase(Locale.ROOT);
+    return lowered.startsWith(KEYWORD_PREFIX)
+        ? lowered.substring(KEYWORD_PREFIX.length())
+        : lowered;
+  }
 
   /**
    * Constructor.

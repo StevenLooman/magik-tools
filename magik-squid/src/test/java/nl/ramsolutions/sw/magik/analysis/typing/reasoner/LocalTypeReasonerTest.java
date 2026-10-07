@@ -618,6 +618,40 @@ class LocalTypeReasonerTest {
   }
 
   @Test
+  void testBinaryOperatorKeyword() {
+    final String code =
+        """
+        _method object.test
+            _return _true _and _false
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new BinaryOperatorDefinition(
+            null,
+            null,
+            null,
+            code,
+            null,
+            "and",
+            TypeString.SW_FALSE,
+            TypeString.SW_FALSE,
+            TypeString.SW_FALSE));
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert user:object.test type determined.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_FALSE));
+  }
+
+  @Test
   void testBinaryOperatorSpecies() {
     final String code =
         """

@@ -28,6 +28,59 @@ class DefinitionKeeperTest {
         this.createLocation(uri), Instant.EPOCH, "module", null, null, owner, name, type);
   }
 
+  private BinaryOperatorDefinition createAndOperatorDefinition() {
+    return new BinaryOperatorDefinition(
+        null, null, null, null, null, "and", TYPE_STR_A, TYPE_STR_B, TYPE_STR_A);
+  }
+
+  private FilterableDefinitionKeeperAdapter createPassThroughAdapter(
+      final IDefinitionKeeper wrappedKeeper) {
+    return new FilterableDefinitionKeeperAdapter(
+        wrappedKeeper,
+        definition -> true,
+        definition -> true,
+        definition -> true,
+        definition -> true,
+        definition -> true,
+        definition -> true,
+        definition -> true,
+        definition -> true,
+        definition -> true,
+        definition -> true,
+        definition -> true,
+        definition -> true);
+  }
+
+  @Test
+  void testGetBinaryOperatorDefinitionsByKeywordToken() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final BinaryOperatorDefinition andDef = this.createAndOperatorDefinition();
+    keeper.add(andDef);
+
+    final Collection<BinaryOperatorDefinition> byToken =
+        keeper.getBinaryOperatorDefinitions("_AND", TYPE_STR_A, TYPE_STR_B);
+    final Collection<BinaryOperatorDefinition> byName =
+        keeper.getBinaryOperatorDefinitions("and", TYPE_STR_A, TYPE_STR_B);
+
+    assertThat(byToken).containsExactly(andDef);
+    assertThat(byName).containsExactly(andDef);
+  }
+
+  @Test
+  void testFilterableAdapterGetsBinaryOperatorDefinitionsAsItsKeeperDoes() {
+    final IDefinitionKeeper keeper = new DefinitionKeeper();
+    final BinaryOperatorDefinition andDef = this.createAndOperatorDefinition();
+    keeper.add(andDef);
+    final IDefinitionKeeper adapter = this.createPassThroughAdapter(keeper);
+    final TypeString genericLhs =
+        TypeString.ofIdentifier("a", "user", TypeString.ofGenericDefinition("E", TYPE_STR_B));
+
+    final Collection<BinaryOperatorDefinition> found =
+        adapter.getBinaryOperatorDefinitions("_and", genericLhs, TYPE_STR_B);
+
+    assertThat(found).containsExactly(andDef);
+  }
+
   @Test
   void testAddAndGetSlotDefinitionByOwner() {
     final IDefinitionKeeper keeper = new DefinitionKeeper();

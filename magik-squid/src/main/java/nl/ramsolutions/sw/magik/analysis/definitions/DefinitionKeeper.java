@@ -525,7 +525,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   }
 
   private String getKey(final String operator, final TypeString lhs, final TypeString rhs) {
-    return operator
+    final String definedName = BinaryOperatorDefinition.getDefinedName(operator);
+    return definedName
         + "_"
         + lhs.getWithoutGenerics().getFullString()
         + "_"
