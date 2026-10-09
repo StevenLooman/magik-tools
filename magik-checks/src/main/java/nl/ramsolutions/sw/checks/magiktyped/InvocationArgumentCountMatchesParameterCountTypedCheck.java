@@ -4,18 +4,17 @@ import com.sonar.sslr.api.AstNode;
 import java.util.Collection;
 import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
-import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.ArgumentRange;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationDefinitionHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
-import nl.ramsolutions.sw.magik.api.MagikKeyword;
 import org.sonar.check.Rule;
 
 /** Check if argument-count for invocation matches. */
@@ -36,18 +35,8 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
     }
 
     // Don't bother checking scatter.
-    final boolean anyScatter =
-        argumentsNode.getChildren(MagikGrammar.ARGUMENT).stream()
-            .anyMatch(
-                argumentNode -> {
-                  AstNode unaryExprNode =
-                      AstQuery.getFirstChildFromChain(
-                          node, MagikGrammar.EXPRESSION, MagikGrammar.UNARY_EXPRESSION);
-                  String tokenValue = unaryExprNode != null ? unaryExprNode.getTokenValue() : null;
-                  return tokenValue != null
-                      && tokenValue.equalsIgnoreCase(MagikKeyword.SCATTER.getValue());
-                });
-    if (anyScatter) {
+    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    if (argumentsHelper.hasScatterArgument()) {
       return;
     }
 
@@ -71,7 +60,7 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
       }
 
       // Match arguments against method.parameters.
-      final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT);
+      final List<AstNode> argumentNodes = argumentsHelper.getArgumentNodes();
       final ArgumentRange argumentRange = ArgumentRange.of(parameterDefs);
       if (argumentRange.required() > argumentNodes.size()) {
         final String message = MESSAGE.formatted(calledTypeStr.getFullString() + "." + methodName);
@@ -85,6 +74,12 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
     // Ensure there are arguments to check.
     final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
     if (argumentsNode == null) {
+      return;
+    }
+
+    // Don't bother checking scatter.
+    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    if (argumentsHelper.hasScatterArgument()) {
       return;
     }
 
@@ -110,7 +105,7 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
       }
 
       // Match arguments against procedure parameters.
-      final List<AstNode> argumentNodes = argumentsNode.getChildren(MagikGrammar.ARGUMENT);
+      final List<AstNode> argumentNodes = argumentsHelper.getArgumentNodes();
       final ArgumentRange argumentRange = ArgumentRange.of(parameterDefs);
       if (argumentRange.required() > argumentNodes.size()) {
         final String baseInvocationName =

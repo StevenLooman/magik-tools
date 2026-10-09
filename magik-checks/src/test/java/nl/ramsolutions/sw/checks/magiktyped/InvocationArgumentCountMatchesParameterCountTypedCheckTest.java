@@ -121,12 +121,72 @@ class InvocationArgumentCountMatchesParameterCountTypedCheckTest {
   }
 
   @Test
+  void testScatterArgumentIsNotCounted() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "m()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p1",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.SW_OBJECT),
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p2",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.SW_OBJECT)),
+            null,
+            null,
+            ExpressionResultString.EMPTY,
+            ExpressionResultString.EMPTY));
+
+    final String code =
+        """
+        _block
+          object.m(_scatter args)
+        _endblock""";
+    final MagikTypedCheck check = new InvocationArgumentCountMatchesParameterCountTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
   void testProcedureArgumentCountMatches() {
     final String code =
         """
         _block
           (_proc(p1, p2)
           _endproc)(object, object)
+        _endblock
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new InvocationArgumentCountMatchesParameterCountTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testProcedureScatterArgumentIsNotCounted() {
+    final String code =
+        """
+        _block
+          (_proc(p1, p2)
+          _endproc)(_scatter args)
         _endblock
         """;
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.magik.api.MagikKeyword;
 
 /** Helper for ARGUMENTS nodes. */
 public class ArgumentsNodeHelper {
@@ -26,6 +27,38 @@ public class ArgumentsNodeHelper {
   }
 
   /**
+   * Get the argument nodes.
+   *
+   * @return ARGUMENT nodes.
+   */
+  public List<AstNode> getArgumentNodes() {
+    return this.node.getChildren(MagikGrammar.ARGUMENT);
+  }
+
+  /**
+   * Test if any argument is scattered.
+   *
+   * @return True if any argument is a {@code _scatter} argument.
+   */
+  public boolean hasScatterArgument() {
+    final List<AstNode> argumentNodes = this.getArgumentNodes();
+    return argumentNodes.stream().anyMatch(ArgumentsNodeHelper::isScatterArgument);
+  }
+
+  /**
+   * Test if the argument is scattered.
+   *
+   * @param argumentNode ARGUMENT node.
+   * @return True if the argument is a {@code _scatter} argument.
+   */
+  public static boolean isScatterArgument(final AstNode argumentNode) {
+    // `_scatter` can only lead an argument.
+    final String firstTokenValue = argumentNode.getTokenValue();
+    final String scatterKeyword = MagikKeyword.SCATTER.getValue();
+    return scatterKeyword.equalsIgnoreCase(firstTokenValue);
+  }
+
+  /**
    * Get the nth argument.
    *
    * @param nth Nth argument.
@@ -33,7 +66,7 @@ public class ArgumentsNodeHelper {
    */
   @CheckForNull
   public AstNode getArgument(final int nth) {
-    final List<AstNode> argumentNodes = this.node.getChildren(MagikGrammar.ARGUMENT);
+    final List<AstNode> argumentNodes = this.getArgumentNodes();
     if (argumentNodes.size() - 1 < nth) {
       return null;
     }
