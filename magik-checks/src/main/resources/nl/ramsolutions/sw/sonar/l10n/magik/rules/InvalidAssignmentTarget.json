@@ -1,0 +1,15 @@
+{
+  "title": "Assignment to something that cannot be assigned to",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "InvalidAssignmentTarget",
+  "sqKey": "invalid-assignment-target"
+}
