@@ -88,7 +88,8 @@ public class CheckClassAssert extends AbstractAssert<CheckClassAssert, Class<? e
   }
 
   /**
-   * Asserts that the metadata's SQ key matches the class name in kebab-case.
+   * Asserts that the metadata's SQ key matches the class name in kebab-case, as a configuration
+   * accepts it.
    *
    * @return This assertion object.
    * @throws IOException -
@@ -103,7 +104,7 @@ public class CheckClassAssert extends AbstractAssert<CheckClassAssert, Class<? e
     }
 
     final String checkName = this.getCheckName();
-    final String checkNameKebabCase = checkName.replaceAll("([a-z])([A-Z])", "$1-$2").toLowerCase();
+    final String checkNameKebabCase = CheckHolder.toKebabCase(checkName);
     final String actualSqKey = metadata.getSqKey();
     if (!checkNameKebabCase.equals(actualSqKey)) {
       this.failWithMessage(
