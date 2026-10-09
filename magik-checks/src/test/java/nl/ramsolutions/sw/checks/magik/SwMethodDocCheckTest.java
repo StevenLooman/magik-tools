@@ -39,6 +39,30 @@ class SwMethodDocCheckTest {
   }
 
   @Test
+  void testAssignmentParameterDocumented() {
+    final MagikCheck check = new SwMethodDocCheck();
+    final String code =
+        """
+        _method a.b(param1) << value
+          ## Sets PARAM1 to VALUE.
+        _endmethod
+        """;
+    assertThat(check).reportsNoIssues(code);
+  }
+
+  @Test
+  void testAssignmentParameterDocMissing() {
+    final MagikCheck check = new SwMethodDocCheck();
+    final String code =
+        """
+        _method a.b(param1) << value
+          ## Sets PARAM1.
+        _endmethod
+        """;
+    assertThat(check).reportsIssueCount(code, 1);
+  }
+
+  @Test
   void testDocMissing() {
     final MagikCheck check = new SwMethodDocCheck();
     final String code =

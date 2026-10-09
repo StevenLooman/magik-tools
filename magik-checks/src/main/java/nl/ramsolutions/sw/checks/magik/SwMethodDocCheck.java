@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.checks.magik;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import nl.ramsolutions.sw.checks.DisabledByDefault;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
-import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
@@ -60,31 +59,12 @@ public class SwMethodDocCheck extends MagikCheck {
   }
 
   private Set<String> getMethodParameters(final AstNode node) {
-    final Set<String> parameters = new HashSet<>();
-
-    // parameters
-    final AstNode parametersNode = node.getFirstChild(MagikGrammar.PARAMETERS);
-    if (parametersNode != null) {
-      final List<AstNode> parameterNodes = parametersNode.getChildren(MagikGrammar.PARAMETER);
-      final List<String> names =
-          parameterNodes.stream()
-              .map(parameterNode -> parameterNode.getFirstChild(MagikGrammar.IDENTIFIER))
-              .map(AstNode::getTokenValue)
-              .map(String::toUpperCase)
-              .toList();
-      parameters.addAll(names);
-    }
-
-    // assignment parameter
-    final AstNode assignmentParameterNode = node.getFirstChild(MagikGrammar.ASSIGNMENT_PARAMETER);
-    if (assignmentParameterNode != null) {
-      final AstNode parameterNode = assignmentParameterNode.getFirstChild(MagikGrammar.PARAMETER);
-      final AstNode identifierNode = parameterNode.getFirstChild(MagikGrammar.IDENTIFIER);
-      final String name = identifierNode.getTokenValue().toUpperCase();
-      parameters.add(name);
-    }
-
-    return parameters;
+    final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(node);
+    final Map<String, AstNode> parameterNodes = helper.getParameterNodes();
+    final Set<String> parameterNames = parameterNodes.keySet();
+    return parameterNames.stream()
+        .map(String::toUpperCase)
+        .collect(Collectors.toCollection(HashSet::new));
   }
 
   private String extractDoc(final AstNode node) {
