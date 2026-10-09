@@ -1,0 +1,14 @@
+<p>Only a variable, a slot or a method call can be the target of an assignment.
+Smallworld refuses to compile an assignment to anything else, such as the result of a procedure call, a literal, <code>_self</code> or a calculation, so the file does not load.</p>
+<p>The rule reports such a target in an assignment (<code>&lt;&lt;</code>, <code>^&lt;&lt;</code>), in an augmented assignment such as <code>+&lt;&lt;</code>, and between the parentheses of a multiple assignment.
+A method call as target is not reported: <code>a.x &lt;&lt; 1</code> and <code>a[1] &lt;&lt; 1</code> send <code>x&lt;&lt;</code> and <code>[]&lt;&lt;</code> to <code>a</code>.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+total &lt;&lt; count() &lt;&lt; 0
+(first, rest()) &lt;&lt; values()
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+total &lt;&lt; counter &lt;&lt; 0
+(first, rest) &lt;&lt; values()
+</pre>
