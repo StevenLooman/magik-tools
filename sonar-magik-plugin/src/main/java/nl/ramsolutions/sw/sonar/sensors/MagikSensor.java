@@ -3,8 +3,11 @@ package nl.ramsolutions.sw.sonar.sensors;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.checks.MagikCheckList;
@@ -79,6 +82,8 @@ public class MagikSensor implements Sensor {
     final List<InputFile> inputFiles = new ArrayList<>();
     fileSystem.inputFiles(filePredicate).forEach(inputFiles::add);
 
+    this.logIgnoredRuleToggles(inputFiles);
+
     final ProgressReport progressReport =
         new ProgressReport("Report about progress of Sonar Magik analyzer", SLEEP_PERIOD);
     final List<String> filenames = inputFiles.stream().map(InputFile::toString).toList();
@@ -90,6 +95,20 @@ public class MagikSensor implements Sensor {
     }
 
     progressReport.stop();
+  }
+
+  // The quality profile decides under Sonar; tell the user when a properties file says otherwise.
+  private void logIgnoredRuleToggles(final List<InputFile> inputFiles) {
+    final Set<Path> directories = new LinkedHashSet<>();
+    for (final InputFile inputFile : inputFiles) {
+      final Path path = Path.of(inputFile.uri());
+      final Path directory = path.getParent();
+      if (directory != null) {
+        directories.add(directory);
+      }
+    }
+
+    RuleTogglesNotice.logIfIgnored(directories);
   }
 
   private void scanMagikFile(final SensorContext context, final InputFile inputFile) {
