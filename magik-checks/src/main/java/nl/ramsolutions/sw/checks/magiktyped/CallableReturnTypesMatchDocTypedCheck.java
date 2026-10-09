@@ -378,7 +378,7 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
     Integer returnCount = null;
     final List<AstNode> returnNodes = AstQuery.getOwnReturnStatementNodes(methodNode);
     for (final AstNode returnNode : returnNodes) {
-      final Integer statementReturnCount = this.extractReturnCountFromReturnStatement(returnNode);
+      final Integer statementReturnCount = this.extractReturnCountFromStatement(returnNode);
       returnCount = this.mergeReturnCounts(returnCount, statementReturnCount);
       if (returnCount == null) {
         return null;
@@ -391,7 +391,7 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
         continue;
       }
 
-      final Integer statementReturnCount = this.extractReturnCountFromEmitStatement(emitNode);
+      final Integer statementReturnCount = this.extractReturnCountFromStatement(emitNode);
       returnCount = this.mergeReturnCounts(returnCount, statementReturnCount);
       if (returnCount == null) {
         return null;
@@ -418,17 +418,8 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
     return currentCount.equals(statementCount) ? currentCount : null;
   }
 
-  private Integer extractReturnCountFromReturnStatement(final AstNode returnNode) {
-    final AstNode tupleNode = returnNode.getFirstChild(MagikGrammar.TUPLE);
-    if (tupleNode == null) {
-      return 0;
-    }
-
-    return this.extractReturnCountFromTuple(tupleNode);
-  }
-
-  private Integer extractReturnCountFromEmitStatement(final AstNode emitNode) {
-    final AstNode tupleNode = emitNode.getFirstChild(MagikGrammar.TUPLE);
+  private Integer extractReturnCountFromStatement(final AstNode returnOrEmitNode) {
+    final AstNode tupleNode = returnOrEmitNode.getFirstChild(MagikGrammar.TUPLE);
     if (tupleNode == null) {
       return 0;
     }
