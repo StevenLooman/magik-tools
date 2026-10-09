@@ -30,8 +30,7 @@ public class ExemplarDefinitionVisitor extends MagikVisitor {
       return;
     }
 
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(node);
     final AstNode symbolNode = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     if (symbolNode == null) {
       return;

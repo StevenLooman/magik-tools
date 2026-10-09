@@ -37,8 +37,7 @@ public class SlotDefaultValueMatchesTypeDocTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(node);
     final AstNode slotsNode = argumentsHelper.getArgument(1, MagikGrammar.SIMPLE_VECTOR);
     if (slotsNode == null) {
       return;

@@ -27,6 +27,17 @@ public class ArgumentsNodeHelper {
   }
 
   /**
+   * Create a helper for the arguments of an invocation.
+   *
+   * @param invocationNode METHOD_INVOCATION or PROCEDURE_INVOCATION node, with arguments.
+   * @return Helper for its ARGUMENTS node.
+   */
+  public static ArgumentsNodeHelper fromInvocationNode(final AstNode invocationNode) {
+    final AstNode argumentsNode = invocationNode.getFirstChild(MagikGrammar.ARGUMENTS);
+    return new ArgumentsNodeHelper(argumentsNode);
+  }
+
+  /**
    * Get the argument nodes.
    *
    * @return ARGUMENT nodes.

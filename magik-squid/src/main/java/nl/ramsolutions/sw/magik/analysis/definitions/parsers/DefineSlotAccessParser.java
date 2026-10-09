@@ -88,8 +88,7 @@ public class DefineSlotAccessParser {
     }
 
     // Arguments: name, flag, optional flavour, owner_name
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(node);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     final AstNode argument1Node = argumentsHelper.getArgument(1, MagikGrammar.SYMBOL);
     return argument0Node != null && argument1Node != null;
@@ -123,8 +122,7 @@ public class DefineSlotAccessParser {
 
     // Arguments: name, optional private?, owner_name
     // `private?` is actually `flavour`.
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(node);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     return argument0Node != null;
   }
@@ -156,8 +154,7 @@ public class DefineSlotAccessParser {
     }
 
     // Arguments: name, optional flavour, owner_name
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(node);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     return argument0Node != null;
   }
@@ -168,8 +165,7 @@ public class DefineSlotAccessParser {
    * @return List of parsed definitions.
    */
   public List<MagikDefinition> parseDefinitions() {
-    final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(this.node);
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(this.node);
 
     // Some sanity.

@@ -67,8 +67,7 @@ public class DefConditionParser {
       return false;
     }
 
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(node);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     if (argument0Node == null) {
       return false;
@@ -108,8 +107,7 @@ public class DefConditionParser {
       throw new IllegalStateException();
     }
 
-    final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(this.node);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     final AstNode argument2Node = argumentsHelper.getArgument(2, MagikGrammar.SIMPLE_VECTOR);
     if (argument0Node == null || argument2Node == null) {

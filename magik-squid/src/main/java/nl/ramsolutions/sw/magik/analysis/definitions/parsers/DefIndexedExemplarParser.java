@@ -52,8 +52,7 @@ public class DefIndexedExemplarParser extends BaseDefParser {
     }
 
     // Some sanity.
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(node);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     if (argument0Node == null) {
       return false;
@@ -69,8 +68,7 @@ public class DefIndexedExemplarParser extends BaseDefParser {
    */
   @Override
   public List<MagikDefinition> parseDefinitions() {
-    final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(this.node);
 
     // Some sanity.
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);

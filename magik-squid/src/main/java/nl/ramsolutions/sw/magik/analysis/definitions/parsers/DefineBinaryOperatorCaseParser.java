@@ -57,8 +57,7 @@ public class DefineBinaryOperatorCaseParser {
       return false;
     }
 
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(node);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     if (argument0Node == null) {
       return false;
@@ -87,8 +86,7 @@ public class DefineBinaryOperatorCaseParser {
    */
   public List<MagikDefinition> parseDefinitions() {
     // Some sanity.
-    final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(this.node);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     if (argument0Node == null) {
       throw new IllegalStateException();

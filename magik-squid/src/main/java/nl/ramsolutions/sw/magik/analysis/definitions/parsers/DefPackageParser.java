@@ -56,8 +56,7 @@ public class DefPackageParser {
       return false;
     }
 
-    final AstNode argumentsNode = node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(node);
 
     // Figure name.
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
@@ -71,8 +70,7 @@ public class DefPackageParser {
    */
   @SuppressWarnings("checkstyle:NestedIfDepth")
   public List<MagikDefinition> parseDefinitions() {
-    final AstNode argumentsNode = this.node.getFirstChild(MagikGrammar.ARGUMENTS);
-    final ArgumentsNodeHelper argumentsHelper = new ArgumentsNodeHelper(argumentsNode);
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(this.node);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     if (argument0Node == null) {
       throw new IllegalStateException();
