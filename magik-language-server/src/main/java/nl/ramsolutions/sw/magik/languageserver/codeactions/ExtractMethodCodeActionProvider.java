@@ -93,9 +93,7 @@ public class ExtractMethodCodeActionProvider {
     }
 
     // Walk up to find the enclosing method/proc definition for this body.
-    final AstNode enclosingDef =
-        bodyNode.getFirstAncestor(
-            MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+    final AstNode enclosingDef = AstQuery.getEnclosingCallableNode(bodyNode);
     if (enclosingDef == null) {
       return null;
     }

@@ -344,13 +344,9 @@ public class MethodDefinitionNodeHelper {
    * @return
    */
   public boolean returnsAnything() {
-    final List<AstNode> returnStatementNodes =
-        this.node.getDescendants(MagikGrammar.RETURN_STATEMENT);
+    final List<AstNode> returnStatementNodes = AstQuery.getOwnReturnStatementNodes(this.node);
     final boolean hasReturn =
         returnStatementNodes.stream()
-            .filter(
-                statementNode ->
-                    statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == null)
             .anyMatch(statementNode -> statementNode.hasDescendant(MagikGrammar.TUPLE));
 
     final boolean hasEmit =
@@ -367,10 +363,8 @@ public class MethodDefinitionNodeHelper {
    * @return
    */
   public boolean hasLoopbody() {
-    return this.node.getDescendants(MagikGrammar.LOOPBODY).stream()
-        .anyMatch(
-            statementNode ->
-                statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == null);
+    final List<AstNode> loopbodyNodes = AstQuery.getOwnLoopbodyNodes(this.node);
+    return !loopbodyNodes.isEmpty();
   }
 
   /**

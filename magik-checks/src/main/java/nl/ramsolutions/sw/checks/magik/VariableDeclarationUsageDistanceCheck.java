@@ -5,6 +5,7 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.HashSet;
 import java.util.Set;
 import nl.ramsolutions.sw.checks.MagikCheck;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -107,8 +108,7 @@ public class VariableDeclarationUsageDistanceCheck extends MagikCheck {
   }
 
   private boolean isProcedureOrMethodDefinition(final AstNode node) {
-    return node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION)
-        != null;
+    return AstQuery.getEnclosingCallableNode(node) != null;
   }
 
   @CheckForNull

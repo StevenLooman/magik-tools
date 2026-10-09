@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
@@ -375,14 +376,8 @@ public class CallableReturnTypesMatchDocTypedCheck extends MagikTypedCheck {
 
   private Integer extractReturnCountFromSyntax(final AstNode methodNode) {
     Integer returnCount = null;
-    for (final AstNode returnNode : methodNode.getDescendants(MagikGrammar.RETURN_STATEMENT)) {
-      final AstNode enclosingDefinition =
-          returnNode.getFirstAncestor(
-              MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
-      if (!methodNode.equals(enclosingDefinition)) {
-        continue;
-      }
-
+    final List<AstNode> returnNodes = AstQuery.getOwnReturnStatementNodes(methodNode);
+    for (final AstNode returnNode : returnNodes) {
       final Integer statementReturnCount = this.extractReturnCountFromReturnStatement(returnNode);
       returnCount = this.mergeReturnCounts(returnCount, statementReturnCount);
       if (returnCount == null) {

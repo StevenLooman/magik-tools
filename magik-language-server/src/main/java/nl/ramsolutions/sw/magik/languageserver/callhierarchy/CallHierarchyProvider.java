@@ -138,9 +138,7 @@ public class CallHierarchyProvider {
               // method/procedure definition.
               final URI calledMethodUri = location.getUri();
               final String uriStr = calledMethodUri.toString();
-              final AstNode definitionNode =
-                  usageNode.getFirstAncestor(
-                      MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+              final AstNode definitionNode = AstQuery.getEnclosingCallableNode(usageNode);
               if (definitionNode == null) {
                 return null;
               } else if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {

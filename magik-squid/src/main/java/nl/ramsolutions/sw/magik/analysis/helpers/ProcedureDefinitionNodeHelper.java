@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
 
@@ -77,13 +78,9 @@ public class ProcedureDefinitionNodeHelper {
    * @return
    */
   public boolean returnsAnything() {
-    final List<AstNode> returnStatementNodes =
-        this.node.getDescendants(MagikGrammar.RETURN_STATEMENT);
+    final List<AstNode> returnStatementNodes = AstQuery.getOwnReturnStatementNodes(this.node);
     final boolean hasReturn =
         returnStatementNodes.stream()
-            .filter(
-                statementNode ->
-                    statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == this.node)
             .anyMatch(statementNode -> statementNode.hasDescendant(MagikGrammar.TUPLE));
 
     final boolean hasEmit =
@@ -100,10 +97,8 @@ public class ProcedureDefinitionNodeHelper {
    * @return
    */
   public boolean hasLoopbody() {
-    return this.node.getDescendants(MagikGrammar.LOOPBODY).stream()
-        .anyMatch(
-            statementNode ->
-                statementNode.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION) == this.node);
+    final List<AstNode> loopbodyNodes = AstQuery.getOwnLoopbodyNodes(this.node);
+    return !loopbodyNodes.isEmpty();
   }
 
   private Collection<AstNode> getMethodModifiers() {

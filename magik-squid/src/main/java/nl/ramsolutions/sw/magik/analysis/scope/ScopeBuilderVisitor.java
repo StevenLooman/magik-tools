@@ -195,9 +195,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
               // Figure parent entry.
               ScopeEntry parentEntry = null;
               if (scopeEntryType == ScopeEntry.Type.IMPORT) {
-                AstNode procScopeNode =
-                    identifierNode.getFirstAncestor(
-                        MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+                AstNode procScopeNode = AstQuery.getEnclosingCallableNode(identifierNode);
                 while (procScopeNode != null) {
                   final AstNode parentScopeNode = procScopeNode.getFirstAncestor(MagikGrammar.BODY);
                   final Scope parentScope =
@@ -209,9 +207,7 @@ public class ScopeBuilderVisitor extends MagikVisitor {
                     break;
                   }
 
-                  procScopeNode =
-                      procScopeNode.getFirstAncestor(
-                          MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+                  procScopeNode = AstQuery.getEnclosingCallableNode(procScopeNode);
                 }
               }
 

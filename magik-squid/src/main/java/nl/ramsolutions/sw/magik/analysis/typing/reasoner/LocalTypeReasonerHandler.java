@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import java.util.List;
 import java.util.Objects;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
@@ -134,13 +135,7 @@ abstract class LocalTypeReasonerHandler {
     }
 
     // Collect return types from RETURN_STATEMENT descendants targeting this definition.
-    definitionNode.getDescendants(MagikGrammar.RETURN_STATEMENT).stream()
-        .filter(
-            returnNode ->
-                returnNode
-                    .getFirstAncestor(
-                        MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION)
-                    .equals(definitionNode))
+    AstQuery.getOwnReturnStatementNodes(definitionNode).stream()
         .map(this.state::getNodeType)
         .forEach(result -> this.addNodeType(definitionNode, result));
 
@@ -156,13 +151,7 @@ abstract class LocalTypeReasonerHandler {
     }
 
     // Collect iter types from LOOPBODY descendants targeting this definition.
-    definitionNode.getDescendants(MagikGrammar.LOOPBODY).stream()
-        .filter(
-            loopbodyNode ->
-                loopbodyNode
-                    .getFirstAncestor(
-                        MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION)
-                    .equals(definitionNode))
+    AstQuery.getOwnLoopbodyNodes(definitionNode).stream()
         .map(this.state::getNodeType)
         .forEach(result -> this.addNodeIterType(definitionNode, result));
   }
@@ -174,8 +163,7 @@ abstract class LocalTypeReasonerHandler {
    * @return Method owner type.
    */
   protected TypeString getMethodOwnerType(final AstNode node) {
-    final AstNode defNode =
-        node.getFirstAncestor(MagikGrammar.PROCEDURE_DEFINITION, MagikGrammar.METHOD_DEFINITION);
+    final AstNode defNode = AstQuery.getEnclosingCallableNode(node);
     if (defNode == null) {
       // Lets try to be safe.
       return TypeString.UNDEFINED;

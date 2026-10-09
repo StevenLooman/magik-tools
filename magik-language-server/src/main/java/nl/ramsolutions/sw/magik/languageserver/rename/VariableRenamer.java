@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
@@ -128,9 +129,7 @@ class VariableRenamer extends Renamer {
   private List<TextEdit> getTypeDocEdits(
       final AstNode definitionNode, final String oldName, final String newName) {
     // Find the parent method/procedure definition node.
-    final AstNode methodNode =
-        definitionNode.getFirstAncestor(
-            MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+    final AstNode methodNode = AstQuery.getEnclosingCallableNode(definitionNode);
     if (methodNode == null) {
       return Collections.emptyList();
     }

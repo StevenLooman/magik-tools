@@ -63,8 +63,7 @@ public class GlobalScope extends Scope {
     AstNode searchNode = node;
     // Do some helping.
     if (node.is(MagikGrammar.PARAMETER) || node.is(MagikGrammar.PARAMETERS)) {
-      searchNode =
-          node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+      searchNode = AstQuery.getEnclosingCallableNode(node);
       searchNode = searchNode.getFirstDescendant(MagikGrammar.BODY);
     }
 

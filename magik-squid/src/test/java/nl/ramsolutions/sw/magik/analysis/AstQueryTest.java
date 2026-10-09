@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.Token;
 import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.MagikParser;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,52 @@ class AstQueryTest {
   private AstNode parseCode(final String code) {
     final MagikParser parser = new MagikParser();
     return parser.parseSafe(code);
+  }
+
+  @Test
+  void testGetEnclosingCallableNodeInMethod() {
+    final String code =
+        """
+        _method a.b
+          _return 1
+        _endmethod
+        """;
+    final AstNode topNode = this.parseCode(code);
+    final AstNode returnNode = topNode.getFirstDescendant(MagikGrammar.RETURN_STATEMENT);
+    final AstNode callableNode = AstQuery.getEnclosingCallableNode(returnNode);
+    final AstNode methodNode = topNode.getFirstDescendant(MagikGrammar.METHOD_DEFINITION);
+    assertThat(callableNode).isSameAs(methodNode);
+  }
+
+  @Test
+  void testGetEnclosingCallableNodeIsNearest() {
+    final String code =
+        """
+        _method a.b
+          _proc()
+            _return 1
+          _endproc
+        _endmethod
+        """;
+    final AstNode topNode = this.parseCode(code);
+    final AstNode returnNode = topNode.getFirstDescendant(MagikGrammar.RETURN_STATEMENT);
+    final AstNode callableNode = AstQuery.getEnclosingCallableNode(returnNode);
+    final AstNode procedureNode = topNode.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
+    assertThat(callableNode).isSameAs(procedureNode);
+  }
+
+  @Test
+  void testGetEnclosingCallableNodeOutsideCallable() {
+    final String code =
+        """
+        _block
+          _return 1
+        _endblock
+        """;
+    final AstNode topNode = this.parseCode(code);
+    final AstNode returnNode = topNode.getFirstDescendant(MagikGrammar.RETURN_STATEMENT);
+    final AstNode callableNode = AstQuery.getEnclosingCallableNode(returnNode);
+    assertThat(callableNode).isNull();
   }
 
   @Test

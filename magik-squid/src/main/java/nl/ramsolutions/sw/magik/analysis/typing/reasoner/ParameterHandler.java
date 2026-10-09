@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 import com.sonar.sslr.api.AstNode;
 import java.util.Map;
 import java.util.Objects;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.ParameterNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
@@ -33,8 +34,7 @@ class ParameterHandler extends LocalTypeReasonerHandler {
     final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
 
     // Parse method/proc docs and extract parameter type.
-    final AstNode definitionNode =
-        node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+    final AstNode definitionNode = AstQuery.getEnclosingCallableNode(node);
     final TypeDocParser docParser = new TypeDocParser(definitionNode);
     final Map<String, TypeString> parameterTypes = docParser.getParameterTypes();
     final String identifier = identifierNode.getTokenValue();

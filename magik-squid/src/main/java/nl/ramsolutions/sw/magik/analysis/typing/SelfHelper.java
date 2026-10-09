@@ -3,6 +3,7 @@ package nl.ramsolutions.sw.magik.analysis.typing;
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.List;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
@@ -42,8 +43,7 @@ public final class SelfHelper {
    */
   @CheckForNull
   public static TypeString getSelfOwnerType(final AstNode node) {
-    final AstNode definitionNode =
-        node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+    final AstNode definitionNode = AstQuery.getEnclosingCallableNode(node);
     if (definitionNode == null) {
       return null;
     }

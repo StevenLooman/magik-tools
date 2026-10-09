@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.helpers;
 
 import com.sonar.sslr.api.AstNode;
+import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /** Helper for CONTINUE_STATEMENT and LEAVE_STATEMENT nodes. */
@@ -61,9 +62,7 @@ public class ContinueLeaveStatementNodeHelper {
 
     if (this.node.is(MagikGrammar.RETURN_STATEMENT)) {
       // Find the nearest procedure or method definition.
-      final AstNode procedureNode =
-          this.node.getFirstAncestor(
-              MagikGrammar.PROCEDURE_DEFINITION, MagikGrammar.METHOD_DEFINITION);
+      final AstNode procedureNode = AstQuery.getEnclosingCallableNode(this.node);
       final AstNode bodyNode = procedureNode.getFirstChild(MagikGrammar.BODY);
       if (bodyNode != null) {
         return bodyNode;

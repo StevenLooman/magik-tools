@@ -128,6 +128,47 @@ public final class AstQuery {
   }
 
   /**
+   * Get the nearest method or procedure definition enclosing the {@link AstNode}.
+   *
+   * @param node {@link AstNode} to query
+   * @return METHOD_DEFINITION or PROCEDURE_DEFINITION node, {@code null} if not in one.
+   */
+  @CheckForNull
+  public static AstNode getEnclosingCallableNode(final AstNode node) {
+    return node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+  }
+
+  /**
+   * Get the {@code _return} statements of a method or procedure definition itself, leaving out
+   * those of procedures nested in it.
+   *
+   * @param callableNode METHOD_DEFINITION or PROCEDURE_DEFINITION node.
+   * @return RETURN_STATEMENT nodes which return from the definition.
+   */
+  public static List<AstNode> getOwnReturnStatementNodes(final AstNode callableNode) {
+    return AstQuery.getOwnDescendants(callableNode, MagikGrammar.RETURN_STATEMENT);
+  }
+
+  /**
+   * Get the {@code _loopbody} statements of a method or procedure definition itself, leaving out
+   * those of procedures nested in it.
+   *
+   * @param callableNode METHOD_DEFINITION or PROCEDURE_DEFINITION node.
+   * @return LOOPBODY nodes which yield from the definition.
+   */
+  public static List<AstNode> getOwnLoopbodyNodes(final AstNode callableNode) {
+    return AstQuery.getOwnDescendants(callableNode, MagikGrammar.LOOPBODY);
+  }
+
+  private static List<AstNode> getOwnDescendants(
+      final AstNode callableNode, final AstNodeType nodeType) {
+    final List<AstNode> descendantNodes = callableNode.getDescendants(nodeType);
+    return descendantNodes.stream()
+        .filter(descendantNode -> AstQuery.getEnclosingCallableNode(descendantNode) == callableNode)
+        .toList();
+  }
+
+  /**
    * Get the first ancestor of {@link AstNode}, or self, which is of one of the given types.
    *
    * @param node {@link AstNode} to query
