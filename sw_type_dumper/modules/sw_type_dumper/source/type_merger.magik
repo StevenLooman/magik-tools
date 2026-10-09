@@ -126,8 +126,8 @@ _private _method type_merger.int!run()
 		"globals",
 		"methods",
 		"procedures",
-		"conditions"
-		# "binary_operators"  # TODO
+		"conditions",
+		"binary_operators"
 	}
 
 	# Skip preambles from left, copy preambles from right.
@@ -162,6 +162,7 @@ _private _method type_merger.int!run()
 			_local right_definition << _self.parse_instruction(right_line)
 
 			# Find corresponding instruction at left side.
+			_local written? << _false
 			_while _not _self.peek_line(:left).default("").trim_spaces().matches?(next_section_marker)
 			_loop @over_left
 				_local left_line << _self.peek_line(:left)
@@ -183,16 +184,24 @@ _private _method type_merger.int!run()
 
 					_local new_definition << _self.merge_definition(left_definition, right_definition)
 					_self.write_definition(new_definition)
+					written? << _true
 
 					_leave @over_left
 				_elif compare_result _is _false
 				_then
 					# Missing in left, copy.
 					_self.write_definition(right_definition)
+					written? << _true
 
 					_leave @over_left
 				_endif
 			_endloop
+
+			_if _not written?
+			_then
+				# Left side has no more instructions in this section, copy.
+				_self.write_definition(right_definition)
+			_endif
 		_endloop
 
 		# Sync to next section on left side.
