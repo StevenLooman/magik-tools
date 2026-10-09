@@ -252,6 +252,13 @@ public class TypeStringResolver {
    * @return True if is kind of, false otherwise.
    */
   public boolean isKindOf(final TypeString typeString1, final TypeString typeString2) {
+    return this.isKindOf(typeString1, typeString2, new HashSet<>());
+  }
+
+  private boolean isKindOf(
+      final TypeString typeString1,
+      final TypeString typeString2,
+      final Set<Entry<TypeString, TypeString>> visited) {
     // Any member or colliding definition may be the runtime value.
     final TypeString combinedTypeString2 = TypeString.combine(typeString2);
     Objects.requireNonNull(combinedTypeString2);
@@ -259,12 +266,14 @@ public class TypeStringResolver {
         combinedTypeString2.getCombinedTypes().stream()
             .flatMap(typeStr2 -> this.resolve(typeStr2).stream())
             .toList();
+    // An inheritance cycle reaches nothing new for the same kind.
     return TypeString.combine(typeString1).getCombinedTypes().stream()
+        .filter(typeStr1 -> visited.add(Map.entry(typeStr1, typeString2)))
         .flatMap(typeStr1 -> this.resolve(typeStr1).stream())
         .anyMatch(
             definition1 ->
                 definitions2.stream()
-                    .anyMatch(definition2 -> this.isKindOf(definition1, definition2)));
+                    .anyMatch(definition2 -> this.isKindOf(definition1, definition2, visited)));
   }
 
   /**
@@ -276,6 +285,13 @@ public class TypeStringResolver {
    */
   public boolean isKindOf(
       final ITypeStringDefinition definition1, final ITypeStringDefinition definition2) {
+    return this.isKindOf(definition1, definition2, new HashSet<>());
+  }
+
+  private boolean isKindOf(
+      final ITypeStringDefinition definition1,
+      final ITypeStringDefinition definition2,
+      final Set<Entry<TypeString, TypeString>> visited) {
     final TypeString typeString1 = definition1.getTypeString();
     final TypeString typeString2 = definition2.getTypeString();
     if (typeString1.equals(typeString2)) {
@@ -283,7 +299,7 @@ public class TypeStringResolver {
     }
 
     return this.getParents(definition1).stream()
-        .anyMatch(parentTypeString1 -> this.isKindOf(parentTypeString1, typeString2));
+        .anyMatch(parentTypeString1 -> this.isKindOf(parentTypeString1, typeString2, visited));
   }
 
   /**
