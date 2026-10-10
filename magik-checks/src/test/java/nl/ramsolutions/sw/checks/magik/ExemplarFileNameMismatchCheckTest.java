@@ -169,4 +169,13 @@ class ExemplarFileNameMismatchCheckTest {
     final List<Issue> issues = this.runCheck(check, "other_file.magik", code);
     assertThat(issues).isEmpty();
   }
+
+  @Test
+  void testNonFileUriIsIgnored() {
+    final String code = "def_slotted_exemplar(:my_exemplar, {})";
+    final ExemplarFileNameMismatchCheck check = new ExemplarFileNameMismatchCheck();
+    final OpenedFile openedFile = new MagikFile(MagikFile.DEFAULT_URI, code);
+    final List<Issue> issues = check.scanFileForIssues(openedFile);
+    assertThat(issues).isEmpty();
+  }
 }

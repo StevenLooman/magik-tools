@@ -3,7 +3,6 @@ package nl.ramsolutions.sw.checks.magik;
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.net.URI;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
@@ -69,14 +68,15 @@ public class ExemplarFileNameMismatchCheck extends MagikCheck {
   }
 
   private @Nullable String getFileName() {
+    // Only files on disk have a meaningful name; skip e.g. in-memory/unsaved files.
     final URI uri = this.getMagikFile().getUri();
-    if (uri == null) {
+    if (uri == null || !"file".equals(uri.getScheme())) {
       return null;
     }
 
-    final Path path = Path.of(uri);
-    final Path fileNamePath = path.getFileName();
-    return fileNamePath != null ? fileNamePath.toString() : null;
+    final String path = uri.getPath();
+    final String fileName = path.substring(path.lastIndexOf('/') + 1);
+    return !fileName.isEmpty() ? fileName : null;
   }
 
   private void checkDefinition(final MagikDefinition definition, final String loweredFileName) {
