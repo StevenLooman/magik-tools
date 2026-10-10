@@ -25,20 +25,20 @@ public class MagicNumberCheck extends MagikCheck {
   private static final String DEFINE_SHARED_CONSTANT = "define_shared_constant()";
   private static final String DEFINE_SHARED_VARIABLE = "define_shared_variable()";
 
-  private static final String DEFAULT_IGNORE_NUMBERS = "-1,0,1,2";
+  private static final String DEFAULT_EXCEPTIONS = "-1,0,1,2";
   private static final boolean DEFAULT_IGNORE_CONSTANT_DECLARATIONS = true;
   private static final boolean DEFAULT_IGNORE_SLOT_DEFAULT_VALUE = false;
 
   private static final String MESSAGE = "'%s' is a magic number.";
 
-  /** List of ignored numbers, separated by ','. */
+  /** List of numbers to ignore, separated by ','. */
   @RuleProperty(
-      key = "ignore numbers",
-      defaultValue = "" + DEFAULT_IGNORE_NUMBERS,
-      description = "List of ignored numbers, separated by ','",
+      key = "exceptions",
+      defaultValue = "" + DEFAULT_EXCEPTIONS,
+      description = "List of numbers to ignore, separated by ','",
       type = "STRING")
   @SuppressWarnings("checkstyle:VisibilityModifier")
-  public String ignoreNumbers = DEFAULT_IGNORE_NUMBERS;
+  public String exceptions = DEFAULT_EXCEPTIONS;
 
   /** Ignore constant declarations. */
   @RuleProperty(
@@ -154,7 +154,7 @@ public class MagicNumberCheck extends MagikCheck {
   }
 
   private Set<String> getIgnoredRawStrings() {
-    return Arrays.stream(this.ignoreNumbers.split(","))
+    return Arrays.stream(this.exceptions.split(","))
         .map(String::trim)
         .filter(s -> !s.isEmpty())
         .collect(Collectors.toSet());

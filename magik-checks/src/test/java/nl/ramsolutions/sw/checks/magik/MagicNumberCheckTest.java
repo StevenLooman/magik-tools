@@ -72,9 +72,9 @@ class MagicNumberCheckTest {
   }
 
   @Test
-  void testCustomIgnoreNumbers() {
+  void testCustomExceptions() {
     final MagicNumberCheck check = new MagicNumberCheck();
-    check.ignoreNumbers = "42, 100";
+    check.exceptions = "42, 100";
 
     final String code =
         """
@@ -88,9 +88,9 @@ class MagicNumberCheckTest {
   }
 
   @Test
-  void testCustomIgnoreNumbersRadix() {
+  void testCustomExceptionsRadix() {
     final MagicNumberCheck check = new MagicNumberCheck();
-    check.ignoreNumbers = "100";
+    check.exceptions = "100";
 
     final String code =
         """
