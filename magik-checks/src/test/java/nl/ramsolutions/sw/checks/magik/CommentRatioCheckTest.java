@@ -106,4 +106,22 @@ class CommentRatioCheckTest {
     check.minCommentPercentage = 29;
     assertThat(check).reportsIssueCount(code, 1);
   }
+
+  @Test
+  void testTrailingCommentsCounted() {
+    // 2 comment lines, 3 code lines: 2 / (3 + 2) = 40%.
+    final String code =
+        """
+        _method a.b()
+          _return 1
+        _endmethod
+        # Trailing comment 1
+        # Trailing comment 2
+        """;
+    final CommentRatioCheck check = new CommentRatioCheck();
+    check.minCommentPercentage = 40;
+    assertThat(check).reportsNoIssues(code);
+    check.minCommentPercentage = 41;
+    assertThat(check).reportsIssueCount(code, 1);
+  }
 }

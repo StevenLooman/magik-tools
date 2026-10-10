@@ -155,6 +155,51 @@ class FileMetricsTest {
     assertThat(this.metrics(code).executableLines()).isEqualTo(expected);
   }
 
+  @Test
+  void testCommentLinesTrailingComments() {
+    final String code =
+        """
+        _method a.b()
+            # comment
+        _endmethod
+        $ # trailing comment on last line
+        # trailing comment 1
+
+        # trailing comment 2
+        """;
+    final Set<Integer> expected = Set.of(2, 4, 5, 7);
+    assertThat(this.metrics(code).commentLines()).isEqualTo(expected);
+    assertThat(this.metrics(code).linesOfCode()).isEqualTo(Set.of(1, 3, 4));
+  }
+
+  @Test
+  void testCommentLinesHeaderCommentIgnored() {
+    final String code =
+        """
+        # header comment
+        _method a.b()
+        _endmethod
+        # trailing comment
+        """;
+    assertThat(this.metrics(code).commentLines()).isEqualTo(Set.of(4));
+  }
+
+  @Test
+  void testCommentLinesOnlyComments() {
+    // A file with only comments has only a header comment.
+    final String code =
+        """
+        # comment 1
+        # comment 2
+        """;
+    assertThat(this.metrics(code).commentLines()).isEmpty();
+    assertThat(this.metrics(code).linesOfCode()).isEmpty();
+
+    final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
+    final FileMetrics metrics = new FileMetrics(magikFile, false);
+    assertThat(metrics.commentLines()).isEqualTo(Set.of(1, 2));
+  }
+
   private FileMetrics metrics(String code) {
     final MagikFile magikFile = new MagikFile(MagikFile.DEFAULT_URI, code);
     return new FileMetrics(magikFile, true);

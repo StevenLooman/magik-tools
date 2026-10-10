@@ -54,18 +54,16 @@ public class FileLinesVisitor extends ProductDefVisitor {
 
   @Override
   public void walkToken(final Token token) {
+    // Process lines of code; the EOF token is not code, but holds the trailing comments.
     final TokenType tokenType = token.getType();
-    if (tokenType.equals(GenericTokenType.EOF)) {
-      return;
+    if (!tokenType.equals(GenericTokenType.EOF)) {
+      final String[] tokenLines = token.getValue().split("\n", -1);
+      for (int line = token.getLine(); line < token.getLine() + tokenLines.length; line++) {
+        this.linesOfDefinition.add(line);
+      }
     }
 
-    // Process lines of code.
-    final String[] tokenLines = token.getValue().split("\n", -1);
-    for (int line = token.getLine(); line < token.getLine() + tokenLines.length; line++) {
-      this.linesOfDefinition.add(line);
-    }
-
-    // Ignore file header comment.
+    // Ignore file header comment; a file with only comments has only a header comment.
     if (this.ignoreHeaderComments && !this.seenFirstToken) {
       this.seenFirstToken = true;
       return;
