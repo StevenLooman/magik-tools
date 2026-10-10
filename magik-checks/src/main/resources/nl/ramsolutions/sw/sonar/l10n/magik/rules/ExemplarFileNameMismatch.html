@@ -1,0 +1,15 @@
+<p>Exemplar related definitions (such as exemplar definitions and method definitions) should be in a file named <code>*&lt;exemplar_name&gt;*.magik</code>.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+# in file other.magik:
+_method my_exemplar.my_method()
+    _return 42
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+# in file my_exemplar.magik:
+_method my_exemplar.my_method()
+    _return 42
+_endmethod
+</pre>
