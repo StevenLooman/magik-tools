@@ -18,6 +18,7 @@
     "LeaveInProtection",
     "LhsRhsComparatorEqual",
     "LocalImportProcedure",
+    "MagicNumber",
     "MethodComplexity",
     "MethodLineCount",
     "NoStatementAfterBodyExit",
