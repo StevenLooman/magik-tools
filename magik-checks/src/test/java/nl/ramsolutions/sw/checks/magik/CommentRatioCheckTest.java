@@ -10,16 +10,48 @@ class CommentRatioCheckTest {
 
   @Test
   void testHighRatio() {
+    // 2 comment lines, 3 code lines: 2 / (3 + 2) = 40%.
     final String code =
         """
-        # This is a comment
-        # This is another comment
         _method a.b()
+          ## This is a comment
           _return 1  # inline comment
         _endmethod
         """;
     final MagikCheck check = new CommentRatioCheck();
     assertThat(check).reportsNoIssues(code);
+  }
+
+  @Test
+  void testLineWithCodeAndCommentCountsAsBoth() {
+    // 1 comment line, 3 code lines: 1 / (3 + 1) = 25%, not 1 / 3 = 33%.
+    final String code =
+        """
+        _method a.b()
+          _return 1  # inline comment
+        _endmethod
+        """;
+    final CommentRatioCheck check = new CommentRatioCheck();
+    check.minCommentPercentage = 25;
+    assertThat(check).reportsNoIssues(code);
+    check.minCommentPercentage = 26;
+    assertThat(check).reportsIssueCount(code, 1);
+  }
+
+  @Test
+  void testHeaderCommentNotCounted() {
+    // Header comment is ignored, just like in the SonarQube metrics: 0 / 3 = 0%.
+    final String code =
+        """
+        # Header comment 1
+        # Header comment 2
+        # Header comment 3
+        _method a.b()
+          _return 1
+        _endmethod
+        """;
+    final MagikCheck check = new CommentRatioCheck();
+    assertThat(check).reportsIssueCount(code, 1);
   }
 
   @Test
@@ -47,29 +79,31 @@ class CommentRatioCheckTest {
         _endmethod
         """;
     final CommentRatioCheck check = new CommentRatioCheck();
-    check.minimumCommentPercentage = 0;
+    check.minCommentPercentage = 0;
     assertThat(check).reportsNoIssues(code);
   }
 
   @Test
   void testBlankLinesNotCounted() {
-    // 3 comment lines, 4 code lines, 3 blank lines: percentage 3/7 = 42% > 25%.
+    // 2 comment lines, 5 code lines, 4 blank lines: 2 / (5 + 2) = 28%.
     final String code =
         """
-        # Comment 1
-        # Comment 2
-
         _method a.b()
 
+          # Comment 1
           _local x << 1
+
+          # Comment 2
           _local y << 2
+
           _return x + y
 
         _endmethod
-
-        # Comment 3
         """;
-    final MagikCheck check = new CommentRatioCheck();
+    final CommentRatioCheck check = new CommentRatioCheck();
+    check.minCommentPercentage = 28;
     assertThat(check).reportsNoIssues(code);
+    check.minCommentPercentage = 29;
+    assertThat(check).reportsIssueCount(code, 1);
   }
 }
