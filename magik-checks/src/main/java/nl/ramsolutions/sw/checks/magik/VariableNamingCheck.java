@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.checks.magik;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Arrays;
 import java.util.List;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.MagikFile;
@@ -20,7 +21,7 @@ public class VariableNamingCheck extends MagikCheck {
   private static final String MESSAGE = "Give the variable \"%s\" a proper descriptive name.";
   private static final int DEFAULT_MIN_LENGTH = 3;
   private static final int DEFAULT_MAX_LENGTH = 32;
-  private static final String DEFAULT_WHITELIST = "x,y,z,id";
+  private static final String DEFAULT_EXCEPTIONS = "x,y,z,id";
 
   /** Minimum number of characters for a variable name. */
   @RuleProperty(
@@ -40,14 +41,14 @@ public class VariableNamingCheck extends MagikCheck {
   @SuppressWarnings("checkstyle:VisibilityModifier")
   public int maxLength = DEFAULT_MAX_LENGTH;
 
-  /** Whitelist of variable names to allow/ignore, separated by ','. */
+  /** List of variable names to ignore, separated by ','. */
   @RuleProperty(
-      key = "whitelist",
-      defaultValue = "" + DEFAULT_WHITELIST,
-      description = "Whitelist of variable names to allow/ignore, separated by ','",
+      key = "exceptions",
+      defaultValue = "" + DEFAULT_EXCEPTIONS,
+      description = "List of variable names to ignore, separated by ','",
       type = "STRING")
   @SuppressWarnings("checkstyle:VisibilityModifier")
-  public String whitelist = DEFAULT_WHITELIST;
+  public String exceptions = DEFAULT_EXCEPTIONS;
 
   @Override
   protected void walkPostMagik(final AstNode node) {
@@ -84,13 +85,13 @@ public class VariableNamingCheck extends MagikCheck {
 
   private boolean isValidName(final String identifier) {
     final String strippedIdentifier = this.stripPrefix(identifier);
-    final List<String> whitelistItems = this.getWhitelistItems();
-    return whitelistItems.contains(strippedIdentifier)
+    final List<String> exceptionItems = this.getExceptions();
+    return exceptionItems.contains(strippedIdentifier)
         || (strippedIdentifier.length() >= this.minLength
             && strippedIdentifier.length() <= this.maxLength);
   }
 
-  private List<String> getWhitelistItems() {
-    return List.of(this.whitelist.split(","));
+  private List<String> getExceptions() {
+    return Arrays.stream(this.exceptions.split(",")).map(String::trim).toList();
   }
 }

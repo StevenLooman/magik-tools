@@ -134,4 +134,17 @@ class VariableNamingCheckTest {
     """;
     assertThat(check).reportsIssueCount(code, 2);
   }
+
+  @Test
+  void testCustomExceptions() {
+    final VariableNamingCheck check = new VariableNamingCheck();
+    check.exceptions = "i, r";
+    final String code =
+        """
+        _block
+          _local (l_i, l_r, x) << (1, 2, 3)
+        _endblock
+        """;
+    assertThat(check).reportsIssueCount(code, 1);
+  }
 }
