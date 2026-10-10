@@ -100,22 +100,26 @@ class RuleTogglesNoticeTest {
 
   @Test
   void testMessageNamesTheFileAndTheProfile() {
-    final String message = RuleTogglesNotice.describe(List.of(Path.of("/p/magik-lint.properties")));
+    final Path file = Path.of("/p/magik-lint.properties");
 
+    final String message = RuleTogglesNotice.describe(List.of(file));
+
+    // The message prints the path with the separators of the platform.
     assertThat(message)
         .isEqualTo(
-            "The rule toggles (enabled, disabled), rule settings and ignored paths in"
-                + " /p/magik-lint.properties are not used under SonarQube; the quality profile"
-                + " decides which rules run and how they are set, and sonar.exclusions which"
-                + " files are skipped");
+            "The rule toggles (enabled, disabled), rule settings and ignored paths in "
+                + file
+                + " are not used under SonarQube; the quality profile decides which rules run"
+                + " and how they are set, and sonar.exclusions which files are skipped");
   }
 
   @Test
   void testMessageCountsTheOtherFiles() {
-    final String message =
-        RuleTogglesNotice.describe(
-            List.of(Path.of("/p/a/magik-lint.properties"), Path.of("/p/b/magik-lint.properties")));
+    final Path fileA = Path.of("/p/a/magik-lint.properties");
+    final Path fileB = Path.of("/p/b/magik-lint.properties");
 
-    assertThat(message).contains("/p/a/magik-lint.properties and 1 more are not used");
+    final String message = RuleTogglesNotice.describe(List.of(fileA, fileB));
+
+    assertThat(message).contains(fileA + " and 1 more are not used");
   }
 }
