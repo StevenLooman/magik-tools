@@ -1,0 +1,26 @@
+<p>The source code should have enough comments to explain the logic.</p>
+<p>The comment density is computed as: <code>comment_lines / (lines_of_code + comment_lines)</code>.</p>
+<p>This matches the comment density as reported by SonarQube: a line with both code and a comment counts as a line of code and as a comment line, and the header comment of the file is not counted.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_method a.b()
+    ## Sum up the values.
+    _local x << 1
+    _local y << 2
+    _local z << 3
+    _local w << 4
+    _return x + y + z + w
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method a.b()
+    ## Sum up the values
+    ## and return the result.
+    _local x << 1  # first value
+    _local y << 2  # second value
+    _local z << 3  # third value
+    _local w << 4  # fourth value
+    _return x + y + z + w
+_endmethod
+</pre>

@@ -1,0 +1,15 @@
+{
+  "title": "Comment density should be above a threshold",
+  "type": "CODE_SMELL",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "10min"
+  },
+  "tags": [
+    "convention"
+  ],
+  "defaultSeverity": "Info",
+  "ruleSpecification": "CommentRatio",
+  "sqKey": "comment-ratio"
+}
