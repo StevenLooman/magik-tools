@@ -345,7 +345,7 @@ public final class Main {
 
     final int exitCode =
         reporter.reportedSeverities().stream()
-            .map(Main.SEVERITY_EXIT_CODE_MAPPING::get)
+            .map(severity -> Main.SEVERITY_EXIT_CODE_MAPPING.getOrDefault(severity, 0))
             .reduce(0, (partial, sum) -> sum | partial);
     System.exit(exitCode);
   }
