@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.typing.reasoner;
 
 import com.sonar.sslr.api.AstNode;
+import java.math.BigInteger;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ContinueLeaveStatementNodeHelper;
@@ -65,7 +66,7 @@ class AtomHandler extends LocalTypeReasonerHandler {
       } else {
         this.assignAtom(node, TypeString.SW_BIGNUM);
       }
-    } else if (number instanceof Long) {
+    } else if (number instanceof Long || number instanceof BigInteger) {
       this.assignAtom(node, TypeString.SW_BIGNUM);
     } else if (number instanceof Double) {
       this.assignAtom(node, TypeString.SW_FLOAT);
