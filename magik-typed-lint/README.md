@@ -95,4 +95,6 @@ The exit code from Magik-lint is determined by the infractions of checks. The se
 
 An infraction of severity Info sets no flag.
 
+When a check fails on a file, the failure is logged, the other files are still linted and flag 1 is set in the exit code.
+
 When using Git, checking flags in the return code allows you to allow minor infractions being committed, but prevent a commit of a major infraction, using Git hooks.

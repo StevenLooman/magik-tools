@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.LogManager;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -128,6 +129,7 @@ public final class Main {
           "Critical", 2,
           "Major", 4,
           "Minor", 8);
+  private static final int FAILED_FILE_EXIT_CODE = 1;
 
   private Main() {}
 
@@ -343,11 +345,25 @@ public final class Main {
     lint.run(paths);
     reporter.finish();
 
-    final int exitCode =
-        reporter.reportedSeverities().stream()
-            .map(severity -> Main.SEVERITY_EXIT_CODE_MAPPING.getOrDefault(severity, 0))
-            .reduce(0, (partial, sum) -> sum | partial);
+    final Set<String> reportedSeverities = reporter.reportedSeverities();
+    final Collection<Path> failedPaths = lint.getFailedPaths();
+    final int exitCode = Main.getExitCode(reportedSeverities, failedPaths);
     System.exit(exitCode);
+  }
+
+  /**
+   * Get the exit code: a flag per reported severity that has one, plus one when a file could not be
+   * linted.
+   *
+   * @param reportedSeverities Severities of the reported issues.
+   * @param failedPaths Files that could not be linted.
+   * @return Exit code.
+   */
+  static int getExitCode(final Set<String> reportedSeverities, final Collection<Path> failedPaths) {
+    final int failureFlag = failedPaths.isEmpty() ? 0 : Main.FAILED_FILE_EXIT_CODE;
+    return reportedSeverities.stream()
+        .map(severity -> Main.SEVERITY_EXIT_CODE_MAPPING.getOrDefault(severity, 0))
+        .reduce(failureFlag, (partial, sum) -> sum | partial);
   }
 
   private static void copyOptionsToConfig(

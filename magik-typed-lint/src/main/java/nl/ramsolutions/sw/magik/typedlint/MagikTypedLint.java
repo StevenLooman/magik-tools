@@ -6,7 +6,9 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import nl.ramsolutions.sw.MagikLintSettings;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
@@ -32,6 +34,7 @@ public class MagikTypedLint {
   private final IDefinitionKeeper definitionKeeper;
   private final MagikToolsProperties properties;
   private final Reporter reporter;
+  private final Collection<Path> failedPaths = new ConcurrentLinkedQueue<>();
 
   /**
    * Constructor, parses command line and reads configuration.
@@ -151,14 +154,47 @@ public class MagikTypedLint {
     final Location.LocationRangeComparator locationCompare = new Location.LocationRangeComparator();
     paths.stream()
         .parallel()
-        .map(path -> Utils.buildOpenedFile(path, this.properties, this.definitionKeeper))
-        .filter(openedFile -> !ChecksConfiguration.isFileIgnored(openedFile))
-        .map(this::runChecksOnFile)
+        .map(this::lintFileSafely)
         .flatMap(List::stream)
         .sorted((issue0, issue1) -> locationCompare.compare(issue0.location(), issue1.location()))
         .sequential()
         .limit(maxInfractions)
         .forEach(this.reporter::reportIssue);
+  }
+
+  /**
+   * Get the files that could not be linted because linting them threw.
+   *
+   * @return Paths of the failed files.
+   */
+  public Collection<Path> getFailedPaths() {
+    return Collections.unmodifiableCollection(this.failedPaths);
+  }
+
+  private List<Issue> lintFileSafely(final Path path) {
+    try {
+      return this.lintFile(path);
+    } catch (final RuntimeException | StackOverflowError exception) {
+      LOGGER.error("Failed to lint file: {}", path, exception);
+      this.failedPaths.add(path);
+      return List.of();
+    }
+  }
+
+  /**
+   * Lint a single file.
+   *
+   * @param path File to lint.
+   * @return {@link Issue}s found, empty if the file is ignored.
+   */
+  List<Issue> lintFile(final Path path) {
+    final MagikTypedFile openedFile =
+        Utils.buildOpenedFile(path, this.properties, this.definitionKeeper);
+    if (ChecksConfiguration.isFileIgnored(openedFile)) {
+      return List.of();
+    }
+
+    return this.runChecksOnFile(openedFile);
   }
 
   /**
