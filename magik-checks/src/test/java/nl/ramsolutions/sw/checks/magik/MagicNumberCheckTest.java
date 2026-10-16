@@ -65,6 +65,16 @@ class MagicNumberCheckTest {
           _local x << 3.14
         _endmethod
         """,
+        """
+        _method a.b()
+          _local x << 1.5e6
+        _endmethod
+        """,
+        """
+        _method a.b()
+          _local x << 16rfffffffffffffffff
+        _endmethod
+        """,
       })
   void testInvalid(final String code) {
     final MagikCheck check = new MagicNumberCheck();

@@ -39,6 +39,9 @@ class UseValueCompareCheckTest {
         "536870913 _isnt a",
         "a _is 16rffffffffffff",
         "a _isnt 16rffffffffffff",
+        "a _is 16rfffffffffffffffff",
+        "a _is 2e19",
+        "a _is 99999999999999999999",
       })
   void testInvalid(final String code) {
     final MagikCheck check = new UseValueCompareCheck();

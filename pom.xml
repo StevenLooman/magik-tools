@@ -480,7 +480,6 @@
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.TypeString.getFullString()</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.TypeString.substituteType(nl.ramsolutions.sw.magik.analysis.typing.TypeString, nl.ramsolutions.sw.magik.analysis.typing.TypeString)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.analysis.typing.reasoner.ExpressionHandler.handleExpression(com.sonar.sslr.api.AstNode)</exclude>
-                    <exclude>nl.ramsolutions.sw.magik.api.MagikNumberParser.parseMagikNumber(java.lang.String)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.ThreadManager.step(long, nl.ramsolutions.sw.magik.debugadapter.slap.StepType)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.debugadapter.slap.SlapProtocol.handleReplyMessage(java.nio.ByteBuffer)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.formatting.StructuralIndentWalker.getParentNode(com.sonar.sslr.api.Token, com.sonar.sslr.api.AstNode)</exclude>

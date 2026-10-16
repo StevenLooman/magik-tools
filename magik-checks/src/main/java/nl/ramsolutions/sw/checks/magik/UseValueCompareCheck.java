@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.checks.magik;
 
 import com.sonar.sslr.api.AstNode;
+import java.math.BigInteger;
 import java.util.List;
 import nl.ramsolutions.sw.checks.MagikCheck;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -61,7 +62,7 @@ public class UseValueCompareCheck extends MagikCheck {
       return numberInt > BIGNUM_LIMIT;
     } else if (number instanceof final Long numberLong) {
       return numberLong > BIGNUM_LIMIT;
-    } else if (number instanceof Double) {
+    } else if (number instanceof BigInteger || number instanceof Double) {
       return true;
     }
 
