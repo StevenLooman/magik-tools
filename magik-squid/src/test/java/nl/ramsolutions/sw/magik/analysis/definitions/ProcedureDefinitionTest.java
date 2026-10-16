@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
@@ -56,5 +57,46 @@ class ProcedureDefinitionTest {
     final ProcedureDefinition procedureDef2 =
         this.createProcedureDefinition(Instant.EPOCH, "module_b");
     assertThat(procedureDef1).isNotEqualTo(procedureDef2);
+  }
+
+  @Test
+  void testGetNameWithParameters() {
+    final ParameterDefinition parameter1 =
+        new ParameterDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            "p1",
+            ParameterDefinition.Modifier.NONE,
+            TypeString.UNDEFINED);
+    final ParameterDefinition parameter2 =
+        new ParameterDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            "p2",
+            ParameterDefinition.Modifier.OPTIONAL,
+            TypeString.UNDEFINED);
+    final List<ParameterDefinition> parameters = List.of(parameter1, parameter2);
+    final ProcedureDefinition procedureDef =
+        new ProcedureDefinition(
+            LOCATION,
+            Instant.EPOCH,
+            "module",
+            null,
+            null,
+            Set.of(),
+            TYPE_STR_A,
+            "proc",
+            parameters,
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY);
+    final String name = procedureDef.getNameWithParameters();
+    assertThat(name).isEqualTo("user:a.invoke(p1, _optional p2)");
   }
 }

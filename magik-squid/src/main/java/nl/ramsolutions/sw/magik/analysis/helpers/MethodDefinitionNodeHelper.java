@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikKeyword;
@@ -97,12 +98,9 @@ public class MethodDefinitionNodeHelper {
    */
   public String getExemplarMethodName() {
     final TypeString exemplarName = this.getExemplarTypeString();
+    final String exemplarIdentifier = exemplarName.getIdentifier();
     final String methodName = this.getMethodName();
-    if (methodName.startsWith("[")) {
-      return exemplarName.getIdentifier() + methodName;
-    }
-
-    return exemplarName.getIdentifier() + "." + methodName;
+    return MethodDefinition.formatName(exemplarIdentifier, methodName);
   }
 
   /**

@@ -294,4 +294,34 @@ class MethodDefinitionNodeHelperTest {
     final boolean abstractMethod = helper.isAbstractMethod();
     assertThat(abstractMethod).isFalse();
   }
+
+  @Test
+  void testGetExemplarMethodName() {
+    final String code =
+        """
+        _package user
+        _method a.m(p1) << p2
+        _endmethod
+        """;
+    final MethodDefinitionNodeHelper helper = this.createHelper(code);
+    final String exemplarMethodName = helper.getExemplarMethodName();
+    assertThat(exemplarMethodName).isEqualTo("a.m()<<");
+    final String fullExemplarMethodName = helper.getFullExemplarMethodName();
+    assertThat(fullExemplarMethodName).isEqualTo("user:a.m()<<");
+  }
+
+  @Test
+  void testGetExemplarMethodNameOfIndexer() {
+    final String code =
+        """
+        _package user
+        _method a[p1, p2] << p3
+        _endmethod
+        """;
+    final MethodDefinitionNodeHelper helper = this.createHelper(code);
+    final String exemplarMethodName = helper.getExemplarMethodName();
+    assertThat(exemplarMethodName).isEqualTo("a[,]<<");
+    final String fullExemplarMethodName = helper.getFullExemplarMethodName();
+    assertThat(fullExemplarMethodName).isEqualTo("user:a[,]<<");
+  }
 }

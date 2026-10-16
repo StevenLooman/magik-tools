@@ -262,11 +262,8 @@ public class ProcedureDefinition extends MagikDefinition
   }
 
   public String getNameWithParameters() {
-    final StringBuilder builder = new StringBuilder();
-
     // Type name.
     final String ownerName = this.getTypeString().getFullString();
-    builder.append(ownerName);
 
     // Determine method name with parameters.
     final String methodName = "invoke()";
@@ -291,23 +288,11 @@ public class ProcedureDefinition extends MagikDefinition
     }
     final String parametersStr = parametersBuilder.toString();
 
-    if (methodName.startsWith("[")) {
-      builder.append("[");
-      builder.append(parametersStr);
-      builder.append(methodName.substring(1)); // "]<<" or "]^<<""
-    } else {
-      builder.append(".");
-      int bracketIndex = methodName.indexOf('(');
-      if (bracketIndex != -1) {
-        builder.append(methodName.substring(0, bracketIndex + 1));
-        builder.append(parametersStr);
-        builder.append(methodName.substring(bracketIndex + 1));
-      } else {
-        builder.append(methodName);
-      }
-    }
-
-    return builder.toString();
+    final int bracketIndex = methodName.indexOf('(');
+    final String methodNameStart = methodName.substring(0, bracketIndex + 1);
+    final String methodNameEnd = methodName.substring(bracketIndex + 1);
+    final String methodNameWithParameters = methodNameStart + parametersStr + methodNameEnd;
+    return MethodDefinition.formatName(ownerName, methodNameWithParameters);
   }
 
   @Override

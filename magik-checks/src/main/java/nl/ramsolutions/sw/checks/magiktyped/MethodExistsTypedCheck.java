@@ -46,7 +46,7 @@ public class MethodExistsTypedCheck extends MagikTypedCheck {
 
       // Add issue if no method is found.
       if (methodDefs.isEmpty()) {
-        final String fullName = typeString.getFullString() + "." + methodName;
+        final String fullName = helper.getReceiverMethodName(typeString);
         final String message = MESSAGE.formatted(fullName);
         final AstNode firstIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
         final AstNode issueNode = firstIdentifierNode != null ? firstIdentifierNode : node;

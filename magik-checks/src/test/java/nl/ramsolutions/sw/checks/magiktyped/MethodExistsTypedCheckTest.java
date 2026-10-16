@@ -5,7 +5,9 @@ import static nl.ramsolutions.sw.checks.magiktyped.MagikTypedCheckAssert.assertT
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
+import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -14,6 +16,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /** Test {@link MethodExistsTypedCheck}. */
@@ -277,5 +280,52 @@ class MethodExistsTypedCheckTest {
         definitionKeeper, TypeString.SW_PROCEDURE, "invoke()", ExpressionResultString.EMPTY);
     final MagikTypedCheck check = new MethodExistsTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testUnknownMethodMessage() {
+    final String code =
+        """
+        _block
+          object.m()
+        _endblock""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final String message = this.runCheckForMessage(code, definitionKeeper);
+    Assertions.assertThat(message).isEqualTo("Unknown method: sw:object.m()");
+  }
+
+  @Test
+  void testUnknownIndexerMethodMessage() {
+    final String code =
+        """
+        _block
+          object[1]
+        _endblock""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final String message = this.runCheckForMessage(code, definitionKeeper);
+    Assertions.assertThat(message).isEqualTo("Unknown method: sw:object[]");
+  }
+
+  @Test
+  void testUnknownIndexerAssignmentMethodMessage() {
+    final String code =
+        """
+        _block
+          object[1, 2] << 3
+        _endblock""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final String message = this.runCheckForMessage(code, definitionKeeper);
+    Assertions.assertThat(message).isEqualTo("Unknown method: sw:object[,]<<");
+  }
+
+  private String runCheckForMessage(final String code, final IDefinitionKeeper definitionKeeper) {
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    final List<Issue> issues = check.scanFileForIssues(magikFile);
+    Assertions.assertThat(issues).hasSize(1);
+
+    final Issue issue = issues.get(0);
+    return issue.message();
   }
 }

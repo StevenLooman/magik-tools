@@ -22,7 +22,7 @@ public class AbstractMethodNotImplementedTypedCheck extends MagikTypedCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "AbstractMethodNotImplemented";
 
-  private static final String MESSAGE = "Abstract method %s.%s is not implemented by %s.";
+  private static final String MESSAGE = "Abstract method %s is not implemented by %s.";
 
   @Override
   protected void walkPostMagik(final AstNode node) {
@@ -57,7 +57,8 @@ public class AbstractMethodNotImplementedTypedCheck extends MagikTypedCheck {
       if (!implemented) {
         final String ancestorName = abstractMethod.getTypeName().getFullString();
         final String typeName = typeStr.getFullString();
-        final String message = MESSAGE.formatted(ancestorName, methodName, typeName);
+        final String abstractName = MethodDefinition.formatName(ancestorName, methodName);
+        final String message = MESSAGE.formatted(abstractName, typeName);
         final AstNode issueNode = this.getIssueNode(exemplarDefinition);
         this.addIssue(issueNode, message);
       }

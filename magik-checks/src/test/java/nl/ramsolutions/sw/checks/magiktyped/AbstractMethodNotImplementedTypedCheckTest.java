@@ -7,8 +7,10 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -17,6 +19,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /** Tests for {@link AbstractMethodNotImplementedTypedCheck}. */
@@ -345,5 +348,38 @@ class AbstractMethodNotImplementedTypedCheckTest {
         definitionKeeper, TYPE_CHILD, ExemplarDefinition.Sort.SLOTTED, List.of(TYPE_PARENT));
     final MagikTypedCheck check = new AbstractMethodNotImplementedTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  private String runCheckForMessage(final String methodName) {
+    final String code = "def_slotted_exemplar(:child, {}, :parent)\n";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(
+        definitionKeeper, TYPE_PARENT, ExemplarDefinition.Sort.SLOTTED, Collections.emptyList());
+    this.addMethod(
+        definitionKeeper, TYPE_PARENT, methodName, EnumSet.of(MethodDefinition.Modifier.ABSTRACT));
+    this.addExemplar(
+        definitionKeeper, TYPE_CHILD, ExemplarDefinition.Sort.SLOTTED, List.of(TYPE_PARENT));
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
+    final MagikTypedCheck check = new AbstractMethodNotImplementedTypedCheck();
+    final List<Issue> issues = check.scanFileForIssues(magikFile);
+    Assertions.assertThat(issues).hasSize(1);
+
+    final Issue issue = issues.get(0);
+    return issue.message();
+  }
+
+  @Test
+  void testAbstractMethodNotImplementedMessage() {
+    final String message = this.runCheckForMessage("do_something()");
+    Assertions.assertThat(message)
+        .isEqualTo("Abstract method sw:parent.do_something() is not implemented by user:child.");
+  }
+
+  @Test
+  void testAbstractIndexerMethodNotImplementedMessage() {
+    final String message = this.runCheckForMessage("[]");
+    Assertions.assertThat(message)
+        .isEqualTo("Abstract method sw:parent[] is not implemented by user:child.");
   }
 }

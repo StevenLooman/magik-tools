@@ -63,7 +63,8 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
       final List<AstNode> argumentNodes = argumentsHelper.getArgumentNodes();
       final ArgumentRange argumentRange = ArgumentRange.of(parameterDefs);
       if (argumentRange.required() > argumentNodes.size()) {
-        final String message = MESSAGE.formatted(calledTypeStr.getFullString() + "." + methodName);
+        final String fullName = helper.getReceiverMethodName(calledTypeStr);
+        final String message = MESSAGE.formatted(fullName);
         this.addIssue(node, message);
       }
     }

@@ -5,6 +5,8 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
@@ -105,6 +107,18 @@ public class MethodInvocationNodeHelper {
     }
 
     return methodName;
+  }
+
+  /**
+   * Get receiver type + invoked method name.
+   *
+   * @param receiverTypeStr Type of the receiver.
+   * @return Receiver type + invoked method name.
+   */
+  public String getReceiverMethodName(final TypeString receiverTypeStr) {
+    final String receiverName = receiverTypeStr.getFullString();
+    final String methodName = this.getMethodName();
+    return MethodDefinition.formatName(receiverName, methodName);
   }
 
   /**

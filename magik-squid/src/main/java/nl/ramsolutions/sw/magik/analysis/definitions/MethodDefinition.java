@@ -335,29 +335,28 @@ public class MethodDefinition extends MagikDefinition implements ICallableDefini
    * @return Name with parameters.
    */
   public String getNameWithParameters() {
-    final StringBuilder builder = new StringBuilder();
-
-    // Type name.
-    final String ownerName = this.getTypeName().getFullString();
-    builder.append(ownerName);
-
-    // Method name.
+    final TypeString ownerTypeStr = this.getTypeName();
+    final String ownerName = ownerTypeStr.getFullString();
     final String methodNameWithParameters = this.getMethodNameWithParameters();
-    if (this.methodName.startsWith("[")) {
-      builder.append(methodNameWithParameters);
-    } else {
-      builder.append(".");
-      builder.append(methodNameWithParameters);
-    }
+    return MethodDefinition.formatName(ownerName, methodNameWithParameters);
+  }
 
-    return builder.toString();
+  /**
+   * Format the name of a method on its owner: {@code owner.name}, or {@code owner[]} for an indexer
+   * method.
+   *
+   * @param ownerName Owner, as it is to be shown.
+   * @param methodName Method name, with or without parameters.
+   * @return Owner + method name.
+   */
+  public static String formatName(final String ownerName, final String methodName) {
+    return methodName.startsWith("[") ? ownerName + methodName : ownerName + "." + methodName;
   }
 
   @Override
   public String getName() {
-    return this.methodName.startsWith("[")
-        ? this.typeName.getFullString() + this.methodName
-        : this.typeName.getFullString() + "." + this.methodName;
+    final String ownerName = this.typeName.getFullString();
+    return MethodDefinition.formatName(ownerName, this.methodName);
   }
 
   /**
