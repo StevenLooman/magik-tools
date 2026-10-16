@@ -4,6 +4,7 @@ import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.sonar.check.Rule;
 import org.sonar.check.RuleProperty;
 
@@ -56,15 +58,14 @@ public class ExemplarFileNameMismatchCheck extends MagikCheck {
       return;
     }
 
+    final Set<AstNode> reportedNodes = new HashSet<>();
     this.getMagikFile().getMagikDefinitions().stream()
         .filter(ExemplarFileNameMismatchCheck::isCheckedDefinition)
-        .forEach(definition -> this.checkDefinition(definition, loweredFileName));
+        .forEach(definition -> this.checkDefinition(definition, loweredFileName, reportedNodes));
   }
 
   private static boolean isCheckedDefinition(final MagikDefinition definition) {
-    return definition instanceof ExemplarDefinition
-        || definition instanceof MethodDefinition methodDefinition
-            && methodDefinition.isActualMethodDefinition();
+    return definition instanceof ExemplarDefinition || definition instanceof MethodDefinition;
   }
 
   private @Nullable String getFileName() {
@@ -79,13 +80,20 @@ public class ExemplarFileNameMismatchCheck extends MagikCheck {
     return !fileName.isEmpty() ? fileName : null;
   }
 
-  private void checkDefinition(final MagikDefinition definition, final String loweredFileName) {
+  private void checkDefinition(
+      final MagikDefinition definition,
+      final String loweredFileName,
+      final Set<AstNode> reportedNodes) {
     final String exemplarName = this.getExemplarName(definition);
     if (loweredFileName.contains(exemplarName.toLowerCase())) {
       return;
     }
 
     final AstNode issueNode = this.getIssueNode(definition);
+    if (!reportedNodes.add(issueNode)) {
+      return;
+    }
+
     final String message = MESSAGE.formatted(exemplarName);
     this.addIssue(issueNode, message);
   }
@@ -107,11 +115,16 @@ public class ExemplarFileNameMismatchCheck extends MagikCheck {
     final AstNode definitionNode = definition.getNode();
     Objects.requireNonNull(definitionNode);
 
-    if (definition instanceof MethodDefinition) {
+    if (definitionNode.is(MagikGrammar.METHOD_DEFINITION)) {
       final MethodDefinitionNodeHelper helper = new MethodDefinitionNodeHelper(definitionNode);
       return helper.getMethodNameNode();
     }
 
-    return definitionNode;
+    if (definitionNode.is(MagikGrammar.STATEMENT)) {
+      return definitionNode;
+    }
+
+    final AstNode statementNode = definitionNode.getFirstAncestor(MagikGrammar.STATEMENT);
+    return Objects.requireNonNullElse(statementNode, definitionNode);
   }
 }
