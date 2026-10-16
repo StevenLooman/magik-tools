@@ -138,36 +138,58 @@ class ExemplarFileNameMismatchCheckTest {
   }
 
   @Test
-  void testSlotAccessorViaDefineSlotAccessNotChecked() {
+  void testSlotAccessorViaDefineSlotAccessInNonMatchingFile() {
     final String code =
         """
         other_exemplar.define_slot_access(:count, :read, :public)
         """;
     final ExemplarFileNameMismatchCheck check = new ExemplarFileNameMismatchCheck();
     final List<Issue> issues = this.runCheck(check, "other_file.magik", code);
+    assertThat(issues).hasSize(1);
+  }
+
+  @Test
+  void testWritableSlotAccessorViaDefineSlotAccessInNonMatchingFileReportsOnce() {
+    final String code =
+        """
+        other_exemplar.define_slot_access(:count, :write, :public)
+        """;
+    final ExemplarFileNameMismatchCheck check = new ExemplarFileNameMismatchCheck();
+    final List<Issue> issues = this.runCheck(check, "other_file.magik", code);
+    assertThat(issues).hasSize(1);
+  }
+
+  @Test
+  void testSharedConstantInMatchingFile() {
+    final String code =
+        """
+        my_exemplar.define_shared_constant(:max_count, 100, :public)
+        """;
+    final ExemplarFileNameMismatchCheck check = new ExemplarFileNameMismatchCheck();
+    final List<Issue> issues = this.runCheck(check, "my_exemplar.magik", code);
     assertThat(issues).isEmpty();
   }
 
   @Test
-  void testSharedConstantNotChecked() {
+  void testSharedConstantInNonMatchingFile() {
     final String code =
         """
         other_exemplar.define_shared_constant(:max_count, 100, :public)
         """;
     final ExemplarFileNameMismatchCheck check = new ExemplarFileNameMismatchCheck();
     final List<Issue> issues = this.runCheck(check, "other_file.magik", code);
-    assertThat(issues).isEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
-  void testSharedVariableNotChecked() {
+  void testSharedVariableInNonMatchingFileReportsOnce() {
     final String code =
         """
         other_exemplar.define_shared_variable(:count, 0, :public)
         """;
     final ExemplarFileNameMismatchCheck check = new ExemplarFileNameMismatchCheck();
     final List<Issue> issues = this.runCheck(check, "other_file.magik", code);
-    assertThat(issues).isEmpty();
+    assertThat(issues).hasSize(1);
   }
 
   @Test
