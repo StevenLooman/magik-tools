@@ -69,6 +69,151 @@ class MagikDefinitionReaderTest {
                 List.of("p1", "p2")));
   }
 
+  private List<MagikDefinition> readDefinitions(final String code) {
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+    return reader.getDefinitions();
+  }
+
+  @Test
+  void testPackageNew() {
+    final String code = "package.new(:zz, :uses, {:sw})";
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    assertThat(definitions).hasSize(1);
+    final PackageDefinition definition = (PackageDefinition) definitions.get(0);
+    final String name = definition.getName();
+    assertThat(name).isEqualTo("zz");
+    final List<String> uses = definition.getUses();
+    assertThat(uses).containsExactly("sw");
+    final Location location = definition.getLocation();
+    final Location expectedLocation =
+        new Location(
+            URI.create("memory:///source.magik"),
+            new Range(new Position(1, 7), new Position(1, 8)));
+    assertThat(location).isEqualTo(expectedLocation);
+  }
+
+  @Test
+  void testPackageNewMultipleUses() {
+    final String code = "package.new(:zz, :uses, {:sw, :p1})";
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    assertThat(definitions).hasSize(1);
+    final PackageDefinition definition = (PackageDefinition) definitions.get(0);
+    final List<String> uses = definition.getUses();
+    assertThat(uses).containsExactly("sw", "p1");
+  }
+
+  @Test
+  void testPackageNewWithoutUses() {
+    final String code = "package.new(:zz)";
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    assertThat(definitions).hasSize(1);
+    final PackageDefinition definition = (PackageDefinition) definitions.get(0);
+    final String name = definition.getName();
+    assertThat(name).isEqualTo("zz");
+    final List<String> uses = definition.getUses();
+    assertThat(uses).containsExactly("sw");
+  }
+
+  @Test
+  void testPackageNewQualifiedReceiver() {
+    final String code = "sw:package.new(:zz, :uses, {:sw})";
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    assertThat(definitions).hasSize(1);
+    final PackageDefinition definition = (PackageDefinition) definitions.get(0);
+    final String name = definition.getName();
+    assertThat(name).isEqualTo("zz");
+  }
+
+  @Test
+  void testPackageNewInTry() {
+    final String code =
+        """
+        _block
+          _try
+            package(:zz)
+          _when error
+            package.new(:zz, :uses, {:sw})
+          _endtry
+        _endblock
+        $
+        """;
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    assertThat(definitions).hasSize(1);
+    final PackageDefinition definition = (PackageDefinition) definitions.get(0);
+    final String name = definition.getName();
+    assertThat(name).isEqualTo("zz");
+    final List<String> uses = definition.getUses();
+    assertThat(uses).containsExactly("sw");
+  }
+
+  @Test
+  void testPackageNewEmptyUses() {
+    final String code = "package.new(:zz, :uses, {})";
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    assertThat(definitions).hasSize(1);
+    final PackageDefinition definition = (PackageDefinition) definitions.get(0);
+    final String name = definition.getName();
+    assertThat(name).isEqualTo("zz");
+    final List<String> uses = definition.getUses();
+    assertThat(uses).isEmpty();
+  }
+
+  @Test
+  void testPackageNewInMethodBody() {
+    final String code =
+        """
+        _method a.b()
+        \t_local p << package.new(:zz, :uses, {:sw})
+        \t_return p
+        _endmethod
+        $
+        """;
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    final List<PackageDefinition> packageDefinitions =
+        definitions.stream()
+            .filter(PackageDefinition.class::isInstance)
+            .map(PackageDefinition.class::cast)
+            .toList();
+    assertThat(packageDefinitions).hasSize(1);
+    final PackageDefinition definition = packageDefinitions.get(0);
+    final String name = definition.getName();
+    assertThat(name).isEqualTo("zz");
+  }
+
+  @Test
+  void testPackageNewComputedName() {
+    final String code = "package.new(name, :uses, {:sw})";
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    assertThat(definitions).isEmpty();
+  }
+
+  @Test
+  void testPackageNewOtherReceiver() {
+    final String code = "other.new(:zz, :uses, {:sw})";
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    assertThat(definitions).isEmpty();
+  }
+
+  @Test
+  void testPackageNewOnChainedReceiver() {
+    final String code = "a.package.new(:zz, :uses, {:sw})";
+    final List<MagikDefinition> definitions = this.readDefinitions(code);
+
+    assertThat(definitions).isEmpty();
+  }
+
   @Test
   void testEnumeratorDefinition() {
     final String code = "sw:def_enumeration(:test_enum, _false, :a)";

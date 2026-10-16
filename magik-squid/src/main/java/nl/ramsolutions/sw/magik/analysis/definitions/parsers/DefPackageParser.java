@@ -11,16 +11,20 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ExpressionNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.parser.MagikCommentExtractor;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 
-/** {@code def_package()} parser. */
+/** {@code def_package()} and {@code package.new()} parser. */
 public class DefPackageParser {
 
   private static final String DEF_PACKAGE = "def_package";
   private static final String SW_DEF_PACKAGE = "sw:def_package";
+  private static final String PACKAGE = "package";
+  private static final String SW_PACKAGE = "sw:package";
+  private static final String NEW = "new()";
 
   private final MagikFile magikFile;
   private final AstNode node;
@@ -28,10 +32,11 @@ public class DefPackageParser {
   /**
    * Constructor.
    *
-   * @param node {@code def_package()} node.
+   * @param node {@code def_package()} or {@code package.new()} node.
    */
   public DefPackageParser(final MagikFile magikFile, final AstNode node) {
-    if (node.isNot(MagikGrammar.PROCEDURE_INVOCATION)) {
+    if (node.isNot(MagikGrammar.PROCEDURE_INVOCATION)
+        && node.isNot(MagikGrammar.METHOD_INVOCATION)) {
       throw new IllegalArgumentException();
     }
 
@@ -59,6 +64,28 @@ public class DefPackageParser {
     final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(node);
 
     // Figure name.
+    final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
+    return argument0Node != null;
+  }
+
+  /**
+   * Test if node is a {@code package.new()}.
+   *
+   * @param node Node to test
+   * @return True if node is a {@code package.new()}, false otherwise.
+   */
+  public static boolean isPackageNew(final AstNode node) {
+    if (!node.is(MagikGrammar.METHOD_INVOCATION)) {
+      return false;
+    }
+
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
+    if (!helper.isMethodInvocationOf(PACKAGE, NEW)
+        && !helper.isMethodInvocationOf(SW_PACKAGE, NEW)) {
+      return false;
+    }
+
+    final ArgumentsNodeHelper argumentsHelper = ArgumentsNodeHelper.fromInvocationNode(node);
     final AstNode argument0Node = argumentsHelper.getArgument(0, MagikGrammar.SYMBOL);
     return argument0Node != null;
   }

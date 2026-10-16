@@ -26,7 +26,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  * Class to easily read/parse AST for. Supported constructs:
  *
  * <ul>
- *   <li>def_package (only takes symbols for name)
+ *   <li>def_package and package.new() (only take symbols for name)
  *   <li>def_enumeration
  *   <li>def_slotted_exemplar (only takes symbols for name + slot names)
  *   <li>def_indexed_exemplar
@@ -107,6 +107,8 @@ public class MagikDefinitionReader extends MagikAstWalker {
     // Anything goes.
     if (DefConditionParser.isDefineCondition(node)) {
       this.handleDefineCondition(node);
+    } else if (DefPackageParser.isPackageNew(node)) {
+      this.handleDefPackage(node);
     }
   }
 
