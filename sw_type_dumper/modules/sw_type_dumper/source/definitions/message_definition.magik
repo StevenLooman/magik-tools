@@ -1,0 +1,165 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Message definition: a message in a message file. This is part of a
+## `mt:message_file_definition`, not a definition which is dumped on its own.
+## @slot {sw:char16_vector} id
+## @slot {sw:char16_vector|sw:unset} language Language given at the message itself, if any.
+## @slot {sw:false} removal True if this removes the message, instead of defining it.
+## @slot {sw:char16_vector} text
+## @slot {sw:simple_vector<E=sw:integer>} parameters Numbers of the parameters used in the text.
+def_slotted_exemplar(
+	:message_definition,
+	{
+		{:id, _unset, :readable, :public},
+		{:language, _unset, :readable, :public},
+		{:removal, _unset, :readable, :public},
+		{:text, _unset, :readable, :public},
+		{:parameters, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Language which marks the removal of a message.
+## @return {sw:symbol}
+message_definition.define_shared_constant(
+	:removal_language,
+	:|REMOVE|,
+	:private)
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_definition.new(id, language, removal, text, parameters)
+	## Constructor.
+	## @param {sw:char16_vector} id
+	## @param {sw:char16_vector|sw:unset} language
+	## @param {sw:false} removal
+	## @param {sw:char16_vector} text
+	## @param {sw:simple_vector<E=sw:integer>} parameters
+	## @return {_self}
+	_return _clone.init(id, language, removal, text, parameters)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method message_definition.init(id, language, removal, text, parameters)
+	## Initializer.
+	## @param {sw:char16_vector} id
+	## @param {sw:char16_vector|sw:unset} language
+	## @param {sw:false} removal
+	## @param {sw:char16_vector} text
+	## @param {sw:simple_vector<E=sw:integer>} parameters
+	## @return {_self}
+	.id << id
+	.language << language
+	.removal << removal
+	.text << text
+	.parameters << parameters
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_definition.new_from(id, language, text)
+	## Construct self from a message, as read by `sw:message_handler.message_definitions()`.
+	## @param {sw:symbol} id
+	## @param {sw:symbol|sw:unset} language
+	## @param {sw:char16_vector} text
+	## @return {_self}
+	_local removal << language _is _self.removal_language
+	_local language_name <<
+		_if language _isnt _unset _andif
+		    _not removal
+		_then
+			>> language.write_string
+		_endif
+	_return _self.new(
+		id.write_string,
+		language_name,
+		removal,
+		text,
+		_self.parameters_of(text))
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method message_definition.parameters_of(text)
+	## Get the numbers of the parameters used in the text of a message: `#1`..`#9`, and
+	## `#@1`/`#h1` with any number. A `#` followed by `#`, `n`, `t` or `s` is a special
+	## character.
+	## @param {sw:char16_vector} text
+	## @return {sw:simple_vector<E=sw:integer>} Sorted, without duplicates.
+	_constant DIGITS << "0123456789"
+	_local numbers << sw:set.new()
+	_local size << text.size
+	_local index << 1
+	_loop
+		_if index >= size
+		_then
+			_leave
+		_endif
+
+		_if text[index] _isnt %#
+		_then
+			index +<< 1
+			_continue
+		_endif
+
+		_local char << text[index + 1]
+		index +<< 2
+		_local digit << DIGITS.index_of(char)
+		_if digit _isnt _unset
+		_then
+			# `#0` is not a parameter.
+			_if digit > 1
+			_then
+				numbers.add(digit - 1)
+			_endif
+			_continue
+		_endif
+
+		_if char _isnt %@ _andif
+		    char _isnt %h
+		_then
+			_continue
+		_endif
+
+		_local number << _unset
+		_loop
+			_if index > size
+			_then
+				_leave
+			_endif
+
+			digit << DIGITS.index_of(text[index])
+			_if digit _is _unset
+			_then
+				_leave
+			_endif
+
+			number << number.default(0) * 10 + digit - 1
+			index +<< 1
+		_endloop
+		_if number _isnt _unset
+		_then
+			numbers.add(number)
+		_endif
+	_endloop
+	_return numbers.as_sorted_collection().as_simple_vector()
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	_return .id + "." + .language.default("")
+_endmethod
+$
+
+message_definition.define_show_attributes(
+	:id,
+	:language)
+$

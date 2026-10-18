@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.message.MessageFileDefinition;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 
@@ -40,6 +41,10 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   private final Map<TypeString, Set<GlobalDefinition>> globalDefinitions =
       new ConcurrentHashMap<>();
   private final Map<TypeString, Set<ProcedureDefinition>> procedureDefinitions =
+      new ConcurrentHashMap<>();
+  private final Map<String, Set<MessageFileDefinition>> messageFileDefinitions =
+      new ConcurrentHashMap<>();
+  private final Map<String, Set<MessageHandlerUseDefinition>> messageHandlerUseDefinitions =
       new ConcurrentHashMap<>();
   private final SortedMap<URI, Set<IDefinition>> uriDefinitions =
       Collections.synchronizedSortedMap(new TreeMap<>());
@@ -196,6 +201,28 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   }
 
   @Override
+  public void add(final MessageFileDefinition definition) {
+    final String handlerName = definition.getHandlerName();
+    final Set<MessageFileDefinition> definitions =
+        this.messageFileDefinitions.computeIfAbsent(
+            handlerName, k -> ConcurrentHashMap.newKeySet());
+    definitions.add(definition);
+
+    this.addToPathIndex(definition);
+  }
+
+  @Override
+  public void add(final MessageHandlerUseDefinition definition) {
+    final String handlerName = definition.getHandlerName();
+    final Set<MessageHandlerUseDefinition> definitions =
+        this.messageHandlerUseDefinitions.computeIfAbsent(
+            handlerName, k -> ConcurrentHashMap.newKeySet());
+    definitions.add(definition);
+
+    this.addToPathIndex(definition);
+  }
+
+  @Override
   public void add(final IDefinition definition) {
     if (definition instanceof final ProductDefinition productDefinition) {
       this.add(productDefinition);
@@ -221,6 +248,10 @@ public class DefinitionKeeper implements IDefinitionKeeper {
       this.add(conditionDefinition);
     } else if (definition instanceof final ProcedureDefinition procedureDefinition) {
       this.add(procedureDefinition);
+    } else if (definition instanceof final MessageFileDefinition messageFileDefinition) {
+      this.add(messageFileDefinition);
+    } else if (definition instanceof final MessageHandlerUseDefinition useDefinition) {
+      this.add(useDefinition);
     } else {
       throw new UnsupportedOperationException();
     }
@@ -356,6 +387,28 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   }
 
   @Override
+  public void remove(final MessageFileDefinition definition) {
+    final String handlerName = definition.getHandlerName();
+    final Set<MessageFileDefinition> definitions =
+        this.messageFileDefinitions.computeIfAbsent(
+            handlerName, k -> ConcurrentHashMap.newKeySet());
+    definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
+  }
+
+  @Override
+  public void remove(final MessageHandlerUseDefinition definition) {
+    final String handlerName = definition.getHandlerName();
+    final Set<MessageHandlerUseDefinition> definitions =
+        this.messageHandlerUseDefinitions.computeIfAbsent(
+            handlerName, k -> ConcurrentHashMap.newKeySet());
+    definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
+  }
+
+  @Override
   public void remove(final IDefinition definition) {
     if (definition instanceof final ProductDefinition productDefinition) {
       this.remove(productDefinition);
@@ -381,9 +434,42 @@ public class DefinitionKeeper implements IDefinitionKeeper {
       this.remove(conditionDefinition);
     } else if (definition instanceof final ProcedureDefinition procedureDefinition) {
       this.remove(procedureDefinition);
+    } else if (definition instanceof final MessageFileDefinition messageFileDefinition) {
+      this.remove(messageFileDefinition);
+    } else if (definition instanceof final MessageHandlerUseDefinition useDefinition) {
+      this.remove(useDefinition);
     } else {
       throw new UnsupportedOperationException();
     }
+  }
+
+  @Override
+  public Collection<MessageFileDefinition> getMessageFileDefinitions(final String handlerName) {
+    final Collection<MessageFileDefinition> definitions =
+        this.messageFileDefinitions.getOrDefault(handlerName, Collections.emptySet());
+    return Collections.unmodifiableCollection(definitions);
+  }
+
+  @Override
+  public Collection<MessageFileDefinition> getMessageFileDefinitions() {
+    return this.messageFileDefinitions.values().stream()
+        .flatMap(Set::stream)
+        .collect(Collectors.toSet());
+  }
+
+  @Override
+  public Collection<MessageHandlerUseDefinition> getMessageHandlerUseDefinitions(
+      final String handlerName) {
+    final Collection<MessageHandlerUseDefinition> definitions =
+        this.messageHandlerUseDefinitions.getOrDefault(handlerName, Collections.emptySet());
+    return Collections.unmodifiableCollection(definitions);
+  }
+
+  @Override
+  public Collection<MessageHandlerUseDefinition> getMessageHandlerUseDefinitions() {
+    return this.messageHandlerUseDefinitions.values().stream()
+        .flatMap(Set::stream)
+        .collect(Collectors.toSet());
   }
 
   @Override
@@ -674,6 +760,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     this.inheritanceDefinitionsByParent.clear();
     this.globalDefinitions.clear();
     this.procedureDefinitions.clear();
+    this.messageFileDefinitions.clear();
+    this.messageHandlerUseDefinitions.clear();
     this.uriDefinitions.clear();
     this.loadedModuleNames.clear();
   }

@@ -34,6 +34,7 @@ import nl.ramsolutions.sw.productdef.ProductDefFile;
 /** Magik file. */
 public class MagikFile extends OpenedFile {
 
+  public static final String LANGUAGE_ID = "magik";
   public static final URI DEFAULT_URI = URI.create("memory:///source.magik");
   public static final Location DEFAULT_LOCATION = new Location(DEFAULT_URI, Range.DEFAULT_RANGE);
 
@@ -81,7 +82,7 @@ public class MagikFile extends OpenedFile {
 
   @Override
   public String getLanguageId() {
-    return "magik";
+    return LANGUAGE_ID;
   }
 
   /**

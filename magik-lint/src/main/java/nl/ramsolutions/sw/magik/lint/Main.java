@@ -26,8 +26,10 @@ import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.CheckHolder;
 import nl.ramsolutions.sw.checks.ChecksConfiguration;
 import nl.ramsolutions.sw.checks.MagikCheckList;
+import nl.ramsolutions.sw.checks.MessageCheckList;
 import nl.ramsolutions.sw.checks.ModuleDefCheckList;
 import nl.ramsolutions.sw.checks.ProductDefCheckList;
+import nl.ramsolutions.sw.checks.TranslationCheckList;
 import nl.ramsolutions.sw.checks.output.MessageFormatReporter;
 import nl.ramsolutions.sw.checks.output.NullReporter;
 import nl.ramsolutions.sw.checks.output.Reporter;
@@ -218,6 +220,8 @@ public final class Main {
     return Stream.of(
             ProductDefCheckList.INSTANCE.getBaseChecks().stream(),
             ModuleDefCheckList.INSTANCE.getBaseChecks().stream(),
+            MessageCheckList.INSTANCE.getBaseChecks().stream(),
+            TranslationCheckList.INSTANCE.getBaseChecks().stream(),
             MagikCheckList.INSTANCE.getBaseChecks().stream())
         .flatMap(stream -> stream)
         .sorted(Comparator.comparing(Class::getSimpleName))

@@ -48,7 +48,7 @@ public class ProductIndexer {
       final Collection<IDefinition> definitions = this.definitionKeeper.getDefinitionsByPath(path);
       final List<ProductDefinition> ownDefinitions =
           definitions.stream()
-              .filter(ProductDefinition.class::isInstance)
+              .filter(ProductIndexer::isProductDefFileOwned)
               .map(ProductDefinition.class::cast)
               .toList();
       ownDefinitions.forEach(this.definitionKeeper::remove);
@@ -62,6 +62,16 @@ public class ProductIndexer {
     }
 
     LOGGER.debug("Handled file event: {}", fileEvent);
+  }
+
+  /**
+   * Test if the definition comes from a product.def file.
+   *
+   * @param definition Definition to test.
+   * @return True if the definition comes from a product.def file.
+   */
+  public static boolean isProductDefFileOwned(final IDefinition definition) {
+    return definition instanceof ProductDefinition;
   }
 
   /**

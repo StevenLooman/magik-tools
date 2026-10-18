@@ -1,0 +1,115 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Message handler use definition: a message handler which uses another message handler,
+## to look for a message it does not have itself, as named by a message file.
+## @slot {mt:location|sw:unset} location
+## @slot {sw:char16_vector|sw:unset} module_name
+## @slot {sw:char16_vector} handler_name
+## @slot {sw:char16_vector} used_handler_name
+def_slotted_exemplar(
+	:message_handler_use_definition,
+	{
+		{:location, _unset, :readable, :public},
+		{:module_name, _unset, :readable, :public},
+		{:handler_name, _unset, :readable, :public},
+		{:used_handler_name, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_handler_use_definition.new(location, module_name, handler_name, used_handler_name)
+	## Constructor.
+	## @param {mt:location|sw:unset} location
+	## @param {sw:char16_vector|sw:unset} module_name
+	## @param {sw:char16_vector} handler_name
+	## @param {sw:char16_vector} used_handler_name
+	## @return {_self}
+	_return _clone.init(location, module_name, handler_name, used_handler_name)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method message_handler_use_definition.init(location, module_name, handler_name, used_handler_name)
+	## Initializer.
+	## @param {mt:location|sw:unset} location
+	## @param {sw:char16_vector|sw:unset} module_name
+	## @param {sw:char16_vector} handler_name
+	## @param {sw:char16_vector} used_handler_name
+	## @return {_self}
+	.location << location
+	.module_name << module_name
+	.handler_name << handler_name
+	.used_handler_name << used_handler_name
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_handler_use_definition.use_key
+	## Key of the use, disregarding where it comes from.
+	## @return {sw:char16_vector}
+	_return .handler_name + "." + .used_handler_name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_handler_use_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	_local uri <<
+		_if .location _isnt _unset
+		_then
+			>> .location.uri
+		_else
+			>> ""
+		_endif
+	_return write_string(_self.use_key, ".", uri)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_handler_use_definition.equals?(other)
+	## Equals?
+	## @param {mt:message_handler_use_definition} other
+	## @return {sw:false}
+	_return _self.sort_value = other.sort_value _andif
+		_self.module_name = other.module_name
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_handler_use_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:message_handler_use_definition} other
+	## @return {sw:false}
+	_return _self.equals?(other)
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, message_handler_use_definition, message_handler_use_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:message_handler_use_definition} definition_a
+		## @param {mt:message_handler_use_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.sort_value _cf definition_b.sort_value
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, message_handler_use_definition, message_handler_use_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:message_handler_use_definition} definition_a
+		## @param {mt:message_handler_use_definition} definition_b
+		## @return {sw:false}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+message_handler_use_definition.define_show_attributes(
+	:handler_name,
+	:used_handler_name)
+$

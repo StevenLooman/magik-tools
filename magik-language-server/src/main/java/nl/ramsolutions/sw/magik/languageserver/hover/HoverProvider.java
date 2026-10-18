@@ -9,8 +9,10 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
+import nl.ramsolutions.sw.message.MessageFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.translation.TranslationFile;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.MarkupKind;
@@ -110,6 +112,28 @@ public class HoverProvider {
    * @return Hover at position.
    */
   public Hover provideHover(final LoadListFile loadListFile, final Position position) {
+    return null;
+  }
+
+  /**
+   * Provide a hover at the given position.
+   *
+   * @param messageFile Message file.
+   * @param position Position in file.
+   * @return Hover at position.
+   */
+  public Hover provideHover(final MessageFile messageFile, final Position position) {
+    return null;
+  }
+
+  /**
+   * Provide a hover at the given position.
+   *
+   * @param translationFile Translation file.
+   * @param position Position in file.
+   * @return Hover at position.
+   */
+  public Hover provideHover(final TranslationFile translationFile, final Position position) {
     return null;
   }
 

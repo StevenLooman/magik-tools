@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.PrintStream;
 import nl.ramsolutions.sw.sslr.loadlist.SwLoadListConfigurationModel;
 import nl.ramsolutions.sw.sslr.magik.MagikConfigurationModel;
+import nl.ramsolutions.sw.sslr.message.SwMessageConfigurationModel;
 import nl.ramsolutions.sw.sslr.moduledef.SwModuleDefConfigurationModel;
 import nl.ramsolutions.sw.sslr.productdef.SwProductDefConfigurationModel;
+import nl.ramsolutions.sw.sslr.translation.SwTranslationConfigurationModel;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -26,7 +28,9 @@ public final class Main {
   private static final Option OPTION_GRAMMAR =
       Option.builder("g")
           .longOpt("grammar")
-          .desc("Grammar, one of: magik, sw-product-def, sw-module-def, sw-load-list")
+          .desc(
+              "Grammar, one of: magik, sw-product-def, sw-module-def, sw-load-list, sw-message, "
+                  + "sw-translation")
           .hasArg()
           .required()
           .type(PatternOptionBuilder.STRING_VALUE)
@@ -123,6 +127,10 @@ public final class Main {
       configurationModel = new SwModuleDefConfigurationModel();
     } else if ("sw-load-list".equalsIgnoreCase(grammar)) {
       configurationModel = new SwLoadListConfigurationModel();
+    } else if ("sw-message".equalsIgnoreCase(grammar)) {
+      configurationModel = new SwMessageConfigurationModel();
+    } else if ("sw-translation".equalsIgnoreCase(grammar)) {
+      configurationModel = new SwTranslationConfigurationModel();
     } else {
       // This should never happen because of the earlier check.
       final PrintStream errStream = Main.getErrStream();

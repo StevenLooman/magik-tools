@@ -6,8 +6,10 @@ import java.util.List;
 import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.message.MessageFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.translation.TranslationFile;
 import org.eclipse.lsp4j.FoldingRange;
 import org.eclipse.lsp4j.ServerCapabilities;
 
@@ -62,6 +64,26 @@ public class FoldingRangeProvider {
    * @return {@link FoldingRange}s.
    */
   public List<FoldingRange> provideFoldingRanges(final LoadListFile loadListFile) {
+    return Collections.emptyList();
+  }
+
+  /**
+   * Provide folding ranges.
+   *
+   * @param messageFile Message file.
+   * @return {@link FoldingRange}s.
+   */
+  public List<FoldingRange> provideFoldingRanges(final MessageFile messageFile) {
+    return Collections.emptyList();
+  }
+
+  /**
+   * Provide folding ranges.
+   *
+   * @param translationFile Translation file.
+   * @return {@link FoldingRange}s.
+   */
+  public List<FoldingRange> provideFoldingRanges(final TranslationFile translationFile) {
     return Collections.emptyList();
   }
 

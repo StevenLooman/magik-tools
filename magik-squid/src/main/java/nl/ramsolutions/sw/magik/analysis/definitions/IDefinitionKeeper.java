@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Set;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.message.MessageFileDefinition;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 
@@ -46,6 +47,10 @@ public interface IDefinitionKeeper {
 
   void add(ProcedureDefinition definition);
 
+  void add(MessageFileDefinition definition);
+
+  void add(MessageHandlerUseDefinition definition);
+
   void add(IDefinition definition);
 
   void remove(ProductDefinition definition);
@@ -82,7 +87,33 @@ public interface IDefinitionKeeper {
 
   void remove(ProcedureDefinition definition);
 
+  void remove(MessageFileDefinition definition);
+
+  void remove(MessageHandlerUseDefinition definition);
+
   void remove(IDefinition definition);
+
+  /**
+   * Get the {@link MessageFileDefinition}s which contribute to the message handler with the given
+   * name.
+   *
+   * @param handlerName Name of the message handler.
+   * @return {@link MessageFileDefinition}s for the message handler.
+   */
+  Collection<MessageFileDefinition> getMessageFileDefinitions(String handlerName);
+
+  Collection<MessageFileDefinition> getMessageFileDefinitions();
+
+  /**
+   * Get the {@link MessageHandlerUseDefinition}s of the message handler with the given name: the
+   * message handlers it uses, as named by a message file or as added by Magik code.
+   *
+   * @param handlerName Name of the message handler.
+   * @return {@link MessageHandlerUseDefinition}s for the message handler.
+   */
+  Collection<MessageHandlerUseDefinition> getMessageHandlerUseDefinitions(String handlerName);
+
+  Collection<MessageHandlerUseDefinition> getMessageHandlerUseDefinitions();
 
   Collection<ProductDefinition> getProductDefinitions(String name);
 

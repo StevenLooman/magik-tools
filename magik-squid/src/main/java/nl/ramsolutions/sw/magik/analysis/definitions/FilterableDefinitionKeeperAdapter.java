@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.message.MessageFileDefinition;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 
@@ -27,6 +28,8 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   final Predicate<BinaryOperatorDefinition> binaryOperatorDefinitionPredicate;
   final Predicate<ConditionDefinition> conditionDefinitionPredicate;
   final Predicate<ProcedureDefinition> procedureDefinitionPredicate;
+  final Predicate<MessageFileDefinition> messageFileDefinitionPredicate;
+  final Predicate<MessageHandlerUseDefinition> messageHandlerUseDefinitionPredicate;
 
   /**
    * Constructor.
@@ -46,6 +49,10 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
    *     BinaryOperatorDefinition}s.
    * @param conditionDefinitionPredicate {@link Predicate} to filter {@link ConditionDefinition}s.
    * @param procedureDefinitionPredicate {@link Predicate} to filter {@link ProcedureDefinition}s.
+   * @param messageFileDefinitionPredicate {@link Predicate} to filter {@link
+   *     MessageFileDefinition}s.
+   * @param messageHandlerUseDefinitionPredicate {@link Predicate} to filter {@link
+   *     MessageHandlerUseDefinition}s.
    */
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public FilterableDefinitionKeeperAdapter(
@@ -61,7 +68,9 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
       final Predicate<GlobalDefinition> globalDefinitionPredicate,
       final Predicate<BinaryOperatorDefinition> binaryOperatorDefinitionPredicate,
       final Predicate<ConditionDefinition> conditionDefinitionPredicate,
-      final Predicate<ProcedureDefinition> procedureDefinitionPredicate) {
+      final Predicate<ProcedureDefinition> procedureDefinitionPredicate,
+      final Predicate<MessageFileDefinition> messageFileDefinitionPredicate,
+      final Predicate<MessageHandlerUseDefinition> messageHandlerUseDefinitionPredicate) {
     this.definitionKeeper = definitionKeeper;
     this.productDefinitionPredicate = productDefinitionPredicate;
     this.moduleDefinitionPredicate = moduleDefinitionPredicate;
@@ -75,6 +84,8 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
     this.binaryOperatorDefinitionPredicate = binaryOperatorDefinitionPredicate;
     this.conditionDefinitionPredicate = conditionDefinitionPredicate;
     this.procedureDefinitionPredicate = procedureDefinitionPredicate;
+    this.messageFileDefinitionPredicate = messageFileDefinitionPredicate;
+    this.messageHandlerUseDefinitionPredicate = messageHandlerUseDefinitionPredicate;
   }
 
   @Override
@@ -205,6 +216,55 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   @Override
   public void remove(final IDefinition definition) {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void add(final MessageFileDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void add(final MessageHandlerUseDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void remove(final MessageFileDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void remove(final MessageHandlerUseDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Collection<MessageFileDefinition> getMessageFileDefinitions(final String handlerName) {
+    return this.definitionKeeper.getMessageFileDefinitions(handlerName).stream()
+        .filter(this.messageFileDefinitionPredicate)
+        .toList();
+  }
+
+  @Override
+  public Collection<MessageFileDefinition> getMessageFileDefinitions() {
+    return this.definitionKeeper.getMessageFileDefinitions().stream()
+        .filter(this.messageFileDefinitionPredicate)
+        .toList();
+  }
+
+  @Override
+  public Collection<MessageHandlerUseDefinition> getMessageHandlerUseDefinitions(
+      final String handlerName) {
+    return this.definitionKeeper.getMessageHandlerUseDefinitions(handlerName).stream()
+        .filter(this.messageHandlerUseDefinitionPredicate)
+        .toList();
+  }
+
+  @Override
+  public Collection<MessageHandlerUseDefinition> getMessageHandlerUseDefinitions() {
+    return this.definitionKeeper.getMessageHandlerUseDefinitions().stream()
+        .filter(this.messageHandlerUseDefinitionPredicate)
+        .toList();
   }
 
   @Override

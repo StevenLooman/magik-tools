@@ -30,6 +30,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MessageHandlerUseDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
@@ -39,6 +40,8 @@ import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
+import nl.ramsolutions.sw.message.MessageDefinition;
+import nl.ramsolutions.sw.message.MessageFileDefinition;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.slf4j.Logger;
@@ -300,9 +303,38 @@ public final class JsonDefinitionReader {
     }
   }
 
+  private static final class MessageFileDefinitionCreator
+      implements InstanceCreator<MessageFileDefinition> {
+
+    @Override
+    public MessageFileDefinition createInstance(final Type type) {
+      return new MessageFileDefinition(
+          null, null, null, "dummy_handler", null, Collections.emptyList());
+    }
+  }
+
+  private static final class MessageDefinitionCreator
+      implements InstanceCreator<MessageDefinition> {
+
+    @Override
+    public MessageDefinition createInstance(final Type type) {
+      return new MessageDefinition(null, "dummy_id", null, false, "", Collections.emptyList());
+    }
+  }
+
+  private static final class MessageHandlerUseDefinitionCreator
+      implements InstanceCreator<MessageHandlerUseDefinition> {
+
+    @Override
+    public MessageHandlerUseDefinition createInstance(final Type type) {
+      return new MessageHandlerUseDefinition(
+          null, null, null, null, "dummy_handler", "dummy_used_handler");
+    }
+  }
+
   private static final Logger LOGGER = LoggerFactory.getLogger(JsonDefinitionReader.class);
 
-  static final int SCHEMA_VERSION = 1;
+  static final int SCHEMA_VERSION = 2;
 
   private final IDefinitionKeeper definitionKeeper;
   private Provenance defaultProvenance = Provenance.DUMPED;
@@ -419,6 +451,14 @@ public final class JsonDefinitionReader {
         this.handleGlobal(obj);
         break;
 
+      case MESSAGE_FILE:
+        this.handleMessageFile(obj);
+        break;
+
+      case MESSAGE_HANDLER_USE:
+        this.handleMessageHandlerUse(obj);
+        break;
+
       default:
         break;
     }
@@ -464,6 +504,10 @@ public final class JsonDefinitionReader {
         .registerTypeAdapter(InheritanceDefinition.class, new InheritanceDefinitionCreator())
         .registerTypeAdapter(SlotDefinition.class, new SlotDefinitionCreator())
         .registerTypeAdapter(BinaryOperatorDefinition.class, new BinaryOperatorDefinitionCreator())
+        .registerTypeAdapter(MessageFileDefinition.class, new MessageFileDefinitionCreator())
+        .registerTypeAdapter(MessageDefinition.class, new MessageDefinitionCreator())
+        .registerTypeAdapter(
+            MessageHandlerUseDefinition.class, new MessageHandlerUseDefinitionCreator())
         .create();
   }
 
@@ -557,6 +601,23 @@ public final class JsonDefinitionReader {
     final String provenanceRaw = this.provenanceRawOf(instruction);
     final Provenance provenance = this.provenanceOf(provenanceRaw);
     final ConditionDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
+  }
+
+  private void handleMessageFile(final JsonObject instruction) {
+    final Gson gson = this.buildGson();
+    final MessageFileDefinition definition =
+        gson.fromJson(instruction, MessageFileDefinition.class);
+    this.definitionKeeper.add(definition);
+  }
+
+  private void handleMessageHandlerUse(final JsonObject instruction) {
+    final Gson gson = this.buildGson();
+    final MessageHandlerUseDefinition definition =
+        gson.fromJson(instruction, MessageHandlerUseDefinition.class);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final MessageHandlerUseDefinition provenancedDefinition = definition.withProvenance(provenance);
     this.definitionKeeper.add(provenancedDefinition);
   }
 

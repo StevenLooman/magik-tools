@@ -49,7 +49,7 @@ public class ModuleIndexer {
       final Collection<IDefinition> definitions = this.definitionKeeper.getDefinitionsByPath(path);
       final List<ModuleDefinition> ownDefinitions =
           definitions.stream()
-              .filter(ModuleDefinition.class::isInstance)
+              .filter(ModuleIndexer::isModuleDefFileOwned)
               .map(ModuleDefinition.class::cast)
               .toList();
       ownDefinitions.forEach(this.definitionKeeper::remove);
@@ -63,6 +63,16 @@ public class ModuleIndexer {
     }
 
     LOGGER.debug("Handled file event: {}", fileEvent);
+  }
+
+  /**
+   * Test if the definition comes from a module.def file.
+   *
+   * @param definition Definition to test.
+   * @return True if the definition comes from a module.def file.
+   */
+  public static boolean isModuleDefFileOwned(final IDefinition definition) {
+    return definition instanceof ModuleDefinition;
   }
 
   /**

@@ -1,0 +1,29 @@
+<p>Message (.msg) file contains a syntax error.</p>
+<h2>Description</h2>
+<p>
+A message starts with its id, a symbol at the start of a line, followed by the
+text of the message. The text continues on the following lines, up to the next
+line which starts with a <code>:</code>. Before the first message, a line
+starting with <code>#</code> is a comment. A single line starting with
+<code>+</code>, which can only be preceded by comments, names the message files
+which are used as well.
+</p>
+<p>
+A message with an invalid id, any other text before the first message or a
+second line starting with <code>+</code> is a syntax error. Smallworld cannot
+read a message file with a syntax error.
+</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+#% text_encoding = utf8
+Text without a message id
+:1_invalid_id Text
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+#% text_encoding = utf8
+:message_id Text
+:other_message_id
+Text of #1,
+on multiple lines
+</pre>

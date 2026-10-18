@@ -1,0 +1,16 @@
+{
+  "title": "Message text has an invalid parameter or special character",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug",
+    "suspicious"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "MessageInvalidEscape",
+  "sqKey": "message-invalid-escape"
+}

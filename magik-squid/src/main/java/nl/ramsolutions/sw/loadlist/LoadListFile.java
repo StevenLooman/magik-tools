@@ -17,6 +17,7 @@ import nl.ramsolutions.sw.magik.Range;
 /** Load list file. */
 public class LoadListFile extends OpenedFile {
 
+  public static final String LANGUAGE_ID = "sw-load-list";
   public static final URI DEFAULT_URI = URI.create("memory://load_list.txt");
   public static final Location DEFAULT_LOCATION = new Location(DEFAULT_URI, Range.DEFAULT_RANGE);
 
@@ -81,7 +82,7 @@ public class LoadListFile extends OpenedFile {
 
   @Override
   public String getLanguageId() {
-    return "sw-load-list";
+    return LANGUAGE_ID;
   }
 
   /**

@@ -1,0 +1,27 @@
+<p>Translation (.trn) file contains a syntax error.</p>
+<h2>Description</h2>
+<p>
+A translation is a single line of fields which are separated by tabs: the type
+of the translation (<code>enumerator</code>, <code>external_name</code> or
+<code>field_value</code>), two keys, the language, the source text and the
+translated text. The language is left out in a file which is specific to a
+language, such as a file in <code>resources/en_gb/translations</code>.
+</p>
+<p>
+A line is a syntax error when Smallworld cannot read it: a line with a
+translated text and an unknown type, a line without both keys, a line without a
+language where one is required, or a line of only spaces. Note that a line is
+only a comment if the <code>#</code> is the first character of the line.
+Smallworld stops reading the file at such a line: the translations after that
+line are not loaded.
+</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+#% text_encoding = utf8
+external_names&#9;pipe&#9;unset&#9;en_gb&#9;Pipe&#9;Water pipe
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+#% text_encoding = utf8
+external_name&#9;pipe&#9;unset&#9;en_gb&#9;Pipe&#9;Water pipe
+</pre>

@@ -27,8 +27,10 @@ import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionWriter;
 import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
+import nl.ramsolutions.sw.magik.analysis.indexer.MessageIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ModuleIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ProductIndexer;
+import nl.ramsolutions.sw.message.MessageFileDefinition;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.eclipse.lsp4j.WorkspaceFolder;
@@ -56,6 +58,7 @@ public class MagikWorkspaceFolder {
   private final ProductIndexer productIndexer;
   private final ModuleIndexer moduleIndexer;
   private final MagikIndexer magikIndexer;
+  private final MessageIndexer messageIndexer;
 
   /**
    * Constructor.
@@ -77,6 +80,7 @@ public class MagikWorkspaceFolder {
     this.moduleIndexer = new ModuleIndexer(this.definitionKeeper, this.ignoreHandler);
     this.magikIndexer =
         new MagikIndexer(this.definitionKeeper, this.languageServerProperties, this.ignoreHandler);
+    this.messageIndexer = new MessageIndexer(this.definitionKeeper, this.ignoreHandler);
   }
 
   /**
@@ -95,6 +99,7 @@ public class MagikWorkspaceFolder {
     this.runProductIndexer();
     this.runModuleIndexer();
     this.runMagikIndexer();
+    this.runMessageIndexer();
 
     LOGGER.debug("Done on init: {}", this);
   }
@@ -187,6 +192,25 @@ public class MagikWorkspaceFolder {
     }
   }
 
+  private void runMessageIndexer() throws IOException {
+    LOGGER.debug("Running MessageIndexer for: {}", this);
+
+    final Path workspaceFolderPath = this.getWorkspacePath();
+    final SourceFileScanner scanner =
+        new SourceFileScanner(this.ignoreHandler, SourceFileScanner.MESSAGE_FILE_FILTER);
+    final Stream<Path> indexableFiles = scanner.getFiles(workspaceFolderPath);
+    final FilterableDefinitionKeeperAdapter filteredDefinitionKeeper =
+        this.getWorkspaceFilteredDefinitionKeeper();
+    final Collection<MessageFileDefinition> indexedMessageFileDefinitions =
+        filteredDefinitionKeeper.getMessageFileDefinitions();
+    final Collection<FileEvent> fileEvents =
+        this.buildFileEventsForDifferences(indexableFiles, indexedMessageFileDefinitions);
+    LOGGER.debug("Message file event count: {}", fileEvents.size());
+    for (final FileEvent fileEvent : fileEvents) {
+      this.messageIndexer.handleFileEvent(fileEvent);
+    }
+  }
+
   private void removeExistingTypesDatabase() throws IOException {
     final Path workspacePath = this.getWorkspacePath();
     final Path typesDbPath = workspacePath.resolve(MagikWorkspaceFolder.TYPES_DB_FILENAME);
@@ -213,6 +237,8 @@ public class MagikWorkspaceFolder {
                 && def.getLocation().getUri().toString().startsWith(workspaceUriStr);
     return new FilterableDefinitionKeeperAdapter(
         this.definitionKeeper,
+        locationPred::test,
+        locationPred::test,
         locationPred::test,
         locationPred::test,
         locationPred::test,

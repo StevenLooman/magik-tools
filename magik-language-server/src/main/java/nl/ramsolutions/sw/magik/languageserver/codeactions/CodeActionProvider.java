@@ -9,14 +9,18 @@ import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.checks.LoadListCheckList;
 import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.checks.MagikTypedCheckList;
+import nl.ramsolutions.sw.checks.MessageCheckList;
 import nl.ramsolutions.sw.checks.ModuleDefCheckList;
 import nl.ramsolutions.sw.checks.ProductDefCheckList;
+import nl.ramsolutions.sw.checks.TranslationCheckList;
 import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.CodeAction;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Range;
+import nl.ramsolutions.sw.message.MessageFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.translation.TranslationFile;
 import org.eclipse.lsp4j.CodeActionContext;
 import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.CodeActionOptions;
@@ -37,6 +41,8 @@ public class CodeActionProvider {
   private final ChecksCodeActionProvider productCodeActionProvider;
   private final ChecksCodeActionProvider moduleDefCodeActionProvider;
   private final ChecksCodeActionProvider loadListCodeActionProvider;
+  private final ChecksCodeActionProvider messageCodeActionProvider;
+  private final ChecksCodeActionProvider translationCodeActionProvider;
   private final List<CodeActionModule> modules;
 
   /**
@@ -52,6 +58,10 @@ public class CodeActionProvider {
         new ChecksCodeActionProvider(ModuleDefCheckList.INSTANCE, properties);
     this.loadListCodeActionProvider =
         new ChecksCodeActionProvider(LoadListCheckList.INSTANCE, properties);
+    this.messageCodeActionProvider =
+        new ChecksCodeActionProvider(MessageCheckList.INSTANCE, properties);
+    this.translationCodeActionProvider =
+        new ChecksCodeActionProvider(TranslationCheckList.INSTANCE, properties);
     this.modules = this.createModules();
   }
 
@@ -98,6 +108,10 @@ public class CodeActionProvider {
       return this.provideCodeActions(moduleDefFile, range, context);
     } else if (openedFile instanceof LoadListFile loadListFile) {
       return this.provideCodeActions(loadListFile, range, context);
+    } else if (openedFile instanceof MessageFile messageFile) {
+      return this.provideCodeActions(this.messageCodeActionProvider, messageFile, range);
+    } else if (openedFile instanceof TranslationFile translationFile) {
+      return this.provideCodeActions(this.translationCodeActionProvider, translationFile, range);
     } else if (openedFile instanceof MagikTypedFile magikTypedFile) {
       return this.provideCodeActions(magikTypedFile, range, context);
     }
@@ -171,6 +185,25 @@ public class CodeActionProvider {
       final LoadListFile loadListFile, final Range range, final CodeActionContext context) {
     try {
       return this.loadListCodeActionProvider.provideCodeActions(loadListFile, range).stream()
+          .filter(
+              codeAction ->
+                  codeAction.getEdits().stream()
+                      .anyMatch(edit -> edit.getRange().overlapsWith(range)))
+          .toList();
+    } catch (final IOException | ReflectiveOperationException exception) {
+      LOGGER.error(exception.getMessage(), exception);
+    }
+
+    // Safety.
+    return Collections.emptyList();
+  }
+
+  private List<CodeAction> provideCodeActions(
+      final ChecksCodeActionProvider checksCodeActionProvider,
+      final OpenedFile openedFile,
+      final Range range) {
+    try {
+      return checksCodeActionProvider.provideCodeActions(openedFile, range).stream()
           .filter(
               codeAction ->
                   codeAction.getEdits().stream()

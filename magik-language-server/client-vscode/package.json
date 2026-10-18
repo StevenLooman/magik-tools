@@ -77,24 +77,27 @@
         "configuration": "./languages/magik-language-configuration.json"
       },
       {
-        "id": "message",
+        "id": "sw-message",
         "aliases": [
-          "Message"
+          "Smallworld Message"
         ],
         "extensions": [
           ".msg"
         ],
-        "configuration": "./languages/message-language-configuration.json"
+        "configuration": "./languages/sw-message-language-configuration.json"
       },
       {
-        "id": "translation",
+        "id": "sw-translation",
         "aliases": [
-          "Translation"
+          "Smallworld Translation"
         ],
         "extensions": [
           ".trn"
         ],
-        "configuration": "./languages/translation-language-configuration.json"
+        "filenamePatterns": [
+          "**/translations/*.txt"
+        ],
+        "configuration": "./languages/sw-translation-language-configuration.json"
       }
     ],
     "grammars": [
@@ -122,8 +125,8 @@
         "path": "./snippets/sw-module-def-snippets.json"
       },
       {
-        "language": "message",
-        "path": "./snippets/message-snippets.json"
+        "language": "sw-message",
+        "path": "./snippets/sw-message-snippets.json"
       }
     ],
     "breakpoints": [

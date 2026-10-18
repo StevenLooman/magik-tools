@@ -12,9 +12,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.loadlist.LoadListFile;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.message.MessageFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.translation.TranslationFile;
 import org.eclipse.lsp4j.DocumentFilter;
 import org.eclipse.lsp4j.SemanticTokens;
 import org.eclipse.lsp4j.SemanticTokensLegend;
@@ -50,10 +53,12 @@ public class SemanticTokenProvider {
     semanticTokensProvider.setRange(false);
     semanticTokensProvider.setDocumentSelector(
         List.of(
-            new DocumentFilter("sw-product-def", "file", null),
-            new DocumentFilter("sw-module-def", "file", null),
-            new DocumentFilter("sw-load-list", "file", null),
-            new DocumentFilter("magik", "file", null)));
+            new DocumentFilter(ProductDefFile.LANGUAGE_ID, "file", null),
+            new DocumentFilter(ModuleDefFile.LANGUAGE_ID, "file", null),
+            new DocumentFilter(LoadListFile.LANGUAGE_ID, "file", null),
+            new DocumentFilter(MessageFile.LANGUAGE_ID, "file", null),
+            new DocumentFilter(TranslationFile.LANGUAGE_ID, "file", null),
+            new DocumentFilter(MagikFile.LANGUAGE_ID, "file", null)));
     capabilities.setSemanticTokensProvider(semanticTokensProvider);
   }
 
@@ -105,6 +110,40 @@ public class SemanticTokenProvider {
 
     final LoadListSemanticTokenWalker walker = new LoadListSemanticTokenWalker();
     final AstNode topNode = loadListFile.getTopNode();
+    walker.walkAst(topNode);
+
+    final List<SemanticToken> walkedSemanticTokens = walker.getSemanticTokens();
+    return this.buildSemanticTokens(walkedSemanticTokens);
+  }
+
+  /**
+   * Build {@link SemanticTokens}.
+   *
+   * @param messageFile Message file.
+   * @return Semantic tokens for file.
+   */
+  public SemanticTokens provideSemanticTokensFull(final MessageFile messageFile) {
+    LOGGER.debug("Providing semantic tokens full, file: {}", messageFile);
+
+    final MessageSemanticTokenWalker walker = new MessageSemanticTokenWalker();
+    final AstNode topNode = messageFile.getTopNode();
+    walker.walkAst(topNode);
+
+    final List<SemanticToken> walkedSemanticTokens = walker.getSemanticTokens();
+    return this.buildSemanticTokens(walkedSemanticTokens);
+  }
+
+  /**
+   * Build {@link SemanticTokens}.
+   *
+   * @param translationFile Translation file.
+   * @return Semantic tokens for file.
+   */
+  public SemanticTokens provideSemanticTokensFull(final TranslationFile translationFile) {
+    LOGGER.debug("Providing semantic tokens full, file: {}", translationFile);
+
+    final TranslationSemanticTokenWalker walker = new TranslationSemanticTokenWalker();
+    final AstNode topNode = translationFile.getTopNode();
     walker.walkAst(topNode);
 
     final List<SemanticToken> walkedSemanticTokens = walker.getSemanticTokens();
