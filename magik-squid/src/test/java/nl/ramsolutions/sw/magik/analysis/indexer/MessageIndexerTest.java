@@ -131,7 +131,7 @@ class MessageIndexerTest {
     final Path messagePath = this.createMessageFile(tempDir, "");
     Files.writeString(
         messagePath,
-        "#% text_encoding = utf8\n:title Geometrie\u00ebn\n:count #1\n",
+        "#% text_encoding = utf8\n:title Price \u00a35\n:count #1\n",
         StandardCharsets.ISO_8859_1);
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper(false);
     final MessageIndexer indexer = new MessageIndexer(definitionKeeper, new IgnoreHandler());
