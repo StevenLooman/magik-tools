@@ -14,8 +14,6 @@ import nl.ramsolutions.sw.magik.FileEvent.FileChangeType;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
-import nl.ramsolutions.sw.moduledef.ModuleDefinition;
-import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,7 +74,9 @@ public class MagikIndexer {
 
   /** Whether {@code definition} is one this indexer produces, and so may remove. */
   private static boolean isMagikOwned(final IDefinition definition) {
-    return !(definition instanceof ProductDefinition) && !(definition instanceof ModuleDefinition);
+    return !ProductIndexer.isProductDefFileOwned(definition)
+        && !ModuleIndexer.isModuleDefFileOwned(definition)
+        && !MessageIndexer.isMessageFileOwned(definition);
   }
 
   /**

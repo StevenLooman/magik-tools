@@ -495,9 +495,11 @@
                     <exclude>nl.ramsolutions.sw.magik.languageserver.semantictokens.MagikSemanticTokenWalker.walkPostIdentifier(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.parser.TypeStringBuilderVisitor.leaveNode(com.sonar.sslr.api.AstNode)</exclude>
                     <exclude>nl.ramsolutions.sw.magik.sessionwrapper.Main.main(java.lang.String[])</exclude>
+                    <exclude>nl.ramsolutions.sw.message.analysis.MessageAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.moduledef.analysis.ModuleDefAstWalker.*</exclude>
                     <exclude>nl.ramsolutions.sw.productdef.ProductDefinition.equals(java.lang.Object)</exclude>
                     <exclude>nl.ramsolutions.sw.productdef.analysis.ProductDefAstWalker.*</exclude>
+                    <exclude>nl.ramsolutions.sw.translation.analysis.TranslationAstWalker.*</exclude>
                   </excludes>
                 </rule>
               </rules>

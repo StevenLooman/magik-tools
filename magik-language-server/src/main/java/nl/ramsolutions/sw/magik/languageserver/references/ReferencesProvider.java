@@ -11,8 +11,10 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.message.MessageFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.translation.TranslationFile;
 import org.eclipse.lsp4j.ServerCapabilities;
 
 /**
@@ -109,6 +111,29 @@ public class ReferencesProvider {
    */
   public List<Location> provideReferences(
       final LoadListFile loadListFile, final Position position) {
+    return Collections.emptyList();
+  }
+
+  /**
+   * Provide references.
+   *
+   * @param messageFile Message file.
+   * @param position Position in file.
+   * @return Locations for references.
+   */
+  public List<Location> provideReferences(final MessageFile messageFile, final Position position) {
+    return Collections.emptyList();
+  }
+
+  /**
+   * Provide references.
+   *
+   * @param translationFile Translation file.
+   * @param position Position in file.
+   * @return Locations for references.
+   */
+  public List<Location> provideReferences(
+      final TranslationFile translationFile, final Position position) {
     return Collections.emptyList();
   }
 

@@ -1,14 +1,20 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.net.URI;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
+import java.util.function.Predicate;
+import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.message.MessageFile;
+import nl.ramsolutions.sw.message.MessageFileDefinition;
 import org.junit.jupiter.api.Test;
 
 /** Test {@link DefinitionKeeper}. */
@@ -37,6 +43,8 @@ class DefinitionKeeperTest {
       final IDefinitionKeeper wrappedKeeper) {
     return new FilterableDefinitionKeeperAdapter(
         wrappedKeeper,
+        definition -> true,
+        definition -> true,
         definition -> true,
         definition -> true,
         definition -> true,
@@ -272,5 +280,64 @@ class DefinitionKeeperTest {
     keeper.add(new InheritanceDefinition(null, null, null, null, null, child, parent));
     keeper.clear();
     assertThat(keeper.getInheritanceDefinitions(child)).isEmpty();
+  }
+
+  @Test
+  void testFilterMessageDefinitions() {
+    final IDefinitionKeeper wrappedKeeper = new DefinitionKeeper(false);
+    final URI insideUri = URI.create("file:///workspace/m/resources/en_gb/messages/editor.msg");
+    final URI outsideUri = URI.create("file:///product/m/resources/en_gb/messages/editor.msg");
+    for (final URI uri : List.of(insideUri, outsideUri)) {
+      final MessageFile messageFile = new MessageFile(uri, "+model\n:a A\n");
+      wrappedKeeper.add(messageFile.getMessageFileDefinition());
+      messageFile.getMessageHandlerUseDefinitions().forEach(wrappedKeeper::add);
+    }
+    final Predicate<IDefinition> insidePredicate =
+        definition ->
+            definition.getLocation() != null
+                && definition.getLocation().getUri().toString().startsWith("file:///workspace/");
+    final FilterableDefinitionKeeperAdapter adapter =
+        new FilterableDefinitionKeeperAdapter(
+            wrappedKeeper,
+            definition -> true,
+            definition -> true,
+            definition -> true,
+            definition -> true,
+            definition -> true,
+            definition -> true,
+            definition -> true,
+            definition -> true,
+            definition -> true,
+            definition -> true,
+            definition -> true,
+            definition -> true,
+            insidePredicate::test,
+            insidePredicate::test);
+
+    assertThat(adapter.getMessageFileDefinitions()).hasSize(1);
+    assertThat(adapter.getMessageFileDefinitions("editor"))
+        .extracting(definition -> definition.getLocation().getUri())
+        .containsExactly(insideUri);
+    assertThat(adapter.getMessageHandlerUseDefinitions()).hasSize(1);
+    assertThat(adapter.getMessageHandlerUseDefinitions("editor")).hasSize(1);
+
+    final MessageFileDefinition definition =
+        wrappedKeeper.getMessageFileDefinitions().iterator().next();
+    assertThatThrownBy(() -> adapter.add(definition))
+        .isInstanceOf(UnsupportedOperationException.class);
+    assertThatThrownBy(() -> adapter.remove(definition))
+        .isInstanceOf(UnsupportedOperationException.class);
+  }
+
+  @Test
+  void testFilterableAdapterGetsMessageFileDefinitionsAsItsKeeperDoes() {
+    final IDefinitionKeeper wrappedKeeper = new DefinitionKeeper(false);
+    final MessageFile messageFile =
+        new MessageFile(URI.create("file:///product/editor.msg"), ":a A\n");
+    wrappedKeeper.add(messageFile.getMessageFileDefinition());
+
+    final FilterableDefinitionKeeperAdapter adapter = this.createPassThroughAdapter(wrappedKeeper);
+
+    assertThat(adapter.getMessageFileDefinitions()).hasSize(1);
   }
 }

@@ -27,6 +27,9 @@ public class SourceFileScanner {
   public static final String SW_MODULE_DEF = "module.def";
   public static final String SW_LOAD_LIST = "load_list.txt";
   public static final String SW_PATCH_LIST = "patch_list.txt";
+  public static final String SW_MESSAGE_EXTENSION = ".msg";
+  public static final String SW_TRANSLATION_EXTENSION = ".trn";
+  public static final String SW_TRANSLATIONS_DIRECTORY = "translations";
 
   public static final Predicate<Path> MAGIK_FILE_FILTER =
       path -> {
@@ -44,11 +47,19 @@ public class SourceFileScanner {
         final String fileName = path.getFileName().toString().toLowerCase();
         return fileName.equals(SW_LOAD_LIST) || fileName.equals(SW_PATCH_LIST);
       };
+  public static final Predicate<Path> MESSAGE_FILE_FILTER =
+      path -> SourceFileScanner.hasExtension(path, SW_MESSAGE_EXTENSION);
+  public static final Predicate<Path> TRANSLATION_FILE_FILTER =
+      path ->
+          SourceFileScanner.hasExtension(path, SW_TRANSLATION_EXTENSION)
+              || SourceFileScanner.isTextFileInTranslationsDirectory(path);
   public static final Predicate<Path> ANY_MAGIK_RELATED_FILE_FILTER =
       MAGIK_FILE_FILTER
           .or(MODULE_DEF_FILE_FILTER)
           .or(PRODUCT_DEF_FILE_FILTER)
-          .or(LOAD_LIST_FILE_FILTER);
+          .or(LOAD_LIST_FILE_FILTER)
+          .or(MESSAGE_FILE_FILTER)
+          .or(TRANSLATION_FILE_FILTER);
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SourceFileScanner.class);
   private static final long MAX_SIZE = 1024L * 1024L * 10L; // 10 MB
@@ -138,6 +149,21 @@ public class SourceFileScanner {
     }
 
     return null;
+  }
+
+  private static boolean hasExtension(final Path path, final String extension) {
+    final String fileName = path.getFileName().toString().toLowerCase();
+    return !fileName.startsWith(".") && !fileName.startsWith("#") && fileName.endsWith(extension);
+  }
+
+  /** Test if the file is a text file in a translations directory. */
+  private static boolean isTextFileInTranslationsDirectory(final Path path) {
+    final Path parentPath = path.getParent();
+    return parentPath != null
+        && parentPath.getFileName() != null
+        && parentPath.getFileName().toString().equalsIgnoreCase(SW_TRANSLATIONS_DIRECTORY)
+        && SourceFileScanner.hasExtension(path, ".txt")
+        && !LOAD_LIST_FILE_FILTER.test(path);
   }
 
   private boolean isWantedFile(final Path path) {

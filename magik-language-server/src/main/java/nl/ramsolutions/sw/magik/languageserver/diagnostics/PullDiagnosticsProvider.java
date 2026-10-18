@@ -5,8 +5,10 @@ import java.util.List;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.message.MessageFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.translation.TranslationFile;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticRegistrationOptions;
 import org.eclipse.lsp4j.DocumentDiagnosticReport;
@@ -43,6 +45,10 @@ public class PullDiagnosticsProvider {
       diagnostics = this.diagnosticsProvider.provideDiagnostics(moduleDefFile);
     } else if (openedFile instanceof LoadListFile loadListFile) {
       diagnostics = this.diagnosticsProvider.provideDiagnostics(loadListFile);
+    } else if (openedFile instanceof MessageFile messageFile) {
+      diagnostics = this.diagnosticsProvider.provideDiagnostics(messageFile);
+    } else if (openedFile instanceof TranslationFile translationFile) {
+      diagnostics = this.diagnosticsProvider.provideDiagnostics(translationFile);
     } else if (openedFile instanceof MagikTypedFile magikFile) {
       diagnostics = this.diagnosticsProvider.provideDiagnostics(magikFile);
     } else {

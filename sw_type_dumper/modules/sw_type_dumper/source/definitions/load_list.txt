@@ -17,3 +17,6 @@ condition_definition
 binary_operator_definition
 global_definition
 loaded_modules_definition
+message_definition
+message_handler_use_definition
+message_file_definition

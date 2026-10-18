@@ -1,0 +1,16 @@
+{
+  "title": "Message file contains a syntax error",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug",
+    "suspicious"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "MessageSyntaxError",
+  "sqKey": "message-syntax-error"
+}

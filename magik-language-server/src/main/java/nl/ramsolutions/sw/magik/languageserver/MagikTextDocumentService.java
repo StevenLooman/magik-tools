@@ -14,6 +14,7 @@ import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.OpenedFile;
 import nl.ramsolutions.sw.loadlist.LoadListFile;
+import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.SourcePathResolver;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
@@ -41,8 +42,10 @@ import nl.ramsolutions.sw.magik.languageserver.selectionrange.SelectionRangeProv
 import nl.ramsolutions.sw.magik.languageserver.semantictokens.SemanticTokenProvider;
 import nl.ramsolutions.sw.magik.languageserver.signaturehelp.SignatureHelpProvider;
 import nl.ramsolutions.sw.magik.languageserver.typehierarchy.TypeHierarchyProvider;
+import nl.ramsolutions.sw.message.MessageFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.translation.TranslationFile;
 import org.eclipse.lsp4j.CallHierarchyIncomingCall;
 import org.eclipse.lsp4j.CallHierarchyIncomingCallsParams;
 import org.eclipse.lsp4j.CallHierarchyItem;
@@ -277,7 +280,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     final String text = textDocument.getText();
     final OpenedFile openedFile;
     switch (textDocument.getLanguageId()) {
-      case "sw-product-def":
+      case ProductDefFile.LANGUAGE_ID:
         {
           final ProductDefFile productDefFile =
               new ProductDefFile(mergedProperties, uri, text, this.definitionKeeper, null);
@@ -288,7 +291,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "sw-module-def":
+      case ModuleDefFile.LANGUAGE_ID:
         {
           final ModuleDefFile moduleDefFile =
               new ModuleDefFile(uri, text, this.definitionKeeper, null);
@@ -299,7 +302,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "sw-load-list":
+      case LoadListFile.LANGUAGE_ID:
         {
           final LoadListFile loadListFile = new LoadListFile(uri, text);
           openedFile = loadListFile;
@@ -309,7 +312,27 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "magik":
+      case MessageFile.LANGUAGE_ID:
+        {
+          final MessageFile messageFile = new MessageFile(mergedProperties, uri, text);
+          openedFile = messageFile;
+
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(messageFile), textDocumentIdentifier, 0);
+          break;
+        }
+
+      case TranslationFile.LANGUAGE_ID:
+        {
+          final TranslationFile translationFile = new TranslationFile(mergedProperties, uri, text);
+          openedFile = translationFile;
+
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(translationFile), textDocumentIdentifier, 0);
+          break;
+        }
+
+      case MagikFile.LANGUAGE_ID:
         {
           final MagikTypedFile magikFile =
               new MagikTypedFile(mergedProperties, uri, text, this.definitionKeeper);
@@ -366,7 +389,7 @@ public class MagikTextDocumentService implements TextDocumentService {
     final String languageId = existingOpenedFile.getLanguageId();
     final OpenedFile openedFile;
     switch (languageId) {
-      case "sw-product-def":
+      case ProductDefFile.LANGUAGE_ID:
         {
           final ProductDefFile productDefFile =
               new ProductDefFile(mergedProperties, uri, text, this.definitionKeeper, null);
@@ -377,7 +400,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "sw-module-def":
+      case ModuleDefFile.LANGUAGE_ID:
         {
           final ModuleDefFile moduleDefFile =
               new ModuleDefFile(uri, text, this.definitionKeeper, null);
@@ -388,7 +411,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "sw-load-list":
+      case LoadListFile.LANGUAGE_ID:
         {
           final LoadListFile loadListFile = new LoadListFile(uri, text);
           openedFile = loadListFile;
@@ -398,7 +421,27 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "magik":
+      case MessageFile.LANGUAGE_ID:
+        {
+          final MessageFile messageFile = new MessageFile(mergedProperties, uri, text);
+          openedFile = messageFile;
+
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(messageFile), realTextDocumentIdentifier, null);
+          break;
+        }
+
+      case TranslationFile.LANGUAGE_ID:
+        {
+          final TranslationFile translationFile = new TranslationFile(mergedProperties, uri, text);
+          openedFile = translationFile;
+
+          this.runDelayedTaskForTextDocument(
+              () -> this.publishDiagnostics(translationFile), realTextDocumentIdentifier, null);
+          break;
+        }
+
+      case MagikFile.LANGUAGE_ID:
         {
           final MagikTypedFile magikFile =
               new MagikTypedFile(mergedProperties, uri, text, this.definitionKeeper);
@@ -527,7 +570,7 @@ public class MagikTextDocumentService implements TextDocumentService {
 
     final String languageId = existingOpenedFile.getLanguageId();
     switch (languageId) {
-      case "sw-product-def":
+      case ProductDefFile.LANGUAGE_ID:
         {
           final ProductDefFile productDefFile = (ProductDefFile) existingOpenedFile;
 
@@ -541,7 +584,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "sw-module-def":
+      case ModuleDefFile.LANGUAGE_ID:
         {
           final ModuleDefFile moduleDefFile = (ModuleDefFile) existingOpenedFile;
 
@@ -555,7 +598,7 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "sw-load-list":
+      case LoadListFile.LANGUAGE_ID:
         {
           final LoadListFile loadListFile = (LoadListFile) existingOpenedFile;
 
@@ -569,7 +612,35 @@ public class MagikTextDocumentService implements TextDocumentService {
           break;
         }
 
-      case "magik":
+      case MessageFile.LANGUAGE_ID:
+        {
+          final MessageFile messageFile = (MessageFile) existingOpenedFile;
+
+          final MagikLanguageServerSettings settings =
+              new MagikLanguageServerSettings(mergedProperties);
+          if (settings.runChecksOnSave()) {
+            this.runDelayedTaskForTextDocument(
+                () -> this.publishDiagnostics(messageFile), realTextDocumentIdentifier, 0);
+          }
+
+          break;
+        }
+
+      case TranslationFile.LANGUAGE_ID:
+        {
+          final TranslationFile translationFile = (TranslationFile) existingOpenedFile;
+
+          final MagikLanguageServerSettings settings =
+              new MagikLanguageServerSettings(mergedProperties);
+          if (settings.runChecksOnSave()) {
+            this.runDelayedTaskForTextDocument(
+                () -> this.publishDiagnostics(translationFile), realTextDocumentIdentifier, 0);
+          }
+
+          break;
+        }
+
+      case MagikFile.LANGUAGE_ID:
         {
           final MagikTypedFile magikFile = (MagikTypedFile) existingOpenedFile;
 
@@ -692,6 +763,55 @@ public class MagikTextDocumentService implements TextDocumentService {
     }
   }
 
+  private void publishDiagnostics(final MessageFile messageFile) {
+    if (this.clientSupportsPullDiagnostics()) {
+      return;
+    }
+
+    final long start = System.nanoTime();
+
+    LOGGER.debug("publishDiagnostics, uri: {}", messageFile.getUri());
+    final List<Diagnostic> diagnostics = this.diagnosticsProvider.provideDiagnostics(messageFile);
+
+    // Publish to client.
+    final String uri = messageFile.getUri().toString();
+    final PublishDiagnosticsParams publishParams = new PublishDiagnosticsParams(uri, diagnostics);
+    final LanguageClient languageClient = this.languageServer.getLanguageClient();
+    languageClient.publishDiagnostics(publishParams);
+
+    if (LOGGER_DURATION.isTraceEnabled()) {
+      LOGGER_DURATION.trace(
+          "Duration: {} publishDiagnostics, uri: {}",
+          "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
+          messageFile.getUri());
+    }
+  }
+
+  private void publishDiagnostics(final TranslationFile translationFile) {
+    if (this.clientSupportsPullDiagnostics()) {
+      return;
+    }
+
+    final long start = System.nanoTime();
+
+    LOGGER.debug("publishDiagnostics, uri: {}", translationFile.getUri());
+    final List<Diagnostic> diagnostics =
+        this.diagnosticsProvider.provideDiagnostics(translationFile);
+
+    // Publish to client.
+    final String uri = translationFile.getUri().toString();
+    final PublishDiagnosticsParams publishParams = new PublishDiagnosticsParams(uri, diagnostics);
+    final LanguageClient languageClient = this.languageServer.getLanguageClient();
+    languageClient.publishDiagnostics(publishParams);
+
+    if (LOGGER_DURATION.isTraceEnabled()) {
+      LOGGER_DURATION.trace(
+          "Duration: {} publishDiagnostics, uri: {}",
+          "%.3f".formatted((System.nanoTime() - start) / 1000000000.0),
+          translationFile.getUri());
+    }
+  }
+
   @Override
   public CompletableFuture<Hover> hover(final HoverParams params) {
     final long start = System.nanoTime();
@@ -719,6 +839,10 @@ public class MagikTextDocumentService implements TextDocumentService {
             hover = this.hoverProvider.provideHover(loadListFile, position);
           } else if (openedFile instanceof MagikTypedFile magikFile) {
             hover = this.hoverProvider.provideHover(magikFile, position);
+          } else if (openedFile instanceof MessageFile messageFile) {
+            hover = this.hoverProvider.provideHover(messageFile, position);
+          } else if (openedFile instanceof TranslationFile translationFile) {
+            hover = this.hoverProvider.provideHover(translationFile, position);
           } else {
             throw new UnsupportedOperationException();
           }
@@ -829,6 +953,10 @@ public class MagikTextDocumentService implements TextDocumentService {
             foldingRanges = this.foldingRangeProvider.provideFoldingRanges(loadListFile);
           } else if (openedFile instanceof MagikTypedFile magikFile) {
             foldingRanges = this.foldingRangeProvider.provideFoldingRanges(magikFile);
+          } else if (openedFile instanceof MessageFile messageFile) {
+            foldingRanges = this.foldingRangeProvider.provideFoldingRanges(messageFile);
+          } else if (openedFile instanceof TranslationFile translationFile) {
+            foldingRanges = this.foldingRangeProvider.provideFoldingRanges(translationFile);
           } else {
             throw new UnsupportedOperationException();
           }
@@ -868,6 +996,10 @@ public class MagikTextDocumentService implements TextDocumentService {
             locations = this.definitionsProvider.provideDefinitions(loadListFile, position);
           } else if (openedFile instanceof MagikTypedFile magikFile) {
             locations = this.definitionsProvider.provideDefinitions(magikFile, position);
+          } else if (openedFile instanceof MessageFile messageFile) {
+            locations = this.definitionsProvider.provideDefinitions(messageFile, position);
+          } else if (openedFile instanceof TranslationFile translationFile) {
+            locations = this.definitionsProvider.provideDefinitions(translationFile, position);
           } else {
             throw new UnsupportedOperationException();
           }
@@ -916,6 +1048,14 @@ public class MagikTextDocumentService implements TextDocumentService {
             references =
                 this.toClientLocations(
                     this.referencesProvider.provideReferences(magikFile, position));
+          } else if (openedFile instanceof MessageFile messageFile) {
+            references =
+                this.toClientLocations(
+                    this.referencesProvider.provideReferences(messageFile, position));
+          } else if (openedFile instanceof TranslationFile translationFile) {
+            references =
+                this.toClientLocations(
+                    this.referencesProvider.provideReferences(translationFile, position));
           } else {
             throw new UnsupportedOperationException();
           }
@@ -1119,6 +1259,10 @@ public class MagikTextDocumentService implements TextDocumentService {
             semanticTokens = this.semanticTokenProver.provideSemanticTokensFull(moduleDefFile);
           } else if (openedFile instanceof LoadListFile loadListFile) {
             semanticTokens = this.semanticTokenProver.provideSemanticTokensFull(loadListFile);
+          } else if (openedFile instanceof MessageFile messageFile) {
+            semanticTokens = this.semanticTokenProver.provideSemanticTokensFull(messageFile);
+          } else if (openedFile instanceof TranslationFile translationFile) {
+            semanticTokens = this.semanticTokenProver.provideSemanticTokensFull(translationFile);
           } else if (openedFile instanceof MagikTypedFile magikFile) {
             semanticTokens = this.semanticTokenProver.provideSemanticTokensFull(magikFile);
           } else {

@@ -172,6 +172,10 @@ public class CheckHolder {
       return ModuleDefCheckList.PROFILE_DIR;
     } else if (this.checkClass.getGenericSuperclass().equals(LoadListCheck.class)) {
       return LoadListCheckList.PROFILE_DIR;
+    } else if (this.checkClass.getGenericSuperclass().equals(MessageCheck.class)) {
+      return MessageCheckList.PROFILE_DIR;
+    } else if (this.checkClass.getGenericSuperclass().equals(TranslationCheck.class)) {
+      return TranslationCheckList.PROFILE_DIR;
     } else if (this.checkClass.getGenericSuperclass().equals(MagikCheck.class)) {
       return MagikCheckList.PROFILE_DIR;
     } else if (this.checkClass.getGenericSuperclass().equals(MagikTypedCheck.class)) {

@@ -12,8 +12,10 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import nl.ramsolutions.sw.message.MessageFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.translation.TranslationFile;
 import org.eclipse.lsp4j.ServerCapabilities;
 
 /**
@@ -124,6 +126,29 @@ public class DefinitionsProvider {
     final AstNode node = loadListFile.getTopNode();
     final AstNode positionNode = AstQuery.nodeAt(node, position, LoadListGrammar.FILE_PATH);
     return this.provideDefinitions(this.loadListModules, loadListFile, positionNode);
+  }
+
+  /**
+   * Provide definitions.
+   *
+   * @param messageFile Message file.
+   * @param position Position.
+   * @return Definitions.
+   */
+  public List<Location> provideDefinitions(final MessageFile messageFile, final Position position) {
+    return Collections.emptyList();
+  }
+
+  /**
+   * Provide definitions.
+   *
+   * @param translationFile Translation file.
+   * @param position Position.
+   * @return Definitions.
+   */
+  public List<Location> provideDefinitions(
+      final TranslationFile translationFile, final Position position) {
+    return Collections.emptyList();
   }
 
   /**

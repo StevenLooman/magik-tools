@@ -1,0 +1,8 @@
+{
+  "name": "Sonar way recommended",
+  "ruleKeys": [
+    "MessageFileMustStartWithTextEncoding",
+    "MessageInvalidEscape",
+    "MessageSyntaxError"
+  ]
+}

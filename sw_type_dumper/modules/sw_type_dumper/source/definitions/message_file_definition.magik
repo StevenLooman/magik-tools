@@ -1,0 +1,160 @@
+#% text_encoding = iso8859_1
+_package mt
+
+_pragma(classify_level=basic, topic=type_dumper)
+## Message file definition: the messages of a message file. A message file contributes
+## its messages to the message handler with the name of the file.
+## @slot {mt:location} location
+## @slot {sw:char16_vector} module_name
+## @slot {sw:char16_vector} handler_name
+## @slot {sw:char16_vector} language Language, as determined by the directory of the file.
+## @slot {sw:simple_vector<E=mt:message_definition>} messages
+def_slotted_exemplar(
+	:message_file_definition,
+	{
+		{:location, _unset, :readable, :public},
+		{:module_name, _unset, :readable, :public},
+		{:handler_name, _unset, :readable, :public},
+		{:language, _unset, :readable, :public},
+		{:messages, _unset, :readable, :public}
+	},
+	{@mt:definition})
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_file_definition.new(location, module_name, handler_name, language, messages)
+	## Constructor.
+	## @param {mt:location} location
+	## @param {sw:char16_vector} module_name
+	## @param {sw:char16_vector} handler_name
+	## @param {sw:char16_vector} language
+	## @param {sw:simple_vector<E=mt:message_definition>} messages
+	## @return {_self}
+	_return _clone.init(location, module_name, handler_name, language, messages)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_private _method message_file_definition.init(location, module_name, handler_name, language, messages)
+	## Initializer.
+	## @param {mt:location} location
+	## @param {sw:char16_vector} module_name
+	## @param {sw:char16_vector} handler_name
+	## @param {sw:char16_vector} language
+	## @param {sw:simple_vector<E=mt:message_definition>} messages
+	## @return {_self}
+	.location << location
+	.module_name << module_name
+	.handler_name << handler_name
+	.language << language
+	.messages << messages
+	_return _self
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_file_definition.handler_name_from_path(path)
+	## Get the name of the message handler for a message file: the name of the file, up
+	## to the first dot.
+	## @param {sw:char16_vector} path
+	## @return {sw:char16_vector}
+	_local filename << sw:system.pathname_components(path)
+	_return filename.split_by(%.)[1]
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_file_definition.new_from(module_name, language, path)
+	## Construct self, and the message handlers which are named to be used, from a message
+	## file. The file is read like Smallworld reads it.
+	## @param {sw:char16_vector} module_name
+	## @param {sw:char16_vector} language
+	## @param {sw:char16_vector} path Path to the message file.
+	## @return {_self}
+	## @return {sw:rope<E=mt:message_handler_use_definition>}
+	_local file_location << location.new_from_path(path)
+	_local handler_name << _self.handler_name_from_path(path)
+	_local uses << sw:rope.new()
+	_local messages << sw:rope.new()
+	_local stream << sw:external_text_input_stream.new(path)
+	_protect
+		stream.check_text_encoding()
+		_for used_handler _over sw:message_handler.usage_definitions(stream)
+		_loop
+			uses.add_last(
+				message_handler_use_definition.new(
+					file_location,
+					module_name,
+					handler_name,
+					used_handler.write_string))
+		_endloop
+		_for id, message_language, text _over sw:message_handler.message_definitions(stream, _unset)
+		_loop
+			messages.add_last(message_definition.new_from(id, message_language, text))
+		_endloop
+	_protection
+		stream.close()
+	_endprotect
+
+	_local definition << _self.new(
+		file_location,
+		module_name,
+		handler_name,
+		language,
+		messages.as_simple_vector())
+	_return definition, uses
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_file_definition.sort_value
+	## Sort value.
+	## @return {sw:char16_vector}
+	_return write_string(.handler_name, ".", .language, ".", .module_name, ".", .location.uri)
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_file_definition.equals?(other)
+	## Equals?
+	## @param {mt:message_file_definition} other
+	## @return {sw:false}
+	_return _self.sort_value = other.sort_value _andif
+		_self.generate_json_string() = other.generate_json_string()
+_endmethod
+$
+
+_pragma(classify_level=basic, topic=type_dumper)
+_method message_file_definition.equals_disregarding_typing?(other)
+	## Equals disregarding typing?
+	## @param {mt:message_file_definition} other
+	## @return {sw:false}
+	_return _self.equals?(other)
+_endmethod
+$
+
+define_binary_operator_case(
+	:|cf|, message_file_definition, message_file_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:message_file_definition} definition_a
+		## @param {mt:message_file_definition} definition_b
+		## @return {sw:false|sw:maybe}
+		_return definition_a.sort_value _cf definition_b.sort_value
+	_endproc)
+$
+
+define_binary_operator_case(
+	:|=|, message_file_definition, message_file_definition,
+	_proc(definition_a, definition_b)
+		## @param {mt:message_file_definition} definition_a
+		## @param {mt:message_file_definition} definition_b
+		## @return {sw:false}
+		_return definition_a.equals?(definition_b)
+	_endproc)
+$
+
+message_file_definition.define_show_attributes(
+	:handler_name,
+	:language,
+	:module_name)
+$

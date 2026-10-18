@@ -10,13 +10,17 @@ import nl.ramsolutions.sw.checks.Check;
 import nl.ramsolutions.sw.checks.LoadListCheckList;
 import nl.ramsolutions.sw.checks.MagikCheckList;
 import nl.ramsolutions.sw.checks.MagikTypedCheckList;
+import nl.ramsolutions.sw.checks.MessageCheckList;
 import nl.ramsolutions.sw.checks.ModuleDefCheckList;
 import nl.ramsolutions.sw.checks.ProductDefCheckList;
+import nl.ramsolutions.sw.checks.TranslationCheckList;
 import nl.ramsolutions.sw.loadlist.LoadListFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.languageserver.MagikLanguageServerSettings;
+import nl.ramsolutions.sw.message.MessageFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.translation.TranslationFile;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.slf4j.Logger;
@@ -86,6 +90,28 @@ public class DiagnosticsProvider {
     diagnostics.addAll(diagnosticsChecks);
 
     return diagnostics;
+  }
+
+  /**
+   * Provides diagnostics for a {@link MessageFile}.
+   *
+   * @param messageFile Message file.
+   * @return Diagnostics.
+   */
+  public List<Diagnostic> provideDiagnostics(final MessageFile messageFile) {
+    return DiagnosticsProvider.getDiagnosticsFromFileAndChecks(
+        messageFile, MessageCheckList.INSTANCE.getBaseChecks());
+  }
+
+  /**
+   * Provides diagnostics for a {@link TranslationFile}.
+   *
+   * @param translationFile Translation file.
+   * @return Diagnostics.
+   */
+  public List<Diagnostic> provideDiagnostics(final TranslationFile translationFile) {
+    return DiagnosticsProvider.getDiagnosticsFromFileAndChecks(
+        translationFile, TranslationCheckList.INSTANCE.getBaseChecks());
   }
 
   /**

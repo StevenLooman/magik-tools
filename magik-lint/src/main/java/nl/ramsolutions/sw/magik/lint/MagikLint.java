@@ -20,8 +20,10 @@ import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.IssueDisabledChecker;
 import nl.ramsolutions.sw.checks.LoadListCheckList;
 import nl.ramsolutions.sw.checks.MagikCheckList;
+import nl.ramsolutions.sw.checks.MessageCheckList;
 import nl.ramsolutions.sw.checks.ModuleDefCheckList;
 import nl.ramsolutions.sw.checks.ProductDefCheckList;
+import nl.ramsolutions.sw.checks.TranslationCheckList;
 import nl.ramsolutions.sw.checks.output.Reporter;
 import nl.ramsolutions.sw.magik.Location;
 import org.slf4j.Logger;
@@ -203,6 +205,8 @@ public class MagikLint {
             ProductDefCheckList.INSTANCE.getBaseChecks().stream(),
             ModuleDefCheckList.INSTANCE.getBaseChecks().stream(),
             LoadListCheckList.INSTANCE.getBaseChecks().stream(),
+            MessageCheckList.INSTANCE.getBaseChecks().stream(),
+            TranslationCheckList.INSTANCE.getBaseChecks().stream(),
             MagikCheckList.INSTANCE.getBaseChecks().stream())
         .flatMap(stream -> stream)
         .sorted(Comparator.comparing(Class::getSimpleName))

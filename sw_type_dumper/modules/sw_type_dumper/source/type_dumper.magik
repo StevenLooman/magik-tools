@@ -270,6 +270,126 @@ _private _method type_dumper.int!run()
 		_local def << condition_definition.new_from(cond)
 		_self.write_definition(def)
 	_endloop
+
+	# Write message files and message handler uses.
+	_self.write_messages()
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_dumper.write_messages()
+	## Write the message files of the loaded modules, and the message handlers each message
+	## handler uses, as named by a message file.
+	_local file_definitions << sw:rope.new()
+	_local use_definitions << sw:rope.new()
+	_for module _over sw_module_manager.loaded_modules.fast_elements()
+	_loop
+		_if .ignore_modules.includes?(module.name)
+		_then
+			_continue
+		_endif
+
+		_for language, path _over _self.module_message_files(module)
+		_loop
+			_local (file_definition, file_use_definitions) <<
+				_self.read_message_file(module.name.write_string, language, path)
+			_if file_definition _is _unset
+			_then
+				_continue
+			_endif
+
+			file_definitions.add_last(file_definition)
+			_for use_definition _over file_use_definitions.fast_elements()
+			_loop
+				use_definitions.add_last(use_definition)
+			_endloop
+		_endloop
+	_endloop
+
+	_self.write_line("// message_files")
+	_local sorter << {:method_result, :sort_value}
+	_for definition _over sorted_collection.new_from(file_definitions, sorter).fast_elements()
+	_loop
+		_self.write_definition(definition)
+	_endloop
+
+	_self.write_line("// message_handler_uses")
+	_for definition _over sorted_collection.new_from(use_definitions, sorter).fast_elements()
+	_loop
+		_self.write_definition(definition)
+	_endloop
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_dumper.read_message_file(module_name, language, path)
+	## Read a message file. A message file which cannot be read is skipped, with a warning.
+	## @param {sw:char16_vector} module_name
+	## @param {sw:char16_vector} language
+	## @param {sw:char16_vector} path
+	## @return {mt:message_file_definition|sw:unset}
+	## @return {sw:rope<E=mt:message_handler_use_definition>|sw:unset}
+	_try _with cond
+		_return message_file_definition.new_from(module_name, language, path)
+	_when error
+		_local msg << write_string("Could not read message file: ", path, ": ", cond.report_contents_string)
+		condition.raise(:warning, :string, msg)
+	_endtry
+	_return _unset, _unset
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _iter _method type_dumper.module_message_files(module)
+	## Iterate over the message files of a module: the files with the extension `.msg` in
+	## the directories `resources/<language>/messages`, for any language.
+	## @param {sw:sw_module} module
+	## @loop {sw:char16_vector} Language.
+	## @loop {sw:char16_vector} Path to message file.
+	_local resources_dir << sw:system.pathname_down(module.full_directory, "resources")
+	_if _not sw:system.file_exists?(resources_dir)
+	_then
+		_return
+	_endif
+
+	_for language _over _self.sorted_directory_entries(resources_dir).fast_elements()
+	_loop
+		_local messages_dir << sw:system.pathname_down(resources_dir, language, "messages")
+		_if _not sw:system.file_exists?(messages_dir)
+		_then
+			_continue
+		_endif
+
+		_for filename _over _self.sorted_directory_entries(messages_dir, "*.msg").fast_elements()
+		_loop
+			_loopbody(language, sw:system.pathname_down(messages_dir, filename))
+		_endloop
+	_endloop
+_endmethod
+$
+
+_pragma(classify_level=restricted, topic=type_dumper, usage=internal)
+_private _method type_dumper.sorted_directory_entries(directory, _optional wildcard)
+	## Get the sorted names of the entries in a directory.
+	## @param {sw:char16_vector} directory
+	## @param {sw:char16_vector} wildcard
+	## @return {sw:sorted_collection<E=sw:char16_vector>}
+	_local names << sw:sorted_collection.new()
+	_local channel << sw:directory_channel.new(directory, wildcard)
+	_protect
+		_loop
+			_local name << channel.get()
+			_if name _is _unset
+			_then
+				_leave
+			_endif
+
+			names.add(name)
+		_endloop
+	_protection
+		channel.close()
+	_endprotect
+	_return names
 _endmethod
 $
 

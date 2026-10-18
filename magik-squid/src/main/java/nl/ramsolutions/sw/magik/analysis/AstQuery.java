@@ -19,8 +19,10 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import nl.ramsolutions.sw.magik.api.MagikOperator;
 import nl.ramsolutions.sw.magik.api.MagikPunctuator;
+import nl.ramsolutions.sw.message.api.MessageGrammar;
 import nl.ramsolutions.sw.moduledef.api.ModuleDefinitionGrammar;
 import nl.ramsolutions.sw.productdef.api.ProductDefinitionGrammar;
+import nl.ramsolutions.sw.translation.api.TranslationGrammar;
 
 /** {@link AstNode} query utility functions. */
 public final class AstQuery {
@@ -571,6 +573,8 @@ public final class AstQuery {
     return node.is(ProductDefinitionGrammar.values())
         || node.is(ModuleDefinitionGrammar.values())
         || node.is(LoadListGrammar.values())
+        || node.is(MessageGrammar.values())
+        || node.is(TranslationGrammar.values())
         || node.is(MagikGrammar.values());
   }
 
@@ -578,6 +582,8 @@ public final class AstQuery {
     return node.isNot(ProductDefinitionGrammar.values())
         && node.isNot(ModuleDefinitionGrammar.values())
         && node.isNot(LoadListGrammar.values())
+        && node.isNot(MessageGrammar.values())
+        && node.isNot(TranslationGrammar.values())
         && node.isNot(MagikGrammar.values());
   }
 }

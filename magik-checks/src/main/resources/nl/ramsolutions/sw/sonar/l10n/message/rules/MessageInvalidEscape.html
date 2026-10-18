@@ -1,0 +1,22 @@
+<p>Message text has an invalid parameter or special character.</p>
+<h2>Description</h2>
+<p>
+A <code>#</code> in the text of a message starts a parameter
+(<code>#1</code> to <code>#9</code>, <code>#@1</code> or <code>#h1</code>) or a
+special character: <code>##</code> for a <code>#</code>, <code>#n</code> for a
+newline, <code>#t</code> for a tab and <code>#s</code> for a space.
+</p>
+<p>
+Any other <code>#</code> is silently left out of the text, together with the
+character following it. The parameter <code>#0</code> does not exist and raises
+an error when the message is used. Use <code>##</code> to get a <code>#</code>
+in the text.
+</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+:number_of_pipes Pipe # #1 of #0
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+:number_of_pipes Pipe ## #1 of #2
+</pre>

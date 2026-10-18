@@ -15,6 +15,7 @@ import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.io.JsonDefinitionReader;
 import nl.ramsolutions.sw.magik.analysis.indexer.MagikIndexer;
+import nl.ramsolutions.sw.magik.analysis.indexer.MessageIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ModuleIndexer;
 import nl.ramsolutions.sw.magik.analysis.indexer.ProductIndexer;
 import nl.ramsolutions.sw.magik.analysis.typing.ClassInfoDefinitionReader;
@@ -53,6 +54,7 @@ public class MagikWorkspaceService implements WorkspaceService {
   private final ProductIndexer productIndexer;
   private final ModuleIndexer moduleIndexer;
   private final MagikIndexer magikIndexer;
+  private final MessageIndexer messageIndexer;
   private final SymbolProvider symbolProvider;
   private final MUnitTestItemProvider testItemProvider;
 
@@ -76,6 +78,7 @@ public class MagikWorkspaceService implements WorkspaceService {
     this.moduleIndexer = new ModuleIndexer(this.definitionKeeper, this.ignoreHandler);
     this.magikIndexer =
         new MagikIndexer(this.definitionKeeper, this.languageServerProperties, this.ignoreHandler);
+    this.messageIndexer = new MessageIndexer(this.definitionKeeper, this.ignoreHandler);
     this.symbolProvider = new SymbolProvider(this.definitionKeeper);
     this.testItemProvider = new MUnitTestItemProvider(this.definitionKeeper);
   }
@@ -197,6 +200,7 @@ public class MagikWorkspaceService implements WorkspaceService {
               try {
                 this.productIndexer.handleFileEvent(magikFileEvent);
                 this.moduleIndexer.handleFileEvent(magikFileEvent);
+                this.messageIndexer.handleFileEvent(magikFileEvent);
                 // Skip .magik files open in the editor — didChange() handles those.
                 if (!this.languageServer.getMagikTextDocumentService().isOpenMagikFile(uri)) {
                   this.magikIndexer.handleFileEvent(magikFileEvent);

@@ -17,7 +17,9 @@ enum Instruction {
   METHOD("method"),
   PROCEDURE("procedure"),
   CONDITION("condition"),
-  BINARY_OPERATOR("binary_operator");
+  BINARY_OPERATOR("binary_operator"),
+  MESSAGE_FILE("message_file"),
+  MESSAGE_HANDLER_USE("message_handler_use");
 
   private final String value;
 

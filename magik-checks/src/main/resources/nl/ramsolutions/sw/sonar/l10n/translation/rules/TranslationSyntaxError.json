@@ -1,0 +1,16 @@
+{
+  "title": "Translation file contains a syntax error",
+  "type": "BUG",
+  "status": "ready",
+  "remediation": {
+    "func": "Constant\/Issue",
+    "constantCost": "5min"
+  },
+  "tags": [
+    "bug",
+    "suspicious"
+  ],
+  "defaultSeverity": "Major",
+  "ruleSpecification": "TranslationSyntaxError",
+  "sqKey": "translation-syntax-error"
+}

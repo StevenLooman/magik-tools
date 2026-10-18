@@ -25,8 +25,10 @@ import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.TextEdit;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.message.MessageFile;
 import nl.ramsolutions.sw.moduledef.ModuleDefFile;
 import nl.ramsolutions.sw.productdef.ProductDefFile;
+import nl.ramsolutions.sw.translation.TranslationFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,6 +157,10 @@ public class MagikLintFixApplier {
       return new ModuleDefFile(uri, newSource, definitionKeeper, null);
     } else if (openedFile instanceof LoadListFile) {
       return new LoadListFile(uri, newSource);
+    } else if (openedFile instanceof MessageFile) {
+      return new MessageFile(uri, newSource);
+    } else if (openedFile instanceof TranslationFile) {
+      return new TranslationFile(uri, newSource);
     } else if (openedFile instanceof MagikFile) {
       return new MagikFile(uri, newSource);
     }

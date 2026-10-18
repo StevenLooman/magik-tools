@@ -40,6 +40,18 @@ CHECK_TYPES = {
             "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/loadlist/rules"
         ),
     ),
+    "Message file checks": (
+        Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/message"),
+        Path(
+            "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/message/rules"
+        ),
+    ),
+    "Translation file checks": (
+        Path("magik-checks/src/main/java/nl/ramsolutions/sw/checks/translation"),
+        Path(
+            "magik-checks/src/main/resources/nl/ramsolutions/sw/sonar/l10n/translation/rules"
+        ),
+    ),
 }
 FOOTER_NOTE = \
     """\n> [!NOTE]\n> This page is generated. """ \

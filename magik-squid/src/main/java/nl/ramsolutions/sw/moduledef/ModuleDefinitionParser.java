@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.moduledef;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.net.URI;
 import java.time.Instant;
@@ -99,6 +100,16 @@ public class ModuleDefinitionParser {
         currentVersion,
         description,
         requiredModules,
-        testsModules);
+        testsModules,
+        ModuleDefinitionParser.getIdentifier(node, ModuleDefinitionGrammar.LANGUAGE),
+        ModuleDefinitionParser.getIdentifier(
+            node, ModuleDefinitionGrammar.CONDITION_MESSAGE_ACCESSOR));
+  }
+
+  /** Get the identifier of a section which consists of a keyword and an identifier. */
+  @CheckForNull
+  private static String getIdentifier(final AstNode node, final ModuleDefinitionGrammar section) {
+    final AstNode sectionNode = node.getFirstChild(section);
+    return sectionNode != null ? sectionNode.getLastToken().getValue() : null;
   }
 }

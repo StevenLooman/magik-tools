@@ -1,0 +1,15 @@
+<p>Translation has fields which are ignored.</p>
+<h2>Description</h2>
+<p>
+Smallworld silently ignores any field after the translated text. This most
+likely is a mistake, such as a missing line break between two translations.
+</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+external_name&#9;pipe&#9;unset&#9;en_gb&#9;Pipe&#9;Water pipeexternal_name&#9;valve&#9;unset&#9;en_gb&#9;Valve&#9;Water valve
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+external_name&#9;pipe&#9;unset&#9;en_gb&#9;Pipe&#9;Water pipe
+external_name&#9;valve&#9;unset&#9;en_gb&#9;Valve&#9;Water valve
+</pre>

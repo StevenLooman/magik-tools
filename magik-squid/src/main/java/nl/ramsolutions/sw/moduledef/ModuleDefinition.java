@@ -21,6 +21,8 @@ public class ModuleDefinition implements IDefinition {
   private final @Nullable String description;
   private final List<ModuleUsage> requiredModules;
   private final List<ModuleUsage> testModules;
+  private final @Nullable String language;
+  private final @Nullable String conditionMessageAccessor;
 
   /**
    * Constructor.
@@ -45,6 +47,48 @@ public class ModuleDefinition implements IDefinition {
       final @Nullable String description,
       final List<ModuleUsage> requiredModules,
       final List<ModuleUsage> testModules) {
+    this(
+        location,
+        timestamp,
+        name,
+        product,
+        baseVersion,
+        currentVersion,
+        description,
+        requiredModules,
+        testModules,
+        null,
+        null);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param location {@link Location} of the module definition.
+   * @param name Name of module.
+   * @param product Name of product.
+   * @param baseVersion Base version.
+   * @param currentVersion Current version.
+   * @param description Description.
+   * @param requiredModules List of required modules.
+   * @param testsModules List of test modules.
+   * @param language Language of the module, e.g. {@code en_gb}.
+   * @param conditionMessageAccessor Name of the message handler for the messages of the conditions
+   *     which are defined by the module.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public ModuleDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final String name,
+      final @Nullable String product,
+      final String baseVersion,
+      final @Nullable String currentVersion,
+      final @Nullable String description,
+      final List<ModuleUsage> requiredModules,
+      final List<ModuleUsage> testModules,
+      final @Nullable String language,
+      final @Nullable String conditionMessageAccessor) {
     this.location = location;
     this.timestamp = timestamp;
     this.name = name;
@@ -54,6 +98,8 @@ public class ModuleDefinition implements IDefinition {
     this.description = description;
     this.requiredModules = List.copyOf(requiredModules);
     this.testModules = List.copyOf(testModules);
+    this.language = language;
+    this.conditionMessageAccessor = conditionMessageAccessor;
   }
 
   public String getName() {
@@ -99,6 +145,27 @@ public class ModuleDefinition implements IDefinition {
 
   public List<ModuleUsage> getTestModules() {
     return Collections.unmodifiableList(this.testModules);
+  }
+
+  /**
+   * Get the language of the module, e.g. {@code en_gb}.
+   *
+   * @return Language, if any.
+   */
+  @CheckForNull
+  public String getLanguage() {
+    return this.language;
+  }
+
+  /**
+   * Get the name of the message handler for the messages of the conditions which are defined by the
+   * module.
+   *
+   * @return Name of the message handler, if any.
+   */
+  @CheckForNull
+  public String getConditionMessageAccessor() {
+    return this.conditionMessageAccessor;
   }
 
   @Override

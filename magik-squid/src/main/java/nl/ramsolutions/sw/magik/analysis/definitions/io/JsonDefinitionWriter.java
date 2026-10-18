@@ -32,6 +32,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MessageHandlerUseDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
@@ -39,6 +40,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.message.MessageFileDefinition;
 import nl.ramsolutions.sw.moduledef.ModuleDefinition;
 import nl.ramsolutions.sw.productdef.ProductDefinition;
 import org.slf4j.Logger;
@@ -132,6 +134,8 @@ public final class JsonDefinitionWriter {
         this.writeProcedures(bufferedWriter);
         this.writeConditions(bufferedWriter);
         this.writeBinaryOperators(bufferedWriter);
+        this.writeMessageFiles(bufferedWriter);
+        this.writeMessageHandlerUses(bufferedWriter);
       }
 
       JsonDefinitionWriter.moveIntoPlace(tempPath, path);
@@ -325,6 +329,28 @@ public final class JsonDefinitionWriter {
         this.definitionKeeper.getConditionDefinitions(),
         Comparator.comparing(ConditionDefinition::getName),
         Instruction.CONDITION);
+  }
+
+  private void writeMessageFiles(final Writer writer) {
+    final Comparator<MessageFileDefinition> handlerNameComparer =
+        Comparator.comparing(MessageFileDefinition::getHandlerName);
+    this.writeDefinitions(
+        writer,
+        this.definitionKeeper.getMessageFileDefinitions(),
+        handlerNameComparer,
+        Instruction.MESSAGE_FILE);
+  }
+
+  private void writeMessageHandlerUses(final Writer writer) {
+    final Comparator<MessageHandlerUseDefinition> handlerNameComparer =
+        Comparator.comparing(MessageHandlerUseDefinition::getHandlerName);
+    final Comparator<MessageHandlerUseDefinition> usedHandlerNameComparer =
+        Comparator.comparing(MessageHandlerUseDefinition::getUsedHandlerName);
+    this.writeDefinitions(
+        writer,
+        this.definitionKeeper.getMessageHandlerUseDefinitions(),
+        handlerNameComparer.thenComparing(usedHandlerNameComparer),
+        Instruction.MESSAGE_HANDLER_USE);
   }
 
   private void writeBinaryOperators(final Writer writer) {

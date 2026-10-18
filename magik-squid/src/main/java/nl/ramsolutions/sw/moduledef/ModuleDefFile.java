@@ -20,6 +20,7 @@ import nl.ramsolutions.sw.productdef.ProductDefinition;
 /** Module definition file. */
 public class ModuleDefFile extends OpenedFile {
 
+  public static final String LANGUAGE_ID = "sw-module-def";
   public static final URI DEFAULT_URI = URI.create("memory://module.def");
   public static final Location DEFAULT_LOCATION = new Location(DEFAULT_URI, Range.DEFAULT_RANGE);
 
@@ -128,7 +129,7 @@ public class ModuleDefFile extends OpenedFile {
 
   @Override
   public String getLanguageId() {
-    return "sw-module-def";
+    return LANGUAGE_ID;
   }
 
   /**
