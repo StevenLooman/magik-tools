@@ -56,6 +56,7 @@ class DefinitionKeeperTest {
         definition -> true,
         definition -> true,
         definition -> true,
+        definition -> true,
         definition -> true);
   }
 
@@ -312,7 +313,8 @@ class DefinitionKeeperTest {
             definition -> true,
             definition -> true,
             insidePredicate::test,
-            insidePredicate::test);
+            insidePredicate::test,
+            definition -> true);
 
     assertThat(adapter.getMessageFileDefinitions()).hasSize(1);
     assertThat(adapter.getMessageFileDefinitions("editor"))

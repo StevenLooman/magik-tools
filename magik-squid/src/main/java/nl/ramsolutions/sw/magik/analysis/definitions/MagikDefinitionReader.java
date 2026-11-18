@@ -20,6 +20,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.parsers.DefineSlotAccessPar
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.GlobalDefinitionParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodDefinitionParser;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.ProcedureDefinitionParser;
+import nl.ramsolutions.sw.magik.analysis.definitions.parsers.TopLevelCodeDefinitionParser;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 
 /**
@@ -36,6 +37,7 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  *   <li>define_shared_variable
  *   <li>define_shared_constant
  *   <li>define_binary_operator_case
+ *   <li>the top-level code of a transmit unit
  * </ul>
  */
 public class MagikDefinitionReader extends MagikAstWalker {
@@ -49,6 +51,14 @@ public class MagikDefinitionReader extends MagikAstWalker {
 
   public List<MagikDefinition> getDefinitions() {
     return Collections.unmodifiableList(this.definitions);
+  }
+
+  @Override
+  protected void walkPostMagik(final AstNode node) {
+    final TopLevelCodeDefinitionParser parser =
+        new TopLevelCodeDefinitionParser(this.magikFile, node);
+    final List<MagikDefinition> parsedDefinitions = parser.parseDefinitions();
+    this.definitions.addAll(parsedDefinitions);
   }
 
   @Override

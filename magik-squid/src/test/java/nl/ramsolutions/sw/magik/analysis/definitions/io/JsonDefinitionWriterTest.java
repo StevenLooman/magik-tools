@@ -604,7 +604,8 @@ class JsonDefinitionWriterTest {
     assertThat(Files.readString(this.tempPath))
         .contains(
             "{\"type_name\":\"user:alias\",\"aliased_type_name\":\"sw:integer\","
-                + "\"used_methods\":[],\"used_globals\":[],\"used_binary_operators\":[],"
+                + "\"used_methods\":[],\"used_globals\":[],\"used_conditions\":[],"
+                + "\"used_binary_operators\":[],"
                 + "\"provenance\":\"UNKNOWN\",\"instruction\":\"global\"}");
   }
 

@@ -51,6 +51,8 @@ public interface IDefinitionKeeper {
 
   void add(MessageHandlerUseDefinition definition);
 
+  void add(TopLevelCodeDefinition definition);
+
   void add(IDefinition definition);
 
   void remove(ProductDefinition definition);
@@ -90,6 +92,8 @@ public interface IDefinitionKeeper {
   void remove(MessageFileDefinition definition);
 
   void remove(MessageHandlerUseDefinition definition);
+
+  void remove(TopLevelCodeDefinition definition);
 
   void remove(IDefinition definition);
 
@@ -201,6 +205,16 @@ public interface IDefinitionKeeper {
   Collection<ProcedureDefinition> getProcedureDefinitions(TypeString typeName);
 
   Collection<ProcedureDefinition> getProcedureDefinitions();
+
+  /**
+   * Get the {@link TopLevelCodeDefinition}s of a file.
+   *
+   * @param uri URI of the file.
+   * @return The definitions of the file's units.
+   */
+  Collection<TopLevelCodeDefinition> getTopLevelCodeDefinitions(URI uri);
+
+  Collection<TopLevelCodeDefinition> getTopLevelCodeDefinitions();
 
   /**
    * Get all {@link IDefinitions} from path or lower.
