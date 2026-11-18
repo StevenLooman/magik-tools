@@ -12,6 +12,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.TopLevelCodeDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.languageserver.Lsp4jConversion;
 import org.eclipse.lsp4j.DocumentSymbol;
@@ -43,6 +44,7 @@ public class DocumentSymbolProvider {
     return magikFile.getMagikDefinitions().stream()
         .filter(definition -> !(definition instanceof SlotDefinition))
         .filter(definition -> !(definition instanceof InheritanceDefinition))
+        .filter(definition -> !(definition instanceof TopLevelCodeDefinition))
         .map(definition -> this.convertDefinition(magikFile, definition))
         .map(Either::<org.eclipse.lsp4j.SymbolInformation, DocumentSymbol>forRight)
         .toList();

@@ -37,6 +37,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Provenance;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.TopLevelCodeDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
@@ -284,6 +285,26 @@ public final class JsonDefinitionReader {
     }
   }
 
+  private static final class TopLevelCodeDefinitionCreator
+      implements InstanceCreator<TopLevelCodeDefinition> {
+
+    @Override
+    public TopLevelCodeDefinition createInstance(final Type type) {
+      return new TopLevelCodeDefinition(
+          null,
+          null,
+          null,
+          null,
+          null,
+          "dummy_top_level_code",
+          List.of(),
+          List.of(),
+          List.of(),
+          List.of(),
+          Provenance.UNKNOWN);
+    }
+  }
+
   private static final class PackageDefinitionCreator
       implements InstanceCreator<PackageDefinition> {
 
@@ -459,6 +480,10 @@ public final class JsonDefinitionReader {
         this.handleMessageHandlerUse(obj);
         break;
 
+      case TOP_LEVEL_CODE:
+        this.handleTopLevelCode(obj);
+        break;
+
       default:
         break;
     }
@@ -508,6 +533,7 @@ public final class JsonDefinitionReader {
         .registerTypeAdapter(MessageDefinition.class, new MessageDefinitionCreator())
         .registerTypeAdapter(
             MessageHandlerUseDefinition.class, new MessageHandlerUseDefinitionCreator())
+        .registerTypeAdapter(TopLevelCodeDefinition.class, new TopLevelCodeDefinitionCreator())
         .create();
   }
 
@@ -646,6 +672,16 @@ public final class JsonDefinitionReader {
     final String provenanceRaw = this.provenanceRawOf(instruction);
     final Provenance provenance = this.provenanceOf(provenanceRaw);
     final GlobalDefinition provenancedDefinition = definition.withProvenance(provenance);
+    this.definitionKeeper.add(provenancedDefinition);
+  }
+
+  private void handleTopLevelCode(final JsonObject instruction) {
+    final Gson gson = this.buildGson();
+    final TopLevelCodeDefinition definition =
+        gson.fromJson(instruction, TopLevelCodeDefinition.class);
+    final String provenanceRaw = this.provenanceRawOf(instruction);
+    final Provenance provenance = this.provenanceOf(provenanceRaw);
+    final TopLevelCodeDefinition provenancedDefinition = definition.withProvenance(provenance);
     this.definitionKeeper.add(provenancedDefinition);
   }
 

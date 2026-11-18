@@ -15,6 +15,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -25,12 +26,14 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikFileDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MessageHandlerUseDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
@@ -38,6 +41,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.TopLevelCodeDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.message.MessageFileDefinition;
@@ -136,6 +140,7 @@ public final class JsonDefinitionWriter {
         this.writeBinaryOperators(bufferedWriter);
         this.writeMessageFiles(bufferedWriter);
         this.writeMessageHandlerUses(bufferedWriter);
+        this.writeTopLevelCode(bufferedWriter);
       }
 
       JsonDefinitionWriter.moveIntoPlace(tempPath, path);
@@ -373,6 +378,30 @@ public final class JsonDefinitionWriter {
         this.definitionKeeper.getGlobalDefinitions(),
         Comparator.comparing(GlobalDefinition::getTypeString),
         Instruction.GLOBAL);
+  }
+
+  private void writeTopLevelCode(final Writer writer) {
+    final Comparator<TopLevelCodeDefinition> uriComparer =
+        Comparator.comparing(JsonDefinitionWriter::describeUri);
+    final Comparator<TopLevelCodeDefinition> nameComparer =
+        Comparator.comparing(TopLevelCodeDefinition::getName);
+    this.writeDefinitions(
+        writer,
+        this.definitionKeeper.getTopLevelCodeDefinitions(),
+        uriComparer.thenComparing(nameComparer),
+        Instruction.TOP_LEVEL_CODE);
+  }
+
+  /**
+   * Describe the URI of a definition, to order definitions by.
+   *
+   * @param definition A definition with a location.
+   * @return The URI as a string.
+   */
+  static String describeUri(final MagikDefinition definition) {
+    final Location location = definition.getLocation();
+    final URI uri = location.getUri();
+    return uri.toString();
   }
 
   /**

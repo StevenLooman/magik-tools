@@ -19,7 +19,8 @@ enum Instruction {
   CONDITION("condition"),
   BINARY_OPERATOR("binary_operator"),
   MESSAGE_FILE("message_file"),
-  MESSAGE_HANDLER_USE("message_handler_use");
+  MESSAGE_HANDLER_USE("message_handler_use"),
+  TOP_LEVEL_CODE("top_level_code");
 
   private final String value;
 

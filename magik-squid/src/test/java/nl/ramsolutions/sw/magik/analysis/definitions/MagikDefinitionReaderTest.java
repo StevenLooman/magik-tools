@@ -6,7 +6,9 @@ import com.sonar.sslr.api.AstNode;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.Position;
@@ -23,6 +25,16 @@ class MagikDefinitionReaderTest {
     return new MagikFile(MagikFile.DEFAULT_URI, code);
   }
 
+  /**
+   * The definitions other than the top-level code, which {@link TopLevelCodeDefinitionTest} tests.
+   */
+  private List<MagikDefinition> readOtherDefinitions(final MagikDefinitionReader reader) {
+    final List<MagikDefinition> definitions = reader.getDefinitions();
+    return definitions.stream()
+        .filter(definition -> !(definition instanceof TopLevelCodeDefinition))
+        .toList();
+  }
+
   @Test
   void testPackageDefinition() {
     final String code = "def_package(:test)";
@@ -31,7 +43,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new PackageDefinition(
@@ -54,7 +66,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new PackageDefinition(
@@ -74,7 +86,7 @@ class MagikDefinitionReaderTest {
     final AstNode node = magikFile.getTopNode();
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
-    return reader.getDefinitions();
+    return this.readOtherDefinitions(reader);
   }
 
   @Test
@@ -227,7 +239,7 @@ class MagikDefinitionReaderTest {
             URI.create("memory:///source.magik"),
             new Range(new Position(1, 19), new Position(1, 29)));
     final TypeString exemplarName = TypeString.ofIdentifier("test_enum", "user");
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
@@ -252,7 +264,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
@@ -299,7 +311,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
@@ -402,7 +414,7 @@ class MagikDefinitionReaderTest {
         new Location(
             URI.create("memory:///source.magik"),
             new Range(new Position(1, 21), new Position(1, 35)));
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
@@ -437,7 +449,7 @@ class MagikDefinitionReaderTest {
             URI.create("memory:///source.magik"),
             new Range(new Position(1, 21), new Position(1, 35)));
     final TypeString exemplarName = TypeString.ofIdentifier("test_exemplar", "user");
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
@@ -480,7 +492,7 @@ class MagikDefinitionReaderTest {
             URI.create("memory:///source.magik"),
             new Range(new Position(1, 21), new Position(1, 35)));
     final TypeString exemplarName = TypeString.ofIdentifier("test_exemplar", "user");
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
@@ -518,7 +530,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
@@ -547,7 +559,7 @@ class MagikDefinitionReaderTest {
             URI.create("memory:///source.magik"),
             new Range(new Position(1, 10), new Position(1, 21)));
     final TypeString mixinName = TypeString.ofIdentifier("test_mixin", "user");
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new ExemplarDefinition(
@@ -570,7 +582,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new ProcedureDefinition(
@@ -632,7 +644,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new MethodDefinition(
@@ -661,7 +673,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions).isEmpty();
   }
 
@@ -673,7 +685,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new MethodDefinition(
@@ -705,7 +717,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new MethodDefinition(
@@ -794,7 +806,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     final MagikDefinition definition = definitions.get(0);
     final MethodDefinition methodDefinition = (MethodDefinition) definition;
 
@@ -817,7 +829,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new MethodDefinition(
@@ -846,7 +858,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new MethodDefinition(
@@ -875,7 +887,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new MethodDefinition(
@@ -904,7 +916,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new MethodDefinition(
@@ -981,7 +993,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new MethodDefinition(
@@ -1058,7 +1070,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new MethodDefinition(
@@ -1087,7 +1099,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new MethodDefinition(
@@ -1116,7 +1128,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new GlobalDefinition(
@@ -1140,7 +1152,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions).hasSize(1);
 
     final GlobalDefinition globalDef = (GlobalDefinition) definitions.get(0);
@@ -1157,13 +1169,75 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions).hasSize(1);
 
     final GlobalDefinition globalDef = (GlobalDefinition) definitions.get(0);
     assertThat(globalDef.getUsedGlobals())
         .extracting(GlobalUsage::getTypeName)
         .containsExactly(TypeString.ofIdentifier("g1", "user"));
+  }
+
+  private List<MagikDefinition> readDefinitions(final MagikFile magikFile) {
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+    return this.readOtherDefinitions(reader);
+  }
+
+  @Test
+  void testAssignGlobalRecordsNoGlobalOfAMethodNameOrAConditionName() {
+    final String code =
+        """
+        _global g << _try
+        	>> thing.thing
+        _when thing
+        _endtry
+        """;
+    final MagikFile magikFile = this.createMagikFile(code);
+
+    final List<MagikDefinition> definitions = this.readDefinitions(magikFile);
+
+    final GlobalDefinition globalDef = (GlobalDefinition) definitions.get(0);
+    final List<GlobalUsage> usedGlobals = globalDef.getUsedGlobals();
+    final List<TypeString> names = usedGlobals.stream().map(GlobalUsage::getTypeName).toList();
+    final TypeString thing = TypeString.ofIdentifier("thing", "user");
+    assertThat(names).containsExactly(thing);
+  }
+
+  @Test
+  void testAssignGlobalRecordsUsedConditions() {
+    final String code =
+        """
+        _global g << _try
+        	>> condition.raise(:my_error)
+        _when my_other_error
+        _endtry
+        """;
+    final MagikFile magikFile = this.createMagikFile(code);
+
+    final List<MagikDefinition> definitions = this.readDefinitions(magikFile);
+
+    final GlobalDefinition globalDef = (GlobalDefinition) definitions.get(0);
+    final List<ConditionUsage> usedConditions = globalDef.getUsedConditions();
+    final List<String> names =
+        usedConditions.stream().map(ConditionUsage::getConditionName).toList();
+    assertThat(names).containsExactly("my_other_error", "my_error");
+  }
+
+  @Test
+  void testAssignGlobalFoldsUnaryOperatorsIntoUsedMethods() {
+    final String code = "_global g << _not thing.ready?";
+    final MagikToolsProperties properties =
+        new MagikToolsProperties(Map.of("magik.typing.indexMethodUsages", "true"));
+    final MagikFile magikFile = new MagikFile(properties, MagikFile.DEFAULT_URI, code);
+
+    final List<MagikDefinition> definitions = this.readDefinitions(magikFile);
+
+    final GlobalDefinition globalDef = (GlobalDefinition) definitions.get(0);
+    final List<MethodUsage> usedMethods = globalDef.getUsedMethods();
+    final List<String> names = usedMethods.stream().map(MethodUsage::getMethodName).toList();
+    assertThat(names).containsExactly("ready?", "not");
   }
 
   @Test
@@ -1178,7 +1252,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new ConditionDefinition(
@@ -1207,7 +1281,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions)
         .containsExactly(
             new ConditionDefinition(
@@ -1238,7 +1312,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions).hasSize(1);
 
     final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
@@ -1263,7 +1337,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions).hasSize(1);
 
     final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
@@ -1288,7 +1362,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     assertThat(definitions).hasSize(1);
 
     final ProcedureDefinition procDef = (ProcedureDefinition) definitions.get(0);
@@ -1307,7 +1381,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     final List<MagikDefinition> globalDefinitions =
         definitions.stream().filter(GlobalDefinition.class::isInstance).toList();
     assertThat(globalDefinitions).isEmpty();
@@ -1331,7 +1405,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     final List<MagikDefinition> globalDefinitions =
         definitions.stream().filter(GlobalDefinition.class::isInstance).toList();
     assertThat(globalDefinitions).hasSize(1);
@@ -1345,7 +1419,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     final List<MagikDefinition> globalDefinitions =
         definitions.stream().filter(GlobalDefinition.class::isInstance).toList();
     assertThat(globalDefinitions).hasSize(1);
@@ -1359,7 +1433,7 @@ class MagikDefinitionReaderTest {
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
 
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     final List<MagikDefinition> globalDefinitions =
         definitions.stream().filter(GlobalDefinition.class::isInstance).toList();
     assertThat(globalDefinitions).hasSize(1);
@@ -1370,7 +1444,7 @@ class MagikDefinitionReaderTest {
     final AstNode node = magikFile.getTopNode();
     final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
     reader.walkAst(node);
-    final List<MagikDefinition> definitions = reader.getDefinitions();
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
     return definitions.stream()
         .filter(ProcedureDefinition.class::isInstance)
         .map(ProcedureDefinition.class::cast)

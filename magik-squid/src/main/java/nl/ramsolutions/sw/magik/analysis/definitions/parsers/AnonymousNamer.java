@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.net.URI;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
@@ -79,14 +80,39 @@ public final class AnonymousNamer {
   }
 
   private static TypeString createProcedureName(final int index, final String... parts) {
-    final StringBuilder builder = new StringBuilder("_proc");
+    final String name = AnonymousNamer.createIdentifier("_proc", index, parts);
+    return TypeString.ofIdentifier(name, TypeString.ANONYMOUS_PACKAGE);
+  }
+
+  private static String createIdentifier(
+      final String prefix, final int index, final String... parts) {
+    final StringBuilder builder = new StringBuilder(prefix);
     for (final String part : parts) {
       final String safePart = part.replaceAll("[^A-Za-z0-9_]", "_"); // Safe for TypeString.
       builder.append("__").append(safePart);
     }
     builder.append("__").append(index);
-    final String name = builder.toString();
-    return TypeString.ofIdentifier(name, TypeString.ANONYMOUS_PACKAGE);
+    return builder.toString();
+  }
+
+  /**
+   * Get a name for the top-level code of a transmit unit, named like a file-level anonymous
+   * procedure: {@code _top__<module>__<file>__<n>}, or {@code _top__<file>__<n>} outside any
+   * module, with {@code n} counting the units of the file that have top-level code.
+   *
+   * @param uri URI of the file.
+   * @param moduleName Name of the module holding the file, if any.
+   * @param index Index of the unit among the units of the file that have top-level code.
+   * @return Name.
+   */
+  public static String getNameForTopLevelCode(
+      final URI uri, final @Nullable String moduleName, final int index) {
+    final String fileName = AnonymousNamer.getFileName(uri);
+    if (moduleName == null) {
+      return AnonymousNamer.createIdentifier("_top", index, fileName);
+    }
+
+    return AnonymousNamer.createIdentifier("_top", index, moduleName, fileName);
   }
 
   /** A procedure is only bound to a global at top level, so only the outermost can be. */

@@ -18,6 +18,7 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
   private final @Nullable Pragma pragma;
   private final List<MethodUsage> usedMethods;
   private final List<GlobalUsage> usedGlobals;
+  private final List<ConditionUsage> usedConditions;
   private final List<BinaryOperatorUsage> usedBinaryOperators;
 
   /**
@@ -163,12 +164,56 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
       final List<GlobalUsage> usedGlobals,
       final List<BinaryOperatorUsage> usedBinaryOperators,
       final Provenance provenance) {
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        typeName,
+        aliasedTypeName,
+        pragma,
+        usedMethods,
+        usedGlobals,
+        Collections.emptyList(),
+        usedBinaryOperators,
+        provenance);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param typeName Type name.
+   * @param aliasedTypeName Aliased type name.
+   * @param usedMethods Methods used by the global's initializing expression, unary operators
+   *     included.
+   * @param usedGlobals Globals used by the global's initializing expression.
+   * @param usedConditions Conditions used by the global's initializing expression.
+   * @param usedBinaryOperators Binary operators used by the global's initializing expression.
+   * @param provenance Provenance.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public GlobalDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final TypeString typeName,
+      final TypeString aliasedTypeName,
+      final @Nullable Pragma pragma,
+      final List<MethodUsage> usedMethods,
+      final List<GlobalUsage> usedGlobals,
+      final List<ConditionUsage> usedConditions,
+      final List<BinaryOperatorUsage> usedBinaryOperators,
+      final Provenance provenance) {
     super(location, timestamp, moduleName, doc, node, provenance);
     this.typeName = typeName;
     this.aliasedTypeName = aliasedTypeName;
     this.pragma = pragma;
     this.usedMethods = List.copyOf(usedMethods);
     this.usedGlobals = List.copyOf(usedGlobals);
+    this.usedConditions = List.copyOf(usedConditions);
     this.usedBinaryOperators = List.copyOf(usedBinaryOperators);
   }
 
@@ -178,6 +223,10 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
 
   public List<GlobalUsage> getUsedGlobals() {
     return Collections.unmodifiableList(this.usedGlobals);
+  }
+
+  public List<ConditionUsage> getUsedConditions() {
+    return Collections.unmodifiableList(this.usedConditions);
   }
 
   public List<BinaryOperatorUsage> getUsedBinaryOperators() {
@@ -215,6 +264,7 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
         this.pragma != null ? this.pragma.getBarePragma() : null,
         this.usedMethods.stream().map(MethodUsage::getWithoutNode).toList(),
         this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).toList(),
+        this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList(),
         this.usedBinaryOperators.stream().map(BinaryOperatorUsage::getWithoutNode).toList(),
         this.getProvenance());
   }
@@ -232,6 +282,7 @@ public class GlobalDefinition extends MagikDefinition implements ITypeStringDefi
         this.pragma,
         this.usedMethods,
         this.usedGlobals,
+        this.usedConditions,
         this.usedBinaryOperators,
         provenance);
   }

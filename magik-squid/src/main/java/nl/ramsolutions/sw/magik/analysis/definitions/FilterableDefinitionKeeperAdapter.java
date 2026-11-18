@@ -30,6 +30,7 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
   final Predicate<ProcedureDefinition> procedureDefinitionPredicate;
   final Predicate<MessageFileDefinition> messageFileDefinitionPredicate;
   final Predicate<MessageHandlerUseDefinition> messageHandlerUseDefinitionPredicate;
+  final Predicate<TopLevelCodeDefinition> topLevelCodeDefinitionPredicate;
 
   /**
    * Constructor.
@@ -53,6 +54,8 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
    *     MessageFileDefinition}s.
    * @param messageHandlerUseDefinitionPredicate {@link Predicate} to filter {@link
    *     MessageHandlerUseDefinition}s.
+   * @param topLevelCodeDefinitionPredicate {@link Predicate} to filter {@link
+   *     TopLevelCodeDefinition}s.
    */
   @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
   public FilterableDefinitionKeeperAdapter(
@@ -70,7 +73,8 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
       final Predicate<ConditionDefinition> conditionDefinitionPredicate,
       final Predicate<ProcedureDefinition> procedureDefinitionPredicate,
       final Predicate<MessageFileDefinition> messageFileDefinitionPredicate,
-      final Predicate<MessageHandlerUseDefinition> messageHandlerUseDefinitionPredicate) {
+      final Predicate<MessageHandlerUseDefinition> messageHandlerUseDefinitionPredicate,
+      final Predicate<TopLevelCodeDefinition> topLevelCodeDefinitionPredicate) {
     this.definitionKeeper = definitionKeeper;
     this.productDefinitionPredicate = productDefinitionPredicate;
     this.moduleDefinitionPredicate = moduleDefinitionPredicate;
@@ -86,6 +90,7 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
     this.procedureDefinitionPredicate = procedureDefinitionPredicate;
     this.messageFileDefinitionPredicate = messageFileDefinitionPredicate;
     this.messageHandlerUseDefinitionPredicate = messageHandlerUseDefinitionPredicate;
+    this.topLevelCodeDefinitionPredicate = topLevelCodeDefinitionPredicate;
   }
 
   @Override
@@ -145,6 +150,11 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
 
   @Override
   public void add(final ProcedureDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void add(final TopLevelCodeDefinition definition) {
     throw new UnsupportedOperationException();
   }
 
@@ -210,6 +220,11 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
 
   @Override
   public void remove(final ProcedureDefinition definition) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void remove(final TopLevelCodeDefinition definition) {
     throw new UnsupportedOperationException();
   }
 
@@ -442,6 +457,20 @@ public class FilterableDefinitionKeeperAdapter implements IDefinitionKeeper {
     return this.definitionKeeper.getProcedureDefinitions().stream()
         .filter(this.procedureDefinitionPredicate)
         .collect(Collectors.toSet());
+  }
+
+  @Override
+  public Collection<TopLevelCodeDefinition> getTopLevelCodeDefinitions(final URI uri) {
+    return this.definitionKeeper.getTopLevelCodeDefinitions(uri).stream()
+        .filter(this.topLevelCodeDefinitionPredicate)
+        .toList();
+  }
+
+  @Override
+  public Collection<TopLevelCodeDefinition> getTopLevelCodeDefinitions() {
+    return this.definitionKeeper.getTopLevelCodeDefinitions().stream()
+        .filter(this.topLevelCodeDefinitionPredicate)
+        .toList();
   }
 
   @Override

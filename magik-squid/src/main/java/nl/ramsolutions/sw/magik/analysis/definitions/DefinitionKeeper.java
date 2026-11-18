@@ -46,6 +46,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
       new ConcurrentHashMap<>();
   private final Map<String, Set<MessageHandlerUseDefinition>> messageHandlerUseDefinitions =
       new ConcurrentHashMap<>();
+  private final Map<URI, Set<TopLevelCodeDefinition>> topLevelCodeDefinitions =
+      new ConcurrentHashMap<>();
   private final SortedMap<URI, Set<IDefinition>> uriDefinitions =
       Collections.synchronizedSortedMap(new TreeMap<>());
   private final Set<String> loadedModuleNames = ConcurrentHashMap.newKeySet();
@@ -223,6 +225,17 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   }
 
   @Override
+  public void add(final TopLevelCodeDefinition definition) {
+    final Location location = definition.getLocation();
+    final URI uri = location.getUri();
+    final Set<TopLevelCodeDefinition> definitions =
+        this.topLevelCodeDefinitions.computeIfAbsent(uri, k -> ConcurrentHashMap.newKeySet());
+    definitions.add(definition);
+
+    this.addToPathIndex(definition);
+  }
+
+  @Override
   public void add(final IDefinition definition) {
     if (definition instanceof final ProductDefinition productDefinition) {
       this.add(productDefinition);
@@ -252,6 +265,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
       this.add(messageFileDefinition);
     } else if (definition instanceof final MessageHandlerUseDefinition useDefinition) {
       this.add(useDefinition);
+    } else if (definition instanceof final TopLevelCodeDefinition topLevelCodeDefinition) {
+      this.add(topLevelCodeDefinition);
     } else {
       throw new UnsupportedOperationException();
     }
@@ -409,6 +424,17 @@ public class DefinitionKeeper implements IDefinitionKeeper {
   }
 
   @Override
+  public void remove(final TopLevelCodeDefinition definition) {
+    final Location location = definition.getLocation();
+    final URI uri = location.getUri();
+    final Set<TopLevelCodeDefinition> definitions =
+        this.topLevelCodeDefinitions.computeIfAbsent(uri, k -> ConcurrentHashMap.newKeySet());
+    definitions.remove(definition);
+
+    this.removeFromPathIndex(definition);
+  }
+
+  @Override
   public void remove(final IDefinition definition) {
     if (definition instanceof final ProductDefinition productDefinition) {
       this.remove(productDefinition);
@@ -438,6 +464,8 @@ public class DefinitionKeeper implements IDefinitionKeeper {
       this.remove(messageFileDefinition);
     } else if (definition instanceof final MessageHandlerUseDefinition useDefinition) {
       this.remove(useDefinition);
+    } else if (definition instanceof final TopLevelCodeDefinition topLevelCodeDefinition) {
+      this.remove(topLevelCodeDefinition);
     } else {
       throw new UnsupportedOperationException();
     }
@@ -664,6 +692,20 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         .collect(Collectors.toSet());
   }
 
+  @Override
+  public Collection<TopLevelCodeDefinition> getTopLevelCodeDefinitions(final URI uri) {
+    final Collection<TopLevelCodeDefinition> definitions =
+        this.topLevelCodeDefinitions.getOrDefault(uri, Collections.emptySet());
+    return Collections.unmodifiableCollection(definitions);
+  }
+
+  @Override
+  public Collection<TopLevelCodeDefinition> getTopLevelCodeDefinitions() {
+    return this.topLevelCodeDefinitions.values().stream()
+        .flatMap(Set::stream)
+        .collect(Collectors.toSet());
+  }
+
   public void replaceDefinitionsForPath(
       final Path path, final Collection<IDefinition> definitions) {
     final Collection<IDefinition> current = this.getDefinitionsByPath(path);
@@ -762,6 +804,7 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     this.procedureDefinitions.clear();
     this.messageFileDefinitions.clear();
     this.messageHandlerUseDefinitions.clear();
+    this.topLevelCodeDefinitions.clear();
     this.uriDefinitions.clear();
     this.loadedModuleNames.clear();
   }
