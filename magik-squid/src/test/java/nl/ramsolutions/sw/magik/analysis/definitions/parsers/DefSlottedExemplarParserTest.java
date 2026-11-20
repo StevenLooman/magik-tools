@@ -43,6 +43,66 @@ class DefSlottedExemplarParserTest {
   }
 
   @Test
+  void testReadFlagGeneratesPublicGetter() {
+    final String code =
+        """
+        _package user
+        def_slotted_exemplar(:my_exemplar, {{:a, _unset, :read}})
+        $
+        """;
+    final List<String> methods = this.readSlotMethods(code);
+    assertThat(methods).containsExactly("a");
+  }
+
+  @Test
+  void testReadFlagWithPrivateFlavourGeneratesPrivateGetter() {
+    final String code =
+        """
+        _package user
+        def_slotted_exemplar(:my_exemplar, {{:a, _unset, :read, :private}})
+        $
+        """;
+    final List<String> methods = this.readSlotMethods(code);
+    assertThat(methods).containsExactly("a private");
+  }
+
+  @Test
+  void testWriteFlagGeneratesPublicAccessors() {
+    final String code =
+        """
+        _package user
+        def_slotted_exemplar(:my_exemplar, {{:a, _unset, :write}})
+        $
+        """;
+    final List<String> methods = this.readSlotMethods(code);
+    assertThat(methods).containsExactlyInAnyOrder("a", "a<<", "a^<<");
+  }
+
+  @Test
+  void testWriteFlagWithPrivateFlavourGeneratesPrivateAccessors() {
+    final String code =
+        """
+        _package user
+        def_slotted_exemplar(:my_exemplar, {{:a, _unset, :write, :private}})
+        $
+        """;
+    final List<String> methods = this.readSlotMethods(code);
+    assertThat(methods).containsExactlyInAnyOrder("a private", "a<< private", "a^<< private");
+  }
+
+  @Test
+  void testWritableFlagWithPrivateFlavourGeneratesPrivateAccessors() {
+    final String code =
+        """
+        _package user
+        def_slotted_exemplar(:my_exemplar, {{:a, _unset, :writable, :private}})
+        $
+        """;
+    final List<String> methods = this.readSlotMethods(code);
+    assertThat(methods).containsExactlyInAnyOrder("a private", "a<< private", "a^<< private");
+  }
+
+  @Test
   void testWritableFlagWithoutFlavourGeneratesPublicAccessors() {
     final String code =
         """

@@ -19,7 +19,7 @@ abstract class BaseDefParser {
 
   static final String FLAG_READ = ":read";
   static final String FLAG_READABLE = ":readable";
-  static final String FLAG_WRITE = ":read";
+  static final String FLAG_WRITE = ":write";
   static final String FLAG_WRITABLE = ":writable";
   static final String FLAVOR_PUBLIC = ":public";
   static final String FLAVOR_READONLY = ":readonly";

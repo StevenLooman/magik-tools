@@ -37,12 +37,6 @@ public class DefineSlotAccessParser {
   private static final String DEFINE_SLOT_ACCESS = "define_slot_access()";
   private static final String DEFINE_SLOT_EXTERNALLY_READABLE = "define_slot_externally_readable()";
   private static final String DEFINE_SLOT_EXTERNALLY_WRITABLE = "define_slot_externally_writable()";
-  private static final String FLAG_READ = ":read";
-  private static final String FLAG_READABLE = ":readable";
-  private static final String FLAG_WRITE = ":write";
-  private static final String FLAG_WRITABLE = ":writable";
-  private static final String FLAVOR_PUBLIC = ":public";
-  private static final String FLAVOR_READ_ONLY = ":read_only";
 
   private final MagikFile magikFile;
   private final AstNode node;
@@ -234,13 +228,15 @@ public class DefineSlotAccessParser {
     final String slotNameSymbol = argument0Node.getTokenValue();
     final String slotName = slotNameSymbol.substring(1);
     final String flavor =
-        argument2Node != null ? argument2Node.getTokenValue() : FLAVOR_PUBLIC; // Default is public.
+        argument2Node != null
+            ? argument2Node.getTokenValue()
+            : BaseDefParser.FLAVOR_PUBLIC; // Default is public.
     final String flag;
     if (helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_EXTERNALLY_READABLE)) {
-      flag = DefineSlotAccessParser.FLAG_READABLE;
+      flag = BaseDefParser.FLAG_READABLE;
     } else if (helper.isMethodInvocationOf(
         DefineSlotAccessParser.DEFINE_SLOT_EXTERNALLY_WRITABLE)) {
-      flag = DefineSlotAccessParser.FLAG_WRITABLE;
+      flag = BaseDefParser.FLAG_WRITABLE;
     } else if (helper.isMethodInvocationOf(DefineSlotAccessParser.DEFINE_SLOT_ACCESS)) {
       flag = argument1Node.getTokenValue(); // NOSONAR: argument1Node cannot be null in this case.
     } else {
@@ -278,11 +274,11 @@ public class DefineSlotAccessParser {
     final URI uri = definitionNode.getToken().getURI();
     final Location location = new Location(uri, definitionNode);
 
-    if (flag.equals(FLAG_READ) || flag.equals(FLAG_READABLE)) {
+    if (flag.equals(BaseDefParser.FLAG_READ) || flag.equals(BaseDefParser.FLAG_READABLE)) {
       // get
       final String getName = slotName;
       final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>();
-      if (!flavor.equals(FLAVOR_PUBLIC)) {
+      if (!flavor.equals(BaseDefParser.FLAVOR_PUBLIC)) {
         getModifiers.add(MethodDefinition.Modifier.PRIVATE);
       }
       final List<ParameterDefinition> getParameters = Collections.emptyList();
@@ -307,10 +303,11 @@ public class DefineSlotAccessParser {
               Collections.emptyList(),
               Collections.emptyList());
       methodDefinitions.add(getMethod);
-    } else if (flag.equals(FLAG_WRITE) || flag.equals(FLAG_WRITABLE)) {
+    } else if (flag.equals(BaseDefParser.FLAG_WRITE) || flag.equals(BaseDefParser.FLAG_WRITABLE)) {
       // get
       final Set<MethodDefinition.Modifier> getModifiers = new HashSet<>();
-      if (!flavor.equals(FLAVOR_PUBLIC) && !flavor.equals(FLAVOR_READ_ONLY)) {
+      if (!flavor.equals(BaseDefParser.FLAVOR_PUBLIC)
+          && !flavor.equals(BaseDefParser.FLAVOR_READ_ONLY)) {
         getModifiers.add(MethodDefinition.Modifier.PRIVATE);
       }
       final List<ParameterDefinition> getParameters = Collections.emptyList();
@@ -339,7 +336,7 @@ public class DefineSlotAccessParser {
       // set
       final String setName = slotName + MagikOperator.CHEVRON.getValue();
       final Set<MethodDefinition.Modifier> setModifiers = new HashSet<>();
-      if (!flavor.equals(FLAVOR_PUBLIC)) {
+      if (!flavor.equals(BaseDefParser.FLAVOR_PUBLIC)) {
         setModifiers.add(MethodDefinition.Modifier.PRIVATE);
       }
       final List<ParameterDefinition> setParameters = Collections.emptyList();
