@@ -11,6 +11,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.junit.jupiter.api.Test;
@@ -318,6 +319,66 @@ class InvocationArgumentTypeMatchesParameterTypeTypedCheckTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  private IDefinitionKeeper createSymbolProcedureKeeper() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString procedureRef = TypeString.ofIdentifier("zz_pr", "user");
+    final ParameterDefinition parameter =
+        new ParameterDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            "p1",
+            ParameterDefinition.Modifier.NONE,
+            TypeString.SW_SYMBOL);
+    definitionKeeper.add(
+        new ProcedureDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            EnumSet.noneOf(ProcedureDefinition.Modifier.class),
+            procedureRef,
+            null,
+            List.of(parameter),
+            null,
+            ExpressionResultString.EMPTY,
+            ExpressionResultString.EMPTY));
+    return definitionKeeper;
+  }
+
+  @Test
+  void testProcedureMemberOfAUnionArgumentTypeNotMatches() {
+    final String code =
+        """
+        _package user
+        _method object.m()
+          _local f << _self.y()  # type: _undefined|user:zz_pr
+          f(1)
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = this.createSymbolProcedureKeeper();
+    final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
+  void testProcedureMemberOfAUnionArgumentTypeMatches() {
+    final String code =
+        """
+        _package user
+        _method object.m()
+          _local f << _self.y()  # type: _undefined|user:zz_pr
+          f(:a)
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = this.createSymbolProcedureKeeper();
+    final MagikTypedCheck check = new InvocationArgumentTypeMatchesParameterTypeTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 
   @Test

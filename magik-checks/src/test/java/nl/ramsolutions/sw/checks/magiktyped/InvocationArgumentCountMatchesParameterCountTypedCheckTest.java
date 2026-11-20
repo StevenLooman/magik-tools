@@ -261,6 +261,85 @@ class InvocationArgumentCountMatchesParameterCountTypedCheckTest {
             "Procedure user:zz_pr invoked with too few arguments (requires 1, given 0)");
   }
 
+  private void addProcedureWithOneParameter(
+      final IDefinitionKeeper definitionKeeper, final String procedureName) {
+    final TypeString procedureRef = TypeString.ofIdentifier(procedureName, "user");
+    final ParameterDefinition parameter =
+        new ParameterDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            "a",
+            ParameterDefinition.Modifier.NONE,
+            TypeString.UNDEFINED);
+    definitionKeeper.add(
+        new ProcedureDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            Set.of(),
+            procedureRef,
+            null,
+            List.of(parameter),
+            null,
+            ExpressionResultString.EMPTY,
+            ExpressionResultString.EMPTY));
+  }
+
+  @Test
+  void testProcedureMemberOfAUnionArgumentMissingMessage() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addProcedureWithOneParameter(definitionKeeper, "zz_pr");
+    final String code =
+        """
+        _package user
+        _method object.m()
+          _local f << _self.y()  # type: _undefined|user:zz_pr
+          f()
+        _endmethod""";
+    final MagikTypedCheck check = new InvocationArgumentCountMatchesParameterCountTypedCheck();
+    assertThat(check)
+        .reportsIssueMessages(
+            code,
+            definitionKeeper,
+            "Procedure user:zz_pr invoked with too few arguments (requires 1, given 0)");
+  }
+
+  @Test
+  void testEachProcedureMemberOfAUnionIsChecked() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addProcedureWithOneParameter(definitionKeeper, "zz_pr");
+    this.addProcedureWithOneParameter(definitionKeeper, "zz_pr2");
+    final String code =
+        """
+        _package user
+        _method object.m()
+          _local f << _self.y()  # type: user:zz_pr|user:zz_pr2
+          f()
+        _endmethod""";
+    final MagikTypedCheck check = new InvocationArgumentCountMatchesParameterCountTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 2);
+  }
+
+  @Test
+  void testProcedureMemberOfAUnionArgumentCountMatches() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addProcedureWithOneParameter(definitionKeeper, "zz_pr");
+    final String code =
+        """
+        _package user
+        _method object.m()
+          _local f << _self.y()  # type: _undefined|user:zz_pr
+          f(1)
+        _endmethod""";
+    final MagikTypedCheck check = new InvocationArgumentCountMatchesParameterCountTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
   @Test
   void testAnonymousProcedureArgumentMissingMessage() {
     // A procedure of no type of its own is a sw:procedure.

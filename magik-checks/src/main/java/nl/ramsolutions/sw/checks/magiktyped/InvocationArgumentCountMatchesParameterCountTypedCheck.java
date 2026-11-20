@@ -11,8 +11,10 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationDefinitionHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
+import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.sonar.check.Rule;
 
@@ -99,10 +101,39 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
     final Collection<ProcedureDefinition> procedureDefs =
         ProcedureInvocationDefinitionHelper.getRespondingProcedureDefinitions(
             node, this.getTypeReasonerState(), this.getTypeStringResolver(), this.getMagikFile());
-    if (procedureDefs.isEmpty()) {
+    if (!procedureDefs.isEmpty()) {
+      this.checkProcedures(node, argumentsHelper, calledTypeStr, procedureDefs);
+      return;
+    }
+
+    // A union is called member by member: check each procedure member.
+    final LocalTypeReasonerState reasonerState = this.getTypeReasonerState();
+    final AstNode calledNode = node.getPreviousSibling();
+    final ExpressionResultString calledResult = reasonerState.getNodeType(calledNode);
+    final TypeString calledUnionTypeStr = calledResult.get(0, TypeString.UNDEFINED);
+    if (!calledUnionTypeStr.isCombined()) {
       // Cannot give any useful information, so abort.
       return;
     }
+
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    for (final TypeString memberTypeStr : calledUnionTypeStr.getCombinedTypes()) {
+      if (memberTypeStr.isUndefined() || memberTypeStr.isSelf()) {
+        continue;
+      }
+
+      final TypeString resolvedMemberTypeStr = resolver.getResolvedTypeString(memberTypeStr);
+      final Collection<ProcedureDefinition> memberProcedureDefs =
+          resolver.getRespondingProcedureDefinitions(resolvedMemberTypeStr);
+      this.checkProcedures(node, argumentsHelper, resolvedMemberTypeStr, memberProcedureDefs);
+    }
+  }
+
+  private void checkProcedures(
+      final AstNode node,
+      final ArgumentsNodeHelper argumentsHelper,
+      final TypeString calledTypeStr,
+      final Collection<ProcedureDefinition> procedureDefs) {
     for (final ProcedureDefinition procedureDef : procedureDefs) {
       final List<ParameterDefinition> parameterDefs = procedureDef.getParameters();
       if (parameterDefs.isEmpty()) {

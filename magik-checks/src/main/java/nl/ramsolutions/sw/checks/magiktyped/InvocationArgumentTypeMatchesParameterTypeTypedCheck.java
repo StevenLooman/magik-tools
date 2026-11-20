@@ -156,11 +156,39 @@ public class InvocationArgumentTypeMatchesParameterTypeTypedCheck extends MagikT
     final Collection<ProcedureDefinition> procedureDefs =
         ProcedureInvocationDefinitionHelper.getRespondingProcedureDefinitions(
             node, this.getTypeReasonerState(), this.getTypeStringResolver(), this.getMagikFile());
-    if (procedureDefs.isEmpty()) {
+    if (!procedureDefs.isEmpty()) {
+      this.checkProcedures(argumentNodes, argumentTypes, effectiveInvokedOnTypeStr, procedureDefs);
+      return;
+    }
+
+    // A union is called member by member: check each procedure member.
+    final AstNode calledNode = node.getPreviousSibling();
+    final ExpressionResultString calledResult = reasonerState.getNodeType(calledNode);
+    final TypeString calledUnionTypeStr = calledResult.get(0, TypeString.UNDEFINED);
+    if (!calledUnionTypeStr.isCombined()) {
       // Cannot give any useful information, so abort.
       return;
     }
 
+    for (final TypeString memberTypeStr : calledUnionTypeStr.getCombinedTypes()) {
+      if (memberTypeStr.isUndefined() || memberTypeStr.isSelf()) {
+        continue;
+      }
+
+      final TypeString resolvedMemberTypeStr = resolver.getResolvedTypeString(memberTypeStr);
+      final Collection<ProcedureDefinition> memberProcedureDefs =
+          resolver.getRespondingProcedureDefinitions(resolvedMemberTypeStr);
+      this.checkProcedures(
+          argumentNodes, argumentTypes, resolvedMemberTypeStr, memberProcedureDefs);
+    }
+  }
+
+  private void checkProcedures(
+      final List<AstNode> argumentNodes,
+      final List<ExpressionResultString> argumentTypes,
+      final TypeString effectiveInvokedOnTypeStr,
+      final Collection<ProcedureDefinition> procedureDefs) {
+    final TypeStringResolver resolver = this.getTypeStringResolver();
     final TypeCoverage coverage = new TypeCoverage(resolver, TypeCoverage.MemberRule.ANY);
     for (final ProcedureDefinition procedure : procedureDefs) {
       final List<ParameterDefinition> parameterDefs = procedure.getParameters();
