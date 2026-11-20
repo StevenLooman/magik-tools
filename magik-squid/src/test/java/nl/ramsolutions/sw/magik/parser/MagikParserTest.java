@@ -3,12 +3,15 @@ package nl.ramsolutions.sw.magik.parser;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.sonar.sslr.api.AstNode;
+import com.sonar.sslr.api.AstNodeType;
 import com.sonar.sslr.api.GenericTokenType;
 import com.sonar.sslr.api.Token;
 import com.sonar.sslr.api.Trivia;
 import java.util.List;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** Test {@link MagikParser}. */
 @SuppressWarnings("checkstyle:MagicNumber")
@@ -311,6 +314,110 @@ class MagikParserTest {
     final AstNode gatherExpressionNode =
         assignablesNode.getFirstDescendant(MagikGrammar.GATHER_EXPRESSION);
     assertThat(gatherExpressionNode).isNull();
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "_return 7 _scatter v",
+        "_return 7\n_scatter v",
+        "_return 7\n\n_scatter v",
+        "_return 7 # note\n_scatter v",
+        ">> 7 _scatter v",
+        ">> 7\n_scatter v",
+        "_leave _with 7 _scatter v",
+        "_leave _with 7\n_scatter v",
+        "_continue _with 7 _scatter v",
+        "_continue _with 7\n_scatter v",
+        "_throw :t _with 7 _scatter v",
+        "_throw :t _with 7\n_scatter v",
+        "_loopbody(7 _scatter v)",
+        "_loopbody(7\n_scatter v)",
+        "_return (7 _scatter v)",
+        "_return (7\n_scatter v)",
+        ">> (7 _scatter v)",
+        "_leave _with (7 _scatter v)",
+        "_continue _with (7 _scatter v)",
+        "_throw :t _with (7 _scatter v)",
+        "(a, b, c) << (7 _scatter v)",
+        "(_gather r) << (7 _scatter v)",
+        "_local (a, b, c) << (7 _scatter v)",
+        "_local (_gather r) << (7 _scatter v)"
+      })
+  void testScatterWithoutACommaIsTheLastExpressionOfOneTuple(final String code) {
+    final AstNode node = this.parseMagik(code);
+
+    final AstNode syntaxErrorNode = node.getFirstDescendant(MagikGrammar.SYNTAX_ERROR);
+    assertThat(syntaxErrorNode).isNull();
+    final List<AstNode> statementNodes = node.getChildren(MagikGrammar.STATEMENT);
+    assertThat(statementNodes).hasSize(1);
+    final AstNode tupleNode = node.getFirstDescendant(MagikGrammar.TUPLE);
+    final List<AstNode> expressionNodes = tupleNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(expressionNodes).hasSize(2);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"_return 1, 7 _scatter v", "_return (1, 7 _scatter v)"})
+  void testScatterWithoutACommaFollowsEveryExpressionOfATuple(final String code) {
+    final AstNode node = this.parseMagik(code);
+
+    final AstNode syntaxErrorNode = node.getFirstDescendant(MagikGrammar.SYNTAX_ERROR);
+    assertThat(syntaxErrorNode).isNull();
+    final AstNode tupleNode = node.getFirstDescendant(MagikGrammar.TUPLE);
+    final List<AstNode> expressionNodes = tupleNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(expressionNodes).hasSize(3);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "_return (1, 2) _scatter v",
+        "_return (1) _scatter v",
+        "_return (7 _scatter v) _scatter v"
+      })
+  void testParenthesesBeforeAScatterAreAValue(final String code) {
+    final AstNode node = this.parseMagik(code);
+
+    final AstNode syntaxErrorNode = node.getFirstDescendant(MagikGrammar.SYNTAX_ERROR);
+    assertThat(syntaxErrorNode).isNull();
+    final AstNode tupleNode = node.getFirstDescendant(MagikGrammar.TUPLE);
+    final AstNode parenthesisNode = tupleNode.getFirstChild();
+    final AstNodeType parenthesisType = parenthesisNode.getType();
+    assertThat(parenthesisType).isEqualTo(MagikGrammar.EXPRESSION);
+    final AstNode atomNode = parenthesisNode.getFirstChild();
+    final AstNodeType atomType = atomNode.getType();
+    assertThat(atomType).isEqualTo(MagikGrammar.ATOM);
+    final List<AstNode> expressionNodes = tupleNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(expressionNodes).hasSize(2);
+  }
+
+  @Test
+  void testParenthesisedScatterAsAValueIsAnAtom() {
+    final String code = "p((7 _scatter v), 1)";
+    final AstNode node = this.parseMagik(code);
+
+    final AstNode syntaxErrorNode = node.getFirstDescendant(MagikGrammar.SYNTAX_ERROR);
+    assertThat(syntaxErrorNode).isNull();
+    final AstNode argumentNode = node.getFirstDescendant(MagikGrammar.ARGUMENT);
+    final AstNode expressionNode = argumentNode.getFirstChild(MagikGrammar.EXPRESSION);
+    final AstNode atomNode = expressionNode.getFirstChild();
+    final AstNodeType atomType = atomNode.getType();
+    assertThat(atomType).isEqualTo(MagikGrammar.ATOM);
+    final List<AstNode> expressionNodes = atomNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(expressionNodes).hasSize(2);
+  }
+
+  @Test
+  void testParenthesisedValueBeforeASendStaysAnAtom() {
+    final String code = "_return (7).x";
+    final AstNode node = this.parseMagik(code);
+
+    final AstNode tupleNode = node.getFirstDescendant(MagikGrammar.TUPLE);
+    final AstNode parenthesisNode = tupleNode.getFirstChild();
+    final AstNodeType parenthesisType = parenthesisNode.getType();
+    assertThat(parenthesisType).isEqualTo(MagikGrammar.EXPRESSION);
+    final List<AstNode> expressionNodes = tupleNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(expressionNodes).hasSize(1);
   }
 
   @Test

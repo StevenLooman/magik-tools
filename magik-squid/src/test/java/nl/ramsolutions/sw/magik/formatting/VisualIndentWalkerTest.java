@@ -1062,6 +1062,46 @@ class VisualIndentWalkerTest {
     assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB2));
   }
 
+  @Test
+  void testIndentEmitScatterContinuation() {
+    final String code =
+        """
+        _method a.b
+        >> 7
+        _scatter v
+        _endmethod
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB2));
+  }
+
+  @Test
+  void testIndentReturnScatterContinuation() {
+    // As after a comma, a _return tuple continues at the statement's indent.
+    final String code =
+        """
+        _method a.b
+        _return 7
+        _scatter v
+        _endmethod
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB));
+  }
+
+  @Test
+  void testIndentReturnCommaContinuation() {
+    final String code =
+        """
+        _method a.b
+        _return 7,
+        _scatter v
+        _endmethod
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB));
+  }
+
   // ==========================================================================
   // Binary expression precedence
   // ==========================================================================

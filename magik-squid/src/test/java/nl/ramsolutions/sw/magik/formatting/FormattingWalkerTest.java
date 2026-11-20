@@ -525,6 +525,19 @@ class FormattingWalkerTest {
   }
 
   @Test
+  void testScatterWithoutAComma() {
+    final String code =
+        """
+        _return 7 _scatter v
+        _return (7 _scatter v)
+        (a, b, c) << (7 _scatter v)
+        _loopbody(7 _scatter v)
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
   void testMultipleAssignmentTuple() { // NOSONAR
     final String code =
         """

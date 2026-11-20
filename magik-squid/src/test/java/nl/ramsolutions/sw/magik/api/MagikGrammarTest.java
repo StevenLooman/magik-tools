@@ -147,7 +147,12 @@ class MagikGrammarTest {
     Assertions.assertThat(this.grammar.rule(MagikGrammar.LOOPBODY))
         .matches("_loopbody()")
         .matches("_loopbody(1)")
-        .matches("_loopbody(1, 2)");
+        .matches("_loopbody(1, 2)")
+        .matches("_loopbody(7 _scatter v)")
+        .matches("_loopbody(1, 7 _scatter v)")
+        .matches("_loopbody(7\n_scatter v)")
+        .matches("_loopbody((7 _scatter v))")
+        .notMatches("_loopbody(7 _scatter v, 8)");
   }
 
   @Test
@@ -158,7 +163,12 @@ class MagikGrammarTest {
         .matches("_leave _with a")
         .matches("_leave _with (a, b)")
         .matches("_leave @label _with a")
-        .matches("_leave _with 1, _scatter _allresults a.m()");
+        .matches("_leave _with 1, _scatter _allresults a.m()")
+        .matches("_leave _with 7 _scatter v")
+        .matches("_leave @label _with 7 _scatter v")
+        .matches("_leave _with 7\n_scatter v")
+        .matches("_leave _with (7 _scatter v)")
+        .notMatches("_leave _with 7 _scatter v, 8");
   }
 
   @Test
@@ -168,7 +178,11 @@ class MagikGrammarTest {
         .matches("_continue @label")
         .matches("_continue _with a")
         .matches("_continue _with (a, b)")
-        .matches("_continue @label _with a");
+        .matches("_continue @label _with a")
+        .matches("_continue _with 7 _scatter v")
+        .matches("_continue _with 7\n_scatter v")
+        .matches("_continue _with (7 _scatter v)")
+        .notMatches("_continue _with 7 _scatter v, 8");
   }
 
   @Test
@@ -177,6 +191,10 @@ class MagikGrammarTest {
         .matches("_throw :test")
         .matches("_throw @error _with _false")
         .matches("_throw :a _with 1, 2, 3")
+        .matches("_throw :a _with 7 _scatter v")
+        .matches("_throw :a _with 7\n_scatter v")
+        .matches("_throw :a _with (7 _scatter v)")
+        .notMatches("_throw :a _with 7 _scatter v, 8")
         .notMatches("_throw a\n _with _false");
   }
 
@@ -287,7 +305,13 @@ class MagikGrammarTest {
         .matches(">> (\na, b)")
         .matches(">> (a) _mod b")
         .matches(">>\na")
-        .matches(">> (a - b).m() < c");
+        .matches(">> (a - b).m() < c")
+        .matches(">> 7 _scatter v")
+        .matches(">> 1, 7 _scatter v")
+        .matches(">> 7\n_scatter v")
+        .matches(">> (7 _scatter v)")
+        .notMatches(">> 7 _scatter v, 8")
+        .notMatches(">> 7 _scatter v _scatter v");
   }
 
   @Test
@@ -333,7 +357,26 @@ class MagikGrammarTest {
         .matches("_return (a).not")
         .matches("_return (a, b)")
         .matches("_return (\na, b)")
-        .matches("_return (a) _mod b");
+        .matches("_return (a) _mod b")
+        .matches("_return (7).x")
+        .matches("_return 7 _scatter v")
+        .matches("_return 1, 7 _scatter v")
+        .matches("_return 1 + 2 _scatter v")
+        .matches("_return v.size _scatter v")
+        .matches("_return 7\n_scatter v")
+        .matches("_return 7\n\n_scatter v")
+        .matches("_return 7 # note\n_scatter v")
+        .matches("_return (7 _scatter v)")
+        .matches("_return (1, 7 _scatter v)")
+        .matches("_return (7\n_scatter v)")
+        .matches("_return (1, 2) _scatter v")
+        .matches("_return (1) _scatter v")
+        .matches("_return (7 _scatter v) _scatter v")
+        .notMatches("_return 7 8")
+        .notMatches("_return 7 _scatter v, 8")
+        .notMatches("_return 7 _scatter v _scatter v")
+        .notMatches("_return (7 _scatter v, 8)")
+        .notMatches("_return\n_scatter v");
   }
 
   @Test
@@ -390,7 +433,13 @@ class MagikGrammarTest {
         .matches("(a, b).m()")
         .matches("(a, b) + 1")
         .matches("x << (a, b)")
-        .matches("_allresults a()");
+        .matches("_allresults a()")
+        .matches("(7 _scatter v)")
+        .matches("(1, 7 _scatter v)")
+        .matches("(7 _scatter v).class_name")
+        .matches("(7 _scatter v) + 1")
+        .notMatches("(7 _scatter v, 8)")
+        .notMatches("x << 7 _scatter v");
   }
 
   @Test
@@ -470,7 +519,9 @@ class MagikGrammarTest {
         .matches("_dynamic _dynamic y")
         .matches("_import a")
         .matches("_import a, b")
-        .matches("_dynamic _import y");
+        .matches("_dynamic _import y")
+        .matches("_local (a, b, c) << (7 _scatter v)")
+        .matches("_local (_gather r) << (7 _scatter v)");
   }
 
   @Test
@@ -487,7 +538,10 @@ class MagikGrammarTest {
         .matches("(a, b) << (_scatter {1, 2})")
         .matches("(a, _gather b) << (1, 2)")
         .matches("(a, _gather b) << (1, 2, 3)")
-        .matches("(a, _gather b) << (1, _scatter {1, 2})");
+        .matches("(a, _gather b) << (1, _scatter {1, 2})")
+        .matches("(a, b, c) << (7 _scatter v)")
+        .matches("(_gather r) << (7 _scatter v)")
+        .notMatches("(a, b, c) << (7 _scatter v, 8)");
   }
 
   @Test

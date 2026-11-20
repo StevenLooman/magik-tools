@@ -152,7 +152,7 @@ class UnaryOperatorTypeMismatchTypedCheckTest {
         """
         _method test.write_line()
           (first, _gather rest) << _self.unknown()
-          _scatter rest
+          _return _scatter rest
         _endmethod
         """;
     final IDefinitionKeeper definitionKeeper = this.createSelfScatteringKeeper();

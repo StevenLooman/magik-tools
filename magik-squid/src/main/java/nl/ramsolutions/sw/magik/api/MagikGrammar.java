@@ -448,6 +448,7 @@ public enum MagikGrammar implements GrammarRuleKey {
                     MagikPunctuator.PAREN_L,
                     EXPRESSION,
                     b.zeroOrMore(MagikPunctuator.COMMA, EXPRESSION),
+                    b.optional(b.next(MagikKeyword.SCATTER), EXPRESSION),
                     MagikPunctuator.PAREN_R),
                 NUMBER,
                 STRING,
@@ -865,10 +866,17 @@ public enum MagikGrammar implements GrammarRuleKey {
                 b.sequence(
                     MagikPunctuator.PAREN_L,
                     EXPRESSION,
-                    b.oneOrMore(MagikPunctuator.COMMA, EXPRESSION),
-                    MagikPunctuator.PAREN_R),
+                    b.firstOf(
+                        b.sequence(
+                            b.oneOrMore(MagikPunctuator.COMMA, EXPRESSION),
+                            b.optional(b.next(MagikKeyword.SCATTER), EXPRESSION)),
+                        b.sequence(b.next(MagikKeyword.SCATTER), EXPRESSION)),
+                    MagikPunctuator.PAREN_R,
+                    b.nextNot(MagikKeyword.SCATTER)),
                 b.sequence(
-                    EXPRESSION, b.zeroOrMore(SPACING_NO_LB_2, MagikPunctuator.COMMA, EXPRESSION))));
+                    EXPRESSION,
+                    b.zeroOrMore(SPACING_NO_LB_2, MagikPunctuator.COMMA, EXPRESSION),
+                    b.optional(b.next(MagikKeyword.SCATTER), EXPRESSION))));
 
     b.rule(IDENTIFIERS).is(IDENTIFIER, b.zeroOrMore(MagikPunctuator.COMMA, IDENTIFIER));
     b.rule(IDENTIFIERS_WITH_GATHER)
