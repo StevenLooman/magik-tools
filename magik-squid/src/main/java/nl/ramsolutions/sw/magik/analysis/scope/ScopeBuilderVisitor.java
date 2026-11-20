@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.scope;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -156,6 +157,17 @@ public class ScopeBuilderVisitor extends MagikVisitor {
 
               this.scopeIndex.put(identifierNode, this.currentScope);
             });
+
+    // A name the body assigns is a local of the body, also where it is read before the assignment.
+    final Collection<ScopeEntry> parameterEntries = this.currentScope.getScopeEntriesInScope();
+    final List<String> parameterNames =
+        parameterEntries.stream().map(ScopeEntry::getIdentifier).toList();
+    final Map<String, AstNode> implicitLocals =
+        ImplicitLocalCollector.collect(node, parameterNames);
+    implicitLocals.forEach(
+        (identifier, identifierNode) ->
+            this.currentScope.addDeclaration(
+                ScopeEntry.Type.DEFINITION, identifier, identifierNode, null));
   }
 
   @SuppressWarnings("java:S3776")

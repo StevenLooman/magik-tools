@@ -71,4 +71,21 @@ class GlobalExistsTypedCheckTest {
     final MagikTypedCheck check = new GlobalExistsTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @Test
+  void testNameAssignedInTheBodyIsNoGlobal() {
+    // A name assigned anywhere in a method is a local of the method, also where it is read first.
+    final String code =
+        """
+        _method a.m(p)
+          _local r << abc
+          _if p _then abc << 1 _endif
+          _return r, abc
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    final MagikTypedCheck check = new GlobalExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
 }

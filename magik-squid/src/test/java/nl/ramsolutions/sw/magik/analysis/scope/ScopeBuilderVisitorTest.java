@@ -7,6 +7,8 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikFile;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** Test ScopeBuilderVisitor. */
 @SuppressWarnings("checkstyle:MagicNumber")
@@ -34,6 +36,11 @@ class ScopeBuilderVisitorTest {
 
     final ScopeEntry entryImportedEntry = scopeEntry.getImportedEntry();
     assertThat(entryImportedEntry).isSameAs(importedEntry);
+  }
+
+  private List<Integer> getUsageLines(final ScopeEntry scopeEntry) {
+    final List<AstNode> usageNodes = scopeEntry.getUsages();
+    return usageNodes.stream().map(AstNode::getTokenLine).toList();
   }
 
   @Test
@@ -187,7 +194,7 @@ class ScopeBuilderVisitorTest {
   }
 
   @Test
-  void testReadBeforeAssigmentStaysGlobal() {
+  void testReadBeforeAssignmentIsALocalOfTheBody() {
     final String code =
         """
         _method a.b()
@@ -199,9 +206,255 @@ class ScopeBuilderVisitorTest {
     final Scope globalScope = visitor.getGlobalScope();
     final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
 
-    // A name whose first mention is a read resolves outside the method.
+    // A name assigned anywhere in the body is a local of the body, read first or not.
     final ScopeEntry entryZ = methodScope.getScopeEntry("l_z");
-    assertThat(entryZ).isEqualTo(new ScopeEntry(ScopeEntry.Type.GLOBAL, "l_z", null, null));
+    this.assertScopeEntry(entryZ, ScopeEntry.Type.DEFINITION, "l_z", null);
+    final AstNode definitionNode = entryZ.getDefinitionNode();
+    assertThat(definitionNode.getTokenLine()).isEqualTo(3);
+    final List<Integer> usageLines = this.getUsageLines(entryZ);
+    assertThat(usageLines).containsExactly(2);
+
+    final ScopeEntry globalEntryZ = globalScope.getScopeEntry("l_z");
+    assertThat(globalEntryZ).isNull();
+  }
+
+  @Test
+  void testReadInABlockBeforeAnAssignmentInTheBodyIsOneLocal() {
+    final String code =
+        """
+        _method a.b(p)
+            _if p
+            _then
+                show(x)
+            _endif
+            x << 1
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+    final Scope ifScope = methodScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry methodEntryX = methodScope.getScopeEntry("x");
+    this.assertScopeEntry(methodEntryX, ScopeEntry.Type.DEFINITION, "x", null);
+    final ScopeEntry ifEntryX = ifScope.getScopeEntry("x");
+    assertThat(ifEntryX).isSameAs(methodEntryX);
+  }
+
+  @Test
+  void testAssignmentInAnArmMakesALocalOfTheBody() {
+    final String code =
+        """
+        _method a.b(p)
+            show(x)
+            _if p
+            _then
+                _block
+                    x << 1
+                _endblock
+            _endif
+            _return x
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry entryX = methodScope.getLocalScopeEntry("x");
+    this.assertScopeEntry(entryX, ScopeEntry.Type.DEFINITION, "x", null);
+    final AstNode definitionNode = entryX.getDefinitionNode();
+    assertThat(definitionNode.getTokenLine()).isEqualTo(6);
+    final List<Integer> usageLines = this.getUsageLines(entryX);
+    assertThat(usageLines).containsExactly(2, 9);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "x +<< 1",
+        "x ^<< 1",
+        "x +^<< 1",
+        "(x, y) << (1, 2)",
+        "(_gather x) << (1, 2)",
+        "y << x << 1",
+      })
+  void testEveryAssignmentFormMakesALocalOfTheBody(final String assignment) {
+    final String code =
+        """
+        _method a.b(p)
+            show(x)
+            _if p
+            _then
+                %s
+            _endif
+        _endmethod"""
+            .formatted(assignment);
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry entryX = methodScope.getLocalScopeEntry("x");
+    this.assertScopeEntry(entryX, ScopeEntry.Type.DEFINITION, "x", null);
+  }
+
+  @Test
+  void testAssignmentInAProcedureMakesALocalOfTheProcedure() {
+    final String code =
+        """
+        _proc()
+            show(x)
+            x << 1
+        _endproc""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope procScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry entryX = procScope.getLocalScopeEntry("x");
+    this.assertScopeEntry(entryX, ScopeEntry.Type.DEFINITION, "x", null);
+  }
+
+  @Test
+  void testAssignmentInANestedProcedureIsALocalOfThatProcedureOnly() {
+    final String code =
+        """
+        _method a.b()
+            show(x)
+            _proc()
+                show(x)
+                x << 1
+            _endproc
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+    final Scope procScope = methodScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry methodEntryX = methodScope.getScopeEntry("x");
+    this.assertScopeEntry(methodEntryX, ScopeEntry.Type.GLOBAL, "x", null);
+    final ScopeEntry procEntryX = procScope.getScopeEntry("x");
+    this.assertScopeEntry(procEntryX, ScopeEntry.Type.DEFINITION, "x", null);
+    final List<Integer> usageLines = this.getUsageLines(procEntryX);
+    assertThat(usageLines).containsExactly(4);
+  }
+
+  @Test
+  void testReadInANestedProcedureOfALocalOfTheBodyIsAGlobal() {
+    final String code =
+        """
+        _method a.b()
+            x << 1
+            _proc()
+                show(x)
+            _endproc
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+    final Scope procScope = methodScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry methodEntryX = methodScope.getScopeEntry("x");
+    this.assertScopeEntry(methodEntryX, ScopeEntry.Type.DEFINITION, "x", null);
+    final ScopeEntry procEntryX = procScope.getScopeEntry("x");
+    this.assertScopeEntry(procEntryX, ScopeEntry.Type.GLOBAL, "x", null);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"_local", "_global", "_dynamic"})
+  void testAssignmentToADeclaredNameMakesNoLocalOfTheBody(final String modifier) {
+    final String code =
+        """
+        _method a.b()
+            show(x)
+            _block
+                %s x
+                x << 1
+            _endblock
+        _endmethod"""
+            .formatted(modifier);
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry entryX = methodScope.getScopeEntry("x");
+    this.assertScopeEntry(entryX, ScopeEntry.Type.GLOBAL, "x", null);
+    final AstNode definitionNode = entryX.getDefinitionNode();
+    assertThat(definitionNode.getTokenLine()).isEqualTo(2);
+  }
+
+  @Test
+  void testAssignmentToALoopVariableMakesNoLocalOfTheBody() {
+    final String code =
+        """
+        _method a.b(c)
+            show(x)
+            _for x _over c.fast_elements()
+            _loop
+                x << 1
+            _endloop
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry entryX = methodScope.getScopeEntry("x");
+    this.assertScopeEntry(entryX, ScopeEntry.Type.GLOBAL, "x", null);
+  }
+
+  @Test
+  void testAssignmentToAParameterMakesNoLocalOfTheBody() {
+    final String code =
+        """
+        _method a.b(x)
+            x << 1
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry entryX = methodScope.getScopeEntry("x");
+    this.assertScopeEntry(entryX, ScopeEntry.Type.PARAMETER, "x", null);
+  }
+
+  @Test
+  void testFileLevelGlobalDoesNotKeepAnAssignedNameGlobal() {
+    final String code =
+        """
+        _global x << 1
+        _method a.b(p)
+            show(x)
+            _if p _then x << 2 _endif
+        _endmethod""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope methodScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry entryX = methodScope.getScopeEntry("x");
+    this.assertScopeEntry(entryX, ScopeEntry.Type.DEFINITION, "x", null);
+  }
+
+  @Test
+  void testReadBeforeAssignmentInATopLevelBlockStaysGlobal() {
+    final String code =
+        """
+        _block
+            show(x)
+            x << 1
+        _endblock""";
+    final ScopeBuilderVisitor visitor = this.buildCode(code);
+
+    final Scope globalScope = visitor.getGlobalScope();
+    final Scope blockScope = globalScope.getSelfAndDescendantScopes().get(1);
+
+    final ScopeEntry entryX = blockScope.getScopeEntry("x");
+    this.assertScopeEntry(entryX, ScopeEntry.Type.GLOBAL, "x", null);
   }
 
   @Test

@@ -42,6 +42,12 @@ class UndefinedVariableCheckTest {
         """,
         """
         _method a.b()
+          show(l_a)
+          l_a << 10
+        _endmethod
+        """,
+        """
+        _method a.b()
           (l_a, _gather l_b) << (1, 2)
           show(l_a, l_b)
         _endmethod
