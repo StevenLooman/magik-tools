@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -446,5 +447,33 @@ class CallHierarchyProviderTest {
     // Verify the procedure body is scanned without error (type of receiver is unresolved here).
     final List<CallHierarchyOutgoingCall> calls = provider.callHierarchyOutgoingCalls(item);
     assertThat(calls).isNotNull();
+  }
+
+  /** A file deleted after the keeper was filled gives no calls, and does not fail the request. */
+  @Test
+  void testCallHierarchyIncomingCallsSkipsCallerInDeletedFile() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+        _method a.method_name
+        _endmethod
+        _method a.caller
+          _self.method_name
+        _endmethod
+        """;
+    final String deletedCode =
+        """
+        _method a.deleted_caller
+          _self.method_name
+        _endmethod
+        """;
+    final Path deletedPath = this.smallworldProject.pathOf("/deleted.magik");
+    this.smallworldProject.addMagikFile(deletedPath, deletedCode);
+    Files.delete(deletedPath);
+
+    final List<CallHierarchyIncomingCall> calls = this.findIncomingCalls(code);
+
+    final List<String> fromNames = this.getFromNames(calls);
+    assertThat(fromNames).containsExactly("user:a.caller");
   }
 }

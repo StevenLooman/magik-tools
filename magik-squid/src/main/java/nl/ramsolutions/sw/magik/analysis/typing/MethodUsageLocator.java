@@ -33,6 +33,8 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Method usage locator.
@@ -41,7 +43,10 @@ import nl.ramsolutions.sw.magik.api.MagikGrammar;
  */
 public class MethodUsageLocator {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(MethodUsageLocator.class);
+
   private final IDefinitionKeeper definitionKeeper;
+  private final Set<URI> unreadableUris = new HashSet<>();
 
   public MethodUsageLocator(final IDefinitionKeeper definitionKeeper) {
     this.definitionKeeper = definitionKeeper;
@@ -236,6 +241,9 @@ public class MethodUsageLocator {
     final String methodName = wantedMethodUsage.getMethodName();
     final Location location = usage.getLocation();
     final MagikTypedFile magikFile = this.getMagikFile(location);
+    if (magikFile == null) {
+      return null;
+    }
 
     final AstNode invocationNode = MethodUsageLocator.findInvocationNode(magikFile, location);
     if (invocationNode == null) {
@@ -288,6 +296,10 @@ public class MethodUsageLocator {
 
     final Location location = usage.getLocation();
     final MagikTypedFile magikFile = this.getMagikFile(location);
+    if (magikFile == null) {
+      return null;
+    }
+
     final AstNode definitionNode = MethodUsageLocator.findDefinitionNode(magikFile, location);
     if (definitionNode == null) {
       return null;
@@ -465,15 +477,29 @@ public class MethodUsageLocator {
         .anyMatch(bareWantedTypeStr::equals);
   }
 
+  /**
+   * Read the file of a usage.
+   *
+   * @param location Location of the usage.
+   * @return The file, or {@code null} when it cannot be read.
+   */
+  @CheckForNull
   private MagikTypedFile getMagikFile(final Location location) {
     final URI calledMethodUri = location.getUri();
+    if (this.unreadableUris.contains(calledMethodUri)) {
+      return null;
+    }
+
     final Path calledMethodPath = Path.of(calledMethodUri);
     final Charset charset = FileCharsetDeterminer.determineCharset(calledMethodPath);
     final String text;
     try {
       text = Files.readString(calledMethodPath, charset);
     } catch (final IOException exception) {
-      throw new IllegalStateException(exception);
+      this.unreadableUris.add(calledMethodUri);
+      final String reason = exception.toString();
+      LOGGER.warn("Cannot read {}: {}", calledMethodUri, reason);
+      return null;
     }
     return new MagikTypedFile(calledMethodUri, text, this.definitionKeeper);
   }

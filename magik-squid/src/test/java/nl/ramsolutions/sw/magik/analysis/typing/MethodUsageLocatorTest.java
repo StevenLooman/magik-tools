@@ -6,11 +6,17 @@ import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -939,5 +945,68 @@ class MethodUsageLocatorTest {
     final TypeString typeStr = TypeString.ofIdentifier(exemplarName, "user");
     final MethodUsage wantedMethodUsage = new MethodUsage(typeStr, methodName);
     return methodUsageLocator.getMethodUsages(wantedMethodUsage);
+  }
+
+  /** A file deleted after the keeper was filled, holding two calls to the wanted method. */
+  private MethodUsageLocator createLocatorWithDeletedCaller() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name
+        _endmethod
+        """;
+    final String deletedCode =
+        """
+        _method a.caller
+          _self.method_name
+          _self.method_name
+        _endmethod
+        """;
+    final Path path = this.smallworldProject.pathOf("/source.magik");
+    this.smallworldProject.addMagikFile(path, code);
+    final Path deletedPath = this.smallworldProject.pathOf("/deleted.magik");
+    this.smallworldProject.addMagikFile(deletedPath, deletedCode);
+    Files.delete(deletedPath);
+    final IDefinitionKeeper keeper = this.smallworldProject.getDefinitionKeeper();
+    return new MethodUsageLocator(keeper);
+  }
+
+  @Test
+  void testGetMethodUsagesSkipsCallSitesInUnreadableFileOnceLogged() throws IOException {
+    final MethodUsageLocator locator = this.createLocatorWithDeletedCaller();
+    final List<LogRecord> warnings = new ArrayList<>();
+    final Handler handler = this.createWarningCollector(warnings);
+    final Logger logger = Logger.getLogger(MethodUsageLocator.class.getName());
+    logger.addHandler(handler);
+    final TypeString typeStr = TypeString.ofIdentifier("a", "user");
+    final MethodUsage wantedMethodUsage = new MethodUsage(typeStr, "method_name");
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages;
+    try {
+      usages = locator.getMethodUsages(wantedMethodUsage);
+    } finally {
+      logger.removeHandler(handler);
+    }
+
+    assertThat(usages).isEmpty();
+    assertThat(warnings).hasSize(1);
+  }
+
+  private Handler createWarningCollector(final List<LogRecord> warnings) {
+    return new Handler() {
+      @Override
+      public void publish(final LogRecord logRecord) {
+        if (logRecord.getLevel() == Level.WARNING) {
+          warnings.add(logRecord);
+        }
+      }
+
+      @Override
+      public void flush() {}
+
+      @Override
+      public void close() {}
+    };
   }
 }

@@ -5,11 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.sonar.sslr.api.AstNode;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
 import nl.ramsolutions.sw.magik.Range;
@@ -551,5 +553,40 @@ class MethodRenamerTest {
                 List.of(
                     new TextEdit(
                         new Range(new Position(7, 10), new Position(7, 21)), "new_method_name"))));
+  }
+
+  /** A file deleted after the keeper was filled gives no edits, and does not fail the rename. */
+  @Test
+  void testRenameMethodSkipsCallInDeletedFile() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name()
+          _self.method_name()
+        _endmethod
+        """;
+    final String deletedCode =
+        """
+        _method a.caller()
+          _self.method_name()
+        _endmethod
+        """;
+    final Position position = new Position(3, 10); // On `method_name`.
+
+    final Path path = this.extension.pathOf("/source.magik");
+    final MagikTypedFile magikFile = this.extension.addMagikFile(path, code);
+    final Path deletedPath = this.extension.pathOf("/deleted.magik");
+    this.extension.addMagikFile(deletedPath, deletedCode);
+    Files.delete(deletedPath);
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode node = AstQuery.nodeAt(topNode, position, MagikGrammar.IDENTIFIER);
+
+    final MethodRenamer renamer = new MethodRenamer(magikFile, node);
+    final Map<URI, List<TextEdit>> renames = renamer.provideRename("new_method_name");
+
+    final Set<URI> renamedUris = renames.keySet();
+    final URI uri = path.toUri();
+    assertThat(renamedUris).containsExactly(uri);
   }
 }
