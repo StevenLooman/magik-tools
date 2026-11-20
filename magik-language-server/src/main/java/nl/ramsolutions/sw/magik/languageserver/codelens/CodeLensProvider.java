@@ -76,7 +76,21 @@ public class CodeLensProvider {
     if (location == null) {
       return false;
     }
-    return Objects.equals(location.getUri(), fileUri);
+
+    // A client may encode a file URI differently than Path.toUri() (a drive colon, a '+').
+    final URI locationUri = location.getUri();
+    if (this.isFileUri(locationUri) && this.isFileUri(fileUri)) {
+      final Path locationPath = Path.of(locationUri);
+      final Path filePath = Path.of(fileUri);
+      return locationPath.equals(filePath);
+    }
+
+    return Objects.equals(locationUri, fileUri);
+  }
+
+  private boolean isFileUri(final URI uri) {
+    final String scheme = uri.getScheme();
+    return "file".equalsIgnoreCase(scheme);
   }
 
   private CodeLens createExemplarCodeLens(final ExemplarDefinition exemplar) {

@@ -108,10 +108,11 @@ public class MagikIndexer {
     LOGGER.debug("Indexing file content for: {}", uri);
 
     final Path path = Path.of(uri);
+    final URI pathUri = path.toUri();
 
     // Parse before touching the keeper: the parse is by far the longest part of a re-index, and
     // removing first would leave the file's definitions absent for its whole duration.
-    final MagikFile magikFile = new MagikFile(this.properties, uri, text);
+    final MagikFile magikFile = new MagikFile(this.properties, pathUri, text);
     final List<IDefinition> definitions =
         magikFile.getDefinitions().stream().map(IDefinition::getBareDefinition).toList();
 
