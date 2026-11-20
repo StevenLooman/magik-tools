@@ -145,24 +145,19 @@ class TypeStringResolverTest {
     assertThat(resolver.getParents(child)).contains(TypeString.SW_SLOTTED_FORMAT_MIXIN);
   }
 
-  /**
-   * Pins a deliberately-preserved quirk: the private {@code getParents(ITypeStringDefinition)} used
-   * by {@link TypeStringResolver#isKindOf} reads raw edge parents WITHOUT implicit format-mixin
-   * parents. So a SLOTTED exemplar is NOT kind-of {@code sw:slotted_format_mixin} even though its
-   * public parents include it implicitly. A follow-up prompt (see docs/superpowers/prompts/)
-   * inverts this; until then this test must keep asserting false.
-   */
   @Test
-  void testIsKindOfDoesNotSeeImplicitParent() {
+  void testIsKindOfSeesImplicitParent() {
     final IDefinitionKeeper keeper = new DefinitionKeeper();
     final TypeString child = TypeString.ofIdentifier("child", "user");
     final TypeString parentA = TypeString.ofIdentifier("parent_a", "user");
     keeper.add(TypeStringResolverTest.createExemplar(child));
     keeper.add(TypeStringResolverTest.createExemplar(parentA));
-    // A real edge so the isKindOf walk has depth; it still must not reach the implicit mixin.
     keeper.add(new InheritanceDefinition(null, null, "m1", null, null, child, parentA));
     final TypeStringResolver resolver = new TypeStringResolver(keeper);
-    assertThat(resolver.isKindOf(child, TypeString.SW_SLOTTED_FORMAT_MIXIN)).isFalse();
+
+    final boolean kindOfMixin = resolver.isKindOf(child, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+
+    assertThat(kindOfMixin).isTrue();
   }
 
   @Test
@@ -178,6 +173,188 @@ class TypeStringResolverTest {
     final TypeStringResolver resolver = new TypeStringResolver(keeper);
     // Must terminate (no StackOverflowError) and still contain the reachable ancestor.
     assertThat(resolver.getAllAncestors(typeA)).contains(typeB);
+  }
+
+  private void addExemplarOfSort(
+      final IDefinitionKeeper definitionKeeper,
+      final ExemplarDefinition.Sort sort,
+      final TypeString typeString,
+      final TypeString... parents) {
+    definitionKeeper.add(
+        new ExemplarDefinition(null, null, null, null, null, sort, typeString, null));
+    for (final TypeString parent : parents) {
+      definitionKeeper.add(
+          new InheritanceDefinition(null, null, null, null, null, typeString, parent));
+    }
+  }
+
+  /** Both format mixins with {@code sw:object} as parent, as a session has them. */
+  private IDefinitionKeeper createFormatMixinKeeper() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.OBJECT, TypeString.SW_OBJECT);
+    this.addExemplarOfSort(
+        definitionKeeper,
+        ExemplarDefinition.Sort.MIXIN,
+        TypeString.SW_SLOTTED_FORMAT_MIXIN,
+        TypeString.SW_OBJECT);
+    this.addExemplarOfSort(
+        definitionKeeper,
+        ExemplarDefinition.Sort.MIXIN,
+        TypeString.SW_INDEXED_FORMAT_MIXIN,
+        TypeString.SW_OBJECT);
+    return definitionKeeper;
+  }
+
+  @Test
+  void testImplicitParentNotAddedWhenAMixinParentInheritsIt() {
+    final IDefinitionKeeper definitionKeeper = this.createFormatMixinKeeper();
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_m", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_e", "user");
+    this.addExemplarOfSort(
+        definitionKeeper,
+        ExemplarDefinition.Sort.MIXIN,
+        mixinRef,
+        TypeString.SW_SLOTTED_FORMAT_MIXIN);
+    this.addExemplarOfSort(
+        definitionKeeper, ExemplarDefinition.Sort.SLOTTED, exemplarRef, mixinRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> parents = resolver.getParents(exemplarRef);
+
+    assertThat(parents).containsExactly(mixinRef);
+  }
+
+  @Test
+  void testImplicitParentNotAddedWhenNamedInAUsingPackage() {
+    final IDefinitionKeeper definitionKeeper = this.createFormatMixinKeeper();
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_e", "user");
+    final TypeString writtenMixinRef = TypeString.ofIdentifier("slotted_format_mixin", "user");
+    this.addExemplarOfSort(
+        definitionKeeper, ExemplarDefinition.Sort.SLOTTED, exemplarRef, writtenMixinRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> parents = resolver.getParents(exemplarRef);
+
+    assertThat(parents).containsExactly(writtenMixinRef);
+  }
+
+  @Test
+  void testImplicitParentAddedWhenAMixinParentDoesNotInheritIt() {
+    final IDefinitionKeeper definitionKeeper = this.createFormatMixinKeeper();
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_m", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_e", "user");
+    this.addExemplarOfSort(
+        definitionKeeper, ExemplarDefinition.Sort.MIXIN, mixinRef, TypeString.SW_OBJECT);
+    this.addExemplarOfSort(
+        definitionKeeper, ExemplarDefinition.Sort.SLOTTED, exemplarRef, mixinRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> parents = resolver.getParents(exemplarRef);
+
+    assertThat(parents).containsExactlyInAnyOrder(mixinRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+  }
+
+  @Test
+  void testImplicitParentNotAddedWhenASlottedParentHasIt() {
+    final IDefinitionKeeper definitionKeeper = this.createFormatMixinKeeper();
+    final TypeString parentRef = TypeString.ofIdentifier("zz_p", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_e", "user");
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, parentRef);
+    this.addExemplarOfSort(
+        definitionKeeper, ExemplarDefinition.Sort.SLOTTED, exemplarRef, parentRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> parents = resolver.getParents(exemplarRef);
+
+    assertThat(parents).containsExactly(parentRef);
+  }
+
+  @Test
+  void testSlottedExemplarWithAnIndexedParentGetsTheSlottedFormatMixin() {
+    final IDefinitionKeeper definitionKeeper = this.createFormatMixinKeeper();
+    final TypeString indexedRef = TypeString.ofIdentifier("zz_hi0", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_hs10", "user");
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.INDEXED, indexedRef);
+    this.addExemplarOfSort(
+        definitionKeeper, ExemplarDefinition.Sort.SLOTTED, exemplarRef, indexedRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> parents = resolver.getParents(exemplarRef);
+
+    assertThat(parents).containsExactlyInAnyOrder(indexedRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+  }
+
+  @Test
+  void testIndexedExemplarOverAMixinInheritingTheIndexedFormatMixinGetsNone() {
+    final IDefinitionKeeper definitionKeeper = this.createFormatMixinKeeper();
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_im", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_hi3", "user");
+    this.addExemplarOfSort(
+        definitionKeeper,
+        ExemplarDefinition.Sort.MIXIN,
+        mixinRef,
+        TypeString.SW_INDEXED_FORMAT_MIXIN);
+    this.addExemplarOfSort(
+        definitionKeeper, ExemplarDefinition.Sort.INDEXED, exemplarRef, mixinRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> parents = resolver.getParents(exemplarRef);
+
+    assertThat(parents).containsExactly(mixinRef);
+  }
+
+  @Test
+  void testPlainSlottedExemplarAndItsSubtypeAreKindsOfObject() {
+    final IDefinitionKeeper definitionKeeper = this.createFormatMixinKeeper();
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_e", "user");
+    final TypeString subtypeRef = TypeString.ofIdentifier("zz_s", "user");
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, exemplarRef);
+    this.addExemplarOfSort(
+        definitionKeeper, ExemplarDefinition.Sort.SLOTTED, subtypeRef, exemplarRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final boolean exemplarKindOfObject = resolver.isKindOf(exemplarRef, TypeString.SW_OBJECT);
+    final boolean subtypeKindOfObject = resolver.isKindOf(subtypeRef, TypeString.SW_OBJECT);
+    final Collection<TypeString> exemplarAncestors = resolver.getAllAncestors(exemplarRef);
+    final Collection<TypeString> subtypeAncestors = resolver.getAllAncestors(subtypeRef);
+
+    assertThat(exemplarKindOfObject).isTrue();
+    assertThat(subtypeKindOfObject).isTrue();
+    assertThat(exemplarAncestors)
+        .containsExactlyInAnyOrder(TypeString.SW_SLOTTED_FORMAT_MIXIN, TypeString.SW_OBJECT);
+    assertThat(subtypeAncestors)
+        .containsExactlyInAnyOrder(
+            exemplarRef, TypeString.SW_SLOTTED_FORMAT_MIXIN, TypeString.SW_OBJECT);
+  }
+
+  @Test
+  void testParentlessMixinIsNotKindOfObject() {
+    final IDefinitionKeeper definitionKeeper = this.createFormatMixinKeeper();
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_m", "user");
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.MIXIN, mixinRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final boolean kindOfObject = resolver.isKindOf(mixinRef, TypeString.SW_OBJECT);
+    final Collection<TypeString> ancestors = resolver.getAllAncestors(mixinRef);
+
+    assertThat(kindOfObject).isFalse();
+    assertThat(ancestors).isEmpty();
+  }
+
+  @Test
+  void testParentsOverAnInheritanceCycleTerminate() {
+    final IDefinitionKeeper definitionKeeper = this.createFormatMixinKeeper();
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_c1", "user");
+    final TypeString mixinA = TypeString.ofIdentifier("zz_cm1", "user");
+    final TypeString mixinB = TypeString.ofIdentifier("zz_cm2", "user");
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.MIXIN, mixinA, mixinB);
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.MIXIN, mixinB, mixinA);
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, exemplarRef, mixinA);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> parents = resolver.getParents(exemplarRef);
+
+    assertThat(parents).containsExactlyInAnyOrder(mixinA, TypeString.SW_SLOTTED_FORMAT_MIXIN);
   }
 
   private IDefinitionKeeper createGrandParentChainKeeper(
@@ -209,7 +386,7 @@ class TypeStringResolverTest {
   }
 
   @Test
-  void testAncestorWalkDoesNotFollowImplicitParent() {
+  void testAncestorWalkFollowsImplicitParent() {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString exemplarRef = TypeString.ofIdentifier("an_exemplar", "user");
     this.addExemplarWithParents(definitionKeeper, exemplarRef);
@@ -226,7 +403,7 @@ class TypeStringResolverTest {
 
     final Collection<TypeString> ancestors = resolver.getAllAncestors(exemplarRef);
 
-    assertThat(ancestors).containsExactly(TypeString.SW_SLOTTED_FORMAT_MIXIN);
+    assertThat(ancestors).containsExactly(TypeString.SW_SLOTTED_FORMAT_MIXIN, TypeString.SW_OBJECT);
   }
 
   @Test

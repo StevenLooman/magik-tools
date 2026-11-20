@@ -270,4 +270,36 @@ class ComparedTypesDoNotMatchTypedCheckTest {
     final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"sw:object", "sw:slotted_format_mixin"})
+  void testKindTestOfAPlainSlottedExemplarAgainstItsImplicitAncestryCanMatch(
+      final String kindName) {
+    final String code =
+        """
+        _method a.m(p)
+          ## @param {user:zz_lp} p
+          _if p.is_kind_of?(%s)
+          _then
+          _endif
+        _endmethod
+        """
+            .formatted(kindName);
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_lp", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, exemplarRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_SLOTTED_FORMAT_MIXIN,
+            TypeString.SW_OBJECT));
+    final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
 }

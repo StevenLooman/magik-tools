@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -584,11 +583,7 @@ public class TypeStringResolver {
   private Collection<TypeString> getParents(
       final ITypeStringDefinition definition, final Set<TypeString> visited) {
     if (definition instanceof ExemplarDefinition exemplarDefinition) {
-      return this.definitionKeeper
-          .getInheritanceDefinitions(exemplarDefinition.getTypeString())
-          .stream()
-          .map(InheritanceDefinition::getParentTypeName)
-          .collect(Collectors.toSet());
+      return this.getParents(exemplarDefinition);
     } else if (definition instanceof ProcedureDefinition) {
       // TODO: Is this right?
       return Set.of(TypeString.SW_PROCEDURE);
@@ -633,28 +628,69 @@ public class TypeStringResolver {
         .collect(Collectors.toUnmodifiableSet());
   }
 
-  /** The explicit parents of one exemplar, plus its implicit parent when it has no other. */
-  private Collection<TypeString> getParents(final ExemplarDefinition exemplarDefinition) {
-    // A parent mixin *can* provide a default mixin, but does not have to be the case. I.e.,
-    // the sw:rope_mixin does inherit from sw:slotted_format_mixin, but
-    // sw:serial_structure_indexed_mixin does not do so. Most mixins do not inherit from
-    // sw:slotted_format_mixin. As such, we assume that a parent mixin does not provide
-    // a default mixin.
+  /**
+   * The explicit parents of one exemplar, plus, last, the format mixin of its sort when no parent
+   * is or inherits it.
+   */
+  private List<TypeString> getParents(final ExemplarDefinition exemplarDefinition) {
+    final TypeString typeString = exemplarDefinition.getTypeString();
     final List<TypeString> parents =
-        this.definitionKeeper.getInheritanceDefinitions(exemplarDefinition.getTypeString()).stream()
+        this.definitionKeeper.getInheritanceDefinitions(typeString).stream()
             .map(InheritanceDefinition::getParentTypeName)
             .toList();
-    final boolean hasNonMixinParent = parents.stream().anyMatch(this::isSlottedOrIndexed);
     final Sort sort = exemplarDefinition.getSort();
-    final TypeString implicitParentTypeStr = hasNonMixinParent ? null : IMPLICIT_PARENTS.get(sort);
-    return Stream.concat(parents.stream(), Optional.ofNullable(implicitParentTypeStr).stream())
-        .toList();
+    final TypeString formatMixin = IMPLICIT_PARENTS.get(sort);
+    if (formatMixin == null || formatMixin.equals(typeString.getWithoutGenerics())) {
+      return parents;
+    }
+
+    // The exemplar itself is seen, so an inheritance cycle back to it does not count.
+    final Set<TypeString> seen = new HashSet<>();
+    seen.add(typeString.getWithoutGenerics());
+    final boolean inherited =
+        parents.stream().anyMatch(parent -> this.inheritsFormatMixin(parent, formatMixin, seen));
+    if (inherited) {
+      return parents;
+    }
+
+    return Stream.concat(parents.stream(), Stream.of(formatMixin)).toList();
   }
 
-  private boolean isSlottedOrIndexed(final TypeString typeString) {
-    return this.getExemplarDefinitions(typeString).stream()
-        .map(ExemplarDefinition::getSort)
-        .anyMatch(sort -> sort == Sort.SLOTTED || sort == Sort.INDEXED);
+  /**
+   * Whether a type is or inherits a format mixin. A slotted or indexed exemplar always inherits
+   * that of its sort, explicitly or implicitly, so only explicit edges are walked.
+   */
+  private boolean inheritsFormatMixin(
+      final TypeString typeString, final TypeString formatMixin, final Set<TypeString> seen) {
+    final TypeString bareTypeString = typeString.getWithoutGenerics();
+    if (bareTypeString.equals(formatMixin)) {
+      return true;
+    }
+
+    // An inheritance cycle reaches nothing new.
+    if (!seen.add(bareTypeString)) {
+      return false;
+    }
+
+    return this.getExemplarDefinitions(bareTypeString).stream()
+        .anyMatch(definition -> this.inheritsFormatMixin(definition, formatMixin, seen));
+  }
+
+  private boolean inheritsFormatMixin(
+      final ExemplarDefinition definition,
+      final TypeString formatMixin,
+      final Set<TypeString> seen) {
+    final TypeString definitionTypeString = definition.getTypeString();
+    final TypeString bareDefinitionTypeString = definitionTypeString.getWithoutGenerics();
+    final Sort sort = definition.getSort();
+    if (bareDefinitionTypeString.equals(formatMixin)
+        || formatMixin.equals(IMPLICIT_PARENTS.get(sort))) {
+      return true;
+    }
+
+    return this.definitionKeeper.getInheritanceDefinitions(definitionTypeString).stream()
+        .map(InheritanceDefinition::getParentTypeName)
+        .anyMatch(parent -> this.inheritsFormatMixin(parent, formatMixin, seen));
   }
 
   /**
@@ -684,14 +720,9 @@ public class TypeStringResolver {
     final Collection<TypeString> typeStringParents = this.getParents(typeString);
     ancestors.addAll(typeStringParents);
 
-    // Recurse over the edges of every exemplar the type stands for. NB: this intentionally recurses
-    // over the raw edge parents (no implicit parents), preserving pre-refactor behaviour. See the
-    // getallancestors prompt under docs/superpowers/prompts/ for the deliberately-untouched quirk.
+    // Recurse over the parents of every exemplar the type stands for.
     exemplarDefinitions.stream()
-        .flatMap(
-            def ->
-                this.definitionKeeper.getInheritanceDefinitions(def.getTypeString()).stream()
-                    .map(InheritanceDefinition::getParentTypeName))
+        .flatMap(def -> this.getParents(def).stream())
         .forEach(parentTypeStr -> this.getAllAncestors(parentTypeStr, ancestors, seen));
   }
 
