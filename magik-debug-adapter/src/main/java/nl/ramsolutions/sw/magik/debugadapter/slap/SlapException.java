@@ -19,6 +19,16 @@ public class SlapException extends Exception {
   /**
    * Constructor.
    *
+   * @param message Message.
+   * @param cause Cause.
+   */
+  public SlapException(final String message, final Throwable cause) {
+    super(message, cause);
+  }
+
+  /**
+   * Constructor.
+   *
    * @param cause Cause.
    */
   public SlapException(final Throwable cause) {

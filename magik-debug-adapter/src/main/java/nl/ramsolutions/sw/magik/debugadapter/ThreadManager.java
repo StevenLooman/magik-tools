@@ -5,26 +5,22 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ErrorMessage;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.SlapErrorException;
-import nl.ramsolutions.sw.magik.debugadapter.slap.StepType;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.BreakpointEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.StepCompletedEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.ThreadEndedEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.ThreadStartedEvent;
-import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ErrorResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.EvalResponse;
-import nl.ramsolutions.sw.magik.debugadapter.slap.responses.SourceFileResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadInfoResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadListResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadStackResponse;
 import org.eclipse.lsp4j.debug.StackFrame;
-import org.eclipse.lsp4j.debug.StoppedEventArguments;
-import org.eclipse.lsp4j.debug.StoppedEventArgumentsReason;
 import org.eclipse.lsp4j.debug.Thread;
 import org.eclipse.lsp4j.debug.ThreadEventArguments;
 import org.eclipse.lsp4j.debug.ThreadEventArgumentsReason;
@@ -37,17 +33,10 @@ class ThreadManager {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ThreadManager.class);
 
-  private static final String LANGUAGE_MAGIK = "Magik";
-  private static final String LOOPBODY = "<loopbody>";
-  private static final String UNNAMED_PROC = "<unnamed proc>()";
-  private static final String EVAL_EXEMPLAR_PACKAGE =
-      "_self.define_method_target.meta_at(:exemplar_global).package.association_at(%s).package.name.write_string";
-
   private final ISlapProtocol slapProtocol;
   private final IDebugProtocolClient debugClient;
-  private final PathMapper pathMapper;
-  private boolean stepCompletedEventReceived;
-  private BreakpointEvent breakpointEvent;
+  private final FrameSourceResolver frameSourceResolver;
+  private final Stepper stepper;
 
   /**
    * Constructor.
@@ -55,14 +44,35 @@ class ThreadManager {
    * @param slapProtocol SLapProtocol.
    * @param debugClient LSP4j DebugClient.
    * @param pathMapper Path mapping.
+   * @param breakpointManager Breakpoint manager, which holds the user breakpoints.
    */
   ThreadManager(
       final ISlapProtocol slapProtocol,
       final IDebugProtocolClient debugClient,
-      final PathMapper pathMapper) {
+      final PathMapper pathMapper,
+      final BreakpointManager breakpointManager) {
     this.slapProtocol = slapProtocol;
     this.debugClient = debugClient;
-    this.pathMapper = pathMapper;
+    this.frameSourceResolver = new FrameSourceResolver(slapProtocol, pathMapper);
+    this.stepper =
+        this.createStepper(slapProtocol, debugClient, breakpointManager, this.frameSourceResolver);
+  }
+
+  /**
+   * Create the stepper which steps the threads.
+   *
+   * @param slapProtocol SLAP protocol.
+   * @param debugClient LSP4j DebugClient.
+   * @param breakpointManager Breakpoint manager, which holds the user breakpoints.
+   * @param frameSourceResolver Resolver for the source of a frame.
+   * @return Stepper.
+   */
+  protected Stepper createStepper(
+      final ISlapProtocol slapProtocol,
+      final IDebugProtocolClient debugClient,
+      final BreakpointManager breakpointManager,
+      final FrameSourceResolver frameSourceResolver) {
+    return new AgentStepper(slapProtocol, debugClient, breakpointManager);
   }
 
   /**
@@ -133,12 +143,13 @@ class ThreadManager {
           stackElement.getOffset());
 
       // Don't mess with non-Magik stack frames.
-      if (!stackElement.getLanguage().equals(LANGUAGE_MAGIK)) {
+      final String language = stackElement.getLanguage();
+      if (!language.equals(FrameSourceResolver.LANGUAGE_MAGIK)) {
         continue;
       }
 
       // This sets the frameId to the given stack frames.
-      final Path path = this.determinePath(threadId, stackElement);
+      final Path path = this.frameSourceResolver.determinePath(threadId, stackElement);
       final StackFrame stackFrame = Lsp4jConversion.toLsp4j(threadId, stackElement, path);
       stackFrames.add(stackFrame);
     }
@@ -146,53 +157,8 @@ class ThreadManager {
     return stackFrames;
   }
 
-  private Path determinePath(
-      final long threadId, final ThreadStackResponse.StackElement stackElement)
-      throws InterruptedException, ExecutionException, IOException {
-    try {
-      String method = stackElement.getName();
-      if (!method.equals(UNNAMED_PROC) && !method.equals(LOOPBODY)) {
-        final int indexDot = method.indexOf('.');
-        final int indexBracket = method.indexOf('[');
-        final int index = indexDot != -1 ? indexDot + 1 : indexBracket;
-        if (!method.contains(":") && index != -1) {
-          // Do some extra work to determine package.
-          final int level = stackElement.getLevel();
-
-          final String exemplarName = ":|" + method.substring(0, index - 1) + "|";
-          final String expr = EVAL_EXEMPLAR_PACKAGE.formatted(exemplarName);
-          LOGGER.debug("Eval expression: '{}'", expr);
-          final EvalResponse eval =
-              (EvalResponse) this.slapProtocol.evaluate(threadId, level, expr).get();
-          method = eval.getResult() + ":" + method;
-
-          // Bonus: update exemplar name with package.
-          stackElement.setName(method);
-        }
-
-        // Clear any spaces (before `<<`/`^<<`). Lazy approach...
-        method = method.replace(" ", "");
-
-        // Get source file for method.
-        final CompletableFuture<ISlapResponse> sourceFileFuture =
-            this.slapProtocol.getSourceFile(method);
-        final SourceFileResponse sourceFile = (SourceFileResponse) sourceFileFuture.get();
-        final String filename = sourceFile.getFilename();
-        final Path daPath = Path.of(filename);
-        return this.pathMapper.applyMapping(daPath);
-      }
-    } catch (final ExecutionException exception) {
-      if (exception.getCause() instanceof SlapErrorException slapErrorException
-          && slapErrorException.getError().getErrorMessage() != ErrorMessage.METHOD_NOT_FOUND) {
-        throw exception;
-      }
-    }
-
-    return null;
-  }
-
   /**
-   * Pause a thread.
+   * Pause a thread. A thread which is already suspended counts as paused.
    *
    * @param threadId Thread ID.
    * @throws IOException -
@@ -200,17 +166,27 @@ class ThreadManager {
    * @throws ExecutionException -
    */
   void pause(final long threadId) throws IOException, InterruptedException, ExecutionException {
+    this.stepper.endStepForPause(threadId);
     try {
       this.slapProtocol.suspendThread(threadId).get();
     } catch (final ExecutionException exception) {
-      if (exception.getCause() instanceof SlapErrorException exception2) {
-        final ErrorResponse error = exception2.getError();
-        final ErrorMessage errorMessage = error.getErrorMessage();
-        if (errorMessage != ErrorMessage.THREAD_ALREADY_SUSPENDED) {
-          // Ignore ErrorMessage.THREAD_ALREADY_SUSPENDED.
-          throw exception;
-        }
+      // The agent answers an already suspended thread with an error which holds the thread id.
+      if (!this.isSuspended(threadId)) {
+        throw exception;
       }
+    }
+  }
+
+  private boolean isSuspended(final long threadId) throws IOException, InterruptedException {
+    try {
+      final CompletableFuture<ISlapResponse> threadInfoFuture =
+          this.slapProtocol.getThreadInfo(threadId);
+      final ThreadInfoResponse threadInfo = (ThreadInfoResponse) threadInfoFuture.get();
+      final Set<ThreadInfoResponse.ThreadFlag> threadFlags = threadInfo.getThreadFlags();
+      return threadFlags.contains(ThreadInfoResponse.ThreadFlag.SUSPENDED);
+    } catch (final ExecutionException exception) {
+      LOGGER.trace("Could not get thread info, id: {}", threadId, exception);
+      return false;
     }
   }
 
@@ -225,7 +201,9 @@ class ThreadManager {
   @SuppressWarnings("java:S100")
   void continue_(final long threadId)
       throws IOException, InterruptedException, ExecutionException { // NOSONAR
-    this.slapProtocol.resumeThread(threadId).get();
+    this.stepper.endStepForContinue(threadId);
+    final CompletableFuture<ISlapResponse> resumeFuture = this.slapProtocol.resumeThread(threadId);
+    resumeFuture.get();
   }
 
   /**
@@ -237,7 +215,7 @@ class ThreadManager {
    * @throws ExecutionException -
    */
   void stepNext(final long threadId) throws IOException, InterruptedException, ExecutionException {
-    this.step(threadId, StepType.OVER);
+    this.stepper.stepOver(threadId);
   }
 
   /**
@@ -249,7 +227,7 @@ class ThreadManager {
    * @throws ExecutionException -
    */
   void stepIn(final long threadId) throws IOException, InterruptedException, ExecutionException {
-    this.step(threadId, StepType.LINE);
+    this.stepper.stepIn(threadId);
   }
 
   /**
@@ -261,7 +239,7 @@ class ThreadManager {
    * @throws ExecutionException -
    */
   void stepOut(final long threadId) throws IOException, InterruptedException, ExecutionException {
-    this.step(threadId, StepType.OUT);
+    this.stepper.stepOut(threadId);
   }
 
   /**
@@ -318,138 +296,21 @@ class ThreadManager {
    * @param event Event.
    */
   void handleStepCompletedEvent(final StepCompletedEvent event) {
-    this.signalStepCompletedEvent();
-  }
-
-  private void step(final long threadId, final StepType stepType)
-      throws IOException, InterruptedException, ExecutionException {
-    // Record what the stack looks like now.
-    CompletableFuture<ISlapResponse> threadStackFuture = this.slapProtocol.getThreadStack(threadId);
-    ThreadStackResponse threadStack = (ThreadStackResponse) threadStackFuture.get();
-    ThreadStackResponse.StackElement topElement = threadStack.getStackFrames().get(0);
-    final String startMethod = topElement.getName();
-    final int startLine = topElement.getOffset();
-    final int startStackDepth = threadStack.getStackFrames().size();
-    LOGGER.trace(
-        "Current state: thread id: {}, top element: {}, line: {}, stack depth: {}",
-        threadId,
-        topElement.getName(),
-        startLine,
-        startStackDepth);
-
-    // Do the stepping.
-    boolean stepping = true;
-    while (stepping) {
-      this.handleBreakpointEvent(null);
-
-      LOGGER.trace("Single step start: thread: {}, step type: {}", threadId, stepType);
-
-      // Do a single step.
-      this.slapProtocol.step(threadId, stepType, 1).get();
-
-      LOGGER.trace("Single step done: thread: {}, step type: {}", threadId, stepType);
-
-      // Wait for the STEP_COMPLETED event.
-      this.waitForStepCompletedEvent();
-
-      // A BreakpointEvent disrupts the stepping.
-      if (this.didReceiveBreakpointEvent()) {
-        LOGGER.debug("Stop stepping, received breakpoint event");
-        return;
-      }
-
-      threadStackFuture = this.slapProtocol.getThreadStack(threadId);
-      threadStack = (ThreadStackResponse) threadStackFuture.get();
-      topElement = threadStack.getStackFrames().get(0);
-      final String currentMethod = topElement.getName();
-      final int currentLine = topElement.getOffset();
-      final int currentStackDepth = threadStack.getStackFrames().size();
-      LOGGER.trace(
-          "Current state: thread id: {}, top element: {}, line: {}, stack depth: {}",
-          threadId,
-          topElement.getName(),
-          currentLine,
-          currentStackDepth);
-
-      // Check if stack looks like something we want:
-      // - Magik
-      // - A real method
-      // If not, otherwise continue stepping anyway.
-      if (!topElement.getLanguage().equals(LANGUAGE_MAGIK)) {
-        continue;
-      }
-
-      switch (stepType) {
-        case LINE:
-          // Continue stepping if:
-          // - method is the same, and
-          // - current line not changed
-          stepping = currentMethod.equals(startMethod) && currentLine == startLine;
-          break;
-
-        case OUT:
-          // Continue stepping if:
-          // - stack depth has not decreased
-          stepping = currentStackDepth > startStackDepth;
-          break;
-
-        case OVER:
-          // Continue stepping if:
-          // - method is the same, and
-          // - current line not changed
-          stepping = currentMethod.equals(startMethod) && currentLine == startLine;
-          break;
-
-        default:
-          break;
-      }
-    }
-
-    // Signal client step is completed.
-    final StoppedEventArguments args = new StoppedEventArguments();
-    args.setThreadId((int) threadId);
-    args.setReason(StoppedEventArgumentsReason.STEP);
-    this.debugClient.stopped(args);
-  }
-
-  private void waitForStepCompletedEvent() {
-    synchronized (this) {
-      LOGGER.trace("Waiting for step to complete, value: {}", this.stepCompletedEventReceived);
-      while (!this.stepCompletedEventReceived) {
-        try {
-          this.wait();
-        } catch (final InterruptedException exception) {
-          // pass; account for spurious wakeups
-          java.lang.Thread.currentThread().interrupt();
-        }
-      }
-      this.stepCompletedEventReceived = false;
-    }
-    LOGGER.trace(
-        "Completed waiting for step to complete, value: {}", this.stepCompletedEventReceived);
-  }
-
-  private void signalStepCompletedEvent() {
-    synchronized (this) {
-      this.stepCompletedEventReceived = true;
-      this.notifyAll();
-    }
+    this.stepper.handleStepCompletedEvent(event);
   }
 
   /**
-   * Handle breakpoint event.
+   * Handle a {@link BreakpointEvent}. The stepper hands the event to the breakpoint manager.
    *
-   * @param newBreakpointEvent Breakpoint event.
+   * @param event Event.
+   * @param clearVariables Clears the variables of the debug client.
    */
-  public void handleBreakpointEvent(final @Nullable BreakpointEvent newBreakpointEvent) {
-    synchronized (this) {
-      this.breakpointEvent = newBreakpointEvent;
-    }
+  void handleBreakpointEvent(final BreakpointEvent event, final Runnable clearVariables) {
+    this.stepper.handleBreakpointEvent(event, clearVariables);
   }
 
-  private boolean didReceiveBreakpointEvent() {
-    synchronized (this) {
-      return this.breakpointEvent != null;
-    }
+  /** Cancel all steps, as the connection is closing. */
+  void cancelSteps() {
+    this.stepper.cancelSteps();
   }
 }

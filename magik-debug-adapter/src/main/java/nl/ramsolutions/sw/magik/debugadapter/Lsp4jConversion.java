@@ -4,10 +4,11 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import java.nio.file.Path;
 import java.util.List;
 import nl.ramsolutions.sw.magik.debugadapter.BreakpointManager.MagikBreakpoint;
-import nl.ramsolutions.sw.magik.debugadapter.VariableManager.MagikVariable;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.BreakpointSetResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadInfoResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadStackResponse;
+import nl.ramsolutions.sw.magik.debugadapter.variables.VariableManager;
+import nl.ramsolutions.sw.magik.debugadapter.variables.VariableManager.MagikVariable;
 import org.eclipse.lsp4j.debug.Breakpoint;
 import org.eclipse.lsp4j.debug.Source;
 import org.eclipse.lsp4j.debug.StackFrame;
@@ -107,10 +108,20 @@ public final class Lsp4jConversion {
         .map(
             magikVariable -> {
               final Variable variable = new Variable();
-              variable.setVariablesReference(magikVariable.getId());
+              final boolean expandable = magikVariable.isExpandable();
+              final int reference = expandable ? magikVariable.getId() : 0;
+              variable.setVariablesReference(reference);
               variable.setName(magikVariable.getName());
               variable.setValue(magikVariable.getValue());
               variable.setEvaluateName(magikVariable.getExpression());
+              final int indexedVariables = magikVariable.getIndexedVariables();
+              if (indexedVariables != VariableManager.NO_INDEXED_VARIABLES) {
+                variable.setIndexedVariables(indexedVariables);
+              }
+              final int namedVariables = magikVariable.getNamedVariables();
+              if (namedVariables > 0) {
+                variable.setNamedVariables(namedVariables);
+              }
               return variable;
             })
         .toArray(size -> new Variable[size]);

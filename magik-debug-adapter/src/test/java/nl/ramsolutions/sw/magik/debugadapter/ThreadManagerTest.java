@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.debugadapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -8,11 +9,17 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import nl.ramsolutions.sw.magik.debugadapter.slap.ErrorMessage;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
+import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
+import nl.ramsolutions.sw.magik.debugadapter.slap.SlapErrorException;
+import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ErrorResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.EvalResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.SourceFileResponse;
+import nl.ramsolutions.sw.magik.debugadapter.slap.responses.SuspendThreadResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadInfoResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadListResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadStackResponse;
@@ -51,7 +58,9 @@ class ThreadManagerTest {
         };
 
     final PathMapper pathMapper = new PathMapper(Collections.emptyMap());
-    final ThreadManager manager = new ThreadManager(slapProtocol, null, pathMapper);
+    final BreakpointManager breakpointManager = new BreakpointManager(slapProtocol, null);
+    final ThreadManager manager =
+        new ThreadManager(slapProtocol, null, pathMapper, breakpointManager);
     final List<Thread> threads = manager.threads();
     assertThat(threads).hasSize(2);
 
@@ -101,7 +110,9 @@ class ThreadManagerTest {
 
     final Map<Path, Path> pathMapping = Map.of(Path.of("/src"), Path.of("/home/user/src"));
     final PathMapper pathMapper = new PathMapper(pathMapping);
-    final ThreadManager manager = new ThreadManager(slapProtocol, null, pathMapper);
+    final BreakpointManager breakpointManager = new BreakpointManager(slapProtocol, null);
+    final ThreadManager manager =
+        new ThreadManager(slapProtocol, null, pathMapper, breakpointManager);
     final List<StackFrame> stackFrames = manager.stackTrace(1);
     assertThat(stackFrames).hasSize(2);
 
@@ -120,5 +131,91 @@ class ThreadManagerTest {
     final Path path1 = Path.of(path1Str);
     final Path path1Expected = Path.of("/home/user/src/module/sources/file2.magik");
     assertThat(path1).isEqualTo(path1Expected);
+  }
+
+  /** Slap protocol of which SUSPEND_THREAD fails the way the agent does for a suspended thread. */
+  private static class SuspendFailingSlapProtocol extends TestSlapProtocol {
+
+    private final Set<ThreadInfoResponse.ThreadFlag> flags;
+    private int infoRequests;
+
+    SuspendFailingSlapProtocol(final Set<ThreadInfoResponse.ThreadFlag> flags) {
+      this.flags = flags;
+    }
+
+    int getInfoRequests() {
+      return this.infoRequests;
+    }
+
+    @Override
+    public CompletableFuture<ISlapResponse> suspendThread(final long threadId) {
+      // The agent puts the thread id in the error field, which is no known error message.
+      final ErrorResponse error = new ErrorResponse(RequestType.SUSPEND_THREAD, null);
+      final SlapErrorException exception = new SlapErrorException(error);
+      return CompletableFuture.failedFuture(exception);
+    }
+
+    @Override
+    public CompletableFuture<ISlapResponse> getThreadInfo(final long threadId) {
+      ++this.infoRequests;
+      final String name = "Thread: " + threadId;
+      final ThreadInfoResponse response =
+          new ThreadInfoResponse(
+              1, false, name, ThreadInfoResponse.ThreadState.RUNNABLE, this.flags);
+      return CompletableFuture.completedFuture(response);
+    }
+  }
+
+  private ThreadManager createThreadManager(final TestSlapProtocol slapProtocol) {
+    final PathMapper pathMapper = new PathMapper(Collections.emptyMap());
+    final BreakpointManager breakpointManager = new BreakpointManager(slapProtocol, null);
+    return new ThreadManager(slapProtocol, null, pathMapper, breakpointManager);
+  }
+
+  @Test
+  void testPauseSuspendedThread() throws IOException, InterruptedException, ExecutionException {
+    final SuspendFailingSlapProtocol slapProtocol =
+        new SuspendFailingSlapProtocol(EnumSet.of(ThreadInfoResponse.ThreadFlag.SUSPENDED));
+    final ThreadManager manager = this.createThreadManager(slapProtocol);
+
+    manager.pause(19);
+
+    final int infoRequests = slapProtocol.getInfoRequests();
+    assertThat(infoRequests).isEqualTo(1);
+  }
+
+  @Test
+  void testPauseFailsForThreadWhichIsNotSuspended() {
+    final SuspendFailingSlapProtocol slapProtocol =
+        new SuspendFailingSlapProtocol(EnumSet.noneOf(ThreadInfoResponse.ThreadFlag.class));
+    final ThreadManager manager = this.createThreadManager(slapProtocol);
+
+    final Throwable thrown = catchThrowable(() -> manager.pause(19));
+
+    assertThat(thrown).isInstanceOf(ExecutionException.class);
+    final Throwable cause = thrown.getCause();
+    assertThat(cause).isInstanceOf(SlapErrorException.class);
+  }
+
+  @Test
+  void testPauseRunningThread() throws IOException, InterruptedException, ExecutionException {
+    final TestSlapProtocol slapProtocol =
+        new TestSlapProtocol() {
+          @Override
+          public CompletableFuture<ISlapResponse> suspendThread(final long threadId) {
+            final SuspendThreadResponse response = new SuspendThreadResponse();
+            return CompletableFuture.completedFuture(response);
+          }
+        };
+    final ThreadManager manager = this.createThreadManager(slapProtocol);
+
+    manager.pause(19);
+  }
+
+  @Test
+  void testThreadIdInErrorFieldIsNoErrorMessage() {
+    final ErrorMessage errorMessage = ErrorMessage.valueOf(20);
+
+    assertThat(errorMessage).isNull();
   }
 }
