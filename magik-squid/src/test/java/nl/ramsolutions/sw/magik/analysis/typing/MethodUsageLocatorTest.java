@@ -10,7 +10,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
+import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.SmallworldProjectExtension;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -94,6 +97,66 @@ class MethodUsageLocatorTest {
             .map(entry -> entry.getValue().getUri())
             .collect(Collectors.toSet());
     assertThat(uris).isEqualTo(Set.of(magikFileA.getUri(), magikFileB.getUri()));
+  }
+
+  @Test
+  void testInvokesMethodAnnotationIsNotCallSite() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name
+        _endmethod
+
+        _method a.caller(name)
+          ## @invokes_method {user:a.method_name}
+          _self.perform(name)
+        _endmethod
+
+        _method a.real_caller
+          _self.method_name
+        _endmethod
+        """;
+    this.addMagikFile(code);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages =
+        this.locateMethodUsages("a", "method_name");
+
+    assertThat(usages).hasSize(1);
+    final Entry<MethodUsage, MagikTypedFile> entry = usages.get(0);
+    final MethodUsage usage = entry.getKey();
+    final Location location = usage.getLocation();
+    final Range range = location.getRange();
+    final Position startPosition = range.getStartPosition();
+    final int line = startPosition.getLine();
+    assertThat(line).isEqualTo(12);
+  }
+
+  @Test
+  void testInvokesMethodAnnotationOnOtherReceiverIsNotCallSite() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+        def_slotted_exemplar(:b, {})
+
+        _method a.method_name
+        _endmethod
+
+        _method b.caller(name)
+          ## @invokes_method {user:b.method_name}
+          _self.perform(name)
+        _endmethod
+
+        _method a.real_caller
+          _self.method_name
+        _endmethod
+        """;
+    this.addMagikFile(code);
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages =
+        this.locateMethodUsages("a", "method_name");
+
+    assertThat(usages).hasSize(1);
   }
 
   @Test

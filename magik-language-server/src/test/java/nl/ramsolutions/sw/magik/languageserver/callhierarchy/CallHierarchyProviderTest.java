@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
@@ -141,6 +142,44 @@ class CallHierarchyProviderTest {
     assertThat(calls).hasSize(1);
     assertThat(calls.get(0).getFrom().getKind()).isEqualTo(SymbolKind.Method);
     assertThat(calls.get(0).getFrom().getName()).contains("caller_method");
+  }
+
+  @Test
+  void testCallHierarchyIncomingCallsSkipsInvokesMethodAnnotation() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+        _method a.method_name
+        _endmethod
+        _method a.caller(name)
+          ## @invokes_method {user:a.method_name}
+          _self.perform(name)
+        _endmethod
+        _method a.real_caller
+          _self.method_name
+        _endmethod
+        """;
+    final Path path = this.smallworldProject.pathOf("/source.magik");
+    this.smallworldProject.addMagikFile(path, code);
+    final IDefinitionKeeper definitionKeeper = this.smallworldProject.getDefinitionKeeper();
+    final CallHierarchyProvider provider = new CallHierarchyProvider(definitionKeeper);
+
+    final JsonObject data = new JsonObject();
+    final URI uri = path.toUri();
+    final String uriStr = uri.toString();
+    data.addProperty("uri", uriStr);
+    data.addProperty("typeString", "user:a");
+    data.addProperty("methodName", "method_name");
+    final CallHierarchyItem item = new CallHierarchyItem();
+    item.setData(data);
+
+    final List<CallHierarchyIncomingCall> calls = provider.callHierarchyIncomingCalls(item);
+
+    assertThat(calls).hasSize(1);
+    final CallHierarchyIncomingCall call = calls.get(0);
+    final CallHierarchyItem from = call.getFrom();
+    final String fromName = from.getName();
+    assertThat(fromName).contains("real_caller");
   }
 
   // ---- callHierarchyOutgoingCalls ----

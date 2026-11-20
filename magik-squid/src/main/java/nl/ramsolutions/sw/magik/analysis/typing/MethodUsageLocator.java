@@ -1,6 +1,7 @@
 package nl.ramsolutions.sw.magik.analysis.typing;
 
 import com.sonar.sslr.api.AstNode;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -19,6 +20,7 @@ import nl.ramsolutions.sw.FileCharsetDeterminer;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.Position;
+import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -56,11 +58,12 @@ public class MethodUsageLocator {
 
               // Determine/reason the type the method is called on.
               final LocalTypeReasonerState reasonerState = magikFile.getTypeReasonerState();
-              final AstNode node = magikFile.getTopNode();
-              final Position invocationPosition = location.getRange().getStartPosition();
-              final AstNode invocationTokenNode = AstQuery.nodeAt(node, invocationPosition);
               final AstNode invocationNode =
-                  invocationTokenNode.getFirstAncestor(MagikGrammar.METHOD_INVOCATION);
+                  MethodUsageLocator.findInvocationNode(magikFile, location);
+              if (invocationNode == null) {
+                return null;
+              }
+
               final MethodInvocationNodeHelper helper =
                   new MethodInvocationNodeHelper(invocationNode);
               final AstNode receiverNode = helper.getReceiverNode();
@@ -91,6 +94,28 @@ public class MethodUsageLocator {
             })
         .filter(Objects::nonNull)
         .toList();
+  }
+
+  /**
+   * Find the invocation a usage sits on. A usage declared by an {@code @invokes_method} annotation
+   * sits at its definition, which is not a call site.
+   *
+   * @param magikFile File of the usage.
+   * @param location Location of the usage.
+   * @return The invocation node, or {@code null} when the usage is not on an invocation.
+   */
+  @CheckForNull
+  private static AstNode findInvocationNode(
+      final MagikTypedFile magikFile, final Location location) {
+    final AstNode topNode = magikFile.getTopNode();
+    final Range range = location.getRange();
+    final Position invocationPosition = range.getStartPosition();
+    final AstNode invocationTokenNode = AstQuery.nodeAt(topNode, invocationPosition);
+    if (invocationTokenNode == null) {
+      return null;
+    }
+
+    return invocationTokenNode.getFirstAncestor(MagikGrammar.METHOD_INVOCATION);
   }
 
   /**

@@ -103,6 +103,43 @@ class MethodRenamerTest {
   }
 
   @Test
+  void testRenameMethodLeavesInvokesMethodAnnotation() throws IOException {
+    final String code =
+        """
+        def_slotted_exemplar(:a, {})
+
+        _method a.method_name()
+        _endmethod
+
+        _method a.caller(name)
+          ## @invokes_method {user:a.method_name()}
+          _self.perform(name)
+        _endmethod
+
+        _method a.real_caller()
+          _self.method_name()
+        _endmethod
+        """;
+    final Position position = new Position(3, 10); // On `method_name`.
+
+    final Path path = this.extension.pathOf("/source.magik");
+    final MagikTypedFile magikFile = this.extension.addMagikFile(path, code);
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode node = AstQuery.nodeAt(topNode, position, MagikGrammar.IDENTIFIER);
+
+    final MethodRenamer renamer = new MethodRenamer(magikFile, node);
+    final Map<URI, List<TextEdit>> renames = renamer.provideRename("new_method_name");
+
+    final URI uri = URI.create("memory:test:///source.magik");
+    final Range definitionRange = new Range(new Position(3, 10), new Position(3, 21));
+    final Range callRange = new Range(new Position(12, 8), new Position(12, 19));
+    final TextEdit definitionEdit = new TextEdit(definitionRange, "new_method_name");
+    final TextEdit callEdit = new TextEdit(callRange, "new_method_name");
+    final List<TextEdit> expectedEdits = List.of(definitionEdit, callEdit);
+    assertThat(renames).isEqualTo(Map.of(uri, expectedEdits));
+  }
+
+  @Test
   void testRenameMethodMultiFile() throws IOException {
     final String codeA =
         """
