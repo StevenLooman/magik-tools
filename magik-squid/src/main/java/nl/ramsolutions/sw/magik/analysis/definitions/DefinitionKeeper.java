@@ -5,6 +5,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -740,6 +741,16 @@ public class DefinitionKeeper implements IDefinitionKeeper {
         definitions.stream()
             .filter(definition -> !currentSet.contains(definition))
             .collect(Collectors.toSet());
+    // An equal definition stays only when its source did not change, see DefinitionSources.
+    final Map<IDefinition, IDefinition> heldByValue = new HashMap<>();
+    current.forEach(definition -> heldByValue.put(definition, definition));
+    final Map<IDefinition, IDefinition> changed = new HashMap<>();
+    for (final IDefinition definition : definitions) {
+      final IDefinition held = heldByValue.get(definition);
+      if (held != null && !DefinitionSources.isSameSource(held, definition)) {
+        changed.put(held, definition);
+      }
+    }
     final Set<IDefinition> removed =
         current.stream()
             .filter(definition -> !replacementSet.contains(definition))
@@ -749,6 +760,12 @@ public class DefinitionKeeper implements IDefinitionKeeper {
     // momentarily absent to a concurrent reader.
     added.forEach(this::add);
     removed.forEach(this::remove);
+    // A changed definition equals the held one, so the held one goes before the new one is added.
+    changed.forEach(
+        (held, definition) -> {
+          this.remove(held);
+          this.add(definition);
+        });
   }
 
   @Override

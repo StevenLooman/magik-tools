@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.IgnoreHandler;
@@ -26,10 +27,12 @@ import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.TopLevelCodeDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import org.junit.jupiter.api.Test;
@@ -366,6 +369,51 @@ class MagikIndexerTest {
     final Collection<ExemplarDefinition> postExemplarDefs =
         definitionKeeper.getExemplarDefinitions(typeString);
     assertThat(postExemplarDefs).isEmpty();
+  }
+
+  @Test
+  void testReindexReplacesTheUsagesOfAnEditedMethodBody(@TempDir final Path tempDir) {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikToolsProperties properties =
+        new MagikToolsProperties(Map.of("magik.typing.indexMethodUsages", "true"));
+    final MagikIndexer indexer =
+        new MagikIndexer(definitionKeeper, properties, new IgnoreHandler());
+    final URI uri = tempDir.resolve("a.magik").toUri();
+
+    // The edit adds a call to the body and leaves the method's name where it is.
+    indexer.indexFileContent(
+        uri, "_package user\n_method thing.m()\n  thing.make(:a)\n_endmethod\n$\n");
+    indexer.indexFileContent(
+        uri,
+        "_package user\n_method thing.m()\n  thing.make(:a)\n  thing.init(:b)\n_endmethod\n$\n");
+
+    final Collection<MethodDefinition> definitions = definitionKeeper.getMethodDefinitions();
+    assertThat(definitions).hasSize(1);
+    final MethodDefinition definition = definitions.iterator().next();
+    assertThat(definition.getUsedMethods())
+        .extracting(MethodUsage::getMethodName)
+        .containsExactly("make()", "init()");
+  }
+
+  @Test
+  void testReindexReplacesTheUsagesOfAnEditedTopLevelLine(@TempDir final Path tempDir) {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikToolsProperties properties =
+        new MagikToolsProperties(Map.of("magik.typing.indexMethodUsages", "true"));
+    final MagikIndexer indexer =
+        new MagikIndexer(definitionKeeper, properties, new IgnoreHandler());
+    final URI uri = tempDir.resolve("a.magik").toUri();
+
+    indexer.indexFileContent(uri, "_package user\nthing.make(:a)\n$\n");
+    indexer.indexFileContent(uri, "_package user\nthing.init(:a)\n$\n");
+
+    final Collection<TopLevelCodeDefinition> definitions =
+        definitionKeeper.getTopLevelCodeDefinitions(uri);
+    assertThat(definitions).hasSize(1);
+    final TopLevelCodeDefinition definition = definitions.iterator().next();
+    assertThat(definition.getUsedMethods())
+        .extracting(MethodUsage::getMethodName)
+        .containsExactly("init()");
   }
 
   @Test
