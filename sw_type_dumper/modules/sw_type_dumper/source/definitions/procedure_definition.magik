@@ -149,6 +149,12 @@ _method procedure_definition.new_from(var)
 		_then
 			>> method_finder.get_method_comment(var.key, "<global>").default("")
 		_endif
+	_local module_name <<
+		_try
+			>> procedure.source_module.name
+		_when error
+			# pass
+		_endtry
 	_return _self.new(
 		type_name,
 		procedure_name,
@@ -158,7 +164,7 @@ _method procedure_definition.new_from(var)
 		loop_types,
 		location,
 		doc,
-		_unset)
+		module_name)
 _endmethod
 $
 
