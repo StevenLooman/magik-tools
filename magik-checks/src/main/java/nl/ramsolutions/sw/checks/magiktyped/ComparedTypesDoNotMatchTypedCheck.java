@@ -1,15 +1,20 @@
 package nl.ramsolutions.sw.checks.magiktyped;
 
 import com.sonar.sslr.api.AstNode;
+import java.util.Collection;
 import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.MagikFile;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
@@ -62,14 +67,18 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
     return result.get(0, TypeString.UNDEFINED);
   }
 
-  /** An undefined type can be anything, and so can a union holding {@code _self}. */
+  /**
+   * An undefined type can be anything, and so can an unbound generic or a union holding {@code
+   * _self}.
+   */
   private boolean isUncheckable(final TypeString typeStr) {
     if (typeStr.isUndefined()) {
       return true;
     }
 
     final List<TypeString> parts = typeStr.getCombinedTypes();
-    return parts.size() > 1 && parts.stream().anyMatch(TypeString::isSelf);
+    return parts.stream().anyMatch(TypeString::isGenericReference)
+        || parts.size() > 1 && parts.stream().anyMatch(TypeString::isSelf);
   }
 
   /**
@@ -141,7 +150,6 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
     return otherParts.stream().anyMatch(part -> resolver.isKindOf(part, ownerTypeStr));
   }
 
-  @SuppressWarnings("checkstyle:NestedIfDepth")
   @Override
   protected void walkPostMethodInvocation(final AstNode node) {
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
@@ -150,37 +158,104 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
     final boolean isClassOf =
         helper.isMethodInvocationOf(ComparedTypesDoNotMatchTypedCheck.IS_CLASS_OF);
     if (isKindOf || isClassOf) {
-      final LocalTypeReasonerState state = this.getTypeReasonerState();
       final AstNode receiverNode = helper.getReceiverNode();
-      final TypeString receiverTypeStr =
-          state.getNodeType(receiverNode).get(0, TypeString.UNDEFINED);
-      if (receiverTypeStr.isUndefined() || receiverTypeStr.equals(TypeString.SW_OBJECT)) {
+      final TypeString receiverTypeStr = this.getTestedType(node, receiverNode);
+      if (this.isUncheckable(receiverTypeStr) || receiverTypeStr.equals(TypeString.SW_OBJECT)) {
         return;
       }
 
       final List<AstNode> argumentNodes = helper.getArgumentExpressionNodes();
       final AstNode argument0Node = argumentNodes.get(0);
-      final ExpressionResultString argument0Result = state.getNodeType(argument0Node);
-      final TypeString checkedTypeStr = argument0Result.get(0, TypeString.UNDEFINED);
-      if (checkedTypeStr.isUndefined()) {
+      final TypeString checkedTypeStr = this.getTestedType(node, argument0Node);
+      if (this.isUncheckable(checkedTypeStr)) {
         return;
       }
 
-      if (isClassOf) {
-        final TypeString intersection = TypeString.intersection(receiverTypeStr, checkedTypeStr);
-        if (intersection == null) {
-          final String message =
-              MESSAGE.formatted(receiverTypeStr.getFullString(), checkedTypeStr.getFullString());
-          this.addIssue(node, message);
-        }
-      } else { // isKindOf.
-        final TypeStringResolver resolver = this.getTypeStringResolver();
-        if (!resolver.isKindOf(receiverTypeStr, checkedTypeStr)) {
-          final String message =
-              MESSAGE.formatted(receiverTypeStr.getFullString(), checkedTypeStr.getFullString());
-          this.addIssue(node, message);
-        }
+      final boolean canMatch =
+          isKindOf
+              ? this.canBeKindOf(receiverNode, receiverTypeStr, checkedTypeStr)
+              : this.canBeClassOf(receiverNode, argument0Node, receiverTypeStr, checkedTypeStr);
+      if (!canMatch) {
+        final String message =
+            MESSAGE.formatted(receiverTypeStr.getFullString(), checkedTypeStr.getFullString());
+        this.addIssue(node, message);
       }
     }
+  }
+
+  /**
+   * The reasoned type of a side of a test. In a method {@code _self} is its exemplar, or an
+   * instance of it or of a subtype. Elsewhere it is not known.
+   */
+  private TypeString getTestedType(final AstNode node, final AstNode sideNode) {
+    final TypeString typeStr = this.getComparedType(sideNode);
+    final List<TypeString> parts = typeStr.getCombinedTypes();
+    if (parts.stream().noneMatch(TypeString::isSelf)) {
+      return typeStr;
+    }
+
+    final AstNode definitionNode =
+        node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
+    if (definitionNode == null || definitionNode.isNot(MagikGrammar.METHOD_DEFINITION)) {
+      return TypeString.UNDEFINED;
+    }
+
+    return SelfHelper.substituteSelf(typeStr, node);
+  }
+
+  /**
+   * A value is an instance of its type or of a subtype, so it can be a kind of the tested type when
+   * some known type is a kind of both. An exemplar read through its global is that exemplar.
+   */
+  private boolean canBeKindOf(
+      final AstNode receiverNode, final TypeString receiverTypeStr, final TypeString kindTypeStr) {
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    if (this.isExemplarRead(receiverNode)) {
+      return resolver.isKindOf(receiverTypeStr, kindTypeStr);
+    }
+
+    return resolver.canBeKindOfBoth(receiverTypeStr, kindTypeStr);
+  }
+
+  /**
+   * The class of a value is its type or a subtype of it, and the class of an exemplar read through
+   * its global is exactly its type.
+   */
+  private boolean canBeClassOf(
+      final AstNode receiverNode,
+      final AstNode argumentNode,
+      final TypeString receiverTypeStr,
+      final TypeString argumentTypeStr) {
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    final boolean receiverIsExact = this.isExemplarRead(receiverNode);
+    final boolean argumentIsExact = this.isExemplarRead(argumentNode);
+    if (!receiverIsExact && !argumentIsExact) {
+      return resolver.canBeKindOfBoth(receiverTypeStr, argumentTypeStr);
+    }
+
+    return (!argumentIsExact || resolver.isKindOf(argumentTypeStr, receiverTypeStr))
+        && (!receiverIsExact || resolver.isKindOf(receiverTypeStr, argumentTypeStr));
+  }
+
+  /** Whether a node reads a global that names an exemplar. */
+  private boolean isExemplarRead(final AstNode node) {
+    AstNode atomNode = node;
+    while (atomNode.isNot(MagikGrammar.ATOM) && atomNode.getNumberOfChildren() == 1) {
+      atomNode = atomNode.getFirstChild();
+    }
+
+    if (atomNode.getNumberOfChildren() != 1 || !this.isGlobalRead(atomNode)) {
+      return false;
+    }
+
+    final AstNode identifierNode = atomNode.getFirstChild(MagikGrammar.IDENTIFIER);
+    final String identifier = identifierNode.getTokenValue();
+    final PackageNodeHelper packageHelper = new PackageNodeHelper(identifierNode);
+    final String currentPackage = packageHelper.getCurrentPackage();
+    final TypeString nameTypeStr = TypeString.ofIdentifier(identifier, currentPackage);
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    final Collection<ITypeStringDefinition> definitions = resolver.resolve(nameTypeStr);
+    return !definitions.isEmpty()
+        && definitions.stream().allMatch(ExemplarDefinition.class::isInstance);
   }
 }

@@ -1466,4 +1466,69 @@ class TypeStringResolverTest {
     final List<TypeString> owners = this.getOwnerTypeStrings(methodDefinitions);
     assertThat(owners).containsExactly(ZZ_P_REF);
   }
+
+  @Test
+  void testCanBeKindOfBothThroughADowncast() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString zzBaseRef = TypeString.ofIdentifier("zz_base", "user");
+    final TypeString zzSubRef = TypeString.ofIdentifier("zz_sub", "user");
+    this.addExemplarWithParents(definitionKeeper, zzBaseRef);
+    this.addExemplarWithParents(definitionKeeper, zzSubRef, zzBaseRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final boolean canBeKindOfBoth = resolver.canBeKindOfBoth(zzBaseRef, zzSubRef);
+
+    assertThat(canBeKindOfBoth).isTrue();
+  }
+
+  @Test
+  void testCanBeKindOfBothThroughAJointSubtype() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString zzPRef = TypeString.ofIdentifier("zz_p", "user");
+    final TypeString zzQRef = TypeString.ofIdentifier("zz_q", "user");
+    final TypeString zzMidRef = TypeString.ofIdentifier("zz_mid", "user");
+    final TypeString zzRRef = TypeString.ofIdentifier("zz_r", "user");
+    this.addExemplarWithParents(definitionKeeper, zzPRef);
+    this.addExemplarWithParents(definitionKeeper, zzQRef);
+    this.addExemplarWithParents(definitionKeeper, zzMidRef, zzPRef);
+    this.addExemplarWithParents(definitionKeeper, zzRRef, zzMidRef, zzQRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final boolean canBeKindOfBoth = resolver.canBeKindOfBoth(zzPRef, zzQRef);
+
+    assertThat(canBeKindOfBoth).isTrue();
+  }
+
+  @Test
+  void testCanBeKindOfBothThroughAnImplicitFormatMixin() {
+    // zz_t inherits the slotted format mixin implicitly, which no inheritance definition holds.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString zzNRef = TypeString.ofIdentifier("zz_n", "user");
+    final TypeString zzTRef = TypeString.ofIdentifier("zz_t", "user");
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.MIXIN, zzNRef);
+    this.addExemplarWithParents(definitionKeeper, zzTRef, zzNRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final boolean canBeKindOfBoth =
+        resolver.canBeKindOfBoth(TypeString.SW_SLOTTED_FORMAT_MIXIN, zzNRef);
+
+    assertThat(canBeKindOfBoth).isTrue();
+  }
+
+  @Test
+  void testCannotBeKindOfBothWithoutAJointSubtype() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString zzPRef = TypeString.ofIdentifier("zz_p", "user");
+    final TypeString zzQRef = TypeString.ofIdentifier("zz_q", "user");
+    final TypeString zzSubRef = TypeString.ofIdentifier("zz_sub", "user");
+    this.addExemplarWithParents(definitionKeeper, zzPRef);
+    this.addExemplarWithParents(definitionKeeper, zzQRef);
+    this.addExemplarWithParents(definitionKeeper, zzSubRef, zzPRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final TypeString unionRef = TypeString.combine(zzPRef, TypeString.SW_UNSET);
+
+    final boolean canBeKindOfBoth = resolver.canBeKindOfBoth(unionRef, zzQRef);
+
+    assertThat(canBeKindOfBoth).isFalse();
+  }
 }

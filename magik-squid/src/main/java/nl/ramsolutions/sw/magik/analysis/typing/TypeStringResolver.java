@@ -320,6 +320,78 @@ public class TypeStringResolver {
   }
 
   /**
+   * Test if some type known to the keeper is a kind of both a member of {@code typeString1} and a
+   * member of {@code typeString2}. Either member itself counts, so a member that is a kind of the
+   * other answers without a walk of the subtypes.
+   *
+   * @param typeString1 The one type.
+   * @param typeString2 The other type.
+   * @return True if some known type is a kind of both.
+   */
+  public boolean canBeKindOfBoth(final TypeString typeString1, final TypeString typeString2) {
+    final List<TypeString> typeStrings1 = typeString1.getCombinedTypes();
+    final List<TypeString> typeStrings2 = typeString2.getCombinedTypes();
+    return typeStrings1.stream()
+        .anyMatch(
+            typeStr1 ->
+                typeStrings2.stream()
+                    .anyMatch(typeStr2 -> this.canBeKindOfBothMembers(typeStr1, typeStr2)));
+  }
+
+  private boolean canBeKindOfBothMembers(
+      final TypeString typeString1, final TypeString typeString2) {
+    return this.isKindOf(typeString1, typeString2)
+        || this.isKindOf(typeString2, typeString1)
+        || this.hasSubtypeOfKind(typeString1, typeString2)
+        || this.hasSubtypeOfKind(typeString2, typeString1);
+  }
+
+  /**
+   * Test if a subtype of {@code typeString} is a kind of {@code kindTypeString}. The walk follows
+   * the inheritance definitions down, which do not hold an implicit format mixin parent, so the
+   * caller walks from both types.
+   */
+  private boolean hasSubtypeOfKind(final TypeString typeString, final TypeString kindTypeString) {
+    final TypeString resolvedTypeStr = this.getResolvedTypeString(typeString);
+    final TypeString bareTypeStr = resolvedTypeStr.getWithoutGenerics();
+    final Set<TypeString> seen = new HashSet<>();
+    seen.add(bareTypeStr);
+    final Deque<TypeString> queue = new ArrayDeque<>();
+    queue.addLast(bareTypeStr);
+    while (!queue.isEmpty()) {
+      final TypeString currentTypeStr = queue.removeFirst();
+      final List<InheritanceDefinition> inheritanceDefinitions =
+          this.getChildInheritanceDefinitions(currentTypeStr);
+      for (final InheritanceDefinition inheritanceDefinition : inheritanceDefinitions) {
+        final TypeString childTypeStr = inheritanceDefinition.getChildTypeName();
+        if (!seen.add(childTypeStr)) {
+          continue;
+        }
+
+        if (this.isKindOf(childTypeStr, kindTypeString)) {
+          return true;
+        }
+
+        queue.addLast(childTypeStr);
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * The inheritance definitions naming a type as parent under any of its spellings: {@code {:a}} in
+   * a file of package {@code P} is filed under parent {@code P:a}.
+   */
+  private List<InheritanceDefinition> getChildInheritanceDefinitions(final TypeString typeString) {
+    final Set<TypeString> spellings = this.getSpellings(typeString);
+    return spellings.stream()
+        .flatMap(
+            spelling -> this.definitionKeeper.getInheritanceDefinitionsByParent(spelling).stream())
+        .toList();
+  }
+
+  /**
    * Get the {@link MethodDefinition}s the {@link TypeString} responds to, including from its super
    * types. A mixin also responds with the methods of {@code sw:object} it does not define itself,
    * as {@link #getRespondingMethodDefinitions(TypeString, String)} does.

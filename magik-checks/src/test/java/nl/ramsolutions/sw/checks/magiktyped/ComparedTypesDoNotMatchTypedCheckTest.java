@@ -302,4 +302,213 @@ class ComparedTypesDoNotMatchTypedCheckTest {
     final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
+
+  private void addExemplar(
+      final IDefinitionKeeper definitionKeeper,
+      final ExemplarDefinition.Sort sort,
+      final TypeString typeRef) {
+    definitionKeeper.add(new ExemplarDefinition(null, null, null, null, null, sort, typeRef, null));
+  }
+
+  private void addParent(
+      final IDefinitionKeeper definitionKeeper,
+      final TypeString childRef,
+      final TypeString parentRef) {
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, childRef, parentRef));
+  }
+
+  /**
+   * Slotted {@code zz_base}, {@code zz_sub} with parent {@code zz_base}, {@code zz_mid} with parent
+   * {@code zz_sub}, {@code zz_p}, {@code zz_q}, {@code zz_r} with parents {@code zz_p} and {@code
+   * zz_q}, {@code zz_s} with parents {@code zz_base} and {@code zz_m}, {@code zz_t} with parent
+   * {@code zz_n}, and {@code zz_lone}; mixins {@code zz_m} and {@code zz_n}.
+   */
+  private IDefinitionKeeper createHierarchyKeeper() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString zzBaseRef = TypeString.ofIdentifier("zz_base", "user");
+    final TypeString zzSubRef = TypeString.ofIdentifier("zz_sub", "user");
+    final TypeString zzMidRef = TypeString.ofIdentifier("zz_mid", "user");
+    final TypeString zzPRef = TypeString.ofIdentifier("zz_p", "user");
+    final TypeString zzQRef = TypeString.ofIdentifier("zz_q", "user");
+    final TypeString zzRRef = TypeString.ofIdentifier("zz_r", "user");
+    final TypeString zzSRef = TypeString.ofIdentifier("zz_s", "user");
+    final TypeString zzTRef = TypeString.ofIdentifier("zz_t", "user");
+    final TypeString zzLoneRef = TypeString.ofIdentifier("zz_lone", "user");
+    final TypeString zzMRef = TypeString.ofIdentifier("zz_m", "user");
+    final TypeString zzNRef = TypeString.ofIdentifier("zz_n", "user");
+    for (final TypeString typeRef :
+        List.of(zzBaseRef, zzSubRef, zzMidRef, zzPRef, zzQRef, zzRRef, zzSRef, zzTRef, zzLoneRef)) {
+      this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, typeRef);
+    }
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.MIXIN, zzMRef);
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.MIXIN, zzNRef);
+    this.addParent(definitionKeeper, zzSubRef, zzBaseRef);
+    this.addParent(definitionKeeper, zzMidRef, zzSubRef);
+    this.addParent(definitionKeeper, zzRRef, zzPRef);
+    this.addParent(definitionKeeper, zzRRef, zzQRef);
+    this.addParent(definitionKeeper, zzSRef, zzBaseRef);
+    this.addParent(definitionKeeper, zzSRef, zzMRef);
+    this.addParent(definitionKeeper, zzTRef, zzNRef);
+    return definitionKeeper;
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        // A downcast: x may hold a zz_sub.
+        """
+        _method zz_base.k(x)
+          ## @param {user:zz_base} x
+          _return x.is_kind_of?(zz_sub)
+        _endmethod
+        """,
+        """
+        _method zz_base.k()
+          _return _self.is_kind_of?(zz_sub)
+        _endmethod
+        """,
+        // A zz_r is a kind of both.
+        """
+        _method a.m(x)
+          ## @param {user:zz_p} x
+          _return x.is_kind_of?(zz_q)
+        _endmethod
+        """,
+        // A zz_s is a zz_base including zz_m.
+        """
+        _method a.m(x)
+          ## @param {user:zz_base} x
+          _return x.is_kind_of?(zz_m)
+        _endmethod
+        """,
+        // A zz_t is a slotted exemplar, so a kind of sw:slotted_format_mixin, including zz_n.
+        """
+        _method a.m(x)
+          ## @param {sw:slotted_format_mixin} x
+          _return x.is_kind_of?(zz_n)
+        _endmethod
+        """,
+        // A zz_mid is a zz_base, two levels down.
+        """
+        _method a.m(x)
+          ## @param {user:zz_base|sw:unset} x
+          _return x.is_kind_of?(zz_mid)
+        _endmethod
+        """,
+        // A class test: x may hold a zz_sub, the class of the exemplar zz_sub.
+        """
+        _method a.m(x)
+          ## @param {user:zz_base} x
+          _return x.is_class_of?(zz_sub)
+        _endmethod
+        """,
+        // Both sides are values: each may hold a zz_mid.
+        """
+        _method a.m(x, y)
+          ## @param {user:zz_sub} x
+          ## @param {user:zz_base} y
+          _return x.is_class_of?(y)
+        _endmethod
+        """,
+      })
+  void testDowncastCanMatch(final String code) {
+    final IDefinitionKeeper definitionKeeper = this.createHierarchyKeeper();
+    final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        // No known type is a kind of both.
+        """
+        _method a.m(x)
+          ## @param {user:zz_base} x
+          _return x.is_kind_of?(zz_lone)
+        _endmethod
+        """,
+        """
+        _method a.m(x)
+          ## @param {user:zz_p} x
+          _return x.is_kind_of?(zz_m)
+        _endmethod
+        """,
+        // The exemplar zz_base is of class zz_base, which is no zz_sub.
+        """
+        _method a.m(x)
+          ## @param {user:zz_sub} x
+          _return x.is_class_of?(zz_base)
+        _endmethod
+        """,
+        """
+        _method a.m(x, y)
+          ## @param {user:zz_base} x
+          ## @param {user:zz_lone} y
+          _return x.is_class_of?(y)
+        _endmethod
+        """,
+        // An exemplar read through its global is that exemplar, which is no zz_sub.
+        """
+        _method a.m()
+          _return zz_base.is_kind_of?(zz_sub)
+        _endmethod
+        """,
+        """
+        _method a.m(x)
+          ## @param {user:zz_sub} x
+          _return zz_base.is_class_of?(x)
+        _endmethod
+        """,
+        """
+        _method a.m()
+          _return zz_base.is_class_of?(zz_sub)
+        _endmethod
+        """,
+      })
+  void testNoJointSubtypeCannotMatch(final String code) {
+    final IDefinitionKeeper definitionKeeper = this.createHierarchyKeeper();
+    final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _method a.m(x)
+          ## @param {<E>} x
+          _return x.is_kind_of?(sw:integer)
+        _endmethod
+        """,
+        """
+        _method a.m(x)
+          ## @param {<E>|sw:unset} x
+          _return x.is_kind_of?(sw:integer)
+        _endmethod
+        """,
+        """
+        _method a.m(x)
+          ## @param {<E>} x
+          _return 1.is_kind_of?(x)
+        _endmethod
+        """,
+        """
+        _method a.m(x)
+          ## @param {<E>} x
+          _return x.is_class_of?(sw:integer)
+        _endmethod
+        """,
+        """
+        _method a.m(x)
+          ## @param {<E>} x
+          _return x _is 1
+        _endmethod
+        """,
+      })
+  void testUnboundGenericIsNotChecked(final String code) {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
 }
