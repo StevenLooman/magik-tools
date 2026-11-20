@@ -10,6 +10,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -468,6 +469,119 @@ class ComparedTypesDoNotMatchTypedCheckTest {
       })
   void testNoJointSubtypeCannotMatch(final String code) {
     final IDefinitionKeeper definitionKeeper = this.createHierarchyKeeper();
+    final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        // Both may hold one zz_sub.
+        """
+        _method a.m(x, y)
+          ## @param {user:zz_base} x
+          ## @param {user:zz_sub} y
+          _return x _is y
+        _endmethod
+        """,
+        """
+        _method a.m(x, y)
+          ## @param {user:zz_sub} x
+          ## @param {user:zz_base} y
+          _return x _isnt y
+        _endmethod
+        """,
+        // Both may hold one zz_r.
+        """
+        _method a.m(x, y)
+          ## @param {user:zz_p} x
+          ## @param {user:zz_q} y
+          _return x _is y
+        _endmethod
+        """,
+        // The exemplar zz_sub is a zz_base.
+        """
+        _method a.m(x)
+          ## @param {user:zz_base} x
+          _return x _is zz_sub
+        _endmethod
+        """,
+        // _self may be a zz_r, as may y.
+        """
+        _method zz_p.m(y)
+          ## @param {user:zz_q} y
+          _return _self _is y
+        _endmethod
+        """,
+        // _self may be a zz_mid, as may y.
+        """
+        _method zz_sub.m(y)
+          ## @param {user:zz_base} y
+          _return y _is _self
+        _endmethod
+        """,
+      })
+  void testIdentityOfJointSubtypeCanMatch(final String code) {
+    final IDefinitionKeeper definitionKeeper = this.createHierarchyKeeper();
+    final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        """
+        _method a.m(x, y)
+          ## @param {user:zz_base} x
+          ## @param {user:zz_lone} y
+          _return x _is y
+        _endmethod
+        """,
+        // Two exemplars read through their globals are two objects.
+        """
+        _method a.m()
+          _return zz_base _is zz_sub
+        _endmethod
+        """,
+        """
+        _method a.m()
+          _return zz_sub _isnt zz_base
+        _endmethod
+        """,
+        // The exemplar zz_base is no zz_sub.
+        """
+        _method a.m(x)
+          ## @param {user:zz_sub} x
+          _return x _is zz_base
+        _endmethod
+        """,
+        """
+        _method zz_sub.m()
+          _return _self _is zz_base
+        _endmethod
+        """,
+      })
+  void testIdentityWithoutJointSubtypeCannotMatch(final String code) {
+    final IDefinitionKeeper definitionKeeper = this.createHierarchyKeeper();
+    final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
+  void testIdentityOfUnrelatedTypesWithoutJointSubtypeCannotMatch() {
+    final String code =
+        """
+        _method a.m(x, y)
+          ## @param {user:zz_p} x
+          ## @param {user:zz_q} y
+          _return x _is y
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString zzPRef = TypeString.ofIdentifier("zz_p", "user");
+    final TypeString zzQRef = TypeString.ofIdentifier("zz_q", "user");
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, zzPRef);
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, zzQRef);
     final MagikTypedCheck check = new ComparedTypesDoNotMatchTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }

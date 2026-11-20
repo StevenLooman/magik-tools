@@ -52,7 +52,7 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
 
     if (this.isGlobalAgainstUnset(leftNode, rightTypeStr)
         || this.isGlobalAgainstUnset(rightNode, leftTypeStr)
-        || this.canMatch(node, leftTypeStr, rightTypeStr)) {
+        || this.canMatch(node, leftNode, rightNode, leftTypeStr, rightTypeStr)) {
       return;
     }
 
@@ -115,22 +115,32 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
         && variableNode.getFirstChild(MagikGrammar.EXPRESSION) == null;
   }
 
+  /**
+   * Both sides can be one object when some known type is a kind of both. An exemplar read through
+   * its global is exactly that exemplar.
+   */
   private boolean canMatch(
-      final AstNode node, final TypeString leftTypeStr, final TypeString rightTypeStr) {
+      final AstNode node,
+      final AstNode leftNode,
+      final AstNode rightNode,
+      final TypeString leftTypeStr,
+      final TypeString rightTypeStr) {
     if (leftTypeStr.isSelf()) {
-      return this.canBeSelf(node, rightTypeStr);
+      return this.canBeSelf(node, rightNode, rightTypeStr);
     }
 
     if (rightTypeStr.isSelf()) {
-      return this.canBeSelf(node, leftTypeStr);
+      return this.canBeSelf(node, leftNode, leftTypeStr);
     }
 
     final TypeString intersection = TypeString.intersection(leftTypeStr, rightTypeStr);
-    return intersection != null;
+    return intersection != null
+        || this.canBeSameType(leftNode, rightNode, leftTypeStr, rightTypeStr);
   }
 
   /** In a method {@code _self} is its exemplar, or an instance of it or of a subtype. */
-  private boolean canBeSelf(final AstNode node, final TypeString otherTypeStr) {
+  private boolean canBeSelf(
+      final AstNode node, final AstNode otherNode, final TypeString otherTypeStr) {
     final AstNode definitionNode =
         node.getFirstAncestor(MagikGrammar.METHOD_DEFINITION, MagikGrammar.PROCEDURE_DEFINITION);
     if (otherTypeStr.isSelf()
@@ -146,8 +156,11 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
     }
 
     final TypeStringResolver resolver = this.getTypeStringResolver();
-    final List<TypeString> otherParts = otherTypeStr.getCombinedTypes();
-    return otherParts.stream().anyMatch(part -> resolver.isKindOf(part, ownerTypeStr));
+    if (this.isExemplarRead(otherNode)) {
+      return resolver.isKindOf(otherTypeStr, ownerTypeStr);
+    }
+
+    return resolver.canBeKindOfBoth(otherTypeStr, ownerTypeStr);
   }
 
   @Override
@@ -174,7 +187,7 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
       final boolean canMatch =
           isKindOf
               ? this.canBeKindOf(receiverNode, receiverTypeStr, checkedTypeStr)
-              : this.canBeClassOf(receiverNode, argument0Node, receiverTypeStr, checkedTypeStr);
+              : this.canBeSameType(receiverNode, argument0Node, receiverTypeStr, checkedTypeStr);
       if (!canMatch) {
         final String message =
             MESSAGE.formatted(receiverTypeStr.getFullString(), checkedTypeStr.getFullString());
@@ -218,23 +231,24 @@ public class ComparedTypesDoNotMatchTypedCheck extends MagikTypedCheck {
   }
 
   /**
-   * The class of a value is its type or a subtype of it, and the class of an exemplar read through
-   * its global is exactly its type.
+   * Whether two sides can hold one object, or two objects of one class. A value is an instance of
+   * its type or of a subtype, so it can when some known type is a kind of both. An exemplar read
+   * through its global is exactly its type.
    */
-  private boolean canBeClassOf(
-      final AstNode receiverNode,
-      final AstNode argumentNode,
-      final TypeString receiverTypeStr,
-      final TypeString argumentTypeStr) {
+  private boolean canBeSameType(
+      final AstNode leftNode,
+      final AstNode rightNode,
+      final TypeString leftTypeStr,
+      final TypeString rightTypeStr) {
     final TypeStringResolver resolver = this.getTypeStringResolver();
-    final boolean receiverIsExact = this.isExemplarRead(receiverNode);
-    final boolean argumentIsExact = this.isExemplarRead(argumentNode);
-    if (!receiverIsExact && !argumentIsExact) {
-      return resolver.canBeKindOfBoth(receiverTypeStr, argumentTypeStr);
+    final boolean leftIsExact = this.isExemplarRead(leftNode);
+    final boolean rightIsExact = this.isExemplarRead(rightNode);
+    if (!leftIsExact && !rightIsExact) {
+      return resolver.canBeKindOfBoth(leftTypeStr, rightTypeStr);
     }
 
-    return (!argumentIsExact || resolver.isKindOf(argumentTypeStr, receiverTypeStr))
-        && (!receiverIsExact || resolver.isKindOf(receiverTypeStr, argumentTypeStr));
+    return (!rightIsExact || resolver.isKindOf(rightTypeStr, leftTypeStr))
+        && (!leftIsExact || resolver.isKindOf(leftTypeStr, rightTypeStr));
   }
 
   /** Whether a node reads a global that names an exemplar. */
