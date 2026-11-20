@@ -29,7 +29,9 @@ public class SuperMethodExistsTypedCheck extends MagikTypedCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "SuperMethodExists";
 
-  private static final String MESSAGE = "Unknown method on super: %s";
+  private static final String MESSAGE = "Cannot find super implementation of %s";
+  // A named super is bound when the send runs, which then fails as any send does.
+  private static final String MESSAGE_NAMED = "Object %s does not understand message %s";
   private static final String MESSAGE_TOO_MANY = "Too many super implementations of %s";
 
   @Override
@@ -79,14 +81,14 @@ public class SuperMethodExistsTypedCheck extends MagikTypedCheck {
       final Collection<MethodDefinition> methodDefs =
           resolver.getRespondingMethodDefinitionsAsParent(typeString, methodName);
       if (methodDefs.isEmpty()) {
-        this.addUnknownMethodIssue(node, helper, typeString);
+        this.addUnknownNamedMethodIssue(node, methodName, typeString);
       }
     }
   }
 
   /**
-   * Report a method no parent answers, once per parent, or one that two or more parents answer. Two
-   * parents reaching the same inherited method are two answers.
+   * Report a method no parent answers, or one that two or more parents answer. Two parents reaching
+   * the same inherited method are two answers.
    */
   private void checkPlainSuper(
       final AstNode node,
@@ -122,13 +124,14 @@ public class SuperMethodExistsTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    memberTypeStrs.forEach(typeString -> this.addUnknownMethodIssue(node, helper, typeString));
+    final String message = MESSAGE.formatted(methodName);
+    this.addIssueAtMethodName(node, message);
   }
 
-  private void addUnknownMethodIssue(
-      final AstNode node, final MethodInvocationNodeHelper helper, final TypeString typeString) {
-    final String fullName = helper.getReceiverMethodName(typeString);
-    final String message = MESSAGE.formatted(fullName);
+  private void addUnknownNamedMethodIssue(
+      final AstNode node, final String methodName, final TypeString typeString) {
+    final String typeName = typeString.getFullString();
+    final String message = MESSAGE_NAMED.formatted(typeName, methodName);
     this.addIssueAtMethodName(node, message);
   }
 

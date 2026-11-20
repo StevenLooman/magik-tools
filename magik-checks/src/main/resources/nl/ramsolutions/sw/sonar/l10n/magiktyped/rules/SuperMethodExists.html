@@ -1,6 +1,6 @@
 <p>Super method exists</p>
 <p>A plain <code>_super.m()</code> is bound, when its method is loaded, to the one direct parent that answers <code>m()</code>. The method fails to load when no parent answers <code>m()</code>, or when two or more parents do.</p>
-<p>When two or more parents answer the method, the send is reported as <code>Too many super implementations of m()</code>. Name the parent to call instead, as in <code>_super(mixin_a).m()</code>; such a send is reported when the named parent does not answer the method.</p>
+<p>When no parent answers the method, the send is reported as <code>Cannot find super implementation of m()</code>; when two or more parents do, as <code>Too many super implementations of m()</code>. Name the parent to call instead, as in <code>_super(mixin_a).m()</code>; such a send is reported when the named parent does not answer the method.</p>
 <h2>Non-compliant Code Example</h2>
 <pre data-diff-id="1" data-diff-type="noncompliant">
 def_slotted_exemplar(:parent, {})

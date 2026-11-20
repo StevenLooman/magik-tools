@@ -24,7 +24,8 @@ public class GlobalExistsTypedCheck extends MagikTypedCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "GlobalExists";
 
-  private static final String MESSAGE = "Unknown global: %s";
+  // A session's error when auto-declare is off.
+  private static final String MESSAGE = "Undefined global: %s";
   private static final String DEFAULT_PACKAGE = "user";
 
   private final Set<TypeString> declaredGlobals = new HashSet<>();

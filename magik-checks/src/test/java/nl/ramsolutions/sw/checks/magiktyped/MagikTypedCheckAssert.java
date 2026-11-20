@@ -97,6 +97,29 @@ public class MagikTypedCheckAssert extends AbstractAssert<MagikTypedCheckAssert,
   }
 
   /**
+   * Test running the {@link MagikTypedCheck} against code reports issues with exactly these
+   * messages, in order.
+   *
+   * @param code Code to run {@link MagikTypedCheck} against.
+   * @param definitionKeeper Keeper of the definitions the code uses.
+   * @param messages Expected messages.
+   * @return Self.
+   */
+  public MagikTypedCheckAssert reportsIssueMessages(
+      final String code, final IDefinitionKeeper definitionKeeper, final String... messages) {
+    this.isNotNull();
+
+    final List<Issue> issues = this.runCheck(code, definitionKeeper);
+    final List<String> reported = issues.stream().map(Issue::message).toList();
+    final List<String> expected = List.of(messages);
+    if (!reported.equals(expected)) {
+      this.failWithMessage("Expected check to report <%s>, but gotten <%s>", expected, reported);
+    }
+
+    return this;
+  }
+
+  /**
    * Test running the {@link MagikTypedCheck} on path results in a specified number of issues.
    *
    * @param path Path of file to run {@link MagikTypedCheck} against.

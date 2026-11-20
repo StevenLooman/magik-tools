@@ -78,6 +78,44 @@ class MethodIsPublicTypedCheckTest {
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
 
+  @Test
+  void testMethodIsPrivateMessageNamesTheReceiver() {
+    // A session says, with two spaces: Cannot invoke private method m()  on object <receiver>.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, ropeRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, ropeRef, TypeString.SW_OBJECT));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "m()",
+            Set.of(MethodDefinition.Modifier.PRIVATE),
+            Collections.emptyList(),
+            null,
+            null,
+            ExpressionResultString.EMPTY,
+            ExpressionResultString.EMPTY));
+
+    final String code =
+        """
+        _block
+          rope.m()
+        _endblock
+        """;
+    final MagikTypedCheck check = new MethodIsPublicTypedCheck();
+    assertThat(check)
+        .reportsIssueMessages(
+            code, definitionKeeper, "Cannot invoke private method m()  on object sw:rope");
+  }
+
   @ParameterizedTest
   @ValueSource(
       strings = {

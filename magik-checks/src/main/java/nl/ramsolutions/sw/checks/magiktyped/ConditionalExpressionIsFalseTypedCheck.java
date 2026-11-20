@@ -16,8 +16,7 @@ public class ConditionalExpressionIsFalseTypedCheck extends MagikTypedCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "ConditionalExpressionIsFalse";
 
-  private static final String MESSAGE =
-      "Conditional expression does not result in true/false, but '%s'";
+  private static final String MESSAGE = "Object %s does not understand message %s";
 
   private static final String SHOULD_BE_BOOLEAN_METHOD = "should_be_boolean()";
 
@@ -42,8 +41,8 @@ public class ConditionalExpressionIsFalseTypedCheck extends MagikTypedCheck {
       return;
     }
 
-    final String typeStringStr = typeStr.getFullString();
-    final String message = MESSAGE.formatted(typeStringStr);
+    final String typeName = typeStr.getFullString();
+    final String message = MESSAGE.formatted(typeName, SHOULD_BE_BOOLEAN_METHOD);
     this.addIssue(node, message);
   }
 }

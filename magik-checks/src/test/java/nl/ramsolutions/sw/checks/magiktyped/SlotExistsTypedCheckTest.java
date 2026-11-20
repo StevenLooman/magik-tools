@@ -41,6 +41,27 @@ class SlotExistsTypedCheckTest {
   }
 
   @Test
+  void testSlotUnknownMessage() {
+    // A session says: Exemplar zz_a does not have a slot named zz_nope.
+    final String code =
+        """
+        _package user
+        _method zz_a.m()
+          _return .zz_nope
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString aRef = TypeString.ofIdentifier("zz_a", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, aRef, null));
+    final MagikTypedCheck check = new SlotExistsTypedCheck();
+    assertThat(check)
+        .reportsIssueMessages(
+            code, definitionKeeper, "Exemplar user:zz_a does not have a slot named zz_nope");
+  }
+
+  @Test
   void testSlotKnown() {
     final String code =
         """

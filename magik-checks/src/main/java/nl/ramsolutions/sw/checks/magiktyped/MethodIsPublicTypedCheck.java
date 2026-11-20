@@ -17,7 +17,8 @@ public class MethodIsPublicTypedCheck extends MagikTypedCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "MethodIsPublic";
 
-  private static final String MESSAGE = "Called method is not public: %s";
+  // Two spaces before `on`, as a session writes it.
+  private static final String MESSAGE = "Cannot invoke private method %s  on object %s";
 
   protected void walkPostMethodInvocation(final AstNode node) {
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
@@ -35,14 +36,17 @@ public class MethodIsPublicTypedCheck extends MagikTypedCheck {
     final TypeStringResolver resolver = this.getTypeStringResolver();
     final Collection<MethodDefinition> methodDefinitions =
         resolver.getRespondingMethodDefinitions(receiverTypeStr, methodName);
-    methodDefinitions.stream()
-        .filter(methodDef -> methodDef.getModifiers().contains(MethodDefinition.Modifier.PRIVATE))
-        .forEach(
-            methodDef -> {
-              final AstNode issueNode = helper.getMethodNameNode();
-              final String methodDefName = methodDef.getName();
-              final String message = MESSAGE.formatted(methodDefName);
-              this.addIssue(issueNode, message);
-            });
+    final boolean privateMethod =
+        methodDefinitions.stream()
+            .anyMatch(
+                methodDef -> methodDef.getModifiers().contains(MethodDefinition.Modifier.PRIVATE));
+    if (!privateMethod) {
+      return;
+    }
+
+    final AstNode issueNode = helper.getMethodNameNode();
+    final String typeName = receiverTypeStr.getFullString();
+    final String message = MESSAGE.formatted(methodName, typeName);
+    this.addIssue(issueNode, message);
   }
 }

@@ -173,7 +173,7 @@ class SuperMethodExistsTypedCheckTest {
     definitionKeeper.add(
         new InheritanceDefinition(null, null, null, null, null, TYPE_CHILD, TYPE_PARENT));
     final String message = this.runCheckForMessage(code, definitionKeeper);
-    Assertions.assertThat(message).isEqualTo("Unknown method on super: sw:parent[]");
+    Assertions.assertThat(message).isEqualTo("Cannot find super implementation of []");
   }
 
   private String runCheckForMessage(final String code, final IDefinitionKeeper definitionKeeper) {
@@ -205,7 +205,7 @@ class SuperMethodExistsTypedCheckTest {
     definitionKeeper.add(
         new InheritanceDefinition(null, null, null, null, null, TYPE_CHILD, TYPE_PARENT));
     final String message = this.runCheckForMessage(code, definitionKeeper);
-    Assertions.assertThat(message).isEqualTo("Unknown method on super: sw:parent.nonexistent()");
+    Assertions.assertThat(message).isEqualTo("Cannot find super implementation of nonexistent()");
   }
 
   @Test
@@ -350,7 +350,7 @@ class SuperMethodExistsTypedCheckTest {
   }
 
   @Test
-  void testNoParentAnswersIsReportedPerParent() {
+  void testNoParentAnswersIsReportedOnce() {
     final String code =
         """
         _package user
@@ -365,9 +365,7 @@ class SuperMethodExistsTypedCheckTest {
     this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, ZZ_C, ZZ_A, ZZ_B);
     final List<String> messages = this.runCheckForMessages(code, definitionKeeper);
     Assertions.assertThat(messages)
-        .containsExactlyInAnyOrder(
-            "Unknown method on super: user:zz_a.nonexistent()",
-            "Unknown method on super: user:zz_b.nonexistent()");
+        .containsExactly("Cannot find super implementation of nonexistent()");
   }
 
   @Test
@@ -413,6 +411,7 @@ class SuperMethodExistsTypedCheckTest {
 
   @Test
   void testNamedSuperStillReportsTheNamedParent() {
+    // A named super is bound when the send runs, which raises does_not_understand.
     final String code =
         """
         _package user
@@ -427,7 +426,8 @@ class SuperMethodExistsTypedCheckTest {
     this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, ZZ_C, ZZ_A, ZZ_B);
     this.addMethod(definitionKeeper, ZZ_A, "only_a()");
     final List<String> messages = this.runCheckForMessages(code, definitionKeeper);
-    Assertions.assertThat(messages).containsExactly("Unknown method on super: user:zz_b.only_a()");
+    Assertions.assertThat(messages)
+        .containsExactly("Object user:zz_b does not understand message only_a()");
   }
 
   private List<String> runCheckForMessages(

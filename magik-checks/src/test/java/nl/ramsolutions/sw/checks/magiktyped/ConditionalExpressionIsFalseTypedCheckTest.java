@@ -63,6 +63,24 @@ class ConditionalExpressionIsFalseTypedCheckTest {
   }
 
   @Test
+  void testFailMessage() {
+    // A session says: Object 1 does not understand message should_be_boolean().
+    final String code =
+        """
+        _if 1
+        _then
+        _endif
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final MagikTypedCheck check = new ConditionalExpressionIsFalseTypedCheck();
+    assertThat(check)
+        .reportsIssueMessages(
+            code,
+            definitionKeeper,
+            "Object sw:integer does not understand message should_be_boolean()");
+  }
+
+  @Test
   void testRespondsToShouldBeBoolean() {
     final String code =
         """

@@ -18,7 +18,7 @@ public class MethodExistsTypedCheck extends MagikTypedCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "MethodExists";
 
-  private static final String MESSAGE = "Unknown method: %s";
+  private static final String MESSAGE = "Object %s does not understand message %s";
 
   @Override
   protected void walkPostMethodInvocation(final AstNode node) {
@@ -51,8 +51,8 @@ public class MethodExistsTypedCheck extends MagikTypedCheck {
 
       // Add issue if no method is found.
       if (methodDefs.isEmpty()) {
-        final String fullName = helper.getReceiverMethodName(typeString);
-        final String message = MESSAGE.formatted(fullName);
+        final String typeName = typeString.getFullString();
+        final String message = MESSAGE.formatted(typeName, methodName);
         final AstNode firstIdentifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
         final AstNode issueNode = firstIdentifierNode != null ? firstIdentifierNode : node;
         this.addIssue(issueNode, message);

@@ -291,7 +291,7 @@ class MethodExistsTypedCheckTest {
         _endblock""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final String message = this.runCheckForMessage(code, definitionKeeper);
-    Assertions.assertThat(message).isEqualTo("Unknown method: sw:object.m()");
+    Assertions.assertThat(message).isEqualTo("Object sw:object does not understand message m()");
   }
 
   @Test
@@ -303,7 +303,7 @@ class MethodExistsTypedCheckTest {
         _endblock""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final String message = this.runCheckForMessage(code, definitionKeeper);
-    Assertions.assertThat(message).isEqualTo("Unknown method: sw:object[]");
+    Assertions.assertThat(message).isEqualTo("Object sw:object does not understand message []");
   }
 
   @Test
@@ -315,7 +315,7 @@ class MethodExistsTypedCheckTest {
         _endblock""";
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final String message = this.runCheckForMessage(code, definitionKeeper);
-    Assertions.assertThat(message).isEqualTo("Unknown method: sw:object[,]<<");
+    Assertions.assertThat(message).isEqualTo("Object sw:object does not understand message [,]<<");
   }
 
   private String runCheckForMessage(final String code, final IDefinitionKeeper definitionKeeper) {

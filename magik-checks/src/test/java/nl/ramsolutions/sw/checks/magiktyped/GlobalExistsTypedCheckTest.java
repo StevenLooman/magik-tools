@@ -29,6 +29,16 @@ class GlobalExistsTypedCheckTest {
   }
 
   @Test
+  void testUnknownGlobalMessage() {
+    // A session with auto-declare off says: Undefined global: abc.
+    final String code = "abc.m";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    final MagikTypedCheck check = new GlobalExistsTypedCheck();
+    assertThat(check).reportsIssueMessages(code, definitionKeeper, "Undefined global: abc");
+  }
+
+  @Test
   void testGlobalDeclaredInMethod() {
     // Compiling `_global abc` creates `abc` when no such global exists yet.
     final String code =

@@ -17,7 +17,7 @@ public class SlotExistsTypedCheck extends MagikTypedCheck {
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "SlotExists";
 
-  private static final String MESSAGE = "Unknown slot: %s";
+  private static final String MESSAGE = "Exemplar %s does not have a slot named %s";
 
   @Override
   protected void walkPostSlot(final AstNode node) {
@@ -37,7 +37,9 @@ public class SlotExistsTypedCheck extends MagikTypedCheck {
 
     final Collection<SlotDefinition> slotDefs = resolver.getSlotDefinitions(typeStr, slotName);
     if (slotDefs.isEmpty()) {
-      final String message = MESSAGE.formatted(slotName);
+      final TypeString resolvedTypeStr = resolver.getResolvedTypeString(typeStr);
+      final String typeName = resolvedTypeStr.getFullString();
+      final String message = MESSAGE.formatted(typeName, slotName);
       final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
       this.addIssue(identifierNode, message);
     }

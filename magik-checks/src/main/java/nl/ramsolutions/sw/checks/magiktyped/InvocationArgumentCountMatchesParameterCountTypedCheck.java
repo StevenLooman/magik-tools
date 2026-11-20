@@ -11,7 +11,6 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationDefinitionHelper;
-import nl.ramsolutions.sw.magik.analysis.helpers.ProcedureInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
@@ -24,7 +23,11 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
   @SuppressWarnings("checkstyle:JavadocVariable")
   public static final String CHECK_KEY = "InvocationArgumentCountMatchesParameterCount";
 
-  private static final String MESSAGE = "Not enough arguments for invocation: %s";
+  private static final String MESSAGE_METHOD =
+      "Object %s sent message %s with too few arguments (requires %d, given %d)";
+  // A session names the procedure object; a check knows its type.
+  private static final String MESSAGE_PROCEDURE =
+      "Procedure %s invoked with too few arguments (requires %d, given %d)";
 
   @Override
   protected void walkPostMethodInvocation(final AstNode node) {
@@ -63,9 +66,11 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
       // Match arguments against method.parameters.
       final List<AstNode> argumentNodes = argumentsHelper.getArgumentNodes();
       final ArgumentRange argumentRange = ArgumentRange.of(parameterDefs);
-      if (argumentRange.required() > argumentNodes.size()) {
-        final String fullName = helper.getReceiverMethodName(calledTypeStr);
-        final String message = MESSAGE.formatted(fullName);
+      final int required = argumentRange.required();
+      final int given = argumentNodes.size();
+      if (required > given) {
+        final String typeName = calledTypeStr.getFullString();
+        final String message = MESSAGE_METHOD.formatted(typeName, methodName, required, given);
         this.addIssue(node, message);
       }
     }
@@ -91,8 +96,6 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
             node, this.getTypeReasonerState(), this.getTypeStringResolver());
 
     // Get procedures.
-    final ProcedureInvocationNodeHelper helper = new ProcedureInvocationNodeHelper(node);
-    final String invokedIdentifier = helper.getInvokedIdentifier();
     final Collection<ProcedureDefinition> procedureDefs =
         ProcedureInvocationDefinitionHelper.getRespondingProcedureDefinitions(
             node, this.getTypeReasonerState(), this.getTypeStringResolver(), this.getMagikFile());
@@ -109,14 +112,14 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
       // Match arguments against procedure parameters.
       final List<AstNode> argumentNodes = argumentsHelper.getArgumentNodes();
       final ArgumentRange argumentRange = ArgumentRange.of(parameterDefs);
-      if (argumentRange.required() > argumentNodes.size()) {
-        final String baseInvocationName =
-            calledTypeStr.isUndefined() ? "procedure" : calledTypeStr.getFullString();
-        final String invocationName =
-            invokedIdentifier != null
-                ? baseInvocationName + "." + invokedIdentifier
-                : baseInvocationName;
-        final String message = MESSAGE.formatted(invocationName);
+      final int required = argumentRange.required();
+      final int given = argumentNodes.size();
+      if (required > given) {
+        // An anonymous procedure's own type has an internal name, so name it a sw:procedure.
+        final TypeString procedureTypeStr =
+            calledTypeStr.isAnonymous() ? TypeString.SW_PROCEDURE : calledTypeStr;
+        final String typeName = procedureTypeStr.getFullString();
+        final String message = MESSAGE_PROCEDURE.formatted(typeName, required, given);
         this.addIssue(node, message);
       }
     }
