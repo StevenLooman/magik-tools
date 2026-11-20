@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.BreakpointManager;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.StepType;
@@ -33,7 +34,7 @@ class AgentStepper implements Stepper {
    *
    * @param slapProtocol SLAP protocol.
    * @param debugClient LSP4j DebugClient.
-   * @param breakpointManager Breakpoint manager, which holds the user breakpoints.
+   * @param breakpointManager Breakpoint manager.
    */
   AgentStepper(
       final ISlapProtocol slapProtocol,

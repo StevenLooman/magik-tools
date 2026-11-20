@@ -17,12 +17,20 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.AnyErrorFilter;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.ExceptionFilter;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.HitAction;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.HitContext;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.StopHitAction;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.BreakpointEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.ThreadStartedEvent;
+import org.eclipse.lsp4j.debug.Capabilities;
 import org.eclipse.lsp4j.debug.ConfigurationDoneArguments;
 import org.eclipse.lsp4j.debug.DisconnectArguments;
 import org.eclipse.lsp4j.debug.EvaluateArguments;
 import org.eclipse.lsp4j.debug.EvaluateResponse;
+import org.eclipse.lsp4j.debug.ExceptionBreakpointsFilter;
+import org.eclipse.lsp4j.debug.InitializeRequestArguments;
 import org.eclipse.lsp4j.debug.StoppedEventArguments;
 import org.eclipse.lsp4j.debug.StoppedEventArgumentsReason;
 import org.eclipse.lsp4j.debug.ThreadEventArguments;
@@ -101,6 +109,123 @@ class MagikDebugAdapterTest {
   }
 
   @Test
+  void testInitializeDoesNotAdvertiseLogpointsWhenNoActionSupportsThem() throws Exception {
+    final MagikDebugAdapter adapter =
+        new MagikDebugAdapter() {
+          @Override
+          protected List<HitAction> createHitActions() {
+            return List.of(new StopHitAction());
+          }
+        };
+
+    final InitializeRequestArguments args = new InitializeRequestArguments();
+    final CompletableFuture<Capabilities> future = adapter.initialize(args);
+
+    final Capabilities capabilities = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    final Boolean supportsLogPoints = capabilities.getSupportsLogPoints();
+    assertThat(supportsLogPoints).isNull();
+  }
+
+  @Test
+  void testInitializeAdvertisesLogpointsWhenAnActionSupportsThem() throws Exception {
+    final HitAction logpointAction =
+        new HitAction() {
+          @Override
+          public boolean handle(final HitContext context) {
+            return false;
+          }
+
+          @Override
+          public boolean supportsLogpoints() {
+            return true;
+          }
+        };
+    final MagikDebugAdapter adapter =
+        new MagikDebugAdapter() {
+          @Override
+          protected List<HitAction> createHitActions() {
+            return List.of(logpointAction, new StopHitAction());
+          }
+        };
+
+    final InitializeRequestArguments args = new InitializeRequestArguments();
+    final CompletableFuture<Capabilities> future = adapter.initialize(args);
+
+    final Capabilities capabilities = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    final Boolean supportsLogPoints = capabilities.getSupportsLogPoints();
+    assertThat(supportsLogPoints).isTrue();
+  }
+
+  @Test
+  void testAdvertisedFiltersAreUnchanged() throws Exception {
+    final MagikDebugAdapter adapter =
+        new MagikDebugAdapter() {
+          @Override
+          protected List<ExceptionFilter> createExceptionFilters() {
+            return List.of(new AnyErrorFilter());
+          }
+        };
+
+    final InitializeRequestArguments args = new InitializeRequestArguments();
+    final CompletableFuture<Capabilities> future = adapter.initialize(args);
+
+    final Capabilities capabilities = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    final ExceptionBreakpointsFilter[] filters = capabilities.getExceptionBreakpointFilters();
+    assertThat(filters).hasSize(1);
+    final ExceptionBreakpointsFilter filter = filters[0];
+    final String label = filter.getLabel();
+    assertThat(label).isEqualTo("Any error condition");
+    final String filterId = filter.getFilter();
+    assertThat(filterId).isEqualTo("_self.taxonomy.includes?(:error)");
+    final String description = filter.getDescription();
+    assertThat(description).isNull();
+    final Boolean isDefault = filter.getDefault_();
+    assertThat(isDefault).isNull();
+    final Boolean supportsCondition = filter.getSupportsCondition();
+    assertThat(supportsCondition).isNull();
+  }
+
+  @Test
+  void testInitializeAdvertisesTheFiltersOfTheFactory() throws Exception {
+    final ExceptionFilter extraFilter =
+        new ExceptionFilter() {
+          @Override
+          public String getId() {
+            return "extra";
+          }
+
+          @Override
+          public String getLabel() {
+            return "Extra";
+          }
+
+          @Override
+          public String getCondition() {
+            return "True";
+          }
+        };
+    final MagikDebugAdapter adapter =
+        new MagikDebugAdapter() {
+          @Override
+          protected List<ExceptionFilter> createExceptionFilters() {
+            return List.of(new AnyErrorFilter(), extraFilter);
+          }
+        };
+
+    final InitializeRequestArguments args = new InitializeRequestArguments();
+    final CompletableFuture<Capabilities> future = adapter.initialize(args);
+
+    final Capabilities capabilities = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+    final ExceptionBreakpointsFilter[] filters = capabilities.getExceptionBreakpointFilters();
+    assertThat(filters).hasSize(2);
+    final ExceptionBreakpointsFilter extra = filters[1];
+    final String extraFilterId = extra.getFilter();
+    assertThat(extraFilterId).isEqualTo("extra");
+    final String extraLabel = extra.getLabel();
+    assertThat(extraLabel).isEqualTo("Extra");
+  }
+
+  @Test
   void testEvaluateWithoutFrameIdFailsWithResponseError() {
     final MagikDebugAdapter adapter = new MagikDebugAdapter();
 
@@ -114,6 +239,21 @@ class MagikDebugAdapterTest {
     assertThat(cause).isInstanceOf(ResponseErrorException.class);
     final String message = cause.getMessage();
     assertThat(message).contains("stack frame").contains("stopped thread");
+  }
+
+  @Test
+  void testEvaluateWithFrameIdBeforeAttachFailsWithResponseError() {
+    final MagikDebugAdapter adapter = new MagikDebugAdapter();
+
+    final EvaluateArguments args = new EvaluateArguments();
+    args.setExpression("1 + 1");
+    args.setFrameId(1);
+    final CompletableFuture<EvaluateResponse> future = adapter.evaluate(args);
+
+    final Throwable thrown = catchThrowable(() -> future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS));
+    assertThat(thrown).isInstanceOf(ExecutionException.class);
+    final Throwable cause = thrown.getCause();
+    assertThat(cause).isInstanceOf(ResponseErrorException.class);
   }
 
   @Test

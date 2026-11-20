@@ -13,7 +13,16 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.BuildInfo;
-import nl.ramsolutions.sw.magik.debugadapter.BreakpointManager.MagikBreakpoint;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.AnyErrorFilter;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.BreakpointManager;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.BreakpointManager.MagikBreakpoint;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.ExceptionFilter;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.HitAction;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.SourceLookup;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.StopHitAction;
+import nl.ramsolutions.sw.magik.debugadapter.evaluate.EvaluateContext;
+import nl.ramsolutions.sw.magik.debugadapter.evaluate.EvaluateManager;
+import nl.ramsolutions.sw.magik.debugadapter.evaluate.FrameEvaluateModule;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.SlapException;
@@ -34,6 +43,7 @@ import org.eclipse.lsp4j.debug.ContinueResponse;
 import org.eclipse.lsp4j.debug.DisconnectArguments;
 import org.eclipse.lsp4j.debug.EvaluateArguments;
 import org.eclipse.lsp4j.debug.EvaluateResponse;
+import org.eclipse.lsp4j.debug.ExceptionBreakpointsFilter;
 import org.eclipse.lsp4j.debug.FunctionBreakpoint;
 import org.eclipse.lsp4j.debug.InitializeRequestArguments;
 import org.eclipse.lsp4j.debug.NextArguments;
@@ -70,8 +80,6 @@ import org.eclipse.lsp4j.debug.VariablesResponse;
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient;
 import org.eclipse.lsp4j.debug.services.IDebugProtocolServer;
 import org.eclipse.lsp4j.jsonrpc.ResponseErrorException;
-import org.eclipse.lsp4j.jsonrpc.messages.ResponseError;
-import org.eclipse.lsp4j.jsonrpc.messages.ResponseErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,14 +94,12 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
   private static final String PATH_MAPPING_FROM_ARG = "from";
   private static final String PATH_MAPPING_TO_ARG = "to";
 
-  private static final String EVALUATE_WITHOUT_FRAME_MESSAGE =
-      "Select a stack frame of a stopped thread to evaluate an expression.";
-
   private IDebugProtocolClient debugClient;
   // Set by attach() and disconnect() on one thread, used by request and event handler threads.
   private volatile SlapProtocol slapProtocol;
   private volatile ThreadManager threadManager;
   private volatile VariableManager variableManager;
+  private volatile EvaluateManager evaluateManager;
   private volatile BreakpointManager breakpointManager;
   private volatile PathMapper pathMapper;
 
@@ -117,7 +123,17 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
 
     final Capabilities capabilities = new Capabilities();
     capabilities.setSupportsFunctionBreakpoints(true);
-    capabilities.setExceptionBreakpointFilters(BreakpointManager.EXCEPTION_BREAKPOINTS_FILTERS);
+    final List<ExceptionFilter> exceptionFilters = this.createExceptionFilters();
+    final ExceptionBreakpointsFilter[] filters =
+        exceptionFilters.stream()
+            .map(MagikDebugAdapter::toBreakpointsFilter)
+            .toArray(ExceptionBreakpointsFilter[]::new);
+    capabilities.setExceptionBreakpointFilters(filters);
+    final List<HitAction> hitActions = this.createHitActions();
+    final boolean supportsLogPoints = hitActions.stream().anyMatch(HitAction::supportsLogpoints);
+    if (supportsLogPoints) {
+      capabilities.setSupportsLogPoints(true);
+    }
     return CompletableFuture.completedFuture(capabilities);
   }
 
@@ -179,10 +195,53 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
    */
   void createManagers(final ISlapProtocol newSlapProtocol, final PathMapper newPathMapper) {
     this.pathMapper = newPathMapper;
-    this.breakpointManager = new BreakpointManager(newSlapProtocol, this.debugClient);
+    final List<HitAction> hitActions = this.createHitActions();
+    final List<ExceptionFilter> exceptionFilters = this.createExceptionFilters();
+    final FrameSourceResolver sourceResolver =
+        new FrameSourceResolver(newSlapProtocol, newPathMapper);
+    final SourceLookup sourceLookup = new FrameSourceLookup(sourceResolver, newPathMapper);
+    this.breakpointManager =
+        new BreakpointManager(
+            newSlapProtocol, this.debugClient, hitActions, exceptionFilters, sourceLookup);
     this.threadManager =
-        new ThreadManager(newSlapProtocol, this.debugClient, newPathMapper, this.breakpointManager);
+        new ThreadManager(
+            newSlapProtocol, this.debugClient, sourceResolver, this.breakpointManager);
     this.variableManager = new VariableManager(newSlapProtocol);
+    this.evaluateManager = new EvaluateManager(newSlapProtocol);
+  }
+
+  /**
+   * Create the ordered actions which handle a breakpoint hit. Override to add or remove actions.
+   *
+   * <p>Called once by {@code initialize} and once per attach, so an override must be free of side
+   * effects. It runs before {@code attach}, so the actions must not depend on state set at attach.
+   *
+   * @return Ordered actions, the last one handles every hit.
+   */
+  protected List<HitAction> createHitActions() {
+    return List.of(new StopHitAction());
+  }
+
+  /**
+   * Create the ordered exception filters the client can select. Override to add or remove filters.
+   *
+   * <p>Called once by {@code initialize} and once per attach, so an override must be free of side
+   * effects. It runs before {@code attach}, so the filters must not depend on state set at attach.
+   *
+   * @return Ordered filters, asked for their verdict in this order. {@link AnyErrorFilter} comes
+   *     first, so when it is selected the stack is not searched for the other filters.
+   */
+  protected List<ExceptionFilter> createExceptionFilters() {
+    return List.of(new AnyErrorFilter());
+  }
+
+  private static ExceptionBreakpointsFilter toBreakpointsFilter(final ExceptionFilter filter) {
+    final ExceptionBreakpointsFilter breakpointsFilter = new ExceptionBreakpointsFilter();
+    final String label = filter.getLabel();
+    breakpointsFilter.setLabel(label);
+    final String id = filter.getId();
+    breakpointsFilter.setFilter(id);
+    return breakpointsFilter;
   }
 
   @SuppressWarnings("unchecked")
@@ -260,6 +319,7 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
 
           this.threadManager = null;
           this.variableManager = null;
+          this.evaluateManager = null;
           this.breakpointManager = null;
         });
   }
@@ -556,21 +616,21 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     LOGGER.trace(
         "evaluate, expression: '{}', frame id: {}", args.getExpression(), args.getFrameId());
 
-    final Integer frameId = args.getFrameId();
-    if (frameId == null) {
-      final ResponseError error = new ResponseError();
-      error.setCode(ResponseErrorCode.InvalidParams);
-      error.setMessage(EVALUATE_WITHOUT_FRAME_MESSAGE);
-      final ResponseErrorException exception = new ResponseErrorException(error);
+    // Before attach, answer as for a request without a frame.
+    final EvaluateManager manager = this.evaluateManager;
+    if (manager == null) {
+      final ResponseErrorException exception = FrameEvaluateModule.createMissingFrameException();
       return CompletableFuture.failedFuture(exception);
     }
 
+    final Integer frameId = args.getFrameId();
+    final String expression = args.getExpression();
+    final String context = args.getContext();
     return CompletableFuture.supplyAsync(
         () -> {
-          final String expression = args.getExpression();
+          final EvaluateContext evaluateContext = new EvaluateContext(frameId, expression, context);
           try {
-            // Evaluate in thread/frame.
-            final String result = this.threadManager.evaluate(frameId, expression);
+            final String result = manager.evaluate(evaluateContext);
 
             // Return response.
             final EvaluateResponse response = new EvaluateResponse();

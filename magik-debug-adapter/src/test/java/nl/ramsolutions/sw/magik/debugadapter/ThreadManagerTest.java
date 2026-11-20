@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.BreakpointManager;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ErrorMessage;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.RequestType;
@@ -59,8 +60,9 @@ class ThreadManagerTest {
 
     final PathMapper pathMapper = new PathMapper(Collections.emptyMap());
     final BreakpointManager breakpointManager = new BreakpointManager(slapProtocol, null);
+    final FrameSourceResolver resolver = new FrameSourceResolver(slapProtocol, pathMapper);
     final ThreadManager manager =
-        new ThreadManager(slapProtocol, null, pathMapper, breakpointManager);
+        new ThreadManager(slapProtocol, null, resolver, breakpointManager);
     final List<Thread> threads = manager.threads();
     assertThat(threads).hasSize(2);
 
@@ -111,8 +113,9 @@ class ThreadManagerTest {
     final Map<Path, Path> pathMapping = Map.of(Path.of("/src"), Path.of("/home/user/src"));
     final PathMapper pathMapper = new PathMapper(pathMapping);
     final BreakpointManager breakpointManager = new BreakpointManager(slapProtocol, null);
+    final FrameSourceResolver resolver = new FrameSourceResolver(slapProtocol, pathMapper);
     final ThreadManager manager =
-        new ThreadManager(slapProtocol, null, pathMapper, breakpointManager);
+        new ThreadManager(slapProtocol, null, resolver, breakpointManager);
     final List<StackFrame> stackFrames = manager.stackTrace(1);
     assertThat(stackFrames).hasSize(2);
 
@@ -169,7 +172,8 @@ class ThreadManagerTest {
   private ThreadManager createThreadManager(final TestSlapProtocol slapProtocol) {
     final PathMapper pathMapper = new PathMapper(Collections.emptyMap());
     final BreakpointManager breakpointManager = new BreakpointManager(slapProtocol, null);
-    return new ThreadManager(slapProtocol, null, pathMapper, breakpointManager);
+    final FrameSourceResolver resolver = new FrameSourceResolver(slapProtocol, pathMapper);
+    return new ThreadManager(slapProtocol, null, resolver, breakpointManager);
   }
 
   @Test

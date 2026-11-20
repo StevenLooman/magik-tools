@@ -7,13 +7,13 @@ import org.eclipse.lsp4j.debug.ThreadEventArguments;
 import org.eclipse.lsp4j.debug.services.IDebugProtocolClient;
 
 /** Debug protocol client which records the events it receives. */
-class RecordingDebugProtocolClient implements IDebugProtocolClient {
+public class RecordingDebugProtocolClient implements IDebugProtocolClient {
 
   private final List<StoppedEventArguments> stoppedEvents = new CopyOnWriteArrayList<>();
   private final List<ThreadEventArguments> threadEvents = new CopyOnWriteArrayList<>();
   private volatile Runnable initializedHook = () -> {};
 
-  List<StoppedEventArguments> getStoppedEvents() {
+  public List<StoppedEventArguments> getStoppedEvents() {
     return this.stoppedEvents;
   }
 

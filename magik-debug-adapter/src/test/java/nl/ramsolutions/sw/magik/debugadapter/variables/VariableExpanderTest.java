@@ -106,6 +106,52 @@ class VariableExpanderTest {
     }
   }
 
+  /** Expander that supplies the value of the variables it claims. */
+  private static final class ValueExpander implements VariableExpander {
+
+    static final String SUMMARY = ".summary";
+
+    @Override
+    public String createCondition(final String expression) {
+      return expression + ".is_kind_of?(sw:table_mixin)";
+    }
+
+    @Override
+    public String createCountExpression(final String expression) {
+      return null;
+    }
+
+    @Override
+    public String createValueExpression(final String expression) {
+      return expression + SUMMARY;
+    }
+
+    @Override
+    public List<MagikVariable> getVariables(
+        final VariableManager manager,
+        final MagikVariable variable,
+        final VariablesArgumentsFilter filter,
+        final int start,
+        final int count) {
+      return List.of();
+    }
+  }
+
+  /** Fake agent that answers the summary expression of a {@link ValueExpander}. */
+  private static final class SummarySlapProtocol extends DescribingSlapProtocol {
+
+    private final String summary;
+
+    SummarySlapProtocol(final String summary) {
+      this.summary = summary;
+    }
+
+    @Override
+    String answer(final String expression) {
+      return expression.endsWith(ValueExpander.SUMMARY) ? this.summary : super.answer(expression);
+    }
+  }
+
   private List<MagikVariable> getLocals(final VariableManager manager)
       throws IOException, InterruptedException, ExecutionException {
     final int frameId = Lsp4jConversion.threadIdLevelToFrameId(20, 0);
@@ -320,5 +366,77 @@ class VariableExpanderTest {
     assertThat(indexedVariables).isEqualTo(7);
     final List<String> expressionsAfter = slapProtocol.getExpressions();
     assertThat(expressionsAfter).isEqualTo(expressionsBefore);
+  }
+
+  @Test
+  void testNoValueExpressionKeepsTheAgentsValueWithoutExtraEvaluate()
+      throws IOException, InterruptedException, ExecutionException {
+    final DescribingSlapProtocol slapProtocol = new DescribingSlapProtocol();
+    final Value table = new Value(Set.of("table_mixin"), 5);
+    slapProtocol.addLocal("a_table", table);
+    final MixinExpander tableExpander = new MixinExpander("table_mixin", true, 0, true);
+    final VariableManager manager = new VariableManager(slapProtocol, List.of(tableExpander));
+
+    final List<MagikVariable> locals = this.getLocals(manager);
+
+    final MagikVariable tableVariable = locals.get(0);
+    final String value = tableVariable.getValue();
+    assertThat(value).isEqualTo("value of a_table");
+    final List<String> expressions = slapProtocol.getExpressions();
+    assertThat(expressions).hasSize(1);
+  }
+
+  @Test
+  void testValueExpressionReplacesTheValue()
+      throws IOException, InterruptedException, ExecutionException {
+    final DescribingSlapProtocol slapProtocol = new SummarySlapProtocol("a table of 5");
+    final Value table = new Value(Set.of("table_mixin"), 5);
+    slapProtocol.addLocal("a_table", table);
+    final VariableManager manager = new VariableManager(slapProtocol, List.of(new ValueExpander()));
+
+    final List<MagikVariable> locals = this.getLocals(manager);
+
+    final MagikVariable tableVariable = locals.get(0);
+    final String value = tableVariable.getValue();
+    assertThat(value).isEqualTo("a table of 5");
+    final List<String> expressions = slapProtocol.getExpressions();
+    assertThat(expressions).hasSize(2);
+    final String valueExpression = expressions.get(1);
+    assertThat(valueExpression).isEqualTo("a_table.summary");
+  }
+
+  @Test
+  void testFailedValueExpressionKeepsTheAgentsValue()
+      throws IOException, InterruptedException, ExecutionException {
+    final DescribingSlapProtocol slapProtocol = new SummarySlapProtocol(null);
+    final Value table = new Value(Set.of("table_mixin"), 5);
+    slapProtocol.addLocal("a_table", table);
+    final VariableManager manager = new VariableManager(slapProtocol, List.of(new ValueExpander()));
+
+    final List<MagikVariable> locals = this.getLocals(manager);
+
+    final MagikVariable tableVariable = locals.get(0);
+    final String value = tableVariable.getValue();
+    assertThat(value).isEqualTo("value of a_table");
+    final VariableExpander expander = tableVariable.getExpander();
+    assertThat(expander).isInstanceOf(ValueExpander.class);
+    // The description and one value expression, which is not tried again.
+    final List<String> expressions = slapProtocol.getExpressions();
+    assertThat(expressions).hasSize(2);
+  }
+
+  @Test
+  void testEmptyValueExpressionAnswerKeepsTheAgentsValue()
+      throws IOException, InterruptedException, ExecutionException {
+    final DescribingSlapProtocol slapProtocol = new SummarySlapProtocol("  ");
+    final Value table = new Value(Set.of("table_mixin"), 5);
+    slapProtocol.addLocal("a_table", table);
+    final VariableManager manager = new VariableManager(slapProtocol, List.of(new ValueExpander()));
+
+    final List<MagikVariable> locals = this.getLocals(manager);
+
+    final MagikVariable tableVariable = locals.get(0);
+    final String value = tableVariable.getValue();
+    assertThat(value).isEqualTo("value of a_table");
   }
 }

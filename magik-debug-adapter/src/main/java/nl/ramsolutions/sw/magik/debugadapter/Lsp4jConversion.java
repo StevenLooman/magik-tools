@@ -3,7 +3,7 @@ package nl.ramsolutions.sw.magik.debugadapter;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.nio.file.Path;
 import java.util.List;
-import nl.ramsolutions.sw.magik.debugadapter.BreakpointManager.MagikBreakpoint;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.BreakpointManager.MagikBreakpoint;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.BreakpointSetResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadInfoResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadStackResponse;

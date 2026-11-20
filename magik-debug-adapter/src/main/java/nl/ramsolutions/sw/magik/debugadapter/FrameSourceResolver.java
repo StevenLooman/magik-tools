@@ -3,16 +3,17 @@ package nl.ramsolutions.sw.magik.debugadapter;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import nl.ramsolutions.sw.magik.debugadapter.slap.ErrorMessage;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.SlapErrorException;
-import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ErrorResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.EvalResponse;
-import nl.ramsolutions.sw.magik.debugadapter.slap.responses.SourceFileResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadStackResponse;
+import nl.ramsolutions.sw.magik.debugadapter.source.AgentSourceModule;
+import nl.ramsolutions.sw.magik.debugadapter.source.SourceModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,7 @@ class FrameSourceResolver {
 
   private final ISlapProtocol slapProtocol;
   private final PathMapper pathMapper;
+  private final List<SourceModule> modules;
 
   /**
    * Constructor.
@@ -39,6 +41,16 @@ class FrameSourceResolver {
   FrameSourceResolver(final ISlapProtocol slapProtocol, final PathMapper pathMapper) {
     this.slapProtocol = slapProtocol;
     this.pathMapper = pathMapper;
+    this.modules = this.createModules();
+  }
+
+  /**
+   * Create the ordered source modules. Override to add or remove source modules.
+   *
+   * @return Ordered modules.
+   */
+  protected List<SourceModule> createModules() {
+    return List.of(new AgentSourceModule(this.slapProtocol, this.pathMapper));
   }
 
   /**
@@ -95,7 +107,7 @@ class FrameSourceResolver {
         final EvalResponse eval = (EvalResponse) evalFuture.get();
         method = eval.getResult() + ":" + method;
       } catch (final ExecutionException exception) {
-        FrameSourceResolver.rethrowUnlessMethodNotFound(exception);
+        SlapErrorException.rethrowUnlessMethodNotFound(exception);
         return null;
       }
 
@@ -119,28 +131,13 @@ class FrameSourceResolver {
   @CheckForNull
   Path determinePath(final String methodName)
       throws IOException, InterruptedException, ExecutionException {
-    try {
-      final CompletableFuture<ISlapResponse> sourceFileFuture =
-          this.slapProtocol.getSourceFile(methodName);
-      final SourceFileResponse sourceFile = (SourceFileResponse) sourceFileFuture.get();
-      final String filename = sourceFile.getFilename();
-      final Path daPath = Path.of(filename);
-      return this.pathMapper.applyMapping(daPath);
-    } catch (final ExecutionException exception) {
-      FrameSourceResolver.rethrowUnlessMethodNotFound(exception);
-      return null;
-    }
-  }
-
-  private static void rethrowUnlessMethodNotFound(final ExecutionException exception)
-      throws ExecutionException {
-    if (!(exception.getCause() instanceof SlapErrorException slapErrorException)) {
-      return;
+    for (final SourceModule module : this.modules) {
+      final Optional<Path> path = module.tryResolve(methodName);
+      if (path.isPresent()) {
+        return path.get();
+      }
     }
 
-    final ErrorResponse error = slapErrorException.getError();
-    if (error.getErrorMessage() != ErrorMessage.METHOD_NOT_FOUND) {
-      throw exception;
-    }
+    return null;
   }
 }

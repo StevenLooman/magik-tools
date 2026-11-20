@@ -1,6 +1,5 @@
 package nl.ramsolutions.sw.magik.debugadapter;
 
-import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -8,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.BreakpointManager;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ErrorMessage;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
@@ -16,7 +16,6 @@ import nl.ramsolutions.sw.magik.debugadapter.slap.events.BreakpointEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.StepCompletedEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.ThreadEndedEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.ThreadStartedEvent;
-import nl.ramsolutions.sw.magik.debugadapter.slap.responses.EvalResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadInfoResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadListResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.responses.ThreadStackResponse;
@@ -43,17 +42,17 @@ class ThreadManager {
    *
    * @param slapProtocol SLapProtocol.
    * @param debugClient LSP4j DebugClient.
-   * @param pathMapper Path mapping.
-   * @param breakpointManager Breakpoint manager, which holds the user breakpoints.
+   * @param frameSourceResolver Resolves the source file of a stack frame.
+   * @param breakpointManager Breakpoint manager.
    */
   ThreadManager(
       final ISlapProtocol slapProtocol,
       final IDebugProtocolClient debugClient,
-      final PathMapper pathMapper,
+      final FrameSourceResolver frameSourceResolver,
       final BreakpointManager breakpointManager) {
     this.slapProtocol = slapProtocol;
     this.debugClient = debugClient;
-    this.frameSourceResolver = new FrameSourceResolver(slapProtocol, pathMapper);
+    this.frameSourceResolver = frameSourceResolver;
     this.stepper =
         this.createStepper(slapProtocol, debugClient, breakpointManager, this.frameSourceResolver);
   }
@@ -63,7 +62,7 @@ class ThreadManager {
    *
    * @param slapProtocol SLAP protocol.
    * @param debugClient LSP4j DebugClient.
-   * @param breakpointManager Breakpoint manager, which holds the user breakpoints.
+   * @param breakpointManager Breakpoint manager.
    * @param frameSourceResolver Resolver for the source of a frame.
    * @return Stepper.
    */
@@ -240,30 +239,6 @@ class ThreadManager {
    */
   void stepOut(final long threadId) throws IOException, InterruptedException, ExecutionException {
     this.stepper.stepOut(threadId);
-  }
-
-  /**
-   * Evaluate an expression in a stack frame.
-   *
-   * @param frameId Stack frame.
-   * @param expression Expression to evaluate.
-   * @return Result of evaluate.
-   * @throws IOException -
-   * @throws InterruptedException -
-   * @throws ExecutionException -
-   */
-  String evaluate(final @Nullable Integer frameId, final String expression)
-      throws IOException, InterruptedException, ExecutionException {
-    if (frameId == null) {
-      throw new IllegalArgumentException("Missing frame ID");
-    }
-
-    final long threadId = Lsp4jConversion.frameIdToThreadId(frameId);
-    final int level = Lsp4jConversion.frameIdToLevel(frameId);
-    final CompletableFuture<ISlapResponse> evaluateFuture =
-        this.slapProtocol.evaluate(threadId, level, expression);
-    final EvalResponse response = (EvalResponse) evaluateFuture.get();
-    return response.getResult();
   }
 
   /**

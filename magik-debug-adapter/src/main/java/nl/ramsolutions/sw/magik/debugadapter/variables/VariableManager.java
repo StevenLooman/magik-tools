@@ -279,7 +279,42 @@ public class VariableManager {
     final Description description = this.describeVariable(frameId, expression);
     final VariableExpander expander = description.expander();
     final int indexedVariables = description.indexedVariables();
-    return this.addVariable(frameId, name, value, expression, expander, indexedVariables);
+    final String shownValue = this.describeValue(frameId, expander, expression, value);
+    return this.addVariable(frameId, name, shownValue, expression, expander, indexedVariables);
+  }
+
+  /**
+   * Get the value to show, from the expander when it supplies one. The agent's value stays when the
+   * expander supplies none, or its evaluation fails or answers nothing.
+   *
+   * @param frameId Frame ID.
+   * @param expander Expander that claimed the variable.
+   * @param expression Expression of the variable.
+   * @param agentValue Value the agent reports.
+   * @return Value to show.
+   */
+  private String describeValue(
+      final int frameId,
+      final VariableExpander expander,
+      final String expression,
+      final String agentValue)
+      throws IOException, InterruptedException {
+    final String valueExpression = expander.createValueExpression(expression);
+    if (valueExpression == null) {
+      return agentValue;
+    }
+
+    final String answer;
+    try {
+      answer = this.evaluateInFrame(frameId, valueExpression);
+    } catch (final ExecutionException exception) {
+      LOGGER.debug("Could not get value: {}", expression, exception);
+      return agentValue;
+    }
+    if (answer == null || answer.isBlank()) {
+      return agentValue;
+    }
+    return answer;
   }
 
   private MagikVariable addVariable(
@@ -394,6 +429,11 @@ public class VariableManager {
   String evaluate(final MagikVariable variable, final String expression)
       throws IOException, InterruptedException, ExecutionException {
     final int frameId = variable.getFrameId();
+    return this.evaluateInFrame(frameId, expression);
+  }
+
+  private String evaluateInFrame(final int frameId, final String expression)
+      throws IOException, InterruptedException, ExecutionException {
     final long threadId = Lsp4jConversion.frameIdToThreadId(frameId);
     final int level = Lsp4jConversion.frameIdToLevel(frameId);
     final CompletableFuture<ISlapResponse> future =

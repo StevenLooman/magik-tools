@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.debugadapter.variables;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -29,6 +30,19 @@ interface VariableExpander {
    *     children.
    */
   String createCountExpression(String expression);
+
+  /**
+   * Create the Magik expression answering the text shown as the value of the variable. Only a
+   * variable this expander claims is asked; a child it adds itself keeps the value it is given.
+   *
+   * @param expression Expression of the variable.
+   * @return Magik expression answering a string, or {@code null} to keep the value the agent
+   *     reports.
+   */
+  @CheckForNull
+  default String createValueExpression(final String expression) {
+    return null;
+  }
 
   /**
    * Get the number of named children, shown next to the indexed children.

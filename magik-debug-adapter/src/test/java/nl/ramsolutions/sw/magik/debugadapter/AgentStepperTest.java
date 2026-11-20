@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
+import nl.ramsolutions.sw.magik.debugadapter.breakpoints.BreakpointManager;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapResponse;
 import nl.ramsolutions.sw.magik.debugadapter.slap.StepType;
 import nl.ramsolutions.sw.magik.debugadapter.slap.events.BreakpointEvent;
