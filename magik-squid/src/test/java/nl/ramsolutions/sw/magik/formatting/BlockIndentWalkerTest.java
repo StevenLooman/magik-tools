@@ -837,6 +837,58 @@ class BlockIndentWalkerTest {
     assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB));
   }
 
+  @Test
+  void testIndentReturnCommaOnTheNextLine() {
+    final String code =
+        """
+        _method a.b
+        _return 7
+        , 8
+        _endmethod
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB));
+  }
+
+  @Test
+  void testIndentEmitCommaOnTheNextLine() {
+    final String code =
+        """
+        _method a.b
+        >> 7
+        , 8
+        _endmethod
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB2));
+  }
+
+  @Test
+  void testIndentReturnCommaOnTheNextLineAfterParentheses() {
+    final String code =
+        """
+        _method a.b
+        _return (7)
+        , 8
+        _endmethod
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB));
+  }
+
+  @Test
+  void testIndentEmitCommaOnTheNextLineAfterParentheses() {
+    final String code =
+        """
+        _method a.b
+        >> (7, 8)
+        , 9
+        _endmethod
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).containsExactly(this.insertAt(2, TAB), this.insertAt(3, TAB2));
+  }
+
   // ==========================================================================
   // Binary expression precedence
   // ==========================================================================

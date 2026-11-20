@@ -407,6 +407,124 @@ class MagikParserTest {
     assertThat(expressionNodes).hasSize(2);
   }
 
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "_return 7\n, 8",
+        "_return 7\n\n, 8",
+        "_return 7 # note\n, 8",
+        ">> 7\n, 8",
+        "_leave _with 7\n, 8",
+        "_continue _with 7\n, 8",
+        "_throw :t _with 7\n, 8",
+        "_loopbody(7\n, 8)"
+      })
+  void testCommaOnTheNextLineStaysInOneTuple(final String code) {
+    final AstNode node = this.parseMagik(code);
+
+    final AstNode syntaxErrorNode = node.getFirstDescendant(MagikGrammar.SYNTAX_ERROR);
+    assertThat(syntaxErrorNode).isNull();
+    final List<AstNode> statementNodes = node.getChildren(MagikGrammar.STATEMENT);
+    assertThat(statementNodes).hasSize(1);
+    final AstNode tupleNode = node.getFirstDescendant(MagikGrammar.TUPLE);
+    final List<AstNode> expressionNodes = tupleNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(expressionNodes).hasSize(2);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "_return (7, 8)",
+        "_return (7, 8); _local x",
+        "_if v _then _return (7, 8) _endif",
+        "_loop _leave _with (7, 8) _endloop",
+        "_return (7, 8) # note",
+        "_block >> (7, 8) _endblock"
+      })
+  void testParenthesisedTupleKeepsItsExpressions(final String code) {
+    final AstNode node = this.parseMagik(code);
+
+    final AstNode syntaxErrorNode = node.getFirstDescendant(MagikGrammar.SYNTAX_ERROR);
+    assertThat(syntaxErrorNode).isNull();
+    final AstNode tupleNode = node.getFirstDescendant(MagikGrammar.TUPLE);
+    final List<AstNode> expressionNodes = tupleNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(expressionNodes).hasSize(2);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "(a, b) << (1, 2)\n(c, d) << (3, 4)",
+        "(a, b) << (1, 2)\n.x << a",
+        "(a, b) << (1, 2) # note\n.x << a",
+        "_local (a, b) << (1, 2)\n(c, d) << (3, 4)",
+        "_local (a, b) << (1, 2)\n.x << a",
+        ">> (7, 8)\n.class_name",
+        ">> (7, 8)\n+ 1",
+        ">> (7, 8)\n- 1",
+        ">> (7, 8)\n_is 7",
+        ">> (_true, 8)\n_and _true",
+        ">> ({7}, 8)\n[1]",
+        ">> (p, 8)\n()"
+      })
+  void testLineBreakEndsAParenthesisedTupleBeforeASendOrOperator(final String code) {
+    final AstNode node = this.parseMagik(code);
+
+    final AstNode tupleNode = node.getFirstDescendant(MagikGrammar.TUPLE);
+    final List<AstNode> expressionNodes = tupleNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(expressionNodes).hasSize(2);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "_return (1, 2).x",
+        ">> (1, 2).x",
+        ">> (1, 2)[1]",
+        ">> (1, 2)()",
+        ">> (1, 2) + 1",
+        ">> (1, 2) < 1",
+        "(a, b) << (1, 2).x",
+        "_return (7 _scatter v).x"
+      })
+  void testParenthesesBeforeAContinuationAreOneValue(final String code) {
+    final AstNode node = this.parseMagik(code);
+
+    final AstNode syntaxErrorNode = node.getFirstDescendant(MagikGrammar.SYNTAX_ERROR);
+    assertThat(syntaxErrorNode).isNull();
+    final AstNode tupleNode = node.getFirstDescendant(MagikGrammar.TUPLE);
+    final List<AstNode> expressionNodes = tupleNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(expressionNodes).hasSize(1);
+    final AstNode atomNode = tupleNode.getFirstDescendant(MagikGrammar.ATOM);
+    final List<AstNode> atomExpressionNodes = atomNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(atomExpressionNodes).hasSize(2);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "_return (1, 2), 3",
+        ">> (1, 2), 3",
+        ">> (1, 2)\n, 3",
+        "_leave _with (1, 2), 3",
+        "_loopbody((1, 2), 3)"
+      })
+  void testParenthesesBeforeACommaAreAValue(final String code) {
+    final AstNode node = this.parseMagik(code);
+
+    final AstNode syntaxErrorNode = node.getFirstDescendant(MagikGrammar.SYNTAX_ERROR);
+    assertThat(syntaxErrorNode).isNull();
+    final AstNode tupleNode = node.getFirstDescendant(MagikGrammar.TUPLE);
+    final List<AstNode> expressionNodes = tupleNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(expressionNodes).hasSize(2);
+    final AstNode firstExpressionNode = expressionNodes.get(0);
+    final AstNode atomNode = firstExpressionNode.getFirstChild();
+    final AstNodeType atomType = atomNode.getType();
+    assertThat(atomType).isEqualTo(MagikGrammar.ATOM);
+    final List<AstNode> atomExpressionNodes = atomNode.getChildren(MagikGrammar.EXPRESSION);
+    assertThat(atomExpressionNodes).hasSize(2);
+  }
+
   @Test
   void testParenthesisedValueBeforeASendStaysAnAtom() {
     final String code = "_return (7).x";

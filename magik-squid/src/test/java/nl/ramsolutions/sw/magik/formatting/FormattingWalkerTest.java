@@ -538,6 +538,31 @@ class FormattingWalkerTest {
   }
 
   @Test
+  void testCommaOnTheNextLine() {
+    final String code =
+        """
+        _return 7
+        , 8
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
+  void testParenthesesAsAValue() {
+    final String code =
+        """
+        _return (1, 2), 3
+        _return (1, 2).class_name
+        _return (1, 2) + 1
+        (a, b) << (1, 2).class_name
+        _loopbody((1, 2), 3)
+        """;
+    final List<TextEdit> edits = this.getEdits(code);
+    assertThat(edits).isEmpty();
+  }
+
+  @Test
   void testMultipleAssignmentTuple() { // NOSONAR
     final String code =
         """

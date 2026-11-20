@@ -61,6 +61,7 @@ public enum MagikGrammar implements GrammarRuleKey {
   BODY,
   OPERATOR,
   TUPLE,
+  TUPLE_CONTINUATION,
   IDENTIFIERS,
   IDENTIFIERS_WITH_GATHER,
   METHOD_INVOCATION,
@@ -872,11 +873,33 @@ public enum MagikGrammar implements GrammarRuleKey {
                             b.optional(b.next(MagikKeyword.SCATTER), EXPRESSION)),
                         b.sequence(b.next(MagikKeyword.SCATTER), EXPRESSION)),
                     MagikPunctuator.PAREN_R,
-                    b.nextNot(MagikKeyword.SCATTER)),
+                    b.nextNot(TUPLE_CONTINUATION)),
                 b.sequence(
                     EXPRESSION,
-                    b.zeroOrMore(SPACING_NO_LB_2, MagikPunctuator.COMMA, EXPRESSION),
+                    b.zeroOrMore(MagikPunctuator.COMMA, EXPRESSION),
                     b.optional(b.next(MagikKeyword.SCATTER), EXPRESSION))));
+    // Only a comma or _scatter continues across a line break, and an assignment never does.
+    b.rule(TUPLE_CONTINUATION)
+        .is(
+            b.firstOf(
+                MagikPunctuator.COMMA,
+                MagikKeyword.SCATTER,
+                b.sequence(
+                    SPACING_NO_LB_2,
+                    b.nextNot(
+                        b.optional(OPERATOR),
+                        b.firstOf(MagikOperator.CHEVRON, MagikOperator.BOOT_CHEVRON)),
+                    b.firstOf(
+                        MagikPunctuator.DOT,
+                        MagikPunctuator.SQUARE_L,
+                        MagikPunctuator.PAREN_L,
+                        OPERATOR,
+                        MagikOperator.GE,
+                        MagikOperator.GT,
+                        MagikOperator.LE,
+                        MagikOperator.LT,
+                        MagikOperator.NE))))
+        .skip();
 
     b.rule(IDENTIFIERS).is(IDENTIFIER, b.zeroOrMore(MagikPunctuator.COMMA, IDENTIFIER));
     b.rule(IDENTIFIERS_WITH_GATHER)

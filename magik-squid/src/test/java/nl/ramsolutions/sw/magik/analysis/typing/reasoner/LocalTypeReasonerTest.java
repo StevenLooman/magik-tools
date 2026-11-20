@@ -21,6 +21,8 @@ import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.MagikGrammar;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /** Test LocalTypeReasoner. */
 @SuppressWarnings("checkstyle:MagicNumber")
@@ -2575,6 +2577,36 @@ class LocalTypeReasonerTest {
     final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
     final ExpressionResultString result = state.getNodeType(methodNode);
     assertThat(result).isEqualTo(new ExpressionResultString(TypeString.SW_INTEGER));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {">> (1, :a) + 1", "_return (1, :a) + 1"})
+  void testOperatorOnParenthesesUsesTheirFirstValue(final String statement) {
+    final String code =
+        """
+        _package sw
+        _method object.test
+            %s
+        _endmethod
+        """
+            .formatted(statement);
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new BinaryOperatorDefinition(
+            null,
+            null,
+            null,
+            code,
+            null,
+            "+",
+            TypeString.SW_INTEGER,
+            TypeString.SW_INTEGER,
+            TypeString.SW_FLOAT));
+
+    final ExpressionResultString result = this.reasonMethodResult(code, definitionKeeper);
+
+    final ExpressionResultString expected = new ExpressionResultString(TypeString.SW_FLOAT);
+    assertThat(result).isEqualTo(expected);
   }
 
   @Test
