@@ -1,10 +1,18 @@
 <p>Inheritance cycle</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 def_slotted_exemplar(:child, {}, :parent)
 $
 
 def_slotted_exemplar(:parent, {}, :child)
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+def_slotted_exemplar(:child, {}, :parent)
+$
+
+def_slotted_exemplar(:parent, {})
 $
 </pre>
 <p>In the above example, <code>child</code> inherits from <code>parent</code>, and <code>parent</code> inherits from <code>child</code>. This cycle can be spread across separate files/modules, so neither file necessarily looks wrong on its own. A type cannot legitimately inherit from itself, directly or indirectly; resolving methods/slots for either type is undefined.</p>

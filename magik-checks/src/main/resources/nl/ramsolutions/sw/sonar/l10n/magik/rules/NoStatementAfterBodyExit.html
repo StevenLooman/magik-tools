@@ -1,8 +1,15 @@
 <p>Statements after a body-exit statement (<code>_return</code>, <code>>></code>, <code>_leave</code>, <code>_continue</code>) are never executed.</p>
 <h2>Non-compliant Code Example</h2>
-<pre>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method a.b
   _return 10
   write(10)  # never executed
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method a.b
+  write(10)
+  _return 10
 _endmethod
 </pre>

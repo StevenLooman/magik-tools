@@ -10,40 +10,67 @@ its reasoned <code>_loopbody</code> yield types. Issues are raised in the follow
 </ul>
 <p>Yield slots whose type is unknown (e.g. from an unresolved method call) are skipped for
 mismatch reporting; those are covered by <em>UndefinedMethodCallResultTypedCheck</em>.</p>
-<h2>Examples</h2>
-<h3>Type mismatch</h3>
-<pre>
+<p>Type mismatch: the callable is documented to yield <code>float</code> but actually yields
+<code>integer</code>.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _iter _method example_exemplar.example_method()
     ## @loop {float}
     _loopbody(1)
 _endmethod
 </pre>
-<p>Raises an issue because the callable is documented to yield <code>float</code> but actually
-yields <code>integer</code>.</p>
-<h3>Missing @loop</h3>
-<pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_iter _method example_exemplar.example_method()
+    ## @loop {integer}
+    _loopbody(1)
+_endmethod
+</pre>
+<p>Missing @loop: the iter callable yields a value but has no <code>@loop</code> annotation.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="noncompliant">
 _iter _method example_exemplar.example_method()
     _loopbody(1)
 _endmethod
 </pre>
-<p>Raises an issue because the iter callable yields a value but has no <code>@loop</code>
-annotation.</p>
-<h3>@loop on non-iter callable</h3>
-<pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="compliant">
+_iter _method example_exemplar.example_method()
+    ## @loop {integer}
+    _loopbody(1)
+_endmethod
+</pre>
+<p>@loop on non-iter callable: <code>@loop</code> is only valid on iter callables.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="3" data-diff-type="noncompliant">
 _method example_exemplar.example_method()
     ## @loop {integer}
 _endmethod
 </pre>
-<p>Raises an issue because <code>@loop</code> is only valid on iter callables.</p>
-<h3>@loop without a type</h3>
-<pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="3" data-diff-type="compliant">
+_iter _method example_exemplar.example_method()
+    ## @loop {integer}
+    _loopbody(1)
+_endmethod
+</pre>
+<p>@loop without a type: the type in a <code>@loop</code> annotation is optional in the grammar: the wrapped description
+line parses as a second, untyped <code>@loop</code> declaration. Untyped annotations are discarded
+before any type comparison, so without this check the mistake goes unnoticed while the callable is
+recorded as yielding two values. Wrapping the line elsewhere resolves it.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="4" data-diff-type="noncompliant">
 _iter _method example_exemplar.example_method()
     ## @loop {integer} the value, which
     ## @loop must be yielded one at a time
     _loopbody(1)
 _endmethod
 </pre>
-<p>Raises an issue because the type in a <code>@loop</code> annotation is optional in the grammar:
-the wrapped description line parses as a second, untyped <code>@loop</code> declaration. Untyped
-annotations are discarded before any type comparison, so without this check the mistake goes
-unnoticed while the callable is recorded as yielding two values.</p>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="4" data-diff-type="compliant">
+_iter _method example_exemplar.example_method()
+    ## @loop {integer} the value, which @loop
+    ## must be yielded one at a time
+    _loopbody(1)
+_endmethod
+</pre>

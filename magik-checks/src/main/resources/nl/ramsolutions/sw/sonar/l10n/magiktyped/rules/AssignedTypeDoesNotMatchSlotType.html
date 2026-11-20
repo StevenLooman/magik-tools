@@ -1,6 +1,6 @@
 <p>Assigned type does not match slot type</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 ## Example exemplar.
 ## @slot {sw:rope} slot_1
 def_slotted_exemplar(
@@ -10,8 +10,22 @@ def_slotted_exemplar(
         })
 
 _method example_exemplar.example_method()
-    ## This assignment will raise an issue, because slot_1 is declared as sw:rope, but we are assigning an sw:integer.
-    .slot_1 << 12345
+    .slot_1 &lt;&lt; 12345
+_endmethod
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+## Example exemplar.
+## @slot {sw:rope} slot_1
+def_slotted_exemplar(
+        :example_exemplar,
+        {
+            {:slot_1, sw:rope}
+        })
+
+_method example_exemplar.example_method()
+    .slot_1 &lt;&lt; rope.new()
 _endmethod
 $
 </pre>

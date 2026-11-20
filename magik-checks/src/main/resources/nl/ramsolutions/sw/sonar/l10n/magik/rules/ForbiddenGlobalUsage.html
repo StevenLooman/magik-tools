@@ -1,5 +1,14 @@
 <p>Forbidden usage of global.</p>
 <h2>Non-compliant Code Example</h2>
-<pre>
-_dynamic !current_grs! << grs
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_method map_plugin.draw_on(grs)
+    _dynamic !current_grs! &lt;&lt; grs
+    _self.draw_parcels()
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method map_plugin.draw_on(grs)
+    _self.draw_parcels(grs)
+_endmethod
 </pre>

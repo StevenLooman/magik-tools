@@ -1,10 +1,22 @@
 <p>Methods/Procedures should not have too many parameters.</p>
+<p>By default, more than 6 parameters are reported.</p>
 <h2>Non-compliant Code Example</h2>
-<pre>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method object.example(p1, p2, p3, p4, p5, p6, p7)
 _endmethod
 </pre>
-<pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method object.example(p1, p2, p3)
+_endmethod
+</pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="noncompliant">
 _proc@example_proc(p1, p2, p3, p4, p5, p6, p7)
+_endproc
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="compliant">
+_proc@example_proc(p1, p2, p3)
 _endproc
 </pre>

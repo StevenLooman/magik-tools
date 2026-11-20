@@ -1,6 +1,6 @@
 <p>Deprecated type usage</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _pragma(classify_level=deprecated)
 ## Example exemplar.
 def_slotted_exemplar(
@@ -11,6 +11,29 @@ $
 
 _block
     example_exemplar.example_method()
+_endblock
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_pragma(classify_level=deprecated)
+## Example exemplar.
+def_slotted_exemplar(
+        :example_exemplar,
+        {
+        })
+$
+
+_pragma(classify_level=basic)
+## Replacement of example_exemplar.
+def_slotted_exemplar(
+        :new_example_exemplar,
+        {
+        })
+$
+
+_block
+    new_example_exemplar.example_method()
 _endblock
 $
 </pre>

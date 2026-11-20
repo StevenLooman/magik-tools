@@ -1,6 +1,6 @@
 <p>Method Is Public</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _private _method example_exemplar.private_example_method()
     ## Private method which cannot be called from other methods or blocks.
 _endmethod
@@ -11,4 +11,16 @@ _block
 _endblock
 $
 </pre>
-<p>The call to <code>example_exemplar.private_example_method()</code> will result in an error, because the method is private and cannot be called from outside its own definition.</p>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_private _method example_exemplar.private_example_method()
+    ## Private method which cannot be called from other methods or blocks.
+_endmethod
+$
+
+_method example_exemplar.example_method()
+    _self.private_example_method()
+_endmethod
+$
+</pre>
+<p>The call to <code>example_exemplar.private_example_method()</code> will result in an error, because the method is private and cannot be called from outside its own definition. A method of <code>example_exemplar</code> may call it on <code>_self</code>.</p>

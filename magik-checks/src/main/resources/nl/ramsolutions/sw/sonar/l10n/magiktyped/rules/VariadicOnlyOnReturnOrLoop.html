@@ -2,25 +2,37 @@
 <h2>Explanation</h2>
 <p>The variadic marker <code>...</code> describes "zero or more values of T". It is meaningful
 on <code>@return</code> (a method returning 0..N values) and on <code>@loop</code> (a
-<code>_loopbody</code> emitting 0..N values per iteration), but not on <code>@param</code> or
-<code>@slot</code>.</p>
-<h2>Examples</h2>
-<h3>Variadic on @param (raises an issue)</h3>
-<pre>
+<code>_loopbody</code> emitting 0..N values per iteration), such as <code>## @loop {sw:integer...}</code>
+on an iter method, but not on <code>@param</code> or <code>@slot</code>.</p>
+<p>Variadic on @param: declare the element type of a gathered parameter.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method example_exemplar.example_method(_gather args)
     ## @param {sw:integer...} args
 _endmethod
 </pre>
-<h3>Correct: declare the element type (no issue)</h3>
-<pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
 _method example_exemplar.example_method(_gather args)
     ## @param {sw:integer} args
 _endmethod
 </pre>
-<h3>Variadic on @return or @loop (no issue)</h3>
-<pre>
-_iter _method example_exemplar.example_iter()
-    ## @loop {sw:integer...}
-    _loopbody(1)
-_endmethod
+<p>Variadic on @slot: a slot holds one value; declare a collection type for many.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="noncompliant">
+## @slot {sw:integer...} values
+def_slotted_exemplar(:example_exemplar,
+    {
+        {:values, _unset}
+    })
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="compliant">
+## @slot {sw:simple_vector} values
+def_slotted_exemplar(:example_exemplar,
+    {
+        {:values, _unset}
+    })
+$
 </pre>

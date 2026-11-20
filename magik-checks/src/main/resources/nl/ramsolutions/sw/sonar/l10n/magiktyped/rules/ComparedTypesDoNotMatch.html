@@ -1,12 +1,23 @@
 <p>Compared types do not match</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method a.m(param1)
     ## @param {sw:integer} param1
     _if param1 _is _unset
     _then
         # This condition will never be true, since param1 is defined as sw:integer,
         # and can therefore never be sw:unset.
+    _endif
+_endmethod
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method a.m(_optional param1)
+    ## @param {sw:integer|sw:unset} param1
+    _if param1 _is _unset
+    _then
+        # param1 was left out.
     _endif
 _endmethod
 $

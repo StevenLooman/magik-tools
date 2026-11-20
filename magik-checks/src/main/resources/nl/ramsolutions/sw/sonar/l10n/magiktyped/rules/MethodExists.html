@@ -1,8 +1,15 @@
 <p>Method Exists</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _block
     rope.non_existing_method()
+_endblock
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_block
+    rope.new()
 _endblock
 $
 </pre>

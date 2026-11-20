@@ -1,1 +1,11 @@
 <p>Having to scroll horizontally makes it harder to get a quick overview and understanding of any piece of code.</p>
+<p>By default, a line is reported when it is longer than 120 characters.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_local message &lt;&lt; write_string("Parcel ", parcel.id, " of owner ", parcel.owner, " has an area of ", parcel.area, " square metres")
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_local message &lt;&lt; write_string("Parcel ", parcel.id, " of owner ", parcel.owner,
+                               " has an area of ", parcel.area, " square metres")
+</pre>

@@ -1,15 +1,33 @@
 <p>Deprecated method usage</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _pragma(classify_level=deprecated)
 _method exemplar.example_method()
 _endmethod
 $
 
 _block
-    _local exem << exemplar
+    _local exem &lt;&lt; exemplar
     exem.example_method()
 _endblock
 $
 </pre>
-<p>In the example above, the method call <code>exem.example_method()</code> is marked as deprecated using the <code>_pragma(classify_level=deprecated)</code> directive.</p>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_pragma(classify_level=deprecated)
+_method exemplar.example_method()
+_endmethod
+$
+
+_pragma(classify_level=basic)
+_method exemplar.new_example_method()
+_endmethod
+$
+
+_block
+    _local exem &lt;&lt; exemplar
+    exem.new_example_method()
+_endblock
+$
+</pre>
+<p>In the example above, the method call <code>exem.example_method()</code> is marked as deprecated using the <code>_pragma(classify_level=deprecated)</code> directive. Calling its replacement <code>new_example_method()</code> resolves it.</p>

@@ -1,10 +1,36 @@
 <p>Module required for used global</p>
-<h2>Explanation</h2>
-<pre>
-# Inside a module which does NOT require the appropriate module to get
-# the test_exemplar_from_another_module global variable.
+<p>In the examples below, the global <code>test_exemplar_from_another_module</code> is defined in module <code>another_module</code>. Each example shows the <code>module.def</code> of the module and a source file in it, each introduced by a comment line naming the file.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+# example_module/module.def
+example_module 1
+
+description
+	Example module
+end
+
+# example_module/source/example.magik
 _block
-    _local var << test_exemplar_from_another_module
+    _local var &lt;&lt; test_exemplar_from_another_module
+_endblock
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+# example_module/module.def
+example_module 1
+
+description
+	Example module
+end
+
+requires
+	another_module
+end
+
+# example_module/source/example.magik
+_block
+    _local var &lt;&lt; test_exemplar_from_another_module
 _endblock
 $
 </pre>

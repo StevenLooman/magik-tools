@@ -1,9 +1,16 @@
 <p>Global exists</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _block
     # non_existing_exemplar is a non-existing global/exemplar.
-    _local var << non_existing_exemplar.new()
+    _local var &lt;&lt; non_existing_exemplar.new()
+_endblock
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_block
+    _local var &lt;&lt; rope.new()
 _endblock
 $
 </pre>

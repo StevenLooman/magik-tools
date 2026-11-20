@@ -1,9 +1,23 @@
 <p>Conditional expression does not result in true/false</p>
-<h2>Explanation</h2>
-<pre>
-_if :a
-_then
-_endif
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_block
+    _local mode &lt;&lt; :edit
+    _if mode
+    _then
+        write("Editing")
+    _endif
+_endblock
 </pre>
-<p>In the above Magik code snippet, the conditional expression <code>:a</code> does not explicitly evaluate to <code>sw:true</code> or <code>sw:false</code>. In Magik, conditional expressions should result in a boolean value (true or false), otherwise this will result in an error.</p>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_block
+    _local mode &lt;&lt; :edit
+    _if mode _is :edit
+    _then
+        write("Editing")
+    _endif
+_endblock
+</pre>
+<p>In the above Magik code snippet, the conditional expression <code>mode</code> holds the symbol <code>:edit</code>, and does not explicitly evaluate to <code>sw:true</code> or <code>sw:false</code>. In Magik, conditional expressions should result in a boolean value (true or false), otherwise this will result in an error.</p>
 <p>A type that responds to <code>should_be_boolean()</code> is also accepted, as Magik will use that method to coerce the value to a boolean.</p>

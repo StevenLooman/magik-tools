@@ -1,9 +1,18 @@
 <p>Import missing definition.</p>
 <h2>Non-compliant Code Example</h2>
-<pre>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method exemplar.method
   _proc@nested_proc()
-    _import missing_var
+    _import value
+  _endproc
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method exemplar.method
+  _local value &lt;&lt; 10
+  _proc@nested_proc()
+    _import value
   _endproc
 _endmethod
 </pre>

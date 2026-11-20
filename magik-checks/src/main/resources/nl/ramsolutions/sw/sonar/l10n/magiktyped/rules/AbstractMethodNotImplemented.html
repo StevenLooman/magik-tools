@@ -1,12 +1,28 @@
 <p>Abstract method not implemented</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _abstract _method parent.do_something()
     ## @return {integer}
 _endmethod
+$
 
-_method child.other_method()
+def_slotted_exemplar(:child, {}, :parent)
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_abstract _method parent.do_something()
+    ## @return {integer}
+_endmethod
+$
+
+def_slotted_exemplar(:child, {}, :parent)
+$
+
+_method child.do_something()
+    ## @return {integer}
     _return 1
 _endmethod
+$
 </pre>
 <p>In the above example, <code>child</code> inherits from <code>parent</code> which defines an abstract method <code>do_something()</code>. Since <code>child</code> does not implement this method, calling it will result in a runtime error.</p>

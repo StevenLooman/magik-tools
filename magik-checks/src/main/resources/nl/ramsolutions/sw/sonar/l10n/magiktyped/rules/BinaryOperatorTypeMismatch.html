@@ -1,9 +1,17 @@
 <p>Binary operator type mismatch</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method a.b
     _local x &lt;&lt; :symbol
     _local y &lt;&lt; :symbol + 1
+    x +&lt;&lt; 1
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method a.b
+    _local x &lt;&lt; 1
+    _local y &lt;&lt; x + 1
     x +&lt;&lt; 1
 _endmethod
 </pre>

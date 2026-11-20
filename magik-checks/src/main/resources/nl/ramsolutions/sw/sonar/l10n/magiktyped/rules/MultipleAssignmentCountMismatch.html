@@ -1,8 +1,14 @@
 <p>Multiple assignment count mismatch</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method a.b
     (x, y, z) &lt;&lt; (1, 2)
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method a.b
+    (x, y) &lt;&lt; (1, 2)
 _endmethod
 </pre>
 <p>In the above example, three variables are assigned from an expression that returns only two values. The third variable <code>z</code> will silently receive <code>_unset</code>.</p>

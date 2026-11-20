@@ -1,9 +1,16 @@
 <p>Type-doc Type Exists</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method a.b(p1)
     ## @param {user:non_existing_exemplar} p1
     ## @return {user:non_existing_exemplar}
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method a.b(p1)
+    ## @param {sw:integer} p1
+    ## @return {sw:integer}
 _endmethod
 </pre>
 <p>This check ensures that all types referenced in type-doc comments actually exist in the codebase. In the example above, both the parameter type and return type refer to a non-existing exemplar.</p>

@@ -1,8 +1,26 @@
 <p>Undefined method call result</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_method example_exemplar.example_method()
+    _return 1
+_endmethod
+$
+
 _block
-    _local var << example_exemplar.undefined_method_call_result_example()
+    _local var &lt;&lt; example_exemplar.example_method()
+_endblock
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method example_exemplar.example_method()
+    ## @return {sw:integer} An example value.
+    _return 1
+_endmethod
+$
+
+_block
+    _local var &lt;&lt; example_exemplar.example_method()
 _endblock
 $
 </pre>

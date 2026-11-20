@@ -1,11 +1,26 @@
 <p>Distance between a variable declaration and its first usage.</p>
-<h2>Non-compliant Code Example, max distance is 5</h2>
-<pre>
-_local a << 10
-do_something_unrelated()  # distance to a is 1
-do_something_unrelated()  # distance to a is 2
-do_something_unrelated()  # distance to a is 3
-do_something_unrelated()  # distance to a is 4
-do_something_unrelated()  # distance to a is 5
-show(a)                   # distance to a is 6
+<p>By default, a distance of more than 5 statements is reported.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_method example.run()
+    _local a &lt;&lt; 10
+    do_something_unrelated()  # distance to a is 1
+    do_something_unrelated()  # distance to a is 2
+    do_something_unrelated()  # distance to a is 3
+    do_something_unrelated()  # distance to a is 4
+    do_something_unrelated()  # distance to a is 5
+    show(a)                   # distance to a is 6
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method example.run()
+    do_something_unrelated()
+    do_something_unrelated()
+    do_something_unrelated()
+    do_something_unrelated()
+    do_something_unrelated()
+    _local a &lt;&lt; 10
+    show(a)                   # distance to a is 1
+_endmethod
 </pre>

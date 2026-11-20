@@ -13,34 +13,65 @@ reasoned return types. Issues are raised in the following situations:</p>
 </ul>
 <p>Return values whose type is unknown (e.g. from an unresolved method call) are skipped for
 mismatch reporting; those are covered by <em>UndefinedMethodCallResultTypedCheck</em>.</p>
-<h2>Examples</h2>
-<h3>Type mismatch</h3>
-<pre>
+<p>Type mismatch: the callable is documented to return <code>sw:integer</code> but actually returns
+<code>sw:symbol</code>.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method example_exemplar.example_method()
     ## @return {sw:integer} Returned value.
     _return :symbol
 _endmethod
 </pre>
-<p>Raises an issue because the callable is documented to return <code>sw:integer</code> but
-actually returns <code>sw:symbol</code>.</p>
-<h3>Missing @return</h3>
-<pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method example_exemplar.example_method()
+    ## @return {sw:symbol} Returned value.
+    _return :symbol
+_endmethod
+</pre>
+<p>Missing @return: the callable returns a value but has no <code>@return</code> annotation.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="noncompliant">
 _method example_exemplar.example_method()
     _return 42
 _endmethod
 </pre>
-<p>Raises an issue because the callable returns a value but has no <code>@return</code> annotation.</p>
-<h3>Unverifiable @return</h3>
-<pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="2" data-diff-type="compliant">
 _method example_exemplar.example_method()
     ## @return {sw:integer} Returned value.
-    _return other_exemplar.unknown_method()
+    _return 42
 _endmethod
 </pre>
-<p>Raises an issue on the <code>@return</code> annotation because the return type cannot be
-verified: <code>unknown_method()</code> has no known return type.</p>
-<h3>@return without a type</h3>
-<pre>
+<p>Unverifiable @return: the issue is raised on the <code>@return</code> annotation because the return type cannot be
+verified: <code>calculate()</code> has no known return type. Documenting the return type of
+<code>calculate()</code> resolves it.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="3" data-diff-type="noncompliant">
+_method example_exemplar.example_method()
+    ## @return {sw:integer} Returned value.
+    _return other_exemplar.calculate()
+_endmethod
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="3" data-diff-type="compliant">
+_method other_exemplar.calculate()
+    ## @return {sw:integer} Calculated value.
+    _return 42
+_endmethod
+$
+
+_method example_exemplar.example_method()
+    ## @return {sw:integer} Returned value.
+    _return other_exemplar.calculate()
+_endmethod
+</pre>
+<p>@return without a type: the issue is raised on the second documentation line. The type is optional in the documentation
+grammar, so a wrapped description line that begins with a tag name parses as a second, untyped
+<code>@return</code> -- which is then discarded, leaving the mistake invisible. Wrapping the line
+elsewhere resolves it.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="4" data-diff-type="noncompliant">
 _method example_exemplar.example_method()
     ## Returns a symbol. The declared
     ## @return must survive reasoning.
@@ -48,6 +79,12 @@ _method example_exemplar.example_method()
     _return :symbol
 _endmethod
 </pre>
-<p>Raises an issue on the second documentation line. The type is optional in the documentation
-grammar, so a wrapped description line that begins with a tag name parses as a second, untyped
-<code>@return</code> -- which is then discarded, leaving the mistake invisible.</p>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="4" data-diff-type="compliant">
+_method example_exemplar.example_method()
+    ## Returns a symbol. The declared @return
+    ## must survive reasoning.
+    ## @return {sw:symbol} Returned value.
+    _return :symbol
+_endmethod
+</pre>

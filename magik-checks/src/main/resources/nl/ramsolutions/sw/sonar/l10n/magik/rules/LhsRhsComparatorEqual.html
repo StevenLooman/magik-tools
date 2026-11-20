@@ -1,8 +1,15 @@
 <p>If the left hand side and right hand side of a comparison are the same, the result is always true.</p>
 <h2>Non-compliant Code Example</h2>
-<pre>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _if "abc" = "abc"
 _then
-  ...
+  write("equal")
+_endif
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_if name = "abc"
+_then
+  write("equal")
 _endif
 </pre>

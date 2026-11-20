@@ -1,6 +1,6 @@
 <p>Invocation argument type does not match parameter type</p>
-<h2>Explanation</h2>
-<pre>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _method a.m(param1, param2)
     ## @param {sw:integer} param1
     ## @param {sw:integer} param2
@@ -9,6 +9,19 @@ $
 
 _block
     a.m(1, :a)
+_endblock
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method a.m(param1, param2)
+    ## @param {sw:integer} param1
+    ## @param {sw:integer} param2
+_endmethod
+$
+
+_block
+    a.m(1, 2)
 _endblock
 $
 </pre>

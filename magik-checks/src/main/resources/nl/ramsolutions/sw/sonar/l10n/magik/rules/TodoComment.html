@@ -1,8 +1,18 @@
 <p>XXX/TODO/FIXME comments should be resolved.</p>
 <h2>Non-compliant Code Example</h2>
-<pre>
+<pre data-diff-id="1" data-diff-type="noncompliant">
 _if a # TODO: add support for c
 _then
   _return b
+_endif
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_if a
+_then
+  _return b
+_elif c
+_then
+  _return d
 _endif
 </pre>

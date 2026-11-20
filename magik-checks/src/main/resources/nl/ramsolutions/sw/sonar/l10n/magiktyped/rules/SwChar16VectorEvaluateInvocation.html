@@ -1,7 +1,16 @@
 <p>Use of sw:char16_vector.evaluate()</p>
-<h2>Explanation</h2>
-<pre>
-_local user_input << "gis_program_manager.cached_dataset(:gis).collection(:very_important_data).empty()"
-user_input.evaluate()
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_block
+    _local user_input &lt;&lt; "gis_program_manager.cached_dataset(:gis).collection(:very_important_data).empty()"
+    user_input.evaluate()
+_endblock
 </pre>
-<p>The example shows the use of <code>sw:char16_vector.evaluate()</code> to execute user input as Magik code. This is dangerous as it can lead to code injection vulnerabilities if the user input is not properly sanitized.</p>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_block
+    _local user_input &lt;&lt; "very_important_data"
+    gis_program_manager.cached_dataset(:gis).collection(user_input.as_symbol())
+_endblock
+</pre>
+<p>The example shows the use of <code>sw:char16_vector.evaluate()</code> to execute user input as Magik code. This is dangerous as it can lead to code injection vulnerabilities if the user input is not properly sanitized. Taking only a name from the user, and using it as data, resolves it.</p>

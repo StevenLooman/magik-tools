@@ -1,1 +1,20 @@
 <p>Method is defined multiple times in the same file.</p>
+<h2>Non-compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="noncompliant">
+_method example.name
+    _return .name
+_endmethod
+$
+
+_method example.name
+    _return .name.default("")
+_endmethod
+$
+</pre>
+<h2>Compliant Code Example</h2>
+<pre data-diff-id="1" data-diff-type="compliant">
+_method example.name
+    _return .name.default("")
+_endmethod
+$
+</pre>
