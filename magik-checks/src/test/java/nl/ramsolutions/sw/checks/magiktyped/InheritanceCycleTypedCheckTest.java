@@ -7,6 +7,7 @@ import java.util.List;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -103,6 +104,39 @@ class InheritanceCycleTypedCheckTest {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     this.addExemplar(
         definitionKeeper, TYPE_CHILD, ExemplarDefinition.Sort.SLOTTED, Collections.emptyList());
+    final MagikTypedCheck check = new InheritanceCycleTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testSameNamedGlobalAliasNotReported() {
+    // A global named as its exemplar and aliased to it.
+    final String code = "def_slotted_exemplar(:child, {}, :parent)\n";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(
+        definitionKeeper, TYPE_PARENT, ExemplarDefinition.Sort.SLOTTED, Collections.emptyList());
+    this.addExemplar(
+        definitionKeeper, TYPE_CHILD, ExemplarDefinition.Sort.SLOTTED, List.of(TYPE_PARENT));
+    definitionKeeper.add(
+        new GlobalDefinition(null, null, null, null, null, TYPE_CHILD, TYPE_CHILD));
+    definitionKeeper.add(
+        new GlobalDefinition(null, null, null, null, null, TYPE_PARENT, TYPE_PARENT));
+    final MagikTypedCheck check = new InheritanceCycleTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testParentNamedByGlobalAliasNotReported() {
+    final String code = "def_slotted_exemplar(:child, {}, :left)\n";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(
+        definitionKeeper, TYPE_BASE, ExemplarDefinition.Sort.SLOTTED, Collections.emptyList());
+    this.addExemplar(
+        definitionKeeper, TYPE_PARENT, ExemplarDefinition.Sort.SLOTTED, List.of(TYPE_BASE));
+    definitionKeeper.add(
+        new GlobalDefinition(null, null, null, null, null, TYPE_LEFT, TYPE_PARENT));
+    this.addExemplar(
+        definitionKeeper, TYPE_CHILD, ExemplarDefinition.Sort.SLOTTED, List.of(TYPE_LEFT));
     final MagikTypedCheck check = new InheritanceCycleTypedCheck();
     assertThat(check).reportsNoIssues(code, definitionKeeper);
   }

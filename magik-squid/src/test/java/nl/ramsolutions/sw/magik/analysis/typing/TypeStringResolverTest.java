@@ -162,6 +162,228 @@ class TypeStringResolverTest {
     assertThat(resolver.getAllAncestors(typeA)).contains(typeB);
   }
 
+  private IDefinitionKeeper createGrandParentChainKeeper(
+      final TypeString exemplarRef, final TypeString parentRef, final TypeString grandParentRef) {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplarWithParents(definitionKeeper, grandParentRef);
+    this.addExemplarWithParents(definitionKeeper, parentRef, grandParentRef);
+    this.addExemplarWithParents(definitionKeeper, exemplarRef, parentRef);
+    return definitionKeeper;
+  }
+
+  @Test
+  void testAncestorWalkOfExemplarHoldsItsParentsNearestFirst() {
+    final TypeString exemplarRef = TypeString.ofIdentifier("an_exemplar", "user");
+    final TypeString parentRef = TypeString.ofIdentifier("a_parent", "user");
+    final TypeString grandParentRef = TypeString.ofIdentifier("a_grand_parent", "user");
+    final IDefinitionKeeper definitionKeeper =
+        this.createGrandParentChainKeeper(exemplarRef, parentRef, grandParentRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> ancestors = resolver.getAllAncestors(exemplarRef);
+    final Collection<TypeString> selfAndAncestors = resolver.getSelfAndAncestors(exemplarRef);
+
+    assertThat(ancestors)
+        .containsExactly(parentRef, grandParentRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+    assertThat(selfAndAncestors)
+        .containsExactlyInAnyOrder(
+            exemplarRef, parentRef, grandParentRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+  }
+
+  @Test
+  void testAncestorWalkDoesNotFollowImplicitParent() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString exemplarRef = TypeString.ofIdentifier("an_exemplar", "user");
+    this.addExemplarWithParents(definitionKeeper, exemplarRef);
+    definitionKeeper.add(
+        new InheritanceDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_SLOTTED_FORMAT_MIXIN,
+            TypeString.SW_OBJECT));
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> ancestors = resolver.getAllAncestors(exemplarRef);
+
+    assertThat(ancestors).containsExactly(TypeString.SW_SLOTTED_FORMAT_MIXIN);
+  }
+
+  @Test
+  void testAncestorWalkKeepsParentAsWrittenWhenDefinedInUsedPackage() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString exemplarRef = TypeString.ofIdentifier("an_exemplar", "user");
+    final TypeString writtenParentRef = TypeString.ofIdentifier("a_parent", "user");
+    final TypeString parentRef = TypeString.ofIdentifier("a_parent", "sw");
+    final TypeString grandParentRef = TypeString.ofIdentifier("a_grand_parent", "sw");
+    this.addExemplarWithParents(definitionKeeper, grandParentRef);
+    this.addExemplarWithParents(definitionKeeper, parentRef, grandParentRef);
+    this.addExemplarWithParents(definitionKeeper, exemplarRef, writtenParentRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> ancestors = resolver.getAllAncestors(exemplarRef);
+
+    assertThat(ancestors)
+        .containsExactly(writtenParentRef, grandParentRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+  }
+
+  @Test
+  void testAncestorWalkOfGlobalAliasHoldsItsExemplarAndItsAncestors() {
+    final TypeString globalRef = TypeString.ofIdentifier("a_global", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("an_exemplar", "user");
+    final TypeString parentRef = TypeString.ofIdentifier("a_parent", "user");
+    final TypeString grandParentRef = TypeString.ofIdentifier("a_grand_parent", "user");
+    final IDefinitionKeeper definitionKeeper =
+        this.createGrandParentChainKeeper(exemplarRef, parentRef, grandParentRef);
+    definitionKeeper.add(this.createGlobalDefinition(globalRef, exemplarRef));
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> ancestors = resolver.getAllAncestors(globalRef);
+    final Collection<TypeString> selfAndAncestors = resolver.getSelfAndAncestors(globalRef);
+
+    assertThat(ancestors)
+        .containsExactly(
+            exemplarRef, parentRef, grandParentRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+    assertThat(selfAndAncestors)
+        .containsExactlyInAnyOrder(
+            globalRef, exemplarRef, parentRef, grandParentRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+  }
+
+  @Test
+  void testAncestorWalkFollowsGlobalAliasChain() {
+    final TypeString globalRef = TypeString.ofIdentifier("a_global", "user");
+    final TypeString otherGlobalRef = TypeString.ofIdentifier("another_global", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("an_exemplar", "user");
+    final TypeString parentRef = TypeString.ofIdentifier("a_parent", "user");
+    final TypeString grandParentRef = TypeString.ofIdentifier("a_grand_parent", "user");
+    final IDefinitionKeeper definitionKeeper =
+        this.createGrandParentChainKeeper(exemplarRef, parentRef, grandParentRef);
+    definitionKeeper.add(this.createGlobalDefinition(globalRef, otherGlobalRef));
+    definitionKeeper.add(this.createGlobalDefinition(otherGlobalRef, exemplarRef));
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> ancestors = resolver.getAllAncestors(globalRef);
+
+    assertThat(ancestors)
+        .containsExactly(
+            exemplarRef, parentRef, grandParentRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+  }
+
+  @Test
+  void testAncestorWalkOfParentNamedByGlobalAliasReachesGrandParents() {
+    final TypeString childRef = TypeString.ofIdentifier("a_child", "user");
+    final TypeString globalRef = TypeString.ofIdentifier("a_global", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("an_exemplar", "user");
+    final TypeString parentRef = TypeString.ofIdentifier("a_parent", "user");
+    final TypeString grandParentRef = TypeString.ofIdentifier("a_grand_parent", "user");
+    final IDefinitionKeeper definitionKeeper =
+        this.createGrandParentChainKeeper(exemplarRef, parentRef, grandParentRef);
+    definitionKeeper.add(this.createGlobalDefinition(globalRef, exemplarRef));
+    this.addExemplarWithParents(definitionKeeper, childRef, globalRef);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> ancestors = resolver.getAllAncestors(childRef);
+
+    assertThat(ancestors)
+        .containsExactly(
+            globalRef, exemplarRef, parentRef, grandParentRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+  }
+
+  @Test
+  void testAncestorWalkOfAliasCycleIsEmpty() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString selfAliasRef = TypeString.ofIdentifier("a_self_alias", "user");
+    final TypeString globalRef = TypeString.ofIdentifier("a_global", "user");
+    final TypeString otherGlobalRef = TypeString.ofIdentifier("another_global", "user");
+    definitionKeeper.add(this.createGlobalDefinition(selfAliasRef, selfAliasRef));
+    definitionKeeper.add(this.createGlobalDefinition(globalRef, otherGlobalRef));
+    definitionKeeper.add(this.createGlobalDefinition(otherGlobalRef, globalRef));
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> selfAliasAncestors = resolver.getAllAncestors(selfAliasRef);
+    final Collection<TypeString> cycleAncestors = resolver.getAllAncestors(globalRef);
+
+    assertThat(selfAliasAncestors).isEmpty();
+    assertThat(cycleAncestors).isEmpty();
+  }
+
+  @Test
+  void testAncestorWalkOfExemplarWithSameNamedSelfAliasIsUnchanged() {
+    final TypeString exemplarRef = TypeString.ofIdentifier("an_exemplar", "user");
+    final TypeString parentRef = TypeString.ofIdentifier("a_parent", "user");
+    final TypeString grandParentRef = TypeString.ofIdentifier("a_grand_parent", "user");
+    final IDefinitionKeeper definitionKeeper =
+        this.createGrandParentChainKeeper(exemplarRef, parentRef, grandParentRef);
+    definitionKeeper.add(this.createGlobalDefinition(exemplarRef, exemplarRef));
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> ancestors = resolver.getAllAncestors(exemplarRef);
+
+    assertThat(ancestors)
+        .containsExactly(parentRef, grandParentRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+  }
+
+  @Test
+  void testAncestorWalkOfProcedureHoldsProcedureExemplarAndItsAncestors() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString procedureRef = TypeString.ofIdentifier("a_procedure", "user");
+    final TypeString parentRef = TypeString.ofIdentifier("a_parent", "user");
+    final TypeString grandParentRef = TypeString.ofIdentifier("a_grand_parent", "user");
+    this.addExemplarWithParents(definitionKeeper, grandParentRef);
+    this.addExemplarWithParents(definitionKeeper, parentRef, grandParentRef);
+    definitionKeeper.add(
+        new InheritanceDefinition(
+            null, null, null, null, null, TypeString.SW_PROCEDURE, parentRef));
+    definitionKeeper.add(this.createProcedureDefinition(procedureRef));
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> ancestors = resolver.getAllAncestors(procedureRef);
+
+    assertThat(ancestors)
+        .containsExactly(
+            TypeString.SW_PROCEDURE, parentRef, grandParentRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+  }
+
+  @Test
+  void testAncestorWalkOfExemplarWithSameNamedProcedureHoldsProcedureAncestors() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString sharedRef = TypeString.ofIdentifier("a_shared_name", "user");
+    final TypeString parentRef = TypeString.ofIdentifier("a_parent", "user");
+    final TypeString grandParentRef = TypeString.ofIdentifier("a_grand_parent", "user");
+    this.addExemplarWithParents(definitionKeeper, grandParentRef);
+    this.addExemplarWithParents(definitionKeeper, parentRef, grandParentRef);
+    definitionKeeper.add(
+        new InheritanceDefinition(
+            null, null, null, null, null, TypeString.SW_PROCEDURE, parentRef));
+    this.addExemplarWithParents(definitionKeeper, sharedRef);
+    definitionKeeper.add(this.createProcedureDefinition(sharedRef));
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<TypeString> ancestors = resolver.getAllAncestors(sharedRef);
+
+    assertThat(ancestors)
+        .contains(
+            TypeString.SW_PROCEDURE, parentRef, grandParentRef, TypeString.SW_SLOTTED_FORMAT_MIXIN);
+  }
+
+  private ProcedureDefinition createProcedureDefinition(final TypeString typeString) {
+    return new ProcedureDefinition(
+        null,
+        null,
+        null,
+        null,
+        null,
+        EnumSet.noneOf(ProcedureDefinition.Modifier.class),
+        typeString,
+        typeString.getIdentifier(),
+        Collections.emptyList(),
+        null,
+        ExpressionResultString.UNDEFINED,
+        ExpressionResultString.UNDEFINED);
+  }
+
   @Test
   void testSlotResolutionWalksParents() {
     final IDefinitionKeeper keeper = new DefinitionKeeper();

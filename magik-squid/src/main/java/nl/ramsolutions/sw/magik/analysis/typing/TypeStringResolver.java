@@ -597,6 +597,8 @@ public class TypeStringResolver {
   /**
    * Find all ancestors for a given {@link TypeString}.
    *
+   * <p>A global or a procedure has the exemplars it stands for as ancestors, then theirs.
+   *
    * @param typeString {@link TypeString} to get ancestors from.
    * @return All ancestors this the given type.
    */
@@ -611,20 +613,37 @@ public class TypeStringResolver {
     if (!seen.add(typeString)) {
       return;
     }
+    final Collection<ExemplarDefinition> exemplarDefinitions =
+        this.getExemplarDefinitions(typeString);
+    final List<TypeString> stoodForTypeStrings =
+        this.getStoodForTypeStrings(typeString, exemplarDefinitions);
+    ancestors.addAll(stoodForTypeStrings);
     final Collection<TypeString> typeStringParents = this.getParents(typeString);
     ancestors.addAll(typeStringParents);
 
-    // Recurse over the resolved exemplar's edges. NB: this intentionally recurses over the raw
-    // edge parents (no implicit parents), preserving pre-refactor behaviour. See the
+    // Recurse over the edges of every exemplar the type stands for. NB: this intentionally recurses
+    // over the raw edge parents (no implicit parents), preserving pre-refactor behaviour. See the
     // getallancestors prompt under docs/superpowers/prompts/ for the deliberately-untouched quirk.
-    this.resolve(typeString).stream()
-        .filter(ExemplarDefinition.class::isInstance)
-        .map(ExemplarDefinition.class::cast)
+    exemplarDefinitions.stream()
         .flatMap(
             def ->
                 this.definitionKeeper.getInheritanceDefinitions(def.getTypeString()).stream()
                     .map(InheritanceDefinition::getParentTypeName))
         .forEach(parentTypeStr -> this.getAllAncestors(parentTypeStr, ancestors, seen));
+  }
+
+  /**
+   * The exemplars a type stands for through a global or a procedure definition, which are its
+   * nearest ancestors. An exemplar of the type's own name is the type itself and is left out.
+   */
+  private List<TypeString> getStoodForTypeStrings(
+      final TypeString typeString, final Collection<ExemplarDefinition> exemplarDefinitions) {
+    final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeString);
+    return exemplarDefinitions.stream()
+        .filter(exemplarDefinition -> !resolvedTypes.contains(exemplarDefinition))
+        .map(ExemplarDefinition::getTypeString)
+        .distinct()
+        .toList();
   }
 
   public Collection<TypeString> getSelfAndAncestors(final TypeString typeString) {

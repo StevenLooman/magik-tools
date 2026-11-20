@@ -13,6 +13,7 @@ import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.GlobalDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
@@ -114,6 +115,32 @@ class AbstractMethodNotImplementedTypedCheckTest {
         EnumSet.of(MethodDefinition.Modifier.ABSTRACT));
     this.addExemplar(
         definitionKeeper, TYPE_CHILD, ExemplarDefinition.Sort.MIXIN, List.of(TYPE_PARENT));
+    final MagikTypedCheck check = new AbstractMethodNotImplementedTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
+
+  @Test
+  void testAbstractMethodBeyondParentNamedByGlobalAliasNotImplemented() {
+    final String code = "def_slotted_exemplar(:child, {}, :alias)\n";
+    final TypeString aliasTypeStr = TypeString.ofIdentifier("alias", "sw");
+    final TypeString middleTypeStr = TypeString.ofIdentifier("middle", "sw");
+    final TypeString baseTypeStr = TypeString.ofIdentifier("base", "sw");
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(
+        definitionKeeper, baseTypeStr, ExemplarDefinition.Sort.SLOTTED, Collections.emptyList());
+    this.addMethod(
+        definitionKeeper,
+        baseTypeStr,
+        "do_something()",
+        EnumSet.of(MethodDefinition.Modifier.ABSTRACT));
+    this.addExemplar(
+        definitionKeeper, middleTypeStr, ExemplarDefinition.Sort.SLOTTED, List.of(baseTypeStr));
+    this.addExemplar(
+        definitionKeeper, TYPE_PARENT, ExemplarDefinition.Sort.SLOTTED, List.of(middleTypeStr));
+    definitionKeeper.add(
+        new GlobalDefinition(null, null, null, null, null, aliasTypeStr, TYPE_PARENT));
+    this.addExemplar(
+        definitionKeeper, TYPE_CHILD, ExemplarDefinition.Sort.SLOTTED, List.of(aliasTypeStr));
     final MagikTypedCheck check = new AbstractMethodNotImplementedTypedCheck();
     assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
   }
