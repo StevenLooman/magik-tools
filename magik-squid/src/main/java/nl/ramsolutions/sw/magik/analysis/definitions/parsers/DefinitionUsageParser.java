@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.definitions.parsers;
 
 import com.sonar.sslr.api.AstNode;
 import com.sonar.sslr.api.AstNodeType;
+import com.sonar.sslr.api.Token;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.net.URI;
 import java.util.ArrayDeque;
@@ -94,26 +95,63 @@ public class DefinitionUsageParser {
 
     final PackageNodeHelper packageNodeHelper = new PackageNodeHelper(this.node);
     final String currentPakkage = packageNodeHelper.getCurrentPackage();
-    return bodyScope.getSelfAndDescendantScopes().stream()
-        .flatMap(scope -> scope.getScopeEntriesInScope().stream())
-        .filter(scopeEntry -> scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC))
-        .map(
-            scopeEntry -> {
-              final String identifier = scopeEntry.getIdentifier();
-              final TypeString ref = TypeString.ofIdentifier(identifier, currentPakkage);
-              final URI uri = this.node.getToken().getURI();
-              final AstNode definitionNode = scopeEntry.getDefinitionNode();
-              final Location location = new Location(uri, definitionNode);
-              final Location validLocation = Location.validLocation(location);
-              // Now you might "see" the reference `user:char16_vector`,
-              // or (from) any other package which is a child of `sw`.
-              // This will most likely be indexed invalidly.
-              // Though, we might be able to resolve it during the query itself.
-              // TODO: Shouldn't this be multiple? I.e., one per `scopeEntry.getUsages()`.
-              return new GlobalUsage(ref, validLocation, definitionNode);
-            })
-        .filter(Objects::nonNull)
-        .toList();
+    final Stream<GlobalUsage> ownUsages =
+        bodyScope.getSelfAndDescendantScopes().stream()
+            .flatMap(scope -> scope.getScopeEntriesInScope().stream())
+            .filter(DefinitionUsageParser::isGlobalEntry)
+            .map(
+                scopeEntry -> {
+                  final AstNode definitionNode = scopeEntry.getDefinitionNode();
+                  // Now you might "see" the reference `user:char16_vector`,
+                  // or (from) any other package which is a child of `sw`.
+                  // This will most likely be indexed invalidly.
+                  // Though, we might be able to resolve it during the query itself.
+                  // TODO: Shouldn't this be multiple? I.e., one per `scopeEntry.getUsages()`.
+                  return this.createEntryUsage(scopeEntry, definitionNode, currentPakkage);
+                });
+    // A global first used at file level has its entry there, where the body finds it.
+    final Stream<GlobalUsage> fileLevelUsages =
+        globalScope.getScopeEntriesInScope().stream()
+            .filter(DefinitionUsageParser::isGlobalEntry)
+            .map(
+                scopeEntry -> {
+                  final AstNode usageNode =
+                      DefinitionUsageParser.getFirstUsageWithin(scopeEntry, bodyNode);
+                  return usageNode != null
+                      ? this.createEntryUsage(scopeEntry, usageNode, currentPakkage)
+                      : null;
+                })
+            .filter(Objects::nonNull);
+    return Stream.concat(ownUsages, fileLevelUsages).toList();
+  }
+
+  private static boolean isGlobalEntry(final ScopeEntry scopeEntry) {
+    return scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC);
+  }
+
+  /** The identifier of the first usage of {@code scopeEntry} within {@code bodyNode}, if any. */
+  @CheckForNull
+  private static AstNode getFirstUsageWithin(final ScopeEntry scopeEntry, final AstNode bodyNode) {
+    for (final AstNode atomNode : scopeEntry.getUsages()) {
+      for (AstNode node = atomNode; node != null; node = node.getParent()) {
+        if (node == bodyNode) {
+          return atomNode.getFirstChild(MagikGrammar.IDENTIFIER);
+        }
+      }
+    }
+
+    return null;
+  }
+
+  private GlobalUsage createEntryUsage(
+      final ScopeEntry scopeEntry, final AstNode identifierNode, final String currentPakkage) {
+    final String identifier = scopeEntry.getIdentifier();
+    final TypeString ref = TypeString.ofIdentifier(identifier, currentPakkage);
+    final Token token = this.node.getToken();
+    final URI uri = token.getURI();
+    final Location location = new Location(uri, identifierNode);
+    final Location validLocation = Location.validLocation(location);
+    return new GlobalUsage(ref, validLocation, identifierNode);
   }
 
   /**
