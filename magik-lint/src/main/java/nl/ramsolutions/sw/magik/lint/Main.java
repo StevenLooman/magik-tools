@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.logging.LogManager;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nl.ramsolutions.sw.BuildInfo;
 import nl.ramsolutions.sw.ConfigurationReader;
 import nl.ramsolutions.sw.IgnoreHandler;
 import nl.ramsolutions.sw.MagikLintSettings;
@@ -152,7 +153,8 @@ public final class Main {
   }
 
   private static String getVersion() {
-    return Main.class.getPackage().getImplementationVersion();
+    final BuildInfo build = BuildInfo.getCurrent();
+    return build.describeVersion();
   }
 
   /**
@@ -207,7 +209,7 @@ public final class Main {
     final String outputFormat = commandLine.getOptionValue(OPTION_FORMAT, "text");
     final String normalizedFormat = outputFormat != null ? outputFormat : "text";
     final PrintStream outStream = Main.getOutStream();
-    final String toolVersion = Main.getVersion() != null ? Main.getVersion() : "dev";
+    final String toolVersion = Main.getVersion();
     final List<Class<? extends Check>> checkClasses = Main.getAllCheckClasses();
     final ChecksConfiguration checksConfig = new ChecksConfiguration(checkClasses, properties);
     final List<CheckHolder> checkHolders = checksConfig.getAllChecks();
@@ -315,7 +317,7 @@ public final class Main {
     // Show checks.
     if (commandLine.hasOption(OPTION_SHOW_CHECKS)) {
       final PrintStream outStream = Main.getOutStream();
-      final String toolVersion = Main.getVersion() != null ? Main.getVersion() : "dev";
+      final String toolVersion = Main.getVersion();
       final List<Class<? extends Check>> checkClasses = getAllCheckClasses();
       final ChecksConfiguration checksConfig = new ChecksConfiguration(checkClasses, properties);
       final List<CheckHolder> checkHolders = checksConfig.getAllChecks();

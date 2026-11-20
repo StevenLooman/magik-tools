@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import nl.ramsolutions.sw.BuildInfo;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -63,7 +64,8 @@ public class MagikLanguageServer implements LanguageServer, LanguageClientAware 
     // Log PID and version.
     final ProcessHandle processHandle = ProcessHandle.current();
     LOGGER.info("PID: {}", processHandle.pid());
-    final String version = this.getClass().getPackage().getImplementationVersion();
+    final BuildInfo build = BuildInfo.getCurrent();
+    final String version = build.describeVersion();
     LOGGER.info("Version: {}", version);
 
     final String rootUri = params.getRootUri();

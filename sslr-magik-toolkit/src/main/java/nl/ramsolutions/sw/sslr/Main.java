@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.sslr;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import nl.ramsolutions.sw.BuildInfo;
 import nl.ramsolutions.sw.sslr.loadlist.SwLoadListConfigurationModel;
 import nl.ramsolutions.sw.sslr.magik.MagikConfigurationModel;
 import nl.ramsolutions.sw.sslr.message.SwMessageConfigurationModel;
@@ -66,7 +67,8 @@ public final class Main {
   }
 
   private static String getVersion() {
-    return Main.class.getPackage().getImplementationVersion();
+    final BuildInfo build = BuildInfo.getCurrent();
+    return build.describeVersion();
   }
 
   /**
