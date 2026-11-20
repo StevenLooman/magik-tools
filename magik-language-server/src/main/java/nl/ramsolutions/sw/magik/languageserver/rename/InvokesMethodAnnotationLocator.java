@@ -11,6 +11,7 @@ import nl.ramsolutions.sw.magik.Range;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.parsers.MethodInvocationStringParser;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.api.TypeDocGrammar;
 import nl.ramsolutions.sw.magik.parser.TypeDocParser;
 
@@ -62,7 +63,16 @@ final class InvokesMethodAnnotationLocator {
         tokens.stream().map(Token::getValue).collect(Collectors.joining());
     final MethodUsage declaredUsage =
         MethodInvocationStringParser.parseInvocationString(invocationString, null, currentPackage);
-    return usage.equals(declaredUsage);
+    if (declaredUsage == null) {
+      return false;
+    }
+
+    // The annotation is parsed without a location, so compare what it names.
+    final TypeString typeName = usage.getTypeName();
+    final TypeString declaredTypeName = declaredUsage.getTypeName();
+    final String methodName = usage.getMethodName();
+    final String declaredMethodName = declaredUsage.getMethodName();
+    return typeName.equals(declaredTypeName) && methodName.equals(declaredMethodName);
   }
 
   @CheckForNull

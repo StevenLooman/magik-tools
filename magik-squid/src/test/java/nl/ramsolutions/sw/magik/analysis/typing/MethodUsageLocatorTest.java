@@ -60,7 +60,9 @@ class MethodUsageLocatorTest {
     assertThat(locatedMethodUsages).hasSize(1);
     final Entry<MethodUsage, MagikTypedFile> entry = locatedMethodUsages.get(0);
     final MethodUsage locatedMethodUsage = entry.getKey();
-    assertThat(locatedMethodUsage).isEqualTo(new MethodUsage(typeStr, "method_name"));
+    final Location location = locatedMethodUsage.getLocation();
+    assertThat(locatedMethodUsage)
+        .isEqualTo(new MethodUsage(typeStr, "method_name", location, null));
     final MagikTypedFile locatedMagikFile = entry.getValue();
     assertThat(locatedMagikFile.getUri()).isEqualTo(magikFile.getUri());
   }
@@ -99,7 +101,15 @@ class MethodUsageLocatorTest {
     // Returned order is random, so test as a set.
     final Set<MethodUsage> methodUsages =
         locatedMethodUsages.stream().map(entry -> entry.getKey()).collect(Collectors.toSet());
-    assertThat(methodUsages).isEqualTo(Set.of(new MethodUsage(typeStr, "method_name")));
+    assertThat(methodUsages).hasSize(2);
+    assertThat(methodUsages)
+        .allSatisfy(
+            methodUsage -> {
+              final TypeString usageTypeStr = methodUsage.getTypeName();
+              assertThat(usageTypeStr).isEqualTo(typeStr);
+              final String methodName = methodUsage.getMethodName();
+              assertThat(methodName).isEqualTo("method_name");
+            });
 
     final Set<URI> uris =
         locatedMethodUsages.stream()

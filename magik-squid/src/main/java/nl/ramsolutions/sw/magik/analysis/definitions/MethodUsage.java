@@ -69,7 +69,7 @@ public class MethodUsage implements Usage {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.typeName, this.methodName);
+    return Objects.hash(this.typeName, this.methodName, this.location);
   }
 
   @Override
@@ -87,8 +87,8 @@ public class MethodUsage implements Usage {
     }
 
     final MethodUsage other = (MethodUsage) obj;
-    // Location is not tested!
     return Objects.equals(other.getTypeName(), this.getTypeName())
-        && Objects.equals(other.getMethodName(), this.getMethodName());
+        && Objects.equals(other.getMethodName(), this.getMethodName())
+        && Objects.equals(other.getLocation(), this.getLocation());
   }
 }

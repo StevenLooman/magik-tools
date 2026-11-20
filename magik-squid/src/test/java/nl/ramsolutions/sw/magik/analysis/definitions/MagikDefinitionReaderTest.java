@@ -1316,11 +1316,12 @@ class MagikDefinitionReaderTest {
     assertThat(definitions).hasSize(1);
 
     final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
+    final Location location = methodDef.getLocation();
     final List<MethodUsage> usedMethods = methodDef.getUsedMethods();
     assertThat(usedMethods)
         .containsExactly(
-            new MethodUsage(TypeString.ofIdentifier("rope", "user"), "size"),
-            new MethodUsage(TypeString.ofIdentifier("integer", "sw"), "write()"));
+            new MethodUsage(TypeString.ofIdentifier("rope", "user"), "size", location, null),
+            new MethodUsage(TypeString.ofIdentifier("integer", "sw"), "write()", location, null));
   }
 
   @Test
@@ -1341,11 +1342,13 @@ class MagikDefinitionReaderTest {
     assertThat(definitions).hasSize(1);
 
     final MethodDefinition methodDef = (MethodDefinition) definitions.get(0);
+    final Location location = methodDef.getLocation();
     final List<MethodUsage> usedMethods = methodDef.getUsedMethods();
     assertThat(usedMethods)
         .containsExactly(
-            new MethodUsage(TypeString.ofIdentifier("rope", "user"), "[]"),
-            new MethodUsage(TypeString.ofIdentifier("vector_key_equality_table", "sw"), "[,]"));
+            new MethodUsage(TypeString.ofIdentifier("rope", "user"), "[]", location, null),
+            new MethodUsage(
+                TypeString.ofIdentifier("vector_key_equality_table", "sw"), "[,]", location, null));
   }
 
   @Test
@@ -1366,11 +1369,12 @@ class MagikDefinitionReaderTest {
     assertThat(definitions).hasSize(1);
 
     final ProcedureDefinition procDef = (ProcedureDefinition) definitions.get(0);
+    final Location location = procDef.getLocation();
     final List<MethodUsage> usedMethods = procDef.getUsedMethods();
     assertThat(usedMethods)
         .containsExactly(
-            new MethodUsage(TypeString.ofIdentifier("rope", "user"), "size"),
-            new MethodUsage(TypeString.ofIdentifier("integer", "sw"), "write()"));
+            new MethodUsage(TypeString.ofIdentifier("rope", "user"), "size", location, null),
+            new MethodUsage(TypeString.ofIdentifier("integer", "sw"), "write()", location, null));
   }
 
   private MethodDefinition readMethodDefinition(final String code) {

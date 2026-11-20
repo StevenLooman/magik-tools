@@ -93,7 +93,7 @@ public class SlotUsage implements Usage {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.slotName);
+    return Objects.hash(this.typeName, this.slotName, this.location);
   }
 
   @Override
@@ -111,8 +111,8 @@ public class SlotUsage implements Usage {
     }
 
     final SlotUsage other = (SlotUsage) obj;
-    // Location is not tested!
     return Objects.equals(other.getTypeName(), this.getTypeName())
-        && Objects.equals(other.getSlotName(), this.getSlotName());
+        && Objects.equals(other.getSlotName(), this.getSlotName())
+        && Objects.equals(other.getLocation(), this.getLocation());
   }
 }

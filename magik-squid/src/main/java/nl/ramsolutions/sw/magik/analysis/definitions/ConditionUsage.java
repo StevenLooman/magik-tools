@@ -56,7 +56,7 @@ public class ConditionUsage implements Usage {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.conditionName);
+    return Objects.hash(this.conditionName, this.location);
   }
 
   @Override
@@ -74,7 +74,7 @@ public class ConditionUsage implements Usage {
     }
 
     final ConditionUsage other = (ConditionUsage) obj;
-    // Location is not tested!
-    return Objects.equals(other.getConditionName(), this.getConditionName());
+    return Objects.equals(other.getConditionName(), this.getConditionName())
+        && Objects.equals(other.getLocation(), this.getLocation());
   }
 }

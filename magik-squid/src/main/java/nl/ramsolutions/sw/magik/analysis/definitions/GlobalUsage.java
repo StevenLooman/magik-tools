@@ -48,7 +48,7 @@ public class GlobalUsage implements Usage {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.typeName);
+    return Objects.hash(this.typeName, this.location);
   }
 
   @Override
@@ -66,7 +66,7 @@ public class GlobalUsage implements Usage {
     }
 
     final GlobalUsage other = (GlobalUsage) obj;
-    // Location is not tested!
-    return Objects.equals(other.getTypeName(), this.getTypeName());
+    return Objects.equals(other.getTypeName(), this.getTypeName())
+        && Objects.equals(other.getLocation(), this.getLocation());
   }
 }

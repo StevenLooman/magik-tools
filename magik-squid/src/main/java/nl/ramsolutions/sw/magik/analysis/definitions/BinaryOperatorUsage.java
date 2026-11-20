@@ -68,7 +68,7 @@ public class BinaryOperatorUsage implements Usage {
 
   @Override
   public int hashCode() {
-    return Objects.hash(this.lhsTypeName, this.rhsTypeName, this.operator);
+    return Objects.hash(this.lhsTypeName, this.rhsTypeName, this.operator, this.location);
   }
 
   @Override
@@ -86,9 +86,9 @@ public class BinaryOperatorUsage implements Usage {
     }
 
     final BinaryOperatorUsage other = (BinaryOperatorUsage) obj;
-    // Location is not tested!
     return Objects.equals(other.getLhsTypeName(), this.getLhsTypeName())
         && Objects.equals(other.getRhsTypeName(), this.getRhsTypeName())
-        && Objects.equals(other.getOperator(), this.getOperator());
+        && Objects.equals(other.getOperator(), this.getOperator())
+        && Objects.equals(other.getLocation(), this.getLocation());
   }
 }
