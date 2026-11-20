@@ -277,9 +277,12 @@ public class CallHierarchyProvider {
 
                   // Build the outgoing call for the method definition.
                   final String calledMethodName = helper.getMethodName();
+                  final boolean superReceiver = helper.isSuperSend();
                   final TypeStringResolver resolver = magikFile.getTypeStringResolver();
                   final Range fromRange = new Range(methodInvocationNode);
-                  return resolver.getRespondingMethodDefinitions(typeStr, calledMethodName).stream()
+                  return resolver
+                      .getRespondingMethodDefinitions(typeStr, calledMethodName, superReceiver)
+                      .stream()
                       .map(calledMethodDef -> this.createOutgoingCall(fromRange, calledMethodDef));
                 });
     final Stream<CallHierarchyOutgoingCall> declaredCalls =

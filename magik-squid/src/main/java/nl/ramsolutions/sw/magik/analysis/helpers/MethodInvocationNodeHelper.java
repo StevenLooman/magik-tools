@@ -2,6 +2,7 @@ package nl.ramsolutions.sw.magik.analysis.helpers;
 
 import com.sonar.sslr.api.AstNode;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
@@ -67,6 +68,28 @@ public class MethodInvocationNodeHelper {
    */
   public AstNode getReceiverNode() {
     return this.node.getPreviousSibling();
+  }
+
+  /**
+   * Test if the method is sent to {@code _super}, named or not.
+   *
+   * @return True if the receiver is {@code _super}.
+   */
+  public boolean isSuperSend() {
+    final AstNode receiverNode = this.getReceiverNode();
+    return MethodInvocationNodeHelper.isSuperReceiver(receiverNode);
+  }
+
+  /**
+   * Test if a receiver node is {@code _super}, named or not.
+   *
+   * @param receiverNode Node a method is invoked on.
+   * @return True if the node is {@code _super}.
+   */
+  public static boolean isSuperReceiver(final @Nullable AstNode receiverNode) {
+    return receiverNode != null
+        && receiverNode.is(MagikGrammar.ATOM)
+        && receiverNode.hasDirectChildren(MagikGrammar.SUPER);
   }
 
   /**

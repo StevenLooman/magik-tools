@@ -77,7 +77,7 @@ public class SuperMethodExistsTypedCheck extends MagikTypedCheck {
       }
 
       final Collection<MethodDefinition> methodDefs =
-          resolver.getRespondingMethodDefinitions(typeString, methodName);
+          resolver.getRespondingMethodDefinitionsAsParent(typeString, methodName);
       if (methodDefs.isEmpty()) {
         this.addUnknownMethodIssue(node, helper, typeString);
       }
@@ -105,7 +105,7 @@ public class SuperMethodExistsTypedCheck extends MagikTypedCheck {
             .filter(
                 typeString -> {
                   final Collection<MethodDefinition> methodDefs =
-                      resolver.getRespondingMethodDefinitions(typeString, methodName);
+                      resolver.getRespondingMethodDefinitionsAsParent(typeString, methodName);
                   return !methodDefs.isEmpty();
                 })
             .collect(Collectors.toSet());

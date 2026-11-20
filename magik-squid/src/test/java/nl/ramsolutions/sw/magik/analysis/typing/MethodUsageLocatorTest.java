@@ -513,6 +513,34 @@ class MethodUsageLocatorTest {
   }
 
   @Test
+  void testSuperCallToLonelyMixinIsNoObjectUsage() throws IOException {
+    // A mixin's table has no parents: `_super.zz_m()` to it does not reach sw:object.
+    final String code =
+        """
+        _package sw
+        _method object.zz_m()
+        _endmethod
+
+        _package user
+        def_mixin(:zz_a)
+        def_mixin(:zz_a2, {:zz_a})
+
+        _method zz_a2.zz_m()
+          _super.zz_m()
+        _endmethod
+        """;
+    this.addMagikFile(code);
+    final IDefinitionKeeper definitionKeeper = this.smallworldProject.getDefinitionKeeper();
+    final MethodUsageLocator methodUsageLocator = new MethodUsageLocator(definitionKeeper);
+    final MethodUsage wantedMethodUsage = new MethodUsage(TypeString.SW_OBJECT, "zz_m()");
+
+    final List<Entry<MethodUsage, MagikTypedFile>> usages =
+        methodUsageLocator.getMethodUsages(wantedMethodUsage);
+
+    assertThat(usages).isEmpty();
+  }
+
+  @Test
   void testNamedSuperCallIsUsageOfNamedParentOnly() throws IOException {
     final String code =
         """

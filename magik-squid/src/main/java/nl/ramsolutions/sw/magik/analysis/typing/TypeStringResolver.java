@@ -30,6 +30,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 public class TypeStringResolver {
 
   private static final String ALL_METHODS = "_all_methods";
+  private static final String ALL_METHODS_AS_PARENT = "_all_methods_as_parent";
   private static final String ALL_PROCEDURES = "_all_procedures";
 
   private static final Map<ExemplarDefinition.Sort, TypeString> IMPLICIT_PARENTS =
@@ -320,17 +321,32 @@ public class TypeStringResolver {
 
   /**
    * Get the {@link MethodDefinition}s the {@link TypeString} responds to, including from its super
-   * types.
+   * types. A mixin also responds with the methods of {@code sw:object} it does not define itself,
+   * as {@link #getRespondingMethodDefinitions(TypeString, String)} does.
    *
    * @param typeString {@link TypeString} to resolve.
    * @return {@link MethodDefinition}s the {@link TypeString} responds to.
    */
+  public Collection<MethodDefinition> getRespondingMethodDefinitions(final TypeString typeString) {
+    return this.getRespondingMethodDefinitions(typeString, false);
+  }
+
+  /**
+   * Get the {@link MethodDefinition}s a send to a receiver of the given type may reach. A parent
+   * answers a send to {@code _super} through its own table, so a mixin then gets no {@code
+   * sw:object} methods.
+   *
+   * @param typeString {@link TypeString} to resolve.
+   * @param superReceiver Whether the receiver is {@code _super}.
+   * @return {@link MethodDefinition}s answering a send to the receiver.
+   */
   public synchronized Collection<MethodDefinition> getRespondingMethodDefinitions(
-      final TypeString typeString) {
+      final TypeString typeString, final boolean superReceiver) {
+    final String cacheName = superReceiver ? ALL_METHODS_AS_PARENT : ALL_METHODS;
     return typeString.getCombinedTypes().stream()
         .map(
             typeStr -> {
-              final Entry<TypeString, String> cacheKey = Map.entry(typeStr, ALL_METHODS);
+              final Entry<TypeString, String> cacheKey = Map.entry(typeStr, cacheName);
               return this.methodsCache.computeIfAbsent(
                   cacheKey,
                   entry -> {
@@ -339,7 +355,8 @@ public class TypeStringResolver {
                     final TypeString actualTypeStr =
                         TypeStringResolver.getSharedTypeString(typeStr, resolvedTypes);
 
-                    return this.collectRespondingMethodDefinitions(actualTypeStr);
+                    final boolean objectFallback = !superReceiver && this.isMixin(typeStr);
+                    return this.collectRespondingMethodDefinitions(actualTypeStr, objectFallback);
                   });
             })
         .flatMap(Collection::stream)
@@ -378,6 +395,11 @@ public class TypeStringResolver {
    * Get the {@link MethodDefinition} that responds to the given {@link TypeString} and {@link
    * methodName}.
    *
+   * <p>A value typed as a mixin is an instance of an exemplar including it, and every such exemplar
+   * reaches {@code sw:object}. So a mixin that answers nothing through its own methods and parents
+   * answers with {@code sw:object}'s. This is lookup only: {@code sw:object} does not become a
+   * parent or an ancestor of the mixin.
+   *
    * @param typeString {@link TypeString}(s) to resolve.
    * @param methodName Method name to resolve.
    * @return {@link MethodDefinition} that are responding to the given type and method name.
@@ -385,14 +407,53 @@ public class TypeStringResolver {
   public synchronized Collection<MethodDefinition> getRespondingMethodDefinitions(
       final TypeString typeString, final String methodName) {
     return typeString.getCombinedTypes().stream()
-        .map(typeStr -> this.getRespondingMethodDefinitionsForType(typeStr, methodName))
+        .map(typeStr -> this.getRespondingMethodDefinitionsForType(typeStr, methodName, true))
         .flatMap(Collection::stream)
         .collect(Collectors.toSet());
   }
 
-  /** Resolve {@link methodName} against a single (non-combined) {@link TypeString}. */
+  /**
+   * Get the {@link MethodDefinition}s a type responds with as a parent: through its own methods and
+   * its parents only. A {@code _super} send asks this. A mixin does not fall back to {@code
+   * sw:object}, as its own method table has no parents.
+   *
+   * @param typeString {@link TypeString}(s) to resolve.
+   * @param methodName Method name to resolve.
+   * @return {@link MethodDefinition}s responding as a parent.
+   */
+  public synchronized Collection<MethodDefinition> getRespondingMethodDefinitionsAsParent(
+      final TypeString typeString, final String methodName) {
+    return typeString.getCombinedTypes().stream()
+        .map(typeStr -> this.getRespondingMethodDefinitionsForType(typeStr, methodName, false))
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
+  }
+
+  /**
+   * Get the {@link MethodDefinition}s answering a send to a receiver of the given type. A parent
+   * answers a send to {@code _super} through its own table, as {@link
+   * #getRespondingMethodDefinitionsAsParent(TypeString, String)} gives it.
+   *
+   * @param typeString {@link TypeString}(s) to resolve.
+   * @param methodName Method name to resolve.
+   * @param superReceiver Whether the receiver is {@code _super}.
+   * @return {@link MethodDefinition}s answering the send.
+   */
+  public Collection<MethodDefinition> getRespondingMethodDefinitions(
+      final TypeString typeString, final String methodName, final boolean superReceiver) {
+    if (superReceiver) {
+      return this.getRespondingMethodDefinitionsAsParent(typeString, methodName);
+    }
+
+    return this.getRespondingMethodDefinitions(typeString, methodName);
+  }
+
+  /**
+   * Resolve {@link methodName} against a single (non-combined) {@link TypeString}, a mixin falling
+   * back to {@code sw:object} when {@code objectFallback} is set.
+   */
   private Collection<MethodDefinition> getRespondingMethodDefinitionsForType(
-      final TypeString typeStr, final String methodName) {
+      final TypeString typeStr, final String methodName, final boolean objectFallback) {
     // Resolve typeString.
     final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeStr);
     final TypeString actualTypeStr = TypeStringResolver.getSharedTypeString(typeStr, resolvedTypes);
@@ -410,14 +471,26 @@ public class TypeStringResolver {
     // Gather every responding branch: the parent set is unordered, so first-wins was a coin flip.
     final Collection<MethodDefinition> parentDefinitions =
         this.getParents(typeStr).stream()
-            .map(parentTypeStr -> this.getRespondingMethodDefinitions(parentTypeStr, methodName))
+            .map(
+                parentTypeStr ->
+                    this.getRespondingMethodDefinitionsAsParent(parentTypeStr, methodName))
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
     if (!parentDefinitions.isEmpty()) {
       return this.preferConcreteMethodDefinitions(parentDefinitions);
     }
 
+    if (objectFallback && this.isMixin(typeStr)) {
+      return this.getRespondingMethodDefinitionsForType(TypeString.SW_OBJECT, methodName, false);
+    }
+
     return ownDefinitions;
+  }
+
+  private boolean isMixin(final TypeString typeString) {
+    return this.getExemplarDefinitions(typeString).stream()
+        .map(ExemplarDefinition::getSort)
+        .anyMatch(sort -> sort == ExemplarDefinition.Sort.MIXIN);
   }
 
   /** Prefer concrete implementations over {@code _abstract} ones, unless none are concrete. */
@@ -436,10 +509,11 @@ public class TypeStringResolver {
 
   /**
    * Every method a type responds to, walking the hierarchy nearest level first. A nearer level
-   * shadows a farther one; same-named methods at one level all respond.
+   * shadows a farther one; same-named methods at one level all respond. With {@code
+   * objectFallback}, {@code sw:object} is the last level when the walk did not reach it.
    */
   private Collection<MethodDefinition> collectRespondingMethodDefinitions(
-      final TypeString typeString) {
+      final TypeString typeString, final boolean objectFallback) {
     final Map<String, Set<MethodDefinition>> byName = new HashMap<>();
     final Set<TypeString> seen = new HashSet<>();
     Set<TypeString> level = Set.of(typeString);
@@ -456,6 +530,9 @@ public class TypeStringResolver {
               .flatMap(typeStr -> this.getParents(typeStr).stream())
               .filter(typeStr -> !seen.contains(typeStr))
               .collect(Collectors.toSet());
+      if (level.isEmpty() && objectFallback && !seen.contains(TypeString.SW_OBJECT)) {
+        level = Set.of(TypeString.SW_OBJECT);
+      }
     }
     return byName.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
   }

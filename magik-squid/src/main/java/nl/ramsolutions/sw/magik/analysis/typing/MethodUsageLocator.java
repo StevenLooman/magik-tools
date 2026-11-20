@@ -459,7 +459,7 @@ public class MethodUsageLocator {
       final TypeString wantedTypeStr,
       final String methodName) {
     final Collection<MethodDefinition> respondingDefinitions =
-        resolver.getRespondingMethodDefinitions(superTypeStr, methodName);
+        resolver.getRespondingMethodDefinitionsAsParent(superTypeStr, methodName);
     return MethodUsageLocator.isWantedAmong(resolver, respondingDefinitions, wantedTypeStr);
   }
 

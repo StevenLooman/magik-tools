@@ -57,13 +57,16 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     // For assignment-methods (`[]<<` / `foo<<`), capture the RHS type so a
     // `_parameter(<param>)` ref in the declared return/loop types can be substituted.
     final TypeString assignmentArgType = this.extractAssignmentArgType(node);
+    final boolean superReceiver =
+        calledNode.is(MagikGrammar.ATOM) && calledNode.hasDirectChildren(MagikGrammar.SUPER);
     final InvocationResult invocationResult =
         this.invokeMethod(
             originalCalledTypeStr,
             calledTypeStr,
             methodName,
             argumentExpressionNodes,
-            assignmentArgType);
+            assignmentArgType,
+            superReceiver);
 
     // Store it!
     final ExpressionResultString callResult = invocationResult.callResult();
@@ -97,9 +100,25 @@ class InvocationHandler extends LocalTypeReasonerHandler {
       final String methodName,
       final List<AstNode> argumentExpressionNodes,
       final @Nullable TypeString assignmentArgType) {
+    return this.invokeMethod(
+        originalCalledTypeStr,
+        calledTypeStr,
+        methodName,
+        argumentExpressionNodes,
+        assignmentArgType,
+        false);
+  }
+
+  private InvocationResult invokeMethod(
+      final TypeString originalCalledTypeStr,
+      final TypeString calledTypeStr,
+      final String methodName,
+      final List<AstNode> argumentExpressionNodes,
+      final @Nullable TypeString assignmentArgType,
+      final boolean superReceiver) {
     final Collection<MethodDefinition> methodDefs =
         calledTypeStr.getCombinedTypes().stream()
-            .map(typeStr -> this.typeResolver.getRespondingMethodDefinitions(typeStr, methodName))
+            .map(typeStr -> this.getRespondingMethodDefinitions(typeStr, methodName, superReceiver))
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
@@ -149,6 +168,14 @@ class InvocationHandler extends LocalTypeReasonerHandler {
     Objects.requireNonNull(callResult);
     Objects.requireNonNull(iterResult);
     return new InvocationResult(callResult, iterResult);
+  }
+
+  /** A {@code _super} send asks its parents as parents, so a mixin parent has no fallback. */
+  private Collection<MethodDefinition> getRespondingMethodDefinitions(
+      final TypeString typeStr, final String methodName, final boolean superReceiver) {
+    return superReceiver
+        ? this.typeResolver.getRespondingMethodDefinitionsAsParent(typeStr, methodName)
+        : this.typeResolver.getRespondingMethodDefinitions(typeStr, methodName);
   }
 
   /**

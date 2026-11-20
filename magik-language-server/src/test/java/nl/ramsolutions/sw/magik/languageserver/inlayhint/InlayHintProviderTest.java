@@ -8,7 +8,9 @@ import java.util.Map;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -167,6 +169,68 @@ class InlayHintProviderTest {
 
     final List<InlayHint> inlayHints =
         provider.provideInlayHints(magikFile, new Range(new Position(0, 0), new Position(3, 0)));
+    assertThat(inlayHints).isEmpty();
+  }
+
+  /** A slotted {@code user:zz_e} over the lonely mixin {@code user:zz_m}. */
+  private void addExemplarOverMixin(final IDefinitionKeeper definitionKeeper) {
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_m", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_e", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.MIXIN, mixinRef, null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, exemplarRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, exemplarRef, mixinRef));
+  }
+
+  @SuppressWarnings("checkstyle:MagicNumber")
+  @Test
+  void testProvideNoParameterHintForObjectMethodOnNamedMixinSuper() {
+    // A mixin's own table has no parents, so sw:object's method does not answer.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "method()",
+            Collections.emptySet(),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "param1",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.UNDEFINED)),
+            null,
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+    this.addExemplarOverMixin(definitionKeeper);
+
+    final String code =
+        """
+        _package user
+        _method zz_e.run()
+            _super(zz_m).method(_unset)
+        _endmethod""";
+    final MagikToolsProperties properties =
+        new MagikToolsProperties(Map.of("magik.typing.showArgumentInlayHints", "true"));
+    final InlayHintProvider provider = new InlayHintProvider(properties);
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
+
+    final Range range = new Range(new Position(0, 0), new Position(4, 0));
+    final List<InlayHint> inlayHints = provider.provideInlayHints(magikFile, range);
     assertThat(inlayHints).isEmpty();
   }
 }

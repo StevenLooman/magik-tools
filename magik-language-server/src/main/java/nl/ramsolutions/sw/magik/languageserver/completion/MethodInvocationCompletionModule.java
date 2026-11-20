@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.AstQuery;
+import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -79,8 +80,9 @@ public class MethodInvocationCompletionModule implements CompletionModule {
     // Convert all known methods to CompletionItems.
     LOGGER.debug("Providing method completions for type: {}", typeStr.getFullString());
     final String methodNamePart = tokenValue.startsWith(".") ? tokenValue.substring(1) : tokenValue;
+    final boolean superReceiver = MethodInvocationNodeHelper.isSuperReceiver(wantedNode);
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
-    return resolver.getRespondingMethodDefinitions(typeStr).stream()
+    return resolver.getRespondingMethodDefinitions(typeStr, superReceiver).stream()
         .filter(methodDef -> methodDef.getMethodName().contains(methodNamePart))
         .map(
             methodDef -> {

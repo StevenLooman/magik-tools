@@ -35,9 +35,10 @@ public class MethodInvocationDefinitionModule implements DefinitionModule<MagikT
     final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
     final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, wantedNode);
 
+    final boolean superReceiver = invocationHelper.isSuperSend();
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     final List<Location> locations =
-        resolver.getRespondingMethodDefinitions(typeStr, methodName).stream()
+        resolver.getRespondingMethodDefinitions(typeStr, methodName, superReceiver).stream()
             .map(MethodDefinition::getLocation)
             .map(Location::validLocation)
             .toList();

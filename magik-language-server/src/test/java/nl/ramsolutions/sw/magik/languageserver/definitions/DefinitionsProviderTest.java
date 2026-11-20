@@ -13,6 +13,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -256,5 +257,52 @@ class DefinitionsProviderTest {
     final List<Location> locations = this.getLoadListDefinitions(code, position);
     assertThat(locations).hasSize(1);
     assertThat(locations.get(0).getUri().toString()).endsWith("my_class.magik");
+  }
+
+  /** A slotted {@code user:zz_e} over the lonely mixin {@code user:zz_m}. */
+  private void addExemplarOverMixin(final IDefinitionKeeper definitionKeeper) {
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_m", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_e", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.MIXIN, mixinRef, null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, exemplarRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, exemplarRef, mixinRef));
+  }
+
+  @Test
+  void testProvideDefinitionsFromObjectMethodOnNamedMixinSuper() {
+    // A mixin's own table has no parents, so sw:object's method does not answer.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            EMPTY_LOCATION,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "invoke_me()",
+            Collections.emptySet(),
+            Collections.emptyList(),
+            null,
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+    this.addExemplarOverMixin(definitionKeeper);
+
+    final String code =
+        """
+        _package user
+        _method zz_e.run()
+            _super(zz_m).invoke_me()
+        _endmethod
+        """;
+    final Position position = new Position(3, 20); // On `invoke_me`.
+    final List<Location> locations = this.getDefinitions(code, position, definitionKeeper);
+    assertThat(locations).isEmpty();
   }
 }

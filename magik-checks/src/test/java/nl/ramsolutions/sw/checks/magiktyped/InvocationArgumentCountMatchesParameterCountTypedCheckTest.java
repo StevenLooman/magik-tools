@@ -8,7 +8,9 @@ import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
@@ -316,5 +318,67 @@ class InvocationArgumentCountMatchesParameterCountTypedCheckTest {
         _endblock""";
     final String message = this.runCheckForMessage(code, definitionKeeper);
     Assertions.assertThat(message).isEqualTo("Not enough arguments for invocation: sw:object.m()");
+  }
+
+  /** A slotted {@code user:zz_e} over the lonely mixin {@code user:zz_m}. */
+  private void addExemplarOverMixin(final IDefinitionKeeper definitionKeeper) {
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_m", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_e", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.MIXIN, mixinRef, null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, exemplarRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, exemplarRef, mixinRef));
+  }
+
+  @Test
+  void testObjectMethodOnNamedMixinSuperIsNotReported() {
+    // A mixin's own table has no parents, so sw:object's method does not answer.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "m()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            List.of(
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p1",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.SW_OBJECT),
+                new ParameterDefinition(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "p2",
+                    ParameterDefinition.Modifier.NONE,
+                    TypeString.SW_OBJECT)),
+            null,
+            null,
+            ExpressionResultString.EMPTY,
+            ExpressionResultString.EMPTY));
+    this.addExemplarOverMixin(definitionKeeper);
+    final String code =
+        """
+        _package user
+        _method zz_e.run()
+          _super(zz_m).m(1)
+        _endmethod""";
+    final MagikTypedCheck check = new InvocationArgumentCountMatchesParameterCountTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 }

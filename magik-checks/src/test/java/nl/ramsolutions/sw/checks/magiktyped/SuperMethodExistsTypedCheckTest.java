@@ -491,4 +491,53 @@ class SuperMethodExistsTypedCheckTest {
             TypeString.SW_OBJECT));
     this.addMethod(definitionKeeper, TypeString.SW_OBJECT, "zz_object_m");
   }
+
+  @Test
+  void testObjectMethodOnMixinSuperIsReported() {
+    // A mixin's table has no parents: `_super.class_name` to it fails to load.
+    final String code =
+        """
+        _package user
+        _method zz_a2.run()
+          _return _super.class_name
+        _endmethod""";
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_a", "user");
+    final TypeString childMixinRef = TypeString.ofIdentifier("zz_a2", "user");
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.OBJECT,
+            TypeString.SW_OBJECT,
+            null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "class_name",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_SYMBOL),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.MIXIN, mixinRef, null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.MIXIN, childMixinRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, childMixinRef, mixinRef));
+    final MagikTypedCheck check = new SuperMethodExistsTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
 }

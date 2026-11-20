@@ -66,12 +66,10 @@ class ArgumentNameInlayHintModule implements InlayHintModule {
     // Get invoked method.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(methodInvocationNode);
     final String methodName = helper.getMethodName();
+    final boolean superReceiver = helper.isSuperSend();
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     final Collection<MethodDefinition> methodDefinitions =
-        typeString.getCombinedTypes().stream()
-            .map(typeStr -> resolver.getRespondingMethodDefinitions(typeStr, methodName))
-            .flatMap(Collection::stream)
-            .collect(Collectors.toSet());
+        resolver.getRespondingMethodDefinitions(typeString, methodName, superReceiver);
 
     // Test if all MethodDefinitions have the same parameters.
     final long methodDefinitionParameterCount =

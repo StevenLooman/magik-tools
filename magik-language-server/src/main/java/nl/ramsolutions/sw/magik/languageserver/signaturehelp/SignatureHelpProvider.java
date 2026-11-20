@@ -81,9 +81,10 @@ public class SignatureHelpProvider {
               .toList();
     } else {
       // Provide methods for this type with the name.
+      final boolean superReceiver = helper.isSuperSend();
       final TypeStringResolver resolver = magikFile.getTypeStringResolver();
       sigInfos =
-          resolver.getRespondingMethodDefinitions(typeStr).stream()
+          resolver.getRespondingMethodDefinitions(typeStr, superReceiver).stream()
               .filter(methodDef -> methodDef.getMethodName().startsWith(methodName))
               .map(
                   methodDef ->

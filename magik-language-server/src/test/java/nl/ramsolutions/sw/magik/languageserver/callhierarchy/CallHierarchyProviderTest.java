@@ -476,4 +476,45 @@ class CallHierarchyProviderTest {
     final List<String> fromNames = this.getFromNames(calls);
     assertThat(fromNames).containsExactly("user:a.caller");
   }
+
+  @Test
+  void testCallHierarchyOutgoingCallsSkipObjectMethodOnNamedMixinSuper() throws IOException {
+    // A mixin's own table has no parents, so sw:object's method does not answer.
+    final String codeTarget =
+        """
+        _package sw
+        _method object.zz_object_method
+        _endmethod
+        """;
+    final Path pathTarget = this.smallworldProject.pathOf("/target.magik");
+    this.smallworldProject.addMagikFile(pathTarget, codeTarget);
+
+    final String codeCaller =
+        """
+        _package user
+        def_mixin(:zz_m)
+        $
+        def_slotted_exemplar(:zz_e, {}, {:zz_m})
+        $
+        _method zz_e.caller_method
+          _super(zz_m).zz_object_method
+        _endmethod
+        """;
+    final Path pathCaller = this.smallworldProject.pathOf("/caller.magik");
+    final MagikTypedFile callerFile = this.smallworldProject.addMagikFile(pathCaller, codeCaller);
+    final IDefinitionKeeper definitionKeeper = this.smallworldProject.getDefinitionKeeper();
+    final CallHierarchyProvider provider = new CallHierarchyProvider(definitionKeeper);
+
+    final Position position = new Position(6, 15); // On `caller_method`.
+    final List<CallHierarchyItem> items = provider.prepareCallHierarchy(callerFile, position);
+    assertThat(items).hasSize(1);
+    final CallHierarchyItem item = items.get(0);
+    final Object data = item.getData();
+    final JsonObject jsonData = GSON.toJsonTree(data).getAsJsonObject();
+    item.setData(jsonData);
+
+    final List<CallHierarchyOutgoingCall> calls = provider.callHierarchyOutgoingCalls(item);
+
+    assertThat(calls).isEmpty();
+  }
 }

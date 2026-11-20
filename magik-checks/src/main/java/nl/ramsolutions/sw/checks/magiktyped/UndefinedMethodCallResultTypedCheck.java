@@ -33,9 +33,10 @@ public class UndefinedMethodCallResultTypedCheck extends MagikTypedCheck {
     }
 
     final String methodName = helper.getMethodName();
+    final boolean superReceiver = helper.isSuperSend();
     final TypeStringResolver resolver = this.getTypeStringResolver();
     final Collection<MethodDefinition> methodDefinitions =
-        resolver.getRespondingMethodDefinitions(receiverTypeStr, methodName);
+        resolver.getRespondingMethodDefinitions(receiverTypeStr, methodName, superReceiver);
     if (methodDefinitions.isEmpty()) {
       // Don't bother with unknown methods.
       return;

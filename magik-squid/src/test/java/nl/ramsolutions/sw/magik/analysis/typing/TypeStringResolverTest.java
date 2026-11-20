@@ -1331,4 +1331,139 @@ class TypeStringResolverTest {
     final boolean sameType = resolver.isSameType(USER_A_REF, SW_A_REF);
     assertThat(sameType).isFalse();
   }
+
+  private static final TypeString ZZ_A_REF = TypeString.ofIdentifier("zz_a", "user");
+  private static final TypeString ZZ_A2_REF = TypeString.ofIdentifier("zz_a2", "user");
+  private static final TypeString ZZ_C_REF = TypeString.ofIdentifier("zz_c", "user");
+  private static final TypeString ZZ_P_REF = TypeString.ofIdentifier("zz_p", "user");
+
+  /**
+   * Keeper with the format mixins, {@code sw:object} answering {@code class_name}, and a lonely
+   * mixin {@code user:zz_a}.
+   */
+  private IDefinitionKeeper createLonelyMixinKeeper() {
+    final IDefinitionKeeper definitionKeeper = this.createFormatMixinKeeper();
+    definitionKeeper.add(
+        TypeStringResolverTest.createMethodDefinition(
+            TypeString.SW_OBJECT, "class_name", TypeString.SW_SYMBOL));
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.MIXIN, ZZ_A_REF);
+    return definitionKeeper;
+  }
+
+  private List<TypeString> getOwnerTypeStrings(final Collection<MethodDefinition> definitions) {
+    return definitions.stream().map(MethodDefinition::getTypeName).toList();
+  }
+
+  @Test
+  void testMixinAnswersObjectMethod() {
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(ZZ_A_REF, "class_name");
+
+    final List<TypeString> owners = this.getOwnerTypeStrings(methodDefinitions);
+    assertThat(owners).containsExactly(TypeString.SW_OBJECT);
+  }
+
+  @Test
+  void testMixinWithMixinParentAnswersObjectMethod() {
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.MIXIN, ZZ_A2_REF, ZZ_A_REF);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(ZZ_A2_REF, "class_name");
+
+    final List<TypeString> owners = this.getOwnerTypeStrings(methodDefinitions);
+    assertThat(owners).containsExactly(TypeString.SW_OBJECT);
+  }
+
+  @Test
+  void testMixinOwnMethodShadowsObjectMethod() {
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    definitionKeeper.add(
+        TypeStringResolverTest.createMethodDefinition(
+            ZZ_A_REF, "class_name", TypeString.SW_INTEGER));
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(ZZ_A_REF, "class_name");
+
+    final List<TypeString> owners = this.getOwnerTypeStrings(methodDefinitions);
+    assertThat(owners).containsExactly(ZZ_A_REF);
+  }
+
+  @Test
+  void testMixinAsParentDoesNotAnswerObjectMethod() {
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.MIXIN, ZZ_A2_REF, ZZ_A_REF);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitionsAsParent(ZZ_A2_REF, "class_name");
+
+    assertThat(methodDefinitions).isEmpty();
+  }
+
+  @Test
+  void testMixinAllMethodsIncludeObjectMethods() {
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(ZZ_A_REF);
+
+    final List<TypeString> owners = this.getOwnerTypeStrings(methodDefinitions);
+    assertThat(owners).containsExactly(TypeString.SW_OBJECT);
+  }
+
+  @Test
+  void testMixinAllMethodsOwnMethodShadowsObjectMethod() {
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    definitionKeeper.add(
+        TypeStringResolverTest.createMethodDefinition(
+            ZZ_A_REF, "class_name", TypeString.SW_INTEGER));
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(ZZ_A_REF);
+
+    final List<TypeString> owners = this.getOwnerTypeStrings(methodDefinitions);
+    assertThat(owners).containsExactly(ZZ_A_REF);
+  }
+
+  @Test
+  void testMixinIsStillNoKindOfObject() {
+    // A guard: the fallback is lookup only, no parent.
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final boolean kindOfObject = resolver.isKindOf(ZZ_A_REF, TypeString.SW_OBJECT);
+    final Collection<TypeString> parents = resolver.getParents(ZZ_A_REF);
+    final Collection<TypeString> ancestors = resolver.getAllAncestors(ZZ_A_REF);
+
+    assertThat(kindOfObject).isFalse();
+    assertThat(parents).isEmpty();
+    assertThat(ancestors).isEmpty();
+  }
+
+  @Test
+  void testIncluderOfLonelyMixinAnswersOnlyItsOtherParent() {
+    // The lonely mixin as a parent is its own table, which holds no class_name.
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    this.addExemplarOfSort(definitionKeeper, ExemplarDefinition.Sort.SLOTTED, ZZ_P_REF);
+    definitionKeeper.add(
+        TypeStringResolverTest.createMethodDefinition(
+            ZZ_P_REF, "class_name", TypeString.SW_INTEGER));
+    this.addExemplarOfSort(
+        definitionKeeper, ExemplarDefinition.Sort.SLOTTED, ZZ_C_REF, ZZ_A_REF, ZZ_P_REF);
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(ZZ_C_REF, "class_name");
+
+    final List<TypeString> owners = this.getOwnerTypeStrings(methodDefinitions);
+    assertThat(owners).containsExactly(ZZ_P_REF);
+  }
 }

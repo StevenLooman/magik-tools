@@ -667,4 +667,51 @@ class HoverProviderTest {
     assertThat(content.getKind()).isEqualTo(MarkupKind.MARKDOWN);
     assertThat(content.getValue()).contains("integer");
   }
+
+  /** A slotted {@code user:zz_e} over the lonely mixin {@code user:zz_m}. */
+  private void addExemplarOverMixin(final IDefinitionKeeper definitionKeeper) {
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_m", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_e", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.MIXIN, mixinRef, null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, exemplarRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, exemplarRef, mixinRef));
+  }
+
+  @Test
+  void testProvideHoverObjectMethodOnNamedMixinSuper() {
+    // A mixin's own table has no parents, so sw:object's method does not answer.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            "method_doc",
+            null,
+            TypeString.SW_OBJECT,
+            "hover_me()",
+            Collections.emptySet(),
+            Collections.emptyList(),
+            null,
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY));
+    this.addExemplarOverMixin(definitionKeeper);
+
+    final String code =
+        """
+        _package user
+        _method zz_e.run()
+            _super(zz_m).hover_me()
+        _endmethod""";
+    final Position position = new Position(2, 20); // On `hover_me`.
+
+    final Hover hover = this.provideHover(code, position, definitionKeeper);
+    assertThat(hover).isNull();
+  }
 }

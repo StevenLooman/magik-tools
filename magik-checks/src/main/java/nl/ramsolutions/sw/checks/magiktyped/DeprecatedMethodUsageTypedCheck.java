@@ -31,9 +31,10 @@ public class DeprecatedMethodUsageTypedCheck extends MagikTypedCheck {
     // Get method.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
+    final boolean superReceiver = helper.isSuperSend();
     final TypeStringResolver resolver = this.getTypeStringResolver();
     final Collection<MethodDefinition> methodDefs =
-        resolver.getRespondingMethodDefinitions(calledTypeStr, methodName);
+        resolver.getRespondingMethodDefinitions(calledTypeStr, methodName, superReceiver);
 
     // Add issue if method is deprecated.
     methodDefs.stream()

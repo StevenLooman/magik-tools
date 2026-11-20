@@ -50,9 +50,10 @@ public class InvocationArgumentCountMatchesParameterCountTypedCheck extends Magi
     // Get methods.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
+    final boolean superReceiver = helper.isSuperSend();
     final TypeStringResolver resolver = this.getTypeStringResolver();
     final Collection<MethodDefinition> methodDefs =
-        resolver.getRespondingMethodDefinitions(calledTypeStr, methodName);
+        resolver.getRespondingMethodDefinitions(calledTypeStr, methodName, superReceiver);
     for (final MethodDefinition methodDef : methodDefs) {
       final List<ParameterDefinition> parameterDefs = methodDef.getParameters();
       if (parameterDefs.isEmpty()) {

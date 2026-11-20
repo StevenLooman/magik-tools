@@ -62,8 +62,9 @@ public class InvocationArgumentTypeMatchesParameterTypeTypedCheck extends MagikT
     // Get methods.
     final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
     final String methodName = helper.getMethodName();
+    final boolean superReceiver = helper.isSuperSend();
     final Collection<MethodDefinition> methodDefs =
-        resolver.getRespondingMethodDefinitions(typeStrInvokedOn, methodName);
+        resolver.getRespondingMethodDefinitions(typeStrInvokedOn, methodName, superReceiver);
     for (final MethodDefinition method : methodDefs) {
       final List<ParameterDefinition> parameterDefs = method.getParameters();
       if (parameterDefs.isEmpty()) {

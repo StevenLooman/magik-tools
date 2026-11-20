@@ -9,7 +9,9 @@ import nl.ramsolutions.sw.checks.Issue;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -168,5 +170,45 @@ class UndefinedMethodCallResultTypedCheckTest {
             ExpressionResultString.EMPTY));
     final String message = this.runCheckForMessage(code, definitionKeeper);
     Assertions.assertThat(message).isEqualTo("UNDEFINED results for method: sw:object.m()");
+  }
+
+  @Test
+  void testObjectMethodOnNamedMixinSuperIsLeftToMethodExists() {
+    // A mixin's own table has no parents, so no method answers the send.
+    final String code =
+        """
+        _package user
+        _method zz_e.run()
+          _return _super(zz_m).class_name
+        _endmethod""";
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_m", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_e", "user");
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "class_name",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_SYMBOL),
+            ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.MIXIN, mixinRef, null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, exemplarRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, exemplarRef, mixinRef));
+
+    final MagikTypedCheck check = new UndefinedMethodCallResultTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
   }
 }

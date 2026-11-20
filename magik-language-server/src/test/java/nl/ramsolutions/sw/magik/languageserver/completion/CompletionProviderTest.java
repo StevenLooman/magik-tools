@@ -13,6 +13,7 @@ import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
+import nl.ramsolutions.sw.magik.analysis.definitions.InheritanceDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
@@ -174,6 +175,41 @@ class CompletionProviderTest {
 
     final List<String> labels = completions.stream().map(CompletionItem::getLabel).toList();
     assertThat(labels).contains("first()");
+  }
+
+  @Test
+  void testMethodCompletionOnMixinTypedParameterOffersObjectMethods() {
+    final String code =
+        """
+        _package user
+        _method zz_c.t(p)
+            ## @param {user:zz_a} p
+            p.
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.OBJECT,
+            TypeString.SW_OBJECT,
+            null));
+    final ExpressionResultString symbolResult = new ExpressionResultString(TypeString.SW_SYMBOL);
+    definitionKeeper.add(
+        this.createMethodDefinition(TypeString.SW_OBJECT, "class_name", symbolResult));
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_a", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.MIXIN, mixinRef, null));
+    final Position position = new Position(3, 6); // After '.'.
+
+    final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
+
+    final List<String> labels = completions.stream().map(CompletionItem::getLabel).toList();
+    assertThat(labels).contains("class_name");
   }
 
   @Test
@@ -439,5 +475,38 @@ class CompletionProviderTest {
             .findFirst()
             .orElseThrow();
     assertThat(item.getTags()).contains(CompletionItemTag.Deprecated);
+  }
+
+  @Test
+  void testMethodCompletionOnNamedMixinSuperOffersNoObjectMethods() {
+    // A mixin's own table has no parents, so sw:object's methods do not answer.
+    final String code =
+        """
+        _package user
+        _method zz_e.t()
+            _super(zz_m).
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final ExpressionResultString symbolResult = new ExpressionResultString(TypeString.SW_SYMBOL);
+    definitionKeeper.add(
+        this.createMethodDefinition(TypeString.SW_OBJECT, "class_name", symbolResult));
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_m", "user");
+    final TypeString exemplarRef = TypeString.ofIdentifier("zz_e", "user");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.MIXIN, mixinRef, null));
+    definitionKeeper.add(
+        this.createMethodDefinition(mixinRef, "zz_own", ExpressionResultString.EMPTY));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, exemplarRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, exemplarRef, mixinRef));
+    final Position position = new Position(2, 17); // After '.'.
+
+    final List<CompletionItem> completions = this.getCompletions(code, definitionKeeper, position);
+
+    final List<String> labels = completions.stream().map(CompletionItem::getLabel).toList();
+    assertThat(labels).contains("zz_own").doesNotContain("class_name");
   }
 }

@@ -397,4 +397,58 @@ class MethodExistsTypedCheckTest {
         new InheritanceDefinition(null, null, null, null, null, hostRef, BASE_REF));
     return definitionKeeper;
   }
+
+  private static final TypeString ZZ_A_REF = TypeString.ofIdentifier("zz_a", "user");
+
+  /** A lonely mixin {@code user:zz_a}, and {@code sw:object} answering {@code class_name}. */
+  private IDefinitionKeeper createLonelyMixinKeeper() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.OBJECT, TypeString.SW_OBJECT);
+    final ExpressionResultString symbolResult = new ExpressionResultString(TypeString.SW_SYMBOL);
+    this.addMethod(definitionKeeper, TypeString.SW_OBJECT, "class_name", symbolResult);
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.MIXIN, ZZ_A_REF);
+    return definitionKeeper;
+  }
+
+  @Test
+  void testObjectMethodOnMixinTypedParameterIsNotReported() {
+    // The value is an includer's instance, and every includer reaches sw:object.
+    final String code =
+        """
+        _package user
+        _method base.run(p)
+          ## @param {user:zz_a} p
+          _return p.class_name
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testObjectMethodOnSelfInLonelyMixinIsNotReported() {
+    final String code =
+        """
+        _package user
+        _method zz_a.run()
+          _return _self.class_name
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
+  void testUnknownMethodOnMixinTypedParameterIsStillReported() {
+    final String code =
+        """
+        _package user
+        _method base.run(p)
+          ## @param {user:zz_a} p
+          _return p.no_such_method
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    assertThat(check).reportsIssueCount(code, definitionKeeper, 1);
+  }
 }

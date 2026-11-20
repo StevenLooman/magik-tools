@@ -48,10 +48,11 @@ public class MethodInvocationHoverModule implements HoverModule<MagikTypedFile> 
     final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
     final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, hoveredNode);
 
+    final boolean superReceiver = invocationHelper.isSuperSend();
     final TypeStringResolver resolver = magikFile.getTypeStringResolver();
     final StringBuilder builder = new StringBuilder();
     resolver
-        .getRespondingMethodDefinitions(typeStr, methodName)
+        .getRespondingMethodDefinitions(typeStr, methodName, superReceiver)
         .forEach(methodDef -> HoverDocBuilder.buildMethodSignatureDoc(methodDef, builder));
     return Optional.of(builder.toString());
   }

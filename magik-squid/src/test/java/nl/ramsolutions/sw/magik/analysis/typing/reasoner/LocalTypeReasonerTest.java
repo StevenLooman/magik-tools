@@ -3169,4 +3169,83 @@ class LocalTypeReasonerTest {
     final ExpressionResultString expected = new ExpressionResultString(TypeString.SW_INTEGER);
     assertThat(result).isEqualTo(expected);
   }
+
+  /**
+   * A mixin {@code sw:zz_a2} with parent mixin {@code sw:zz_a}, and {@code sw:object.class_name}.
+   */
+  private IDefinitionKeeper createMixinChainKeeper() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ExemplarDefinition.Sort.OBJECT,
+            TypeString.SW_OBJECT,
+            null));
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            TypeString.SW_OBJECT,
+            "class_name",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_SYMBOL),
+            ExpressionResultString.EMPTY));
+    final TypeString mixinRef = TypeString.ofIdentifier("zz_a", "sw");
+    final TypeString childMixinRef = TypeString.ofIdentifier("zz_a2", "sw");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.MIXIN, mixinRef, null));
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.MIXIN, childMixinRef, null));
+    definitionKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, childMixinRef, mixinRef));
+    return definitionKeeper;
+  }
+
+  @Test
+  void testReasonParameterTypedAsAMixinAnswersObjectMethod() {
+    // The value is an includer's instance, and every includer reaches sw:object.
+    final String code =
+        """
+        _package sw
+        _method other.test(p1)
+            ## @param {sw:zz_a} p1
+            _return p1.class_name
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = this.createMixinChainKeeper();
+
+    final ExpressionResultString result = this.reasonMethodResult(code, definitionKeeper);
+
+    final ExpressionResultString expected = new ExpressionResultString(TypeString.SW_SYMBOL);
+    assertThat(result).isEqualTo(expected);
+  }
+
+  @Test
+  void testReasonSuperToAMixinDoesNotAnswerObjectMethod() {
+    // A mixin's table has no parents: `_super.class_name` to it fails to load.
+    final String code =
+        """
+        _package sw
+        _method zz_a2.test
+            _return _super.class_name
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = this.createMixinChainKeeper();
+
+    final ExpressionResultString result = this.reasonMethodResult(code, definitionKeeper);
+
+    assertThat(result).isEqualTo(ExpressionResultString.UNDEFINED);
+  }
 }
