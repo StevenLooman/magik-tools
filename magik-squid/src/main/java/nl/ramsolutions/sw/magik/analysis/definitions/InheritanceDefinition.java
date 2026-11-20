@@ -10,8 +10,17 @@ import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 /** Inheritance definition: one directed edge {@code child extends parent}. */
 public class InheritanceDefinition extends MagikDefinition {
 
+  /** What made an inheritance edge. */
+  public enum Origin {
+    /** An exemplar definition, or the session's own inheritance table. */
+    DECLARED,
+    /** A call {@code <receiver>.add_child(<child>)}, an edge only when the receiver is a mixin. */
+    ADD_CHILD,
+  }
+
   private final TypeString childTypeName;
   private final TypeString parentTypeName;
+  private final Origin origin;
 
   /**
    * Constructor.
@@ -66,9 +75,46 @@ public class InheritanceDefinition extends MagikDefinition {
       final TypeString childTypeName,
       final TypeString parentTypeName,
       final Provenance provenance) {
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        childTypeName,
+        parentTypeName,
+        provenance,
+        Origin.DECLARED);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param location Location of definition.
+   * @param timestamp Timestamp of definition.
+   * @param moduleName Name of module this edge is defined in.
+   * @param doc Doc.
+   * @param node Node for definition.
+   * @param childTypeName Child (owner) type.
+   * @param parentTypeName Parent type the child extends.
+   * @param provenance Provenance.
+   * @param origin What made the edge.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public InheritanceDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final TypeString childTypeName,
+      final TypeString parentTypeName,
+      final Provenance provenance,
+      final Origin origin) {
     super(location, timestamp, moduleName, doc, node, provenance);
     this.childTypeName = childTypeName;
     this.parentTypeName = parentTypeName;
+    this.origin = origin;
   }
 
   public TypeString getChildTypeName() {
@@ -77,6 +123,10 @@ public class InheritanceDefinition extends MagikDefinition {
 
   public TypeString getParentTypeName() {
     return this.parentTypeName;
+  }
+
+  public Origin getOrigin() {
+    return this.origin;
   }
 
   @Override
@@ -94,7 +144,8 @@ public class InheritanceDefinition extends MagikDefinition {
         null,
         this.childTypeName,
         this.parentTypeName,
-        this.getProvenance());
+        this.getProvenance(),
+        this.origin);
   }
 
   @Override
@@ -107,7 +158,8 @@ public class InheritanceDefinition extends MagikDefinition {
         this.getNode(),
         this.childTypeName,
         this.parentTypeName,
-        provenance);
+        provenance,
+        this.origin);
   }
 
   @Override

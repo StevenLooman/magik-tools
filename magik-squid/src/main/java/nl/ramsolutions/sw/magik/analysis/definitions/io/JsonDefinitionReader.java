@@ -536,6 +536,9 @@ public final class JsonDefinitionReader {
         .registerTypeAdapter(
             ParameterDefinition.Modifier.class,
             new LowerCaseEnumDeserializer<ParameterDefinition.Modifier>())
+        .registerTypeAdapter(
+            InheritanceDefinition.Origin.class,
+            new LowerCaseEnumDeserializer<InheritanceDefinition.Origin>())
         .registerTypeAdapter(ProductDefinition.class, new ProductDefinitionCreator())
         .registerTypeAdapter(ModuleDefinition.class, new ModuleDefinitionCreator())
         .registerTypeAdapter(MethodDefinition.class, new MethodDefinitionCreator())

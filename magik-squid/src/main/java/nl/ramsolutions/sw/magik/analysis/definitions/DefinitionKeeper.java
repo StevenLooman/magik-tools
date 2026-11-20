@@ -1,5 +1,6 @@
 package nl.ramsolutions.sw.magik.analysis.definitions;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -145,6 +146,12 @@ public class DefinitionKeeper implements IDefinitionKeeper {
 
   @Override
   public void add(final InheritanceDefinition definition) {
+    // A declared edge supersedes its add_child() twin, whichever came first.
+    final InheritanceDefinition addChildTwin = this.findAddChildTwin(definition);
+    if (addChildTwin != null) {
+      this.remove(addChildTwin);
+    }
+
     final TypeString bareTypeString = definition.getChildTypeName().getWithoutGenerics();
     final Set<InheritanceDefinition> definitions =
         this.inheritanceDefinitions.computeIfAbsent(
@@ -156,6 +163,23 @@ public class DefinitionKeeper implements IDefinitionKeeper {
             bareParentTypeString, k -> ConcurrentHashMap.newKeySet());
     parentDefinitions.add(definition);
     this.addToPathIndex(definition);
+  }
+
+  @CheckForNull
+  private InheritanceDefinition findAddChildTwin(final InheritanceDefinition definition) {
+    if (definition.getOrigin() != InheritanceDefinition.Origin.DECLARED) {
+      return null;
+    }
+
+    final TypeString childTypeString = definition.getChildTypeName();
+    final TypeString bareTypeString = childTypeString.getWithoutGenerics();
+    final Set<InheritanceDefinition> held =
+        this.inheritanceDefinitions.getOrDefault(bareTypeString, Collections.emptySet());
+    return held.stream()
+        .filter(twin -> twin.getOrigin() == InheritanceDefinition.Origin.ADD_CHILD)
+        .filter(definition::equals)
+        .findAny()
+        .orElse(null);
   }
 
   @Override

@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
@@ -88,6 +89,25 @@ public final class JsonDefinitionWriter {
     public JsonElement serialize(
         final E src, final Type typeOfSrc, final JsonSerializationContext context) {
       final String val = src.toString().toLowerCase();
+      return new JsonPrimitive(val);
+    }
+  }
+
+  /** Writes nothing for the default origin, so a declared edge's line stays as it was. */
+  private static final class OriginSerializer
+      implements JsonSerializer<InheritanceDefinition.Origin> {
+
+    @Override
+    public JsonElement serialize(
+        final InheritanceDefinition.Origin src,
+        final Type typeOfSrc,
+        final JsonSerializationContext context) {
+      if (src == InheritanceDefinition.Origin.DECLARED) {
+        return JsonNull.INSTANCE;
+      }
+
+      final String name = src.toString();
+      final String val = name.toLowerCase();
       return new JsonPrimitive(val);
     }
   }
@@ -181,6 +201,7 @@ public final class JsonDefinitionWriter {
         .registerTypeAdapter(
             ParameterDefinition.Modifier.class,
             new LowerCaseEnumSerializer<ParameterDefinition.Modifier>())
+        .registerTypeAdapter(InheritanceDefinition.Origin.class, new OriginSerializer())
         .create();
   }
 
