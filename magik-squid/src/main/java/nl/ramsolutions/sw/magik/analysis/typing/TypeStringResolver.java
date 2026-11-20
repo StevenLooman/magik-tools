@@ -94,8 +94,9 @@ public class TypeStringResolver {
 
   private Set<ITypeStringDefinition> resolveInPackageHierarchy(final TypeString typeString) {
     // Only a single type reference can resolve to a definition; a combined/variadic type
-    // has no identifier to look up.
-    if (!typeString.isSingle()) {
+    // has no identifier to look up. `_undefined` names nothing, even when a misread definition
+    // was filed under it.
+    if (!typeString.isSingle() || typeString.isUndefined()) {
       return Set.of();
     }
 

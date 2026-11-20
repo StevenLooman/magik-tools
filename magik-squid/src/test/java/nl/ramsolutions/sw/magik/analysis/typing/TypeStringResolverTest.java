@@ -59,6 +59,20 @@ class TypeStringResolverTest {
   }
 
   @Test
+  void testResolveUndefinedFindsNothing() {
+    // A misread definition keyed under `_undefined` must not answer for every unknown type.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper(false);
+    final TypeString ropeRef = TypeString.ofIdentifier("rope", "sw");
+    definitionKeeper.add(TypeStringResolverTest.createExemplar(ropeRef));
+    definitionKeeper.add(
+        new GlobalDefinition(null, null, null, null, null, TypeString.UNDEFINED, ropeRef));
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final Collection<ITypeStringDefinition> definitions = resolver.resolve(TypeString.UNDEFINED);
+    assertThat(definitions).isEmpty();
+  }
+
+  @Test
   void testGetSlotDefinitionsFromKeeper() {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final TypeString typeA = TypeString.ofIdentifier("a", "user");

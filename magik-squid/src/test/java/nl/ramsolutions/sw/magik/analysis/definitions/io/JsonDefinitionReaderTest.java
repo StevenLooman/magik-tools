@@ -38,11 +38,149 @@ import org.junit.jupiter.api.io.TempDir;
 /** Tests for JsonDefinitionReader. */
 class JsonDefinitionReaderTest {
 
+  private static final TypeString SW_ROPE_REF = TypeString.ofIdentifier("rope", "sw");
+
   private IDefinitionKeeper readTypes() throws IOException {
     final Path path = Path.of("src/test/resources/tests/type_database.jsonl");
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     JsonDefinitionReader.readTypes(path, definitionKeeper);
     return definitionKeeper;
+  }
+
+  private IDefinitionKeeper writeAndReadTypes(final Path tempDir, final IDefinitionKeeper keeper)
+      throws IOException {
+    final Path path = tempDir.resolve("types.jsonl");
+    JsonDefinitionWriter.write(path, keeper);
+    final IDefinitionKeeper readKeeper = new DefinitionKeeper();
+    JsonDefinitionReader.readTypes(path, readKeeper);
+    return readKeeper;
+  }
+
+  private IDefinitionKeeper createRopeKeeper(final TypeString globalName) {
+    final TypeString ropeRef = JsonDefinitionReaderTest.SW_ROPE_REF;
+    final IDefinitionKeeper keeper = new DefinitionKeeper(false);
+    keeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, ropeRef, null));
+    keeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            ropeRef,
+            "size",
+            Collections.emptySet(),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_INTEGER),
+            ExpressionResultString.EMPTY));
+    keeper.add(new GlobalDefinition(null, null, null, null, null, globalName, ropeRef));
+    return keeper;
+  }
+
+  @Test
+  void testReadAtNamedGlobalAndProcedure(@TempDir final Path tempDir) throws IOException {
+    final TypeString globalName = TypeString.ofIdentifier("@_sw5_processed_files", "sw");
+    final TypeString procedureName = TypeString.ofIdentifier("@", "sw");
+    final IDefinitionKeeper writtenKeeper = this.createRopeKeeper(globalName);
+    writtenKeeper.add(
+        new ProcedureDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            Collections.emptySet(),
+            procedureName,
+            "\\@",
+            Collections.emptyList(),
+            null,
+            new ExpressionResultString(TypeString.SW_INTEGER),
+            ExpressionResultString.EMPTY));
+
+    final IDefinitionKeeper readKeeper = this.writeAndReadTypes(tempDir, writtenKeeper);
+
+    final Collection<GlobalDefinition> globals = readKeeper.getGlobalDefinitions(globalName);
+    assertThat(globals).hasSize(1);
+    final Collection<ProcedureDefinition> procedures =
+        readKeeper.getProcedureDefinitions(procedureName);
+    assertThat(procedures).hasSize(1);
+    final Collection<GlobalDefinition> undefinedGlobals =
+        readKeeper.getGlobalDefinitions(TypeString.UNDEFINED);
+    assertThat(undefinedGlobals).isEmpty();
+  }
+
+  @Test
+  void testReadSkipsDefinitionsWithAnUnparsableName(@TempDir final Path tempDir)
+      throws IOException {
+    // A piped identifier such as `|hello world|` has no type string spelling.
+    final TypeString unparsableName = TypeString.ofIdentifier("hello world", "sw");
+    final IDefinitionKeeper writtenKeeper = this.createRopeKeeper(unparsableName);
+    final TypeString ropeRef = JsonDefinitionReaderTest.SW_ROPE_REF;
+    writtenKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, unparsableName, null));
+    writtenKeeper.add(
+        new InheritanceDefinition(null, null, null, null, null, unparsableName, ropeRef));
+    writtenKeeper.add(
+        new SlotDefinition(
+            null, null, null, null, null, unparsableName, "s", TypeString.SW_INTEGER));
+    writtenKeeper.add(
+        new ProcedureDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            Collections.emptySet(),
+            unparsableName,
+            null,
+            Collections.emptyList(),
+            null,
+            new ExpressionResultString(TypeString.SW_INTEGER),
+            ExpressionResultString.EMPTY));
+    writtenKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            unparsableName,
+            "size",
+            Collections.emptySet(),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_INTEGER),
+            ExpressionResultString.EMPTY));
+
+    final IDefinitionKeeper readKeeper = this.writeAndReadTypes(tempDir, writtenKeeper);
+
+    final TypeString undefined = TypeString.UNDEFINED;
+    final Collection<ExemplarDefinition> undefinedExemplars =
+        readKeeper.getExemplarDefinitions(undefined);
+    assertThat(undefinedExemplars).isEmpty();
+    final Collection<InheritanceDefinition> undefinedInheritances =
+        readKeeper.getInheritanceDefinitions(undefined);
+    assertThat(undefinedInheritances).isEmpty();
+    final Collection<SlotDefinition> undefinedSlots = readKeeper.getSlotDefinitions(undefined);
+    assertThat(undefinedSlots).isEmpty();
+    final Collection<ProcedureDefinition> undefinedProcedures =
+        readKeeper.getProcedureDefinitions(undefined);
+    assertThat(undefinedProcedures).isEmpty();
+    final Collection<GlobalDefinition> undefinedGlobals =
+        readKeeper.getGlobalDefinitions(undefined);
+    assertThat(undefinedGlobals).isEmpty();
+    final Collection<MethodDefinition> undefinedMethods =
+        readKeeper.getMethodDefinitions(undefined);
+    assertThat(undefinedMethods).isEmpty();
+    final Collection<MethodDefinition> ropeMethods =
+        readKeeper.getMethodDefinitions(JsonDefinitionReaderTest.SW_ROPE_REF);
+    assertThat(ropeMethods).hasSize(1);
   }
 
   @Test

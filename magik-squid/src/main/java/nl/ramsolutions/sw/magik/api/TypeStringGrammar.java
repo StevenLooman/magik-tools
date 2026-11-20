@@ -94,8 +94,9 @@ public enum TypeStringGrammar implements GrammarRuleKey {
   private static final String LINE_TERMINATOR_REGEXP = "\\n\\r";
   private static final String WHITESPACE_REGEXP = "\\t\\v\\f\\u0020\\u00A0\\uFEFF";
 
+  // A Magik identifier spelled `\@x` is named `@x`, and its name is written unescaped.
   private static final String SIMPLE_IDENTIFIER_REGEXP =
-      "([a-zA-Z!?]|\\\\.)([a-zA-Z0-9_!?]|\\\\.)*";
+      "([a-zA-Z!?@]|\\\\.)([a-zA-Z0-9_!?@]|\\\\.)*";
   // Only an explicit `_anon:` package admits a leading `_`, so a mistyped marker stays an error.
   private static final String ANONYMOUS_IDENTIFIER_REGEXP =
       "_anon:([a-zA-Z_!?]|\\\\.)([a-zA-Z0-9_!?]|\\\\.)*";

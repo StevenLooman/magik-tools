@@ -45,6 +45,23 @@ class TypeStringParserTest {
   }
 
   @Test
+  void testAtNamedIdentifier() {
+    // `_global \@x` in Magik names the global `@x`, persisted as it is named.
+    final TypeString expected = TypeString.ofIdentifier("@_sw5_processed_files", "sw");
+    final String typeStr = expected.getFullString();
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    assertThat(typeString).isEqualTo(expected);
+  }
+
+  @Test
+  void testBareAtIdentifier() {
+    final TypeString expected = TypeString.ofIdentifier("@", "sw");
+    final String typeStr = expected.getFullString();
+    final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);
+    assertThat(typeString).isEqualTo(expected);
+  }
+
+  @Test
   void testParameterRef() {
     final String typeStr = "_parameter(p1)";
     final TypeString typeString = TypeStringParser.parseTypeString(typeStr, SW_PACKAGE);

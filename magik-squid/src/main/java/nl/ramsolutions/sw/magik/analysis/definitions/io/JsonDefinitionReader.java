@@ -40,6 +40,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.TopLevelCodeDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
+import nl.ramsolutions.sw.magik.api.TypeStringGrammar.Keyword;
 import nl.ramsolutions.sw.magik.parser.TypeStringParser;
 import nl.ramsolutions.sw.message.MessageDefinition;
 import nl.ramsolutions.sw.message.MessageFileDefinition;
@@ -489,6 +490,24 @@ public final class JsonDefinitionReader {
     }
   }
 
+  /** Whether a definition's name read as `_undefined` without being written so; it is skipped. */
+  private static boolean isMisreadName(
+      final TypeString name, final JsonObject instruction, final String field) {
+    final JsonElement nameElement = instruction.get(field);
+    if (!name.isUndefined() || nameElement == null || nameElement.isJsonNull()) {
+      return false;
+    }
+
+    final String rawName = nameElement.getAsString();
+    final String strippedName = rawName.strip();
+    if (strippedName.equalsIgnoreCase(Keyword.TYPE_STRING_UNDEFINED.getValue())) {
+      return false;
+    }
+
+    LOGGER.warn("Skipping a definition named {}: its name does not parse as a type", rawName);
+    return true;
+  }
+
   private void verifySchemaVersion(final JsonObject instruction) throws IncompatibleCacheException {
     final int found = instruction.get("value").getAsInt();
     if (found != JsonDefinitionReader.SCHEMA_VERSION) {
@@ -580,10 +599,13 @@ public final class JsonDefinitionReader {
   private void handleType(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final ExemplarDefinition definition = gson.fromJson(instruction, ExemplarDefinition.class);
+    final TypeString typeString = definition.getTypeString();
+    if (JsonDefinitionReader.isMisreadName(typeString, instruction, "type_name")) {
+      return;
+    }
 
     // We are allowed to overwrite definitions which have no location, as these will most likely
     // be the default definitions from DefaultDefinitionsAdder.
-    final TypeString typeString = definition.getTypeString();
     this.definitionKeeper.getExemplarDefinitions(typeString).stream()
         .filter(def -> def.getLocation() == null)
         .forEach(this.definitionKeeper::remove);
@@ -597,6 +619,11 @@ public final class JsonDefinitionReader {
     final Gson gson = this.buildGson();
     final InheritanceDefinition definition =
         gson.fromJson(instruction, InheritanceDefinition.class);
+    final TypeString name = definition.getChildTypeName();
+    if (JsonDefinitionReader.isMisreadName(name, instruction, "child_type_name")) {
+      return;
+    }
+
     final String provenanceRaw = this.provenanceRawOf(instruction);
     final Provenance provenance = this.provenanceOf(provenanceRaw);
     final InheritanceDefinition provenancedDefinition = definition.withProvenance(provenance);
@@ -606,6 +633,11 @@ public final class JsonDefinitionReader {
   private void handleSlot(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final SlotDefinition definition = gson.fromJson(instruction, SlotDefinition.class);
+    final TypeString name = definition.getOwnerTypeName();
+    if (JsonDefinitionReader.isMisreadName(name, instruction, "owner_type_name")) {
+      return;
+    }
+
     final String provenanceRaw = this.provenanceRawOf(instruction);
     final Provenance provenance = this.provenanceOf(provenanceRaw);
     final SlotDefinition provenancedDefinition = definition.withProvenance(provenance);
@@ -615,6 +647,11 @@ public final class JsonDefinitionReader {
   private void handleMethod(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final MethodDefinition definition = gson.fromJson(instruction, MethodDefinition.class);
+    final TypeString name = definition.getTypeName();
+    if (JsonDefinitionReader.isMisreadName(name, instruction, "type_name")) {
+      return;
+    }
+
     final String provenanceRaw = this.provenanceRawOf(instruction);
     final Provenance provenance = this.provenanceOf(provenanceRaw);
     final MethodDefinition provenancedDefinition = definition.withProvenance(provenance);
@@ -660,6 +697,11 @@ public final class JsonDefinitionReader {
   private void handleProcedure(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final ProcedureDefinition definition = gson.fromJson(instruction, ProcedureDefinition.class);
+    final TypeString name = definition.getTypeString();
+    if (JsonDefinitionReader.isMisreadName(name, instruction, "type_name")) {
+      return;
+    }
+
     final String provenanceRaw = this.provenanceRawOf(instruction);
     final Provenance provenance = this.provenanceOf(provenanceRaw);
     final ProcedureDefinition provenancedDefinition = definition.withProvenance(provenance);
@@ -669,6 +711,11 @@ public final class JsonDefinitionReader {
   private void handleGlobal(final JsonObject instruction) {
     final Gson gson = this.buildGson();
     final GlobalDefinition definition = gson.fromJson(instruction, GlobalDefinition.class);
+    final TypeString name = definition.getTypeString();
+    if (JsonDefinitionReader.isMisreadName(name, instruction, "type_name")) {
+      return;
+    }
+
     final String provenanceRaw = this.provenanceRawOf(instruction);
     final Provenance provenance = this.provenanceOf(provenanceRaw);
     final GlobalDefinition provenancedDefinition = definition.withProvenance(provenance);
