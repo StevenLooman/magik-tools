@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.LogManager;
 import java.util.regex.Pattern;
+import nl.ramsolutions.sw.BuildInfo;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -95,7 +96,8 @@ public class Main {
   }
 
   private static String getVersion() {
-    return Main.class.getPackage().getImplementationVersion();
+    final BuildInfo build = BuildInfo.getCurrent();
+    return build.describeVersion();
   }
 
   /**

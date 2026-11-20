@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.logging.LogManager;
+import nl.ramsolutions.sw.BuildInfo;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -58,7 +59,8 @@ public final class Main {
   }
 
   private static String getVersion() {
-    return Main.class.getPackage().getImplementationVersion();
+    final BuildInfo build = BuildInfo.getCurrent();
+    return build.describeVersion();
   }
 
   /**

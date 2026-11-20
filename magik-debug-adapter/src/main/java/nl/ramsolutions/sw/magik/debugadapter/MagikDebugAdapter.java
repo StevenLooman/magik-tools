@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import nl.ramsolutions.sw.BuildInfo;
 import nl.ramsolutions.sw.magik.debugadapter.BreakpointManager.MagikBreakpoint;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapEvent;
 import nl.ramsolutions.sw.magik.debugadapter.slap.ISlapProtocol;
@@ -110,7 +111,8 @@ public class MagikDebugAdapter implements IDebugProtocolServer, SlapEventListene
     LOGGER.trace("initialize");
 
     // Log server version.
-    final String version = this.getClass().getPackage().getImplementationVersion();
+    final BuildInfo build = BuildInfo.getCurrent();
+    final String version = build.describeVersion();
     LOGGER.info("Version: {}", version);
 
     final Capabilities capabilities = new Capabilities();

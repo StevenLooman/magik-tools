@@ -72,4 +72,72 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Bake the version and git commit into every jar, so each tool can report the exact build. A build
+           without git records no commit. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>${maven-antrun-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>write-build-info</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <exec executable="git" dir="${project.basedir}" failonerror="false" failifexecutionfails="false"
+                      outputproperty="build.git.commit" errorproperty="build.git.commit.error"
+                      resultproperty="build.git.commit.result">
+                  <arg value="rev-parse" />
+                  <arg value="--short=12" />
+                  <arg value="HEAD" />
+                </exec>
+                <exec executable="git" dir="${project.basedir}" failonerror="false" failifexecutionfails="false"
+                      outputproperty="build.git.status" errorproperty="build.git.status.error"
+                      resultproperty="build.git.status.result">
+                  <arg value="status" />
+                  <arg value="--porcelain" />
+                  <arg value="--untracked-files=no" />
+                </exec>
+                <!-- A clean checkout of a release tag records no commit: its version says it all. -->
+                <exec executable="git" dir="${project.basedir}" failonerror="false" failifexecutionfails="false"
+                      outputproperty="build.git.tag" errorproperty="build.git.tag.error"
+                      resultproperty="build.git.tag.result">
+                  <arg value="describe" />
+                  <arg value="--exact-match" />
+                  <arg value="--tags" />
+                  <arg value="HEAD" />
+                </exec>
+                <condition property="build.git.dirty" value="-dirty" else="">
+                  <and>
+                    <equals arg1="${build.git.status.result}" arg2="0" />
+                    <length string="${build.git.status}" when="greater" length="0" />
+                  </and>
+                </condition>
+                <condition property="build.commit.line" value="commit=${build.git.commit}${build.git.dirty}&#10;" else="">
+                  <and>
+                    <equals arg1="${build.git.commit.result}" arg2="0" />
+                    <not>
+                      <and>
+                        <equals arg1="${build.git.tag.result}" arg2="0" />
+                        <equals arg1="${build.git.dirty}" arg2="" />
+                      </and>
+                    </not>
+                  </and>
+                </condition>
+                <mkdir dir="${project.build.outputDirectory}/nl/ramsolutions/sw" />
+                <echo file="${project.build.outputDirectory}/nl/ramsolutions/sw/magik-tools-build.properties"
+                      encoding="UTF-8" message="version=${project.version}&#10;${build.commit.line}" />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
