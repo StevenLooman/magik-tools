@@ -407,6 +407,33 @@ class LocalTypeReasonerTest {
   }
 
   @Test
+  void testAllResultsAssignedToVariable() {
+    final String code =
+        """
+        _package sw
+        _method object.test
+            _local all
+            all << _allresults _self.two()
+            _return all
+        _endmethod
+        """;
+
+    // Set up.
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+
+    // Do analysis.
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+
+    // Assert sw:object.test type determined.
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    final ExpressionResultString expected = new ExpressionResultString(TypeString.SW_SIMPLE_VECTOR);
+    assertThat(result).isEqualTo(expected);
+  }
+
+  @Test
   void testBinaryOperator() {
     final String code =
         """

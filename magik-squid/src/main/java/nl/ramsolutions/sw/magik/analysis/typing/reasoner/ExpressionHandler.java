@@ -211,7 +211,7 @@ class ExpressionHandler extends LocalTypeReasonerHandler {
 
     if (helper.isAllResults()) {
       final ExpressionResultString allResultsResult = this.getAllResultsResult(operandResult);
-      this.assignAtom(node, allResultsResult);
+      this.state.setNodeType(node, allResultsResult);
       return;
     }
 
