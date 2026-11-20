@@ -173,9 +173,10 @@ public class DefSlottedExemplarParser extends BaseDefParser {
       // Method definitions.
       final AstNode flagNode = simpleVectorHelper.getNth(2, MagikGrammar.SYMBOL);
       final AstNode flavorNode = simpleVectorHelper.getNth(3, MagikGrammar.SYMBOL);
-      if (flagNode != null && flavorNode != null) {
+      if (flagNode != null) {
         final String flag = flagNode.getTokenValue();
-        final String flavor = flavorNode.getTokenValue();
+        final String flavor =
+            flavorNode != null ? flavorNode.getTokenValue() : FLAVOR_PUBLIC; // Default is public.
         final List<MethodDefinition> slotMethodDefinitions =
             this.generateSlotMethods(
                 timestamp,
