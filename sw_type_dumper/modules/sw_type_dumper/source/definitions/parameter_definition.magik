@@ -80,7 +80,12 @@ _method parameter_definition.new_from(name, procedure)
 	_endif
 
 	_local parameter_definitions << sw:rope.new()
-	_local param_list << procedure.basic_arglist
+	_local param_list <<
+		_try
+			>> procedure.basic_arglist
+		_when error
+			>> {}
+		_endtry
 	_for index, param_name _over param_list.fast_keys_and_elements()
 	_loop
 		_local modifier <<
