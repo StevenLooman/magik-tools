@@ -71,16 +71,46 @@ public final class ProcedureInvocationDefinitionHelper {
         .toList();
   }
 
+  /**
+   * Get the procedure literal invoked directly, as in {@code _proc … _endproc()} or {@code (_proc …
+   * _endproc)()}. Only parentheses around a single expression are looked through, so a literal
+   * elsewhere in the called expression, such as an argument, is not the invoked procedure.
+   *
+   * @param invocationNode PROCEDURE_INVOCATION node.
+   * @return The PROCEDURE_DEFINITION node, or {@code null}.
+   */
   private static AstNode getInlineProcedureNode(final AstNode invocationNode) {
-    final AstNode calledNode = invocationNode.getPreviousSibling();
-    if (calledNode == null) {
+    AstNode calledNode = invocationNode.getPreviousSibling();
+    while (calledNode != null && !calledNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
+      calledNode = ProcedureInvocationDefinitionHelper.getWrappedNode(calledNode);
+    }
+
+    return calledNode;
+  }
+
+  /**
+   * Get the node an ATOM or EXPRESSION passes through unchanged: the sole child, or the single
+   * expression between parentheses.
+   *
+   * @param node Node to unwrap.
+   * @return The wrapped node, or {@code null}.
+   */
+  private static AstNode getWrappedNode(final AstNode node) {
+    if (!node.is(MagikGrammar.ATOM, MagikGrammar.EXPRESSION)) {
       return null;
     }
 
-    if (calledNode.is(MagikGrammar.PROCEDURE_DEFINITION)) {
-      return calledNode;
+    if (node.getNumberOfChildren() == 1) {
+      return node.getFirstChild();
     }
 
-    return calledNode.getFirstDescendant(MagikGrammar.PROCEDURE_DEFINITION);
+    final List<AstNode> expressionNodes = node.getChildren(MagikGrammar.EXPRESSION);
+    if (!node.is(MagikGrammar.ATOM)
+        || expressionNodes.size() != 1
+        || node.getNumberOfChildren() != 3) {
+      return null;
+    }
+
+    return expressionNodes.get(0);
   }
 }
