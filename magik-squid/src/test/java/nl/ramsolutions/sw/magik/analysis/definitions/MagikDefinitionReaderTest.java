@@ -1373,6 +1373,268 @@ class MagikDefinitionReaderTest {
             new MethodUsage(TypeString.ofIdentifier("integer", "sw"), "write()"));
   }
 
+  private MethodDefinition readMethodDefinition(final String code) {
+    final MagikFile magikFile = this.createMagikFile(code);
+    final AstNode node = magikFile.getTopNode();
+    final MagikDefinitionReader reader = new MagikDefinitionReader(magikFile);
+    reader.walkAst(node);
+    final List<MagikDefinition> definitions = this.readOtherDefinitions(reader);
+    return definitions.stream()
+        .filter(MethodDefinition.class::isInstance)
+        .map(MethodDefinition.class::cast)
+        .findFirst()
+        .orElseThrow();
+  }
+
+  private List<TypeString> readGlobalNames(final List<GlobalUsage> usedGlobals) {
+    return usedGlobals.stream().map(GlobalUsage::getTypeName).toList();
+  }
+
+  private List<Integer> readGlobalLines(final List<GlobalUsage> usedGlobals) {
+    return usedGlobals.stream()
+        .map(GlobalUsage::getLocation)
+        .map(Location::getRange)
+        .map(Range::getStartPosition)
+        .map(Position::getLine)
+        .toList();
+  }
+
+  @Test
+  void testProcedureDefinitionUsedBinaryOperators() {
+    final String code =
+        """
+        _package user
+        _global p <<
+            _proc(a, b)
+                >> -a + b
+            _endproc
+        $
+        """;
+    final ProcedureDefinition definition = this.readProcedureDefinition(code);
+
+    final List<BinaryOperatorUsage> usedBinaryOperators = definition.getUsedBinaryOperators();
+    final List<String> operators =
+        usedBinaryOperators.stream().map(BinaryOperatorUsage::getOperator).toList();
+    assertThat(operators).containsExactly("+");
+  }
+
+  @Test
+  void testProcedureDefinitionFoldsUnaryOperatorsIntoUsedMethods() {
+    final String code =
+        """
+        _package user
+        _global p <<
+            _proc(a, b)
+                >> -a + b
+            _endproc
+        $
+        """;
+    final ProcedureDefinition definition = this.readProcedureDefinition(code);
+
+    final List<MethodUsage> usedMethods = definition.getUsedMethods();
+    final List<String> names = usedMethods.stream().map(MethodUsage::getMethodName).toList();
+    assertThat(names).containsExactly("negated");
+  }
+
+  private ProcedureDefinition readProcedureDefinition(
+      final String code, final Map<String, String> settings) {
+    final MagikToolsProperties properties = new MagikToolsProperties(settings);
+    final MagikFile magikFile = new MagikFile(properties, MagikFile.DEFAULT_URI, code);
+    final List<MagikDefinition> definitions = magikFile.getMagikDefinitions();
+    return definitions.stream()
+        .filter(ProcedureDefinition.class::isInstance)
+        .map(ProcedureDefinition.class::cast)
+        .findFirst()
+        .orElseThrow();
+  }
+
+  @Test
+  void testProcedureDefinitionLeavesOutUnaryOperatorsWhenNotIndexed() {
+    final Map<String, String> settings = Map.of("magik.typing.indexUnaryOperatorUsages", "false");
+    final String code =
+        """
+        _package user
+        _global p <<
+            _proc(a, b)
+                >> -a + b
+            _endproc
+        $
+        """;
+    final ProcedureDefinition definition = this.readProcedureDefinition(code, settings);
+
+    final List<MethodUsage> usedMethods = definition.getUsedMethods();
+    final List<BinaryOperatorUsage> usedBinaryOperators = definition.getUsedBinaryOperators();
+    final List<String> operators =
+        usedBinaryOperators.stream().map(BinaryOperatorUsage::getOperator).toList();
+    assertThat(usedMethods).isEmpty();
+    assertThat(operators).containsExactly("+");
+  }
+
+  @Test
+  void testProcedureDefinitionLeavesOutBinaryOperatorsWhenNotIndexed() {
+    final Map<String, String> settings = Map.of("magik.typing.indexBinaryOperatorUsages", "false");
+    final String code =
+        """
+        _package user
+        _global p <<
+            _proc(a, b)
+                >> -a + b
+            _endproc
+        $
+        """;
+    final ProcedureDefinition definition = this.readProcedureDefinition(code, settings);
+
+    final List<MethodUsage> usedMethods = definition.getUsedMethods();
+    final List<String> names = usedMethods.stream().map(MethodUsage::getMethodName).toList();
+    final List<BinaryOperatorUsage> usedBinaryOperators = definition.getUsedBinaryOperators();
+    assertThat(names).containsExactly("negated");
+    assertThat(usedBinaryOperators).isEmpty();
+  }
+
+  @Test
+  void testMethodDefinitionRecordsNoGlobalItAssigns() {
+    final String code =
+        """
+        _package user
+        a.x
+        $
+        _method b.m()
+            a << 1
+            _return a
+        _endmethod
+        $
+        """;
+    final MethodDefinition definition = this.readMethodDefinition(code);
+
+    final List<GlobalUsage> usedGlobals = definition.getUsedGlobals();
+    assertThat(usedGlobals).isEmpty();
+  }
+
+  @Test
+  void testMethodDefinitionRecordsNoGlobalItAssignsInAMultipleAssignment() {
+    final String code =
+        """
+        _package user
+        a.x
+        $
+        _method b.m()
+            (a, c) << (1, 2)
+            _return a
+        _endmethod
+        $
+        """;
+    final MethodDefinition definition = this.readMethodDefinition(code);
+
+    final List<GlobalUsage> usedGlobals = definition.getUsedGlobals();
+    assertThat(usedGlobals).isEmpty();
+  }
+
+  @Test
+  void testMethodDefinitionRecordsNoGlobalItAssignsInAnAugmentedAssignment() {
+    final String code =
+        """
+        _package user
+        a.x
+        $
+        _method b.m()
+            a +<< 1
+            _return a
+        _endmethod
+        $
+        """;
+    final MethodDefinition definition = this.readMethodDefinition(code);
+
+    final List<GlobalUsage> usedGlobals = definition.getUsedGlobals();
+    assertThat(usedGlobals).isEmpty();
+  }
+
+  @Test
+  void testMethodDefinitionBeforeTheTopLevelUseRecordsItsOwnUsage() {
+    final String code =
+        """
+        _package user
+        _method b.m()
+            _return a
+        _endmethod
+        $
+        a.x
+        $
+        """;
+    final MethodDefinition definition = this.readMethodDefinition(code);
+
+    final List<GlobalUsage> usedGlobals = definition.getUsedGlobals();
+    final List<Integer> lines = this.readGlobalLines(usedGlobals);
+    assertThat(lines).containsExactly(3);
+  }
+
+  @Test
+  void testMethodAndItsProcedureRecordAGlobalTheFileUsedBefore() {
+    final String code =
+        """
+        _package user
+        a.x
+        $
+        _method b.m()
+            _return _proc()
+                >> a
+            _endproc
+        _endmethod
+        $
+        """;
+    final MethodDefinition methodDefinition = this.readMethodDefinition(code);
+    final ProcedureDefinition procedureDefinition = this.readProcedureDefinition(code);
+
+    final List<GlobalUsage> methodGlobals = methodDefinition.getUsedGlobals();
+    final List<GlobalUsage> procedureGlobals = procedureDefinition.getUsedGlobals();
+    final List<Integer> methodLines = this.readGlobalLines(methodGlobals);
+    final List<Integer> procedureLines = this.readGlobalLines(procedureGlobals);
+    assertThat(methodLines).containsExactly(6);
+    assertThat(procedureLines).containsExactly(6);
+  }
+
+  @Test
+  void testMethodDefinitionRecordsADynamicDeclaredBefore() {
+    final String code =
+        """
+        _package user
+        _dynamic !x!
+        $
+        _method b.m()
+            _return !x!
+        _endmethod
+        $
+        """;
+    final MethodDefinition definition = this.readMethodDefinition(code);
+
+    final List<GlobalUsage> usedGlobals = definition.getUsedGlobals();
+    final List<TypeString> names = this.readGlobalNames(usedGlobals);
+    final List<Integer> lines = this.readGlobalLines(usedGlobals);
+    final TypeString expected = TypeString.ofIdentifier("!x!", "user");
+    assertThat(names).containsExactly(expected);
+    assertThat(lines).containsExactly(5);
+  }
+
+  @Test
+  void testMethodDefinitionRecordsAGlobalItDeclaresAfterReadingItOnce() {
+    final String code =
+        """
+        _package user
+        _global x
+        $
+        _method b.m()
+            x.y
+            _global x
+            _return x
+        _endmethod
+        $
+        """;
+    final MethodDefinition definition = this.readMethodDefinition(code);
+
+    final List<GlobalUsage> usedGlobals = definition.getUsedGlobals();
+    final List<Integer> lines = this.readGlobalLines(usedGlobals);
+    assertThat(lines).containsExactly(6);
+  }
+
   @Test
   void testGlobalProcedureIsIndexedAsProcedureOnly() {
     final String code = "_global my_proc << _proc() _endproc";

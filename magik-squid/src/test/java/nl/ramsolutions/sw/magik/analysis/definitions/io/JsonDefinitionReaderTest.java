@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
@@ -25,6 +26,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.PackageDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ParameterDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.definitions.ProcedureDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Provenance;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotDefinition;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
@@ -103,6 +105,57 @@ class JsonDefinitionReaderTest {
     final ProcedureDefinition readDefinition = definitions.iterator().next();
     final TypeString readSelfType = readDefinition.getSelfType();
     assertThat(readSelfType).isEqualTo(selfType);
+  }
+
+  @Test
+  void testReadProcedureUsedBinaryOperators(@TempDir final Path tempDir) throws IOException {
+    final TypeString name = TypeString.ofIdentifier("p", "user");
+    final Location location = new Location(URI.create("file:///a.magik"));
+    final BinaryOperatorUsage usage =
+        new BinaryOperatorUsage(TypeString.SW_INTEGER, TypeString.SW_INTEGER, "+", location, null);
+    final IDefinitionKeeper writtenKeeper = new DefinitionKeeper(false);
+    writtenKeeper.add(
+        new ProcedureDefinition(
+            location,
+            null,
+            null,
+            null,
+            null,
+            Collections.emptySet(),
+            name,
+            null,
+            Collections.emptyList(),
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptyList(),
+            List.of(usage),
+            Provenance.UNKNOWN,
+            null));
+    final Path path = tempDir.resolve("types.jsonl");
+    JsonDefinitionWriter.write(path, writtenKeeper);
+
+    final IDefinitionKeeper readKeeper = new DefinitionKeeper(false);
+    JsonDefinitionReader.readTypes(path, readKeeper);
+
+    final Collection<ProcedureDefinition> definitions = readKeeper.getProcedureDefinitions(name);
+    final ProcedureDefinition readDefinition = definitions.iterator().next();
+    final List<BinaryOperatorUsage> usedBinaryOperators = readDefinition.getUsedBinaryOperators();
+    assertThat(usedBinaryOperators).containsExactly(usage);
+  }
+
+  @Test
+  void testReadProcedureWithoutUsedBinaryOperators() throws IOException {
+    final IDefinitionKeeper definitionKeeper = this.readTypes();
+
+    final TypeString name = TypeString.ofIdentifier("quit", "sw");
+    final Collection<ProcedureDefinition> definitions =
+        definitionKeeper.getProcedureDefinitions(name);
+    final ProcedureDefinition definition = definitions.iterator().next();
+    final List<BinaryOperatorUsage> usedBinaryOperators = definition.getUsedBinaryOperators();
+    assertThat(usedBinaryOperators).isEmpty();
   }
 
   @Test

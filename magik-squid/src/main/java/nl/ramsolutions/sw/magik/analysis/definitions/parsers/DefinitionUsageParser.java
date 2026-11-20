@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.Location;
@@ -22,6 +24,7 @@ import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.SlotUsage;
 import nl.ramsolutions.sw.magik.analysis.helpers.ArgumentsNodeHelper;
+import nl.ramsolutions.sw.magik.analysis.helpers.AssignmentExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.BinaryExpressionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodDefinitionNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
@@ -83,7 +86,7 @@ public class DefinitionUsageParser {
   }
 
   /**
-   * Get the used globals.
+   * Get the used globals, one per scope entry.
    *
    * @return Used globals.
    */
@@ -95,24 +98,29 @@ public class DefinitionUsageParser {
 
     final PackageNodeHelper packageNodeHelper = new PackageNodeHelper(this.node);
     final String currentPakkage = packageNodeHelper.getCurrentPackage();
-    final Stream<GlobalUsage> ownUsages =
+    final List<ScopeEntry> ownEntries =
         bodyScope.getSelfAndDescendantScopes().stream()
             .flatMap(scope -> scope.getScopeEntriesInScope().stream())
             .filter(DefinitionUsageParser::isGlobalEntry)
+            .toList();
+    final Stream<GlobalUsage> ownUsages =
+        ownEntries.stream()
             .map(
                 scopeEntry -> {
                   final AstNode definitionNode = scopeEntry.getDefinitionNode();
-                  // Now you might "see" the reference `user:char16_vector`,
-                  // or (from) any other package which is a child of `sw`.
-                  // This will most likely be indexed invalidly.
-                  // Though, we might be able to resolve it during the query itself.
+                  // Reference may be indexed under the wrong package (e.g. a child of `sw`); we
+                  // may still resolve it at query time.
                   // TODO: Shouldn't this be multiple? I.e., one per `scopeEntry.getUsages()`.
                   return this.createEntryUsage(scopeEntry, definitionNode, currentPakkage);
                 });
-    // A global first used at file level has its entry there, where the body finds it.
+    // A global first used at file level has its entry there, where the body finds it. A body that
+    // declares the name itself keeps only its own entry.
+    final Set<String> ownIdentifiers =
+        ownEntries.stream().map(ScopeEntry::getIdentifier).collect(Collectors.toSet());
     final Stream<GlobalUsage> fileLevelUsages =
         globalScope.getScopeEntriesInScope().stream()
             .filter(DefinitionUsageParser::isGlobalEntry)
+            .filter(scopeEntry -> !ownIdentifiers.contains(scopeEntry.getIdentifier()))
             .map(
                 scopeEntry -> {
                   final AstNode usageNode =
@@ -129,18 +137,35 @@ public class DefinitionUsageParser {
     return scopeEntry.isType(ScopeEntry.Type.GLOBAL, ScopeEntry.Type.DYNAMIC);
   }
 
-  /** The identifier of the first usage of {@code scopeEntry} within {@code bodyNode}, if any. */
+  /**
+   * The identifier of the first usage of {@code scopeEntry} within {@code bodyNode}, if any. A body
+   * that assigns the entry gets none: an assigned free variable is local.
+   */
   @CheckForNull
   private static AstNode getFirstUsageWithin(final ScopeEntry scopeEntry, final AstNode bodyNode) {
-    for (final AstNode atomNode : scopeEntry.getUsages()) {
-      for (AstNode node = atomNode; node != null; node = node.getParent()) {
-        if (node == bodyNode) {
-          return atomNode.getFirstChild(MagikGrammar.IDENTIFIER);
-        }
+    final List<AstNode> atomNodes =
+        scopeEntry.getUsages().stream()
+            .filter(atomNode -> DefinitionUsageParser.isWithin(atomNode, bodyNode))
+            .toList();
+    // An assignment in a nested procedure drops the outer read too.
+    final boolean assigned =
+        atomNodes.stream().anyMatch(AssignmentExpressionNodeHelper::isAssignmentTarget);
+    if (atomNodes.isEmpty() || assigned) {
+      return null;
+    }
+
+    final AstNode atomNode = atomNodes.get(0);
+    return atomNode.getFirstChild(MagikGrammar.IDENTIFIER);
+  }
+
+  private static boolean isWithin(final AstNode node, final AstNode ancestorNode) {
+    for (AstNode current = node; current != null; current = current.getParent()) {
+      if (current == ancestorNode) {
+        return true;
       }
     }
 
-    return null;
+    return false;
   }
 
   private GlobalUsage createEntryUsage(

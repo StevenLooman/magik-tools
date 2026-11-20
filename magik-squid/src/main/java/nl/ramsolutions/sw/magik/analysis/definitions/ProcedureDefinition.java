@@ -35,6 +35,7 @@ public class ProcedureDefinition extends MagikDefinition
   private final List<GlobalUsage> usedGlobals;
   private final List<MethodUsage> usedMethods;
   private final List<ConditionUsage> usedConditions;
+  private final List<BinaryOperatorUsage> usedBinaryOperators;
   private final @Nullable Pragma pragma;
   private final @Nullable TypeString selfType;
 
@@ -229,6 +230,67 @@ public class ProcedureDefinition extends MagikDefinition
       final List<ConditionUsage> usedConditions,
       final Provenance provenance,
       final @Nullable TypeString selfType) {
+    this(
+        location,
+        timestamp,
+        moduleName,
+        doc,
+        node,
+        modifiers,
+        typeName,
+        procedureName,
+        parameters,
+        pragma,
+        returnTypes,
+        loopTypes,
+        usedGlobals,
+        usedMethods,
+        usedConditions,
+        Collections.emptyList(),
+        provenance,
+        selfType);
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param moduleName Module name.
+   * @param node Node.
+   * @param modifiers Modifiers.
+   * @param typeName Type name.
+   * @param procedureName Procedure name.
+   * @param parameters Parameters.
+   * @param pragma Pragma.
+   * @param doc Doc.
+   * @param returnTypes Return types.
+   * @param loopTypes Loop types.
+   * @param usedGlobals Globals used.
+   * @param usedMethods Methods used, unary operators included.
+   * @param usedConditions Conditions used.
+   * @param usedBinaryOperators Binary operators used.
+   * @param provenance Provenance.
+   * @param selfType Type {@code _self} takes inside the procedure, or null when not annotated.
+   */
+  @SuppressWarnings({"checkstyle:ParameterNumber", "java:S107"})
+  public ProcedureDefinition(
+      final @Nullable Location location,
+      final @Nullable Instant timestamp,
+      final @Nullable String moduleName,
+      final @Nullable String doc,
+      final @Nullable AstNode node,
+      final Set<Modifier> modifiers,
+      final TypeString typeName,
+      final @Nullable String procedureName,
+      final List<ParameterDefinition> parameters,
+      final @Nullable Pragma pragma,
+      final ExpressionResultString returnTypes,
+      final ExpressionResultString loopTypes,
+      final List<GlobalUsage> usedGlobals,
+      final List<MethodUsage> usedMethods,
+      final List<ConditionUsage> usedConditions,
+      final List<BinaryOperatorUsage> usedBinaryOperators,
+      final Provenance provenance,
+      final @Nullable TypeString selfType) {
     super(location, timestamp, moduleName, doc, node, provenance);
     this.modifiers = ProcedureDefinition.createModifiersSet(modifiers);
     this.typeName = typeName;
@@ -240,6 +302,7 @@ public class ProcedureDefinition extends MagikDefinition
     this.usedGlobals = Collections.unmodifiableList(usedGlobals);
     this.usedMethods = Collections.unmodifiableList(usedMethods);
     this.usedConditions = Collections.unmodifiableList(usedConditions);
+    this.usedBinaryOperators = Collections.unmodifiableList(usedBinaryOperators);
     this.selfType = selfType;
   }
 
@@ -342,6 +405,10 @@ public class ProcedureDefinition extends MagikDefinition
     return Collections.unmodifiableList(this.usedConditions);
   }
 
+  public List<BinaryOperatorUsage> getUsedBinaryOperators() {
+    return Collections.unmodifiableList(this.usedBinaryOperators);
+  }
+
   @Override
   public ProcedureDefinition getBareDefinition() {
     return new ProcedureDefinition(
@@ -360,6 +427,7 @@ public class ProcedureDefinition extends MagikDefinition
         this.usedGlobals.stream().map(GlobalUsage::getWithoutNode).toList(),
         this.usedMethods.stream().map(MethodUsage::getWithoutNode).toList(),
         this.usedConditions.stream().map(ConditionUsage::getWithoutNode).toList(),
+        this.usedBinaryOperators.stream().map(BinaryOperatorUsage::getWithoutNode).toList(),
         this.getProvenance(),
         this.selfType);
   }
@@ -382,6 +450,7 @@ public class ProcedureDefinition extends MagikDefinition
         this.usedGlobals,
         this.usedMethods,
         this.usedConditions,
+        this.usedBinaryOperators,
         provenance,
         this.selfType);
   }
@@ -409,6 +478,7 @@ public class ProcedureDefinition extends MagikDefinition
         this.usedGlobals,
         this.usedMethods,
         this.usedConditions,
+        this.usedBinaryOperators,
         this.getProvenance(),
         newSelfType);
   }

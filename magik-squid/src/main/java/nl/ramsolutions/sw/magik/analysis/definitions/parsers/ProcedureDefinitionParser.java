@@ -16,6 +16,7 @@ import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.Location;
 import nl.ramsolutions.sw.magik.MagikFile;
 import nl.ramsolutions.sw.magik.analysis.MagikAnalysisSettings;
+import nl.ramsolutions.sw.magik.analysis.definitions.BinaryOperatorUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.ConditionUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.GlobalUsage;
 import nl.ramsolutions.sw.magik.analysis.definitions.MagikDefinition;
@@ -164,6 +165,14 @@ public class ProcedureDefinitionParser {
         settings.getTypingIndexConditionUsages()
             ? usageParser.getUsedConditions()
             : Collections.emptyList();
+    final List<MethodUsage> usedUnaryOperators =
+        settings.getTypingIndexUnaryOperatorUsages()
+            ? usageParser.getUsedUnaryOperators()
+            : Collections.emptyList();
+    final List<BinaryOperatorUsage> usedBinaryOperators =
+        settings.getTypingIndexBinaryOperatorUsages()
+            ? usageParser.getUsedBinaryOperators()
+            : Collections.emptyList();
 
     // Parse @invokes_method annotations from TypeDoc.
     final String currentPackage = new PackageNodeHelper(this.node).getCurrentPackage();
@@ -171,8 +180,9 @@ public class ProcedureDefinitionParser {
     final List<MethodUsage> invokesMethodUsages =
         this.parseInvokesMethodAnnotations(invokesMethodAnnotations, location, currentPackage);
 
-    // Combine method usages from code analysis and @invokes_method annotations.
+    // Combine method usages from code analysis, unary operators, and @invokes_method annotations.
     final List<MethodUsage> allUsedMethods = new ArrayList<>(usedMethods);
+    allUsedMethods.addAll(usedUnaryOperators);
     allUsedMethods.addAll(invokesMethodUsages);
 
     final TypeString typeString = ProcedureNamer.getNameForProcedure(this.node);
@@ -194,6 +204,7 @@ public class ProcedureDefinitionParser {
             usedGlobals,
             allUsedMethods,
             usedConditions,
+            usedBinaryOperators,
             Provenance.UNKNOWN,
             selfType));
   }

@@ -99,4 +99,41 @@ class ProcedureDefinitionTest {
     final String name = procedureDef.getNameWithParameters();
     assertThat(name).isEqualTo("user:a.invoke(p1, _optional p2)");
   }
+
+  @Test
+  void testCopiesKeepUsedBinaryOperators() {
+    final BinaryOperatorUsage usage =
+        new BinaryOperatorUsage(TypeString.UNDEFINED, TypeString.UNDEFINED, "+", LOCATION, null);
+    final List<BinaryOperatorUsage> usages = List.of(usage);
+    final ProcedureDefinition procedureDef =
+        new ProcedureDefinition(
+            LOCATION,
+            Instant.EPOCH,
+            "module",
+            null,
+            null,
+            Set.of(),
+            TYPE_STR_A,
+            "proc",
+            Collections.emptyList(),
+            null,
+            ExpressionResultString.UNDEFINED,
+            ExpressionResultString.EMPTY,
+            Collections.emptyList(),
+            Collections.emptyList(),
+            Collections.emptyList(),
+            usages,
+            Provenance.UNKNOWN,
+            null);
+
+    final ProcedureDefinition bareDef = procedureDef.getBareDefinition();
+    final ProcedureDefinition provenancedDef = procedureDef.withProvenance(Provenance.INDEXED);
+    final ProcedureDefinition selfTypeDef = procedureDef.withSelfType(TYPE_STR_A);
+    final List<BinaryOperatorUsage> bareUsages = bareDef.getUsedBinaryOperators();
+    final List<BinaryOperatorUsage> provenancedUsages = provenancedDef.getUsedBinaryOperators();
+    final List<BinaryOperatorUsage> selfTypeUsages = selfTypeDef.getUsedBinaryOperators();
+    assertThat(bareUsages).isEqualTo(usages);
+    assertThat(provenancedUsages).isEqualTo(usages);
+    assertThat(selfTypeUsages).isEqualTo(usages);
+  }
 }
