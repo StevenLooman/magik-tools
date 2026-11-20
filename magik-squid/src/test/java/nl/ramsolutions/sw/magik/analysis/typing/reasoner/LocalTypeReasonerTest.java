@@ -3248,4 +3248,31 @@ class LocalTypeReasonerTest {
 
     assertThat(result).isEqualTo(ExpressionResultString.UNDEFINED);
   }
+
+  @Test
+  void testReasonSuperInAParentlessMixinIsUndefined() {
+    // A mixin without parents has no super: the send fails to load.
+    final String code =
+        """
+        _package sw
+        _method zz_a.test
+            _return _super.class_name
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = this.createMixinChainKeeper();
+
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode superKeywordNode = topNode.getFirstDescendant(MagikGrammar.SUPER);
+    final AstNode superNode = superKeywordNode.getParent();
+    final ExpressionResultString superResult = state.getNodeType(superNode);
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    final ExpressionResultString result = state.getNodeType(methodNode);
+    final TypeString superTypeStr = superResult.get(0, TypeString.SW_UNSET);
+    final TypeString typeStr = result.get(0, TypeString.SW_UNSET);
+
+    assertThat(superTypeStr).isEqualTo(TypeString.UNDEFINED);
+    assertThat(typeStr).isEqualTo(TypeString.UNDEFINED);
+  }
 }

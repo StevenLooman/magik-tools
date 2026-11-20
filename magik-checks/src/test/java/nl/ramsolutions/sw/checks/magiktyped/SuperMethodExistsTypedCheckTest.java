@@ -430,6 +430,138 @@ class SuperMethodExistsTypedCheckTest {
         .containsExactly("Object user:zz_b does not understand message only_a()");
   }
 
+  @Test
+  void testSuperInAParentlessMixinIsReported() {
+    // A mixin's own table has no parents, so the method fails to load.
+    final String code =
+        """
+        _package user
+        $
+        _method zz_a.t()
+          _super.m()
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.MIXIN, ZZ_A);
+    final List<String> messages = this.runCheckForMessages(code, definitionKeeper);
+    Assertions.assertThat(messages).containsExactly("Cannot find super implementation of m()");
+  }
+
+  @Test
+  void testSuperWithoutParenthesesInAParentlessMixinIsReported() {
+    final String code =
+        """
+        _package user
+        $
+        _method zz_a.t()
+          _super.m
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.MIXIN, ZZ_A);
+    final List<String> messages = this.runCheckForMessages(code, definitionKeeper);
+    Assertions.assertThat(messages).containsExactly("Cannot find super implementation of m");
+  }
+
+  @Test
+  void testSuperInAMethodOfObjectIsReported() {
+    // `object` has no parents, so the method fails to load.
+    final String code =
+        """
+        _package sw
+        $
+        _method object.t()
+          _super.m()
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.OBJECT, TypeString.SW_OBJECT);
+    final List<String> messages = this.runCheckForMessages(code, definitionKeeper);
+    Assertions.assertThat(messages).containsExactly("Cannot find super implementation of m()");
+  }
+
+  @Test
+  void testSuperWithoutParenthesesInAMethodOfObjectIsReported() {
+    final String code =
+        """
+        _package sw
+        $
+        _method object.t()
+          _super.m
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.OBJECT, TypeString.SW_OBJECT);
+    final List<String> messages = this.runCheckForMessages(code, definitionKeeper);
+    Assertions.assertThat(messages).containsExactly("Cannot find super implementation of m");
+  }
+
+  @Test
+  void testSuperInAMixinWithAnAnsweringParentIsNotReported() {
+    final String code =
+        """
+        _package user
+        $
+        _method zz_b.t()
+          _super.m()
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.MIXIN, ZZ_A);
+    this.addMethod(definitionKeeper, ZZ_A, "m()");
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.MIXIN, ZZ_B, ZZ_A);
+    final List<String> messages = this.runCheckForMessages(code, definitionKeeper);
+    Assertions.assertThat(messages).isEmpty();
+  }
+
+  @Test
+  void testUnknownNamedSuperInAParentlessMixinIsNotReported() {
+    final String code =
+        """
+        _package user
+        $
+        _method zz_a.t()
+          _super(zz_nope).m()
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.MIXIN, ZZ_A);
+    final List<String> messages = this.runCheckForMessages(code, definitionKeeper);
+    Assertions.assertThat(messages).isEmpty();
+  }
+
+  @Test
+  void testSuperInAParentlessExemplarOfUnknownSortIsNotReported() {
+    // A database may not record the parents of an exemplar of unknown sort.
+    final String code =
+        """
+        _package user
+        $
+        _method zz_a.t()
+          _super.m()
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    this.addExemplar(definitionKeeper, ExemplarDefinition.Sort.UNDEFINED, ZZ_A);
+    final List<String> messages = this.runCheckForMessages(code, definitionKeeper);
+    Assertions.assertThat(messages).isEmpty();
+  }
+
+  @Test
+  void testSuperInAMethodOfAnUnknownExemplarIsNotReported() {
+    final String code =
+        """
+        _package user
+        $
+        _method zz_a.t()
+          _super.m()
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final List<String> messages = this.runCheckForMessages(code, definitionKeeper);
+    Assertions.assertThat(messages).isEmpty();
+  }
+
   private List<String> runCheckForMessages(
       final String code, final IDefinitionKeeper definitionKeeper) {
     final MagikTypedFile magikFile =

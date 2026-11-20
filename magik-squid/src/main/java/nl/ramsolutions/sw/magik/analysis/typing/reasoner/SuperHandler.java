@@ -54,6 +54,7 @@ class SuperHandler extends LocalTypeReasonerHandler {
       superTypeStr = parents.stream().reduce(TypeString::combine).orElse(null);
     }
 
+    // No parents, or an unknown named exemplar: `_super` stays `_undefined`.
     if (superTypeStr == null) {
       return;
     }

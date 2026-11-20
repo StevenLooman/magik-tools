@@ -376,6 +376,19 @@ class MethodExistsTypedCheckTest {
   }
 
   @Test
+  void testSuperSendInAParentlessMixinIsLeftToSuperMethodExists() {
+    final String code =
+        """
+        _package user
+        _method zz_a.run()
+          _super.m()
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = this.createLonelyMixinKeeper();
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
+
+  @Test
   void testNamedSuperSendIsLeftToSuperMethodExists() {
     final String code =
         """

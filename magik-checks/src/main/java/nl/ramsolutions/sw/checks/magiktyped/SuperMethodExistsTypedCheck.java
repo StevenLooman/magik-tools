@@ -2,14 +2,17 @@ package nl.ramsolutions.sw.checks.magiktyped;
 
 import com.sonar.sslr.api.AstNode;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nl.ramsolutions.sw.checks.MagikTypedCheck;
+import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
@@ -33,6 +36,8 @@ public class SuperMethodExistsTypedCheck extends MagikTypedCheck {
   // A named super is bound when the send runs, which then fails as any send does.
   private static final String MESSAGE_NAMED = "Object %s does not understand message %s";
   private static final String MESSAGE_TOO_MANY = "Too many super implementations of %s";
+  private static final Set<ExemplarDefinition.Sort> PARENTLESS_SORTS =
+      EnumSet.of(ExemplarDefinition.Sort.MIXIN, ExemplarDefinition.Sort.OBJECT);
 
   @Override
   protected void walkPostMethodInvocation(final AstNode node) {
@@ -51,14 +56,19 @@ public class SuperMethodExistsTypedCheck extends MagikTypedCheck {
     final LocalTypeReasonerState state = this.getTypeReasonerState();
     final ExpressionResultString superResult = state.getNodeType(receiverNode);
     final TypeString superTypeStr = superResult.get(0, TypeString.UNDEFINED);
+    final boolean namedSuper = superNode.getFirstChild(MagikGrammar.IDENTIFIER) != null;
     if (superTypeStr.isUndefined()) {
+      if (!namedSuper && this.isInParentlessMixinOrObject(node)) {
+        final String methodName = helper.getMethodName();
+        final String message = MESSAGE.formatted(methodName);
+        this.addIssueAtMethodName(node, message);
+      }
       return;
     }
 
     final TypeString combinedTypeString = TypeString.combine(superTypeStr);
     Objects.requireNonNull(combinedTypeString);
     final List<TypeString> memberTypeStrs = combinedTypeString.getCombinedTypes();
-    final boolean namedSuper = superNode.getFirstChild(MagikGrammar.IDENTIFIER) != null;
     if (namedSuper) {
       this.checkNamedSuper(node, helper, memberTypeStrs);
     } else {
@@ -126,6 +136,32 @@ public class SuperMethodExistsTypedCheck extends MagikTypedCheck {
 
     final String message = MESSAGE.formatted(methodName);
     this.addIssueAtMethodName(node, message);
+  }
+
+  /**
+   * Whether the node is in a method of a mixin without parents, or of {@code object}, whose {@code
+   * _super} the reasoner leaves untyped. A database may not record the parents of another sort.
+   */
+  private boolean isInParentlessMixinOrObject(final AstNode node) {
+    final TypeString ownerTypeStr = SelfHelper.getSelfOwnerType(node);
+    if (ownerTypeStr == null) {
+      return false;
+    }
+
+    final TypeStringResolver resolver = this.getTypeStringResolver();
+    final Collection<ExemplarDefinition> exemplarDefs =
+        resolver.getExemplarDefinitions(ownerTypeStr);
+    final boolean mixinOrObject =
+        !exemplarDefs.isEmpty()
+            && exemplarDefs.stream()
+                .map(ExemplarDefinition::getSort)
+                .allMatch(SuperMethodExistsTypedCheck.PARENTLESS_SORTS::contains);
+    if (!mixinOrObject) {
+      return false;
+    }
+
+    final Collection<TypeString> parentTypeStrs = resolver.getParents(ownerTypeStr);
+    return parentTypeStrs.isEmpty();
   }
 
   private void addUnknownNamedMethodIssue(
