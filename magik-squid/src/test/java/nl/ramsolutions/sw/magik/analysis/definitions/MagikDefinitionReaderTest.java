@@ -1615,7 +1615,7 @@ class MagikDefinitionReaderTest {
   }
 
   @Test
-  void testMethodDefinitionRecordsAGlobalItDeclaresAfterReadingItOnce() {
+  void testMethodDefinitionRecordsEachOccurrenceOfAGlobalItDeclaresAfterReadingIt() {
     final String code =
         """
         _package user
@@ -1632,7 +1632,7 @@ class MagikDefinitionReaderTest {
 
     final List<GlobalUsage> usedGlobals = definition.getUsedGlobals();
     final List<Integer> lines = this.readGlobalLines(usedGlobals);
-    assertThat(lines).containsExactly(6);
+    assertThat(lines).containsExactlyInAnyOrder(5, 6, 7);
   }
 
   @Test

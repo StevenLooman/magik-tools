@@ -124,7 +124,7 @@ class DefinitionUsageParserTest {
   }
 
   @Test
-  void hiddenGlobalUsedTwiceYieldsOneUsageAtItsFirstUse() {
+  void topLevelGlobalYieldsAUsagePerOccurrence() {
     final List<GlobalUsage> usages =
         this.parseUsedGlobals(
             """
@@ -140,7 +140,7 @@ class DefinitionUsageParserTest {
             MagikGrammar.METHOD_DEFINITION);
 
     final List<String> namesAndLines = DefinitionUsageParserTest.formatNamesAndLines(usages);
-    assertThat(namesAndLines).containsExactly("sw:a@5");
+    assertThat(namesAndLines).containsExactly("sw:a@5", "sw:a@6");
   }
 
   @Test
@@ -182,7 +182,7 @@ class DefinitionUsageParserTest {
   }
 
   @Test
-  void methodsOwnFirstUseIsUnchanged() {
+  void methodsOwnGlobalYieldsAUsagePerOccurrence() {
     final List<GlobalUsage> usages =
         this.parseUsedGlobals(
             """
@@ -196,7 +196,71 @@ class DefinitionUsageParserTest {
             MagikGrammar.METHOD_DEFINITION);
 
     final List<String> namesAndLines = DefinitionUsageParserTest.formatNamesAndLines(usages);
-    assertThat(namesAndLines).containsExactly("sw:a@3");
+    assertThat(namesAndLines).containsExactly("sw:a@3", "sw:a@4");
+  }
+
+  @Test
+  void occurrenceInNestedBlockIsAUsage() {
+    final List<GlobalUsage> usages =
+        this.parseUsedGlobals(
+            """
+            _package sw
+            _method b.m()
+              a.x
+              _if _true
+              _then
+                a.y
+              _endif
+              _return a.z
+            _endmethod
+            $
+            """,
+            MagikGrammar.METHOD_DEFINITION);
+
+    final List<String> namesAndLines = DefinitionUsageParserTest.formatNamesAndLines(usages);
+    assertThat(namesAndLines).containsExactly("sw:a@3", "sw:a@6", "sw:a@8");
+  }
+
+  @Test
+  void declaredDynamicYieldsItsDeclarationAndEachRead() {
+    final List<GlobalUsage> usages =
+        this.parseUsedGlobals(
+            """
+            _package sw
+            _method b.m()
+              _dynamic !d! << 1
+              !d!.x
+              _return !d!.y
+            _endmethod
+            $
+            """,
+            MagikGrammar.METHOD_DEFINITION);
+
+    final List<String> namesAndLines = DefinitionUsageParserTest.formatNamesAndLines(usages);
+    assertThat(namesAndLines).containsExactly("sw:!d!@3", "sw:!d!@4", "sw:!d!@5");
+  }
+
+  @Test
+  void bodyDeclaringATopLevelGlobalKeepsItsEarlierOccurrence() {
+    final List<GlobalUsage> usages =
+        this.parseUsedGlobals(
+            """
+            _package sw
+            a.x
+            $
+            _method b.m()
+              a.y
+              _block
+                _global a
+                _return a.z
+              _endblock
+            _endmethod
+            $
+            """,
+            MagikGrammar.METHOD_DEFINITION);
+
+    final List<String> namesAndLines = DefinitionUsageParserTest.formatNamesAndLines(usages);
+    assertThat(namesAndLines).containsExactlyInAnyOrder("sw:a@5", "sw:a@7", "sw:a@8");
   }
 
   @Test

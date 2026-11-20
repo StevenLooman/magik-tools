@@ -7,12 +7,13 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.ramsolutions.sw.MagikToolsProperties;
 import nl.ramsolutions.sw.magik.Location;
@@ -86,7 +87,7 @@ public class DefinitionUsageParser {
   }
 
   /**
-   * Get the used globals, one per scope entry.
+   * Get the used globals, one per occurrence.
    *
    * @return Used globals.
    */
@@ -98,38 +99,26 @@ public class DefinitionUsageParser {
 
     final PackageNodeHelper packageNodeHelper = new PackageNodeHelper(this.node);
     final String currentPakkage = packageNodeHelper.getCurrentPackage();
-    final List<ScopeEntry> ownEntries =
+    final Stream<GlobalUsage> ownUsages =
         bodyScope.getSelfAndDescendantScopes().stream()
             .flatMap(scope -> scope.getScopeEntriesInScope().stream())
             .filter(DefinitionUsageParser::isGlobalEntry)
-            .toList();
-    final Stream<GlobalUsage> ownUsages =
-        ownEntries.stream()
-            .map(
+            .flatMap(
                 scopeEntry -> {
-                  final AstNode definitionNode = scopeEntry.getDefinitionNode();
-                  // Reference may be indexed under the wrong package (e.g. a child of `sw`); we
-                  // may still resolve it at query time.
-                  // TODO: Shouldn't this be multiple? I.e., one per `scopeEntry.getUsages()`.
-                  return this.createEntryUsage(scopeEntry, definitionNode, currentPakkage);
+                  final Set<AstNode> identifierNodes =
+                      DefinitionUsageParser.getOccurrences(scopeEntry);
+                  return this.createEntryUsages(scopeEntry, identifierNodes, currentPakkage);
                 });
-    // A global first used at file level has its entry there, where the body finds it. A body that
-    // declares the name itself keeps only its own entry.
-    final Set<String> ownIdentifiers =
-        ownEntries.stream().map(ScopeEntry::getIdentifier).collect(Collectors.toSet());
+    // A global first used at file level has its entry there, where the body finds it.
     final Stream<GlobalUsage> fileLevelUsages =
         globalScope.getScopeEntriesInScope().stream()
             .filter(DefinitionUsageParser::isGlobalEntry)
-            .filter(scopeEntry -> !ownIdentifiers.contains(scopeEntry.getIdentifier()))
-            .map(
+            .flatMap(
                 scopeEntry -> {
-                  final AstNode usageNode =
-                      DefinitionUsageParser.getFirstUsageWithin(scopeEntry, bodyNode);
-                  return usageNode != null
-                      ? this.createEntryUsage(scopeEntry, usageNode, currentPakkage)
-                      : null;
-                })
-            .filter(Objects::nonNull);
+                  final List<AstNode> identifierNodes =
+                      DefinitionUsageParser.getOccurrencesWithin(scopeEntry, bodyNode);
+                  return this.createEntryUsages(scopeEntry, identifierNodes, currentPakkage);
+                });
     return Stream.concat(ownUsages, fileLevelUsages).toList();
   }
 
@@ -138,11 +127,27 @@ public class DefinitionUsageParser {
   }
 
   /**
-   * The identifier of the first usage of {@code scopeEntry} within {@code bodyNode}, if any. A body
-   * that assigns the entry gets none: an assigned free variable is local.
+   * The identifiers of {@code scopeEntry}: its declaration, then each usage. The first usage of an
+   * undeclared global is its declaration.
    */
-  @CheckForNull
-  private static AstNode getFirstUsageWithin(final ScopeEntry scopeEntry, final AstNode bodyNode) {
+  private static Set<AstNode> getOccurrences(final ScopeEntry scopeEntry) {
+    final Set<AstNode> identifierNodes = new LinkedHashSet<>();
+    final AstNode definitionNode = scopeEntry.getDefinitionNode();
+    identifierNodes.add(definitionNode);
+    final List<AstNode> atomNodes = scopeEntry.getUsages();
+    for (final AstNode atomNode : atomNodes) {
+      final AstNode identifierNode = atomNode.getFirstChild(MagikGrammar.IDENTIFIER);
+      identifierNodes.add(identifierNode);
+    }
+    return identifierNodes;
+  }
+
+  /**
+   * The identifiers of the usages of {@code scopeEntry} within {@code bodyNode}. A body that
+   * assigns the entry gets none: an assigned free variable is local.
+   */
+  private static List<AstNode> getOccurrencesWithin(
+      final ScopeEntry scopeEntry, final AstNode bodyNode) {
     final List<AstNode> atomNodes =
         scopeEntry.getUsages().stream()
             .filter(atomNode -> DefinitionUsageParser.isWithin(atomNode, bodyNode))
@@ -150,12 +155,13 @@ public class DefinitionUsageParser {
     // An assignment in a nested procedure drops the outer read too.
     final boolean assigned =
         atomNodes.stream().anyMatch(AssignmentExpressionNodeHelper::isAssignmentTarget);
-    if (atomNodes.isEmpty() || assigned) {
-      return null;
+    if (assigned) {
+      return List.of();
     }
 
-    final AstNode atomNode = atomNodes.get(0);
-    return atomNode.getFirstChild(MagikGrammar.IDENTIFIER);
+    return atomNodes.stream()
+        .map(atomNode -> atomNode.getFirstChild(MagikGrammar.IDENTIFIER))
+        .toList();
   }
 
   private static boolean isWithin(final AstNode node, final AstNode ancestorNode) {
@@ -166,6 +172,16 @@ public class DefinitionUsageParser {
     }
 
     return false;
+  }
+
+  private Stream<GlobalUsage> createEntryUsages(
+      final ScopeEntry scopeEntry,
+      final Collection<AstNode> identifierNodes,
+      final String currentPakkage) {
+    // Reference may be indexed under the wrong package (e.g. a child of `sw`); we may still resolve
+    // it at query time.
+    return identifierNodes.stream()
+        .map(identifierNode -> this.createEntryUsage(scopeEntry, identifierNode, currentPakkage));
   }
 
   private GlobalUsage createEntryUsage(
