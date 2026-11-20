@@ -18,12 +18,15 @@ import nl.ramsolutions.sw.magik.analysis.AstQuery;
 import nl.ramsolutions.sw.magik.analysis.MagikAstWalker;
 import nl.ramsolutions.sw.magik.analysis.definitions.ExemplarDefinition;
 import nl.ramsolutions.sw.magik.analysis.definitions.ITypeStringDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.MethodDefinition;
+import nl.ramsolutions.sw.magik.analysis.definitions.Pragma;
 import nl.ramsolutions.sw.magik.analysis.helpers.MethodInvocationNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.helpers.PackageNodeHelper;
 import nl.ramsolutions.sw.magik.analysis.scope.GlobalScope;
 import nl.ramsolutions.sw.magik.analysis.scope.Scope;
 import nl.ramsolutions.sw.magik.analysis.scope.ScopeEntry;
 import nl.ramsolutions.sw.magik.analysis.typing.ExpressionResultString;
+import nl.ramsolutions.sw.magik.analysis.typing.SelfHelper;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeString;
 import nl.ramsolutions.sw.magik.analysis.typing.TypeStringResolver;
 import nl.ramsolutions.sw.magik.analysis.typing.reasoner.LocalTypeReasonerState;
@@ -322,33 +325,6 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
   }
 
   @Override
-  protected void walkPreMethodInvocation(final AstNode node) {
-    final AstNode identifierNode = node.getFirstChild(MagikGrammar.IDENTIFIER);
-    if (identifierNode == null) {
-      return;
-    }
-
-    // Test for deprecation.
-    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
-    final AstNode receiverNode = helper.getReceiverNode();
-    final LocalTypeReasonerState reasonerState = this.magikFile.getTypeReasonerState();
-    final ExpressionResultString result = reasonerState.getNodeType(receiverNode);
-    final TypeString typeStr = result.get(0, TypeString.UNDEFINED);
-    final String methodName = helper.getMethodName();
-    final TypeStringResolver resolver = this.magikFile.getTypeStringResolver();
-    final Set<SemanticToken.Modifier> modifiers =
-        resolver.getRespondingMethodDefinitions(typeStr, methodName).stream()
-                .anyMatch(
-                    method ->
-                        method.getPragma() != null
-                            && method.getPragma().getTopics().contains(TOPIC_DEPRECATED))
-            ? EnumSet.of(SemanticToken.Modifier.DEPRECATED)
-            : Collections.emptySet();
-
-    this.addSemanticToken(identifierNode, SemanticToken.Type.METHOD, modifiers);
-  }
-
-  @Override
   protected void walkPostIdentifier(final AstNode node) {
     final AstNode parentNode = node.getParent();
     if (parentNode == null) {
@@ -358,7 +334,7 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
     if (parentNode.is(MagikGrammar.EXEMPLAR_NAME)) {
       this.addSemanticToken(node, SemanticToken.Type.CLASS);
     } else if (parentNode.is(MagikGrammar.METHOD_NAME)) {
-      this.addSemanticToken(node, SemanticToken.Type.METHOD);
+      this.walkPostIdentifierMethodName(node, parentNode);
     } else if (parentNode.is(MagikGrammar.CONDITION_NAME)) {
       this.addSemanticToken(node, SemanticToken.Type.CLASS);
     } else if (parentNode.is(MagikGrammar.ATOM) && !this.isPartOfProcedureInvocation(node)) {
@@ -375,6 +351,45 @@ public class MagikSemanticTokenWalker extends MagikAstWalker {
     if (node.getFirstAncestor(MagikGrammar.FOR_VARIABLES) != null) {
       this.walkPostIdentifierFor(node);
     }
+  }
+
+  private void walkPostIdentifierMethodName(final AstNode node, final AstNode methodNameNode) {
+    final AstNode parentNode = methodNameNode.getParent();
+    final Set<SemanticToken.Modifier> modifiers =
+        parentNode != null
+                && parentNode.is(MagikGrammar.METHOD_INVOCATION)
+                && this.isDeprecatedMethodInvocation(parentNode)
+            ? EnumSet.of(SemanticToken.Modifier.DEPRECATED)
+            : Collections.emptySet();
+    this.addSemanticToken(node, SemanticToken.Type.METHOD, modifiers);
+  }
+
+  private boolean isDeprecatedMethodInvocation(final AstNode node) {
+    final MethodInvocationNodeHelper helper = new MethodInvocationNodeHelper(node);
+    final AstNode receiverNode = helper.getReceiverNode();
+    if (receiverNode == null) {
+      return false;
+    }
+
+    final LocalTypeReasonerState reasonerState = this.magikFile.getTypeReasonerState();
+    final ExpressionResultString result = reasonerState.getNodeType(receiverNode);
+    final TypeString resultTypeStr = result.get(0, TypeString.UNDEFINED);
+    final TypeString typeStr = SelfHelper.substituteSelf(resultTypeStr, node);
+    if (typeStr.isUndefined()) {
+      return false;
+    }
+
+    final String methodName = helper.getMethodName();
+    final boolean superReceiver = helper.isSuperSend();
+    final TypeStringResolver resolver = this.magikFile.getTypeStringResolver();
+    final Collection<MethodDefinition> methodDefs =
+        resolver.getRespondingMethodDefinitions(typeStr, methodName, superReceiver);
+    return methodDefs.stream()
+        .map(MethodDefinition::getPragma)
+        .anyMatch(
+            pragma ->
+                pragma != null
+                    && pragma.getClassifyLevels().contains(Pragma.CLASSIFY_LEVEL_DEPRECATED));
   }
 
   private boolean isPartOfProcedureInvocation(final AstNode node) {

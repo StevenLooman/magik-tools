@@ -2,6 +2,11 @@ package nl.ramsolutions.sw.magik.languageserver.semantictokens;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import nl.ramsolutions.sw.IDefinition;
 import nl.ramsolutions.sw.magik.MagikTypedFile;
 import nl.ramsolutions.sw.magik.analysis.definitions.DefinitionKeeper;
 import nl.ramsolutions.sw.magik.analysis.definitions.IDefinitionKeeper;
@@ -12,12 +17,70 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("checkstyle:MagicNumber")
 class SemanticTokenProviderTest {
 
+  private static final String PARENT_CHILD_LIBRARY =
+      """
+      _package user
+      def_slotted_exemplar(:zz_p, {})
+      def_slotted_exemplar(:zz_c, {}, {:zz_p})
+      _pragma(classify_level=deprecated)
+      _method zz_p.m()
+      _endmethod
+      _pragma(classify_level=basic)
+      _method zz_c.m()
+      _endmethod""";
+
+  private static final String PARENT_CHILD_CODE =
+      """
+      _package user
+      _method zz_c.run()
+        _super.m()
+        _self.m()
+      _endmethod""";
+
   private SemanticTokens getSemanticTokens(final String code) {
     final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
     final MagikTypedFile magikFile =
         new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
     final SemanticTokenProvider provider = new SemanticTokenProvider();
     return provider.provideSemanticTokensFull(magikFile);
+  }
+
+  /** A semantic token at an absolute position, decoded from the relative LSP data. */
+  private record DecodedToken(int line, int column, int length, int type, int modifiers) {}
+
+  private List<DecodedToken> getSemanticTokensAt(
+      final String library, final String code, final int line, final int column) {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final URI libraryUri = URI.create("tests://unittest/library.magik");
+    final MagikTypedFile libraryFile = new MagikTypedFile(libraryUri, library, definitionKeeper);
+    final Collection<IDefinition> definitions = libraryFile.getDefinitions();
+    definitions.stream().map(IDefinition::getBareDefinition).forEach(definitionKeeper::add);
+
+    final MagikTypedFile magikFile =
+        new MagikTypedFile(MagikTypedFile.DEFAULT_URI, code, definitionKeeper);
+    final SemanticTokenProvider provider = new SemanticTokenProvider();
+    final SemanticTokens semanticTokens = provider.provideSemanticTokensFull(magikFile);
+    final List<DecodedToken> decodedTokens = this.decodeSemanticTokens(semanticTokens);
+    return decodedTokens.stream()
+        .filter(token -> token.line() == line && token.column() == column)
+        .toList();
+  }
+
+  private List<DecodedToken> decodeSemanticTokens(final SemanticTokens semanticTokens) {
+    final List<Integer> data = semanticTokens.getData();
+    final List<DecodedToken> decodedTokens = new ArrayList<>();
+    int line = 0;
+    int column = 0;
+    for (int i = 0; i < data.size(); i += 5) {
+      final int deltaLine = data.get(i);
+      final int deltaColumn = data.get(i + 1);
+      column = deltaLine == 0 ? column + deltaColumn : deltaColumn;
+      line += deltaLine;
+      final DecodedToken decodedToken =
+          new DecodedToken(line, column, data.get(i + 2), data.get(i + 3), data.get(i + 4));
+      decodedTokens.add(decodedToken);
+    }
+    return decodedTokens;
   }
 
   @Test
@@ -463,5 +526,134 @@ class SemanticTokenProviderTest {
             "_endmethod".length(),
             SemanticToken.Type.KEYWORD.getTokenType(),
             0);
+  }
+
+  @Test
+  void testMethodInvocationDeprecated() {
+    final String library =
+        """
+        _package sw
+        _pragma(classify_level=deprecated)
+        _method object.m()
+        _endmethod""";
+    final String code = "object.m()";
+    final List<DecodedToken> tokens = this.getSemanticTokensAt(library, code, 0, 7);
+    final int deprecatedModifier = SemanticToken.Modifier.DEPRECATED.getModifierType();
+    assertThat(tokens)
+        .containsExactly(
+            new DecodedToken(
+                0, 7, "m".length(), SemanticToken.Type.METHOD.getTokenType(), deprecatedModifier));
+  }
+
+  @Test
+  void testMethodInvocationNotDeprecated() {
+    final String library =
+        """
+        _package sw
+        _pragma(classify_level=basic)
+        _method object.m()
+        _endmethod""";
+    final String code = "object.m()";
+    final List<DecodedToken> tokens = this.getSemanticTokensAt(library, code, 0, 7);
+    assertThat(tokens)
+        .containsExactly(
+            new DecodedToken(0, 7, "m".length(), SemanticToken.Type.METHOD.getTokenType(), 0));
+  }
+
+  @Test
+  void testSelfMethodInvocationDeprecated() {
+    final String library =
+        """
+        _package user
+        def_slotted_exemplar(:zz_e, {})
+        _pragma(classify_level=deprecated)
+        _method zz_e.m()
+        _endmethod""";
+    final String code =
+        """
+        _package user
+        _method zz_e.run()
+          _self.m()
+        _endmethod""";
+    final List<DecodedToken> tokens = this.getSemanticTokensAt(library, code, 2, 8);
+    final int deprecatedModifier = SemanticToken.Modifier.DEPRECATED.getModifierType();
+    assertThat(tokens)
+        .containsExactly(
+            new DecodedToken(
+                2, 8, "m".length(), SemanticToken.Type.METHOD.getTokenType(), deprecatedModifier));
+  }
+
+  @Test
+  void testSuperMethodInvocationDeprecatedOnParent() {
+    final List<DecodedToken> tokens =
+        this.getSemanticTokensAt(PARENT_CHILD_LIBRARY, PARENT_CHILD_CODE, 2, 9);
+    final int deprecatedModifier = SemanticToken.Modifier.DEPRECATED.getModifierType();
+    assertThat(tokens)
+        .containsExactly(
+            new DecodedToken(
+                2, 9, "m".length(), SemanticToken.Type.METHOD.getTokenType(), deprecatedModifier));
+  }
+
+  @Test
+  void testSelfMethodInvocationOverrideNotDeprecated() {
+    final List<DecodedToken> tokens =
+        this.getSemanticTokensAt(PARENT_CHILD_LIBRARY, PARENT_CHILD_CODE, 3, 8);
+    assertThat(tokens)
+        .containsExactly(
+            new DecodedToken(3, 8, "m".length(), SemanticToken.Type.METHOD.getTokenType(), 0));
+  }
+
+  @Test
+  void testSuperMethodInvocationOnMixinHasNoObjectFallback() {
+    // A mixin's own table has no parents, so sw:object's deprecated method does not answer.
+    // The named form leaves out the implicit sw:slotted_format_mixin parent.
+    final String library =
+        """
+        _package sw
+        _pragma(classify_level=deprecated)
+        _method object.m()
+        _endmethod
+        _package user
+        def_mixin(:zz_m)
+        def_slotted_exemplar(:zz_e, {}, {:zz_m})""";
+    final String code =
+        """
+        _package user
+        _method zz_e.run()
+          _super(zz_m).m()
+        _endmethod""";
+    final List<DecodedToken> tokens = this.getSemanticTokensAt(library, code, 2, 15);
+    assertThat(tokens)
+        .containsExactly(
+            new DecodedToken(2, 15, "m".length(), SemanticToken.Type.METHOD.getTokenType(), 0));
+  }
+
+  @Test
+  void testIndexedMethodInvocation() {
+    final String library =
+        """
+        _package sw
+        _pragma(classify_level=deprecated)
+        _method object[index]
+        _endmethod""";
+    final String code = "object[1]";
+    final List<DecodedToken> tokens = this.getSemanticTokensAt(library, code, 0, 7);
+    assertThat(tokens)
+        .containsExactly(
+            new DecodedToken(0, 7, "1".length(), SemanticToken.Type.NUMBER.getTokenType(), 0));
+  }
+
+  @Test
+  void testDeprecatedMethodDefinitionName() {
+    final String code =
+        """
+        _package sw
+        _pragma(classify_level=deprecated)
+        _method object.m()
+        _endmethod""";
+    final List<DecodedToken> tokens = this.getSemanticTokensAt(code, code, 2, 15);
+    assertThat(tokens)
+        .containsExactly(
+            new DecodedToken(2, 15, "m".length(), SemanticToken.Type.METHOD.getTokenType(), 0));
   }
 }
