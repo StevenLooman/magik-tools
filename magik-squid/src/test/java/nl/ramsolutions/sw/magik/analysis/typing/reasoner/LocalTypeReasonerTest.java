@@ -3102,4 +3102,71 @@ class LocalTypeReasonerTest {
     final ExpressionResultString result = state.getNodeType(methodNode);
     assertThat(result).isEqualTo(ExpressionResultString.UNDEFINED);
   }
+
+  /** Seed exemplar {@code sw:a}, and {@code sibling()} written as {@code user:a.sibling()}. */
+  private IDefinitionKeeper createSpelledMethodKeeper() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString swARef = TypeString.ofIdentifier("a", "sw");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, swARef, null));
+    final TypeString userARef = TypeString.ofIdentifier("a", "user");
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            userARef,
+            "sibling()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            new ExpressionResultString(TypeString.SW_INTEGER),
+            ExpressionResultString.EMPTY));
+    return definitionKeeper;
+  }
+
+  private ExpressionResultString reasonMethodResult(
+      final String code, final IDefinitionKeeper definitionKeeper) {
+    final MagikTypedFile magikFile = this.createMagikFile(code, definitionKeeper);
+    final LocalTypeReasonerState state = magikFile.getTypeReasonerState();
+    final AstNode topNode = magikFile.getTopNode();
+    final AstNode methodNode = topNode.getFirstChild(MagikGrammar.METHOD_DEFINITION);
+    return state.getNodeType(methodNode);
+  }
+
+  @Test
+  void testReasonCallOfMethodWrittenInUsingPackage() {
+    final String code =
+        """
+        _package sw
+        _method a.caller()
+            _return _self.sibling()
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = this.createSpelledMethodKeeper();
+
+    final ExpressionResultString result = this.reasonMethodResult(code, definitionKeeper);
+    final ExpressionResultString expected = new ExpressionResultString(TypeString.SW_INTEGER);
+    assertThat(result).isEqualTo(expected);
+  }
+
+  @Test
+  void testReasonSelfCallBetweenMethodsWrittenInUsingPackage() {
+    final String code =
+        """
+        _package user
+        _method a.caller()
+            _return _self.sibling()
+        _endmethod
+        """;
+    final IDefinitionKeeper definitionKeeper = this.createSpelledMethodKeeper();
+
+    final ExpressionResultString result = this.reasonMethodResult(code, definitionKeeper);
+    final ExpressionResultString expected = new ExpressionResultString(TypeString.SW_INTEGER);
+    assertThat(result).isEqualTo(expected);
+  }
 }

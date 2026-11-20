@@ -244,6 +244,22 @@ public class TypeStringResolver {
   }
 
   /**
+   * Whether two type strings name the same type, each resolved through its package's uses: {@code
+   * user:a} and {@code sw:a} do when {@code user} uses {@code sw} and has no {@code a} of its own.
+   *
+   * @param typeString1 The one type string.
+   * @param typeString2 The other type string.
+   * @return True when both resolve to the same type, or are equal and resolve to nothing.
+   */
+  public boolean isSameType(final TypeString typeString1, final TypeString typeString2) {
+    final TypeString resolvedTypeString1 = this.getResolvedTypeString(typeString1);
+    final TypeString resolvedTypeString2 = this.getResolvedTypeString(typeString2);
+    final TypeString bareTypeString1 = resolvedTypeString1.getWithoutGenerics();
+    final TypeString bareTypeString2 = resolvedTypeString2.getWithoutGenerics();
+    return bareTypeString1.equals(bareTypeString2);
+  }
+
+  /**
    * Test if any member of {@link typeString1}, through any of its definitions, is kind of any
    * member of {@link typeString2}.
    *
@@ -383,7 +399,8 @@ public class TypeStringResolver {
 
     // The type's own methods shadow every parent.
     final Collection<MethodDefinition> ownDefinitions =
-        this.definitionKeeper.getMethodDefinitions(actualTypeStr).stream()
+        this.getSpellings(actualTypeStr).stream()
+            .flatMap(ownTypeStr -> this.definitionKeeper.getMethodDefinitions(ownTypeStr).stream())
             .filter(def -> def.getMethodName().equals(methodName))
             .collect(Collectors.toSet());
     if (!ownDefinitions.isEmpty()) {
@@ -428,6 +445,8 @@ public class TypeStringResolver {
     Set<TypeString> level = Set.of(typeString);
     while (!level.isEmpty()) {
       level.stream()
+          .flatMap(typeStr -> this.getSpellings(typeStr).stream())
+          .distinct()
           .flatMap(typeStr -> this.definitionKeeper.getMethodDefinitions(typeStr).stream())
           .collect(Collectors.groupingBy(MethodDefinition::getMethodName, Collectors.toSet()))
           .forEach(byName::putIfAbsent);
@@ -439,6 +458,33 @@ public class TypeStringResolver {
               .collect(Collectors.toSet());
     }
     return byName.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
+  }
+
+  /**
+   * A type string, the type it resolves to, and every other spelling of that type: {@code P:N} for
+   * a package {@code P} whose uses resolve {@code N} to it. A method written as {@code _method
+   * N.m()} in a file of package {@code P} is kept under {@code P:N}.
+   */
+  private Set<TypeString> getSpellings(final TypeString typeString) {
+    final Set<TypeString> spellings = new HashSet<>();
+    spellings.add(typeString);
+    final TypeString resolvedTypeStr = this.getResolvedTypeString(typeString);
+    spellings.add(resolvedTypeStr);
+
+    // Only a defined type can be named from another package.
+    final Collection<ITypeStringDefinition> resolvedTypes = this.resolve(typeString);
+    if (resolvedTypes.isEmpty()) {
+      return spellings;
+    }
+
+    final String identifier = resolvedTypeStr.getIdentifier();
+    this.definitionKeeper.getPackageDefinitions().stream()
+        .map(PackageDefinition::getName)
+        .distinct()
+        .map(packageName -> TypeString.ofIdentifier(identifier, packageName))
+        .filter(spelling -> this.isSameType(spelling, resolvedTypeStr))
+        .forEach(spellings::add);
+    return spellings;
   }
 
   /** Every procedure of a type and its ancestors; colliding definitions all respond. */

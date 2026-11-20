@@ -70,7 +70,11 @@ public class ImplementationProvider {
     final IDefinitionKeeper definitionKeeper = magikFile.getDefinitionKeeper();
     return definitionKeeper.getMethodDefinitions().stream()
         .filter(methodDef -> methodName.equals(methodDef.getMethodName()))
-        .filter(methodDef -> !typeStr.equals(methodDef.getTypeName()))
+        .filter(
+            methodDef -> {
+              final TypeString ownerTypeStr = methodDef.getTypeName();
+              return !resolver.isSameType(typeStr, ownerTypeStr);
+            })
         .filter(methodDef -> resolver.isKindOf(methodDef.getTypeName(), typeStr))
         .map(MethodDefinition::getLocation)
         .map(Location::validLocation)

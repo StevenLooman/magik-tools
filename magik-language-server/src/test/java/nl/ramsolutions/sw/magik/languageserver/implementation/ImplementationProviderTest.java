@@ -159,6 +159,32 @@ class ImplementationProviderTest {
     assertThat(implementations).isEmpty();
   }
 
+  @Test
+  void testProvideNoImplementationForMethodWrittenInUsingPackage() {
+    final TypeString swARef = TypeString.ofIdentifier("a", "sw");
+    final TypeString swBRef = TypeString.ofIdentifier("b", "sw");
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    definitionKeeper.add(this.createExemplarDefinition(swARef));
+    definitionKeeper.add(this.createExemplarDefinition(swBRef));
+    definitionKeeper.add(new InheritanceDefinition(null, null, null, null, null, swBRef, swARef));
+    definitionKeeper.add(this.createMethodDefinition(swARef, "abstract()", true, 0));
+    definitionKeeper.add(this.createMethodDefinition(swBRef, "abstract()", false, 50));
+    // The same exemplar's method, written in a file of package `user`.
+    definitionKeeper.add(this.createMethodDefinition(A_REF, "abstract()", false, 70));
+
+    final String code =
+        """
+        _package sw
+        _abstract _method a.abstract()
+        _endmethod""";
+    final Position position = new Position(2, 26); // On `abstract()`.
+
+    final List<Location> implementations =
+        this.provideImplementations(definitionKeeper, code, position);
+    final Location expected = this.createMethodLocation(50);
+    assertThat(implementations).containsOnly(expected);
+  }
+
   private List<Location> provideImplementations(
       final IDefinitionKeeper definitionKeeper, final String code, final Position position) {
     final MagikTypedFile magikFile =

@@ -328,4 +328,37 @@ class MethodExistsTypedCheckTest {
     final Issue issue = issues.get(0);
     return issue.message();
   }
+
+  @Test
+  void testMethodWrittenInUsingPackageKnown() {
+    final String code =
+        """
+        _package sw
+        _method a.caller()
+          _self.m()
+        _endmethod""";
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    final TypeString swARef = TypeString.ofIdentifier("a", "sw");
+    definitionKeeper.add(
+        new ExemplarDefinition(
+            null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, swARef, null));
+    final TypeString userARef = TypeString.ofIdentifier("a", "user");
+    definitionKeeper.add(
+        new MethodDefinition(
+            null,
+            null,
+            null,
+            null,
+            null,
+            userARef,
+            "m()",
+            EnumSet.noneOf(MethodDefinition.Modifier.class),
+            Collections.emptyList(),
+            null,
+            null,
+            ExpressionResultString.EMPTY,
+            ExpressionResultString.EMPTY));
+    final MagikTypedCheck check = new MethodExistsTypedCheck();
+    assertThat(check).reportsNoIssues(code, definitionKeeper);
+  }
 }

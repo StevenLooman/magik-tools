@@ -28,6 +28,10 @@ import org.junit.jupiter.api.Test;
 /** Tests for {@link TypeStringResolver}. */
 class TypeStringResolverTest {
 
+  private static final TypeString SW_A_REF = TypeString.ofIdentifier("a", "sw");
+  private static final TypeString USER_A_REF = TypeString.ofIdentifier("a", "user");
+  private static final TypeString SW_B_REF = TypeString.ofIdentifier("b", "sw");
+
   private static ExemplarDefinition createExemplar(final TypeString typeString) {
     return new ExemplarDefinition(
         null, null, null, null, null, ExemplarDefinition.Sort.SLOTTED, typeString, null);
@@ -1025,5 +1029,92 @@ class TypeStringResolverTest {
     final TypeStringResolver resolver = new TypeStringResolver(keeper);
     final TypeString exemplarTypeString = resolver.getExemplarTypeString(unknownRef);
     assertThat(exemplarTypeString).isEqualTo(unknownRef);
+  }
+
+  /** Keeper with exemplar {@code sw:a} and {@code m()} written as {@code user:a.m()}. */
+  private static IDefinitionKeeper createSpelledMethodKeeper() {
+    final IDefinitionKeeper definitionKeeper = new DefinitionKeeper();
+    TypeStringResolverTest.addExemplarWithParents(definitionKeeper, SW_A_REF);
+    final MethodDefinition methodDefinition =
+        TypeStringResolverTest.createMethodDefinition(USER_A_REF, "m()", TypeString.SW_INTEGER);
+    definitionKeeper.add(methodDefinition);
+    return definitionKeeper;
+  }
+
+  @Test
+  void testRespondingMethodDefinitionsIncludeMethodWrittenInUsingPackage() {
+    final IDefinitionKeeper definitionKeeper = TypeStringResolverTest.createSpelledMethodKeeper();
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(SW_A_REF, "m()");
+    final Set<TypeString> ownerTypeStrs =
+        methodDefinitions.stream().map(MethodDefinition::getTypeName).collect(Collectors.toSet());
+    assertThat(ownerTypeStrs).containsExactly(USER_A_REF);
+
+    final Collection<MethodDefinition> allMethodDefinitions =
+        resolver.getRespondingMethodDefinitions(SW_A_REF);
+    assertThat(allMethodDefinitions).containsAll(methodDefinitions);
+  }
+
+  @Test
+  void testRespondingMethodDefinitionsOfSpellingIncludeMethodWrittenUnderIt() {
+    final IDefinitionKeeper definitionKeeper = TypeStringResolverTest.createSpelledMethodKeeper();
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(USER_A_REF, "m()");
+    assertThat(methodDefinitions).hasSize(1);
+  }
+
+  @Test
+  void testRespondingMethodDefinitionsOfChildIncludeMethodWrittenInUsingPackage() {
+    final IDefinitionKeeper definitionKeeper = TypeStringResolverTest.createSpelledMethodKeeper();
+    TypeStringResolverTest.addExemplarWithParents(definitionKeeper, SW_B_REF, SW_A_REF);
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(SW_B_REF, "m()");
+    assertThat(methodDefinitions).hasSize(1);
+
+    final Collection<MethodDefinition> allMethodDefinitions =
+        resolver.getRespondingMethodDefinitions(SW_B_REF);
+    assertThat(allMethodDefinitions).containsAll(methodDefinitions);
+  }
+
+  @Test
+  void testRespondingMethodDefinitionsSkipSpellingWithItsOwnExemplar() {
+    final IDefinitionKeeper definitionKeeper = TypeStringResolverTest.createSpelledMethodKeeper();
+    TypeStringResolverTest.addExemplarWithParents(definitionKeeper, USER_A_REF);
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final Collection<MethodDefinition> methodDefinitions =
+        resolver.getRespondingMethodDefinitions(SW_A_REF, "m()");
+    assertThat(methodDefinitions).isEmpty();
+
+    final Collection<MethodDefinition> shadowingDefinitions =
+        resolver.getRespondingMethodDefinitions(USER_A_REF, "m()");
+    assertThat(shadowingDefinitions).hasSize(1);
+  }
+
+  @Test
+  void testIsSameTypeThroughUsingPackage() {
+    final IDefinitionKeeper definitionKeeper = TypeStringResolverTest.createSpelledMethodKeeper();
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final boolean sameType = resolver.isSameType(USER_A_REF, SW_A_REF);
+    assertThat(sameType).isTrue();
+    final boolean otherType = resolver.isSameType(USER_A_REF, SW_B_REF);
+    assertThat(otherType).isFalse();
+  }
+
+  @Test
+  void testIsSameTypeNotForSpellingWithItsOwnExemplar() {
+    final IDefinitionKeeper definitionKeeper = TypeStringResolverTest.createSpelledMethodKeeper();
+    TypeStringResolverTest.addExemplarWithParents(definitionKeeper, USER_A_REF);
+
+    final TypeStringResolver resolver = new TypeStringResolver(definitionKeeper);
+    final boolean sameType = resolver.isSameType(USER_A_REF, SW_A_REF);
+    assertThat(sameType).isFalse();
   }
 }
